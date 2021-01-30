@@ -1,5 +1,5 @@
 package models
 
 type Product struct {
-	tableName string `sql:"products"`
+	tableName string `pg:"products"`
 }

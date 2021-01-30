@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	configuration := config.LoadConfiguration()
 	app := iris.New()
 	app.UseRouter(cors.New(cors.Options{
 		AllowedOrigins: []string{
@@ -27,16 +28,6 @@ func main() {
 		OptionsPassthrough: false,
 		Debug:              true,
 	}))
-
-	configuration := config.Configuration{
-		JWTSecret:     "abc123",
-		UIDomainName:  "localhost:3000",
-		APIDomainName: "localhost:4000",
-		PostgreSQL:    config.PostgreSQL{},
-		SMTP:          config.SMTPClient{},
-		ReCAPTCHA:     config.ReCAPTCHA{},
-		AllowSignUp:   true,
-	}
 
 	c := controller.NewController(configuration, nil)
 	c.RegisterRoutes(app)

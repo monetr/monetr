@@ -1,14 +1,14 @@
 package models
 
 type Link struct {
-	tableName string `sql:"links"`
+	tableName string `pg:"links"`
 
-	LinkId      uint64   `json:"linkId" sql:"link_id,notnull,pk,type:'bigserial'"`
-	AccountId   uint64   `json:"-" sql:"account_id,notnull,pk,on_delete:CASCADE"`
-	Account     *Account `json:"-" sql:"rel:has-one"`
-	PlaidItemId string   `json:"-" sql:"plaid_item_id,notnull"`
+	LinkId      uint64   `json:"linkId" pg:"link_id,notnull,pk,type:'bigserial'"`
+	AccountId   uint64   `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
+	Account     *Account `json:"-" pg:"rel:has-one"`
+	PlaidItemId string   `json:"-" pg:"plaid_item_id,notnull"`
 	// TODO (elliotcourant) Allow this access token to be stored elsewhere, such
 	//  as vault.
-	PlaidAccessToken string `json:"-" sql:"plaid_access_token,notnull"`
-	WebhookUrl       string `json:"-" sql:"webhook_url,null"`
+	PlaidAccessToken string `json:"-" pg:"plaid_access_token,notnull"`
+	WebhookUrl       string `json:"-" pg:"webhook_url"`
 }
