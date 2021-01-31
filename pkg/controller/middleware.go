@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
 	"github.com/kataras/iris/v12/context"
@@ -12,6 +13,9 @@ import (
 
 const (
 	transactionContextKey = "_harderTransaction_"
+	accountIdContextKey   = "_accountId_"
+	userIdContextKey      = "_userId_"
+	loginIdContextKey     = "_loginId_"
 )
 
 func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
@@ -43,7 +47,39 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 }
 
 func (c *Controller) authenticationMiddleware(ctx *context.Context) {
+	token := ctx.GetHeader(TokenName)
+	if len(token) == 0 {
+		ctx.StatusCode(http.StatusForbidden)
+		ctx.JSON(map[string]interface{}{
+			"error": "you are not authorized to use this endpoint",
+		})
+		return
+	}
 
+	var claims HarderClaims
+	result, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(c.configuration.JWTSecret), nil
+	})
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")
+		return
+	}
+
+	if !result.Valid {
+		c.returnError(ctx, http.StatusForbidden, "unauthorized")
+		return
+	}
+
+	ctx.Values().Set(accountIdContextKey, claims.AccountId)
+	ctx.Values().Set(userIdContextKey, claims.UserId)
+	ctx.Values().Set(loginIdContextKey, claims.LoginId)
+
+	ctx.Next()
 }
 
 func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (repository.UnauthenticatedRepository, error) {

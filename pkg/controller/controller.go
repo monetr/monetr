@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -78,7 +79,13 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			p.Post("/register", c.registerEndpoint)
 		})
 
-		p.Use()
+		p.Use(c.authenticationMiddleware)
+
+		p.PartyFunc("/users", func(p router.Party) {
+			p.Get("/me", func(ctx *context.Context) {
+				fmt.Println(ctx)
+			})
+		})
 
 	})
 }
