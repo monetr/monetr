@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:13
+    restart: always
+    hostname: postgres
+    ports:
+      - 5432:5432
+    env_file:
+      - .development.env
+    volumes:
+      - "./schema:/docker-entrypoint-initdb.d"
+    command: [ "postgres", "-c", "log_statement=all" ]

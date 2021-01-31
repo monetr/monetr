@@ -3,8 +3,8 @@ package models
 var (
 	AllModels = []interface{}{
 		&Login{},
-		&User{},
 		&Account{},
+		&User{},
 		&Link{},
 		&BankAccount{},
 		&FundingSchedule{},

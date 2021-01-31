@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/kataras/iris/v12/context"
 	"github.com/pkg/errors"
@@ -42,6 +43,48 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 		return
 	}
 
+	// TODO (elliotcourant) Add stuff to verify email address by sending an
+	//  email.
+
+	repository, err := c.getUnauthenticatedRepository(ctx)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "cannot register user")
+		return
+	}
+
+	hashedPassword := c.hashPassword(registerRequest.Email, registerRequest.Password)
+
+	login, err := repository.CreateLogin(registerRequest.Email, hashedPassword)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create login")
+		return
+	}
+
+	account, err := repository.CreateAccount(time.Local)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create account")
+		return
+	}
+
+	user, err := repository.CreateUser(login.LoginId, account.AccountId, registerRequest.FirstName, registerRequest.LastName)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create user")
+		return
+	}
+
+	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create JWT")
+		return
+	}
+
+	user.Login = login
+	user.Account = account
+
+	ctx.JSON(map[string]interface{}{
+		"token": token,
+		"user":  user,
+	})
 }
 
 func (c *Controller) validateRegistration(email, password, firstName string) error {

@@ -107,7 +107,7 @@ func (c *Controller) hashPassword(email, password string) string {
 	hash := sha256.New()
 	hash.Write([]byte(email))
 	hash.Write([]byte(password))
-	return fmt.Sprintf("%x", hash.Sum(nil))
+	return fmt.Sprintf("%X", hash.Sum(nil))
 }
 
 func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {

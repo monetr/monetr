@@ -10,13 +10,30 @@ import (
 )
 
 var (
+	address    = flag.String("address", "", "PostgreSQL address")
+	port       = flag.Int("port", 5432, "PostgreSQL port")
+	username   = flag.String("user", "postgres", "PostgreSQL username")
+	database   = flag.String("db", "postgres", "PostgreSQL database")
+	password   = flag.String("password", "", "PostgreSQL password")
+	dryRun     = flag.Bool("dry-run", true, "Simply print the schema to STDOUT rather than applying it to the database")
 	dropTables = flag.Bool("drop", false, "add DROP TABLE before CREATE statements")
 )
 
 func main() {
 	flag.Parse()
 
-	db := pg.Connect(&pg.Options{})
+	var db *pg.DB
+	if *dryRun {
+		db = pg.Connect(&pg.Options{})
+	} else {
+		db = pg.Connect(&pg.Options{
+			Addr:            fmt.Sprintf("%s:%d", *address, *port),
+			User:            *username,
+			Password:        *password,
+			Database:        *database,
+			ApplicationName: "harder - schemagen",
+		})
+	}
 
 	for _, model := range models.AllModels {
 		if *dropTables {
@@ -25,6 +42,11 @@ func main() {
 				Cascade:  true,
 			})
 			fmt.Println(query.String() + ";")
+			if !*dryRun {
+				if _, err := db.Exec(query); err != nil {
+					panic(err)
+				}
+			}
 		}
 
 		query := orm.NewCreateTableQuery(db.Model(model), &orm.CreateTableOptions{
@@ -34,5 +56,10 @@ func main() {
 			FKConstraints: true,
 		})
 		fmt.Println(query.String() + ";")
+		if !*dryRun {
+			if _, err := db.Exec(query); err != nil {
+				panic(err)
+			}
+		}
 	}
 }
