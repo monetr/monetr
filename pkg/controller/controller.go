@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
+	"github.com/plaid/plaid-go/plaid"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
 )
 
@@ -21,6 +21,7 @@ type Controller struct {
 	db            *pg.DB
 	configuration config.Configuration
 	captcha       *recaptcha.ReCAPTCHA
+	plaid         *plaid.Client
 }
 
 func NewController(configuration config.Configuration, db *pg.DB) *Controller {
@@ -82,10 +83,9 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(c.authenticationMiddleware)
 
 		p.PartyFunc("/users", func(p router.Party) {
-			p.Get("/me", func(ctx *context.Context) {
-				fmt.Println(ctx)
-			})
+			p.Get("/me", c.meEndpoint)
 		})
 
+		p.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
 	})
 }

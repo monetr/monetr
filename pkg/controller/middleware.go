@@ -90,3 +90,27 @@ func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (reposit
 
 	return repository.NewUnauthenticatedRepository(txn), nil
 }
+
+func (c *Controller) getAuthenticatedRepository(ctx *context.Context) (repository.Repository, error) {
+	loginId := ctx.Values().GetUint64Default(loginIdContextKey, 0)
+	if loginId == 0 {
+		return nil, errors.Errorf("not authorized")
+	}
+
+	userId := ctx.Values().GetUint64Default(userIdContextKey, 0)
+	if userId == 0 {
+		return nil, errors.Errorf("you are not authenticated to an account")
+	}
+
+	accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0)
+	if accountId == 0 {
+		return nil, errors.Errorf("you are not authenticated to an account")
+	}
+
+	txn, ok := ctx.Values().Get(transactionContextKey).(*pg.Tx)
+	if !ok {
+		return nil, errors.Errorf("no transaction for request")
+	}
+
+	return repository.NewRepositoryFromSession(userId, accountId, txn), nil
+}

@@ -12,8 +12,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/nleeper/goment v1.4.0
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
-	github.com/smartystreets/goconvey v1.6.4 // indirect
-	github.com/spf13/cobra v1.1.1 // indirect
+	github.com/plaid/plaid-go v0.0.0-20210112002311-0cf0e6f0ea3e
 	github.com/spf13/viper v1.7.1
 	github.com/teambition/rrule-go v1.6.2
 	github.com/yudai/pp v2.0.1+incompatible // indirect

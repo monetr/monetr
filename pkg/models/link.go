@@ -9,6 +9,9 @@ type Link struct {
 	PlaidItemId string   `json:"-" pg:"plaid_item_id,notnull"`
 	// TODO (elliotcourant) Allow this access token to be stored elsewhere, such
 	//  as vault.
-	PlaidAccessToken string `json:"-" pg:"plaid_access_token,notnull"`
-	WebhookUrl       string `json:"-" pg:"webhook_url"`
+	PlaidAccessToken      string `json:"-" pg:"plaid_access_token,notnull"`
+	WebhookUrl            string `json:"-" pg:"webhook_url"`
+	InstitutionId         string `json:"institutionId" pg:"institution_id,notnull"`
+	InstitutionName       string `json:"institutionName" pg:"institution_name,notnull"`
+	CustomInstitutionName string `json:"customInstitutionName,omitempty" pg:"custom_institution_name"`
 }
