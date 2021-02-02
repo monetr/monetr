@@ -69,6 +69,11 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		})
 	})
 
+	if c.configuration.EnableWebhooks {
+		// Webhooks use their own authentication, so we want to declare this first.
+		app.Post("/api/plaid/webhook/{identifier:string}", c.handlePlaidWebhook)
+	}
+
 	// For the following endpoints we want to have a repository available to us.
 	app.PartyFunc("/api", func(p router.Party) {
 		p.Get("/config", c.configEndpoint)

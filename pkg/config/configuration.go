@@ -5,13 +5,16 @@ import (
 )
 
 type Configuration struct {
-	JWTSecret     string
-	UIDomainName  string
-	APIDomainName string
-	PostgreSQL    PostgreSQL
-	SMTP          SMTPClient
-	ReCAPTCHA     ReCAPTCHA
-	AllowSignUp   bool
+	Name           string
+	JWTSecret      string
+	UIDomainName   string
+	APIDomainName  string
+	AllowSignUp    bool
+	EnableWebhooks bool
+	PostgreSQL     PostgreSQL
+	SMTP           SMTPClient
+	ReCAPTCHA      ReCAPTCHA
+	Plaid          Plaid
 }
 
 type PostgreSQL struct {
@@ -36,13 +39,34 @@ type ReCAPTCHA struct {
 	Enabled    bool
 	PublicKey  string
 	PrivateKey string
-	Version    int
+	Version    int // Currently only version 2 is supported by the UI.
 
 	VerifyLogin    bool
 	VerifyRegister bool
 }
 
+type Plaid struct {
+	ClientID     string
+	ClientSecret string
+	// This does not seem to be a scope within the documentation. Per the
+	// documentation "balance is not a valid product" and is enabled
+	// automatically. It is not clear if that includes this beta feature though.
+	EnableBalanceTransfers bool
+
+	// EnableReturningUserExperience changes the required data for sign up. If
+	// this is enabled then the user must provide their full legal name as well
+	// as their phone number.
+	// If enabled; email address and phone number verification is REQUIRED.
+	EnableReturningUserExperience bool
+
+	// EnableBirthdatePrompt will allow users to provide their birthday during
+	// sign up or afterwards in their user settings. This is used by plaid for
+	// future products. At the time of writing this it does not do anything.
+	EnableBirthdatePrompt bool
+}
+
 func LoadConfiguration() Configuration {
+	viper.SetDefault("Name", "Harder Than It Needs To Be")
 	viper.SetDefault("UIDomainName", "localhost:3000")
 	viper.SetDefault("APIDomainName", "localhost:4000")
 	viper.SetDefault("AllowSignUp", true)

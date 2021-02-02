@@ -6,6 +6,8 @@ import (
 
 func (c *Controller) configEndpoint(ctx *context.Context) {
 	var config struct {
+		RequireLegalName    bool   `json:"requireLegalName"`
+		RequirePhoneNumber  bool   `json:"requirePhoneNumber"`
 		VerifyLogin         bool   `json:"verifyLogin"`
 		VerifyRegister      bool   `json:"verifyRegister"`
 		ReCAPTCHAKey        string `json:"ReCAPTCHAKey,omitempty"`

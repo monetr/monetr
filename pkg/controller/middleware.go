@@ -91,6 +91,15 @@ func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (reposit
 	return repository.NewUnauthenticatedRepository(txn), nil
 }
 
+func (c *Controller) mustGetUserId(ctx *context.Context) uint64 {
+	userId := ctx.Values().GetUint64Default(userIdContextKey, 0)
+	if userId == 0 {
+		panic("unauthorized")
+	}
+
+	return userId
+}
+
 func (c *Controller) getAuthenticatedRepository(ctx *context.Context) (repository.Repository, error) {
 	loginId := ctx.Values().GetUint64Default(loginIdContextKey, 0)
 	if loginId == 0 {
@@ -113,4 +122,13 @@ func (c *Controller) getAuthenticatedRepository(ctx *context.Context) (repositor
 	}
 
 	return repository.NewRepositoryFromSession(userId, accountId, txn), nil
+}
+
+func (c *Controller) mustGetAuthenticatedRepository(ctx *context.Context) repository.Repository {
+	repo, err := c.getAuthenticatedRepository(ctx)
+	if err != nil {
+		panic("unauthorized")
+	}
+
+	return repo
 }
