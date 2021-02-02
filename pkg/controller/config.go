@@ -31,5 +31,10 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 
 	config.AllowSignUp = c.configuration.AllowSignUp
 
+	if c.configuration.Plaid.EnableReturningUserExperience {
+		config.RequireLegalName = true
+		config.RequirePhoneNumber = true
+	}
+
 	ctx.JSON(config)
 }

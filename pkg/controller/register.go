@@ -72,6 +72,10 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 		return
 	}
 
+	if c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails {
+		c.sendEmailVerification(registerRequest.Email)
+	}
+
 	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create JWT")

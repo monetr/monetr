@@ -16,6 +16,7 @@ func main() {
 	app.UseRouter(cors.New(cors.Options{
 		AllowedOrigins: []string{
 			"http://localhost:3000",
+			"https://app.development.harderthanitneedstobe.com",
 		},
 		AllowOriginFunc: nil,
 		AllowedMethods: []string{

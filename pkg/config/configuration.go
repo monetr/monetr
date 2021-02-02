@@ -31,6 +31,7 @@ type SMTPClient struct {
 	Username string
 	Password string
 	Host     string
+	Port     int
 
 	VerifyEmails bool
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"net/smtp"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -22,6 +23,7 @@ type Controller struct {
 	configuration config.Configuration
 	captcha       *recaptcha.ReCAPTCHA
 	plaid         *plaid.Client
+	smtp          *smtp.Client
 }
 
 func NewController(configuration config.Configuration, db *pg.DB) *Controller {
@@ -61,10 +63,10 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 	})
 
 	app.Get("/health", func(ctx *context.Context) {
-		dbHealthy := c.db.Ping(ctx.Request().Context()) == nil
+		err := c.db.Ping(ctx.Request().Context())
 
 		ctx.JSON(map[string]interface{}{
-			"dbHealthy":  dbHealthy,
+			"dbHealthy":  err == nil,
 			"apiHealthy": true,
 		})
 	})

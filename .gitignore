@@ -1,2 +1,4 @@
 bin
 config.yaml
+telepresence.log
+telepresence

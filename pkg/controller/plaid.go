@@ -13,9 +13,13 @@ import (
 
 func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 	p.Get("/token/new", func(ctx *context.Context) {
+		// Retrieve the user's details. We need to pass some of these along to
+		// plaid as part of the linking process.
 		me, err := c.mustGetAuthenticatedRepository(ctx).GetMe()
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
+			c.wrapAndReturnError(ctx, err,
+				http.StatusInternalServerError, "failed to get user details for link",
+			)
 		}
 
 		userId := c.mustGetUserId(ctx)
@@ -35,19 +39,21 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 
 		token, err := c.plaid.CreateLinkToken(plaid.LinkTokenConfigs{
 			User: &plaid.LinkTokenUser{
-				ClientUserID:             strconv.FormatUint(userId, 10),
-				LegalName:                legalName,
-				PhoneNumber:              "",
-				EmailAddress:             me.Login.Email,
+				ClientUserID: strconv.FormatUint(userId, 10),
+				LegalName:    legalName,
+				PhoneNumber:  phoneNumber,
+				EmailAddress: me.Login.Email,
+				// TODO (elliotcourant) I'm going to leave these be for now but we need
+				//  to loop back and add this once email/phone verification is working.
 				PhoneNumberVerifiedTime:  time.Time{},
 				EmailAddressVerifiedTime: time.Time{},
 			},
-			ClientName:  "Hard",
-			Products:    plaidProducts,
-			AccessToken: "",
+			ClientName: "Hard",
+			Products:   plaidProducts,
 			CountryCodes: []string{
 				"US",
 			},
+			// TODO (elliotcourant) Implement webhook once we are running in kube.
 			Webhook:               "",
 			AccountFilters:        nil,
 			CrossAppItemAdd:       nil,
@@ -72,5 +78,6 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			InstitutionId   string `json:"institutionId"`
 			InstitutionName string `json:"institutionName"`
 		}
+		fmt.Sprint(callbackRequest)
 	})
 }
