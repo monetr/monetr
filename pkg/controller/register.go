@@ -72,8 +72,10 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 		return
 	}
 
+	code := c.mailVerifyCode.At(int(login.LoginId))
+
 	if c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails {
-		c.sendEmailVerification(registerRequest.Email)
+		c.sendEmailVerification(registerRequest.Email, code)
 	}
 
 	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)

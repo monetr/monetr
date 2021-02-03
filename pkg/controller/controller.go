@@ -11,6 +11,7 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/plaid/plaid-go/plaid"
+	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
 )
 
@@ -19,11 +20,12 @@ const (
 )
 
 type Controller struct {
-	db            *pg.DB
-	configuration config.Configuration
-	captcha       *recaptcha.ReCAPTCHA
-	plaid         *plaid.Client
-	smtp          *smtp.Client
+	db             *pg.DB
+	configuration  config.Configuration
+	captcha        *recaptcha.ReCAPTCHA
+	plaid          *plaid.Client
+	smtp           *smtp.Client
+	mailVerifyCode *gotp.HOTP
 }
 
 func NewController(configuration config.Configuration, db *pg.DB) *Controller {

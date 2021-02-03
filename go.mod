@@ -17,6 +17,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/teambition/rrule-go v1.6.2
+	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
