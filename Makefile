@@ -1,8 +1,7 @@
 .PHONY: schema
 
 schema:
-	go run github.com/harderthanitneedstobe/rest-api/v0/cmd/schemagen | \
-		sql-formatter-cli -s postgresql - > schema/00000000_Initial.up.sql
+	go run github.com/harderthanitneedstobe/rest-api/v0/cmd/schemagen > schema/00000000_Initial.up.sql
 
 docker:
 	GOOS=linux go build -o ./bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/api

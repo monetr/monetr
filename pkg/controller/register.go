@@ -9,6 +9,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+type VerifyClaims struct {
+	LoginId uint64 `json:"loginId"`
+	UserId  uint64 `json:"userId"`
+	jwt.StandardClaims
+}
+
 func (c *Controller) registerEndpoint(ctx *context.Context) {
 	var registerRequest struct {
 		Email     string `json:"email"`

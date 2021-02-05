@@ -35,13 +35,18 @@ func main() {
 		})
 	}
 
+	fmt.Println(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
+	fmt.Println()
+	fmt.Println(`CREATE EXTENSION IF NOT EXISTS "citext";`)
+	fmt.Println()
+
 	for _, model := range models.AllModels {
 		if *dropTables {
 			query := orm.NewDropTableQuery(db.Model(model), &orm.DropTableOptions{
 				IfExists: true,
 				Cascade:  true,
 			})
-			fmt.Println(query.String() + ";")
+			fmt.Println(query.String() + ";\n")
 			if !*dryRun {
 				if _, err := db.Exec(query); err != nil {
 					panic(err)
@@ -55,7 +60,7 @@ func main() {
 			IfNotExists:   true,
 			FKConstraints: true,
 		})
-		fmt.Println(query.String() + ";")
+		fmt.Println(query.String() + ";\n")
 		if !*dryRun {
 			if _, err := db.Exec(query); err != nil {
 				panic(err)

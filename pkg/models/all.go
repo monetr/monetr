@@ -3,6 +3,7 @@ package models
 var (
 	AllModels = []interface{}{
 		&Login{},
+		&Registration{},
 		&EmailVerification{},
 		&PhoneVerification{},
 		&Account{},
