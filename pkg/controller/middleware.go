@@ -63,7 +63,7 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 			return nil, errors.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(c.configuration.JWTSecret), nil
+		return []byte(c.configuration.JWT.LoginJwtSecret), nil
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")
