@@ -16,12 +16,14 @@ import {
 import SignUpView from "./views/SignUp";
 import LoginView from "./views/Login";
 import bootstrapLogin from "./shared/authentication/actions/bootstrapLogin";
-import {AppBar, Button, IconButton, Tab, Tabs, Toolbar, Typography} from "@material-ui/core";
+import {AppBar, Button, IconButton, Menu, MenuItem, Tab, Tabs, Toolbar, Typography} from "@material-ui/core";
 import MenuIcon from '@material-ui/icons/Menu';
+import AuthenticatedApplication from "./AuthenticatedApplication";
 
 export class Root extends PureComponent {
   state = {
     loading: true,
+    anchorEl: null,
   };
 
   static propTypes = {
@@ -35,6 +37,9 @@ export class Root extends PureComponent {
   componentDidMount() {
     this.props.bootstrapApplication()
       .then(() => this.props.bootstrapLogin())
+      .catch(error => {
+        alert(error);
+      })
       .finally(() => {
         this.setState({
           loading: false
@@ -62,41 +67,19 @@ export class Root extends PureComponent {
     )
   };
 
-  renderAuthenticated = () => {
-    return (
-      <Router>
-        <AppBar position="static">
-          <Toolbar>
-            <Button to="/transactions" component={RouterLink} color="inherit">Transactions</Button>
-            <Button to="/expenses" component={RouterLink} color="inherit">Expenses</Button>
-            <Button to="/goals" component={RouterLink} color="inherit">Goals</Button>
-            <div style={{marginLeft: 'auto'}}/>
-            <Button color="inherit">Logout</Button>
-            <IconButton edge="start" color="inherit" aria-label="menu">
-              <MenuIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        <Switch>
-          <Route path="/transactions">
-            <h1>Transactions</h1>
-          </Route>
-          <Route path="/expenses">
-            <h1>Expenses</h1>
-          </Route>
-          <Route path="/goals">
-            <h1>Goals</h1>
-          </Route>
-          <Route path="/">
-            <h1>Home/Setup</h1>
-          </Route>
-          <Route>
-            <h1>Not found</h1>
-          </Route>
-        </Switch>
-      </Router>
-    )
+  openMenu = event =>{
+    this.setState({
+      anchorEl: event.currentTarget,
+    });
   };
+
+  closeMenu = () => {
+    this.setState({
+      anchorEl: null,
+    });
+  };
+
+
 
   render() {
     const {isReady, isAuthenticated} = this.props;
@@ -108,7 +91,11 @@ export class Root extends PureComponent {
       return this.renderUnauthenticated();
     }
 
-    return this.renderAuthenticated();
+    return (
+      <Router>
+        <AuthenticatedApplication />
+      </Router>
+    )
   }
 }
 

@@ -5,4 +5,5 @@ export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 
 export const SET_TOKEN = 'SET_TOKEN';
 export const BOOTSTRAP_LOGIN = 'BOOTSTRAP_LOGIN';
+export const LOGOUT = 'LOGOUT';
 

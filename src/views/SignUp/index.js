@@ -37,7 +37,7 @@ export class SignUpView extends Component {
   static propTypes = {
     ReCAPTCHAKey: PropTypes.string,
     bootstrapLogin: PropTypes.func.isRequired,
-    history: PropTypes.object.isRequired,
+    history: PropTypes.instanceOf(History).isRequired,
     requireLegalName: PropTypes.bool.isRequired,
     requirePhoneNumber: PropTypes.bool.isRequired,
     setToken: PropTypes.func.isRequired,
@@ -61,6 +61,7 @@ export class SignUpView extends Component {
         if (result.data.token) {
           return bootstrapLogin(result.data.token, result.data.user)
             .then(() => {
+              debugger;
               this.props.history.push('/');
             });
         }

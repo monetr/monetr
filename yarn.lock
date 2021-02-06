@@ -9302,6 +9302,14 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz"
   integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
 
+react-plaid-link@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-plaid-link/-/react-plaid-link-3.1.0.tgz#585bda7f8d64689478ed6339c0b111643fd34066"
+  integrity sha512-jTbThGcka3YjpKntGquzmfMXpEhENdbpiGJ97W33McPcqAosdOUCdbBJmm2Ih6hE56exTrISxzpdhOpLD4/emA==
+  dependencies:
+    prop-types "^15.7.2"
+    react-script-hook "1.1.0"
+
 react-recaptcha@^2.3.10:
   version "2.3.10"
   resolved "https://registry.npmjs.org/react-recaptcha/-/react-recaptcha-2.3.10.tgz"
@@ -9351,6 +9359,11 @@ react-router@5.2.0:
     react-is "^16.6.0"
     tiny-invariant "^1.0.2"
     tiny-warning "^1.0.0"
+
+react-script-hook@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-script-hook/-/react-script-hook-1.1.0.tgz#f88bb74b1c89250d7577e6cd5472f10992190706"
+  integrity sha512-swEdGFIOgG4lfi1gdYzFNV28uKuowzbgEGb8Lwi/yp696BVa6RvvuW4a7FY9mic+SecojVlHMWcllygmAg6EJg==
 
 react-scripts@4.0.1:
   version "4.0.1"
