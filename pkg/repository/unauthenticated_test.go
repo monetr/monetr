@@ -18,7 +18,7 @@ func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
 	account, err := repo.CreateAccount(time.UTC)
 	assert.NoError(t, err, "should successfully create account")
 	assert.NotEmpty(t, account, "new account should not be empty")
-	assert.Greater(t, 0, account.AccountId, "accountId should be greater than 0")
+	assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
 }
 
 func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
