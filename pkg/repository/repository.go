@@ -19,6 +19,7 @@ type UnauthenticatedRepository interface {
 	CreateLogin(email, hashedPassword string) (*models.Login, error)
 	CreateAccount(timezone *time.Location) (*models.Account, error)
 	CreateUser(loginId, accountId uint64, firstName, lastName string) (*models.User, error)
+	CreateRegistration(loginId uint64) (*models.Registration, error)
 }
 
 func NewRepositoryFromSession(userId, accountId uint64, txn *pg.Tx) Repository {

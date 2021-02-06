@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"net/http"
 	"strings"
 	"time"
@@ -9,9 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-type VerifyClaims struct {
-	LoginId uint64 `json:"loginId"`
-	UserId  uint64 `json:"userId"`
+type RegistrationClaims struct {
+	RegistrationId string `json:"registrationId"`
 	jwt.StandardClaims
 }
 
@@ -78,10 +78,22 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 		return
 	}
 
-	code := c.mailVerifyCode.At(int(login.LoginId))
-
 	if c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails {
-		c.sendEmailVerification(registerRequest.Email, code)
+		registration, err := repository.CreateRegistration(login.LoginId)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create registration")
+			return
+		}
+
+		registrationToken, err := c.generateRegistrationToken(registration.RegistrationId)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create registration token")
+			return
+		}
+
+		if err := c.sendEmailVerification(registerRequest.Email, registrationToken); err != nil {
+
+		}
 	}
 
 	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
@@ -126,4 +138,28 @@ func (c *Controller) validateCaptchaMaybe(captcha string) error {
 	}
 
 	return c.captcha.Verify(captcha)
+}
+
+func (c *Controller) generateRegistrationToken(registrationId string) (string, error) {
+	now := time.Now()
+	claims := &RegistrationClaims{
+		RegistrationId: registrationId,
+		StandardClaims: jwt.StandardClaims{
+			Audience:  c.configuration.APIDomainName,
+			ExpiresAt: now.Add(7 * 24 * time.Hour).Unix(),
+			Id:        "",
+			IssuedAt:  now.Unix(),
+			Issuer:    c.configuration.APIDomainName,
+			NotBefore: now.Unix(),
+			Subject:   "harderThanItNeedsToBe - registration",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(c.configuration.JWT.RegistrationJwtSecret))
+	if err != nil {
+		return "", errors.Wrap(err, "failed to sign registration JWT")
+	}
+
+	return signedToken, nil
 }

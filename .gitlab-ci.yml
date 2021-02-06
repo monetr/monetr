@@ -1,0 +1,48 @@
+stages:
+  - Dependencies
+  - Build
+  - Test
+
+variables:
+  GO111MODULE: on
+  GOFLAGS: -mod=vendor
+
+Fetch Dependencies:
+  stage: Dependencies
+  image: golang:1.15.8
+  tags:
+    - k8s:shared
+  script:
+    - go get ./...
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./vendor
+    policy: push
+
+Build:
+  stage: Build
+  image: golang:1.15.8
+  tags:
+    - k8s:shared
+  script:
+    - go build -o ./bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/api
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./bin
+      - ./vendor
+    policy: pull-push
+
+Test:
+  stage: Test
+  image: golang:1.15.8
+  tags:
+    - k8s:shared
+  script:
+    - go test -race -v ./...
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./vendor
+    policy: pull

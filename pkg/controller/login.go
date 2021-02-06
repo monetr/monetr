@@ -128,7 +128,7 @@ func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, e
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(c.configuration.JWTSecret))
+	signedToken, err := token.SignedString([]byte(c.configuration.JWT.LoginJwtSecret))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to sign JWT")
 	}

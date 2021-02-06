@@ -6,15 +6,20 @@ import (
 
 type Configuration struct {
 	Name           string
-	JWTSecret      string
 	UIDomainName   string
 	APIDomainName  string
 	AllowSignUp    bool
 	EnableWebhooks bool
+	JWT            JWT
 	PostgreSQL     PostgreSQL
 	SMTP           SMTPClient
 	ReCAPTCHA      ReCAPTCHA
 	Plaid          Plaid
+}
+
+type JWT struct {
+	LoginJwtSecret        string
+	RegistrationJwtSecret string
 }
 
 type PostgreSQL struct {
