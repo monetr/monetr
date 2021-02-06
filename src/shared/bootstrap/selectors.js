@@ -9,3 +9,7 @@ export const getShouldVerifyRegister = state => state.bootstrap.ReCAPTCHAKey && 
 export const getShouldVerifyLogin = state => state.bootstrap.ReCAPTCHAKey && state.bootstrap.verifyLogin;
 
 export const getReCAPTCHAKey = state => state.bootstrap.ReCAPTCHAKey;
+
+export const getRequireLegalName = state => state.bootstrap.requireLegalName;
+
+export const getRequirePhoneNumber = state => state.bootstrap.requirePhoneNumber;

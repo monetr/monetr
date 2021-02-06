@@ -1,0 +1,27 @@
+stages:
+  - Dependencies
+  - Build
+
+Fetch Dependencies:
+  stage: Dependencies
+  image: node:15.8.0-buster
+  tags:
+    - k8s:shared
+  script:
+    - npm install
+  cache:
+    paths:
+      - ./node_modules
+    policy: push
+
+Build:
+  stage: Build
+  image: node:15.8.0-buster
+  tags:
+    - k8s:shared
+  script:
+    - npm build
+  cache:
+    paths:
+      - ./node_modules
+    policy: pull

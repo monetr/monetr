@@ -11,7 +11,7 @@ import {
   CardHeader,
   Container,
   Grid, Grow,
-  Paper,
+  Paper, Snackbar,
   TextField,
   Typography
 } from "@material-ui/core";
@@ -23,8 +23,13 @@ import ReCAPTCHA from "react-google-recaptcha";
 import {getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed} from "../../shared/bootstrap/selectors";
 import request from "../../shared/util/request";
 import bootstrapLogin from "../../shared/authentication/actions/bootstrapLogin";
+import {Alert, AlertTitle} from "@material-ui/lab";
 
 export class LoginView extends Component {
+  state = {
+    error: null,
+  };
+
   static propTypes = {
     allowSignUp: PropTypes.bool.isRequired,
     verifyLogin: PropTypes.bool.isRequired,
@@ -34,7 +39,9 @@ export class LoginView extends Component {
   };
 
   submitLogin = values => {
-    console.log(values);
+    this.setState({
+      error: null,
+    });
     return request().post('/api/authentication/login', {
       email: values.email,
       password: values.password,
@@ -46,7 +53,13 @@ export class LoginView extends Component {
         this.props.history.push('/');
       })
       .catch(error => {
-        alert(error);
+        if (error.response.data.error) {
+          this.setState({
+            error: error.response.data.error,
+          });
+        } else {
+          alert(error);
+        }
       });
   };
 
@@ -66,9 +79,26 @@ export class LoginView extends Component {
     )
   };
 
+  renderErrorMaybe = () => {
+    const {error} = this.state;
+    if (!error) {
+      return null;
+    }
+
+    return (
+      <Snackbar open autoHideDuration={10000}>
+        <Alert variant="filled" severity="error">
+          <AlertTitle>Error</AlertTitle>
+          {this.state.error}
+        </Alert>
+      </Snackbar>
+    )
+  };
+
   render() {
     return (
       <div className="login-view">
+        {this.renderErrorMaybe()}
         <Formik
           initialValues={{
             email: '',

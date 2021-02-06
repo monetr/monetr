@@ -2,7 +2,12 @@ import {useHistory} from "react-router-dom";
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 import {connect} from "react-redux";
-import {getReCAPTCHAKey, getShouldVerifyRegister, getSignUpAllowed} from "../../shared/bootstrap/selectors";
+import {
+  getReCAPTCHAKey,
+  getRequireLegalName, getRequirePhoneNumber,
+  getShouldVerifyRegister,
+  getSignUpAllowed
+} from "../../shared/bootstrap/selectors";
 import {bindActionCreators} from "redux";
 import {Link as RouterLink, withRouter} from "react-router-dom";
 import request from "../../shared/util/request";
@@ -30,11 +35,13 @@ export class SignUpView extends Component {
   };
 
   static propTypes = {
-    verifyRegister: PropTypes.bool.isRequired,
     ReCAPTCHAKey: PropTypes.string,
-    setToken: PropTypes.func.isRequired,
-    history: PropTypes.object.isRequired,
     bootstrapLogin: PropTypes.func.isRequired,
+    history: PropTypes.object.isRequired,
+    requireLegalName: PropTypes.bool.isRequired,
+    requirePhoneNumber: PropTypes.bool.isRequired,
+    setToken: PropTypes.func.isRequired,
+    verifyRegister: PropTypes.bool.isRequired,
   }
 
   submitRegister = values => {
@@ -111,6 +118,7 @@ export class SignUpView extends Component {
   };
 
   onValidate = (values) => {
+    const {requireLegalName} = this.props;
     const errors = {};
     if (!values.email) {
       errors.email = 'An email is required to sign up.';
@@ -126,6 +134,10 @@ export class SignUpView extends Component {
 
     if (!values.firstName || values.firstName.length === 0) {
       errors.firstName = 'First name is required.';
+    }
+
+    if (requireLegalName && (!values.lastName || values.lastName.length === 0)) {
+      errors.lastName = 'Last name is required.';
     }
 
     return errors;
@@ -230,7 +242,7 @@ export class SignUpView extends Component {
                           <TextField
                             fullWidth
                             id="lastName"
-                            label="Last Name (optional)"
+                            label={ this.props.requireLegalName ? "Last Name" : "Last Name (optional)"}
                             name="lastName"
                             value={values.lastName}
                             onChange={handleChange}
@@ -278,6 +290,8 @@ export default connect(
     allowSignUp: getSignUpAllowed(state),
     verifyRegister: getShouldVerifyRegister(state),
     ReCAPTCHAKey: getReCAPTCHAKey(state),
+    requireLegalName: getRequireLegalName(state),
+    requirePhoneNumber: getRequirePhoneNumber(state),
   }),
   dispatch => bindActionCreators({
     bootstrapLogin,

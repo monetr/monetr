@@ -43,7 +43,7 @@ export default function bootstrapLogin(token = null, user = null) {
             payload: {
               isAuthenticated: true,
               token: token,
-              user: new User(result.data),
+              user: new User(result.data.user),
             }
           })
         })

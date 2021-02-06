@@ -6,6 +6,8 @@ export default class BootstrapState extends Record({
   isBootstrapping: true,
   verifyLogin: false,
   verifyRegister: false,
+  requireLegalName: false,
+  requirePhoneNumber: false,
   ReCAPTCHAKey: null,
   allowSignUp: false,
   allowForgotPassword: false,

@@ -11,11 +11,13 @@ import {
   Switch,
   Route,
   Link,
-  Redirect
+  Redirect, Link as RouterLink
 } from "react-router-dom";
 import SignUpView from "./views/SignUp";
 import LoginView from "./views/Login";
 import bootstrapLogin from "./shared/authentication/actions/bootstrapLogin";
+import {AppBar, Button, IconButton, Tab, Tabs, Toolbar, Typography} from "@material-ui/core";
+import MenuIcon from '@material-ui/icons/Menu';
 
 export class Root extends PureComponent {
   state = {
@@ -63,6 +65,18 @@ export class Root extends PureComponent {
   renderAuthenticated = () => {
     return (
       <Router>
+        <AppBar position="static">
+          <Toolbar>
+            <Button to="/transactions" component={RouterLink} color="inherit">Transactions</Button>
+            <Button to="/expenses" component={RouterLink} color="inherit">Expenses</Button>
+            <Button to="/goals" component={RouterLink} color="inherit">Goals</Button>
+            <div style={{marginLeft: 'auto'}}/>
+            <Button color="inherit">Logout</Button>
+            <IconButton edge="start" color="inherit" aria-label="menu">
+              <MenuIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
         <Switch>
           <Route path="/transactions">
             <h1>Transactions</h1>
