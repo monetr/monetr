@@ -41,6 +41,12 @@ Schema Generation:
     - k8s:shared
   script:
     - make schema
+    - make special-tests
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./vendor
+    policy: pull
 
 Tests:
   services:
