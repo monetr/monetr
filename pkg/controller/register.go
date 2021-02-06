@@ -45,60 +45,119 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 		registerRequest.Password,
 		registerRequest.FirstName,
 	); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid registration")
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest,
+			"invalid registration",
+		)
 		return
 	}
 
 	// TODO (elliotcourant) Add stuff to verify email address by sending an
 	//  email.
 
+	// If the registration details provided look good then we want to create an
+	// unauthenticated repository. This will give us some basic database access
+	// without being able to access user information directly. It is essentially
+	// a write only interface to the database.
 	repository, err := c.getUnauthenticatedRepository(ctx)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "cannot register user")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			"cannot register user",
+		)
 		return
 	}
 
-	hashedPassword := c.hashPassword(registerRequest.Email, registerRequest.Password)
+	// Hash the user's password so that we can store it securely.
+	hashedPassword := c.hashPassword(
+		registerRequest.Email, registerRequest.Password,
+	)
 
-	login, err := repository.CreateLogin(registerRequest.Email, hashedPassword)
+	// Create the user's login record in the database, this will return the login
+	// record including the new login's loginId which we will need below. If SMTP
+	// is enabled and we want to verify emails then the user is disabled
+	// initially.
+	login, err := repository.CreateLogin(
+		registerRequest.Email,
+		hashedPassword,
+		!(c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails),
+	)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create login")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			"failed to create login",
+		)
 		return
 	}
 
+	// Now that the login exists we can create the account, at the time of
+	// writing this we are only using the local time zone of the server, but in
+	// the future I want to have it somehow use the user's timezone.
 	account, err := repository.CreateAccount(time.Local)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create account")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			"failed to create account",
+		)
 		return
 	}
 
-	user, err := repository.CreateUser(login.LoginId, account.AccountId, registerRequest.FirstName, registerRequest.LastName)
+	// Now that we have an accountId we can create the user object which will
+	// bind the login and the account together.
+	user, err := repository.CreateUser(
+		login.LoginId,
+		account.AccountId,
+		registerRequest.FirstName,
+		registerRequest.LastName,
+	)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create user")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			"failed to create user",
+		)
 		return
 	}
 
+	// If SMTP is enabled and we are verifying emails then we want to create a
+	// registration record and send the user a verification email.
 	if c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails {
 		registration, err := repository.CreateRegistration(login.LoginId)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create registration")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+				"failed to create registration",
+			)
 			return
 		}
 
+		// Once we have the registrationId create a token specifically for it. This
+		// token is used in a link that we send the user in an email.
 		registrationToken, err := c.generateRegistrationToken(registration.RegistrationId)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create registration token")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+				"failed to create registration token",
+			)
 			return
 		}
 
-		if err := c.sendEmailVerification(registerRequest.Email, registrationToken); err != nil {
-
+		// With the email and the token send the user a message asking them to
+		// activate their account.
+		if err := c.sendEmailVerification(
+			registerRequest.Email, registrationToken,
+		); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+				"failed to send activation email",
+			)
+			return
 		}
+
+		ctx.JSON(map[string]interface{}{
+			"needsVerification": true,
+		})
+		return
 	}
 
+	// If we are not requiring email verification to activate an account we can
+	// simply return a token here for the user to be signed in.
 	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create JWT")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			"failed to create JWT",
+		)
 		return
 	}
 

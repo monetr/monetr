@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -16,10 +17,13 @@ type unauthenticatedRepo struct {
 	txn *pg.Tx
 }
 
-func (u *unauthenticatedRepo) CreateLogin(email, hashedPassword string) (*models.Login, error) {
+func (u *unauthenticatedRepo) CreateLogin(
+	email, hashedPassword string, isEnabled bool,
+) (*models.Login, error) {
 	login := &models.Login{
-		Email:        email,
+		Email:        strings.ToLower(email),
 		PasswordHash: hashedPassword,
+		IsEnabled:    isEnabled,
 	}
 	count, err := u.txn.Model(login).
 		Where(`"login"."email" = ?`, email).
@@ -57,5 +61,14 @@ func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, firstName, l
 }
 
 func (u *unauthenticatedRepo) CreateRegistration(loginId uint64) (*models.Registration, error) {
-	return nil, nil
+	now := time.Now().UTC()
+	registration := &models.Registration{
+		RegistrationId: "", // Will be generated when we insert it.
+		LoginId:        loginId,
+		DateCreated:    now,
+		DateExpires:    now.Add(7 * 24 * time.Hour), // Expires in 7 days.
+	}
+
+	_, err := u.txn.Model(registration).Insert(registration)
+	return nil, errors.Wrap(err, "failed to create registration")
 }
