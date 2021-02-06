@@ -10,6 +10,7 @@ Fetch Dependencies:
   script:
     - yarn install
   cache:
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
       - ./node_modules
     policy: push
@@ -22,6 +23,7 @@ Build:
   script:
     - npm build
   cache:
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
       - ./node_modules
     policy: pull
