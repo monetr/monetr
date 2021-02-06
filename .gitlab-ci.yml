@@ -4,8 +4,8 @@ stages:
   - Test
 
 variables:
-  GO111MODULE: on
-  GOFLAGS: -mod=vendor
+  GO111MODULE: 'on'
+  GOFLAGS: '-mod=vendor'
 
 Fetch Dependencies:
   stage: Dependencies
