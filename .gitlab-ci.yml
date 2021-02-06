@@ -34,11 +34,29 @@ Build:
       - ./vendor
     policy: pull-push
 
-Test:
+Schema Generation:
   stage: Test
   image: golang:1.15.8
   tags:
     - k8s:shared
+  script:
+    - make schema
+
+Tests:
+  services:
+    - postgres:13
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: ""
+    POSTGRES_USER: api-testing
+    POSTGRES_DB: test-db
+    POSTGRES_HOST_AUTH_METHOD: trust
+  stage: Test
+  image: golang:1.15.8
+  tags:
+    - k8s:shared
+  before_script:
+    - make apply-schema-ci
   script:
     - go test -race -v ./...
   cache:

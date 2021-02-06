@@ -20,6 +20,10 @@ type UnauthenticatedRepository interface {
 	CreateAccount(timezone *time.Location) (*models.Account, error)
 	CreateUser(loginId, accountId uint64, firstName, lastName string) (*models.User, error)
 	CreateRegistration(loginId uint64) (*models.Registration, error)
+
+	// VerifyRegistration takes a registrationId and will finalize the registration record. If the registration has
+	// already been completed an error is returned.
+	VerifyRegistration(registrationId string) (*models.User, error)
 }
 
 func NewRepositoryFromSession(userId, accountId uint64, txn *pg.Tx) Repository {

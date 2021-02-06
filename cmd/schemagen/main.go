@@ -19,6 +19,13 @@ var (
 	dropTables = flag.Bool("drop", false, "add DROP TABLE before CREATE statements")
 )
 
+var (
+	createExtensions = []string{
+		`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`,
+		`CREATE EXTENSION IF NOT EXISTS "citext":`,
+	}
+)
+
 func main() {
 	flag.Parse()
 
@@ -35,10 +42,14 @@ func main() {
 		})
 	}
 
-	fmt.Println(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
-	fmt.Println()
-	fmt.Println(`CREATE EXTENSION IF NOT EXISTS "citext";`)
-	fmt.Println()
+	for _, extension := range createExtensions {
+		fmt.Println(extension + "\n")
+		if !*dryRun {
+			if _, err := db.Exec(extension); err != nil {
+				panic(err)
+			}
+		}
+	}
 
 	for _, model := range models.AllModels {
 		if *dropTables {

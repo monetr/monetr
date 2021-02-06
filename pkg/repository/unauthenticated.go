@@ -72,3 +72,58 @@ func (u *unauthenticatedRepo) CreateRegistration(loginId uint64) (*models.Regist
 	_, err := u.txn.Model(registration).Insert(registration)
 	return nil, errors.Wrap(err, "failed to create registration")
 }
+
+func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models.User, error) {
+	var registration models.Registration
+	err := u.txn.Model(&registration).
+		Where(`"registration_id" = ?`, registrationId).
+		Limit(1).
+		Select(&registration)
+	switch err {
+	case pg.ErrNoRows, pg.ErrMultiRows:
+		return nil, errors.Errorf("registration is not valid")
+	case nil:
+		break
+	default:
+		return nil, errors.Wrap(err, "failed to verify registration")
+	}
+
+	// Make sure the registration is not already complete.
+	if registration.IsComplete {
+		return nil, errors.Errorf("registration is already complete")
+	}
+
+	// Make sure the registration is not expired.
+	if time.Now().After(registration.DateExpires) {
+		return nil, errors.Errorf("registration has expired")
+	}
+
+	var user models.User
+	err = u.txn.Model(&user).
+		Relation("Login").
+		Relation("Account").
+		Where(`"user"."login_id" = ?`, registration.LoginId).
+		Limit(1).
+		Select(&user)
+	switch err {
+	case pg.ErrNoRows, pg.ErrMultiRows:
+		return nil, errors.Wrap(err, "user is corrupt")
+	case nil:
+		break
+	default:
+		return nil, errors.Wrap(err, "failed to find user for registration")
+	}
+
+	registration.IsComplete = true
+	if _, err = u.txn.Model(&registration).Update(&registration); err != nil {
+		return nil, errors.Wrap(err, "failed to mark registration as complete")
+	}
+
+	user.Login.IsEnabled = true
+	user.Login.IsEmailVerified = true
+	if _, err = u.txn.Model(user.Login).Update(user.Login); err != nil {
+		return nil, errors.Wrap(err, "failed to enable user after registration")
+	}
+
+	return &user, nil
+}
