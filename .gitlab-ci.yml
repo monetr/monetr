@@ -8,7 +8,7 @@ Fetch Dependencies:
   tags:
     - k8s:shared
   script:
-    - npm install --force
+    - yarn install
   cache:
     paths:
       - ./node_modules
