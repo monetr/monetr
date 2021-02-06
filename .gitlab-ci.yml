@@ -73,7 +73,7 @@ Tests:
     policy: pull
 
 Kaniko:
-  stage: Containers
+  stage: Container
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
