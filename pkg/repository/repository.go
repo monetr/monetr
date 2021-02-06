@@ -14,6 +14,9 @@ type Repository interface {
 	GetMe() (*models.User, error)
 	GetIsSetup() (bool, error)
 
+	CreateLink(link *models.Link) error
+	CreateBankAccounts(bankAccounts []models.BankAccount) error
+
 	GetLinks() ([]models.Link, error)
 }
 
@@ -90,7 +93,6 @@ func (r *repositoryBase) GetIsSetup() (bool, error) {
 func (r *repositoryBase) GetLinks() ([]models.Link, error) {
 	var result []models.Link
 	err := r.txn.Model(&result).
-		Relation("BankAccounts").
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Select(&result)
 	if err != nil {
@@ -98,4 +100,16 @@ func (r *repositoryBase) GetLinks() ([]models.Link, error) {
 	}
 
 	return result, nil
+}
+
+func (r *repositoryBase) CreateLink(link *models.Link) error {
+	return nil
+}
+
+func (r *repositoryBase) CreateBankAccounts(bankAccounts []models.BankAccount) error {
+	return nil
+}
+
+func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
+	return nil, nil
 }

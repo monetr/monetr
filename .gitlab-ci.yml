@@ -1,8 +1,8 @@
 stages:
   - Dependencies
-  - Build
+  - Build Binary
   - Test
-  - Container
+  - Build Container
 
 variables:
   GO111MODULE: 'on'
@@ -22,7 +22,7 @@ Fetch Dependencies:
     policy: push
 
 Build:
-  stage: Build
+  stage: Build Binary
   image: golang:1.15.8
   tags:
     - k8s:shared
@@ -73,14 +73,14 @@ Tests:
     policy: pull
 
 Kaniko:
-  stage: Container
+  stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
   tags:
     - k8s:shared
   script:
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.x --no-push
   cache:
     key: ${CI_COMMIT_SHA}
     paths:

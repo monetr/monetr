@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
 	"net/http"
 	"strconv"
 	"time"
@@ -78,6 +79,65 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			InstitutionId   string `json:"institutionId"`
 			InstitutionName string `json:"institutionName"`
 		}
-		fmt.Sprint(callbackRequest)
+		if err := ctx.ReadJSON(&callbackRequest); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+			return
+		}
+
+		result, err := c.plaid.ExchangePublicToken(callbackRequest.PublicToken)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
+			return
+		}
+
+		plaidAccounts, err := c.plaid.GetAccounts(result.AccessToken)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve accounts")
+			return
+		}
+
+		repo := c.mustGetAuthenticatedRepository(ctx)
+
+		link := models.Link{
+			AccountId:        repo.AccountId(),
+			PlaidItemId:      result.ItemID,
+			PlaidAccessToken: result.AccessToken,
+			PlaidProducts: []string{
+				// TODO (elliotcourant) Make this based on what product's we sent in the create link token request.
+				"transactions",
+			},
+			WebhookUrl:      "",
+			InstitutionId:   callbackRequest.InstitutionId,
+			InstitutionName: callbackRequest.InstitutionName,
+			CreatedByUserId: repo.UserId(),
+		}
+		if err = repo.CreateLink(&link); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
+			return
+		}
+
+		accounts := make([]models.BankAccount, len(plaidAccounts.Accounts))
+		for i, plaidAccount := range plaidAccounts.Accounts {
+			accounts[i] = models.BankAccount{
+				AccountId:         repo.AccountId(),
+				LinkId:            link.LinkId,
+				PlaidAccountId:    plaidAccount.AccountID,
+				AvailableBalance:  int64(plaidAccount.Balances.Available * 100),
+				CurrentBalance:    int64(plaidAccount.Balances.Current * 100),
+				Mask:              plaidAccount.Mask,
+				PlaidName:         plaidAccount.Name,
+				PlaidOfficialName: plaidAccount.OfficialName,
+				Type:              plaidAccount.Type,
+				SubType:           plaidAccount.Subtype,
+			}
+		}
+		if err = repo.CreateBankAccounts(accounts); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
+			return
+		}
+
+		ctx.JSON(map[string]interface{}{
+			"success": true,
+		})
 	})
 }
