@@ -1,3 +1,3 @@
 
 assert-clean-generated:
-	git diff --exit-code ../schema
+	# git diff --exit-code ../schema
