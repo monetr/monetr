@@ -13,7 +13,7 @@ Fetch Dependencies:
   tags:
     - k8s:shared
   script:
-    - go get ./...
+    - go mod vendor
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
