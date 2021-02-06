@@ -10,13 +10,14 @@ import (
 )
 
 var (
-	address    = flag.String("address", "", "PostgreSQL address")
-	port       = flag.Int("port", 5432, "PostgreSQL port")
-	username   = flag.String("user", "postgres", "PostgreSQL username")
-	database   = flag.String("db", "postgres", "PostgreSQL database")
-	password   = flag.String("password", "", "PostgreSQL password")
-	dryRun     = flag.Bool("dry-run", true, "Simply print the schema to STDOUT rather than applying it to the database")
-	dropTables = flag.Bool("drop", false, "add DROP TABLE before CREATE statements")
+	address      = flag.String("address", "", "PostgreSQL address")
+	port         = flag.Int("port", 5432, "PostgreSQL port")
+	username     = flag.String("user", "postgres", "PostgreSQL username")
+	database     = flag.String("db", "postgres", "PostgreSQL database")
+	password     = flag.String("password", "", "PostgreSQL password")
+	dryRun       = flag.Bool("dry-run", true, "Simply print the schema to STDOUT rather than applying it to the database")
+	dropTables   = flag.Bool("drop", false, "add DROP TABLE before CREATE statements")
+	printChanges = flag.Bool("print", true, "print schema changes to STDOUT")
 )
 
 var (
@@ -25,6 +26,12 @@ var (
 		`CREATE EXTENSION IF NOT EXISTS "citext";`,
 	}
 )
+
+func printMaybe(str string) {
+	if *printChanges {
+		fmt.Println(str)
+	}
+}
 
 func main() {
 	flag.Parse()
@@ -43,7 +50,7 @@ func main() {
 	}
 
 	for _, extension := range createExtensions {
-		fmt.Println(extension + "\n")
+		printMaybe(extension + "\n")
 		if !*dryRun {
 			if _, err := db.Exec(extension); err != nil {
 				panic(err)
@@ -57,7 +64,7 @@ func main() {
 				IfExists: true,
 				Cascade:  true,
 			})
-			fmt.Println(query.String() + ";\n")
+			printMaybe(query.String() + ";\n")
 			if !*dryRun {
 				if _, err := db.Exec(query); err != nil {
 					panic(err)
@@ -71,7 +78,7 @@ func main() {
 			IfNotExists:   true,
 			FKConstraints: true,
 		})
-		fmt.Println(query.String() + ";\n")
+		printMaybe(query.String() + ";\n")
 		if !*dryRun {
 			if _, err := db.Exec(query); err != nil {
 				panic(err)

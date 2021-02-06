@@ -13,7 +13,8 @@ apply-schema-ci:
 		--user=$$POSTGRES_USER \
 		--db=$$POSTGRES_DB \
 		--dry-run=false \
-		--drop=true
+		--drop=true \
+		--print=false
 
 docker:
 	GOOS=linux go build -o ./bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/api
