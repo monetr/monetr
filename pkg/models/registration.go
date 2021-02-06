@@ -19,7 +19,7 @@ import "time"
 type Registration struct {
 	tableName string `pg:"registrations"`
 
-	RegistrationId string    `json:"-" pg:"registration_id,notnull,pk,type:'uuid',default:'uuid_generate_v4()'"`
+	RegistrationId string    `json:"-" pg:"registration_id,notnull,pk,type:'uuid',default:uuid_generate_v4()"`
 	LoginId        uint64    `json:"loginId" pg:"login_id,notnull,on_delete:CASCADE"`
 	Login          *Login    `json:"login,omitempty" pg:"rel:has-one"`
 	IsComplete     bool      `json:"isComplete" pg:"is_complete,notnull,use-zero"`
