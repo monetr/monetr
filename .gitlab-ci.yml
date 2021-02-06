@@ -75,7 +75,7 @@ Tests:
 Kaniko:
   stage: Build
   image:
-    name: gcr.io/kaniko-project/executor:latest
+    name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
   tags:
     - k8s:shared
