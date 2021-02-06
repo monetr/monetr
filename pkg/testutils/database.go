@@ -15,7 +15,7 @@ func GetPgDatabaseTxn(t *testing.T) *pg.Tx {
 		User:            os.Getenv("POSTGRES_USER"),
 		Password:        os.Getenv("POSTGRES_PASSWORD"),
 		Database:        os.Getenv("POSTGRES_DB"),
-		ApplicationName: "harder - api - " + t.Name(),
+		ApplicationName: "harder - api - tests",
 	}
 	db := pg.Connect(options)
 

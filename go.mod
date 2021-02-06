@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/Joker/hpp v1.0.0 // indirect
+	github.com/brianvoe/gofakeit/v6 v6.0.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-pg/pg/v10 v10.7.4
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d

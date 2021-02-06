@@ -56,8 +56,11 @@ func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, firstName, l
 		FirstName:        firstName,
 		LastName:         lastName,
 	}
-	_, err := u.txn.Model(user).Insert(user)
-	return user, errors.Wrap(err, "failed to create user")
+	if _, err := u.txn.Model(user).Insert(user); err != nil {
+		return nil, errors.Wrap(err, "failed to create user")
+	}
+
+	return user, nil
 }
 
 func (u *unauthenticatedRepo) CreateRegistration(loginId uint64) (*models.Registration, error) {
