@@ -1,5 +1,6 @@
 FROM golang:1.15.8 as builder
-COPY ./ ./
+COPY ./ /build
+WORKDIR /build
 RUN go get ./...
 RUN go build -o /bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/api
 

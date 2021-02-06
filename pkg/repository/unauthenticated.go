@@ -73,7 +73,7 @@ func (u *unauthenticatedRepo) CreateRegistration(loginId uint64) (*models.Regist
 	}
 
 	_, err := u.txn.Model(registration).Insert(registration)
-	return nil, errors.Wrap(err, "failed to create registration")
+	return registration, errors.Wrap(err, "failed to create registration")
 }
 
 func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models.User, error) {

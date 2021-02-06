@@ -42,10 +42,21 @@ func NewController(configuration config.Configuration, db *pg.DB) *Controller {
 		}
 	}
 
+	p, err := plaid.NewClient(plaid.ClientOptions{
+		ClientID:    configuration.Plaid.ClientID,
+		Secret:      configuration.Plaid.ClientSecret,
+		Environment: plaid.Development,
+		HTTPClient:  http.DefaultClient,
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	return &Controller{
 		captcha:       &captcha,
 		configuration: configuration,
 		db:            db,
+		plaid:         p,
 	}
 }
 

@@ -18,7 +18,7 @@ func (c *Controller) sendEmailVerification(emailAddress, code string) error {
 	to := []string{emailAddress}
 	from := "no-reply@mail.harderthanitneedstobe.com"
 	msg := []byte(fmt.Sprintf("To: %s\r\n"+
-		"From: No Reply\r\n"+
+		"From: no-reply\r\n"+
 		"Subject: Please Verify Your Email Address\r\n"+
 		"\r\n"+
 		"Click the link to verify your account: %s/registration/verify?token=%s\r\n",

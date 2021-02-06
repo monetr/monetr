@@ -59,7 +59,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			AccountFilters:        nil,
 			CrossAppItemAdd:       nil,
 			PaymentInitiation:     nil,
-			Language:              "en-US",
+			Language:              "en",
 			LinkCustomizationName: "",
 			RedirectUri:           "",
 		})
@@ -69,7 +69,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 		}
 
 		ctx.JSON(map[string]interface{}{
-			"linkToken": token,
+			"linkToken": token.LinkToken,
 		})
 	})
 
