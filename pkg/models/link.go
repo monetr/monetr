@@ -17,4 +17,6 @@ type Link struct {
 	CustomInstitutionName string   `json:"customInstitutionName,omitempty" pg:"custom_institution_name"`
 	CreatedByUserId       uint64   `json:"createdByUserId" pg:"created_by_user_id,notnull,on_delete:CASCADE"`
 	CreatedByUser         *User    `json:"createdByUser,omitempty" pg:"rel:has-one,fk:created_by_user_id"`
+
+	BankAccounts []BankAccount `json:"bankAccounts,omitempty" pg:"rel:has-many"`
 }

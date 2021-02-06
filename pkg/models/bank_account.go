@@ -7,7 +7,7 @@ type BankAccount struct {
 	AccountId         uint64   `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE"`
 	Account           *Account `json:"-" pg:"rel:has-one"`
 	LinkId            uint64   `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE"`
-	Link              *Link    `json:"-" pg:"rel:has-one"`
+	Link              *Link    `json:"link,omitempty" pg:"rel:has-one"`
 	PlaidAccountId    string   `json:"-" pg:"plaid_account_id,notnull"`
 	AvailableBalance  int64    `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance    int64    `json:"currentBalance" pg:"current_balance,notnull,use_zero"`

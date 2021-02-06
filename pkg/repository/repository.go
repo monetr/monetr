@@ -13,6 +13,8 @@ type Repository interface {
 	AccountId() uint64
 	GetMe() (*models.User, error)
 	GetIsSetup() (bool, error)
+
+	GetLinks() ([]models.Link, error)
 }
 
 type UnauthenticatedRepository interface {
@@ -83,4 +85,17 @@ func (r *repositoryBase) GetIsSetup() (bool, error) {
 	return r.txn.Model(&models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Exists()
+}
+
+func (r *repositoryBase) GetLinks() ([]models.Link, error) {
+	var result []models.Link
+	err := r.txn.Model(&result).
+		Relation("BankAccounts").
+		Where(`"link"."account_id" = ?`, r.accountId).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve links")
+	}
+
+	return result, nil
 }

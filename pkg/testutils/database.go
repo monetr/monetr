@@ -9,7 +9,7 @@ import (
 )
 
 func GetPgDatabaseTxn(t *testing.T) *pg.Tx {
-	db := GetPgDatabaseTxn(t)
+	db := GetPgDatabase(t)
 
 	txn, err := db.Begin()
 	require.NoError(t, err, "must begin transaction")
