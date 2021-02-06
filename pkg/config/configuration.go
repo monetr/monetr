@@ -15,6 +15,7 @@ type Configuration struct {
 	SMTP           SMTPClient
 	ReCAPTCHA      ReCAPTCHA
 	Plaid          Plaid
+	CORS           CORS
 }
 
 type JWT struct {
@@ -69,6 +70,11 @@ type Plaid struct {
 	// sign up or afterwards in their user settings. This is used by plaid for
 	// future products. At the time of writing this it does not do anything.
 	EnableBirthdatePrompt bool
+}
+
+type CORS struct {
+	AllowedOrigins []string
+	Debug          bool
 }
 
 func LoadConfiguration() Configuration {

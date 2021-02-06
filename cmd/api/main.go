@@ -2,40 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/application"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/controller"
-	"github.com/iris-contrib/middleware/cors"
-	"github.com/kataras/iris/v12"
 )
 
 func main() {
 	configuration := config.LoadConfiguration()
-	app := iris.New()
-	app.UseRouter(cors.New(cors.Options{
-		AllowedOrigins: []string{
-			"http://localhost:3000",
-			"https://app.development.harderthanitneedstobe.com",
-		},
-		AllowOriginFunc: nil,
-		AllowedMethods: []string{
-			"HEAD",
-			"OPTIONS",
-			"GET",
-			"POST",
-		},
-		AllowedHeaders: []string{
-			"Content-Type",
-			"H-Token",
-		},
-		ExposedHeaders:     nil,
-		MaxAge:             0,
-		AllowCredentials:   true,
-		OptionsPassthrough: false,
-		Debug:              true,
-	}))
-
 	db := pg.Connect(&pg.Options{
 		Addr: fmt.Sprintf("%s:%d",
 			configuration.PostgreSQL.Address,
@@ -48,7 +23,8 @@ func main() {
 	})
 
 	c := controller.NewController(configuration, db)
-	c.RegisterRoutes(app)
+
+	app := application.NewApp(configuration, c)
 
 	app.Listen(":4000")
 }

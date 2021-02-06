@@ -87,6 +87,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.PartyFunc("/authentication", func(p router.Party) {
 			p.Post("/login", c.loginEndpoint)
 			p.Post("/register", c.registerEndpoint)
+			p.Post("/verify", c.verifyEndpoint)
 		})
 
 		p.Use(c.authenticationMiddleware)

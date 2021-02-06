@@ -170,6 +170,60 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 	})
 }
 
+func (c *Controller) verifyEndpoint(ctx *context.Context) {
+	var verifyRequest struct {
+		Token string `json:"token"`
+	}
+	if err := ctx.ReadJSON(&verifyRequest); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+		return
+	}
+
+	var claims RegistrationClaims
+	result, err := jwt.ParseWithClaims(verifyRequest.Token, &claims, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(c.configuration.JWT.RegistrationJwtSecret), nil
+	})
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")
+		return
+	}
+
+	if !result.Valid {
+		c.returnError(ctx, http.StatusForbidden, "unauthorized")
+		return
+	}
+
+	repo, err := c.getUnauthenticatedRepository(ctx)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get repository")
+		return
+	}
+
+	user, err := repo.VerifyRegistration(claims.RegistrationId)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify registration")
+		return
+	}
+
+	token, err := c.generateToken(user.LoginId, user.UserId, user.AccountId)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			"failed to create JWT",
+		)
+		return
+	}
+
+	ctx.JSON(map[string]interface{}{
+		"token": token,
+		"user":  user,
+	})
+}
+
 func (c *Controller) validateRegistration(email, password, firstName string) error {
 	if len(email) == 0 {
 		return errors.Errorf("email cannot be blank")
