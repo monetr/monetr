@@ -115,3 +115,13 @@ func (r *repositoryBase) CreateBankAccounts(bankAccounts []models.BankAccount) e
 func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
 	return nil, nil
 }
+
+func (r *repositoryBase) GetTransactions(bankAccountId uint64) ([]models.Transaction, error) {
+	var result []models.Transaction
+	err := r.txn.Model(&result).
+		Where(`"transaction"."account_id" = ? AND "transaction"."bank_account_id" = ?`, r.AccountId(), bankAccountId).
+		Order(`"transaction"."transaction_id" DESC`).
+		Limit(25).
+		Select(&result)
+	return result, err
+}
