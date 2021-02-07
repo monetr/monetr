@@ -22,7 +22,7 @@ Build:
   tags:
     - k8s:shared
   script:
-    - npm build
+    - yarn build
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
