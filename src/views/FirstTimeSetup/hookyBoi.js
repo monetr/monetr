@@ -8,7 +8,7 @@ export const PlaidConnectButton = props => {
     onSuccess: props.onSuccess
   };
 
-  const { open, ready, error } = usePlaidLink(config);
+  const { open } = usePlaidLink(config);
 
   return (
     <Button style={{float: 'right'}} color="primary" variant="outlined" onClick={ open }>

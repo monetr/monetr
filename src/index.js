@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './Application';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux'
 import configureStore from './store';
@@ -8,8 +7,6 @@ import Root from "./root";
 import './styles/index.scss';
 
 const store = configureStore();
-
-
 
 ReactDOM.render(
   <React.StrictMode>

@@ -2,7 +2,6 @@ import React, {PureComponent} from 'react';
 import PropTypes from "prop-types";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import Application from "./Application";
 import {getIsAuthenticated} from "./shared/authentication/selectors";
 import bootstrapApplication from "./shared/bootstrap";
 import {getIsBootstrapped, getSignUpAllowed} from "./shared/bootstrap/selectors";
@@ -10,14 +9,11 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
-  Redirect, Link as RouterLink
+  Redirect,
 } from "react-router-dom";
 import SignUpView from "./views/SignUp";
 import LoginView from "./views/Login";
 import bootstrapLogin from "./shared/authentication/actions/bootstrapLogin";
-import {AppBar, Button, IconButton, Menu, MenuItem, Tab, Tabs, Toolbar, Typography} from "@material-ui/core";
-import MenuIcon from '@material-ui/icons/Menu';
 import AuthenticatedApplication from "./AuthenticatedApplication";
 
 export class Root extends PureComponent {

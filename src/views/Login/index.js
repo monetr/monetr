@@ -11,11 +11,10 @@ import {
   CardHeader,
   Container,
   Grid, Grow,
-  Paper, Snackbar,
+  Snackbar,
   TextField,
-  Typography
 } from "@material-ui/core";
-import {Formik, Form, Field, ErrorMessage} from 'formik';
+import {Formik} from 'formik';
 
 import './styles/login.scss';
 import {Link as RouterLink} from 'react-router-dom'

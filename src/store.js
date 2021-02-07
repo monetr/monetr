@@ -1,10 +1,8 @@
 import {applyMiddleware, createStore, compose, Action} from 'redux';
 import {composeWithDevTools} from 'redux-devtools-extension';
 import reducers from './shared/state';
-import Cookies from 'js-cookie';
-import thunk, {ThunkAction, ThunkDispatch} from 'redux-thunk';
+import thunk from 'redux-thunk';
 import AuthenticationState from "./shared/authentication/state";
-import {Map} from "immutable";
 import BootstrapState from "./shared/bootstrap/state";
 
 

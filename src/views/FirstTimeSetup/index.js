@@ -4,7 +4,6 @@ import {bindActionCreators} from "redux";
 import {withRouter} from "react-router-dom";
 import {connect} from "react-redux";
 import request from "../../shared/util/request";
-import {PlaidLink} from "react-plaid-link";
 import PropTypes from "prop-types";
 import logout from "../../shared/authentication/actions/logout";
 import {PlaidConnectButton} from "./hookyBoi";

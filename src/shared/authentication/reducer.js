@@ -1,6 +1,5 @@
-import {BOOTSTRAP_LOGIN, LOGIN_SUCCESS, LOGOUT, SET_TOKEN} from "./actions";
+import {BOOTSTRAP_LOGIN, LOGOUT} from "./actions";
 import AuthenticationState from "./state";
-
 
 export default function reducer(state = new AuthenticationState(), action) {
   switch (action.type) {
@@ -14,6 +13,7 @@ export default function reducer(state = new AuthenticationState(), action) {
         token: null,
         user: null,
       });
+    default:
+      return state;
   }
-  return state;
 }
