@@ -11,6 +11,7 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/plaid/plaid-go/plaid"
+	"github.com/sirupsen/logrus"
 	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
 )
@@ -26,9 +27,12 @@ type Controller struct {
 	plaid          *plaid.Client
 	smtp           *smtp.Client
 	mailVerifyCode *gotp.HOTP
+	log            *logrus.Entry
 }
 
 func NewController(configuration config.Configuration, db *pg.DB) *Controller {
+	logger := logrus.New()
+	entry := logrus.NewEntry(logger)
 	var captcha recaptcha.ReCAPTCHA
 	var err error
 	if configuration.ReCAPTCHA.Enabled {
@@ -45,7 +49,7 @@ func NewController(configuration config.Configuration, db *pg.DB) *Controller {
 	p, err := plaid.NewClient(plaid.ClientOptions{
 		ClientID:    configuration.Plaid.ClientID,
 		Secret:      configuration.Plaid.ClientSecret,
-		Environment: plaid.Development,
+		Environment: configuration.Plaid.Environment,
 		HTTPClient:  http.DefaultClient,
 	})
 	if err != nil {
@@ -57,10 +61,12 @@ func NewController(configuration config.Configuration, db *pg.DB) *Controller {
 		configuration: configuration,
 		db:            db,
 		plaid:         p,
+		log:           entry,
 	}
 }
 
 func (c *Controller) RegisterRoutes(app *iris.Application) {
+	app.Use(c.loggingMiddleware)
 	app.OnAnyErrorCode(func(ctx *context.Context) {
 		if err := ctx.GetErr(); err != nil {
 			ctx.JSON(map[string]interface{}{
@@ -113,4 +119,5 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		p.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
 	})
+
 }

@@ -82,6 +82,14 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	ctx.Next()
 }
 
+func (c *Controller) loggingMiddleware(ctx *context.Context) {
+	ctx.Next()
+
+	if err := ctx.GetErr(); err != nil {
+		c.log.WithContext(ctx.Request().Context()).WithError(err).Errorf("%+v", ctx.GetErr())
+	}
+}
+
 func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (repository.UnauthenticatedRepository, error) {
 	txn, ok := ctx.Values().Get(transactionContextKey).(*pg.Tx)
 	if !ok {

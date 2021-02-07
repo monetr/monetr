@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/viper"
 )
 
@@ -55,6 +56,7 @@ type ReCAPTCHA struct {
 type Plaid struct {
 	ClientID     string
 	ClientSecret string
+	Environment  plaid.Environment
 	// This does not seem to be a scope within the documentation. Per the
 	// documentation "balance is not a valid product" and is enabled
 	// automatically. It is not clear if that includes this beta feature though.

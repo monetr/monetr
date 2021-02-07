@@ -103,11 +103,13 @@ func (r *repositoryBase) GetLinks() ([]models.Link, error) {
 }
 
 func (r *repositoryBase) CreateLink(link *models.Link) error {
-	return nil
+	_, err := r.txn.Model(link).Insert(link)
+	return errors.Wrap(err, "failed to insert link")
 }
 
 func (r *repositoryBase) CreateBankAccounts(bankAccounts []models.BankAccount) error {
-	return nil
+	_, err := r.txn.Model(&bankAccounts).Insert(&bankAccounts)
+	return errors.Wrap(err, "failed to insert bank accounts")
 }
 
 func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {

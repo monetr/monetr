@@ -75,9 +75,10 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 
 	p.Post("/token/callback", func(ctx *context.Context) {
 		var callbackRequest struct {
-			PublicToken     string `json:"publicToken"`
-			InstitutionId   string `json:"institutionId"`
-			InstitutionName string `json:"institutionName"`
+			PublicToken     string   `json:"publicToken"`
+			InstitutionId   string   `json:"institutionId"`
+			InstitutionName string   `json:"institutionName"`
+			AccountIds      []string `json:"accountIds"`
 		}
 		if err := ctx.ReadJSON(&callbackRequest); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
@@ -90,7 +91,9 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			return
 		}
 
-		plaidAccounts, err := c.plaid.GetAccounts(result.AccessToken)
+		plaidAccounts, err := c.plaid.GetAccountsWithOptions(result.AccessToken, plaid.GetAccountsOptions{
+			AccountIDs: callbackRequest.AccountIds,
+		})
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve accounts")
 			return

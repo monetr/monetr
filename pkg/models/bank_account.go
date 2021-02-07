@@ -13,8 +13,8 @@ type BankAccount struct {
 	CurrentBalance    int64    `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
 	Mask              string   `json:"mask" pg:"mask,notnull"`
 	Name              string   `json:"name,omitempty" pg:"name"`
-	PlaidName         string   `json:"originalName" pg:"original_name,notnull"`
-	PlaidOfficialName string   `json:"officialName" pg:"official_name,notnull"`
+	PlaidName         string   `json:"originalName" pg:"plaid_name,notnull"`
+	PlaidOfficialName string   `json:"officialName" pg:"plaid_official_name"`
 	Type              string   `json:"accountType" pg:"account_type,notnull"`
 	SubType           string   `json:"accountSubType" pg:"account_sub_type,notnull"`
 }

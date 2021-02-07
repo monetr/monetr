@@ -15,6 +15,7 @@ require (
 	github.com/nyaruka/phonenumbers v1.0.65
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	github.com/plaid/plaid-go v0.0.0-20210112002311-0cf0e6f0ea3e
+	github.com/sirupsen/logrus v1.7.1-0.20201217161852-cd4bf4ef8de1
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/teambition/rrule-go v1.6.2
