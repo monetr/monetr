@@ -17,7 +17,6 @@ apply-schema-ci:
 		--print=false
 
 docker:
-	GOOS=linux go build -o ./bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/api
 	docker build -t harder-rest-api -f Dockerfile .
 
 clean-development:
