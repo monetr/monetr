@@ -8,6 +8,7 @@ import {PlaidLink} from "react-plaid-link";
 import PropTypes from "prop-types";
 import logout from "../../shared/authentication/actions/logout";
 import {PlaidConnectButton} from "./hookyBoi";
+import {List} from "immutable";
 
 
 export class FirstTimeSetup extends Component {
@@ -38,8 +39,24 @@ export class FirstTimeSetup extends Component {
     this.props.logout();
   }
 
-  plaidLinkSuccess = result => {
+  plaidLinkSuccess = (token, metadata) => {
+    console.log({
+      token,
+      metadata,
+    });
 
+    request().post('/api/plaid/link/token/callback', {
+      publicToken: token,
+      institutionId: metadata.institution.institution_id,
+      institutionName: metadata.institution.name,
+      accountIds: new List(metadata.accounts).map(account => account.id).toArray()
+    })
+      .then(result => {
+        console.log(result);
+      })
+      .catch(error => {
+        console.error(error);
+      })
   };
 
   renderPlaidLink = () => {

@@ -15,7 +15,7 @@ export default function bootstrapLogin(token = null, user = null) {
     // If the token is not present at this point then the user is not authenticated. We want to dispatch accordingly and
     // store in redux that the user is not authenticated.
     if (!token) {
-      return dispatch({
+      dispatch({
         type: BOOTSTRAP_LOGIN,
         payload: {
           isAuthenticated: false,
@@ -23,6 +23,7 @@ export default function bootstrapLogin(token = null, user = null) {
           user: null,
         }
       });
+      return Promise.resolve();
     }
 
     const apiUrl = getAPIUrl(getState());
@@ -53,7 +54,7 @@ export default function bootstrapLogin(token = null, user = null) {
         });
     }
 
-    return dispatch({
+    dispatch({
       type: BOOTSTRAP_LOGIN,
       payload: {
         isAuthenticated: true,
@@ -61,5 +62,6 @@ export default function bootstrapLogin(token = null, user = null) {
         user: new User(user),
       }
     });
+    return Promise.resolve();
   };
 }

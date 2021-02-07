@@ -1,6 +1,7 @@
 stages:
   - Dependencies
-  - Build
+  - Build Javascript
+  - Build Container
 
 Fetch Dependencies:
   stage: Dependencies
@@ -16,7 +17,7 @@ Fetch Dependencies:
     policy: push
 
 Build:
-  stage: Build
+  stage: Build Javascript
   image: node:15.8.0-buster
   tags:
     - k8s:shared
@@ -25,5 +26,22 @@ Build:
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
+      - ./build
       - ./node_modules
+    policy: pull-push
+
+Kaniko:
+  stage: Build Container
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  tags:
+    - k8s:shared
+  script:
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./build
     policy: pull
+
