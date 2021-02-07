@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react';
 import {BrowserRouter as Router, Link as RouterLink, Redirect, Route, Switch, withRouter} from "react-router-dom";
-import {AppBar, Button, IconButton, Menu, MenuItem, Toolbar, Typography} from "@material-ui/core";
+import {AppBar, Button, IconButton, InputLabel, Menu, MenuItem, Select, Toolbar, Typography} from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import {connect} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -8,6 +8,7 @@ import PropTypes from "prop-types";
 import logout from "./shared/authentication/actions/logout";
 import fetchLinksIfNeeded from "./shared/links/actions/fetchLinksIfNeeded";
 import FirstTimeSetup from "./views/FirstTimeSetup";
+import {getHasAnyLinks} from "./shared/links/selectors/getHasAnyLinks";
 
 export class AuthenticatedApplication extends Component {
   state = {
@@ -63,6 +64,23 @@ export class AuthenticatedApplication extends Component {
             <Button to="/expenses" component={RouterLink} color="inherit">Expenses</Button>
             <Button to="/goals" component={RouterLink} color="inherit">Goals</Button>
             <div style={{marginLeft: 'auto'}}/>
+            <div style={{marginRight: '10px', marginLeft: '10px'}}>
+              <InputLabel id="demo-simple-select-outlined-label">Bank Account</InputLabel>
+              <Select
+                labelId="demo-simple-select-outlined-label"
+                id="demo-simple-select-outlined"
+                value={10}
+                onChange={() => {}}
+                label="Bank Account"
+              >
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value={10}>US Bank</MenuItem>
+                <MenuItem value={20}>Twenty</MenuItem>
+                <MenuItem value={30}>Thirty</MenuItem>
+              </Select>
+            </div>
             <IconButton onClick={this.openMenu} edge="start" color="inherit" aria-label="menu">
               <MenuIcon/>
             </IconButton>
@@ -128,7 +146,9 @@ export class AuthenticatedApplication extends Component {
 }
 
 export default connect(
-  state => ({}),
+  state => ({
+    hasAnyLinks: getHasAnyLinks(state),
+  }),
   dispatch => bindActionCreators({
     logout,
     fetchLinksIfNeeded,

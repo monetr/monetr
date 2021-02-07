@@ -9,6 +9,7 @@ import PropTypes from "prop-types";
 import logout from "../../shared/authentication/actions/logout";
 import {PlaidConnectButton} from "./hookyBoi";
 import {List} from "immutable";
+import fetchLinks from "../../shared/links/actions/fetchLinks";
 
 
 export class FirstTimeSetup extends Component {
@@ -19,6 +20,7 @@ export class FirstTimeSetup extends Component {
 
   static propTypes = {
     logout: PropTypes.func.isRequired,
+    fetchLinks: PropTypes.func.isRequired,
   }
 
   componentDidMount() {
@@ -52,7 +54,7 @@ export class FirstTimeSetup extends Component {
       accountIds: new List(metadata.accounts).map(account => account.id).toArray()
     })
       .then(result => {
-        console.log(result);
+        return this.props.fetchLinks();
       })
       .catch(error => {
         console.error(error);
@@ -109,5 +111,6 @@ export default connect(
   state => ({}),
   dispatch => bindActionCreators({
     logout,
+    fetchLinks,
   }, dispatch),
 )(withRouter(FirstTimeSetup));
