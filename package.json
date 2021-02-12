@@ -14,6 +14,7 @@
     "formik": "^2.2.6",
     "immutable": "^4.0.0-rc.12",
     "js-cookie": "^2.2.1",
+    "moment": "^2.29.1",
     "path-to-regexp": "^0.1.7",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",

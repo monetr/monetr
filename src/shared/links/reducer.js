@@ -1,5 +1,6 @@
 import LinksState from "./state";
 import {FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS} from "./actions";
+import {LOGOUT} from "../authentication/actions";
 
 export default function reducer(state = new LinksState(), action) {
   switch (action.type) {
@@ -17,6 +18,8 @@ export default function reducer(state = new LinksState(), action) {
         loading: false,
         links: action.payload,
       });
+    case LOGOUT:
+      return new LinksState();
     default:
       return state;
   }
