@@ -112,4 +112,5 @@ Minikube:
     - touch ${HOME}/.kube/config
     - curl -Lo minikube https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION}/minikube-linux-amd64 && chmod +x minikube && mv minikube /usr/local/bin/
     - minikube start --vm-driver=none --cpus 2 --memory 4096 --kubernetes-version=${K8S_VERSION}
+  script:
     - kubectl get po
