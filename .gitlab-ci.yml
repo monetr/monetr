@@ -69,3 +69,27 @@ Publish GitLab:
     paths:
       - ./build
     policy: pull
+
+Publish GitHub:
+  stage: Publish Container
+  only:
+    refs:
+      - main
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  tags:
+    - k8s:shared
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"ghcr.io\":{\"username\":\"elliotcourant\",\"password\":\"$K8S_SECRET_GITHUB_ACCESS_TOKEN\"}}}" > /kaniko/.docker/config.json
+  script:
+    - |
+      /kaniko/executor --context $CI_PROJECT_DIR \
+        --dockerfile $CI_PROJECT_DIR/Dockerfile \
+        --destination ghcr.io/harderthanitneedstobe/web-ui:latest
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./build
+    policy: pull
