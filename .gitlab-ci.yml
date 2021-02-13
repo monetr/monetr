@@ -3,6 +3,7 @@ stages:
   - Build Javascript
   - Build Container
   - Publish Container
+  - Kubernetes
 
 Fetch Dependencies:
   stage: Dependencies
@@ -93,3 +94,22 @@ Publish GitHub:
     paths:
       - ./build
     policy: pull
+
+Minikube:
+  stage: Kubernetes
+  only:
+    refs:
+      - main
+  image: ubuntu:20.04
+  tags:
+    - k8s:shared
+  variables:
+    K8S_VERSION: v1.18.4
+    MINIKUBE_VERSION: v1.17.1
+  before_script:
+    - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${K8S_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && mv kubectl /usr/local/bin/
+    - mkdir -p ${HOME}/.kube
+    - touch ${HOME}/.kube/config
+    - curl -Lo minikube https://github.com/kubernetes/minikube/releases/download/${MINIKUBE_VERSION}/minikube-linux-amd64 && chmod +x minikube && mv minikube /usr/local/bin/
+    - minikube start --vm-driver=none --cpus 2 --memory 4096 --kubernetes-version=${K8S_VERSION}
+    - kubectl get po
