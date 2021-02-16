@@ -1,8 +1,8 @@
-import {FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS} from "../actions";
-import request from "../../util/request";
+import { FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS } from "shared/links/actions";
+import request from "shared/util/request";
 
-import {Map} from 'immutable';
-import Link from "../../../data/link";
+import { Map } from 'immutable';
+import Link from "data/Link";
 
 
 export const fetchLinksRequest = {

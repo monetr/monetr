@@ -5,7 +5,7 @@ import {
   FETCH_BANK_ACCOUNT_SUCCESS,
   FETCH_BANK_ACCOUNTS_REQUEST
 } from "./actions";
-import {LOGOUT} from "../authentication/actions";
+import { LOGOUT } from "shared/authentication/actions";
 
 
 export default function reducer(state = new BankAccountsState(), action) {

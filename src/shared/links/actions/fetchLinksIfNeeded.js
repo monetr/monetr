@@ -1,5 +1,5 @@
-import {getHasAnyLinks} from "../selectors/getHasAnyLinks";
-import fetchLinks from "./fetchLinks";
+import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
+import fetchLinks from "shared/links/actions/fetchLinks";
 
 export default function fetchLinksIfNeeded() {
   return (dispatch, getState) => {

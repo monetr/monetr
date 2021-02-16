@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {BOOTSTRAP_FAILED, BOOTSTRAP_FINISHED, BOOTSTRAP_START} from "./actions";
-import request from "../util/request";
+import request from "shared/util/request";
 
 function bootstrapStart() {
   return {

@@ -1,5 +1,5 @@
 import {Record} from "immutable";
-import User from "../../data/user";
+import User from "data/User";
 
 export default class AuthenticationState extends Record({
   isAuthenticated: false,

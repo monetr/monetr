@@ -1,5 +1,5 @@
-import BootstrapState from "./state";
-import {BOOTSTRAP_FAILED, BOOTSTRAP_FINISHED, BOOTSTRAP_START} from "./actions";
+import BootstrapState from "shared/bootstrap/state";
+import { BOOTSTRAP_FAILED, BOOTSTRAP_FINISHED, BOOTSTRAP_START } from "shared/bootstrap/actions";
 
 export default function reducer(state = new BootstrapState(), action) {
   switch (action.type) {

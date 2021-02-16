@@ -1,7 +1,7 @@
-import User from "../../../data/user";
-import request from "../../util/request";
-import {BOOTSTRAP_LOGIN} from "../actions";
-import {getAPIUrl} from "../../bootstrap/selectors";
+import User from "data/User";
+import request from "shared/util/request";
+import {BOOTSTRAP_LOGIN} from "shared/authentication/actions";
+import {getAPIUrl} from "shared/bootstrap/selectors";
 import axios from "axios";
 
 export default function bootstrapLogin(token = null, user = null) {

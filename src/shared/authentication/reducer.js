@@ -1,5 +1,5 @@
-import {BOOTSTRAP_LOGIN, LOGOUT} from "./actions";
-import AuthenticationState from "./state";
+import { BOOTSTRAP_LOGIN, LOGOUT } from "shared/authentication/actions";
+import AuthenticationState from "shared/authentication/state";
 
 export default function reducer(state = new AuthenticationState(), action) {
   switch (action.type) {

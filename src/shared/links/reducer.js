@@ -1,6 +1,6 @@
-import LinksState from "./state";
-import {FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS} from "./actions";
-import {LOGOUT} from "../authentication/actions";
+import LinksState from "shared/links/state";
+import { FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS } from "shared/links/actions";
+import { LOGOUT } from "shared/authentication/actions";
 
 export default function reducer(state = new LinksState(), action) {
   switch (action.type) {

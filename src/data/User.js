@@ -1,5 +1,5 @@
 import {Record} from "immutable";
-import Login from "./login";
+import Login from "data/Login";
 
 export default class User extends Record({
   userId: 0,

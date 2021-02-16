@@ -1,6 +1,6 @@
+import { Button } from "@material-ui/core";
 import React from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import {Button} from "@material-ui/core";
 
 export const PlaidConnectButton = props => {
   const config = {
@@ -15,7 +15,7 @@ export const PlaidConnectButton = props => {
 
   return (
     <Button
-      style={{float: 'right'}}
+      style={ { float: 'right' } }
       color="primary"
       variant="outlined"
       onClick={ open }>

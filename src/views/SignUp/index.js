@@ -1,16 +1,3 @@
-import React, {Component} from "react";
-import PropTypes from "prop-types";
-import {connect} from "react-redux";
-import {
-  getReCAPTCHAKey,
-  getRequireLegalName, getRequirePhoneNumber,
-  getShouldVerifyRegister,
-  getSignUpAllowed
-} from "../../shared/bootstrap/selectors";
-import {bindActionCreators} from "redux";
-import {Link as RouterLink, withRouter} from "react-router-dom";
-import request from "../../shared/util/request";
-import {Formik} from "formik";
 import {
   Box,
   Button,
@@ -19,13 +6,28 @@ import {
   CardContent,
   CardHeader,
   Container,
-  Grid, Grow,
+  Grid,
+  Grow,
   Snackbar,
   TextField
 } from "@material-ui/core";
+import { Alert, AlertTitle } from "@material-ui/lab";
+import { Formik } from "formik";
+import PropTypes from "prop-types";
+import React, { Component } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import {Alert, AlertTitle} from "@material-ui/lab";
-import bootstrapLogin from "../../shared/authentication/actions/bootstrapLogin";
+import { connect } from "react-redux";
+import { Link as RouterLink, withRouter } from "react-router-dom";
+import { bindActionCreators } from "redux";
+import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
+import {
+  getReCAPTCHAKey,
+  getRequireLegalName,
+  getRequirePhoneNumber,
+  getShouldVerifyRegister,
+  getSignUpAllowed
+} from "shared/bootstrap/selectors";
+import request from "shared/util/request";
 
 export class SignUpView extends Component {
   state = {
@@ -47,8 +49,8 @@ export class SignUpView extends Component {
     this.setState({
       error: null,
     });
-    const {verification} = this.state;
-    const {bootstrapLogin} = this.props;
+    const { verification } = this.state;
+    const { bootstrapLogin } = this.props;
     return request().post('/api/authentication/register', {
       email: values.email,
       password: values.password,
@@ -80,45 +82,45 @@ export class SignUpView extends Component {
   };
 
   renderReCAPTCHAMaybe = () => {
-    const {verifyRegister, ReCAPTCHAKey} = this.props;
+    const { verifyRegister, ReCAPTCHAKey } = this.props;
     if (!verifyRegister) {
       return null;
     }
 
     return (
-      <Grid item xs={12}>
+      <Grid item xs={ 12 }>
         <ReCAPTCHA
-          sitekey={ReCAPTCHAKey}
-          onChange={value => this.setState({verification: value})}
+          sitekey={ ReCAPTCHAKey }
+          onChange={ value => this.setState({ verification: value }) }
         />
       </Grid>
     )
   };
 
   cannotSubmit = (isSubmitting, values) => {
-    const {verifyRegister} = this.props;
-    const {verification} = this.state;
+    const { verifyRegister } = this.props;
+    const { verification } = this.state;
     return isSubmitting || !values.email || !values.password || !values.confirmPassword || !values.firstName || (verifyRegister && !verification)
   };
 
   renderErrorMaybe = () => {
-    const {error} = this.state;
+    const { error } = this.state;
     if (!error) {
       return null;
     }
 
     return (
-      <Snackbar open autoHideDuration={10000}>
+      <Snackbar open autoHideDuration={ 10000 }>
         <Alert variant="filled" severity="error">
           <AlertTitle>Error</AlertTitle>
-          {this.state.error}
+          { this.state.error }
         </Alert>
       </Snackbar>
     )
   };
 
   onValidate = (values) => {
-    const {requireLegalName} = this.props;
+    const { requireLegalName } = this.props;
     const errors = {};
     if (!values.email) {
       errors.email = 'An email is required to sign up.';
@@ -143,7 +145,7 @@ export class SignUpView extends Component {
     return errors;
   };
 
-  onSubmit = (values, {setSubmitting}) => {
+  onSubmit = (values, { setSubmitting }) => {
     return this.submitRegister(values)
       .finally(() => setSubmitting(false));
   };
@@ -151,125 +153,125 @@ export class SignUpView extends Component {
   render() {
     return (
       <div className="register-view">
-        {this.renderErrorMaybe()}
+        { this.renderErrorMaybe() }
         <Formik
-          initialValues={{
+          initialValues={ {
             email: '',
             password: '',
             confirmPassword: '',
             firstName: '',
             lastName: '',
-          }}
-          validate={this.onValidate}
-          onSubmit={this.onSubmit}
+          } }
+          validate={ this.onValidate }
+          onSubmit={ this.onSubmit }
         >
-          {({
-              values,
-              errors,
-              touched,
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              isSubmitting,
-              /* and other goodies */
-            }) => (
-            <Box m={6}>
-              <Container maxWidth="xs" className={"login-root"}>
+          { ({
+               values,
+               errors,
+               touched,
+               handleChange,
+               handleBlur,
+               handleSubmit,
+               isSubmitting,
+               /* and other goodies */
+             }) => (
+            <Box m={ 6 }>
+              <Container maxWidth="xs" className={ "login-root" }>
                 <Grow in>
                   <Card>
                     <CardHeader title="Harder Than It Needs To Be" subheader="Sign Up"/>
                     <CardContent>
-                      <Grid container spacing={1}>
-                        <Grid item xs={12}>
+                      <Grid container spacing={ 1 }>
+                        <Grid item xs={ 12 }>
                           <TextField
                             fullWidth
                             id="email"
                             label="Email"
                             name="email"
-                            value={values.email}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            error={touched.email && !!errors.email}
-                            helperText={touched.email && errors.email}
-                            disabled={isSubmitting}
+                            value={ values.email }
+                            onChange={ handleChange }
+                            onBlur={ handleBlur }
+                            error={ touched.email && !!errors.email }
+                            helperText={ touched.email && errors.email }
+                            disabled={ isSubmitting }
                           />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={ 12 }>
                           <TextField
                             fullWidth
                             id="password"
                             label="Password"
                             name="password"
                             type="password"
-                            value={values.password}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            error={touched.password && !!errors.password}
-                            helperText={touched.password && errors.password}
-                            disabled={isSubmitting}
+                            value={ values.password }
+                            onChange={ handleChange }
+                            onBlur={ handleBlur }
+                            error={ touched.password && !!errors.password }
+                            helperText={ touched.password && errors.password }
+                            disabled={ isSubmitting }
                           />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={ 12 }>
                           <TextField
                             fullWidth
                             id="confirmPassword"
                             label="Confirm Password"
                             name="confirmPassword"
                             type="password"
-                            value={values.confirmPassword}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            error={touched.confirmPassword && !!errors.confirmPassword}
-                            helperText={touched.confirmPassword && errors.confirmPassword}
-                            disabled={isSubmitting}
+                            value={ values.confirmPassword }
+                            onChange={ handleChange }
+                            onBlur={ handleBlur }
+                            error={ touched.confirmPassword && !!errors.confirmPassword }
+                            helperText={ touched.confirmPassword && errors.confirmPassword }
+                            disabled={ isSubmitting }
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={ 6 }>
                           <TextField
                             fullWidth
                             id="firstName"
                             label="First Name"
                             name="firstName"
-                            value={values.firstName}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            error={touched.firstName && !!errors.firstName}
-                            helperText={touched.firstName && errors.firstName}
-                            disabled={isSubmitting}
+                            value={ values.firstName }
+                            onChange={ handleChange }
+                            onBlur={ handleBlur }
+                            error={ touched.firstName && !!errors.firstName }
+                            helperText={ touched.firstName && errors.firstName }
+                            disabled={ isSubmitting }
                           />
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid item xs={ 6 }>
                           <TextField
                             fullWidth
                             id="lastName"
-                            label={ this.props.requireLegalName ? "Last Name" : "Last Name (optional)"}
+                            label={ this.props.requireLegalName ? "Last Name" : "Last Name (optional)" }
                             name="lastName"
-                            value={values.lastName}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            error={touched.lastName && !!errors.lastName}
-                            helperText={touched.lastName && errors.lastName}
-                            disabled={isSubmitting}
+                            value={ values.lastName }
+                            onChange={ handleChange }
+                            onBlur={ handleBlur }
+                            error={ touched.lastName && !!errors.lastName }
+                            helperText={ touched.lastName && errors.lastName }
+                            disabled={ isSubmitting }
                           />
                         </Grid>
-                        {this.renderReCAPTCHAMaybe()}
+                        { this.renderReCAPTCHAMaybe() }
                       </Grid>
                     </CardContent>
                     <CardActions>
                       <Button
                         to="/login"
-                        component={RouterLink}
+                        component={ RouterLink }
                       >
                         Cancel
                       </Button>
-                      <div style={{marginLeft: 'auto'}}/>
+                      <div style={ { marginLeft: 'auto' } }/>
                       <Button
                         to="/register"
-                        component={RouterLink}
+                        component={ RouterLink }
                         variant="outlined"
                         color="primary"
-                        onClick={handleSubmit}
-                        disabled={this.cannotSubmit(isSubmitting, values)}
+                        onClick={ handleSubmit }
+                        disabled={ this.cannotSubmit(isSubmitting, values) }
                       >
                         Sign Up
                       </Button>
@@ -278,7 +280,7 @@ export class SignUpView extends Component {
                 </Grow>
               </Container>
             </Box>
-          )}
+          ) }
         </Formik>
       </div>
     )

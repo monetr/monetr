@@ -1,20 +1,15 @@
-import React, {PureComponent} from 'react';
+import AuthenticatedApplication from "AuthenticatedApplication";
 import PropTypes from "prop-types";
-import {bindActionCreators} from "redux";
-import {connect} from "react-redux";
-import {getIsAuthenticated} from "./shared/authentication/selectors";
-import bootstrapApplication from "./shared/bootstrap";
-import {getIsBootstrapped, getSignUpAllowed} from "./shared/bootstrap/selectors";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from "react-router-dom";
-import SignUpView from "./views/SignUp";
-import LoginView from "./views/Login";
-import bootstrapLogin from "./shared/authentication/actions/bootstrapLogin";
-import AuthenticatedApplication from "./AuthenticatedApplication";
+import React, { PureComponent } from 'react';
+import { connect } from "react-redux";
+import { BrowserRouter as Router, Redirect, Route, Switch, } from "react-router-dom";
+import { bindActionCreators } from "redux";
+import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
+import { getIsAuthenticated } from "shared/authentication/selectors";
+import bootstrapApplication from "shared/bootstrap";
+import { getIsBootstrapped, getSignUpAllowed } from "shared/bootstrap/selectors";
+import LoginView from "views/Login";
+import SignUpView from "views/SignUp";
 
 export class Root extends PureComponent {
   state = {
@@ -50,20 +45,20 @@ export class Root extends PureComponent {
           <Route path="/login">
             <LoginView/>
           </Route>
-          {this.props.allowSignUp &&
+          { this.props.allowSignUp &&
           <Route path="/register">
             <SignUpView/>
           </Route>
           }
           <Route>
-            <Redirect to={{pathname: '/login'}}/>
+            <Redirect to={ { pathname: '/login' } }/>
           </Route>
         </Switch>
       </Router>
     )
   };
 
-  openMenu = event =>{
+  openMenu = event => {
     this.setState({
       anchorEl: event.currentTarget,
     });
@@ -76,9 +71,8 @@ export class Root extends PureComponent {
   };
 
 
-
   render() {
-    const {isReady, isAuthenticated} = this.props;
+    const { isReady, isAuthenticated } = this.props;
     if (!isReady || this.state.loading) {
       return <h1>Loading...</h1>;
     }
@@ -89,7 +83,7 @@ export class Root extends PureComponent {
 
     return (
       <Router>
-        <AuthenticatedApplication />
+        <AuthenticatedApplication/>
       </Router>
     )
   }

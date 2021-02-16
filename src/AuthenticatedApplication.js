@@ -1,14 +1,14 @@
-import React, {Component, Fragment} from 'react';
-import {BrowserRouter as Router, Link as RouterLink, Redirect, Route, Switch, withRouter} from "react-router-dom";
-import {AppBar, Button, IconButton, InputLabel, Menu, MenuItem, Select, Toolbar, Typography} from "@material-ui/core";
+import { AppBar, Button, IconButton, InputLabel, Menu, MenuItem, Select, Toolbar, Typography } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
-import {connect} from "react-redux";
-import {bindActionCreators} from "redux";
 import PropTypes from "prop-types";
-import logout from "./shared/authentication/actions/logout";
-import fetchLinksIfNeeded from "./shared/links/actions/fetchLinksIfNeeded";
-import FirstTimeSetup from "./views/FirstTimeSetup";
-import {getHasAnyLinks} from "./shared/links/selectors/getHasAnyLinks";
+import React, { Component, Fragment } from 'react';
+import { connect } from "react-redux";
+import { BrowserRouter as Router, Link as RouterLink, Redirect, Route, Switch, withRouter } from "react-router-dom";
+import { bindActionCreators } from "redux";
+import logout from "shared/authentication/actions/logout";
+import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
+import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
+import FirstTimeSetup from "views/FirstTimeSetup";
 
 export class AuthenticatedApplication extends Component {
   state = {
@@ -25,7 +25,7 @@ export class AuthenticatedApplication extends Component {
 
   componentDidMount() {
     this.props.fetchLinksIfNeeded()
-      .then(() => this.setState({loading: false}));
+      .then(() => this.setState({ loading: false }));
   }
 
   openMenu = event => {
@@ -60,40 +60,41 @@ export class AuthenticatedApplication extends Component {
       <Fragment>
         <AppBar position="static">
           <Toolbar>
-            <Button to="/transactions" component={RouterLink} color="inherit">Transactions</Button>
-            <Button to="/expenses" component={RouterLink} color="inherit">Expenses</Button>
-            <Button to="/goals" component={RouterLink} color="inherit">Goals</Button>
-            <div style={{marginLeft: 'auto'}}/>
-            <div style={{marginRight: '10px', marginLeft: '10px'}}>
+            <Button to="/transactions" component={ RouterLink } color="inherit">Transactions</Button>
+            <Button to="/expenses" component={ RouterLink } color="inherit">Expenses</Button>
+            <Button to="/goals" component={ RouterLink } color="inherit">Goals</Button>
+            <div style={ { marginLeft: 'auto' } }/>
+            <div style={ { marginRight: '10px', marginLeft: '10px' } }>
               <InputLabel id="demo-simple-select-outlined-label">Bank Account</InputLabel>
               <Select
                 labelId="demo-simple-select-outlined-label"
                 id="demo-simple-select-outlined"
-                value={10}
-                onChange={() => {}}
+                value={ 10 }
+                onChange={ () => {
+                } }
                 label="Bank Account"
               >
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
-                <MenuItem value={10}>US Bank</MenuItem>
-                <MenuItem value={20}>Twenty</MenuItem>
-                <MenuItem value={30}>Thirty</MenuItem>
+                <MenuItem value={ 10 }>US Bank</MenuItem>
+                <MenuItem value={ 20 }>Twenty</MenuItem>
+                <MenuItem value={ 30 }>Thirty</MenuItem>
               </Select>
             </div>
-            <IconButton onClick={this.openMenu} edge="start" color="inherit" aria-label="menu">
+            <IconButton onClick={ this.openMenu } edge="start" color="inherit" aria-label="menu">
               <MenuIcon/>
             </IconButton>
             <Menu
               id="user-menu"
-              anchorEl={this.state.anchorEl}
+              anchorEl={ this.state.anchorEl }
               keepMounted
-              open={Boolean(this.state.anchorEl)}
-              onClose={this.closeMenu}
+              open={ Boolean(this.state.anchorEl) }
+              onClose={ this.closeMenu }
             >
               <MenuItem>Profile</MenuItem>
               <MenuItem>My account</MenuItem>
-              <MenuItem onClick={this.doLogout}>Logout</MenuItem>
+              <MenuItem onClick={ this.doLogout }>Logout</MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
@@ -132,14 +133,14 @@ export class AuthenticatedApplication extends Component {
     if (this.props.hasAnyLinks) {
       return (
         <Router>
-          {this.renderSetup()}
+          { this.renderSetup() }
         </Router>
       );
     }
 
     return (
       <Router>
-        {this.renderNotSetup()}
+        { this.renderNotSetup() }
       </Router>
     );
   }

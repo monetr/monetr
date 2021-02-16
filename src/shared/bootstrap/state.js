@@ -1,4 +1,4 @@
-import {Record} from 'immutable';
+import { Record } from 'immutable';
 
 export default class BootstrapState extends Record({
   apiUrl: '',

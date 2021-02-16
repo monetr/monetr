@@ -1,9 +1,9 @@
-import {applyMiddleware, createStore, compose} from 'redux';
-import {composeWithDevTools} from 'redux-devtools-extension';
-import reducers from './shared/state';
+import { applyMiddleware, compose, createStore } from 'redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from 'redux-thunk';
-import AuthenticationState from "./shared/authentication/state";
-import BootstrapState from "./shared/bootstrap/state";
+import AuthenticationState from "shared/authentication/state";
+import BootstrapState from "shared/bootstrap/state";
+import reducers from 'shared/state';
 
 
 export default function configureStore(initialState = {

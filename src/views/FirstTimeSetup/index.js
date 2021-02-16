@@ -1,14 +1,14 @@
-import React, {Component} from "react";
-import {Box, Button, CircularProgress, Container, Grid, Grow, Paper, Typography} from "@material-ui/core";
-import {bindActionCreators} from "redux";
-import {withRouter} from "react-router-dom";
-import {connect} from "react-redux";
-import request from "../../shared/util/request";
+import React, { Component } from "react";
+import { Box, Button, CircularProgress, Container, Grid, Grow, Paper, Typography } from "@material-ui/core";
+import { bindActionCreators } from "redux";
+import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import request from "shared/util/request";
 import PropTypes from "prop-types";
-import logout from "../../shared/authentication/actions/logout";
-import {PlaidConnectButton} from "./hookyBoi";
-import {List} from "immutable";
-import fetchLinks from "../../shared/links/actions/fetchLinks";
+import logout from "shared/authentication/actions/logout";
+import { PlaidConnectButton } from "views/FirstTimeSetup/PlaidConnectButton";
+import { List } from "immutable";
+import fetchLinks from "shared/links/actions/fetchLinks";
 
 
 export class FirstTimeSetup extends Component {
@@ -41,11 +41,6 @@ export class FirstTimeSetup extends Component {
   }
 
   plaidLinkSuccess = (token, metadata) => {
-    console.log({
-      token,
-      metadata,
-    });
-
     request().post('/api/plaid/link/token/callback', {
       publicToken: token,
       institutionId: metadata.institution.institution_id,
@@ -61,14 +56,14 @@ export class FirstTimeSetup extends Component {
   };
 
   renderPlaidLink = () => {
-    const {loading, linkToken} = this.state;
+    const { loading, linkToken } = this.state;
     if (loading) {
-      return <CircularProgress style={{float: 'right'}}/>;
+      return <CircularProgress style={ { float: 'right' } }/>;
     }
 
     if (linkToken.length > 0) {
       return (
-        <PlaidConnectButton token={linkToken} onSuccess={this.plaidLinkSuccess}/>
+        <PlaidConnectButton token={ linkToken } onSuccess={ this.plaidLinkSuccess }/>
       )
     }
 
@@ -79,22 +74,22 @@ export class FirstTimeSetup extends Component {
   render() {
 
     return (
-      <Box m={12}>
+      <Box m={ 12 }>
         <Container maxWidth="sm">
           <Grow in>
-            <Paper elevation={3}>
-              <Box m={4}>
-                <Grid container spacing={4}>
-                  <Grid item xs={12}>
+            <Paper elevation={ 3 }>
+              <Box m={ 4 }>
+                <Grid container spacing={ 4 }>
+                  <Grid item xs={ 12 }>
                     <Typography variant="h5">Welcome to Harder Than It Needs To Be</Typography>
                     <Typography>To continue, you'll need to link your bank account.</Typography>
                     <Typography>If you would not like to do this, click cancel and you will be logged out.</Typography>
                   </Grid>
-                  <Grid item xs={6}>
-                    <Button variant="outlined" onClick={this.doCancel}>Cancel</Button>
+                  <Grid item xs={ 6 }>
+                    <Button variant="outlined" onClick={ this.doCancel }>Cancel</Button>
                   </Grid>
-                  <Grid item xs={6}>
-                    {this.renderPlaidLink()}
+                  <Grid item xs={ 6 }>
+                    { this.renderPlaidLink() }
                   </Grid>
                 </Grid>
               </Box>

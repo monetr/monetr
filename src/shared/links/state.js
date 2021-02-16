@@ -1,4 +1,4 @@
-import {Record,Map} from "immutable";
+import { Record, Map } from "immutable";
 
 
 export default class LinksState extends Record({
