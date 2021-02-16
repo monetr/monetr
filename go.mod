@@ -17,7 +17,7 @@ require (
 	github.com/plaid/plaid-go v0.0.0-20210112002311-0cf0e6f0ea3e
 	github.com/sirupsen/logrus v1.7.1-0.20201217161852-cd4bf4ef8de1
 	github.com/spf13/viper v1.7.1
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.7.0
 	github.com/teambition/rrule-go v1.6.2
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	github.com/yudai/pp v2.0.1+incompatible // indirect
