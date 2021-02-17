@@ -1,4 +1,4 @@
-import AuthenticatedApplication from "AuthenticatedApplication";
+import AuthenticatedApplication from "./AuthenticatedApplication";
 import PropTypes from "prop-types";
 import React, { PureComponent } from 'react';
 import { connect } from "react-redux";
