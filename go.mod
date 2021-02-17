@@ -20,7 +20,7 @@ require (
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	github.com/plaid/plaid-go v0.0.0-20210216195344-700b8cfc627d
 	github.com/robfig/cron v1.2.0 // indirect
-	github.com/sirupsen/logrus v1.7.1
+	github.com/sirupsen/logrus v1.8.0
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	github.com/teambition/rrule-go v1.6.2
