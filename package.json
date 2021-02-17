@@ -9,7 +9,7 @@
     "@material-ui/pickers": "3.2.10",
     "@testing-library/jest-dom": "5.11.9",
     "@testing-library/react": "11.2.3",
-    "@testing-library/user-event": "12.6.2",
+    "@testing-library/user-event": "12.7.1",
     "axios": "0.21.1",
     "formik": "2.2.6",
     "immutable": "4.0.0-rc.12",
