@@ -6,7 +6,7 @@ require (
 	github.com/Joker/hpp v1.0.0 // indirect
 	github.com/brianvoe/gofakeit/v6 v6.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/go-pg/pg/v10 v10.7.4
+	github.com/go-pg/pg/v10 v10.7.6
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect

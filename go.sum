@@ -93,6 +93,8 @@ github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9
 github.com/go-logfmt/logfmt v0.4.0/go.mod h1:3RMwSq7FuexP4Kalkev3ejPJsZTpXXBr9+V4qmtdjCk=
 github.com/go-pg/pg/v10 v10.7.4 h1:mlEZibLDMH20k5BK0iXp4KOpLytSjnknBw3rPEuJb4c=
 github.com/go-pg/pg/v10 v10.7.4/go.mod h1:lKGGb3/k9tK5NBMPTcEuFJf9MQJOZIk6qrDOknygYVo=
+github.com/go-pg/pg/v10 v10.7.6 h1:pR/qDgffBrIida8DcUGv/7HcOhfSRSmXt11bBpUrwrs=
+github.com/go-pg/pg/v10 v10.7.6/go.mod h1:lKGGb3/k9tK5NBMPTcEuFJf9MQJOZIk6qrDOknygYVo=
 github.com/go-pg/zerochecker v0.2.0 h1:pp7f72c3DobMWOb2ErtZsnrPaSvHd2W4o9//8HtF4mU=
 github.com/go-pg/zerochecker v0.2.0/go.mod h1:NJZ4wKL0NmTtz0GKCoJ8kym6Xn/EQzXRl2OnAe7MmDo=
 github.com/go-redis/redis/v8 v8.4.0/go.mod h1:A1tbYoHSa1fXwN+//ljcCYYJeLmVrwL9hbQN45Jdy0M=
