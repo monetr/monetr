@@ -42,7 +42,7 @@ func (j *JobManager) getAccountId(job *work.Job) (uint64, error) {
 	return accountId.(uint64), nil
 }
 
-func (j *JobManager) Drain() error {
-	j.work.Drain()
+func (j *JobManager) Close() error {
+	j.work.Stop()
 	return nil
 }

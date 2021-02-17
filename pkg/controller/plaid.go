@@ -119,7 +119,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 
 		link := models.Link{
 			AccountId:       repo.AccountId(),
-			PlaidLinkId:     plaidLink.PlaidLinkID,
+			PlaidLinkId:     &plaidLink.PlaidLinkID,
 			LinkType:        models.PlaidLinkType,
 			InstitutionName: callbackRequest.InstitutionName,
 			CreatedByUserId: repo.UserId(),

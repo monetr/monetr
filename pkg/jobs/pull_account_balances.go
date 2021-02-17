@@ -11,14 +11,14 @@ const (
 	PullAccountBalances        = "PullAccountBalances"
 )
 
-func (j *JobManager) EnqueuePullAccountBalances(job *work.Job) error {
-	log := j.log.WithField("job", EnqueuePullAccountBalances)
+type PullAccountBalanceWorkItem struct {
+	AccountID      uint64   `pg:"account_id"`
+	BankAccountIDs []uint64 `pg:"bank_account_ids"`
+}
 
+func (j *JobManager) getPlaidBankAccountsByAccount() ([]PullAccountBalanceWorkItem, error) {
 	// We need an accountId, and all of the bank accounts for that account that can be updated.
-	var accounts []struct {
-		AccountID      uint64   `pg:"account_id"`
-		BankAccountIDs []uint64 `pg:"bank_account_ids"`
-	}
+	var accounts []PullAccountBalanceWorkItem
 
 	// Query the database for all accounts with bank accounts that have a link type of plaid.
 	_, err := j.db.Query(&accounts, `
@@ -32,8 +32,18 @@ func (j *JobManager) EnqueuePullAccountBalances(job *work.Job) error {
 		GROUP BY "accounts"."account_id"
 	`, models.PlaidLinkType)
 	if err != nil {
-		err = errors.Wrap(err, "failed to retrieve accounts to update balances")
-		log.WithError(err).Error("could not get accounts to update balances")
+		return nil, errors.Wrap(err, "failed to retrieve accounts to update balances")
+	}
+
+	return accounts, nil
+}
+
+func (j *JobManager) EnqueuePullAccountBalances(job *work.Job) error {
+	log := j.log.WithField("job", EnqueuePullAccountBalances)
+
+	accounts, err := j.getPlaidBankAccountsByAccount()
+	if err != nil {
+		log.WithError(err).Errorf("failed to retrieve bank accounts that need to by synced")
 		return err
 	}
 

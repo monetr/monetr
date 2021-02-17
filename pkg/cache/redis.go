@@ -70,3 +70,9 @@ func waitForRedis(log *logrus.Entry, maxAttempts int, pool *redis.Pool) error {
 func (r *RedisController) Pool() *redis.Pool {
 	return r.pool
 }
+
+func (r *RedisController) Close() error {
+	err := r.pool.Close()
+	r.mini.Close()
+	return errors.Wrap(err, "failed to close pool gracefully")
+}

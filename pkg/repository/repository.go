@@ -9,17 +9,17 @@ import (
 )
 
 type Repository interface {
-	UserId() uint64
 	AccountId() uint64
-	GetMe() (*models.User, error)
-	GetIsSetup() (bool, error)
+	UserId() uint64
 
-	CreatePlaidLink(link *models.PlaidLink) error
-	CreateLink(link *models.Link) error
 	CreateBankAccounts(bankAccounts []models.BankAccount) error
-
-	GetLinks() ([]models.Link, error)
+	CreateLink(link *models.Link) error
+	UpdateLink(link *models.Link) error
+	CreatePlaidLink(link *models.PlaidLink) error
 	GetBankAccounts() ([]models.BankAccount, error)
+	GetIsSetup() (bool, error)
+	GetLinks() ([]models.Link, error)
+	GetMe() (*models.User, error)
 }
 
 type UnauthenticatedRepository interface {
@@ -85,23 +85,6 @@ func (r *repositoryBase) GetIsSetup() (bool, error) {
 	return r.txn.Model(&models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Exists()
-}
-
-func (r *repositoryBase) GetLinks() ([]models.Link, error) {
-	var result []models.Link
-	err := r.txn.Model(&result).
-		Where(`"link"."account_id" = ?`, r.accountId).
-		Select(&result)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve links")
-	}
-
-	return result, nil
-}
-
-func (r *repositoryBase) CreateLink(link *models.Link) error {
-	_, err := r.txn.Model(link).Insert(link)
-	return errors.Wrap(err, "failed to insert link")
 }
 
 func (r *repositoryBase) CreateBankAccounts(bankAccounts []models.BankAccount) error {

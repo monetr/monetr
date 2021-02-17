@@ -113,9 +113,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			p.Get("/me", c.meEndpoint)
 		})
 
-		p.PartyFunc("/links", func(p router.Party) {
-			p.Get("/", c.getLinksEndpoint)
-		})
+		p.PartyFunc("/links", c.linksController)
 
 		p.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
 	})

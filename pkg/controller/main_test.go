@@ -7,6 +7,7 @@ import (
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/controller"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/testutils"
 	"github.com/kataras/iris/v12/httptest"
+	"github.com/plaid/plaid-go/plaid"
 	"testing"
 )
 
@@ -25,7 +26,9 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 		PostgreSQL: config.PostgreSQL{},
 		SMTP:       config.SMTPClient{},
 		ReCAPTCHA:  config.ReCAPTCHA{},
-		Plaid:      config.Plaid{},
+		Plaid: config.Plaid{
+			Environment: plaid.Development,
+		},
 		CORS: config.CORS{
 			Debug: false,
 		},

@@ -32,9 +32,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer redisController.Close()
 
 	job := jobs.NewJobManager(log, redisController.Pool(), db)
-	defer job.Drain()
+	defer job.Close()
 
 	c := controller.NewController(configuration, db)
 
