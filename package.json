@@ -8,7 +8,7 @@
     "@material-ui/lab": "4.0.0-alpha.57",
     "@material-ui/pickers": "3.2.10",
     "@testing-library/jest-dom": "5.11.9",
-    "@testing-library/react": "11.2.3",
+    "@testing-library/react": "11.2.5",
     "@testing-library/user-event": "12.7.1",
     "axios": "0.21.1",
     "formik": "2.2.6",
