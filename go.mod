@@ -4,9 +4,12 @@ go 1.15
 
 require (
 	github.com/Joker/hpp v1.0.0 // indirect
+	github.com/alicebob/miniredis/v2 v2.14.2
 	github.com/brianvoe/gofakeit/v6 v6.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-pg/pg/v10 v10.7.6
+	github.com/gocraft/work v0.5.1
+	github.com/gomodule/redigo v1.8.3
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
@@ -16,6 +19,7 @@ require (
 	github.com/nyaruka/phonenumbers v1.0.66
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	github.com/plaid/plaid-go v0.0.0-20210216195344-700b8cfc627d
+	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.7.1
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0

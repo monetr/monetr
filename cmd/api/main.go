@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/application"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/cache"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/jobs"
+	"github.com/sirupsen/logrus"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
@@ -11,6 +14,9 @@ import (
 
 func main() {
 	configuration := config.LoadConfiguration()
+
+	log := logrus.NewEntry(logrus.StandardLogger())
+
 	db := pg.Connect(&pg.Options{
 		Addr: fmt.Sprintf("%s:%d",
 			configuration.PostgreSQL.Address,
@@ -21,6 +27,14 @@ func main() {
 		Database:        configuration.PostgreSQL.Database,
 		ApplicationName: "harder - api",
 	})
+
+	redisController, err := cache.NewRedisCache(log, configuration.Redis)
+	if err != nil {
+		panic(err)
+	}
+
+	job := jobs.NewJobManager(log, redisController.Pool(), db)
+	defer job.Drain()
 
 	c := controller.NewController(configuration, db)
 
