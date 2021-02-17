@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: go:1.16
+    container: golang:1.16
     services:
       postgres:
         image: postgres:13
