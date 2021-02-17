@@ -22,13 +22,29 @@ Fetch Dependencies:
       - ./vendor
     policy: push
 
-Build:
+Build - amd64:
   stage: Build Binary
   image: golang:1.16.0
   tags:
     - k8s:shared
+    - arch:amd64
   script:
-    - go build -o ./bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/api
+    - go build -o ./bin/rest-api-amd64 github.com/harderthanitneedstobe/rest-api/v0/cmd/api
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./bin
+      - ./vendor
+    policy: pull-push
+    
+Build - arm64:
+  stage: Build Binary
+  image: golang:1.16.0
+  tags:
+    - k8s:shared
+    - arch:arm64
+  script:
+    - go build -o ./bin/rest-api-arm64 github.com/harderthanitneedstobe/rest-api/v0/cmd/api
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
@@ -73,13 +89,14 @@ Tests:
       - ./vendor
     policy: pull
 
-Kaniko:
+Kaniko - amd64:
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [ "" ]
   tags:
     - k8s:shared
+    - arch:amd64
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
   cache:
@@ -87,7 +104,7 @@ Kaniko:
     paths:
       - ./bin
     policy: pull
-
+    
 Publish GitLab:
   stage: Publish Container
   only:
@@ -98,6 +115,7 @@ Publish GitLab:
     entrypoint: [ "" ]
   tags:
     - k8s:shared
+    - arch:amd64
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
@@ -117,6 +135,7 @@ Publish GitHub:
     entrypoint: [ "" ]
   tags:
     - k8s:shared
+    - arch:amd64
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"ghcr.io\":{\"username\":\"elliotcourant\",\"password\":\"$K8S_SECRET_GITHUB_ACCESS_TOKEN\"}}}" > /kaniko/.docker/config.json
