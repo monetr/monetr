@@ -14,10 +14,12 @@ type Repository interface {
 	GetMe() (*models.User, error)
 	GetIsSetup() (bool, error)
 
+	CreatePlaidLink(link *models.PlaidLink) error
 	CreateLink(link *models.Link) error
 	CreateBankAccounts(bankAccounts []models.BankAccount) error
 
 	GetLinks() ([]models.Link, error)
+	GetBankAccounts() ([]models.BankAccount, error)
 }
 
 type UnauthenticatedRepository interface {
@@ -48,11 +50,6 @@ func NewUnauthenticatedRepository(txn *pg.Tx) UnauthenticatedRepository {
 var (
 	_ Repository = &repositoryBase{}
 )
-
-type repositoryBase struct {
-	userId, accountId uint64
-	txn               *pg.Tx
-}
 
 func (r *repositoryBase) UserId() uint64 {
 	return r.userId
@@ -113,7 +110,35 @@ func (r *repositoryBase) CreateBankAccounts(bankAccounts []models.BankAccount) e
 }
 
 func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
-	return nil, nil
+	var result []models.BankAccount
+	err := r.txn.Model(&result).
+		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
+		Select(&result)
+	return result, errors.Wrap(err, "failed to retrieve bank accounts")
+}
+
+func (r *repositoryBase) GetExpenses(bankAccountId uint64) ([]models.Expense, error) {
+	var result []models.Expense
+	err := r.txn.Model(&result).
+		Where(`"expense"."account_id" = ?`, r.AccountId()).
+		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
+		Select(&result)
+	return result, errors.Wrap(err, "failed to retrieve expenses")
+}
+
+func (r *repositoryBase) GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error) {
+	var result []models.FundingSchedule
+	err := r.txn.Model(&result).
+		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
+		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
+		Select(&result)
+	return result, errors.Wrap(err, "failed to retrieve funding schedules")
+}
+
+func (r *repositoryBase) CreateTransaction(transaction *models.Transaction) error {
+	transaction.AccountId = r.AccountId()
+	_, err := r.txn.Model(transaction).Insert(transaction)
+	return errors.Wrap(err, "failed to create transaction")
 }
 
 func (r *repositoryBase) GetTransactions(bankAccountId uint64) ([]models.Transaction, error) {

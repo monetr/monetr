@@ -101,16 +101,26 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 
 		repo := c.mustGetAuthenticatedRepository(ctx)
 
-		link := models.Link{
-			AccountId:        repo.AccountId(),
-			PlaidItemId:      result.ItemID,
-			PlaidAccessToken: result.AccessToken,
-			PlaidProducts: []string{
+		plaidLink := models.PlaidLink{
+			ItemId:      result.ItemID,
+			AccessToken: result.AccessToken,
+			Products: []string{
 				// TODO (elliotcourant) Make this based on what product's we sent in the create link token request.
 				"transactions",
 			},
 			WebhookUrl:      "",
 			InstitutionId:   callbackRequest.InstitutionId,
+			InstitutionName: callbackRequest.InstitutionName,
+		}
+		if err := repo.CreatePlaidLink(&plaidLink); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
+			return
+		}
+
+		link := models.Link{
+			AccountId:       repo.AccountId(),
+			PlaidLinkId:     plaidLink.PlaidLinkID,
+			LinkType:        models.PlaidLinkType,
 			InstitutionName: callbackRequest.InstitutionName,
 			CreatedByUserId: repo.UserId(),
 		}

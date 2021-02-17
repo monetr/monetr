@@ -50,11 +50,10 @@ func (u *unauthenticatedRepo) CreateAccount(timezone *time.Location) (*models.Ac
 
 func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, firstName, lastName string) (*models.User, error) {
 	user := &models.User{
-		LoginId:          loginId,
-		AccountId:        accountId,
-		StripeCustomerId: "",
-		FirstName:        firstName,
-		LastName:         lastName,
+		LoginId:   loginId,
+		AccountId: accountId,
+		FirstName: firstName,
+		LastName:  lastName,
 	}
 	if _, err := u.txn.Model(user).Insert(user); err != nil {
 		return nil, errors.Wrap(err, "failed to create user")

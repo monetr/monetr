@@ -8,6 +8,7 @@ var (
 		&PhoneVerification{},
 		&Account{},
 		&User{},
+		&PlaidLink{},
 		&Link{},
 		&BankAccount{},
 		&FundingSchedule{},
