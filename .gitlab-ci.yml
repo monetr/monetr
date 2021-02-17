@@ -11,7 +11,7 @@ variables:
 
 Fetch Dependencies:
   stage: Dependencies
-  image: golang:1.15.8
+  image: golang:1.16.0
   tags:
     - k8s:shared
   script:
@@ -24,7 +24,7 @@ Fetch Dependencies:
 
 Build:
   stage: Build Binary
-  image: golang:1.15.8
+  image: golang:1.16.0
   tags:
     - k8s:shared
   script:
@@ -38,7 +38,7 @@ Build:
 
 Schema Generation:
   stage: Test
-  image: golang:1.15.8
+  image: golang:1.16.0
   tags:
     - k8s:shared
   script:
@@ -60,7 +60,7 @@ Tests:
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
   stage: Test
-  image: golang:1.15.8
+  image: golang:1.16.0
   tags:
     - k8s:shared
   before_script:
