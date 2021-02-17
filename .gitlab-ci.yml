@@ -14,6 +14,7 @@ Fetch Dependencies:
   image: golang:1.16.0
   tags:
     - k8s:shared
+    - arch:amd64  
   script:
     - go mod vendor
   cache:
@@ -27,10 +28,7 @@ Build:
   image: golang:1.16.0
   tags:
     - k8s:shared
-  matrix:
-    - GOARCH:
-      - amd64
-      - arm64
+    - arch:amd64
   script:
     - go build -o ./bin/rest-api-${GOARCH} github.com/harderthanitneedstobe/rest-api/v0/cmd/api
   cache:
@@ -67,6 +65,7 @@ Tests:
   image: golang:1.16.0
   tags:
     - k8s:shared
+    - arch:amd64
   before_script:
     - make apply-schema-ci
   script:
