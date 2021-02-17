@@ -30,7 +30,7 @@
     "reselect": "4.0.0",
     "sass": "1.32.7",
     "selector-action": "1.2.0",
-    "web-vitals": "0.2.4"
+    "web-vitals": "1.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
