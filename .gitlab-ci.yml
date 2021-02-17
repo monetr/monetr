@@ -22,29 +22,17 @@ Fetch Dependencies:
       - ./vendor
     policy: push
 
-Build - amd64:
+Build:
   stage: Build Binary
   image: golang:1.16.0
   tags:
     - k8s:shared
-    - arch:amd64
+  matrix:
+    - GOARCH:
+      - amd64
+      - arm64
   script:
-    - go build -o ./bin/rest-api-amd64 github.com/harderthanitneedstobe/rest-api/v0/cmd/api
-  cache:
-    key: ${CI_COMMIT_SHA}
-    paths:
-      - ./bin
-      - ./vendor
-    policy: pull-push
-    
-Build - arm64:
-  stage: Build Binary
-  image: golang:1.16.0
-  tags:
-    - k8s:shared
-    - arch:arm64
-  script:
-    - go build -o ./bin/rest-api-arm64 github.com/harderthanitneedstobe/rest-api/v0/cmd/api
+    - go build -o ./bin/rest-api-${GOARCH} github.com/harderthanitneedstobe/rest-api/v0/cmd/api
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
