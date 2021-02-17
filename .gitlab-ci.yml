@@ -93,6 +93,7 @@ Kaniko - amd64:
     policy: pull
     
 Publish GitLab:
+  environment: GitLab
   stage: Publish Container
   only:
     refs:
@@ -113,6 +114,7 @@ Publish GitLab:
         --destination $CI_REGISTRY_IMAGE:latest
 
 Publish GitHub:
+  environment: GitHub
   stage: Publish Container
   only:
     refs:
