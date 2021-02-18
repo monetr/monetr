@@ -33,6 +33,7 @@ func (c *Controller) linksController(p iris.Party) {
 			return
 		}
 
+		link.LinkId = 0 // Make sure the link Id is unset.
 		link.InstitutionName = strings.TrimSpace(link.InstitutionName)
 		link.LinkType = models.ManualLinkType
 

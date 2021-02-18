@@ -18,6 +18,7 @@ type Configuration struct {
 	Plaid          Plaid
 	CORS           CORS
 	Redis          Redis
+	Logging        Logging
 }
 
 type JWT struct {
@@ -90,6 +91,10 @@ type Redis struct {
 	Namespace string
 }
 
+type Logging struct {
+	Level string
+}
+
 func LoadConfiguration() Configuration {
 	viper.SetDefault("Name", "Harder Than It Needs To Be")
 	viper.SetDefault("UIDomainName", "localhost:3000")
@@ -101,6 +106,7 @@ func LoadConfiguration() Configuration {
 	viper.SetDefault("PostgreSQL.Database", "postgres")
 	viper.SetDefault("SMTP.Enabled", false)
 	viper.SetDefault("ReCAPTCHA.Enabled", false)
+	viper.SetDefault("Logging.Level", "info")
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")

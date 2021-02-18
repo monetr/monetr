@@ -85,6 +85,11 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			return
 		}
 
+		if len(callbackRequest.AccountIds) == 0 {
+			c.returnError(ctx, http.StatusBadRequest, "must select at least one account")
+			return
+		}
+
 		result, err := c.plaid.ExchangePublicToken(callbackRequest.PublicToken)
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
@@ -96,6 +101,11 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 		})
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve accounts")
+			return
+		}
+
+		if len(plaidAccounts.Accounts) == 0 {
+			c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
 			return
 		}
 

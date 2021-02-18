@@ -8,9 +8,11 @@ import (
 func (c *Controller) wrapAndReturnError(ctx *context.Context, err error, status int, msg string, args ...interface{}) {
 	ctx.SetErr(errors.Wrapf(err, msg, args...))
 	ctx.StatusCode(status)
+	ctx.StopExecution()
 }
 
 func (c *Controller) returnError(ctx *context.Context, status int, msg string, args ...interface{}) {
 	ctx.SetErr(errors.Errorf(msg, args...))
 	ctx.StatusCode(status)
+	ctx.StopExecution()
 }

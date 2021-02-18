@@ -49,10 +49,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	token := ctx.GetHeader(TokenName)
 	if len(token) == 0 {
-		ctx.StatusCode(http.StatusForbidden)
-		ctx.JSON(map[string]interface{}{
-			"error": "you are not authorized to use this endpoint",
-		})
+		c.returnError(ctx, http.StatusForbidden, "unauthorized")
 		return
 	}
 

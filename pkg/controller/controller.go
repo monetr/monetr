@@ -32,9 +32,13 @@ type Controller struct {
 
 func NewController(configuration config.Configuration, db *pg.DB) *Controller {
 	logger := logrus.New()
+	level, err := logrus.ParseLevel(configuration.Logging.Level)
+	if err != nil {
+		panic(err)
+	}
+	logger.SetLevel(level)
 	entry := logrus.NewEntry(logger)
 	var captcha recaptcha.ReCAPTCHA
-	var err error
 	if configuration.ReCAPTCHA.Enabled {
 		captcha, err = recaptcha.NewReCAPTCHA(
 			configuration.ReCAPTCHA.PrivateKey,
