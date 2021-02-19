@@ -1,7 +1,8 @@
 .PHONY: schema
 
 test:
-	./tools/coverage.sh
+	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
+	go tool cover -func=coverage.txt
 
 special-tests:
 	cd tests && make assert-clean-generated
