@@ -2,6 +2,7 @@ stages:
   - Dependencies
   - Build Binary
   - Test
+  - Coverage
   - Build Container
   - Publish Container
 
@@ -69,11 +70,26 @@ Tests:
   before_script:
     - make apply-schema-ci
   script:
-    - go test -race -v ./...
+    - make test
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
       - ./vendor
+      - ./coverage.txt
+    policy: pull-push
+
+Yeet Coverage:
+  when: never # Still working on getting this setup.
+  image: ubuntu:20.04
+  tags:
+    - k8s:shared
+    - arch:amd64
+  script:
+    - bash <(curl -s https://codecov.io/bash)
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./coverage.txt
     policy: pull
 
 Kaniko - amd64:

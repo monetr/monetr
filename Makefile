@@ -1,5 +1,8 @@
 .PHONY: schema
 
+test:
+	./tools/coverage.sh
+
 special-tests:
 	cd tests && make assert-clean-generated
 
