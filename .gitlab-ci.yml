@@ -79,6 +79,7 @@ Tests:
     policy: pull-push
 
 Yeet Coverage:
+  stage: Coverage
   when: manual # Still working on getting this setup.
   image: ubuntu:20.04
   tags:
