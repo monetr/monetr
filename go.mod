@@ -9,7 +9,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-pg/pg/v10 v10.7.6
 	github.com/gocraft/work v0.5.1
-	github.com/gomodule/redigo v1.8.3
+	github.com/gomodule/redigo v1.8.4
 	github.com/hashicorp/vault/api v1.0.4
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d
 	github.com/jarcoal/httpmock v1.0.8
