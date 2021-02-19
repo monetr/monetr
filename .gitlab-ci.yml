@@ -79,7 +79,7 @@ Tests:
     policy: pull-push
 
 Yeet Coverage:
-  when: never # Still working on getting this setup.
+  when: manual # Still working on getting this setup.
   image: ubuntu:20.04
   tags:
     - k8s:shared
