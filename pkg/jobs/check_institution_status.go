@@ -1,5 +1,5 @@
 package jobs
 
-func (j *JobManager) CheckInstitutionStatus() error {
+func (j *jobManagerBase) checkInstitutionStatus() error {
 	return nil
 }

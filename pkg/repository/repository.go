@@ -18,8 +18,10 @@ type Repository interface {
 	CreatePlaidLink(link *models.PlaidLink) error
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetIsSetup() (bool, error)
+	GetLink(linkId uint64) (*models.Link, error)
 	GetLinks() ([]models.Link, error)
 	GetMe() (*models.User, error)
+	InsertTransactions(transactions []models.Transaction) error
 }
 
 type UnauthenticatedRepository interface {

@@ -30,6 +30,7 @@ func (c *Controller) linksController(p iris.Party) {
 	p.Post("/", func(ctx *context.Context) {
 		var link models.Link
 		if err := ctx.ReadJSON(&link); err != nil {
+			// TODO (elliotcourant) Add tests for malformed json.
 			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 			return
 		}
@@ -56,6 +57,7 @@ func (c *Controller) linksController(p iris.Party) {
 
 		var link models.Link
 		if err := ctx.ReadJSON(&link); err != nil {
+			// TODO (elliotcourant) Add tests for malformed json.
 			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 			return
 		}
@@ -73,7 +75,7 @@ func (c *Controller) linksController(p iris.Party) {
 		repo := c.mustGetAuthenticatedRepository(ctx)
 
 		if err := repo.UpdateLink(&link); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not update link")
+			c.wrapPgError(ctx, err, "could not update link")
 			return
 		}
 

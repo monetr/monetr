@@ -13,10 +13,10 @@ const (
 
 type PullAccountBalanceWorkItem struct {
 	AccountID      uint64   `pg:"account_id"`
-	BankAccountIDs []uint64 `pg:"bank_account_ids"`
+	BankAccountIDs []uint64 `pg:"bank_account_ids,type:int[]"`
 }
 
-func (j *JobManager) getPlaidBankAccountsByAccount() ([]PullAccountBalanceWorkItem, error) {
+func (j *jobManagerBase) getPlaidBankAccountsByAccount() ([]PullAccountBalanceWorkItem, error) {
 	// We need an accountId, and all of the bank accounts for that account that can be updated.
 	var accounts []PullAccountBalanceWorkItem
 
@@ -27,8 +27,8 @@ func (j *JobManager) getPlaidBankAccountsByAccount() ([]PullAccountBalanceWorkIt
 			array_agg("bank_accounts"."bank_account_id") "bank_account_ids"
 		FROM "accounts"
 		INNER JOIN "bank_accounts" ON "bank_accounts"."account_id" = "accounts"."account_id"
-		INNER JOIN "links" ON "links"."link_id" = "bank_account"."link_id" AND "links"."account_id" = "bank_account"."account_id"
-		WHERE "links"."link_type" = ? -- We want to filter by link type so we don't try to update manual accounts.
+		INNER JOIN "links" ON "links"."link_id" = "bank_accounts"."link_id" AND "links"."account_id" = "bank_accounts"."account_id"
+		WHERE "links"."link_type" = ?
 		GROUP BY "accounts"."account_id"
 	`, models.PlaidLinkType)
 	if err != nil {
@@ -38,7 +38,7 @@ func (j *JobManager) getPlaidBankAccountsByAccount() ([]PullAccountBalanceWorkIt
 	return accounts, nil
 }
 
-func (j *JobManager) EnqueuePullAccountBalances(job *work.Job) error {
+func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 	log := j.log.WithField("job", EnqueuePullAccountBalances)
 
 	accounts, err := j.getPlaidBankAccountsByAccount()
@@ -67,6 +67,8 @@ func (j *JobManager) EnqueuePullAccountBalances(job *work.Job) error {
 	return nil
 }
 
-func (j *JobManager) PullAccountBalances(job *work.Job) error {
+func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
+	log := j.getLogForJob(job)
+	log.Infof("pulling account balances")
 	return nil
 }

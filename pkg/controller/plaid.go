@@ -147,6 +147,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 				PlaidAccountId:    plaidAccount.AccountID,
 				AvailableBalance:  int64(plaidAccount.Balances.Available * 100),
 				CurrentBalance:    int64(plaidAccount.Balances.Current * 100),
+				Name:              plaidAccount.Name,
 				Mask:              plaidAccount.Mask,
 				PlaidName:         plaidAccount.Name,
 				PlaidOfficialName: plaidAccount.OfficialName,
@@ -159,8 +160,18 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			return
 		}
 
+		jobId, err := c.job.TriggerPullInitialTransactions(repo.AccountId(), repo.UserId(), link.LinkId)
+		if err != nil {
+			// TODO (elliotcourant) This error would technically throw out all of our data above. Including credentials.
+			//  This might cause the account to appear as not linked when it technically is. Maybe this should not
+			//  cause such a failure state?
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to queue transaction job")
+			return
+		}
+
 		ctx.JSON(map[string]interface{}{
-			"success": true,
+			"success":          true,
+			"transactionJobId": jobId,
 		})
 	})
 }

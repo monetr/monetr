@@ -23,8 +23,11 @@ apply-schema-ci:
 docker:
 	docker build -t harder-rest-api -f Dockerfile .
 
+docker-work-web-ui:
+	docker build -t workwebui -f Dockerfile.work .
+
 clean-development:
 	docker-compose -f ./docker-compose.development.yaml rm --stop --force || true
 
-compose-development: schema
+compose-development: schema docker-work-web-ui
 	docker-compose  -f ./docker-compose.development.yaml up

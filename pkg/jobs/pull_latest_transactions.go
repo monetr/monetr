@@ -1,5 +1,5 @@
 package jobs
 
-func (j *JobManager) PullLatestTransactions() error {
+func (j *jobManagerBase) pullLatestTransactions() error {
 	return nil
 }

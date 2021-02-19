@@ -1,0 +1,10 @@
+FROM golang:1.16 AS builder
+RUN mkdir /src
+COPY ./ /src
+WORKDIR /src
+RUN go get github.com/gocraft/work/cmd/workwebui
+RUN go build -o /bin/workwebui github.com/gocraft/work/cmd/workwebui
+FROM ubuntu:20.04
+COPY --from=builder /bin/workwebui /bin/workwebui
+EXPOSE 8090
+ENTRYPOINT ["/bin/workwebui", "-listen=:8090", "-redis=redis://redis:6379", "-ns=harder"]

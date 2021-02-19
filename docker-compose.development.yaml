@@ -11,3 +11,14 @@ services:
     volumes:
       - "./schema:/docker-entrypoint-initdb.d"
     command: [ "postgres", "-c", "log_statement=all" ]
+  redis:
+    image: library/redis:6.0.10-alpine
+    restart: always
+    hostname: redis
+    ports:
+      - 6379:6379
+  workwebui:
+    image: workwebui
+    hostname: workwebui
+    ports:
+      - 8090:8090

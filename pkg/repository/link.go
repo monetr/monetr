@@ -6,6 +6,21 @@ import (
 	"time"
 )
 
+func (r *repositoryBase) GetLink(linkId uint64) (*models.Link, error) {
+	var link models.Link
+	err := r.txn.Model(&link).
+		Relation("PlaidLink").
+		Relation("BankAccounts").
+		Where(`"link"."link_id" = ? AND "link"."account_id" = ?`, r.AccountId(), linkId).
+		Limit(1).
+		Select(&link)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get link")
+	}
+
+	return &link, nil
+}
+
 func (r *repositoryBase) GetLinks() ([]models.Link, error) {
 	var result []models.Link
 	err := r.txn.Model(&result).

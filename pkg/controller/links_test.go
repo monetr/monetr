@@ -212,4 +212,77 @@ func TestPutLink(t *testing.T) {
 		updated.Status(http.StatusForbidden)
 		updated.JSON().Path("$.error").String().Equal("unauthorized")
 	})
+
+	t.Run("cannot update someone elses", func(t *testing.T) {
+		e := NewTestApplication(t)
+
+		tokenA, tokenB := GivenIHaveToken(t, e), GivenIHaveToken(t, e)
+
+		link := models.Link{
+			InstitutionName:       "U.S. Bank",
+			CustomInstitutionName: "US Bank",
+		}
+
+		// We want to create a link with tokenA. This link should not be visible later when we request the link for
+		// tokenB. This will help verify that we do not expose data from someone else's login.
+		var linkAID, linkBID uint64
+		{
+			response := e.POST("/api/links").
+				WithHeader("H-Token", tokenA).
+				WithJSON(link).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
+			response.JSON().Path("$.linkId").Number().Gt(0)
+			response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
+			response.JSON().Path("$.institutionName").String().NotEmpty()
+			linkAID = uint64(response.JSON().Path("$.linkId").Number().Raw())
+		}
+
+		// Create a link for tokenB too. This way we can do a GET request for both tokens to test each scenario.
+		{
+			response := e.POST("/api/links").
+				WithHeader("H-Token", tokenB).
+				WithJSON(link).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
+			response.JSON().Path("$.linkId").Number().Gt(0)
+			response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
+			response.JSON().Path("$.institutionName").String().NotEmpty()
+			linkBID = uint64(response.JSON().Path("$.linkId").Number().Raw())
+		}
+
+		// Now using token A, try to update token B's link.
+		{
+			link := models.Link{
+				LinkId:                linkBID,
+				CustomInstitutionName: "I have changed",
+			}
+			response := e.PUT(fmt.Sprintf("/api/links/%d", link.LinkId)).
+				WithHeader("H-Token", tokenA).
+				WithJSON(link).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().Equal("could not update link: record does not exist")
+		}
+
+		// Now do the same thing with token B for token A's link.
+		{
+			link := models.Link{
+				LinkId:                linkAID,
+				CustomInstitutionName: "I have changed",
+			}
+			response := e.PUT(fmt.Sprintf("/api/links/%d", link.LinkId)).
+				WithHeader("H-Token", tokenB).
+				WithJSON(link).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().Equal("could not update link: record does not exist")
+		}
+	})
 }

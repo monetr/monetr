@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/jobs"
 	"net/http"
 	"net/smtp"
 	"time"
@@ -28,9 +29,15 @@ type Controller struct {
 	smtp           *smtp.Client
 	mailVerifyCode *gotp.HOTP
 	log            *logrus.Entry
+	job            jobs.JobManager
 }
 
-func NewController(configuration config.Configuration, db *pg.DB) *Controller {
+func NewController(
+	configuration config.Configuration,
+	db *pg.DB,
+	job jobs.JobManager,
+	plaidClient *plaid.Client,
+) *Controller {
 	logger := logrus.New()
 	level, err := logrus.ParseLevel(configuration.Logging.Level)
 	if err != nil {
@@ -50,22 +57,13 @@ func NewController(configuration config.Configuration, db *pg.DB) *Controller {
 		}
 	}
 
-	p, err := plaid.NewClient(plaid.ClientOptions{
-		ClientID:    configuration.Plaid.ClientID,
-		Secret:      configuration.Plaid.ClientSecret,
-		Environment: configuration.Plaid.Environment,
-		HTTPClient:  http.DefaultClient,
-	})
-	if err != nil {
-		panic(err)
-	}
-
 	return &Controller{
 		captcha:       &captcha,
 		configuration: configuration,
 		db:            db,
-		plaid:         p,
+		plaid:         plaidClient,
 		log:           entry,
+		job:           job,
 	}
 }
 
@@ -79,10 +77,16 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		}
 	})
 	app.OnErrorCode(http.StatusNotFound, func(ctx *context.Context) {
-		ctx.JSON(map[string]interface{}{
-			"path":  ctx.Path(),
-			"error": "the requested path does not exist",
-		})
+		if err := ctx.GetErr(); err == nil {
+			ctx.JSON(map[string]interface{}{
+				"path":  ctx.Path(),
+				"error": "the requested path does not exist",
+			})
+		} else {
+			ctx.JSON(map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
 	})
 
 	app.Get("/health", func(ctx *context.Context) {

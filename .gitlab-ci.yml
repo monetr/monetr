@@ -95,7 +95,7 @@ Yeet Coverage:
       - ./coverage.txt
     policy: pull
 
-Kaniko - amd64:
+Kaniko:
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug

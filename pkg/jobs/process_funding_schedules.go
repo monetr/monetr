@@ -1,5 +1,5 @@
 package jobs
 
-func (j *JobManager) ProcessFundingSchedules() error {
+func (j *jobManagerBase) processFundingSchedules() error {
 	return nil
 }

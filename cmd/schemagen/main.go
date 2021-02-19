@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
@@ -85,4 +86,54 @@ func main() {
 			}
 		}
 	}
+
+	login := models.Login{
+		LoginId:      math.MaxUint64,
+		Email:        "support@harderthanitneedstobe.com",
+		PasswordHash: string([]byte{0}), // Will never be valid.
+	}
+	{
+		query := orm.NewInsertQuery(db.Model(&login))
+		printMaybe(query.String() + ";")
+
+		if !*dryRun {
+			if _, err := db.Model(&login).Insert(&login); err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	account := models.Account{
+		AccountId: math.MaxUint64,
+		Timezone:  "UTC",
+	}
+	{
+		query := orm.NewInsertQuery(db.Model(&account))
+		printMaybe(query.String() + ";")
+
+		if !*dryRun {
+			if _, err := db.Model(&account).Insert(&account); err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	user := models.User{
+		UserId:    math.MaxUint64,
+		LoginId:   math.MaxUint64,
+		AccountId: math.MaxUint64,
+		FirstName: "System",
+		LastName:  "Bot",
+	}
+	{
+		query := orm.NewInsertQuery(db.Model(&user))
+		printMaybe(query.String() + ";")
+
+		if !*dryRun {
+			if _, err := db.Model(&user).Insert(&user); err != nil {
+				panic(err)
+			}
+		}
+	}
+
 }

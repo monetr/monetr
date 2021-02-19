@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/application"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
@@ -10,6 +11,7 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -42,7 +44,17 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 
 func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httptest.Expect {
 	db := testutils.GetPgDatabase(t)
-	c := controller.NewController(configuration, db)
+	p, err := plaid.NewClient(plaid.ClientOptions{
+		ClientID:    configuration.Plaid.ClientID,
+		Secret:      configuration.Plaid.ClientSecret,
+		Environment: configuration.Plaid.Environment,
+		HTTPClient:  http.DefaultClient,
+	})
+	require.NoError(t, err, "must be able to create plaid client")
+
+	mockJobManager := testutils.NewMockJobManager()
+
+	c := controller.NewController(configuration, db, mockJobManager, p)
 	app := application.NewApp(configuration, c)
 	return httptest.New(t, app)
 }
@@ -54,7 +66,7 @@ func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
 		FirstName string `json:"firstName"`
 		LastName  string `json:"lastName"`
 	}
-	registerRequest.Email = gofakeit.UUID() + "@test.harderthanitneedstobe.com"
+	registerRequest.Email = GivenIHaveAnEmail(t)
 	registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 	registerRequest.FirstName = gofakeit.FirstName()
 	registerRequest.LastName = gofakeit.LastName()
@@ -68,4 +80,8 @@ func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
 	require.NotEmpty(t, token, "token cannot be empty")
 
 	return token
+}
+
+func GivenIHaveAnEmail(t *testing.T) string {
+	return fmt.Sprintf("%s@testing.harderthanitneedstobe.com", strings.ReplaceAll(gofakeit.UUID(), "-", ""))
 }
