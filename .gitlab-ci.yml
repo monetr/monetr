@@ -15,7 +15,7 @@ Fetch Dependencies:
   image: golang:1.16.0
   tags:
     - k8s:shared
-    - arch:amd64  
+    - arch:amd64
   script:
     - go mod vendor
   cache:
@@ -86,7 +86,9 @@ Yeet Coverage:
     - k8s:shared
     - arch:amd64
   script:
+    - curl https://deepsource.io/cli | sh
     - bash <(curl -s https://codecov.io/bash)
+    - ./bin/deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
   cache:
     key: ${CI_COMMIT_SHA}
     paths:

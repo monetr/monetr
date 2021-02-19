@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"fmt"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
 	"math"
 	"net/http"
@@ -109,5 +110,106 @@ func TestGetLink(t *testing.T) {
 			response.JSON().Path("$.links").Array().Length().Equal(1)
 			response.JSON().Path("$.links[0].linkId").Number().Equal(linkAID)
 		}
+
+		// Now we want to test GET with token B.
+		{
+			response := e.GET("/api/links").
+				WithHeader("H-Token", tokenB).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.links").Array().Length().Equal(1)
+			// Make sure that we do not receive token A's link.
+			response.JSON().Path("$.links[0].linkId").Number().NotEqual(linkAID)
+		}
+	})
+
+	t.Run("unauthenticated", func(t *testing.T) {
+		e := NewTestApplication(t)
+		response := e.GET("/api/links").
+			Expect()
+
+		response.Status(http.StatusForbidden)
+		response.JSON().Path("$.error").String().Equal("unauthorized")
+	})
+}
+
+func TestPutLink(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		institutionName := "U.S. Bank"
+
+		link := models.Link{
+			LinkType:              models.ManualLinkType,
+			InstitutionName:       institutionName,
+			CustomInstitutionName: institutionName,
+		}
+
+		response := e.POST("/api/links").
+			WithHeader("H-Token", token).
+			WithJSON(link).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.linkId").Number().Gt(0)
+		response.JSON().Path("$.institutionName").String().Equal(institutionName)
+		response.JSON().Path("$.customInstitutionName").String().Equal(institutionName)
+
+		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
+
+		link.LinkId = linkId
+		link.CustomInstitutionName = "New Name"
+		link.InstitutionName = "New Name"
+
+		updated := e.PUT(fmt.Sprintf("/api/links/%d", linkId)).
+			WithHeader("H-Token", token).
+			WithJSON(link).
+			Expect()
+
+		updated.Status(http.StatusOK)
+		updated.JSON().Path("$.linkId").Number().Equal(linkId)
+		// Make sure the institution name has not changed. This cannot be changed once a link is created.
+		updated.JSON().Path("$.institutionName").String().Equal(institutionName)
+		// But make sure that the custom institution name has changed.
+		updated.JSON().Path("$.customInstitutionName").String().Equal("New Name")
+	})
+
+	t.Run("unauthenticated", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		institutionName := "U.S. Bank"
+
+		link := models.Link{
+			LinkType:              models.ManualLinkType,
+			InstitutionName:       institutionName,
+			CustomInstitutionName: institutionName,
+		}
+
+		response := e.POST("/api/links").
+			WithHeader("H-Token", token).
+			WithJSON(link).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.linkId").Number().Gt(0)
+		response.JSON().Path("$.institutionName").String().Equal(institutionName)
+		response.JSON().Path("$.customInstitutionName").String().Equal(institutionName)
+
+		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
+
+		link.LinkId = linkId
+		link.CustomInstitutionName = "New Name"
+		link.InstitutionName = "New Name"
+
+		// Try to perform an update without a token.
+		updated := e.PUT(fmt.Sprintf("/api/links/%d", linkId)).
+			WithJSON(link).
+			Expect()
+
+		updated.Status(http.StatusForbidden)
+		updated.JSON().Path("$.error").String().Equal("unauthorized")
 	})
 }

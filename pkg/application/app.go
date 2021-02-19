@@ -17,6 +17,8 @@ func NewApp(configuration config.Configuration, controller *controller.Controlle
 			"OPTIONS",
 			"GET",
 			"POST",
+			"PUT",
+			"DELETE",
 		},
 		AllowedHeaders: []string{
 			"Content-Type",

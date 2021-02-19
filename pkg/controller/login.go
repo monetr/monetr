@@ -32,7 +32,7 @@ func (c *Controller) loginEndpoint(ctx *context.Context) {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to decode login request")
 		return
 	}
-	loginRequest.Email = strings.TrimSpace(loginRequest.Email)
+	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
 	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
 
 	if err := c.validateLogin(loginRequest.Email, loginRequest.Password); err != nil {

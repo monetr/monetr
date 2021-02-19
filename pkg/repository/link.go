@@ -37,6 +37,6 @@ func (r *repositoryBase) UpdateLink(link *models.Link) error {
 	link.UpdatedByUserId = &userId
 	link.UpdatedAt = time.Now().UTC()
 
-	_, err := r.txn.Model(link).UpdateNotZero(link)
+	_, err := r.txn.Model(link).WherePK().Returning(`*`).UpdateNotZero(link)
 	return errors.Wrap(err, "failed to update link")
 }

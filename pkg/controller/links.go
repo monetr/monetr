@@ -6,6 +6,7 @@ import (
 	"github.com/kataras/iris/v12/context"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (c *Controller) linksController(p iris.Party) {
@@ -63,7 +64,8 @@ func (c *Controller) linksController(p iris.Party) {
 
 		// We are not going to update default value or null fields. So we can simply clear these fields out to make sure
 		// the user does not overwrite them somehow.
-		link.CreatedByUserId = 0  // Make sure they don't change the created by userId.
+		link.CreatedByUserId = 0 // Make sure they don't change the created by userId.
+		link.CreatedAt = time.Time{}
 		link.InstitutionName = "" // This cannot be changed. If the user wants to set a name then they need to change the custom one.
 		link.LinkType = 0         // Make sure they don't change the link type. This can be changed, but not by the user.
 		link.PlaidLinkId = nil    // Make sure they don't change the plaidLink.
