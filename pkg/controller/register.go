@@ -225,7 +225,7 @@ func (c *Controller) verifyEndpoint(ctx *context.Context) {
 }
 
 func (c *Controller) validateRegistration(email, password, firstName string) error {
-	if len(email) == 0 {
+	if email == "" {
 		return errors.Errorf("email cannot be blank")
 	}
 
@@ -233,7 +233,7 @@ func (c *Controller) validateRegistration(email, password, firstName string) err
 		return errors.Errorf("password must be at least 8 characters")
 	}
 
-	if len(firstName) == 0 {
+	if firstName == "" {
 		return errors.Errorf("first name cannot be blank")
 	}
 
@@ -246,7 +246,7 @@ func (c *Controller) validateCaptchaMaybe(captcha string) error {
 		return nil
 	}
 
-	if len(captcha) == 0 {
+	if captcha == "" {
 		return errors.Errorf("captcha is not valid")
 	}
 

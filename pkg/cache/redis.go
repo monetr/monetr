@@ -28,9 +28,7 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 		}
 
 		// Store our "embedded" redis address for use below.
-		redisAddress = fmt.Sprintf(
-			"%s", controller.mini.Server().Addr().String(),
-		)
+		redisAddress = controller.mini.Server().Addr().String()
 	}
 
 	// Setup the redis pool for running jobs.

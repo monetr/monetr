@@ -72,10 +72,10 @@ func (r *repositoryBase) GetMe() (*models.User, error) {
 	switch err {
 	case pg.ErrNoRows:
 		return nil, errors.Errorf("user does not exist")
-	default:
-		return nil, errors.Wrapf(err, "failed to retrieve user")
 	case nil:
 		break
+	default:
+		return nil, errors.Wrapf(err, "failed to retrieve user")
 	}
 
 	return &user, nil

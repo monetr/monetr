@@ -48,7 +48,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 
 func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	token := ctx.GetHeader(TokenName)
-	if len(token) == 0 {
+	if token == "" {
 		c.returnError(ctx, http.StatusForbidden, "unauthorized")
 		return
 	}
