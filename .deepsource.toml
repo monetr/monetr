@@ -1,0 +1,34 @@
+version = 1
+
+test_patterns = ["**/*.spec.js"]
+
+exclude_patterns = ["**/*.min.js"]
+
+[[analyzers]]
+name = "test-coverage"
+enabled = true
+
+[[analyzers]]
+name = "docker"
+enabled = true
+
+  [analyzers.meta]
+  dockerfile_paths = ["Dockerfile"]
+
+[[analyzers]]
+name = "javascript"
+enabled = true
+
+  [analyzers.meta]
+  environment = [
+    "nodejs",
+    "browser",
+    "jest"
+  ]
+  plugins = ["react"]
+  style_guide = "airbnb"
+  dialect = "flow"
+
+[[analyzers]]
+name = "secrets"
+enabled = true
