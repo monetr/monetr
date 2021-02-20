@@ -52,6 +52,19 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 
 		repo := c.mustGetAuthenticatedRepository(ctx)
 
+		// Bank accounts can only be created this way when they are associated with a link that allows manual
+		// management. If the link they specified does not, then a bank account cannot be created for this link.
+		link, err := repo.GetLink(bankAccount.LinkId)
+		if err != nil {
+			c.wrapPgError(ctx, err, "link does not exist")
+			return
+		}
+
+		if link.LinkType != models.ManualLinkType {
+			c.returnError(ctx, http.StatusBadRequest, "cannot create a bank account for a non-manual link")
+			return
+		}
+
 		if err := repo.CreateBankAccounts(bankAccount); err != nil {
 			c.wrapPgError(ctx, err, "could not create bank account")
 			return
