@@ -155,7 +155,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 				SubType:           plaidAccount.Subtype,
 			}
 		}
-		if err = repo.CreateBankAccounts(accounts); err != nil {
+		if err = repo.CreateBankAccounts(accounts...); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
 			return
 		}

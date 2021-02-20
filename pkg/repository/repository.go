@@ -12,7 +12,7 @@ type Repository interface {
 	AccountId() uint64
 	UserId() uint64
 
-	CreateBankAccounts(bankAccounts []models.BankAccount) error
+	CreateBankAccounts(bankAccounts ...models.BankAccount) error
 	CreateLink(link *models.Link) error
 	UpdateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
@@ -87,11 +87,6 @@ func (r *repositoryBase) GetIsSetup() (bool, error) {
 	return r.txn.Model(&models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Exists()
-}
-
-func (r *repositoryBase) CreateBankAccounts(bankAccounts []models.BankAccount) error {
-	_, err := r.txn.Model(&bankAccounts).Insert(&bankAccounts)
-	return errors.Wrap(err, "failed to insert bank accounts")
 }
 
 func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
