@@ -38,10 +38,13 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	manager.work.Middleware(manager.middleware)
 
 	manager.work.Job(EnqueuePullAccountBalances, manager.enqueuePullAccountBalances)
+	manager.work.Job(EnqueuePullLatestTransactions, manager.enqueuePullLatestTransactions)
 	manager.work.Job(PullAccountBalances, manager.pullAccountBalances)
 	manager.work.Job(PullInitialTransactions, manager.pullInitialTransactions)
+	manager.work.Job(PullLatestTransactions, manager.pullLatestTransactions)
 
-	manager.work.PeriodicallyEnqueue("0 */5 * * * *", EnqueuePullAccountBalances)
+	manager.work.PeriodicallyEnqueue("0 */30 * * * *", EnqueuePullAccountBalances)
+	manager.work.PeriodicallyEnqueue("0 */30 * * * *", EnqueuePullLatestTransactions)
 
 	manager.work.Start()
 

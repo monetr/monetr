@@ -39,7 +39,7 @@ func (j *jobManagerBase) getPlaidBankAccountsByAccount() ([]PullAccountBalanceWo
 }
 
 func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
-	log := j.log.WithField("job", EnqueuePullAccountBalances)
+	log := j.getLogForJob(job)
 
 	accounts, err := j.getPlaidBankAccountsByAccount()
 	if err != nil {
