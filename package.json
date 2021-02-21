@@ -134,7 +134,7 @@
       "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
     ],
     "testEnvironment": "jsdom",
-    "testRunner": "/Users/clarktomlinson/Sites/web-ui/node_modules/jest-circus/runner.js",
+    "testRunner": "/node_modules/jest-circus/runner.js",
     "transform": {
       "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
       "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
@@ -145,7 +145,7 @@
       "^.+\\.module\\.(css|sass|scss)$"
     ],
     "modulePaths": [
-      "/Users/clarktomlinson/Sites/web-ui/src"
+      "/src"
     ],
     "moduleNameMapper": {
       "^react-native$": "react-native-web",
