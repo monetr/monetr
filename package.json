@@ -40,7 +40,7 @@
     "file-loader": "6.2.0",
     "formik": "2.2.6",
     "fs-extra": "9.0.1",
-    "html-webpack-plugin": "4.5.0",
+    "html-webpack-plugin": "4.5.2",
     "identity-obj-proxy": "3.0.0",
     "immutable": "4.0.0-rc.12",
     "jest": "26.6.0",
