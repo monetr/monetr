@@ -37,14 +37,18 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 
 	manager.work.Middleware(manager.middleware)
 
+	manager.work.Job(EnqueueProcessFundingSchedules, manager.enqueueProcessFundingSchedules)
 	manager.work.Job(EnqueuePullAccountBalances, manager.enqueuePullAccountBalances)
 	manager.work.Job(EnqueuePullLatestTransactions, manager.enqueuePullLatestTransactions)
+
+	manager.work.Job(ProcessFundingSchedules, manager.processFundingSchedules)
 	manager.work.Job(PullAccountBalances, manager.pullAccountBalances)
 	manager.work.Job(PullInitialTransactions, manager.pullInitialTransactions)
 	manager.work.Job(PullLatestTransactions, manager.pullLatestTransactions)
 
 	manager.work.PeriodicallyEnqueue("0 */30 * * * *", EnqueuePullAccountBalances)
 	manager.work.PeriodicallyEnqueue("0 */30 * * * *", EnqueuePullLatestTransactions)
+	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueueProcessFundingSchedules)
 
 	manager.work.Start()
 
@@ -107,6 +111,12 @@ func (j *jobManagerBase) getRepositoryForJob(job *work.Job, wrapper func(repo re
 		repo := repository.NewRepositoryFromSession(userId, accountId, txn)
 
 		return wrapper(repo)
+	})
+}
+
+func (j *jobManagerBase) getJobHelperRepository(job *work.Job, wrapper func(repo repository.JobRepository) error) error {
+	return j.db.RunInTransaction(context.Background(), func(txn *pg.Tx) error {
+		return wrapper(repository.NewJobRepository(txn))
 	})
 }
 

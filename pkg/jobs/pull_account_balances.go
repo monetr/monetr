@@ -13,7 +13,7 @@ const (
 
 type PullAccountBalanceWorkItem struct {
 	AccountID      uint64   `pg:"account_id"`
-	BankAccountIDs []uint64 `pg:"bank_account_ids,type:int[]"`
+	BankAccountIDs []uint64 `pg:"bank_account_ids,type:bigint[]"`
 }
 
 func (j *jobManagerBase) getPlaidBankAccountsByAccount() ([]PullAccountBalanceWorkItem, error) {
