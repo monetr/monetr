@@ -79,7 +79,7 @@
     "sass-loader": "10.1.1",
     "selector-action": "1.2.0",
     "semver": "7.3.4",
-    "style-loader": "1.3.0",
+    "style-loader": "2.0.0",
     "terser-webpack-plugin": "4.2.3",
     "ts-pnp": "1.2.0",
     "url-loader": "4.1.1",
