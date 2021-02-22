@@ -51,6 +51,6 @@ func (j *jobManagerBase) enqueueProcessFundingSchedules(job *work.Job) error {
 
 }
 
-func (j *jobManagerBase) processFundingSchedules() error {
+func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 	return nil
 }

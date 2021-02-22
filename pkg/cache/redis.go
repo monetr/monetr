@@ -71,6 +71,8 @@ func (r *RedisController) Pool() *redis.Pool {
 
 func (r *RedisController) Close() error {
 	err := r.pool.Close()
-	r.mini.Close()
+	if r.mini != nil {
+		r.mini.Close()
+	}
 	return errors.Wrap(err, "failed to close pool gracefully")
 }
