@@ -73,7 +73,7 @@
     "redux": "4.0.5",
     "redux-thunk": "2.3.0",
     "reselect": "4.0.0",
-    "resolve": "1.18.1",
+    "resolve": "1.20.0",
     "resolve-url-loader": "3.1.2",
     "sass": "1.32.8",
     "sass-loader": "10.1.1",
