@@ -90,7 +90,7 @@
     "webpack": "4.46.0",
     "webpack-dev-server": "3.11.2",
     "webpack-manifest-plugin": "2.2.0",
-    "workbox-webpack-plugin": "6.1.0"
+    "workbox-webpack-plugin": "6.1.1"
   },
   "scripts": {
     "start": "node scripts/start.js",
