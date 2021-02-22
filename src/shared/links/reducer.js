@@ -16,7 +16,7 @@ export default function reducer(state = new LinksState(), action) {
       return state.merge({
         loaded: true,
         loading: false,
-        links: action.payload,
+        items: action.payload,
       });
     case LOGOUT:
       return new LinksState();

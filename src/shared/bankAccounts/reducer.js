@@ -1,11 +1,11 @@
-import BankAccountsState from "./state";
+import { LOGOUT } from "shared/authentication/actions";
 import {
   CHANGE_BANK_ACCOUNT,
   FETCH_BANK_ACCOUNT_FAILURE,
   FETCH_BANK_ACCOUNT_SUCCESS,
   FETCH_BANK_ACCOUNTS_REQUEST
-} from "./actions";
-import { LOGOUT } from "shared/authentication/actions";
+} from "shared/bankAccounts/actions";
+import BankAccountsState from "shared/bankAccounts/state";
 
 
 export default function reducer(state = new BankAccountsState(), action) {
@@ -22,7 +22,7 @@ export default function reducer(state = new BankAccountsState(), action) {
       return state.merge({
         loaded: true,
         loading: false,
-        bankAccounts: action.payload,
+        items: action.payload,
       });
     case CHANGE_BANK_ACCOUNT:
       return state.merge({

@@ -1,7 +1,7 @@
 import {Map, Record} from 'immutable';
 
 export default class BankAccountsState extends Record({
-  bankAccounts: new Map(),
+  items: new Map(),
   loaded: false,
   loading: false,
   // When the user selects a bank account that they want to view, this value is changed.

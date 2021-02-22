@@ -1,6 +1,7 @@
 stages:
   - Dependencies
   - Build Javascript
+  - Test Javascript
   - Build Container
   - Publish Container
 
@@ -31,6 +32,19 @@ Build:
       - ./node_modules
     policy: pull-push
 
+Test:
+  stage: Test Javascript
+  image: node:15.9.0-buster
+  tags:
+    - k8s:shared
+  script:
+    - yarn test
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./node_modules
+    policy: pull
+
 Kaniko:
   stage: Build Container
   image:
@@ -47,6 +61,8 @@ Kaniko:
     policy: pull
 
 Publish GitHub:
+  environment:
+    name: GitHub
   stage: Publish Container
   only:
     refs:

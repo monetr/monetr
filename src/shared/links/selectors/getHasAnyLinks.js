@@ -1,1 +1,1 @@
-export const getHasAnyLinks = state => state.links.links.count() > 0;
+export const getHasAnyLinks = state => state.links.items.count() > 0;
