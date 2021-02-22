@@ -36,7 +36,7 @@
     "eslint-plugin-react": "7.21.5",
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-testing-library": "3.10.1",
-    "eslint-webpack-plugin": "2.4.0",
+    "eslint-webpack-plugin": "2.5.2",
     "file-loader": "6.2.0",
     "formik": "2.2.6",
     "fs-extra": "9.0.1",
