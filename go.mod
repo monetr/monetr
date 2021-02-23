@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/Joker/hpp v1.0.0 // indirect
 	github.com/alicebob/miniredis/v2 v2.14.3
-	github.com/brianvoe/gofakeit/v6 v6.2.1
+	github.com/brianvoe/gofakeit/v6 v6.2.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-pg/pg/v10 v10.7.7
 	github.com/gocraft/work v0.5.1
