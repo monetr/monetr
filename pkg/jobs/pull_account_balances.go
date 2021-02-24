@@ -105,70 +105,42 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 			return err
 		}
 
-		groupedByPlaidAccessToken := map[string][]models.BankAccount{}
-
-		for _, bankAccount := range bankAccounts {
-			if bankAccount.Link == nil || bankAccount.Link.PlaidLink == nil {
-				// TODO (elliotcourant) Log something here maybe? This shouldn't happen so we might want to try to keep track
-				//  of it if it does?
-				continue
-			}
-
-			accounts, ok := groupedByPlaidAccessToken[bankAccount.Link.PlaidLink.AccessToken]
-			if !ok {
-				// If the access token is not present, store it and create a new array.
-				groupedByPlaidAccessToken[bankAccount.Link.PlaidLink.AccessToken] = []models.BankAccount{
-					bankAccount,
-				}
-
-				// Keep moving along.
-				continue
-			}
-
-			// If the access token is already present, simply append this account.
-			accounts = append(accounts, bankAccount)
+		// Gather the plaid account Ids so we can precisely query plaid.
+		plaidIdsToBankIds := map[string]uint64{}
+		itemBankAccountIds := make([]string, len(bankAccounts))
+		for i, bankAccount := range bankAccounts {
+			itemBankAccountIds[i] = bankAccount.PlaidAccountId
+			plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
 		}
 
-		for accessToken, banks := range groupedByPlaidAccessToken {
-			// Gather the plaid account Ids so we can precisely query plaid.
-			plaidIdsToBankIds := map[string]uint64{}
-			itemBankAccountIds := make([]string, len(banks))
-			for i, bankAccount := range banks {
-				itemBankAccountIds[i] = bankAccount.PlaidAccountId
-				plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
-			}
+		log.Tracef("requesting information for %d bank account(s)", len(itemBankAccountIds))
 
-			log.Tracef("requesting information for %d bank account(s)", len(itemBankAccountIds))
+		result, err := j.plaidClient.GetAccountsWithOptions(
+			link.PlaidLink.AccessToken,
+			plaid.GetAccountsOptions{
+				AccountIDs: itemBankAccountIds,
+			},
+		)
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve bank accounts from plaid")
+			return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
+		}
 
-			result, err := j.plaidClient.GetAccountsWithOptions(
-				accessToken,
-				plaid.GetAccountsOptions{
-					AccountIDs: itemBankAccountIds,
-				},
-			)
-			if err != nil {
-				log.WithError(err).Error("failed to retrieve bank accounts from plaid")
-				continue // We don't want it to prevent others from being processed.
+		updatedBankAccounts := make([]models.BankAccount, len(result.Accounts))
+		for i, item := range result.Accounts {
+			// TODO (elliotcourant) Maybe add something here to compare balances to the existing account record? If there
+			//  are no changes there is no need to update the account at all.
+			updatedBankAccounts[i] = models.BankAccount{
+				BankAccountId:    plaidIdsToBankIds[item.AccountID],
+				AccountId:        accountId,
+				AvailableBalance: int64(item.Balances.Available * 100),
+				CurrentBalance:   int64(item.Balances.Current * 100),
 			}
+		}
 
-			// TODO (elliotcourant) If we lift this array out of this loop then we could update all the bank accounts for all
-			//  of an account's links in a single query which would be more efficient.
-			updatedBankAccounts := make([]models.BankAccount, len(result.Accounts))
-			for i, item := range result.Accounts {
-				// TODO (elliotcourant) Maybe add something here to compare balances to the existing account record? If there
-				//  are no changes there is no need to update the account at all.
-				updatedBankAccounts[i] = models.BankAccount{
-					BankAccountId:    plaidIdsToBankIds[item.AccountID],
-					AccountId:        accountId,
-					AvailableBalance: int64(item.Balances.Available * 100),
-					CurrentBalance:   int64(item.Balances.Current * 100),
-				}
-			}
-
-			if err := repo.UpdateBankAccounts(updatedBankAccounts); err != nil {
-				log.WithError(err).Error("failed to update bank account balances")
-				return err
-			}
+		if err := repo.UpdateBankAccounts(updatedBankAccounts); err != nil {
+			log.WithError(err).Error("failed to update bank account balances")
+			return err
 		}
 
 		return nil
