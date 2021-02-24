@@ -5,6 +5,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
@@ -23,6 +24,7 @@ type jobManagerBase struct {
 	queue       *work.Enqueuer
 	db          *pg.DB
 	plaidClient *plaid.Client
+	stats       *metrics.Stats
 }
 
 func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *plaid.Client) JobManager {
@@ -53,6 +55,14 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	manager.work.Start()
 
 	return manager
+}
+
+func (j *jobManagerBase) enqueueUniqueJob(name string, arguments map[string]interface{}) (*work.Job, error) {
+	if j.stats != nil {
+		j.stats.JobEnqueued(name)
+	}
+
+	return j.queue.EnqueueUnique(name, arguments)
 }
 
 func (j *jobManagerBase) TriggerPullInitialTransactions(accountId, userId, linkId uint64) (jobId string, err error) {

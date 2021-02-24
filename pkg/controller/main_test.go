@@ -1,7 +1,6 @@
 package controller_test
 
 import (
-	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/application"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
@@ -11,7 +10,6 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
 	"net/http"
-	"strings"
 	"testing"
 )
 
@@ -66,7 +64,7 @@ func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
 		FirstName string `json:"firstName"`
 		LastName  string `json:"lastName"`
 	}
-	registerRequest.Email = GivenIHaveAnEmail(t)
+	registerRequest.Email = testutils.GivenIHaveAnEmail(t)
 	registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 	registerRequest.FirstName = gofakeit.FirstName()
 	registerRequest.LastName = gofakeit.LastName()
@@ -80,8 +78,4 @@ func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
 	require.NotEmpty(t, token, "token cannot be empty")
 
 	return token
-}
-
-func GivenIHaveAnEmail(t *testing.T) string {
-	return fmt.Sprintf("%s@testing.harderthanitneedstobe.com", strings.ReplaceAll(gofakeit.UUID(), "-", ""))
 }

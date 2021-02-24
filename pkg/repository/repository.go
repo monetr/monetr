@@ -17,6 +17,8 @@ type Repository interface {
 	UpdateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
 	GetBankAccounts() ([]models.BankAccount, error)
+	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
+	UpdateBankAccounts(accounts []models.BankAccount) error
 	GetIsSetup() (bool, error)
 	GetLink(linkId uint64) (*models.Link, error)
 	GetLinks() ([]models.Link, error)

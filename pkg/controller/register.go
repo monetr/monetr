@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/hash"
 	"net/http"
 	"strings"
 	"time"
@@ -67,7 +68,7 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 	}
 
 	// Hash the user's password so that we can store it securely.
-	hashedPassword := c.hashPassword(
+	hashedPassword := hash.HashPassword(
 		registerRequest.Email, registerRequest.Password,
 	)
 

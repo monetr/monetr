@@ -13,7 +13,7 @@ const (
 func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 	log := j.getLogForJob(job)
 
-	accounts, err := j.getPlaidBankAccountsByAccount()
+	accounts, err := j.getPlaidLinksByAccount()
 	if err != nil {
 		log.WithError(err).Errorf("failed to retrieve bank accounts that need to by synced")
 		return err
@@ -25,8 +25,8 @@ func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 		accountLog := log.WithField("accountId", account.AccountID)
 		accountLog.Trace("enqueueing for latest transactions update")
 		_, err := j.queue.EnqueueUnique(PullLatestTransactions, map[string]interface{}{
-			"accountId":      account.AccountID,
-			"bankAccountIds": account.BankAccountIDs,
+			"accountId": account.AccountID,
+			// TODO (elliotcourant) Convert pull latest transactions to use linkIds instead.
 		})
 		if err != nil {
 			err = errors.Wrap(err, "failed to enqueue account")

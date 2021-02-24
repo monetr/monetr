@@ -40,12 +40,11 @@ func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedule
 	var items []ProcessFundingSchedulesItem
 	_, err := j.txn.Query(&items, `
 		SELECT
-			"accounts"."account_id",
+			"funding_schedules"."account_id",
 			array_agg("funding_schedules"."funding_schedule_id") AS "funding_schedule_ids"
-		FROM "accounts"
-		INNER JOIN "funding_schedules" ON "funding_schedules"."account_id" = "accounts"."account_id"
+		FROM "funding_schedules"
 		WHERE "funding_schedules"."next_occurrence" < (now() AT TIME ZONE 'UTC')
-		GROUP BY "accounts"."account_id"
+		GROUP BY "funding_schedules"."account_id"
 	`)
 	if err != nil {
 		// TODO (elliotcourant) Can pg.NoRows return here? If it can this error is useless.

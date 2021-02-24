@@ -3,6 +3,8 @@ package testutils
 import (
 	"context"
 	"github.com/go-pg/pg/v10"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"os"
@@ -15,7 +17,8 @@ var (
 )
 
 type queryHook struct {
-	log *logrus.Entry
+	log   *logrus.Entry
+	stats *metrics.Stats
 }
 
 func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
@@ -30,6 +33,10 @@ func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (cont
 }
 
 func (q *queryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
+	if q.stats != nil {
+		q.stats.Queries.With(prometheus.Labels{}).Inc()
+	}
+
 	return nil
 }
 
@@ -92,7 +99,7 @@ func GetPgDatabase(t *testing.T) *pg.DB {
 	}
 	log := logrus.NewEntry(logger)
 	db.AddQueryHook(&queryHook{
-		log.WithField("test", t.Name()),
+		log: log.WithField("test", t.Name()),
 	})
 
 	t.Cleanup(func() {

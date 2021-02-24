@@ -1,8 +1,7 @@
 package controller
 
 import (
-	"crypto/sha256"
-	"fmt"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/hash"
 	"net/http"
 	"strings"
 	"time"
@@ -40,7 +39,7 @@ func (c *Controller) loginEndpoint(ctx *context.Context) {
 		return
 	}
 
-	hashedPassword := c.hashPassword(loginRequest.Email, loginRequest.Password)
+	hashedPassword := hash.HashPassword(loginRequest.Email, loginRequest.Password)
 	var login models.Login
 	if err := c.db.RunInTransaction(ctx.Request().Context(), func(txn *pg.Tx) error {
 		return txn.Model(&login).
@@ -100,17 +99,6 @@ func (c *Controller) validateLogin(email, password string) error {
 	}
 
 	return nil
-}
-
-// hashPassword will return a one way hash of the provided user's credentials.
-// The email is always converted to lowercase for this hash but the password is
-// not modified.
-func (c *Controller) hashPassword(email, password string) string {
-	email = strings.ToLower(email)
-	hash := sha256.New()
-	hash.Write([]byte(email))
-	hash.Write([]byte(password))
-	return fmt.Sprintf("%X", hash.Sum(nil))
 }
 
 func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {

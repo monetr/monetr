@@ -11,7 +11,7 @@ func (r *repositoryBase) GetLink(linkId uint64) (*models.Link, error) {
 	err := r.txn.Model(&link).
 		Relation("PlaidLink").
 		Relation("BankAccounts").
-		Where(`"link"."link_id" = ? AND "link"."account_id" = ?`, r.AccountId(), linkId).
+		Where(`"link"."link_id" = ? AND "link"."account_id" = ?`, linkId, r.AccountId()).
 		Limit(1).
 		Select(&link)
 	if err != nil {
