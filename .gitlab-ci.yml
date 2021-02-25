@@ -13,7 +13,7 @@ Fetch Dependencies:
   before_script:
     - yarn set version berry
   script:
-    - yarn install --registry https://nexus.elliotcourant.dev/repository/registry.npmjs.org/
+    - yarn install
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
