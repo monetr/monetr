@@ -12,7 +12,8 @@ Fetch Dependencies:
     - k8s:shared
   script:
     - yarn config get registry
-    - yarn install --registry "https://nexus.elliotcourant.dev/repository/registry.npmjs.org/" --verbose
+    - cat /builds/.yarnrc
+    - yarn install --registry https://nexus.elliotcourant.dev/repository/registry.npmjs.org/
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
