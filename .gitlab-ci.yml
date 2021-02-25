@@ -10,9 +10,9 @@ Fetch Dependencies:
   image: node:15.10.0-buster
   tags:
     - k8s:shared
+  before_script:
+    - yarn set version berry
   script:
-    - yarn config get registry
-    - cat /builds/.yarnrc
     - yarn install --registry https://nexus.elliotcourant.dev/repository/registry.npmjs.org/
   cache:
     key: ${CI_COMMIT_SHA}
