@@ -11,6 +11,7 @@ Fetch Dependencies:
   tags:
     - k8s:shared
   script:
+    - env
     - yarn install
   cache:
     key: ${CI_COMMIT_SHA}
