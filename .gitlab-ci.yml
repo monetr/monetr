@@ -10,6 +10,8 @@ Fetch Dependencies:
   image: node:15.10.0-buster
   tags:
     - k8s:shared
+  before_script:
+    - npm config set registry https://nexus.elliotcourant.dev/repository/registry.npmjs.org/
   script:
     - yarn install
   cache:
