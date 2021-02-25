@@ -49,6 +49,7 @@ func TestPullAccountBalances(t *testing.T) {
 		require.NoError(t, err, "must create plaid client")
 
 		job := NewJobManager(log, cache, db, plaidClient, nil).(*jobManagerBase)
+		defer require.NoError(t, job.Close(), "must close job manager")
 
 		// TODO (elliotcourant) Tweak the plaid data balances before we make our request. This way we can add proper
 		//  assertions around whether or not the balances in our database have actually updated.

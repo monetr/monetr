@@ -52,7 +52,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 
 	mockJobManager := testutils.NewMockJobManager()
 
-	c := controller.NewController(configuration, db, mockJobManager, p)
+	c := controller.NewController(configuration, db, mockJobManager, p, nil)
 	app := application.NewApp(configuration, c)
 	return httptest.New(t, app)
 }
