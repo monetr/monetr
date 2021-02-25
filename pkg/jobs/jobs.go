@@ -27,7 +27,7 @@ type jobManagerBase struct {
 	stats       *metrics.Stats
 }
 
-func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *plaid.Client) JobManager {
+func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *plaid.Client, stats *metrics.Stats) JobManager {
 	manager := &jobManagerBase{
 		log: log,
 		// TODO (elliotcourant) Use namespace from config.
@@ -35,6 +35,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 		queue:       work.NewEnqueuer("harder", pool),
 		db:          db,
 		plaidClient: plaidClient,
+		stats:       stats,
 	}
 
 	manager.work.Middleware(manager.middleware)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/jobs"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
 	"net/http"
 	"net/smtp"
 	"time"
@@ -30,6 +31,7 @@ type Controller struct {
 	mailVerifyCode *gotp.HOTP
 	log            *logrus.Entry
 	job            jobs.JobManager
+	stats          *metrics.Stats
 }
 
 func NewController(
@@ -37,6 +39,7 @@ func NewController(
 	db *pg.DB,
 	job jobs.JobManager,
 	plaidClient *plaid.Client,
+	stats *metrics.Stats,
 ) *Controller {
 	logger := logrus.New()
 	level, err := logrus.ParseLevel(configuration.Logging.Level)
@@ -64,10 +67,22 @@ func NewController(
 		plaid:         plaidClient,
 		log:           entry,
 		job:           job,
+		stats:         stats,
 	}
 }
 
 func (c *Controller) RegisterRoutes(app *iris.Application) {
+	if c.stats != nil {
+		app.UseGlobal(func(ctx *context.Context) {
+			start := time.Now()
+			defer func() {
+				c.stats.FinishedRequest(ctx, time.Since(start))
+			}()
+
+			ctx.Next()
+		})
+	}
+
 	app.Use(c.loggingMiddleware)
 	app.OnAnyErrorCode(func(ctx *context.Context) {
 		if err := ctx.GetErr(); err != nil {

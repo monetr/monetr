@@ -20,12 +20,12 @@ func (r *repositoryBase) InsertTransactions(transactions []models.Transaction) e
 }
 
 func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error) {
-	type WithPlaidId struct {
+	type Transaction struct {
 		tableName          string `pg:"transactions"`
 		plaidTransactionId string `pg:"plaid_transaction_id"`
 		TransactionUpdateId
 	}
-	var items []WithPlaidId
+	var items []Transaction
 	err := r.txn.Model(&items).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).

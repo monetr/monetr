@@ -28,7 +28,7 @@ func (j *jobManagerBase) getPlaidLinksByAccount() ([]PullAccountBalanceWorkItem,
 	// Query the database for all accounts with bank accounts that have a link type of plaid.
 	_, err := j.db.Query(&accounts, `
 		SELECT
-			"links"."account_id"
+			"links"."account_id",
 			array_agg("links"."link_id") "link_ids"
 		FROM "links"
 		WHERE "links"."link_type" = ? AND "links"."plaid_link_id" IS NOT NULL

@@ -135,7 +135,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		transactionIds, err := repo.GetTransactionsByPlaidId(linkId, plaidTransactionIds)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transaction ids for updating plaid transactions")
-			return nil
+			return err
 		}
 
 		transactionsToUpdate := make([]models.Transaction, 0)
@@ -200,5 +200,4 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 
 		return nil
 	})
-	return nil
 }
