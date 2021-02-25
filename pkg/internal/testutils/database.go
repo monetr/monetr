@@ -8,7 +8,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"os"
-	"sort"
 	"testing"
 )
 
@@ -66,38 +65,8 @@ func GetPgDatabase(t *testing.T) *pg.DB {
 
 	require.NoError(t, db.Ping(context.Background()), "must ping database")
 
-	logger := logrus.New()
-	logger.SetLevel(logrus.FatalLevel)
-	logger.Formatter = &logrus.TextFormatter{
-		ForceColors:               false,
-		DisableColors:             false,
-		ForceQuote:                false,
-		DisableQuote:              true,
-		EnvironmentOverrideColors: false,
-		DisableTimestamp:          true,
-		FullTimestamp:             false,
-		TimestampFormat:           "",
-		DisableSorting:            false,
-		SortingFunc: func(input []string) {
-			keys := make([]string, 0, len(input)-1)
-			for _, key := range input {
-				if key == "msg" {
-					continue
-				}
+	log := GetLog(t)
 
-				keys = append(keys, key)
-			}
-			sort.Strings(keys)
-			keys = append(keys, "msg")
-			copy(input, keys)
-		},
-		DisableLevelTruncation: false,
-		PadLevelText:           false,
-		QuoteEmptyFields:       false,
-		FieldMap:               nil,
-		CallerPrettyfier:       nil,
-	}
-	log := logrus.NewEntry(logger)
 	db.AddQueryHook(&queryHook{
 		log: log.WithField("test", t.Name()),
 	})

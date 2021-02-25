@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"github.com/sirupsen/logrus"
+	"time"
 
 	"github.com/gocraft/work"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
@@ -75,6 +76,7 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
+	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
 
@@ -83,6 +85,12 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
+
+	defer func() {
+		if j.stats != nil {
+			j.stats.JobFinished(PullAccountBalances, accountId, start)
+		}
+	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
 

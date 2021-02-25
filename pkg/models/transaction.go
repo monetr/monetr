@@ -10,9 +10,9 @@ type Transaction struct {
 	TransactionId        uint64       `json:"transactionId" pg:"transaction_id,notnull,pk,type:'bigserial'"`
 	AccountId            uint64       `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
 	Account              *Account     `json:"-" pg:"rel:has-one"`
-	BankAccountId        uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
+	BankAccountId        uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,type:'bigint',unique:per_bank_account"`
 	BankAccount          *BankAccount `json:"bankAccount,omitempty" pg:"rel:has-one"`
-	PlaidTransactionId   string       `json:"-" pg:"plaid_transaction_id,notnull"`
+	PlaidTransactionId   string       `json:"-" pg:"plaid_transaction_id,unique:per_bank_account"`
 	Amount               int64        `json:"amount" pg:"amount,notnull,use_zero"`
 	ExpenseId            *uint64      `json:"expenseId" pg:"expense_id,on_delete:SET NULL"`
 	Expense              *Expense     `json:"expense,omitempty" pg:"rel:has-one"`

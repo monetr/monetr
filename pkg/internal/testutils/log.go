@@ -1,12 +1,11 @@
 package testutils
 
 import (
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/logging"
 	"github.com/sirupsen/logrus"
 	"testing"
 )
 
 func GetLog(t *testing.T) *logrus.Entry {
-	logger := logrus.New()
-	log := logger.WithField("test", t.Name())
-	return log
+	return logging.NewLogger().WithField("test", t.Name())
 }

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/mock_http_helper"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/testutils"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/testutils"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
 	"net/http"

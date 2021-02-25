@@ -24,6 +24,7 @@ type Repository interface {
 	GetLinks() ([]models.Link, error)
 	GetMe() (*models.User, error)
 	InsertTransactions(transactions []models.Transaction) error
+	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error)
 }
 
 type UnauthenticatedRepository interface {

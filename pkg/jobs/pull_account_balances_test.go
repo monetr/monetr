@@ -6,8 +6,8 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/mock_plaid"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/testutils"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/testutils"
 	"github.com/jarcoal/httpmock"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/assert"
@@ -69,5 +69,10 @@ func TestPullAccountBalances(t *testing.T) {
 			FailedAt: 0,
 		})
 		assert.NoError(t, err, "job should succeed")
+
+		// Make sure the API calls we made match what we expect.
+		assert.Equal(t, map[string]int{
+			"POST https://sandbox.plaid.com/accounts/get": 1,
+		}, httpmock.GetCallCountInfo(), "call counts should match")
 	})
 }

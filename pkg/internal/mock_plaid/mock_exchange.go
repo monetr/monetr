@@ -2,7 +2,6 @@ package mock_plaid
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/mock_http_helper"
 	"github.com/plaid/plaid-go/plaid"
@@ -17,8 +16,7 @@ import (
 func MockExchangePublicToken(t *testing.T) string {
 	publicToken := gofakeit.UUID()
 
-	path := fmt.Sprintf("%s/item/public_token/exchange", plaid.Development)
-	mock_http_helper.NewHttpMockJsonResponder(t, "POST", path, func(t *testing.T, request *http.Request) (interface{}, int) {
+	mock_http_helper.NewHttpMockJsonResponder(t, "POST", Path(t, "/item/public_token/exchange"), func(t *testing.T, request *http.Request) (interface{}, int) {
 		var exchangeRequest struct {
 			ClientID    string `json:"client_id"`
 			Secret      string `json:"secret"`

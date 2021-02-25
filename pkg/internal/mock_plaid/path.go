@@ -9,5 +9,5 @@ import (
 
 func Path(t *testing.T, relative string) string {
 	require.NotEmpty(t, relative, "relative url cannot be empty")
-	return fmt.Sprintf("%s%s", plaid.Development, relative)
+	return fmt.Sprintf("%s%s", plaid.Sandbox, relative)
 }

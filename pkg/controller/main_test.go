@@ -5,7 +5,7 @@ import (
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/application"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/controller"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/testutils"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/testutils"
 	"github.com/kataras/iris/v12/httptest"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
@@ -28,7 +28,7 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 		SMTP:       config.SMTPClient{},
 		ReCAPTCHA:  config.ReCAPTCHA{},
 		Plaid: config.Plaid{
-			Environment: plaid.Development,
+			Environment: plaid.Sandbox,
 		},
 		CORS: config.CORS{
 			Debug: false,
