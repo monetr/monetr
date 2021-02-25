@@ -11,7 +11,7 @@ Fetch Dependencies:
   tags:
     - k8s:shared
   before_script:
-    - npm config set registry https://nexus.elliotcourant.dev/repository/registry.npmjs.org/
+    - yarn config set registry https://nexus.elliotcourant.dev/repository/registry.npmjs.org/
   script:
     - yarn install
   cache:
