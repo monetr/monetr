@@ -11,7 +11,7 @@ Fetch Dependencies:
   tags:
     - k8s:shared
   script:
-    - yarn install --no-lockfile --verbose
+    - yarn install --no-lockfile # Will use my npm proxy/registry allowing for faster pulling of dependencies.
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
