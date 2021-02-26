@@ -11,7 +11,7 @@ Fetch Dependencies:
   tags:
     - k8s:shared
   script:
-    - yarn install --no-lockfile
+    - yarn install --no-lockfile --verbose
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
