@@ -10,8 +10,6 @@ Fetch Dependencies:
   image: node:15.10.0-buster
   tags:
     - k8s:shared
-  before_script:
-    - yarn set version berry
   script:
     - yarn install
   cache:
