@@ -1,7 +1,16 @@
 import { InputLabel, MenuItem, Select } from "@material-ui/core";
+import PropTypes from "prop-types";
 import React, { Component, Fragment } from 'react';
+import { connect } from "react-redux";
+import setSelectedBankAccountId from "shared/bankAccounts/actions/setSelectedBankAccountId";
+import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
 
 export class BankAccountSelector extends Component {
+
+  static propTypes = {
+    selectedBankAccountId: PropTypes.number.isRequired,
+    setSelectedBankAccountId: PropTypes.func
+  };
 
   render() {
     return (
@@ -10,8 +19,9 @@ export class BankAccountSelector extends Component {
         <Select
           labelId="bank-account-selection-label"
           id="bank-account-selection-select"
-          value={ 10 }
-          onChange={ () => {
+          value={ this.props.selectedBankAccountId }
+          onChange={ (value) => {
+            this.props.setSelectedBankAccountId(0);
           } }
           label="Bank Account"
         >
@@ -26,3 +36,12 @@ export class BankAccountSelector extends Component {
     )
   }
 }
+
+export default connect(
+  state => ({
+    selectedBankAccountId: getSelectedBankAccountId(state),
+  }),
+  {
+    setSelectedBankAccountId,
+  },
+)(BankAccountSelector);
