@@ -1,4 +1,4 @@
-import {LOGOUT} from "../actions";
+import {LOGOUT} from "shared/authentication/actions";
 
 
 export default function logout() {

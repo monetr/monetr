@@ -1,7 +1,7 @@
 import {
-  FETCH_BANK_ACCOUNT_FAILURE,
-  FETCH_BANK_ACCOUNT_SUCCESS,
-  FETCH_BANK_ACCOUNTS_REQUEST
+  FETCH_BANK_ACCOUNTS_FAILURE,
+  FETCH_BANK_ACCOUNTS_REQUEST,
+  FETCH_BANK_ACCOUNTS_SUCCESS
 } from "shared/bankAccounts/actions";
 import request from "shared/util/request";
 import BankAccount from "data/BankAccount";
@@ -12,7 +12,7 @@ export const fetchBankAccountsRequest = {
 };
 
 export const fetchBankAccountsFailure = {
-  type: FETCH_BANK_ACCOUNT_FAILURE,
+  type: FETCH_BANK_ACCOUNTS_FAILURE,
 };
 
 export default function fetchBankAccounts() {
@@ -20,10 +20,10 @@ export default function fetchBankAccounts() {
     return request().get('/api/bank_accounts')
       .then(result => {
         dispatch({
-          type: FETCH_BANK_ACCOUNT_SUCCESS,
+          type: FETCH_BANK_ACCOUNTS_SUCCESS,
           payload: Map<number, BankAccount>().withMutations(map => {
-            (result.data.bank_accounts || []).forEach((bankAccount: BankAccount) => {
-              map.set(bankAccount.bankAccountId, bankAccount);
+            (result.data.bankAccounts || []).forEach((bankAccount: BankAccount) => {
+              map.set(bankAccount.bankAccountId, new BankAccount(bankAccount));
             })
           }),
         });

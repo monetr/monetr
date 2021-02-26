@@ -1,11 +1,11 @@
-import { Map, Record } from 'immutable';
+import { Map } from 'immutable';
 import BankAccount from "data/BankAccount";
 
-export default class BankAccountsState extends Record({
-  items: Map<number, BankAccount>(),
-  loaded: false,
-  loading: false,
-}) {
+export default class BankAccountsState {
+  constructor() {
+    this.items = Map<number, BankAccount>();
+  }
+
   items: Map<number, BankAccount>;
   loaded: boolean;
   loading: boolean;

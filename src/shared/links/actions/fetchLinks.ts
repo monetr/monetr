@@ -20,8 +20,10 @@ export default function fetchLinks() {
       .then(result => {
         dispatch({
           type: FETCH_LINKS_SUCCESS,
-          payload: new Map().withMutations(map => {
-            (result.data.links || []).forEach(link => map.set(link.linkId, new Link(link)));
+          payload: Map<number, Link>().withMutations(map => {
+            (result.data.links || []).forEach((link: Link) =>
+              map.set(link.linkId, new Link(link))
+            );
           }),
         });
       })

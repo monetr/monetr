@@ -1,11 +1,13 @@
-import { AppBar, Button, IconButton, InputLabel, Menu, MenuItem, Select, Toolbar, Typography } from "@material-ui/core";
+import { AppBar, Button, IconButton, Menu, MenuItem, Toolbar, Typography } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
+import BankAccountSelector from "components/BankAccountSelector";
 import PropTypes from "prop-types";
 import React, { Component, Fragment } from 'react';
 import { connect } from "react-redux";
 import { BrowserRouter as Router, Link as RouterLink, Redirect, Route, Switch, withRouter } from "react-router-dom";
 import { bindActionCreators } from "redux";
 import logout from "shared/authentication/actions/logout";
+import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
 import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
 import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
 import FirstTimeSetup from "views/FirstTimeSetup";
@@ -20,11 +22,15 @@ export class AuthenticatedApplication extends Component {
     logout: PropTypes.func.isRequired,
     history: PropTypes.object.isRequired,
     fetchLinksIfNeeded: PropTypes.func.isRequired,
+    fetchBankAccounts: PropTypes.func.isRequired,
     hasAnyLinks: PropTypes.bool.isRequired,
   };
 
   componentDidMount() {
-    this.props.fetchLinksIfNeeded()
+    Promise.all([
+      this.props.fetchLinksIfNeeded(),
+      this.props.fetchBankAccounts(),
+    ])
       .then(() => this.setState({ loading: false }));
   }
 
@@ -65,22 +71,7 @@ export class AuthenticatedApplication extends Component {
             <Button to="/goals" component={ RouterLink } color="inherit">Goals</Button>
             <div style={ { marginLeft: 'auto' } }/>
             <div style={ { marginRight: '10px', marginLeft: '10px' } }>
-              <InputLabel id="demo-simple-select-outlined-label">Bank Account</InputLabel>
-              <Select
-                labelId="demo-simple-select-outlined-label"
-                id="demo-simple-select-outlined"
-                value={ 10 }
-                onChange={ () => {
-                } }
-                label="Bank Account"
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value={ 10 }>US Bank</MenuItem>
-                <MenuItem value={ 20 }>Twenty</MenuItem>
-                <MenuItem value={ 30 }>Thirty</MenuItem>
-              </Select>
+              <BankAccountSelector/>
             </div>
             <IconButton onClick={ this.openMenu } edge="start" color="inherit" aria-label="menu">
               <MenuIcon/>
@@ -153,5 +144,6 @@ export default connect(
   dispatch => bindActionCreators({
     logout,
     fetchLinksIfNeeded,
+    fetchBankAccounts,
   }, dispatch),
 )(withRouter(AuthenticatedApplication));
