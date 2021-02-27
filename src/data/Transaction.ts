@@ -37,4 +37,12 @@ export default class Transaction implements TransactionFields {
   constructor(data: TransactionFields) {
     Object.assign(this, data);
   }
+
+  getAmountString(): string {
+    if (this.amount < 0) {
+      return `+ $${ (-this.amount / 100).toFixed(2) }`
+    }
+
+    return `$${ (this.amount / 100).toFixed(2) }`
+  }
 }

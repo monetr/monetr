@@ -10,6 +10,7 @@ import { getLinks } from "shared/links/selectors/getLinks";
 import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
 import { getBankAccountsLoading } from "shared/bankAccounts/selectors/getBankAccountsLoading";
 import { getLinksLoading } from "shared/links/selectors/getLinksLoading";
+import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
 
 interface PropTypes {
   selectedBankAccountId: number;
@@ -20,9 +21,17 @@ interface PropTypes {
   bankAccountsLoading: boolean;
   links: Map<number, Link>;
   linksLoading: boolean;
+  fetchInitialTransactionsIfNeeded: {
+    (): Promise<void>;
+  };
 }
 
 export class BankAccountSelector extends Component<PropTypes, {}> {
+
+  changeBankAccount = (event) => {
+    this.props.setSelectedBankAccountId(event.target.value as number);
+    this.props.fetchInitialTransactionsIfNeeded();
+  };
 
   render() {
     const { bankAccountsLoading, linksLoading } = this.props;
@@ -38,9 +47,7 @@ export class BankAccountSelector extends Component<PropTypes, {}> {
           labelId="bank-account-selection-label"
           id="bank-account-selection-select"
           value={ this.props.selectedBankAccountId || this.props.bankAccounts.first<BankAccount>().bankAccountId }
-          onChange={ (value) => {
-            this.props.setSelectedBankAccountId(value.target.value as number);
-          } }
+          onChange={ this.changeBankAccount }
           label="Bank Account"
         >
           {
@@ -72,5 +79,6 @@ export default connect(
   }),
   {
     setSelectedBankAccountId,
+    fetchInitialTransactionsIfNeeded,
   },
 )(BankAccountSelector);

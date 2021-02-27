@@ -3,6 +3,8 @@ import Transaction from "data/Transaction";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
+import { getTransactions } from "shared/transactions/selectors/getTransactions";
+import { Box, Card, List, ListItem, ListItemText, Typography } from "@material-ui/core";
 
 interface PropTypes {
   transactions: OrderedMap<number, Transaction>;
@@ -23,17 +25,57 @@ export class TransactionsView extends Component<PropTypes, {}> {
       })
   }
 
+  renderTransactions = () => {
+    const { transactions } = this.props;
+
+    return transactions.toArray().map(([_, item]) => this.renderTransaction(item));
+  }
+
+  renderTransaction = (transaction: Transaction) => {
+    return (
+      <ListItem
+        dense
+        button
+        key={ transaction.transactionId.toString() }
+        alignItems="flex-start"
+      >
+        <ListItemText
+          primary={ transaction.name }
+          secondary={
+            <React.Fragment>
+              <Typography
+                component="span"
+                variant="body2"
+                color="textPrimary"
+              >
+                { transaction.getAmountString() }
+              </Typography>
+            </React.Fragment>
+          }
+        >
+
+        </ListItemText>
+      </ListItem>
+    )
+  };
+
   render() {
 
     return (
-      <span>Transactions</span>
+      <Box m={ 6 }>
+        <Card elevation={ 6 }>
+          <List>
+            { this.renderTransactions() }
+          </List>
+        </Card>
+      </Box>
     )
   }
 }
 
 export default connect(
   state => ({
-    transactions: OrderedMap<number, Transaction>(),
+    transactions: getTransactions(state),
   }),
   {
     fetchInitialTransactionsIfNeeded,
