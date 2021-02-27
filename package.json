@@ -27,7 +27,6 @@
     "css-loader": "5.1.0",
     "dotenv": "8.2.0",
     "dotenv-expand": "5.1.0",
-    "enzyme": "^3.11.0",
     "esbuild": "0.8.53",
     "eslint": "7.20.0",
     "eslint-config-react-app": "6.0.0",
@@ -120,7 +119,6 @@
     ]
   },
   "devDependencies": {
-    "enzyme-adapter-react-16": "^1.15.6",
     "redux-devtools-extension": "2.13.8"
   },
   "jest": {

@@ -32,7 +32,6 @@ export class TransactionsView extends Component<PropTypes, {}> {
   }
 
   renderTransaction = (transaction: Transaction) => {
-    debugger;
     return (
       <ListItem
         dense
@@ -49,7 +48,7 @@ export class TransactionsView extends Component<PropTypes, {}> {
                 variant="body2"
                 color="textPrimary"
               >
-                { transaction.getAmountString() } { transaction.date.toISOString() }
+                { transaction.getAmountString() } { transaction.date }
               </Typography>
             </React.Fragment>
           }
