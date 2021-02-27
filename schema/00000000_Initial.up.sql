@@ -122,8 +122,8 @@ CREATE TABLE IF NOT EXISTS "bank_accounts"
     "account_type"        text,
     "account_sub_type"    text,
     PRIMARY KEY ("bank_account_id", "account_id"),
-    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
-    FOREIGN KEY ("link_id", "account_id") REFERENCES "links" ("link_id", "account_id") ON DELETE CASCADE
+    FOREIGN KEY ("link_id", "account_id") REFERENCES "links" ("link_id", "account_id") ON DELETE CASCADE,
+    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "funding_schedules"
@@ -159,9 +159,9 @@ CREATE TABLE IF NOT EXISTS "expenses"
     "is_behind"                boolean   NOT NULL,
     PRIMARY KEY ("expense_id", "account_id", "bank_account_id"),
     UNIQUE ("bank_account_id", "name"),
-    FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id") ON DELETE CASCADE,
     FOREIGN KEY ("funding_schedule_id", "account_id", "bank_account_id") REFERENCES "funding_schedules" ("funding_schedule_id", "account_id", "bank_account_id") ON DELETE SET NULL,
-    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE
+    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
+    FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "transactions"
@@ -184,9 +184,9 @@ CREATE TABLE IF NOT EXISTS "transactions"
     "created_at"             timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("transaction_id", "account_id", "bank_account_id"),
     UNIQUE ("bank_account_id", "plaid_transaction_id"),
-    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
     FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id") ON DELETE CASCADE,
-    FOREIGN KEY ("expense_id", "account_id", "bank_account_id") REFERENCES "expenses" ("expense_id", "account_id", "bank_account_id") ON DELETE SET NULL
+    FOREIGN KEY ("expense_id", "account_id", "bank_account_id") REFERENCES "expenses" ("expense_id", "account_id", "bank_account_id") ON DELETE SET NULL,
+    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE
 );
 
 INSERT INTO "logins" ("login_id", "email", "password_hash", "phone_number", "is_enabled", "is_email_verified",

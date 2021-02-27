@@ -14,17 +14,18 @@ type Repository interface {
 
 	CreateBankAccounts(bankAccounts ...models.BankAccount) error
 	CreateLink(link *models.Link) error
-	UpdateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
-	UpdateBankAccounts(accounts []models.BankAccount) error
 	GetIsSetup() (bool, error)
 	GetLink(linkId uint64) (*models.Link, error)
 	GetLinks() ([]models.Link, error)
 	GetMe() (*models.User, error)
-	InsertTransactions(transactions []models.Transaction) error
+	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error)
+	InsertTransactions(transactions []models.Transaction) error
+	UpdateBankAccounts(accounts []models.BankAccount) error
+	UpdateLink(link *models.Link) error
 }
 
 type UnauthenticatedRepository interface {
@@ -116,20 +117,4 @@ func (r *repositoryBase) GetFundingSchedules(bankAccountId uint64) ([]models.Fun
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve funding schedules")
-}
-
-func (r *repositoryBase) CreateTransaction(transaction *models.Transaction) error {
-	transaction.AccountId = r.AccountId()
-	_, err := r.txn.Model(transaction).Insert(transaction)
-	return errors.Wrap(err, "failed to create transaction")
-}
-
-func (r *repositoryBase) GetTransactions(bankAccountId uint64) ([]models.Transaction, error) {
-	var result []models.Transaction
-	err := r.txn.Model(&result).
-		Where(`"transaction"."account_id" = ? AND "transaction"."bank_account_id" = ?`, r.AccountId(), bankAccountId).
-		Order(`"transaction"."transaction_id" DESC`).
-		Limit(25).
-		Select(&result)
-	return result, err
 }

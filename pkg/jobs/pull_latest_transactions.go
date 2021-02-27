@@ -132,7 +132,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			plaidTransactionIds[i] = transaction.ID
 		}
 
-		// TODO This is causing existing transactions to be re-inserted somehow.
 		transactionIds, err := repo.GetTransactionsByPlaidId(linkId, plaidTransactionIds)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transaction ids for updating plaid transactions")
@@ -193,6 +192,10 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		}
 
 		if len(transactionsToInsert) > 0 {
+			// Reverse the list so the oldest records are inserted first.
+			for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
+				transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
+			}
 			if err = repo.InsertTransactions(transactionsToInsert); err != nil {
 				log.WithError(err).Error("failed to insert new transactions")
 				return err

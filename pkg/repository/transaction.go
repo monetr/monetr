@@ -22,7 +22,7 @@ func (r *repositoryBase) InsertTransactions(transactions []models.Transaction) e
 func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error) {
 	type Transaction struct {
 		tableName          string `pg:"transactions"`
-		plaidTransactionId string `pg:"plaid_transaction_id"`
+		PlaidTransactionId string `pg:"plaid_transaction_id"`
 		TransactionUpdateId
 	}
 	var items []Transaction
@@ -39,8 +39,25 @@ func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactio
 
 	result := map[string]TransactionUpdateId{}
 	for _, item := range items {
-		result[item.plaidTransactionId] = item.TransactionUpdateId
+		result[item.PlaidTransactionId] = item.TransactionUpdateId
 	}
 
 	return result, nil
+}
+
+func (r *repositoryBase) GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error) {
+	var items []models.Transaction
+	err := r.txn.Model(&items).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Limit(limit).
+		Offset(offset).
+		Order(`date DESC`).
+		Order(`transaction_id DESC`).
+		Select(&items)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve transactions")
+	}
+
+	return items, nil
 }

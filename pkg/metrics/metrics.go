@@ -130,12 +130,12 @@ func (s *Stats) JobFinished(name string, accountId uint64, start time.Time) {
 
 func (s *Stats) FinishedRequest(ctx *context.Context, responseTime time.Duration) {
 	s.HTTPRequests.With(prometheus.Labels{
-		"path":   ctx.Path(),
+		"path":   ctx.RouteName(),
 		"method": ctx.Method(),
 		"status": strconv.FormatInt(int64(ctx.GetStatusCode()), 10),
 	}).Inc()
 	s.HTTPResponseTime.With(prometheus.Labels{
-		"path":   ctx.Path(),
+		"path":   ctx.RouteName(),
 		"method": ctx.Method(),
 		"status": strconv.FormatInt(int64(ctx.GetStatusCode()), 10),
 	}).Observe(float64(responseTime.Milliseconds()))

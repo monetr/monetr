@@ -11,6 +11,7 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"math"
+	"time"
 )
 
 type JobManager interface {
@@ -80,7 +81,14 @@ func (j *jobManagerBase) TriggerPullInitialTransactions(accountId, userId, linkI
 }
 
 func (j *jobManagerBase) middleware(job *work.Job, next work.NextMiddlewareFunc) error {
+	start := time.Now()
 	j.log.WithField("jobId", job.ID).WithField("name", job.Name).Infof("starting job")
+	defer func() {
+		j.log.WithField("jobId", job.ID).WithField("name", job.Name).Infof("finished job")
+		if j.stats != nil {
+			j.stats.JobFinished(job.Name, uint64(job.ArgInt64("accountId")), start)
+		}
+	}()
 	return next()
 }
 
