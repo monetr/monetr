@@ -105,6 +105,15 @@ func (c *Controller) mustGetUserId(ctx *context.Context) uint64 {
 	return userId
 }
 
+func (c *Controller) mustGetAccountId(ctx *context.Context) uint64 {
+	accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0)
+	if accountId == 0 {
+		panic("unauthorized")
+	}
+
+	return accountId
+}
+
 func (c *Controller) getAuthenticatedRepository(ctx *context.Context) (repository.Repository, error) {
 	loginId := ctx.Values().GetUint64Default(loginIdContextKey, 0)
 	if loginId == 0 {

@@ -17,6 +17,8 @@ const (
 func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 	log := j.getLogForJob(job)
 
+	accountId := uint64(job.ArgInt64("accountId"))
+
 	linkId := uint64(job.ArgInt64("linkId"))
 	if linkId == 0 {
 		log.Error("cannot pull initial transactions without a link Id")
@@ -115,7 +117,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			return err
 		}
 
-		_, err = j.db.Exec(fmt.Sprintf(`NOTIFY job_%s, ?`, job.ID), "DONE")
+		_, err = j.db.Exec(fmt.Sprintf(`NOTIFY job_%d_%s, ?`, accountId, job.ID), "DONE")
 		if err != nil {
 			return err
 		}
