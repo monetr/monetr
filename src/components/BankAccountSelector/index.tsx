@@ -46,7 +46,7 @@ export class BankAccountSelector extends Component<PropTypes, {}> {
         <Select
           labelId="bank-account-selection-label"
           id="bank-account-selection-select"
-          value={ this.props.selectedBankAccountId || this.props.bankAccounts.first<BankAccount>().bankAccountId }
+          value={ this.props.selectedBankAccountId ?? this.props.bankAccounts.first<BankAccount>()?.bankAccountId }
           onChange={ this.changeBankAccount }
           label="Bank Account"
         >
