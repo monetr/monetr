@@ -42,6 +42,7 @@ func (h *hooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
 	var queryType string
 	switch query := event.Query.(type) {
 	case string:
+		query = strings.TrimSpace(query)
 		switch strings.ToUpper(query) {
 		case "BEGIN", "COMMIT", "ROLLBACK":
 			// Do nothing we don't want to count these.
