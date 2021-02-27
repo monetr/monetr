@@ -7,14 +7,14 @@ export interface TransactionFields {
   expenseId?: number;
   categories: string[];
   originalCategories: string[];
-  date: moment.Moment;
-  authorizedDate?: moment.Moment;
+  date: moment.Moment | string;
+  authorizedDate?: moment.Moment | string;
   name?: string;
   originalName: string;
   merchantName?: string;
   originalMerchantName?: string;
   isPending: boolean;
-  createdAt: moment.Moment;
+  createdAt: moment.Moment | string;
 }
 
 

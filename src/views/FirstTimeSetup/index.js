@@ -56,6 +56,8 @@ export class FirstTimeSetup extends Component {
       accountIds: new List(metadata.accounts).map(account => account.id).toArray()
     })
       .then(result => {
+        // TODO Add long polling of the jobId returned in the result to wait for transactions and bank info to be
+        //  retrieved from Plaid.
         return this.props.fetchLinks();
       })
       .catch(error => {
