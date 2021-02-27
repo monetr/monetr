@@ -26,10 +26,13 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         loading: false,
       };
     case FETCH_BANK_ACCOUNTS_SUCCESS:
+      // If no bank account is currently selected, and there are bank accounts in our response. Select the first one.
+      const selectedBankAccountId = state.selectedBankAccountId ?? action.payload.first(null)?.bankAccountId;
       return {
         ...state,
         loaded: true,
         loading: false,
+        selectedBankAccountId: selectedBankAccountId,
         items: state.items.merge(action.payload)
       }
     case LOGOUT:

@@ -23,8 +23,10 @@ export default class BankAccount implements BankAccountFields {
   type: string;
   subType: string;
 
-  constructor(data: BankAccountFields) {
-    Object.assign(this, data)
+  constructor(data?: BankAccountFields) {
+    if (data) {
+      Object.assign(this, data)
+    }
   }
 
   getAvailableBalanceString() {

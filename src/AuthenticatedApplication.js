@@ -11,6 +11,7 @@ import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
 import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
 import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
 import FirstTimeSetup from "views/FirstTimeSetup";
+import TransactionsView from "views/TransactionsView";
 
 export class AuthenticatedApplication extends Component {
   state = {
@@ -97,7 +98,7 @@ export class AuthenticatedApplication extends Component {
             <Redirect to="/"/>
           </Route>
           <Route path="/transactions">
-            <h1>Transactions</h1>
+            <TransactionsView/>
           </Route>
           <Route path="/expenses">
             <h1>Expenses</h1>
