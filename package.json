@@ -83,7 +83,7 @@
     "sass-loader": "10.1.1",
     "selector-action": "1.2.0",
     "semver": "7.3.4",
-    "socket.io-client": "^3.1.2",
+    "socket.io-client": "3.1.2",
     "style-loader": "2.0.0",
     "terser-webpack-plugin": "4.2.3",
     "ts-pnp": "1.2.0",
