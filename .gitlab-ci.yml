@@ -79,16 +79,16 @@ Tests:
     policy: pull-push
 
 Yeet Coverage:
+  environment:
+    name: DeepSource
   stage: Coverage
-  when: manual # Still working on getting this setup.
   image: ubuntu:20.04
   tags:
     - k8s:shared
     - arch:amd64
   script:
     - curl https://deepsource.io/cli | sh
-    - bash <(curl -s https://codecov.io/bash)
-    - ./bin/deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
+    - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN ./bin/deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
