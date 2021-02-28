@@ -6,6 +6,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
@@ -56,6 +57,8 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 
 	manager.work.Start()
 
+	manager.queue.Enqueue(EnqueuePullLatestTransactions, nil)
+
 	return manager
 }
 
@@ -82,11 +85,47 @@ func (j *jobManagerBase) TriggerPullInitialTransactions(accountId, userId, linkI
 
 func (j *jobManagerBase) middleware(job *work.Job, next work.NextMiddlewareFunc) error {
 	start := time.Now()
-	j.log.WithField("jobId", job.ID).WithField("name", job.Name).Infof("starting job")
+	log := j.log.WithFields(logrus.Fields{
+		"jobId": job.ID,
+		"name":  job.Name,
+	})
+	log.Infof("starting job")
+
+	jobData := models.Job{
+		JobId:      job.ID,
+		AccountId:  uint64(job.ArgInt64("accountId")),
+		Name:       job.Name,
+		Args:       job.Args,
+		EnqueuedAt: time.Unix(job.EnqueuedAt, 0),
+		StartedAt:  &start,
+		FinishedAt: nil,
+		Retries:    int(job.Fails),
+	}
+
+	if jobData.Retries == 0 {
+		log.Trace("inserting job record before running")
+		if _, err := j.db.Model(&jobData).Insert(&jobData); err != nil {
+			log.WithError(err).Warn("failed to insert job record before running")
+		}
+	} else {
+		log.Trace("updating job record before running")
+		if _, err := j.db.Model(&jobData).WherePK().Update(&jobData); err != nil {
+			log.WithError(err).Warn("failed to update job record before running")
+		}
+	}
+
 	defer func() {
-		j.log.WithField("jobId", job.ID).WithField("name", job.Name).Infof("finished job")
+		log.Infof("finished job")
 		if j.stats != nil {
 			j.stats.JobFinished(job.Name, uint64(job.ArgInt64("accountId")), start)
+		}
+
+		now := time.Now()
+		jobData.FinishedAt = &now
+
+		log.Trace("updating job record after running")
+		if _, err := j.db.Model(&jobData).WherePK().Update(&jobData); err != nil {
+			log.WithError(err).Warn("failed to update job record after running")
 		}
 	}()
 	return next()

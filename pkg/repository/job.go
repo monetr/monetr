@@ -53,3 +53,14 @@ func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedule
 
 	return items, nil
 }
+
+func (r *repositoryBase) GetJob(jobId string) (models.Job, error) {
+	var result models.Job
+	err := r.txn.Model(&result).
+		Where(`"job"."account_id" = ?`, r.AccountId()).
+		Where(`"job"."job_id" = ?`, jobId).
+		Limit(1).
+		Select(&result)
+
+	return result, errors.Wrap(err, "failed to retrieve job")
+}

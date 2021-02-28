@@ -18,6 +18,7 @@ type Repository interface {
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
 	GetIsSetup() (bool, error)
+	GetJob(jobId string) (models.Job, error)
 	GetLink(linkId uint64) (*models.Link, error)
 	GetLinks() ([]models.Link, error)
 	GetMe() (*models.User, error)

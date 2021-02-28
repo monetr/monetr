@@ -8,6 +8,7 @@ var (
 		&PhoneVerification{},
 		&Account{},
 		&User{},
+		&Job{},
 		&PlaidLink{},
 		&Link{},
 		&BankAccount{},
@@ -23,6 +24,7 @@ var (
 	_ = EmailVerification{}.tableName
 	_ = Expense{}.tableName
 	_ = FundingSchedule{}.tableName
+	_ = Job{}.tableName
 	_ = Link{}.tableName
 	_ = Login{}.tableName
 	_ = PhoneVerification{}.tableName

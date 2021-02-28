@@ -144,6 +144,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			c.handleBankAccounts(p)
 			c.handleTransactions(p)
 		})
+
+		p.PartyFunc("/jobs", c.handleJobs)
 	})
 
 }

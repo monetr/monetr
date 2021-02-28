@@ -170,8 +170,8 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 		}
 
 		ctx.JSON(map[string]interface{}{
-			"success":          true,
-			"transactionJobId": jobId,
+			"success": true,
+			"jobId":   jobId,
 		})
 	})
 }
