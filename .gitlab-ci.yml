@@ -95,7 +95,7 @@ Yeet Coverage:
       - ./coverage.txt
     policy: pull
 
-Kaniko:
+Kaniko - REST API:
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -105,13 +105,19 @@ Kaniko:
     - arch:amd64
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
-  cache:
-    key: ${CI_COMMIT_SHA}
-    paths:
-      - ./bin
-    policy: pull
 
-Publish GitHub:
+Kaniko - Work UI:
+  stage: Build Container
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  tags:
+    - k8s:shared
+    - arch:amd64
+  script:
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.work --no-push
+
+Publish GitHub - REST API:
   environment: GitHub
   stage: Publish Container
   only:
@@ -129,5 +135,27 @@ Publish GitHub:
   script:
     - |
       /kaniko/executor --context $CI_PROJECT_DIR \
+        --build-arg $CI_COMMIT_SHA \
         --dockerfile $CI_PROJECT_DIR/Dockerfile \
         --destination ghcr.io/harderthanitneedstobe/rest-api:latest
+
+Publish GitHub - Work UI:
+  environment: GitHub
+  stage: Publish Container
+  only:
+    refs:
+      - main
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [ "" ]
+  tags:
+    - k8s:shared
+    - arch:amd64
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"ghcr.io\":{\"username\":\"elliotcourant\",\"password\":\"$K8S_SECRET_GITHUB_ACCESS_TOKEN\"}}}" > /kaniko/.docker/config.json
+  script:
+    - |
+      /kaniko/executor --context $CI_PROJECT_DIR \
+        --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
+        --destination ghcr.io/harderthanitneedstobe/work-ui:latest
