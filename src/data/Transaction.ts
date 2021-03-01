@@ -47,4 +47,8 @@ export default class Transaction implements TransactionFields {
 
     return `$${ (this.amount / 100).toFixed(2) }`
   }
+
+  getIsAddition(): boolean {
+    return this.amount < 0;
+  }
 }

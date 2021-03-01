@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import Transaction from "data/Transaction";
 import { Avatar, Box, Grid, Typography } from "@material-ui/core";
 import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
+import classnames from 'classnames';
 
 import './styles/TransactionItem.scss';
 
@@ -35,12 +36,16 @@ export class TransactionItem extends Component<PropTypes, {}> {
               </Grid>
               <Grid item>
                 <Typography>
-                  Spent From Things
+                  Spent From Safe-To-Spend
                 </Typography>
               </Grid>
             </Grid>
             <Grid item>
-              <Typography>{ transaction.getAmountString() }</Typography>
+              <Typography className={ classnames('amount', {
+                'addition': transaction.getIsAddition(),
+              }) }>
+                { transaction.getAmountString() }
+              </Typography>
             </Grid>
           </Grid>
         </Grid>

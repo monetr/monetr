@@ -12,3 +12,15 @@
     }
   }
 }
+
+
+.transactions-item {
+
+  .amount {
+    color: red;
+
+    &.addition {
+      color: green;
+    }
+  }
+}
