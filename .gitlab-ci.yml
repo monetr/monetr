@@ -82,6 +82,7 @@ Yeet Coverage:
   environment:
     name: DeepSource
   stage: Coverage
+  when: manual
   image: ghcr.io/harderthanitneedstobe/deepsource
   tags:
     - k8s:shared
