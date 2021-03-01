@@ -62,7 +62,6 @@ export class SignUpView extends Component {
         if (result.data.token) {
           return bootstrapLogin(result.data.token, result.data.user)
             .then(() => {
-              debugger;
               this.props.history.push('/');
             });
         }

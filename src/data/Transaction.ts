@@ -1,20 +1,20 @@
 import moment from "moment";
 
 export interface TransactionFields {
-  transactionId: number;
-  bankAccountId: number;
-  amount: number;
+  transactionId?: number;
+  bankAccountId?: number;
+  amount?: number;
   expenseId?: number;
-  categories: string[];
-  originalCategories: string[];
-  date: moment.Moment | string;
+  categories?: string[];
+  originalCategories?: string[];
+  date?: moment.Moment | string;
   authorizedDate?: moment.Moment | string;
   name?: string;
-  originalName: string;
+  originalName?: string;
   merchantName?: string;
   originalMerchantName?: string;
-  isPending: boolean;
-  createdAt: moment.Moment | string;
+  isPending?: boolean;
+  createdAt?: moment.Moment | string;
 }
 
 
@@ -34,8 +34,10 @@ export default class Transaction implements TransactionFields {
   isPending: boolean;
   createdAt: moment.Moment;
 
-  constructor(data: TransactionFields) {
-    Object.assign(this, data);
+  constructor(data?: TransactionFields) {
+    if (data) {
+      Object.assign(this, data);
+    }
   }
 
   getAmountString(): string {

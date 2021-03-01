@@ -1,0 +1,14 @@
+.transactions-view {
+
+  .transactions-item {
+    &:after {
+      content: " ";
+      clear: both;
+      display: block;
+      height: 1px;
+      width: 100%;
+      position: relative;
+      background-color: lightgray;
+    }
+  }
+}
