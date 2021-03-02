@@ -17,6 +17,7 @@ type Repository interface {
 	CreatePlaidLink(link *models.PlaidLink) error
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
+	GetExpenses(bankAccountId uint64) ([]models.Expense, error)
 	GetIsSetup() (bool, error)
 	GetJob(jobId string) (models.Job, error)
 	GetLink(linkId uint64) (*models.Link, error)
@@ -100,15 +101,6 @@ func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
-}
-
-func (r *repositoryBase) GetExpenses(bankAccountId uint64) ([]models.Expense, error) {
-	var result []models.Expense
-	err := r.txn.Model(&result).
-		Where(`"expense"."account_id" = ?`, r.AccountId()).
-		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
-		Select(&result)
-	return result, errors.Wrap(err, "failed to retrieve expenses")
 }
 
 func (r *repositoryBase) GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error) {
