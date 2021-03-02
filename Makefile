@@ -1,5 +1,8 @@
 .PHONY: schema
 
+docs:
+	swag init -d ./pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
+
 test:
 	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
 	go tool cover -func=coverage.txt
