@@ -115,10 +115,10 @@ CREATE TABLE IF NOT EXISTS "links"
     "updated_at"              timestamptz NOT NULL,
     "updated_by_user_id"      bigint,
     PRIMARY KEY ("link_id", "account_id"),
+    FOREIGN KEY ("updated_by_user_id") REFERENCES "users" ("user_id") ON DELETE SET NULL,
     FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
     FOREIGN KEY ("plaid_link_id") REFERENCES "plaid_links" ("plaid_link_id") ON DELETE SET NULL,
-    FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id") ON DELETE CASCADE,
-    FOREIGN KEY ("updated_by_user_id") REFERENCES "users" ("user_id") ON DELETE SET NULL
+    FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "bank_accounts"
@@ -173,9 +173,9 @@ CREATE TABLE IF NOT EXISTS "expenses"
     "is_behind"                boolean   NOT NULL,
     PRIMARY KEY ("expense_id", "account_id", "bank_account_id"),
     UNIQUE ("bank_account_id", "name"),
-    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
     FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id") ON DELETE CASCADE,
-    FOREIGN KEY ("funding_schedule_id", "account_id", "bank_account_id") REFERENCES "funding_schedules" ("funding_schedule_id", "account_id", "bank_account_id") ON DELETE SET NULL
+    FOREIGN KEY ("funding_schedule_id", "account_id", "bank_account_id") REFERENCES "funding_schedules" ("funding_schedule_id", "account_id", "bank_account_id") ON DELETE SET NULL,
+    FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "transactions"
@@ -198,9 +198,9 @@ CREATE TABLE IF NOT EXISTS "transactions"
     "created_at"             timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("transaction_id", "account_id", "bank_account_id"),
     UNIQUE ("bank_account_id", "plaid_transaction_id"),
-    FOREIGN KEY ("expense_id", "account_id", "bank_account_id") REFERENCES "expenses" ("expense_id", "account_id", "bank_account_id") ON DELETE SET NULL,
     FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id") ON DELETE CASCADE,
-    FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id") ON DELETE CASCADE
+    FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id") ON DELETE CASCADE,
+    FOREIGN KEY ("expense_id", "account_id", "bank_account_id") REFERENCES "expenses" ("expense_id", "account_id", "bank_account_id") ON DELETE SET NULL
 );
 
 INSERT INTO "logins" ("login_id", "email", "password_hash", "phone_number", "is_enabled", "is_email_verified",

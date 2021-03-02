@@ -9,19 +9,7 @@ import (
 )
 
 func (c *Controller) handleBankAccounts(p iris.Party) {
-	p.Get("/", func(ctx *context.Context) {
-		repo := c.mustGetAuthenticatedRepository(ctx)
-
-		bankAccounts, err := repo.GetBankAccounts()
-		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve bank accounts")
-			return
-		}
-
-		ctx.JSON(map[string]interface{}{
-			"bankAccounts": bankAccounts,
-		})
-	})
+	p.Get("/", c.getBankAccounts)
 
 	// Create bank accounts manually.
 	p.Post("/", func(ctx *context.Context) {
@@ -72,4 +60,21 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 
 		ctx.JSON(bankAccount)
 	})
+}
+
+// List All Bank Accounts
+// @id list-all-bank-accounts
+// @description List's all of the bank accounts for the currently authenticated user.
+// @Router /bank_accounts [get]
+// @Success 200 {array} models.BankAccount
+func (c *Controller) getBankAccounts(ctx *context.Context) {
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	bankAccounts, err := repo.GetBankAccounts()
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve bank accounts")
+		return
+	}
+
+	ctx.JSON(bankAccounts)
 }

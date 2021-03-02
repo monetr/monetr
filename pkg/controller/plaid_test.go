@@ -19,7 +19,7 @@ func TestPostTokenCallback(t *testing.T) {
 		publicToken := mock_plaid.MockExchangePublicToken(t)
 		mock_plaid.MockGetAccounts(t, nil)
 
-		response := e.POST("/api/plaid/link/token/callback").
+		response := e.POST("/plaid/link/token/callback").
 			WithHeader("H-Token", token).
 			WithJSON(map[string]interface{}{
 				"publicToken":     publicToken,

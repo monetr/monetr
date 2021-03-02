@@ -71,6 +71,18 @@ func NewController(
 	}
 }
 
+// @title Harder Than It Needs To Be's REST API
+// @version 0.0
+// @description This is the REST API for our budgeting application.
+
+// @contact.name Support
+// @contact.url http://github.com/harderthanitneedstobe/rest-api
+// @contact.email no-reply@harderthanitneedstobe.com
+
+// @license.name Business Source License 1.1
+// @license.url https://github.com/HarderThanItNeedsToBe/rest-api/blob/main/LICENSE
+
+// @host api.harderthanitneedstobe.com
 func (c *Controller) RegisterRoutes(app *iris.Application) {
 	if c.stats != nil {
 		app.UseGlobal(func(ctx *context.Context) {
@@ -119,7 +131,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 	}
 
 	// For the following endpoints we want to have a repository available to us.
-	app.PartyFunc("/api", func(p router.Party) {
+	app.PartyFunc("/", func(p router.Party) {
 		p.Get("/config", c.configEndpoint)
 
 		p.Use(c.setupRepositoryMiddleware)

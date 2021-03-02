@@ -69,7 +69,7 @@ func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
 	registerRequest.FirstName = gofakeit.FirstName()
 	registerRequest.LastName = gofakeit.LastName()
 
-	response := e.POST(`/api/authentication/register`).
+	response := e.POST(`/authentication/register`).
 		WithJSON(registerRequest).
 		Expect()
 
