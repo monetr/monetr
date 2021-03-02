@@ -22,7 +22,7 @@ func TestPostLink(t *testing.T) {
 			UpdatedAt:             time.Now().Add(1 * time.Hour),
 		}
 
-		response := e.POST("/api/links").
+		response := e.POST("/links").
 			WithHeader("H-Token", token).
 			WithJSON(link).
 			Expect()
