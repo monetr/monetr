@@ -12,7 +12,7 @@ services:
       - "./schema:/docker-entrypoint-initdb.d"
     command: [ "postgres", "-c", "log_statement=all" ]
   redis:
-    image: library/redis:6.2.0-alpine
+    image: library/redis:6.2.1-alpine
     restart: always
     hostname: redis
     ports:
