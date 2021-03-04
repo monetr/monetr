@@ -7,7 +7,7 @@ stages:
 
 Fetch Dependencies:
   stage: Dependencies
-  image: node:15.10.0-buster
+  image: node:15.11.0-buster
   tags:
     - k8s:shared
   script:
@@ -20,7 +20,7 @@ Fetch Dependencies:
 
 Build:
   stage: Build Javascript
-  image: node:15.10.0-buster
+  image: node:15.11.0-buster
   tags:
     - k8s:shared
   script:
@@ -34,7 +34,7 @@ Build:
 
 Test:
   stage: Test Javascript
-  image: node:15.10.0-buster
+  image: node:15.11.0-buster
   tags:
     - k8s:shared
   script:
