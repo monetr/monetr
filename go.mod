@@ -9,7 +9,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.2.2
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/spec v0.20.3 // indirect
-	github.com/go-pg/pg/v10 v10.7.7
+	github.com/go-pg/pg/v10 v10.8.0
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.4
 	github.com/hashicorp/vault/api v1.0.4
@@ -33,7 +33,6 @@ require (
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	github.com/yudai/pp v2.0.1+incompatible // indirect
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
-	golang.org/x/sys v0.0.0-20210301091718-77cc2087c03b // indirect
 	golang.org/x/tools v0.1.0 // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
