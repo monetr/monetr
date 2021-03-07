@@ -21,7 +21,7 @@ export default function fetchLinks() {
         dispatch({
           type: FETCH_LINKS_SUCCESS,
           payload: Map<number, Link>().withMutations(map => {
-            (result.data.links || []).forEach((link: Link) =>
+            (result.data || []).forEach((link: Link) =>
               map.set(link.linkId, new Link(link))
             );
           }),

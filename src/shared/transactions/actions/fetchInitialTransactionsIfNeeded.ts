@@ -39,7 +39,7 @@ export default function fetchInitialTransactionsIfNeeded(): ActionWithState {
         dispatch({
           type: FETCH_TRANSACTIONS_SUCCESS,
           bankAccountId: selectedBankAccountId,
-          payload: result.data.transactions.map(item => new Transaction(item)),
+          payload: result.data.map(item => new Transaction(item)),
         });
       })
       .catch(error => {

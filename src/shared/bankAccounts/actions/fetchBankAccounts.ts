@@ -22,7 +22,7 @@ export default function fetchBankAccounts() {
         dispatch({
           type: FETCH_BANK_ACCOUNTS_SUCCESS,
           payload: Map<number, BankAccount>().withMutations(map => {
-            (result.data.bankAccounts || []).forEach((bankAccount: BankAccount) => {
+            (result.data || []).forEach((bankAccount: BankAccount) => {
               map.set(bankAccount.bankAccountId, new BankAccount(bankAccount));
             })
           }),
