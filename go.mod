@@ -25,7 +25,7 @@ require (
 	github.com/plaid/plaid-go v0.0.0-20210216195344-700b8cfc627d
 	github.com/prometheus/client_golang v1.9.0
 	github.com/robfig/cron v1.2.0 // indirect
-	github.com/sirupsen/logrus v1.8.0
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	github.com/swaggo/swag v1.7.0
