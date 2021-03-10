@@ -2,6 +2,7 @@ stages:
   - Dependencies
   - Build Javascript
   - Test Javascript
+  - Coverage
   - Build Container
   - Publish Container
 
@@ -43,6 +44,28 @@ Test:
     key: ${CI_COMMIT_SHA}
     paths:
       - ./node_modules
+    policy: pull
+
+Yeet Coverage:
+  environment:
+    name: DeepSource
+  stage: Coverage
+  when: manual
+  image: ubuntu:20.04
+  tags:
+    - k8s:shared
+  variables:
+    DEBIAN_FRONTEND: noninteractive
+  before_script:
+    - apt-get update
+    - apt-get install curl git-all -y
+    - curl https://deepsource.io/cli | sh
+  script:
+    - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN ./bin/deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./coverage.txt
     policy: pull
 
 Kaniko:
