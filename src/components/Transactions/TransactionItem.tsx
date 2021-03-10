@@ -9,10 +9,13 @@ import './styles/TransactionItem.scss';
 
 interface PropTypes {
   transactionId: number;
+}
+
+interface WithConnectionPropTypes extends PropTypes {
   transaction: Transaction;
 }
 
-export class TransactionItem extends Component<PropTypes, {}> {
+class TransactionItem extends Component<WithConnectionPropTypes, {}> {
 
   render() {
     const { transaction } = this.props;
