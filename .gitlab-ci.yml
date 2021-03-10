@@ -86,6 +86,7 @@ Yeet Coverage:
   tags:
     - k8s:shared
   before_script:
+    - apt update
     - apt install curl
     - curl https://deepsource.io/cli | sh
   script:
