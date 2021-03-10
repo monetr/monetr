@@ -85,6 +85,9 @@ Yeet Coverage:
   image: ubuntu:20.04
   tags:
     - k8s:shared
+  before_script:
+    - apt install curl
+    - curl https://deepsource.io/cli | sh
   script:
     - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
   cache:
