@@ -82,8 +82,7 @@ Yeet Coverage:
   environment:
     name: DeepSource
   stage: Coverage
-  when: manual
-  image: ghcr.io/harderthanitneedstobe/deepsource
+  image: ubuntu:20.04
   tags:
     - k8s:shared
   script:
