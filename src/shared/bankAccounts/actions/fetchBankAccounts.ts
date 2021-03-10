@@ -17,7 +17,7 @@ export const fetchBankAccountsFailure = {
 
 export default function fetchBankAccounts() {
   return dispatch => {
-    return request().get('/api/bank_accounts')
+    return request().get('/bank_accounts')
       .then(result => {
         dispatch({
           type: FETCH_BANK_ACCOUNTS_SUCCESS,

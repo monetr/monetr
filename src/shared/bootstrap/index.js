@@ -31,7 +31,7 @@ export default function bootstrapApplication() {
         window.API = axios.create({
           baseURL: uiConfig.data.apiUrl,
         });
-        return request().get('/api/config')
+        return request().get('/config')
           .then(apiConfig => {
             dispatch(bootstrapFinished({
               ...apiConfig.data,

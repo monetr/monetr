@@ -16,7 +16,7 @@ export const fetchLinksFailure = {
 export default function fetchLinks() {
   return dispatch => {
     dispatch(fetchLinksRequest);
-    return request().get('/api/links')
+    return request().get('/links')
       .then(result => {
         dispatch({
           type: FETCH_LINKS_SUCCESS,

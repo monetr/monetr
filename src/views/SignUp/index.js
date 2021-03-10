@@ -51,7 +51,7 @@ export class SignUpView extends Component {
     });
     const { verification } = this.state;
     const { bootstrapLogin } = this.props;
-    return request().post('/api/authentication/register', {
+    return request().post('/authentication/register', {
       email: values.email,
       password: values.password,
       firstName: values.firstName,

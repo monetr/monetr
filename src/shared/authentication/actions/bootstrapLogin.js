@@ -37,7 +37,7 @@ export default function bootstrapLogin(token = null, user = null) {
     if (!user) {
       // If we do have the token but we don't have the user info then we need to retrieve it using an API call to get
       // our user data from the API.
-      return request().get('/api/users/me')
+      return request().get('/users/me')
         .then(result => {
           dispatch({
             type: BOOTSTRAP_LOGIN,

@@ -1,6 +1,6 @@
 import { InputLabel, MenuItem, Select } from "@material-ui/core";
-import React, { Component, Fragment } from 'react';
-import { connect } from "react-redux";
+import React, { ChangeEvent, Component, Fragment } from 'react';
+import { connect } from 'react-redux';
 import setSelectedBankAccountId from 'shared/bankAccounts/actions/setSelectedBankAccountId';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import BankAccount from 'data/BankAccount';
@@ -26,9 +26,14 @@ interface PropTypes {
   };
 }
 
+interface SelectEvent {
+  name: string;
+  value: number;
+};
+
 export class BankAccountSelector extends Component<PropTypes, {}> {
 
-  changeBankAccount = (event) => {
+  changeBankAccount = (event: ChangeEvent<SelectEvent>) => {
     this.props.setSelectedBankAccountId(event.target.value as number);
     this.props.fetchInitialTransactionsIfNeeded();
   };
