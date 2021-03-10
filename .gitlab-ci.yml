@@ -85,6 +85,8 @@ Yeet Coverage:
   image: ubuntu:20.04
   tags:
     - k8s:shared
+  variables:
+    DEBIAN_FRONTEND: noninteractive
   before_script:
     - apt-get update
     - apt-get install curl git-all -y
