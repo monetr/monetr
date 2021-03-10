@@ -86,8 +86,8 @@ Yeet Coverage:
   tags:
     - k8s:shared
   before_script:
-    - apt update
-    - apt install curl git-all -y
+    - apt-get update
+    - apt-get install curl git-all -y
     - curl https://deepsource.io/cli | sh
   script:
     - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN ./bin/deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
