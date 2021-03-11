@@ -1,4 +1,4 @@
-FROM nginx:1.19.7
+FROM nginx:1.19.8
 LABEL org.opencontainers.image.source=https://github.com/harderthanitneedstobe/web-ui
 EXPOSE 80
 COPY ./build /usr/share/nginx/html
