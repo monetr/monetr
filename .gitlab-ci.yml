@@ -109,6 +109,8 @@ Yeet Coverage:
     policy: pull
 
 Kaniko - REST API:
+  needs:
+    - "Go Dependencies"
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -120,6 +122,8 @@ Kaniko - REST API:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
 
 Kaniko - Work UI:
+  needs:
+    - "Go Dependencies"
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -131,6 +135,9 @@ Kaniko - Work UI:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.work --no-push
 
 Publish GitHub - REST API:
+  needs:
+    - "Kaniko - REST API"
+    - "Tests"
   environment: GitHub
   stage: Publish Container
   only:
@@ -153,6 +160,8 @@ Publish GitHub - REST API:
         --destination ghcr.io/harderthanitneedstobe/rest-api:latest
 
 Publish GitHub - Work UI:
+  needs:
+    - "Kaniko - Work UI"
   environment: GitHub
   stage: Publish Container
   only:
