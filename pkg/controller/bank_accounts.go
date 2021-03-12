@@ -12,54 +12,7 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 	p.Get("/", c.getBankAccounts)
 
 	// Create bank accounts manually.
-	p.Post("/", func(ctx *context.Context) {
-		var bankAccount models.BankAccount
-		if err := ctx.ReadJSON(&bankAccount); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-			return
-		}
-
-		// TODO (elliotcourant) Also verify that the link is a manual link.
-		if bankAccount.LinkId == 0 {
-			c.returnError(ctx, http.StatusBadRequest, "link Id must be provided")
-			return
-		}
-
-		bankAccount.BankAccountId = 0
-		bankAccount.Name = strings.TrimSpace(bankAccount.Name)
-		bankAccount.Mask = strings.TrimSpace(bankAccount.Mask)
-
-		// TODO (elliotcourant) Add proper bank account types that the user can specify. Make them required.
-		bankAccount.Type = strings.TrimSpace(bankAccount.Type)
-		bankAccount.SubType = strings.TrimSpace(bankAccount.SubType)
-
-		if bankAccount.Name == "" {
-			c.returnError(ctx, http.StatusBadRequest, "bank account must have a name")
-			return
-		}
-
-		repo := c.mustGetAuthenticatedRepository(ctx)
-
-		// Bank accounts can only be created this way when they are associated with a link that allows manual
-		// management. If the link they specified does not, then a bank account cannot be created for this link.
-		link, err := repo.GetLink(bankAccount.LinkId)
-		if err != nil {
-			c.wrapPgError(ctx, err, "link does not exist")
-			return
-		}
-
-		if link.LinkType != models.ManualLinkType {
-			c.returnError(ctx, http.StatusBadRequest, "cannot create a bank account for a non-manual link")
-			return
-		}
-
-		if err := repo.CreateBankAccounts(bankAccount); err != nil {
-			c.wrapPgError(ctx, err, "could not create bank account")
-			return
-		}
-
-		ctx.JSON(bankAccount)
-	})
+	p.Post("/", c.postBankAccounts)
 }
 
 // List All Bank Accounts
@@ -77,4 +30,58 @@ func (c *Controller) getBankAccounts(ctx *context.Context) {
 	}
 
 	ctx.JSON(bankAccounts)
+}
+
+// Create Bank Account
+// @id create-bank-account
+// @description Create a bank account for the provided link.
+// @Router /bank_accounts [post]
+// @Success 200 {object} models.BankAccount
+func (c *Controller) postBankAccounts(ctx *context.Context) {
+	var bankAccount models.BankAccount
+	if err := ctx.ReadJSON(&bankAccount); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	// TODO (elliotcourant) Also verify that the link is a manual link.
+	if bankAccount.LinkId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "link Id must be provided")
+		return
+	}
+
+	bankAccount.BankAccountId = 0
+	bankAccount.Name = strings.TrimSpace(bankAccount.Name)
+	bankAccount.Mask = strings.TrimSpace(bankAccount.Mask)
+
+	// TODO (elliotcourant) Add proper bank account types that the user can specify. Make them required.
+	bankAccount.Type = strings.TrimSpace(bankAccount.Type)
+	bankAccount.SubType = strings.TrimSpace(bankAccount.SubType)
+
+	if bankAccount.Name == "" {
+		c.returnError(ctx, http.StatusBadRequest, "bank account must have a name")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	// Bank accounts can only be created this way when they are associated with a link that allows manual
+	// management. If the link they specified does not, then a bank account cannot be created for this link.
+	link, err := repo.GetLink(bankAccount.LinkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "link does not exist")
+		return
+	}
+
+	if link.LinkType != models.ManualLinkType {
+		c.returnError(ctx, http.StatusBadRequest, "cannot create a bank account for a non-manual link")
+		return
+	}
+
+	if err := repo.CreateBankAccounts(bankAccount); err != nil {
+		c.wrapPgError(ctx, err, "could not create bank account")
+		return
+	}
+
+	ctx.JSON(bankAccount)
 }
