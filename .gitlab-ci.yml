@@ -2,6 +2,7 @@ stages:
   - Dependencies
   - Build Binary
   - Test
+  - Documentation
   - Coverage
   - Build Container
   - Publish Container
