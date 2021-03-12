@@ -108,6 +108,24 @@ Yeet Coverage:
       - ./coverage.txt
     policy: pull
 
+Documentation:
+  allow_failure: true
+  needs:
+    - "Go Dependencies"
+  stage: Documentation
+  image: golang:1.16.2
+  tags:
+    - k8s:shared
+    - arch:amd64
+  script:
+    - make docs
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./docs
+      - ./vendor
+    policy: pull-push
+
 Kaniko - REST API:
   needs:
     - "Go Dependencies"
@@ -122,6 +140,7 @@ Kaniko - REST API:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
 
 Kaniko - Work UI:
+  allow_failure: true
   needs:
     - "Go Dependencies"
   stage: Build Container
