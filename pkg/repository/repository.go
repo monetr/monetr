@@ -13,14 +13,18 @@ type Repository interface {
 	UserId() uint64
 
 	CreateBankAccounts(bankAccounts ...models.BankAccount) error
+	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
 	GetExpenses(bankAccountId uint64) ([]models.Expense, error)
+	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
 	GetIsSetup() (bool, error)
 	GetJob(jobId string) (models.Job, error)
 	GetLink(linkId uint64) (*models.Link, error)
+	GetLinkIsManual(linkId uint64) (bool, error)
+	GetLinkIsManualByBankAccountId(bankAccountId uint64) (bool, error)
 	GetLinks() ([]models.Link, error)
 	GetMe() (*models.User, error)
 	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
@@ -103,11 +107,3 @@ func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
 }
 
-func (r *repositoryBase) GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error) {
-	var result []models.FundingSchedule
-	err := r.txn.Model(&result).
-		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
-		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
-		Select(&result)
-	return result, errors.Wrap(err, "failed to retrieve funding schedules")
-}

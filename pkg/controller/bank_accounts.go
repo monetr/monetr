@@ -18,6 +18,7 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 // List All Bank Accounts
 // @id list-all-bank-accounts
 // @description List's all of the bank accounts for the currently authenticated user.
+// @Security ApiKeyAuth
 // @Router /bank_accounts [get]
 // @Success 200 {array} models.BankAccount
 func (c *Controller) getBankAccounts(ctx *context.Context) {
@@ -35,6 +36,7 @@ func (c *Controller) getBankAccounts(ctx *context.Context) {
 // Create Bank Account
 // @id create-bank-account
 // @description Create a bank account for the provided link.
+// @Security ApiKeyAuth
 // @Router /bank_accounts [post]
 // @Success 200 {object} models.BankAccount
 func (c *Controller) postBankAccounts(ctx *context.Context) {
@@ -44,7 +46,6 @@ func (c *Controller) postBankAccounts(ctx *context.Context) {
 		return
 	}
 
-	// TODO (elliotcourant) Also verify that the link is a manual link.
 	if bankAccount.LinkId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "link Id must be provided")
 		return
@@ -67,13 +68,13 @@ func (c *Controller) postBankAccounts(ctx *context.Context) {
 
 	// Bank accounts can only be created this way when they are associated with a link that allows manual
 	// management. If the link they specified does not, then a bank account cannot be created for this link.
-	link, err := repo.GetLink(bankAccount.LinkId)
+	isManual, err := repo.GetLinkIsManual(bankAccount.LinkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "link does not exist")
+		c.wrapPgError(ctx, err, "could not validate link is manual")
 		return
 	}
 
-	if link.LinkType != models.ManualLinkType {
+	if !isManual {
 		c.returnError(ctx, http.StatusBadRequest, "cannot create a bank account for a non-manual link")
 		return
 	}

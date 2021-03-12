@@ -83,6 +83,10 @@ func NewController(
 // @license.url https://github.com/HarderThanItNeedsToBe/rest-api/blob/main/LICENSE
 
 // @host api.harderthanitneedstobe.com
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name H-Token
 func (c *Controller) RegisterRoutes(app *iris.Application) {
 	if c.stats != nil {
 		app.UseGlobal(func(ctx *context.Context) {

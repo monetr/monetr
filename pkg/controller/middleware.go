@@ -46,9 +46,6 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 	ctx.Next()
 }
 
-// @securityDefinitions.apikey Token
-// @securityDefinitions.apikey.in H-Token
-// @description The API requires an H-Token header for all authenticated API calls.
 func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	token := ctx.GetHeader(TokenName)
 	if token == "" {

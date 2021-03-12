@@ -10,7 +10,8 @@ variables:
   GO111MODULE: 'on'
   GOFLAGS: '-mod=vendor'
 
-Fetch Dependencies:
+Go Dependencies:
+  needs: []
   stage: Dependencies
   image: golang:1.16.2
   tags:
@@ -25,6 +26,8 @@ Fetch Dependencies:
     policy: push
 
 Build:
+  needs:
+    - "Go Dependencies"
   stage: Build Binary
   image: golang:1.16.2
   tags:
@@ -40,6 +43,8 @@ Build:
     policy: pull-push
 
 Schema Generation:
+  needs:
+    - "Go Dependencies"
   stage: Test
   image: golang:1.16.2
   tags:
@@ -54,6 +59,8 @@ Schema Generation:
     policy: pull
 
 Tests:
+  needs:
+    - "Go Dependencies"
   services:
     - postgres:13
   variables:
@@ -79,6 +86,8 @@ Tests:
     policy: pull-push
 
 Yeet Coverage:
+  needs:
+    - "Tests"
   environment:
     name: DeepSource
   stage: Coverage
@@ -100,6 +109,7 @@ Yeet Coverage:
     policy: pull
 
 Kaniko - REST API:
+  needs: []
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -111,6 +121,7 @@ Kaniko - REST API:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
 
 Kaniko - Work UI:
+  needs: []
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -122,6 +133,7 @@ Kaniko - Work UI:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.work --no-push
 
 Publish GitHub - REST API:
+  needs: []
   environment: GitHub
   stage: Publish Container
   only:
@@ -144,6 +156,7 @@ Publish GitHub - REST API:
         --destination ghcr.io/harderthanitneedstobe/rest-api:latest
 
 Publish GitHub - Work UI:
+  needs: []
   environment: GitHub
   stage: Publish Container
   only:

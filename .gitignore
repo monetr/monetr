@@ -3,3 +3,4 @@ config.yaml
 telepresence.log
 telepresence
 coverage.txt
+docs

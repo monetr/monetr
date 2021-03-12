@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 
 	"github.com/go-pg/pg/v10/types"
@@ -24,7 +25,7 @@ type Rule struct {
 func (r *Rule) UnmarshalJSON(input []byte) error {
 	rule, err := rrule.StrToRRule(strings.Trim(string(input), `"`))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to parse rule")
 	}
 
 	moment, _ := goment.New()

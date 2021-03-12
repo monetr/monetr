@@ -1,11 +1,17 @@
 package controller
 
 import (
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"net/http"
+	"strings"
+	"time"
 )
 
+// @tag.name Funding Schedules
+// @tag.description Funding Schedules are created by the user to tell us when money should be taken from their account
+//  to fund their goals and expenses.
 func (c *Controller) handleFundingSchedules(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/funding_schedules", c.getFundingSchedules)
 	p.Post("/{bankAccountId:uint64}/funding_schedules", c.postFundingSchedules)
@@ -13,11 +19,17 @@ func (c *Controller) handleFundingSchedules(p iris.Party) {
 	p.Delete("/{bankAccountId:uint64}/funding_schedules/{fundingScheduleId:uint64}", c.deleteFundingSchedules)
 }
 
+
 // List Funding Schedules
 // @id list-funding-schedules
+// @tags Funding Schedules
 // @description List all of the funding schedule's for the current bank account.
+// @Security ApiKeyAuth
+// @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/funding_schedules [get]
 // @Success 200 {array} models.FundingSchedule
+// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getFundingSchedules(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
@@ -25,8 +37,31 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 		return
 	}
 
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	fundingSchedules, err := repo.GetFundingSchedules(bankAccountId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
+		return
+	}
+
+	ctx.JSON(fundingSchedules)
 }
 
+// Create Funding Schedule
+// @id create-funding-schedule
+// @tags Funding Schedules
+// @summary Create a funding schedule for the specified bank account.
+// @security ApiKeyAuth
+// @accept json
+// @product json
+// @Param bankAccountId path int true "Bank Account ID"
+// @Param fundingSchedule body models.FundingSchedule true "New Funding Schedule"
+// @Router /bank_accounts/{bankAccountId}/funding_schedules [post]
+// @Success 200 {object} models.FundingSchedule
+// @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
+// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
+// @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postFundingSchedules(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
@@ -34,6 +69,34 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 		return
 	}
 
+	var fundingSchedule models.FundingSchedule
+	if err := ctx.ReadJSON(&fundingSchedule); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	fundingSchedule.FundingScheduleId = 0 // Make sure we create a new funding schedule.
+	fundingSchedule.Name = strings.TrimSpace(fundingSchedule.Name)
+	fundingSchedule.Description = strings.TrimSpace(fundingSchedule.Description)
+
+	if fundingSchedule.Name == "" {
+		c.returnError(ctx, http.StatusBadRequest, "bank account must have a name")
+		return
+	}
+
+	// Set the next occurrence based on the provided rule.
+	fundingSchedule.NextOccurrence = fundingSchedule.Rule.After(time.Now(), false)
+	// It has never occurred so this needs to be nil.
+	fundingSchedule.LastOccurrence = nil
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	if err := repo.CreateFundingSchedule(&fundingSchedule); err != nil {
+		c.wrapPgError(ctx, err, "failed to create funding schedule")
+		return
+	}
+
+	ctx.JSON(fundingSchedule)
 }
 
 func (c *Controller) putFundingSchedules(ctx *context.Context) {

@@ -1,6 +1,9 @@
 .PHONY: schema
 
-docs:
+docs-dependencies:
+	which swag || (go get github.com/swaggo/swag/cmd/swag && go build github.com/swaggo/swag/cmd/swag /usr/local/bin/swag)
+
+docs: docs-dependencies
 	swag init -d ./pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
 
 test:
