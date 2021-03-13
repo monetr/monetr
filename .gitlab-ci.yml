@@ -21,7 +21,7 @@ Go Dependencies:
   script:
     - go mod vendor
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: go-${CI_COMMIT_SHA}
     paths:
       - ./vendor
     policy: push
@@ -36,7 +36,7 @@ JS Dependencies:
   script:
     - yarn install --no-lockfile # Will use my npm proxy/registry allowing for faster pulling of dependencies.
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: js-${CI_COMMIT_SHA}
     paths:
       - ./node_modules
     policy: push
@@ -52,7 +52,7 @@ Build:
   script:
     - go build -o ./bin/rest-api-${GOARCH} github.com/harderthanitneedstobe/rest-api/v0/cmd/api
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: go-${CI_COMMIT_SHA}
     paths:
       - ./bin
       - ./vendor
@@ -69,7 +69,7 @@ Schema Generation:
     - make schema
     - make special-tests
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: go-${CI_COMMIT_SHA}
     paths:
       - ./vendor
     policy: pull
@@ -95,11 +95,15 @@ Tests:
   script:
     - make test
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: go-${CI_COMMIT_SHA}
     paths:
       - ./vendor
+    policy: pull
+  artifacts:
+    name: "$CI_COMMIT_SHA-test-coverage"
+    paths:
       - ./coverage.txt
-    policy: pull-push
+    expires_in: 7 days
 
 Yeet Coverage:
   needs:
@@ -118,11 +122,8 @@ Yeet Coverage:
     - curl https://deepsource.io/cli | sh
   script:
     - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN ./bin/deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
-  cache:
-    key: ${CI_COMMIT_SHA}
-    paths:
-      - ./coverage.txt
-    policy: pull
+  dependencies:
+    - "Tests"
 
 Documentation:
   allow_failure: true
@@ -136,11 +137,15 @@ Documentation:
   script:
     - make docs
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: go-${CI_COMMIT_SHA}
+    paths:
+      - ./vendor
+    policy: pull
+  artifacts:
+    name: "$CI_COMMIT_SHA-documentation"
     paths:
       - ./docs
-      - ./vendor
-    policy: pull-push
+    expires_in: 7 days
 
 Kaniko - REST API:
   needs:
