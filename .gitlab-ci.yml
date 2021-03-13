@@ -103,7 +103,7 @@ Tests:
     name: "$CI_COMMIT_SHA-test-coverage"
     paths:
       - ./coverage.txt
-    expires_in: 7 days
+    expire_in: 7 days
 
 Yeet Coverage:
   needs:
@@ -145,7 +145,7 @@ Documentation:
     name: "$CI_COMMIT_SHA-documentation"
     paths:
       - ./docs
-    expires_in: 7 days
+    expire_in: 7 days
 
 Kaniko - REST API:
   needs:
