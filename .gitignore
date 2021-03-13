@@ -4,3 +4,4 @@ telepresence.log
 telepresence
 coverage.txt
 docs
+node_modules
