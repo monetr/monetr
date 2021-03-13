@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/schemagen"
 	"math"
 
 	"github.com/go-pg/pg/v10"
@@ -73,13 +74,13 @@ func main() {
 			}
 		}
 
-		query := orm.NewCreateTableQuery(db.Model(model), &orm.CreateTableOptions{
+		query := schemagen.NewCreateTableQuery(model, orm.CreateTableOptions{
 			Varchar:       0,
 			Temp:          false,
 			IfNotExists:   true,
 			FKConstraints: true,
 		})
-		printMaybe(query.String() + ";\n")
+		printMaybe(query.String() + "\n")
 		if !*dryRun {
 			if _, err := db.Exec(query); err != nil {
 				panic(err)
