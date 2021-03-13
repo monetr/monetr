@@ -13,6 +13,7 @@ type Repository interface {
 	UserId() uint64
 
 	CreateBankAccounts(bankAccounts ...models.BankAccount) error
+	CreateExpense(expense *models.Expense) error
 	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error

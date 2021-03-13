@@ -19,7 +19,6 @@ func (c *Controller) handleFundingSchedules(p iris.Party) {
 	p.Delete("/{bankAccountId:uint64}/funding_schedules/{fundingScheduleId:uint64}", c.deleteFundingSchedules)
 }
 
-
 // List Funding Schedules
 // @id list-funding-schedules
 // @tags Funding Schedules
@@ -80,7 +79,7 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 	fundingSchedule.Description = strings.TrimSpace(fundingSchedule.Description)
 
 	if fundingSchedule.Name == "" {
-		c.returnError(ctx, http.StatusBadRequest, "bank account must have a name")
+		c.returnError(ctx, http.StatusBadRequest, "funding schedule must have a name")
 		return
 	}
 
