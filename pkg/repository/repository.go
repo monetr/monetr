@@ -17,10 +17,12 @@ type Repository interface {
 	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
+	GetAccount() (*models.Account, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
 	GetExpenses(bankAccountId uint64) ([]models.Expense, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
+	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetIsSetup() (bool, error)
 	GetJob(jobId string) (models.Job, error)
 	GetLink(linkId uint64) (*models.Link, error)

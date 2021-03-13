@@ -72,8 +72,8 @@ func (c *Controller) postExpenses(ctx *context.Context) {
 		return
 	}
 
-	var expense models.Expense
-	if err := ctx.ReadJSON(&expense); err != nil {
+	expense := &models.Expense{}
+	if err := ctx.ReadJSON(expense); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
@@ -91,12 +91,35 @@ func (c *Controller) postExpenses(ctx *context.Context) {
 	expense.LastRecurrence = nil
 	expense.NextRecurrence = expense.RecurrenceRule.After(time.Now(), false)
 
-	if expense.FundingScheduleId != nil && *expense.FundingScheduleId > 0 {
-		// Calculate the next contribution.
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	// We need to calculate what the next contribution will be for this new expense. So we need to retrieve it's funding
+	// schedule. This also helps us validate that the user has provided a valid funding schedule id.
+	fundingSchedule, err := repo.GetFundingSchedule(bankAccountId, expense.FundingScheduleId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not find funding schedule specified")
+		return
 	}
 
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	if err := repo.CreateExpense(&expense); err != nil {
+	// We also need to know the current account's timezone, as contributions are made at midnight in that user's
+	// timezone.
+	account, err := repo.GetAccount()
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve account details")
+		return
+	}
+
+	// Once we have all that data we can calculate the new expenses next contribution amount.
+	if err = expense.CalculateNextContribution(
+		account.Timezone,
+		fundingSchedule.NextOccurrence,
+		fundingSchedule.Rule,
+	); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new expense")
+		return
+	}
+
+	if err = repo.CreateExpense(expense); err != nil {
 		c.wrapPgError(ctx, err, "failed to create expense")
 		return
 	}
