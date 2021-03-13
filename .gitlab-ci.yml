@@ -6,7 +6,8 @@ stages:
   - Build Container
   - Publish Container
 
-Fetch Dependencies:
+JS Dependencies:
+  needs: []
   stage: Dependencies
   image: node:15.11.0-buster
   tags:
@@ -20,6 +21,8 @@ Fetch Dependencies:
     policy: push
 
 Build:
+  needs:
+    - "JS Dependencies"
   stage: Build Javascript
   image: node:15.11.0-buster
   tags:
@@ -34,6 +37,8 @@ Build:
     policy: pull-push
 
 Test:
+  needs:
+    - "JS Dependencies"
   stage: Test Javascript
   image: node:15.11.0-buster
   tags:
@@ -47,6 +52,8 @@ Test:
     policy: pull
 
 Yeet Coverage:
+  needs:
+    - "Test"
   environment:
     name: DeepSource
   stage: Coverage
@@ -69,6 +76,8 @@ Yeet Coverage:
     policy: pull
 
 Kaniko:
+  needs:
+    - "JS Dependencies"
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
@@ -84,6 +93,9 @@ Kaniko:
     policy: pull
 
 Publish GitHub:
+  needs:
+    - "Test"
+    - "Kaniko"
   environment:
     name: GitHub
   stage: Publish Container
