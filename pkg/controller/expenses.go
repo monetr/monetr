@@ -91,7 +91,9 @@ func (c *Controller) postExpenses(ctx *context.Context) {
 	expense.LastRecurrence = nil
 	expense.NextRecurrence = expense.RecurrenceRule.After(time.Now(), false)
 
-	// TODO Add next contribution calculation here.
+	if expense.FundingScheduleId != nil && *expense.FundingScheduleId > 0 {
+		// Calculate the next contribution.
+	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	if err := repo.CreateExpense(&expense); err != nil {

@@ -34,7 +34,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 	if ctx.GetErr() != nil {
 		if err := txn.RollbackContext(ctx.Request().Context()); err != nil {
 			// Rollback
-			fmt.Println(err)
+			c.log.WithError(err).Errorf("failed to rollback request")
 		}
 	} else {
 		if err = txn.CommitContext(ctx.Request().Context()); err != nil {
