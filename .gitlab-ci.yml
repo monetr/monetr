@@ -26,6 +26,21 @@ Go Dependencies:
       - ./vendor
     policy: push
 
+JS Dependencies:
+  needs: []
+  stage: Dependencies
+  image: node:15.11.0-buster
+  tags:
+    - k8s:shared
+    - arch:amd64
+  script:
+    - yarn install --no-lockfile # Will use my npm proxy/registry allowing for faster pulling of dependencies.
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./node_modules
+    policy: push
+
 Build:
   needs:
     - "Go Dependencies"

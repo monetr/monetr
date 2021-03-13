@@ -1,5 +1,15 @@
 {
+  "type": "module",
   "dependencies": {
-    "sql-formatter": "^4.0.2"
+    "sql-formatter": "^4.0.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3",
+    "yargs": "^16.2.0"
+  },
+  "scripts": {
+    "formatter": "node tssrc/formatter/format.js"
+  },
+  "devDependencies": {
+    "@types/yargs": "^16.0.0"
   }
 }
