@@ -1,10 +1,11 @@
 .PHONY: schema
 
 docs-dependencies:
-	which swag || (go get github.com/swaggo/swag/cmd/swag && go build github.com/swaggo/swag/cmd/swag /usr/local/bin/swag)
+	mkdir -p ./bin
+	stat ./bin/swag || (go get github.com/swaggo/swag/cmd/swag && go build -o ./bin/swag github.com/swaggo/swag/cmd/swag)
 
 docs: docs-dependencies
-	swag init -d ./pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
+	./bin/swag init -d ./pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
 
 test:
 	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
