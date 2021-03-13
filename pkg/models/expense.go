@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/nleeper/goment"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -88,9 +87,9 @@ func (e *Expense) CalculateNextContribution(
 	if nextContributionDate.Before(nextDueDate) {
 		numberOfContributions++
 	}
-	moment, _ := goment.New(midnightInLocal(time.Now(), timezone))
-	now := moment.StartOf("day").ToTime()
-	nextContributionRule.DTStart(now)
+
+	midnightToday := midnightInLocal(time.Now(), timezone)
+	nextContributionRule.DTStart(midnightToday)
 	contributionDateX := nextContributionDate
 	for {
 		contributionDateX = nextContributionRule.After(contributionDateX, false)
