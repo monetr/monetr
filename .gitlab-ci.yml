@@ -77,7 +77,7 @@ Yeet Coverage:
 
 Kaniko:
   needs:
-    - "JS Dependencies"
+    - "Build"
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
