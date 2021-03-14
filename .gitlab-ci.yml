@@ -111,17 +111,12 @@ Yeet Coverage:
   environment:
     name: DeepSource
   stage: Coverage
-  image: ubuntu:20.04
+  image: ghcr.io/harderthanitneedstobe/deepsource:v0.1.7-9-gff81369
   tags:
     - k8s:shared
-  variables:
-    DEBIAN_FRONTEND: noninteractive
-  before_script:
-    - apt-get update
-    - apt-get install curl git-all -y
-    - curl https://deepsource.io/cli | sh
+    - arch:amd64
   script:
-    - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN ./bin/deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
+    - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
   dependencies:
     - "Tests"
 
