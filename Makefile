@@ -19,7 +19,7 @@ schema:
 		schema/00000000_Initial.up.sql -o schema/00000000_Initial.up.sql
 
 apply-schema-ci:
-	go run github.com/harderthanitneedstobe/rest-api/v0/cmd/schemagen \
+	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen \
 		--address=$$POSTGRES_HOST \
 		--port=5432 \
 		--user=$$POSTGRES_USER \
