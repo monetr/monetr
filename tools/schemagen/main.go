@@ -74,15 +74,17 @@ func main() {
 			}
 		}
 
-		query := schemagen.NewCreateTableQuery(model, orm.CreateTableOptions{
+		options := orm.CreateTableOptions{
 			Varchar:       0,
 			Temp:          false,
 			IfNotExists:   true,
 			FKConstraints: true,
-		})
+		}
+
+		query := schemagen.NewCreateTableQuery(model, options)
 		printMaybe(query.String() + "\n")
 		if !*dryRun {
-			if _, err := db.Exec(query); err != nil {
+			if _, err := db.Exec(orm.NewCreateTableQuery(db.Model(model), &options)); err != nil {
 				panic(err)
 			}
 		}
