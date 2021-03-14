@@ -18,9 +18,11 @@ type Repository interface {
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
 	GetAccount() (*models.Account, error)
+	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
 	GetExpenses(bankAccountId uint64) ([]models.Expense, error)
+	GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Expense, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
 	GetIsSetup() (bool, error)
@@ -36,6 +38,7 @@ type Repository interface {
 	InsertTransactions(transactions []models.Transaction) error
 	UpdateBankAccounts(accounts []models.BankAccount) error
 	UpdateLink(link *models.Link) error
+	UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error
 }
 
 type UnauthenticatedRepository interface {
@@ -110,4 +113,3 @@ func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
 }
-

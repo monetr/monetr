@@ -14,12 +14,13 @@ type JobRepository interface {
 
 type ProcessFundingSchedulesItem struct {
 	AccountId          uint64   `pg:"account_id"`
+	BankAccountId      uint64   `pg:"bank_account_id"`
 	FundingScheduleIds []uint64 `pg:"funding_schedule_ids,type:bigint[]"`
 }
 
 type CheckingPendingTransactionsItem struct {
-	AccountId      uint64   `pg:"account_id"`
-	LinkId         uint64   `pg:"link_id"`
+	AccountId uint64 `pg:"account_id"`
+	LinkId    uint64 `pg:"link_id"`
 }
 
 type jobRepository struct {
@@ -47,10 +48,11 @@ func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedule
 	_, err := j.txn.Query(&items, `
 		SELECT
 			"funding_schedules"."account_id",
+			"funding_schedules"."bank_account_id",
 			array_agg("funding_schedules"."funding_schedule_id") AS "funding_schedule_ids"
 		FROM "funding_schedules"
 		WHERE "funding_schedules"."next_occurrence" < (now() AT TIME ZONE 'UTC')
-		GROUP BY "funding_schedules"."account_id"
+		GROUP BY "funding_schedules"."account_id", "funding_schedules"."bank_account_id"
 	`)
 	if err != nil {
 		// TODO (elliotcourant) Can pg.NoRows return here? If it can this error is useless.

@@ -27,6 +27,19 @@ func (r *repositoryBase) GetBankAccountsByLinkId(linkId uint64) ([]models.BankAc
 	return result, nil
 }
 
+func (r *repositoryBase) GetBankAccount(bankAccountId uint64) (*models.BankAccount, error) {
+	var result models.BankAccount
+	err := r.txn.Model(&result).
+		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
+		Where(`"bank_account"."bank_account_id" = ? `, bankAccountId).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve bank account")
+	}
+
+	return &result, nil
+}
+
 func (r *repositoryBase) UpdateBankAccounts(accounts []models.BankAccount) error {
 	if len(accounts) == 0 {
 		return nil
