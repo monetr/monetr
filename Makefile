@@ -15,8 +15,8 @@ special-tests:
 
 schema:
 	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen > schema/00000000_Initial.up.sql
-	yarn sql-formatter -l postgresql -u --lines-between-queries 2 -i 4 \
-		schema/00000000_Initial.up.sql -o schema/00000000_Initial.up.sql
+	(which yarn && yarn sql-formatter -l postgresql -u --lines-between-queries 2 -i 4 \
+		schema/00000000_Initial.up.sql -o schema/00000000_Initial.up.sql) || true
 
 apply-schema-ci:
 	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen \
