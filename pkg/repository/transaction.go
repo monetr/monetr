@@ -19,6 +19,20 @@ func (r *repositoryBase) InsertTransactions(transactions []models.Transaction) e
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
+func (r *repositoryBase) GetPendingTransactionsForBankAccount(bankAccountId uint64) ([]models.Transaction, error) {
+	var result []models.Transaction
+	err := r.txn.Model(&result).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."is_pending" = ?`, true).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not retrieve pending transactions for bank account")
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error) {
 	type Transaction struct {
 		tableName          string `pg:"transactions"`
