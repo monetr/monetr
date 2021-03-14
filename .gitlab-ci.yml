@@ -116,6 +116,7 @@ Yeet Coverage:
     - k8s:shared
     - arch:amd64
   script:
+    - echo $PATH
     - DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
   dependencies:
     - "Tests"
