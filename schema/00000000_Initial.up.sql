@@ -189,6 +189,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "plaid_transaction_id" TEXT,
     "amount" BIGINT NOT NULL,
     "expense_id" BIGINT,
+    "expense_amount" BIGINT,
     "categories" TEXT [ ],
     "original_categories" TEXT [ ],
     "date" DATE NOT NULL,
