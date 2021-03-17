@@ -99,10 +99,27 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		return
 	}
 
-	// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
-	if existingTransaction.Amount != transaction.Amount && !isManual {
-		c.returnError(ctx, http.StatusBadRequest, "cannot change transaction amount on non-manual links")
-		return
+	if !isManual {
+		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
+		if existingTransaction.Amount != transaction.Amount {
+			c.returnError(ctx, http.StatusBadRequest, "cannot change transaction amount on non-manual links")
+			return
+		}
+
+		if existingTransaction.IsPending != transaction.IsPending {
+			c.badRequest(ctx, "cannot change transaction pending state on non-manual links")
+			return
+		}
+
+		if existingTransaction.Date != transaction.Date {
+			c.badRequest(ctx, "cannot change transaction date on non-manual links")
+			return
+		}
+
+		if existingTransaction.AuthorizedDate != transaction.AuthorizedDate {
+			c.badRequest(ctx, "cannot change transaction authorized date on non-manual links")
+			return
+		}
 	}
 
 }
