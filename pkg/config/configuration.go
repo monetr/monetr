@@ -14,6 +14,7 @@ type Configuration struct {
 	JWT            JWT
 	PostgreSQL     PostgreSQL
 	SMTP           SMTPClient
+	SendGrid       SendGrid
 	ReCAPTCHA      ReCAPTCHA
 	Plaid          Plaid
 	CORS           CORS
@@ -43,6 +44,10 @@ type SMTPClient struct {
 	Port     int
 
 	VerifyEmails bool
+}
+
+type SendGrid struct {
+	Enabled bool
 }
 
 type ReCAPTCHA struct {

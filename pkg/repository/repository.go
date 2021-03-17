@@ -34,6 +34,7 @@ type Repository interface {
 	GetMe() (*models.User, error)
 	GetPendingTransactionsForBankAccount(bankAccountId uint64) ([]models.Transaction, error)
 	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
+	GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error)
 	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error)
 	InsertTransactions(transactions []models.Transaction) error
 	UpdateBankAccounts(accounts []models.BankAccount) error

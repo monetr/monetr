@@ -75,3 +75,7 @@ func (r *repositoryBase) GetTransactions(bankAccountId uint64, limit, offset int
 
 	return items, nil
 }
+
+func (r *repositoryBase) GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error) {
+	return nil, nil
+}
