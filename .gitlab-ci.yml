@@ -131,7 +131,9 @@ Documentation:
     - k8s:shared
     - arch:amd64
   script:
-    - make docs
+    - go get github.com/swaggo/swag/cmd/swag
+    - go build -o /bin/swag github.com/swaggo/swag/cmd/swag
+    - /bin/swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:
