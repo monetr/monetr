@@ -18,7 +18,7 @@ func (c *Controller) handleTransactions(p iris.Party) {
 func (c *Controller) getTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		c.badRequest(ctx, "must specify a valid bank account Id")
 		return
 	}
 
@@ -44,7 +44,7 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 func (c *Controller) postTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		c.badRequest(ctx, "must specify a valid bank account Id")
 		return
 	}
 
@@ -66,7 +66,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 func (c *Controller) putTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		c.badRequest(ctx, "must specify a valid bank account Id")
 		return
 	}
 
@@ -110,7 +110,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 func (c *Controller) deleteTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		c.badRequest(ctx, "must specify a valid bank account Id")
 		return
 	}
 
