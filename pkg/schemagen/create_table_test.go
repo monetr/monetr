@@ -3,6 +3,7 @@ package schemagen
 import (
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/testutils"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -20,6 +21,21 @@ func TestCreateTableQuery_String(t *testing.T) {
 		}
 
 		createTable := NewCreateTableQuery(&Login{}, orm.CreateTableOptions{
+			Temp:          false,
+			IfNotExists:   true,
+			FKConstraints: true,
+		})
+
+		query := createTable.String()
+		assert.NotEmpty(t, query, "query should not be empty")
+
+		log.Debug(query)
+	})
+
+	t.Run("backwards fk", func(t *testing.T) {
+		log := testutils.GetLog(t)
+
+		createTable := NewCreateTableQuery(&models.User{}, orm.CreateTableOptions{
 			Temp:          false,
 			IfNotExists:   true,
 			FKConstraints: true,

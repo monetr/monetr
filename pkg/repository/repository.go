@@ -17,10 +17,12 @@ type Repository interface {
 	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
+	CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 	GetAccount() (*models.Account, error)
 	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
+	GetExpense(bankAccountId, expenseId uint64) (*models.Expense, error)
 	GetExpenses(bankAccountId uint64) ([]models.Expense, error)
 	GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Expense, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
@@ -33,11 +35,13 @@ type Repository interface {
 	GetLinks() ([]models.Link, error)
 	GetMe() (*models.User, error)
 	GetPendingTransactionsForBankAccount(bankAccountId uint64) ([]models.Transaction, error)
-	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error)
+	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error)
 	InsertTransactions(transactions []models.Transaction) error
 	UpdateBankAccounts(accounts []models.BankAccount) error
+	UpdateExpenses(bankAccountId uint64, updates []models.Expense) error
+	UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 	UpdateLink(link *models.Link) error
 	UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error
 }

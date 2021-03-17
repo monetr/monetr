@@ -104,6 +104,10 @@ func (c *CreateTableQuery) String() string {
 	if c.options.FKConstraints {
 		foreignConstraints := make([]string, 0, len(table.Relations))
 		for _, relation := range table.Relations {
+			if relation.Type != orm.HasOneRelation {
+				continue
+			}
+
 			fkString := strings.Builder{}
 
 			fkString.WriteString(`, CONSTRAINT "fk_`)
@@ -111,6 +115,10 @@ func (c *CreateTableQuery) String() string {
 			fkString.WriteString("_")
 			unquotedJoinTable := strings.ReplaceAll(string(relation.JoinTable.SQLName), `"`, "")
 			fkString.WriteString(unquotedJoinTable)
+			for _, column := range relation.BaseFKs {
+				fkString.WriteString("_")
+				fkString.WriteString(strings.ReplaceAll(column.SQLName, `"`, ""))
+			}
 			fkString.WriteString(`" FOREIGN KEY (`)
 			appendColumns(&fkString, "", relation.BaseFKs)
 			fkString.WriteString(`) REFERENCES `)

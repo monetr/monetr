@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
 	"github.com/pkg/errors"
-	"time"
 )
 
 func (r *repositoryBase) GetExpenses(bankAccountId uint64) ([]models.Expense, error) {
@@ -40,15 +39,35 @@ func (r *repositoryBase) CreateExpense(expense *models.Expense) error {
 	return errors.Wrap(err, "failed to create expense")
 }
 
-type ExpenseUpdateItem struct {
-	ExpenseId              uint64     `pg:"expense_id"`
-	CurrentAmount          int64      `pg:"current_amount"`
-	NextContributionAmount int64      `pg:"next_contribution_amount"`
-	IsBehind               bool       `pg:"is_behind"`
-	LastRecurrence         *time.Time `pg:"last_recurrence"`
-	NextRecurrence         *time.Time `pg:"next_recurrence"`
+// UpdateExpenses should only be called with complete expense models. Do not use partial models with missing data for
+// this action.
+func (r *repositoryBase) UpdateExpenses(bankAccountId uint64, updates []models.Expense) error {
+	for i := range updates {
+		updates[i].AccountId = r.AccountId()
+	}
+
+	_, err := r.txn.Model(&updates).
+		Where(`"expense"."account_id" = ?`, r.AccountId()).
+		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
+		Update(&updates)
+	if err != nil {
+		return errors.Wrap(err, "failed to update expenses")
+	}
+
+	return nil
 }
 
-func (r *repositoryBase) UpdateExpenseBalances(bankAccountId uint64, updates []ExpenseUpdateItem) error {
-	return nil
+func (r *repositoryBase) GetExpense(bankAccountId, expenseId uint64) (*models.Expense, error) {
+	var result models.Expense
+	err := r.txn.Model(&result).
+		Relation("FundingSchedule").
+		Where(`"expense"."account_id" = ?`, r.AccountId()).
+		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
+		Where(`"expense"."expense_id" = ?`, expenseId).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve expense")
+	}
+
+	return &result, nil
 }

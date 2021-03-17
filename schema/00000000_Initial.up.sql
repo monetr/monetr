@@ -11,10 +11,7 @@ CREATE TABLE IF NOT EXISTS "logins" (
     "is_email_verified" BOOLEAN NOT NULL,
     "is_phone_verified" BOOLEAN NOT NULL,
     CONSTRAINT "pk_logins" PRIMARY KEY ("login_id"),
-    CONSTRAINT "uq_logins_email" UNIQUE ("email"),
-    CONSTRAINT "fk_logins_email_verifications" FOREIGN KEY ("login_id") REFERENCES "email_verifications" ("login_id"),
-    CONSTRAINT "fk_logins_phone_verifications" FOREIGN KEY ("login_id") REFERENCES "phone_verifications" ("login_id"),
-    CONSTRAINT "fk_logins_users" FOREIGN KEY ("login_id") REFERENCES "users" ("login_id")
+    CONSTRAINT "uq_logins_email" UNIQUE ("email")
 );
 
 CREATE TABLE IF NOT EXISTS "registrations" (
@@ -24,7 +21,7 @@ CREATE TABLE IF NOT EXISTS "registrations" (
     "date_created" TIMESTAMPTZ NOT NULL,
     "date_expires" TIMESTAMPTZ NOT NULL,
     CONSTRAINT "pk_registrations" PRIMARY KEY ("registration_id"),
-    CONSTRAINT "fk_registrations_logins" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
+    CONSTRAINT "fk_registrations_logins_login_id" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
 );
 
 CREATE TABLE IF NOT EXISTS "email_verifications" (
@@ -37,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "email_verifications" (
     "verified_at" TIMESTAMPTZ,
     CONSTRAINT "pk_email_verifications" PRIMARY KEY ("email_verification_id"),
     CONSTRAINT "uq_email_verifications_login_id_email_address" UNIQUE ("login_id", "email_address"),
-    CONSTRAINT "fk_email_verifications_logins" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
+    CONSTRAINT "fk_email_verifications_logins_login_id" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
 );
 
 CREATE TABLE IF NOT EXISTS "phone_verifications" (
@@ -52,7 +49,7 @@ CREATE TABLE IF NOT EXISTS "phone_verifications" (
     CONSTRAINT "pk_phone_verifications" PRIMARY KEY ("phone_verification_id"),
     CONSTRAINT "uq_phone_verifications_login_id_code" UNIQUE ("login_id", "code"),
     CONSTRAINT "uq_phone_verifications_login_id_phone_number" UNIQUE ("login_id", "phone_number"),
-    CONSTRAINT "fk_phone_verifications_logins" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
+    CONSTRAINT "fk_phone_verifications_logins_login_id" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
 );
 
 CREATE TABLE IF NOT EXISTS "accounts" (
@@ -69,8 +66,8 @@ CREATE TABLE IF NOT EXISTS "users" (
     "last_name" TEXT,
     CONSTRAINT "pk_users" PRIMARY KEY ("user_id"),
     CONSTRAINT "uq_users_login_id_account_id" UNIQUE ("login_id", "account_id"),
-    CONSTRAINT "fk_users_accounts" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-    CONSTRAINT "fk_users_logins" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
+    CONSTRAINT "fk_users_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+    CONSTRAINT "fk_users_logins_login_id" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
 );
 
 CREATE TABLE IF NOT EXISTS "jobs" (
@@ -83,7 +80,7 @@ CREATE TABLE IF NOT EXISTS "jobs" (
     "finished_at" TIMESTAMPTZ,
     "retries" BIGINT,
     CONSTRAINT "pk_jobs" PRIMARY KEY ("job_id"),
-    CONSTRAINT "fk_jobs_accounts" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id")
+    CONSTRAINT "fk_jobs_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id")
 );
 
 CREATE TABLE IF NOT EXISTS "plaid_links" (
@@ -109,11 +106,10 @@ CREATE TABLE IF NOT EXISTS "links" (
     "updated_at" TIMESTAMPTZ NOT NULL,
     "updated_by_user_id" BIGINT,
     CONSTRAINT "pk_links" PRIMARY KEY ("link_id", "account_id"),
-    CONSTRAINT "fk_links_accounts" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-    CONSTRAINT "fk_links_bank_accounts" FOREIGN KEY ("link_id", "account_id") REFERENCES "bank_accounts" ("link_id", "account_id"),
-    CONSTRAINT "fk_links_plaid_links" FOREIGN KEY ("plaid_link_id") REFERENCES "plaid_links" ("plaid_link_id"),
-    CONSTRAINT "fk_links_users" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id"),
-    CONSTRAINT "fk_links_users" FOREIGN KEY ("updated_by_user_id") REFERENCES "users" ("user_id")
+    CONSTRAINT "fk_links_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+    CONSTRAINT "fk_links_plaid_links_plaid_link_id" FOREIGN KEY ("plaid_link_id") REFERENCES "plaid_links" ("plaid_link_id"),
+    CONSTRAINT "fk_links_users_created_by_user_id" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id"),
+    CONSTRAINT "fk_links_users_updated_by_user_id" FOREIGN KEY ("updated_by_user_id") REFERENCES "users" ("user_id")
 );
 
 CREATE TABLE IF NOT EXISTS "bank_accounts" (
@@ -130,8 +126,8 @@ CREATE TABLE IF NOT EXISTS "bank_accounts" (
     "account_type" TEXT,
     "account_sub_type" TEXT,
     CONSTRAINT "pk_bank_accounts" PRIMARY KEY ("bank_account_id", "account_id"),
-    CONSTRAINT "fk_bank_accounts_accounts" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-    CONSTRAINT "fk_bank_accounts_links" FOREIGN KEY ("link_id", "account_id") REFERENCES "links" ("link_id", "account_id")
+    CONSTRAINT "fk_bank_accounts_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+    CONSTRAINT "fk_bank_accounts_links_link_id_account_id" FOREIGN KEY ("link_id", "account_id") REFERENCES "links" ("link_id", "account_id")
 );
 
 CREATE TABLE IF NOT EXISTS "funding_schedules" (
@@ -149,8 +145,8 @@ CREATE TABLE IF NOT EXISTS "funding_schedules" (
         "bank_account_id"
     ),
     CONSTRAINT "uq_funding_schedules_bank_account_id_name" UNIQUE ("bank_account_id", "name"),
-    CONSTRAINT "fk_funding_schedules_accounts" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-    CONSTRAINT "fk_funding_schedules_bank_accounts" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id")
+    CONSTRAINT "fk_funding_schedules_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+    CONSTRAINT "fk_funding_schedules_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id")
 );
 
 CREATE TABLE IF NOT EXISTS "expenses" (
@@ -169,9 +165,9 @@ CREATE TABLE IF NOT EXISTS "expenses" (
     "is_behind" BOOLEAN NOT NULL,
     CONSTRAINT "pk_expenses" PRIMARY KEY ("expense_id", "account_id", "bank_account_id"),
     CONSTRAINT "uq_expenses_bank_account_id_name" UNIQUE ("bank_account_id", "name"),
-    CONSTRAINT "fk_expenses_accounts" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-    CONSTRAINT "fk_expenses_bank_accounts" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
-    CONSTRAINT "fk_expenses_funding_schedules" FOREIGN KEY (
+    CONSTRAINT "fk_expenses_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+    CONSTRAINT "fk_expenses_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
+    CONSTRAINT "fk_expenses_funding_schedules_funding_schedule_id_account_id_bank_account_id" FOREIGN KEY (
         "funding_schedule_id",
         "account_id",
         "bank_account_id"
@@ -202,9 +198,9 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT "pk_transactions" PRIMARY KEY ("transaction_id", "account_id", "bank_account_id"),
     CONSTRAINT "uq_transactions_bank_account_id_plaid_transaction_id" UNIQUE ("bank_account_id", "plaid_transaction_id"),
-    CONSTRAINT "fk_transactions_accounts" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-    CONSTRAINT "fk_transactions_bank_accounts" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
-    CONSTRAINT "fk_transactions_expenses" FOREIGN KEY ("expense_id", "account_id", "bank_account_id") REFERENCES "expenses" ("expense_id", "account_id", "bank_account_id")
+    CONSTRAINT "fk_transactions_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+    CONSTRAINT "fk_transactions_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
+    CONSTRAINT "fk_transactions_expenses_expense_id_account_id_bank_account_id" FOREIGN KEY ("expense_id", "account_id", "bank_account_id") REFERENCES "expenses" ("expense_id", "account_id", "bank_account_id")
 );
 
 INSERT INTO

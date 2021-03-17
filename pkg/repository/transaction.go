@@ -77,5 +77,42 @@ func (r *repositoryBase) GetTransactions(bankAccountId uint64, limit, offset int
 }
 
 func (r *repositoryBase) GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error) {
-	return nil, nil
+	var result models.Transaction
+	err := r.txn.Model(&result).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."transaction_id" = ?`, transactionId).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve transaction")
+	}
+
+	return &result, nil
+}
+
+func (r *repositoryBase) CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error {
+	transaction.AccountId = r.AccountId()
+	transaction.BankAccountId = bankAccountId
+
+	_, err := r.txn.Model(transaction).Insert(transaction)
+	if err != nil {
+		return errors.Wrap(err, "failed to create transaction")
+	}
+
+	return nil
+}
+
+func (r *repositoryBase) UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error {
+	transaction.AccountId = r.AccountId()
+
+	_, err := r.txn.Model(transaction).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		WherePK().
+		Update(&transaction)
+	if err != nil {
+		return errors.Wrap(err, "failed to update transaction")
+	}
+
+	return nil
 }
