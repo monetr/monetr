@@ -44,7 +44,7 @@
     "fs-extra": "9.1.0",
     "html-webpack-plugin": "4.5.2",
     "identity-obj-proxy": "3.0.0",
-    "immer": "8.0.1",
+    "immer": "8.0.2",
     "immutable": "4.0.0-rc.12",
     "ini": "2.0.0",
     "jest": "26.6.3",
