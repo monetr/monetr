@@ -4,8 +4,10 @@ import Transaction from "data/Transaction";
 import { Avatar, Box, Grid, Typography } from "@material-ui/core";
 import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
 import classnames from 'classnames';
+import Expense from "data/Expense";
 
 import './styles/TransactionItem.scss';
+import { getExpenseById } from "shared/expenses/selectors/getExpenseById";
 
 interface PropTypes {
   transactionId: number;
@@ -13,9 +15,20 @@ interface PropTypes {
 
 interface WithConnectionPropTypes extends PropTypes {
   transaction: Transaction;
+  expense?: Expense;
 }
 
 class TransactionItem extends Component<WithConnectionPropTypes, {}> {
+
+  getSpentFromString(): string {
+    const { expense } = this.props;
+
+    if (!expense) {
+      return 'Spent From Safe-To-Spend';
+    }
+
+    return `Spent From ${expense.name}`;
+  }
 
   render() {
     const { transaction } = this.props;
@@ -39,7 +52,7 @@ class TransactionItem extends Component<WithConnectionPropTypes, {}> {
               </Grid>
               <Grid item>
                 <Typography>
-                  Spent From Safe-To-Spend
+                  { this.getSpentFromString() }
                 </Typography>
               </Grid>
             </Grid>
@@ -58,8 +71,13 @@ class TransactionItem extends Component<WithConnectionPropTypes, {}> {
 }
 
 export default connect(
-  (state, props: PropTypes) => ({
-    transaction: getTransactionById(props.transactionId)(state),
-  }),
+  (state, props: PropTypes) => {
+    const transaction = getTransactionById(props.transactionId)(state);
+
+    return {
+      transaction: transaction,
+      expense: getExpenseById(transaction.expenseId)(state),
+    }
+  },
   {}
 )(TransactionItem)
