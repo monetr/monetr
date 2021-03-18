@@ -9,7 +9,7 @@ import { LOGOUT } from "shared/authentication/actions";
 import { OrderedMap } from "immutable";
 import Transaction from "data/Transaction";
 
-export default function reducer(state: TransactionState = new TransactionState(), action: TransactionActions) {
+export default function reducer(state: TransactionState = new TransactionState(), action: TransactionActions): TransactionState {
   switch (action.type) {
     case FETCH_TRANSACTIONS_REQUEST:
       return {
