@@ -29,7 +29,7 @@ Go Dependencies:
 JS Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: node:15.11.0-buster
+  image: node:15.12.0-buster
   tags:
     - k8s:shared
     - arch:amd64
