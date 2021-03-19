@@ -9,7 +9,7 @@ stages:
 JS Dependencies:
   needs: []
   stage: Dependencies
-  image: node:15.11.0-buster
+  image: node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -24,7 +24,7 @@ Build:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
-  image: node:15.11.0-buster
+  image: node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -40,7 +40,7 @@ Test:
   needs:
     - "JS Dependencies"
   stage: Test Javascript
-  image: node:15.11.0-buster
+  image: node:15.12.0-buster
   tags:
     - k8s:shared
   script:
