@@ -1,11 +1,11 @@
+import { Box, Button, Card, Container, Grid } from "@material-ui/core";
+import TransactionItem from "components/Transactions/TransactionItem";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import { Box, Button, Card, Container, Grid } from "@material-ui/core";
-import TransactionItem from "components/Transactions/TransactionItem";
+import { getTransactionIds } from "shared/transactions/selectors/getTransactionIds";
 
 import './styles/TransactionsView.scss';
-import { getTransactionIds } from "shared/transactions/selectors/getTransactionIds";
 
 interface PropTypes {
   transactionIds: number[];

@@ -42,7 +42,7 @@ export class LoginView extends Component {
     this.setState({
       error: null,
     });
-    return request().post('/api/authentication/login', {
+    return request().post('/authentication/login', {
       email: values.email,
       password: values.password,
     })

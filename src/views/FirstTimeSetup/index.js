@@ -22,6 +22,7 @@ export class FirstTimeSetup extends Component {
   state = {
     step: this.STEP.INTRO,
     loading: true,
+    error: false,
     linkToken: '',
   };
 
@@ -32,7 +33,7 @@ export class FirstTimeSetup extends Component {
 
   componentDidMount() {
     request()
-      .get('/api/plaid/link/token/new')
+      .get('/plaid/link/token/new')
       .then(result => {
         this.setState({
           loading: false,
@@ -40,7 +41,10 @@ export class FirstTimeSetup extends Component {
         });
       })
       .catch(error => {
-        alert(error);
+        this.setState({
+          loading: false,
+          error: true,
+        })
       });
   }
 
@@ -49,7 +53,7 @@ export class FirstTimeSetup extends Component {
   }
 
   plaidLinkSuccess = (token, metadata) => {
-    request().post('/api/plaid/link/token/callback', {
+    request().post('/plaid/link/token/callback', {
       publicToken: token,
       institutionId: metadata.institution.institution_id,
       institutionName: metadata.institution.name,

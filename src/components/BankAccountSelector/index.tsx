@@ -29,7 +29,7 @@ interface PropTypes {
 interface SelectEvent {
   name: string;
   value: number;
-};
+}
 
 export class BankAccountSelector extends Component<PropTypes, {}> {
 

@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
-import { connect } from "react-redux";
-import Transaction from "data/Transaction";
-import { Avatar, Box, Grid, Typography } from "@material-ui/core";
-import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
+import { Box, Grid, Typography } from "@material-ui/core";
 import classnames from 'classnames';
 import Expense from "data/Expense";
+import Transaction from "data/Transaction";
+import React, { Component } from 'react';
+import { connect } from "react-redux";
+import { getExpenseById } from "shared/expenses/selectors/getExpenseById";
+import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
 
 import './styles/TransactionItem.scss';
-import { getExpenseById } from "shared/expenses/selectors/getExpenseById";
 
 interface PropTypes {
   transactionId: number;
@@ -27,7 +27,7 @@ class TransactionItem extends Component<WithConnectionPropTypes, {}> {
       return 'Spent From Safe-To-Spend';
     }
 
-    return `Spent From ${expense.name}`;
+    return `Spent From ${ expense.name }`;
   }
 
   render() {
@@ -36,13 +36,6 @@ class TransactionItem extends Component<WithConnectionPropTypes, {}> {
     return (
       <Box className="transactions-item">
         <Grid container spacing={ 2 }>
-          <Grid item>
-            <Box bgcolor="primary.main" clone>
-              <Avatar>
-
-              </Avatar>
-            </Box>
-          </Grid>
           <Grid item xs={ 12 } sm container>
             <Grid item xs container spacing={ 2 } direction="column">
               <Grid item xs>
@@ -57,10 +50,16 @@ class TransactionItem extends Component<WithConnectionPropTypes, {}> {
               </Grid>
             </Grid>
             <Grid item>
-              <Typography className={ classnames('amount', {
+              { transaction.isPending &&
+              <Typography>Pending</Typography>
+              }
+              <Typography align="right" className={ classnames('amount', {
                 'addition': transaction.getIsAddition(),
               }) }>
                 { transaction.getAmountString() }
+              </Typography>
+              <Typography>
+                { transaction.categories.join(', ') }
               </Typography>
             </Grid>
           </Grid>
@@ -75,7 +74,7 @@ export default connect(
     const transaction = getTransactionById(props.transactionId)(state);
 
     return {
-      transaction: transaction,
+      transaction,
       expense: getExpenseById(transaction.expenseId)(state),
     }
   },

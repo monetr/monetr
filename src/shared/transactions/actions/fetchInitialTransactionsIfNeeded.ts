@@ -34,7 +34,7 @@ export default function fetchInitialTransactionsIfNeeded(): ActionWithState {
       type: FETCH_TRANSACTIONS_REQUEST,
     });
 
-    return request().get(`/api/bank_accounts/${ selectedBankAccountId }/transactions`)
+    return request().get(`/bank_accounts/${ selectedBankAccountId }/transactions`)
       .then(result => {
         dispatch({
           type: FETCH_TRANSACTIONS_SUCCESS,

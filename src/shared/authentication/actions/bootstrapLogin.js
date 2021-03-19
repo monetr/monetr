@@ -50,7 +50,7 @@ export default function bootstrapLogin(token = null, user = null) {
         })
         .catch(error => {
           window.localStorage.removeItem('H-Token');
-          throw Error('failed to retrieve user data');
+          console.error(error);
         });
     }
 
