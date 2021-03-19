@@ -39,9 +39,7 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 		return
 	}
 
-	ctx.JSON(map[string]interface{}{
-		"transactions": transactions,
-	})
+	ctx.JSON(transactions)
 }
 
 func (c *Controller) postTransactions(ctx *context.Context) {

@@ -20,9 +20,7 @@ func (c *Controller) linksController(p iris.Party) {
 			return
 		}
 
-		ctx.JSON(map[string]interface{}{
-			"links": links,
-		})
+		ctx.JSON(links)
 	})
 
 	// POST will create a new link, links created this way are manual only. Plaid links must be created through a plaid

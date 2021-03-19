@@ -18,9 +18,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 		// plaid as part of the linking process.
 		me, err := c.mustGetAuthenticatedRepository(ctx).GetMe()
 		if err != nil {
-			c.wrapAndReturnError(ctx, err,
-				http.StatusInternalServerError, "failed to get user details for link",
-			)
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
 		}
 
 		userId := c.mustGetUserId(ctx)
