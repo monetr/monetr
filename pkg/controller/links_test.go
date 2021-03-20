@@ -107,8 +107,8 @@ func TestGetLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.links").Array().Length().Equal(1)
-			response.JSON().Path("$.links[0].linkId").Number().Equal(linkAID)
+			response.JSON().Path("$").Array().Length().Equal(1)
+			response.JSON().Path("$[0].linkId").Number().Equal(linkAID)
 		}
 
 		// Now we want to test GET with token B.
@@ -118,9 +118,9 @@ func TestGetLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.links").Array().Length().Equal(1)
+			response.JSON().Path("$").Array().Length().Equal(1)
 			// Make sure that we do not receive token A's link.
-			response.JSON().Path("$.links[0].linkId").Number().NotEqual(linkAID)
+			response.JSON().Path("$[0].linkId").Number().NotEqual(linkAID)
 		}
 	})
 

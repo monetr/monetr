@@ -83,6 +83,8 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 		return
 	}
 
+	var updatedExpense *models.Expense
+
 	if transaction.ExpenseId != nil && *transaction.ExpenseId > 0 {
 		account, err := repo.GetAccount()
 		if err != nil {
@@ -90,19 +92,19 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 			return
 		}
 
-		expense, err := repo.GetExpense(bankAccountId, *transaction.ExpenseId)
+		updatedExpense, err = repo.GetExpense(bankAccountId, *transaction.ExpenseId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "could not get expense provided for transaction")
 			return
 		}
 
-		if err = c.addExpenseToTransaction(account, &transaction, expense); err != nil {
+		if err = c.addExpenseToTransaction(account, &transaction, updatedExpense); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
 			return
 		}
 
 		if err = repo.UpdateExpenses(bankAccountId, []models.Expense{
-			*expense,
+			*updatedExpense,
 		}); err != nil {
 			c.wrapPgError(ctx, err, "failed to update expense for transaction")
 			return
@@ -114,7 +116,17 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 		return
 	}
 
-	ctx.JSON(transaction)
+	returnedObject := map[string]interface{}{
+		"transaction": transaction,
+	}
+
+	// If an expense was updated as part of this transaction being created then we want to include that updated expense
+	// in our response so the UI can update its redux store.
+	if updatedExpense != nil {
+		returnedObject["expense"] = *updatedExpense
+	}
+
+	ctx.JSON(returnedObject)
 }
 
 func (c *Controller) putTransactions(ctx *context.Context) {
@@ -176,7 +188,8 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		}
 	}
 
-	if err = c.processTransactionSpentFrom(repo, bankAccountId, &transaction, existingTransaction); err != nil {
+	updatedExpenses, err := c.processTransactionSpentFrom(repo, bankAccountId, &transaction, existingTransaction)
+	if err != nil {
 		c.wrapPgError(ctx, err, "failed to process expense changes")
 		return
 	}
@@ -190,7 +203,10 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		return
 	}
 
-	ctx.JSON(transaction)
+	ctx.JSON(map[string]interface{}{
+		"transaction": transaction,
+		"expenses":    updatedExpenses,
+	})
 }
 
 func (c *Controller) deleteTransactions(ctx *context.Context) {
@@ -224,10 +240,10 @@ func (c *Controller) processTransactionSpentFrom(
 	repo repository.Repository,
 	bankAccountId uint64,
 	input, existing *models.Transaction,
-) error {
+) (updatedExpenses []models.Expense, _ error) {
 	account, err := repo.GetAccount()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	const (
@@ -260,7 +276,7 @@ func (c *Controller) processTransactionSpentFrom(
 		expensePlan = RemoveExpense
 	default:
 		// TODO Handle transaction amount changes with expenses.
-		return nil
+		return nil, nil
 	}
 
 	// Retrieve the expenses that we need to work with and potentially update.
@@ -279,9 +295,9 @@ func (c *Controller) processTransactionSpentFrom(
 	// If we failed to retrieve either of the expenses then something is wrong and we need to stop.
 	switch {
 	case currentErr != nil:
-		return errors.Wrap(currentErr, "failed to retrieve the current expense for the transaction")
+		return nil, errors.Wrap(currentErr, "failed to retrieve the current expense for the transaction")
 	case newErr != nil:
-		return errors.Wrap(newErr, "failed to retrieve the new expense for the transaction")
+		return nil, errors.Wrap(newErr, "failed to retrieve the new expense for the transaction")
 	}
 
 	expenseUpdates := make([]models.Expense, 0)
@@ -304,7 +320,7 @@ func (c *Controller) processTransactionSpentFrom(
 			currentExpense.FundingSchedule.NextOccurrence,
 			currentExpense.FundingSchedule.Rule,
 		); err != nil {
-			return errors.Wrap(err, "failed to calculate next contribution for current transaction expense")
+			return nil, errors.Wrap(err, "failed to calculate next contribution for current transaction expense")
 		}
 
 		// Then take all the fields that have changed and throw them in our list of things to update.
@@ -320,14 +336,14 @@ func (c *Controller) processTransactionSpentFrom(
 		fallthrough
 	case AddExpense:
 		if err = c.addExpenseToTransaction(account, input, newExpense); err != nil {
-			return err
+			return nil, err
 		}
 
 		// Then take all the fields that have changed and throw them in our list of things to update.
 		expenseUpdates = append(expenseUpdates, *newExpense)
 	}
 
-	return repo.UpdateExpenses(bankAccountId, expenseUpdates)
+	return expenseUpdates, repo.UpdateExpenses(bankAccountId, expenseUpdates)
 }
 
 func (c *Controller) addExpenseToTransaction(
