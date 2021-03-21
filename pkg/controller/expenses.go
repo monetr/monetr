@@ -18,6 +18,10 @@ func (c *Controller) handleExpenses(p iris.Party) {
 
 	})
 
+	p.Post("/{bankAccountId:uint64}/expenses/transfer", func(c *context.Context) {
+
+	})
+
 	p.Delete("/{bankAccountId:uint64}/expenses/{expenseId:uint64}", func(ctx *context.Context) {
 
 	})
