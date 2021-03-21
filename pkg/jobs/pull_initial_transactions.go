@@ -93,7 +93,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 				BankAccountId:        bankAccountIdsByPlaid[plaidTransaction.AccountID],
 				PlaidTransactionId:   plaidTransaction.ID,
 				Amount:               int64(plaidTransaction.Amount * 100),
-				ExpenseId:            nil,
+				SpendingId:           nil,
 				Categories:           plaidTransaction.Category,
 				OriginalCategories:   plaidTransaction.Category,
 				Date:                 date,

@@ -15,7 +15,7 @@ func TestPostTransactions(t *testing.T) {
 			WithHeader("H-Token", token).
 			WithJSON(models.Transaction{
 				BankAccountId: 1234,
-				ExpenseId:     nil,
+				SpendingId:    nil,
 				Categories: []string{
 					"Things",
 				},

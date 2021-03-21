@@ -14,12 +14,12 @@ type Transaction struct {
 	BankAccount        *BankAccount `json:"bankAccount,omitempty" pg:"rel:has-one"`
 	PlaidTransactionId string       `json:"-" pg:"plaid_transaction_id,unique:per_bank_account"`
 	Amount             int64        `json:"amount" pg:"amount,notnull,use_zero"`
-	ExpenseId          *uint64      `json:"expenseId" pg:"expense_id,on_delete:SET NULL"`
-	Expense            *Spending    `json:"expense,omitempty" pg:"rel:has-one"`
-	// ExpenseAmount is the amount deducted from the expense this transaction was spent from. This is used when a
+	SpendingId         *uint64      `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
+	Spending           *Spending    `json:"spending,omitempty" pg:"rel:has-one"`
+	// SpendingAmount is the amount deducted from the expense this transaction was spent from. This is used when a
 	// transaction is more than the expense currently has allocated. If the transaction were to be deleted or changed we
 	// want to make sure we return the correct amount to the expense.
-	ExpenseAmount        *int64     `json:"expenseAmount,omitempty" pg:"expense_amount,use_zero"`
+	SpendingAmount       *int64     `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
 	Categories           []string   `json:"categories" pg:"categories,type:'text[]'"`
 	OriginalCategories   []string   `json:"originalCategories" pg:"original_categories,type:'text[]'"`
 	Date                 time.Time  `json:"date" pg:"date,notnull,type:'date'"`

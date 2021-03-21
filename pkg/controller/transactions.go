@@ -85,14 +85,14 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 
 	var updatedExpense *models.Spending
 
-	if transaction.ExpenseId != nil && *transaction.ExpenseId > 0 {
+	if transaction.SpendingId != nil && *transaction.SpendingId > 0 {
 		account, err := repo.GetAccount()
 		if err != nil {
 			c.wrapPgError(ctx, err, "could not get account to create transaction")
 			return
 		}
 
-		updatedExpense, err = repo.GetExpense(bankAccountId, *transaction.ExpenseId)
+		updatedExpense, err = repo.GetExpense(bankAccountId, *transaction.SpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "could not get expense provided for transaction")
 			return
@@ -252,26 +252,26 @@ func (c *Controller) processTransactionSpentFrom(
 		RemoveExpense
 	)
 
-	var existingExpenseId uint64
-	if existing.ExpenseId != nil {
-		existingExpenseId = *existing.ExpenseId
+	var existingSpendingId uint64
+	if existing.SpendingId != nil {
+		existingSpendingId = *existing.SpendingId
 	}
 
-	var newExpenseId uint64
-	if input.ExpenseId != nil {
-		newExpenseId = *input.ExpenseId
+	var newSpendingId uint64
+	if input.SpendingId != nil {
+		newSpendingId = *input.SpendingId
 	}
 
 	var expensePlan int
 
 	switch {
-	case existingExpenseId == 0 && newExpenseId > 0:
+	case existingSpendingId == 0 && newSpendingId > 0:
 		// Spending is being added to the transaction.
 		expensePlan = AddExpense
-	case existingExpenseId != 0 && newExpenseId != existingExpenseId && newExpenseId > 0:
+	case existingSpendingId != 0 && newSpendingId != existingSpendingId && newSpendingId > 0:
 		// Spending is being changed from one expense to another.
 		expensePlan = ChangeExpense
-	case existingExpenseId != 0 && newExpenseId == 0:
+	case existingSpendingId != 0 && newSpendingId == 0:
 		// Spending is being removed from the transaction.
 		expensePlan = RemoveExpense
 	default:
@@ -284,12 +284,12 @@ func (c *Controller) processTransactionSpentFrom(
 	var currentErr, newErr error
 	switch expensePlan {
 	case AddExpense:
-		newExpense, newErr = repo.GetExpense(bankAccountId, newExpenseId)
+		newExpense, newErr = repo.GetExpense(bankAccountId, newSpendingId)
 	case ChangeExpense:
-		currentExpense, currentErr = repo.GetExpense(bankAccountId, existingExpenseId)
-		newExpense, newErr = repo.GetExpense(bankAccountId, newExpenseId)
+		currentExpense, currentErr = repo.GetExpense(bankAccountId, existingSpendingId)
+		newExpense, newErr = repo.GetExpense(bankAccountId, newSpendingId)
 	case RemoveExpense:
-		currentExpense, currentErr = repo.GetExpense(bankAccountId, existingExpenseId)
+		currentExpense, currentErr = repo.GetExpense(bankAccountId, existingSpendingId)
 	}
 
 	// If we failed to retrieve either of the expenses then something is wrong and we need to stop.
@@ -306,13 +306,13 @@ func (c *Controller) processTransactionSpentFrom(
 	case ChangeExpense, RemoveExpense:
 		// If the transaction already has an expense then it should have an expense amount. If this is missing then
 		// something is wrong.
-		if existing.ExpenseAmount == nil {
+		if existing.SpendingAmount == nil {
 			// TODO Handle missing expense amount when changing or removing a transaction's expense.
 			panic("somethings wrong, expense amount missing")
 		}
 
 		// Add the amount we took from the expense back to it.
-		currentExpense.CurrentAmount += *existing.ExpenseAmount
+		currentExpense.CurrentAmount += *existing.SpendingAmount
 
 		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
 		if err = currentExpense.CalculateNextContribution(
@@ -365,7 +365,7 @@ func (c *Controller) addExpenseToTransaction(
 	expense.CurrentAmount -= allocationAmount
 
 	// Keep track of how much we took from the expense in case things change later.
-	transaction.ExpenseAmount = &allocationAmount
+	transaction.SpendingAmount = &allocationAmount
 
 	// Now that we have deducted the amount we need from the expense we need to recalculate it's next contribution.
 	if err := expense.CalculateNextContribution(
