@@ -78,7 +78,7 @@ Tests:
   needs:
     - "Go Dependencies"
   services:
-    - postgres:13
+    - containers.harderthanitneedstobe.com/postgres:13
   variables:
     POSTGRES_HOST: postgres
     POSTGRES_PASSWORD: ""
