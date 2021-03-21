@@ -67,7 +67,7 @@ Schema Generation:
     - k8s:shared
   script:
     - make schema
-    - make special-tests
+    - git diff --exit-code schema/ # Make sure that the schema is properly generated
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:

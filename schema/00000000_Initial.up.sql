@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS "logins" (
     "email" TEXT NOT NULL,
     "password_hash" TEXT NOT NULL,
     "phone_number" TEXT,
-    "is_enabled" BOOLEAN NOT NULL,
     "is_email_verified" BOOLEAN NOT NULL,
     "is_phone_verified" BOOLEAN NOT NULL,
     CONSTRAINT "pk_logins" PRIMARY KEY ("login_id"),
