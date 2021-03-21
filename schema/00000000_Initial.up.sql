@@ -149,25 +149,27 @@ CREATE TABLE IF NOT EXISTS "funding_schedules" (
     CONSTRAINT "fk_funding_schedules_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id")
 );
 
-CREATE TABLE IF NOT EXISTS "expenses" (
-    "expense_id" BIGSERIAL NOT NULL,
+CREATE TABLE IF NOT EXISTS "spending" (
+    "spending_id" BIGSERIAL NOT NULL,
     "account_id" BIGINT NOT NULL,
     "bank_account_id" BIGINT NOT NULL,
     "funding_schedule_id" BIGINT NOT NULL,
+    "spending_type" SMALLINT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
     "target_amount" BIGINT NOT NULL,
     "current_amount" BIGINT NOT NULL,
+    "used_amount" BIGINT NOT NULL,
     "recurrence_rule" TEXT NOT NULL,
     "last_recurrence" DATE,
     "next_recurrence" DATE NOT NULL,
     "next_contribution_amount" BIGINT NOT NULL,
     "is_behind" BOOLEAN NOT NULL,
-    CONSTRAINT "pk_expenses" PRIMARY KEY ("expense_id", "account_id", "bank_account_id"),
-    CONSTRAINT "uq_expenses_bank_account_id_name" UNIQUE ("bank_account_id", "name"),
-    CONSTRAINT "fk_expenses_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-    CONSTRAINT "fk_expenses_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
-    CONSTRAINT "fk_expenses_funding_schedules_funding_schedule_id_account_id_bank_account_id" FOREIGN KEY (
+    CONSTRAINT "pk_spending" PRIMARY KEY ("spending_id", "account_id", "bank_account_id"),
+    CONSTRAINT "uq_spending_bank_account_id_name" UNIQUE ("bank_account_id", "name"),
+    CONSTRAINT "fk_spending_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+    CONSTRAINT "fk_spending_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
+    CONSTRAINT "fk_spending_funding_schedules_funding_schedule_id_account_id_bank_account_id" FOREIGN KEY (
         "funding_schedule_id",
         "account_id",
         "bank_account_id"
@@ -184,8 +186,8 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     "bank_account_id" BIGINT NOT NULL,
     "plaid_transaction_id" TEXT,
     "amount" BIGINT NOT NULL,
-    "expense_id" BIGINT,
-    "expense_amount" BIGINT,
+    "spending_id" BIGINT,
+    "spending_amount" BIGINT,
     "categories" TEXT [ ],
     "original_categories" TEXT [ ],
     "date" DATE NOT NULL,
@@ -200,7 +202,7 @@ CREATE TABLE IF NOT EXISTS "transactions" (
     CONSTRAINT "uq_transactions_bank_account_id_plaid_transaction_id" UNIQUE ("bank_account_id", "plaid_transaction_id"),
     CONSTRAINT "fk_transactions_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
     CONSTRAINT "fk_transactions_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
-    CONSTRAINT "fk_transactions_expenses_expense_id_account_id_bank_account_id" FOREIGN KEY ("expense_id", "account_id", "bank_account_id") REFERENCES "expenses" ("expense_id", "account_id", "bank_account_id")
+    CONSTRAINT "fk_transactions_spending_spending_id_account_id_bank_account_id" FOREIGN KEY ("spending_id", "account_id", "bank_account_id") REFERENCES "spending" ("spending_id", "account_id", "bank_account_id")
 );
 
 INSERT INTO
