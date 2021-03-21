@@ -78,7 +78,8 @@ Tests:
   needs:
     - "Go Dependencies"
   services:
-    - containers.harderthanitneedstobe.com/postgres:13
+    - name: containers.harderthanitneedstobe.com/postgres:13
+      alias: postgres
   variables:
     POSTGRES_HOST: postgres
     POSTGRES_PASSWORD: ""
