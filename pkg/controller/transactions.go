@@ -83,7 +83,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 		return
 	}
 
-	var updatedExpense *models.Expense
+	var updatedExpense *models.Spending
 
 	if transaction.ExpenseId != nil && *transaction.ExpenseId > 0 {
 		account, err := repo.GetAccount()
@@ -103,7 +103,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 			return
 		}
 
-		if err = repo.UpdateExpenses(bankAccountId, []models.Expense{
+		if err = repo.UpdateExpenses(bankAccountId, []models.Spending{
 			*updatedExpense,
 		}); err != nil {
 			c.wrapPgError(ctx, err, "failed to update expense for transaction")
@@ -240,7 +240,7 @@ func (c *Controller) processTransactionSpentFrom(
 	repo repository.Repository,
 	bankAccountId uint64,
 	input, existing *models.Transaction,
-) (updatedExpenses []models.Expense, _ error) {
+) (updatedExpenses []models.Spending, _ error) {
 	account, err := repo.GetAccount()
 	if err != nil {
 		return nil, err
@@ -266,13 +266,13 @@ func (c *Controller) processTransactionSpentFrom(
 
 	switch {
 	case existingExpenseId == 0 && newExpenseId > 0:
-		// Expense is being added to the transaction.
+		// Spending is being added to the transaction.
 		expensePlan = AddExpense
 	case existingExpenseId != 0 && newExpenseId != existingExpenseId && newExpenseId > 0:
-		// Expense is being changed from one expense to another.
+		// Spending is being changed from one expense to another.
 		expensePlan = ChangeExpense
 	case existingExpenseId != 0 && newExpenseId == 0:
-		// Expense is being removed from the transaction.
+		// Spending is being removed from the transaction.
 		expensePlan = RemoveExpense
 	default:
 		// TODO Handle transaction amount changes with expenses.
@@ -280,7 +280,7 @@ func (c *Controller) processTransactionSpentFrom(
 	}
 
 	// Retrieve the expenses that we need to work with and potentially update.
-	var currentExpense, newExpense *models.Expense
+	var currentExpense, newExpense *models.Spending
 	var currentErr, newErr error
 	switch expensePlan {
 	case AddExpense:
@@ -300,7 +300,7 @@ func (c *Controller) processTransactionSpentFrom(
 		return nil, errors.Wrap(newErr, "failed to retrieve the new expense for the transaction")
 	}
 
-	expenseUpdates := make([]models.Expense, 0)
+	expenseUpdates := make([]models.Spending, 0)
 
 	switch expensePlan {
 	case ChangeExpense, RemoveExpense:
@@ -349,7 +349,7 @@ func (c *Controller) processTransactionSpentFrom(
 func (c *Controller) addExpenseToTransaction(
 	account *models.Account,
 	transaction *models.Transaction,
-	expense *models.Expense,
+	expense *models.Spending,
 ) error {
 	var allocationAmount int64
 	// If the amount allocated to the expense we are adding to the transaction is less than the amount of the

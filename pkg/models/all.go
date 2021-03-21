@@ -13,7 +13,7 @@ var (
 		&Link{},
 		&BankAccount{},
 		&FundingSchedule{},
-		&Expense{},
+		&Spending{},
 		&Transaction{},
 	}
 
@@ -22,7 +22,7 @@ var (
 	_ = Account{}.tableName
 	_ = BankAccount{}.tableName
 	_ = EmailVerification{}.tableName
-	_ = Expense{}.tableName
+	_ = Spending{}.tableName
 	_ = FundingSchedule{}.tableName
 	_ = Job{}.tableName
 	_ = Link{}.tableName

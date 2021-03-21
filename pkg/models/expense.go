@@ -5,20 +5,29 @@ import (
 	"time"
 )
 
-type Expense struct {
-	tableName string `pg:"expenses"`
+type SpendingType uint8
 
-	ExpenseId              uint64           `json:"expenseId" pg:"expense_id,notnull,pk,type:'bigserial'"`
+const (
+	SpendingTypeExpense SpendingType = iota
+	SpendingTypeGoal
+)
+
+type Spending struct {
+	tableName string `pg:"spending"`
+
+	SpendingId             uint64           `json:"spendingId" pg:"spending_id,notnull,pk,type:'bigserial'"`
 	AccountId              uint64           `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
 	Account                *Account         `json:"-" pg:"rel:has-one"`
 	BankAccountId          uint64           `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank,on_delete:CASCADE,type:'bigint'"`
 	BankAccount            *BankAccount     `json:"bankAccount,omitempty" pg:"rel:has-one"`
 	FundingScheduleId      uint64           `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,on_delete:RESTRICT"`
 	FundingSchedule        *FundingSchedule `json:"fundingSchedule,omitempty" pg:"rel:has-one" swaggerignore:"true"`
+	SpendingType           SpendingType     `json:"spendingType" pg:"spending_type,notnull,use_zero"`
 	Name                   string           `json:"name" pg:"name,notnull,unique:per_bank"`
 	Description            string           `json:"description,omitempty" pg:"description"`
 	TargetAmount           int64            `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
 	CurrentAmount          int64            `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
+	UsedAmount             int64            `json:"userAmount" pg:"used_amount,notnull,use_zero"`
 	RecurrenceRule         *Rule            `json:"recurrenceRule" pg:"recurrence_rule,notnull,type:'text'" swaggertype:"string"`
 	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence,type:'date'"`
 	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull,type:'date'"`
@@ -41,7 +50,7 @@ func midnightInLocal(input time.Time, timezone *time.Location) time.Time {
 	return midnight
 }
 
-func (e *Expense) CalculateNextContribution(
+func (e *Spending) CalculateNextContribution(
 	accountTimezone string,
 	nextContributionDate time.Time,
 	nextContributionRule *Rule,

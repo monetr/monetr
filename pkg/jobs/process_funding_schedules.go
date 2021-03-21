@@ -85,7 +85,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 			return err
 		}
 
-		expensesToUpdate := make([]models.Expense, 0)
+		expensesToUpdate := make([]models.Spending, 0)
 
 		for _, fundingScheduleId := range fundingScheduleIds {
 			fundingLog := log.WithFields(logrus.Fields{
@@ -116,11 +116,10 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 				return err
 			}
 
-
 			for _, expense := range expenses {
 				expenseLog := fundingLog.WithFields(logrus.Fields{
-					"expenseId":   expense.ExpenseId,
-					"expenseName": expense.Name,
+					"spendingId":   expense.SpendingId,
+					"spendingName": expense.Name,
 				})
 				if expense.TargetAmount <= expense.CurrentAmount {
 					expenseLog.Trace("skipping expense, target amount is already achieved")
@@ -151,8 +150,6 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 		}
 
 		log.Tracef("preparing to update %d expense(s)", len(expensesToUpdate))
-
-
 
 		return nil
 	})

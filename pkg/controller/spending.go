@@ -34,7 +34,7 @@ func (c *Controller) handleExpenses(p iris.Party) {
 // @Security ApiKeyAuth
 // @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/expenses [get]
-// @Success 200 {array} models.Expense
+// @Success 200 {array} models.Spending
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getExpenses(ctx *context.Context) {
@@ -57,15 +57,15 @@ func (c *Controller) getExpenses(ctx *context.Context) {
 
 // Create Expense
 // @id create-expense
-// @tags Expense
+// @tags Spending
 // @summary Create an expense for the specified bank account.
 // @security ApiKeyAuth
 // @accept json
 // @product json
 // @Param bankAccountId path int true "Bank Account ID"
-// @Param expense body models.Expense true "New Expense"
+// @Param expense body models.Spending true "New Expense"
 // @Router /bank_accounts/{bankAccountId}/expenses [post]
-// @Success 200 {object} models.Expense
+// @Success 200 {object} models.Spending
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
@@ -76,13 +76,14 @@ func (c *Controller) postExpenses(ctx *context.Context) {
 		return
 	}
 
-	expense := &models.Expense{}
+	expense := &models.Spending{}
 	if err := ctx.ReadJSON(expense); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
 
-	expense.ExpenseId = 0 // Make sure we create a new expense.
+	expense.SpendingId = 0 // Make sure we create a new expense.
+	expense.SpendingType = models.SpendingTypeExpense
 	expense.BankAccountId = bankAccountId
 	expense.Name = strings.TrimSpace(expense.Name)
 	expense.Description = strings.TrimSpace(expense.Description)

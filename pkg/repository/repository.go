@@ -13,7 +13,7 @@ type Repository interface {
 	UserId() uint64
 
 	CreateBankAccounts(bankAccounts ...models.BankAccount) error
-	CreateExpense(expense *models.Expense) error
+	CreateExpense(expense *models.Spending) error
 	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
@@ -22,9 +22,9 @@ type Repository interface {
 	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
-	GetExpense(bankAccountId, expenseId uint64) (*models.Expense, error)
-	GetExpenses(bankAccountId uint64) ([]models.Expense, error)
-	GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Expense, error)
+	GetExpense(bankAccountId, expenseId uint64) (*models.Spending, error)
+	GetExpenses(bankAccountId uint64) ([]models.Spending, error)
+	GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
 	GetIsSetup() (bool, error)
@@ -40,7 +40,7 @@ type Repository interface {
 	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error)
 	InsertTransactions(transactions []models.Transaction) error
 	UpdateBankAccounts(accounts []models.BankAccount) error
-	UpdateExpenses(bankAccountId uint64, updates []models.Expense) error
+	UpdateExpenses(bankAccountId uint64, updates []models.Spending) error
 	UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 	UpdateLink(link *models.Link) error
 	UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error
