@@ -172,50 +172,54 @@ Kaniko - Work UI:
   script:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.work --no-push
 
-Publish GitHub - REST API:
+Publish - REST API:
   needs:
     - "Kaniko - REST API"
     - "Tests"
-  environment: GitHub
+  secrets:
+    DOCKER_CONFIG_JSON:
+      vault: containers/push/docker-config.json@pipelines/harderthanitneedstobe.com
   stage: Publish Container
   only:
     refs:
       - main
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: containers.harderthanitneedstobe.com/kaniko-ci:latest
     entrypoint: [ "" ]
   tags:
     - k8s:shared
     - arch:amd64
   before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"ghcr.io\":{\"username\":\"elliotcourant\",\"password\":\"$K8S_SECRET_GITHUB_ACCESS_TOKEN\"}}}" > /kaniko/.docker/config.json
+    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
   script:
     - |
       /kaniko/executor --context $CI_PROJECT_DIR \
         --build-arg $CI_COMMIT_SHA \
         --dockerfile $CI_PROJECT_DIR/Dockerfile \
-        --destination ghcr.io/harderthanitneedstobe/rest-api:latest
+        --destination ghcr.io/harderthanitneedstobe/rest-api:latest \
+        --destination containers.harderthanitneedstobe.com/rest-api:latest
 
-Publish GitHub - Work UI:
+Publish - Work UI:
   needs:
     - "Kaniko - Work UI"
-  environment: GitHub
+  secrets:
+    DOCKER_CONFIG_JSON:
+      vault: containers/push/docker-config.json@pipelines/harderthanitneedstobe.com
   stage: Publish Container
   only:
     refs:
       - main
   image:
-    name: gcr.io/kaniko-project/executor:debug
+    name: containers.harderthanitneedstobe.com/kaniko-ci:latest
     entrypoint: [ "" ]
   tags:
     - k8s:shared
     - arch:amd64
   before_script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"ghcr.io\":{\"username\":\"elliotcourant\",\"password\":\"$K8S_SECRET_GITHUB_ACCESS_TOKEN\"}}}" > /kaniko/.docker/config.json
+    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
   script:
     - |
       /kaniko/executor --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
-        --destination ghcr.io/harderthanitneedstobe/work-ui:latest
+        --destination ghcr.io/harderthanitneedstobe/work-ui:latest \
+        --destination containers.harderthanitneedstobe.com/work-ui:latest
