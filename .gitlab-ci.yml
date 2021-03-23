@@ -7,7 +7,7 @@ stages:
   - Publish Container
 
 JS Dependencies:
-  needs: []
+  needs: [ ]
   stage: Dependencies
   image: node:15.12.0-buster
   tags:
@@ -20,7 +20,7 @@ JS Dependencies:
       - ./node_modules
     policy: push
 
-Build:
+Build Development:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
@@ -28,7 +28,22 @@ Build:
   tags:
     - k8s:shared
   script:
-    - yarn build
+    - yarn build-dev
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./node_modules
+    policy: pull
+
+Build Production:
+  needs:
+    - "JS Dependencies"
+  stage: Build Javascript
+  image: node:15.12.0-buster
+  tags:
+    - k8s:shared
+  script:
+    - yarn build-prod
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
