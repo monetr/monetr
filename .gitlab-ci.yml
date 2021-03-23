@@ -92,7 +92,7 @@ Yeet Coverage:
 
 Kaniko:
   needs:
-    - "Build"
+    - "Build Production"
   stage: Build Container
   image:
     name: gcr.io/kaniko-project/executor:debug
