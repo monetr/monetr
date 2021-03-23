@@ -9,7 +9,7 @@ stages:
 JS Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: node:15.12.0-buster
+  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -24,7 +24,7 @@ Build Development:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
-  image: node:15.12.0-buster
+  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -39,7 +39,7 @@ Build Production:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
-  image: node:15.12.0-buster
+  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -55,7 +55,7 @@ Test:
   needs:
     - "JS Dependencies"
   stage: Test Javascript
-  image: node:15.12.0-buster
+  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -94,13 +94,11 @@ Kaniko:
   needs:
     - "Build Production"
   stage: Build Container
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [ "" ]
+  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
   tags:
     - k8s:shared
   script:
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
+    - kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
@@ -117,19 +115,14 @@ Publish GitHub:
   only:
     refs:
       - main
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [ "" ]
+  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
   tags:
     - k8s:shared
   before_script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"ghcr.io\":{\"username\":\"elliotcourant\",\"password\":\"$K8S_SECRET_GITHUB_ACCESS_TOKEN\"}}}" > /kaniko/.docker/config.json
   script:
-    - |
-      /kaniko/executor --context $CI_PROJECT_DIR \
-        --dockerfile $CI_PROJECT_DIR/Dockerfile \
-        --destination ghcr.io/harderthanitneedstobe/web-ui:latest
+    - kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ghcr.io/harderthanitneedstobe/web-ui:latest
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
