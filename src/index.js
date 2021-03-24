@@ -1,17 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux'
-import configureStore from './store';
+import reportWebVitals from './reportWebVitals';
 import Root from "./root";
+import configureStore from './store';
+import "./styles/styles.css";
 import './styles/index.scss';
 
 const store = configureStore();
 
+if(module.hot){
+  module.hot.accept()
+}
+
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <Root />
+    <Provider store={ store }>
+      <Root/>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

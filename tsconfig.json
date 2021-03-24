@@ -1,10 +1,17 @@
 {
   "compilerOptions": {
-    "jsx": "react",
-    "baseUrl": "src",
     "allowJs": true,
+    "baseUrl": "src",
     "esModuleInterop": true,
-    "outDir": "build"
+    "jsx": "react",
+    "module": "es6",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "outDir": "build",
+    "sourceMap": true,
+    "strict": false,
+    "target": "es5"
   },
   "include": [
     "src/**/*"

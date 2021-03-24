@@ -41,6 +41,24 @@ export class TransactionsView extends Component<PropTypes, {}> {
   render() {
 
     return (
+      <div className="flex flex-col h-full p-10">
+        <div className="grid grid-cols-3 gap-4 flex-1">
+          <div className="col-span-2">
+            <Card elevation={4} className="h-full w-full">
+
+            </Card>
+          </div>
+          <div className="">
+            <Card elevation={4} className="h-full w-full">
+
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
+
+
+    return (
       <Box m={ 6 }>
         <Container maxWidth="lg">
           <Grid container spacing={ 2 } justify={ "flex-start" }>
