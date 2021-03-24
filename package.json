@@ -86,7 +86,7 @@
   "scripts": {
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production",
-    "clean": "rm build/bundle.js",
+    "clean": "rm -rf build/* || true",
     "start": "webpack serve --hot --mode development",
     "test": "jest"
   },
