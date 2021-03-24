@@ -9,6 +9,10 @@ import './styles/index.scss';
 
 const store = configureStore();
 
+if(module.hot){
+  module.hot.accept()
+}
+
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={ store }>

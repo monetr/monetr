@@ -10,3 +10,9 @@ html {
 body {
   margin: 0;
 }
+
+body > #root {
+  height: -webkit-calc(100% - 64px);
+  height:    -moz-calc(100% - 64px);
+  height:         calc(100% - 64px);
+}
