@@ -75,7 +75,7 @@
     "resolve-url-loader": "3.1.2",
     "sass": "1.32.8",
     "selector-action": "1.2.0",
-    "semver": "7.3.4",
+    "semver": "7.3.5",
     "socket.io-client": "4.0.0",
     "terser-webpack-plugin": "4.2.3",
     "ts-pnp": "1.2.0",
