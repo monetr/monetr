@@ -47,13 +47,14 @@ export class BankAccountSelector extends Component<PropTypes, {}> {
 
     return (
       <Fragment>
-        <InputLabel id="bank-account-selection-label">Bank Account</InputLabel>
+        <InputLabel id="bank-account-selection-label" className="text-gray-200">Bank Account</InputLabel>
         <Select
           labelId="bank-account-selection-label"
           id="bank-account-selection-select"
           value={ this.props.selectedBankAccountId ?? this.props.bankAccounts.first<BankAccount>()?.bankAccountId }
           onChange={ this.changeBankAccount }
           label="Bank Account"
+          className="text-gray-200"
         >
           {
             this.props.bankAccounts.map(bankAccount => {

@@ -1,4 +1,4 @@
-import { Box, Button, Card, Container, Grid } from "@material-ui/core";
+import { Box, Button, Card, Container, Grid, List } from "@material-ui/core";
 import TransactionItem from "components/Transactions/TransactionItem";
 import React, { Component } from "react";
 import { connect } from "react-redux";
@@ -16,6 +16,10 @@ interface PropTypes {
 
 export class TransactionsView extends Component<PropTypes, {}> {
 
+  state = {
+    selectedTransaction: 0,
+  };
+
   componentDidMount() {
     this.props.fetchInitialTransactionsIfNeeded()
       .then(() => {
@@ -32,52 +36,46 @@ export class TransactionsView extends Component<PropTypes, {}> {
     return transactionIds.map(transactionId => this.renderTransaction(transactionId));
   }
 
+  selectTransaction = (transactionId: number) => {
+    return this.setState({
+      selectedTransaction: transactionId,
+    })
+  }
+
   renderTransaction = (transactionId: number) => {
+    const { selectedTransaction } = this.state;
     return (
-      <TransactionItem transactionId={ transactionId }/>
+      <TransactionItem
+        transactionId={ transactionId }
+        selected={ transactionId === selectedTransaction }
+        onClick={ this.selectTransaction }
+      />
     );
   };
 
   render() {
 
     return (
-      <div className="flex flex-col h-full p-10">
-        <div className="grid grid-cols-3 gap-4 flex-1">
-          <div className="col-span-2">
-            <Card elevation={4} className="h-full w-full">
-
-            </Card>
-          </div>
-          <div className="">
-            <Card elevation={4} className="h-full w-full">
-
-            </Card>
+      <div className="minus-nav">
+        <div className="flex flex-col h-full p-10 max-h-full overflow-y-scroll">
+          <div className="grid grid-cols-3 gap-4 flex-grow">
+            <div className="col-span-2">
+              <Card elevation={ 4 } className="w-full overflow-scroll table">
+                <List disablePadding className="w-full">
+                  { this.renderTransactions() }
+                </List>
+              </Card>
+            </div>
+            <div className="">
+              <Card elevation={ 4 } className="h-full w-full">
+                Test content
+                Selected transaction { this.state.selectedTransaction }
+              </Card>
+            </div>
           </div>
         </div>
       </div>
-    )
-
-
-    return (
-      <Box m={ 6 }>
-        <Container maxWidth="lg">
-          <Grid container spacing={ 2 } justify={ "flex-start" }>
-            <Grid item md={ 8 }>
-              <Card elevation={ 6 }>
-                <div className="transactions-view">
-                  { this.renderTransactions() }
-                </div>
-              </Card>
-            </Grid>
-            <Grid item sm>
-              <Card elevation={ 6 }>
-                <Button>Test</Button>
-              </Card>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-    )
+    );
   }
 }
 
