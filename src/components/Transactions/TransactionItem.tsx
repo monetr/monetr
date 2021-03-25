@@ -58,7 +58,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
             <Typography className="transaction-item-name">{ transaction.name }</Typography>
           </div>
           <div className="col-span-3 opacity-75">
-            <Typography>{ this.getSpentFromString() }</Typography>
+            <Typography className="transaction-expense-name">{ this.getSpentFromString() }</Typography>
           </div>
           <div className="row-span-2 col-span-1 flex justify-end">
             <Typography className={ classnames('amount align-middle self-center', {
