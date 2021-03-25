@@ -1807,10 +1807,10 @@
     "@babel/runtime" "^7.12.5"
     "@testing-library/dom" "^7.28.1"
 
-"@testing-library/user-event@13.0.14":
-  version "13.0.14"
-  resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-13.0.14.tgz#e2f2e3f404bd0a9f7669e24507a4e626e51160c3"
-  integrity sha512-UnLyNKC5qWecKpxhRYMpbIDGiAm8229XwJWZr5944uVeOYh7FE5l/45E6N5oXCupNEheTPZaXB+sKkmbeogkFQ==
+"@testing-library/user-event@13.0.15":
+  version "13.0.15"
+  resolved "https://registry.yarnpkg.com/@testing-library/user-event/-/user-event-13.0.15.tgz#9b2cbcd954474b71392f52341053b24c770bb404"
+  integrity sha512-GjSG8Sf/aIvYkaN54ENrA0brg1fU/69P+ow02fBF4NQpbLLKRfGX1z3pWGBBpxBXY/2Be9RHBYlkj2058SroTg==
   dependencies:
     "@babel/runtime" "^7.12.5"
 
