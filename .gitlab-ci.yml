@@ -192,7 +192,9 @@ Publish - REST API:
         --build-arg $CI_COMMIT_SHA \
         --dockerfile $CI_PROJECT_DIR/Dockerfile \
         --destination ghcr.io/harderthanitneedstobe/rest-api:latest \
-        --destination containers.harderthanitneedstobe.com/rest-api:latest
+        --destination ghcr.io/harderthanitneedstobe/rest-api:$(git rev-parse --short HEAD)  \
+        --destination containers.harderthanitneedstobe.com/rest-api:latest \
+        --destination containers.harderthanitneedstobe.com/rest-api:$(git rev-parse --short HEAD)
 
 Publish - Work UI:
   needs:
