@@ -1,0 +1,10 @@
+.transaction-detail {
+
+  .amount {
+    color: red;
+
+    &.addition {
+      color: green;
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import parseToMoment from "util/parseToMoment";
+import { parseToMoment } from "util/parseToMoment";
 import Moment from "moment";
 
 describe('parse to moment', () => {

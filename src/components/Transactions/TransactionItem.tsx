@@ -20,10 +20,14 @@ interface WithConnectionPropTypes extends PropTypes {
   expense?: Expense;
 }
 
-class TransactionItem extends Component<WithConnectionPropTypes, {}> {
+export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
 
   getSpentFromString(): string {
-    const { expense } = this.props;
+    const { expense, transaction } = this.props;
+
+    if (transaction.getIsAddition()) {
+      return 'Deposited Into Safe-To-Spend';
+    }
 
     if (!expense) {
       return 'Spent From Safe-To-Spend';
@@ -40,17 +44,18 @@ class TransactionItem extends Component<WithConnectionPropTypes, {}> {
     const { transaction, selected } = this.props;
 
     return (
-      <ListItem button onClick={ this.handleClick } className="transactions-item">
+      <ListItem button onClick={ this.handleClick } className="transactions-item" role="transaction-row">
         <ListItemIcon>
           <Checkbox
             edge="start"
             checked={ selected }
             tabIndex={ -1 }
+            color="primary"
           />
         </ListItemIcon>
         <div className="grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full">
           <div className="col-span-3">
-            <Typography>{ transaction.name }</Typography>
+            <Typography className="transaction-item-name">{ transaction.name }</Typography>
           </div>
           <div className="col-span-3 opacity-75">
             <Typography>{ this.getSpentFromString() }</Typography>

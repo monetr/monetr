@@ -1,4 +1,5 @@
 import moment from "moment";
+import { parseToMoment, parseToMomentMaybe } from "util/parseToMoment";
 
 export interface TransactionFields {
   transactionId?: number;
@@ -36,7 +37,12 @@ export default class Transaction implements TransactionFields {
 
   constructor(data?: TransactionFields) {
     if (data) {
-      Object.assign(this, data);
+      Object.assign(this, {
+        ...data,
+        date: parseToMoment(data.date),
+        authorizedDate: parseToMomentMaybe(data.authorizedDate),
+        createdAt: parseToMoment(data.createdAt),
+      });
     }
   }
 

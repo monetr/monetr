@@ -1,4 +1,5 @@
-import { Box, Button, Card, Container, Grid, List } from "@material-ui/core";
+import { Box, Button, Card, Container, Grid, List, Typography } from "@material-ui/core";
+import TransactionDetailView from "components/Transactions/TransactionDetail";
 import TransactionItem from "components/Transactions/TransactionItem";
 import React, { Component } from "react";
 import { connect } from "react-redux";
@@ -14,10 +15,14 @@ interface PropTypes {
   }
 }
 
-export class TransactionsView extends Component<PropTypes, {}> {
+interface State {
+  selectedTransaction: number;
+}
+
+export class TransactionsView extends Component<PropTypes, State> {
 
   state = {
-    selectedTransaction: 0,
+    selectedTransaction: 0
   };
 
   componentDidMount() {
@@ -37,15 +42,18 @@ export class TransactionsView extends Component<PropTypes, {}> {
   }
 
   selectTransaction = (transactionId: number) => {
-    return this.setState({
-      selectedTransaction: transactionId,
-    })
+    return this.setState(prevState => ({
+      // This logic will make it so that if the selectTransaction method is called again for a transaction that is
+      // already selected, then the selection will be toggled.
+      selectedTransaction: transactionId === prevState.selectedTransaction ? 0 : transactionId
+    }));
   }
 
   renderTransaction = (transactionId: number) => {
     const { selectedTransaction } = this.state;
     return (
       <TransactionItem
+        key={ transactionId }
         transactionId={ transactionId }
         selected={ transactionId === selectedTransaction }
         onClick={ this.selectTransaction }
@@ -53,8 +61,24 @@ export class TransactionsView extends Component<PropTypes, {}> {
     );
   };
 
-  render() {
+  renderTransactionDetailView = () => {
+    const { selectedTransaction } = this.state;
 
+    if (selectedTransaction) {
+      return (
+        <TransactionDetailView transactionId={ selectedTransaction } />
+      );
+    }
+
+
+    return (
+      <div className="flex justify-center place-content-center">
+        <Typography className="pt-10">Nothing here...</Typography>
+      </div>
+    )
+  };
+
+  render() {
     return (
       <div className="minus-nav">
         <div className="flex flex-col h-full p-10 max-h-full overflow-y-scroll">
@@ -68,8 +92,7 @@ export class TransactionsView extends Component<PropTypes, {}> {
             </div>
             <div className="">
               <Card elevation={ 4 } className="h-full w-full">
-                Test content
-                Selected transaction { this.state.selectedTransaction }
+                { this.renderTransactionDetailView() }
               </Card>
             </div>
           </div>

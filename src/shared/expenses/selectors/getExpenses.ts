@@ -5,7 +5,7 @@ import Expense from "data/Expense";
 
 const getExpensesByBankAccount = state => state.expenses.items;
 
-export const getExpenses = createSelector(
+export const getExpenses = createSelector<any, any, Map<number, Expense>>(
   [getSelectedBankAccountId, getExpensesByBankAccount],
   (selectedBankAccountId: number, byBankAccount: Map<number, Map<number, Expense>>) => {
     return byBankAccount.get(selectedBankAccountId) ?? Map<number, Expense>();

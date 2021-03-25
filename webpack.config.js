@@ -104,6 +104,8 @@ module.exports = (env, argv) => {
       contentBase: './public',
       historyApiFallback: true,
       hot: true,
+      host: 'localhost',
+      port: 8080,
       transportMode: 'ws',
       before(app, server) {
         // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
