@@ -10,6 +10,7 @@ import logout from "shared/authentication/actions/logout";
 import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
 import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
 import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
+import fetchSpending from "shared/spending/actions/fetchSpending";
 import FirstTimeSetup from "views/FirstTimeSetup";
 import TransactionsView from "views/TransactionsView";
 
@@ -24,6 +25,7 @@ export class AuthenticatedApplication extends Component {
     history: PropTypes.object.isRequired,
     fetchLinksIfNeeded: PropTypes.func.isRequired,
     fetchBankAccounts: PropTypes.func.isRequired,
+    fetchSpending: PropTypes.func.isRequired,
     hasAnyLinks: PropTypes.bool.isRequired,
   };
 
@@ -31,6 +33,7 @@ export class AuthenticatedApplication extends Component {
     Promise.all([
       this.props.fetchLinksIfNeeded(),
       this.props.fetchBankAccounts(),
+      this.props.fetchSpending(),
     ])
       .then(() => this.setState({ loading: false }));
   }
@@ -107,7 +110,7 @@ export class AuthenticatedApplication extends Component {
             <h1>Goals</h1>
           </Route>
           <Route path="/">
-            <h1>Home/Setup</h1>
+            <Redirect to="/transactions" />
           </Route>
           <Route>
             <h1>Not found</h1>
@@ -146,5 +149,6 @@ export default connect(
     logout,
     fetchLinksIfNeeded,
     fetchBankAccounts,
+    fetchSpending,
   }, dispatch),
 )(withRouter(AuthenticatedApplication));
