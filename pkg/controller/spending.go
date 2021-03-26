@@ -10,19 +10,19 @@ import (
 )
 
 // @tag.name Expenses
-func (c *Controller) handleExpenses(p iris.Party) {
-	p.Get("/{bankAccountId:uint64}/expenses", c.getExpenses)
-	p.Post("/{bankAccountId:uint64}/expenses", c.postExpenses)
+func (c *Controller) handleSpending(p iris.Party) {
+	p.Get("/{bankAccountId:uint64}/spending", c.getExpenses)
+	p.Post("/{bankAccountId:uint64}/spending", c.postExpenses)
 
-	p.Put("/{bankAccountId:uint64}/expenses/{expenseId:uint64}", func(ctx *context.Context) {
-
-	})
-
-	p.Post("/{bankAccountId:uint64}/expenses/transfer", func(c *context.Context) {
+	p.Put("/{bankAccountId:uint64}/spending/{expenseId:uint64}", func(ctx *context.Context) {
 
 	})
 
-	p.Delete("/{bankAccountId:uint64}/expenses/{expenseId:uint64}", func(ctx *context.Context) {
+	p.Post("/{bankAccountId:uint64}/spending/transfer", func(c *context.Context) {
+
+	})
+
+	p.Delete("/{bankAccountId:uint64}/spending/{expenseId:uint64}", func(ctx *context.Context) {
 
 	})
 }

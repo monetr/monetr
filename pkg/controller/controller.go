@@ -160,7 +160,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			c.handleBankAccounts(p)
 			c.handleTransactions(p)
 			c.handleFundingSchedules(p)
-			c.handleExpenses(p)
+			c.handleSpending(p)
 		})
 
 		p.PartyFunc("/jobs", c.handleJobs)

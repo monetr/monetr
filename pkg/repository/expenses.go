@@ -8,9 +8,9 @@ import (
 func (r *repositoryBase) GetExpenses(bankAccountId uint64) ([]models.Spending, error) {
 	var result []models.Spending
 	err := r.txn.Model(&result).
-		Where(`"expense"."account_id" = ?`, r.AccountId()).
-		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
-		Where(`"expense"."spending_type" = ?`, models.SpendingTypeExpense).
+		Where(`"spending"."account_id" = ?`, r.AccountId()).
+		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
+		Where(`"spending"."spending_type" = ?`, models.SpendingTypeExpense).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve expenses")
@@ -22,10 +22,10 @@ func (r *repositoryBase) GetExpenses(bankAccountId uint64) ([]models.Spending, e
 func (r *repositoryBase) GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error) {
 	var result []models.Spending
 	err := r.txn.Model(&result).
-		Where(`"expense"."account_id" = ?`, r.AccountId()).
-		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
-		Where(`"expense"."funding_schedule_id" = ?`, fundingScheduleId).
-		Where(`"expense"."spending_type" = ?`, models.SpendingTypeExpense).
+		Where(`"spending"."account_id" = ?`, r.AccountId()).
+		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
+		Where(`"spending"."funding_schedule_id" = ?`, fundingScheduleId).
+		Where(`"spending"."spending_type" = ?`, models.SpendingTypeExpense).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve expenses for funding schedule")
@@ -50,9 +50,9 @@ func (r *repositoryBase) UpdateExpenses(bankAccountId uint64, updates []models.S
 	}
 
 	_, err := r.txn.Model(&updates).
-		Where(`"expense"."account_id" = ?`, r.AccountId()).
-		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
-		Where(`"expense"."spending_type" = ?`, models.SpendingTypeExpense).
+		Where(`"spending"."account_id" = ?`, r.AccountId()).
+		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
+		Where(`"spending"."spending_type" = ?`, models.SpendingTypeExpense).
 		Update(&updates)
 	if err != nil {
 		return errors.Wrap(err, "failed to update expenses")
@@ -65,10 +65,10 @@ func (r *repositoryBase) GetExpense(bankAccountId, expenseId uint64) (*models.Sp
 	var result models.Spending
 	err := r.txn.Model(&result).
 		Relation("FundingSchedule").
-		Where(`"expense"."account_id" = ?`, r.AccountId()).
-		Where(`"expense"."bank_account_id" = ?`, bankAccountId).
-		Where(`"expense"."expense_id" = ?`, expenseId).
-		Where(`"expense"."spending_type" = ?`, models.SpendingTypeExpense).
+		Where(`"spending"."account_id" = ?`, r.AccountId()).
+		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
+		Where(`"spending"."expense_id" = ?`, expenseId).
+		Where(`"spending"."spending_type" = ?`, models.SpendingTypeExpense).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve expense")
