@@ -5,7 +5,8 @@ export interface TransactionFields {
   transactionId?: number;
   bankAccountId?: number;
   amount?: number;
-  expenseId?: number;
+  spendingId?: number;
+  spendingAmount?: number;
   categories?: string[];
   originalCategories?: string[];
   date?: moment.Moment | string;
@@ -18,12 +19,12 @@ export interface TransactionFields {
   createdAt?: moment.Moment | string;
 }
 
-
 export default class Transaction implements TransactionFields {
   transactionId: number;
   bankAccountId: number;
   amount: number;
-  expenseId?: number;
+  spendingId?: number;
+  spendingAmount?: number;
   categories: string[];
   originalCategories: string[];
   date: moment.Moment;
@@ -56,5 +57,17 @@ export default class Transaction implements TransactionFields {
 
   getIsAddition(): boolean {
     return this.amount < 0;
+  }
+
+  getName(): string {
+    if (this.name) {
+      return this.name;
+    }
+
+    return this.originalName;
+  }
+
+  getOriginalName(): string {
+    return this.originalName;
   }
 }

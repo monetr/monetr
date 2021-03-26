@@ -1,10 +1,10 @@
 import { Checkbox, ListItem, ListItemIcon, Typography } from "@material-ui/core";
 import classnames from 'classnames';
-import Expense from "data/Expense";
+import Spending from "data/Spending";
 import Transaction from "data/Transaction";
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { getExpenseById } from "shared/expenses/selectors/getExpenseById";
+import { getSpendingById } from "shared/spending/selectors/getSpendingById";
 import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
 
 import './styles/TransactionItem.scss';
@@ -17,23 +17,23 @@ interface PropTypes {
 
 interface WithConnectionPropTypes extends PropTypes {
   transaction: Transaction;
-  expense?: Expense;
+  spending?: Spending;
 }
 
 export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
 
   getSpentFromString(): string {
-    const { expense, transaction } = this.props;
+    const { spending, transaction } = this.props;
 
     if (transaction.getIsAddition()) {
       return 'Deposited Into Safe-To-Spend';
     }
 
-    if (!expense) {
+    if (!spending) {
       return 'Spent From Safe-To-Spend';
     }
 
-    return `Spent From ${ expense.name }`;
+    return `Spent From ${ spending.name }`;
   }
 
   handleClick = () => {
@@ -55,7 +55,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
         </ListItemIcon>
         <div className="grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full">
           <div className="col-span-3">
-            <Typography className="transaction-item-name">{ transaction.name }</Typography>
+            <Typography className="transaction-item-name">{ transaction.getName() }</Typography>
           </div>
           <div className="col-span-3 opacity-75">
             <Typography className="transaction-expense-name">{ this.getSpentFromString() }</Typography>
@@ -79,7 +79,7 @@ export default connect(
 
     return {
       transaction,
-      expense: getExpenseById(transaction.expenseId)(state),
+      spending: getSpendingById(transaction.spendingId)(state),
     }
   },
   {}

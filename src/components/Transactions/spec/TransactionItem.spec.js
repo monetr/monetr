@@ -1,8 +1,9 @@
 import { render } from '@testing-library/react'
 import { TransactionItem } from "components/Transactions/TransactionItem";
-import Expense from "data/Expense";
+import Spending from "data/Spending";
 import Transaction from "data/Transaction";
 import moment from "moment";
+import { queryText } from "testutils/queryText";
 
 
 describe('transaction item', () => {
@@ -17,7 +18,7 @@ describe('transaction item', () => {
 
     // Make sure it's actually there.
     expect(document.querySelector('.transactions-item')).not.toBeEmptyDOMElement();
-    expect(document.querySelector('.transaction-item-name').textContent).toBe('Dumb Stuff');
+    expect(queryText('.transaction-item-name')).toBe('Dumb Stuff');
   });
 
   it('will render with expense', () => {
@@ -27,12 +28,12 @@ describe('transaction item', () => {
         name: 'Dumb Stuff',
         date: moment(),
       }) }
-      expense={ new Expense({
+      spending={ new Spending({
         name: 'Dumb Stuff Budget'
       }) }
     />);
 
-    expect(document.querySelector('.transaction-expense-name').textContent).toBe('Spent From Dumb Stuff Budget');
+    expect(queryText('.transaction-expense-name')).toBe('Spent From Dumb Stuff Budget');
   });
 
   it('will render a deposit', () => {
@@ -45,7 +46,7 @@ describe('transaction item', () => {
       }) }
     />);
 
-    expect(document.querySelector('.transaction-expense-name').textContent).toBe('Deposited Into Safe-To-Spend');
-    expect(document.querySelector('.amount').textContent).toBe('+ $1.00');
+    expect(queryText('.transaction-expense-name')).toBe('Deposited Into Safe-To-Spend');
+    expect(queryText('.amount')).toBe('+ $1.00');
   });
 });

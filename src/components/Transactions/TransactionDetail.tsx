@@ -1,9 +1,9 @@
 import { Button, Chip, Divider, Typography } from "@material-ui/core";
-import Expense from "data/Expense";
+import Spending from "data/Spending";
 import Transaction from "data/Transaction";
 import React, { Component, Fragment } from 'react';
 import { connect } from "react-redux";
-import { getExpenses } from "shared/expenses/selectors/getExpenses";
+import { getSpending } from "shared/spending/selectors/getSpending";
 import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
 import { Map } from 'immutable';
 import classnames from 'classnames';
@@ -16,7 +16,7 @@ interface PropTypes {
 
 interface WithConnectionPropTypes extends PropTypes {
   transaction: Transaction;
-  expenses: Map<number, Expense>;
+  spending: Map<number, Spending>;
 }
 
 class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
@@ -102,7 +102,7 @@ export default connect(
 
     return {
       transaction,
-      expenses: getExpenses(state),
+      spending: getSpending(state),
     };
   },
   {}

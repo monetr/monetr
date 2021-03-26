@@ -1,5 +1,12 @@
+export enum LinkType {
+  Unknown = 0,
+  Plaid = 1,
+  Manual = 2,
+}
+
 export interface LinkFields {
   linkId: number;
+  linkType: LinkType;
   institutionId: string;
   institutionName: string;
   customInstitutionName?: string;
@@ -8,6 +15,7 @@ export interface LinkFields {
 
 export default class Link implements LinkFields {
   linkId: number;
+  linkType: LinkType;
   institutionId: string;
   institutionName: string;
   customInstitutionName?: string;
@@ -17,7 +25,11 @@ export default class Link implements LinkFields {
     Object.assign(this, data)
   }
 
-  public getName(): string {
+  getName(): string {
     return this.customInstitutionName ?? this.institutionName;
+  }
+
+  getIsManual(): boolean {
+    return this.linkType === LinkType.Manual;
   }
 }
