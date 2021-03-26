@@ -54,4 +54,8 @@ export default class Spending implements SpendingFields {
   getCurrentAmountString(): string {
     return `$${ (this.currentAmount / 100).toFixed(2) }`;
   }
+
+  getIsExpense(): boolean {
+    return this.spendingType === SpendingType.Expense;
+  }
 }
