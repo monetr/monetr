@@ -7,7 +7,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.14.3
 	github.com/brianvoe/gofakeit/v6 v6.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/go-pg/pg/v10 v10.8.0
+	github.com/go-pg/pg/v10 v10.9.0
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.4
 	github.com/hashicorp/vault/api v1.0.4
