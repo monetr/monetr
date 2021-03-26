@@ -1,7 +1,8 @@
 import axios from "axios";
 import Spending from "data/Spending";
+import { FETCH_SPENDING_SUCCESS } from "shared/spending/actions";
 import fetchSpending from "shared/spending/actions/fetchSpending";
-import { mockAxios } from "testutils/axios";
+import { mockAxiosGetOnce } from "testutils/axios";
 
 jest.mock('axios');
 
@@ -13,15 +14,22 @@ describe('fetchSpending', () => {
       data: [
         new Spending({
           spendingId: 123,
+          bankAccountId: 345,
           name: 'Test'
         })
       ]
     };
 
-    axios.get.mockImplementationOnce(() => Promise.resolve(data));
-    mockAxios()
+    const dispatch = jest.fn();
 
-    await expect(fetchSpending()(jest.fn)).resolves.toBeUndefined();
+    mockAxiosGetOnce(Promise.resolve(data));
+
+    await expect(fetchSpending()(dispatch)).resolves.toBeUndefined();
+
+    expect(dispatch).toHaveBeenCalledWith({
+      type: FETCH_SPENDING_SUCCESS,
+      payload: expect.anything(),
+    });
   });
 
   it('will fail to fetch spending', async () => {
@@ -33,8 +41,7 @@ describe('fetchSpending', () => {
       }
     };
 
-    axios.get.mockImplementationOnce(() => Promise.reject(data));
-    mockAxios()
+    mockAxiosGetOnce(Promise.reject(data));
 
     await expect(fetchSpending()(jest.fn)).rejects.toBe(data);
   });
