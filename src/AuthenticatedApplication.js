@@ -32,8 +32,7 @@ export class AuthenticatedApplication extends Component {
   componentDidMount() {
     Promise.all([
       this.props.fetchLinksIfNeeded(),
-      this.props.fetchBankAccounts(),
-      this.props.fetchSpending(),
+      this.props.fetchBankAccounts().then(() => this.props.fetchSpending()),
     ])
       .then(() => this.setState({ loading: false }));
   }

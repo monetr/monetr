@@ -3,7 +3,7 @@ import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelec
 import { Map } from "immutable";
 import Spending from "data/Spending";
 
-const getExpensesByBankAccount = state => state.expenses.items;
+const getExpensesByBankAccount = state => state.spending.items;
 
 export const getSpending = createSelector<any, any, Map<number, Spending>>(
   [getSelectedBankAccountId, getExpensesByBankAccount],
