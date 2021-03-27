@@ -41,6 +41,7 @@
     "immer": "9.0.1",
     "immutable": "4.0.0-rc.12",
     "ini": "2.0.0",
+    "is-svg": "4.2.2",
     "jest-circus": "26.6.3",
     "jest-resolve": "26.6.2",
     "jest-watch-typeahead": "0.6.1",
