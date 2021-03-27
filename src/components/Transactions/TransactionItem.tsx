@@ -5,19 +5,21 @@ import Transaction from "data/Transaction";
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import { getSpendingById } from "shared/spending/selectors/getSpendingById";
+import selectTransaction from "shared/transactions/actions/selectTransaction";
 import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
 
 import './styles/TransactionItem.scss';
+import { getTransactionIsSelected } from "shared/transactions/selectors/getTransactionIsSelected";
 
 interface PropTypes {
   transactionId: number;
-  selected: boolean;
-  onClick: { (transactionId: number): void };
 }
 
 interface WithConnectionPropTypes extends PropTypes {
   transaction: Transaction;
   spending?: Spending;
+  isSelected: boolean;
+  selectTransaction: { (transactionId: number): void }
 }
 
 export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
@@ -37,18 +39,18 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
   }
 
   handleClick = () => {
-    return this.props.onClick(this.props.transactionId);
+    return this.props.selectTransaction(this.props.transactionId);
   }
 
   render() {
-    const { transaction, selected } = this.props;
+    const { transaction, isSelected } = this.props;
 
     return (
       <ListItem button onClick={ this.handleClick } className="transactions-item" role="transaction-row">
         <ListItemIcon>
           <Checkbox
             edge="start"
-            checked={ selected }
+            checked={ isSelected }
             tabIndex={ -1 }
             color="primary"
           />
@@ -76,11 +78,15 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
 export default connect(
   (state, props: PropTypes) => {
     const transaction = getTransactionById(props.transactionId)(state);
+    const isSelected = getTransactionIsSelected(props.transactionId)(state);
 
     return {
       transaction,
+      isSelected,
       spending: getSpendingById(transaction.spendingId)(state),
     }
   },
-  {}
+  {
+    selectTransaction,
+  }
 )(TransactionItem)

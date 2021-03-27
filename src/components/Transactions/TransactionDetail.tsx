@@ -1,21 +1,17 @@
 import { Button, Chip, Divider, Typography } from "@material-ui/core";
+import classnames from 'classnames';
 import Spending from "data/Spending";
 import Transaction from "data/Transaction";
+import { Map } from 'immutable';
 import React, { Component, Fragment } from 'react';
 import { connect } from "react-redux";
 import { getSpending } from "shared/spending/selectors/getSpending";
-import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
-import { Map } from 'immutable';
-import classnames from 'classnames';
+import { getSelectedTransaction } from "shared/transactions/selectors/getSelectedTransaction";
 
 import './styles/TransactionDetail.scss';
 
-interface PropTypes {
-  transactionId: number;
-}
-
-interface WithConnectionPropTypes extends PropTypes {
-  transaction: Transaction;
+interface WithConnectionPropTypes {
+  transaction?: Transaction;
   spending: Map<number, Spending>;
 }
 
@@ -23,6 +19,10 @@ class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
 
   render() {
     const { transaction } = this.props;
+
+    if (!transaction) {
+      return null;
+    }
 
     return (
       <div className="w-full p-5 transaction-detail">
@@ -36,7 +36,7 @@ class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
             { transaction.getAmountString() }
           </Typography>
         </div>
-        <Divider className="mt-5 mb-5" />
+        <Divider className="mt-5 mb-5"/>
 
         <div className="grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full">
           <div className="col-span-3 row-span-1">
@@ -49,7 +49,7 @@ class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
             <Button color="primary" className="align-middle self-center">Change</Button>
           </div>
         </div>
-        <Divider className="mt-5 mb-5" />
+        <Divider className="mt-5 mb-5"/>
 
         <div className="grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full">
           <div className="col-span-3 row-span-1">
@@ -71,7 +71,7 @@ class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
             <Button color="primary" className="align-middle self-center">Change</Button>
           </div>
         </div>
-        <Divider className="mt-5 mb-5" />
+        <Divider className="mt-5 mb-5"/>
 
         {
           // Deposits are not spent from anything, so we don't want to show this for deposits.
@@ -88,7 +88,7 @@ class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
                 <Button color="primary" className="align-middle self-center">Change</Button>
               </div>
             </div>
-            <Divider className="mt-5 mb-5" />
+            <Divider className="mt-5 mb-5"/>
           </Fragment>
         }
       </div>
@@ -97,13 +97,9 @@ class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
 }
 
 export default connect(
-  (state, props: PropTypes) => {
-    const transaction = getTransactionById(props.transactionId)(state);
-
-    return {
-      transaction,
-      spending: getSpending(state),
-    };
-  },
+  (state) => ({
+    transaction: getSelectedTransaction(state),
+    spending: getSpending(state),
+  }),
   {}
 )(TransactionDetailView);

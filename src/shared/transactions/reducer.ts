@@ -1,13 +1,15 @@
-import TransactionState from "shared/transactions/state";
+import Transaction from "data/Transaction";
+import { OrderedMap } from "immutable";
+import { LOGOUT } from "shared/authentication/actions";
+import { CHANGE_BANK_ACCOUNT } from "shared/bankAccounts/actions";
 import {
+  CHANGE_SELECTED_TRANSACTION,
   FETCH_TRANSACTIONS_FAILURE,
   FETCH_TRANSACTIONS_REQUEST,
   FETCH_TRANSACTIONS_SUCCESS,
   TransactionActions
 } from "shared/transactions/actions";
-import { LOGOUT } from "shared/authentication/actions";
-import { OrderedMap } from "immutable";
-import Transaction from "data/Transaction";
+import TransactionState from "shared/transactions/state";
 
 export default function reducer(state: TransactionState = new TransactionState(), action: TransactionActions): TransactionState {
   switch (action.type) {
@@ -38,6 +40,18 @@ export default function reducer(state: TransactionState = new TransactionState()
         loading: false,
         loaded: true,
         items: mergedTransactions,
+      };
+    case CHANGE_SELECTED_TRANSACTION:
+      return {
+        ...state,
+        // The comparison logic will allow the selected transaction to be toggled if it is attempted to be selected more
+        // than once. Basically if the user clicks a transaction that's already selected then it will unselect it.
+        selectedTransactionId: state.selectedTransactionId === action.transactionId ? null : action.transactionId,
+      };
+    case CHANGE_BANK_ACCOUNT:
+      return {
+        ...state,
+        selectedTransactionId: null,
       };
     case LOGOUT:
       return new TransactionState();
