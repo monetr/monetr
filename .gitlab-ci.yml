@@ -122,7 +122,10 @@ Publish GitHub:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"ghcr.io\":{\"username\":\"elliotcourant\",\"password\":\"$K8S_SECRET_GITHUB_ACCESS_TOKEN\"}}}" > /kaniko/.docker/config.json
   script:
-    - kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination ghcr.io/harderthanitneedstobe/web-ui:latest
+    - |
+      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile \
+        --destination ghcr.io/harderthanitneedstobe/web-ui:$(git rev-parse --short HEAD) \
+        --destination ghcr.io/harderthanitneedstobe/web-ui:latest
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
