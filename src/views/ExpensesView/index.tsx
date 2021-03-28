@@ -1,5 +1,7 @@
 import { Button, Card, List, Typography } from "@material-ui/core";
 import NewExpenseDialog from "components/Expenses/NewExpenseDialog";
+import FundingScheduleList from "components/FundingSchedules/FundingScheduleList";
+import { NewFundingScheduleDialog } from "components/FundingSchedules/NewFundingScheduleDialog";
 import Spending from "data/Spending";
 import { Map } from 'immutable';
 import React, { Component, Fragment } from "react";
@@ -12,6 +14,7 @@ interface PropTypes {
 
 interface State {
   newExpenseDialogOpen: boolean;
+  showFundingSchedules: boolean;
   selectedExpense?: number;
 }
 
@@ -19,6 +22,7 @@ export class ExpensesView extends Component<PropTypes, State> {
 
   state = {
     newExpenseDialogOpen: false,
+    showFundingSchedules: false,
     selectedExpense: null
   };
 
@@ -36,6 +40,17 @@ export class ExpensesView extends Component<PropTypes, State> {
 
       </List>
     )
+  };
+
+  renderSideBar = () => {
+    const { showFundingSchedules } = this.state;
+    if (showFundingSchedules) {
+      return (
+        <FundingScheduleList onHide={ this.hideFundingSchedules }/>
+      );
+    }
+
+    return this.renderExpenseDetailView();
   };
 
   renderExpenseDetailView = () => {
@@ -72,8 +87,20 @@ export class ExpensesView extends Component<PropTypes, State> {
     });
   };
 
+  showFundingSchedules = () => {
+    return this.setState({
+      showFundingSchedules: true
+    });
+  };
+
+  hideFundingSchedules = () => {
+    return this.setState({
+      showFundingSchedules: false
+    });
+  }
+
   render() {
-    const { newExpenseDialogOpen } = this.state;
+    const { newExpenseDialogOpen, showFundingSchedules } = this.state;
     return (
       <Fragment>
         <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen={ newExpenseDialogOpen }/>
@@ -86,9 +113,11 @@ export class ExpensesView extends Component<PropTypes, State> {
 
                 </div>
                 <div className="flex justify-end w-full">
-                  <Button className="w-full" color="secondary">
+                  { !showFundingSchedules &&
+                  <Button className="w-full" color="secondary" onClick={ this.showFundingSchedules }>
                     Funding Schedules
                   </Button>
+                  }
                 </div>
                 <div className="flex justify-end w-full">
                   <Button variant="outlined" className="w-full" color="primary" onClick={ this.openNewExpenseDialog }>
@@ -105,7 +134,7 @@ export class ExpensesView extends Component<PropTypes, State> {
               </div>
               <div className="">
                 <Card elevation={ 4 } className="h-full w-full">
-                  { this.renderExpenseDetailView() }
+                  { this.renderSideBar() }
                 </Card>
               </div>
             </div>

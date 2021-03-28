@@ -100,6 +100,7 @@ module.exports = (env, argv) => {
       },
       modules: [path.resolve(__dirname, 'src'), 'node_modules'],
     },
+    devtool: 'inline-source-map',
     devServer: {
       contentBase: './public',
       historyApiFallback: true,

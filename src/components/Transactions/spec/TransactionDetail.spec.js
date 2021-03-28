@@ -18,4 +18,14 @@ describe('transaction detail view', () => {
     // Make sure it's actually there.
     expect(document.querySelector('.transaction-detail')).not.toBeEmptyDOMElement();
   });
+
+  it('will not render', () => {
+    render(<TransactionDetailView
+      transaction={ null }
+      spending={ new Map() }
+    />);
+
+    // Make sure it's actually there.
+    expect(document.querySelector('.transaction-detail')).toBeNull();
+  })
 });

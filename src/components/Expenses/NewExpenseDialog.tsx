@@ -40,7 +40,7 @@ export interface WithConnectionPropTypes extends PropTypes {
   fundingSchedules: Map<number, FundingSchedule>;
 }
 
-export interface State {
+interface State {
   step: NewExpenseStep;
   canNextStep: boolean;
 }
