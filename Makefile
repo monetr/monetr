@@ -39,5 +39,5 @@ docker-work-web-ui:
 clean-development:
 	docker-compose -f ./docker-compose.development.yaml rm --stop --force || true
 
-compose-development: schema docker-work-web-ui
+compose-development: schema docker docker-work-web-ui
 	docker-compose  -f ./docker-compose.development.yaml up

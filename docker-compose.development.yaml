@@ -1,5 +1,16 @@
 version: "3.9"
 services:
+  rest-api:
+    image: harder-rest-api
+    deploy:
+      mode: replicated
+      replicas: 1
+    hostname: rest-api
+    ports:
+      - 4000:4000
+    volumes:
+      - "./config.yaml:/etc/harder/config.yaml"
+    restart: always
   postgres:
     image: postgres:13
     restart: always
