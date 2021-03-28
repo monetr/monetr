@@ -5,6 +5,10 @@ import Transaction from "data/Transaction";
 import moment from "moment";
 import { queryText } from "testutils/queryText";
 
+TransactionItem.defaultProps = {
+  isSelected: false,
+  selectTransaction: jest.fn(),
+};
 
 describe('transaction item', () => {
   it('will render', () => {

@@ -15,7 +15,7 @@ interface WithConnectionPropTypes {
   spending: Map<number, Spending>;
 }
 
-class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
+export class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
 
   render() {
     const { transaction } = this.props;
@@ -57,6 +57,7 @@ class TransactionDetailView extends Component<WithConnectionPropTypes, {}> {
           </div>
           <div className="col-span-3 row-span-1">
             {
+              transaction.categories &&
               transaction.categories.map(cat => (
                 <Chip
                   className="mr-1 mb-1"

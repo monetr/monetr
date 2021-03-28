@@ -1,11 +1,12 @@
-import request from "shared/util/request";
+import Transaction from "data/Transaction";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
 import {
   FETCH_TRANSACTIONS_FAILURE,
   FETCH_TRANSACTIONS_REQUEST,
   FETCH_TRANSACTIONS_SUCCESS
 } from "shared/transactions/actions";
-import Transaction from "data/Transaction";
+import { getHasAnyTransactions } from "shared/transactions/selectors/getHasAnyTransactions";
+import request from "shared/util/request";
 
 interface Dispatch {
   (action: {}): void
@@ -27,8 +28,10 @@ export default function fetchInitialTransactionsIfNeeded(): ActionWithState {
       return Promise.resolve();
     }
 
-    // TODO Check and see if there are any transactions for the selected bank account first. If there are do nothing,
-    //  if there are not then request the first page of transactions.
+    const hasAnyTransactions = getHasAnyTransactions(getState());
+    if (hasAnyTransactions) {
+      return Promise.resolve();
+    }
 
     dispatch({
       type: FETCH_TRANSACTIONS_REQUEST,

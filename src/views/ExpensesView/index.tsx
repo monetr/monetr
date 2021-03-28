@@ -1,5 +1,5 @@
 import { Button, Card, List, Typography } from "@material-ui/core";
-import { NewExpenseDialog } from "components/Expenses/NewExpenseDialog";
+import NewExpenseDialog from "components/Expenses/NewExpenseDialog";
 import Spending from "data/Spending";
 import { Map } from 'immutable';
 import React, { Component, Fragment } from "react";
@@ -76,7 +76,7 @@ export class ExpensesView extends Component<PropTypes, State> {
     const { newExpenseDialogOpen } = this.state;
     return (
       <Fragment>
-        <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen={ newExpenseDialogOpen } />
+        <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen={ newExpenseDialogOpen }/>
 
         <div className="minus-nav">
           <div className="flex flex-col h-full p-10 max-h-full overflow-y-scroll">
