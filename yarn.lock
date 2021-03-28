@@ -9916,7 +9916,7 @@ rollup@^2.25.0:
   optionalDependencies:
     fsevents "~2.3.1"
 
-rrule@^2.6.8:
+rrule@2.6.8:
   version "2.6.8"
   resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.6.8.tgz#c61714f246e7676e8efa16c2baabac199f20f6db"
   integrity sha512-cUaXuUPrz9d1wdyzHsBfT1hptKlGgABeCINFXFvulEPqh9Np9BnF3C3lrv9uO54IIr8VDb58tsSF3LhsW+4VRw==
