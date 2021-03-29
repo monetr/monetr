@@ -4560,10 +4560,10 @@ es6-symbol@^3.1.1, es6-symbol@~3.1.3:
     d "^1.0.1"
     ext "^1.1.2"
 
-esbuild@0.10.2:
-  version "0.10.2"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.10.2.tgz#caa65a8f3096d547d89159918039df6c5c6c90be"
-  integrity sha512-/5vsZD7wTJJHC3yNXLUjXNvUDwqwNoIMvFvLd9tcDQ9el5l13pspYm3yufavjIeYvNtAbo+6N/6uoWx9dGA6ug==
+esbuild@0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.11.0.tgz#1a54ab199a144af76fee1399702efa11be99d31f"
+  integrity sha512-soxN5dic/pDMM0LKLUKmpOY/MVfF+6n3RHLS2ez0YQoM0dmd2tTs/hmAC4pxfhm2Pvn/28UtMJyFedRYC+8olA==
 
 escalade@^3.0.2, escalade@^3.1.1:
   version "3.1.1"
