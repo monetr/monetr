@@ -1,7 +1,7 @@
 import Recurrence from "components/Recurrence/Recurrence";
+import { List } from 'immutable';
 import moment from "moment";
 import RRule, { Weekday } from "rrule";
-import { List } from 'immutable';
 
 export default function getRecurrencesForDate(date: moment.Moment): List<Recurrence> {
   const input = date.clone().startOf('day');
@@ -77,7 +77,7 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
 
   if (isStartOfMonth) {
     rules.push(new Recurrence({
-      name: `On the 1st and 15th of every month`,
+      name: `1st and 15th of every month`,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
@@ -88,7 +88,7 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
 
   if (isEndOfMonth) {
     rules.push(new Recurrence({
-      name: `On the 15th and last day of every month`,
+      name: `15th and last day of every month`,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,

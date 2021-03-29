@@ -1,4 +1,5 @@
 import { Moment } from "moment";
+import { parseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export default class FundingSchedule {
   fundingScheduleId: number;
@@ -11,7 +12,11 @@ export default class FundingSchedule {
 
   constructor(data?: Partial<FundingSchedule>) {
     if (data) {
-      Object.assign(this, data);
+      Object.assign(this, {
+        ...data,
+        lastOccurrence: parseToMomentMaybe(data.lastOccurrence),
+        nextOccurrence: parseToMoment(data.nextOccurrence),
+      });
     }
   }
 }

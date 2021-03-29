@@ -20,10 +20,31 @@ export interface FetchSpendingRequest {
   type: typeof FETCH_SPENDING_REQUEST;
 }
 
+export enum CreateSpending {
+  Request = 'CreateSpendingRequest',
+  Failure = 'CreateSpendingFailure',
+  Success = 'CreateSpendingSuccess',
+}
+
+export interface CreateSpendingRequest {
+  type: typeof CreateSpending.Request;
+}
+
+export interface CreateSpendingFailure {
+  type: typeof CreateSpending.Failure;
+}
+
+export interface CreateSpendingSuccess {
+  type: typeof CreateSpending.Success;
+  payload: Spending;
+}
 
 export type SpendingActions =
   FetchSpendingRequest
   | FetchSpendingFailure
   | FetchSpendingSuccess
+  | CreateSpendingRequest
+  | CreateSpendingFailure
+  | CreateSpendingSuccess
   | Logout
   | ChangeBankAccount

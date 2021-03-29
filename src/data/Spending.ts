@@ -6,23 +6,7 @@ export enum SpendingType {
   Goal = 1,
 }
 
-export interface SpendingFields {
-  spendingId: number;
-  bankAccountId: number;
-  fundingScheduleId?: number;
-  name: string;
-  description?: string;
-  spendingType: SpendingType;
-  targetAmount: number;
-  currentAmount: number;
-  recurrenceRule: string;
-  lastRecurrence?: Moment;
-  nextRecurrence: Moment;
-  nextContributionAmount: number;
-  isBehind: boolean;
-}
-
-export default class Spending implements SpendingFields {
+export default class Spending {
   spendingId: number;
   bankAccountId: number;
   fundingScheduleId?: number;
@@ -37,7 +21,7 @@ export default class Spending implements SpendingFields {
   nextContributionAmount: number;
   isBehind: boolean;
 
-  constructor(data?: SpendingFields) {
+  constructor(data?: Partial<Spending>) {
     if (data) {
       Object.assign(this, {
         ...data,

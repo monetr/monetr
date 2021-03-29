@@ -1,4 +1,4 @@
-import Spending, { SpendingFields } from "data/Spending";
+import Spending from "data/Spending";
 import { Map } from 'immutable';
 import { Dispatch } from "redux";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
@@ -22,13 +22,14 @@ export default function fetchSpending() {
 
     dispatch(fetchSpendingRequest);
 
-    return request().get(`/bank_accounts/${selectedBankAccountId}/spending`)
+    return request().get(`/bank_accounts/${ selectedBankAccountId }/spending`)
       .then(result => {
         dispatch({
           type: FETCH_SPENDING_SUCCESS,
           payload: Map<number, Map<number, Spending>>().withMutations(map => {
-            (result.data || []).forEach((spending: SpendingFields) => {
-              map.setIn([spending.bankAccountId, spending.spendingId], new Spending(spending));
+            (result.data || []).forEach(item => {
+              const spending = new Spending(item);
+              map.setIn([spending.bankAccountId, spending.spendingId], spending);
             })
           }),
         });

@@ -4,24 +4,31 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   FormControl,
   Input,
   InputAdornment,
   InputLabel,
+  Snackbar,
   Step,
   StepContent,
   StepLabel,
   Stepper,
   TextField
 } from "@material-ui/core";
+import { Alert } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import FundingSchedule from "data/FundingSchedule";
+import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
+import Recurrence from 'components/Recurrence/Recurrence';
+import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
+import Spending, { SpendingType } from 'data/Spending';
 import { Formik, FormikErrors } from "formik";
-import { Map } from 'immutable';
 import moment from "moment";
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
+import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
+import createSpending from 'shared/spending/actions/createSpending';
 
 enum NewExpenseStep {
   Name,
@@ -37,19 +44,21 @@ export interface PropTypes {
 }
 
 export interface WithConnectionPropTypes extends PropTypes {
-  fundingSchedules: Map<number, FundingSchedule>;
+  bankAccountId: number;
+  createSpending: { (spending: Spending): Promise<any> }
 }
 
 interface State {
   step: NewExpenseStep;
   canNextStep: boolean;
+  error?: string;
 }
 
 interface newExpenseForm {
   name: string;
   amount: number;
   nextOccurrence: moment.Moment;
-  recurrenceRule: string;
+  recurrenceRule: Recurrence;
   fundingScheduleId: number;
 }
 
@@ -57,7 +66,7 @@ const initialValues: newExpenseForm = {
   name: '',
   amount: 0.00,
   nextOccurrence: moment(),
-  recurrenceRule: '',
+  recurrenceRule: new Recurrence(),
   fundingScheduleId: 0,
 };
 
@@ -66,6 +75,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
   state = {
     step: NewExpenseStep.Name,
     canNextStep: true,
+    error: null,
   };
 
   validateInput = (values: newExpenseForm): FormikErrors<any> => {
@@ -90,7 +100,29 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
   };
 
   submit = (values: newExpenseForm, { setSubmitting }) => {
+    const { bankAccountId, createSpending, onClose } = this.props;
 
+    const newSpending = new Spending({
+      bankAccountId: bankAccountId,
+      name: values.name,
+      nextRecurrence: values.nextOccurrence,
+      spendingType: SpendingType.Expense,
+      fundingScheduleId: values.fundingScheduleId,
+      targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
+      recurrenceRule: values.recurrenceRule.ruleString(),
+    });
+
+    return createSpending(newSpending)
+      .then(() => {
+        onClose();
+      })
+      .catch(error => {
+        setSubmitting(false);
+
+        this.setState({
+          error: error.response.data.error,
+        });
+      })
   };
 
   nextStep = () => {
@@ -107,7 +139,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
     }));
   };
 
-  renderActions = () => {
+  renderActions = (isSubmitting: boolean, submitForm: { (): Promise<any> }) => {
     const { onClose } = this.props;
     const { step, canNextStep } = this.state;
 
@@ -118,19 +150,32 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
     );
 
     const previousButton = (
-      <Button color="secondary" onClick={ this.previousStep }>
+      <Button
+        disabled={ isSubmitting }
+        color="secondary"
+        onClick={ this.previousStep }
+      >
         Previous
       </Button>
     );
 
     const nextButton = (
-      <Button color="primary" onClick={ this.nextStep } disabled={ !canNextStep }>
+      <Button
+        color="primary"
+        onClick={ this.nextStep }
+        disabled={ !canNextStep }
+      >
         Next
       </Button>
     );
 
     const submitButton = (
-      <Button color="primary" type="submit">
+      <Button
+        disabled={ isSubmitting }
+        onClick={ submitForm }
+        color="primary"
+        type="submit"
+      >
         Create
       </Button>
     );
@@ -160,8 +205,26 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
     }
   };
 
+  renderErrorMaybe = () => {
+    const { error } = this.state;
+
+    if (!error) {
+      return null;
+    }
+
+    const onClose = () => this.setState({ error: null });
+
+    return (
+      <Snackbar open autoHideDuration={ 6000 } onClose={ onClose }>
+        <Alert onClose={ onClose } severity="error">
+          { error }
+        </Alert>
+      </Snackbar>
+    )
+  };
+
   render() {
-    const { onClose, isOpen } = this.props;
+    const { isOpen } = this.props;
     const { step } = this.state;
 
     return (
@@ -179,15 +242,21 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
              handleSubmit,
              setFieldValue,
              isSubmitting,
+             submitForm,
            }) => (
           <form onSubmit={ handleSubmit }>
             <MuiPickersUtilsProvider utils={ MomentUtils }>
-              <Dialog open={ isOpen }>
+              <Dialog open={ isOpen } maxWidth="sm">
                 <DialogTitle>
                   Create a new expense
                 </DialogTitle>
                 <DialogContent>
-                  <div className="w-96">
+                  { this.renderErrorMaybe() }
+                  <DialogContentText>
+                    Expenses let you budget for things that happen on a regular basis automatically. Money is allocated
+                    to expenses whenever you get paid so that you don't have to pay something from a single paycheck.
+                  </DialogContentText>
+                  <div>
                     <Stepper activeStep={ step } orientation="vertical">
                       <Step key="What is your expense for?">
                         <StepLabel>What is your expense for?</StepLabel>
@@ -246,20 +315,30 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
                       <Step key="How frequently do you need it?">
                         <StepLabel>How frequently do you need it?</StepLabel>
                         <StepContent>
-                          <TextField id="new-expense-frequency" className="w-full" label="Frequency"/>
+                          { (step === NewExpenseStep.Recurrence || values.nextOccurrence) &&
+                          <RecurrenceList
+                            disabled={ isSubmitting }
+                            date={ values.nextOccurrence }
+                            onChange={ (value) => setFieldValue('recurrenceRule', value) }
+                          />
+                          }
                         </StepContent>
                       </Step>
                       <Step key="How do you want to fund it?">
                         <StepLabel>How do you want to fund it?</StepLabel>
                         <StepContent>
-                          <TextField id="new-expense-funding" className="w-full" label="Funding"/>
+                          <div className="mt-5"/>
+                          <FundingScheduleSelectionList
+                            disabled={ isSubmitting }
+                            onChange={ (value) => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
+                          />
                         </StepContent>
                       </Step>
                     </Stepper>
                   </div>
                 </DialogContent>
                 <DialogActions>
-                  { this.renderActions() }
+                  { this.renderActions(isSubmitting, submitForm) }
                 </DialogActions>
               </Dialog>
             </MuiPickersUtilsProvider>
@@ -272,7 +351,9 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
 
 export default connect(
   (state, props: PropTypes) => ({
-    fundingSchedules: Map<number, FundingSchedule>(),
+    bankAccountId: getSelectedBankAccountId(state),
   }),
-  {}
+  {
+    createSpending,
+  }
 )(NewExpenseDialog)
