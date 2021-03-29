@@ -4,7 +4,7 @@ services:
     image: harder-rest-api
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0
     hostname: rest-api
     ports:
       - 4000:4000

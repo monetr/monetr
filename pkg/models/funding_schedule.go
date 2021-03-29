@@ -15,6 +15,6 @@ type FundingSchedule struct {
 	Name              string       `json:"name" pg:"name,notnull,unique:per_bank"`
 	Description       string       `json:"description,omitempty" pg:"description"`
 	Rule              *Rule        `json:"rule" pg:"rule,notnull,type:'text'" swaggertype:"string" example:"FREQ=MONTHLY;BYMONTHDAY=15,-1"`
-	LastOccurrence    *time.Time   `json:"lastOccurrence" pg:"last_occurrence,type:'date'"`
-	NextOccurrence    time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull,type:'date'"`
+	LastOccurrence    *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
+	NextOccurrence    time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
 }

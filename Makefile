@@ -41,3 +41,6 @@ clean-development:
 
 compose-development: schema docker docker-work-web-ui
 	docker-compose  -f ./docker-compose.development.yaml up
+
+compose-development-lite: schema
+	docker-compose  -f ./docker-compose.development.yaml up

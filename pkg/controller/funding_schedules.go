@@ -77,6 +77,7 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 	fundingSchedule.FundingScheduleId = 0 // Make sure we create a new funding schedule.
 	fundingSchedule.Name = strings.TrimSpace(fundingSchedule.Name)
 	fundingSchedule.Description = strings.TrimSpace(fundingSchedule.Description)
+	fundingSchedule.BankAccountId = bankAccountId
 
 	if fundingSchedule.Name == "" {
 		c.returnError(ctx, http.StatusBadRequest, "funding schedule must have a name")

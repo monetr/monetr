@@ -17,7 +17,23 @@ func (c *Controller) wrapPgError(ctx *context.Context, err error, msg string, ar
 		ctx.StatusCode(http.StatusNotFound)
 		ctx.StopExecution()
 	default:
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, msg, args...)
+		switch actualErr := errors.Cause(err).(type) {
+		case pg.Error:
+			cleanedErr, status := c.sanitizePgError(actualErr)
+			c.wrapAndReturnError(ctx, cleanedErr, status, msg, args...)
+		default:
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, msg, args...)
+		}
+	}
+}
+
+func (c *Controller) sanitizePgError(err pg.Error) (error, int) {
+	switch err.Field(67) {
+	case "23505": // Duplicate
+		// TODO Return actual duplicate information in this error.
+		return errors.New("a similar object already exists"), http.StatusBadRequest
+	default:
+		return err, http.StatusInternalServerError
 	}
 }
 

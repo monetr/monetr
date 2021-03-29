@@ -137,8 +137,8 @@ CREATE TABLE IF NOT EXISTS "funding_schedules" (
     "name" TEXT NOT NULL,
     "description" TEXT,
     "rule" TEXT NOT NULL,
-    "last_occurrence" DATE,
-    "next_occurrence" DATE NOT NULL,
+    "last_occurrence" TIMESTAMPTZ,
+    "next_occurrence" TIMESTAMPTZ NOT NULL,
     CONSTRAINT "pk_funding_schedules" PRIMARY KEY (
         "funding_schedule_id",
         "account_id",

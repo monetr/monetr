@@ -31,7 +31,11 @@ func (r *repositoryBase) GetFundingSchedule(bankAccountId, fundingScheduleId uin
 }
 
 func (r *repositoryBase) CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error {
-	return nil
+	fundingSchedule.AccountId = r.AccountId()
+	_, err := r.txn.Model(fundingSchedule).
+		Insert(fundingSchedule)
+
+	return errors.Wrap(err, "failed to create funding schedule")
 }
 
 func (r *repositoryBase) UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error {
