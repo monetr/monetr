@@ -21,7 +21,7 @@ import moment from "moment";
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
-import request from "shared/util/request";
+import createFundingSchedule from "shared/fundingSchedules/actions/createFundingSchedule";
 
 enum NewFundingScheduleStep {
   Name,
@@ -36,6 +36,7 @@ export interface PropTypes {
 
 interface WithConnectionPropTypes extends PropTypes {
   bankAccountId: number;
+  createFundingSchedule: { (fundingSchedule: FundingSchedule): Promise<FundingSchedule> }
 }
 
 interface State {
@@ -65,7 +66,7 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
   };
 
   submit = (values: newFundingScheduleForm, { setSubmitting }) => {
-    const { bankAccountId } = this.props;
+    const { bankAccountId, createFundingSchedule } = this.props;
 
     const newFundingSchedule = new FundingSchedule({
       bankAccountId: bankAccountId,
@@ -75,14 +76,13 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
       rule: values.recurrenceRule.ruleString(),
     });
 
-    console.log(newFundingSchedule);
-
-    return request().post(`/bank_accounts/${bankAccountId}/funding_schedules`, newFundingSchedule)
+    return createFundingSchedule(newFundingSchedule)
       .then(result => {
-
-      })
-      .catch(error => {
-
+        // Close the dialog.
+        this.props.onClose();
+      }).catch(error => {
+        setSubmitting(false);
+        alert(error);
       });
   };
 
@@ -116,7 +116,12 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
     );
 
     const nextButton = (
-      <Button color="primary" onClick={ this.nextStep } disabled={ isSubmitting }>
+      <Button
+        data-testid="new-funding-schedule-next-button"
+        color="primary"
+        onClick={ this.nextStep }
+        disabled={ isSubmitting }
+      >
         Next
       </Button>
     );
@@ -175,7 +180,7 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
            }) => (
           <form onSubmit={ handleSubmit }>
             <MuiPickersUtilsProvider utils={ MomentUtils }>
-              <Dialog open={ isOpen } maxWidth="sm">
+              <Dialog open={ isOpen } maxWidth="sm" className="new-funding-schedule">
                 <DialogTitle>
                   Create a new funding schedule
                 </DialogTitle>
@@ -208,6 +213,7 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
                         <StepLabel>When do you get paid next?</StepLabel>
                         <StepContent>
                           <KeyboardDatePicker
+                            data-testid="new-funding-schedule-date-picker"
                             fullWidth
                             minDate={ moment().subtract('1 day') }
                             name="date"
@@ -251,5 +257,7 @@ export default connect(
   state => ({
     bankAccountId: getSelectedBankAccountId(state),
   }),
-  {}
+  {
+    createFundingSchedule,
+  }
 )(NewFundingScheduleDialog);
