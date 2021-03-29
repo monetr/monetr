@@ -11,6 +11,6 @@ export default class Recurrence {
   }
 
   ruleString(): string {
-    return this.rule.toString();
+    return this.rule.toString().replace('RRULE:', '');
   }
 }

@@ -3,9 +3,9 @@ import { Map } from 'immutable';
 import { Logout } from "shared/authentication/actions";
 
 export enum FetchFundingSchedules {
-  Request,
-  Failure,
-  Success,
+  Request = 'FetchFundingSchedulesRequest',
+  Failure = 'FetchFundingSchedulesFailure',
+  Success = 'FetchFundingSchedulesSuccess',
 }
 
 export interface FetchFundingSchedulesRequest {
@@ -22,9 +22,9 @@ export interface FetchFundingSchedulesSuccess {
 }
 
 export enum CreateFundingSchedule {
-  Request,
-  Failure,
-  Success,
+  Request = 'CreateFundingScheduleRequest',
+  Failure = 'CreateFundingScheduleFailure',
+  Success = 'CreateFundingScheduleSuccess',
 }
 
 export interface CreateFundingScheduleRequest {

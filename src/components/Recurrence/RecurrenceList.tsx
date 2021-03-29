@@ -9,6 +9,7 @@ import React, { Component } from "react";
 export interface PropTypes {
   date: moment.Moment;
   onChange: { (value: Recurrence): void }
+  disabled?: boolean;
 }
 
 interface State {
@@ -42,6 +43,7 @@ export class RecurrenceList extends Component<PropTypes, State> {
   };
 
   renderItems = () => {
+    const { disabled } = this.props;
     const { rules, selectedIndex } = this.state;
 
     return rules.map((rule, index) => (
@@ -52,6 +54,7 @@ export class RecurrenceList extends Component<PropTypes, State> {
             checked={ selectedIndex === index }
             tabIndex={ -1 }
             color="primary"
+            disabled={ !!disabled }
           />
         </ListItemIcon>
         <ListItemText>

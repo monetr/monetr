@@ -6,12 +6,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
   Step,
   StepContent,
   StepLabel,
   Stepper,
   TextField
 } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import Recurrence from "components/Recurrence/Recurrence";
 import { RecurrenceList } from "components/Recurrence/RecurrenceList";
@@ -41,6 +43,7 @@ interface WithConnectionPropTypes extends PropTypes {
 
 interface State {
   step: NewFundingScheduleStep;
+  error?: string;
 }
 
 interface newFundingScheduleForm {
@@ -59,6 +62,7 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
 
   state = {
     step: NewFundingScheduleStep.Name,
+    error: null,
   };
 
   validateInput = (values: newFundingScheduleForm): FormikErrors<any> => {
@@ -82,7 +86,10 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
         this.props.onClose();
       }).catch(error => {
         setSubmitting(false);
-        alert(error);
+
+        this.setState({
+          error: error.response.data.error,
+        });
       });
   };
 
@@ -157,6 +164,24 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
     }
   };
 
+  renderErrorMaybe = () => {
+    const { error } = this.state;
+
+    if (!error) {
+      return null;
+    }
+
+    const onClose = () => this.setState({ error: null });
+
+    return (
+      <Snackbar open autoHideDuration={ 6000 } onClose={ onClose }>
+        <Alert onClose={ onClose } severity="error">
+          { error }
+        </Alert>
+      </Snackbar>
+    )
+  };
+
   render() {
     const { onClose, isOpen } = this.props;
     const { step } = this.state;
@@ -189,6 +214,7 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
                     Funding schedules let us know when you will get paid so we can automatically allocate money towards
                     your budgets.
                   </DialogContentText>
+                  { this.renderErrorMaybe() }
                   <div>
                     <Stepper activeStep={ step } orientation="vertical">
                       <Step key="What do you want to call this funding schedule?">
@@ -233,8 +259,11 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
                         <StepLabel>How often do you get paid?</StepLabel>
                         <StepContent>
                           { (step === NewFundingScheduleStep.Recurrence || values.nextOccurrence) &&
-                          <RecurrenceList date={ values.nextOccurrence }
-                                          onChange={ (value) => setFieldValue('recurrenceRule', value) }/>
+                          <RecurrenceList
+                            disabled={ isSubmitting }
+                            date={ values.nextOccurrence }
+                            onChange={ (value) => setFieldValue('recurrenceRule', value) }
+                          />
                           }
                         </StepContent>
                       </Step>
