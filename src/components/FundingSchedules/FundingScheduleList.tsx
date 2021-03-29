@@ -46,7 +46,7 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
           <Button onClick={ onHide }>
             Back
           </Button>
-          <Button onClick={ this.openNewFundingScheduleDialog }>
+          <Button className="justify-end" onClick={ this.openNewFundingScheduleDialog }>
             New Funding Schedule
           </Button>
         </div>
