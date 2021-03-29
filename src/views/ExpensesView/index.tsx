@@ -1,15 +1,13 @@
-import { Button, Card, List, Typography } from "@material-ui/core";
+import { Button, Card, Divider, List, Typography } from "@material-ui/core";
+import ExpenseItem from 'components/Expenses/ExpenseItem';
 import NewExpenseDialog from "components/Expenses/NewExpenseDialog";
 import FundingScheduleList from "components/FundingSchedules/FundingScheduleList";
-import { NewFundingScheduleDialog } from "components/FundingSchedules/NewFundingScheduleDialog";
-import Spending from "data/Spending";
-import { Map } from 'immutable';
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
-import { getExpenses } from "shared/spending/selectors/getExpenses";
+import { getExpenseIds } from 'shared/spending/selectors/getExpenseIds';
 
-interface PropTypes {
-  expenses: Map<number, Spending>;
+interface WithConnectionPropTypes {
+  expenseIds: number[],
 }
 
 interface State {
@@ -18,7 +16,7 @@ interface State {
   selectedExpense?: number;
 }
 
-export class ExpensesView extends Component<PropTypes, State> {
+export class ExpensesView extends Component<WithConnectionPropTypes, State> {
 
   state = {
     newExpenseDialogOpen: false,
@@ -27,9 +25,9 @@ export class ExpensesView extends Component<PropTypes, State> {
   };
 
   renderExpenseList = () => {
-    const { expenses } = this.props;
+    const { expenseIds } = this.props;
 
-    if (expenses.isEmpty()) {
+    if (expenseIds.length === 0) {
       return (
         <Typography>You don't have any expenses yet...</Typography>
       )
@@ -37,7 +35,14 @@ export class ExpensesView extends Component<PropTypes, State> {
 
     return (
       <List disablePadding className="w-full">
-
+        {
+          expenseIds.map(expense => (
+            <Fragment>
+              <ExpenseItem expenseId={ expense } key={ expense }/>
+              <Divider/>
+            </Fragment>
+          ))
+        }
       </List>
     )
   };
@@ -147,7 +152,7 @@ export class ExpensesView extends Component<PropTypes, State> {
 
 export default connect(
   state => ({
-    expenses: getExpenses(state)
+    expenseIds: getExpenseIds(state),
   }),
   {}
 )(ExpensesView)

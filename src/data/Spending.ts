@@ -39,6 +39,10 @@ export default class Spending {
     return `$${ (this.currentAmount / 100).toFixed(2) }`;
   }
 
+  getNextContributionAmountString(): string {
+    return `$${ (this.nextContributionAmount / 100).toFixed(2) }`;
+  }
+
   getIsExpense(): boolean {
     return this.spendingType === SpendingType.Expense;
   }

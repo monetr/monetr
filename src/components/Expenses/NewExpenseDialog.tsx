@@ -105,6 +105,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
     const newSpending = new Spending({
       bankAccountId: bankAccountId,
       name: values.name,
+      description: values.recurrenceRule.name,
       nextRecurrence: values.nextOccurrence,
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
