@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Link as RouterLink, Redirect, Route, Switch, w
 import { bindActionCreators } from "redux";
 import logout from "shared/authentication/actions/logout";
 import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
+import { fetchFundingSchedulesIfNeeded } from "shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded";
 import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
 import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
 import fetchSpending from "shared/spending/actions/fetchSpending";
@@ -27,13 +28,19 @@ export class AuthenticatedApplication extends Component {
     fetchLinksIfNeeded: PropTypes.func.isRequired,
     fetchBankAccounts: PropTypes.func.isRequired,
     fetchSpending: PropTypes.func.isRequired,
+    fetchFundingSchedulesIfNeeded: PropTypes.func.isRequired,
     hasAnyLinks: PropTypes.bool.isRequired,
   };
 
   componentDidMount() {
     Promise.all([
       this.props.fetchLinksIfNeeded(),
-      this.props.fetchBankAccounts().then(() => this.props.fetchSpending()),
+      this.props.fetchBankAccounts().then(() => {
+        return Promise.all([
+          this.props.fetchSpending(),
+          this.props.fetchFundingSchedulesIfNeeded(),
+        ]);
+      }),
     ])
       .then(() => this.setState({ loading: false }));
   }
@@ -150,5 +157,6 @@ export default connect(
     fetchLinksIfNeeded,
     fetchBankAccounts,
     fetchSpending,
+    fetchFundingSchedulesIfNeeded,
   }, dispatch),
 )(withRouter(AuthenticatedApplication));

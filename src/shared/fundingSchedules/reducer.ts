@@ -19,6 +19,7 @@ export default function reducer(state: FundingScheduleState = new FundingSchedul
     case FetchFundingSchedules.Success:
       return {
         ...state,
+        loading: false,
         items: state.items.mergeDeep(action.payload),
       };
     case CreateFundingSchedule.Success:

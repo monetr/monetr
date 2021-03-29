@@ -1,5 +1,8 @@
+import FundingSchedule from "data/FundingSchedule";
+import { Map } from 'immutable';
 import { Dispatch } from "redux";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
+import { FetchFundingSchedules } from "shared/fundingSchedules/actions";
 import request from "shared/util/request";
 
 interface GetState {
@@ -18,13 +21,29 @@ export function fetchFundingSchedulesIfNeeded(): ActionWithState {
       return Promise.resolve();
     }
 
+    dispatch({
+      type: FetchFundingSchedules.Request,
+    });
+
     return request()
       .get(`/bank_accounts/${ selectedBankAccountId }/funding_schedules`)
       .then(result => {
-
+        dispatch({
+          type: FetchFundingSchedules.Success,
+          payload: Map<number, Map<number, FundingSchedule>>().withMutations(map => {
+            result.data.map(item => {
+              const fundingSchedule = new FundingSchedule(item);
+              map.setIn([fundingSchedule.bankAccountId, fundingSchedule.fundingScheduleId], fundingSchedule);
+            });
+          }),
+        });
       })
       .catch(error => {
+        dispatch({
+          type: FetchFundingSchedules.Failure,
+        });
 
+        throw error;
       });
   };
 }

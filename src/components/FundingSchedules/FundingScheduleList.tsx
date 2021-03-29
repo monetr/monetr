@@ -4,6 +4,7 @@ import FundingSchedule from "data/FundingSchedule";
 import { Map } from 'immutable';
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { getFundingSchedules } from "shared/fundingSchedules/selectors/getFundingSchedules";
 
 export interface PropTypes {
   onHide: { (): void }
@@ -58,7 +59,7 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
                   { schedule.name }
                 </ListItemText>
               </ListItem>
-            )).toArray()
+            )).valueSeq().toArray()
           }
         </List>
       </div>
@@ -68,7 +69,7 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
 
 export default connect(
   state => ({
-    fundingSchedules: Map<number, FundingSchedule>(),
+    fundingSchedules: getFundingSchedules(state),
   }),
   {}
 )(FundingScheduleList);
