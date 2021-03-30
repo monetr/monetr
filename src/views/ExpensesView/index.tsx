@@ -6,6 +6,8 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { getExpenseIds } from 'shared/spending/selectors/getExpenseIds';
 
+import './styles/ExpensesView.scss';
+
 interface WithConnectionPropTypes {
   expenseIds: number[],
 }
@@ -111,7 +113,7 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
         <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen={ newExpenseDialogOpen }/>
 
         <div className="minus-nav">
-          <div className="flex flex-col h-full p-10 max-h-full overflow-y-scroll">
+          <div className="flex flex-col h-full p-10 max-h-full">
             <Card elevation={ 4 } className="w-full h-13 mb-4 p-1">
               <div className="grid grid-cols-6 gap-4 flex-grow">
                 <div className="col-span-4">
@@ -133,7 +135,7 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
             </Card>
             <div className="grid grid-cols-3 gap-4 flex-grow">
               <div className="col-span-2">
-                <Card elevation={ 4 } className="h-full w-full overflow-scroll table">
+                <Card elevation={ 4 } className="w-full expenses-list">
                   { this.renderExpenseList() }
                 </Card>
               </div>

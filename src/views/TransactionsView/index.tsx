@@ -1,4 +1,4 @@
-import { Box, Button, Card, Container, Grid, List, Typography } from "@material-ui/core";
+import { Card, List } from "@material-ui/core";
 import TransactionDetailView from "components/Transactions/TransactionDetail";
 import TransactionItem from "components/Transactions/TransactionItem";
 import React, { Component } from "react";
@@ -64,7 +64,7 @@ export class TransactionsView extends Component<PropTypes, State> {
             </div>
             <div className="">
               <Card elevation={ 4 } className="h-full w-full">
-                <TransactionDetailView />
+                <TransactionDetailView/>
               </Card>
             </div>
           </div>
