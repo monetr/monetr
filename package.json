@@ -11,7 +11,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "5.11.10",
-    "@testing-library/react": "11.2.5",
+    "@testing-library/react": "11.2.6",
     "@testing-library/user-event": "13.1.1",
     "@typescript-eslint/eslint-plugin": "4.20.0",
     "@typescript-eslint/parser": "4.20.0",
