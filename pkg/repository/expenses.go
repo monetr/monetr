@@ -38,7 +38,7 @@ func (r *repositoryBase) CreateExpense(expense *models.Spending) error {
 	expense.AccountId = r.AccountId()
 	expense.SpendingType = models.SpendingTypeExpense
 
-	_, err := r.txn.Model(&expense).Insert(&expense)
+	_, err := r.txn.Model(expense).Insert(expense)
 	return errors.Wrap(err, "failed to create expense")
 }
 

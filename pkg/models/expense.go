@@ -97,6 +97,7 @@ func (e *Spending) CalculateNextContribution(
 		numberOfContributions++
 	}
 
+	// TODO Handle expenses that recur more frequently than they are funded.
 	midnightToday := midnightInLocal(time.Now(), timezone)
 	nextContributionRule.DTStart(midnightToday)
 	contributionDateX := nextContributionDate
