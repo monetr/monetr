@@ -106,7 +106,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
       bankAccountId: bankAccountId,
       name: values.name,
       description: values.recurrenceRule.name,
-      nextRecurrence: values.nextOccurrence,
+      nextRecurrence: values.nextOccurrence.startOf('day'),
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.

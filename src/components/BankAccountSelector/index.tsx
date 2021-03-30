@@ -1,15 +1,17 @@
 import { InputLabel, MenuItem, Select } from "@material-ui/core";
+import BankAccount from 'data/BankAccount';
+import Link from 'data/Link';
+import { Map } from 'immutable';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import setSelectedBankAccountId from 'shared/bankAccounts/actions/setSelectedBankAccountId';
-import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
-import BankAccount from 'data/BankAccount';
-import { Map } from 'immutable';
-import Link from 'data/Link';
-import { getLinks } from "shared/links/selectors/getLinks";
 import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
 import { getBankAccountsLoading } from "shared/bankAccounts/selectors/getBankAccountsLoading";
+import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
+import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
+import { getLinks } from "shared/links/selectors/getLinks";
 import { getLinksLoading } from "shared/links/selectors/getLinksLoading";
+import fetchSpending from 'shared/spending/actions/fetchSpending';
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
 
 interface PropTypes {
@@ -24,6 +26,8 @@ interface PropTypes {
   fetchInitialTransactionsIfNeeded: {
     (): Promise<void>;
   };
+  fetchFundingSchedulesIfNeeded: { (): Promise<void> }
+  fetchSpending: { (): Promise<void> }
 }
 
 interface SelectEvent {
@@ -35,7 +39,11 @@ export class BankAccountSelector extends Component<PropTypes, {}> {
 
   changeBankAccount = (event: ChangeEvent<SelectEvent>) => {
     this.props.setSelectedBankAccountId(event.target.value as number);
-    this.props.fetchInitialTransactionsIfNeeded();
+    return Promise.all([
+      this.props.fetchInitialTransactionsIfNeeded(),
+      this.props.fetchFundingSchedulesIfNeeded(),
+      this.props.fetchSpending(),
+    ])
   };
 
   render() {
@@ -86,5 +94,7 @@ export default connect(
   {
     setSelectedBankAccountId,
     fetchInitialTransactionsIfNeeded,
+    fetchFundingSchedulesIfNeeded,
+    fetchSpending,
   },
 )(BankAccountSelector);

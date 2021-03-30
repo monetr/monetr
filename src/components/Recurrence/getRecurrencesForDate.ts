@@ -61,7 +61,7 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
       name: `Every 6 months on the ${ dayStr }`,
       rule: new RRule({
         freq: RRule.MONTHLY,
-        interval: 3,
+        interval: 6,
         bymonthday: input.date(),
       }),
     }),
@@ -69,7 +69,8 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
       name: `Every year on the ${ ordinalSuffixOf(input.date()) } of ${ input.format('MMMM') }`,
       rule: new RRule({
         freq: RRule.YEARLY,
-        interval: 3,
+        interval: 1,
+        bymonth: input.month() + 1,
         bymonthday: input.date(),
       }),
     }),
