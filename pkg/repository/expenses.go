@@ -20,7 +20,7 @@ func (r *repositoryBase) GetExpenses(bankAccountId uint64) ([]models.Spending, e
 }
 
 func (r *repositoryBase) GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error) {
-	var result []models.Spending
+	result := make([]models.Spending, 0)
 	err := r.txn.Model(&result).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
@@ -50,9 +50,6 @@ func (r *repositoryBase) UpdateExpenses(bankAccountId uint64, updates []models.S
 	}
 
 	_, err := r.txn.Model(&updates).
-		Where(`"spending"."account_id" = ?`, r.AccountId()).
-		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Where(`"spending"."spending_type" = ?`, models.SpendingTypeExpense).
 		Update(&updates)
 	if err != nil {
 		return errors.Wrap(err, "failed to update expenses")

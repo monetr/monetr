@@ -63,7 +63,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 
 	manager.work.Start()
 
-	manager.queue.Enqueue(EnqueuePullLatestTransactions, nil)
+	manager.queue.Enqueue(EnqueueProcessFundingSchedules, nil)
 
 	return manager
 }

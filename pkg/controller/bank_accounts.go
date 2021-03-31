@@ -17,6 +17,7 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 
 // List All Bank Accounts
 // @id list-all-bank-accounts
+// @tags Bank Accounts
 // @description List's all of the bank accounts for the currently authenticated user.
 // @Security ApiKeyAuth
 // @Router /bank_accounts [get]
@@ -35,6 +36,7 @@ func (c *Controller) getBankAccounts(ctx *context.Context) {
 
 // Create Bank Account
 // @id create-bank-account
+// @tags Bank Accounts
 // @description Create a bank account for the provided link.
 // @Security ApiKeyAuth
 // @Router /bank_accounts [post]

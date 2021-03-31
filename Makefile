@@ -2,11 +2,10 @@
 
 docs-dependencies:
 	go get ./...
-	stat /bin/swag || (go get github.com/swaggo/swag/cmd/swag && go build -o /bin/swag github.com/swaggo/swag/cmd/swag)
+	(PATH=$$PATH:./bin/swag which swag) || (go get github.com/swaggo/swag/cmd/swag && go build -o ./bin/swag github.com/swaggo/swag/cmd/swag)
 
 docs: docs-dependencies
-	ls
-	/bin/swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
+	PATH=$$PATH:./bin/swag swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
 
 test:
 	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...

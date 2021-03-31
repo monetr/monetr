@@ -44,6 +44,10 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 		return
 	}
 
+	if fundingSchedules == nil {
+		fundingSchedules = make([]models.FundingSchedule, 0)
+	}
+
 	ctx.JSON(fundingSchedules)
 }
 

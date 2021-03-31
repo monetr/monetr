@@ -19,7 +19,7 @@ type Spending struct {
 	AccountId              uint64           `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
 	Account                *Account         `json:"-" pg:"rel:has-one"`
 	BankAccountId          uint64           `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank,on_delete:CASCADE,type:'bigint'"`
-	BankAccount            *BankAccount     `json:"bankAccount,omitempty" pg:"rel:has-one"`
+	BankAccount            *BankAccount     `json:"bankAccount,omitempty" pg:"rel:has-one" swaggerignore:"true"`
 	FundingScheduleId      uint64           `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,on_delete:RESTRICT"`
 	FundingSchedule        *FundingSchedule `json:"fundingSchedule,omitempty" pg:"rel:has-one" swaggerignore:"true"`
 	SpendingType           SpendingType     `json:"spendingType" pg:"spending_type,notnull,use_zero"`
@@ -29,8 +29,8 @@ type Spending struct {
 	CurrentAmount          int64            `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
 	UsedAmount             int64            `json:"userAmount" pg:"used_amount,notnull,use_zero"`
 	RecurrenceRule         *Rule            `json:"recurrenceRule" pg:"recurrence_rule,notnull,type:'text'" swaggertype:"string"`
-	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence,type:'date'"`
-	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull,type:'date'"`
+	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence"`
+	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull"`
 	NextContributionAmount int64            `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`
 	IsBehind               bool             `json:"isBehind" pg:"is_behind,notnull,use_zero"`
 }

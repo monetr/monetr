@@ -57,11 +57,11 @@ type UnauthenticatedRepository interface {
 	VerifyRegistration(registrationId string) (*models.User, error)
 }
 
-func NewRepositoryFromSession(userId, accountId uint64, txn *pg.Tx) Repository {
+func NewRepositoryFromSession(userId, accountId uint64, database pg.DBI) Repository {
 	return &repositoryBase{
 		userId:    userId,
 		accountId: accountId,
-		txn:       txn,
+		txn:       database,
 	}
 }
 

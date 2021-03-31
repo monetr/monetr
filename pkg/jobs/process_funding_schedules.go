@@ -6,6 +6,8 @@ import (
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -38,10 +40,14 @@ func (j *jobManagerBase) enqueueProcessFundingSchedules(job *work.Job) error {
 	for _, item := range items {
 		accountLog := log.WithField("accountId", item.AccountId)
 		accountLog.Trace("enqueueing for funding schedule processing")
+		fundingScheduleIds := make([]string, len(item.FundingScheduleIds))
+		for x, id := range item.FundingScheduleIds {
+			fundingScheduleIds[x] = strconv.FormatUint(id, 10)
+		}
 		_, err := j.queue.EnqueueUnique(ProcessFundingSchedules, map[string]interface{}{
 			"accountId":          item.AccountId,
 			"bankAccountId":      item.BankAccountId,
-			"fundingScheduleIds": item.FundingScheduleIds,
+			"fundingScheduleIds": strings.Join(fundingScheduleIds, ","),
 		})
 		if err != nil {
 			err = errors.Wrap(err, "failed to enqueue account")
@@ -75,8 +81,16 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 	bankAccountId := uint64(job.ArgInt64("bankAccountId"))
 	log = log.WithField("bankAccountId", bankAccountId)
 
-	// TODO Parse the funding schedule Ids from the job arg.
 	fundingScheduleIds := make([]uint64, 0)
+	idStrings := job.ArgString("fundingScheduleIds")
+	for _, idString := range strings.Split(idStrings,",") {
+		id, err := strconv.ParseUint(idString, 10, 64)
+		if err != nil {
+			log.WithError(err).Error("failed to parse funding schedule id: %s", idString)
+		}
+
+		fundingScheduleIds = append(fundingScheduleIds, id)
+	}
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		account, err := repo.GetAccount()
@@ -96,6 +110,11 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 			if err != nil {
 				fundingLog.WithError(err).Error("failed to retrieve funding schedule for processing")
 				return err
+			}
+
+			if time.Now().Before(fundingSchedule.NextOccurrence) {
+				fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
+				continue
 			}
 
 			// Calculate the next time this funding schedule will happen. We need this for calculating how much each
@@ -150,6 +169,11 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 		}
 
 		log.Tracef("preparing to update %d expense(s)", len(expensesToUpdate))
+
+		if err := repo.UpdateExpenses(bankAccountId, expensesToUpdate); err != nil {
+			log.WithError(err).Error("failed to update expenses")
+			return err
+		}
 
 		return nil
 	})

@@ -7,7 +7,7 @@ import (
 )
 
 func (r *repositoryBase) GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error) {
-	var result []models.FundingSchedule
+	result := make([]models.FundingSchedule, 0)
 	err := r.txn.Model(&result).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
@@ -40,7 +40,7 @@ func (r *repositoryBase) CreateFundingSchedule(fundingSchedule *models.FundingSc
 
 func (r *repositoryBase) UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error {
 	_, err := r.txn.Model(&models.FundingSchedule{}).
-		Set(`"funding_schedule"."next_occurrence" = ?`, nextOccurrence).
+		Set(`"next_occurrence" = ?`, nextOccurrence).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
 		Update()

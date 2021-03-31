@@ -7,6 +7,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -129,13 +130,8 @@ func (s *Stats) JobFinished(name string, accountId uint64, start time.Time) {
 }
 
 func (s *Stats) FinishedRequest(ctx *context.Context, responseTime time.Duration) {
-	s.HTTPRequests.With(prometheus.Labels{
-		"path":   ctx.RouteName(),
-		"method": ctx.Method(),
-		"status": strconv.FormatInt(int64(ctx.GetStatusCode()), 10),
-	}).Inc()
 	s.HTTPResponseTime.With(prometheus.Labels{
-		"path":   ctx.RouteName(),
+		"path":   strings.TrimPrefix(ctx.RouteName(), ctx.Method()),
 		"method": ctx.Method(),
 		"status": strconv.FormatInt(int64(ctx.GetStatusCode()), 10),
 	}).Observe(float64(responseTime.Milliseconds()))

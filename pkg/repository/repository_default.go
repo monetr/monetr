@@ -8,5 +8,5 @@ import (
 
 type repositoryBase struct {
 	userId, accountId uint64
-	txn               *pg.Tx
+	txn               pg.DBI
 }
