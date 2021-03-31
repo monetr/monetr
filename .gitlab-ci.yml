@@ -59,25 +59,6 @@ Build:
       - ./vendor
     policy: pull-push
 
-Build Database Image:
-  needs: [ ]
-  stage: Schema Preflight
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
-  variables:
-    VAULT_AUTH_ROLE: harder-rest-api-shorty
-  secrets:
-    DOCKER_CONFIG_JSON:
-      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
-  tags:
-    - k8s:shared
-    - arch:amd64
-  before_script:
-    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
-  script:
-    - |
-      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
-
 Schema Generation:
   needs:
     - "Go Dependencies"
@@ -125,6 +106,26 @@ Tests:
     paths:
       - ./coverage.txt
     expire_in: 7 days
+
+Build Database Image:
+  needs:
+    - "Tests"
+  stage: Schema Preflight
+  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  variables:
+    VAULT_AUTH_ROLE: harder-rest-api-shorty
+  secrets:
+    DOCKER_CONFIG_JSON:
+      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
+  tags:
+    - k8s:shared
+    - arch:amd64
+  before_script:
+    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
+  script:
+    - |
+      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
+        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
 Yeet Coverage:
   needs:
@@ -242,3 +243,28 @@ Publish - Work UI:
         --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
         --destination ghcr.io/harderthanitneedstobe/work-ui:latest \
         --destination containers.harderthanitneedstobe.com/work-ui:latest
+
+Publish - Database Schema:
+  needs:
+    - "Build Database Image"
+  variables:
+    VAULT_AUTH_ROLE: harder-rest-api
+  secrets:
+    DOCKER_CONFIG_JSON:
+      vault: containers/push/docker-config.json@pipelines/harderthanitneedstobe.com
+  stage: Publish Container
+  only:
+    refs:
+      - main
+  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  tags:
+    - k8s:shared
+    - arch:amd64
+  before_script:
+    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
+  script:
+    - |
+      kaniko --context $CI_PROJECT_DIR \
+        --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
+        --destination containers.harderthanitneedstobe.com/database-schema-base:$CI_COMMIT_SHORT_SHA \
+        --destination containers.harderthanitneedstobe.com/database-schema-base:latest
