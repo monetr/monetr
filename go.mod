@@ -11,7 +11,7 @@ require (
 	github.com/go-pg/pg/v10 v10.9.0
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.4
-	github.com/hashicorp/vault/api v1.0.4
+	github.com/hashicorp/vault/api v1.1.0
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
