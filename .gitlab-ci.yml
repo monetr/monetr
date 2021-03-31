@@ -193,6 +193,8 @@ Publish - REST API:
   needs:
     - "Kaniko - REST API"
     - "Tests"
+  variables:
+    VAULT_AUTH_ROLE: harder-rest-api
   secrets:
     DOCKER_CONFIG_JSON:
       vault: containers/push/docker-config.json@pipelines/harderthanitneedstobe.com
@@ -219,6 +221,8 @@ Publish - REST API:
 Publish - Work UI:
   needs:
     - "Kaniko - Work UI"
+  variables:
+    VAULT_AUTH_ROLE: harder-rest-api
   secrets:
     DOCKER_CONFIG_JSON:
       vault: containers/push/docker-config.json@pipelines/harderthanitneedstobe.com
