@@ -4,6 +4,8 @@ import Spending from 'data/Spending';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
+import selectExpense from 'shared/spending/actions/selectExpense';
+import { getExpenseIsSelected } from 'shared/spending/selectors/getExpenseIsSelected';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
 
 export interface PropTypes {
@@ -13,19 +15,25 @@ export interface PropTypes {
 interface WithConnectionPropTypes extends PropTypes {
   expense: Spending;
   fundingSchedule: FundingSchedule;
+  isSelected: boolean;
+  selectExpense: { (expenseId: number): void };
 }
 
 export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
 
+  onClick = () => {
+    return this.props.selectExpense(this.props.expenseId);
+  };
+
   render() {
-    const { expense, fundingSchedule } = this.props;
+    const { expense, isSelected, fundingSchedule } = this.props;
 
     return (
-      <ListItem button>
+      <ListItem button onClick={ this.onClick }>
         <ListItemIcon>
           <Checkbox
             edge="start"
-            checked={ false }
+            checked={ isSelected }
             tabIndex={ -1 }
             color="primary"
           />
@@ -59,11 +67,15 @@ export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
 export default connect(
   (state, props: PropTypes) => {
     const expense = getSpendingById(props.expenseId)(state);
+    const isSelected = getExpenseIsSelected(props.expenseId)(state);
 
     return {
       expense,
+      isSelected,
       fundingSchedule: getFundingScheduleById(expense.fundingScheduleId)(state),
     };
   },
-  {},
+  {
+    selectExpense,
+  },
 )(ExpenseItem);

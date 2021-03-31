@@ -39,6 +39,14 @@ export interface CreateSpendingSuccess {
   payload: Spending;
 }
 
+export const SelectExpense = 'SelectExpense';
+
+export interface SelectExpense {
+  type: typeof SelectExpense;
+  expenseId: number | null;
+}
+
+
 export type SpendingActions =
   FetchSpendingRequest
   | FetchSpendingFailure
@@ -46,5 +54,6 @@ export type SpendingActions =
   | CreateSpendingRequest
   | CreateSpendingFailure
   | CreateSpendingSuccess
+  | SelectExpense
   | Logout
   | ChangeBankAccount

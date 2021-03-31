@@ -6,6 +6,8 @@ export default class SpendingState {
   loaded: boolean;
   loading: boolean;
 
+  selectedExpenseId: number|null;
+
   constructor() {
     this.items = Map<number, Map<number, Spending>>();
   }
