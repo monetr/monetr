@@ -76,7 +76,7 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
       bankAccountId: bankAccountId,
       name: values.name,
       description: values.recurrenceRule.name,
-      nextOccurrence: values.nextOccurrence,
+      nextOccurrence: values.nextOccurrence.startOf('day'),
       rule: values.recurrenceRule.ruleString(),
     });
 

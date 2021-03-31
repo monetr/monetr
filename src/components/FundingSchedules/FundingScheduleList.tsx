@@ -42,8 +42,10 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
     const { fundingSchedules, onHide } = this.props;
     return (
       <div className="w-full funding-schedule-list">
-        <NewFundingScheduleDialog onClose={ this.closeFundingScheduleDialog }
-                                  isOpen={ this.state.newFundingScheduleDialogOpen }/>
+        <NewFundingScheduleDialog
+          onClose={ this.closeFundingScheduleDialog }
+          isOpen={ this.state.newFundingScheduleDialogOpen }
+        />
         <div className="w-full p-5 grid grid-cols-3 gap-2 flex-grow">
           <div className="col-span-1">
             <Button onClick={ onHide }>

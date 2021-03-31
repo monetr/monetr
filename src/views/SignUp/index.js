@@ -56,6 +56,7 @@ export class SignUpView extends Component {
       password: values.password,
       firstName: values.firstName,
       lastName: values.lastName,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       captcha: verification,
     })
       .then(result => {
