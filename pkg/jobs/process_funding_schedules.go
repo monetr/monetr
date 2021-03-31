@@ -87,7 +87,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 	for _, idString := range strings.Split(idStrings, ",") {
 		id, err := strconv.ParseUint(idString, 10, 64)
 		if err != nil {
-			log.WithError(err).Error("failed to parse funding schedule id: %s", idString)
+			log.WithError(err).Errorf("failed to parse funding schedule id: %s", idString)
 		}
 
 		fundingScheduleIds = append(fundingScheduleIds, id)
