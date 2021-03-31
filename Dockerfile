@@ -4,7 +4,7 @@ WORKDIR /build
 RUN go get ./...
 RUN go build -o /bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/api
 
-FROM alpine:3.13.3
+FROM alpine:3.13.4
 
 ARG REVISION
 
