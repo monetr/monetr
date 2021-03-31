@@ -22,6 +22,7 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 		Password  string `json:"password"`
 		FirstName string `json:"firstName"`
 		LastName  string `json:"lastName"`
+		Timezone  string `json:"timezone"`
 		Captcha   string `json:"captcha"`
 	}
 	if err := ctx.ReadJSON(&registerRequest); err != nil {
@@ -49,6 +50,12 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest,
 			"invalid registration",
 		)
+		return
+	}
+
+	timezone, err := time.LoadLocation(registerRequest.Timezone)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse timezone")
 		return
 	}
 
@@ -91,7 +98,7 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 	// Now that the login exists we can create the account, at the time of
 	// writing this we are only using the local time zone of the server, but in
 	// the future I want to have it somehow use the user's timezone.
-	account, err := repository.CreateAccount(time.Local)
+	account, err := repository.CreateAccount(timezone)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create account",

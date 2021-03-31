@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/util"
 	"github.com/pkg/errors"
 	"time"
 )
@@ -35,21 +36,6 @@ type Spending struct {
 	IsBehind               bool             `json:"isBehind" pg:"is_behind,notnull,use_zero"`
 }
 
-func midnightInLocal(input time.Time, timezone *time.Location) time.Time {
-	midnight := time.Date(
-		input.Year(),  // Year
-		input.Month(), // Month
-		input.Day(),   // Day
-		0,             // Hours
-		0,             // Minutes
-		0,             // Seconds
-		0,             // Nano seconds
-		timezone,      // The account's time zone.
-	)
-
-	return midnight
-}
-
 func (e *Spending) CalculateNextContribution(
 	accountTimezone string,
 	nextContributionDate time.Time,
@@ -60,7 +46,7 @@ func (e *Spending) CalculateNextContribution(
 		return errors.Wrap(err, "failed to parse account's timezone")
 	}
 
-	nextContributionDate = midnightInLocal(nextContributionDate, timezone)
+	nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
 
 	// If we have achieved our expense then we don't need to do anything.
 	if e.TargetAmount <= e.CurrentAmount {
@@ -68,11 +54,11 @@ func (e *Spending) CalculateNextContribution(
 		e.NextContributionAmount = 0
 	}
 
-	nextDueDate := midnightInLocal(e.NextRecurrence, timezone)
+	nextDueDate := util.MidnightInLocal(e.NextRecurrence, timezone)
 	if time.Now().After(nextDueDate) {
 		e.LastRecurrence = &nextDueDate
 		e.NextRecurrence = e.RecurrenceRule.After(nextDueDate, false)
-		nextDueDate = midnightInLocal(e.NextRecurrence, timezone)
+		nextDueDate = util.MidnightInLocal(e.NextRecurrence, timezone)
 	}
 
 	// If the next time we would contribute to this expense is after the next time the expense is due, then the expense
@@ -98,7 +84,7 @@ func (e *Spending) CalculateNextContribution(
 	}
 
 	// TODO Handle expenses that recur more frequently than they are funded.
-	midnightToday := midnightInLocal(time.Now(), timezone)
+	midnightToday := util.MidnightInLocal(time.Now(), timezone)
 	nextContributionRule.DTStart(midnightToday)
 	contributionDateX := nextContributionDate
 	for {

@@ -43,3 +43,15 @@ compose-development: schema docker docker-work-web-ui
 
 compose-development-lite: schema
 	docker-compose  -f ./docker-compose.development.yaml up
+
+helm-configure:
+	which kubernetes-split-yaml || make helm-deps
+
+helm-deps:
+	git clone https://github.com/mogensen/kubernetes-split-yaml.git
+	cd kubernetes-split-yaml.git && go build ./...
+	cp kubernetes-split-yaml/kubernetes-split-yaml /usr/local/bin
+	rm -rfd kubernetes-split-yaml
+
+helm-generate: helm-configure
+	helm template rest-api ./ --dry-run --values=values.mayview.yaml | kubernetes-split-yaml -

@@ -88,12 +88,18 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 		return
 	}
 
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	var err error
 	// Set the next occurrence based on the provided rule.
-	fundingSchedule.NextOccurrence = fundingSchedule.Rule.After(time.Now(), false)
+	fundingSchedule.NextOccurrence, err = c.midnightInLocal(ctx, fundingSchedule.Rule.After(time.Now(), false))
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine next occurrence")
+		return
+	}
+
 	// It has never occurred so this needs to be nil.
 	fundingSchedule.LastOccurrence = nil
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	if err := repo.CreateFundingSchedule(&fundingSchedule); err != nil {
 		c.wrapPgError(ctx, err, "failed to create funding schedule")

@@ -5,3 +5,5 @@ telepresence
 coverage.txt
 docs
 node_modules
+generated
+values.*.yaml

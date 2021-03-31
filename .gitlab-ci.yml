@@ -2,6 +2,7 @@ stages:
   - Dependencies
   - Build Binary
   - Test
+  - Schema Preflight
   - Documentation
   - Coverage
   - Build Container
@@ -57,6 +58,25 @@ Build:
       - ./bin
       - ./vendor
     policy: pull-push
+
+Build Database Image:
+  needs: [ ]
+  stage: Schema Preflight
+  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  variables:
+    VAULT_AUTH_ROLE: harder-rest-api-shorty
+  secrets:
+    DOCKER_CONFIG_JSON:
+      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
+  tags:
+    - k8s:shared
+    - arch:amd64
+  before_script:
+    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
+  script:
+    - |
+      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
+        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
 Schema Generation:
   needs:

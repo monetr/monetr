@@ -4,6 +4,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"strconv"
@@ -83,7 +84,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 
 	fundingScheduleIds := make([]uint64, 0)
 	idStrings := job.ArgString("fundingScheduleIds")
-	for _, idString := range strings.Split(idStrings,",") {
+	for _, idString := range strings.Split(idStrings, ",") {
 		id, err := strconv.ParseUint(idString, 10, 64)
 		if err != nil {
 			log.WithError(err).Error("failed to parse funding schedule id: %s", idString)
@@ -96,6 +97,12 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 		account, err := repo.GetAccount()
 		if err != nil {
 			log.WithError(err).Error("could not retrieve account for funding schedule processing")
+			return err
+		}
+
+		timezone, err := account.GetTimezone()
+		if err != nil {
+			log.WithError(err).Error("could not parse account's timezone")
 			return err
 		}
 
@@ -119,7 +126,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 
 			// Calculate the next time this funding schedule will happen. We need this for calculating how much each
 			// expense will need the next time we do this processing.
-			nextFundingOccurrence := fundingSchedule.Rule.After(time.Now(), false)
+			nextFundingOccurrence := util.MidnightInLocal(fundingSchedule.Rule.After(time.Now(), false), timezone)
 			if err = repo.UpdateNextFundingScheduleDate(fundingScheduleId, nextFundingOccurrence); err != nil {
 				fundingLog.WithError(err).Error("failed to set the next occurrence for funding schedule")
 				return err

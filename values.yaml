@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository:
+  repository: ghcr.io/harderthanitneedstobe/rest-api
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -14,14 +14,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
+serviceAccountName:
 
 podAnnotations: {}
 
@@ -72,11 +65,13 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
+nodeSelector:
+  kubernetes.io/arch: amd64
 
 tolerations: []
 
 affinity: {}
 
 api:
-  listenPort: 8080
+  listenPort: 4000
+  metricsPort: 9000
