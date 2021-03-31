@@ -19,6 +19,7 @@ module.exports = (env, argv) => {
   }
 
   const config = {
+    target: 'web',
     entry: [
       'react-hot-loader/patch',
       './src/index.js'
@@ -106,7 +107,7 @@ module.exports = (env, argv) => {
       historyApiFallback: true,
       hot: true,
       host: 'localhost',
-      port: 8080,
+      port: 3000,
       transportMode: 'ws',
       before(app, server) {
         // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
@@ -147,13 +148,25 @@ module.exports = (env, argv) => {
     optimization: {
       runtimeChunk: 'single',
       splitChunks: {
+        chunks: 'async',
+        minSize: 20000,
+        minRemainingSize: 0,
+        minChunks: 1,
+        maxAsyncRequests: 30,
+        maxInitialRequests: 30,
+        enforceSizeThreshold: 50000,
         cacheGroups: {
-          vendor: {
+          defaultVendors: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all'
-          }
-        }
+            priority: -10,
+            reuseExistingChunk: true,
+          },
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+        },
       }
     }
   };
