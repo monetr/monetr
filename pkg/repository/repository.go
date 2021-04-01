@@ -19,6 +19,7 @@ type Repository interface {
 	CreatePlaidLink(link *models.PlaidLink) error
 	CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 	GetAccount() (*models.Account, error)
+	GetBalances(bankAccountId uint64) (*Balances, error)
 	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)

@@ -149,5 +149,112 @@ type SpendingTransfer struct {
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postSpendingTransfer(ctx *context.Context) {
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
 
+	transfer := &SpendingTransfer{}
+	if err := ctx.ReadJSON(transfer); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	if (transfer.FromSpendingId == nil || *transfer.FromSpendingId == 0) &&
+		(transfer.ToSpendingId == nil || *transfer.ToSpendingId == 0) {
+		c.badRequest(ctx, "both a from and a to must be specified to transfer allocated funds")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	balances, err := repo.GetBalances(bankAccountId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to get balances for transfer")
+		return
+	}
+
+	spendingToUpdate := make([]models.Spending, 0)
+
+	account, err := repo.GetAccount()
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
+		return
+	}
+
+	var fundingSchedule *models.FundingSchedule
+
+	if transfer.FromSpendingId == nil && balances.Safe < transfer.Amount {
+		c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
+		return
+	} else {
+		fromExpense, err := repo.GetExpense(bankAccountId, *transfer.FromSpendingId)
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
+			return
+		}
+
+		if fromExpense.CurrentAmount < transfer.Amount {
+			c.badRequest(ctx, "cannot transfer more than is available in source goal/expense")
+			return
+		}
+
+		fundingSchedule, err = repo.GetFundingSchedule(bankAccountId, fromExpense.FundingScheduleId)
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to retrieve funding schedule for source goal/expense")
+			return
+		}
+
+		fromExpense.CurrentAmount -= transfer.Amount
+
+		if err = fromExpense.CalculateNextContribution(
+			account.Timezone,
+			fundingSchedule.NextOccurrence,
+			fundingSchedule.Rule,
+		); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
+			return
+		}
+
+		spendingToUpdate = append(spendingToUpdate, *fromExpense)
+	}
+
+	// If we are transferring the allocated funds to another spending object then we need to update that object. If we
+	// are transferring it back to "Safe to spend" then we can just subtract the allocation from the source.
+	if transfer.ToSpendingId != nil {
+		toExpense, err := repo.GetExpense(bankAccountId, *transfer.ToSpendingId)
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to get destination goal/expense for transfer")
+			return
+		}
+
+		// If the funding schedule that we already have put aside is not the same as the one we need for this spending
+		// then we need to retrieve the proper one.
+		if fundingSchedule == nil || fundingSchedule.FundingScheduleId != toExpense.FundingScheduleId {
+			fundingSchedule, err = repo.GetFundingSchedule(bankAccountId, toExpense.FundingScheduleId)
+			if err != nil {
+				c.wrapPgError(ctx, err, "failed to retrieve funding schedule for destination goal/expense")
+				return
+			}
+		}
+
+		toExpense.CurrentAmount += transfer.Amount
+
+		if err = toExpense.CalculateNextContribution(
+			account.Timezone,
+			fundingSchedule.NextOccurrence,
+			fundingSchedule.Rule,
+		); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
+			return
+		}
+
+		spendingToUpdate = append(spendingToUpdate, *toExpense)
+	}
+
+	if err = repo.UpdateExpenses(bankAccountId, spendingToUpdate); err != nil {
+		c.wrapPgError(ctx, err, "failed to update spending for transfer")
+		return
+	}
 }

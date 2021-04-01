@@ -10,6 +10,7 @@ import (
 
 func (c *Controller) handleBankAccounts(p iris.Party) {
 	p.Get("/", c.getBankAccounts)
+	p.Get("/{bankAccountId:uint64}/balances", c.getBalances)
 
 	// Create bank accounts manually.
 	p.Post("/", c.postBankAccounts)
@@ -32,6 +33,24 @@ func (c *Controller) getBankAccounts(ctx *context.Context) {
 	}
 
 	ctx.JSON(bankAccounts)
+}
+
+func (c *Controller) getBalances(ctx *context.Context) {
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	balances, err := repo.GetBalances(bankAccountId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve balances")
+		return
+	}
+
+	ctx.JSON(balances)
 }
 
 // Create Bank Account
