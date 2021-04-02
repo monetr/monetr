@@ -368,8 +368,6 @@ Staging Dry Run - Main:
 Staging Deploy - Main:
   when: manual
   stage: Deploy Staging
-  needs:
-    - "Staging Dry Run - Main"
   only:
     refs:
       - main
