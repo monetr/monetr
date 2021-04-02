@@ -128,13 +128,14 @@ Build Database Image:
         --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
 Diff Schema:
-  needs:
-    - "Build Database Image"
+  needs: []
   stage: Schema
   services:
     - name: containers.harderthanitneedstobe.com/pgtest:latest
       alias: postgres
-  image: containers.harderthanitneedstobe.com/pgtest:latest
+  image:
+    name: containers.harderthanitneedstobe.com/pgtest:latest
+    entrypoint: [ "" ]
   tags:
     - k8s:shared
     - arch:amd64
@@ -145,6 +146,7 @@ Diff Schema:
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
   script:
+    - sleep 5
     - |
       for file in $CI_PROJECT_DIR/schema/*; do
         psql -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -f $file
