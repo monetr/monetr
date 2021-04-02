@@ -1,0 +1,74 @@
+name: main/ci
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  GO111MODULE: 'on'
+  GOFLAGS: '-mod=vendor'
+
+jobs:
+  go_dependencies:
+    name: Go Dependencies
+    runs-on: ubuntu-20.04
+    container: golang:1.16.2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fetch Dependencies
+        run: go get ./...
+      - name: Store Dependencies
+        uses: actions/upload-artifact@v2
+        with:
+          name: go-deps-artifact-${{ github.sha }}
+          path: ./vendor
+
+  go_build:
+    name: Go Build
+    needs:
+      - go_dependencies
+    runs-on: ubuntu-20.04
+    container: golang:1.16.2
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grab Dependencies
+        uses: actions/download-artifact@v2
+        with:
+          name: go-deps-artifact-${{ github.sha }}
+      - name: Build Go Binary
+        run: go build -v ./...
+
+  go_test:
+    name: Go Test
+    needs:
+      - go_dependencies
+    runs-on: ubuntu-20.04
+    container: golang:1.16.2
+    env:
+      POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: ""
+      POSTGRES_USER: api-testing
+      POSTGRES_DB: test-db
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: api-testing
+          POSTGRES_DB: test-db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Grab Dependencies
+        uses: actions/download-artifact@v2
+        with:
+          name: go-deps-artifact-${{ github.sha }}
+      - name: Setup Schema
+        run: make apply-schema-ci
+      - name: Run Tests
+        run: go test -race -v ./..

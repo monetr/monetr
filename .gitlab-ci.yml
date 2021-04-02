@@ -135,6 +135,9 @@ Diff Schema:
     - name: containers.harderthanitneedstobe.com/pgtest:latest
       alias: postgres
   image: containers.harderthanitneedstobe.com/pgtest:latest
+  tags:
+    - k8s:shared
+    - arch:amd64
   variables:
     POSTGRES_HOST: postgres
     POSTGRES_PASSWORD: ""
