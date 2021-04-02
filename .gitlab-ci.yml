@@ -145,7 +145,6 @@ Build Database Image:
         --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
 Diff Schema PGDiff:
-  allow_failure: true
   needs:
     - "Build Database Image"
   stage: Schema
@@ -171,7 +170,6 @@ Diff Schema PGDiff:
       pgdiff \
         -U $POSTGRES_USER -H current -D $POSTGRES_DB -O "sslmode=disable" -W $POSTGRES_PASSWORD \
         -u $POSTGRES_USER -h new -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD ALL
-    - sleep 1000
 
 Diff Schema Migra:
   allow_failure: true
@@ -196,7 +194,7 @@ Diff Schema Migra:
   script:
     - apt-get update
     - apt-get install -y python3-pip
-    - pip install migra[pg]
+    - pip3 install migra[pg]
 
 Yeet Coverage:
   needs:
