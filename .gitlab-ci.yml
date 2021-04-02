@@ -194,7 +194,8 @@ Diff Schema Migra:
     POSTGRES_HOST_AUTH_METHOD: trust
     GOFLAGS: '' # Clear this flag for this one.
   script:
-    - apt-get install python3-pip
+    - apt-get update
+    - apt-get install -y python3-pip
     - pip install migra[pg]
 
 Yeet Coverage:
@@ -339,6 +340,6 @@ Publish - Database Schema:
   script:
     - |
       kaniko --context $CI_PROJECT_DIR \
-        --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
+        --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
         --destination containers.harderthanitneedstobe.com/database-schema-base:$CI_COMMIT_SHORT_SHA \
         --destination containers.harderthanitneedstobe.com/database-schema-base:latest
