@@ -170,7 +170,7 @@ Diff Schema PGDiff:
     - |
       pgdiff \
         -U $POSTGRES_USER -H new -D $POSTGRES_DB -O "sslmode=disable" -W $POSTGRES_PASSWORD \
-        -u $POSTGRES_USER -h current -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD TABLE
+        -u $POSTGRES_USER -h current -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD ALL
 
 Diff Schema Migra:
   allow_failure: true
