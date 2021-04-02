@@ -123,7 +123,7 @@ Test Schema:
         psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -f $file
       done
     - psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
-    - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB ./tests/pg/*.sql
+    - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f ./tests/pg/*.sql
 
 Build Database Image:
   needs:
@@ -150,7 +150,7 @@ Diff Schema:
     - "Build Database Image"
   stage: Schema
   services:
-    - name: short.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+    - name: shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
       alias: new
     - name: containers.harderthanitneedstobe.com/database-schema-base:latest
       alias: current
