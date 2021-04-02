@@ -1,4 +1,4 @@
-name: main/ci
+name: Main
 
 on:
   push:
@@ -23,6 +23,7 @@ jobs:
         with:
           name: go-deps-artifact-${{ github.sha }}
           path: ./vendor
+          retention-days: 7
 
   go_build:
     name: Go Build
