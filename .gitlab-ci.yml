@@ -159,7 +159,7 @@ Diff Schema:
     - k8s:shared
     - arch:amd64
   variables:
-    POSTGRES_PASSWORD: ""
+    POSTGRES_PASSWORD: "password"
     POSTGRES_USER: postgres
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
@@ -169,8 +169,8 @@ Diff Schema:
     - go build -o /usr/local/bin/pgdiff github.com/joncrlsn/pgdiff
     - |
       pgdiff \
-        -U $POSTGRES_USER -H current -D $POSTGRES_DB -O "sslmode=disable" -W "" \
-        -u $POSTGRES_USER -h new -d $POSTGRES_DB -o "sslmode=disable" -w "" ALL
+        -U $POSTGRES_USER -H current -D $POSTGRES_DB -O "sslmode=disable" -W $POSTGRES_PASSWORD \
+        -u $POSTGRES_USER -h new -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD ALL
 
 Yeet Coverage:
   needs:
