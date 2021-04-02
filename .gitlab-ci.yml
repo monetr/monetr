@@ -193,6 +193,7 @@ Diff Schema Migra:
     POSTGRES_HOST_AUTH_METHOD: trust
     GOFLAGS: '' # Clear this flag for this one.
   script:
+    - apt-get install python3-pip
     - pip install migra[pg]
 
 Yeet Coverage:
