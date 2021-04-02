@@ -126,8 +126,7 @@ Test Schema:
     - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f ./tests/pg/*.sql
 
 Build Database Image:
-  needs:
-    - "Tests"
+  needs: [ ]
   stage: Schema Preflight
   image: containers.harderthanitneedstobe.com/kaniko-ci:latest
   variables:
@@ -146,6 +145,7 @@ Build Database Image:
         --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
 Diff Schema:
+  allow_failure: true
   needs:
     - "Build Database Image"
   stage: Schema
