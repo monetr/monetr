@@ -154,7 +154,7 @@ Diff Schema:
       alias: new
     - name: containers.harderthanitneedstobe.com/database-schema-base:latest
       alias: current
-  image: containers.harderthanitneedstobe.com/ubuntu:20.04
+  image: containers.harderthanitneedstobe.com/golang:1.16.2
   tags:
     - k8s:shared
     - arch:amd64
@@ -163,8 +163,11 @@ Diff Schema:
     POSTGRES_USER: postgres
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
+    GOFLAGS: '' # Clear this flag for this one.
   script:
-    - echo "not doing anything yet"
+    - go get github.com/joncrlsn/pgdiff
+    - go build -o /usr/local/bin/pgdiff github.com/joncrlsn/pgdiff
+    - pgdiff
 
 Yeet Coverage:
   needs:
