@@ -322,7 +322,7 @@ Publish - Work UI:
 
 Publish - Database Schema:
   needs:
-    - "Build Database Image"
+    - "Database"
   variables:
     VAULT_AUTH_ROLE: harder-rest-api
   secrets:
