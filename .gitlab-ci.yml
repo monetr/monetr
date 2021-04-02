@@ -167,7 +167,10 @@ Diff Schema:
   script:
     - go get github.com/joncrlsn/pgdiff
     - go build -o /usr/local/bin/pgdiff github.com/joncrlsn/pgdiff
-    - pgdiff -U $POSTGRES_USER -u $POSTGRES_USER -H current -h new -D $POSTGRES_DB -d $POSTGRES_DB -O "sslmode=disable" -o "sslmode=disable" ALL
+    - |
+      pgdiff \
+        -U $POSTGRES_USER -H current -D $POSTGRES_DB -O "sslmode=disable" -W "" \
+        -u $POSTGRES_USER -h new -d $POSTGRES_DB -o "sslmode=disable" -w "" ALL
 
 Yeet Coverage:
   needs:
@@ -191,14 +194,13 @@ Documentation:
     - "Go Dependencies"
   stage: Documentation
   image: containers.harderthanitneedstobe.com/golang:1.16.2
-  variables:
-    GOFLAGS: '' # Clear this flag for this one.
   tags:
     - k8s:shared
     - arch:amd64
+  before_script:
+    - GOFLAGS="" go get github.com/swaggo/swag/cmd/swag
+    - GOFLAGS="" go build -o /usr/local/bin/swag github.com/swaggo/swag/cmd/swag
   script:
-    - go get github.com/swaggo/swag/cmd/swag
-    - go build -o /usr/local/bin/swag github.com/swaggo/swag/cmd/swag
     - swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
   cache:
     key: go-${CI_COMMIT_SHA}
