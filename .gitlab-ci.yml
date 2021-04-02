@@ -22,7 +22,7 @@ variables:
 Go Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.harderthanitneedstobe.com/golang:1.16.2
+  image: hub.proxy.harderthanitneedstobe.com/golang:1.16.2
   tags:
     - k8s:shared
     - arch:amd64
@@ -193,7 +193,7 @@ Diff Schema Migra:
     GOFLAGS: '' # Clear this flag for this one.
   script:
     - apt-get update
-    - apt-get install -y python3-pip
+    - apt-get install -y python3 python3-pip
     - pip3 install migra[pg]
 
 Yeet Coverage:
