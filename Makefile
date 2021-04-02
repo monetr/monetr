@@ -11,9 +11,6 @@ test:
 	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
 	go tool cover -func=coverage.txt
 
-special-tests:
-	cd tests && make assert-clean-generated
-
 schema:
 	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen > schema/00000000_Initial.up.sql
 	(which yarn && yarn sql-formatter -l postgresql -u --lines-between-queries 2 -i 4 \

@@ -1,0 +1,1 @@
+SELECT has_table('test');

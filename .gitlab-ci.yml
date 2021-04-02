@@ -3,6 +3,7 @@ stages:
   - Build Binary
   - Test
   - Schema Preflight
+  - Schema
   - Documentation
   - Coverage
   - Build Container
@@ -68,7 +69,6 @@ Schema Generation:
     - k8s:shared
   script:
     - make schema
-    - make special-tests
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:
@@ -126,6 +126,27 @@ Build Database Image:
     - |
       kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
         --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+
+Diff Schema:
+  needs:
+    - "Build Database Image"
+  stage: Schema
+  services:
+    - name: containers.harderthanitneedstobe.com/pgtest:latest
+      alias: postgres
+  image: containers.harderthanitneedstobe.com/pgtest:latest
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: ""
+    POSTGRES_USER: postgres
+    POSTGRES_DB: test-db
+    POSTGRES_HOST_AUTH_METHOD: trust
+  script:
+    - |
+      for file in $CI_PROJECT_DIR/schema/*; do
+        psql -d $POSTGRES_DB -u $POSTGRES_USER -h $POSTGRES_HOST "${file}"
+      done
+    - pg_prove -h $POSTGRES_HOST -u $POSTGRES_USER -d $POSTGRES_DB ./tests/pg/*.sql
 
 Yeet Coverage:
   needs:
