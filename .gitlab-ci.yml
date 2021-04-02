@@ -144,7 +144,7 @@ Build Database Image:
       kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
         --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
-Diff Schema:
+Diff Schema PGDiff:
   allow_failure: true
   needs:
     - "Build Database Image"
@@ -171,6 +171,29 @@ Diff Schema:
       pgdiff \
         -U $POSTGRES_USER -H new -D $POSTGRES_DB -O "sslmode=disable" -W $POSTGRES_PASSWORD \
         -u $POSTGRES_USER -h current -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD TABLE
+
+Diff Schema Migra:
+  allow_failure: true
+  needs:
+    - "Build Database Image"
+  stage: Schema
+  services:
+    - name: shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+      alias: new
+    - name: containers.harderthanitneedstobe.com/database-schema-base:latest
+      alias: current
+  image: containers.harderthanitneedstobe.com/ubuntu:20.04
+  tags:
+    - k8s:shared
+    - arch:amd64
+  variables:
+    POSTGRES_PASSWORD: "password"
+    POSTGRES_USER: postgres
+    POSTGRES_DB: test-db
+    POSTGRES_HOST_AUTH_METHOD: trust
+    GOFLAGS: '' # Clear this flag for this one.
+  script:
+    - pip install migra[pg]
 
 Yeet Coverage:
   needs:
