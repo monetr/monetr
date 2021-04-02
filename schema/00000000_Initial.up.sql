@@ -55,7 +55,6 @@ CREATE TABLE IF NOT EXISTS "phone_verifications" (
 CREATE TABLE IF NOT EXISTS "accounts" (
     "account_id" BIGSERIAL NOT NULL,
     "timezone" TEXT NOT NULL DEFAULT 'UTC',
-    "is_enabled" BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT "pk_accounts" PRIMARY KEY ("account_id")
 );
 
@@ -228,9 +227,9 @@ VALUES
     ) RETURNING "phone_number";
 
 INSERT INTO
-    "accounts" ("account_id", "timezone", "is_enabled")
+    "accounts" ("account_id", "timezone")
 VALUES
-    (-1, 'UTC', DEFAULT) RETURNING "is_enabled";
+    (-1, 'UTC');
 
 INSERT INTO
     "users" (

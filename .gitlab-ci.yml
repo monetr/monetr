@@ -339,5 +339,5 @@ Publish - Database Schema:
     - |
       kaniko --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination containers.harderthanitneedstobe.com/database-schema-base:$CI_COMMIT_SHORT_SHA \
+        --destination containers.harderthanitneedstobe.com/database-schema-base:$CI_COMMIT_SHA \
         --destination containers.harderthanitneedstobe.com/database-schema-base:latest

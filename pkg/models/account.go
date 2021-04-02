@@ -10,7 +10,6 @@ type Account struct {
 
 	AccountId uint64 `json:"accountId" pg:"account_id,notnull,pk,type:'bigserial'"`
 	Timezone  string `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
-	Enabled   bool   `json:"-" pg:"is_enabled,notnull,default:true"`
 }
 
 func (a *Account) GetTimezone() (*time.Location, error) {
