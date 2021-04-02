@@ -80,7 +80,7 @@ func main() {
 	logger.SetLevel(logrus.TraceLevel)
 	log := logrus.NewEntry(logger)
 
-	db := pg.Connect(&pg.Options{
+	pgOptions := &pg.Options{
 		Addr: fmt.Sprintf("%s:%d",
 			configuration.PostgreSQL.Address,
 			configuration.PostgreSQL.Port,
@@ -89,7 +89,9 @@ func main() {
 		Password:        configuration.PostgreSQL.Password,
 		Database:        configuration.PostgreSQL.Database,
 		ApplicationName: "harder - api",
-	})
+	}
+
+	db := pg.Connect(pgOptions)
 
 	db.AddQueryHook(&hooks{
 		stats: stats,

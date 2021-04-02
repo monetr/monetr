@@ -6,4 +6,4 @@ coverage.txt
 docs
 node_modules
 generated
-values.*.yaml
+values.mayview.yaml

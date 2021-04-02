@@ -52,3 +52,10 @@ helm-deps:
 
 helm-generate: helm-configure
 	helm template rest-api ./ --dry-run --values=values.mayview.yaml | kubernetes-split-yaml -
+
+staging-dry:
+	helm template rest-api ./ --dry-run \
+		--set api.jwt.loginJwtSecret=$$(vault kv get --field=jwt_secret pipelines/harderthanitneedstobe.com/staging/primary) \
+		--set api.jwt.registrationJwtSecret=$$(vault kv get --field=register_jwt_secret pipelines/harderthanitneedstobe.com/staging/primary) \
+		--set api.postgreSql.password=$$(vault kv get --field=pg_password pipelines/harderthanitneedstobe.com/staging/primary) \
+		--values=values.staging.yaml | kubectl apply -n harder-staging --dry-run=server -f -

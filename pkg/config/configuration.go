@@ -5,21 +5,23 @@ import (
 	"github.com/spf13/viper"
 )
 
+const EnvironmentPrefix = "HARDER"
+
 type Configuration struct {
 	Name           string
 	UIDomainName   string
 	APIDomainName  string
 	AllowSignUp    bool
 	EnableWebhooks bool
+	CORS           CORS
 	JWT            JWT
+	Logging        Logging
+	Plaid          Plaid
 	PostgreSQL     PostgreSQL
+	ReCAPTCHA      ReCAPTCHA
+	Redis          Redis
 	SMTP           SMTPClient
 	SendGrid       SendGrid
-	ReCAPTCHA      ReCAPTCHA
-	Plaid          Plaid
-	CORS           CORS
-	Redis          Redis
-	Logging        Logging
 }
 
 type JWT struct {
@@ -101,17 +103,13 @@ type Logging struct {
 }
 
 func LoadConfiguration() Configuration {
-	viper.SetDefault("Name", "Harder Than It Needs To Be")
-	viper.SetDefault("UIDomainName", "localhost:3000")
-	viper.SetDefault("APIDomainName", "localhost:4000")
-	viper.SetDefault("AllowSignUp", true)
-	viper.SetDefault("PostgreSQL.Port", 5432)
-	viper.SetDefault("PostgreSQL.Address", "localhost")
-	viper.SetDefault("PostgreSQL.Username", "postgres")
-	viper.SetDefault("PostgreSQL.Database", "postgres")
-	viper.SetDefault("SMTP.Enabled", false)
-	viper.SetDefault("ReCAPTCHA.Enabled", false)
-	viper.SetDefault("Logging.Level", "info")
+	v := viper.GetViper()
+
+	v.SetEnvPrefix(EnvironmentPrefix)
+	v.AutomaticEnv()
+
+	setupDefaults(v)
+	setupEnv(v)
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
@@ -127,4 +125,49 @@ func LoadConfiguration() Configuration {
 	}
 
 	return config
+}
+
+func setupDefaults(v *viper.Viper) {
+	v.SetDefault("Name", "Harder Than It Needs To Be")
+	v.SetDefault("UIDomainName", "localhost:3000")
+	v.SetDefault("APIDomainName", "localhost:4000")
+	v.SetDefault("AllowSignUp", true)
+	v.SetDefault("PostgreSQL.Port", 5432)
+	v.SetDefault("PostgreSQL.Address", "localhost")
+	v.SetDefault("PostgreSQL.Username", "postgres")
+	v.SetDefault("PostgreSQL.Database", "postgres")
+	v.SetDefault("SMTP.Enabled", false)
+	v.SetDefault("ReCAPTCHA.Enabled", false)
+	v.SetDefault("Logging.Level", "info")
+}
+
+func setupEnv(v *viper.Viper) {
+	v.BindEnv("Name", "HARDER_NAME")
+	v.BindEnv("UIDomainName", "HARDER_UI_DOMAIN_NAME")
+	v.BindEnv("APIDomainName", "HARDER_API_DOMAIN_NAME")
+	v.BindEnv("AllowSignUp", "HARDER_ALLOW_SIGN_UP")
+	v.BindEnv("EnableWebhooks", "HARDER_ENABLE_WEBHOOKS")
+	v.BindEnv("Cors.AllowedOrigins", "HARDER_CORS_ALLOWED_ORIGINS")
+	v.BindEnv("Cors.Debug", "HARDER_CORS_DEBUG")
+	v.BindEnv("JWT.LoginJwtSecret", "HARDER_JWT_LOGIN_SECRET")
+	v.BindEnv("JWT.RegistrationJwtSecret", "HARDER_JWT_REGISTRATION_SECRET")
+	v.BindEnv("Logging.Level", "HARDER_LOG_LEVEL")
+	v.BindEnv("Plaid.ClientID", "HARDER_PLAID_CLIENT_ID")
+	v.BindEnv("Plaid.ClientSecret", "HARDER_PLAID_CLIENT_SECRET")
+	v.BindEnv("Plaid.Environment", "HARDER_PLAID_ENVIRONMENT")
+	v.BindEnv("Plaid.EnableBirthdatePrompt", "HARDER_PLAID_BIRTHDATE_PROMPT")
+	v.BindEnv("PostgreSQL.Address", "HARDER_PG_ADDRESS")
+	v.BindEnv("PostgreSQL.Port", "HARDER_PG_PORT")
+	v.BindEnv("PostgreSQL.Username", "HARDER_PG_USERNAME")
+	v.BindEnv("PostgreSQL.Password", "HARDER_PG_PASSWORD")
+	v.BindEnv("PostgreSQL.Database", "HARDER_PG_DATABASE")
+	v.BindEnv("ReCAPTCHA.Enabled", "HARDER_CAPTCHA_ENABLED")
+	v.BindEnv("ReCAPTCHA.PublicKey", "HARDER_CAPTCHA_PUBLIC_KEY")
+	v.BindEnv("ReCAPTCHA.PrivateKey", "HARDER_CAPTCHA_PRIVATE_KEY")
+	v.BindEnv("ReCAPTCHA.VerifyLogin", "HARDER_CAPTCHA_VERIFY_LOGIN")
+	v.BindEnv("ReCAPTCHA.VerifyRegister", "HARDER_CAPTCHA_VERIFY_REGISTER")
+	v.BindEnv("Redis.Enabled", "HARDER_REDIS_ENABLED")
+	v.BindEnv("Redis.Address", "HARDER_REDIS_ADDRESS")
+	v.BindEnv("Redis.Port", "HARDER_REDIS_PORT")
+	v.BindEnv("Redis.Namespace", "HARDER_REDIS_NAMESPACE")
 }

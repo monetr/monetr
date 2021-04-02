@@ -35,6 +35,9 @@ spec:
           {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ include "api.fullname" . }}
           ports:
             - name: http
               containerPort: {{ .Values.api.listenPort }}
