@@ -66,7 +66,7 @@ Build:
       - ./vendor
     policy: pull-push
 
-Tests:
+Go Tests:
   needs:
     - "Go Dependencies"
   services:
@@ -98,7 +98,7 @@ Tests:
       - ./coverage.txt
     expire_in: 7 days
 
-Test Schema:
+PostgreSQL Tests:
   needs: [ ]
   stage: Test
   services:
@@ -168,7 +168,7 @@ Diff Schema:
 
 Yeet Coverage:
   needs:
-    - "Tests"
+    - "Go Tests"
   environment:
     name: DeepSource
   stage: Coverage
@@ -180,7 +180,7 @@ Yeet Coverage:
     - export DEEPSOURCE_DSN=$K8S_SECRET_DEEPSOURCE_DSN
     - deepsource report --analyzer test-coverage --key go --value-file ./coverage.txt
   dependencies:
-    - "Tests"
+    - "Go Tests"
 
 Documentation:
   allow_failure: true
@@ -232,7 +232,7 @@ Kaniko - Work UI:
 Publish - REST API:
   needs:
     - "Kaniko - REST API"
-    - "Tests"
+    - "Go Tests"
   variables:
     VAULT_AUTH_ROLE: harder-rest-api
   secrets:
