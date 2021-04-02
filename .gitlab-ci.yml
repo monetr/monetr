@@ -6,7 +6,7 @@ workflow:
 
 stages:
   - Dependencies
-  - Build Binary
+  - Build
   - Test
   - Schema Preflight
   - Schema
@@ -54,7 +54,7 @@ JS Dependencies:
 Binary:
   needs:
     - "Go Dependencies"
-  stage: Build Binary
+  stage: Build
   image: containers.harderthanitneedstobe.com/golang:1.16.2
   tags:
     - k8s:shared
