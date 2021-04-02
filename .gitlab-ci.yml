@@ -223,8 +223,8 @@ Documentation:
   before_script:
     - mkdir -p /home || true
     - cd /home
-    - GOFLAGS="" go get github.com/swaggo/swag/cmd/swag
-    - GOFLAGS="" go build -o /usr/local/bin/swag github.com/swaggo/swag/cmd/swag
+    - GO111MODULE=off GOFLAGS="" go get github.com/swaggo/swag/cmd/swag
+    - GO111MODULE=off GOFLAGS="" go build -o /usr/local/bin/swag github.com/swaggo/swag/cmd/swag
     - cd $CI_PROJECT_DIR
   script:
     - swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
