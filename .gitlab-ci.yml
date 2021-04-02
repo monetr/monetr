@@ -149,9 +149,9 @@ Diff Schema:
     - sleep 5
     - |
       for file in $CI_PROJECT_DIR/schema/*; do
-        psql -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -f $file
+        psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -f $file
       done
-    - psql -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
+    - psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
     - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB ./tests/pg/*.sql
 
 Yeet Coverage:

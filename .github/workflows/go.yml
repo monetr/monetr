@@ -29,18 +29,8 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
-
       - name: Fetch Dependencies
         run: go get ./...
-
-      - name: Build
-        run: go build -v ./...
-
       - name: Setup Schema
         run: make apply-schema-ci
       - name: Test
