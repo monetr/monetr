@@ -169,8 +169,8 @@ Diff Schema:
     - go build -o /usr/local/bin/pgdiff github.com/joncrlsn/pgdiff
     - |
       pgdiff \
-        -U $POSTGRES_USER -H current -D $POSTGRES_DB -O "sslmode=disable" -W $POSTGRES_PASSWORD \
-        -u $POSTGRES_USER -h new -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD ALL
+        -U $POSTGRES_USER -H new -D $POSTGRES_DB -O "sslmode=disable" -W $POSTGRES_PASSWORD \
+        -u $POSTGRES_USER -h current -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD TABLE
 
 Yeet Coverage:
   needs:
