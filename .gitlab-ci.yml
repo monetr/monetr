@@ -167,7 +167,7 @@ Diff Schema:
   script:
     - go get github.com/joncrlsn/pgdiff
     - go build -o /usr/local/bin/pgdiff github.com/joncrlsn/pgdiff
-    - pgdiff
+    - pgdiff -U $POSTGRES_USER -u $POSTGRES_USER -H current -h new -D $POSTGRES_DB -d $POSTGRES_DB -O sslmode=disable -o sslmode=disable ALL
 
 Yeet Coverage:
   needs:
