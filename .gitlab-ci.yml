@@ -24,7 +24,7 @@ variables:
 Go Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: hub.proxy.harderthanitneedstobe.com/golang:1.16.2
+  image: containers.harderthanitneedstobe.com/golang:1.16.2
   tags:
     - k8s:shared
     - arch:amd64
