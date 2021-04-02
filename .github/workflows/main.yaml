@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Fetch Dependencies
-        run: go get ./...
+        run: go mod vendor
       - name: Store Dependencies
         uses: actions/upload-artifact@v2
         with:
