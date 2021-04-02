@@ -1,0 +1,7 @@
+status = [
+    "ci/gitlab/gitlab.elliotcourant.dev"
+]
+
+[committer]
+name = "bors[bot]"
+email = "me@elliotcourant.dev"

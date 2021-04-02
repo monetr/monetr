@@ -1,3 +1,9 @@
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
+      when: never
+    - when: always
+
 stages:
   - Dependencies
   - Build Binary
@@ -60,21 +66,6 @@ Build:
       - ./vendor
     policy: pull-push
 
-Schema Generation:
-  needs:
-    - "Go Dependencies"
-  stage: Test
-  image: containers.harderthanitneedstobe.com/golang:1.16.2
-  tags:
-    - k8s:shared
-  script:
-    - make schema
-  cache:
-    key: go-${CI_COMMIT_SHA}
-    paths:
-      - ./vendor
-    policy: pull
-
 Tests:
   needs:
     - "Go Dependencies"
@@ -107,29 +98,9 @@ Tests:
       - ./coverage.txt
     expire_in: 7 days
 
-Build Database Image:
-  needs:
-    - "Tests"
-  stage: Schema Preflight
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
-  variables:
-    VAULT_AUTH_ROLE: harder-rest-api-shorty
-  secrets:
-    DOCKER_CONFIG_JSON:
-      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
-  tags:
-    - k8s:shared
-    - arch:amd64
-  before_script:
-    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
-  script:
-    - |
-      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
-
-Diff Schema:
+Test Schema:
   needs: [ ]
-  stage: Schema
+  stage: Test
   services:
     - name: containers.harderthanitneedstobe.com/pgtest:latest
       alias: postgres
@@ -153,6 +124,47 @@ Diff Schema:
       done
     - psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
     - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB ./tests/pg/*.sql
+
+Build Database Image:
+  needs:
+    - "Tests"
+  stage: Schema Preflight
+  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  variables:
+    VAULT_AUTH_ROLE: harder-rest-api-shorty
+  secrets:
+    DOCKER_CONFIG_JSON:
+      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
+  tags:
+    - k8s:shared
+    - arch:amd64
+  before_script:
+    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
+  script:
+    - |
+      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
+        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+
+Diff Schema:
+  needs:
+    - "Build Database Image"
+  stage: Schema
+  services:
+    - name: short.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+      alias: new
+    - name: containers.harderthanitneedstobe.com/database-schema-base:latest
+      alias: current
+  image: containers.harderthanitneedstobe.com/ubuntu:20.04
+  tags:
+    - k8s:shared
+    - arch:amd64
+  variables:
+    POSTGRES_PASSWORD: ""
+    POSTGRES_USER: postgres
+    POSTGRES_DB: test-db
+    POSTGRES_HOST_AUTH_METHOD: trust
+  script:
+    - echo "not doing anything yet"
 
 Yeet Coverage:
   needs:
