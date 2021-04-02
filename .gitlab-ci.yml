@@ -51,7 +51,7 @@ JS Dependencies:
       - ./node_modules
     policy: push
 
-Build:
+Binary:
   needs:
     - "Go Dependencies"
   stage: Build Binary
@@ -67,6 +67,25 @@ Build:
       - ./bin
       - ./vendor
     policy: pull-push
+
+Database:
+  needs: [ ]
+  stage: Build
+  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  variables:
+    VAULT_AUTH_ROLE: harder-rest-api-shorty
+  secrets:
+    DOCKER_CONFIG_JSON:
+      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
+  tags:
+    - k8s:shared
+    - arch:amd64
+  before_script:
+    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
+  script:
+    - |
+      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
+        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
 Go Tests:
   needs:
@@ -127,28 +146,9 @@ PostgreSQL Tests:
     - psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
     - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f ./tests/pg/*.sql
 
-Build Database Image:
-  needs: [ ]
-  stage: Schema Preflight
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
-  variables:
-    VAULT_AUTH_ROLE: harder-rest-api-shorty
-  secrets:
-    DOCKER_CONFIG_JSON:
-      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
-  tags:
-    - k8s:shared
-    - arch:amd64
-  before_script:
-    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
-  script:
-    - |
-      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
-
 Diff Schema PGDiff:
   needs:
-    - "Build Database Image"
+    - "Database"
   stage: Schema
   services:
     - name: shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
@@ -176,7 +176,7 @@ Diff Schema PGDiff:
 Diff Schema Migra:
   allow_failure: true
   needs:
-    - "Build Database Image"
+    - "Database"
   stage: Schema
   services:
     - name: shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
@@ -244,6 +244,7 @@ Documentation:
 
 Kaniko - REST API:
   needs:
+    - "Binary"
     - "Go Dependencies"
   stage: Build Container
   image: containers.harderthanitneedstobe.com/kaniko-ci:latest
@@ -348,6 +349,7 @@ Staging Dry Run - Main:
   when: manual
   stage: Prepare Staging
   needs:
+    - "PostgreSQL Tests"
     - "Publish - REST API"
   only:
     refs:

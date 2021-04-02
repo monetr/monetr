@@ -6,7 +6,7 @@ image:
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
 imagePullSecrets:
-  - containers.harderthanitneedstobe.com
+  - name: containers.harderthanitneedstobe.com
 
 podAnnotations:
   harderthanitneedstobe.com/branch: "" # Branch of the deployment will be put here
