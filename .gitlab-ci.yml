@@ -128,7 +128,7 @@ Build Database Image:
         --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
 
 Diff Schema:
-  needs: []
+  needs: [ ]
   stage: Schema
   services:
     - name: containers.harderthanitneedstobe.com/pgtest:latest
