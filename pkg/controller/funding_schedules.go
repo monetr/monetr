@@ -92,10 +92,15 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 
 	var err error
 	// Set the next occurrence based on the provided rule.
-	fundingSchedule.NextOccurrence, err = c.midnightInLocal(ctx, fundingSchedule.Rule.After(time.Now(), false))
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine next occurrence")
-		return
+
+	// If the next occurrence is not specified then assume that the rule is relative to now. If it is specified though
+	// then do nothing, and the subsequent occurrence will be calculated relative to the provided date.
+	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) {
+		fundingSchedule.NextOccurrence, err = c.midnightInLocal(ctx, fundingSchedule.Rule.After(time.Now(), false))
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine next occurrence")
+			return
+		}
 	}
 
 	// It has never occurred so this needs to be nil.
