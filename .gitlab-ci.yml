@@ -59,12 +59,17 @@ Test:
   tags:
     - k8s:shared
   script:
-    - yarn test
+    - yarn coverage
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
       - ./node_modules
     policy: pull
+  artifacts:
+    name: "$CI_COMMIT_SHA-coverage-report"
+    paths:
+      - ./reports
+    expire_in: 7 days
 
 Yeet Coverage:
   needs:

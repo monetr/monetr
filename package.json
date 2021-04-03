@@ -91,7 +91,8 @@
     "build-prod": "webpack --mode production",
     "clean": "rm -rf build/* || true",
     "start": "webpack serve --hot --mode development",
-    "test": "jest"
+    "test": "jest",
+    "coverage": "jest --coverage --collectCoverageFrom=src/**/*.{js,jsx,ts,tsx} --coverageDirectory=./reports"
   },
   "eslintConfig": {
     "extends": [
