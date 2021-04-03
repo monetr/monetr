@@ -1,4 +1,5 @@
 import { Button, Card, Divider, List, Typography } from "@material-ui/core";
+import ExpenseDetail from 'components/Expenses/ExpenseDetail';
 import ExpenseItem from 'components/Expenses/ExpenseItem';
 import NewExpenseDialog from "components/Expenses/NewExpenseDialog";
 import FundingScheduleList from "components/FundingSchedules/FundingScheduleList";
@@ -57,22 +58,9 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
       );
     }
 
-    return this.renderExpenseDetailView();
-  };
-
-  renderExpenseDetailView = () => {
-    const { selectedExpense } = this.state;
-
-    if (!selectedExpense) {
-      return (
-        <div>
-          <Typography>Some stuff here</Typography>
-        </div>
-      );
-    }
 
     return (
-      <Typography>Selected expense: { selectedExpense }</Typography>
+      <ExpenseDetail/>
     );
   };
 
@@ -140,7 +128,7 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
                 </Card>
               </div>
               <div className="">
-                <Card elevation={ 4 } className="h-full w-full">
+                <Card elevation={ 4 } className="w-full expenses-list">
                   { this.renderSideBar() }
                 </Card>
               </div>

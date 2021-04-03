@@ -76,7 +76,7 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
     }),
   ];
 
-  if (isStartOfMonth) {
+  if (isStartOfMonth || input.date() === 15) {
     rules.push(new Recurrence({
       name: `1st and 15th of every month`,
       rule: new RRule({
@@ -87,7 +87,7 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
     }));
   }
 
-  if (isEndOfMonth) {
+  if (isEndOfMonth || input.date() === 15) {
     rules.push(new Recurrence({
       name: `15th and last day of every month`,
       rule: new RRule({
