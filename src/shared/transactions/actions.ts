@@ -26,6 +26,25 @@ export interface ChangeSelectedTransaction {
   transactionId: number;
 }
 
+export enum UpdateTransaction {
+  Request = 'UpdateTransactionRequest',
+  Failure = 'UpdateTransactionFailure',
+  Success = 'UpdateTransactionSuccess',
+}
+
+export interface UpdateTransactionRequest {
+  type: typeof UpdateTransaction.Request;
+}
+
+export interface UpdateTransactionFailure {
+  type: typeof UpdateTransaction.Failure;
+}
+
+export interface UpdateTransactionSuccess {
+  type: typeof UpdateTransaction.Success;
+  payload: Transaction;
+}
+
 export type TransactionActions =
   FetchTransactionsSuccess
   | FetchTransactionsRequest
@@ -33,3 +52,6 @@ export type TransactionActions =
   | Logout
   | ChangeBankAccount
   | ChangeSelectedTransaction
+  | UpdateTransactionRequest
+  | UpdateTransactionFailure
+  | UpdateTransactionSuccess

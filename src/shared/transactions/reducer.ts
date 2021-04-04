@@ -7,7 +7,8 @@ import {
   FETCH_TRANSACTIONS_FAILURE,
   FETCH_TRANSACTIONS_REQUEST,
   FETCH_TRANSACTIONS_SUCCESS,
-  TransactionActions
+  TransactionActions,
+  UpdateTransaction
 } from "shared/transactions/actions";
 import TransactionState from "shared/transactions/state";
 
@@ -47,6 +48,15 @@ export default function reducer(state: TransactionState = new TransactionState()
         // The comparison logic will allow the selected transaction to be toggled if it is attempted to be selected more
         // than once. Basically if the user clicks a transaction that's already selected then it will unselect it.
         selectedTransactionId: state.selectedTransactionId === action.transactionId ? null : action.transactionId,
+      };
+    case UpdateTransaction.Request:
+    case UpdateTransaction.Failure:
+      // Idk what we'd want to do here right now;
+      return state;
+    case UpdateTransaction.Success:
+      return {
+        ...state,
+        items: state.items.setIn([action.payload.bankAccountId, action.payload.transactionId], action.payload),
       };
     case CHANGE_BANK_ACCOUNT:
       return {
