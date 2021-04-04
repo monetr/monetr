@@ -86,7 +86,13 @@ export class TransactionDetailView extends Component<WithConnectionPropTypes, {}
                 <Typography>Safe-To-Spend</Typography>
               </div>
               <div className="col-span-1 row-span-2 justify-end flex">
-                <Button color="primary" className="align-middle self-center">Change</Button>
+                <Button
+                  color="primary"
+                  className="align-middle self-center"
+                  onClick={ () => {} }
+                >
+                  Change
+                </Button>
               </div>
             </div>
             <Divider className="mt-5 mb-5"/>
