@@ -56,7 +56,7 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
           {
             spending.map(item => (
               <ListItem
-                key={ `${item.spendingId}` }
+                key={ `${ item.spendingId }` }
                 onClick={ this.selectItem(item.spendingId) }
                 button
               >

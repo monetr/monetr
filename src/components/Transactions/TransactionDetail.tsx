@@ -1,6 +1,6 @@
 import { Button, Chip, Divider, Typography } from "@material-ui/core";
 import classnames from 'classnames';
-import { EditSpentFromDialog } from 'components/Transactions/EditSpentFromDialog';
+import EditSpentFromDialog from 'components/Transactions/EditSpentFromDialog';
 import Spending from "data/Spending";
 import Transaction from "data/Transaction";
 import { Map } from 'immutable';
@@ -39,20 +39,24 @@ export class TransactionDetailView extends Component<WithConnectionPropTypes, St
   };
 
   render() {
-    const { transaction } = this.props;
+    const { transaction, spending } = this.props;
     const { editSpentFromDialogOpen } = this.state;
 
     if (!transaction) {
       return null;
     }
 
+    const spentFrom = spending.get(transaction.spendingId, null);
+
     return (
       <Fragment>
+        { editSpentFromDialogOpen &&
         <EditSpentFromDialog
           isOpen={ editSpentFromDialogOpen }
           onClose={ this.closeEditSpentFromDialog }
           transaction={ transaction }
         />
+        }
 
         <div className="w-full p-5 transaction-detail">
           <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-1 w-auto">
@@ -117,7 +121,7 @@ export class TransactionDetailView extends Component<WithConnectionPropTypes, St
                   <Typography variant="h5">Spent From</Typography>
                 </div>
                 <div className="col-span-3 row-span-1">
-                  <Typography>Safe-To-Spend</Typography>
+                  <Typography>{ spentFrom ? spentFrom.name : 'Safe-To-Spend' }</Typography>
                 </div>
                 <div className="col-span-1 row-span-2 justify-end flex">
                   <Button

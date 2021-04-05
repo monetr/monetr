@@ -29,7 +29,7 @@ export default function updateTransaction(transaction: Transaction): ActionWithS
       type: typeof UpdateTransaction.Request
     });
 
-    return request().put(`/bank_accounts/${ selectedBankAccountId }/transactions`, transaction)
+    return request().put(`/bank_accounts/${ selectedBankAccountId }/transactions/${ transaction.transactionId }`, transaction)
       .then(result => {
         dispatch({
           type: UpdateTransaction.Success,
