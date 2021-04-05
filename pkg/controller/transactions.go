@@ -186,6 +186,10 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 			c.badRequest(ctx, "cannot change transaction authorized date on non-manual links")
 			return
 		}
+
+		transaction.OriginalName = existingTransaction.OriginalName
+		transaction.OriginalMerchantName = existingTransaction.OriginalMerchantName
+		transaction.OriginalCategories = existingTransaction.OriginalCategories
 	}
 
 	updatedExpenses, err := c.processTransactionSpentFrom(repo, bankAccountId, &transaction, existingTransaction)

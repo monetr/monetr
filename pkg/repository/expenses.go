@@ -64,7 +64,7 @@ func (r *repositoryBase) GetExpense(bankAccountId, expenseId uint64) (*models.Sp
 		Relation("FundingSchedule").
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Where(`"spending"."expense_id" = ?`, expenseId).
+		Where(`"spending"."spending_id" = ?`, expenseId).
 		Where(`"spending"."spending_type" = ?`, models.SpendingTypeExpense).
 		Select(&result)
 	if err != nil {
