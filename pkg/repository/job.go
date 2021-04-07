@@ -74,7 +74,7 @@ func (j *jobRepository) GetBankAccountsWithPendingTransactions() ([]CheckingPend
 		WHERE
 			"link"."link_type" = ? AND
 			"transaction"."is_pending" = true
-	`)
+	`, models.PlaidLinkType)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve bank accounts with pending transactions")
 	}
