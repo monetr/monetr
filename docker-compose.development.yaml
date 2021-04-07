@@ -4,8 +4,11 @@ services:
     image: harder-rest-api
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
     hostname: rest-api
+    environment:
+      - HARDER_REDIS_ADDRESS=redis
+      - HARDER_PG_ADDRESS=postgres
     ports:
       - 4000:4000
       - 9000:9000

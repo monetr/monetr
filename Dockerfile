@@ -6,6 +6,8 @@ RUN go build -o /bin/rest-api github.com/harderthanitneedstobe/rest-api/v0/cmd/a
 
 FROM alpine:3.13.4
 
+RUN apk add --no-cache tzdata
+
 ARG REVISION
 
 LABEL org.opencontainers.image.url=https://github.com/harderthanitneedstobe/rest-api
