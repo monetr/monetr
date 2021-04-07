@@ -3,7 +3,7 @@
   "dependencies": {
     "sql-formatter": "4.0.2",
     "ts-node": "9.1.1",
-    "typescript": "4.2.3",
+    "typescript": "4.2.4",
     "yargs": "16.2.0"
   },
   "devDependencies": {
