@@ -165,6 +165,8 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		return
 	}
 
+	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId
+
 	if !isManual {
 		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
 		if existingTransaction.Amount != transaction.Amount {
@@ -317,6 +319,7 @@ func (c *Controller) processTransactionSpentFrom(
 
 		// Add the amount we took from the expense back to it.
 		currentExpense.CurrentAmount += *existing.SpendingAmount
+		existing.SpendingAmount = nil
 
 		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
 		if err = currentExpense.CalculateNextContribution(
