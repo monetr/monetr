@@ -66,7 +66,7 @@ func (j *jobRepository) GetBankAccountsWithPendingTransactions() ([]CheckingPend
 	var items []CheckingPendingTransactionsItem
 	_, err := j.txn.Query(&items, `
 		SELECT DISTINCT
-			"bank_account"."account_id"
+			"bank_account"."account_id",
 			"bank_account"."link_id"
 		FROM "transactions" AS "transaction"
 		INNER JOIN "bank_accounts" AS "bank_account" ON "bank_account"."account_id" = "transaction"."account_id" AND "bank_account"."bank_account_id" = "transaction"."bank_account_id"
