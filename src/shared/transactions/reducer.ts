@@ -56,7 +56,7 @@ export default function reducer(state: TransactionState = new TransactionState()
     case UpdateTransaction.Success:
       return {
         ...state,
-        items: state.items.setIn([action.payload.transaction.bankAccountId, action.payload.transaction.transactionId], action.payload),
+        items: state.items.setIn([action.payload.transaction.bankAccountId, action.payload.transaction.transactionId], action.payload.transaction),
       };
     case CHANGE_BANK_ACCOUNT:
       return {

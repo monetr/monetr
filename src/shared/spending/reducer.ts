@@ -51,10 +51,9 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         selectedExpenseId: state.selectedExpenseId === action.expenseId ? null : action.expenseId,
       };
     case UpdateTransaction.Success:
-      const items = state.items.withMutations(map => {
-        action.payload.spending.forEach(item => {
-          map = map.setIn([item.bankAccountId, item.spendingId], item);
-        });
+      let items = state.items;
+      action.payload.spending.forEach(item => {
+        items = items.setIn([item.bankAccountId, item.spendingId], item);
       });
       return {
         ...state,

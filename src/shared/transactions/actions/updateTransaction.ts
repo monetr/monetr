@@ -27,11 +27,12 @@ export default function updateTransaction(transaction: Transaction): ActionWithS
     transaction.bankAccountId = selectedBankAccountId;
 
     dispatch({
-      type: typeof UpdateTransaction.Request
+      type: UpdateTransaction.Request
     });
 
     return request().put(`/bank_accounts/${ selectedBankAccountId }/transactions/${ transaction.transactionId }`, transaction)
       .then(result => {
+        // TODO Use multiple redux actions to handle the transaction update and the spending update.
         dispatch({
           type: UpdateTransaction.Success,
           payload: {
@@ -42,7 +43,7 @@ export default function updateTransaction(transaction: Transaction): ActionWithS
       })
       .catch(error => {
         dispatch({
-          type: typeof UpdateTransaction.Failure
+          type: UpdateTransaction.Failure
         });
 
         throw error;
