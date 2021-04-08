@@ -1,3 +1,4 @@
+import Spending from 'data/Spending';
 import Transaction from 'data/Transaction';
 import { Dispatch } from 'redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
@@ -33,7 +34,10 @@ export default function updateTransaction(transaction: Transaction): ActionWithS
       .then(result => {
         dispatch({
           type: UpdateTransaction.Success,
-          payload: new Transaction(result.data),
+          payload: {
+            transaction: new Transaction(result.data.transaction),
+            spending: result.data.spending?.map(item => new Spending(item)),
+          }
         });
       })
       .catch(error => {

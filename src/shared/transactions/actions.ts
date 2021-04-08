@@ -1,3 +1,4 @@
+import Spending from 'data/Spending';
 import Transaction from "data/Transaction";
 import { Logout } from "shared/authentication/actions";
 import { ChangeBankAccount } from "shared/bankAccounts/actions";
@@ -42,7 +43,10 @@ export interface UpdateTransactionFailure {
 
 export interface UpdateTransactionSuccess {
   type: typeof UpdateTransaction.Success;
-  payload: Transaction;
+  payload: {
+    transaction: Transaction;
+    spending: Spending[];
+  };
 }
 
 export type TransactionActions =

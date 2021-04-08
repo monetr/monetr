@@ -9,6 +9,7 @@ import {
   SpendingActions
 } from "shared/spending/actions";
 import SpendingState from "shared/spending/state";
+import { UpdateTransaction } from 'shared/transactions/actions';
 
 export default function reducer(state: SpendingState = new SpendingState(), action: SpendingActions): SpendingState {
   switch (action.type) {
@@ -49,6 +50,16 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         // than once. Basically if the user clicks a expense that's already selected then it will unselect it.
         selectedExpenseId: state.selectedExpenseId === action.expenseId ? null : action.expenseId,
       };
+    case UpdateTransaction.Success:
+      const items = state.items.withMutations(map => {
+        action.payload.spending.forEach(item => {
+          map = map.setIn([item.bankAccountId, item.spendingId], item);
+        });
+      });
+      return {
+        ...state,
+        items,
+      }
     case LOGOUT:
       return new SpendingState();
     default:

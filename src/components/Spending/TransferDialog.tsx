@@ -1,6 +1,8 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem } from "@material-ui/core";
 import Spending from 'data/Spending';
 import React, { Component } from "react";
+import { connect } from 'react-redux';
+import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
 
 export interface PropTypes {
   fromSpendingId?: number;
@@ -14,12 +16,21 @@ interface WithConnectionPropTypes extends PropTypes {
   to: Spending | null;
 }
 
+interface State {
+  from: Spending | null;
+  to: Spending | null;
+}
+
 const SafeToSpend = new Spending({
   spendingId: -1, // Indicates that this is safe to spend.
   name: 'Safe-To-Spend',
 });
 
-class TransferDialog extends Component<PropTypes, {}> {
+class TransferDialog extends Component<WithConnectionPropTypes, {}> {
+
+  componentDidMount() {
+
+  }
 
   doTransfer = () => {
 
@@ -37,7 +48,7 @@ class TransferDialog extends Component<PropTypes, {}> {
             <ListItem key="from" button>
               From: Thing
             </ListItem>
-            <ListItem key="to">
+            <ListItem key="to" button>
               To: Place
             </ListItem>
           </List>
@@ -60,3 +71,37 @@ class TransferDialog extends Component<PropTypes, {}> {
     );
   }
 }
+
+export default connect(
+  (state, props: PropTypes) => {
+    let from: Spending, to: Spending;
+
+    switch (props.fromSpendingId) {
+      case null:
+      case undefined:
+        break;
+      case 0:
+        from = SafeToSpend;
+        break;
+      default:
+        from = getSpendingById(props.fromSpendingId)(state);
+    }
+
+    switch (props.toSpendingId) {
+      case null:
+      case undefined:
+        break;
+      case 0:
+        to = SafeToSpend;
+        break;
+      default:
+        to = getSpendingById(props.toSpendingId)(state);
+    }
+
+    return {
+      from,
+      to,
+    };
+  },
+  {}
+)(TransferDialog);
