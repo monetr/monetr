@@ -50,7 +50,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
     return (
       <Fragment>
         { transferDialogOpen &&
-        <TransferDialog isOpen onClose={ this.closeTransferDialog } toSpendingId={ expense.spendingId }/>
+        <TransferDialog isOpen onClose={ this.closeTransferDialog } initialToSpendingId={ expense.spendingId }/>
         }
 
         <div className="w-full pl-5 pr-5 pt-5 expense-detail">

@@ -40,7 +40,7 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
             <ListItemIcon>
               <Checkbox
                 edge="start"
-                checked={ value === null }
+                checked={ !value }
                 tabIndex={ -1 }
                 color="primary"
                 disabled={ !!disabled }
