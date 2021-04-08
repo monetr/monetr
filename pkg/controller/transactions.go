@@ -211,7 +211,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 
 	ctx.JSON(map[string]interface{}{
 		"transaction": transaction,
-		"expenses":    updatedExpenses,
+		"spending":    updatedExpenses,
 	})
 }
 
