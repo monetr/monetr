@@ -35,6 +35,16 @@ func (c *Controller) getBankAccounts(ctx *context.Context) {
 	ctx.JSON(bankAccounts)
 }
 
+// Get Bank Account Balances
+// @id get-bank-account-balances
+// @tags Bank Accounts
+// @description Get the balances for the specified bank account (including calculated balances).
+// @Security ApiKeyAuth
+// @Param bankAccountId path int true "Bank Account ID"
+// @Router /bank_accounts/{bankAccountId}/balances [get]
+// @Success 200 {object} repository.Balances
+// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getBalances(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
