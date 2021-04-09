@@ -219,7 +219,7 @@ Documentation:
   needs:
     - "Go Dependencies"
   stage: Documentation
-  image: containers.harderthanitneedstobe.com/golang:1.16.2
+  image: containers.harderthanitneedstobe.com/ubuntu:20.04
   tags:
     - k8s:shared
     - arch:amd64
@@ -229,16 +229,19 @@ Documentation:
     - GO111MODULE=off GOFLAGS="" go get github.com/swaggo/swag/cmd/swag
     - GO111MODULE=off GOFLAGS="" go build -o /usr/local/bin/swag github.com/swaggo/swag/cmd/swag
     - cd $CI_PROJECT_DIR
+    - export PATH=$PATH:$CI_PROJECT_DIR/node_modules/.bin
   script:
-    - swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
+    - make docs
+    - redoc-cli bundle
   cache:
-    key: go-${CI_COMMIT_SHA}
+    key: js-${CI_COMMIT_SHA}
     paths:
-      - ./vendor
+      - ./node_modules
     policy: pull
   artifacts:
     name: "$CI_COMMIT_SHA-documentation"
     paths:
+      - ./redoc-static.html
       - ./docs
     expire_in: 7 days
 

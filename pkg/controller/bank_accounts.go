@@ -21,7 +21,7 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 // @Summary List All Bank Accounts
 // @id list-all-bank-accounts
 // @tags Bank Accounts
-// @description List's all of the bank accounts for the currently authenticated user.
+// @description Lists all of the bank accounts for the currently authenticated user.
 // @Produce json
 // @Security ApiKeyAuth
 // @Router /bank_accounts [get]
@@ -72,7 +72,7 @@ func (c *Controller) getBalances(ctx *context.Context) {
 // @Summary Create Bank Account
 // @ID create-bank-account
 // @tags Bank Accounts
-// @description Create a bank account for the provided link.
+// @description Create a bank account for the provided link. Note: Bank accounts can only be created this way for manual links. Attempting to create a bank account for a link that is associated with Plaid will result in an error.
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json

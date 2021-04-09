@@ -7,3 +7,4 @@ docs
 node_modules
 generated
 values.mayview.yaml
+redoc-static.html

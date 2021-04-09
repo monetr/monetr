@@ -8,6 +8,7 @@ import (
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/cache"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/jobs"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/migrations"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
@@ -97,6 +98,8 @@ func main() {
 		stats: stats,
 		log:   log,
 	})
+
+	migrations.RunMigrations(db)
 
 	redisController, err := cache.NewRedisCache(log, configuration.Redis)
 	if err != nil {

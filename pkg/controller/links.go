@@ -11,17 +11,7 @@ import (
 
 func (c *Controller) linksController(p iris.Party) {
 	// GET will list all the links in the current account.
-	p.Get("/", func(ctx *context.Context) {
-		repo := c.mustGetAuthenticatedRepository(ctx)
-
-		links, err := repo.GetLinks()
-		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve links")
-			return
-		}
-
-		ctx.JSON(links)
-	})
+	p.Get("/", c.getLinks)
 
 	// POST will create a new link, links created this way are manual only. Plaid links must be created through a plaid
 	// workflow.
@@ -79,4 +69,25 @@ func (c *Controller) linksController(p iris.Party) {
 
 		ctx.JSON(link)
 	})
+}
+
+// List all links
+// @Summary List All Links
+// @id list-all-links
+// @tags Links
+// @description Lists all of the links for the currently authenticated user.
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /links [get]
+// @Success 200 {array} models.Link
+func (c *Controller) getLinks(ctx *context.Context) {
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	links, err := repo.GetLinks()
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve links")
+		return
+	}
+
+	ctx.JSON(links)
 }

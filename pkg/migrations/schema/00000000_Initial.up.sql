@@ -160,7 +160,7 @@ CREATE TABLE IF NOT EXISTS "spending" (
     "target_amount" BIGINT NOT NULL,
     "current_amount" BIGINT NOT NULL,
     "used_amount" BIGINT NOT NULL,
-    "recurrence_rule" TEXT NOT NULL,
+    "recurrence_rule" TEXT,
     "last_recurrence" TIMESTAMPTZ,
     "next_recurrence" TIMESTAMPTZ NOT NULL,
     "next_contribution_amount" BIGINT NOT NULL,
