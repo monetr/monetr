@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	_ "github.com/harderthanitneedstobe/rest-api/v0/pkg/swag"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"net/http"
@@ -17,9 +18,11 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 }
 
 // List All Bank Accounts
+// @Summary List All Bank Accounts
 // @id list-all-bank-accounts
 // @tags Bank Accounts
 // @description List's all of the bank accounts for the currently authenticated user.
+// @Produce json
 // @Security ApiKeyAuth
 // @Router /bank_accounts [get]
 // @Success 200 {array} models.BankAccount
@@ -36,10 +39,12 @@ func (c *Controller) getBankAccounts(ctx *context.Context) {
 }
 
 // Get Bank Account Balances
+// @Summary Get Bank Account Balances
 // @id get-bank-account-balances
 // @tags Bank Accounts
 // @description Get the balances for the specified bank account (including calculated balances).
 // @Security ApiKeyAuth
+// @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/balances [get]
 // @Success 200 {object} repository.Balances
@@ -64,10 +69,14 @@ func (c *Controller) getBalances(ctx *context.Context) {
 }
 
 // Create Bank Account
-// @id create-bank-account
+// @Summary Create Bank Account
+// @ID create-bank-account
 // @tags Bank Accounts
 // @description Create a bank account for the provided link.
 // @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param newBankAccount body swag.BankAccountCreateRequest true "New Bank Account"
 // @Router /bank_accounts [post]
 // @Success 200 {object} models.BankAccount
 func (c *Controller) postBankAccounts(ctx *context.Context) {
