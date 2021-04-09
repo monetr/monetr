@@ -1468,10 +1468,10 @@ readdirp@~3.5.0:
   dependencies:
     picomatch "^2.2.1"
 
-redoc-cli@0.11.1:
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.11.1.tgz#88af0c1914b6f611e42b966d712c070daae030f3"
-  integrity sha512-BBAbgtOfId6fI/ncmKyeeN1cnheoVPw2/s6urzPI757hpNifmfsxQjn+qK9dT3NoVOlh/t6BIIDdv2zd0ghCoA==
+redoc-cli@0.11.2:
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.11.2.tgz#fed64733a7c24cea3707371f86cb756aebf0b1bd"
+  integrity sha512-lwdyhckChoMaz988cN3gAh53Rl6UMUQ78g4UvjnDYX2gR//UF0Iz58QUbV0ybQhw5l5PiakdVOr5V/rZc+G8bA==
   dependencies:
     chokidar "^3.4.1"
     handlebars "^4.7.6"
