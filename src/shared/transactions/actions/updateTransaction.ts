@@ -1,6 +1,8 @@
+import Balance from 'data/Balance';
 import Spending from 'data/Spending';
 import Transaction from 'data/Transaction';
 import { Dispatch } from 'redux';
+import { FetchBalances } from 'shared/balances/actions';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { UpdateTransaction } from 'shared/transactions/actions';
 import request from 'shared/util/request';
@@ -40,6 +42,13 @@ export default function updateTransaction(transaction: Transaction): ActionWithS
             spending: result.data.spending?.map(item => new Spending(item)),
           }
         });
+
+        if (result.data.balance) {
+          dispatch({
+            type: FetchBalances.Success,
+            payload: new Balance(result.data.balance),
+          });
+        }
       })
       .catch(error => {
         dispatch({

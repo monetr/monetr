@@ -23,7 +23,9 @@ import Spending from 'data/Spending';
 import React, { Component, Fragment } from "react";
 import { connect } from 'react-redux';
 import { getBalance } from 'shared/balances/selectors/getBalance';
+import transfer from 'shared/spending/actions/transfer';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
+import { Formik, FormikErrors, FormikHandlers, FormikHelpers } from "formik";
 
 import './styles/TransferDialog.scss';
 
@@ -38,6 +40,7 @@ interface WithConnectionPropTypes extends PropTypes {
   from: Spending | null;
   to: Spending | null;
   balance: Balance;
+  transfer: { (from: number | null, to: number | null, amount: number): Promise<void> }
 }
 
 interface State {
@@ -56,6 +59,14 @@ let SafeToSpend = new Spending({
   spendingId: null, // Indicates that this is safe to spend.
   name: 'Safe-To-Spend',
 });
+
+interface transferForm {
+  amount: number;
+}
+
+const initialValues: transferForm = {
+  amount: 0.00,
+};
 
 class TransferDialog extends Component<WithConnectionPropTypes, State> {
 
@@ -89,8 +100,33 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
     }));
   };
 
-  doTransfer = () => {
+  doTransfer = (values: transferForm, { setSubmitting, setFieldError }: FormikHelpers<transferForm>) => {
+    const { to, from } = this.state;
 
+    if (values.amount <= 0) {
+      setFieldError('amount', 'Amount must be greater than 0');
+      setSubmitting(false);
+      return null;
+    }
+
+    if (values.amount > from.currentAmount) {
+      setFieldError('amount', 'Amount must be less than or equal to the source amount');
+      setSubmitting(false);
+      return null;
+    }
+
+    const fromId = from === SafeToSpend ? null : from.spendingId;
+    const toId = to === SafeToSpend ? null : to.spendingId;
+    const amount = Math.round(values.amount * 100);
+
+    return this.props.transfer(fromId, toId, amount)
+      .then(() => {
+        this.props.onClose();
+      })
+      .catch(error => {
+        console.error(error);
+        setSubmitting(false);
+      });
   };
 
   renderSelection = (selection: Spending | null) => {
@@ -147,109 +183,130 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
   render() {
     const { isOpen, onClose } = this.props;
     return (
-      <Fragment>
-        <Dialog open={ isOpen } maxWidth="xs">
-          <DialogTitle>
-            Transfer Funds
-          </DialogTitle>
-          <DialogContent className="p-5">
-            <DialogContentText>
-              Transfer funds to or from an expense or goal. This will allocate these funds to the destination so they
-              can
-              be put aside or used.
-            </DialogContentText>
-            <IconButton
-              onClick={ this.reverse }
-              color="primary"
-              size="medium"
-              className={ classNames('reverse-button transition-opacity', {
-                'opacity-0': this.state.selectionDialog !== null,
-                'opacity-100': this.state.selectionDialog === null,
-              }) }
-            >
-              <SwapVert/>
-            </IconButton>
-            <div>
-              <Accordion expanded={ this.state.selectionDialog === Target.From } className="transfer-item"
-                         onChange={ this.toggleExpanded(Target.From) }>
-                <AccordionSummary>
-                  <div className='grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full'>
-                    <div className="col-span-1 row-span-2">
-                      <Typography
-                        variant="h5"
-                      >
-                        From
-                      </Typography>
-                    </div>
-                    { this.renderSelection(this.state.from) }
-                  </div>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <SpendingSelectionList
-                    value={ this.state.from?.spendingId }
-                    onChange={ this.handleFromOnChange }
-                    excludeIds={ this.state.to ? [this.state.to.spendingId] : null }
-                    excludeSafeToSpend={ this.state.to === SafeToSpend }
-                  />
-                </AccordionDetails>
-              </Accordion>
-              <Accordion expanded={ this.state.selectionDialog === Target.To }
-                         onChange={ this.toggleExpanded(Target.To) }>
-                <AccordionSummary>
-                  <div className='grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full'>
-                    <div className="col-span-1 row-span-2">
-                      <Typography
-                        variant="h5"
-                      >
-                        To
-                      </Typography>
-                    </div>
-                    { this.renderSelection(this.state.to) }
-                  </div>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <SpendingSelectionList
-                    value={ this.state.to?.spendingId }
-                    onChange={ this.handleToOnChange }
-                    excludeIds={ this.state.from ? [this.state.from.spendingId] : null }
-                    excludeSafeToSpend={ this.state.from === SafeToSpend }
-                  />
-                </AccordionDetails>
-              </Accordion>
-            </div>
-            <div className="w-full mt-5">
-              <FormControl fullWidth>
-                <InputLabel htmlFor="new-expense-amount">Amount</InputLabel>
-                <Input
-                  id="new-expense-amount"
-                  name="amount"
-                  value={ 0 }
-                  onBlur={ () => {
-                  } }
-                  onChange={ () => {
-                  } }
-                  disabled={ false }
-                  startAdornment={ <InputAdornment position="start">$</InputAdornment> }
-                />
-              </FormControl>
-            </div>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={ onClose }
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={ this.doTransfer }
-            >
-              Transfer
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Fragment>
+      <Formik
+        initialValues={ initialValues }
+        onSubmit={ this.doTransfer }
+      >
+        { ({
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          setFieldValue,
+          isSubmitting,
+          submitForm,
+        }) => (
+          <form onSubmit={ handleSubmit }>
+            <Dialog open={ isOpen } maxWidth="xs">
+              <DialogTitle>
+                Transfer Funds
+              </DialogTitle>
+              <DialogContent className="p-5">
+                <DialogContentText>
+                  Transfer funds to or from an expense or goal. This will allocate these funds to the destination so they
+                  can
+                  be put aside or used.
+                </DialogContentText>
+                <IconButton
+                  onClick={ this.reverse }
+                  color="primary"
+                  size="medium"
+                  className={ classNames('reverse-button transition-opacity', {
+                    'opacity-0': this.state.selectionDialog !== null,
+                    'opacity-100': this.state.selectionDialog === null,
+                  }) }
+                >
+                  <SwapVert/>
+                </IconButton>
+                <div>
+                  <Accordion expanded={ this.state.selectionDialog === Target.From } className="transfer-item"
+                             onChange={ this.toggleExpanded(Target.From) }>
+                    <AccordionSummary>
+                      <div className='grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full'>
+                        <div className="col-span-1 row-span-2">
+                          <Typography
+                            variant="h5"
+                          >
+                            From
+                          </Typography>
+                        </div>
+                        { this.renderSelection(this.state.from) }
+                      </div>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <SpendingSelectionList
+                        disabled={ isSubmitting }
+                        value={ this.state.from?.spendingId }
+                        onChange={ this.handleFromOnChange }
+                        excludeIds={ this.state.to ? [this.state.to.spendingId] : null }
+                        excludeSafeToSpend={ this.state.to === SafeToSpend }
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+                  <Accordion expanded={ this.state.selectionDialog === Target.To }
+                             onChange={ this.toggleExpanded(Target.To) }>
+                    <AccordionSummary>
+                      <div className='grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full'>
+                        <div className="col-span-1 row-span-2">
+                          <Typography
+                            variant="h5"
+                          >
+                            To
+                          </Typography>
+                        </div>
+                        { this.renderSelection(this.state.to) }
+                      </div>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <SpendingSelectionList
+                        disabled={ isSubmitting }
+                        value={ this.state.to?.spendingId }
+                        onChange={ this.handleToOnChange }
+                        excludeIds={ this.state.from ? [this.state.from.spendingId] : null }
+                        excludeSafeToSpend={ this.state.from === SafeToSpend }
+                      />
+                    </AccordionDetails>
+                  </Accordion>
+                </div>
+                <div className="w-full mt-5">
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor="new-expense-amount">Amount</InputLabel>
+                    <Input
+                      type="number"
+                      id="new-expense-amount"
+                      name="amount"
+                      value={ values.amount }
+                      onBlur={ handleBlur }
+                      onChange={ handleChange }
+                      disabled={ isSubmitting }
+                      startAdornment={ <InputAdornment position="start">$</InputAdornment> }
+                    />
+                  </FormControl>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  onClick={ onClose }
+                  disabled={ isSubmitting }
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="outlined"
+                  color="primary"
+                  disabled={ isSubmitting }
+                  onClick={ submitForm }
+                >
+                  Transfer
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </form>
+        )}
+      </Formik>
     );
   }
 }
@@ -286,5 +343,7 @@ export default connect(
       balance: getBalance(state),
     };
   },
-  {}
+  {
+    transfer,
+  }
 )(TransferDialog);

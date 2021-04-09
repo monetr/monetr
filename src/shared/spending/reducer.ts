@@ -6,7 +6,8 @@ import {
   FETCH_SPENDING_REQUEST,
   FETCH_SPENDING_SUCCESS,
   SelectExpense,
-  SpendingActions
+  SpendingActions,
+  Transfer
 } from "shared/spending/actions";
 import SpendingState from "shared/spending/state";
 import { UpdateTransaction } from 'shared/transactions/actions';
@@ -50,7 +51,7 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         // than once. Basically if the user clicks a expense that's already selected then it will unselect it.
         selectedExpenseId: state.selectedExpenseId === action.expenseId ? null : action.expenseId,
       };
-    case UpdateTransaction.Success:
+    case UpdateTransaction.Success: {
       let items = state.items;
       action.payload.spending.forEach(item => {
         items = items.setIn([item.bankAccountId, item.spendingId], item);
@@ -59,6 +60,17 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         ...state,
         items,
       }
+    }
+    case Transfer: {
+      let items = state.items;
+      action.payload.spending.forEach(item => {
+        items = items.setIn([item.bankAccountId, item.spendingId], item);
+      });
+      return {
+        ...state,
+        items,
+      };
+    }
     case LOGOUT:
       return new SpendingState();
     default:

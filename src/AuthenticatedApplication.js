@@ -1,5 +1,6 @@
 import { AppBar, Button, IconButton, Menu, MenuItem, Toolbar, Typography } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
+import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
 import BankAccountSelector from "components/BankAccountSelector";
 import PropTypes from "prop-types";
 import React, { Component, Fragment } from 'react';
@@ -86,6 +87,7 @@ export class AuthenticatedApplication extends Component {
             <Button to="/transactions" component={ RouterLink } color="inherit">Transactions</Button>
             <Button to="/expenses" component={ RouterLink } color="inherit">Expenses</Button>
             <Button to="/goals" component={ RouterLink } color="inherit">Goals</Button>
+            <BalanceNavDisplay/>
             <div style={ { marginLeft: 'auto' } }/>
             <div style={ { marginRight: '10px', marginLeft: '10px' } }>
               <BankAccountSelector/>

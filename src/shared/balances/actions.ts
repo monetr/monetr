@@ -1,5 +1,6 @@
 import Balance from 'data/Balance';
 import { Logout } from 'shared/authentication/actions';
+import { Transfer } from 'shared/spending/actions';
 
 
 export enum FetchBalances {
@@ -25,4 +26,5 @@ export type BalanceActions =
   FetchBalancesRequest
   | FetchBalancesFailure
   | FetchBalancesSuccess
+  | Transfer
   | Logout

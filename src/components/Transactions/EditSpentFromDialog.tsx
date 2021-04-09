@@ -58,9 +58,12 @@ export class EditSpentFromDialog extends Component<WithConnectionPropTypes, Stat
       return Promise.resolve();
     }
 
-    transaction.spendingId = spendingId;
+    const updatedTransaction = new Transaction({
+      ...transaction,
+      spendingId,
+    });
 
-    return updateTransaction(transaction)
+    return updateTransaction(updatedTransaction)
       .then(() => {
         return onClose();
       })

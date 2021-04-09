@@ -15,4 +15,12 @@ export default class Balance {
   getSafeToSpendString(): string {
     return `$${ (this.safe / 100).toFixed(2) }`;
   }
+
+  getAvailableString(): string {
+    return `$${ (this.available / 100).toFixed(2) }`;
+  }
+
+  getExpensesString(): string {
+    return `$${ (this.expenses / 100).toFixed(2) }`;
+  }
 }

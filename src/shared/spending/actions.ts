@@ -1,3 +1,4 @@
+import Balance from 'data/Balance';
 import Spending from "data/Spending";
 import { Map } from 'immutable';
 import { Logout } from "shared/authentication/actions";
@@ -47,6 +48,15 @@ export interface SelectExpense {
   expenseId: number | null;
 }
 
+export const Transfer = 'Transfer';
+
+export interface Transfer {
+  type: typeof Transfer;
+  payload: {
+    balance: Balance;
+    spending: Spending[];
+  };
+}
 
 export type SpendingActions =
   FetchSpendingRequest
@@ -56,6 +66,7 @@ export type SpendingActions =
   | CreateSpendingFailure
   | CreateSpendingSuccess
   | SelectExpense
+  | Transfer
   | UpdateTransactionSuccess
   | Logout
   | ChangeBankAccount

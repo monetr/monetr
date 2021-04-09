@@ -27,6 +27,7 @@ import './styles/login.scss';
 
 export class LoginView extends Component {
   state = {
+    verification: null,
     error: null,
   };
 
