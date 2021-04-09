@@ -89,8 +89,16 @@ func (c *Controller) postExpenses(ctx *context.Context) {
 		return
 	}
 
+	// Make sure that the next recurrence date is properly in the user's timezone.
+	next := spending.RecurrenceRule.After(time.Now(), false)
+	nextRecurrence, err := c.midnightInLocal(ctx, next)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
+		return
+	}
+
 	spending.LastRecurrence = nil
-	spending.NextRecurrence = spending.RecurrenceRule.After(time.Now(), false)
+	spending.NextRecurrence = nextRecurrence
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 

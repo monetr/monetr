@@ -319,7 +319,7 @@ func (c *Controller) processTransactionSpentFrom(
 
 		// Add the amount we took from the expense back to it.
 		currentExpense.CurrentAmount += *existing.SpendingAmount
-		existing.SpendingAmount = nil
+		input.SpendingAmount = nil
 
 		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
 		if err = currentExpense.CalculateNextContribution(

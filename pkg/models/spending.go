@@ -57,15 +57,15 @@ func (e *Spending) CalculateNextContribution(
 	nextDueDate := util.MidnightInLocal(e.NextRecurrence, timezone)
 	if time.Now().After(nextDueDate) {
 		e.LastRecurrence = &nextDueDate
-		e.NextRecurrence = e.RecurrenceRule.After(nextDueDate, false)
+		e.NextRecurrence = util.MidnightInLocal(e.RecurrenceRule.After(nextDueDate, false), timezone)
 		nextDueDate = util.MidnightInLocal(e.NextRecurrence, timezone)
 	}
 
 	// If the next time we would contribute to this expense is after the next time the expense is due, then the expense
 	// has fallen behind. Mark it as behind and set the contribution to be the difference.
 	if nextContributionDate.After(nextDueDate) {
-		e.IsBehind = true
 		e.NextContributionAmount = e.TargetAmount - e.CurrentAmount
+		e.IsBehind = e.CurrentAmount < e.TargetAmount
 		return nil
 	} else if nextContributionDate.Equal(nextDueDate) {
 		// If the next time we would contribute is the same day it's due, this is okay. The user could change the due
@@ -74,6 +74,8 @@ func (e *Spending) CalculateNextContribution(
 		e.IsBehind = false
 		e.NextContributionAmount = e.TargetAmount - e.CurrentAmount
 		return nil
+	} else if e.CurrentAmount >= e.TargetAmount {
+		e.IsBehind = false
 	}
 
 	// If the next time we would contribute to this expense is not behind and has more than one contribution to meet its
@@ -86,9 +88,9 @@ func (e *Spending) CalculateNextContribution(
 	// TODO Handle expenses that recur more frequently than they are funded.
 	midnightToday := util.MidnightInLocal(time.Now(), timezone)
 	nextContributionRule.DTStart(midnightToday)
-	contributionDateX := nextContributionDate
+	contributionDateX := util.MidnightInLocal(nextContributionDate, timezone)
 	for {
-		contributionDateX = nextContributionRule.After(contributionDateX, false)
+		contributionDateX = util.MidnightInLocal(nextContributionRule.After(contributionDateX, false), timezone)
 		if nextDueDate.Before(contributionDateX) {
 			break
 		}
