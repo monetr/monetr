@@ -1453,7 +1453,7 @@ readdirp@~3.5.0:
   dependencies:
     picomatch "^2.2.1"
 
-redoc-cli@^0.11.1:
+redoc-cli@0.11.1:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.11.1.tgz#88af0c1914b6f611e42b966d712c070daae030f3"
   integrity sha512-BBAbgtOfId6fI/ncmKyeeN1cnheoVPw2/s6urzPI757hpNifmfsxQjn+qK9dT3NoVOlh/t6BIIDdv2zd0ghCoA==
@@ -1471,7 +1471,7 @@ redoc-cli@^0.11.1:
     tslib "^2.0.0"
     yargs "^15.4.1"
 
-redoc@2.0.0-rc.51, redoc@^2.0.0-rc.51:
+redoc@2.0.0-rc.51:
   version "2.0.0-rc.51"
   resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.51.tgz#39a1c6eed071a062860fac87b48a43119283ab60"
   integrity sha512-oy8RVrGXioizboAJaOpxnblvqLxfDknmFyjKvwFCpKzoAnrmgm4zXem73Ni/4NLGQg3dn73KzMmRHIiRQbtuqg==
