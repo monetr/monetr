@@ -209,9 +209,16 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		return
 	}
 
+	balance, err := repo.GetBalances(bankAccountId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not get updated balances")
+		return
+	}
+
 	ctx.JSON(map[string]interface{}{
 		"transaction": transaction,
 		"spending":    updatedExpenses,
+		"balance":     balance,
 	})
 }
 
@@ -319,6 +326,15 @@ func (c *Controller) processTransactionSpentFrom(
 
 		// Add the amount we took from the expense back to it.
 		currentExpense.CurrentAmount += *existing.SpendingAmount
+
+		switch currentExpense.SpendingType {
+		case models.SpendingTypeExpense:
+		// Nothing special for expenses.
+		case models.SpendingTypeGoal:
+			// Revert the amount used for the current spending object.
+			currentExpense.UsedAmount -= *existing.SpendingAmount
+		}
+
 		input.SpendingAmount = nil
 
 		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
@@ -356,29 +372,37 @@ func (c *Controller) processTransactionSpentFrom(
 func (c *Controller) addExpenseToTransaction(
 	account *models.Account,
 	transaction *models.Transaction,
-	expense *models.Spending,
+	spending *models.Spending,
 ) error {
 	var allocationAmount int64
-	// If the amount allocated to the expense we are adding to the transaction is less than the amount of the
+	// If the amount allocated to the spending we are adding to the transaction is less than the amount of the
 	// transaction then we can only do a partial allocation.
-	if expense.CurrentAmount < transaction.Amount {
-		allocationAmount = expense.CurrentAmount
+	if spending.CurrentAmount < transaction.Amount {
+		allocationAmount = spending.CurrentAmount
 	} else {
-		// Otherwise we will allocate the entire transaction amount from the expense.
+		// Otherwise we will allocate the entire transaction amount from the spending.
 		allocationAmount = transaction.Amount
 	}
 
-	// Subtract the amount we are taking from the expense from it's current amount.
-	expense.CurrentAmount -= allocationAmount
+	// Subtract the amount we are taking from the spending from it's current amount.
+	spending.CurrentAmount -= allocationAmount
 
-	// Keep track of how much we took from the expense in case things change later.
+	switch spending.SpendingType {
+	case models.SpendingTypeExpense:
+	// We don't need to do anything special if it's an expense, at least not right now.
+	case models.SpendingTypeGoal:
+		// Goals also keep track of how much has been spent, so increment the used amount.
+		spending.UsedAmount += allocationAmount
+	}
+
+	// Keep track of how much we took from the spending in case things change later.
 	transaction.SpendingAmount = &allocationAmount
 
-	// Now that we have deducted the amount we need from the expense we need to recalculate it's next contribution.
-	if err := expense.CalculateNextContribution(
+	// Now that we have deducted the amount we need from the spending we need to recalculate it's next contribution.
+	if err := spending.CalculateNextContribution(
 		account.Timezone,
-		expense.FundingSchedule.NextOccurrence,
-		expense.FundingSchedule.Rule,
+		spending.FundingSchedule.NextOccurrence,
+		spending.FundingSchedule.Rule,
 	); err != nil {
 		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
 	}

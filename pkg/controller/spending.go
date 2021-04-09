@@ -11,8 +11,8 @@ import (
 
 // @tag.name Expenses
 func (c *Controller) handleSpending(p iris.Party) {
-	p.Get("/{bankAccountId:uint64}/spending", c.getExpenses)
-	p.Post("/{bankAccountId:uint64}/spending", c.postExpenses)
+	p.Get("/{bankAccountId:uint64}/spending", c.getSpending)
+	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)
 	p.Post("/{bankAccountId:uint64}/spending/transfer", c.postSpendingTransfer)
 
 	p.Put("/{bankAccountId:uint64}/spending/{expenseId:uint64}", func(ctx *context.Context) {
@@ -34,7 +34,7 @@ func (c *Controller) handleSpending(p iris.Party) {
 // @Success 200 {array} models.Spending
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getExpenses(ctx *context.Context) {
+func (c *Controller) getSpending(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
@@ -66,7 +66,7 @@ func (c *Controller) getExpenses(ctx *context.Context) {
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
-func (c *Controller) postExpenses(ctx *context.Context) {
+func (c *Controller) postSpending(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
@@ -89,17 +89,6 @@ func (c *Controller) postExpenses(ctx *context.Context) {
 		return
 	}
 
-	// Make sure that the next recurrence date is properly in the user's timezone.
-	next := spending.RecurrenceRule.After(time.Now(), false)
-	nextRecurrence, err := c.midnightInLocal(ctx, next)
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
-		return
-	}
-
-	spending.LastRecurrence = nil
-	spending.NextRecurrence = nextRecurrence
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// We need to calculate what the next contribution will be for this new spending. So we need to retrieve it's funding
@@ -117,6 +106,31 @@ func (c *Controller) postExpenses(ctx *context.Context) {
 		c.wrapPgError(ctx, err, "failed to retrieve account details")
 		return
 	}
+
+	spending.LastRecurrence = nil
+
+	var next time.Time
+
+	switch spending.SpendingType {
+	case models.SpendingTypeExpense:
+		// If this is an expense then we need to figure out when it happens next.
+		next = spending.RecurrenceRule.After(time.Now(), false)
+	case models.SpendingTypeGoal:
+		// If the spending is a goal, then we don't need the rule at all.
+		next = spending.NextRecurrence
+
+		// Goals do not recur.
+		spending.RecurrenceRule = nil
+	}
+
+	// Make sure that the next recurrence date is properly in the user's timezone.
+	nextRecurrence, err := c.midnightInLocal(ctx, next)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
+		return
+	}
+
+	spending.NextRecurrence = nextRecurrence
 
 	// Once we have all that data we can calculate the new expenses next contribution amount.
 	if err = spending.CalculateNextContribution(
@@ -196,7 +210,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	if transfer.FromSpendingId == nil && balances.Safe < transfer.Amount {
 		c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
 		return
-	} else {
+	} else if transfer.FromSpendingId != nil {
 		fromExpense, err := repo.GetExpense(bankAccountId, *transfer.FromSpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
@@ -265,4 +279,15 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		c.wrapPgError(ctx, err, "failed to update spending for transfer")
 		return
 	}
+
+	balance, err := repo.GetBalances(bankAccountId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not get updated balances")
+		return
+	}
+
+	ctx.JSON(map[string]interface{}{
+		"balance":  balance,
+		"spending": spendingToUpdate,
+	})
 }

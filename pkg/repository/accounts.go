@@ -6,14 +6,20 @@ import (
 )
 
 func (r *repositoryBase) GetAccount() (*models.Account, error) {
-	var result models.Account
-	err := r.txn.Model(&result).
+	if r.account != nil {
+		return r.account, nil
+	}
+
+	var account models.Account
+	err := r.txn.Model(&account).
 		Where(`"account"."account_id" = ?`, r.AccountId()).
 		Limit(1).
-		Select(&result)
+		Select(&account)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve account")
 	}
 
-	return &result, nil
+	r.account = &account
+
+	return r.account, nil
 }
