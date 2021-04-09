@@ -165,6 +165,21 @@
     node-fetch "^2.6.1"
     yaml-ast-parser "0.0.43"
 
+"@redocly/openapi-core@^1.0.0-beta.43":
+  version "1.0.0-beta.43"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.0.0-beta.43.tgz#9744b689b12eb623b3cfe0ead1f61d994741a6be"
+  integrity sha512-R9Jcwqn4NimI4ZNlWCY0cvo4WvzmhxtCTFzHB15G6WwdQXsAPC4q7ZR6ocHlKYDuilpCLrtMjMBEwAZji5JU9w==
+  dependencies:
+    "@redocly/ajv" "^6.12.3"
+    "@types/node" "^14.11.8"
+    colorette "^1.2.0"
+    js-levenshtein "^1.1.6"
+    js-yaml "^3.14.0"
+    lodash.isequal "^4.5.0"
+    minimatch "^3.0.4"
+    node-fetch "^2.6.1"
+    yaml-ast-parser "0.0.43"
+
 "@redocly/react-dropdown-aria@^2.0.11":
   version "2.0.11"
   resolved "https://registry.yarnpkg.com/@redocly/react-dropdown-aria/-/react-dropdown-aria-2.0.11.tgz#532b864b329237e646abe45d0f8edc923e77370a"
@@ -1477,6 +1492,36 @@ redoc@2.0.0-rc.51:
   integrity sha512-oy8RVrGXioizboAJaOpxnblvqLxfDknmFyjKvwFCpKzoAnrmgm4zXem73Ni/4NLGQg3dn73KzMmRHIiRQbtuqg==
   dependencies:
     "@redocly/openapi-core" "^1.0.0-beta.42"
+    "@redocly/react-dropdown-aria" "^2.0.11"
+    "@types/node" "^13.11.1"
+    classnames "^2.2.6"
+    decko "^1.2.0"
+    dompurify "^2.0.12"
+    eventemitter3 "^4.0.4"
+    json-pointer "^0.6.0"
+    lunr "2.3.8"
+    mark.js "^8.11.1"
+    marked "^0.7.0"
+    memoize-one "~5.1.1"
+    mobx-react "^7.0.5"
+    openapi-sampler "^1.0.0-beta.18"
+    perfect-scrollbar "^1.4.0"
+    polished "^3.6.5"
+    prismjs "^1.22.0"
+    prop-types "^15.7.2"
+    react-tabs "^3.1.1"
+    slugify "^1.4.4"
+    stickyfill "^1.1.1"
+    swagger2openapi "^6.2.1"
+    tslib "^2.0.0"
+    url-template "^2.0.8"
+
+redoc@2.0.0-rc.52:
+  version "2.0.0-rc.52"
+  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.52.tgz#85cef6f4447dcd88b41f725a5298d24bdc0eef3c"
+  integrity sha512-+IxAHI1T4SK4LO+KIrvCUNAABg4XIG14lfIOWT4b4f+n5KN2clhsv5a9Fxu5HbAN1hO1eWoAyYap6vapI/ebzA==
+  dependencies:
+    "@redocly/openapi-core" "^1.0.0-beta.43"
     "@redocly/react-dropdown-aria" "^2.0.11"
     "@types/node" "^13.11.1"
     classnames "^2.2.6"
