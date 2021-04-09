@@ -1,25 +1,18 @@
-import { BankAccountFields } from "data/BankAccount";
-
-export interface BalanceFields {
+export default class Balance {
   bankAccountId: number;
-  availableBalance: number;
-  currentBalance: number;
-  safeToSpendBalance: number;
-  expensesBalance: number;
-  goalsBalance: number;
-}
+  available: number;
+  current: number;
+  safe: number;
+  expenses: number;
+  goals: number;
 
-export default class Balance implements BalanceFields {
-  bankAccountId: number;
-  availableBalance: number;
-  currentBalance: number;
-  safeToSpendBalance: number;
-  expensesBalance: number;
-  goalsBalance: number;
-
-  constructor(data?: BankAccountFields) {
+  constructor(data?: Partial<Balance>) {
     if (data) {
       Object.assign(this, data)
     }
+  }
+
+  getSafeToSpendString(): string {
+    return `$${ (this.safe / 100).toFixed(2) }`;
   }
 }

@@ -4,6 +4,7 @@ import Link from 'data/Link';
 import { Map } from 'immutable';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import { connect } from 'react-redux';
+import fetchBalances from 'shared/balances/actions/fetchBalances';
 import setSelectedBankAccountId from 'shared/bankAccounts/actions/setSelectedBankAccountId';
 import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
 import { getBankAccountsLoading } from "shared/bankAccounts/selectors/getBankAccountsLoading";
@@ -28,6 +29,7 @@ interface PropTypes {
   };
   fetchFundingSchedulesIfNeeded: { (): Promise<void> }
   fetchSpending: { (): Promise<void> }
+  fetchBalances: { (): Promise<void> }
 }
 
 interface SelectEvent {
@@ -43,6 +45,7 @@ export class BankAccountSelector extends Component<PropTypes, {}> {
       this.props.fetchInitialTransactionsIfNeeded(),
       this.props.fetchFundingSchedulesIfNeeded(),
       this.props.fetchSpending(),
+      this.props.fetchBalances(),
     ])
   };
 
@@ -96,5 +99,6 @@ export default connect(
     fetchInitialTransactionsIfNeeded,
     fetchFundingSchedulesIfNeeded,
     fetchSpending,
+    fetchBalances,
   },
 )(BankAccountSelector);

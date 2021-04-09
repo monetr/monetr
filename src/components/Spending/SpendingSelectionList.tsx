@@ -9,6 +9,8 @@ export interface PropTypes {
   value: number | null;
   onChange: { (spending: Spending | null): void };
   disabled?: boolean;
+  excludeIds?: number[];
+  excludeSafeToSpend?: boolean;
 }
 
 interface WithConnectionPropTypes extends PropTypes {
@@ -27,11 +29,12 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
   };
 
   render() {
-    const { spending, value, disabled } = this.props;
+    const { spending, value, disabled, excludeIds, excludeSafeToSpend } = this.props;
 
     return (
       <div className="w-full spending-selection-list">
         <List>
+          { !excludeSafeToSpend &&
           <ListItem
             key={ 'safe' }
             onClick={ this.selectItem(null) }
@@ -52,33 +55,36 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
               </div>
             </div>
           </ListItem>
+          }
 
           {
-            spending.map(item => (
-              <ListItem
-                key={ `${ item.spendingId }` }
-                onClick={ this.selectItem(item.spendingId) }
-                button
-              >
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    checked={ value === item.spendingId }
-                    tabIndex={ -1 }
-                    color="primary"
-                    disabled={ !!disabled }
-                  />
-                </ListItemIcon>
-                <div className="grid grid-cols-3 grid-rows-1 grid-flow-col gap-1 w-full">
-                  <div className="col-span-2">
-                    <Typography>{ item.name }</Typography>
+            spending
+              .filter(item => !excludeIds?.includes(item.spendingId))
+              .map(item => (
+                <ListItem
+                  key={ `${ item.spendingId }` }
+                  onClick={ this.selectItem(item.spendingId) }
+                  button
+                >
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      checked={ value === item.spendingId }
+                      tabIndex={ -1 }
+                      color="primary"
+                      disabled={ !!disabled }
+                    />
+                  </ListItemIcon>
+                  <div className="grid grid-cols-3 grid-rows-1 grid-flow-col gap-1 w-full">
+                    <div className="col-span-2">
+                      <Typography>{ item.name }</Typography>
+                    </div>
+                    <div className="col-span-1 flex justify-end">
+                      <Typography>{ item.getCurrentAmountString() }</Typography>
+                    </div>
                   </div>
-                  <div className="col-span-1 flex justify-end">
-                    <Typography>{ item.getCurrentAmountString() }</Typography>
-                  </div>
-                </div>
-              </ListItem>
-            )).valueSeq().toArray()
+                </ListItem>
+              )).valueSeq().toArray()
           }
         </List>
       </div>

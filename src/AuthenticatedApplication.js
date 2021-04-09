@@ -7,11 +7,13 @@ import { connect } from "react-redux";
 import { BrowserRouter as Router, Link as RouterLink, Redirect, Route, Switch, withRouter } from "react-router-dom";
 import { bindActionCreators } from "redux";
 import logout from "shared/authentication/actions/logout";
+import fetchBalances from "shared/balances/actions/fetchBalances";
 import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
 import { fetchFundingSchedulesIfNeeded } from "shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded";
 import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
 import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
 import fetchSpending from "shared/spending/actions/fetchSpending";
+import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
 import ExpensesView from "views/ExpensesView";
 import FirstTimeSetup from "views/FirstTimeSetup";
 import TransactionsView from "views/TransactionsView";
@@ -30,6 +32,8 @@ export class AuthenticatedApplication extends Component {
     fetchSpending: PropTypes.func.isRequired,
     fetchFundingSchedulesIfNeeded: PropTypes.func.isRequired,
     hasAnyLinks: PropTypes.bool.isRequired,
+    fetchInitialTransactionsIfNeeded: PropTypes.func.isRequired,
+    fetchBalances: PropTypes.func.isRequired,
   };
 
   componentDidMount() {
@@ -37,8 +41,10 @@ export class AuthenticatedApplication extends Component {
       this.props.fetchLinksIfNeeded(),
       this.props.fetchBankAccounts().then(() => {
         return Promise.all([
-          this.props.fetchSpending(),
+          this.props.fetchInitialTransactionsIfNeeded(),
           this.props.fetchFundingSchedulesIfNeeded(),
+          this.props.fetchSpending(),
+          this.props.fetchBalances(),
         ]);
       }),
     ])
@@ -158,5 +164,7 @@ export default connect(
     fetchBankAccounts,
     fetchSpending,
     fetchFundingSchedulesIfNeeded,
+    fetchInitialTransactionsIfNeeded,
+    fetchBalances,
   }, dispatch),
 )(withRouter(AuthenticatedApplication));
