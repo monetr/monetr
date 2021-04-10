@@ -12,8 +12,6 @@ import (
 func (c *Controller) handleBankAccounts(p iris.Party) {
 	p.Get("/", c.getBankAccounts)
 	p.Get("/{bankAccountId:uint64}/balances", c.getBalances)
-
-	// Create bank accounts manually.
 	p.Post("/", c.postBankAccounts)
 }
 

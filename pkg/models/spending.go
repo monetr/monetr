@@ -46,10 +46,26 @@ func (e *Spending) CalculateNextContribution(
 		return errors.Wrap(err, "failed to parse account's timezone")
 	}
 
+	// The total needed needs to be calculated differently for goals and expenses. How much expenses need is always a
+	// representation of the target amount minus the current amount allocated to the expense. But goals work a bit
+	// differently because the allocated amount can fluctuate throughout the life of the goal. When a transaction is
+	// spent from a goal it deducts from the current amount, but adds to the used amount. This is to keep track of how
+	// much the goal has actually progress while maintaining existing patterns for calculating allocations. As a result
+	// for us to know how much a goal needs, we need to subtract the current amount plus the used amount from the target
+	// for goals.
+	var progressAmount int64
+
+	switch e.SpendingType {
+	case SpendingTypeExpense:
+		progressAmount = e.CurrentAmount
+	case SpendingTypeGoal:
+		progressAmount = e.CurrentAmount + e.UsedAmount
+	}
+
 	nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
 
 	// If we have achieved our expense then we don't need to do anything.
-	if e.TargetAmount <= e.CurrentAmount {
+	if e.TargetAmount <= progressAmount {
 		e.IsBehind = false
 		e.NextContributionAmount = 0
 	}
@@ -64,7 +80,7 @@ func (e *Spending) CalculateNextContribution(
 	// If the next time we would contribute to this expense is after the next time the expense is due, then the expense
 	// has fallen behind. Mark it as behind and set the contribution to be the difference.
 	if nextContributionDate.After(nextDueDate) {
-		e.NextContributionAmount = e.TargetAmount - e.CurrentAmount
+		e.NextContributionAmount = e.TargetAmount - progressAmount
 		e.IsBehind = e.CurrentAmount < e.TargetAmount
 		return nil
 	} else if nextContributionDate.Equal(nextDueDate) {
@@ -72,7 +88,7 @@ func (e *Spending) CalculateNextContribution(
 		// date if they want a bit of a buffer and we would plan it differently. But we don't want to consider this
 		// "behind".
 		e.IsBehind = false
-		e.NextContributionAmount = e.TargetAmount - e.CurrentAmount
+		e.NextContributionAmount = e.TargetAmount - progressAmount
 		return nil
 	} else if e.CurrentAmount >= e.TargetAmount {
 		e.IsBehind = false
@@ -86,6 +102,10 @@ func (e *Spending) CalculateNextContribution(
 	}
 
 	// TODO Handle expenses that recur more frequently than they are funded.
+
+	// TODO A Timezone difference that would make the current moment a different day than the server might cause
+	//  problems here. If time.Now() on the server is 01/02/2021 but the user it is already 01/03/2021 then midnight in
+	//  the user's timezone here would evaluate to the midnight of the second, not the third.
 	midnightToday := util.MidnightInLocal(time.Now(), timezone)
 	nextContributionRule.DTStart(midnightToday)
 	contributionDateX := util.MidnightInLocal(nextContributionDate, timezone)
@@ -98,7 +118,7 @@ func (e *Spending) CalculateNextContribution(
 		numberOfContributions++
 	}
 
-	totalNeeded := e.TargetAmount - e.CurrentAmount
+	totalNeeded := e.TargetAmount - progressAmount
 	perContribution := totalNeeded / int64(numberOfContributions)
 
 	e.NextContributionAmount = perContribution

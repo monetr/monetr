@@ -5,8 +5,11 @@ import (
 )
 
 // Application Configuration
+// @Summary Get Config
+// @tags Config
 // @id app-config
 // @description Provides the configuration that should be used by the frontend application or UI.
+// @Produce json
 // @Router /config [get]
 // @Success 200
 func (c *Controller) configEndpoint(ctx *context.Context) {

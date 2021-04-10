@@ -20,6 +20,7 @@ func (c *Controller) handleFundingSchedules(p iris.Party) {
 }
 
 // List Funding Schedules
+// @Summary List Funding Schedules
 // @id list-funding-schedules
 // @tags Funding Schedules
 // @description List all of the funding schedule's for the current bank account.
@@ -52,6 +53,7 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 }
 
 // Create Funding Schedule
+// @Summary Create Funding Schedule
 // @id create-funding-schedule
 // @tags Funding Schedules
 // @summary Create a funding schedule for the specified bank account.

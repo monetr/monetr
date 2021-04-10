@@ -12,29 +12,7 @@ import (
 func (c *Controller) linksController(p iris.Party) {
 	// GET will list all the links in the current account.
 	p.Get("/", c.getLinks)
-
-	// POST will create a new link, links created this way are manual only. Plaid links must be created through a plaid
-	// workflow.
-	p.Post("/", func(ctx *context.Context) {
-		var link models.Link
-		if err := ctx.ReadJSON(&link); err != nil {
-			// TODO (elliotcourant) Add tests for malformed json.
-			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-			return
-		}
-
-		link.LinkId = 0 // Make sure the link Id is unset.
-		link.InstitutionName = strings.TrimSpace(link.InstitutionName)
-		link.LinkType = models.ManualLinkType
-
-		repo := c.mustGetAuthenticatedRepository(ctx)
-		if err := repo.CreateLink(&link); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create manual link")
-			return
-		}
-
-		ctx.JSON(link)
-	})
+	p.Post("/", c.postLinks)
 
 	p.Put("/{linkId:uint64}", func(ctx *context.Context) {
 		linkId := ctx.Params().GetUint64Default("linkId", 0)
@@ -80,6 +58,7 @@ func (c *Controller) linksController(p iris.Party) {
 // @Security ApiKeyAuth
 // @Router /links [get]
 // @Success 200 {array} models.Link
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getLinks(ctx *context.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
@@ -90,4 +69,35 @@ func (c *Controller) getLinks(ctx *context.Context) {
 	}
 
 	ctx.JSON(links)
+}
+
+// Create A Link
+// @Summary Create A Link
+// @id create-link
+// @tags Links
+// @description Create a manual link.
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /links [post]
+// @Success 200 {object} models.Link
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) postLinks(ctx *context.Context) {
+	var link models.Link
+	if err := ctx.ReadJSON(&link); err != nil {
+		// TODO (elliotcourant) Add tests for malformed json.
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	link.LinkId = 0 // Make sure the link Id is unset.
+	link.InstitutionName = strings.TrimSpace(link.InstitutionName)
+	link.LinkType = models.ManualLinkType
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	if err := repo.CreateLink(&link); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create manual link")
+		return
+	}
+
+	ctx.JSON(link)
 }

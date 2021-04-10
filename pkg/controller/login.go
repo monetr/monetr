@@ -22,10 +22,19 @@ type HarderClaims struct {
 	jwt.StandardClaims
 }
 
+// Login
+// @Summary Login
+// @id login
+// @tags Authentication
+// @description Authenticate a user.
+// @Produce json
+// @Router /authentication/login [post]
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx *context.Context) {
 	var loginRequest struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email        string `json:"email"`
+		Password     string `json:"password"`
+		Verification string `json:"verification"`
 	}
 	if err := ctx.ReadJSON(&loginRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to decode login request")
