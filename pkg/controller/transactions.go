@@ -92,7 +92,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 			return
 		}
 
-		updatedExpense, err = repo.GetExpense(bankAccountId, *transaction.SpendingId)
+		updatedExpense, err = repo.GetSpendingById(bankAccountId, *transaction.SpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "could not get expense provided for transaction")
 			return
@@ -297,12 +297,12 @@ func (c *Controller) processTransactionSpentFrom(
 	var currentErr, newErr error
 	switch expensePlan {
 	case AddExpense:
-		newExpense, newErr = repo.GetExpense(bankAccountId, newSpendingId)
+		newExpense, newErr = repo.GetSpendingById(bankAccountId, newSpendingId)
 	case ChangeExpense:
-		currentExpense, currentErr = repo.GetExpense(bankAccountId, existingSpendingId)
-		newExpense, newErr = repo.GetExpense(bankAccountId, newSpendingId)
+		currentExpense, currentErr = repo.GetSpendingById(bankAccountId, existingSpendingId)
+		newExpense, newErr = repo.GetSpendingById(bankAccountId, newSpendingId)
 	case RemoveExpense:
-		currentExpense, currentErr = repo.GetExpense(bankAccountId, existingSpendingId)
+		currentExpense, currentErr = repo.GetSpendingById(bankAccountId, existingSpendingId)
 	}
 
 	// If we failed to retrieve either of the expenses then something is wrong and we need to stop.

@@ -23,12 +23,12 @@ type Spending struct {
 	BankAccount            *BankAccount     `json:"bankAccount,omitempty" pg:"rel:has-one" swaggerignore:"true"`
 	FundingScheduleId      uint64           `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,on_delete:RESTRICT"`
 	FundingSchedule        *FundingSchedule `json:"-" pg:"rel:has-one" swaggerignore:"true"`
-	SpendingType           SpendingType     `json:"spendingType" pg:"spending_type,notnull,use_zero"`
+	SpendingType           SpendingType     `json:"spendingType" pg:"spending_type,notnull,use_zero,unique:per_bank"`
 	Name                   string           `json:"name" pg:"name,notnull,unique:per_bank"`
 	Description            string           `json:"description,omitempty" pg:"description"`
 	TargetAmount           int64            `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
 	CurrentAmount          int64            `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
-	UsedAmount             int64            `json:"userAmount" pg:"used_amount,notnull,use_zero"`
+	UsedAmount             int64            `json:"usedAmount" pg:"used_amount,notnull,use_zero"`
 	RecurrenceRule         *Rule            `json:"recurrenceRule" pg:"recurrence_rule,type:'text'" swaggertype:"string"`
 	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence"`
 	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull"`

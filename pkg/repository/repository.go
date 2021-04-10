@@ -13,7 +13,7 @@ type Repository interface {
 	UserId() uint64
 
 	CreateBankAccounts(bankAccounts ...models.BankAccount) error
-	CreateExpense(expense *models.Spending) error
+	CreateSpending(expense *models.Spending) error
 	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
@@ -23,8 +23,8 @@ type Repository interface {
 	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
-	GetExpense(bankAccountId, expenseId uint64) (*models.Spending, error)
-	GetExpenses(bankAccountId uint64) ([]models.Spending, error)
+	GetSpendingById(bankAccountId, expenseId uint64) (*models.Spending, error)
+	GetSpending(bankAccountId uint64) ([]models.Spending, error)
 	GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)

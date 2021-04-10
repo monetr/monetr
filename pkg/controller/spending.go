@@ -43,7 +43,7 @@ func (c *Controller) getSpending(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	expenses, err := repo.GetExpenses(bankAccountId)
+	expenses, err := repo.GetSpending(bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "could not retrieve expenses")
 		return
@@ -142,7 +142,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		return
 	}
 
-	if err = repo.CreateExpense(spending); err != nil {
+	if err = repo.CreateSpending(spending); err != nil {
 		c.wrapPgError(ctx, err, "failed to create spending")
 		return
 	}
@@ -211,7 +211,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
 		return
 	} else if transfer.FromSpendingId != nil {
-		fromExpense, err := repo.GetExpense(bankAccountId, *transfer.FromSpendingId)
+		fromExpense, err := repo.GetSpendingById(bankAccountId, *transfer.FromSpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
 			return
@@ -245,7 +245,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	// If we are transferring the allocated funds to another spending object then we need to update that object. If we
 	// are transferring it back to "Safe to spend" then we can just subtract the allocation from the source.
 	if transfer.ToSpendingId != nil {
-		toExpense, err := repo.GetExpense(bankAccountId, *transfer.ToSpendingId)
+		toExpense, err := repo.GetSpendingById(bankAccountId, *transfer.ToSpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to get destination goal/expense for transfer")
 			return
