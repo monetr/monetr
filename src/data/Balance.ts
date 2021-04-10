@@ -23,4 +23,8 @@ export default class Balance {
   getExpensesString(): string {
     return `$${ (this.expenses / 100).toFixed(2) }`;
   }
+
+  getGoalsString(): string {
+    return `$${ (this.goals / 100).toFixed(2) }`;
+  }
 }

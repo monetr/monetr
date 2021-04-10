@@ -17,6 +17,7 @@ import fetchSpending from "shared/spending/actions/fetchSpending";
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
 import ExpensesView from "views/ExpensesView";
 import FirstTimeSetup from "views/FirstTimeSetup";
+import GoalsView from "views/GoalsView";
 import TransactionsView from "views/TransactionsView";
 
 export class AuthenticatedApplication extends Component {
@@ -122,7 +123,7 @@ export class AuthenticatedApplication extends Component {
             <ExpensesView/>
           </Route>
           <Route path="/goals">
-            <h1>Goals</h1>
+            <GoalsView/>
           </Route>
           <Route path="/">
             <Redirect to="/transactions"/>

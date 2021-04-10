@@ -184,6 +184,7 @@ export class SignUpView extends Component {
                       <Grid container spacing={ 1 }>
                         <Grid item xs={ 12 }>
                           <TextField
+                            autoFocus={ true }
                             fullWidth
                             id="email"
                             label="Email"

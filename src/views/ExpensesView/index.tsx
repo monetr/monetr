@@ -16,7 +16,6 @@ interface WithConnectionPropTypes {
 interface State {
   newExpenseDialogOpen: boolean;
   showFundingSchedules: boolean;
-  selectedExpense?: number;
 }
 
 export class ExpensesView extends Component<WithConnectionPropTypes, State> {
@@ -24,7 +23,6 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
   state = {
     newExpenseDialogOpen: false,
     showFundingSchedules: false,
-    selectedExpense: null
   };
 
   renderExpenseList = () => {
@@ -62,12 +60,6 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
     return (
       <ExpenseDetail/>
     );
-  };
-
-  selectExpense = (expenseId: number) => {
-    return this.setState(prevState => ({
-      selectedExpense: expenseId === prevState.selectedExpense ? null : expenseId
-    }));
   };
 
   openNewExpenseDialog = () => {

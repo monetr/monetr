@@ -48,6 +48,13 @@ export interface SelectExpense {
   expenseId: number | null;
 }
 
+export const SelectGoal = 'SelectGoal';
+
+export interface SelectGoal {
+  type: typeof SelectGoal;
+  goalId: number | null;
+}
+
 export const Transfer = 'Transfer';
 
 export interface Transfer {
@@ -66,6 +73,7 @@ export type SpendingActions =
   | CreateSpendingFailure
   | CreateSpendingSuccess
   | SelectExpense
+  | SelectGoal
   | Transfer
   | UpdateTransactionSuccess
   | Logout

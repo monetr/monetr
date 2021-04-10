@@ -6,6 +6,7 @@ import {
   FETCH_SPENDING_REQUEST,
   FETCH_SPENDING_SUCCESS,
   SelectExpense,
+  SelectGoal,
   SpendingActions,
   Transfer
 } from "shared/spending/actions";
@@ -50,6 +51,11 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         // The comparison logic will allow the selected expense to be toggled if it is attempted to be selected more
         // than once. Basically if the user clicks a expense that's already selected then it will unselect it.
         selectedExpenseId: state.selectedExpenseId === action.expenseId ? null : action.expenseId,
+      };
+    case SelectGoal:
+      return {
+        ...state,
+        selectedGoalId: state.selectedGoalId === action.goalId ? null : action.goalId,
       };
     case UpdateTransaction.Success: {
       let items = state.items;

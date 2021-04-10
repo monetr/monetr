@@ -15,6 +15,7 @@ export default class Spending {
   spendingType: SpendingType;
   targetAmount: number;
   currentAmount: number;
+  usedAmount: number;
   recurrenceRule: string;
   lastRecurrence?: Moment;
   nextRecurrence: Moment;
@@ -45,5 +46,20 @@ export default class Spending {
 
   getIsExpense(): boolean {
     return this.spendingType === SpendingType.Expense;
+  }
+
+  getIsGoal(): boolean {
+    return this.spendingType === SpendingType.Goal;
+  }
+
+  // getGoalIsInProgress will return true if the user is still contributing to the goal. This is determined by looking
+  // at what is currently allocated to the goal plus what has already been used on the goal. If the sum of these two
+  // values is less than the target amount for the goal then we are still contributing to the goal.
+  getGoalIsInProgress(): boolean {
+    return this.currentAmount + this.usedAmount < this.targetAmount;
+  }
+
+  getGoalSavedAmountString(): string {
+    return `$${ ((this.currentAmount + this.usedAmount) / 100).toFixed(2) }`;
   }
 }
