@@ -9,6 +9,8 @@ import selectGoal from 'shared/spending/actions/selectGoal';
 import { getGoalIsSelected } from 'shared/spending/selectors/getGoalIsSelected';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
 
+import './styles/GoalRow.scss';
+
 export interface PropTypes {
   goalId: number;
 }
@@ -46,20 +48,23 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
         </div>
         <div className="col-span-3 flex items-center">
           <LinearProgress
+            classes={ {
+              buffer: 'MuiLinearProgress-colorPrimary',
+            } }
             className="w-full"
-            variant="determinate"
+            variant="buffer"
             color="primary"
-            value={ ((goal.currentAmount + goal.usedAmount) / goal.targetAmount) * 100 }
+            valueBuffer={ ((goal.currentAmount + goal.usedAmount) / goal.targetAmount) * 100 }
             // TODO valueBuffer might only work if the variant is buffer.
             //  If this is the case then we will want to have a CSS rule to suppress the dotty bois.
-            valueBuffer={ (goal.usedAmount / goal.targetAmount) * 100 }
+            value={ (goal.usedAmount / goal.targetAmount) * 100 }
           />
         </div>
         <div className="col-span-1">
           <Typography
             variant="body2"
           >
-            <b>{ goal.getGoalSavedAmountString() }</b>
+            <b>{ goal.getCurrentAmountString() }</b>
           </Typography>
         </div>
         <div className="col-span-1 flex justify-center">

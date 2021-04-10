@@ -1,0 +1,22 @@
+
+.goal-row {
+
+  .MuiLinearProgress-dashed {
+    // Don't display the dashed animation.
+    display: none;
+  }
+
+  .MuiLinearProgress-buffer {
+    // TODO Fix this dumb SCSS hack.
+    //  I am doing this because I want the progress bar to have two indicators. The progress bar can only do this when
+    //  the variant is set to buffer, but then it has an animated dot thing and a transparent background. This fixes the
+    //  background to make it look normal again, but means that if the priamry color of the app changes ever this will
+    //  need to be changed as well.
+    background-color: rgb(182, 188, 226) !important;
+  }
+
+  .MuiLinearProgress-bar2Buffer {
+    // Make the secondary bar (the one that indicates progress, not the amount used) a bit darker so you can see it.
+    background-color: rgb(89, 97, 146) !important;
+  }
+}
