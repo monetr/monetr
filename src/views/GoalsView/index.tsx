@@ -1,4 +1,5 @@
 import { Button, Card, Divider, List, Typography } from '@material-ui/core';
+import GoalDetails from 'components/Goals/GoalDetails';
 import GoalRow from 'components/Goals/GoalRow';
 import NewGoalDialog from 'components/Goals/NewGoalDialog';
 import React, { Component, Fragment } from 'react';
@@ -61,24 +62,26 @@ export class GoalsView extends Component<WithConnectionProps, State> {
             <div className="flex flex-col h-full p-10 max-h-full">
               <div className="grid grid-cols-3 gap-4 flex-grow">
                 <div className="col-span-3">
-                  <Card elevation={ 4 } className="w-full goals-list flex justify-center items-center">
-                    <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
-                      <Typography
-                        className="opacity-50"
-                        variant="h3"
-                      >
-                        You don't have any goals yet...
-                      </Typography>
-                      <Button
-                        onClick={ this.openNewGoalDialog }
-                        color="primary"
-                      >
+                  <Card elevation={ 4 } className="w-full goals-list ">
+                    <div className="h-full flex justify-center items-center">
+                      <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
                         <Typography
-                          variant="h6"
+                          className="opacity-50"
+                          variant="h3"
                         >
-                          Create A Goal
+                          You don't have any goals yet...
                         </Typography>
-                      </Button>
+                        <Button
+                          onClick={ this.openNewGoalDialog }
+                          color="primary"
+                        >
+                          <Typography
+                            variant="h6"
+                          >
+                            Create A Goal
+                          </Typography>
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 </div>
@@ -98,7 +101,7 @@ export class GoalsView extends Component<WithConnectionProps, State> {
             </div>
             <div>
               <Card elevation={ 4 } className="w-full goals-list">
-
+                <GoalDetails />
               </Card>
             </div>
           </div>

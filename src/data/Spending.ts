@@ -40,6 +40,10 @@ export default class Spending {
     return `$${ (this.currentAmount / 100).toFixed(2) }`;
   }
 
+  getUsedAmountString(): string {
+    return `$${ (this.usedAmount / 100).toFixed(2) }`;
+  }
+
   getNextContributionAmountString(): string {
     return `$${ (this.nextContributionAmount / 100).toFixed(2) }`;
   }

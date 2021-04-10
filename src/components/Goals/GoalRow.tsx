@@ -55,8 +55,6 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
             variant="buffer"
             color="primary"
             valueBuffer={ ((goal.currentAmount + goal.usedAmount) / goal.targetAmount) * 100 }
-            // TODO valueBuffer might only work if the variant is buffer.
-            //  If this is the case then we will want to have a CSS rule to suppress the dotty bois.
             value={ (goal.usedAmount / goal.targetAmount) * 100 }
           />
         </div>
