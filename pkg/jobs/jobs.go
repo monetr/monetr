@@ -53,17 +53,15 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	manager.work.Job(PullInitialTransactions, manager.pullInitialTransactions)
 	manager.work.Job(PullLatestTransactions, manager.pullLatestTransactions)
 
-	// Every 30 minutes.
-	manager.work.PeriodicallyEnqueue("0 */30 * * * *", EnqueuePullAccountBalances)
-	manager.work.PeriodicallyEnqueue("0 */30 * * * *", EnqueuePullLatestTransactions)
+	// Every 30 minutes. 0 */30 * * * *
 
 	// Every hour.
+	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullAccountBalances)
+	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullLatestTransactions)
 	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueueProcessFundingSchedules)
 	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueueCheckPendingTransactions)
 
 	manager.work.Start()
-
-	manager.queue.Enqueue(EnqueueProcessFundingSchedules, nil)
 
 	return manager
 }
