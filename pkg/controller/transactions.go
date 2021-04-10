@@ -13,6 +13,7 @@ import (
 
 func (c *Controller) handleTransactions(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/transactions", c.getTransactions)
+	p.Get("/{bankAccountId:uint64/transactions/spending/{spendingId:uint64}", c.getTransactionsForSpending)
 	p.Post("/{bankAccountId:uint64}/transactions", c.postTransactions)
 	p.Put("/{bankAccountId:uint64}/transactions/{transactionId:uint64}", c.putTransactions)
 	p.Delete("/{bankAccountId:uint64}/transactions/{transactionId:uint64}", c.deleteTransactions)
@@ -40,6 +41,10 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 	}
 
 	ctx.JSON(transactions)
+}
+
+func (c *Controller) getTransactionsForSpending(ctx *context.Context) {
+
 }
 
 func (c *Controller) postTransactions(ctx *context.Context) {
