@@ -1,5 +1,5 @@
 import { Button, Card, Divider, IconButton, LinearProgress, List, ListItem, Typography } from '@material-ui/core';
-import { ArrowBack } from '@material-ui/icons';
+import { ArrowBack, DeleteOutline } from '@material-ui/icons';
 import NewGoalDialog from 'components/Goals/NewGoalDialog';
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
@@ -61,7 +61,11 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
                 In-progress Goal
               </Typography>
             </div>
-            <div className="col-span-1"/>
+            <div className="col-span-1">
+              <IconButton disabled>
+                <DeleteOutline/>
+              </IconButton>
+            </div>
           </div>
         </div>
         <Divider/>
@@ -217,20 +221,50 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
             </div>
           </div>
         </div>
-        <Divider />
+        <Divider/>
 
-        <Card className="w-full" elevation={3}>
-          <List dense>
-            <ListItem>
-              <Typography>
-                Total spent from Goal
-              </Typography>
-              <Typography>
-                { goal.getUsedAmountString() }
-              </Typography>
-            </ListItem>
-          </List>
-        </Card>
+        <div className="w-full pt-5 pb-5">
+          <Card elevation={ 3 }>
+            <List dense>
+              <ListItem key="totals" className="grid grid-cols-3 grid-flow-col">
+                <div className="col-span-2 flex justify-start items-center">
+                  <Typography>
+                    Total spent from Goal
+                  </Typography>
+                </div>
+                <div className="col-span-1 flex justify-end items-center">
+                  <Typography>
+                    { goal.getUsedAmountString() }
+                  </Typography>
+                </div>
+              </ListItem>
+              <Divider/>
+              <ListItem key="wip" className="flex justify-center items-center opacity-50">
+                <Typography>
+                  Transactions For Thing (WIP)
+                </Typography>
+              </ListItem>
+            </List>
+          </Card>
+        </div>
+        <Divider/>
+
+        <div className="w-full pt-5 pb-5 grid grid-cols-2 grid-flow-col gap-1">
+          <div className="col-span-1 flex justify-start items-center">
+            <Button
+              variant="outlined"
+            >
+              More Edits
+            </Button>
+          </div>
+          <div className="col-span-1 flex justify-end items-center">
+            <Button
+              variant="outlined"
+            >
+              Transfer
+            </Button>
+          </div>
+        </div>
       </div>
     );
   };
