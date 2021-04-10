@@ -15,15 +15,7 @@ interface PropTypes {
   }
 }
 
-interface State {
-  selectedTransaction: number;
-}
-
-export class TransactionsView extends Component<PropTypes, State> {
-
-  state = {
-    selectedTransaction: 0
-  };
+export class TransactionsView extends Component<PropTypes, any> {
 
   componentDidMount() {
     this.props.fetchInitialTransactionsIfNeeded()

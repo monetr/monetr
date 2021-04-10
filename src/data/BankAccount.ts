@@ -1,17 +1,4 @@
-export interface BankAccountFields {
-  bankAccountId: number;
-  linkId: number;
-  availableBalance: number;
-  currentBalance: number;
-  mask?: string;
-  name: string;
-  plaidName?: string;
-  plaidOfficialName?: string;
-  type: string;
-  subType: string;
-}
-
-export default class BankAccount implements BankAccountFields {
+export default class BankAccount {
   bankAccountId: number;
   linkId: number;
   availableBalance: number;
@@ -23,7 +10,7 @@ export default class BankAccount implements BankAccountFields {
   type: string;
   subType: string;
 
-  constructor(data?: BankAccountFields) {
+  constructor(data?: Partial<BankAccount>) {
     if (data) {
       Object.assign(this, data)
     }

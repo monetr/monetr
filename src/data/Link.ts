@@ -4,16 +4,7 @@ export enum LinkType {
   Manual = 2,
 }
 
-export interface LinkFields {
-  linkId: number;
-  linkType: LinkType;
-  institutionId: string;
-  institutionName: string;
-  customInstitutionName?: string;
-  createdByUserId: number;
-}
-
-export default class Link implements LinkFields {
+export default class Link {
   linkId: number;
   linkType: LinkType;
   institutionId: string;
@@ -21,7 +12,7 @@ export default class Link implements LinkFields {
   customInstitutionName?: string;
   createdByUserId: number;
 
-  constructor(data: LinkFields) {
+  constructor(data: Partial<Link>) {
     Object.assign(this, data)
   }
 
