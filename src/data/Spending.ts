@@ -56,7 +56,7 @@ export default class Spending {
   // at what is currently allocated to the goal plus what has already been used on the goal. If the sum of these two
   // values is less than the target amount for the goal then we are still contributing to the goal.
   getGoalIsInProgress(): boolean {
-    return this.currentAmount + this.usedAmount < this.targetAmount;
+    return (this.currentAmount + this.usedAmount) < this.targetAmount;
   }
 
   getGoalSavedAmountString(): string {

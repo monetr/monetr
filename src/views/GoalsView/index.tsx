@@ -1,5 +1,6 @@
 import { Button, Card, Divider, List, Typography } from '@material-ui/core';
 import GoalRow from 'components/Goals/GoalRow';
+import NewGoalDialog from 'components/Goals/NewGoalDialog';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getGoalIds } from 'shared/spending/selectors/getGoalIds';
@@ -10,7 +11,23 @@ interface WithConnectionProps {
   goalIds: number[];
 }
 
-export class GoalsView extends Component<WithConnectionProps, any> {
+interface State {
+  newGoalDialogOpen: boolean;
+}
+
+export class GoalsView extends Component<WithConnectionProps, State> {
+
+  state = {
+    newGoalDialogOpen: false,
+  };
+
+  openNewGoalDialog = () => this.setState({
+    newGoalDialogOpen: true,
+  });
+
+  closeNewGoalDialog = () => this.setState({
+    newGoalDialogOpen: false,
+  });
 
   renderGoalList = () => {
     const { goalIds } = this.props;
@@ -33,36 +50,42 @@ export class GoalsView extends Component<WithConnectionProps, any> {
 
   render() {
     const { goalIds } = this.props;
+    const { newGoalDialogOpen } = this.state;
 
     if (goalIds.length === 0) {
       return (
-        <div className="minus-nav">
-          <div className="flex flex-col h-full p-10 max-h-full">
-            <div className="grid grid-cols-3 gap-4 flex-grow">
-              <div className="col-span-3">
-                <Card elevation={ 4 } className="w-full goals-list flex justify-center items-center">
-                  <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
-                    <Typography
-                      className="opacity-50"
-                      variant="h3"
-                    >
-                      You don't have any goals yet...
-                    </Typography>
-                    <Button
-                      color="primary"
-                    >
+        <Fragment>
+          { newGoalDialogOpen && <NewGoalDialog onClose={ this.closeNewGoalDialog } isOpen={ newGoalDialogOpen }/> }
+
+          <div className="minus-nav">
+            <div className="flex flex-col h-full p-10 max-h-full">
+              <div className="grid grid-cols-3 gap-4 flex-grow">
+                <div className="col-span-3">
+                  <Card elevation={ 4 } className="w-full goals-list flex justify-center items-center">
+                    <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
                       <Typography
-                        variant="h6"
+                        className="opacity-50"
+                        variant="h3"
                       >
-                        Create A Goal
+                        You don't have any goals yet...
                       </Typography>
-                    </Button>
-                  </div>
-                </Card>
+                      <Button
+                        onClick={ this.openNewGoalDialog }
+                        color="primary"
+                      >
+                        <Typography
+                          variant="h6"
+                        >
+                          Create A Goal
+                        </Typography>
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </Fragment>
       )
     }
 

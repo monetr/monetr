@@ -1,6 +1,7 @@
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@material-ui/core';
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
+import moment from 'moment';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
@@ -28,8 +29,14 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
   renderInProgress = () => {
     const { goal, fundingSchedule } = this.props;
 
+    const due = goal.nextRecurrence;
+
+    // If the goal is the same year then just do the month and the day, but if its a different year then do the month
+    // the day, and the year.
+    const date = due.year() !== moment().year() ? due.format('MMMM Do, YYYY') : due.format('MMMM Do')
+
     return (
-      <div className="grid grid-cols-3 grid-rows-3 grid-flow-col gap-1 w-full">
+      <div className="grid grid-cols-3 grid-rows-3 grid-flow-col w-full">
         <div className="col-span-3">
           <Typography
             variant="subtitle1"
@@ -37,8 +44,9 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
             { goal.name }
           </Typography>
         </div>
-        <div className="col-span-3">
+        <div className="col-span-3 flex items-center">
           <LinearProgress
+            className="w-full"
             variant="determinate"
             color="primary"
             value={ ((goal.currentAmount + goal.usedAmount) / goal.targetAmount) * 100 }
@@ -65,7 +73,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
           <Typography
             variant="body2"
           >
-            <b>{ goal.getTargetAmountString() }</b> by { goal.nextRecurrence.format('MMMM Do') }
+            <b>{ goal.getTargetAmountString() }</b> by { date }
           </Typography>
         </div>
       </div>
