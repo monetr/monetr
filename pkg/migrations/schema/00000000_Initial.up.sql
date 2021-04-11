@@ -165,8 +165,10 @@ CREATE TABLE IF NOT EXISTS "spending" (
     "next_recurrence" TIMESTAMPTZ NOT NULL,
     "next_contribution_amount" BIGINT NOT NULL,
     "is_behind" BOOLEAN NOT NULL,
+    "is_paused" BOOLEAN NOT NULL,
+    "date_created" TIMESTAMPTZ NOT NULL,
     CONSTRAINT "pk_spending" PRIMARY KEY ("spending_id", "account_id", "bank_account_id"),
-    CONSTRAINT "uq_spending_bank_account_id_name" UNIQUE ("bank_account_id", "name"),
+    CONSTRAINT "uq_spending_bank_account_id_spending_type_name" UNIQUE ("bank_account_id", "spending_type", "name"),
     CONSTRAINT "fk_spending_accounts_account_id" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
     CONSTRAINT "fk_spending_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
     CONSTRAINT "fk_spending_funding_schedules_funding_schedule_id_account_id_bank_account_id" FOREIGN KEY (

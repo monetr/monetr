@@ -136,19 +136,27 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 			// logs to find a problem.
 			fundingLog = fundingLog.WithField("fundingScheduleName", fundingSchedule.Name)
 
-			expenses, err := repo.GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId)
+			expenses, err := repo.GetSpendingByFundingSchedule(bankAccountId, fundingScheduleId)
 			if err != nil {
 				fundingLog.WithError(err).Error("failed to retrieve expenses for processing")
 				return err
 			}
 
-			for _, expense := range expenses {
-				expenseLog := fundingLog.WithFields(logrus.Fields{
-					"spendingId":   expense.SpendingId,
-					"spendingName": expense.Name,
+			for _, spending := range expenses {
+				spendingLog := fundingLog.WithFields(logrus.Fields{
+					"spendingId":   spending.SpendingId,
+					"spendingName": spending.Name,
 				})
-				if expense.TargetAmount <= expense.CurrentAmount {
-					expenseLog.Trace("skipping expense, target amount is already achieved")
+
+				if spending.IsPaused {
+					spendingLog.Debug("skipping funding spending item, it is paused")
+					continue
+				}
+
+				progressAmount := spending.GetProgressAmount()
+
+				if spending.TargetAmount <= progressAmount {
+					spendingLog.Trace("skipping spending, target amount is already achieved")
 					continue
 				}
 
@@ -157,13 +165,13 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 				//  enough money in their account at the time of this running that this will accurately reflect a real
 				//  allocated balance. This can be impacted though by a delay in a deposit showing in Plaid and thus us
 				//  over-allocating temporarily until the deposit shows properly in Plaid.
-				expense.CurrentAmount += expense.NextContributionAmount
-				if err = (&expense).CalculateNextContribution(
+				spending.CurrentAmount += spending.NextContributionAmount
+				if err = (&spending).CalculateNextContribution(
 					account.Timezone,
 					nextFundingOccurrence,
 					fundingSchedule.Rule,
 				); err != nil {
-					expenseLog.WithError(err).Error("failed to calculate next contribution for expense")
+					spendingLog.WithError(err).Error("failed to calculate next contribution for spending")
 					return err
 				}
 
@@ -171,14 +179,14 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 				//  If I remember correctly using a variable that is from a "for" loop will cause issues as that
 				//  variable actually changes with each iteration? So will this cause the appended value to change and
 				//  thus be invalid?
-				expensesToUpdate = append(expensesToUpdate, expense)
+				expensesToUpdate = append(expensesToUpdate, spending)
 			}
 		}
 
-		log.Tracef("preparing to update %d expense(s)", len(expensesToUpdate))
+		log.Tracef("preparing to update %d spending(s)", len(expensesToUpdate))
 
 		if err := repo.UpdateExpenses(bankAccountId, expensesToUpdate); err != nil {
-			log.WithError(err).Error("failed to update expenses")
+			log.WithError(err).Error("failed to update spending")
 			return err
 		}
 

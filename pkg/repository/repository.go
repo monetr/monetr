@@ -25,7 +25,7 @@ type Repository interface {
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
 	GetSpendingById(bankAccountId, expenseId uint64) (*models.Spending, error)
 	GetSpending(bankAccountId uint64) ([]models.Spending, error)
-	GetExpensesByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
+	GetSpendingByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
 	GetIsSetup() (bool, error)

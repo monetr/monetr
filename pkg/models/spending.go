@@ -34,6 +34,19 @@ type Spending struct {
 	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull"`
 	NextContributionAmount int64            `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`
 	IsBehind               bool             `json:"isBehind" pg:"is_behind,notnull,use_zero"`
+	IsPaused               bool             `json:"isPaused" pg:"is_paused,notnull,use_zero"`
+	DateCreated            time.Time        `json:"dateCreated" pg:"date_created,notnull"`
+}
+
+func (e Spending) GetProgressAmount() int64 {
+	switch e.SpendingType {
+	case SpendingTypeGoal:
+		return e.CurrentAmount + e.UsedAmount
+	case SpendingTypeExpense:
+		fallthrough
+	default:
+		return e.CurrentAmount
+	}
 }
 
 func (e *Spending) CalculateNextContribution(
@@ -53,14 +66,7 @@ func (e *Spending) CalculateNextContribution(
 	// much the goal has actually progress while maintaining existing patterns for calculating allocations. As a result
 	// for us to know how much a goal needs, we need to subtract the current amount plus the used amount from the target
 	// for goals.
-	var progressAmount int64
-
-	switch e.SpendingType {
-	case SpendingTypeExpense:
-		progressAmount = e.CurrentAmount
-	case SpendingTypeGoal:
-		progressAmount = e.CurrentAmount + e.UsedAmount
-	}
+	progressAmount := e.GetProgressAmount()
 
 	nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
 
@@ -81,7 +87,7 @@ func (e *Spending) CalculateNextContribution(
 	// has fallen behind. Mark it as behind and set the contribution to be the difference.
 	if nextContributionDate.After(nextDueDate) {
 		e.NextContributionAmount = e.TargetAmount - progressAmount
-		e.IsBehind = e.CurrentAmount < e.TargetAmount
+		e.IsBehind = progressAmount < e.TargetAmount
 		return nil
 	} else if nextContributionDate.Equal(nextDueDate) {
 		// If the next time we would contribute is the same day it's due, this is okay. The user could change the due
@@ -90,7 +96,7 @@ func (e *Spending) CalculateNextContribution(
 		e.IsBehind = false
 		e.NextContributionAmount = e.TargetAmount - progressAmount
 		return nil
-	} else if e.CurrentAmount >= e.TargetAmount {
+	} else if progressAmount >= e.TargetAmount {
 		e.IsBehind = false
 	}
 
