@@ -10,7 +10,7 @@ endif
 	$(eval $(shell env)) # Dumb hack might work?
 	for FILE in $(CI_PROJECT_DIR)/schema/*; do \
 		echo "Applying $$FILE"; \
-  		psql -q -d $$POSTGRES_DB -U $$POSTGRES_USER -H $$POSTGRES_HOST -f $$FILE || exit 1; \
+  		psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -f $$FILE || exit 1; \
   	done;
 
 apply-schema-ci-deps:
