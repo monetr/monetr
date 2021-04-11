@@ -1,6 +1,7 @@
 import { Button, Card, Divider, IconButton, LinearProgress, List, ListItem, Typography } from '@material-ui/core';
 import { ArrowBack, DeleteOutline } from '@material-ui/icons';
 import NewGoalDialog from 'components/Goals/NewGoalDialog';
+import TransferDialog from 'components/Spending/TransferDialog';
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
 import moment from 'moment';
@@ -18,12 +19,14 @@ interface WithConnectionPropTypes {
 
 interface State {
   newGoalDialogOpen: boolean;
+  transferDialogOpen: boolean;
 }
 
 export class GoalDetails extends Component<WithConnectionPropTypes, State> {
 
   state = {
     newGoalDialogOpen: false,
+    transferDialogOpen: false,
   };
 
   openNewGoalDialog = () => this.setState({
@@ -32,6 +35,14 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
 
   closeNewGoalDialog = () => this.setState({
     newGoalDialogOpen: false,
+  });
+
+  openTransferDialog = () => this.setState({
+    transferDialogOpen: true,
+  });
+
+  closeTransferDialog = () => this.setState({
+    transferDialogOpen: false,
   });
 
   renderInProgress = () => {
@@ -260,6 +271,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
           <div className="col-span-1 flex justify-end items-center">
             <Button
               variant="outlined"
+              onClick={ this.openTransferDialog }
             >
               Transfer
             </Button>
@@ -293,7 +305,6 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
 
     return (
       <Fragment>
-        { newGoalDialogOpen && <NewGoalDialog onClose={ this.closeNewGoalDialog } isOpen={ newGoalDialogOpen }/> }
 
         <div className="h-full flex justify-center items-center">
           <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
@@ -315,9 +326,24 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
     )
   };
 
+  renderDialogs = () => {
+    const { goal } = this.props;
+    const { newGoalDialogOpen, transferDialogOpen } = this.state;
+    if (newGoalDialogOpen) {
+      return <NewGoalDialog onClose={ this.closeNewGoalDialog } isOpen={ newGoalDialogOpen }/>;
+    }
+
+    if (transferDialogOpen) {
+      return <TransferDialog isOpen onClose={ this.closeTransferDialog } initialToSpendingId={ goal.spendingId }/>;
+    }
+
+    return null;
+  };
+
   render() {
     return (
       <div className="w-full h-full p-5">
+        { this.renderDialogs() }
         { this.renderContents() }
       </div>
     );
