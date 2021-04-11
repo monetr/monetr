@@ -3,12 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/schemagen"
-	"math"
-
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	"github.com/harderthanitneedstobe/rest-api/v0/pkg/schemagen"
+	"math"
 )
 
 var (

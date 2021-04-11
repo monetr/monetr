@@ -23,8 +23,6 @@ services:
       - 5432:5432
     env_file:
       - .development.env
-    volumes:
-      - "./schema:/docker-entrypoint-initdb.d"
     command: [ "postgres", "-c", "log_statement=all" ]
   redis:
     image: library/redis:6.2.1-alpine

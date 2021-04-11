@@ -14,10 +14,7 @@ func (c *Controller) handleSpending(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/spending", c.getSpending)
 	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)
 	p.Post("/{bankAccountId:uint64}/spending/transfer", c.postSpendingTransfer)
-
-	p.Put("/{bankAccountId:uint64}/spending/{expenseId:uint64}", func(ctx *context.Context) {
-
-	})
+	p.Put("/{bankAccountId:uint64}/spending/{expenseId:uint64}", c.putSpending)
 
 	p.Delete("/{bankAccountId:uint64}/spending/{expenseId:uint64}", func(ctx *context.Context) {
 
@@ -290,4 +287,114 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		"balance":  balance,
 		"spending": spendingToUpdate,
 	})
+}
+
+// Update Spending
+// @id update-spending
+// @tags Spending
+// @summary Update an existing expense or goal spending object.
+// @security ApiKeyAuth
+// @accept json
+// @product json
+// @Param bankAccountId path int true "Bank Account ID"
+// @Param Spending body models.Spending true "Updated spending"
+// @Router /bank_accounts/{bankAccountId}/spending [put]
+// @Success 200 {object} models.Spending
+// @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
+// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
+// @Failure 500 {object} ApiError "Failed to persist data."
+func (c *Controller) putSpending(ctx *context.Context) {
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
+
+	updatedSpending := &models.Spending{}
+	if err := ctx.ReadJSON(updatedSpending); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	if updatedSpending.SpendingId == 0 {
+		c.badRequest(ctx, "spending Id must be valid")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	existingSpending, err := repo.GetSpendingById(bankAccountId, updatedSpending.SpendingId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to find existing spending")
+		return
+	}
+
+	// These fields cannot be changed by the end user and must be maintained by the API, some of these fields are
+	// just meant to be immutable like date created.
+	updatedSpending.SpendingType = existingSpending.SpendingType
+	updatedSpending.DateCreated = existingSpending.DateCreated
+	updatedSpending.UsedAmount = existingSpending.UsedAmount
+	updatedSpending.CurrentAmount = existingSpending.CurrentAmount
+	updatedSpending.BankAccountId = existingSpending.BankAccountId
+	updatedSpending.IsBehind = existingSpending.IsBehind
+	updatedSpending.LastRecurrence = existingSpending.LastRecurrence
+	updatedSpending.NextContributionAmount = existingSpending.NextContributionAmount
+
+	if updatedSpending.SpendingType == models.SpendingTypeGoal {
+		updatedSpending.RecurrenceRule = nil
+	}
+
+	recalculateSpending := false
+	if updatedSpending.NextRecurrence != existingSpending.NextRecurrence {
+		newNext, err := c.midnightInLocal(ctx, updatedSpending.NextRecurrence)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to update next recurrence")
+			return
+		}
+
+		if newNext != existingSpending.NextRecurrence {
+			updatedSpending.NextRecurrence = newNext
+			recalculateSpending = true
+		}
+	}
+
+	if updatedSpending.TargetAmount != existingSpending.TargetAmount {
+		recalculateSpending = true
+	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
+		recalculateSpending = true
+	} else if updatedSpending.RecurrenceRule != nil {
+		recalculateSpending = updatedSpending.RecurrenceRule.String() == existingSpending.RecurrenceRule.String()
+	}
+
+	if recalculateSpending {
+		account, err := repo.GetAccount()
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to retrieve account details")
+			return
+		}
+
+		fundingSchedule, err := repo.GetFundingSchedule(bankAccountId, updatedSpending.FundingScheduleId)
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
+			return
+		}
+
+		if err = updatedSpending.CalculateNextContribution(
+			account.Timezone,
+			fundingSchedule.NextOccurrence,
+			fundingSchedule.Rule,
+		); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
+			return
+		}
+	}
+
+	if err = repo.UpdateExpenses(bankAccountId, []models.Spending{
+		*updatedSpending,
+	}); err != nil {
+		c.wrapPgError(ctx, err, "failed to update spending")
+		return
+	}
+
+	ctx.JSON(updatedSpending)
 }

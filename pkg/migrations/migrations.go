@@ -1,13 +1,12 @@
 package migrations
 
 import (
-	"fmt"
 	"github.com/go-pg/migrations/v8"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func RunMigrations(db migrations.DB) {
+func RunMigrations(log *logrus.Entry, db migrations.DB) {
 	collection := migrations.NewCollection()
 	collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema")
 
@@ -18,8 +17,21 @@ func RunMigrations(db migrations.DB) {
 
 	currentVersion, err := collection.Version(db)
 	if err != nil {
-		panic(err)
+		log.Fatalf("failed to get database version: %+v", err)
+		return
 	}
 
-	fmt.Printf("current database version is %d\n", currentVersion)
+	log.Infof("current database version is %d", currentVersion)
+
+	oldVersion, newVersion, err := collection.Run(db, "up")
+	if err != nil {
+		log.Fatalf("failed to run migrations: %+v", err)
+		return
+	}
+
+	if oldVersion == newVersion {
+		log.Info("no database updates")
+	} else {
+		log.Infof("database upgraded from %d to %d", oldVersion, newVersion)
+	}
 }

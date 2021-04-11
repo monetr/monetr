@@ -99,7 +99,7 @@ func main() {
 		log:   log,
 	})
 
-	migrations.RunMigrations(db)
+	migrations.RunMigrations(log, db)
 
 	redisController, err := cache.NewRedisCache(log, configuration.Redis)
 	if err != nil {

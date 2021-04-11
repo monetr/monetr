@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: database
+          image: postgres:13
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: ""
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "trust"
+            - name: POSTGRES_DB
+              value: "postgres"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api
+  labels:
+    app: rest-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rest-api
+  template:
+    metadata:
+      labels:
+        app: rest-api
+    spec:
+      containers:
+        - name: rest-api
+          image: localhost:5000/harder/rest-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 4000
+              name: http
+            - containerPort: 9000
+              name: metrics
+          env:
+            - name: HARDER_PG_ADDRESS
+              value: postgres.svc.cluster.local

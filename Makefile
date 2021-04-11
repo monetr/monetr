@@ -2,6 +2,11 @@
 
 PATH := "$(PATH):$(GOPATH)"
 
+default: dependencies test
+
+dependencies:
+	go get ./...
+
 docs-dependencies:
 	go get ./...
 	(PATH=$$PATH:./bin/swag which swag) || (go get github.com/swaggo/swag/cmd/swag && go build -o ./bin/swag github.com/swaggo/swag/cmd/swag)
@@ -18,15 +23,6 @@ schema:
 	(which yarn && yarn sql-formatter -l postgresql -u --lines-between-queries 2 -i 4 \
 		schema/00000000_Initial.up.sql -o schema/00000000_Initial.up.sql) || true
 
-apply-schema-ci:
-	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen \
-		--address=$$POSTGRES_HOST \
-		--port=5432 \
-		--user=$$POSTGRES_USER \
-		--db=$$POSTGRES_DB \
-		--dry-run=false \
-		--drop=true \
-		--print=false
 
 docker:
 	docker build -t harder-rest-api -f Dockerfile .
@@ -37,10 +33,10 @@ docker-work-web-ui:
 clean-development:
 	docker-compose -f ./docker-compose.development.yaml rm --stop --force || true
 
-compose-development: schema docker docker-work-web-ui
+compose-development: docker docker-work-web-ui
 	docker-compose  -f ./docker-compose.development.yaml up
 
-compose-development-lite: schema
+compose-development-lite:
 	docker-compose  -f ./docker-compose.development.yaml up
 
 helm-configure:
@@ -76,4 +72,8 @@ migrations:
 	make generate_schema TARGET_DIRECTORY=$(CURRENT_TMP)
 	$(info "Cleaning up temp directories")
 	rm -rf $(CURRENT_TMP)
+
+ifdef CI
+include Makefile.ci
+endif
 
