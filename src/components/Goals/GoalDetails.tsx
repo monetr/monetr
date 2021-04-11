@@ -48,11 +48,13 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
   renderInProgress = () => {
     const { goal, fundingSchedule } = this.props;
 
+    const created = goal.dateCreated;
     const due = goal.nextRecurrence;
 
     // If the goal is the same year then just do the month and the day, but if its a different year then do the month
     // the day, and the year.
     const dueDate = due.year() !== moment().year() ? due.format('MMMM Do, YYYY') : due.format('MMMM Do')
+    const createdDate = created.year() !== moment().year() ? created.format('MMMM Do, YYYY') : created.format('MMMM Do');
 
     return (
       <div className="w-full h-full">
@@ -105,10 +107,9 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
           <div className="grid grid-cols-3 grid-rows-3">
             <div className="h-5 col-span-2 row-span-1 flex justify-start">
               <Typography
-                className="opacity-50"
                 variant="caption"
               >
-                Date Created (WIP)
+                { createdDate }
               </Typography>
             </div>
             <div className="col-span-1 row-span-1 flex justify-end">

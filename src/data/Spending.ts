@@ -21,6 +21,8 @@ export default class Spending {
   nextRecurrence: Moment;
   nextContributionAmount: number;
   isBehind: boolean;
+  isPaused: boolean;
+  dateCreated: Moment;
 
   constructor(data?: Partial<Spending>) {
     if (data) {
@@ -28,6 +30,7 @@ export default class Spending {
         ...data,
         lastRecurrence: parseToMomentMaybe(data.lastRecurrence),
         nextRecurrence: parseToMoment(data.nextRecurrence),
+        dateCreated: parseToMoment(data.dateCreated),
       });
     }
   }
