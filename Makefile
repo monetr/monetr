@@ -1,5 +1,7 @@
 .PHONY: schema
 
+PATH := "$(PATH):$(GOPATH)"
+
 docs-dependencies:
 	go get ./...
 	(PATH=$$PATH:./bin/swag which swag) || (go get github.com/swaggo/swag/cmd/swag && go build -o ./bin/swag github.com/swaggo/swag/cmd/swag)
@@ -59,3 +61,19 @@ staging-dry:
 		--set api.jwt.registrationJwtSecret=$$(vault kv get --field=register_jwt_secret pipelines/harderthanitneedstobe.com/staging/primary) \
 		--set api.postgreSql.password=$$(vault kv get --field=pg_password pipelines/harderthanitneedstobe.com/staging/primary) \
 		--values=values.staging.yaml | kubectl apply -n harder-staging --dry-run=server -f -
+
+
+generate_schema:
+	$(eval TARGET_FILE := $(shell echo "$(TARGET_DIRECTORY)/0_initial.up.sql"))
+	$(info "Generating current schema into file $(TARGET_FILE)")
+	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen > $(TARGET_FILE)
+	yarn sql-formatter -l postgresql -u --lines-between-queries 2 $(TARGET_FILE) -o $(TARGET_FILE)
+
+migrations:
+	$(eval CURRENT_TMP := $(shell mktemp -d))
+	$(eval BASE_TMP := $(shell mktemp -d))
+	$(info "Generating schema migrations for the current schema in $(CURRENT_TMP)")
+	make generate_schema TARGET_DIRECTORY=$(CURRENT_TMP)
+	$(info "Cleaning up temp directories")
+	rm -rf $(CURRENT_TMP)
+
