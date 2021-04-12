@@ -165,10 +165,10 @@
     node-fetch "^2.6.1"
     yaml-ast-parser "0.0.43"
 
-"@redocly/openapi-core@^1.0.0-beta.43":
-  version "1.0.0-beta.43"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.0.0-beta.43.tgz#9744b689b12eb623b3cfe0ead1f61d994741a6be"
-  integrity sha512-R9Jcwqn4NimI4ZNlWCY0cvo4WvzmhxtCTFzHB15G6WwdQXsAPC4q7ZR6ocHlKYDuilpCLrtMjMBEwAZji5JU9w==
+"@redocly/openapi-core@^1.0.0-beta.44":
+  version "1.0.0-beta.44"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.0.0-beta.44.tgz#e9a6c50ee2bb18e93b3439ed92c53e440de3aa7a"
+  integrity sha512-9HNnh1MzvMsLK1liuidFBqWiAsZ2Yg3RY58fcEsy0QruSMdDbn7SoeI1qnXe6O+BkBS+vAP4oVzZDMHCMKGsOQ==
   dependencies:
     "@redocly/ajv" "^6.12.3"
     "@types/node" "^14.11.8"
@@ -1516,12 +1516,12 @@ redoc@2.0.0-rc.51:
     tslib "^2.0.0"
     url-template "^2.0.8"
 
-redoc@2.0.0-rc.52:
-  version "2.0.0-rc.52"
-  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.52.tgz#85cef6f4447dcd88b41f725a5298d24bdc0eef3c"
-  integrity sha512-+IxAHI1T4SK4LO+KIrvCUNAABg4XIG14lfIOWT4b4f+n5KN2clhsv5a9Fxu5HbAN1hO1eWoAyYap6vapI/ebzA==
+redoc@2.0.0-rc.53:
+  version "2.0.0-rc.53"
+  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.53.tgz#2841b78638894e724eb997a434c4ef31ac853983"
+  integrity sha512-nyHIEIVo+kxsMfAy7nkYSlU7qjXZAARcj0INaRwCoy/DG9BMMi3xLcpo0CmarL9XeI891+VN2tpyTJ8jhZUtPw==
   dependencies:
-    "@redocly/openapi-core" "^1.0.0-beta.43"
+    "@redocly/openapi-core" "^1.0.0-beta.44"
     "@redocly/react-dropdown-aria" "^2.0.11"
     "@types/node" "^13.11.1"
     classnames "^2.2.6"
