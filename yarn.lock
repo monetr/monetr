@@ -4793,10 +4793,10 @@ es6-symbol@^3.1.1, es6-symbol@~3.1.3:
     d "^1.0.1"
     ext "^1.1.2"
 
-esbuild@0.11.9:
-  version "0.11.9"
-  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.11.9.tgz#408bf4fb5ae9abc2f27d56b62e19aab697687975"
-  integrity sha512-qP7w/oWjJBIh9x+H37DbpkMtmSnLm63VDyA06+vkJJEHlVR7QSDiPAaka7mtMQZHoBn87irUx5rDxbXMKaf8xw==
+esbuild@0.11.10:
+  version "0.11.10"
+  resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.11.10.tgz#f5d39e4d9cc130b78d751664fef1b663240f5545"
+  integrity sha512-XvGbf+UreVFA24Tlk6sNOqNcvF2z49XAZt4E7A4H80+yqn944QOLTTxaU0lkdYNtZKFiITNea+VxmtrfjvnLPA==
 
 escalade@^3.0.2, escalade@^3.1.1:
   version "3.1.1"
