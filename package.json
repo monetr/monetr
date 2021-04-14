@@ -2,7 +2,7 @@
   "type": "module",
   "dependencies": {
     "redoc": "2.0.0-rc.53",
-    "redoc-cli": "0.11.3",
+    "redoc-cli": "0.11.4",
     "sql-formatter": "4.0.2",
     "ts-node": "9.1.1",
     "typescript": "4.2.4",
