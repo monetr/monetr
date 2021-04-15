@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/testutils"
+	"github.com/monetrapp/rest-api/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

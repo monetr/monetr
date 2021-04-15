@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-pg/pg/v10/orm"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/application"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/cache"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/jobs"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/migrations"
+	"github.com/monetrapp/rest-api/pkg/application"
+	"github.com/monetrapp/rest-api/pkg/cache"
+	"github.com/monetrapp/rest-api/pkg/jobs"
+	"github.com/monetrapp/rest-api/pkg/metrics"
+	"github.com/monetrapp/rest-api/pkg/migrations"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
@@ -16,8 +16,8 @@ import (
 	"strings"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/controller"
+	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/controller"
 )
 
 var (

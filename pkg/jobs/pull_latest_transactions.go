@@ -2,8 +2,8 @@ package jobs
 
 import (
 	"github.com/gocraft/work"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
+	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"

@@ -6,7 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
+	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/kataras/iris/v12/context"
 	"github.com/pkg/errors"
 )

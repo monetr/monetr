@@ -6,10 +6,10 @@ RUN go get github.com/gocraft/work/cmd/workwebui
 RUN go build -o /bin/workwebui github.com/gocraft/work/cmd/workwebui
 FROM ubuntu:20.04
 
-LABEL org.opencontainers.image.url=https://github.com/harderthanitneedstobe/rest-api
+LABEL org.opencontainers.image.url=https://github.com/monetrapp/rest-api
 LABEL org.opencontainers.image.source=https://github.com/gocraft/work/tree/master/webui
 LABEL org.opencontainers.image.authors=me@elliotcourant.dev
-LABEL org.opencontainers.image.vendor="Harder Than It Needs To Be"
+LABEL org.opencontainers.image.vendor="monetr"
 LABEL org.opencontainers.image.title="Work UI"
 LABEL org.opencontainers.image.description="Web UI for viewing gocraft/work information"
 

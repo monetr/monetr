@@ -1,15 +1,15 @@
 replicaCount: 1
 
 image:
-  repository: containers.harderthanitneedstobe.com/rest-api
+  repository: containers.monetr.dev/rest-api
   pullPolicy: IfNotPresent
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
 imagePullSecrets:
-  - name: containers.harderthanitneedstobe.com
+  - name: containers.monetr.dev
 
 podAnnotations:
-  harderthanitneedstobe.com/branch: "" # Branch of the deployment will be put here
+  monetr.dev/branch: "" # Branch of the deployment will be put here
 
 ingress:
   enabled: true
@@ -17,13 +17,13 @@ ingress:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: api.staging.harderthanitneedstobe.com
+    - host: api.staging.monetr.dev
       paths:
         - path: /
   tls:
-    - secretName: staging-harderthanitneedstobe-api-tls
+    - secretName: staging-monetr.dev-tls
       hosts:
-        - api.staging.harderthanitneedstobe.com
+        - api.staging.monetr.dev
 
 resources:
   limits:
@@ -38,15 +38,15 @@ nodeSelector:
 
 api:
   name: Harder Than It Needs To Be
-  uiDomainName: app.staging.harderthanitneedstobe.com
-  apiDomainName: api.staging.harderthanitneedstobe.com
+  uiDomainName: app.staging.monetr.dev
+  apiDomainName: api.staging.monetr.dev
   allowSignUp: true
   enableWebhooks: false
   jwt:
     loginJwtSecret: ""
     registrationJwtSecret: ""
   postgreSql:
-    address: alsatian.harder-staging.svc.cluster.local
+    address: alsatian.monetr-staging.svc.cluster.local
     port: 5432
     username: harder-api
     password: ""
@@ -63,11 +63,11 @@ api:
     environment: "https://sandbox.plaid.com"
   cors:
     allowedOrigins:
-      - "app.staging.harderthanitneedstobe.com"
+      - "app.staging.monetr.dev"
     debug: true
   redis:
     enabled: true
-    address: redis-main.harder-staging.svc.cluster.local
+    address: redis-main.monetr-staging.svc.cluster.local
     port: 6379
   logging:
     level: trace

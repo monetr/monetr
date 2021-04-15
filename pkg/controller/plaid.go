@@ -2,7 +2,7 @@ package controller
 
 import (
 	"fmt"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"net/http"
 	"strconv"
 	"time"

@@ -1,7 +1,7 @@
 package controller_test
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"net/http"
 	"testing"
 )

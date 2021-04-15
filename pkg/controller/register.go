@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/hash"
+	"github.com/monetrapp/rest-api/pkg/hash"
 	"net/http"
 	"strings"
 	"time"

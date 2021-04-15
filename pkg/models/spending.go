@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/util"
+	"github.com/monetrapp/rest-api/pkg/util"
 	"github.com/pkg/errors"
 	"time"
 )

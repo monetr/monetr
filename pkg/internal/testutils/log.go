@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/logging"
+	"github.com/monetrapp/rest-api/pkg/logging"
 	"github.com/sirupsen/logrus"
 	"testing"
 )

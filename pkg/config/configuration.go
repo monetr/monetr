@@ -113,7 +113,7 @@ func LoadConfiguration() Configuration {
 
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/etc/harder/")
+	viper.AddConfigPath("/etc/monetr/")
 	viper.AddConfigPath(".")
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)

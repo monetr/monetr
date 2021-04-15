@@ -2,7 +2,7 @@ package jobs
 
 import (
 	"github.com/gocraft/work"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/repository"
+	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

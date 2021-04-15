@@ -1,10 +1,10 @@
 package application
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/controller"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
+	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/controller"
 )
 
 func NewApp(configuration config.Configuration, controller *controller.Controller) *iris.Application {

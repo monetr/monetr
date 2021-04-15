@@ -2,10 +2,10 @@ package controller_test
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/application"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/controller"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/testutils"
+	"github.com/monetrapp/rest-api/pkg/application"
+	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/controller"
+	"github.com/monetrapp/rest-api/pkg/internal/testutils"
 	"github.com/kataras/iris/v12/httptest"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"

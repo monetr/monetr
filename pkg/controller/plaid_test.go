@@ -2,7 +2,7 @@ package controller_test
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/mock_plaid"
+	"github.com/monetrapp/rest-api/pkg/internal/mock_plaid"
 	"github.com/jarcoal/httpmock"
 	"net/http"
 	"testing"

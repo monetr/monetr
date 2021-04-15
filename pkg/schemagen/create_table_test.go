@@ -2,8 +2,8 @@ package schemagen
 
 import (
 	"github.com/go-pg/pg/v10/orm"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/testutils"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/internal/testutils"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

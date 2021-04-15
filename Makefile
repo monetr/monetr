@@ -19,7 +19,7 @@ test:
 	go tool cover -func=coverage.txt
 
 schema:
-	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen > schema/00000000_Initial.up.sql
+	go run github.com/monetrapp/rest-api/tools/schemagen > schema/00000000_Initial.up.sql
 	(which yarn && yarn sql-formatter -l postgresql -u --lines-between-queries 2 -i 4 \
 		schema/00000000_Initial.up.sql -o schema/00000000_Initial.up.sql) || true
 
@@ -62,7 +62,7 @@ staging-dry:
 generate_schema:
 	$(eval TARGET_FILE := $(shell echo "$(TARGET_DIRECTORY)/0_initial.up.sql"))
 	$(info "Generating current schema into file $(TARGET_FILE)")
-	go run github.com/harderthanitneedstobe/rest-api/v0/tools/schemagen > $(TARGET_FILE)
+	go run github.com/monetrapp/rest-api/tools/schemagen > $(TARGET_FILE)
 	yarn sql-formatter -l postgresql -u --lines-between-queries 2 $(TARGET_FILE) -o $(TARGET_FILE)
 
 migrations:

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"net/http"

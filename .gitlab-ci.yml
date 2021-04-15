@@ -67,7 +67,7 @@ Binary:
     - k8s:shared
     - arch:amd64
   script:
-    - go build -o ./bin/rest-api-${GOARCH} github.com/harderthanitneedstobe/rest-api/v0/cmd/api
+    - go build -o ./bin/rest-api-${GOARCH} github.com/monetrapp/rest-api/cmd/api
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:

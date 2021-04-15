@@ -3,7 +3,7 @@ package mock_plaid
 import (
 	"encoding/json"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/internal/mock_http_helper"
+	"github.com/monetrapp/rest-api/pkg/internal/mock_http_helper"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
 	"net/http"

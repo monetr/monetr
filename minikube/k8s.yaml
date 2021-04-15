@@ -48,7 +48,7 @@ spec:
     spec:
       containers:
         - name: rest-api
-          image: localhost:5000/harder/rest-api:latest
+          image: localhost:5000/monetr/rest-api:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 4000

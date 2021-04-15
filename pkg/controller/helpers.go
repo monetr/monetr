@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/util"
+	"github.com/monetrapp/rest-api/pkg/util"
 	"github.com/kataras/iris/v12/context"
 	"github.com/pkg/errors"
 	"time"

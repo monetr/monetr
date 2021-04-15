@@ -3,7 +3,7 @@ package testutils
 import (
 	"context"
 	"github.com/go-pg/pg/v10"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
+	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"

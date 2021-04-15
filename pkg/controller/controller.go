@@ -1,14 +1,14 @@
 package controller
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/jobs"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/metrics"
+	"github.com/monetrapp/rest-api/pkg/jobs"
+	"github.com/monetrapp/rest-api/pkg/metrics"
 	"net/http"
 	"net/smtp"
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"

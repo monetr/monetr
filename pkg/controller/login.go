@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/hash"
+	"github.com/monetrapp/rest-api/pkg/hash"
 	"net/http"
 	"strings"
 	"time"
@@ -9,7 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 
 	"github.com/kataras/iris/v12/context"

@@ -2,7 +2,7 @@ package controller_test
 
 import (
 	"fmt"
-	"github.com/harderthanitneedstobe/rest-api/v0/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"math"
 	"net/http"
 	"testing"
