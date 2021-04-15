@@ -8,14 +8,18 @@ func init() {
 	databaseCommand.AddCommand(databaseVersionCommand)
 
 	databaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "H", "", "PostgreSQL host address.")
-	databaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 5432, "PostgreSQL port.")
+	databaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 0, "PostgreSQL port.")
+	databaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "", "PostgreSQL user.")
+	databaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
+	databaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "", "PostgreSQL database.")
 }
 
 var (
 	postgresAddress  = ""
-	postgresPort     = 5432
-	postgresUsername = "postgres"
+	postgresPort     = 0
+	postgresUsername = ""
 	postgresPassword = ""
+	postgresDatabase = ""
 )
 
 var (
