@@ -18,7 +18,7 @@ workflow:
 JS Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
+  image: containers.monetr.dev/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -33,7 +33,7 @@ Build Development:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
-  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
+  image: containers.monetr.dev/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -48,7 +48,7 @@ Build Production:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
-  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
+  image: containers.monetr.dev/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -64,7 +64,7 @@ Test:
   needs:
     - "JS Dependencies"
   stage: Test Javascript
-  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
+  image: containers.monetr.dev/node:15.12.0-buster
   tags:
     - k8s:shared
   script:
@@ -108,7 +108,7 @@ Kaniko:
   needs:
     - "Build Production"
   stage: Build Container
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   tags:
     - k8s:shared
   script:
@@ -129,7 +129,7 @@ Publish GitHub:
   only:
     refs:
       - main
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   tags:
     - k8s:shared
   before_script:
@@ -138,8 +138,8 @@ Publish GitHub:
   script:
     - |
       kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile \
-        --destination ghcr.io/harderthanitneedstobe/web-ui:$(git rev-parse --short HEAD) \
-        --destination ghcr.io/harderthanitneedstobe/web-ui:latest
+        --destination ghcr.io/monetrapp/web-ui:$(git rev-parse --short HEAD) \
+        --destination ghcr.io/monetrapp/web-ui:latest
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
