@@ -102,7 +102,7 @@ type Logging struct {
 	Level string
 }
 
-func LoadConfiguration() Configuration {
+func LoadConfiguration(configFilePath *string) Configuration {
 	v := viper.GetViper()
 
 	v.SetEnvPrefix(EnvironmentPrefix)
@@ -111,10 +111,15 @@ func LoadConfiguration() Configuration {
 	setupDefaults(v)
 	setupEnv(v)
 
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/etc/monetr/")
-	viper.AddConfigPath(".")
+	if configFilePath != nil {
+		viper.SetConfigName(*configFilePath)
+	} else {
+		viper.SetConfigName("config")
+		viper.SetConfigType("yaml")
+		viper.AddConfigPath("/etc/monetr/")
+		viper.AddConfigPath(".")
+	}
+
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)
 	}

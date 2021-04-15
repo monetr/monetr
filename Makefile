@@ -1,11 +1,16 @@
-.PHONY: schema
+PATH := "$(PATH):$(GOPATH):$(PWD)/bin"
 
-PATH := "$(PATH):$(GOPATH)"
-
-default: dependencies test
+default: dependencies build test
 
 dependencies:
 	go get ./...
+
+build: dependencies
+	go build -o bin/monetr github.com/monetrapp/rest-api/cmd/monetr
+
+test:
+	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
+	go tool cover -func=coverage.txt
 
 docs-dependencies:
 	go get ./...
@@ -13,10 +18,6 @@ docs-dependencies:
 
 docs: docs-dependencies
 	PATH=$$PATH:./bin/swag swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
-
-test:
-	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
-	go tool cover -func=coverage.txt
 
 schema:
 	go run github.com/monetrapp/rest-api/tools/schemagen > schema/00000000_Initial.up.sql
@@ -45,7 +46,7 @@ helm-configure:
 helm-deps:
 	git clone https://github.com/mogensen/kubernetes-split-yaml.git
 	cd kubernetes-split-yaml.git && go build ./...
-	cp kubernetes-split-yaml/kubernetes-split-yaml /usr/local/bin
+	cp kubernetes-split-yaml/kubernetes-split-yaml $(PWD)/bin
 	rm -rfd kubernetes-split-yaml
 
 helm-generate: helm-configure

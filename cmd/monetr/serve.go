@@ -20,9 +20,11 @@ import (
 func init() {
 	rootCmd.AddCommand(serveCommand)
 	serveCommand.LocalFlags().BoolVarP(&migrateDatabase, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
+	serveCommand.LocalFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use, if omitted ./config.yaml or /etc/monetr/config.yaml will be used.")
 }
 
 var (
+	configFilePath  = ""
 	migrateDatabase = false
 
 	serveCommand = &cobra.Command{
@@ -40,7 +42,12 @@ func RunServer() error {
 	stats.Listen(":9000")
 	defer stats.Close()
 
-	configuration := config.LoadConfiguration()
+	var configPath *string
+	if len(configFilePath) > 0 {
+		configPath = &configFilePath
+	}
+
+	configuration := config.LoadConfiguration(configPath)
 
 	logger := logrus.StandardLogger()
 	// TODO Determine logging level from configuration.

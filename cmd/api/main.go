@@ -20,7 +20,7 @@ func main() {
 	stats.Listen(":9000")
 	defer stats.Close()
 
-	configuration := config.LoadConfiguration()
+	configuration := config.LoadConfiguration(nil)
 
 	logger := logrus.StandardLogger()
 	logger.SetLevel(logrus.TraceLevel)
