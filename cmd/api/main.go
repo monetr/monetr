@@ -1,74 +1,19 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"github.com/go-pg/pg/v10/orm"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/cache"
+	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/controller"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/migrations"
 	"github.com/plaid/plaid-go/plaid"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"net/http"
-	"strings"
-
-	"github.com/go-pg/pg/v10"
-	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/monetrapp/rest-api/pkg/controller"
 )
-
-var (
-	_ pg.QueryHook = &hooks{}
-)
-
-type hooks struct {
-	log   *logrus.Entry
-	stats *metrics.Stats
-}
-
-func (h *hooks) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
-	query, err := event.FormattedQuery()
-	if err != nil {
-		return ctx, nil
-	}
-	h.log.Trace(string(query))
-
-	return ctx, nil
-}
-
-func (h *hooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
-	var queryType string
-	switch query := event.Query.(type) {
-	case string:
-		query = strings.TrimSpace(query)
-		query = strings.ReplaceAll(query, "\n", " ")
-		switch strings.ToUpper(query) {
-		case "BEGIN", "COMMIT", "ROLLBACK":
-			// Do nothing we don't want to count these.
-			return nil
-		default:
-			firstSpace := strings.IndexRune(query, ' ')
-			queryType = strings.ToUpper(query[:firstSpace])
-		}
-	case *orm.SelectQuery:
-		queryType = "SELECT"
-	case *orm.InsertQuery:
-		queryType = "INSERT"
-	case *orm.UpdateQuery:
-		queryType = "UPDATE"
-	case *orm.DeleteQuery:
-		queryType = "DELETE"
-	default:
-		queryType = "UNKNOWN"
-	}
-	h.stats.Queries.With(prometheus.Labels{
-		"stmt": queryType,
-	}).Inc()
-	return nil
-}
 
 func main() {
 	stats := metrics.NewStats()
@@ -93,11 +38,6 @@ func main() {
 	}
 
 	db := pg.Connect(pgOptions)
-
-	db.AddQueryHook(&hooks{
-		stats: stats,
-		log:   log,
-	})
 
 	migrations.RunMigrations(log, db)
 
