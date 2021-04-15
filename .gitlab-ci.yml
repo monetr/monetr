@@ -31,7 +31,7 @@ variables:
 Go Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.harderthanitneedstobe.com/golang:1.16.2
+  image: containers.monetr.dev/golang:1.16.2
   tags:
     - k8s:shared
     - arch:amd64
@@ -46,7 +46,7 @@ Go Dependencies:
 JS Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.harderthanitneedstobe.com/node:15.12.0-buster
+  image: containers.monetr.dev/node:15.12.0-buster
   tags:
     - k8s:shared
     - arch:amd64
@@ -62,7 +62,7 @@ Binary:
   needs:
     - "Go Dependencies"
   stage: Build
-  image: containers.harderthanitneedstobe.com/golang:1.16.2
+  image: containers.monetr.dev/golang:1.16.2
   tags:
     - k8s:shared
     - arch:amd64
@@ -78,7 +78,7 @@ Binary:
 Database:
   needs: [ ]
   stage: Build
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   variables:
     VAULT_AUTH_ROLE: harder-rest-api-shorty
   secrets:
@@ -92,13 +92,13 @@ Database:
   script:
     - |
       kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+        --destination shorty.containers.monetr.dev/database-schema-changes:$CI_COMMIT_SHA
 
 Go Tests:
   needs:
     - "Go Dependencies"
   services:
-    - name: containers.harderthanitneedstobe.com/postgres:13
+    - name: containers.monetr.dev/postgres:13
       alias: postgres
   variables:
     POSTGRES_HOST: postgres
@@ -107,7 +107,7 @@ Go Tests:
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
   stage: Test
-  image: containers.harderthanitneedstobe.com/golang:1.16.2
+  image: containers.monetr.dev/golang:1.16.2
   tags:
     - k8s:shared
     - arch:amd64
@@ -136,10 +136,10 @@ PostgreSQL Tests:
   needs: [ ]
   stage: Test
   services:
-    - name: containers.harderthanitneedstobe.com/pgtest:latest
+    - name: containers.monetr.dev/pgtest:latest
       alias: postgres
   image:
-    name: containers.harderthanitneedstobe.com/pgtest:latest
+    name: containers.monetr.dev/pgtest:latest
     entrypoint: [ "" ]
   tags:
     - k8s:shared
@@ -164,11 +164,11 @@ Diff Schema PGDiff:
     - "Database"
   stage: Schema
   services:
-    - name: shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+    - name: shorty.containers.monetr.dev/database-schema-changes:$CI_COMMIT_SHA
       alias: new
-    - name: containers.harderthanitneedstobe.com/database-schema-base:latest
+    - name: containers.monetr.dev/database-schema-base:latest
       alias: current
-  image: containers.harderthanitneedstobe.com/golang:1.16.2
+  image: containers.monetr.dev/golang:1.16.2
   tags:
     - k8s:shared
     - arch:amd64
@@ -192,9 +192,9 @@ Diff Schema Migra:
     - "Database"
   stage: Schema
   services:
-    - name: shorty.containers.harderthanitneedstobe.com/database-schema-changes:$CI_COMMIT_SHA
+    - name: shorty.containers.monetr.dev/database-schema-changes:$CI_COMMIT_SHA
       alias: new
-    - name: containers.harderthanitneedstobe.com/database-schema-base:latest
+    - name: containers.monetr.dev/database-schema-base:latest
       alias: current
   image: containers.harderthanitneedstobe.com/ubuntu:20.04
   tags:
