@@ -75,6 +75,8 @@ github.com/bketelsen/crypt v0.0.3-0.20200106085610-5cbc8cc4026c/go.mod h1:MKsuJm
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/brianvoe/gofakeit/v6 v6.3.0 h1:h1M5XPubl81K+41Ry0g5P4Q9a7OCM8FgFf2Heey5j24=
 github.com/brianvoe/gofakeit/v6 v6.3.0/go.mod h1:palrJUk4Fyw38zIFB/uBZqsgzW5VsNllhHKKwAebzew=
+github.com/brianvoe/gofakeit/v6 v6.4.0 h1:iI6ItvrSB8vqDiaonjMXqQ63osRWk2W3hFHDpoJTqmc=
+github.com/brianvoe/gofakeit/v6 v6.4.0/go.mod h1:palrJUk4Fyw38zIFB/uBZqsgzW5VsNllhHKKwAebzew=
 github.com/casbin/casbin/v2 v2.1.2/go.mod h1:YcPU1XXisHhLzuxH9coDNf2FbKpjGlbCg3n9yuLkIJQ=
 github.com/cenkalti/backoff v2.2.1+incompatible/go.mod h1:90ReRw6GdpyfrHakVjL/QHaoyV4aDUVVkXQJJJ3NXXM=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
