@@ -2,7 +2,7 @@ FROM golang:1.16.3-alpine3.13 as builder
 COPY ./ /build
 WORKDIR /build
 RUN go get ./...
-RUN go build -o /bin/rest-api github.com/monetrapp/rest-api/v0/cmd/api
+RUN go build -o /bin/rest-api github.com/monetrapp/rest-api/cmd/monetr
 
 FROM alpine:3.13.5
 
