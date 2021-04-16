@@ -76,6 +76,7 @@ Binary:
     policy: pull-push
 
 Database:
+  when: manual
   needs: [ ]
   stage: Build
   image: containers.monetr.dev/kaniko-ci:latest
