@@ -197,7 +197,7 @@ Diff Schema Migra:
       alias: new
     - name: containers.monetr.dev/database-schema-base:latest
       alias: current
-  image: containers.harderthanitneedstobe.com/ubuntu:20.04
+  image: containers.monetr.dev/ubuntu:20.04
   tags:
     - k8s:shared
     - arch:amd64
@@ -233,7 +233,7 @@ Documentation:
   needs:
     - "Go Dependencies"
   stage: Documentation
-  image: containers.harderthanitneedstobe.com/ubuntu:20.04
+  image: containers.monetr.dev/ubuntu:20.04
   tags:
     - k8s:shared
     - arch:amd64
@@ -264,7 +264,7 @@ Kaniko - REST API:
     - "Binary"
     - "Go Dependencies"
   stage: Build Container
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   tags:
     - k8s:shared
     - arch:amd64
@@ -276,7 +276,7 @@ Kaniko - Work UI:
   needs:
     - "Go Dependencies"
   stage: Build Container
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   tags:
     - k8s:shared
     - arch:amd64
@@ -296,7 +296,7 @@ Publish - REST API:
   only:
     refs:
       - main
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   tags:
     - k8s:shared
     - arch:amd64
@@ -309,8 +309,8 @@ Publish - REST API:
         --dockerfile $CI_PROJECT_DIR/Dockerfile \
         --destination ghcr.io/harderthanitneedstobe/rest-api:latest \
         --destination ghcr.io/harderthanitneedstobe/rest-api:$CI_COMMIT_SHORT_SHA  \
-        --destination containers.harderthanitneedstobe.com/rest-api:latest \
-        --destination containers.harderthanitneedstobe.com/rest-api:$CI_COMMIT_SHORT_SHA
+        --destination containers.monetr.dev/rest-api:latest \
+        --destination containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA
 
 Publish - Work UI:
   needs:
@@ -324,7 +324,7 @@ Publish - Work UI:
   only:
     refs:
       - main
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   tags:
     - k8s:shared
     - arch:amd64
@@ -335,7 +335,7 @@ Publish - Work UI:
       kaniko --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
         --destination ghcr.io/harderthanitneedstobe/work-ui:latest \
-        --destination containers.harderthanitneedstobe.com/work-ui:latest
+        --destination containers.monetr.dev/work-ui:latest
 
 Publish - Database Schema:
   needs:
@@ -349,7 +349,7 @@ Publish - Database Schema:
   only:
     refs:
       - main
-  image: containers.harderthanitneedstobe.com/kaniko-ci:latest
+  image: containers.monetr.dev/kaniko-ci:latest
   tags:
     - k8s:shared
     - arch:amd64
@@ -359,8 +359,8 @@ Publish - Database Schema:
     - |
       kaniko --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination containers.harderthanitneedstobe.com/database-schema-base:$CI_COMMIT_SHA \
-        --destination containers.harderthanitneedstobe.com/database-schema-base:latest
+        --destination containers.monetr.dev/database-schema-base:$CI_COMMIT_SHA \
+        --destination containers.monetr.dev/database-schema-base:latest
 
 Staging Dry Run - Main:
   when: manual
@@ -378,7 +378,7 @@ Staging Dry Run - Main:
     name: staging
     url: https://api.staging.harderthanitneedstobe.com
     action: prepare
-  image: containers.harderthanitneedstobe.com/ubuntu:20.04
+  image: containers.monetr.dev/ubuntu:20.04
   script:
     - echo "test"
 
@@ -395,6 +395,6 @@ Staging Deploy - Main:
     name: staging
     url: https://api.staging.harderthanitneedstobe.com
     action: start
-  image: containers.harderthanitneedstobe.com/ubuntu:20.04
+  image: containers.monetr.dev/ubuntu:20.04
   script:
     - echo "test"
