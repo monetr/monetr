@@ -114,7 +114,7 @@ Go Tests:
     - k8s:shared
     - arch:amd64
   before_script:
-    - $CI_PROJECT_DIR/bin/monetr database migrate -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST
+    - $CI_PROJECT_DIR/bin/monetr database migrate -d $POSTGRES_DB -U $POSTGRES_USER -H $POSTGRES_HOST
   script:
     - make test
   cache:

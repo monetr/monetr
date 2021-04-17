@@ -33,6 +33,13 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 		return
 	}
 
+	if err := c.processWebhook(hook); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to handle webhook")
+		return
+	}
+}
+
+func (c *Controller) processWebhook(hook PlaidWebhook) error {
 	switch hook.WebhookType {
 	case "TRANSACTIONS":
 		switch hook.WebhookCode {
