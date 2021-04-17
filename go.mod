@@ -8,7 +8,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.4.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.9.0
+	github.com/go-pg/pg/v10 v10.9.1
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.4
 	github.com/hashicorp/vault/api v1.1.0
