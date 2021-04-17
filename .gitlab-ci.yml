@@ -27,7 +27,6 @@ stages:
 variables:
   GO111MODULE: 'on'
   GOFLAGS: '-mod=vendor'
-#  PATH: '$PATH:$CI_PROJECT_DIR/bin'
 
 Go Dependencies:
   needs: [ ]
@@ -68,7 +67,7 @@ Binary:
     - k8s:shared
     - arch:amd64
   script:
-    - go build -o ./bin/rest-api-${GOARCH} github.com/monetrapp/rest-api/cmd/api
+    - make build
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:
