@@ -138,7 +138,7 @@ Yeet Coverage:
   environment:
     name: DeepSource
   stage: Coverage
-  image: ghcr.io/monetrapp/deepsource:v0.1.7-9-gff81369
+  image: ghcr.io/monetrapp/deepsource:latest
   tags:
     - k8s:shared
     - arch:amd64
