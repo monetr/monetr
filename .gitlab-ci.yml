@@ -31,7 +31,7 @@ variables:
 Go Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.monetr.dev/golang:1.16.2
+  image: containers.monetr.dev/golang:1.16.3
   tags:
     - k8s:shared
     - arch:amd64
@@ -46,7 +46,7 @@ Go Dependencies:
 JS Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.monetr.dev/node:15.12.0-buster
+  image: containers.monetr.dev/node:15.14.0-buster
   tags:
     - k8s:shared
     - arch:amd64
@@ -62,7 +62,7 @@ Binary:
   needs:
     - "Go Dependencies"
   stage: Build
-  image: containers.monetr.dev/golang:1.16.2
+  image: containers.monetr.dev/golang:1.16.4
   tags:
     - k8s:shared
     - arch:amd64
@@ -89,7 +89,7 @@ Go Tests:
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
   stage: Test
-  image: containers.monetr.dev/golang:1.16.2
+  image: containers.monetr.dev/golang:1.16.3
   tags:
     - k8s:shared
     - arch:amd64
