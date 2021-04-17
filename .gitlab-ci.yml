@@ -40,7 +40,7 @@ Go Dependencies:
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:
-      - ./vendor
+      - $CI_PROJECT_DIR/vendor
     policy: push
 
 JS Dependencies:
@@ -72,7 +72,7 @@ Binary:
     key: go-${CI_COMMIT_SHA}
     paths:
       - $CI_PROJECT_DIR/bin
-      - ./vendor
+      - $CI_PROJECT_DIR/vendor
     policy: pull-push
 
 Go Tests:
@@ -101,7 +101,7 @@ Go Tests:
     key: go-${CI_COMMIT_SHA}
     paths:
       - $CI_PROJECT_DIR/bin
-      - ./vendor
+      - $CI_PROJECT_DIR/vendor
     policy: pull
   artifacts:
     name: "$CI_COMMIT_SHA-test-coverage"
@@ -130,16 +130,8 @@ PostgreSQL Tests:
     POSTGRES_HOST_AUTH_METHOD: trust
   before_script:
     - sleep 5
-    - make apply-schema-ci
-    - psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
   script:
-    - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f ./tests/pg/*.sql
-  cache:
-    key: go-${CI_COMMIT_SHA}
-    paths:
-      - $CI_PROJECT_DIR/bin
-      - ./vendor
-    policy: pull
+    - make pg_test
 
 Yeet Coverage:
   needs:

@@ -5,14 +5,22 @@ default:
 apply-schema-ci:
 ifndef CI_PROJECT_DIR
 	$(warning "CI_PROJECT_DIR is not defined, are you running in CI?")
-	$(eval CI_PROJECT_DIR := $(PWD))
+	$(eval CI_PROJECT_DIR = $(PWD))
 endif
 	$(CI_PROJECT_DIR)/bin/monetr database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) || make apply-schema-ci-psql
 
 apply-schema-ci-psql:
-	$(warning "monetr failed to perform database migrations, database migrations will be run manually.")
-	$(warning "This should ONLY be run in CI.")
 	for FILE in $(CI_PROJECT_DIR)/schema/*.up.sql; do \
 		echo "Applying $$FILE"; \
   		psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -h $(POSTGRES_HOST) -f $$FILE || exit 1; \
   	done;
+
+PG_PROVE_TESTS = "$(PWD)/tests/pg/*.sql"
+PG_TEST_EXTENSION_QUERY = "CREATE EXTENSION pgtap;"
+
+pg_test: apply-schema-ci-psql
+	psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -h $(POSTGRES_HOST) -c $(PG_TEST_EXTENSION_QUERY)
+	make pg_prove_tests
+
+pg_prove_tests:
+	pg_prove -h $(POSTGRES_HOST) -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f $(PG_PROVE_TESTS)

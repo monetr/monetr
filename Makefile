@@ -1,4 +1,11 @@
-PATH := "$(PATH):$(GOPATH):$(PWD)/bin"
+LOCAL_BIN_DIR = "$(PWD)/bin"
+NODE_MODULES_DIR = "$(PWD)/node_modules"
+VENDOR_DIR = "$(PWD)/vendor"
+
+MONETR_CLI_PACKAGE = "github.com/monetrapp/rest-api/cmd/monetr"
+COVERAGE_TXT = "$(PWD)/coverage.txt"
+
+PATH += "$(GOPATH):$(LOCAL_BIN_DIR)"
 
 default: dependencies build test
 
@@ -6,11 +13,17 @@ dependencies:
 	go get ./...
 
 build: dependencies
-	go build -o bin/monetr github.com/monetrapp/rest-api/cmd/monetr
+	go build -o $(LOCAL_BIN_DIR)/monetr $(MONETR_CLI_PACKAGE)
 
 test:
-	go test -race -v -coverprofile=coverage.txt -covermode=atomic ./...
-	go tool cover -func=coverage.txt
+	go test -race -v -coverprofile=$(COVERAGE_TXT) -covermode=atomic ./...
+	go tool cover -func=$(COVERAGE_TXT)
+
+clean:
+	rm -rf $(LOCAL_BIN_DIR) || true
+	rm -rf $(COVERAGE_TXT) || true
+	rm -rf $(NODE_MODULES_DIR) || true
+	rm -rf $(VENDOR_DIR) || true
 
 docs-dependencies:
 	go get ./...
@@ -19,12 +32,6 @@ docs-dependencies:
 docs: docs-dependencies
 	PATH=$$PATH:./bin/swag swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
 
-schema:
-	go run github.com/monetrapp/rest-api/tools/schemagen > schema/00000000_Initial.up.sql
-	(which yarn && yarn sql-formatter -l postgresql -u --lines-between-queries 2 -i 4 \
-		schema/00000000_Initial.up.sql -o schema/00000000_Initial.up.sql) || true
-
-
 docker:
 	docker build -t harder-rest-api -f Dockerfile .
 
@@ -32,13 +39,13 @@ docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
 
 clean-development:
-	docker-compose -f ./docker-compose.development.yaml rm --stop --force || true
+	docker compose -f ./docker-compose.development.yaml rm --stop --force || true
 
 compose-development: docker docker-work-web-ui
-	docker-compose  -f ./docker-compose.development.yaml up
+	docker compose  -f ./docker-compose.development.yaml up
 
 compose-development-lite:
-	docker-compose  -f ./docker-compose.development.yaml up
+	docker compose  -f ./docker-compose.development.yaml up
 
 helm-configure:
 	which kubernetes-split-yaml || make helm-deps
