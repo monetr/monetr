@@ -130,6 +130,7 @@ PostgreSQL Tests:
     POSTGRES_HOST_AUTH_METHOD: trust
   before_script:
     - sleep 5
+    - ls -la $CI_PROJECT_DIR/bin
     - make apply-schema-ci
     - psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
   script:
@@ -147,7 +148,7 @@ Yeet Coverage:
   environment:
     name: DeepSource
   stage: Coverage
-  image: ghcr.io/harderthanitneedstobe/deepsource:v0.1.7-9-gff81369
+  image: ghcr.io/monetrapp/deepsource:v0.1.7-9-gff81369
   tags:
     - k8s:shared
     - arch:amd64
@@ -236,8 +237,8 @@ Publish - REST API:
       kaniko --context $CI_PROJECT_DIR \
         --build-arg $CI_COMMIT_SHA \
         --dockerfile $CI_PROJECT_DIR/Dockerfile \
-        --destination ghcr.io/harderthanitneedstobe/rest-api:latest \
-        --destination ghcr.io/harderthanitneedstobe/rest-api:$CI_COMMIT_SHORT_SHA  \
+        --destination ghcr.io/monetrapp/rest-api:latest \
+        --destination ghcr.io/monetrapp/rest-api:$CI_COMMIT_SHORT_SHA  \
         --destination containers.monetr.dev/rest-api:latest \
         --destination containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA
 
@@ -263,7 +264,7 @@ Publish - Work UI:
     - |
       kaniko --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
-        --destination ghcr.io/harderthanitneedstobe/work-ui:latest \
+        --destination ghcr.io/monetrapp/work-ui:latest \
         --destination containers.monetr.dev/work-ui:latest
 
 Staging Dry Run - Main:
@@ -280,7 +281,7 @@ Staging Dry Run - Main:
     - arch:amd64
   environment:
     name: staging
-    url: https://api.staging.harderthanitneedstobe.com
+    url: https://api.staging.monetr.app
     action: prepare
   image: containers.monetr.dev/ubuntu:20.04
   script:
@@ -297,7 +298,7 @@ Staging Deploy - Main:
     - arch:amd64
   environment:
     name: staging
-    url: https://api.staging.harderthanitneedstobe.com
+    url: https://api.staging.monetr.app
     action: start
   image: containers.monetr.dev/ubuntu:20.04
   script:
