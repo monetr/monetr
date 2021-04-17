@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - '!renovate/*'
-  pull_request: { }
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   docker:
