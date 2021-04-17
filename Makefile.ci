@@ -7,4 +7,10 @@ ifndef CI_PROJECT_DIR
 	$(warning "CI_PROJECT_DIR is not defined, are you running in CI?")
 	$(eval CI_PROJECT_DIR := $(PWD))
 endif
-	$(CI_PROJECT_DIR)/bin/monetr database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
+	$(CI_PROJECT_DIR)/bin/monetr database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) || make apply-schema-ci-psql
+
+apply-schema-ci-psql:
+	for FILE in $(CI_PROJECT_DIR)/schema/*.up.sql; do \
+		echo "Applying $$FILE"; \
+  		psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -f $$FILE || exit 1; \
+  	done;
