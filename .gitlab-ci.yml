@@ -27,6 +27,7 @@ stages:
 variables:
   GO111MODULE: 'on'
   GOFLAGS: '-mod=vendor'
+  PATH: '$PATH:$CI_PROJECT_DIR/bin'
 
 Go Dependencies:
   needs: [ ]
@@ -113,13 +114,13 @@ Go Tests:
     - k8s:shared
     - arch:amd64
   before_script:
-    - ./bin/monetr database migrate -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST
+    - $CI_PROJECT_DIR/bin/monetr database migrate -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST
   script:
     - make test
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:
-      - ./bin
+      - $CI_PROJECT_DIR/bin
       - ./vendor
     policy: pull
   artifacts:
