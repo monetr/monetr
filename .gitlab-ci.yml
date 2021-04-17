@@ -110,8 +110,7 @@ Go Tests:
     expire_in: 7 days
 
 PostgreSQL Tests:
-  needs:
-    - "Binary"
+  needs: [ ]
   stage: Test
   services:
     - name: containers.monetr.dev/pgtest:latest

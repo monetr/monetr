@@ -23,4 +23,4 @@ pg_test: apply-schema-ci-psql
 	make pg_prove_tests
 
 pg_prove_tests:
-	pg_prove -h $(POSTGRES_HOST) -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f $(PG_PROVE_TESTS)
+	pg_prove -h $(POSTGRES_HOST) -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f ./tests/pg/*.sql
