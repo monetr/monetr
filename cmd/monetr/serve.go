@@ -12,7 +12,6 @@ import (
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/migrations"
 	"github.com/plaid/plaid-go/plaid"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"net/http"
 )
@@ -49,10 +48,7 @@ func RunServer() error {
 
 	configuration := config.LoadConfiguration(configPath)
 
-	logger := logrus.StandardLogger()
-	// TODO Determine logging level from configuration.
-	logger.SetLevel(logrus.TraceLevel)
-	log := logrus.NewEntry(logger)
+	log := logging.NewLogger()
 
 	pgOptions := &pg.Options{
 		Addr: fmt.Sprintf("%s:%d",

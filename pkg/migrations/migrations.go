@@ -2,9 +2,56 @@ package migrations
 
 import (
 	"github.com/go-pg/migrations/v8"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
+
+type MonetrMigrationsManager struct {
+	collection *migrations.Collection
+	log        *logrus.Entry
+	db         migrations.DB
+}
+
+func NewMigrationsManager(log *logrus.Entry, db migrations.DB) (*MonetrMigrationsManager, error) {
+	collection := migrations.NewCollection()
+	if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema"); err != nil {
+		return nil, errors.Wrap(err, "failed to discover embedded sql migrations")
+	}
+
+	if _, _, err := collection.Run(db, "init"); err != nil {
+		return nil, errors.Wrap(err, "failed to initialize schema migrations")
+	}
+
+	return &MonetrMigrationsManager{
+		collection: collection,
+		log:        log,
+		db:         db,
+	}, nil
+}
+
+func (m *MonetrMigrationsManager) CurrentVersion() (int64, error) {
+	currentVersion, err := m.collection.Version(m.db)
+
+	return currentVersion, errors.Wrap(err, "failed to get current database version")
+}
+
+func (m *MonetrMigrationsManager) LatestVersion() (int64, error) {
+	var latest int64
+	for _, migration := range m.collection.Migrations() {
+		if migration.Version > latest {
+			latest = migration.Version
+		}
+	}
+
+	return latest, nil
+}
+
+func (m *MonetrMigrationsManager) Up() (oldVersion, newVersion int64, err error) {
+	oldVersion, newVersion, err = m.collection.Run(m.db, "up")
+	err = errors.Wrap(err, "failed to update database")
+	return
+}
 
 func RunMigrations(log *logrus.Entry, db migrations.DB) {
 	collection := migrations.NewCollection()
