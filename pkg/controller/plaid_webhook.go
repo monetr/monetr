@@ -33,6 +33,16 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 		return
 	}
 
+	switch hook.WebhookType {
+	case "TRANSACTIONS":
+		switch hook.WebhookCode {
+		case "INITIAL_UPDATE":
+
+
+		}
+
+	}
+
 }
 
 func (c *Controller) getWebhookUrl() string {

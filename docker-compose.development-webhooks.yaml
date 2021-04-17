@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  rest-api:
+    image: harder-rest-api
+    deploy:
+      mode: replicated
+      replicas: 0
+    hostname: rest-api
+    environment:
+      - HARDER_REDIS_ADDRESS=redis
+      - HARDER_PG_ADDRESS=postgres
+    ports:
+      - 4000:4000
+      - 9000:9000
+    volumes:
+      - "./config.yaml:/etc/harder/config.yaml"
+    restart: always
+  postgres:
+    image: postgres:13
+    restart: always
+    hostname: postgres
+    ports:
+      - 5432:5432
+    env_file:
+      - .development.env
+    command: [ "postgres", "-c", "log_statement=all" ]
+  redis:
+    image: library/redis:6.2.1-alpine
+    restart: always
+    hostname: redis
+    ports:
+      - 6379:6379
+  workwebui:
+    image: workwebui
+    hostname: workwebui
+    ports:
+      - 8090:8090

@@ -13,7 +13,7 @@ func init() {
 	databaseCommand.AddCommand(migrateCommand)
 	databaseCommand.AddCommand(databaseVersionCommand)
 
-	databaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "H", "localhost", "PostgreSQL host address.")
+	databaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "h", "localhost", "PostgreSQL host address.")
 	databaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 5432, "PostgreSQL port.")
 	databaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "postgres", "PostgreSQL user.")
 	databaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
