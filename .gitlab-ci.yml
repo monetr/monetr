@@ -75,26 +75,6 @@ Binary:
       - ./vendor
     policy: pull-push
 
-Database:
-  when: manual
-  needs: [ ]
-  stage: Build
-  image: containers.monetr.dev/kaniko-ci:latest
-  variables:
-    VAULT_AUTH_ROLE: harder-rest-api-shorty
-  secrets:
-    DOCKER_CONFIG_JSON:
-      vault: containers/shorty/docker-config.json@pipelines/harderthanitneedstobe.com
-  tags:
-    - k8s:shared
-    - arch:amd64
-  before_script:
-    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
-  script:
-    - |
-      kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination shorty.containers.monetr.dev/database-schema-changes:$CI_COMMIT_SHA
-
 Go Tests:
   needs:
     - "Binary"
@@ -114,7 +94,7 @@ Go Tests:
     - k8s:shared
     - arch:amd64
   before_script:
-    - $CI_PROJECT_DIR/bin/monetr database migrate -d $POSTGRES_DB -U $POSTGRES_USER -H $POSTGRES_HOST
+    - make apply-schema-ci
   script:
     - make test
   cache:
@@ -130,7 +110,8 @@ Go Tests:
     expire_in: 7 days
 
 PostgreSQL Tests:
-  needs: [ ]
+  needs:
+    - "Binary"
   stage: Test
   services:
     - name: containers.monetr.dev/pgtest:latest
@@ -147,66 +128,17 @@ PostgreSQL Tests:
     POSTGRES_USER: postgres
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
-  script:
+  before_script:
     - sleep 5
-    - |
-      for file in $CI_PROJECT_DIR/schema/*; do
-        psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -f $file
-      done
+    - make apply-schema-ci
     - psql -q -d $POSTGRES_DB -U $POSTGRES_USER -h $POSTGRES_HOST -c "CREATE EXTENSION pgtap;"
+  script:
     - pg_prove -h $POSTGRES_HOST -U $POSTGRES_USER -d $POSTGRES_DB -f ./tests/pg/*.sql
-
-Diff Schema PGDiff:
-  needs:
-    - "Database"
-  stage: Schema
-  services:
-    - name: shorty.containers.monetr.dev/database-schema-changes:$CI_COMMIT_SHA
-      alias: new
-    - name: containers.monetr.dev/database-schema-base:latest
-      alias: current
-  image: containers.monetr.dev/golang:1.16.2
-  tags:
-    - k8s:shared
-    - arch:amd64
-  variables:
-    POSTGRES_PASSWORD: "password"
-    POSTGRES_USER: postgres
-    POSTGRES_DB: test-db
-    POSTGRES_HOST_AUTH_METHOD: trust
-    GOFLAGS: '' # Clear this flag for this one.
-  script:
-    - go get github.com/joncrlsn/pgdiff
-    - go build -o /usr/local/bin/pgdiff github.com/joncrlsn/pgdiff
-    - |
-      pgdiff \
-        -U $POSTGRES_USER -H current -D $POSTGRES_DB -O "sslmode=disable" -W $POSTGRES_PASSWORD \
-        -u $POSTGRES_USER -h new -d $POSTGRES_DB -o "sslmode=disable" -w $POSTGRES_PASSWORD ALL
-
-Diff Schema Migra:
-  allow_failure: true
-  needs:
-    - "Database"
-  stage: Schema
-  services:
-    - name: shorty.containers.monetr.dev/database-schema-changes:$CI_COMMIT_SHA
-      alias: new
-    - name: containers.monetr.dev/database-schema-base:latest
-      alias: current
-  image: containers.monetr.dev/ubuntu:20.04
-  tags:
-    - k8s:shared
-    - arch:amd64
-  variables:
-    POSTGRES_PASSWORD: "password"
-    POSTGRES_USER: postgres
-    POSTGRES_DB: test-db
-    POSTGRES_HOST_AUTH_METHOD: trust
-    GOFLAGS: '' # Clear this flag for this one.
-  script:
-    - apt-get update
-    - apt-get install -y python3 python3-pip
-    - pip3 install migra[pg]
+  cache:
+    key: go-${CI_COMMIT_SHA}
+    paths:
+      - $CI_PROJECT_DIR/bin
+    policy: pull
 
 Yeet Coverage:
   needs:
@@ -332,31 +264,6 @@ Publish - Work UI:
         --dockerfile $CI_PROJECT_DIR/Dockerfile.work \
         --destination ghcr.io/harderthanitneedstobe/work-ui:latest \
         --destination containers.monetr.dev/work-ui:latest
-
-Publish - Database Schema:
-  needs:
-    - "Database"
-  variables:
-    VAULT_AUTH_ROLE: harder-rest-api
-  secrets:
-    DOCKER_CONFIG_JSON:
-      vault: containers/push/docker-config.json@pipelines/harderthanitneedstobe.com
-  stage: Publish Container
-  only:
-    refs:
-      - main
-  image: containers.monetr.dev/kaniko-ci:latest
-  tags:
-    - k8s:shared
-    - arch:amd64
-  before_script:
-    - ln -s $DOCKER_CONFIG_JSON /kaniko/.docker/config.json
-  script:
-    - |
-      kaniko --context $CI_PROJECT_DIR \
-        --dockerfile $CI_PROJECT_DIR/Dockerfile.database \
-        --destination containers.monetr.dev/database-schema-base:$CI_COMMIT_SHA \
-        --destination containers.monetr.dev/database-schema-base:latest
 
 Staging Dry Run - Main:
   when: manual

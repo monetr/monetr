@@ -172,4 +172,49 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			"jobId":   jobId,
 		})
 	})
+
+	// This endpoint can be used to long poll waiting for transactions to come in.
+	p.Get("/setup/wait/{jobId:string}", func(ctx *context.Context) {
+		jobId := ctx.Params().GetStringDefault("jobId", "")
+		if jobId == "" {
+			c.badRequest(ctx, "must specify a job Id")
+			return
+		}
+
+		repo := c.mustGetAuthenticatedRepository(ctx)
+		job, err := repo.GetJob(jobId)
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to retrieve job")
+			return
+		}
+
+		// If the job is done just return.
+		if job.FinishedAt != nil {
+			return
+		}
+
+		channelName := fmt.Sprintf("job_%d_%s", c.mustGetAccountId(ctx), jobId)
+
+		listener := c.db.Listen(ctx.Request().Context(), channelName)
+		defer listener.Close()
+
+		deadLine := time.NewTimer(30 * time.Second)
+		defer deadLine.Stop()
+
+	ListenLoop:
+		for {
+			select {
+			case <-deadLine.C:
+				break ListenLoop
+			case notification := <-listener.Channel():
+				if notification.Channel == channelName {
+					break ListenLoop
+				}
+			}
+		}
+
+		if err = listener.Unlisten(ctx.Request().Context()); err != nil {
+			c.log.WithError(err).Warnf("failed to stop listening on channel %s", channelName)
+		}
+	})
 }

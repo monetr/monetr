@@ -21,6 +21,7 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 		ReCAPTCHAKey        string `json:"ReCAPTCHAKey,omitempty"`
 		AllowSignUp         bool   `json:"allowSignUp"`
 		AllowForgotPassword bool   `json:"allowForgotPassword"`
+		LongPollPlaidSetup  bool   `json:"longPollPlaidSetup"`
 	}
 
 	// If ReCAPTCHA is enabled then we want to provide the UI our public key as
@@ -43,6 +44,9 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 		config.RequireLegalName = true
 		config.RequirePhoneNumber = true
 	}
+
+	// Just make this true for now, this might change in the future as I do websockets.
+	config.LongPollPlaidSetup = true
 
 	ctx.JSON(config)
 }

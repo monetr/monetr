@@ -45,7 +45,6 @@ func (c *Controller) processWebhook(hook PlaidWebhook) error {
 		switch hook.WebhookCode {
 		case "INITIAL_UPDATE":
 
-
 		}
 
 	}

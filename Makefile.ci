@@ -2,16 +2,9 @@
 default:
 	$(info "This makefile is meant to be used in CI.")
 
-apply-schema-ci: apply-schema-ci-deps
+apply-schema-ci:
 ifndef CI_PROJECT_DIR
 	$(warning "CI_PROJECT_DIR is not defined, are you running in CI?")
 	$(eval CI_PROJECT_DIR := $(PWD))
 endif
-	$(eval $(shell env)) # Dumb hack might work?
-	for FILE in $(CI_PROJECT_DIR)/schema/*; do \
-		echo "Applying $$FILE"; \
-  		psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -f $$FILE || exit 1; \
-  	done;
-
-apply-schema-ci-deps:
-	which psql || (apt-get update && apt-get install -y postgresql-client);
+	$(CI_PROJECT_DIR)/bin/monetr database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
