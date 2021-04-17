@@ -98,6 +98,7 @@ Database:
 
 Go Tests:
   needs:
+    - "Binary"
     - "Go Dependencies"
   services:
     - name: containers.monetr.dev/postgres:13
