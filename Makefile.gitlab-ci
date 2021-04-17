@@ -24,3 +24,6 @@ pg_test: apply-schema-ci-psql
 
 pg_prove_tests:
 	pg_prove -h $(POSTGRES_HOST) -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f ./tests/pg/*.sql
+
+wait-for-docker:
+	@for i in 1 2 3 4 5; do (docker info 2>&1 > /dev/null) && break || echo "Waiting for docker to start..." && sleep 15; done
