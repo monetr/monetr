@@ -188,7 +188,7 @@ Documentation:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   services:
-    - name: docker:19.03.13-dind
+    - name: proxy.monetr.dev/docker:19.03.13-dind
       command: [ "--registry-mirror", "https://proxy.monetr.dev" ]
   tags:
     - k8s:shared-docker
@@ -203,6 +203,7 @@ REST API:
     - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
 
 Publish - REST API:
+  when: manual
   needs:
     - "Go Tests"
   variables:
@@ -231,6 +232,7 @@ Publish - REST API:
         --destination containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA
 
 Publish - Work UI:
+  when: manual
   variables:
     VAULT_AUTH_ROLE: harder-rest-api
   secrets:
