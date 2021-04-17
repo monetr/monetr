@@ -1,7 +1,9 @@
 name: Build
 
 on:
-  push: { }
+  push:
+    branches:
+      - '!renovate/*'
   pull_request: { }
 
 jobs:
