@@ -1,3 +1,0 @@
-FROM postgres:13
-
-COPY ./schema ./docker-entrypoint-initdb.d

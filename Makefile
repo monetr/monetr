@@ -81,7 +81,13 @@ migrations:
 	$(info "Cleaning up temp directories")
 	rm -rf $(CURRENT_TMP)
 
-ifdef CI
-include Makefile.ci
+ifdef GITLAB_CI
+include Makefile.gitlab-ci
 endif
+
+ifdef GITHUB_ACTION
+include Makefile.github-actions
+endif
+
+include Makefile.tinker
 

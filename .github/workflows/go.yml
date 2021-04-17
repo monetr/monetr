@@ -8,8 +8,9 @@ on:
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
-    container: golang:1.16
+    container: golang:1.16.3
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
@@ -33,7 +34,7 @@ jobs:
         run: make dependencies
       - name: Build
         run: make build
-#      - name: Setup Schema
-#        run: make apply-schema-ci
-#      - name: Test
-#        run: go test -race -v ./...
+      - name: Setup Schema
+        run: make apply-schema-ci
+      - name: Test
+        run: make test
