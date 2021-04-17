@@ -27,7 +27,7 @@ stages:
 variables:
   GO111MODULE: 'on'
   GOFLAGS: '-mod=vendor'
-  PATH: '$PATH:$CI_PROJECT_DIR/bin'
+#  PATH: '$PATH:$CI_PROJECT_DIR/bin'
 
 Go Dependencies:
   needs: [ ]
