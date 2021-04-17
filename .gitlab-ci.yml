@@ -72,7 +72,7 @@ Binary:
   cache:
     key: go-${CI_COMMIT_SHA}
     paths:
-      - ./bin
+      - $CI_PROJECT_DIR/bin
       - ./vendor
     policy: pull-push
 
