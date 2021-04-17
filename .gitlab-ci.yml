@@ -200,7 +200,6 @@ REST API:
   stage: Publish Container
   <<: [ *docker_template ]
   script:
-    - cat $HOME/.docker/config.json
     - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
 
 Publish - REST API:
