@@ -138,6 +138,7 @@ PostgreSQL Tests:
     key: go-${CI_COMMIT_SHA}
     paths:
       - $CI_PROJECT_DIR/bin
+      - ./vendor
     policy: pull
 
 Yeet Coverage:
