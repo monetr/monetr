@@ -50,6 +50,7 @@ func (c *Controller) processWebhook(hook PlaidWebhook) error {
 
 	}
 
+	return nil
 }
 
 func (c *Controller) getWebhookUrl() string {
