@@ -62,7 +62,7 @@ Binary:
   needs:
     - "Go Dependencies"
   stage: Build
-  image: containers.monetr.dev/golang:1.16.4
+  image: containers.monetr.dev/golang:1.16.3
   tags:
     - k8s:shared
     - arch:amd64
