@@ -188,7 +188,9 @@ Documentation:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   services:
-    - proxy.monetr.dev/docker:19.03.13-dind
+    - name: proxy.monetr.dev/docker:19.03.13-dind
+      command: [ "--registry-mirror", "https://proxy.monetr.dev" ]
+      alias: docker
   tags:
     - k8s:shared-docker
     - arch:amd64
