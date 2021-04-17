@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const EnvironmentPrefix = "HARDER"
+const EnvironmentPrefix = "MONETR"
 
 type Configuration struct {
 	Name           string
@@ -133,7 +133,7 @@ func LoadConfiguration(configFilePath *string) Configuration {
 }
 
 func setupDefaults(v *viper.Viper) {
-	v.SetDefault("Name", "Harder Than It Needs To Be")
+	v.SetDefault("Name", "monetr")
 	v.SetDefault("UIDomainName", "localhost:3000")
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
@@ -147,32 +147,32 @@ func setupDefaults(v *viper.Viper) {
 }
 
 func setupEnv(v *viper.Viper) {
-	v.BindEnv("Name", "HARDER_NAME")
-	v.BindEnv("UIDomainName", "HARDER_UI_DOMAIN_NAME")
-	v.BindEnv("APIDomainName", "HARDER_API_DOMAIN_NAME")
-	v.BindEnv("AllowSignUp", "HARDER_ALLOW_SIGN_UP")
-	v.BindEnv("EnableWebhooks", "HARDER_ENABLE_WEBHOOKS")
-	v.BindEnv("Cors.AllowedOrigins", "HARDER_CORS_ALLOWED_ORIGINS")
-	v.BindEnv("Cors.Debug", "HARDER_CORS_DEBUG")
-	v.BindEnv("JWT.LoginJwtSecret", "HARDER_JWT_LOGIN_SECRET")
-	v.BindEnv("JWT.RegistrationJwtSecret", "HARDER_JWT_REGISTRATION_SECRET")
-	v.BindEnv("Logging.Level", "HARDER_LOG_LEVEL")
-	v.BindEnv("Plaid.ClientID", "HARDER_PLAID_CLIENT_ID")
-	v.BindEnv("Plaid.ClientSecret", "HARDER_PLAID_CLIENT_SECRET")
-	v.BindEnv("Plaid.Environment", "HARDER_PLAID_ENVIRONMENT")
-	v.BindEnv("Plaid.EnableBirthdatePrompt", "HARDER_PLAID_BIRTHDATE_PROMPT")
-	v.BindEnv("PostgreSQL.Address", "HARDER_PG_ADDRESS")
-	v.BindEnv("PostgreSQL.Port", "HARDER_PG_PORT")
-	v.BindEnv("PostgreSQL.Username", "HARDER_PG_USERNAME")
-	v.BindEnv("PostgreSQL.Password", "HARDER_PG_PASSWORD")
-	v.BindEnv("PostgreSQL.Database", "HARDER_PG_DATABASE")
-	v.BindEnv("ReCAPTCHA.Enabled", "HARDER_CAPTCHA_ENABLED")
-	v.BindEnv("ReCAPTCHA.PublicKey", "HARDER_CAPTCHA_PUBLIC_KEY")
-	v.BindEnv("ReCAPTCHA.PrivateKey", "HARDER_CAPTCHA_PRIVATE_KEY")
-	v.BindEnv("ReCAPTCHA.VerifyLogin", "HARDER_CAPTCHA_VERIFY_LOGIN")
-	v.BindEnv("ReCAPTCHA.VerifyRegister", "HARDER_CAPTCHA_VERIFY_REGISTER")
-	v.BindEnv("Redis.Enabled", "HARDER_REDIS_ENABLED")
-	v.BindEnv("Redis.Address", "HARDER_REDIS_ADDRESS")
-	v.BindEnv("Redis.Port", "HARDER_REDIS_PORT")
-	v.BindEnv("Redis.Namespace", "HARDER_REDIS_NAMESPACE")
+	v.BindEnv("Name", "MONETR_NAME")
+	v.BindEnv("UIDomainName", "MONETR_UI_DOMAIN_NAME")
+	v.BindEnv("APIDomainName", "MONETR_API_DOMAIN_NAME")
+	v.BindEnv("AllowSignUp", "MONETR_ALLOW_SIGN_UP")
+	v.BindEnv("EnableWebhooks", "MONETR_ENABLE_WEBHOOKS")
+	v.BindEnv("Cors.AllowedOrigins", "MONETR_CORS_ALLOWED_ORIGINS")
+	v.BindEnv("Cors.Debug", "MONETR_CORS_DEBUG")
+	v.BindEnv("JWT.LoginJwtSecret", "MONETR_JWT_LOGIN_SECRET")
+	v.BindEnv("JWT.RegistrationJwtSecret", "MONETR_JWT_REGISTRATION_SECRET")
+	v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")
+	v.BindEnv("Plaid.ClientID", "MONETR_PLAID_CLIENT_ID")
+	v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
+	v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")
+	v.BindEnv("Plaid.EnableBirthdatePrompt", "MONETR_PLAID_BIRTHDATE_PROMPT")
+	v.BindEnv("PostgreSQL.Address", "MONETR_PG_ADDRESS")
+	v.BindEnv("PostgreSQL.Port", "MONETR_PG_PORT")
+	v.BindEnv("PostgreSQL.Username", "MONETR_PG_USERNAME")
+	v.BindEnv("PostgreSQL.Password", "MONETR_PG_PASSWORD")
+	v.BindEnv("PostgreSQL.Database", "MONETR_PG_DATABASE")
+	v.BindEnv("ReCAPTCHA.Enabled", "MONETR_CAPTCHA_ENABLED")
+	v.BindEnv("ReCAPTCHA.PublicKey", "MONETR_CAPTCHA_PUBLIC_KEY")
+	v.BindEnv("ReCAPTCHA.PrivateKey", "MONETR_CAPTCHA_PRIVATE_KEY")
+	v.BindEnv("ReCAPTCHA.VerifyLogin", "MONETR_CAPTCHA_VERIFY_LOGIN")
+	v.BindEnv("ReCAPTCHA.VerifyRegister", "MONETR_CAPTCHA_VERIFY_REGISTER")
+	v.BindEnv("Redis.Enabled", "MONETR_REDIS_ENABLED")
+	v.BindEnv("Redis.Address", "MONETR_REDIS_ADDRESS")
+	v.BindEnv("Redis.Port", "MONETR_REDIS_PORT")
+	v.BindEnv("Redis.Namespace", "MONETR_REDIS_NAMESPACE")
 }

@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: containers.monetr.dev/rest-api
-  pullPolicy: IfNotPresent
+  pullPolicy: always
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
 imagePullSecrets:
@@ -21,7 +21,7 @@ ingress:
       paths:
         - path: /
   tls:
-    - secretName: staging-monetr.dev-tls
+    - secretName: api-staging-monetr-dev-tls
       hosts:
         - api.staging.monetr.dev
 
@@ -37,20 +37,20 @@ nodeSelector:
   kubernetes.io/arch: amd64
 
 api:
-  name: Harder Than It Needs To Be
+  name: monetr (staging)
   uiDomainName: app.staging.monetr.dev
   apiDomainName: api.staging.monetr.dev
   allowSignUp: true
-  enableWebhooks: false
+  enableWebhooks: true
   jwt:
     loginJwtSecret: ""
     registrationJwtSecret: ""
   postgreSql:
     address: alsatian.monetr-staging.svc.cluster.local
     port: 5432
-    username: harder-api
+    username: monetr-api
     password: ""
-    database: harder
+    database: monetr
   smtp:
     enabled: false
   reCaptcha:
@@ -63,7 +63,7 @@ api:
     environment: "https://sandbox.plaid.com"
   cors:
     allowedOrigins:
-      - "app.staging.monetr.dev"
+      - "staging.monetr.dev"
     debug: true
   redis:
     enabled: true

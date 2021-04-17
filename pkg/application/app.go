@@ -21,6 +21,7 @@ func NewApp(configuration config.Configuration, controller *controller.Controlle
 			"DELETE",
 		},
 		AllowedHeaders: []string{
+			"Cookies",
 			"Content-Type",
 			"H-Token",
 		},

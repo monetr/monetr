@@ -179,33 +179,32 @@ Documentation:
       - ./docs
     expire_in: 7 days
 
-Kaniko - REST API:
-  needs:
-    - "Binary"
-    - "Go Dependencies"
-  stage: Build Container
-  image: containers.monetr.dev/kaniko-ci:latest
+.docker_template: &docker_template
+  only:
+    refs:
+      - main
+  image: proxy.monetr.dev/docker:19.03.13
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+  services:
+    - name: docker:19.03.13-dind
+      command: [ "--registry-mirror", "https://proxy.monetr.dev" ]
   tags:
-    - k8s:shared
+    - k8s:shared-docker
     - arch:amd64
-  script:
-    - kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --no-push
 
-Kaniko - Work UI:
-  allow_failure: true
+REST API:
   needs:
-    - "Go Dependencies"
-  stage: Build Container
-  image: containers.monetr.dev/kaniko-ci:latest
-  tags:
-    - k8s:shared
-    - arch:amd64
+    - "Go Tests"
+  stage: Publish Container
+  <<: [ *docker_template ]
   script:
-    - kaniko --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.work --no-push
+    - cat $HOME/.docker/config.json
+    - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
 
 Publish - REST API:
   needs:
-    - "Kaniko - REST API"
     - "Go Tests"
   variables:
     VAULT_AUTH_ROLE: harder-rest-api
@@ -233,8 +232,6 @@ Publish - REST API:
         --destination containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA
 
 Publish - Work UI:
-  needs:
-    - "Kaniko - Work UI"
   variables:
     VAULT_AUTH_ROLE: harder-rest-api
   secrets:

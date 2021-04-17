@@ -7,8 +7,8 @@ services:
       replicas: 0
     hostname: rest-api
     environment:
-      - HARDER_REDIS_ADDRESS=redis
-      - HARDER_PG_ADDRESS=postgres
+      - MONETR_REDIS_ADDRESS=redis
+      - MONETR_PG_ADDRESS=postgres
     ports:
       - 4000:4000
       - 9000:9000
