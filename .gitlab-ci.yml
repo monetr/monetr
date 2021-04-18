@@ -122,7 +122,7 @@ Yeet Coverage:
   before_script:
     - for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
 
-REST API:
+Docker:
   needs:
     - "Test"
     - "Build Production"
@@ -130,3 +130,9 @@ REST API:
   <<: [ *docker_template ]
   script:
     - docker build -t containers.monetr.dev/web-ui:$CI_COMMIT_SHORT_SHA -f Dockerfile .
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./build
+    policy: pull
+
