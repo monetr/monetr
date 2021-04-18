@@ -1,13 +1,13 @@
 name: Build
 
-on:
-  push:
-    branches:
-      - '!renovate/*'
-      - main
-  pull_request:
-    branches:
-      - main
+#on:
+#  push:
+#    branches:
+#      - '!renovate/*'
+#      - main
+#  pull_request:
+#    branches:
+#      - main
 
 jobs:
   docker:
