@@ -196,7 +196,7 @@ Documentation:
     - k8s:shared-docker
     - arch:amd64
   before_script:
-    - for i in 1 2 3 4 5; do (docker info 2>&1 > /dev/null) && break || echo "Waiting for docker to start..." && sleep 15; done
+    - for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
 
 REST API:
   needs:
