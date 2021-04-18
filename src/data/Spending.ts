@@ -39,6 +39,10 @@ export default class Spending {
     return `$${ (this.targetAmount / 100).toFixed(2) }`;
   }
 
+  getTargetAmountDollars(): number {
+    return this.targetAmount / 100;
+  }
+
   getCurrentAmountString(): string {
     return `$${ (this.currentAmount / 100).toFixed(2) }`;
   }

@@ -8,6 +8,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
 import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
+import EditSpendingAmountDialog from "components/Spending/EditSpendingAmountDialog";
 
 interface WithConnectionPropTypes {
   expense?: Spending;
@@ -16,12 +17,14 @@ interface WithConnectionPropTypes {
 
 interface State {
   transferDialogOpen: boolean;
+  editAmountDialogOpen: boolean;
 }
 
 export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
 
   state = {
     transferDialogOpen: false,
+    editAmountDialogOpen: false,
   };
 
   openTransferDialog = () => {
@@ -36,6 +39,13 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
     });
   };
 
+  openEditAmountDialog = () => this.setState({
+    editAmountDialogOpen: true,
+  });
+
+  closeEditAmountDialog = () => this.setState({
+    editAmountDialogOpen: false,
+  });
 
   render() {
     const { expense } = this.props;
@@ -45,12 +55,15 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
 
     const fundingSchedule = this.props.fundingSchedules.get(expense.fundingScheduleId, new FundingSchedule());
 
-    const { transferDialogOpen } = this.state;
+    const { transferDialogOpen, editAmountDialogOpen } = this.state;
 
     return (
       <Fragment>
         { transferDialogOpen &&
         <TransferDialog isOpen onClose={ this.closeTransferDialog } initialToSpendingId={ expense.spendingId }/>
+        }
+        { editAmountDialogOpen &&
+        <EditSpendingAmountDialog isOpen onClose={ this.closeEditAmountDialog }/>
         }
 
         <div className="w-full pl-5 pr-5 pt-5 expense-detail">
@@ -90,7 +103,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
 
           <List dense>
             <Divider/>
-            <ListItem button dense>
+            <ListItem button dense onClick={ this.openEditAmountDialog }>
               <ListItemIcon>
                 <AccountBalance/>
               </ListItemIcon>

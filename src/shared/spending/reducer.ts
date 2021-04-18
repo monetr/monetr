@@ -8,7 +8,8 @@ import {
   SelectExpense,
   SelectGoal,
   SpendingActions,
-  Transfer
+  Transfer,
+  UpdateSpending
 } from "shared/spending/actions";
 import SpendingState from "shared/spending/state";
 import { UpdateTransaction } from 'shared/transactions/actions';
@@ -77,6 +78,11 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         items,
       };
     }
+    case UpdateSpending.Success:
+      return {
+        ...state,
+        items: state.items.setIn([action.payload.bankAccountId, action.payload.spendingId], action.payload),
+      };
     case LOGOUT:
       return new SpendingState();
     default:

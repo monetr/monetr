@@ -65,6 +65,17 @@ export interface Transfer {
   };
 }
 
+export enum UpdateSpending {
+  Request = 'UpdateSpendingRequest',
+  Failure = 'UpdateSpendingFailure',
+  Success = 'UpdateSpendingSuccess',
+}
+
+export interface UpdateSpendingSuccess {
+  type: typeof UpdateSpending.Success;
+  payload: Spending;
+}
+
 export type SpendingActions =
   FetchSpendingRequest
   | FetchSpendingFailure
@@ -76,5 +87,6 @@ export type SpendingActions =
   | SelectGoal
   | Transfer
   | UpdateTransactionSuccess
+  | UpdateSpendingSuccess
   | Logout
   | ChangeBankAccount

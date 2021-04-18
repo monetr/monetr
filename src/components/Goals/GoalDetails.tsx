@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
 import selectGoal from 'shared/spending/actions/selectGoal';
 import { getSelectedGoal } from 'shared/spending/selectors/getSelectedGoal';
+import EditGoalView from "components/Goals/EditGoalView";
 
 interface WithConnectionPropTypes {
   selectGoal: { (goalId: number | null): void }
@@ -20,6 +21,7 @@ interface WithConnectionPropTypes {
 interface State {
   newGoalDialogOpen: boolean;
   transferDialogOpen: boolean;
+  editGoalOpen: boolean;
 }
 
 export class GoalDetails extends Component<WithConnectionPropTypes, State> {
@@ -27,7 +29,17 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
   state = {
     newGoalDialogOpen: false,
     transferDialogOpen: false,
+    editGoalOpen: false,
   };
+
+  componentDidUpdate(prevProps: Readonly<WithConnectionPropTypes>, prevState: Readonly<State>, snapshot?: any) {
+    // When the user "un-selects" a goal, we want to make sure that we close the edit goal view.
+    if (this.props.goal?.spendingId !== prevProps.goal?.spendingId && this.state.editGoalOpen) {
+      this.setState({
+        editGoalOpen: false,
+      });
+    }
+  }
 
   openNewGoalDialog = () => this.setState({
     newGoalDialogOpen: true,
@@ -43,6 +55,14 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
 
   closeTransferDialog = () => this.setState({
     transferDialogOpen: false,
+  });
+
+  openEditView = () => this.setState({
+    editGoalOpen: true,
+  });
+
+  closeEditView = () => this.setState({
+    editGoalOpen: false,
   });
 
   renderInProgress = () => {
@@ -265,6 +285,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
           <div className="col-span-1 flex justify-start items-center">
             <Button
               variant="outlined"
+              onClick={ this.openEditView }
             >
               More Edits
             </Button>
@@ -292,6 +313,13 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
     // If there is no goal selected then render the empty state view.
     if (!goal) {
       return this.renderNoGoal();
+    }
+
+    const { editGoalOpen } = this.state;
+    if (editGoalOpen) {
+      return (
+        <EditGoalView hideView={ this.closeEditView }/>
+      );
     }
 
     if (goal.getGoalIsInProgress()) {
