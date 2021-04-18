@@ -2,7 +2,7 @@ import { Checkbox, ListItem, ListItemIcon, Typography } from "@material-ui/core"
 import classnames from 'classnames';
 import Spending from "data/Spending";
 import Transaction from "data/Transaction";
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from "react-redux";
 import { getSpendingById } from "shared/spending/selectors/getSpendingById";
 import selectTransaction from "shared/transactions/actions/selectTransaction";
@@ -24,18 +24,30 @@ interface WithConnectionPropTypes extends PropTypes {
 
 export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
 
-  getSpentFromString(): string {
+  getSpentFromString() {
     const { spending, transaction } = this.props;
 
     if (transaction.getIsAddition()) {
-      return 'Deposited Into Safe-To-Spend';
+      return (
+        <Fragment>
+          Deposited Into Safe-To-Spend
+        </Fragment>
+      );
     }
 
     if (!spending) {
-      return 'Spent From Safe-To-Spend';
+      return (
+        <Fragment>
+          Spent From Safe-To-Spend
+        </Fragment>
+      );
     }
 
-    return `Spent From ${ spending.name }`;
+    return (
+      <Fragment>
+        Spent From <b>{ spending.name }</b>
+      </Fragment>
+    )
   }
 
   handleClick = () => {
@@ -60,7 +72,9 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
             <Typography className="transaction-item-name">{ transaction.getName() }</Typography>
           </div>
           <div className="col-span-3 opacity-75">
-            <Typography className="transaction-expense-name">{ this.getSpentFromString() }</Typography>
+            <Typography className="transaction-expense-name">
+              { this.getSpentFromString() }
+            </Typography>
           </div>
           <div className="row-span-2 col-span-1 flex justify-end">
             <Typography className={ classnames('amount align-middle self-center', {

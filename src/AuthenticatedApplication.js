@@ -5,7 +5,7 @@ import BankAccountSelector from "components/BankAccountSelector";
 import PropTypes from "prop-types";
 import React, { Component, Fragment } from 'react';
 import { connect } from "react-redux";
-import { BrowserRouter as Router, Link as RouterLink, Redirect, Route, Switch, withRouter } from "react-router-dom";
+import { Link as RouterLink, Redirect, Route, Switch, withRouter } from "react-router-dom";
 import { bindActionCreators } from "redux";
 import logout from "shared/authentication/actions/logout";
 import fetchBalances from "shared/balances/actions/fetchBalances";
@@ -19,6 +19,7 @@ import ExpensesView from "views/ExpensesView";
 import FirstTimeSetup from "views/FirstTimeSetup";
 import GoalsView from "views/GoalsView";
 import TransactionsView from "views/TransactionsView";
+import AccountView from "views/AccountView";
 
 export class AuthenticatedApplication extends Component {
   state = {
@@ -29,6 +30,7 @@ export class AuthenticatedApplication extends Component {
   static propTypes = {
     logout: PropTypes.func.isRequired,
     history: PropTypes.object.isRequired,
+    location: PropTypes.instanceOf(Location).isRequired,
     fetchLinksIfNeeded: PropTypes.func.isRequired,
     fetchBankAccounts: PropTypes.func.isRequired,
     fetchSpending: PropTypes.func.isRequired,
@@ -80,6 +82,14 @@ export class AuthenticatedApplication extends Component {
     )
   };
 
+  gotoAccount = () => {
+    this.setState({
+      anchorEl: null,
+    }, () => {
+      this.props.history.push('/account');
+    });
+  };
+
   renderSetup = () => {
     return (
       <Fragment>
@@ -103,8 +113,7 @@ export class AuthenticatedApplication extends Component {
               open={ Boolean(this.state.anchorEl) }
               onClose={ this.closeMenu }
             >
-              <MenuItem>Profile</MenuItem>
-              <MenuItem>My account</MenuItem>
+              <MenuItem onClick={ this.gotoAccount }>My account</MenuItem>
               <MenuItem onClick={ this.doLogout }>Logout</MenuItem>
             </Menu>
           </Toolbar>
@@ -125,6 +134,9 @@ export class AuthenticatedApplication extends Component {
           <Route path="/goals">
             <GoalsView/>
           </Route>
+          <Route path="/account">
+            <AccountView/>
+          </Route>
           <Route path="/">
             <Redirect to="/transactions"/>
           </Route>
@@ -142,18 +154,10 @@ export class AuthenticatedApplication extends Component {
     }
 
     if (this.props.hasAnyLinks) {
-      return (
-        <Router>
-          { this.renderSetup() }
-        </Router>
-      );
+      return this.renderSetup();
     }
 
-    return (
-      <Router>
-        { this.renderNotSetup() }
-      </Router>
-    );
+    return this.renderNotSetup()
   }
 }
 
