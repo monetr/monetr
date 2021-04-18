@@ -47,7 +47,7 @@
     "jest-resolve": "26.6.2",
     "jest-watch-typeahead": "0.6.2",
     "js-cookie": "2.2.1",
-    "mini-css-extract-plugin": "1.4.1",
+    "mini-css-extract-plugin": "1.5.0",
     "moment": "2.29.1",
     "node-notifier": "9.0.1",
     "optimize-css-assets-webpack-plugin": "5.0.4",
