@@ -157,7 +157,7 @@ Documentation:
     - k8s:shared
     - arch:amd64
   before_script:
-    - env
+    - ls $GOPATH/bin
     - mkdir -p /home || true
     - cd /home
     - GO111MODULE=off GOFLAGS="" go get github.com/swaggo/swag/cmd/swag
