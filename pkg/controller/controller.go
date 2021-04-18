@@ -119,14 +119,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		}
 	})
 
-	app.Get("/health", func(ctx *context.Context) {
-		err := c.db.Ping(ctx.Request().Context())
-
-		ctx.JSON(map[string]interface{}{
-			"dbHealthy":  err == nil,
-			"apiHealthy": true,
-		})
-	})
+	app.Get("/health", c.getHealth)
 
 	if c.configuration.EnableWebhooks {
 		// Webhooks use their own authentication, so we want to declare this first.
@@ -164,5 +157,21 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		p.PartyFunc("/jobs", c.handleJobs)
 	})
+}
 
+// Check API Health
+// @Summary Check API Health
+// @ID api-health
+// @tags Health
+// @description Just a simple health check endpoint. This is not used at all in the frontend of the application and is meant to be used in containers to determine if the primary API listener is working.
+// @Produce json
+// @Router /health [get]
+// @Success 200 {object} swag.HealthResponse
+func (c *Controller) getHealth(ctx *context.Context) {
+	err := c.db.Ping(ctx.Request().Context())
+
+	ctx.JSON(map[string]interface{}{
+		"dbHealthy":  err == nil,
+		"apiHealthy": true,
+	})
 }

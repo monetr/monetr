@@ -25,6 +25,7 @@ clean:
 	rm -rf $(NODE_MODULES_DIR) || true
 	rm -rf $(VENDOR_DIR) || true
 
+.PHONY: docs
 docs:
 	swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
 

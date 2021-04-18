@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"math"
 	"net/http"
@@ -19,6 +19,20 @@ func (c *Controller) handleTransactions(p iris.Party) {
 	p.Delete("/{bankAccountId:uint64}/transactions/{transactionId:uint64}", c.deleteTransactions)
 }
 
+// List Transactions
+// @Summary List Transactions
+// @ID list-transactions
+// @tags Transactions
+// @description Lists the transactions for the specified bank account Id. Transactions are returned sorted by the date they were authorized (descending) and then by their numeric Id (descending). This means that transactions that were first seen later will be higher in the list than they may have actually occurred.
+// @Security ApiKeyAuth
+// @Produce json
+// @Param bankAccountId path int true "Bank Account ID"
+// @Param limit query int false "Specifies the number of transactions to return in the result, default is 25. Max is 100."
+// @Param offset query int false "The number of transactions to skip before returning any."
+// @Router /bank_accounts/{bankAccountId}/transactions [get]
+// @Success 200 {array} models.Transaction
+// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
