@@ -163,7 +163,7 @@ Documentation:
     - make dependencies
     - go mod vendor
     - make docs
-    - redoc-cli bundle
+    - redoc-cli bundle $CI_PROJECT_DIR/docs/swagger.yaml
   cache:
     key: js-${CI_COMMIT_SHA}
     paths:
@@ -172,8 +172,8 @@ Documentation:
   artifacts:
     name: "$CI_COMMIT_SHA-documentation"
     paths:
-      - ./redoc-static.html
-      - ./docs
+      - $CI_PROJECT_DIR/redoc-static.html
+      - $CI_PROJECT_DIR/docs
     expire_in: 7 days
 
 .docker_template: &docker_template
