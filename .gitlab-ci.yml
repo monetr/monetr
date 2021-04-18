@@ -15,14 +15,9 @@ stages:
   - Dependencies
   - Build
   - Test
-  - Schema Preflight
-  - Schema
   - Documentation
   - Coverage
-  - Build Container
   - Publish Container
-  - Prepare Staging
-  - Deploy Staging
 
 variables:
   GO111MODULE: 'on'
@@ -148,9 +143,7 @@ Yeet Coverage:
     - "Go Tests"
 
 Documentation:
-  allow_failure: true
   needs:
-    - "Go Dependencies"
     - "JS Dependencies"
   stage: Documentation
   image: containers.monetr.dev/ubuntu:20.04
