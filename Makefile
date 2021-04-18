@@ -25,12 +25,8 @@ clean:
 	rm -rf $(NODE_MODULES_DIR) || true
 	rm -rf $(VENDOR_DIR) || true
 
-docs-dependencies:
-	go get ./...
-	(PATH=$$PATH:./bin/swag which swag) || (go get github.com/swaggo/swag/cmd/swag && go build -o ./bin/swag github.com/swaggo/swag/cmd/swag)
-
-docs: docs-dependencies
-	PATH=$$PATH:./bin/swag swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
+docs:
+	swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
 
 docker:
 	docker build -t harder-rest-api -f Dockerfile .
