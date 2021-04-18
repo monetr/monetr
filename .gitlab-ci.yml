@@ -55,7 +55,7 @@ JS Dependencies:
   cache:
     key: js-${CI_COMMIT_SHA}
     paths:
-      - ./node_modules
+      - $CI_PROJECT_DIR/node_modules
     policy: push
 
 Binary:
@@ -158,12 +158,6 @@ Documentation:
     - k8s:shared
     - arch:amd64
   before_script:
-    - ls $GOPATH/bin
-    - mkdir -p /home || true
-    - cd /home
-    - GO111MODULE=off GOFLAGS="" go get github.com/swaggo/swag/cmd/swag
-    - GO111MODULE=off GOFLAGS="" go build -o /usr/local/bin/swag github.com/swaggo/swag/cmd/swag
-    - cd $CI_PROJECT_DIR
     - export PATH=$PATH:$CI_PROJECT_DIR/node_modules/.bin
   script:
     - make docs
@@ -171,7 +165,7 @@ Documentation:
   cache:
     key: js-${CI_COMMIT_SHA}
     paths:
-      - ./node_modules
+      - $CI_PROJECT_DIR/node_modules
     policy: pull
   artifacts:
     name: "$CI_COMMIT_SHA-documentation"
