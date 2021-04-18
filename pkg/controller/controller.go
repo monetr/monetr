@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
+	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"github.com/xlzd/gotp"
@@ -71,18 +71,17 @@ func NewController(
 	}
 }
 
-// @title Harder Than It Needs To Be's REST API
+// @title monetr's REST API
 // @version 0.0
 // @description This is the REST API for our budgeting application.
 
 // @contact.name Support
-// @contact.url http://github.com/harderthanitneedstobe/rest-api
-// @contact.email no-reply@harderthanitneedstobe.com
+// @contact.url http://github.com/monetrapp/rest-api
 
 // @license.name Business Source License 1.1
-// @license.url https://github.com/HarderThanItNeedsToBe/rest-api/blob/main/LICENSE
+// @license.url https://github.com/monetrapp/rest-api/blob/main/LICENSE
 
-// @host api.harderthanitneedstobe.com
+// @host api.monetr.app
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
