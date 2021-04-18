@@ -1,4 +1,4 @@
-name: Build / Test
+name: Documentation
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Go
+    name: Generate
     runs-on: ubuntu-latest
     container: ghcr.io/monetrapp/build-containers/ubuntu:20.04-2021.04.18
     steps:
