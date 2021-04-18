@@ -15,8 +15,7 @@ jobs:
       - run: yarn install
       - run: make dependencies
       - run: make docs
-      - run: export PATH=$PATH:$GITHUB_WORKSPACE/node_modules/.bin
-      - run: redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
+      - run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
