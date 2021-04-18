@@ -46,6 +46,7 @@ export class LoginView extends Component {
     return request().post('/authentication/login', {
       email: values.email,
       password: values.password,
+      captcha: this.state.verification,
     })
       .then(result => {
         return this.props.bootstrapLogin(result.data.token, result.data.user);
@@ -169,7 +170,8 @@ export class LoginView extends Component {
                         Sign Up
                       </Button>
                       }
-                      <Button onClick={ handleSubmit } variant="outlined" color="primary">Login</Button>
+                      <Button onClick={ handleSubmit } variant="outlined"
+                              color="primary">Login</Button>
                     </CardActions>
                   </Card>
                 </Grow>
