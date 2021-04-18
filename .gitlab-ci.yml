@@ -151,6 +151,7 @@ Documentation:
   allow_failure: true
   needs:
     - "Go Dependencies"
+    - "JS Dependencies"
   stage: Documentation
   image: containers.monetr.dev/ubuntu:20.04
   tags:
