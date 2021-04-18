@@ -83,6 +83,9 @@ func NewController(
 
 // @host api.monetr.app
 
+// @tag.name Funding Schedules
+// @tag.description Funding Schedules are created by the user to tell us when money should be taken from their account to fund their goals and expenses.
+
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name H-Token

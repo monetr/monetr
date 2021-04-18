@@ -1,17 +1,14 @@
 package controller
 
 import (
-	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"net/http"
 	"strings"
 	"time"
 )
 
-// @tag.name Funding Schedules
-// @tag.description Funding Schedules are created by the user to tell us when money should be taken from their account
-//  to fund their goals and expenses.
 func (c *Controller) handleFundingSchedules(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/funding_schedules", c.getFundingSchedules)
 	p.Post("/{bankAccountId:uint64}/funding_schedules", c.postFundingSchedules)
