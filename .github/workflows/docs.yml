@@ -14,5 +14,5 @@ jobs:
       - run: yarn install
       - run: make dependencies
       - run: make docs
-      - run: export PATH=$PATH:$(PWD)/node_modules/.bin
-      - run: redoc-cli bundle $(PWD)/docs/swagger.yaml -o $(PWD)/docs/index.html
+      - run: export PATH=$PATH:$GITHUB_WORKSPACE/node_modules/.bin
+      - run: redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
