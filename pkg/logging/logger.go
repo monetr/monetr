@@ -25,6 +25,9 @@ func NewLogger() *logrus.Entry {
 		TimestampFormat:           "",
 		DisableSorting:            false,
 		SortingFunc: func(input []string) {
+			if len(input) == 0 {
+				return
+			}
 			keys := make([]string, 0, len(input)-1)
 			for _, key := range input {
 				if key == "msg" {

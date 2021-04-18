@@ -2,7 +2,7 @@ FROM golang:1.16.3-alpine3.13 as builder
 COPY ./ /build
 WORKDIR /build
 RUN go get ./...
-RUN go build -o /bin/rest-api github.com/monetrapp/rest-api/cmd/monetr
+RUN go build -o /bin/monetr github.com/monetrapp/rest-api/cmd/monetr
 
 FROM alpine:3.13.5
 
@@ -19,7 +19,7 @@ LABEL org.opencontainers.image.licenses="BSL-1.1"
 LABEL org.opencontainers.image.title="REST API"
 LABEL org.opencontainers.image.description="monetr's REST API"
 
-COPY --from=builder /bin/rest-api /usr/bin/rest-api
+COPY --from=builder /bin/monetr /usr/bin/monetr
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
-ENTRYPOINT ["/usr/bin/rest-api"]
+ENTRYPOINT ["/usr/bin/monetr", "serve", "--migrate=true"]
