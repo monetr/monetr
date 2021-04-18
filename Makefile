@@ -12,7 +12,7 @@ default: dependencies build test
 dependencies:
 	go get ./...
 
-build: dependencies
+build:
 	go build -o $(LOCAL_BIN_DIR)/monetr $(MONETR_CLI_PACKAGE)
 
 test:
