@@ -2,12 +2,19 @@
 default:
 	$(info "This makefile is meant to be used in CI.")
 
-apply-schema-ci:
 ifndef CI_PROJECT_DIR
 	$(warning "CI_PROJECT_DIR is not defined, are you running in CI?")
 	$(eval CI_PROJECT_DIR = $(PWD))
 endif
+
+ifndef GOPATH
+apply-schema-ci:
 	$(CI_PROJECT_DIR)/bin/monetr database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) || make apply-schema-ci-psql
+endif
+ifdef GOPATH
+apply-schema-ci:
+	go run github.com/monetrapp/rest-api/cmd/monetr database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
+endif
 
 apply-schema-ci-psql:
 	@for FILE in $(CI_PROJECT_DIR)/schema/*.up.sql; do \
