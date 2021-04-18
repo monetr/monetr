@@ -1,8 +1,9 @@
 name: Documentation
 
 on:
-  pull_request:
-    branches: [ main ]
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -16,3 +17,8 @@ jobs:
       - run: make docs
       - run: export PATH=$PATH:$(PWD)/node_modules/.bin
       - run: redoc-cli bundle $(PWD)/docs/swagger.yaml -o $(PWD)/docs/index.html
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        with:
+          branch: gh-pages
+          folder: docs

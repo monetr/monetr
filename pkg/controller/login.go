@@ -32,14 +32,23 @@ type HarderClaims struct {
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx *context.Context) {
 	var loginRequest struct {
-		Email        string `json:"email"`
-		Password     string `json:"password"`
-		Verification string `json:"verification"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+		Captcha  string `json:"captcha"`
 	}
 	if err := ctx.ReadJSON(&loginRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to decode login request")
 		return
 	}
+
+	// This will take the captcha from the request and validate it if the API is
+	// configured to do so. If it is enabled and the captcha fails then an error
+	// is returned to the client.
+	if err := c.validateCaptchaMaybe(loginRequest.Captcha); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
+		return
+	}
+
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
 	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
 
