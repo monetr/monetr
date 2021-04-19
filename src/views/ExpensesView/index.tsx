@@ -90,7 +90,9 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
     const { newExpenseDialogOpen, showFundingSchedules } = this.state;
     return (
       <Fragment>
-        <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen={ newExpenseDialogOpen }/>
+        { newExpenseDialogOpen &&
+        <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen />
+        }
 
         <div className="minus-nav">
           <div className="flex flex-col h-full p-10 max-h-full">

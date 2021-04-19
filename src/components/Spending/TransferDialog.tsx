@@ -274,6 +274,7 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
                   <FormControl fullWidth>
                     <InputLabel htmlFor="new-expense-amount">Amount</InputLabel>
                     <Input
+                      autoFocus={ true }
                       type="number"
                       id="new-expense-amount"
                       name="amount"
