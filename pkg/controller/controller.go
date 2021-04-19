@@ -143,12 +143,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		p.Use(c.authenticationMiddleware)
 
-		p.PartyFunc("/users", func(p router.Party) {
-			p.Get("/me", c.meEndpoint)
-		})
-
+		p.PartyFunc("/users", c.handleUsers)
 		p.PartyFunc("/links", c.linksController)
-
 		p.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
 
 		p.PartyFunc("/bank_accounts", func(p router.Party) {

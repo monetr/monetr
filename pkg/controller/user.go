@@ -1,12 +1,16 @@
 package controller
 
 import (
-	"net/http"
-
 	"github.com/kataras/iris/v12/context"
+	"github.com/kataras/iris/v12/core/router"
+	"net/http"
 )
 
-func (c *Controller) meEndpoint(ctx *context.Context) {
+func (c *Controller) handleUsers(p router.Party) {
+	p.Get("/me", c.getMe)
+}
+
+func (c *Controller) getMe(ctx *context.Context) {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "cannot retrieve user details")
@@ -30,3 +34,4 @@ func (c *Controller) meEndpoint(ctx *context.Context) {
 		"isSetup": isSetup,
 	})
 }
+

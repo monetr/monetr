@@ -75,7 +75,7 @@ affinity: { }
 api:
   listenPort: 4000
   metricsPort: 9000
-  name: Harder Than It Needs To Be
+  name: monetr
   uiDomainName: localhost:3000
   apiDomainName: localhost:4000
   allowSignUp: true
@@ -95,10 +95,13 @@ api:
     enabled: false
     privateKey: ""
     publicKey: ""
+    verifyLogin: false
+    verifyRegister: false
   plaid:
     clientId: "abc123"
     clientSecret: "abc123"
     environment: "https://sandbox.plaid.com"
+    birthdatePrompt: false # Not yet implemented
   cors:
     allowedOrigins:
       - "*"
@@ -107,5 +110,6 @@ api:
     enabled: true
     address: localhost
     port: 6379
+    namespace: monetr
   logging:
     level: trace

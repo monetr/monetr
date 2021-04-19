@@ -38,6 +38,8 @@ spec:
           envFrom:
             - secretRef:
                 name: {{ include "api.fullname" . }}
+            - configMapRef:
+                name: {{ include "api.fullname" . }}
           ports:
             - name: http
               containerPort: {{ .Values.api.listenPort }}
