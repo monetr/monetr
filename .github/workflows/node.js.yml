@@ -5,9 +5,12 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - '!renovate/*'
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   test:
