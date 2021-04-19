@@ -76,7 +76,7 @@
     "resolve": "1.20.0",
     "resolve-url-loader": "3.1.2",
     "rrule": "2.6.8",
-    "sass": "1.32.8",
+    "sass": "1.32.10",
     "selector-action": "1.2.0",
     "semver": "7.3.5",
     "socket.io-client": "4.0.1",
