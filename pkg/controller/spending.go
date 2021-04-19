@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"net/http"
 	"strings"
 	"time"
@@ -24,6 +24,7 @@ func (c *Controller) handleSpending(p iris.Party) {
 // List Spending
 // @id list-spending
 // @tags Spending
+// @Summary List Spending
 // @description List all of the spending for the specified bank account.
 // @Security ApiKeyAuth
 // @Param bankAccountId path int true "Bank Account ID"
@@ -52,7 +53,8 @@ func (c *Controller) getSpending(ctx *context.Context) {
 // Create Spending
 // @id create-spending
 // @tags Spending
-// @summary Create an spending for the specified bank account.
+// @Summary Create Spending
+// @description Create an spending for the specified bank account.
 // @security ApiKeyAuth
 // @accept json
 // @product json
@@ -156,7 +158,8 @@ type SpendingTransfer struct {
 // Transfer To or From Spending
 // @id transfer-spending
 // @tags Spending
-// @summary Transfer allocated funds to or from a spending object.
+// @Summary Transfer To or From Spending
+// @description Transfer allocated funds to or from a spending object.
 // @security ApiKeyAuth
 // @accept json
 // @product json
@@ -292,12 +295,13 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 // Update Spending
 // @id update-spending
 // @tags Spending
-// @summary Update an existing expense or goal spending object.
+// @summary Update Spending
+// @description Update an existing spending object. Some changes may cause the spending object to be recalculated.
 // @security ApiKeyAuth
 // @accept json
 // @product json
 // @Param bankAccountId path int true "Bank Account ID"
-// @Param Spending body models.Spending true "Updated spending"
+// @Param Spending body swag.UpdateSpendingRequest true "Updated spending"
 // @Router /bank_accounts/{bankAccountId}/spending [put]
 // @Success 200 {object} models.Spending
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
@@ -362,7 +366,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 		recalculateSpending = true
 	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
 		recalculateSpending = true
-	} else if updatedSpending.RecurrenceRule != nil {
+	} else if !recalculateSpending && updatedSpending.RecurrenceRule != nil {
 		recalculateSpending = updatedSpending.RecurrenceRule.String() == existingSpending.RecurrenceRule.String()
 	}
 
