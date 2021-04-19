@@ -77,7 +77,7 @@ func (e *Spending) CalculateNextContribution(
 	}
 
 	nextDueDate := util.MidnightInLocal(e.NextRecurrence, timezone)
-	if time.Now().After(nextDueDate) {
+	if time.Now().After(nextDueDate) && e.RecurrenceRule != nil {
 		e.LastRecurrence = &nextDueDate
 		e.NextRecurrence = util.MidnightInLocal(e.RecurrenceRule.After(nextDueDate, false), timezone)
 		nextDueDate = util.MidnightInLocal(e.NextRecurrence, timezone)
