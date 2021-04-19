@@ -38,8 +38,8 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
       <List disablePadding className="w-full">
         {
           expenseIds.map(expense => (
-            <Fragment>
-              <ExpenseItem expenseId={ expense } key={ expense }/>
+            <Fragment key={ expense }>
+              <ExpenseItem expenseId={ expense }/>
               <Divider/>
             </Fragment>
           ))

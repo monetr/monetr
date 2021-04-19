@@ -7,6 +7,7 @@ import moment from "moment";
 import React, { Component } from "react";
 
 export interface PropTypes {
+  // TODO Add a way to pass a current value to the RecurrenceList component.
   date: moment.Moment;
   onChange: { (value: Recurrence): void }
   disabled?: boolean;

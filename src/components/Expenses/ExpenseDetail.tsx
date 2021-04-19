@@ -8,7 +8,8 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
 import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
-import EditSpendingAmountDialog from "components/Spending/EditSpendingAmountDialog";
+import EditSpendingAmountDialog from "components/Expenses/EditSpendingAmountDialog";
+import EditExpenseDueDateDialog from "components/Expenses/EditExpenseDueDateDialog";
 
 interface WithConnectionPropTypes {
   expense?: Spending;
@@ -18,6 +19,7 @@ interface WithConnectionPropTypes {
 interface State {
   transferDialogOpen: boolean;
   editAmountDialogOpen: boolean;
+  editDueDateDialogOpen: boolean;
 }
 
 export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
@@ -25,6 +27,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
   state = {
     transferDialogOpen: false,
     editAmountDialogOpen: false,
+    editDueDateDialogOpen: false,
   };
 
   openTransferDialog = () => {
@@ -47,6 +50,14 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
     editAmountDialogOpen: false,
   });
 
+  openEditDueDateDialog = () => this.setState({
+    editDueDateDialogOpen: true,
+  });
+
+  closeEditDueDateDialog = () => this.setState({
+    editDueDateDialogOpen: false,
+  });
+
   render() {
     const { expense } = this.props;
     if (!expense) {
@@ -55,7 +66,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
 
     const fundingSchedule = this.props.fundingSchedules.get(expense.fundingScheduleId, new FundingSchedule());
 
-    const { transferDialogOpen, editAmountDialogOpen } = this.state;
+    const { transferDialogOpen, editAmountDialogOpen, editDueDateDialogOpen } = this.state;
 
     return (
       <Fragment>
@@ -64,6 +75,9 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
         }
         { editAmountDialogOpen &&
         <EditSpendingAmountDialog isOpen onClose={ this.closeEditAmountDialog }/>
+        }
+        { editDueDateDialogOpen &&
+        <EditExpenseDueDateDialog isOpen onClose={ this.closeEditDueDateDialog }/>
         }
 
         <div className="w-full pl-5 pr-5 pt-5 expense-detail">
@@ -114,7 +128,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
                   </Typography>
                 </div>
                 <div className="col-span-3 opacity-50">
-                  <Typography>
+                  <Typography variant="body2">
                     { expense.getTargetAmountString() }
                   </Typography>
                 </div>
@@ -125,7 +139,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
             </ListItem>
             <Divider/>
 
-            <ListItem button dense>
+            <ListItem button dense onClick={ this.openEditDueDateDialog }>
               <ListItemIcon>
                 <Event/>
               </ListItemIcon>
@@ -136,7 +150,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
                   </Typography>
                 </div>
                 <div className="col-span-3 opacity-50">
-                  <Typography>
+                  <Typography variant="body2">
                     { expense.description }
                   </Typography>
                 </div>
@@ -158,7 +172,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
                   </Typography>
                 </div>
                 <div className="col-span-3 opacity-50">
-                  <Typography>
+                  <Typography variant="body2">
                     { expense.getNextContributionAmountString() }/{ fundingSchedule.name }
                   </Typography>
                 </div>
@@ -180,7 +194,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
                   </Typography>
                 </div>
                 <div className="col-span-3 opacity-50">
-                  <Typography>
+                  <Typography variant="body2">
                     Set aside target amount
                   </Typography>
                 </div>
@@ -202,7 +216,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
                   </Typography>
                 </div>
                 <div className="col-span-3 opacity-50">
-                  <Typography>
+                  <Typography variant="body2">
                     ....
                   </Typography>
                 </div>
