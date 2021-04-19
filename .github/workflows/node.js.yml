@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Test & Build
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,7 +22,7 @@ jobs:
       - run: yarn install
       - run: yarn test
   build:
-    name: Test & Build
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
