@@ -11292,10 +11292,10 @@ tryer@^1.0.1:
   resolved "https://registry.yarnpkg.com/tryer/-/tryer-1.0.1.tgz#f2c85406800b9b0f74c9f7465b81eaad241252f8"
   integrity sha512-c3zayb8/kWWpycWYg87P71E1S1ZL6b6IJxfb5fvsUgsf0S2MVGaDhDXXjDMpdCpfWXqptc+4mXwmiy1ypXqRAA==
 
-ts-loader@9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-9.0.0.tgz#0cf4bbd708e4a8e8b25671ea2f7e33af3950fdc1"
-  integrity sha512-okLMCTkzp1lCldwJ+/+mEY66qilDpwAs5Xs8REG9IwjfbG9fRQmt4a6XCFeFU6XaVI2C0qOEEEu+jIcWAUgc4w==
+ts-loader@9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-9.0.1.tgz#de3daa2057ef949a6bf68d2ff1c1f6a346f2fc93"
+  integrity sha512-b08vtDzkH+dVIjickgNbsOyfTaIDzX1idCxkcrVDAgPpsnL79RJn7Q944k7YTc9yPXRX/iBsAgefMHX/yqxa2g==
   dependencies:
     chalk "^4.1.0"
     enhanced-resolve "^5.0.0"
