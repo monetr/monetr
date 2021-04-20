@@ -1,12 +1,12 @@
-FROM golang:1.16.3-alpine3.13 as builder
+FROM golang:1.16.3 as builder
 COPY ./ /build
 WORKDIR /build
 RUN go get ./...
 RUN go build -o /bin/monetr github.com/monetrapp/rest-api/pkg/cmd
 
-FROM alpine:3.13.5
+FROM debian:bullseye-slim
 
-RUN apk add --no-cache tzdata
+RUN apt-get install -y tzdata
 
 ARG REVISION
 
