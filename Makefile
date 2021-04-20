@@ -2,7 +2,7 @@ LOCAL_BIN_DIR = "$(PWD)/bin"
 NODE_MODULES_DIR = "$(PWD)/node_modules"
 VENDOR_DIR = "$(PWD)/vendor"
 
-MONETR_CLI_PACKAGE = "github.com/monetrapp/rest-api/cmd/monetr"
+MONETR_CLI_PACKAGE = "github.com/monetrapp/rest-api/pkg/cmd"
 COVERAGE_TXT = "$(PWD)/coverage.txt"
 
 PATH += "$(GOPATH):$(LOCAL_BIN_DIR)"

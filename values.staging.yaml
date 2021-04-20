@@ -63,7 +63,7 @@ api:
     environment: "https://sandbox.plaid.com"
   cors:
     allowedOrigins:
-      - "staging.monetr.dev"
+      - "app.staging.monetr.dev"
     debug: true
   redis:
     enabled: true

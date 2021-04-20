@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -9,15 +9,15 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(databaseCommand)
-	databaseCommand.AddCommand(migrateCommand)
-	databaseCommand.AddCommand(databaseVersionCommand)
+	RootCommand.AddCommand(DatabaseCommand)
+	DatabaseCommand.AddCommand(MigrateCommand)
+	DatabaseCommand.AddCommand(DatabaseVersionCommand)
 
-	databaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "H", "localhost", "PostgreSQL host address.")
-	databaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 5432, "PostgreSQL port.")
-	databaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "postgres", "PostgreSQL user.")
-	databaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
-	databaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "postgres", "PostgreSQL database.")
+	DatabaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "H", "localhost", "PostgreSQL host address.")
+	DatabaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 5432, "PostgreSQL port.")
+	DatabaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "postgres", "PostgreSQL user.")
+	DatabaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
+	DatabaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "postgres", "PostgreSQL database.")
 }
 
 var (
@@ -29,7 +29,7 @@ var (
 )
 
 var (
-	migrateCommand = &cobra.Command{
+	MigrateCommand = &cobra.Command{
 		Use:   "migrate",
 		Short: "Run database migrations against your PostgreSQL.",
 		Long:  "Updates your PostgreSQL database to the latest schema version for monetr.",
@@ -62,7 +62,7 @@ var (
 		},
 	}
 
-	databaseVersionCommand = &cobra.Command{
+	DatabaseVersionCommand = &cobra.Command{
 		Use:   "version",
 		Short: "Prints version information about your database.",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -99,7 +99,7 @@ var (
 		},
 	}
 
-	databaseCommand = &cobra.Command{
+	DatabaseCommand = &cobra.Command{
 		Use:   "database",
 		Short: "Manages the PostgreSQL database used by monetr.",
 		RunE: func(cmd *cobra.Command, args []string) error {

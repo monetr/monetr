@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/cache"
 	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/monetrapp/rest-api/pkg/controller"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/logging"
 	"github.com/monetrapp/rest-api/pkg/metrics"
@@ -17,16 +16,16 @@ import (
 )
 
 func init() {
-	serveCommand.PersistentFlags().BoolVarP(&migrateDatabase, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
-	serveCommand.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use, if omitted ./config.yaml or /etc/monetr/config.yaml will be used.")
-	rootCmd.AddCommand(serveCommand)
+	ServeCommand.PersistentFlags().BoolVarP(&migrateDatabase, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
+	ServeCommand.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use, if omitted ./config.yaml or /etc/monetr/config.yaml will be used.")
+	RootCommand.AddCommand(ServeCommand)
 }
 
 var (
 	configFilePath  = ""
 	migrateDatabase = false
 
-	serveCommand = &cobra.Command{
+	ServeCommand = &cobra.Command{
 		Use:   "serve",
 		Short: "Run the REST API HTTP server",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -93,9 +92,7 @@ func RunServer() error {
 	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidClient, stats)
 	defer jobManager.Close()
 
-	apiController := controller.NewController(configuration, db, jobManager, plaidClient, stats)
-
-	app := application.NewApp(configuration, apiController)
+	app := application.NewApp(configuration, getControllers(configuration, db, jobManager, plaidClient, stats)...)
 
 	// TODO Allow listen port to be changed via config.
 	return app.Listen(":4000")

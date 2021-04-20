@@ -13,7 +13,7 @@ apply-schema-ci:
 endif
 ifdef GOPATH
 apply-schema-ci:
-	go run github.com/monetrapp/rest-api/cmd/monetr database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
+	go run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 endif
 
 apply-schema-ci-psql:

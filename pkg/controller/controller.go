@@ -101,61 +101,63 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		})
 	}
 
-	app.Use(c.loggingMiddleware)
-	app.OnAnyErrorCode(func(ctx *context.Context) {
-		if err := ctx.GetErr(); err != nil {
-			ctx.JSON(map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-	})
-	app.OnErrorCode(http.StatusNotFound, func(ctx *context.Context) {
-		if err := ctx.GetErr(); err == nil {
-			ctx.JSON(map[string]interface{}{
-				"path":  ctx.Path(),
-				"error": "the requested path does not exist",
-			})
-		} else {
-			ctx.JSON(map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-	})
-
 	app.Get("/health", c.getHealth)
 
-	if c.configuration.EnableWebhooks {
-		// Webhooks use their own authentication, so we want to declare this first.
-		app.Post("/api/plaid/webhook/{identifier:string}", c.handlePlaidWebhook)
-	}
-
-	// For the following endpoints we want to have a repository available to us.
-	app.PartyFunc("/", func(p router.Party) {
-		p.Get("/config", c.configEndpoint)
-
-		p.Use(c.setupRepositoryMiddleware)
-
-		p.PartyFunc("/authentication", func(p router.Party) {
-			p.Post("/login", c.loginEndpoint)
-			p.Post("/register", c.registerEndpoint)
-			p.Post("/verify", c.verifyEndpoint)
+	app.PartyFunc(APIPath, func(p router.Party) {
+		p.Use(c.loggingMiddleware)
+		p.OnAnyErrorCode(func(ctx *context.Context) {
+			if err := ctx.GetErr(); err != nil {
+				ctx.JSON(map[string]interface{}{
+					"error": err.Error(),
+				})
+			}
+		})
+		p.OnErrorCode(http.StatusNotFound, func(ctx *context.Context) {
+			if err := ctx.GetErr(); err == nil {
+				ctx.JSON(map[string]interface{}{
+					"path":  ctx.Path(),
+					"error": "the requested path does not exist",
+				})
+			} else {
+				ctx.JSON(map[string]interface{}{
+					"error": err.Error(),
+				})
+			}
 		})
 
-		p.Use(c.authenticationMiddleware)
+		if c.configuration.EnableWebhooks {
+			// Webhooks use their own authentication, so we want to declare this first.
+			p.Post("/plaid/webhook/{identifier:string}", c.handlePlaidWebhook)
+		}
 
-		p.PartyFunc("/users", c.handleUsers)
-		p.PartyFunc("/links", c.linksController)
-		p.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
+		// For the following endpoints we want to have a repository available to us.
+		p.PartyFunc("/", func(repoParty router.Party) {
+			repoParty.Use(c.setupRepositoryMiddleware)
+			repoParty.Get("/config", c.configEndpoint)
 
-		p.PartyFunc("/bank_accounts", func(p router.Party) {
-			c.handleBankAccounts(p)
-			c.handleTransactions(p)
-			c.handleFundingSchedules(p)
-			c.handleSpending(p)
+			repoParty.PartyFunc("/authentication", func(repoParty router.Party) {
+				repoParty.Post("/login", c.loginEndpoint)
+				repoParty.Post("/register", c.registerEndpoint)
+				repoParty.Post("/verify", c.verifyEndpoint)
+			})
+
+			repoParty.Use(c.authenticationMiddleware)
+
+			repoParty.PartyFunc("/users", c.handleUsers)
+			repoParty.PartyFunc("/links", c.linksController)
+			repoParty.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
+
+			repoParty.PartyFunc("/bank_accounts", func(bankParty router.Party) {
+				c.handleBankAccounts(bankParty)
+				c.handleTransactions(bankParty)
+				c.handleFundingSchedules(bankParty)
+				c.handleSpending(bankParty)
+			})
+
+			repoParty.PartyFunc("/jobs", c.handleJobs)
 		})
-
-		p.PartyFunc("/jobs", c.handleJobs)
 	})
+
 }
 
 // Check API Health

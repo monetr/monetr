@@ -4,10 +4,13 @@ import (
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/monetrapp/rest-api/pkg/controller"
 )
 
-func NewApp(configuration config.Configuration, controller *controller.Controller) *iris.Application {
+type Controller interface {
+	RegisterRoutes(app *iris.Application)
+}
+
+func NewApp(configuration config.Configuration, controllers ...Controller) *iris.Application {
 	app := iris.New()
 	app.UseRouter(cors.New(cors.Options{
 		AllowedOrigins:  configuration.CORS.AllowedOrigins,
@@ -31,7 +34,10 @@ func NewApp(configuration config.Configuration, controller *controller.Controlle
 		OptionsPassthrough: false,
 		Debug:              configuration.CORS.Debug,
 	}))
-	controller.RegisterRoutes(app)
+
+	for _, controller := range controllers {
+		controller.RegisterRoutes(app)
+	}
 
 	return app
 }
