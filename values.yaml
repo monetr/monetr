@@ -73,6 +73,7 @@ tolerations: [ ]
 affinity: { }
 
 api:
+  includeSecrets: false
   listenPort: 4000
   metricsPort: 9000
   name: monetr
