@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Joker/hpp v1.0.0 // indirect
 	github.com/alicebob/miniredis/v2 v2.14.3
-	github.com/brianvoe/gofakeit/v6 v6.4.0
+	github.com/brianvoe/gofakeit/v6 v6.4.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
