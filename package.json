@@ -45,7 +45,7 @@
     "is-svg": "4.3.1",
     "jest-circus": "26.6.3",
     "jest-resolve": "26.6.2",
-    "jest-watch-typeahead": "0.6.2",
+    "jest-watch-typeahead": "0.6.3",
     "js-cookie": "2.2.1",
     "mini-css-extract-plugin": "1.5.0",
     "moment": "2.29.1",
