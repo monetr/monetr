@@ -46,8 +46,13 @@ dependencies-helm: directories-maybe
 	cp $(HELM_DIR)/$(HELM_BIN_DIR)/$(HELM) $(LOCAL_BIN)/$(HELM)
 	rm -rf $(HELM_DIR)
 
+ENVIRONMENT_DIR = $(PWD)/generated/$(ENV_LOWER)
+
 generate: dependencies-maybe
 	helm template rest-api ./ \
 		--dry-run \
 		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml \
-		--outdir $(PWD)/generated/$(ENV_LOWER) -
+		--outdir $(ENVIRONMENT_DIR) -
+
+dry:
+	kubectl apply -f $(ENVIRONMENT_DIR) -n monetr-$(ENV_LOWER) --dry-run=server

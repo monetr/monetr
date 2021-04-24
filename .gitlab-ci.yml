@@ -19,6 +19,7 @@ stages:
   - Coverage
   - Publish Container
   - Prepare
+  - Dry Run
 
 variables:
   GO111MODULE: 'on'
@@ -208,7 +209,6 @@ Generate K8S:
     - arch:amd64
   script:
     - make generate ENVIRONMENT=${ENVIRONMENT}
-    - git diff --exit-code
   variables:
     GOFLAGS: ''
   cache:
@@ -221,3 +221,31 @@ Generate K8S:
     paths:
       - $CI_PROJECT_DIR/generated
     expire_in: 7 days
+
+Dry - Staging:
+  only:
+    refs:
+      - main
+  environment:
+    name: Staging
+    url: https://api.staging.monetr.dev
+    deployment_tier: staging
+    kubernetes:
+      namespace: monetr-staging
+  needs:
+    - "Generate K8S"
+    - "REST API"
+  stage: Dry Run
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - monetr:staging
+  variables:
+    GOFLAGS: ''
+    ENVIRONMENT: Staging
+  script:
+    - make dry ENVIRONMENT=${ENVIRONMENT}
+  cache:
+    key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
+    paths:
+      - $CI_PROJECT_DIR/generated
+    policy: pull
