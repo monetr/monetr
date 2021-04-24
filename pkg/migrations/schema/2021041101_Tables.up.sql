@@ -176,8 +176,7 @@ VALUES (-1,
         DEFAULT,
         FALSE,
         FALSE,
-        FALSE)
-RETURNING "phone_number";
+        FALSE);
 
 INSERT INTO "accounts" ("account_id", "timezone")
 VALUES (-1, 'UTC');

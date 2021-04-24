@@ -21,6 +21,7 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 	var err error
 	if conf.Enabled {
 		redisAddress = fmt.Sprintf("%s:%d", conf.Address, conf.Port)
+		log.Debugf("connecting to redis at: %s", redisAddress)
 	} else {
 		controller.mini, err = miniredis.Run()
 		if err != nil {
@@ -29,6 +30,7 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 
 		// Store our "embedded" redis address for use below.
 		redisAddress = controller.mini.Server().Addr().String()
+		log.Debugf("using miniredis")
 	}
 
 	// Setup the redis pool for running jobs.
@@ -42,8 +44,11 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 
 	// This will try to ping redis to make sure its up and running.
 	if err = waitForRedis(log, 10, controller.pool); err != nil {
+		log.WithError(err).Errorf("failed to wait for redis to be available")
 		return nil, err
 	}
+
+	log.Tracef("successfully setup redis pool")
 
 	return controller, nil
 }

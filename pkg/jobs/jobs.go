@@ -62,6 +62,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueueCheckPendingTransactions)
 
 	manager.work.Start()
+	log.Debug("job manager started")
 
 	return manager
 }
