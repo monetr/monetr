@@ -245,11 +245,8 @@ Dry - Staging:
     ENVIRONMENT: Staging
   script:
     - make dry ENVIRONMENT=${ENVIRONMENT}
-  cache:
-    key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
-    paths:
-      - $CI_PROJECT_DIR/generated/${ENVIRONMENT}
-    policy: pull
+  dependencies:
+    - "Generate - Staging"
 
 Deploy - Staging:
   only:
@@ -273,8 +270,5 @@ Deploy - Staging:
     ENVIRONMENT: Staging
   script:
     - make deploy ENVIRONMENT=${ENVIRONMENT}
-  cache:
-    key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
-    paths:
-      - $CI_PROJECT_DIR/generated/${ENVIRONMENT}
-    policy: pull
+  dependencies:
+    - "Generate - Staging"
