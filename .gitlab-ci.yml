@@ -245,8 +245,6 @@ Dry - Staging:
     ENVIRONMENT: Staging
   script:
     - make dry ENVIRONMENT=${ENVIRONMENT}
-  dependencies:
-    - "Generate - Staging"
 
 Deploy - Staging:
   only:
@@ -261,6 +259,7 @@ Deploy - Staging:
       namespace: monetr-staging
   needs:
     - "Dry - Staging"
+    - "Generate - Staging"
   stage: Deploy
   image: containers.monetr.dev/ubuntu:20.04
   tags:
@@ -270,5 +269,3 @@ Deploy - Staging:
     ENVIRONMENT: Staging
   script:
     - make deploy ENVIRONMENT=${ENVIRONMENT}
-  dependencies:
-    - "Generate - Staging"
