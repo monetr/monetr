@@ -73,6 +73,7 @@ tolerations: [ ]
 affinity: { }
 
 api:
+  customEnv: []
   includeSecrets: false
   listenPort: 4000
   metricsPort: 9000

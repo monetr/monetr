@@ -18,6 +18,7 @@ stages:
   - Documentation
   - Coverage
   - Publish Container
+  - Prepare
 
 variables:
   GO111MODULE: 'on'
@@ -194,3 +195,24 @@ REST API:
   <<: [ *docker_template ]
   script:
     - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
+
+Generate K8S:
+  needs: []
+  stage: Prepare
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - k8s:shared
+    - arch:amd64
+  script:
+    - make generate
+    - git diff --exit-code
+  cache:
+    key: k8s-${CI_COMMIT_SHA}
+    paths:
+      - $CI_PROJECT_DIR/generated
+    policy: push
+  artifacts:
+    name: "k8s-${CI_COMMIT_SHA}"
+    paths:
+      - $CI_PROJECT_DIR/generated
+    expire_in: 7 days

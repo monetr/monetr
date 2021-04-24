@@ -44,26 +44,6 @@ compose-development: docker docker-work-web-ui
 compose-development-lite:
 	docker compose  -f ./docker-compose.development.yaml up
 
-helm-configure:
-	which kubernetes-split-yaml || make helm-deps
-
-helm-deps:
-	git clone https://github.com/mogensen/kubernetes-split-yaml.git
-	cd kubernetes-split-yaml.git && go build ./...
-	cp kubernetes-split-yaml/kubernetes-split-yaml $(PWD)/bin
-	rm -rfd kubernetes-split-yaml
-
-helm-generate: helm-configure
-	helm template rest-api ./ --dry-run --values=values.mayview.yaml | kubernetes-split-yaml -
-
-staging-dry:
-	helm template rest-api ./ --dry-run \
-		--set api.jwt.loginJwtSecret=$$(vault kv get --field=jwt_secret pipelines/harderthanitneedstobe.com/staging/primary) \
-		--set api.jwt.registrationJwtSecret=$$(vault kv get --field=register_jwt_secret pipelines/harderthanitneedstobe.com/staging/primary) \
-		--set api.postgreSql.password=$$(vault kv get --field=pg_password pipelines/harderthanitneedstobe.com/staging/primary) \
-		--values=values.staging.yaml | kubectl apply -n harder-staging --dry-run=server -f -
-
-
 generate_schema:
 	$(eval TARGET_FILE := $(shell echo "$(TARGET_DIRECTORY)/0_initial.up.sql"))
 	$(info "Generating current schema into file $(TARGET_FILE)")
@@ -87,4 +67,5 @@ include Makefile.github-actions
 endif
 
 include Makefile.tinker
+include Makefile.deploy
 

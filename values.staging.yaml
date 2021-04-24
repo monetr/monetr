@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: containers.monetr.dev/rest-api
-  pullPolicy: always
+  pullPolicy: Always
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
 imagePullSecrets:
@@ -38,6 +38,17 @@ nodeSelector:
 
 api:
   name: monetr (staging)
+  customEnv:
+    - name: HARDER_PG_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: password
+          name: alsatian-rest-api-secret
+    - name: HARDER_PG_USERNAME
+      valueFrom:
+        secretKeyRef:
+          key: username
+          name: alsatian-rest-api-secret
   uiDomainName: app.staging.monetr.dev
   apiDomainName: api.staging.monetr.dev
   allowSignUp: true
@@ -48,8 +59,6 @@ api:
   postgreSql:
     address: alsatian.monetr-staging.svc.cluster.local
     port: 5432
-    username: monetr-api
-    password: ""
     database: monetr
   smtp:
     enabled: false
@@ -67,7 +76,7 @@ api:
     debug: true
   redis:
     enabled: true
-    address: redis-main.monetr-staging.svc.cluster.local
+    address: redis.monetr-staging.svc.cluster.local
     port: 6379
   logging:
     level: trace

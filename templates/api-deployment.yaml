@@ -36,10 +36,16 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
-            - secretRef:
-                name: {{ include "api.fullname" . }}
             - configMapRef:
                 name: {{ include "api.fullname" . }}
+            {{- if .Values.api.includeSecrets }}
+            - secretRef:
+                name: {{ include "api.fullname" . }}
+            {{- end }}
+          {{- if .Values.api.customEnv }}
+          env:
+            {{- toYaml .Values.api.customEnv | nindent 10 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.api.listenPort }}
