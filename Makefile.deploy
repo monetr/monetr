@@ -4,7 +4,7 @@ PATH += :$(LOCAL_BIN)
 HELM_VERSION = 3.5.4
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
-ENVIRONMENT = staging
+ENVIRONMENT = Staging
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
 default-deploy:
@@ -49,4 +49,5 @@ dependencies-helm: directories-maybe
 generate: dependencies-maybe
 	helm template rest-api ./ \
 		--dry-run \
-		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml -
+		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml \
+		--outdir $(PWD)/generated/$(ENV_LOWER) -

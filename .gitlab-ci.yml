@@ -200,21 +200,24 @@ Generate K8S:
   needs: []
   stage: Prepare
   image: containers.monetr.dev/ubuntu:20.04
+  parallel:
+    matrix:
+      - ENVIRONMENT: Staging
   tags:
     - k8s:shared
     - arch:amd64
   script:
-    - make generate
+    - make generate ENVIRONMENT=${ENVIRONMENT}
     - git diff --exit-code
   variables:
     GOFLAGS: ''
   cache:
-    key: k8s-${CI_COMMIT_SHA}
+    key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
       - $CI_PROJECT_DIR/generated
     policy: push
   artifacts:
-    name: "k8s-${CI_COMMIT_SHA}"
+    name: "k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}"
     paths:
       - $CI_PROJECT_DIR/generated
     expire_in: 7 days
