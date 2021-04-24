@@ -212,7 +212,7 @@ Generate - Staging:
   cache:
     key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
-      - $CI_PROJECT_DIR/generated
+      - $CI_PROJECT_DIR/generated/${ENVIRONMENT}
     policy: push
   artifacts:
     name: "k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}"
@@ -228,6 +228,7 @@ Dry - Staging:
     name: Staging
     url: https://api.staging.monetr.dev
     deployment_tier: staging
+    action: prepare
     kubernetes:
       namespace: monetr-staging
   needs:
@@ -245,5 +246,5 @@ Dry - Staging:
   cache:
     key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
-      - $CI_PROJECT_DIR/generated
+      - $CI_PROJECT_DIR/generated/${ENVIRONMENT}
     policy: pull
