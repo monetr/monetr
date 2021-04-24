@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/viper"
 )
@@ -121,7 +122,7 @@ func LoadConfiguration(configFilePath *string) Configuration {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
+		fmt.Printf("failed to read in config from file: %+v\n", err)
 	}
 
 	var config Configuration
