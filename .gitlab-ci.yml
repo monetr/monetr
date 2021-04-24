@@ -188,6 +188,7 @@ Documentation:
     - arch:amd64
   before_script:
     - for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
+    - echo "$CONTAINERS_MONETR_PASS" | docker login containers.monetr.dev --username $CONTAINERS_MONETR_USER --password-stdin
 
 REST API:
   needs:
