@@ -187,7 +187,7 @@ Documentation:
     - k8s:shared-docker
     - arch:amd64
   before_script:
-    - apk add make
+    - apk add make git
     - echo "$CONTAINERS_MONETR_PASS" | docker login containers.monetr.dev --username $CONTAINERS_MONETR_USER --password-stdin
 
 REST API:
