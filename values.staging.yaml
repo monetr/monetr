@@ -39,23 +39,50 @@ nodeSelector:
 api:
   name: monetr (staging)
   customEnv:
-    - name: HARDER_PG_PASSWORD
+    - name: MONETR_PG_PASSWORD
       valueFrom:
         secretKeyRef:
           key: password
           name: alsatian-rest-api-secret
-    - name: HARDER_PG_USERNAME
+    - name: MONETR_PG_USERNAME
       valueFrom:
         secretKeyRef:
           key: username
           name: alsatian-rest-api-secret
+    - name: MONETR_JWT_LOGIN_SECRET
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_JWT_LOGIN_SECRET
+          name: rest-api-config-secrets
+    - name: MONETR_JWT_REGISTRATION_SECRET
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_JWT_REGISTRATION_SECRET
+          name: rest-api-config-secrets
+    - name: MONETR_CAPTCHA_PUBLIC_KEY
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_CAPTCHA_PUBLIC_KEY
+          name: rest-api-config-secrets
+    - name: MONETR_CAPTCHA_PRIVATE_KEY
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_CAPTCHA_PRIVATE_KEY
+          name: rest-api-config-secrets
+    - name: MONETR_PLAID_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_PLAID_CLIENT_ID
+          name: rest-api-config-secrets
+    - name: MONETR_PLAID_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_PLAID_CLIENT_SECRET
+          name: rest-api-config-secrets
   uiDomainName: app.staging.monetr.dev
   apiDomainName: api.staging.monetr.dev
   allowSignUp: true
-  enableWebhooks: true
-  jwt:
-    loginJwtSecret: ""
-    registrationJwtSecret: ""
+  enableWebhooks: false
   postgreSql:
     address: alsatian.monetr-staging.svc.cluster.local
     port: 5432
@@ -64,11 +91,7 @@ api:
     enabled: false
   reCaptcha:
     enabled: true
-    publicKey: ""
-    privateKey: ""
   plaid:
-    clientId: ""
-    clientSecret: ""
     environment: "https://sandbox.plaid.com"
   cors:
     allowedOrigins:

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: rest-api
-description: REST API for Harder Then It Needs To Be
+description: REST API for monetr.app
 
 # A chart can be either an 'application' or a 'library' chart.
 #

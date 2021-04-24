@@ -22,4 +22,5 @@ LABEL org.opencontainers.image.description="monetr's REST API"
 COPY --from=builder /bin/monetr /usr/bin/monetr
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
-ENTRYPOINT ["/usr/bin/monetr", "serve", "--migrate=true"]
+ENTRYPOINT ["/usr/bin/monetr"]
+CMD ["serve", "--migrate=true"]
