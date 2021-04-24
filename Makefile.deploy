@@ -51,16 +51,13 @@ ENVIRONMENT_DIR = $(PWD)/generated/$(ENV_LOWER)
 IMAGE_TAG = $(shell git rev-parse HEAD)
 
 generate: dependencies-maybe
-	$(eval REPO_SHA = $(shell git rev-parse --short HEAD))
-	$(eval REPO_BRANCH = $(shell git branch --show-current))
+	$(eval REPO_SHA = $(shell git rev-parse HEAD))
 	$(eval REPO_NAME = $(shell git config --get remote.origin.url))
 	helm template rest-api ./ \
 		--dry-run \
 		--set image.tag="$(IMAGE_TAG)" \
 		--set podAnnotations."monetr\.dev/date"="$(shell date)" \
 		--set podAnnotations."monetr\.dev/sha"="$(REPO_SHA)" \
-		--set podAnnotations."monetr\.dev/branch"="$(REPO_BRANCH)" \
-		--set podAnnotations."monetr\.dev/repo"="$(REPO_NAME)" \
 		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml \
 		--outdir $(ENVIRONMENT_DIR) -
 
