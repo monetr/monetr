@@ -12,6 +12,4 @@ type Login struct {
 	IsPhoneVerified bool         `json:"isPhoneVerified" pg:"is_phone_verified,notnull,use_zero"`
 
 	Users              []User              `json:"-" pg:"rel:has-many"`
-	EmailVerifications []EmailVerification `json:"emailVerifications,omitempty" pg:"rel:has-many"`
-	PhoneVerifications []PhoneVerification `json:"phoneVerifications,omitempty" pg:"rel:has-many"`
 }

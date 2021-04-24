@@ -42,8 +42,6 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 			IsEnabled:          true,
 			IsEmailVerified:    true,
 			Users:              nil,
-			EmailVerifications: nil,
-			PhoneVerifications: nil,
 		}
 
 		_, err := txn.Model(&login).Insert(&login)

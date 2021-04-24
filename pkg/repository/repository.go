@@ -51,7 +51,6 @@ type UnauthenticatedRepository interface {
 	CreateLogin(email, hashedPassword string, isEnabled bool) (*models.Login, error)
 	CreateAccount(timezone *time.Location) (*models.Account, error)
 	CreateUser(loginId, accountId uint64, firstName, lastName string) (*models.User, error)
-	CreateRegistration(loginId uint64) (*models.Registration, error)
 
 	// VerifyRegistration takes a registrationId and will finalize the registration record. If the registration has
 	// already been completed an error is returned.

@@ -124,35 +124,6 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 	// If SMTP is enabled and we are verifying emails then we want to create a
 	// registration record and send the user a verification email.
 	if c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails {
-		registration, err := repository.CreateRegistration(login.LoginId)
-		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
-				"failed to create registration",
-			)
-			return
-		}
-
-		// Once we have the registrationId create a token specifically for it. This
-		// token is used in a link that we send the user in an email.
-		registrationToken, err := c.generateRegistrationToken(registration.RegistrationId)
-		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
-				"failed to create registration token",
-			)
-			return
-		}
-
-		// With the email and the token send the user a message asking them to
-		// activate their account.
-		if err := c.sendEmailVerification(
-			registerRequest.Email, registrationToken,
-		); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
-				"failed to send activation email",
-			)
-			return
-		}
-
 		ctx.JSON(map[string]interface{}{
 			"needsVerification": true,
 		})

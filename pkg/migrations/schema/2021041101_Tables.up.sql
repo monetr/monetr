@@ -11,47 +11,6 @@ CREATE TABLE IF NOT EXISTS "logins"
     CONSTRAINT "uq_logins_email" UNIQUE ("email")
 );
 
-CREATE TABLE IF NOT EXISTS "registrations"
-(
-    "registration_id" UUID        NOT NULL DEFAULT uuid_generate_v4(),
-    "login_id"        BIGINT      NOT NULL,
-    "is_complete"     BOOLEAN     NOT NULL,
-    "date_created"    TIMESTAMPTZ NOT NULL,
-    "date_expires"    TIMESTAMPTZ NOT NULL,
-    CONSTRAINT "pk_registrations" PRIMARY KEY ("registration_id"),
-    CONSTRAINT "fk_registrations_logins_login_id" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
-);
-
-CREATE TABLE IF NOT EXISTS "email_verifications"
-(
-    "email_verification_id" BIGSERIAL   NOT NULL,
-    "login_id"              BIGINT      NOT NULL,
-    "email_address"         TEXT        NOT NULL,
-    "is_verified"           BOOLEAN     NOT NULL,
-    "created_at"            TIMESTAMPTZ NOT NULL DEFAULT now(),
-    "expires_at"            TIMESTAMPTZ NOT NULL,
-    "verified_at"           TIMESTAMPTZ,
-    CONSTRAINT "pk_email_verifications" PRIMARY KEY ("email_verification_id"),
-    CONSTRAINT "uq_email_verifications_login_id_email_address" UNIQUE ("login_id", "email_address"),
-    CONSTRAINT "fk_email_verifications_logins_login_id" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
-);
-
-CREATE TABLE IF NOT EXISTS "phone_verifications"
-(
-    "phone_verification_id" BIGSERIAL   NOT NULL,
-    "login_id"              BIGINT      NOT NULL,
-    "code"                  TEXT        NOT NULL,
-    "phone_number"          TEXT        NOT NULL,
-    "is_verified"           BOOLEAN     NOT NULL,
-    "created_at"            TIMESTAMPTZ NOT NULL DEFAULT now(),
-    "expires_at"            TIMESTAMPTZ NOT NULL,
-    "verified_at"           TIMESTAMPTZ,
-    CONSTRAINT "pk_phone_verifications" PRIMARY KEY ("phone_verification_id"),
-    CONSTRAINT "uq_phone_verifications_login_id_code" UNIQUE ("login_id", "code"),
-    CONSTRAINT "uq_phone_verifications_login_id_phone_number" UNIQUE ("login_id", "phone_number"),
-    CONSTRAINT "fk_phone_verifications_logins_login_id" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id")
-);
-
 CREATE TABLE IF NOT EXISTS "accounts"
 (
     "account_id" BIGSERIAL NOT NULL,

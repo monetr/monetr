@@ -3,9 +3,6 @@ package models
 var (
 	AllModels = []interface{}{
 		&Login{},
-		&Registration{},
-		&EmailVerification{},
-		&PhoneVerification{},
 		&Account{},
 		&User{},
 		&Job{},
@@ -21,15 +18,12 @@ var (
 	// query and generate schemas/SQL.
 	_ = Account{}.tableName
 	_ = BankAccount{}.tableName
-	_ = EmailVerification{}.tableName
 	_ = Spending{}.tableName
 	_ = FundingSchedule{}.tableName
 	_ = Job{}.tableName
 	_ = Link{}.tableName
 	_ = Login{}.tableName
-	_ = PhoneVerification{}.tableName
 	_ = PlaidLink{}.tableName
-	_ = Registration{}.tableName
 	_ = Transaction{}.tableName
 	_ = User{}.tableName
 )
