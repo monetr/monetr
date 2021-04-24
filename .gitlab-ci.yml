@@ -197,20 +197,18 @@ REST API:
   script:
     - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
 
-Generate K8S:
+Generate - Staging:
   needs: []
   stage: Prepare
   image: containers.monetr.dev/ubuntu:20.04
-  parallel:
-    matrix:
-      - ENVIRONMENT: Staging
   tags:
     - k8s:shared
     - arch:amd64
-  script:
-    - make generate ENVIRONMENT=${ENVIRONMENT}
   variables:
     GOFLAGS: ''
+    ENVIRONMENT: Staging
+  script:
+    - make generate ENVIRONMENT=${ENVIRONMENT}
   cache:
     key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
@@ -233,7 +231,7 @@ Dry - Staging:
     kubernetes:
       namespace: monetr-staging
   needs:
-    - "Generate K8S"
+    - "Generate - Staging"
     - "REST API"
   stage: Dry Run
   image: containers.monetr.dev/ubuntu:20.04
