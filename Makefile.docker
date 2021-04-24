@@ -1,0 +1,29 @@
+DOCKER_REPOSITORY = containers.monetr.dev
+DOCKER_IMAGE = rest-api
+
+default:
+	$(error Please run a specific target)
+
+ifndef VERSION_TAG
+	VERSION_TAG = $(shell date -u +%Y.%m.%d.%H.%M)
+endif
+
+wait-for-docker:
+	$(info Waiting for docker to start)
+	@for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
+	$(info Docker is running)
+
+BASE_IMAGE = $(DOCKER_REPOSITORY)/$(DOCKER_IMAGE)
+IMAGE_NAME = $(BASE_IMAGE):$(VERSION_TAG)
+docker-build:
+	docker build -t $(IMAGE_NAME) -t $(BASE_IMAGE):latest -f Dockerfile .
+ifdef CI_COMMIT_SHA
+	docker image tag $(IMAGE_NAME) $(BASE_IMAGE):$(CI_COMMIT_SHA)
+endif
+
+docker-push:
+	docker push $(IMAGE_NAME)
+	docker push $(BASE_IMAGE)
+ifdef CI_COMMIT_SHA
+	docker push $(BASE_IMAGE):$(CI_COMMIT_SHA)
+endif

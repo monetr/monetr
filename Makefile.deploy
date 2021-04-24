@@ -48,9 +48,14 @@ dependencies-helm: directories-maybe
 
 ENVIRONMENT_DIR = $(PWD)/generated/$(ENV_LOWER)
 
+ifndef VERSION_TAG
+VERSION_TAG = $(shell date -u +%Y.%m.%d.%H.%M)
+endif
+
 generate: dependencies-maybe
 	helm template rest-api ./ \
 		--dry-run \
+		--set image.tag=$(VERSION_TAG)
 		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml \
 		--outdir $(ENVIRONMENT_DIR) -
 

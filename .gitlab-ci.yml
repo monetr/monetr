@@ -187,7 +187,8 @@ Documentation:
     - k8s:shared-docker
     - arch:amd64
   before_script:
-    - for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
+    - apk add make
+    - make wait-for-docker
     - echo "$CONTAINERS_MONETR_PASS" | docker login containers.monetr.dev --username $CONTAINERS_MONETR_USER --password-stdin
 
 REST API:
@@ -196,13 +197,15 @@ REST API:
   stage: Publish Container
   <<: [ *docker_template ]
   script:
-    - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
-    - docker image tag containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA containers.monetr.dev/rest-api:latest
-    - docker push containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA
-    - docker push containers.monetr.dev/rest-api:latest
+    - make docker-build
+    - make docker-push
+#    - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
+#    - docker image tag containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA containers.monetr.dev/rest-api:latest
+#    - docker push containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA
+#    - docker push containers.monetr.dev/rest-api:latest
 
 Generate - Staging:
-  needs: []
+  needs: [ ]
   stage: Prepare
   image: containers.monetr.dev/ubuntu:20.04
   tags:

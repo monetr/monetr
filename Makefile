@@ -68,4 +68,5 @@ endif
 
 include Makefile.tinker
 include Makefile.deploy
+include Makefile.docker
 
