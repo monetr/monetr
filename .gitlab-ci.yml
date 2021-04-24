@@ -197,7 +197,8 @@ REST API:
   script:
     - docker build -t containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA -f Dockerfile .
     - docker image tag containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA containers.monetr.dev/rest-api:latest
-    - docker image push --all-tags containers.monetr.dev/rest-api
+    - docker push containers.monetr.dev/rest-api:$CI_COMMIT_SHORT_SHA
+    - docker push containers.monetr.dev/rest-api:latest
 
 Generate - Staging:
   needs: []
