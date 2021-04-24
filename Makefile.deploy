@@ -47,9 +47,7 @@ dependencies-helm: directories-maybe
 	rm -rf $(HELM_DIR)
 
 ENVIRONMENT_DIR = $(PWD)/generated/$(ENV_LOWER)
-
 IMAGE_TAG = $(shell git rev-parse HEAD)
-
 generate: dependencies-maybe
 	$(eval REPO_SHA = $(shell git rev-parse HEAD))
 	$(eval REPO_NAME = $(shell git config --get remote.origin.url))
@@ -61,5 +59,9 @@ generate: dependencies-maybe
 		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml \
 		--outdir $(ENVIRONMENT_DIR) -
 
+NAMESPACE = monetr-$(ENV_LOWER)
 dry:
-	kubectl apply -f $(ENVIRONMENT_DIR) -n monetr-$(ENV_LOWER) --dry-run=server
+	kubectl apply -f $(ENVIRONMENT_DIR) -n $(NAMESPACE) --dry-run=server
+
+deploy:
+	kubectl apply -f $(ENVIRONMENT_DIR) -n $(NAMESPACE)

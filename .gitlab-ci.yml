@@ -20,6 +20,7 @@ stages:
   - Publish Container
   - Prepare
   - Dry Run
+  - Deploy
 
 variables:
   GO111MODULE: 'on'
@@ -244,6 +245,34 @@ Dry - Staging:
     ENVIRONMENT: Staging
   script:
     - make dry ENVIRONMENT=${ENVIRONMENT}
+  cache:
+    key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
+    paths:
+      - $CI_PROJECT_DIR/generated/${ENVIRONMENT}
+    policy: pull
+
+Deploy - Staging:
+  only:
+    refs:
+      - main
+  environment:
+    name: Staging
+    url: https://api.staging.monetr.dev
+    deployment_tier: staging
+    action: start
+    kubernetes:
+      namespace: monetr-staging
+  needs:
+    - "Dry - Staging"
+  stage: Deploy
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - monetr:staging
+  variables:
+    GOFLAGS: ''
+    ENVIRONMENT: Staging
+  script:
+    - make deploy ENVIRONMENT=${ENVIRONMENT}
   cache:
     key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
