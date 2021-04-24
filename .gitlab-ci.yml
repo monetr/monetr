@@ -206,6 +206,8 @@ Generate K8S:
   script:
     - make generate
     - git diff --exit-code
+  variables:
+    GOFLAGS: ''
   cache:
     key: k8s-${CI_COMMIT_SHA}
     paths:

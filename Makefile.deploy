@@ -7,10 +7,10 @@ OS = $(shell uname -s | tr A-Z a-z)
 ENVIRONMENT = staging
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
-default:
+default-deploy:
 	echo "Please run a specific target."
 
-clean:
+clean-deploy:
 	rm -rf $(LOCAL_BIN) || true
 	rm -rf $(LOCAL_TMP) || true
 
