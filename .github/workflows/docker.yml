@@ -1,0 +1,35 @@
+name: Build
+
+#on:
+#  push:
+#    branches:
+#      - main
+
+jobs:
+  docker:
+    environment: containers.monetr.dev
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate Tag
+        id: tag
+        run: |
+          echo ::set-output name=POST_TAG::$(git rev-parse HEAD)
+      - name: Build and push ghcr.io
+        uses: docker/build-push-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: Dockerfile
+          tags: latest,${{ steps.tag.outputs.POST_TAG }}
+          repository: monetrapp/rest-api
+      - name: Build and push containers.monetr.dev
+        uses: docker/build-push-action@v1
+        with:
+          registry: containers.monetr.dev
+          username: ${{ secrets.containers_push_username }}
+          password: ${{ secrets.containers_push_password }}
+          dockerfile: Dockerfile
+          tags: latest,${{ steps.tag.outputs.POST_TAG }}
