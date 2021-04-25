@@ -6,7 +6,7 @@ RUN go build -o /bin/monetr github.com/monetrapp/rest-api/pkg/cmd
 
 FROM debian:bullseye-slim
 
-RUN apt-get update && apt-get install -y tzdata ca-certificates
+RUN apt-get install -y tzdata ca-certificates
 
 ARG REVISION
 
