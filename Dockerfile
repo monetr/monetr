@@ -6,7 +6,7 @@ RUN go build -o /bin/monetr github.com/monetrapp/rest-api/pkg/cmd
 
 FROM debian:bullseye-slim
 
-RUN apt-get install -y tzdata
+RUN apt-get update && apt-get install -y tzdata ca-certificates
 
 ARG REVISION
 
@@ -20,8 +20,6 @@ LABEL org.opencontainers.image.title="REST API"
 LABEL org.opencontainers.image.description="monetr's REST API"
 
 COPY --from=builder /bin/monetr /usr/bin/monetr
-
-RUN apt-get update && apt-get install -y ca-certificates
 
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
