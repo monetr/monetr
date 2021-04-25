@@ -53,6 +53,7 @@ func RunServer() error {
 	log := logging.NewLogger()
 
 	if configuration.Sentry.Enabled {
+		log.Debug("sentry is enabled, setting up")
 		hostname, err := os.Hostname()
 		if err != nil {
 			log.WithError(err).Warn("failed to get hostname for sentry")

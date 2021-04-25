@@ -105,7 +105,7 @@ api:
   cors:
     allowedOrigins:
       - "https://app.staging.monetr.dev"
-    debug: true
+    debug: false
   redis:
     enabled: true
     address: redis.monetr-staging.svc.cluster.local

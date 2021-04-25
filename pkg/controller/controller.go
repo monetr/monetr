@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"net/http"
@@ -107,6 +108,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(c.loggingMiddleware)
 		p.OnAnyErrorCode(func(ctx *context.Context) {
 			if err := ctx.GetErr(); err != nil {
+				sentry.CaptureException(err)
 				ctx.JSON(map[string]interface{}{
 					"error": err.Error(),
 				})
