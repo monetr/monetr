@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const metricsNamespace = "monetr"
+
 type Stats struct {
 	mux                 *http.ServeMux
 	server              *http.Server
@@ -32,7 +34,7 @@ func NewStats() *Stats {
 	return &Stats{
 		mux: mux,
 		JobsEnqueued: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   "harder",
+			Namespace:   metricsNamespace,
 			Name:        "jobs_enqueued",
 			Help:        "Number of jobs that have been enqueued for background work.",
 			ConstLabels: map[string]string{},
@@ -40,7 +42,7 @@ func NewStats() *Stats {
 			"job_name",
 		}),
 		JobsProcessed: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   "harder",
+			Namespace:   metricsNamespace,
 			Name:        "jobs_processed",
 			Help:        "Number of jobs that have been processed, processed jobs are jobs that have succeeded or failed.",
 			ConstLabels: map[string]string{},
@@ -48,7 +50,7 @@ func NewStats() *Stats {
 			"job_name",
 		}),
 		JobsFailed: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   "harder",
+			Namespace:   metricsNamespace,
 			Name:        "jobs_failed",
 			Help:        "Number of jobs that have failed.",
 			ConstLabels: map[string]string{},
@@ -56,7 +58,7 @@ func NewStats() *Stats {
 			"job_name",
 		}),
 		JobRunTime: promauto.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: "harder",
+			Namespace: metricsNamespace,
 			Name:      "job_run_time",
 			Help:      "The amount of time it takes for jobs to run.",
 			Buckets:   []float64{1, 50, 100, 500, 1000, 10000},
@@ -65,7 +67,7 @@ func NewStats() *Stats {
 			"account_id",
 		}),
 		Queries: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   "harder",
+			Namespace:   metricsNamespace,
 			Name:        "queries",
 			Help:        "Number of SQL queries issued. This excludes BEGIN, COMMIT and ROLLBACK. Essentially each PostgreSQL round trip.",
 			ConstLabels: map[string]string{},
@@ -73,7 +75,7 @@ func NewStats() *Stats {
 			"stmt",
 		}),
 		HTTPRequests: promauto.NewCounterVec(prometheus.CounterOpts{
-			Namespace:   "harder",
+			Namespace:   metricsNamespace,
 			Name:        "http_requests",
 			Help:        "Number of HTTP requests received.",
 			ConstLabels: map[string]string{},
@@ -83,7 +85,7 @@ func NewStats() *Stats {
 			"status",
 		}),
 		HTTPResponseTime: promauto.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: "harder",
+			Namespace: metricsNamespace,
 			Name:      "http_response_time",
 			Help:      "Time it takes for an HTTP request to be completed.",
 			Buckets:   []float64{1, 50, 100, 500, 1000, 10000},

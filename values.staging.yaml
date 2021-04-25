@@ -10,6 +10,8 @@ imagePullSecrets:
 
 podAnnotations:
   monetr.dev/branch: "" # Branch of the deployment will be put here
+  prometheus.io/scrape: 'true'
+  prometheus.io/port: '9000'
 
 ingress:
   enabled: true
