@@ -124,6 +124,7 @@ Yeet Coverage:
     - apk add make git
 
 Docker:
+  when: manual
   needs: []
   stage: Publish Container
   <<: [ *docker_template ]
