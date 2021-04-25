@@ -176,12 +176,12 @@ Documentation:
   only:
     refs:
       - main
-  image: proxy.monetr.dev/docker:19.03.13
+  image: proxy.monetr.dev/docker:19.03.15
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   services:
-    - name: proxy.monetr.dev/docker:19.03.13-dind
+    - name: proxy.monetr.dev/docker:19.03.15-dind
       command: [ "--registry-mirror", "https://proxy.monetr.dev" ]
       alias: docker
   tags:
