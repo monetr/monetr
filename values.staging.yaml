@@ -91,6 +91,8 @@ api:
     enabled: false
   reCaptcha:
     enabled: true
+    verifyLogin: true
+    verifyRegister: true
   plaid:
     environment: "https://sandbox.plaid.com"
   cors:

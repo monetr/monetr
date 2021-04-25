@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(4);
+SELECT plan(10);
 
 SELECT has_table('accounts');
 SELECT has_table('bank_accounts');
