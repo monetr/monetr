@@ -125,7 +125,7 @@ export class LoginView extends Component {
               <Container maxWidth="xs" className={ "login-root" }>
                 <Grow in>
                   <Card>
-                    <CardHeader title="Harder Than It Needs To Be" subheader="Login"/>
+                    <CardHeader title="monetr" subheader="Login"/>
                     <CardContent>
                       <Grid container spacing={ 1 }>
                         <Grid item xs={ 12 }>

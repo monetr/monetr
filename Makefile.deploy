@@ -1,0 +1,12 @@
+
+default-deploy:
+	$(error Please run a specific target)
+
+ENVIRONMENT = Staging
+ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
+BUCKET_NAME = gs://monetr-$(ENV_LOWER)
+BUILD_DIR = $(PWD)/build
+
+deploy:
+	cp $(PWD)/config.$(ENV_LOWER).json $(BUILD_DIR)/config.json
+	gsutil cp -e -r -z js $(BUILD_DIR)/* $(BUCKET_NAME)

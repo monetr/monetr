@@ -144,6 +144,9 @@ module.exports = (env, argv) => {
       // in `package.json`, in which case it will be the pathname of that URL.
       new InterpolateHtmlPlugin(HtmlWebpackPlugin, env),
       new ModuleNotFoundPlugin(resolveApp('.')),
+      // new webpack.optimize.ModuleConcatenationPlugin(),
+      // I'm stupid and don't know how to make this better. So just uncomment this when you need it.
+      // new WebpackBundleAnalyzer(),
     ],
     optimization: {
       runtimeChunk: 'single',

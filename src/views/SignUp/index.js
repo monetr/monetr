@@ -179,7 +179,7 @@ export class SignUpView extends Component {
               <Container maxWidth="xs" className={ "login-root" }>
                 <Grow in>
                   <Card>
-                    <CardHeader title="Harder Than It Needs To Be" subheader="Sign Up"/>
+                    <CardHeader title="monetr" subheader="Sign Up"/>
                     <CardContent>
                       <Grid container spacing={ 1 }>
                         <Grid item xs={ 12 }>
