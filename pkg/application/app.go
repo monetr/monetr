@@ -1,6 +1,7 @@
 package application
 
 import (
+	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/config"
@@ -12,6 +13,13 @@ type Controller interface {
 
 func NewApp(configuration config.Configuration, controllers ...Controller) *iris.Application {
 	app := iris.New()
+
+	if configuration.Sentry.Enabled {
+		app.Use(sentryiris.New(sentryiris.Options{
+			Repanic: false,
+		}))
+	}
+
 	app.UseRouter(cors.New(cors.Options{
 		AllowedOrigins:  configuration.CORS.AllowedOrigins,
 		AllowOriginFunc: nil,

@@ -115,3 +115,5 @@ api:
     namespace: monetr
   logging:
     level: trace
+  sentry:
+    enabled: false

@@ -1,7 +1,9 @@
 package controller
 
 import (
+	gocontext "context"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/hash"
 	"net/http"
 	"strings"
@@ -17,6 +19,9 @@ type RegistrationClaims struct {
 }
 
 func (c *Controller) registerEndpoint(ctx *context.Context) {
+	goCtx := ctx.Request().Context()
+	span := sentry.StartSpan(goCtx, "register")
+	defer span.Finish()
 	var registerRequest struct {
 		Email     string `json:"email"`
 		Password  string `json:"password"`
@@ -33,7 +38,7 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateCaptchaMaybe(registerRequest.Captcha); err != nil {
+	if err := c.validateCaptchaMaybe(goCtx, registerRequest.Captcha); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 		return
 	}
@@ -219,11 +224,14 @@ func (c *Controller) validateRegistration(email, password, firstName string) err
 	return nil
 }
 
-func (c *Controller) validateCaptchaMaybe(captcha string) error {
+func (c *Controller) validateCaptchaMaybe(ctx gocontext.Context, captcha string) error {
 	if !c.configuration.ReCAPTCHA.Enabled {
 		// If it is disabled then we don't need to do anything.
 		return nil
 	}
+
+	span := sentry.StartSpan(ctx, "validate ReCAPTCHA")
+	defer span.Finish()
 
 	if captcha == "" {
 		return errors.Errorf("captcha is not valid")

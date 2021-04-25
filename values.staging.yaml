@@ -79,6 +79,13 @@ api:
         secretKeyRef:
           key: MONETR_PLAID_CLIENT_SECRET
           name: rest-api-config-secrets
+    - name: MONETR_ENVIRONMENT
+      value: "staging"
+    - name: MONETR_SENTRY_DSN
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_SENTRY_DSN
+          name: monetr-staging-sentry
   uiDomainName: app.staging.monetr.dev
   apiDomainName: api.staging.monetr.dev
   allowSignUp: true
@@ -105,3 +112,5 @@ api:
     port: 6379
   logging:
     level: trace
+  sentry:
+    enabled: true

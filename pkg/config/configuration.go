@@ -10,6 +10,7 @@ const EnvironmentPrefix = "MONETR"
 
 type Configuration struct {
 	Name           string
+	Environment    string
 	UIDomainName   string
 	APIDomainName  string
 	AllowSignUp    bool
@@ -23,6 +24,7 @@ type Configuration struct {
 	Redis          Redis
 	SMTP           SMTPClient
 	SendGrid       SendGrid
+	Sentry         Sentry
 }
 
 type JWT struct {
@@ -103,6 +105,11 @@ type Logging struct {
 	Level string
 }
 
+type Sentry struct {
+	Enabled bool
+	DSN     string
+}
+
 func LoadConfiguration(configFilePath *string) Configuration {
 	v := viper.GetViper()
 
@@ -135,6 +142,7 @@ func LoadConfiguration(configFilePath *string) Configuration {
 
 func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Name", "monetr")
+	v.SetDefault("Environment", "development")
 	v.SetDefault("UIDomainName", "localhost:3000")
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
@@ -149,6 +157,7 @@ func setupDefaults(v *viper.Viper) {
 
 func setupEnv(v *viper.Viper) {
 	v.BindEnv("Name", "MONETR_NAME")
+	v.BindEnv("Environment", "MONETR_ENVIRONMENT")
 	v.BindEnv("UIDomainName", "MONETR_UI_DOMAIN_NAME")
 	v.BindEnv("APIDomainName", "MONETR_API_DOMAIN_NAME")
 	v.BindEnv("AllowSignUp", "MONETR_ALLOW_SIGN_UP")
@@ -176,4 +185,6 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Redis.Address", "MONETR_REDIS_ADDRESS")
 	v.BindEnv("Redis.Port", "MONETR_REDIS_PORT")
 	v.BindEnv("Redis.Namespace", "MONETR_REDIS_NAMESPACE")
+	v.BindEnv("Sentry.Enabled", "MONETR_SENTRY_ENABLED")
+	v.BindEnv("Sentry.DSN", "MONETR_SENTRY_DSN")
 }

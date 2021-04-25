@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/hash"
 	"net/http"
 	"strings"
@@ -31,6 +32,9 @@ type HarderClaims struct {
 // @Router /authentication/login [post]
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx *context.Context) {
+	goCtx := ctx.Request().Context()
+	span := sentry.StartSpan(goCtx, "login")
+	defer span.Finish()
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -44,7 +48,7 @@ func (c *Controller) loginEndpoint(ctx *context.Context) {
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateCaptchaMaybe(loginRequest.Captcha); err != nil {
+	if err := c.validateCaptchaMaybe(goCtx, loginRequest.Captcha); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 		return
 	}

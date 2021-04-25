@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/cache"
@@ -13,6 +14,8 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/cobra"
 	"net/http"
+	"os"
+	"time"
 )
 
 func init() {
@@ -48,6 +51,27 @@ func RunServer() error {
 	configuration := config.LoadConfiguration(configPath)
 
 	log := logging.NewLogger()
+
+	if configuration.Sentry.Enabled {
+		hostname, err := os.Hostname()
+		if err != nil {
+			log.WithError(err).Warn("failed to get hostname for sentry")
+		}
+
+		err = sentry.Init(sentry.ClientOptions{
+			Dsn:              configuration.Sentry.DSN,
+			Debug:            false,
+			AttachStacktrace: true,
+			ServerName:       hostname,
+			Release:          "latest",
+			Dist:             "",
+			Environment:      configuration.Environment,
+		})
+		if err != nil {
+			log.WithError(err).Error("failed to init sentry")
+		}
+		defer sentry.Flush(10 * time.Second)
+	}
 
 	pgOptions := &pg.Options{
 		Addr: fmt.Sprintf("%s:%d",
