@@ -87,8 +87,6 @@ func (r *repositoryBase) GetMe() (*models.User, error) {
 	var user models.User
 	err := r.txn.Model(&user).
 		Relation("Login").
-		Relation("Login.EmailVerifications").
-		Relation("Login.PhoneVerifications").
 		Relation("Account").
 		Where(`"user"."user_id" = ? AND "user"."account_id" = ?`, r.userId, r.accountId).
 		Limit(1).
