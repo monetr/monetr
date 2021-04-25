@@ -63,12 +63,12 @@ api:
       valueFrom:
         secretKeyRef:
           key: MONETR_CAPTCHA_PUBLIC_KEY
-          name: rest-api-config-secrets
+          name: monetr-staging-recaptcha
     - name: MONETR_CAPTCHA_PRIVATE_KEY
       valueFrom:
         secretKeyRef:
           key: MONETR_CAPTCHA_PRIVATE_KEY
-          name: rest-api-config-secrets
+          name: monetr-staging-recaptcha
     - name: MONETR_PLAID_CLIENT_ID
       valueFrom:
         secretKeyRef:
