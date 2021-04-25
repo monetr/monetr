@@ -108,31 +108,46 @@ Yeet Coverage:
   only:
     refs:
       - main
-  image: proxy.monetr.dev/docker:19.03.13
+  image: proxy.monetr.dev/docker:19.03.15
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
   services:
-    - name: proxy.monetr.dev/docker:19.03.13-dind
+    - name: proxy.monetr.dev/docker:19.03.15-dind
       command: [ "--registry-mirror", "https://proxy.monetr.dev" ]
       alias: docker
   tags:
     - k8s:shared-docker
     - arch:amd64
   before_script:
-    - for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
+    - apk add make git
 
 Docker:
-  needs:
-    - "Test"
-    - "Build Production"
+  needs: []
   stage: Publish Container
   <<: [ *docker_template ]
   script:
-    - docker build -t containers.monetr.dev/web-ui:$CI_COMMIT_SHORT_SHA -f Dockerfile .
+    - make docker-build
+
+Deploy - Staging:
+  only:
+    refs:
+      - main
+  environment:
+    name: Staging
+    url: https://app.staging.monetr.dev
+  needs:
+    - "Build Production"
+  stage: Deploy
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - k8s:shared
+  before_script:
+    - gcloud auth activate-service-account --key-file $GCS_SERVICE_ACCOUNT
+  script:
+    - make deploy
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
       - ./build
     policy: pull
-

@@ -21,3 +21,4 @@ build: dependencies clean
 	cp $(PUBLIC_DIR)/robots.txt $(BUILD_DIR)/
 
 include Makefile.deploy
+include Makefile.docker
