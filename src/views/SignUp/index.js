@@ -274,7 +274,7 @@ export class SignUpView extends Component {
                         onClick={ handleSubmit }
                         disabled={ this.cannotSubmit(isSubmitting, values) }
                       >
-                        Sign Up
+                        Register
                       </Button>
                     </CardActions>
                   </Card>
