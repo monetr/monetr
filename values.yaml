@@ -117,3 +117,5 @@ api:
     level: trace
   sentry:
     enabled: false
+    sampleRate: 0.0
+    traceSampleRate: 0.0

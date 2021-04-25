@@ -106,8 +106,10 @@ type Logging struct {
 }
 
 type Sentry struct {
-	Enabled bool
-	DSN     string
+	Enabled         bool
+	DSN             string
+	SampleRate      float64
+	TraceSampleRate float64
 }
 
 func LoadConfiguration(configFilePath *string) Configuration {
@@ -187,4 +189,6 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Redis.Namespace", "MONETR_REDIS_NAMESPACE")
 	v.BindEnv("Sentry.Enabled", "MONETR_SENTRY_ENABLED")
 	v.BindEnv("Sentry.DSN", "MONETR_SENTRY_DSN")
+	v.BindEnv("Sentry.SampleRate", "MONETR_SENTRY_SAMPLE_RATE")
+	v.BindEnv("Sentry.TraceSampleRate", "MONETR_SENTRY_TRACE_SAMPLE_RATE")
 }

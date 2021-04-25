@@ -64,9 +64,10 @@ func RunServer() error {
 			Debug:            false,
 			AttachStacktrace: true,
 			ServerName:       hostname,
-			Release:          "latest",
 			Dist:             "",
 			Environment:      configuration.Environment,
+			SampleRate:       configuration.Sentry.SampleRate,
+			TracesSampleRate: configuration.Sentry.TraceSampleRate,
 		})
 		if err != nil {
 			log.WithError(err).Error("failed to init sentry")

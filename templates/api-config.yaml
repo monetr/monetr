@@ -26,3 +26,5 @@ data:
   MONETR_REDIS_PORT: {{ quote .Values.api.redis.port }}
   MONETR_REDIS_NAMESPACE: {{ quote .Values.api.redis.namespace }}
   MONETR_SENTRY_ENABLED: {{ quote .Values.api.sentry.enabled }}
+  MONETR_SENTRY_SAMPLE_RATE: {{ quote .Values.api.sentry.sampleRate }}
+  MONETR_SENTRY_TRACE_SAMPLE_RATE: {{ quote .Values.api.sentry.traceSampleRate }}
