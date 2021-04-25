@@ -5,6 +5,7 @@ stages:
   - Coverage
   - Build Container
   - Publish Container
+  - Deploy
 
 workflow:
   rules:
