@@ -4,7 +4,7 @@ WORKDIR /build
 RUN go get ./...
 RUN go build -o /bin/monetr github.com/monetrapp/rest-api/pkg/cmd
 
-FROM ubuntu:21.04
+FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y tzdata ca-certificates
 
