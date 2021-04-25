@@ -20,6 +20,9 @@ LABEL org.opencontainers.image.title="REST API"
 LABEL org.opencontainers.image.description="monetr's REST API"
 
 COPY --from=builder /bin/monetr /usr/bin/monetr
+
+RUN apt-get update && apt-get install -y ca-certificates
+
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
 ENTRYPOINT ["/usr/bin/monetr"]
