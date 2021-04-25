@@ -20,7 +20,7 @@ type RegistrationClaims struct {
 
 func (c *Controller) registerEndpoint(ctx *context.Context) {
 	goCtx := ctx.Request().Context()
-	span := sentry.StartSpan(goCtx, "register")
+	span := sentry.StartSpan(goCtx, "register", sentry.TransactionName("POST /authentication/register"))
 	defer span.Finish()
 	var registerRequest struct {
 		Email     string `json:"email"`

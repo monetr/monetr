@@ -33,7 +33,7 @@ type HarderClaims struct {
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx *context.Context) {
 	goCtx := ctx.Request().Context()
-	span := sentry.StartSpan(goCtx, "login")
+	span := sentry.StartSpan(goCtx, "login", sentry.TransactionName("POST /authentication/login"))
 	defer span.Finish()
 	var loginRequest struct {
 		Email    string `json:"email"`
