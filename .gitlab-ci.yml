@@ -32,6 +32,8 @@ Release Testing:
   needs: [ ]
   stage: Release
   image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - k8s:shared
   script:
     - git --no-pager log --oneline $(git describe --tags --abbrev=0 @^)..@
 
