@@ -12,6 +12,7 @@ workflow:
       when: never
 
 stages:
+  - Release
   - Dependencies
   - Build
   - Test
@@ -25,6 +26,14 @@ stages:
 variables:
   GO111MODULE: 'on'
   GOFLAGS: '-mod=vendor'
+
+Release Testing:
+  allow_failure: true
+  needs: [ ]
+  stage: Release
+  image: containers.monetr.dev/ubuntu:20.04
+  script:
+    - git --no-pager log --oneline $(git describe --tags --abbrev=0 @^)..@
 
 Go Dependencies:
   needs: [ ]
