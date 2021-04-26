@@ -16,6 +16,7 @@ const (
 	accountIdContextKey = "_accountId_"
 	userIdContextKey    = "_userId_"
 	loginIdContextKey   = "_loginId_"
+	spanContextKey      = "_span_"
 )
 
 func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
@@ -65,7 +66,7 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	var token string
 
 	token = ctx.GetCookie("M-Token", context.CookieSecure)
-	if token ==  "" {
+	if token == "" {
 		token = ctx.GetHeader(TokenName)
 	}
 

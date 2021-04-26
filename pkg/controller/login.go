@@ -1,19 +1,15 @@
 package controller
 
 import (
-	"github.com/getsentry/sentry-go"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/go-pg/pg/v10"
+	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
+	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/pkg/errors"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
-
-	"github.com/go-pg/pg/v10"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/pkg/errors"
-
-	"github.com/kataras/iris/v12/context"
 )
 
 type HarderClaims struct {
@@ -31,10 +27,7 @@ type HarderClaims struct {
 // @Produce json
 // @Router /authentication/login [post]
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) loginEndpoint(ctx *context.Context) {
-	goCtx := ctx.Request().Context()
-	span := sentry.StartSpan(goCtx, "login", sentry.TransactionName("POST /authentication/login"))
-	defer span.Finish()
+func (c *Controller) loginEndpoint(ctx iris.Context) {
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -48,7 +41,7 @@ func (c *Controller) loginEndpoint(ctx *context.Context) {
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateCaptchaMaybe(span.Context(), loginRequest.Captcha); err != nil {
+	if err := c.validateCaptchaMaybe(c.getContext(ctx), loginRequest.Captcha); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 		return
 	}
@@ -63,8 +56,8 @@ func (c *Controller) loginEndpoint(ctx *context.Context) {
 
 	hashedPassword := hash.HashPassword(loginRequest.Email, loginRequest.Password)
 	var login models.Login
-	if err := c.db.RunInTransaction(ctx.Request().Context(), func(txn *pg.Tx) error {
-		return txn.Model(&login).
+	if err := c.db.RunInTransaction(c.getContext(ctx), func(txn *pg.Tx) error {
+		return txn.ModelContext(c.getContext(ctx), &login).
 			Relation("Users").
 			Relation("Users.Account").
 			Where(`"login"."email" = ? AND "login"."password_hash" = ?`, loginRequest.Email, hashedPassword).

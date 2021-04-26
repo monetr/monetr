@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/plaid/plaid-go/plaid"
@@ -93,7 +93,7 @@ func NewController(
 // @name H-Token
 func (c *Controller) RegisterRoutes(app *iris.Application) {
 	if c.stats != nil {
-		app.UseGlobal(func(ctx *context.Context) {
+		app.UseGlobal(func(ctx iris.Context) {
 			start := time.Now()
 			defer func() {
 				c.stats.FinishedRequest(ctx, time.Since(start))
@@ -107,7 +107,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 	app.PartyFunc(APIPath, func(p router.Party) {
 		p.Use(c.loggingMiddleware)
-		p.OnAnyErrorCode(func(ctx *context.Context) {
+		p.OnAnyErrorCode(func(ctx iris.Context) {
 			if err := ctx.GetErr(); err != nil {
 				sentry.CaptureException(err)
 				ctx.JSON(map[string]interface{}{
@@ -115,7 +115,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				})
 			}
 		})
-		p.OnErrorCode(http.StatusNotFound, func(ctx *context.Context) {
+		p.OnErrorCode(http.StatusNotFound, func(ctx iris.Context) {
 			if err := ctx.GetErr(); err == nil {
 				ctx.JSON(map[string]interface{}{
 					"path":  ctx.Path(),
@@ -134,11 +134,13 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		}
 
 		// Trace API calls to sentry
-		p.Use(func(ctx *context.Context) {
+		p.Use(func(ctx iris.Context) {
 			goCtx := ctx.Request().Context()
 			name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
 			span := sentry.StartSpan(goCtx, ctx.Method(), sentry.TransactionName(name))
 			defer span.Finish()
+
+			ctx.Values().Set(spanContextKey, span.Context())
 
 			ctx.Next()
 		})
@@ -181,11 +183,16 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 // @Produce json
 // @Router /health [get]
 // @Success 200 {object} swag.HealthResponse
-func (c *Controller) getHealth(ctx *context.Context) {
+func (c *Controller) getHealth(ctx iris.Context) {
 	err := c.db.Ping(ctx.Request().Context())
 
 	ctx.JSON(map[string]interface{}{
 		"dbHealthy":  err == nil,
 		"apiHealthy": true,
 	})
+}
+
+
+func (c *Controller) getContext(ctx iris.Context) context.Context {
+	return ctx.Values().Get(spanContextKey).(context.Context)
 }

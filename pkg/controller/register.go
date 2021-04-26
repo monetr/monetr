@@ -1,16 +1,15 @@
 package controller
 
 import (
-	gocontext "context"
+	"context"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/getsentry/sentry-go"
+	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
+	"github.com/pkg/errors"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/kataras/iris/v12/context"
-	"github.com/pkg/errors"
 )
 
 type RegistrationClaims struct {
@@ -18,7 +17,7 @@ type RegistrationClaims struct {
 	jwt.StandardClaims
 }
 
-func (c *Controller) registerEndpoint(ctx *context.Context) {
+func (c *Controller) registerEndpoint(ctx iris.Context) {
 	goCtx := ctx.Request().Context()
 	span := sentry.StartSpan(goCtx, "register", sentry.TransactionName("POST /authentication/register"))
 	defer span.Finish()
@@ -154,7 +153,7 @@ func (c *Controller) registerEndpoint(ctx *context.Context) {
 	})
 }
 
-func (c *Controller) verifyEndpoint(ctx *context.Context) {
+func (c *Controller) verifyEndpoint(ctx iris.Context) {
 	var verifyRequest struct {
 		Token string `json:"token"`
 	}
@@ -224,7 +223,7 @@ func (c *Controller) validateRegistration(email, password, firstName string) err
 	return nil
 }
 
-func (c *Controller) validateCaptchaMaybe(ctx gocontext.Context, captcha string) error {
+func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) error {
 	if !c.configuration.ReCAPTCHA.Enabled {
 		// If it is disabled then we don't need to do anything.
 		return nil
