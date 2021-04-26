@@ -76,7 +76,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 
 	unformattedQuery, err := event.UnformattedQuery()
 	if err == nil && len(unformattedQuery) > 0 {
-		span := sentry.StartSpan(ctx, queryType)
+		span := sentry.StartSpan(ctx, queryType, sentry.TransactionName(string(unformattedQuery)))
 		span.StartTime = event.StartTime
 		span.Data = map[string]interface{}{
 			"query": string(unformattedQuery),
