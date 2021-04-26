@@ -45,6 +45,12 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 	case string:
 		query = strings.TrimSpace(query)
 		query = strings.ReplaceAll(query, "\n", " ")
+
+		// Don't do anything with health check queries.
+		if strings.ToLower(query) == "select 1" {
+			return nil
+		}
+
 		switch strings.ToUpper(query) {
 		case "BEGIN", "COMMIT", "ROLLBACK":
 			// Do nothing we don't want to count these.
