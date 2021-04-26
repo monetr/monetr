@@ -2,7 +2,6 @@ package logging
 
 import (
 	"context"
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetrapp/rest-api/pkg/metrics"
@@ -74,15 +73,15 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 		"stmt": queryType,
 	}).Inc()
 
-	unformattedQuery, err := event.UnformattedQuery()
-	if err == nil && len(unformattedQuery) > 0 {
-		span := sentry.StartSpan(ctx, queryType, sentry.TransactionName(string(unformattedQuery)))
-		span.StartTime = event.StartTime
-		span.Data = map[string]interface{}{
-			"query": string(unformattedQuery),
-		}
-		defer span.Finish()
-	}
+	//unformattedQuery, err := event.UnformattedQuery()
+	//if err == nil && len(unformattedQuery) > 0 {
+	//	span := sentry.StartSpan(ctx, queryType, sentry.TransactionName(string(unformattedQuery)))
+	//	span.StartTime = event.StartTime
+	//	span.Data = map[string]interface{}{
+	//		"query": string(unformattedQuery),
+	//	}
+	//	defer span.Finish()
+	//}
 
 	return nil
 }
