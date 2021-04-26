@@ -11,7 +11,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.4.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/flosch/pongo2 v0.0.0-20190707114632-bbf5a6c351f4 // indirect
-	github.com/getsentry/sentry-go v0.10.0 // indirect
+	github.com/getsentry/sentry-go v0.10.0
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-pg/migrations/v8 v8.1.0

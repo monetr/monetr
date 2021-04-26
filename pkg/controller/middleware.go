@@ -6,8 +6,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 )
 
@@ -62,7 +62,13 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 }
 
 func (c *Controller) authenticationMiddleware(ctx *context.Context) {
-	token := ctx.GetHeader(TokenName)
+	var token string
+
+	token = ctx.GetCookie("M-Token", context.CookieSecure)
+	if token ==  "" {
+		token = ctx.GetHeader(TokenName)
+	}
+
 	if token == "" {
 		c.returnError(ctx, http.StatusForbidden, "unauthorized")
 		return

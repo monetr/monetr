@@ -48,7 +48,7 @@ func (c *Controller) loginEndpoint(ctx *context.Context) {
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateCaptchaMaybe(goCtx, loginRequest.Captcha); err != nil {
+	if err := c.validateCaptchaMaybe(span.Context(), loginRequest.Captcha); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 		return
 	}

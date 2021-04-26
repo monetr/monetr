@@ -6,6 +6,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"net/http"
 	"net/smtp"
+	"strings"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -131,6 +132,16 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			// Webhooks use their own authentication, so we want to declare this first.
 			p.Post("/plaid/webhook/{identifier:string}", c.handlePlaidWebhook)
 		}
+
+		// Trace API calls to sentry
+		p.Use(func(ctx *context.Context) {
+			goCtx := ctx.Request().Context()
+			name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
+			span := sentry.StartSpan(goCtx, ctx.Method(), sentry.TransactionName(name))
+			defer span.Finish()
+
+			ctx.Next()
+		})
 
 		// For the following endpoints we want to have a repository available to us.
 		p.PartyFunc("/", func(repoParty router.Party) {
