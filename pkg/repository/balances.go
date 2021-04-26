@@ -1,6 +1,9 @@
 package repository
 
-import "github.com/pkg/errors"
+import (
+	"context"
+	"github.com/pkg/errors"
+)
 
 type Balances struct {
 	tableName string `pg:"balances"`
@@ -14,9 +17,9 @@ type Balances struct {
 	Goals         int64  `json:"goals" pg:"goals"`
 }
 
-func (r *repositoryBase) GetBalances(bankAccountId uint64) (*Balances, error) {
+func (r *repositoryBase) GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error) {
 	var balance Balances
-	err := r.txn.Model(&balance).
+	err := r.txn.ModelContext(ctx, &balance).
 		Where(`"balances"."account_id" = ?`, r.AccountId()).
 		Where(`"balances"."bank_account_id" = ?`, bankAccountId).
 		Limit(1).

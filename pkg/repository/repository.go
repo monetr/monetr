@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -19,12 +20,12 @@ type Repository interface {
 	CreatePlaidLink(link *models.PlaidLink) error
 	CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 	GetAccount() (*models.Account, error)
-	GetBalances(bankAccountId uint64) (*Balances, error)
+	GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error)
 	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
 	GetSpendingById(bankAccountId, expenseId uint64) (*models.Spending, error)
-	GetSpending(bankAccountId uint64) ([]models.Spending, error)
+	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
 	GetSpendingByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)

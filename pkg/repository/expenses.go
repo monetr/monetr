@@ -1,14 +1,15 @@
 package repository
 
 import (
+	"context"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"time"
 )
 
-func (r *repositoryBase) GetSpending(bankAccountId uint64) ([]models.Spending, error) {
+func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error) {
 	var result []models.Spending
-	err := r.txn.Model(&result).
+	err := r.txn.ModelContext(ctx, &result).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
 		Select(&result)
