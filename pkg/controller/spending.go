@@ -41,7 +41,7 @@ func (c *Controller) getSpending(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	expenses, err := repo.GetSpending(bankAccountId)
+	expenses, err := repo.GetSpending(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "could not retrieve expenses")
 		return
@@ -191,7 +191,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	balances, err := repo.GetBalances(bankAccountId)
+	balances, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to get balances for transfer")
 		return
@@ -280,7 +280,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		return
 	}
 
-	balance, err := repo.GetBalances(bankAccountId)
+	balance, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "could not get updated balances")
 		return

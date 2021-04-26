@@ -228,7 +228,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		return
 	}
 
-	balance, err := repo.GetBalances(bankAccountId)
+	balance, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "could not get updated balances")
 		return

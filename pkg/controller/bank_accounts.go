@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"github.com/monetrapp/rest-api/pkg/models"
-	_ "github.com/monetrapp/rest-api/pkg/swag"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetrapp/rest-api/pkg/models"
+	_ "github.com/monetrapp/rest-api/pkg/swag"
 	"net/http"
 	"strings"
 )
@@ -57,7 +57,7 @@ func (c *Controller) getBalances(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	balances, err := repo.GetBalances(bankAccountId)
+	balances, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve balances")
 		return
