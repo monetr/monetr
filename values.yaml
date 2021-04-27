@@ -119,3 +119,6 @@ api:
     enabled: false
     sampleRate: 0.0
     traceSampleRate: 0.0
+  stripe:
+    enabled: false
+    apiKey: ""

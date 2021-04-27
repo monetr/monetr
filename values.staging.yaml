@@ -41,6 +41,8 @@ nodeSelector:
 api:
   name: monetr (staging)
   customEnv:
+    - name: MONETR_ENVIRONMENT
+      value: "staging"
     - name: MONETR_PG_PASSWORD
       valueFrom:
         secretKeyRef:
@@ -81,13 +83,16 @@ api:
         secretKeyRef:
           key: MONETR_PLAID_CLIENT_SECRET
           name: rest-api-config-secrets
-    - name: MONETR_ENVIRONMENT
-      value: "staging"
     - name: MONETR_SENTRY_DSN
       valueFrom:
         secretKeyRef:
           key: MONETR_SENTRY_DSN
           name: monetr-staging-sentry
+    - name: MONETR_STRIPE_API_KEY
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_STRIPE_API_KEY
+          name: monetr-staging-stripe
   uiDomainName: app.staging.monetr.dev
   apiDomainName: api.staging.monetr.dev
   allowSignUp: true
@@ -118,3 +123,5 @@ api:
     enabled: true
     sampleRate: 1.0
     traceSampleRate: 1.0
+  stripe:
+    enabled: true
