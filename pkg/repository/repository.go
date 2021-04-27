@@ -49,7 +49,7 @@ type Repository interface {
 }
 
 type UnauthenticatedRepository interface {
-	CreateLogin(email, hashedPassword string, isEnabled bool) (*models.Login, error)
+	CreateLogin(email, hashedPassword string, firstName, lastName string, isEnabled bool) (*models.Login, error)
 	CreateAccount(timezone *time.Location) (*models.Account, error)
 	CreateUser(loginId, accountId uint64, firstName, lastName string) (*models.User, error)
 

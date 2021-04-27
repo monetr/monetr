@@ -105,6 +105,8 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	login, err := repository.CreateLogin(
 		registerRequest.Email,
 		hashedPassword,
+		registerRequest.FirstName,
+		registerRequest.LastName,
 		!(c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails),
 	)
 	if err != nil {

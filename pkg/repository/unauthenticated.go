@@ -18,11 +18,13 @@ type unauthenticatedRepo struct {
 }
 
 func (u *unauthenticatedRepo) CreateLogin(
-	email, hashedPassword string, isEnabled bool,
+	email, hashedPassword string, firstName, lastName string, isEnabled bool,
 ) (*models.Login, error) {
 	login := &models.Login{
 		Email:        strings.ToLower(email),
 		PasswordHash: hashedPassword,
+		FirstName:    firstName,
+		LastName:     lastName,
 		IsEnabled:    isEnabled,
 	}
 	count, err := u.txn.Model(login).
