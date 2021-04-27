@@ -88,7 +88,7 @@ export class FirstTimeSetup extends Component {
     return (
       <Fragment>
         <Grid item xs={ 12 }>
-          <Typography variant="h5">Welcome to Harder Than It Needs To Be</Typography>
+          <Typography variant="h5">Welcome to monetr!</Typography>
           <Typography>
             To continue you will need to setup a bank account. You can setup a manual bank account where all
             transactions and balances are entered manually. Or you can link your bank account with our
