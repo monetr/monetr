@@ -37,11 +37,13 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 	err := db.RunInTransaction(context.Background(), func(txn *pg.Tx) error {
 		email := GivenIHaveAnEmail(t)
 		login := models.Login{
-			Email:              email,
-			PasswordHash:       hash.HashPassword(email, gofakeit.Password(true, true, true, true, false, 16)),
-			IsEnabled:          true,
-			IsEmailVerified:    true,
-			Users:              nil,
+			Email:           email,
+			PasswordHash:    hash.HashPassword(email, gofakeit.Password(true, true, true, true, false, 16)),
+			IsEnabled:       true,
+			IsEmailVerified: true,
+			FirstName:       gofakeit.FirstName(),
+			LastName:        gofakeit.LastName(),
+			Users:           nil,
 		}
 
 		_, err := txn.Model(&login).Insert(&login)
@@ -57,8 +59,8 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 		user = models.User{
 			LoginId:   login.LoginId,
 			AccountId: account.AccountId,
-			FirstName: gofakeit.FirstName(),
-			LastName:  gofakeit.LastName(),
+			FirstName: login.FirstName,
+			LastName:  login.LastName,
 		}
 
 		_, err = txn.Model(&user).Insert(&user)
