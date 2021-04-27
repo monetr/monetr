@@ -5,6 +5,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
+	stripe_client "github.com/stripe/stripe-go/v72/client"
 	"net/http"
 	"net/smtp"
 	"strings"
@@ -34,6 +35,7 @@ type Controller struct {
 	log            *logrus.Entry
 	job            jobs.JobManager
 	stats          *metrics.Stats
+	stripeClient   *stripe_client.API
 }
 
 func NewController(
@@ -42,6 +44,7 @@ func NewController(
 	job jobs.JobManager,
 	plaidClient *plaid.Client,
 	stats *metrics.Stats,
+	stripeClient *stripe_client.API,
 ) *Controller {
 	logger := logrus.New()
 	level, err := logrus.ParseLevel(configuration.Logging.Level)
@@ -70,6 +73,7 @@ func NewController(
 		log:           entry,
 		job:           job,
 		stats:         stats,
+		stripeClient:  stripeClient,
 	}
 }
 
@@ -191,7 +195,6 @@ func (c *Controller) getHealth(ctx iris.Context) {
 		"apiHealthy": true,
 	})
 }
-
 
 func (c *Controller) getContext(ctx iris.Context) context.Context {
 	return ctx.Values().Get(spanContextKey).(context.Context)

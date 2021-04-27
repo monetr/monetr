@@ -2,11 +2,11 @@ package controller_test
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/kataras/iris/v12/httptest"
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/monetrapp/rest-api/pkg/controller"
 	"github.com/monetrapp/rest-api/pkg/internal/testutils"
-	"github.com/kataras/iris/v12/httptest"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -52,7 +52,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 
 	mockJobManager := testutils.NewMockJobManager()
 
-	c := controller.NewController(configuration, db, mockJobManager, p, nil)
+	c := controller.NewController(configuration, db, mockJobManager, p, nil, nil)
 	app := application.NewApp(configuration, c)
 	return httptest.New(t, app)
 }

@@ -25,6 +25,7 @@ type Configuration struct {
 	SMTP           SMTPClient
 	SendGrid       SendGrid
 	Sentry         Sentry
+	Stripe         Stripe
 }
 
 type JWT struct {
@@ -112,6 +113,11 @@ type Sentry struct {
 	TraceSampleRate float64
 }
 
+type Stripe struct {
+	Enabled bool
+	APIKey string
+}
+
 func LoadConfiguration(configFilePath *string) Configuration {
 	v := viper.GetViper()
 
@@ -191,4 +197,5 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Sentry.DSN", "MONETR_SENTRY_DSN")
 	v.BindEnv("Sentry.SampleRate", "MONETR_SENTRY_SAMPLE_RATE")
 	v.BindEnv("Sentry.TraceSampleRate", "MONETR_SENTRY_TRACE_SAMPLE_RATE")
+	v.BindEnv("Stripe.APIKey", "MONETR_STRIPE_API_KEY")
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
 	"github.com/pkg/errors"
+	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"strings"
 	"time"
@@ -65,6 +66,20 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// TODO (elliotcourant) Add stuff to verify email address by sending an
 	//  email.
+
+	if c.configuration.Stripe.Enabled {
+		name := registerRequest.FirstName + " " + registerRequest.LastName
+		_, err := c.stripeClient.Customers.New(&stripe.CustomerParams{
+			Email:               &registerRequest.Email,
+			Name:                &name,
+		})
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
+			return
+		}
+
+		// TODO Add stripe customer details to the login/user record.
+	}
 
 	// If the registration details provided look good then we want to create an
 	// unauthenticated repository. This will give us some basic database access

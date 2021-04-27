@@ -11,6 +11,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/ui"
 	"github.com/plaid/plaid-go/plaid"
+	stripe_client "github.com/stripe/stripe-go/v72/client"
 )
 
 func getControllers(
@@ -19,9 +20,10 @@ func getControllers(
 	job jobs.JobManager,
 	plaidClient *plaid.Client,
 	stats *metrics.Stats,
+	stripeClient *stripe_client.API,
 ) []application.Controller {
 	return []application.Controller{
-		controller.NewController(configuration, db, job, plaidClient, stats),
+		controller.NewController(configuration, db, job, plaidClient, stats, stripeClient),
 		ui.NewUIController(),
 	}
 }

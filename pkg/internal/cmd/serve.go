@@ -13,6 +13,8 @@ import (
 	"github.com/monetrapp/rest-api/pkg/migrations"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/cobra"
+	"github.com/stripe/stripe-go/v72"
+	stripe_client "github.com/stripe/stripe-go/v72/client"
 	"net/http"
 	"os"
 	"time"
@@ -75,6 +77,12 @@ func RunServer() error {
 		defer sentry.Flush(10 * time.Second)
 	}
 
+	var stripeClient *stripe_client.API
+	if configuration.Stripe.Enabled {
+		log.Trace("stripe is enabled, creating client")
+		stripeClient = stripe_client.New(configuration.Stripe.APIKey, stripe.NewBackends(http.DefaultClient))
+	}
+
 	pgOptions := &pg.Options{
 		Addr: fmt.Sprintf("%s:%d",
 			configuration.PostgreSQL.Address,
@@ -118,7 +126,14 @@ func RunServer() error {
 	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidClient, stats)
 	defer jobManager.Close()
 
-	app := application.NewApp(configuration, getControllers(configuration, db, jobManager, plaidClient, stats)...)
+	app := application.NewApp(configuration, getControllers(
+		configuration,
+		db,
+		jobManager,
+		plaidClient,
+		stats,
+		stripeClient,
+	)...)
 
 	// TODO Allow listen port to be changed via config.
 	return app.Listen(":4000")
