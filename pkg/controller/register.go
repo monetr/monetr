@@ -68,6 +68,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	//  email.
 
 	if c.configuration.Stripe.Enabled {
+		c.log.Debug("creating stripe customer for new user")
 		name := registerRequest.FirstName + " " + registerRequest.LastName
 		_, err := c.stripeClient.Customers.New(&stripe.CustomerParams{
 			Email:               &registerRequest.Email,
