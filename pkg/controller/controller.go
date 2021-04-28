@@ -180,6 +180,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			})
 
 			repoParty.PartyFunc("/jobs", c.handleJobs)
+
+			if c.configuration.Environment != "production" {
+				repoParty.Get("/test/error", func(ctx iris.Context) {
+					c.badRequest(ctx, "this endpoint is meant to be used to test error reporting to sentry")
+				})
+			}
 		})
 	})
 
