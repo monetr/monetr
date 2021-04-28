@@ -536,6 +536,8 @@ github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f/go.mod h1:bwawxfHBFNV
 github.com/pkg/profile v1.2.1/go.mod h1:hJw3o1OdXxsrSjjVksARp5W95eeEaEfptyVZyv6JUPA=
 github.com/plaid/plaid-go v0.0.0-20210415221026-3b4d45b90672 h1:YcQUiV3P86GXlbYET3EHTHLjtqDj1q0Kb96BaxdnKQc=
 github.com/plaid/plaid-go v0.0.0-20210415221026-3b4d45b90672/go.mod h1:c7cDT1Lkcr0AgKJGVIG+oCa07jOrrg4Um8nduQ1eQN0=
+github.com/plaid/plaid-go v0.0.0-20210428192152-db9fc08bf3ea h1:SGviHt4PT3zrMRpNr4YwBasafW3+4mJIPiISLYAsf0A=
+github.com/plaid/plaid-go v0.0.0-20210428192152-db9fc08bf3ea/go.mod h1:c7cDT1Lkcr0AgKJGVIG+oCa07jOrrg4Um8nduQ1eQN0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
