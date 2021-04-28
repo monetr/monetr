@@ -30,22 +30,7 @@ JS Dependencies:
       - ./node_modules
     policy: push
 
-Build Development:
-  needs:
-    - "JS Dependencies"
-  stage: Build Javascript
-  image: containers.monetr.dev/node:15.14.0-buster
-  tags:
-    - k8s:shared
-  script:
-    - yarn build-dev
-  cache:
-    key: ${CI_COMMIT_SHA}
-    paths:
-      - ./node_modules
-    policy: pull
-
-Build Production:
+Build:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
@@ -139,7 +124,7 @@ Deploy - Staging:
     name: Staging
     url: https://app.staging.monetr.dev
   needs:
-    - "Build Production"
+    - "Build"
   stage: Deploy
   image: containers.monetr.dev/ubuntu:20.04
   tags:
