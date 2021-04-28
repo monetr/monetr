@@ -166,12 +166,19 @@ export class LoginView extends Component {
                         component={ RouterLink }
                         variant="outlined"
                         color="secondary"
+                        disabled={ isSubmitting }
                       >
                         Sign Up
                       </Button>
                       }
-                      <Button onClick={ handleSubmit } variant="outlined"
-                              color="primary">Login</Button>
+                      <Button
+                        onClick={ handleSubmit }
+                        variant="outlined"
+                        color="primary"
+                        disabled={ isSubmitting }
+                      >
+                        Login
+                      </Button>
                     </CardActions>
                   </Card>
                 </Grow>

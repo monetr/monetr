@@ -75,8 +75,14 @@ export class AuthenticatedApplication extends Component {
   renderNotSetup = () => {
     return (
       <Switch>
-        <Route>
+        <Route path="/setup">
           <FirstTimeSetup/>
+        </Route>
+        <Route path="/">
+          <Redirect to="/setup"/>
+        </Route>
+        <Route>
+          <Redirect to="/setup"/>
         </Route>
       </Switch>
     )
