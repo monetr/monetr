@@ -88,6 +88,11 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		return
 	}
 
+	if spending.TargetAmount <= 0 {
+		c.badRequest(ctx, "target amount must be greater than 0")
+		return
+	}
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// We need to calculate what the next contribution will be for this new spending. So we need to retrieve it's funding
@@ -117,6 +122,10 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	case models.SpendingTypeGoal:
 		// If the spending is a goal, then we don't need the rule at all.
 		next = spending.NextRecurrence
+		if next.Before(time.Now()) {
+			c.badRequest(ctx, "due date cannot be in the past")
+			return
+		}
 
 		// Goals do not recur.
 		spending.RecurrenceRule = nil
@@ -180,6 +189,11 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	transfer := &SpendingTransfer{}
 	if err := ctx.ReadJSON(transfer); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	if transfer.Amount <= 0 {
+		c.badRequest(ctx, "transfer amount must be greater than 0")
 		return
 	}
 
@@ -330,6 +344,11 @@ func (c *Controller) putSpending(ctx *context.Context) {
 	existingSpending, err := repo.GetSpendingById(bankAccountId, updatedSpending.SpendingId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to find existing spending")
+		return
+	}
+
+	if updatedSpending.TargetAmount <= 0 {
+		c.badRequest(ctx, "target amount must be greater than 0")
 		return
 	}
 
