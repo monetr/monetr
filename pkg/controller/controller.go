@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
+	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
@@ -113,7 +114,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(c.loggingMiddleware)
 		p.OnAnyErrorCode(func(ctx iris.Context) {
 			if err := ctx.GetErr(); err != nil {
-				sentry.CaptureException(err)
+				if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+					_ = hub.CaptureException(err)
+				} else {
+					sentry.CaptureException(err)
+				}
+
 				ctx.JSON(map[string]interface{}{
 					"error": err.Error(),
 				})

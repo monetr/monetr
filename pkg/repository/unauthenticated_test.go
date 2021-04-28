@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetrapp/rest-api/pkg/internal/testutils"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -73,7 +74,14 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
 
 		firstName, lastName := gofakeit.FirstName(), gofakeit.LastName()
-		user, err := repo.CreateUser(login.LoginId, account.AccountId, firstName, lastName)
+		user := models.User{
+			LoginId:          login.LoginId,
+			AccountId:        account.AccountId,
+			FirstName:        firstName,
+			LastName:         lastName,
+			StripeCustomerId: nil,
+		}
+		err = repo.CreateUser(login.LoginId, account.AccountId, &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
 		assert.Greater(t, user.UserId, uint64(0), "userId should be greater than 0")
@@ -95,14 +103,23 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
 
 		firstName, lastName := gofakeit.FirstName(), gofakeit.LastName()
-		user, err := repo.CreateUser(login.LoginId, account.AccountId, firstName, lastName)
+		user := models.User{
+			LoginId:          login.LoginId,
+			AccountId:        account.AccountId,
+			FirstName:        firstName,
+			LastName:         lastName,
+			StripeCustomerId: nil,
+		}
+		err = repo.CreateUser(login.LoginId, account.AccountId, &user)
 		assert.NoError(t, err, "should successfully create user")
 		assert.NotEmpty(t, user, "new user should not be empty")
 		assert.Greater(t, user.UserId, uint64(0), "userId should be greater than 0")
 
 		// Try to create another user with the same login and account, this should fail.
-		userAgain, err := repo.CreateUser(login.LoginId, account.AccountId, firstName, lastName)
+		userAgain := user
+		userAgain.UserId = 0
+		err = repo.CreateUser(login.LoginId, account.AccountId, &userAgain)
 		assert.Error(t, err, "should not create duplicate login for account")
-		assert.Nil(t, userAgain, "should return nil for user")
+		assert.Zero(t, userAgain.UserId, "should not have an id")
 	})
 }

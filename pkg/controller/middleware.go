@@ -2,7 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
+	sentryiris "github.com/getsentry/sentry-go/iris"
 	"net/http"
+	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-pg/pg/v10"
@@ -68,6 +71,9 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	token = ctx.GetCookie("M-Token", context.CookieSecure)
 	if token == "" {
 		token = ctx.GetHeader(TokenName)
+	} else {
+		// I'm adding this to test stuff in staging. It will be removed later.
+		c.log.Tracef("found authentication on cookie")
 	}
 
 	if token == "" {
@@ -92,6 +98,17 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	if !result.Valid {
 		c.returnError(ctx, http.StatusForbidden, "unauthorized")
 		return
+	}
+
+	// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
+	// way we can grab it later if there is an error.
+	if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+		hub.Scope().SetUser(sentry.User{
+			ID:        strconv.FormatUint(claims.UserId, 10),
+			IPAddress: ctx.GetHeader("X-Forwarded-For"),
+		})
+		hub.Scope().SetTag("accountId", strconv.FormatUint(claims.AccountId, 10))
+		hub.Scope().SetTag("loginId", strconv.FormatUint(claims.LoginId, 10))
 	}
 
 	ctx.Values().Set(accountIdContextKey, claims.AccountId)

@@ -50,18 +50,16 @@ func (u *unauthenticatedRepo) CreateAccount(timezone *time.Location) (*models.Ac
 	return account, errors.Wrap(err, "failed to create account")
 }
 
-func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, firstName, lastName string) (*models.User, error) {
-	user := &models.User{
-		LoginId:   loginId,
-		AccountId: accountId,
-		FirstName: firstName,
-		LastName:  lastName,
-	}
+func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, user *models.User) error {
+	user.UserId = 0
+	user.AccountId = accountId
+	user.LoginId = loginId
+
 	if _, err := u.txn.Model(user).Insert(user); err != nil {
-		return nil, errors.Wrap(err, "failed to create user")
+		return errors.Wrap(err, "failed to create user")
 	}
 
-	return user, nil
+	return nil
 }
 
 func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models.User, error) {

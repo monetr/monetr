@@ -3,9 +3,9 @@ package controller
 import (
 	"context"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
 	"net/http"
@@ -19,9 +19,6 @@ type RegistrationClaims struct {
 }
 
 func (c *Controller) registerEndpoint(ctx iris.Context) {
-	goCtx := ctx.Request().Context()
-	span := sentry.StartSpan(goCtx, "register", sentry.TransactionName("POST /authentication/register"))
-	defer span.Finish()
 	var registerRequest struct {
 		Email     string `json:"email"`
 		Password  string `json:"password"`
@@ -38,7 +35,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateCaptchaMaybe(goCtx, registerRequest.Captcha); err != nil {
+	if err := c.validateCaptchaMaybe(c.getContext(ctx), registerRequest.Captcha); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 		return
 	}
@@ -67,19 +64,20 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// TODO (elliotcourant) Add stuff to verify email address by sending an
 	//  email.
 
+	var stripeCustomerId *string
 	if c.configuration.Stripe.Enabled {
 		c.log.Debug("creating stripe customer for new user")
 		name := registerRequest.FirstName + " " + registerRequest.LastName
-		_, err := c.stripeClient.Customers.New(&stripe.CustomerParams{
-			Email:               &registerRequest.Email,
-			Name:                &name,
+		result, err := c.stripeClient.Customers.New(&stripe.CustomerParams{
+			Email: &registerRequest.Email,
+			Name:  &name,
 		})
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
 			return
 		}
 
-		// TODO Add stripe customer details to the login/user record.
+		stripeCustomerId = &result.ID
 	}
 
 	// If the registration details provided look good then we want to create an
@@ -128,13 +126,20 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		return
 	}
 
+	user := models.User{
+		LoginId:          login.LoginId,
+		AccountId:        account.AccountId,
+		FirstName:        registerRequest.FirstName,
+		LastName:         registerRequest.LastName,
+		StripeCustomerId: stripeCustomerId,
+	}
+
 	// Now that we have an accountId we can create the user object which will
 	// bind the login and the account together.
-	user, err := repository.CreateUser(
+	err = repository.CreateUser(
 		login.LoginId,
 		account.AccountId,
-		registerRequest.FirstName,
-		registerRequest.LastName,
+		&user,
 	)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
@@ -166,8 +171,9 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	user.Account = account
 
 	ctx.JSON(map[string]interface{}{
-		"token": token,
-		"user":  user,
+		"nextUrl": "/setup",
+		"token":   token,
+		"user":    user,
 	})
 }
 
@@ -246,9 +252,6 @@ func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) e
 		// If it is disabled then we don't need to do anything.
 		return nil
 	}
-
-	span := sentry.StartSpan(ctx, "validate ReCAPTCHA")
-	defer span.Finish()
 
 	if captcha == "" {
 		return errors.Errorf("captcha is not valid")
