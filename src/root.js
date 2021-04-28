@@ -10,11 +10,11 @@ import bootstrapApplication from "shared/bootstrap";
 import { getIsBootstrapped, getSignUpAllowed } from "shared/bootstrap/selectors";
 import LoginView from "views/Login";
 import SignUpView from "views/SignUp";
+import { Backdrop, CircularProgress } from "@material-ui/core";
 
 export class Root extends PureComponent {
   state = {
     loading: true,
-    anchorEl: null,
   };
 
   static propTypes = {
@@ -26,6 +26,10 @@ export class Root extends PureComponent {
   };
 
   componentDidMount() {
+    this.attemptBootstrap();
+  }
+
+  attemptBootstrap = () => {
     this.props.bootstrapApplication()
       .then(() => this.props.bootstrapLogin())
       .catch(error => {
@@ -36,7 +40,7 @@ export class Root extends PureComponent {
           loading: false
         });
       });
-  }
+  };
 
   renderUnauthenticated = () => {
     return (
@@ -58,23 +62,14 @@ export class Root extends PureComponent {
     )
   };
 
-  openMenu = event => {
-    this.setState({
-      anchorEl: event.currentTarget,
-    });
-  };
-
-  closeMenu = () => {
-    this.setState({
-      anchorEl: null,
-    });
-  };
-
-
   render() {
     const { isReady, isAuthenticated } = this.props;
     if (!isReady || this.state.loading) {
-      return <h1>Loading...</h1>;
+      return (
+        <Backdrop  open={ true }>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      );
     }
 
     if (!isAuthenticated) {

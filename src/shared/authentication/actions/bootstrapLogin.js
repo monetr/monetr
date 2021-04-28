@@ -1,12 +1,25 @@
 import User from "data/User";
 import request from "shared/util/request";
-import {BOOTSTRAP_LOGIN} from "shared/authentication/actions";
-import {getAPIUrl} from "shared/bootstrap/selectors";
+import { BOOTSTRAP_LOGIN } from "shared/authentication/actions";
+import { getAPIUrl } from "shared/bootstrap/selectors";
 import axios from "axios";
+import Cookies from 'js-cookie'
 
 export default function bootstrapLogin(token = null, user = null) {
   return (dispatch, getState) => {
     if (token) {
+      // Trying to switch over to using cookies, but I don't want to break anything at the moment.
+      try {
+        Cookies.set('M-Token', token, {
+          // TODO Make the cookie domain a configuration variable.
+          domain: '.staging.monetr.dev',
+          secure: true,
+          path: '/',
+        });
+      } catch (e) {
+        console.error(e);
+      }
+
       window.localStorage.setItem('H-Token', token);
     } else {
       token = window.localStorage.getItem('H-Token');

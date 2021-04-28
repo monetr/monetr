@@ -73,10 +73,12 @@ export class LoginView extends Component {
 
     return (
       <Grid item xs={ 12 }>
-        <ReCAPTCHA
-          sitekey={ ReCAPTCHAKey }
-          onChange={ value => this.setState({ verification: value }) }
-        />
+        <div className="w-full flex justify-center items-center">
+          <ReCAPTCHA
+            sitekey={ ReCAPTCHAKey }
+            onChange={ value => this.setState({ verification: value }) }
+          />
+        </div>
       </Grid>
     )
   };

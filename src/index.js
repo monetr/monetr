@@ -9,7 +9,7 @@ import './styles/index.scss';
 
 const store = configureStore();
 
-if(module.hot){
+if (module.hot) {
   module.hot.accept()
 }
 
