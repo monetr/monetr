@@ -9,19 +9,21 @@ export default function bootstrapLogin(token = null, user = null) {
   return (dispatch, getState) => {
     if (token) {
       // Trying to switch over to using cookies, but I don't want to break anything at the moment.
-      try {
-        Cookies.set('M-Token', token, {
-          // TODO Make the cookie domain a configuration variable.
-          domain: '.staging.monetr.dev',
-          secure: true,
-        });
-      } catch (e) {
-        console.error(e);
-      }
+      Cookies.set('M-Token', token, {
+        // TODO Make the cookie domain a configuration variable.
+        domain: '.staging.monetr.dev',
+        secure: true,
+      });
 
-      window.localStorage.setItem('H-Token', token);
+      // TODO Add a configuration option to store token in local storage.
     } else {
-      token = window.localStorage.getItem('H-Token');
+      token = Cookies.get('M-Token');
+
+      if (!token) {
+        token = window.localStorage.getItem('H-Token');
+      } else {
+        console.trace("successfully retrieved token from cookies")
+      }
     }
 
     // If the token is not present at this point then the user is not authenticated. We want to dispatch accordingly and
@@ -41,9 +43,6 @@ export default function bootstrapLogin(token = null, user = null) {
     const apiUrl = getAPIUrl(getState());
     window.API = axios.create({
       baseURL: apiUrl,
-      headers: {
-        'H-Token': token,
-      },
       withCredentials: true,
     });
 
@@ -62,6 +61,7 @@ export default function bootstrapLogin(token = null, user = null) {
           })
         })
         .catch(error => {
+          Cookies.remove('M-Token');
           window.localStorage.removeItem('H-Token');
           console.error(error);
         });
