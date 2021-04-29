@@ -12,7 +12,7 @@ export default function bootstrapLogin(token = null, user = null) {
       try {
         Cookies.set('M-Token', token, {
           // TODO Make the cookie domain a configuration variable.
-          domain: '*.staging.monetr.dev',
+          domain: '.staging.monetr.dev',
           secure: true,
         });
       } catch (e) {
@@ -44,6 +44,7 @@ export default function bootstrapLogin(token = null, user = null) {
       headers: {
         'H-Token': token,
       },
+      withCredentials: true,
     });
 
     if (!user) {
