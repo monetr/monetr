@@ -1,0 +1,24 @@
+
+AUTO_VERSION_TAG=$(shell date +%Y.%m.%d)
+RELEASE_REVISION=$(shell git rev-parse HEAD)
+
+default-release:
+	$(info Version: $(AUTO_VERSION_TAG))
+	$(error please run a specific target)
+
+get-tags-maybe:
+ifdef CI
+	git fetch --prune --unshallow
+endif
+	$(info retrieved tags for release)
+
+notes:
+	$(PWD)/tools/releasenotes.sh $(AUTO_VERSION_TAG) > Notes.md || exit 0
+
+pre-clean:
+	git tag -d $(AUTO_VERSION_TAG) || true
+	git push --delete origin $(AUTO_VERSION_TAG) || true
+
+release: get-tags-maybe pre-clean notes
+	gh release delete $(AUTO_VERSION_TAG) -y || true
+	gh release create $(AUTO_VERSION_TAG) -p -F Notes.md --target $(RELEASE_REVISION)
