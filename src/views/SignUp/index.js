@@ -39,7 +39,9 @@ export class SignUpView extends Component {
   static propTypes = {
     ReCAPTCHAKey: PropTypes.string,
     bootstrapLogin: PropTypes.func.isRequired,
-    history: PropTypes.instanceOf(History).isRequired,
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+    }).isRequired,
     requireLegalName: PropTypes.bool.isRequired,
     requirePhoneNumber: PropTypes.bool.isRequired,
     setToken: PropTypes.func.isRequired,
@@ -91,10 +93,12 @@ export class SignUpView extends Component {
 
     return (
       <Grid item xs={ 12 }>
-        <ReCAPTCHA
-          sitekey={ ReCAPTCHAKey }
-          onChange={ value => this.setState({ verification: value }) }
-        />
+        <div className="w-full flex justify-center items-center">
+          <ReCAPTCHA
+            sitekey={ ReCAPTCHAKey }
+            onChange={ value => this.setState({ verification: value }) }
+          />
+        </div>
       </Grid>
     )
   };
@@ -194,8 +198,8 @@ export class SignUpView extends Component {
                             value={ values.email }
                             onChange={ handleChange }
                             onBlur={ handleBlur }
-                            error={ touched.email && !!errors.email }
-                            helperText={ touched.email && errors.email }
+                            error={ values.email && touched.email && !!errors.email }
+                            helperText={ values.email && touched.email && errors.email }
                             disabled={ isSubmitting }
                           />
                         </Grid>
@@ -209,8 +213,8 @@ export class SignUpView extends Component {
                             value={ values.password }
                             onChange={ handleChange }
                             onBlur={ handleBlur }
-                            error={ touched.password && !!errors.password }
-                            helperText={ touched.password && errors.password }
+                            error={ values.password && touched.password && !!errors.password }
+                            helperText={ values.password && touched.password && errors.password }
                             disabled={ isSubmitting }
                           />
                         </Grid>
@@ -224,8 +228,8 @@ export class SignUpView extends Component {
                             value={ values.confirmPassword }
                             onChange={ handleChange }
                             onBlur={ handleBlur }
-                            error={ touched.confirmPassword && !!errors.confirmPassword }
-                            helperText={ touched.confirmPassword && errors.confirmPassword }
+                            error={ values.confirmPassword && touched.confirmPassword && !!errors.confirmPassword }
+                            helperText={ values.confirmPassword && touched.confirmPassword && errors.confirmPassword }
                             disabled={ isSubmitting }
                           />
                         </Grid>
