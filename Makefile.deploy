@@ -2,8 +2,10 @@
 default-deploy:
 	$(error Please run a specific target)
 
-ENVIRONMENT = Staging
-ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
+ifndef ENV_LOWER
+$(error Envrionment not properly specicfied)
+endif
+
 BUCKET_NAME = gs://monetr-$(ENV_LOWER)
 BUILD_DIR = $(PWD)/build
 

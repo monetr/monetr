@@ -1,0 +1,4 @@
+BOOTSTRAP_CONFIG_JSON: false
+USE_LOCAL_STORAGE: true
+ENVIRONMENT: "Local"
+API_URL: "http://localhost:4000"

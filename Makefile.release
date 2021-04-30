@@ -1,6 +1,5 @@
 
 AUTO_VERSION_TAG=$(shell date +%Y.%m.%d)
-RELEASE_REVISION=$(shell git rev-parse HEAD)
 
 default-release:
 	$(info Version: $(AUTO_VERSION_TAG))

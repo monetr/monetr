@@ -48,6 +48,7 @@
     "jest-resolve": "26.6.2",
     "jest-watch-typeahead": "0.6.3",
     "js-cookie": "2.2.1",
+    "js-yaml": "^4.1.0",
     "mini-css-extract-plugin": "1.6.0",
     "moment": "2.29.1",
     "node-notifier": "9.0.1",
@@ -88,6 +89,9 @@
     "workbox-webpack-plugin": "6.1.5"
   },
   "scripts": {
+    "build": "MONETR_ENV=${MONETR_ENV:=production} webpack",
+    "build:staging": "MONETR_ENV=staging yarn build:production",
+    "build:production": "yarn build --mode production",
     "build-dev": "webpack --mode development",
     "build-prod": "webpack --mode production",
     "clean": "rm -rf build/* || true",
@@ -203,6 +207,7 @@
       [
         "@babel/preset-env",
         {
+          "loose": true,
           "modules": false
         }
       ],

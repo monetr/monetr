@@ -9,14 +9,37 @@ const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware
 const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
 const ignoredFiles = require('react-dev-utils/ignoredFiles');
 const redirectServedPath = require('react-dev-utils/redirectServedPathMiddleware');
+const yaml = require('js-yaml');
 
 const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
+
+const GetBuildConfigYaml = (environment = 'local') => {
+  const fileName = `config.${ environment }.yaml`
+
+  console.log(`Reading: ${ fileName }`);
+
+  let configuration = {};
+
+  try {
+    configuration = {
+      ...configuration,
+      ...yaml.load(fs.readFileSync(fileName, 'utf8')),
+    };
+  } catch (err) {
+    // Do nothing
+    console.error(err);
+  }
+
+  return configuration;
+}
 
 module.exports = (env, argv) => {
   if (!env.PUBLIC_URL) {
     env.PUBLIC_URL = ''
   }
+
+  let buildConfig = GetBuildConfigYaml(process.env.MONETR_ENV)
 
   const config = {
     target: 'web',
@@ -26,7 +49,7 @@ module.exports = (env, argv) => {
     ],
     output: {
       path: path.resolve(__dirname, 'build'),
-      filename: '[name].[contenthash].js'
+      filename: '[name].[chunkhash].js'
     },
     module: {
       rules: [
@@ -130,6 +153,10 @@ module.exports = (env, argv) => {
       },
     },
     plugins: [
+      new webpack.DefinePlugin({
+        CONFIG: JSON.stringify(buildConfig),
+        RELEASE_REVISION: JSON.stringify(process.env.RELEASE_REVISION),
+      }),
       new HtmlWebpackPlugin({
         inject: true,
         appMountId: 'app',

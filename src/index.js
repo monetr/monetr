@@ -6,6 +6,17 @@ import Root from "./root";
 import configureStore from './store';
 import "./styles/styles.css";
 import './styles/index.scss';
+import * as Sentry from "@sentry/react";
+
+// eslint-disable-next-line no-undef
+if (CONFIG.SENTRY_DSN) {
+  Sentry.init({
+    // eslint-disable-next-line no-undef
+    dsn: CONFIG.SENTRY_DSN,
+    // eslint-disable-next-line no-undef
+    release: `web-ui@${RELEASE_REVISION}`,
+  });
+}
 
 const store = configureStore();
 
@@ -16,7 +27,9 @@ if (module.hot) {
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={ store }>
-      <Root/>
+      <Sentry.ErrorBoundary fallback={"A fatal error has occurred"}>
+        <Root/>
+      </Sentry.ErrorBoundary>
     </Provider>
   </React.StrictMode>,
   document.getElementById('root')

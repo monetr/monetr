@@ -34,11 +34,13 @@ Build:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
+  variables:
+    ENVIRONMENT: Staging
   image: containers.monetr.dev/node:15.14.0-buster
   tags:
     - k8s:shared
   script:
-    - yarn build-prod
+    - make build
   cache:
     key: ${CI_COMMIT_SHA}
     paths:
@@ -129,6 +131,8 @@ Deploy - Staging:
   image: containers.monetr.dev/ubuntu:20.04
   tags:
     - k8s:shared
+  variables:
+    ENVIRONMENT: Staging
   before_script:
     - gcloud auth activate-service-account --key-file $GCS_SERVICE_ACCOUNT
   script:
