@@ -15,6 +15,7 @@ data:
   MONETR_LOG_LEVEL: {{ quote .Values.api.logging.level }}
   MONETR_PLAID_ENVIRONMENT: {{ quote .Values.api.plaid.environment }}
   MONETR_PLAID_BIRTHDATE_PROMPT: {{ quote .Values.api.plaid.birthdatePrompt }}
+  MONETR_PLAID_RETURNING_EXPERIENCE: {{ quote .Values.api.plaid.enableReturningUserExperience }}
   MONETR_PG_ADDRESS: {{ quote .Values.api.postgreSql.address }}
   MONETR_PG_PORT: {{ quote .Values.api.postgreSql.port }}
   MONETR_PG_DATABASE: {{ quote .Values.api.postgreSql.database }}

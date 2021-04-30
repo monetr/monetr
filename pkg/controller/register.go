@@ -67,6 +67,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	var stripeCustomerId *string
 	if c.configuration.Stripe.Enabled {
+		stripeSpan := sentry.StartSpan(c.getContext(ctx), "Create Stripe Customer")
 		c.log.Debug("creating stripe customer for new user")
 		name := registerRequest.FirstName + " " + registerRequest.LastName
 		result, err := c.stripeClient.Customers.New(&stripe.CustomerParams{
@@ -74,9 +75,13 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 			Name:  &name,
 		})
 		if err != nil {
+			stripeSpan.Status = sentry.SpanStatusInternalError
+			stripeSpan.Finish()
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
 			return
 		}
+		stripeSpan.Status = sentry.SpanStatusOK
+		stripeSpan.Finish()
 
 		stripeCustomerId = &result.ID
 	}

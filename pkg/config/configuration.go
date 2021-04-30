@@ -114,8 +114,9 @@ type Sentry struct {
 }
 
 type Stripe struct {
-	Enabled bool
-	APIKey string
+	Enabled   bool
+	APIKey    string
+	PublicKey string
 }
 
 func LoadConfiguration(configFilePath *string) Configuration {
@@ -179,6 +180,7 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
 	v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")
 	v.BindEnv("Plaid.EnableBirthdatePrompt", "MONETR_PLAID_BIRTHDATE_PROMPT")
+	v.BindEnv("Plaid.EnableReturningUserExperience", "MONETR_PLAID_RETURNING_EXPERIENCE")
 	v.BindEnv("PostgreSQL.Address", "MONETR_PG_ADDRESS")
 	v.BindEnv("PostgreSQL.Port", "MONETR_PG_PORT")
 	v.BindEnv("PostgreSQL.Username", "MONETR_PG_USERNAME")
@@ -199,4 +201,5 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Sentry.TraceSampleRate", "MONETR_SENTRY_TRACE_SAMPLE_RATE")
 	v.BindEnv("Stripe.Enabled", "MONETR_STRIPE_ENABLED")
 	v.BindEnv("Stripe.APIKey", "MONETR_STRIPE_API_KEY")
+	v.BindEnv("Stripe.PublicKey", "MONETR_STRIPE_PUBLIC_KEY")
 }

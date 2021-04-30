@@ -104,6 +104,7 @@ api:
     clientSecret: "abc123"
     environment: "https://sandbox.plaid.com"
     birthdatePrompt: false # Not yet implemented
+    enableReturningUserExperience: false
   cors:
     allowedOrigins:
       - "*"

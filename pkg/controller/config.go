@@ -19,6 +19,7 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 		VerifyLogin         bool   `json:"verifyLogin"`
 		VerifyRegister      bool   `json:"verifyRegister"`
 		ReCAPTCHAKey        string `json:"ReCAPTCHAKey,omitempty"`
+		StripePublicKey     string `json:"stripePublicKey,omitempty"`
 		AllowSignUp         bool   `json:"allowSignUp"`
 		AllowForgotPassword bool   `json:"allowForgotPassword"`
 		LongPollPlaidSetup  bool   `json:"longPollPlaidSetup"`
@@ -43,6 +44,10 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 	if c.configuration.Plaid.EnableReturningUserExperience {
 		config.RequireLegalName = true
 		config.RequirePhoneNumber = true
+	}
+
+	if c.configuration.Stripe.Enabled {
+		config.StripePublicKey = c.configuration.Stripe.PublicKey
 	}
 
 	// Just make this true for now, this might change in the future as I do websockets.

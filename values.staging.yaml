@@ -109,6 +109,7 @@ api:
     verifyRegister: true
   plaid:
     environment: "https://sandbox.plaid.com"
+    enableReturningUserExperience: true
   cors:
     allowedOrigins:
       - "https://app.staging.monetr.dev"
