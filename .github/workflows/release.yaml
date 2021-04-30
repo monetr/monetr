@@ -1,0 +1,16 @@
+name: Daily Release
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch: { }
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: 'main'
+      - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} make release

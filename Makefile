@@ -22,3 +22,4 @@ build: dependencies clean
 
 include Makefile.deploy
 include Makefile.docker
+include Makefile.release
