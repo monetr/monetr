@@ -9,20 +9,22 @@ export default function bootstrapLogin(token = null, user = null) {
   return (dispatch, getState) => {
     if (token) {
       // Trying to switch over to using cookies, but I don't want to break anything at the moment.
-      Cookies.set('M-Token', token, {
-        // TODO Make the cookie domain a configuration variable.
-        domain: '.staging.monetr.dev',
-        secure: true,
-      });
-
-      // TODO Add a configuration option to store token in local storage.
+      // eslint-disable-next-line no-undef
+      if (CONFIG.USE_LOCAL_STORAGE) {
+        window.localStorage.setItem('M-Token', token);
+      } else {
+        Cookies.set('M-Token', token, {
+          // eslint-disable-next-line no-undef
+          domain: CONFIG.COOKIE_DOMAIN,
+          secure: true,
+        });
+      }
     } else {
-      token = Cookies.get('M-Token');
-
-      if (!token) {
+      // eslint-disable-next-line no-undef
+      if (CONFIG.USE_LOCAL_STORAGE) {
         token = window.localStorage.getItem('H-Token');
       } else {
-        console.trace("successfully retrieved token from cookies")
+        token = Cookies.get('M-Token');
       }
     }
 
@@ -62,7 +64,7 @@ export default function bootstrapLogin(token = null, user = null) {
         })
         .catch(error => {
           Cookies.remove('M-Token');
-          window.localStorage.removeItem('H-Token');
+          window.localStorage.removeItem('M-Token');
           console.error(error);
         });
     }
