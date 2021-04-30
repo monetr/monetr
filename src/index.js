@@ -7,6 +7,7 @@ import configureStore from './store';
 import "./styles/styles.css";
 import './styles/index.scss';
 import * as Sentry from "@sentry/react";
+import { Integrations } from "@sentry/tracing";
 
 // eslint-disable-next-line no-undef
 if (CONFIG.SENTRY_DSN) {
@@ -15,6 +16,8 @@ if (CONFIG.SENTRY_DSN) {
     dsn: CONFIG.SENTRY_DSN,
     // eslint-disable-next-line no-undef
     release: `web-ui@${RELEASE_REVISION}`,
+    integrations: [new Integrations.BrowserTracing()],
+    tracesSampleRate: 1.0,
   });
 }
 
