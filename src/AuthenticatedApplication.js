@@ -1,4 +1,14 @@
-import { AppBar, Button, IconButton, Menu, MenuItem, Toolbar, Typography } from "@material-ui/core";
+import {
+  AppBar,
+  Backdrop,
+  Button,
+  CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
+  Typography
+} from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
 import BankAccountSelector from "components/BankAccountSelector";
@@ -156,7 +166,11 @@ export class AuthenticatedApplication extends Component {
 
   render() {
     if (this.state.loading) {
-      return <Typography>Loading...</Typography>
+      return (
+        <Backdrop  open={ true }>
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      );
     }
 
     if (this.props.hasAnyLinks) {
