@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"net/http"
 	"strconv"
@@ -36,6 +37,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			phoneNumber = me.Login.PhoneNumber.E164()
 		}
 
+		plaidSpan := sentry.StartSpan(c.getContext(ctx), "Create Plaid Link Token")
 		token, err := c.plaid.CreateLinkToken(plaid.LinkTokenConfigs{
 			User: &plaid.LinkTokenUser{
 				ClientUserID: strconv.FormatUint(userId, 10),
@@ -62,9 +64,13 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 			RedirectUri:           "",
 		})
 		if err != nil {
+			plaidSpan.Status = sentry.SpanStatusInternalError
+			plaidSpan.Finish()
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
 			return
 		}
+		plaidSpan.Status = sentry.SpanStatusOK
+		plaidSpan.Finish()
 
 		ctx.JSON(map[string]interface{}{
 			"linkToken": token.LinkToken,
