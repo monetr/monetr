@@ -10,9 +10,6 @@ export default function configureStore(initialState = {
   authentication: new AuthenticationState(),
   bootstrap: new BootstrapState(),
 }) {
-  // eslint-disable-next-line no-undef
-  console.log(CONFIG);
-
   const composeEnhancer = process.env.NODE_ENV !== 'production' ? composeWithDevTools({
     name: 'Primary',
     maxAge: 150,
