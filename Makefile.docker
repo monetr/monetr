@@ -1,5 +1,6 @@
 DOCKER_REPOSITORY = containers.monetr.dev
 DOCKER_IMAGE = rest-api
+RELEASE_REVISION=$(shell git rev-parse HEAD)
 
 default-docker:
 	$(error Please run a specific target)
@@ -12,8 +13,15 @@ BASE_IMAGE = $(DOCKER_REPOSITORY)/$(DOCKER_IMAGE)
 SHA_IMAGE_NAME = $(BASE_IMAGE):$(VERSION_TAG)
 LATEST_IMAGE_NAME = $(BASE_IMAGE):latest
 
+BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+
 docker-build: wait-for-docker
-	docker build -t $(SHA_IMAGE_NAME) -t $(LATEST_IMAGE_NAME) -f Dockerfile .
+	docker build \
+		--build-arg REVISION=$(RELEASE_REVISION) \
+		--build-arg BUILD_TIME=$(BUILD_TIME) \
+		-t $(SHA_IMAGE_NAME) \
+		-t $(LATEST_IMAGE_NAME) \
+		-f Dockerfile .
 
 docker-push: docker-build
 	docker push $(SHA_IMAGE_NAME)

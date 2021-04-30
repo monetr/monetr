@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	sentryiris "github.com/getsentry/sentry-go/iris"
+	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
@@ -205,6 +206,8 @@ func (c *Controller) getHealth(ctx iris.Context) {
 	ctx.JSON(map[string]interface{}{
 		"dbHealthy":  err == nil,
 		"apiHealthy": true,
+		"revision":   build.Revision,
+		"buildTime":  build.BuildTime,
 	})
 }
 
