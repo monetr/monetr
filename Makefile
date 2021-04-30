@@ -1,6 +1,6 @@
 
 # Make it so we can run commands from our dependencies directly.
-PATH += :$(PWD)/node_modules/.bin
+PATH:=$(PATH):$(PWD)/node_modules/.bin
 BUILD_DIR = $(PWD)/build
 PUBLIC_DIR = $(PWD)/public
 
@@ -32,3 +32,12 @@ build: dependencies clean
 include Makefile.deploy
 include Makefile.docker
 include Makefile.release
+
+# This is something to help debug CI issues locally. It will run a container and mount the current directory
+# locally. Its the same container used in the pipelines so it should be pretty close to the same for debugging.
+debug-ci:
+	docker run \
+		-w /build \
+		-v $(PWD):/build \
+		-it containers.monetr.dev/node:15.14.0-buster \
+		/bin/bash
