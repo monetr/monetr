@@ -17,7 +17,7 @@ gpgBadge() {
     fi
 }
 
-git_commits=$(git --no-pager log $(git describe --tags --abbrev=0)..HEAD --pretty=format:"%H");
+git_commits=$(git --no-pager log $(git describe --tags --abbrev=0)..HEAD --no-merges --pretty=format:"%H");
 commitCount=$(echo "$git_commits" | wc -l | xargs);
 if [ "$commitCount" == "0" ]
 then
