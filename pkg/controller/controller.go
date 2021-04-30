@@ -146,12 +146,14 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		// Trace API calls to sentry
 		p.Use(func(ctx iris.Context) {
-			goCtx := ctx.Request().Context()
-			name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
-			span := sentry.StartSpan(goCtx, ctx.Method(), sentry.TransactionName(name))
-			defer span.Finish()
+			if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+				tracingCtx := sentry.SetHubOnContext(ctx.Request().Context(), hub)
+				name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
+				span := sentry.StartSpan(tracingCtx, ctx.Method(), sentry.TransactionName(name))
+				defer span.Finish()
 
-			ctx.Values().Set(spanContextKey, span.Context())
+				ctx.Values().Set(spanContextKey, span.Context())
+			}
 
 			ctx.Next()
 		})

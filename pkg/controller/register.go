@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
 	"github.com/monetrapp/rest-api/pkg/models"
@@ -256,6 +257,9 @@ func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) e
 	if captcha == "" {
 		return errors.Errorf("captcha is not valid")
 	}
+
+	span := sentry.StartSpan(ctx, "ReCAPTCHA")
+	defer span.Finish()
 
 	return c.captcha.Verify(captcha)
 }
