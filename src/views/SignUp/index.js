@@ -28,6 +28,7 @@ import {
   getSignUpAllowed
 } from "shared/bootstrap/selectors";
 import request from "shared/util/request";
+import * as Sentry from "@sentry/react";
 
 export class SignUpView extends Component {
   state = {
@@ -68,6 +69,7 @@ export class SignUpView extends Component {
         }
       })
       .catch(error => {
+        Sentry.captureException(error);
         if (error.response.data.error) {
           this.setState({
             error: error.response.data.error,
