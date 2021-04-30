@@ -153,6 +153,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				defer span.Finish()
 
 				ctx.Values().Set(spanContextKey, span.Context())
+			} else {
+				ctx.Values().Set(spanContextKey, ctx.Request().Context())
 			}
 
 			ctx.Next()
