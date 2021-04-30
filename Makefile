@@ -64,9 +64,9 @@ endif
 
 ifdef GITHUB_ACTION
 include Makefile.github-actions
-include Makefile.release
 endif
 
+include Makefile.release
 include Makefile.tinker
 include Makefile.deploy
 include Makefile.docker
