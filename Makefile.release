@@ -1,5 +1,5 @@
 
-AUTO_VERSION_TAG=$(shell date +%Y.%m.%d)
+AUTO_VERSION_TAG=$(shell date -u +%Y.%m.%d)
 
 default-release:
 	$(info Version: $(AUTO_VERSION_TAG))
