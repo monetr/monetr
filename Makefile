@@ -6,7 +6,7 @@ PUBLIC_DIR = $(PWD)/public
 
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 ifndef ENVIRONMENT
-	ENVIRONMENT = Staging
+	ENVIRONMENT = Local
 endif
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
