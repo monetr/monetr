@@ -1,6 +1,7 @@
 package application
 
 import (
+	"github.com/getsentry/sentry-go"
 	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
@@ -21,6 +22,13 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *iris
 	app.UseGlobal(func(ctx *context.Context) {
 		if forwardedFor := ctx.GetHeader("X-Forwarded-For"); forwardedFor != "" {
 			ctx.Request().RemoteAddr = forwardedFor
+		}
+
+		// This way we still have a way to correlate users even if they are not authenticated.
+		if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+			hub.Scope().SetUser(sentry.User{
+				IPAddress: ctx.GetHeader("X-Forwarded-For"),
+			})
 		}
 
 		ctx.Next()
