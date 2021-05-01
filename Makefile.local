@@ -1,18 +1,35 @@
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
-LOCAL_CERTS = $(PWD)/local/certs
+LOCAL_DIR=$(PWD)/local
+LOCAL_CERTS = $(LOCAL_DIR)/certs
 PATH:=$(PATH):$(LOCAL_BIN)
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
+GO_HASH=$(shell find -s $(PWD)/pkg -type f -exec shasum {} \; | shasum | cut -d " " -f 1)
 
+# Tools used to run the application locally
 KUBECTL=kubectl
 JQ=jq
+YQ=yq
 HOSTESS=hostess
+HELM=helm
+SPLIT_YAML=kubernetes-split-yaml
 
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
 SUBDOMAINS=app api
+
+VALUES=$(PWD)/values.local.yaml
+LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
+REGISTER_JWT_SECRET=$(LOCAL_DIR)/register_jwt_secret.txt
+
+LOCAL_REST_API_DEPLOY=$(LOCAL_DIR)/rest-api-yaml
+
+REST_API_IMAGE_NAME=rest-api
+
+$(LOCAL_DIR):
+	mkdir -p $(PWD)/local
 
 stop-mini:
 	minikube stop || true
@@ -20,12 +37,18 @@ stop-mini:
 
 clean-mini: stop-mini clean-certificates
 	minikube delete || true
+	rm -rf $(VALUES) || true
+	rm -rf $(PWD)/local || true
+	rm -rf $(LOCAL_TMP) || true
+	rm -rf $(LOCAL_BIN) || true
 
 init-mini: local-dependencies-maybe
 	(minikube status | grep "minikube start") && make start-minikube
 	make setup-hosts
+	make setup-registry
+	make deploy-mini-application
 
-
+MINIKUBE_NAMESPACE=default
 MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
 MINIKUBE_MEMORY=8192 # 8GB of memory. Reduce if this is too high for your computer. Could be reduced to 2GB
 MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
@@ -34,7 +57,7 @@ INSECURE_REGISTRY=localhost:5000
 start-minikube:
 	$(info Starting minikube)
 	minikube start \
-		--addons=ingress \
+		--addons=ingress,registry \
 		--cpus=$(MINIKUBE_CPUS) \
 		--memory=$(MINIKUBE_MEMORY) \
 		--delete-on-failure \
@@ -60,7 +83,7 @@ remove-certificate:
 NGINX_NAMESPACE=ingress-nginx
 NGINX_DEPLOYMENT=ingress-nginx-controller
 TLS_SECRET_NAME=monetr-tls
-setup-certificates:
+setup-certificates: $(LOCAL_DIR)
 	mkdir -p $(LOCAL_CERTS)
 	openssl genrsa -out $(KEY_PATH) 2048
 	openssl req -new -x509 -addext "subjectAltName = DNS:*.$(LOCAL_DOMAIN)" -key $(KEY_PATH) -out $(CERT_PATH) -days 3650 \
@@ -98,10 +121,67 @@ deploy-certificate:
 	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE)
 	rm -rf $(LOCAL_TMP)/nginx-*.json || true
 
+setup-registry:
+	#$(KUBECTL) apply -f $(PWD)/minikube/registry.yaml
+
+# We want to check and see if the values file exists or is up to date.
+$(VALUES):
+	if [ ! -f "$(VALUES)" ]; then $(HELM) show values $(PWD) > $(VALUES) && make init-mini-values; fi
+
+$(LOGIN_JWT_SECRET): $(LOCAL_DIR)
+	if [ ! -f "$(LOGIN_JWT_SECRET)" ]; then echo "Login JWT secret has not been generated, creating now" && (date | md5 > $(LOGIN_JWT_SECRET)); fi
+
+$(REGISTER_JWT_SECRET): $(LOCAL_DIR)
+	if [ ! -f "$(REGISTER_JWT_SECRET)" ]; then echo "Register JWT secret has not been generated, creating now" && (date | md5 > $(REGISTER_JWT_SECRET)); fi
+
+REST_API_IMAGE_REPO=$(INSECURE_REGISTRY)/$(REST_API_IMAGE_NAME)
+init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
+	yq e '.image.repository = "$(REST_API_IMAGE_REPO)"' -i $(VALUES)
+	yq e '.ingress.enabled = true' -i $(VALUES)
+	yq e '.ingress.annotations."kubernetes.io/ingress.class" = "nginx"' -i $(VALUES)
+	yq e '.ingress.hosts[0].host = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	yq e '.ingress.hosts[0].paths[0] = {"path": "/"}' -i $(VALUES)
+	yq e '.api.includeSecrets = true' -i $(VALUES)
+	yq e '.api.uiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	yq e '.api.apiDomainName = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	$(eval LOGIN_JWT_SECRET_VALUE = $(shell cat $(LOGIN_JWT_SECRET)))
+	export jwt_secret_value=$(LOGIN_JWT_SECRET_VALUE) && yq e '.api.jwt.loginJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
+	$(eval REGISTER_JWT_SECRET_VALUE = $(shell cat $(REGISTER_JWT_SECRET)))
+	export jwt_secret_value=$(REGISTER_JWT_SECRET_VALUE) && yq e '.api.jwt.registrationJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
+	yq e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	yq e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	yq e '.api.cors.allowedOrigins[0] = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
+
+values-file: local-dependencies-maybe $(VALUES)
+
+$(LOCAL_REST_API_DEPLOY):
+	mkdir -p $(LOCAL_REST_API_DEPLOY)
+
+MINIKUBE_IP = $(shell minikube ip)
+IMAGE_NAME = $(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME):$(GO_HASH)
+build-rest-api-mini:
+	docker build \
+		--build-arg REVISION=$(RELEASE_REVISION) \
+		--build-arg BUILD_TIME=$(BUILD_TIME) \
+		-t $(IMAGE_NAME) \
+		-f Dockerfile .
+	docker push $(IMAGE_NAME)
+	yq e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
+
+deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini
+	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
+ 		--dry-run \
+ 		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
+	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE)
+
 local-dependencies-maybe:
 	which minikube || make dependencies-minikube
 	which $(HOSTESS) || make dependencies-hostess
 	which $(JQ) || make dependencies-jq
+	which $(HELM) || make dependencies-helm
+	which $(SPLIT_YAML) || make dependencies-split-yaml
+	which $(YQ) || make dependencies-yq
 
 MINIKUBE_VERSION=latest
 dependencies-minikube:
@@ -122,3 +202,16 @@ dependencies-jq:
 	rm -rf $(LOCAL_BIN)/$(JQ) || true
 	curl -L $(JQ_URL) -o $(LOCAL_BIN)/$(JQ)
 	sudo chmod +x $(LOCAL_BIN)/$(JQ)
+
+YQ_VERSION=v4.7.1
+YQ_BINARY=yq_$(OS)_$(ARCH)
+YQ_URL=https://github.com/mikefarah/yq/releases/download/$(YQ_VERSION)/$(YQ_BINARY).tar.gz
+YQ_DIR=$(LOCAL_TMP)/$(YQ)
+dependencies-yq:
+	rm -rf $(YQ_DIR) || true
+	mkdir -p $(YQ_DIR)
+	curl -L $(YQ_URL) -o $(YQ_DIR).tar.gz
+	tar -xzf $(YQ_DIR).tar.gz -C $(YQ_DIR)
+	mv $(YQ_DIR)/$(YQ)_$(OS)_$(ARCH) $(LOCAL_BIN)/$(YQ)
+	rm -rf $(YQ_DIR) || true
+

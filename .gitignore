@@ -13,3 +13,4 @@ pkg/ui/*.html
 pkg/ui/*.txt
 tmp
 local
+values.local.yaml
