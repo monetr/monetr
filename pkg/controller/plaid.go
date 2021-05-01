@@ -100,7 +100,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 // @Security ApiKeyAuth
 // @Produce json
 // @Router /plaid/token/callback [post]
-// @Success 200 swag.PlaidTokenCallbackResponse
+// @Success 200 {object} swag.PlaidTokenCallbackResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	var callbackRequest struct {
