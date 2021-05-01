@@ -9,7 +9,7 @@ jobs:
   build:
     name: Generate
     runs-on: ubuntu-latest
-    container: ghcr.io/monetrapp/build-containers/ubuntu:20.04-2021.04.18
+    container: ghcr.io/monetr/build-containers/ubuntu:20.04-2021.04.18
     steps:
       - uses: actions/checkout@v2
       - run: yarn install
