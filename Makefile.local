@@ -233,3 +233,11 @@ dependencies-yq:
 	mv $(YQ_DIR)/$(YQ)_$(OS)_$(ARCH) $(LOCAL_BIN)/$(YQ)
 	rm -rf $(YQ_DIR) || true
 
+
+
+###################### DEBUGGING THE REST API ##################################
+debug-api-mini:
+	telepresence connect
+	telepresence leave rest-api || true
+	kubectl rollout restart deploy/rest-api
+	telepresence intercept rest-api --port=4000 || true
