@@ -18,7 +18,7 @@ SPLIT_YAML=kubernetes-split-yaml
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=app api
+SUBDOMAINS=registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -43,6 +43,7 @@ clean-mini: stop-mini clean-certificates
 	rm -rf $(LOCAL_BIN) || true
 
 init-mini: local-dependencies-maybe
+	make setup-certificates
 	(minikube status | grep "minikube start") && make start-minikube
 	make setup-hosts
 	make setup-registry
@@ -53,7 +54,7 @@ MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
 MINIKUBE_MEMORY=8192 # 8GB of memory. Reduce if this is too high for your computer. Could be reduced to 2GB
 MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
 KUBERNETES_VERSION=v1.18.15
-INSECURE_REGISTRY=localhost:5000
+INSECURE_REGISTRY=registry.$(LOCAL_DOMAIN)
 start-minikube:
 	$(info Starting minikube)
 	minikube start \
@@ -63,18 +64,23 @@ start-minikube:
 		--delete-on-failure \
 		--driver=$(MINIKUBE_DRIVER) \
 		--kubernetes-version=$(KUBERNETES_VERSION) \
-		--insecure-registry=$(INSECURE_REGISTRY)
+		--insecure-registry=$(INSECURE_REGISTRY) \
+		--embed-certs
 
 setup-hosts:
 	$(eval MINIKUBE_IP = $(shell minikube ip))
 	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) add $$subdomain.$(LOCAL_DOMAIN) $(MINIKUBE_IP); done
-	make setup-certificates
+	$(eval MINIKUBE_SSH_KEY = $(shell minikube ssh-key))
+	@sleep 5
+	ssh -o IdentitiesOnly=yes -i $(MINIKUBE_SSH_KEY) docker@$(MINIKUBE_IP) 'sudo chown docker /etc/hosts && echo "$(MINIKUBE_IP) registry.monetr.mini" >> /etc/hosts'
+	make deploy-certificate
 
 KEY_PATH=$(LOCAL_CERTS)/$(LOCAL_DOMAIN).key
 CERT_PATH=$(LOCAL_CERTS)/$(LOCAL_DOMAIN).crt
 clean-certificates:
 	(sudo security find-certificate -c $(LOCAL_DOMAIN) && make remove-certificate) || true
 	rm -rf $(LOCAL_CERTS) || true
+	rm -rf $(HOME)/.minikube/certs/$(LOCAL_DOMAIN).pem || true
 
 remove-certificate:
 	$(info Local development certificate is registered, it will be removed)
@@ -89,7 +95,9 @@ setup-certificates: $(LOCAL_DIR)
 	openssl req -new -x509 -addext "subjectAltName = DNS:*.$(LOCAL_DOMAIN)" -key $(KEY_PATH) -out $(CERT_PATH) -days 3650 \
 		-subj /CN=*.$(LOCAL_DOMAIN) || make help-certificates-openssl
 	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(CERT_PATH)
-	make deploy-certificate
+	(killall Docker && open /Applications/Docker.app) || true
+	mkdir -p $(HOME)/.minikube/certs
+	openssl x509 -in $(CERT_PATH) -out $(HOME)/.minikube/certs/$(LOCAL_DOMAIN).pem
 
 help-certificates-openssl:
 	@echo "============================================================="
@@ -118,11 +126,12 @@ deploy-certificate:
 	jq '.spec.template.spec.containers[0].args |= . + ["--default-ssl-certificate=$$(POD_NAMESPACE)/$(TLS_SECRET_NAME)"]' \
 		$(LOCAL_TMP)/nginx-args.json > $(LOCAL_TMP)/nginx-new.json
 	cat $(LOCAL_TMP)/nginx-new.json | $(KUBECTL) apply -f -
-	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE)
+	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=30s
 	rm -rf $(LOCAL_TMP)/nginx-*.json || true
 
 setup-registry:
-	#$(KUBECTL) apply -f $(PWD)/minikube/registry.yaml
+	$(KUBECTL) apply -f $(PWD)/minikube/registry.yaml
+	$(KUBECTL) rollout status deploy/registry
 
 # We want to check and see if the values file exists or is up to date.
 $(VALUES):
@@ -134,7 +143,7 @@ $(LOGIN_JWT_SECRET): $(LOCAL_DIR)
 $(REGISTER_JWT_SECRET): $(LOCAL_DIR)
 	if [ ! -f "$(REGISTER_JWT_SECRET)" ]; then echo "Register JWT secret has not been generated, creating now" && (date | md5 > $(REGISTER_JWT_SECRET)); fi
 
-REST_API_IMAGE_REPO=$(INSECURE_REGISTRY)/$(REST_API_IMAGE_NAME)
+REST_API_IMAGE_REPO=registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
 init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	yq e '.image.repository = "$(REST_API_IMAGE_REPO)"' -i $(VALUES)
 	yq e '.ingress.enabled = true' -i $(VALUES)
@@ -157,9 +166,8 @@ values-file: local-dependencies-maybe $(VALUES)
 $(LOCAL_REST_API_DEPLOY):
 	mkdir -p $(LOCAL_REST_API_DEPLOY)
 
-MINIKUBE_IP = $(shell minikube ip)
-IMAGE_NAME = $(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME):$(GO_HASH)
-build-rest-api-mini:
+IMAGE_NAME = registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME):$(GO_HASH)
+build-rest-api-mini: wait-for-docker
 	docker build \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
@@ -168,12 +176,22 @@ build-rest-api-mini:
 	docker push $(IMAGE_NAME)
 	yq e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
 
+deploy-redis:
+	$(KUBECTL) apply -f $(PWD)/minikube/redis.yaml --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/redis --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
+
+deploy-postgres:
+	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/postgres --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
+
 deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
  		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
+	make deploy-redis
+	make deploy-postgres
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
 local-dependencies-maybe:
 	which minikube || make dependencies-minikube

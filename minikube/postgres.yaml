@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+    name: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+      app.kubernetes.io/instance: postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/instance: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: "postgres:13"
+          imagePullPolicy: Always
+          ports:
+            - name: pg
+              containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: ""
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "trust"
+            - name: POSTGRES_DB
+              value: "postgres"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+    name: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: postgres
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: pg
+      protocol: TCP
+      name: pg
+  selector:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/instance: postgres
