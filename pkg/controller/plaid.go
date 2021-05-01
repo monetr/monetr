@@ -27,7 +27,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 // @Security ApiKeyAuth
 // @Produce json
 // @Router /plaid/token/new [get]
-// @Success 200 {object}
+// @Success 200
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) newPlaidToken(ctx iris.Context) {
 	// Retrieve the user's details. We need to pass some of these along to
@@ -100,7 +100,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 // @Security ApiKeyAuth
 // @Produce json
 // @Router /plaid/token/callback [post]
-// @Success 200 {object}
+// @Success 200
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	var callbackRequest struct {
