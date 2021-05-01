@@ -1,0 +1,124 @@
+LOCAL_TMP = $(PWD)/tmp
+LOCAL_BIN = $(PWD)/bin
+LOCAL_CERTS = $(PWD)/local/certs
+PATH:=$(PATH):$(LOCAL_BIN)
+ARCH = amd64
+OS = $(shell uname -s | tr A-Z a-z)
+
+KUBECTL=kubectl
+JQ=jq
+HOSTESS=hostess
+
+# This is the domain that is used for local development. You can change it to anything you want here and run init-mini
+# and everything will be provisioned and setup on your development machine for that domain.
+LOCAL_DOMAIN=monetr.mini
+SUBDOMAINS=app api
+
+stop-mini:
+	minikube stop || true
+	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) rm $$subdomain.$(LOCAL_DOMAIN) || true; done
+
+clean-mini: stop-mini clean-certificates
+	minikube delete || true
+
+init-mini: local-dependencies-maybe
+	(minikube status | grep "minikube start") && make start-minikube
+	make setup-hosts
+
+
+MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
+MINIKUBE_MEMORY=8192 # 8GB of memory. Reduce if this is too high for your computer. Could be reduced to 2GB
+MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
+KUBERNETES_VERSION=v1.18.15
+INSECURE_REGISTRY=localhost:5000
+start-minikube:
+	$(info Starting minikube)
+	minikube start \
+		--addons=ingress \
+		--cpus=$(MINIKUBE_CPUS) \
+		--memory=$(MINIKUBE_MEMORY) \
+		--delete-on-failure \
+		--driver=$(MINIKUBE_DRIVER) \
+		--kubernetes-version=$(KUBERNETES_VERSION) \
+		--insecure-registry=$(INSECURE_REGISTRY)
+
+setup-hosts:
+	$(eval MINIKUBE_IP = $(shell minikube ip))
+	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) add $$subdomain.$(LOCAL_DOMAIN) $(MINIKUBE_IP); done
+	make setup-certificates
+
+KEY_PATH=$(LOCAL_CERTS)/$(LOCAL_DOMAIN).key
+CERT_PATH=$(LOCAL_CERTS)/$(LOCAL_DOMAIN).crt
+clean-certificates:
+	(sudo security find-certificate -c $(LOCAL_DOMAIN) && make remove-certificate) || true
+	rm -rf $(LOCAL_CERTS) || true
+
+remove-certificate:
+	$(info Local development certificate is registered, it will be removed)
+	sudo security delete-certificate -c $(LOCAL_DOMAIN) || true
+
+NGINX_NAMESPACE=ingress-nginx
+NGINX_DEPLOYMENT=ingress-nginx-controller
+TLS_SECRET_NAME=monetr-tls
+setup-certificates:
+	mkdir -p $(LOCAL_CERTS)
+	openssl genrsa -out $(KEY_PATH) 2048
+	openssl req -new -x509 -addext "subjectAltName = DNS:*.$(LOCAL_DOMAIN)" -key $(KEY_PATH) -out $(CERT_PATH) -days 3650 \
+		-subj /CN=*.$(LOCAL_DOMAIN) || make help-certificates-openssl
+	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(CERT_PATH)
+	make deploy-certificate
+
+help-certificates-openssl:
+	@echo "============================================================="
+	@echo "It looks like there was a problem generating the certificate."
+	@echo "This can be due to using a version of openssl that is included with macOS."
+	@echo "You can check you version by running:"
+	@echo ""
+	@echo "$ openssl version"
+	@echo ""
+	@echo "If you see something like LibreSSL 2.8.3 then you'll need to install a different version of openssl"
+	@echo "If you have brew installed you can simply install the correct version using"
+	@echo ""
+	@echo "$ brew install openssl && brew link openssl"
+	@echo ""
+	@echo "You may also need to put the brew openssl first in your path"
+	@echo "More information on this can be found here: https://security.stackexchange.com/a/183973"
+	exit 100
+
+deploy-certificate:
+	rm -rf $(LOCAL_TMP)/nginx-*.json || true
+	$(KUBECTL) -n $(NGINX_NAMESPACE) create secret tls $(TLS_SECRET_NAME) --key $(KEY_PATH) --cert $(CERT_PATH) \
+		--dry-run=client \
+		-o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) get deploy/$(NGINX_DEPLOYMENT) \
+		--namespace=$(NGINX_NAMESPACE) -o json > $(LOCAL_TMP)/nginx-args.json
+	jq '.spec.template.spec.containers[0].args |= . + ["--default-ssl-certificate=$$(POD_NAMESPACE)/$(TLS_SECRET_NAME)"]' \
+		$(LOCAL_TMP)/nginx-args.json > $(LOCAL_TMP)/nginx-new.json
+	cat $(LOCAL_TMP)/nginx-new.json | $(KUBECTL) apply -f -
+	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE)
+	rm -rf $(LOCAL_TMP)/nginx-*.json || true
+
+local-dependencies-maybe:
+	which minikube || make dependencies-minikube
+	which $(HOSTESS) || make dependencies-hostess
+	which $(JQ) || make dependencies-jq
+
+MINIKUBE_VERSION=latest
+dependencies-minikube:
+	curl -LO https://storage.googleapis.com/minikube/releases/$(MINIKUBE_VERSION)/minikube-$(OS)-amd64
+	sudo install minikube-$(OS)-amd64 $(LOCAL_BIN)/minikube
+
+HOSTESS_REPO=https://github.com/cbednarski/hostess
+HOSTESS_DIR=$(LOCAL_TMP)/$(HOSTESS)
+dependencies-hostess:
+	rm -rf $(HOSTESS_DIR) || true
+	git clone $(HOSTESS_REPO) $(HOSTESS_DIR)
+	cd $(HOSTESS_DIR) && go build -o $(LOCAL_BIN)/$(HOSTESS) .
+	rm -rf $(HOSTESS_DIR)
+
+JQ_URL=https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64
+JQ_DIR=$(LOCAL_TMP)/$(JQ)
+dependencies-jq:
+	rm -rf $(LOCAL_BIN)/$(JQ) || true
+	curl -L $(JQ_URL) -o $(LOCAL_BIN)/$(JQ)
+	sudo chmod +x $(LOCAL_BIN)/$(JQ)

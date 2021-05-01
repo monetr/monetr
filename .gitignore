@@ -12,3 +12,4 @@ pkg/ui/*.js
 pkg/ui/*.html
 pkg/ui/*.txt
 tmp
+local

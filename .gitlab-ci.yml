@@ -28,6 +28,9 @@ variables:
   GOFLAGS: '-mod=vendor'
 
 Release Testing:
+  only:
+    refs:
+      - tags
   allow_failure: true
   needs: [ ]
   stage: Release
@@ -157,6 +160,7 @@ Yeet Coverage:
     - "Go Tests"
 
 Documentation:
+  when: manual
   needs:
     - "JS Dependencies"
   stage: Documentation

@@ -54,6 +54,13 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 		return
 	}
 
+	// If transactions are null or empty then make sure what we return is an empty array. Otherwise we can accidentally
+	// return null.
+	if len(transactions) == 0 {
+		ctx.JSON(make([]models.Transaction, 0))
+		return
+	}
+
 	ctx.JSON(transactions)
 }
 

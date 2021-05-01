@@ -1,6 +1,6 @@
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
-PATH += :$(LOCAL_BIN)
+PATH:=$(PATH):$(LOCAL_BIN)
 HELM_VERSION = 3.5.4
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)

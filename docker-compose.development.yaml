@@ -4,7 +4,7 @@ services:
     image: harder-rest-api
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
     hostname: rest-api
     environment:
       - MONETR_REDIS_ADDRESS=redis
@@ -13,7 +13,7 @@ services:
       - 4000:4000
       - 9000:9000
     volumes:
-      - "./config.yaml:/etc/harder/config.yaml"
+      - "./config.yaml:/etc/monetr/config.yaml"
     restart: always
   postgres:
     image: postgres:13

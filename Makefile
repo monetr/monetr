@@ -1,7 +1,8 @@
 LOCAL_BIN_DIR = "$(PWD)/bin"
 NODE_MODULES_DIR = "$(PWD)/node_modules"
 VENDOR_DIR = "$(PWD)/vendor"
-
+BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+RELEASE_REVISION=$(shell git rev-parse HEAD)
 MONETR_CLI_PACKAGE = "github.com/monetrapp/rest-api/pkg/cmd"
 COVERAGE_TXT = "$(PWD)/coverage.txt"
 
@@ -30,19 +31,22 @@ docs:
 	swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
 
 docker:
-	docker build -t harder-rest-api -f Dockerfile .
+	docker build \
+		--build-arg REVISION=$(RELEASE_REVISION) \
+		--build-arg BUILD_TIME=$(BUILD_TIME) \
+		-t harder-rest-api -f Dockerfile .
 
 docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
 
 clean-development:
-	docker compose -f ./docker-compose.development.yaml rm --stop --force || true
+	docker-compose -f ./docker-compose.development.yaml rm --stop --force || true
 
 compose-development: docker docker-work-web-ui
-	docker compose  -f ./docker-compose.development.yaml up
+	docker-compose  -f ./docker-compose.development.yaml up
 
 compose-development-lite:
-	docker compose  -f ./docker-compose.development.yaml up
+	docker-compose  -f ./docker-compose.development.yaml up
 
 generate_schema:
 	$(eval TARGET_FILE := $(shell echo "$(TARGET_DIRECTORY)/0_initial.up.sql"))
@@ -71,3 +75,6 @@ include Makefile.tinker
 include Makefile.deploy
 include Makefile.docker
 
+ifndef CI
+include Makefile.local
+endif
