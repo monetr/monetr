@@ -20,7 +20,6 @@ make init-mini
 ```
 
 You will be prompted once for your password in a window; this is to add the certificate as trusted to macOS.
-You will then be prompted a
 
 This will allow you to access the REST API via `https://api.monetr.mini`.
 
@@ -89,3 +88,13 @@ make webhooks-mini NGROK_AUTH=${YOUR_NGROK_TOKEN}
 
 This will deploy ngrok locally within the minikube cluster and will forward traffic to the REST API service.
 You can see the ngrok inspector at `https://ngrok.monetr.mini` after this command has been run.
+
+To disable webhooks if you have enabled them:
+
+```bash
+make disable-webhooks-mini
+```
+
+This will update the `values.local.yaml` in your project directory and disable the webhook settings, it will then
+redeploy the REST API to minikube using the updated values file. Then it will delete the ngrok service that was
+previously deployed.
