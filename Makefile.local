@@ -126,7 +126,7 @@ deploy-certificate:
 	jq '.spec.template.spec.containers[0].args |= . + ["--default-ssl-certificate=$$(POD_NAMESPACE)/$(TLS_SECRET_NAME)"]' \
 		$(LOCAL_TMP)/nginx-args.json > $(LOCAL_TMP)/nginx-new.json
 	cat $(LOCAL_TMP)/nginx-new.json | $(KUBECTL) apply -f -
-	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=30s
+	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=90s
 	rm -rf $(LOCAL_TMP)/nginx-*.json || true
 
 setup-registry:

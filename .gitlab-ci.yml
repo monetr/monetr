@@ -1,15 +1,15 @@
 # This workflow rule might need to be tweaked once we are using bors to regulate builds. I think it will need another
 # exception for staging branches that bors creates.
-workflow:
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-      when: always
-    - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event"'
-      when: always
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
-      when: never
+#workflow:
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "main"'
+#      when: always
+#    - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
+#      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event"'
+#      when: always
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
+#      when: never
 
 stages:
   - Release
