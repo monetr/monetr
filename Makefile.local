@@ -143,10 +143,10 @@ $(VALUES):
 	if [ ! -f "$(VALUES)" ]; then $(HELM) show values $(PWD) > $(VALUES) && make init-mini-values; fi
 
 $(LOGIN_JWT_SECRET): $(LOCAL_DIR)
-	if [ ! -f "$(LOGIN_JWT_SECRET)" ]; then echo "Login JWT secret has not been generated, creating now" && (date | md5 > $(LOGIN_JWT_SECRET)); fi
+	if [ ! -f "$(LOGIN_JWT_SECRET)" ]; then echo "Login JWT secret has not been generated, creating now" && sleep 1 && (date | md5 > $(LOGIN_JWT_SECRET)); fi
 
 $(REGISTER_JWT_SECRET): $(LOCAL_DIR)
-	if [ ! -f "$(REGISTER_JWT_SECRET)" ]; then echo "Register JWT secret has not been generated, creating now" && (date | md5 > $(REGISTER_JWT_SECRET)); fi
+	if [ ! -f "$(REGISTER_JWT_SECRET)" ]; then echo "Register JWT secret has not been generated, creating now" && sleep 1 && (date | md5 > $(REGISTER_JWT_SECRET)); fi
 
 REST_API_IMAGE_REPO=registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
 init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
