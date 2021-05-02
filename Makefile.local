@@ -5,7 +5,6 @@ LOCAL_CERTS = $(LOCAL_DIR)/certs
 PATH:=$(PATH):$(LOCAL_BIN)
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
-GO_HASH=$(shell find -s $(PWD)/pkg -type f -exec shasum {} \; | shasum | cut -d " " -f 1)
 
 # Tools used to run the application locally
 KUBECTL=kubectl
@@ -18,7 +17,7 @@ SPLIT_YAML=kubernetes-split-yaml
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=app vault ngrok registry app api
+SUBDOMAINS=pghero vault ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -58,7 +57,7 @@ INSECURE_REGISTRY=registry.$(LOCAL_DOMAIN)
 start-minikube:
 	$(info Starting minikube)
 	minikube start \
-		--addons=ingress,registry \
+		--addons=ingress \
 		--cpus=$(MINIKUBE_CPUS) \
 		--memory=$(MINIKUBE_MEMORY) \
 		--delete-on-failure \
@@ -172,14 +171,19 @@ values-file: local-dependencies-maybe $(VALUES)
 $(LOCAL_REST_API_DEPLOY):
 	mkdir -p $(LOCAL_REST_API_DEPLOY)
 
-IMAGE_NAME = registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME):$(GO_HASH)
+GO_HASH=$(shell find -s $(PWD)/pkg -type f -exec shasum {} \; | shasum | cut -d " " -f 1)
+BASE_IMAGE_NAME = registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
+IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
 build-rest-api-mini: wait-for-docker
 	docker build \
+		--cache-from=$(BASE_IMAGE_NAME):latest \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		-t $(IMAGE_NAME) \
+		-t $(BASE_IMAGE_NAME):latest \
 		-f Dockerfile .
 	docker push $(IMAGE_NAME)
+	docker push $(BASE_IMAGE_NAME):latest
 	yq e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
 
 deploy-redis:
@@ -190,12 +194,17 @@ deploy-postgres:
 	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/postgres --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
+deploy-web-ui:
+	$(KUBECTL) apply -f $(PWD)/minikube/web-ui.yaml --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/web-ui --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
+
 deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
  		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
 	make deploy-redis
 	make deploy-postgres
+	make deploy-web-ui
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
@@ -265,6 +274,9 @@ endif
 	$(KUBECTL) rollout status deploy/ngrok \
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	make reconfigure-webhooks
+	@echo "#################################################################################"
+	@echo "ngrok inspector is now accessible at: https://ngrok.$(LOCAL_DOMAIN)"
+	@echo "#################################################################################"
 
 reconfigure-webhooks:
 	export WEBHOOKS_DOMAIN=$$(curl -s "https://ngrok.$(LOCAL_DOMAIN)/api/tunnels" | $(JQ) '.tunnels[0].public_url' - -r) && \
@@ -273,3 +285,21 @@ reconfigure-webhooks:
 	yq e '.api.stripe.webhooksEnabled = true' -i $(VALUES) && \
 	yq e '.api.stripe.webhooksDomain = strenv(WEBHOOKS_DOMAIN)' -i $(VALUES)
 	make deploy-mini-application
+
+disable-webhooks-mini:
+	yq e '.api.plaid.webhooksEnabled = true' -i $(VALUES)
+	yq e '.api.stripe.webhooksEnabled = true' -i $(VALUES)
+	make deploy-mini-application
+	$(KUBECTL) delete deploy/ngrok --namespace $(MINIKUBE_NAMESPACE)
+
+
+
+###################### POSTGRESQL ANALYTICS ##################################
+pghero-mini:
+	$(KUBECTL) apply -f $(PWD)/minikube/pghero.yaml \
+		--namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/pghero \
+		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	@echo "#################################################################################"
+	@echo "pghero dashboard is now accessible at: https://pghero.$(LOCAL_DOMAIN)"
+	@echo "#################################################################################"
