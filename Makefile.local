@@ -18,7 +18,7 @@ SPLIT_YAML=kubernetes-split-yaml
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=vault ngrok registry app api
+SUBDOMAINS=app vault ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -72,7 +72,10 @@ setup-hosts:
 	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) add $$subdomain.$(LOCAL_DOMAIN) $(MINIKUBE_IP); done
 	$(eval MINIKUBE_SSH_KEY = $(shell minikube ssh-key))
 	@sleep 5
-	ssh -o IdentitiesOnly=yes -i $(MINIKUBE_SSH_KEY) docker@$(MINIKUBE_IP) 'sudo chown docker /etc/hosts && echo "$(MINIKUBE_IP) registry.monetr.mini" >> /etc/hosts'
+	ssh -o "IdentitiesOnly=yes" \
+ 		-o "StrictHostKeyChecking no" \
+ 		-i $(MINIKUBE_SSH_KEY) docker@$(MINIKUBE_IP) \
+ 		 'sudo chown docker /etc/hosts && echo "$(MINIKUBE_IP) registry.monetr.mini" >> /etc/hosts'
 	make deploy-certificate
 
 KEY_PATH=$(LOCAL_CERTS)/$(LOCAL_DOMAIN).key
@@ -118,12 +121,14 @@ help-certificates-openssl:
 
 deploy-certificate:
 	rm -rf $(LOCAL_TMP)/nginx-*.json || true
+	$(KUBECTL) -n $(NGINX_NAMESPACE) get configmap/$(NGINX_DEPLOYMENT) \
+ 		-o yaml | $(YQ) e '.data.hsts = "true"' - | $(KUBECTL) apply -f -
 	$(KUBECTL) -n $(NGINX_NAMESPACE) create secret tls $(TLS_SECRET_NAME) --key $(KEY_PATH) --cert $(CERT_PATH) \
 		--dry-run=client \
 		-o yaml | $(KUBECTL) apply -f -
 	$(KUBECTL) get deploy/$(NGINX_DEPLOYMENT) \
 		--namespace=$(NGINX_NAMESPACE) -o json > $(LOCAL_TMP)/nginx-args.json
-	jq '.spec.template.spec.containers[0].args |= . + ["--default-ssl-certificate=$$(POD_NAMESPACE)/$(TLS_SECRET_NAME)"]' \
+	$(JQ) '.spec.template.spec.containers[0].args |= . + ["--default-ssl-certificate=$$(POD_NAMESPACE)/$(TLS_SECRET_NAME)"]' \
 		$(LOCAL_TMP)/nginx-args.json > $(LOCAL_TMP)/nginx-new.json
 	cat $(LOCAL_TMP)/nginx-new.json | $(KUBECTL) apply -f -
 	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=90s

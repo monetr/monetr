@@ -19,7 +19,6 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 		UIDomainName:   "http://localhost:1234",
 		APIDomainName:  "http://localhost:1235",
 		AllowSignUp:    true,
-		EnableWebhooks: false,
 		JWT: config.JWT{
 			LoginJwtSecret:        gofakeit.UUID(),
 			RegistrationJwtSecret: gofakeit.UUID(),

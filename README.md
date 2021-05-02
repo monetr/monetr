@@ -19,6 +19,9 @@ This has been mostly automated and can be initiated by running the following com
 make init-mini
 ```
 
+You will be prompted once for your password in a window; this is to add the certificate as trusted to macOS.
+You will then be prompted a
+
 This will allow you to access the REST API via `https://api.monetr.mini`.
 
 **NOTE:** This is still being tuned and is subject to change significantly. This also requires the following
@@ -44,6 +47,33 @@ make clean-mini
 
 This will remove all of the generated files, trusted certificates, and dependencies that were pulled for running
 locally. It will also delete your minikube cluster to make sure the environment is completely clean.
+
+### Seeing Your Changes
+
+As you make changes to the code you can deploy your changes to the local minikube cluster by running:
+
+```bash
+make deploy-mini-application
+```
+
+This will build a new docker image from your current code as well as evaluate any changes made to the `values.local.yaml`
+file in your project directory and push those changes to minikube.
+
+If you want to do step debugging you can use a tool called telepresence. I recommend using telepresence 2 which can be
+downloaded here: https://www.getambassador.io/docs/telepresence/latest/install/
+Eventually this will be added to your project's bin directory automatically but for now you must download it manually.
+
+Once you have downloaded telepresence you can run:
+
+```bash
+make debug-api-mini
+```
+
+Which will let you run the REST API on your actual computer and serve requests from minikube there. This means you can
+run the REST API in GoLand or VSCode and use a step debugger to debug requests. There is a caveat with doing this though;
+configuration is primarily provided to the REST API service in Kubernetes via environment variables. So you may need to
+make a `config.yaml` file in your project directory and add any configuration options there in order to run the service
+properly. More documentation on that file will be added at a later date.
 
 ### Testing Webhooks
 
