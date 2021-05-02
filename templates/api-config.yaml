@@ -34,3 +34,16 @@ data:
   MONETR_STRIPE_ENABLED: {{ quote .Values.api.stripe.enabled }}
   MONETR_STRIPE_WEBHOOKS_ENABLED: {{ quote .Values.api.stripe.webhooksEnabled }}
   MONETR_STRIPE_WEBHOOKS_DOMAIN: {{ quote .Values.api.stripe.webhooksDomain }}
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "api.fullname" . }}-config-file
+  labels:
+  {{- include "api.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    sendGrid:
+      templates:
+        {{- toYaml .Values.api.sendGrid.templates | nindent 8 }}

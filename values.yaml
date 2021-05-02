@@ -93,6 +93,12 @@ api:
     database: postgres
   smtp:
     enabled: false
+  sendGrid:
+    enabled: false
+    apiKey: ""
+    templates:
+      verifyEmailTemplate: ""
+      forgotPasswordTemplate: ""
   reCaptcha:
     enabled: false
     privateKey: ""
@@ -125,5 +131,6 @@ api:
   stripe:
     enabled: false
     apiKey: ""
+    publicKey: ""
     webhooksEnabled: false
     webhooksDomain: ""

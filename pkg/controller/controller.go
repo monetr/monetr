@@ -139,10 +139,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			}
 		})
 
-		if c.configuration.Plaid.WebhooksEnabled {
-			// Webhooks use their own authentication, so we want to declare this first.
-			p.Post("/plaid/webhook/{identifier:string}", c.handlePlaidWebhook)
-		}
 
 		// Trace API calls to sentry
 		p.Use(func(ctx iris.Context) {
@@ -159,6 +155,15 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 			ctx.Next()
 		})
+
+		if c.configuration.Plaid.WebhooksEnabled {
+			// Webhooks use their own authentication, so we want to declare this first.
+			p.Post("/plaid/webhook/{identifier:string}", c.handlePlaidWebhook)
+		}
+
+		if c.configuration.Stripe.Enabled && c.configuration.Stripe.WebhooksEnabled {
+			p.PartyFunc("/stripe", c.handleStripe)
+		}
 
 		// For the following endpoints we want to have a repository available to us.
 		p.PartyFunc("/", func(repoParty router.Party) {

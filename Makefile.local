@@ -18,7 +18,7 @@ SPLIT_YAML=kubernetes-split-yaml
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=ngrok registry app api
+SUBDOMAINS=vault ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -160,6 +160,7 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	yq e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	yq e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	yq e '.api.cors.allowedOrigins[0] = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	yq e '.api.cors.debug = false' -i $(VALUES)
 
 values-file: local-dependencies-maybe $(VALUES)
 

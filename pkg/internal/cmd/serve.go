@@ -127,7 +127,7 @@ func RunServer() error {
 		log.Debugf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain)
 	}
 
-	if configuration.Stripe.WebhooksEnabled {
+	if configuration.Stripe.Enabled && configuration.Stripe.WebhooksEnabled {
 		log.Debugf("stripe webhooks are enabled and will be sent to: %s", configuration.Stripe.WebhooksDomain)
 	}
 

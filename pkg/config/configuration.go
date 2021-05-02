@@ -16,6 +16,13 @@ const (
 	PlaidProduction  PlaidEnvironment = "production"
 )
 
+type SendGridTemplate string
+
+const (
+	VerifyEmailAddressTemplate SendGridTemplate = "verifyEmailTemplate"
+	ForgotPasswordTemplate     SendGridTemplate = "forgotPasswordTemplate"
+)
+
 type Configuration struct {
 	Name             string
 	Environment      string
@@ -66,7 +73,9 @@ type SMTPClient struct {
 }
 
 type SendGrid struct {
-	Enabled bool
+	Enabled   bool
+	APIKey    string
+	Templates map[SendGridTemplate]string
 }
 
 type ReCAPTCHA struct {

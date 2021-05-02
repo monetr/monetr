@@ -54,7 +54,7 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *iris
 		AllowedHeaders: []string{
 			"Cookies",
 			"Content-Type",
-			"H-Token",
+			"M-Token",
 		},
 		ExposedHeaders:     nil,
 		MaxAge:             0,

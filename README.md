@@ -19,6 +19,8 @@ This has been mostly automated and can be initiated by running the following com
 make init-mini
 ```
 
+This will allow you to access the REST API via `https://api.monetr.mini`.
+
 **NOTE:** This is still being tuned and is subject to change significantly. This also requires the following
 to be installed on your computer.
 - minikube
