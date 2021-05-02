@@ -191,6 +191,10 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 					c.badRequest(ctx, "this endpoint is meant to be used to test error reporting to sentry")
 				})
 			}
+
+			if c.configuration.Stripe.Enabled {
+				repoParty.PartyFunc("/billing", c.handleBilling)
+			}
 		})
 	})
 

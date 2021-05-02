@@ -8,24 +8,38 @@ import (
 
 const EnvironmentPrefix = "MONETR"
 
+type PlaidEnvironment string
+
+const (
+	PlaidSandbox     PlaidEnvironment = "sandbox"
+	PlaidDevelopment PlaidEnvironment = "development"
+	PlaidProduction  PlaidEnvironment = "production"
+)
+
 type Configuration struct {
-	Name           string
-	Environment    string
-	UIDomainName   string
-	APIDomainName  string
-	AllowSignUp    bool
-	EnableWebhooks bool
-	CORS           CORS
-	JWT            JWT
-	Logging        Logging
-	Plaid          Plaid
-	PostgreSQL     PostgreSQL
-	ReCAPTCHA      ReCAPTCHA
-	Redis          Redis
-	SMTP           SMTPClient
-	SendGrid       SendGrid
-	Sentry         Sentry
-	Stripe         Stripe
+	Name             string
+	Environment      string
+	UIDomainName     string
+	APIDomainName    string
+	AllowSignUp      bool
+	EnableWebhooks   bool
+	CORS             CORS
+	JWT              JWT
+	Logging          Logging
+	Plaid            Plaid
+	PostgreSQL       PostgreSQL
+	ReCAPTCHA        ReCAPTCHA
+	Redis            Redis
+	SMTP             SMTPClient
+	SendGrid         SendGrid
+	Sentry           Sentry
+	Stripe           Stripe
+	MultiPlaidConfig map[PlaidEnvironment]PlaidSingleConfig
+}
+
+type PlaidSingleConfig struct {
+	ClientID     string
+	ClientSecret string
 }
 
 type JWT struct {
