@@ -139,7 +139,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			}
 		})
 
-		if c.configuration.EnableWebhooks {
+		if c.configuration.Plaid.WebhooksEnabled {
 			// Webhooks use their own authentication, so we want to declare this first.
 			p.Post("/plaid/webhook/{identifier:string}", c.handlePlaidWebhook)
 		}

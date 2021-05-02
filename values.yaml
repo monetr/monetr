@@ -105,6 +105,8 @@ api:
     environment: "https://sandbox.plaid.com"
     birthdatePrompt: false # Not yet implemented
     enableReturningUserExperience: false
+    webhooksEnabled: false
+    webhooksDomain: ""
   cors:
     allowedOrigins:
       - "*"
@@ -123,3 +125,5 @@ api:
   stripe:
     enabled: false
     apiKey: ""
+    webhooksEnabled: false
+    webhooksDomain: ""

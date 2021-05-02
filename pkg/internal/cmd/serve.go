@@ -123,6 +123,14 @@ func RunServer() error {
 		return err
 	}
 
+	if configuration.Plaid.WebhooksEnabled {
+		log.Debugf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain)
+	}
+
+	if configuration.Stripe.WebhooksEnabled {
+		log.Debugf("stripe webhooks are enabled and will be sent to: %s", configuration.Stripe.WebhooksDomain)
+	}
+
 	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidClient, stats)
 	defer jobManager.Close()
 

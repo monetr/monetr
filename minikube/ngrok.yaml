@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrok
+  labels:
+    app: ngrok
+    name: ngrok
+    app.kubernetes.io/name: ngrok
+    app.kubernetes.io/instance: ngrok
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ngrok
+      app.kubernetes.io/instance: ngrok
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ngrok
+        app.kubernetes.io/instance: ngrok
+    spec:
+      containers:
+        - name: ngrok
+          image: wernight/ngrok
+          imagePullPolicy: Always
+          env:
+            - name: NGROK_PORT
+              value: "rest-api.default.svc.cluster.local:80"
+            - name: NGROK_DEBUG
+              value: "true"
+            - name: NGROK_AUTH
+              valueFrom:
+                secretKeyRef:
+                  key: NGROK_AUTH # Is created by the make command.
+                  name: ngrok-auth-secret
+          ports:
+            - name: http
+              containerPort: 4040
+              protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngrok
+  labels:
+    app: ngrok
+    name: ngrok
+    app.kubernetes.io/name: ngrok
+    app.kubernetes.io/instance: ngrok
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4040
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: ngrok
+    app.kubernetes.io/instance: ngrok
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ngrok
+  labels:
+    app: ngrok
+    name: ngrok
+    app.kubernetes.io/name: ngrok
+    app.kubernetes.io/instance: ngrok
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: "ngrok.monetr.mini"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: ngrok
+              servicePort: 4040

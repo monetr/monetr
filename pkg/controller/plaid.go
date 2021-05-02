@@ -52,6 +52,16 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		phoneNumber = me.Login.PhoneNumber.E164()
 	}
 
+	var webhook string
+	if c.configuration.Plaid.WebhooksEnabled {
+		domain := c.configuration.Plaid.WebhooksDomain
+		if domain != "" {
+			webhook = fmt.Sprintf("%s/plaid/webhook", c.configuration.Plaid.WebhooksDomain)
+		} else {
+			c.log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
+		}
+	}
+
 	plaidSpan := sentry.StartSpan(c.getContext(ctx), "Create Plaid Link Token")
 	token, err := c.plaid.CreateLinkToken(plaid.LinkTokenConfigs{
 		User: &plaid.LinkTokenUser{
@@ -70,7 +80,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 			"US",
 		},
 		// TODO (elliotcourant) Implement webhook once we are running in kube.
-		Webhook:               "",
+		Webhook:               webhook,
 		AccountFilters:        nil,
 		CrossAppItemAdd:       nil,
 		PaymentInitiation:     nil,

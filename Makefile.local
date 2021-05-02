@@ -18,7 +18,7 @@ SPLIT_YAML=kubernetes-split-yaml
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=registry app api
+SUBDOMAINS=ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -241,3 +241,29 @@ debug-api-mini:
 	telepresence leave rest-api || true
 	kubectl rollout restart deploy/rest-api
 	telepresence intercept rest-api --port=4000 || true
+
+
+
+###################### WORKING ON WEBHOOKS LOCALLY ##################################
+webhooks-mini:
+ifndef NGROK_AUTH
+	$(error Must specify NGROK_AUTH to setup webhooks)
+	exit 100
+endif
+	$(KUBECTL) create secret generic ngrok-auth-secret \
+		--from-literal=NGROK_AUTH=$(NGROK_AUTH) \
+		--dry-run=client -o yaml | $(KUBECTL) apply -f - \
+		--namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(PWD)/minikube/ngrok.yaml \
+		--namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/ngrok \
+		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	make reconfigure-webhooks
+
+reconfigure-webhooks:
+	export WEBHOOKS_DOMAIN=$$(curl -s "https://ngrok.$(LOCAL_DOMAIN)/api/tunnels" | $(JQ) '.tunnels[0].public_url' - -r) && \
+	yq e '.api.plaid.webhooksEnabled = true' -i $(VALUES) && \
+	yq e '.api.plaid.webhooksDomain = strenv(WEBHOOKS_DOMAIN)' -i $(VALUES) && \
+	yq e '.api.stripe.webhooksEnabled = true' -i $(VALUES) && \
+	yq e '.api.stripe.webhooksDomain = strenv(WEBHOOKS_DOMAIN)' -i $(VALUES)
+	make deploy-mini-application

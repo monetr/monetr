@@ -22,7 +22,6 @@ type Configuration struct {
 	UIDomainName     string
 	APIDomainName    string
 	AllowSignUp      bool
-	EnableWebhooks   bool
 	CORS             CORS
 	JWT              JWT
 	Logging          Logging
@@ -99,6 +98,9 @@ type Plaid struct {
 	// sign up or afterwards in their user settings. This is used by plaid for
 	// future products. At the time of writing this it does not do anything.
 	EnableBirthdatePrompt bool
+
+	WebhooksEnabled bool
+	WebhooksDomain  string
 }
 
 type CORS struct {
@@ -128,9 +130,11 @@ type Sentry struct {
 }
 
 type Stripe struct {
-	Enabled   bool
-	APIKey    string
-	PublicKey string
+	Enabled         bool
+	APIKey          string
+	PublicKey       string
+	WebhooksEnabled bool
+	WebhooksDomain  string
 }
 
 func LoadConfiguration(configFilePath *string) Configuration {
@@ -195,6 +199,8 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")
 	v.BindEnv("Plaid.EnableBirthdatePrompt", "MONETR_PLAID_BIRTHDATE_PROMPT")
 	v.BindEnv("Plaid.EnableReturningUserExperience", "MONETR_PLAID_RETURNING_EXPERIENCE")
+	v.BindEnv("Plaid.WebhooksEnabled", "MONETR_PLAID_WEBHOOKS_ENABLED")
+	v.BindEnv("Plaid.WebhooksDomain", "MONETR_PLAID_WEBHOOKS_DOMAIN")
 	v.BindEnv("PostgreSQL.Address", "MONETR_PG_ADDRESS")
 	v.BindEnv("PostgreSQL.Port", "MONETR_PG_PORT")
 	v.BindEnv("PostgreSQL.Username", "MONETR_PG_USERNAME")
@@ -216,4 +222,6 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Stripe.Enabled", "MONETR_STRIPE_ENABLED")
 	v.BindEnv("Stripe.APIKey", "MONETR_STRIPE_API_KEY")
 	v.BindEnv("Stripe.PublicKey", "MONETR_STRIPE_PUBLIC_KEY")
+	v.BindEnv("Stripe.WebhooksEnabled", "MONETR_STRIPE_WEBHOOKS_ENABLED")
+	v.BindEnv("Stripe.WebhooksDomain", "MONETR_STRIPE_WEBHOOKS_DOMAIN")
 }

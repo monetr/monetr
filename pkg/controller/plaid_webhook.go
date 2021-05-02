@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/kataras/iris/v12/context"
@@ -50,17 +49,4 @@ func (c *Controller) processWebhook(hook PlaidWebhook) error {
 	}
 
 	return nil
-}
-
-func (c *Controller) getWebhookUrl() string {
-	if !c.configuration.EnableWebhooks {
-		return ""
-	}
-
-	uri, err := url.Parse(c.configuration.APIDomainName)
-	if err != nil {
-		panic(err)
-	}
-
-	return uri.String()
 }

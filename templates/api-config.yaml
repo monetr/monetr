@@ -16,6 +16,8 @@ data:
   MONETR_PLAID_ENVIRONMENT: {{ quote .Values.api.plaid.environment }}
   MONETR_PLAID_BIRTHDATE_PROMPT: {{ quote .Values.api.plaid.birthdatePrompt }}
   MONETR_PLAID_RETURNING_EXPERIENCE: {{ quote .Values.api.plaid.enableReturningUserExperience }}
+  MONETR_PLAID_WEBHOOKS_ENABLED: {{ quote .Values.api.plaid.webhooksEnabled }}
+  MONETR_PLAID_WEBHOOKS_DOMAIN: {{ quote .Values.api.plaid.webhooksDomain }}
   MONETR_PG_ADDRESS: {{ quote .Values.api.postgreSql.address }}
   MONETR_PG_PORT: {{ quote .Values.api.postgreSql.port }}
   MONETR_PG_DATABASE: {{ quote .Values.api.postgreSql.database }}
@@ -30,3 +32,5 @@ data:
   MONETR_SENTRY_SAMPLE_RATE: {{ quote .Values.api.sentry.sampleRate }}
   MONETR_SENTRY_TRACE_SAMPLE_RATE: {{ quote .Values.api.sentry.traceSampleRate }}
   MONETR_STRIPE_ENABLED: {{ quote .Values.api.stripe.enabled }}
+  MONETR_STRIPE_WEBHOOKS_ENABLED: {{ quote .Values.api.stripe.webhooksEnabled }}
+  MONETR_STRIPE_WEBHOOKS_DOMAIN: {{ quote .Values.api.stripe.webhooksDomain }}
