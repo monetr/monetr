@@ -12,7 +12,7 @@ func TestPostTransactions(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		response := e.POST("/bank_accounts/1234/transactions").
-			WithHeader("H-Token", token).
+			WithHeader("M-Token", token).
 			WithJSON(models.Transaction{
 				BankAccountId: 1234,
 				SpendingId:    nil,

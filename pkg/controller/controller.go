@@ -96,7 +96,7 @@ func NewController(
 
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name H-Token
+// @name M-Token
 func (c *Controller) RegisterRoutes(app *iris.Application) {
 	if c.stats != nil {
 		app.UseGlobal(func(ctx iris.Context) {

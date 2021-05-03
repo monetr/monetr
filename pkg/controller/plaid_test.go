@@ -20,7 +20,7 @@ func TestPostTokenCallback(t *testing.T) {
 		mock_plaid.MockGetAccounts(t, nil)
 
 		response := e.POST("/plaid/link/token/callback").
-			WithHeader("H-Token", token).
+			WithHeader("M-Token", token).
 			WithJSON(map[string]interface{}{
 				"publicToken":     publicToken,
 				"institutionId":   "123",

@@ -23,7 +23,7 @@ func TestPostLink(t *testing.T) {
 		}
 
 		response := e.POST("/links").
-			WithHeader("H-Token", token).
+			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
 
@@ -74,7 +74,7 @@ func TestGetLink(t *testing.T) {
 		var linkAID uint64
 		{
 			response := e.POST("/links").
-				WithHeader("H-Token", tokenA).
+				WithHeader("M-Token", tokenA).
 				WithJSON(link).
 				Expect()
 
@@ -89,7 +89,7 @@ func TestGetLink(t *testing.T) {
 		// Create a link for tokenB too. This way we can do a GET request for both tokens to test each scenario.
 		{
 			response := e.POST("/links").
-				WithHeader("H-Token", tokenB).
+				WithHeader("M-Token", tokenB).
 				WithJSON(link).
 				Expect()
 
@@ -103,7 +103,7 @@ func TestGetLink(t *testing.T) {
 		// Now we want to test GET with token A.
 		{
 			response := e.GET("/links").
-				WithHeader("H-Token", tokenA).
+				WithHeader("M-Token", tokenA).
 				Expect()
 
 			response.Status(http.StatusOK)
@@ -114,7 +114,7 @@ func TestGetLink(t *testing.T) {
 		// Now we want to test GET with token B.
 		{
 			response := e.GET("/links").
-				WithHeader("H-Token", tokenB).
+				WithHeader("M-Token", tokenB).
 				Expect()
 
 			response.Status(http.StatusOK)
@@ -148,7 +148,7 @@ func TestPutLink(t *testing.T) {
 		}
 
 		response := e.POST("/links").
-			WithHeader("H-Token", token).
+			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
 
@@ -164,7 +164,7 @@ func TestPutLink(t *testing.T) {
 		link.InstitutionName = "New Name"
 
 		updated := e.PUT(fmt.Sprintf("/links/%d", linkId)).
-			WithHeader("H-Token", token).
+			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
 
@@ -189,7 +189,7 @@ func TestPutLink(t *testing.T) {
 		}
 
 		response := e.POST("/links").
-			WithHeader("H-Token", token).
+			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
 
@@ -228,7 +228,7 @@ func TestPutLink(t *testing.T) {
 		var linkAID, linkBID uint64
 		{
 			response := e.POST("/links").
-				WithHeader("H-Token", tokenA).
+				WithHeader("M-Token", tokenA).
 				WithJSON(link).
 				Expect()
 
@@ -243,7 +243,7 @@ func TestPutLink(t *testing.T) {
 		// Create a link for tokenB too. This way we can do a GET request for both tokens to test each scenario.
 		{
 			response := e.POST("/links").
-				WithHeader("H-Token", tokenB).
+				WithHeader("M-Token", tokenB).
 				WithJSON(link).
 				Expect()
 
@@ -262,7 +262,7 @@ func TestPutLink(t *testing.T) {
 				CustomInstitutionName: "I have changed",
 			}
 			response := e.PUT(fmt.Sprintf("/links/%d", link.LinkId)).
-				WithHeader("H-Token", tokenA).
+				WithHeader("M-Token", tokenA).
 				WithJSON(link).
 				Expect()
 
@@ -277,7 +277,7 @@ func TestPutLink(t *testing.T) {
 				CustomInstitutionName: "I have changed",
 			}
 			response := e.PUT(fmt.Sprintf("/links/%d", link.LinkId)).
-				WithHeader("H-Token", tokenB).
+				WithHeader("M-Token", tokenB).
 				WithJSON(link).
 				Expect()
 
