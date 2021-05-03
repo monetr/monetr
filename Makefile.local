@@ -1,0 +1,30 @@
+LOCAL_BIN = $(PWD)/bin
+LOCAL_TMP = $(PWD)/tmp
+PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
+ARCH = amd64
+OS = $(shell uname -s | tr A-Z a-z)
+TELEPRESENCE=$(LOCAL_BIN)/telepresence
+
+local-dependencies-maybe:
+	which $(TELEPRESENCE) || make dependencies-telepresence # We always want to use our version to make sure it'll work properly.
+
+TELEPRESENCE_VERSION=0.109
+TELEPRESENCE_URL=https://github.com/telepresenceio/telepresence/archive/refs/tags/$(TELEPRESENCE_VERSION).tar.gz
+TELEPRESENCE_DIR=$(LOCAL_TMP)/telepresence
+dependencies-telepresence:
+	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
+	rm -rf $(TELEPRESENCE_DIR) || true
+	mkdir -p $(TELEPRESENCE_DIR)
+	curl -L -s $(TELEPRESENCE_URL) -o $(TELEPRESENCE_DIR).tar.gz
+	tar -xzf $(TELEPRESENCE_DIR).tar.gz -C $(TELEPRESENCE_DIR)
+	PREFIX=$(PWD) $(TELEPRESENCE_DIR)/telepresence-$(TELEPRESENCE_VERSION)/install.sh
+	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
+	rm -rf $(TELEPRESENCE_DIR) || true
+
+
+###################### DEBUGGING THE WEB UI ##################################
+debug-ui-mini: local-dependencies-maybe
+	tmux \
+		new-session  '$(TELEPRESENCE) --method=inject-tcp --swap-deployment web-ui --expose 3000 --local-cluster' \; \
+		split-window 'yarn start' \;
+

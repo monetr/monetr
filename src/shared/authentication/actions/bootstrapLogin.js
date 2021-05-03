@@ -22,7 +22,7 @@ export default function bootstrapLogin(token = null, user = null) {
     } else {
       // eslint-disable-next-line no-undef
       if (CONFIG.USE_LOCAL_STORAGE) {
-        token = window.localStorage.getItem('H-Token');
+        token = window.localStorage.getItem('M-Token');
       } else {
         token = Cookies.get('M-Token');
       }
@@ -43,10 +43,23 @@ export default function bootstrapLogin(token = null, user = null) {
     }
 
     const apiUrl = getAPIUrl(getState());
-    window.API = axios.create({
-      baseURL: apiUrl,
-      withCredentials: true,
-    });
+
+    // eslint-disable-next-line no-undef
+    if (CONFIG.USE_LOCAL_STORAGE) {
+      window.API = axios.create({
+        baseURL: apiUrl,
+        withCredentials: true,
+        headers: {
+          'M-Token': token,
+        },
+      });
+    } else {
+      window.API = axios.create({
+        baseURL: apiUrl,
+        withCredentials: true,
+      });
+    }
+
 
     if (!user) {
       // If we do have the token but we don't have the user info then we need to retrieve it using an API call to get

@@ -1,4 +1,7 @@
 build
+bin
+libexec
+tmp
 node_modules
 .eslintcache
 package-lock.json

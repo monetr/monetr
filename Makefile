@@ -32,6 +32,7 @@ build:
 include Makefile.deploy
 include Makefile.docker
 include Makefile.release
+include Makefile.local
 
 # This is something to help debug CI issues locally. It will run a container and mount the current directory
 # locally. Its the same container used in the pipelines so it should be pretty close to the same for debugging.

@@ -126,6 +126,7 @@ module.exports = (env, argv) => {
     },
     devtool: 'inline-source-map',
     devServer: {
+      disableHostCheck: true,
       contentBase: './public',
       historyApiFallback: true,
       hot: true,
