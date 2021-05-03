@@ -22,10 +22,12 @@ spec:
       containers:
         - name: web-ui
           image: nginx:1.19.0
-          imagePullPolicy: Always
+          env:
+            - name: NGINX_PORT
+              value: "3000"
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 3000
               protocol: TCP
 
 ---
@@ -41,7 +43,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 80
+    - port: 3000
       targetPort: http
       protocol: TCP
       name: http
@@ -69,4 +71,4 @@ spec:
           - path: /
             backend:
               serviceName: web-ui
-              servicePort: 80
+              servicePort: 3000

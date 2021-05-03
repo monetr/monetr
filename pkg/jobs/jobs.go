@@ -42,12 +42,10 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 
 	manager.work.Middleware(manager.middleware)
 
-	manager.work.Job(EnqueueCheckPendingTransactions, manager.enqueueCheckPendingTransactions)
 	manager.work.Job(EnqueueProcessFundingSchedules, manager.enqueueProcessFundingSchedules)
 	manager.work.Job(EnqueuePullAccountBalances, manager.enqueuePullAccountBalances)
 	manager.work.Job(EnqueuePullLatestTransactions, manager.enqueuePullLatestTransactions)
 
-	manager.work.Job(CheckPendingTransactions, manager.checkPendingTransactions)
 	manager.work.Job(ProcessFundingSchedules, manager.processFundingSchedules)
 	manager.work.Job(PullAccountBalances, manager.pullAccountBalances)
 	manager.work.Job(PullInitialTransactions, manager.pullInitialTransactions)
@@ -59,7 +57,6 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullAccountBalances)
 	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullLatestTransactions)
 	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueueProcessFundingSchedules)
-	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueueCheckPendingTransactions)
 
 	manager.work.Start()
 	log.Debug("job manager started")

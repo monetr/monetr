@@ -144,6 +144,7 @@ type Stripe struct {
 	PublicKey       string
 	WebhooksEnabled bool
 	WebhooksDomain  string
+	WebhookSecret   string
 }
 
 func LoadConfiguration(configFilePath *string) Configuration {
@@ -233,4 +234,5 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Stripe.PublicKey", "MONETR_STRIPE_PUBLIC_KEY")
 	v.BindEnv("Stripe.WebhooksEnabled", "MONETR_STRIPE_WEBHOOKS_ENABLED")
 	v.BindEnv("Stripe.WebhooksDomain", "MONETR_STRIPE_WEBHOOKS_DOMAIN")
+	v.BindEnv("Stripe.WebhookSecret", "MONETR_STRIPE_WEBHOOK_SECRET")
 }

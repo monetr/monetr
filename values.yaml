@@ -134,3 +134,4 @@ api:
     publicKey: ""
     webhooksEnabled: false
     webhooksDomain: ""
+    webhookSecret: ""

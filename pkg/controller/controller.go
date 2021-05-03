@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	TokenName = "H-Token"
+	TokenName = "M-Token"
 )
 
 type Controller struct {
@@ -138,7 +138,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				})
 			}
 		})
-
 
 		// Trace API calls to sentry
 		p.Use(func(ctx iris.Context) {

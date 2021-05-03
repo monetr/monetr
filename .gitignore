@@ -1,4 +1,5 @@
 bin
+libexec
 config.yaml
 telepresence.log
 telepresence

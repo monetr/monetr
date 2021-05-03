@@ -2,17 +2,19 @@ LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
 LOCAL_DIR=$(PWD)/local
 LOCAL_CERTS = $(LOCAL_DIR)/certs
-PATH:=$(PATH):$(LOCAL_BIN)
+PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
 
 # Tools used to run the application locally
-KUBECTL=kubectl
-JQ=jq
-YQ=yq
-HOSTESS=hostess
 HELM=helm
+HOSTESS=hostess
+JQ=jq
+KUBECTL=kubectl
 SPLIT_YAML=kubernetes-split-yaml
+SSHFS=sshfs
+TELEPRESENCE=telepresence
+YQ=yq
 
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
@@ -26,6 +28,9 @@ REGISTER_JWT_SECRET=$(LOCAL_DIR)/register_jwt_secret.txt
 LOCAL_REST_API_DEPLOY=$(LOCAL_DIR)/rest-api-yaml
 
 REST_API_IMAGE_NAME=rest-api
+
+$(LOCAL_BIN):
+	mkdir -p $(LOCAL_BIN)
 
 $(LOCAL_DIR):
 	mkdir -p $(PWD)/local
@@ -46,6 +51,9 @@ init-mini: local-dependencies-maybe
 	(minikube status | grep "minikube start") && make start-minikube
 	make setup-hosts
 	make setup-registry
+	make deploy-redis
+	make deploy-postgres
+	make deploy-web-ui
 	make deploy-mini-application
 
 MINIKUBE_NAMESPACE=default
@@ -53,7 +61,6 @@ MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
 MINIKUBE_MEMORY=8192 # 8GB of memory. Reduce if this is too high for your computer. Could be reduced to 2GB
 MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
 KUBERNETES_VERSION=v1.18.15
-INSECURE_REGISTRY=registry.$(LOCAL_DOMAIN)
 start-minikube:
 	$(info Starting minikube)
 	minikube start \
@@ -63,7 +70,6 @@ start-minikube:
 		--delete-on-failure \
 		--driver=$(MINIKUBE_DRIVER) \
 		--kubernetes-version=$(KUBERNETES_VERSION) \
-		--insecure-registry=$(INSECURE_REGISTRY) \
 		--embed-certs
 
 setup-hosts:
@@ -88,8 +94,8 @@ remove-certificate:
 	$(info Local development certificate is registered, it will be removed)
 	sudo security delete-certificate -c $(LOCAL_DOMAIN) || true
 
-NGINX_NAMESPACE=ingress-nginx
 NGINX_DEPLOYMENT=ingress-nginx-controller
+NGINX_NAMESPACE=$(shell $(KUBECTL) get deploy --all-namespaces --field-selector "metadata.name"=$(NGINX_DEPLOYMENT) -o yaml | $(YQ) e '.items[0].metadata.namespace' -)
 TLS_SECRET_NAME=monetr-tls
 setup-certificates: $(LOCAL_DIR)
 	mkdir -p $(LOCAL_CERTS)
@@ -120,8 +126,6 @@ help-certificates-openssl:
 
 deploy-certificate:
 	rm -rf $(LOCAL_TMP)/nginx-*.json || true
-	$(KUBECTL) -n $(NGINX_NAMESPACE) get configmap/$(NGINX_DEPLOYMENT) \
- 		-o yaml | $(YQ) e '.data.hsts = "true"' - | $(KUBECTL) apply -f -
 	$(KUBECTL) -n $(NGINX_NAMESPACE) create secret tls $(TLS_SECRET_NAME) --key $(KEY_PATH) --cert $(CERT_PATH) \
 		--dry-run=client \
 		-o yaml | $(KUBECTL) apply -f -
@@ -163,7 +167,7 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	export jwt_secret_value=$(REGISTER_JWT_SECRET_VALUE) && yq e '.api.jwt.registrationJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
 	yq e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	yq e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
-	yq e '.api.cors.allowedOrigins[0] = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	yq e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	yq e '.api.cors.debug = false' -i $(VALUES)
 
 values-file: local-dependencies-maybe $(VALUES)
@@ -199,12 +203,11 @@ deploy-web-ui:
 	$(KUBECTL) rollout status deploy/web-ui --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
 deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini
+	$(eval CONFIG_HASH = $(shell md5 -q $(VALUES)))
+	CONFIG_HASH=$(CONFIG_HASH) $(YQ) e '.podAnnotations.configHash = strenv(CONFIG_HASH)' -i $(VALUES)
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
  		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
-	make deploy-redis
-	make deploy-postgres
-	make deploy-web-ui
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
@@ -215,6 +218,8 @@ local-dependencies-maybe:
 	which $(HELM) || make dependencies-helm
 	which $(SPLIT_YAML) || make dependencies-split-yaml
 	which $(YQ) || make dependencies-yq
+	which $(AMBASSADOR) || make dependencies-ambassador
+	make dependencies-telepresence # We always want to use our version to make sure it'll work properly.
 
 MINIKUBE_VERSION=latest
 dependencies-minikube:
@@ -248,16 +253,25 @@ dependencies-yq:
 	mv $(YQ_DIR)/$(YQ)_$(OS)_$(ARCH) $(LOCAL_BIN)/$(YQ)
 	rm -rf $(YQ_DIR) || true
 
+TELEPRESENCE_VERSION=0.109
+TELEPRESENCE_URL=https://github.com/telepresenceio/telepresence/archive/refs/tags/$(TELEPRESENCE_VERSION).tar.gz
+TELEPRESENCE_DIR=$(LOCAL_TMP)/$(TELEPRESENCE)
+dependencies-telepresence:
+	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
+	rm -rf $(TELEPRESENCE_DIR) || true
+	mkdir -p $(TELEPRESENCE_DIR)
+	curl -L -s $(TELEPRESENCE_URL) -o $(TELEPRESENCE_DIR).tar.gz
+	tar -xzf $(TELEPRESENCE_DIR).tar.gz -C $(TELEPRESENCE_DIR)
+	PREFIX=$(PWD) $(TELEPRESENCE_DIR)/$(TELEPRESENCE)-$(TELEPRESENCE_VERSION)/install.sh
+	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
+	rm -rf $(TELEPRESENCE_DIR) || true
 
 
 ###################### DEBUGGING THE REST API ##################################
 debug-api-mini:
-	telepresence connect
-	telepresence leave rest-api || true
-	kubectl rollout restart deploy/rest-api
-	telepresence intercept rest-api --port=4000 || true
-
-
+	tmux \
+		new-session  '$(TELEPRESENCE) --method=inject-tcp --swap-deployment rest-api --expose 4000 --local-cluster' \; \
+		split-window 'minikube tunnel' \;
 
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
 webhooks-mini:
@@ -273,6 +287,7 @@ endif
 		--namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/ngrok \
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	@sleep 15 # Wait for ngrok to setup its public url.
 	make reconfigure-webhooks
 	@echo "#################################################################################"
 	@echo "ngrok inspector is now accessible at: https://ngrok.$(LOCAL_DOMAIN)"
@@ -280,15 +295,15 @@ endif
 
 reconfigure-webhooks:
 	export WEBHOOKS_DOMAIN=$$(curl -s "https://ngrok.$(LOCAL_DOMAIN)/api/tunnels" | $(JQ) '.tunnels[0].public_url' - -r) && \
-	yq e '.api.plaid.webhooksEnabled = true' -i $(VALUES) && \
 	yq e '.api.plaid.webhooksDomain = strenv(WEBHOOKS_DOMAIN)' -i $(VALUES) && \
-	yq e '.api.stripe.webhooksEnabled = true' -i $(VALUES) && \
 	yq e '.api.stripe.webhooksDomain = strenv(WEBHOOKS_DOMAIN)' -i $(VALUES)
+	yq e '.api.stripe.webhooksEnabled = true' -i $(VALUES)
+	yq e '.api.plaid.webhooksEnabled = true' -i $(VALUES)
 	make deploy-mini-application
 
 disable-webhooks-mini:
-	yq e '.api.plaid.webhooksEnabled = true' -i $(VALUES)
-	yq e '.api.stripe.webhooksEnabled = true' -i $(VALUES)
+	yq e '.api.plaid.webhooksEnabled = false' -i $(VALUES)
+	yq e '.api.stripe.webhooksEnabled = false' -i $(VALUES)
 	make deploy-mini-application
 	$(KUBECTL) delete deploy/ngrok --namespace $(MINIKUBE_NAMESPACE)
 

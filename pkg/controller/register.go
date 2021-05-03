@@ -65,6 +65,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// TODO (elliotcourant) Add stuff to verify email address by sending an
 	//  email.
 
+	// TODO Verify that a login with the same email does not already exist BEFORE creating stripe customer.
 	var stripeCustomerId *string
 	if c.configuration.Stripe.Enabled {
 		stripeSpan := sentry.StartSpan(c.getContext(ctx), "Create Stripe Customer")
@@ -73,6 +74,11 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		result, err := c.stripeClient.Customers.New(&stripe.CustomerParams{
 			Email: &registerRequest.Email,
 			Name:  &name,
+			Params: stripe.Params{
+				Metadata: map[string]string{
+					"environment": c.configuration.Environment,
+				},
+			},
 		})
 		if err != nil {
 			stripeSpan.Status = sentry.SpanStatusInternalError
