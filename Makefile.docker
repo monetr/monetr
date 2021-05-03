@@ -14,6 +14,7 @@ LATEST_IMAGE_NAME = $(BASE_IMAGE):latest
 
 docker-build: wait-for-docker
 	docker build \
+		--cache-from=$(LATEST_IMAGE_NAME) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		-t $(SHA_IMAGE_NAME) \
