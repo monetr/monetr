@@ -218,7 +218,6 @@ local-dependencies-maybe:
 	which $(HELM) || make dependencies-helm
 	which $(SPLIT_YAML) || make dependencies-split-yaml
 	which $(YQ) || make dependencies-yq
-	which $(AMBASSADOR) || make dependencies-ambassador
 	make dependencies-telepresence # We always want to use our version to make sure it'll work properly.
 
 MINIKUBE_VERSION=latest
