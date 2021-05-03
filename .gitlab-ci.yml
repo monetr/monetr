@@ -125,7 +125,7 @@ PostgreSQL Tests:
   needs: [ ]
   stage: Test
   services:
-    - name: containers.monetr.dev/pgtest:2021.04.17
+    - name: containers.monetr.dev/pgtest:2021.04.30
       alias: postgres
   image:
     name: containers.monetr.dev/pgtest:latest
