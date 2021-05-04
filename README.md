@@ -21,3 +21,4 @@ This will spawn a new tmux window, install any JS dependencies needed and will s
 then open a browser window to `https://app.monetr.mini` and see the application running. You can make changes to the
 application and see the changes reload.
 
+<!-- Testing Gitlab CI -->
