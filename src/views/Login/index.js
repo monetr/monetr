@@ -4,7 +4,7 @@ import {
   Card,
   CardActions,
   CardContent,
-  CardHeader,
+  CardHeader, CircularProgress,
   Container,
   Grid,
   Grow,
@@ -29,6 +29,7 @@ export class LoginView extends Component {
   state = {
     verification: null,
     error: null,
+    loading: false,
   };
 
   static propTypes = {
@@ -42,6 +43,7 @@ export class LoginView extends Component {
   submitLogin = values => {
     this.setState({
       error: null,
+      loading: true,
     });
     return request().post('/authentication/login', {
       email: values.email,
@@ -58,6 +60,7 @@ export class LoginView extends Component {
         if (error.response.data.error) {
           this.setState({
             error: error.response.data.error,
+            loading: false,
           });
         } else {
           alert(error);
@@ -74,10 +77,11 @@ export class LoginView extends Component {
     return (
       <Grid item xs={ 12 }>
         <div className="w-full flex justify-center items-center">
-          <ReCAPTCHA
+          { !this.state.loading && <ReCAPTCHA
             sitekey={ ReCAPTCHAKey }
             onChange={ value => this.setState({ verification: value }) }
-          />
+          /> }
+          { this.state.loading && <CircularProgress /> }
         </div>
       </Grid>
     )
