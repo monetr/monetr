@@ -6,8 +6,18 @@
 
 The web app for the budgeting application monetr.
 
-## Screenshots
+## Developing Locally
 
-![Transactions](misc/Screenshot%20Transactions.png)
-![Expenses](misc/Screenshot%20Expenses.png)
-![Goals](misc/Screenshot%20Goals.png)
+Developing locally on it's own has no additional requirements outside of node. However if you want to run the UI locally
+and use its entire functionality then you will need to be running the rest of the application stack in minikube. See the
+REST API for details. You will need to run `make init-mini` from the REST API project first to get everything running,
+once that is complete you can run the following command from the WEB UI project directory.
+
+```bash
+make local-ui
+```
+
+This will spawn a new tmux window, install any JS dependencies needed and will start the webpack dev server. You can
+then open a browser window to `https://app.monetr.mini` and see the application running. You can make changes to the
+application and see the changes reload.
+

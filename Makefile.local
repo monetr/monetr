@@ -3,28 +3,40 @@ LOCAL_TMP = $(PWD)/tmp
 PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
-TELEPRESENCE=$(LOCAL_BIN)/telepresence
 
-local-dependencies-maybe:
-	which $(TELEPRESENCE) || make dependencies-telepresence # We always want to use our version to make sure it'll work properly.
+KUBECTL=kubectl
+YQ=$(LOCAL_BIN)/yq
 
-TELEPRESENCE_VERSION=0.109
-TELEPRESENCE_URL=https://github.com/telepresenceio/telepresence/archive/refs/tags/$(TELEPRESENCE_VERSION).tar.gz
-TELEPRESENCE_DIR=$(LOCAL_TMP)/telepresence
-dependencies-telepresence:
-	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
-	rm -rf $(TELEPRESENCE_DIR) || true
-	mkdir -p $(TELEPRESENCE_DIR)
-	curl -L -s $(TELEPRESENCE_URL) -o $(TELEPRESENCE_DIR).tar.gz
-	tar -xzf $(TELEPRESENCE_DIR).tar.gz -C $(TELEPRESENCE_DIR)
-	PREFIX=$(PWD) $(TELEPRESENCE_DIR)/telepresence-$(TELEPRESENCE_VERSION)/install.sh
-	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
-	rm -rf $(TELEPRESENCE_DIR) || true
+$(LOCAL_BIN):
+	mkdir -p $(LOCAL_BIN)
 
+YQ_VERSION=v4.7.1
+YQ_BINARY=yq_$(OS)_$(ARCH)
+YQ_URL=https://github.com/mikefarah/yq/releases/download/$(YQ_VERSION)/$(YQ_BINARY).tar.gz
+YQ_DIR=$(LOCAL_TMP)/yq
+$(YQ): $(LOCAL_BIN)
+	rm -rf $(YQ_DIR) || true
+	mkdir -p $(YQ_DIR)
+	curl -L $(YQ_URL) -o $(YQ_DIR).tar.gz
+	tar -xzf $(YQ_DIR).tar.gz -C $(YQ_DIR)
+	mv $(YQ_DIR)/yq_$(OS)_$(ARCH) $(YQ)
+	rm -rf $(YQ_DIR) || true
+
+MINIKUBE_NAMESPACE=default
+
+WEB_UI_NAME=web-ui
+LOCAL_WEB_UI_DEPLOY=$(PWD)/minikube/$(WEB_UI_NAME).yaml
+
+deploy-web-ui:
+	$(KUBECTL) apply -f $(LOCAL_WEB_UI_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/$(WEB_UI_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
 ###################### DEBUGGING THE WEB UI ##################################
-debug-ui-mini: local-dependencies-maybe
-	tmux \
-		new-session  '$(TELEPRESENCE) --method=inject-tcp --swap-deployment web-ui --expose 3000 --local-cluster' \; \
-		split-window 'yarn start' \;
+LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
+local-ui: $(YQ)
+	LOCAL_IP=$(LOCAL_IP) $(YQ) e '.subsets[0].addresses[0].ip = strenv(LOCAL_IP)' $(PWD)/minikube/ui-endpoint.yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(WEB_UI_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	tmux new-session 'make start' || true
+	$(KUBECTL) delete svc/$(WEB_UI_NAME) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(LOCAL_WEB_UI_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 

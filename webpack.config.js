@@ -130,9 +130,11 @@ module.exports = (env, argv) => {
       contentBase: './public',
       historyApiFallback: true,
       hot: true,
-      host: 'localhost',
-      port: 3000,
+      host: '0.0.0.0',
+      port: 30000,
       transportMode: 'ws',
+      sockHost: 'app.monetr.mini',
+      sockPort: 443,
       before(app, server) {
         // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
         // middlewares before `redirectServedPath` otherwise will not have any effect
