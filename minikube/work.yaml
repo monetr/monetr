@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: work
+  labels:
+    app: work
+    name: work
+    app.kubernetes.io/name: work
+    app.kubernetes.io/instance: work
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: work
+      app.kubernetes.io/instance: work
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: work
+        app.kubernetes.io/instance: work
+    spec:
+      containers:
+        - name: work
+          image: registry.monetr.mini/work
+          imagePullPolicy: Always
+          command:
+            - /bin/workwebui
+            - -listen=:8080
+            - -redis=redis://redis.default.svc.cluster.local:6379
+            - -ns=harder
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: work
+  labels:
+    app: work
+    name: work
+    app.kubernetes.io/name: work
+    app.kubernetes.io/instance: work
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: work
+    app.kubernetes.io/instance: work
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: work
+  labels:
+    app: work
+    name: work
+    app.kubernetes.io/name: work
+    app.kubernetes.io/instance: work
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: "work.monetr.mini"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: work
+              servicePort: 8080
