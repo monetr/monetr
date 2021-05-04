@@ -56,6 +56,8 @@ generate: dependencies-maybe
 		--set image.tag="$(IMAGE_TAG)" \
 		--set podAnnotations."monetr\.dev/date"="$(shell date)" \
 		--set podAnnotations."monetr\.dev/sha"="$(REPO_SHA)" \
+		--set podAnnotations."app\.gitlab\.com/app"="$$CI_PROJECT_PATH_SLUG" \
+		--set podAnnotations."app\.gitlab\.com/env"="$$CI_ENVIRONMENT_SLUG" \
 		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml \
 		--outdir $(ENVIRONMENT_DIR) -
 
