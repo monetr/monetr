@@ -38,7 +38,7 @@
     "eslint-plugin-testing-library": "4.2.0",
     "eslint-webpack-plugin": "2.5.4",
     "formik": "2.2.6",
-    "fs-extra": "9.1.0",
+    "fs-extra": "10.0.0",
     "identity-obj-proxy": "3.0.0",
     "immer": "9.0.2",
     "immutable": "4.0.0-rc.12",
