@@ -13,6 +13,4 @@ type PlaidLink struct {
 	WebhookUrl      string   `json:"-" pg:"webhook_url"`
 	InstitutionId   string   `json:"-" pg:"institution_id"`
 	InstitutionName string   `json:"-" pg:"institution_name"`
-
-	Link *Link `json:"-" pg:"rel:has-one"`
 }

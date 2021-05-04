@@ -56,7 +56,7 @@ type UnauthenticatedRepository interface {
 	// VerifyRegistration takes a registrationId and will finalize the registration record. If the registration has
 	// already been completed an error is returned.
 	VerifyRegistration(registrationId string) (*models.User, error)
-	GetLinksForItem(itemId string) (*models.PlaidLink, error)
+	GetLinksForItem(itemId string) (*models.Link, error)
 }
 
 func NewRepositoryFromSession(userId, accountId uint64, database pg.DBI) Repository {

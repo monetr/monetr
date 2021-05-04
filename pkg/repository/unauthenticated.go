@@ -66,10 +66,10 @@ func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models
 	panic("not implemented")
 }
 
-func (u *unauthenticatedRepo) GetLinksForItem(itemId string) (*models.PlaidLink, error) {
-	var link models.PlaidLink
+func (u *unauthenticatedRepo) GetLinksForItem(itemId string) (*models.Link, error) {
+	var link models.Link
 	err := u.txn.Model(&link).
-		Relation("Link").
+		Relation("PlaidLink").
 		Where(`"plaid_link"."item_id" = ?`, itemId).
 		Limit(1).
 		Select(&link)
@@ -77,7 +77,7 @@ func (u *unauthenticatedRepo) GetLinksForItem(itemId string) (*models.PlaidLink,
 		return nil, errors.Wrap(err, "failed to retrieve plaid link")
 	}
 
-	if link.Link == nil {
+	if link.PlaidLink == nil {
 		return nil, errors.Errorf("failed to retrieve link for item id")
 	}
 
