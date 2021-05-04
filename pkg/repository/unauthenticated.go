@@ -65,3 +65,21 @@ func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, user *models
 func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models.User, error) {
 	panic("not implemented")
 }
+
+func (u *unauthenticatedRepo) GetLinksForItem(itemId string) (*models.PlaidLink, error) {
+	var link models.PlaidLink
+	err := u.txn.Model(&link).
+		Relation("Link").
+		Where(`"plaid_link"."item_id" = ?`, itemId).
+		Limit(1).
+		Select(&link)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve plaid link")
+	}
+
+	if link.Link == nil {
+		return nil, errors.Errorf("failed to retrieve link for item id")
+	}
+
+	return &link, nil
+}

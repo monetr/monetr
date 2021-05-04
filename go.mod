@@ -16,6 +16,7 @@ require (
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/kataras/iris/v12 v12.2.0-alpha2.0.20210127025153-61f04ee4ff51
 	github.com/kr/text v0.2.0 // indirect
+	github.com/lestrrat-go/jwx v1.2.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/nleeper/goment v1.4.1
@@ -35,6 +36,5 @@ require (
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d // indirect
 	golang.org/x/sys v0.0.0-20210415045647-66c3f260301c // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )

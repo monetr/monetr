@@ -258,11 +258,11 @@ local-api:
 	LOCAL_IP=$(LOCAL_IP) $(YQ) e '.subsets[0].addresses[0].ip = strenv(LOCAL_IP)' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
 	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
 	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
-	tmux new-session 'minikube tunnel' || true
+	tmux new-session 'minikube tunnel --cleanup' || true
 	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/ngrok --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
 webhooks-mini:
@@ -279,9 +279,10 @@ endif
 	$(KUBECTL) rollout status deploy/ngrok \
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	@sleep 15 # Wait for ngrok to setup its public url.
-	make reconfigure-webhooks
 	@echo "#################################################################################"
 	@echo "ngrok inspector is now accessible at: https://ngrok.$(LOCAL_DOMAIN)"
+	@echo "run: make reconfigure-webhooks"
+	@echo "to apply config changes for the ngrok url"
 	@echo "#################################################################################"
 
 reconfigure-webhooks:
