@@ -52,7 +52,6 @@ init-mini: local-dependencies-maybe
 	make setup-registry
 	make deploy-redis
 	make deploy-postgres
-	make deploy-web-ui
 	make deploy-mini-application
 
 MINIKUBE_NAMESPACE=default
@@ -208,7 +207,7 @@ deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
  		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) || true
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
