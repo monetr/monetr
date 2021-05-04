@@ -25,7 +25,7 @@ services:
       - .development.env
     command: [ "postgres", "-c", "log_statement=all" ]
   redis:
-    image: library/redis:6.2.2-alpine
+    image: library/redis:6.2.3-alpine
     restart: always
     hostname: redis
     ports:
