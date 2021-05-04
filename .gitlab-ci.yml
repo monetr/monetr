@@ -182,6 +182,13 @@ Generate - Staging:
   variables:
     GOFLAGS: ''
     ENVIRONMENT: Staging
+  environment:
+    name: Staging
+    url: https://api.staging.monetr.dev
+    deployment_tier: staging
+    action: prepare
+    kubernetes:
+      namespace: monetr-staging  
   script:
     - make generate ENVIRONMENT=${ENVIRONMENT}
   cache:
