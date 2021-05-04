@@ -22,7 +22,7 @@ require (
 	github.com/nleeper/goment v1.4.1
 	github.com/nyaruka/phonenumbers v1.0.68
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
-	github.com/plaid/plaid-go v0.0.0-20210428192152-db9fc08bf3ea
+	github.com/plaid/plaid-go v0.0.0-20210504000355-4f57bad07697
 	github.com/prometheus/client_golang v1.10.0
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sendgrid/rest v2.6.3+incompatible // indirect
