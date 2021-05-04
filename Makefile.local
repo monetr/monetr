@@ -13,7 +13,6 @@ JQ=jq
 KUBECTL=kubectl
 SPLIT_YAML=kubernetes-split-yaml
 SSHFS=sshfs
-TELEPRESENCE=telepresence
 YQ=yq
 
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
@@ -158,6 +157,7 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	yq e '.ingress.annotations."kubernetes.io/ingress.class" = "nginx"' -i $(VALUES)
 	yq e '.ingress.hosts[0].host = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	yq e '.ingress.hosts[0].paths[0] = {"path": "/"}' -i $(VALUES)
+	yq e '.service.port = 4000' -i $(VALUES)
 	yq e '.api.includeSecrets = true' -i $(VALUES)
 	yq e '.api.uiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	yq e '.api.apiDomainName = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
@@ -198,9 +198,6 @@ deploy-postgres:
 	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/postgres --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
-deploy-web-ui:
-	$(KUBECTL) apply -f $(PWD)/minikube/web-ui.yaml --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/web-ui --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
 deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini
 	$(eval CONFIG_HASH = $(shell md5 -q $(VALUES)))
@@ -208,6 +205,7 @@ deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
  		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
@@ -218,7 +216,6 @@ local-dependencies-maybe:
 	which $(HELM) || make dependencies-helm
 	which $(SPLIT_YAML) || make dependencies-split-yaml
 	which $(YQ) || make dependencies-yq
-	make dependencies-telepresence # We always want to use our version to make sure it'll work properly.
 
 MINIKUBE_VERSION=latest
 dependencies-minikube:
@@ -252,25 +249,14 @@ dependencies-yq:
 	mv $(YQ_DIR)/$(YQ)_$(OS)_$(ARCH) $(LOCAL_BIN)/$(YQ)
 	rm -rf $(YQ_DIR) || true
 
-TELEPRESENCE_VERSION=0.109
-TELEPRESENCE_URL=https://github.com/telepresenceio/telepresence/archive/refs/tags/$(TELEPRESENCE_VERSION).tar.gz
-TELEPRESENCE_DIR=$(LOCAL_TMP)/$(TELEPRESENCE)
-dependencies-telepresence:
-	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
-	rm -rf $(TELEPRESENCE_DIR) || true
-	mkdir -p $(TELEPRESENCE_DIR)
-	curl -L -s $(TELEPRESENCE_URL) -o $(TELEPRESENCE_DIR).tar.gz
-	tar -xzf $(TELEPRESENCE_DIR).tar.gz -C $(TELEPRESENCE_DIR)
-	PREFIX=$(PWD) $(TELEPRESENCE_DIR)/$(TELEPRESENCE)-$(TELEPRESENCE_VERSION)/install.sh
-	rm -rf $(TELEPRESENCE_DIR).tar.gz || true
-	rm -rf $(TELEPRESENCE_DIR) || true
-
-
 ###################### DEBUGGING THE REST API ##################################
-debug-api-mini:
-	tmux \
-		new-session  '$(TELEPRESENCE) --method=inject-tcp --swap-deployment rest-api --expose 4000 --local-cluster' \; \
-		split-window 'minikube tunnel' \;
+LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
+local-api:
+	LOCAL_IP=$(LOCAL_IP) $(YQ) e '.subsets[0].addresses[0].ip = strenv(LOCAL_IP)' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	tmux new-session 'minikube tunnel' || true
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
 webhooks-mini:

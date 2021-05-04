@@ -25,3 +25,4 @@ node_modules
 generated
 tools
 pkg
+*.sock

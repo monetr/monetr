@@ -58,76 +58,19 @@ make deploy-mini-application
 This will build a new docker image from your current code as well as evaluate any changes made to the `values.local.yaml`
 file in your project directory and push those changes to minikube.
 
-If you want to do step debugging you can use a tool called telepresence. The shorthand make target below will spawn a new
-tmux session with both `minikube tunnel` and `telepresence` running side by side. This is because on their own I've found
-that telepresence does not always tunnel traffic properly. And minikube has no way to send traffic from its cluster to
-a local target. This will do both.
+If you want to do step debugging there is a shortcut in the makefile to do so. You will need to create a `config.yaml`
+file in your project directory with all the same settings you have specified in your `values.local.yaml` for everything
+to work properly. Once you have done that you can run the command below:
 
 ```bash
-make debug-api-mini
+make local-api
 ```
 
-Which will let you run the REST API on your actual computer and serve requests from minikube there. This means you can
-run the REST API in GoLand or VSCode and use a step debugger to debug requests. There is a caveat with doing this though;
-configuration is primarily provided to the REST API service in Kubernetes via environment variables. So you may need to
-make a `config.yaml` file in your project directory and add any configuration options there in order to run the service
-properly. More documentation on that file will be added at a later date.
-
-You'll need to install macFUSE and SSHFS from the installer packages here: https://osxfuse.github.io/
-
-
-You may see an error like the following in the tmux session that is started:
-```
-T: Warning: kubectl 1.21.0 may not work correctly with cluster version 1.18.15 due to the version discrepancy. See https://kubernetes.io/docs/setup/version-skew-policy/ for more information.
-
-T: Using a Pod instead of a Deployment for the Telepresence proxy. If you experience problems, please file an issue!
-T: Set the environment variable TELEPRESENCE_USE_DEPLOYMENT to any non-empty value to force the old behavior, e.g.,
-T:     env TELEPRESENCE_USE_DEPLOYMENT=1 telepresence --run curl hello
-
-T: Starting proxy with method 'inject-tcp', which has the following limitations: Go programs, static binaries, suid programs, and custom DNS implementations are not supported. For a full list of method limitations see
-T: https://telepresence.io/reference/methods.html
-T: Volumes are rooted at $TELEPRESENCE_ROOT. See https://telepresence.io/howto/volumes.html for details.
-T: Starting network proxy to cluster by swapping out Deployment rest-api with a proxy Pod
-T: Forwarding remote port 9000 to local port 9000.
-T: Forwarding remote port 4000 to local port 4000.
-
-
-Looks like there's a bug in our code. Sorry about that!
-
-Traceback (most recent call last):
-  File "/Users/elliotcourant/monetr/rest-api/bin/telepresence/telepresence/cli.py", line 135, in crash_reporting
-    yield
-  File "/Users/elliotcourant/monetr/rest-api/bin/telepresence/telepresence/main.py", line 81, in main
-    user_process = launch(
-  File "/Users/elliotcourant/monetr/rest-api/bin/telepresence/telepresence/outbound/setup.py", line 64, in launch
-    return launch_inject(runner_, command, socks_port, env)
-  File "/Users/elliotcourant/monetr/rest-api/bin/telepresence/telepresence/outbound/local.py", line 120, in launch_inject
-    torsocks_env = set_up_torsocks(runner, socks_port)
-  File "/Users/elliotcourant/monetr/rest-api/bin/telepresence/telepresence/outbound/local.py", line 71, in set_up_torsocks
-    raise RuntimeError("SOCKS network proxying failed to start...")
-RuntimeError: SOCKS network proxying failed to start...
-
-
-Here are the last few lines of the logfile (see /Users/elliotcourant/monetr/rest-api/telepresence.log for the complete logs):
-
-  17.8 TEL | [114] exit -11 in 0.05 secs.
-  17.9 TEL | [115] Running: torsocks python3 -c 'import socket; socket.socket().connect(('"'"'kubernetes.default'"'"', 443))'
-  17.9 TEL | [115] exit -11 in 0.05 secs.
-  18.0 TEL | [116] Running: torsocks python3 -c 'import socket; socket.socket().connect(('"'"'kubernetes.default'"'"', 443))'
-  18.0 TEL | [116] exit -11 in 0.05 secs.
-  18.2 TEL | [117] Running: torsocks python3 -c 'import socket; socket.socket().connect(('"'"'kubernetes.default'"'"', 443))'
-  18.2 TEL | [117] exit -11 in 0.05 secs.
-  18.3 TEL | [118] Running: torsocks python3 -c 'import socket; socket.socket().connect(('"'"'kubernetes.default'"'"', 443))'
-  18.3 TEL | [118] exit -11 in 0.05 secs.
-  18.5 TEL | [119] Running: torsocks python3 -c 'import socket; socket.socket().connect(('"'"'kubernetes.default'"'"', 443))'
-  18.5 TEL | [119] exit -11 in 0.04 secs.
-  18.5 TEL | END SPAN local.py:42(set_up_torsocks)   15.0s
-
-Would you like to file an issue in our issue tracker? You'll be able to review and edit before anything is posted to the public. We'd really appreciate the help improving our product. [Y/n]:
-```
-
-If you do, **do not enter `n` or exit telepresence**. Chances are it actually did work and is tunneling TCP traffic like
-we want it to.
+This will spawn a new tmux window with a minikube tunnel in it. This is needed for the API to talk to the services it
+needs within the minikube cluster.
+This will also swap out the target for the API service in kubernetes with an endpoint pointed at your computer and at port
+4000. This way you can run a REST API instance locally through something like GoLand or VSCode and step debug API
+requests directly.
 
 ### Testing Webhooks
 

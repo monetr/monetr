@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/cache"
 	"github.com/monetrapp/rest-api/pkg/config"
@@ -15,6 +16,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/stripe/stripe-go/v72"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -143,6 +145,24 @@ func RunServer() error {
 		stripeClient,
 	)...)
 
-	// TODO Allow listen port to be changed via config.
-	return app.Listen(":4000")
+	unixSocket := false
+
+	if unixSocket {
+		workingDirectory, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+		listener, err := net.ListenUnix("unix", &net.UnixAddr{
+			Name: workingDirectory + "/api.sock",
+			Net: "unix",
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		return app.Run(iris.Listener(listener))
+	} else {
+		// TODO Allow listen port to be changed via config.
+		return app.Listen(":4000")
+	}
 }
