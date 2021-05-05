@@ -1,12 +1,14 @@
 package controller
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
+	"github.com/plaid/plaid-go/plaid"
 	"net/http"
 	"strings"
 
+	"github.com/MicahParks/keyfunc"
 	"github.com/kataras/iris/v12/context"
 )
 
@@ -29,8 +31,8 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 
 	var kid string
 	var claims jwt.StandardClaims
-	result, err := jwt.ParseWithClaims(verification, &claims, func(token *jwt.Token) (interface{}, error) {
 
+	result, err := jwt.ParseWithClaims(verification, &claims, func(token *jwt.Token) (interface{}, error) {
 		// Make sure the signing method for the JWT token is ES256 per Plaid's documentation. Anything else should be
 		// rejected.
 		method, ok := token.Method.(*jwt.SigningMethodECDSA)
@@ -64,18 +66,37 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 			return nil, errors.Wrap(err, "failed to retrieve public verification key")
 		}
 
-		fmt.Sprint(verificationResponse)
+		var keys = struct {
+			Keys []plaid.WebhookVerificationKey `json:"keys"`
+		}{
+			Keys: []plaid.WebhookVerificationKey{
+				verificationResponse.Key,
+			},
+		}
 
-		return nil, nil
+		encodedKeys, err := json.Marshal(keys)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to convert plaid verification key to json")
+		}
+
+		var jwksJSON json.RawMessage = encodedKeys
+
+		jwkKeyFunc, err := keyfunc.New(jwksJSON)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create key function")
+		}
+
+		return jwkKeyFunc.KeyFunc(token)
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")
 		return
 	}
 
-	fmt.Sprint(result)
-
-	// TODO Properly verify webhooks from Plaid.
+	if !result.Valid {
+		c.returnError(ctx, http.StatusForbidden, "unauthorized")
+		return
+	}
 
 	var hook PlaidWebhook
 	if err := ctx.ReadJSON(&hook); err != nil {
@@ -96,7 +117,6 @@ func (c *Controller) processWebhook(hook PlaidWebhook) error {
 		case "INITIAL_UPDATE":
 
 		}
-
 	}
 
 	return nil
