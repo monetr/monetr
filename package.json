@@ -141,7 +141,7 @@
     "sass-loader": "11.0.1",
     "style-loader": "2.0.0",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",
-    "ts-loader": "9.1.1",
+    "ts-loader": "9.1.2",
     "typescript": "4.2.4",
     "url-loader": "4.1.1",
     "webpack": "5.36.2",
