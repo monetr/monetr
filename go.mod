@@ -32,7 +32,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.43.0
-	github.com/teambition/rrule-go v1.6.2
+	github.com/teambition/rrule-go v1.7.0
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d // indirect
 	golang.org/x/sys v0.0.0-20210415045647-66c3f260301c // indirect
