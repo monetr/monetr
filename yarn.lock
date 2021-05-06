@@ -10781,10 +10781,10 @@ snapdragon@^0.8.1:
     source-map-resolve "^0.5.0"
     use "^3.1.0"
 
-socket.io-client@4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.0.1.tgz#8f3bf4ce9282dda1741a4ed0f726b412944e012b"
-  integrity sha512-6AkaEG5zrVuSVW294cH1chioag9i1OqnCYjKwTc3EBGXbnyb98Lw7yMa40ifLjFj3y6fsFKsd0llbUZUCRf3Qw==
+socket.io-client@4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.0.2.tgz#bcbfc1a5b075167cbc9180aabebc6f8b3a83f462"
+  integrity sha512-z6Hw9Cs+cc7BEkSPlDrtHFpAI++xXMklG9iEEyPJdK4WcFcVrhrXcczYVDZmV3GIpFed5hL3LEXhpnmMy8DqDg==
   dependencies:
     "@types/component-emitter" "^1.2.10"
     backo2 "~1.0.2"
