@@ -62,7 +62,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 		for {
 			log.WithField("offset", offset).Debug("retrieving transactions from plaid")
 			response, err := j.plaidClient.GetTransactionsWithOptions(link.PlaidLink.AccessToken, plaid.GetTransactionsOptions{
-				StartDate:  time.Now().Add(-2 * 365 * 24 * time.Hour).Format("2006-01-02"),
+				StartDate:  time.Now().Add(-30 * 24 * time.Hour).Format("2006-01-02"),
 				EndDate:    time.Now().Format("2006-01-02"),
 				AccountIDs: bankAccountIds,
 				Count:      500,

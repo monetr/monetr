@@ -7,6 +7,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 	"time"
@@ -139,24 +140,38 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 	}
 
 	var hook PlaidWebhook
-	if err := ctx.ReadJSON(&hook); err != nil {
+	if err = ctx.ReadJSON(&hook); err != nil {
 		c.badRequest(ctx, "malformed JSON")
 		return
 	}
 
-	if err := c.processWebhook(ctx, hook); err != nil {
+	if err = c.processWebhook(ctx, hook); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to handle webhook")
 		return
 	}
 }
 
 func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
+	log := c.log.WithFields(logrus.Fields{
+		"webhookType": hook.WebhookType,
+		"webhookCode": hook.WebhookCode,
+	})
+
 	repo := c.mustGetUnauthenticatedRepository(ctx)
+
+	log.Trace("retrieving link for webhook")
 	link, err := repo.GetLinksForItem(hook.ItemId)
 	if err != nil {
-		c.log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
+		log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
 		return err
 	}
+
+	log = c.log.WithFields(logrus.Fields{
+		"accountId":   link.AccountId,
+		"linkId":      link.LinkId,
+	})
+
+	log.Trace("processing webhook")
 
 	switch hook.WebhookType {
 	case "TRANSACTIONS":
@@ -165,6 +180,8 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
 			return err
 		case "HISTORICAL_UPDATE":
+		case "DEFAULT_UPDATE":
+		case "TRANSACTIONS_REMOVED":
 		}
 	}
 

@@ -69,6 +69,7 @@ start-minikube:
 		--driver=$(MINIKUBE_DRIVER) \
 		--kubernetes-version=$(KUBERNETES_VERSION) \
 		--embed-certs
+
 setup-etc-hosts:
 	$(eval MINIKUBE_IP = $(shell minikube ip))
 	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) add $$subdomain.$(LOCAL_DOMAIN) $(MINIKUBE_IP); done
@@ -221,8 +222,8 @@ local-dependencies-maybe:
 
 MINIKUBE_VERSION=latest
 dependencies-minikube:
-	curl -LO https://storage.googleapis.com/minikube/releases/$(MINIKUBE_VERSION)/minikube-$(OS)-amd64
-	sudo install minikube-$(OS)-amd64 $(LOCAL_BIN)/minikube
+	curl -LO https://storage.googleapis.com/minikube/releases/$(MINIKUBE_VERSION)/minikube-$(OS)-$(ARCH)
+	sudo install minikube-$(OS)-$(ARCH) $(LOCAL_BIN)/minikube
 
 HOSTESS_REPO=https://github.com/cbednarski/hostess
 HOSTESS_DIR=$(LOCAL_TMP)/$(HOSTESS)
@@ -232,7 +233,7 @@ dependencies-hostess:
 	cd $(HOSTESS_DIR) && go build -o $(LOCAL_BIN)/$(HOSTESS) .
 	rm -rf $(HOSTESS_DIR)
 
-JQ_URL=https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-amd64
+JQ_URL=https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-$(ARCH)
 JQ_DIR=$(LOCAL_TMP)/$(JQ)
 dependencies-jq:
 	rm -rf $(LOCAL_BIN)/$(JQ) || true
