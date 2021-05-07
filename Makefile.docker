@@ -12,11 +12,16 @@ BASE_IMAGE = $(DOCKER_REPOSITORY)/$(DOCKER_IMAGE)
 SHA_IMAGE_NAME = $(BASE_IMAGE):$(VERSION_TAG)
 LATEST_IMAGE_NAME = $(BASE_IMAGE):latest
 
+ifdef CI_COMMIT_TAG
+GIT_RELEASE=$(CI_COMMIT_TAG)
+endif
+
 docker-build: wait-for-docker
 	docker build \
 		--cache-from=$(LATEST_IMAGE_NAME) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
+		--build-arg RELEASE=$(GIT_RELEASE) \
 		-t $(SHA_IMAGE_NAME) \
 		-t $(LATEST_IMAGE_NAME) \
 		-f Dockerfile .

@@ -2,18 +2,19 @@ FROM golang:1.16.4 as builder
 
 ARG REVISION
 ARG BUILD_TIME
+ARG RELEASE
 
 COPY ./ /build
 WORKDIR /build
 RUN go get ./...
-RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.buildtime=$BUILD_TIME" -o /bin/monetr github.com/monetrapp/rest-api/pkg/cmd
+RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.buildtime=$BUILD_TIME -X main.release=$RELEASE" -o /bin/monetr github.com/monetrapp/rest-api/pkg/cmd
 
 FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y tzdata ca-certificates
 
-LABEL org.opencontainers.image.url=https://github.com/monetrapp/rest-api
-LABEL org.opencontainers.image.source=https://github.com/monetrapp/rest-api
+LABEL org.opencontainers.image.url=https://github.com/monetr/rest-api
+LABEL org.opencontainers.image.source=https://github.com/monetr/rest-api
 LABEL org.opencontainers.image.authors=me@elliotcourant.dev
 LABEL org.opencontainers.image.revision=$REVISION
 LABEL org.opencontainers.image.vendor="monetr"

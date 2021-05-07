@@ -220,12 +220,20 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 func (c *Controller) getHealth(ctx iris.Context) {
 	err := c.db.Ping(ctx.Request().Context())
 
-	ctx.JSON(map[string]interface{}{
+	result := map[string]interface{}{
 		"dbHealthy":  err == nil,
 		"apiHealthy": true,
 		"revision":   build.Revision,
 		"buildTime":  build.BuildTime,
-	})
+	}
+
+	if build.Release != "" {
+		result["release"] = build.Release
+	} else {
+		result["release"] = nil
+	}
+
+	ctx.JSON(result)
 }
 
 func (c *Controller) getContext(ctx iris.Context) context.Context {
