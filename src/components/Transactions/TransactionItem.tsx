@@ -89,7 +89,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
               <Typography className={ classnames('amount align-middle self-center', {
                 'addition': transaction.getIsAddition(),
               }) }>
-                { transaction.getAmountString() }
+                <b>{ transaction.getAmountString() }</b>
               </Typography>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Checkbox, LinearProgress, ListItem, ListItemIcon, Typography } from '@material-ui/core';
+import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@material-ui/core';
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
 import React, { Component } from 'react';
@@ -38,25 +38,51 @@ export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
             color="primary"
           />
         </ListItemIcon>
-        <div className="grid grid-cols-4 grid-rows-4 grid-flow-col gap-1 w-full">
-          <div className="col-span-3">
-            <Typography>{ expense.name }</Typography>
-          </div>
-          <div className="col-span-3">
-            <Typography>{ expense.getCurrentAmountString() } of { expense.getTargetAmountString() }</Typography>
-          </div>
-          <div className="col-span-3">
+        <div className="grid grid-cols-6 grid-rows-4 grid-flow-col w-full">
+          <div className="col-span-4">
             <Typography>
+              <b>{ expense.name }</b>
+            </Typography>
+          </div>
+          <div className="col-span-4">
+            <Typography
+              variant="body1"
+            >
+              { expense.getCurrentAmountString() } <span
+              className="opacity-80">of</span> { expense.getTargetAmountString() }
+            </Typography>
+          </div>
+          <div className="col-span-4">
+            <Typography
+              variant="body1"
+            >
               { expense.nextRecurrence.format('MMM Do') }
               { expense.description && ` - ${ expense.description }` }
             </Typography>
           </div>
-          <div className="col-span-3">
-            <Typography>{ expense.getNextContributionAmountString() }/{ fundingSchedule.name }</Typography>
+          <div className="col-span-4">
+            <Typography
+              variant="body1"
+            >
+              { expense.getNextContributionAmountString() }/{ fundingSchedule.name }
+            </Typography>
           </div>
-          <div className="col-span-1 row-span-2">
-            <LinearProgress variant="determinate" color="primary"
-                            value={ (expense.currentAmount / expense.targetAmount) * 100 }/>
+          <div className="col-span-1 row-span-4 flex justify-end align-middle p-5">
+            { expense.isBehind &&
+            <Chip
+              className="self-center"
+              label="Behind"
+              color="secondary"
+            />
+            }
+          </div>
+          <div className="col-span-1 row-span-4 flex justify-end align-middle">
+            <LinearProgress
+              variant="determinate"
+              color="primary"
+              className="w-full self-center"
+              value={ Math.min((expense.currentAmount / expense.targetAmount) * 100, 100) }
+            />
           </div>
         </div>
       </ListItem>

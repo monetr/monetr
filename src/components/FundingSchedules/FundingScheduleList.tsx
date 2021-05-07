@@ -1,4 +1,4 @@
-import { Button, Divider, IconButton, List, ListItem, Typography } from "@material-ui/core";
+import { Button, ButtonGroup, Divider, IconButton, List, ListItem, Typography } from "@material-ui/core";
 import { ChevronRight } from '@material-ui/icons';
 import NewFundingScheduleDialog from "components/FundingSchedules/NewFundingScheduleDialog";
 import FundingSchedule from "data/FundingSchedule";
@@ -6,24 +6,34 @@ import { Map } from 'immutable';
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { getFundingSchedules } from "shared/fundingSchedules/selectors/getFundingSchedules";
+import NewExpenseDialog from "components/Expenses/NewExpenseDialog";
 
-export interface PropTypes {
-  onHide: { (): void }
-}
-
-interface WithConnectionPropTypes extends PropTypes {
+interface WithConnectionPropTypes {
   fundingSchedules: Map<number, FundingSchedule>;
 }
 
-
 interface State {
   newFundingScheduleDialogOpen: boolean;
+  newExpenseDialogOpen: boolean;
 }
 
 export class FundingScheduleList extends Component<WithConnectionPropTypes, State> {
 
   state = {
     newFundingScheduleDialogOpen: false,
+    newExpenseDialogOpen: false,
+  };
+
+  openNewExpenseDialog = () => {
+    return this.setState({
+      newExpenseDialogOpen: true
+    });
+  };
+
+  closeNewExpenseDialog = () => {
+    return this.setState({
+      newExpenseDialogOpen: false
+    });
   };
 
   openNewFundingScheduleDialog = () => {
@@ -39,24 +49,30 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
   };
 
   render() {
-    const { fundingSchedules, onHide } = this.props;
+    const { fundingSchedules } = this.props;
     return (
       <div className="w-full funding-schedule-list">
+        { this.state.newFundingScheduleDialogOpen &&
         <NewFundingScheduleDialog
           onClose={ this.closeFundingScheduleDialog }
           isOpen={ this.state.newFundingScheduleDialogOpen }
         />
-        <div className="w-full p-5 grid grid-cols-3 gap-2 flex-grow">
-          <div className="col-span-1">
-            <Button onClick={ onHide }>
-              Back
-            </Button>
-          </div>
-          <div className="col-span-2 flex justify-end w-full">
-            <Button variant="outlined" color="primary" onClick={ this.openNewFundingScheduleDialog }>
+        }
+        { this.state.newExpenseDialogOpen &&
+        <NewExpenseDialog
+          onClose={ this.closeNewExpenseDialog }
+          isOpen={ this.state.newExpenseDialogOpen }
+        />
+        }
+        <div className="w-full p-5">
+          <ButtonGroup color="primary" className="w-full">
+            <Button variant="outlined" className="w-full" color="primary" onClick={ this.openNewFundingScheduleDialog }>
               New Funding Schedule
             </Button>
-          </div>
+            <Button variant="outlined" className="w-full" color="primary" onClick={ this.openNewExpenseDialog }>
+              New Expense
+            </Button>
+          </ButtonGroup>
         </div>
         <Divider/>
         <List className="w-full">

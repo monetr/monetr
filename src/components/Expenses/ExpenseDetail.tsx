@@ -10,6 +10,7 @@ import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundin
 import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
 import EditSpendingAmountDialog from "components/Expenses/EditSpendingAmountDialog";
 import EditExpenseDueDateDialog from "components/Expenses/EditExpenseDueDateDialog";
+import FundingScheduleList from "components/FundingSchedules/FundingScheduleList";
 
 interface WithConnectionPropTypes {
   expense?: Spending;
@@ -58,10 +59,16 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
     editDueDateDialogOpen: false,
   });
 
+  renderNoExpenseSelected = () => {
+    return (
+      <FundingScheduleList />
+    )
+  };
+
   render() {
     const { expense } = this.props;
     if (!expense) {
-      return null;
+      return this.renderNoExpenseSelected();
     }
 
     const fundingSchedule = this.props.fundingSchedules.get(expense.fundingScheduleId, new FundingSchedule());

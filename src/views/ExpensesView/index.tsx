@@ -49,14 +49,6 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
   };
 
   renderSideBar = () => {
-    const { showFundingSchedules } = this.state;
-    if (showFundingSchedules) {
-      return (
-        <FundingScheduleList onHide={ this.hideFundingSchedules }/>
-      );
-    }
-
-
     return (
       <ExpenseDetail/>
     );
@@ -96,25 +88,6 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
 
         <div className="minus-nav">
           <div className="flex flex-col h-full p-10 max-h-full">
-            <Card elevation={ 4 } className="w-full h-13 mb-4 p-1">
-              <div className="grid grid-cols-6 gap-4 flex-grow">
-                <div className="col-span-4">
-
-                </div>
-                <div className="flex justify-end w-full">
-                  { !showFundingSchedules &&
-                  <Button className="w-full" color="secondary" onClick={ this.showFundingSchedules }>
-                    Funding Schedules
-                  </Button>
-                  }
-                </div>
-                <div className="flex justify-end w-full">
-                  <Button variant="outlined" className="w-full" color="primary" onClick={ this.openNewExpenseDialog }>
-                    New Expense
-                  </Button>
-                </div>
-              </div>
-            </Card>
             <div className="grid grid-cols-3 gap-4 flex-grow">
               <div className="col-span-2">
                 <Card elevation={ 4 } className="w-full expenses-list">
