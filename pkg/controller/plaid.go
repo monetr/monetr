@@ -75,7 +75,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 			PhoneNumberVerifiedTime:  time.Time{},
 			EmailAddressVerifiedTime: time.Time{},
 		},
-		ClientName: "Hard",
+		ClientName: "monetr",
 		Products:   plaidProducts,
 		CountryCodes: []string{
 			"US",
@@ -151,6 +151,16 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
+	var webhook string
+	if c.configuration.Plaid.WebhooksEnabled {
+		domain := c.configuration.Plaid.WebhooksDomain
+		if domain != "" {
+			webhook = fmt.Sprintf("%s/plaid/webhook", c.configuration.Plaid.WebhooksDomain)
+		} else {
+			c.log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
+		}
+	}
+
 	plaidLink := models.PlaidLink{
 		ItemId:      result.ItemID,
 		AccessToken: result.AccessToken,
@@ -158,7 +168,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 			// TODO (elliotcourant) Make this based on what product's we sent in the create link token request.
 			"transactions",
 		},
-		WebhookUrl:      "",
+		WebhookUrl:      webhook,
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
 	}
@@ -171,6 +181,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		AccountId:       repo.AccountId(),
 		PlaidLinkId:     &plaidLink.PlaidLinkID,
 		LinkType:        models.PlaidLinkType,
+		LinkStatus:      models.LinkStatusPending,
 		InstitutionName: callbackRequest.InstitutionName,
 		CreatedByUserId: repo.UserId(),
 	}
