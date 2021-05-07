@@ -23,6 +23,7 @@ func (c *Controller) handleFundingSchedules(p iris.Party) {
 // @tags Funding Schedules
 // @description List all of the funding schedule's for the current bank account.
 // @Security ApiKeyAuth
+// @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/funding_schedules [get]
 // @Success 200 {array} models.FundingSchedule
@@ -56,6 +57,7 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 // @tags Funding Schedules
 // @description Retrieve information about how much spending objects will receive on the next funding schedule.
 // @Security ApiKeyAuth
+// @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/funding_schedules/stats [get]
 // @Success 200 {object} repository.FundingStats
