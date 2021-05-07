@@ -1,14 +1,15 @@
 package models
 
 type Price struct {
-	tableName string `sql:"prices"`
+	tableName string `pg:"prices"`
 
-	PriceId         uint64   `json:"priceId" sql:"price_id,pk,type:'bigserial'"`
-	ProductId       uint64   `json:"productId" sql:"product_id,notnull,on_delete:cascade"`
-	Product         *Product `json:"-" sql:"rel:has-one"`
-	Interval        string   `json:"interval" sql:"interval,notnull"`
-	IntervalCount   int16    `json:"intervalCount" sql:"interval_count,notnull"`
-	TrialPeriodDays int32    `json:"trialPeriodDays" sql:"trial_period_days,notnull"`
-	UnitAmount      int64    `json:"unitAmount" sql:"unit_amount,notnull"`
-	StripePricingId string   `json:"-" sql:"stripe_pricing_id,notnull"`
+	PriceId         uint64   `json:"priceId" pg:"price_id,pk,type:'bigserial'"`
+	PriceCode       string   `json:"priceCode" pg:"price_code,notnull,unique"`
+	ProductId       uint64   `json:"productId" pg:"product_id,notnull,on_delete:cascade"`
+	Product         *Product `json:"-" pg:"rel:has-one"`
+	Interval        string   `json:"interval" pg:"interval,notnull"`
+	IntervalCount   int16    `json:"intervalCount" pg:"interval_count,notnull"`
+	TrialPeriodDays *int32   `json:"trialPeriodDays" pg:"trial_period_days"`
+	UnitAmount      int64    `json:"unitAmount" pg:"unit_amount,notnull"`
+	StripePricingId string   `json:"-" pg:"stripe_pricing_id,notnull"`
 }

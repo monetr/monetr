@@ -12,18 +12,24 @@ var (
 		&FundingSchedule{},
 		&Spending{},
 		&Transaction{},
+		&Product{},
+		&Price{},
+		&Subscription{},
 	}
 
 	// This silences any warnings about the tableName field not being used. It's used via reflection in our ORM to
 	// query and generate schemas/SQL.
 	_ = Account{}.tableName
 	_ = BankAccount{}.tableName
-	_ = Spending{}.tableName
 	_ = FundingSchedule{}.tableName
 	_ = Job{}.tableName
 	_ = Link{}.tableName
 	_ = Login{}.tableName
 	_ = PlaidLink{}.tableName
+	_ = Spending{}.tableName
 	_ = Transaction{}.tableName
 	_ = User{}.tableName
+ 	_ = Price{}.tableName
+ 	_ = Product{}.tableName
+ 	_ = Subscription{}.tableName
 )

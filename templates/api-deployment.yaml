@@ -61,12 +61,19 @@ spec:
             httpGet:
               path: /health
               port: http
+          volumeMounts:
+            - mountPath: /etc/monetr
+              name: config-file
           resources:
       {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: config-file
+          configMap:
+            name: {{ include "api.fullname" . }}-config-file
       {{- with .Values.affinity }}
       affinity:
       {{- toYaml . | nindent 8 }}
