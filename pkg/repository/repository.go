@@ -28,6 +28,7 @@ type Repository interface {
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
+	GetFundingStats(ctx context.Context, bankAccountId uint64) (*FundingStats, error)
 	GetIsSetup() (bool, error)
 	GetJob(jobId string) (models.Job, error)
 	GetLink(linkId uint64) (*models.Link, error)
