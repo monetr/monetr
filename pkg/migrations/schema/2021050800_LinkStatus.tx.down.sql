@@ -1,0 +1,1 @@
+ALTER TABLE links DROP COLUMN link_status;

@@ -1,20 +1,5 @@
 version: "3.9"
 services:
-  rest-api:
-    image: harder-rest-api
-    deploy:
-      mode: replicated
-      replicas: 1
-    hostname: rest-api
-    environment:
-      - MONETR_REDIS_ADDRESS=redis
-      - MONETR_PG_ADDRESS=postgres
-    ports:
-      - 4000:4000
-      - 9000:9000
-    volumes:
-      - "./config.yaml:/etc/monetr/config.yaml"
-    restart: always
   postgres:
     image: postgres:13
     restart: always
@@ -30,8 +15,3 @@ services:
     hostname: redis
     ports:
       - 6379:6379
-  workwebui:
-    image: workwebui
-    hostname: workwebui
-    ports:
-      - 8090:8090

@@ -7,6 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/pubsub"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
@@ -27,6 +28,7 @@ type jobManagerBase struct {
 	db          *pg.DB
 	plaidClient *plaid.Client
 	stats       *metrics.Stats
+	ps          pubsub.PublishSubscribe
 }
 
 func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *plaid.Client, stats *metrics.Stats) JobManager {
@@ -38,6 +40,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 		db:          db,
 		plaidClient: plaidClient,
 		stats:       stats,
+		ps:          pubsub.NewPostgresPubSub(log, db),
 	}
 
 	manager.work.Middleware(manager.middleware)

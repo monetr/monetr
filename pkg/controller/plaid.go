@@ -5,6 +5,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,7 +17,7 @@ import (
 func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 	p.Get("/token/new", c.newPlaidToken)
 	p.Post("/token/callback", c.plaidTokenCallback)
-	p.Get("/setup/wait/{jobId:string}", c.waitForPlaid)
+	p.Get("/setup/wait/{linkId:uint64}", c.waitForPlaid)
 }
 
 // New Plaid Token
@@ -199,18 +200,21 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
-	jobId, err := c.job.TriggerPullInitialTransactions(repo.AccountId(), repo.UserId(), link.LinkId)
-	if err != nil {
-		// TODO (elliotcourant) This error would technically throw out all of our data above. Including credentials.
-		//  This might cause the account to appear as not linked when it technically is. Maybe this should not
-		//  cause such a failure state?
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to queue transaction job")
-		return
+	var jobIdStr *string
+	if !c.configuration.Plaid.WebhooksEnabled {
+		jobId, err := c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to pull initial transactions")
+			return
+		}
+
+		jobIdStr = &jobId
 	}
 
 	ctx.JSON(map[string]interface{}{
 		"success": true,
-		"jobId":   jobId,
+		"linkId":  link.LinkId,
+		"jobId":   jobIdStr,
 	})
 }
 
@@ -220,51 +224,55 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 // @tags Plaid
 // @description Long poll endpoint that will timeout if data has not yet been pulled. Or will return 200 if data is ready.
 // @Security ApiKeyAuth
-// @Param jobId path string true "Job ID returned from the token callback endpoint"
-// @Router /plaid/setup/wait/{jobId:string} [get]
+// @Param linkId path string true "Link ID for the plaid link that is being setup. NOTE: Not Plaid's ID, this is a numeric ID we assign to the object that is returned from the callback endpoint."
+// @Router /plaid/setup/wait/{linkId:uint64} [get]
 // @Success 200
 // @Success 408
 func (c *Controller) waitForPlaid(ctx iris.Context) {
-	jobId := ctx.Params().GetStringDefault("jobId", "")
-	if jobId == "" {
+	// TODO Make the waitForPlaid endpoint handle both linkId and jobId.
+	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	if linkId == 0 {
 		c.badRequest(ctx, "must specify a job Id")
 		return
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	job, err := repo.GetJob(jobId)
+	link, err := repo.GetLink(linkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve job")
+		c.wrapPgError(ctx, err, "failed to retrieve link")
 		return
 	}
 
-	// If the job is done just return.
-	if job.FinishedAt != nil {
+	// If the link is done just return.
+	if link.LinkStatus == models.LinkStatusSetup {
 		return
 	}
 
-	channelName := fmt.Sprintf("job_%d_%s", c.mustGetAccountId(ctx), jobId)
+	channelName := fmt.Sprintf("initial_plaid_link_%d_%d", c.mustGetAccountId(ctx), linkId)
 
-	listener := c.db.Listen(ctx.Request().Context(), channelName)
-	defer listener.Close()
+	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to listen on channel")
+		return
+	}
+	defer func() {
+		if err = listener.Close(); err != nil {
+			c.log.WithFields(logrus.Fields{
+				"accountId": c.mustGetAccountId(ctx),
+				"linkId":    linkId,
+			}).WithError(err).Error("failed to gracefully close listener")
+		}
+	}()
 
 	deadLine := time.NewTimer(30 * time.Second)
 	defer deadLine.Stop()
 
-ListenLoop:
-	for {
-		select {
-		case <-deadLine.C:
-			ctx.StatusCode(http.StatusRequestTimeout)
-			break ListenLoop
-		case notification := <-listener.Channel():
-			if notification.Channel == channelName {
-				break ListenLoop
-			}
-		}
-	}
-
-	if err = listener.Unlisten(ctx.Request().Context()); err != nil {
-		c.log.WithError(err).Warnf("failed to stop listening on channel %s", channelName)
+	select {
+	case <-deadLine.C:
+		ctx.StatusCode(http.StatusRequestTimeout)
+		return
+	case <-listener.Channel():
+		// Just exist successfully, any message on this channel is considered a success.
+		return
 	}
 }

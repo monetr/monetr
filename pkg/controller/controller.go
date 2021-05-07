@@ -7,6 +7,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
+	"github.com/monetrapp/rest-api/pkg/pubsub"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
 	"net/http"
 	"net/smtp"
@@ -38,6 +39,7 @@ type Controller struct {
 	job            jobs.JobManager
 	stats          *metrics.Stats
 	stripeClient   *stripe_client.API
+	ps             pubsub.PublishSubscribe
 }
 
 func NewController(
@@ -76,6 +78,7 @@ func NewController(
 		job:           job,
 		stats:         stats,
 		stripeClient:  stripeClient,
+		ps:            pubsub.NewPostgresPubSub(entry, db),
 	}
 }
 

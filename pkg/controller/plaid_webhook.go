@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/kataras/iris/v12"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"net/http"
@@ -104,18 +105,27 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 		return
 	}
 
-	if err := c.processWebhook(hook); err != nil {
+	if err := c.processWebhook(ctx, hook); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to handle webhook")
 		return
 	}
 }
 
-func (c *Controller) processWebhook(hook PlaidWebhook) error {
+func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
+	repo := c.mustGetUnauthenticatedRepository(ctx)
+	link, err :=  repo.GetLinksForItem(hook.ItemId)
+	if err != nil {
+		c.log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
+		return err
+	}
+
 	switch hook.WebhookType {
 	case "TRANSACTIONS":
 		switch hook.WebhookCode {
 		case "INITIAL_UPDATE":
-
+			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
+			return err
+		case "HISTORICAL_UPDATE":
 		}
 	}
 

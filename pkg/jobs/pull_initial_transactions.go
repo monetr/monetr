@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	"context"
 	"fmt"
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/models"
@@ -117,10 +118,20 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			return err
 		}
 
-		_, err = j.db.Exec(fmt.Sprintf(`NOTIFY job_%d_%s, ?`, accountId, job.ID), "DONE")
-		if err != nil {
+		link.LinkStatus = models.LinkStatusSetup
+		if err = repo.UpdateLink(link); err != nil {
+			log.WithError(err).Error("failed to update link status")
 			return err
 		}
+
+		if err = j.ps.Notify(context.Background(),
+			fmt.Sprintf("initial_plaid_link_%d_%d", accountId, link.LinkId),
+			"success",
+		); err != nil {
+			log.WithError(err).Error("failed to publish link status to pubsub")
+			return nil // Not good enough of a reason to fail.
+		}
+
 		return nil
 	})
 }

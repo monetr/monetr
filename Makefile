@@ -8,6 +8,18 @@ COVERAGE_TXT = "$(PWD)/coverage.txt"
 
 PATH += "$(GOPATH):$(LOCAL_BIN_DIR)"
 
+ifndef POSTGRES_DB
+POSTGRES_DB=postgres
+endif
+
+ifndef POSTGRES_USER
+POSTGRES_USER=postgres
+endif
+
+ifndef POSTGRES_HOST
+POSTGRES_HOST=localhost
+endif
+
 default: dependencies build test
 
 dependencies:
@@ -17,6 +29,9 @@ build:
 	go build -o $(LOCAL_BIN_DIR)/monetr $(MONETR_CLI_PACKAGE)
 
 test:
+ifndef CI
+	go run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
+endif
 	go test -race -v -coverprofile=$(COVERAGE_TXT) -covermode=atomic ./...
 	go tool cover -func=$(COVERAGE_TXT)
 
@@ -47,20 +62,6 @@ compose-development: docker docker-work-web-ui
 
 compose-development-lite:
 	docker-compose  -f ./docker-compose.development.yaml up
-
-generate_schema:
-	$(eval TARGET_FILE := $(shell echo "$(TARGET_DIRECTORY)/0_initial.up.sql"))
-	$(info "Generating current schema into file $(TARGET_FILE)")
-	go run github.com/monetrapp/rest-api/tools/schemagen > $(TARGET_FILE)
-	yarn sql-formatter -l postgresql -u --lines-between-queries 2 $(TARGET_FILE) -o $(TARGET_FILE)
-
-migrations:
-	$(eval CURRENT_TMP := $(shell mktemp -d))
-	$(eval BASE_TMP := $(shell mktemp -d))
-	$(info "Generating schema migrations for the current schema in $(CURRENT_TMP)")
-	make generate_schema TARGET_DIRECTORY=$(CURRENT_TMP)
-	$(info "Cleaning up temp directories")
-	rm -rf $(CURRENT_TMP)
 
 ifdef GITLAB_CI
 include Makefile.gitlab-ci

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	sentryiris "github.com/getsentry/sentry-go/iris"
+	"github.com/kataras/iris/v12"
 	"net/http"
 	"strconv"
 
@@ -133,6 +134,15 @@ func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (reposit
 	}
 
 	return repository.NewUnauthenticatedRepository(txn), nil
+}
+
+func (c *Controller) mustGetUnauthenticatedRepository(ctx iris.Context) (repository.UnauthenticatedRepository) {
+	repo, err := c.getUnauthenticatedRepository(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	return repo
 }
 
 func (c *Controller) mustGetUserId(ctx *context.Context) uint64 {

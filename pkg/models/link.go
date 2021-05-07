@@ -2,6 +2,14 @@ package models
 
 import "time"
 
+type LinkStatus uint8
+
+const (
+	LinkStatusUnknown LinkStatus = 0
+	LinkStatusPending LinkStatus = 1
+	LinkStatusSetup   LinkStatus = 2
+)
+
 type Link struct {
 	tableName string `pg:"links"`
 
@@ -11,6 +19,7 @@ type Link struct {
 	LinkType              LinkType   `json:"linkType" pg:"link_type,notnull"`
 	PlaidLinkId           *uint64    `json:"-" pg:"plaid_link_id,on_delete:SET NULL"`
 	PlaidLink             *PlaidLink `json:"-" pg:"rel:has-one"`
+	LinkStatus            LinkStatus `json:"linkStatus" pg:"link_status,notnull,default:0"`
 	InstitutionName       string     `json:"institutionName" pg:"institution_name"`
 	CustomInstitutionName string     `json:"customInstitutionName,omitempty" pg:"custom_institution_name"`
 	CreatedAt             time.Time  `json:"createdAt" pg:"created_at,notnull"`
