@@ -79,3 +79,9 @@ include Makefile.docker
 ifndef CI
 include Makefile.local
 endif
+
+migrate:
+	@go run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
+
+beta-code: migrate
+	@go run $(MONETR_CLI_PACKAGE) beta new-code -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)

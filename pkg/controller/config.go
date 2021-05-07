@@ -23,6 +23,7 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 		AllowSignUp         bool   `json:"allowSignUp"`
 		AllowForgotPassword bool   `json:"allowForgotPassword"`
 		LongPollPlaidSetup  bool   `json:"longPollPlaidSetup"`
+		RequireBetaCode     bool   `json:"requireBetaCode"`
 	}
 
 	// If ReCAPTCHA is enabled then we want to provide the UI our public key as
@@ -49,6 +50,8 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 	if c.configuration.Stripe.Enabled {
 		config.StripePublicKey = c.configuration.Stripe.PublicKey
 	}
+
+	config.RequireBetaCode = c.configuration.Beta.EnableBetaCodes
 
 	// Just make this true for now, this might change in the future as I do websockets.
 	config.LongPollPlaidSetup = true

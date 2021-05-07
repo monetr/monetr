@@ -97,6 +97,8 @@ api:
   apiDomainName: api.acceptance.monetr.dev
   allowSignUp: true
   enableWebhooks: false # Will be deprecated soon.
+  beta:
+    enableBetaCodes: true
   postgreSql:
     address: newfoundland.monetr-acceptance.svc.cluster.local
     port: 5432

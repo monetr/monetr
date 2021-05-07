@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
+	"github.com/monetrapp/rest-api/pkg/hash"
 	"strings"
 	"time"
 
@@ -82,4 +85,51 @@ func (u *unauthenticatedRepo) GetLinksForItem(itemId string) (*models.Link, erro
 	}
 
 	return &link, nil
+}
+
+func (u *unauthenticatedRepo) ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error) {
+	span := sentry.StartSpan(ctx, "Validate Beta Code")
+	defer span.Finish()
+	var beta models.Beta
+	hashedCode := hash.HashPassword(strings.ToLower(betaCode), betaCode)
+	err := u.txn.ModelContext(span.Context(), &beta).
+		Where(`"beta"."code_hash" = ?`, hashedCode).
+		Where(`"beta"."used_by_user_id" IS NULL`).
+		Limit(1).
+		Select(&beta)
+	if err != nil {
+		span.Status = sentry.SpanStatusNotFound
+		return nil, errors.Wrap(err, "failed to validate beta code")
+	}
+
+	if time.Now().After(beta.ExpiresAt) {
+		span.Status = sentry.SpanStatusResourceExhausted
+		return nil, errors.Errorf("beta code is expired")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &beta, nil
+}
+
+func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy uint64) error {
+	span := sentry.StartSpan(ctx, "Validate Beta Code")
+	defer span.Finish()
+	result, err := u.txn.ModelContext(span.Context(), &models.Beta{}).
+		Set(`"beta"."used_by_user_id" = ?`, usedBy).
+		Where(`"beta"."beta_id" = ?`, betaId).
+		Update()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to use beta code")
+	}
+
+	if result.RowsAffected() != 1 {
+		span.Status = sentry.SpanStatusInvalidArgument
+		return errors.Errorf("invalid number of beta codes used: %d", result.RowsAffected())
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return nil
 }

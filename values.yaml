@@ -82,6 +82,8 @@ api:
   apiDomainName: localhost:4000
   allowSignUp: true
   enableWebhooks: false
+  beta:
+    enableBetaCodes: false
   jwt:
     loginJwtSecret: ""
     registrationJwtSecret: ""

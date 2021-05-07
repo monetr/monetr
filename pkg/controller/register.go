@@ -19,6 +19,19 @@ type RegistrationClaims struct {
 	jwt.StandardClaims
 }
 
+// Register
+// @Summary Register
+// @id register
+// @tags Authentication
+// @description Register creates a new login, user and account. Logins are used for authentication, users tie authentication to an account, and accounts hold budgeting data.
+// @Produce json
+// @Accept json
+// @Param Registration body swag.RegisterRequest true "New User Registration"
+// @Router /authentication/register [post]
+// @Success 200 {object} swag.RegisterResponse
+// @Failure 400 {object} ApiError Required data is missing.
+// @Failure 403 {object} ApiError Invalid credentials.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) registerEndpoint(ctx iris.Context) {
 	var registerRequest struct {
 		Email     string `json:"email"`
@@ -27,6 +40,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		LastName  string `json:"lastName"`
 		Timezone  string `json:"timezone"`
 		Captcha   string `json:"captcha"`
+		BetaCode  *string `json:"betaCode"`
 	}
 	if err := ctx.ReadJSON(&registerRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid register JSON")
@@ -41,9 +55,14 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		return
 	}
 
+
 	registerRequest.Email = strings.TrimSpace(registerRequest.Email)
 	registerRequest.Password = strings.TrimSpace(registerRequest.Password)
 	registerRequest.FirstName = strings.TrimSpace(registerRequest.FirstName)
+	if registerRequest.BetaCode != nil {
+		*registerRequest.BetaCode = strings.TrimSpace(*registerRequest.BetaCode)
+	}
+
 
 	if err := c.validateRegistration(
 		registerRequest.Email,
@@ -60,6 +79,32 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse timezone")
 		return
+	}
+
+	// If the registration details provided look good then we want to create an
+	// unauthenticated repository. This will give us some basic database access
+	// without being able to access user information directly. It is essentially
+	// a write only interface to the database.
+	repository, err := c.getUnauthenticatedRepository(ctx)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			"cannot register user",
+		)
+		return
+	}
+
+	var beta *models.Beta
+	if c.configuration.Beta.EnableBetaCodes {
+		if registerRequest.BetaCode == nil || *registerRequest.BetaCode == "" {
+			c.badRequest(ctx, "beta code required for registration")
+			return
+		}
+
+		beta, err = repository.ValidateBetaCode(c.getContext(ctx), *registerRequest.BetaCode)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "could not verify beta code")
+			return
+		}
 	}
 
 	// TODO (elliotcourant) Add stuff to verify email address by sending an
@@ -90,18 +135,6 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		stripeSpan.Finish()
 
 		stripeCustomerId = &result.ID
-	}
-
-	// If the registration details provided look good then we want to create an
-	// unauthenticated repository. This will give us some basic database access
-	// without being able to access user information directly. It is essentially
-	// a write only interface to the database.
-	repository, err := c.getUnauthenticatedRepository(ctx)
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
-			"cannot register user",
-		)
-		return
 	}
 
 	// Hash the user's password so that we can store it securely.
@@ -158,6 +191,15 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 			"failed to create user",
 		)
 		return
+	}
+
+	if beta != nil {
+		if err = repository.UseBetaCode(c.getContext(ctx), beta.BetaID, user.UserId); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+				"failed to use beta code",
+			)
+			return
+		}
 	}
 
 	// If SMTP is enabled and we are verifying emails then we want to create a

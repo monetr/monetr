@@ -62,6 +62,8 @@ type UnauthenticatedRepository interface {
 	// already been completed an error is returned.
 	VerifyRegistration(registrationId string) (*models.User, error)
 	GetLinksForItem(itemId string) (*models.Link, error)
+	ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error)
+	UseBetaCode(ctx context.Context, betaId, usedBy uint64) error
 }
 
 func NewRepositoryFromSession(userId, accountId uint64, database pg.DBI) Repository {

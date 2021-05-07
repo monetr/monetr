@@ -27,6 +27,8 @@ func (c *Controller) handleSpending(p iris.Party) {
 // @Summary List Spending
 // @description List all of the spending for the specified bank account.
 // @Security ApiKeyAuth
+// @Accept json
+// @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/spending [get]
 // @Success 200 {array} models.Spending

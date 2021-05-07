@@ -6,6 +6,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/application"
+	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/cache"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/monetrapp/rest-api/pkg/jobs"
@@ -68,7 +69,8 @@ func RunServer() error {
 			Debug:            false,
 			AttachStacktrace: true,
 			ServerName:       hostname,
-			Dist:             "",
+			Dist:             build.Revision,
+			Release:          build.Release,
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
@@ -154,7 +156,7 @@ func RunServer() error {
 		}
 		listener, err := net.ListenUnix("unix", &net.UnixAddr{
 			Name: workingDirectory + "/api.sock",
-			Net: "unix",
+			Net:  "unix",
 		})
 		if err != nil {
 			panic(err)

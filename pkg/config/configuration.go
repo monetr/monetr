@@ -29,6 +29,7 @@ type Configuration struct {
 	UIDomainName     string
 	APIDomainName    string
 	AllowSignUp      bool
+	Beta             Beta
 	CORS             CORS
 	JWT              JWT
 	Logging          Logging
@@ -41,6 +42,10 @@ type Configuration struct {
 	Sentry           Sentry
 	Stripe           Stripe
 	MultiPlaidConfig map[PlaidEnvironment]PlaidSingleConfig
+}
+
+type Beta struct {
+	EnableBetaCodes bool
 }
 
 type PlaidSingleConfig struct {
@@ -199,6 +204,7 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("APIDomainName", "MONETR_API_DOMAIN_NAME")
 	v.BindEnv("AllowSignUp", "MONETR_ALLOW_SIGN_UP")
 	v.BindEnv("EnableWebhooks", "MONETR_ENABLE_WEBHOOKS")
+	v.BindEnv("Beta.EnableBetaCodes", "MONETR_ENABLE_BETA_CODES")
 	v.BindEnv("Cors.AllowedOrigins", "MONETR_CORS_ALLOWED_ORIGINS")
 	v.BindEnv("Cors.Debug", "MONETR_CORS_DEBUG")
 	v.BindEnv("JWT.LoginJwtSecret", "MONETR_JWT_LOGIN_SECRET")

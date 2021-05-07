@@ -24,8 +24,13 @@ type HarderClaims struct {
 // @id login
 // @tags Authentication
 // @description Authenticate a user.
+// @Accept json
 // @Produce json
+// @Param Login body swag.LoginRequest true "User Login Request"
 // @Router /authentication/login [post]
+// @Success 200 {object} swag.LoginResponse
+// @Failure 400 {object} ApiError Required data is missing.
+// @Failure 403 {object} ApiError Invalid credentials.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx iris.Context) {
 	var loginRequest struct {
