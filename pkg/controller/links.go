@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"net/http"
 	"strings"
 	"time"
@@ -92,6 +92,7 @@ func (c *Controller) postLinks(ctx *context.Context) {
 	link.LinkId = 0 // Make sure the link Id is unset.
 	link.InstitutionName = strings.TrimSpace(link.InstitutionName)
 	link.LinkType = models.ManualLinkType
+	link.LinkStatus = models.LinkStatusSetup
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	if err := repo.CreateLink(&link); err != nil {
