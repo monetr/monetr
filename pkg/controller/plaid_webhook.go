@@ -41,6 +41,10 @@ func (c PlaidClaims) Valid() error {
 		vErr.Errors |= jwt.ValidationErrorExpired
 	}
 
+	// I'm adding 5 seconds onto the now timestamp because I was running into an issue periodically that the clock on
+	// the server would be slightly different than the clock on Plaid's side. And the issued at was causing a conflict
+	// where it was just a few seconds (sometimes just one) out of bounds for this to be handled. So adding a buffer of
+	// 5 seconds to account for any clock drift between our servers and Plaid's.
 	if c.VerifyIssuedAt(now+5, false) == false {
 		vErr.Inner = fmt.Errorf("Token used before issued, %d | %d", now, c.IssuedAt)
 		vErr.Errors |= jwt.ValidationErrorIssuedAt
