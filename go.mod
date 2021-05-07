@@ -26,7 +26,7 @@ require (
 	github.com/prometheus/client_golang v1.10.0
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sendgrid/rest v2.6.3+incompatible // indirect
-	github.com/sendgrid/sendgrid-go v3.9.0+incompatible
+	github.com/sendgrid/sendgrid-go v3.10.0+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.1
