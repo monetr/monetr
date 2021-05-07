@@ -104,7 +104,8 @@ func (p *postgresListener) backgroundListener() {
 			close(p.closeChannel)
 			close(p.dataChannel)
 			// Release the listener connection
-			_  = p.listener.Unlisten(context.Background(), p.channel)
+			_ = p.listener.Unlisten(context.Background(), p.channel)
+			_ = p.listener.Close()
 			return
 		}
 	}

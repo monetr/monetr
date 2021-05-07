@@ -2,12 +2,14 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/kataras/iris/v12"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/MicahParks/keyfunc"
 	"github.com/kataras/iris/v12/context"
@@ -23,6 +25,39 @@ type PlaidWebhook struct {
 	RemovedTransactions []string               `json:"removed_transactions"`
 }
 
+type PlaidClaims struct {
+	jwt.StandardClaims
+}
+
+func (c PlaidClaims) Valid() error {
+	vErr := new(jwt.ValidationError)
+	now := jwt.TimeFunc().Unix()
+
+	// The claims below are optional, by default, so if they are set to the
+	// default value in Go, let's not fail the verification for them.
+	if c.VerifyExpiresAt(now, false) == false {
+		delta := time.Unix(now, 0).Sub(time.Unix(c.ExpiresAt, 0))
+		vErr.Inner = fmt.Errorf("token is expired by %v", delta)
+		vErr.Errors |= jwt.ValidationErrorExpired
+	}
+
+	if c.VerifyIssuedAt(now+5, false) == false {
+		vErr.Inner = fmt.Errorf("Token used before issued, %d | %d", now, c.IssuedAt)
+		vErr.Errors |= jwt.ValidationErrorIssuedAt
+	}
+
+	if c.VerifyNotBefore(now, false) == false {
+		vErr.Inner = fmt.Errorf("token is not valid yet")
+		vErr.Errors |= jwt.ValidationErrorNotValidYet
+	}
+
+	if vErr.Errors == 0 {
+		return nil
+	}
+
+	return vErr
+}
+
 func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 	verification := ctx.GetHeader("Plaid-Verification")
 	if strings.TrimSpace(verification) == "" {
@@ -31,7 +66,7 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 	}
 
 	var kid string
-	var claims jwt.StandardClaims
+	var claims PlaidClaims
 
 	result, err := jwt.ParseWithClaims(verification, &claims, func(token *jwt.Token) (interface{}, error) {
 		// Make sure the signing method for the JWT token is ES256 per Plaid's documentation. Anything else should be
@@ -113,7 +148,7 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 
 func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 	repo := c.mustGetUnauthenticatedRepository(ctx)
-	link, err :=  repo.GetLinksForItem(hook.ItemId)
+	link, err := repo.GetLinksForItem(hook.ItemId)
 	if err != nil {
 		c.log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
 		return err

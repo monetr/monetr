@@ -236,7 +236,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 // @description Long poll endpoint that will timeout if data has not yet been pulled. Or will return 200 if data is ready.
 // @Security ApiKeyAuth
 // @Param linkId path string true "Link ID for the plaid link that is being setup. NOTE: Not Plaid's ID, this is a numeric ID we assign to the object that is returned from the callback endpoint."
-// @Router /plaid/setup/wait/{linkId:uint64} [get]
+// @Router /plaid/link/setup/wait/{linkId:uint64} [get]
 // @Success 200
 // @Success 408
 func (c *Controller) waitForPlaid(ctx iris.Context) {
@@ -246,6 +246,11 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 		c.badRequest(ctx, "must specify a job Id")
 		return
 	}
+
+	log := c.log.WithFields(logrus.Fields{
+		"accountId": c.mustGetAccountId(ctx),
+		"linkId":    linkId,
+	})
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(linkId)
@@ -268,12 +273,14 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 	}
 	defer func() {
 		if err = listener.Close(); err != nil {
-			c.log.WithFields(logrus.Fields{
+			log.WithFields(logrus.Fields{
 				"accountId": c.mustGetAccountId(ctx),
 				"linkId":    linkId,
 			}).WithError(err).Error("failed to gracefully close listener")
 		}
 	}()
+
+	log.Tracef("waiting for link to be setup on channel: %s", channelName)
 
 	deadLine := time.NewTimer(30 * time.Second)
 	defer deadLine.Stop()
@@ -281,9 +288,11 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 	select {
 	case <-deadLine.C:
 		ctx.StatusCode(http.StatusRequestTimeout)
+		log.Trace("timed out waiting for link to be setup")
 		return
 	case <-listener.Channel():
-		// Just exist successfully, any message on this channel is considered a success.
+		// Just exit successfully, any message on this channel is considered a success.
+		log.Trace("link setup successfully")
 		return
 	}
 }
