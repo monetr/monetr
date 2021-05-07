@@ -4,7 +4,11 @@ PATH:=$(PATH):$(LOCAL_BIN)
 HELM_VERSION = 3.5.4
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
+
+ifndef ENVIRONMENT
 ENVIRONMENT = Staging
+endif
+
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
 default-deploy:

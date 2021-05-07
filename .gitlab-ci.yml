@@ -1,15 +1,15 @@
 # This workflow rule might need to be tweaked once we are using bors to regulate builds. I think it will need another
 # exception for staging branches that bors creates.
-#workflow:
-#  rules:
-#    - if: '$CI_COMMIT_BRANCH == "main"'
-#      when: always
-#    - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
-#      when: never
-#    - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event"'
-#      when: always
-#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
-#      when: never
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
+      when: never
 
 stages:
   - Release
@@ -173,6 +173,9 @@ REST API:
     - make docker-push
 
 Generate - Staging:
+  except:
+    refs:
+      - tags
   needs: [ ]
   stage: Prepare
   image: containers.monetr.dev/ubuntu:20.04
@@ -202,10 +205,43 @@ Generate - Staging:
       - $CI_PROJECT_DIR/generated
     expire_in: 7 days
 
+Generate - Acceptance:
+  needs: [ ]
+  stage: Prepare
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - k8s:shared
+    - arch:amd64
+  variables:
+    GOFLAGS: ''
+    ENVIRONMENT: Acceptance
+  environment:
+    name: Acceptance
+    url: https://api.acceptance.monetr.dev
+    deployment_tier: other
+    action: prepare
+    kubernetes:
+      namespace: monetr-acceptance
+  script:
+    - make generate ENVIRONMENT=${ENVIRONMENT}
+  cache:
+    key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
+    paths:
+      - $CI_PROJECT_DIR/generated/${ENVIRONMENT}
+    policy: push
+  artifacts:
+    name: "k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}"
+    paths:
+      - $CI_PROJECT_DIR/generated
+    expire_in: 7 days
+
 Dry - Staging:
   only:
     refs:
       - main
+  except:
+    refs:
+      - tags
   environment:
     name: Staging
     url: https://api.staging.monetr.dev
@@ -226,10 +262,37 @@ Dry - Staging:
   script:
     - make dry ENVIRONMENT=${ENVIRONMENT}
 
+Dry - Acceptance:
+  only:
+    refs:
+      - tags
+  environment:
+    name: Acceptance
+    url: https://api.acceptance.monetr.dev
+    deployment_tier: other
+    action: prepare
+    kubernetes:
+      namespace: monetr-acceptance
+  needs:
+    - "Generate - Acceptance"
+    - "REST API"
+  stage: Dry Run
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - monetr:acceptance
+  variables:
+    GOFLAGS: ''
+    ENVIRONMENT: Acceptance
+  script:
+    - make dry ENVIRONMENT=${ENVIRONMENT}
+
 Deploy - Staging:
   only:
     refs:
       - main
+  except:
+    refs:
+      - tags
   environment:
     name: Staging
     url: https://api.staging.monetr.dev
@@ -247,5 +310,29 @@ Deploy - Staging:
   variables:
     GOFLAGS: ''
     ENVIRONMENT: Staging
+  script:
+    - make deploy ENVIRONMENT=${ENVIRONMENT}
+
+Deploy - Acceptance:
+  only:
+    refs:
+      - tags
+  environment:
+    name: Acceptance
+    url: https://api.acceptance.monetr.dev
+    deployment_tier: acceptance
+    action: start
+    kubernetes:
+      namespace: monetr-acceptance
+  needs:
+    - "Dry - Acceptance"
+    - "Generate - Acceptance"
+  stage: Deploy
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - monetr:acceptance
+  variables:
+    GOFLAGS: ''
+    ENVIRONMENT: Acceptance
   script:
     - make deploy ENVIRONMENT=${ENVIRONMENT}
