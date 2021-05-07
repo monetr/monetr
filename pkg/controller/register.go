@@ -102,7 +102,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 		beta, err = repository.ValidateBetaCode(c.getContext(ctx), *registerRequest.BetaCode)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "could not verify beta code")
+			c.wrapPgError(ctx, err, "could not verify beta code")
 			return
 		}
 	}

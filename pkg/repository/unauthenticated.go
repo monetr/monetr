@@ -116,7 +116,7 @@ func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy ui
 	span := sentry.StartSpan(ctx, "Validate Beta Code")
 	defer span.Finish()
 	result, err := u.txn.ModelContext(span.Context(), &models.Beta{}).
-		Set(`"beta"."used_by_user_id" = ?`, usedBy).
+		Set(`"used_by_user_id" = ?`, usedBy).
 		Where(`"beta"."beta_id" = ?`, betaId).
 		Update()
 	if err != nil {
