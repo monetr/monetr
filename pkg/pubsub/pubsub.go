@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -79,7 +80,7 @@ func (p *postgresPubSub) Subscribe(ctx context.Context, channel string) (Listene
 }
 
 func (p *postgresPubSub) Notify(ctx context.Context, channel, payload string) error {
-	_, err := p.db.ExecContext(ctx, `NOTIFY ?, ?`, channel, payload)
+	_, err := p.db.ExecContext(ctx, fmt.Sprintf(`NOTIFY %s, ?`, channel), payload)
 
 	return errors.Wrap(err, "failed to notify channel")
 }

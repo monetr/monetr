@@ -158,18 +158,20 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			ctx.Next()
 		})
 
-		if c.configuration.Plaid.WebhooksEnabled {
-			// Webhooks use their own authentication, so we want to declare this first.
-			p.Post("/plaid/webhook", c.handlePlaidWebhook)
-		}
-
-		if c.configuration.Stripe.Enabled && c.configuration.Stripe.WebhooksEnabled {
-			p.PartyFunc("/stripe", c.handleStripe)
-		}
 
 		// For the following endpoints we want to have a repository available to us.
 		p.PartyFunc("/", func(repoParty router.Party) {
 			repoParty.Use(c.setupRepositoryMiddleware)
+
+			if c.configuration.Plaid.WebhooksEnabled {
+				// Webhooks use their own authentication, so we want to declare this first.
+				repoParty.Post("/plaid/webhook", c.handlePlaidWebhook)
+			}
+
+			if c.configuration.Stripe.Enabled && c.configuration.Stripe.WebhooksEnabled {
+				repoParty.PartyFunc("/stripe", c.handleStripe)
+			}
+
 			repoParty.Get("/config", c.configEndpoint)
 
 			repoParty.PartyFunc("/authentication", func(repoParty router.Party) {

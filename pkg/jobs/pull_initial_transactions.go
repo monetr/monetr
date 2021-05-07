@@ -26,10 +26,17 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 		return errors.Errorf("cannot pull initial transactions without a link Id")
 	}
 
+	log = log.WithField("linkId", linkId)
+
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(linkId)
 		if err != nil {
 			log.WithError(err).Error("cannot pull initial transactions for link provided")
+			return nil
+		}
+
+		if link.LinkStatus == models.LinkStatusSetup {
+			log.Warn("link has already been setup, initial transactions will not be pulled")
 			return nil
 		}
 
