@@ -74,6 +74,17 @@ func RunServer() error {
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
+			BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+				// Make sure user authentication doesn't make its way into sentry.
+				if event.Request != nil {
+					event.Request.Cookies = ""
+					if event.Request.Headers != nil {
+						delete(event.Request.Headers, "M-Token")
+					}
+				}
+
+				return event
+			},
 		})
 		if err != nil {
 			log.WithError(err).Error("failed to init sentry")
