@@ -30,7 +30,26 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
 
     if (expenseIds.length === 0) {
       return (
-        <Typography>You don't have any expenses yet...</Typography>
+        <div className="h-full flex justify-center items-center">
+          <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
+            <Typography
+              className="opacity-50"
+              variant="h3"
+            >
+              You don't have any expenses yet...
+            </Typography>
+            <Button
+              onClick={ this.openNewExpenseDialog }
+              color="primary"
+            >
+              <Typography
+                variant="h6"
+              >
+                Create An Expense
+              </Typography>
+            </Button>
+          </div>
+        </div>
       )
     }
 

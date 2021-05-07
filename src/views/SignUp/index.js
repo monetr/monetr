@@ -21,7 +21,7 @@ import { Link as RouterLink, withRouter } from "react-router-dom";
 import { bindActionCreators } from "redux";
 import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
 import {
-  getReCAPTCHAKey,
+  getReCAPTCHAKey, getRequireBetaCode,
   getRequireLegalName,
   getRequirePhoneNumber,
   getShouldVerifyRegister,
@@ -47,6 +47,7 @@ export class SignUpView extends Component {
     requirePhoneNumber: PropTypes.bool.isRequired,
     setToken: PropTypes.func.isRequired,
     verifyRegister: PropTypes.bool.isRequired,
+    requireBetaCode: PropTypes.bool.isRequired,
   }
 
   submitRegister = values => {
@@ -63,6 +64,7 @@ export class SignUpView extends Component {
       lastName: values.lastName,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       captcha: verification,
+      betaCode: values.betaCode,
     })
       .then(result => {
         if (result.data.token) {
@@ -153,6 +155,10 @@ export class SignUpView extends Component {
       errors.lastName = 'Last name is required.';
     }
 
+    if (this.props.requireBetaCode && !values.betaCode) {
+      errors.betaCode = 'Beta Code is required.'
+    }
+
     return errors;
   };
 
@@ -172,6 +178,7 @@ export class SignUpView extends Component {
             confirmPassword: '',
             firstName: '',
             lastName: '',
+            betaCode: '',
           } }
           validate={ this.onValidate }
           onSubmit={ this.onSubmit }
@@ -247,8 +254,8 @@ export class SignUpView extends Component {
                             value={ values.firstName }
                             onChange={ handleChange }
                             onBlur={ handleBlur }
-                            error={ touched.firstName && !!errors.firstName }
-                            helperText={ touched.firstName && errors.firstName }
+                            error={ values.firstName && touched.firstName && !!errors.firstName }
+                            helperText={ values.firstName && touched.firstName && errors.firstName }
                             disabled={ isSubmitting }
                           />
                         </Grid>
@@ -261,11 +268,26 @@ export class SignUpView extends Component {
                             value={ values.lastName }
                             onChange={ handleChange }
                             onBlur={ handleBlur }
-                            error={ touched.lastName && !!errors.lastName }
-                            helperText={ touched.lastName && errors.lastName }
+                            error={ values.lastName && touched.lastName && !!errors.lastName }
+                            helperText={ values.lastName && touched.lastName && errors.lastName }
                             disabled={ isSubmitting }
                           />
                         </Grid>
+                        { this.props.requireBetaCode && <Grid item xs={ 12 }>
+                          <TextField
+                            fullWidth
+                            id="betaCode"
+                            label="Beta Code"
+                            name="betaCode"
+                            type="betaCode"
+                            value={ values.betaCode }
+                            onChange={ handleChange }
+                            onBlur={ handleBlur }
+                            error={ values.betaCode && touched.betaCode && !!errors.betaCode }
+                            helperText={ values.betaCode && touched.betaCode && errors.betaCode }
+                            disabled={ isSubmitting }
+                          />
+                        </Grid> }
                         { this.renderReCAPTCHAMaybe() }
                       </Grid>
                     </CardContent>
@@ -306,6 +328,7 @@ export default connect(
     ReCAPTCHAKey: getReCAPTCHAKey(state),
     requireLegalName: getRequireLegalName(state),
     requirePhoneNumber: getRequirePhoneNumber(state),
+    requireBetaCode: getRequireBetaCode(state),
   }),
   dispatch => bindActionCreators({
     bootstrapLogin,

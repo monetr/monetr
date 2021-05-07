@@ -13,3 +13,5 @@ export const getReCAPTCHAKey = state => state.bootstrap.ReCAPTCHAKey;
 export const getRequireLegalName = state => state.bootstrap.requireLegalName;
 
 export const getRequirePhoneNumber = state => state.bootstrap.requirePhoneNumber;
+
+export const getRequireBetaCode = state => state.bootstrap.requireBetaCode;

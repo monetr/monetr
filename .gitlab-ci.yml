@@ -122,6 +122,9 @@ Deploy - Staging:
   only:
     refs:
       - main
+  except:
+    refs:
+      - tags
   environment:
     name: Staging
     url: https://app.staging.monetr.dev
@@ -133,6 +136,32 @@ Deploy - Staging:
     - k8s:shared
   variables:
     ENVIRONMENT: Staging
+  before_script:
+    - gcloud auth activate-service-account --key-file $GCS_SERVICE_ACCOUNT
+  script:
+    - make deploy
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./build
+    policy: pull
+
+Deploy - Acceptance:
+  when: manual
+  only:
+    refs:
+      - tags
+  environment:
+    name: Acceptance
+    url: https://acceptance.monetr.dev
+  needs:
+    - "Build"
+  stage: Deploy
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - k8s:shared
+  variables:
+    ENVIRONMENT: Acceptance
   before_script:
     - gcloud auth activate-service-account --key-file $GCS_SERVICE_ACCOUNT
   script:

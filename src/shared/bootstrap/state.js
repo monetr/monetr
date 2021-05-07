@@ -11,6 +11,7 @@ export default class BootstrapState extends Record({
   ReCAPTCHAKey: null,
   allowSignUp: false,
   allowForgotPassword: false,
+  requireBetaCode: false,
 }) {
 
 }
