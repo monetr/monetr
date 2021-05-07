@@ -15,6 +15,7 @@ export const PlaidConnectButton = props => {
 
   return (
     <Button
+      disabled={ props.disabled }
       style={ { float: 'right' } }
       color="primary"
       variant="outlined"

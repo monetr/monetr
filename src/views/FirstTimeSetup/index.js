@@ -9,6 +9,11 @@ import logout from "shared/authentication/actions/logout";
 import fetchLinks from "shared/links/actions/fetchLinks";
 import request from "shared/util/request";
 import { PlaidConnectButton } from "views/FirstTimeSetup/PlaidConnectButton";
+import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
+import fetchSpending from "shared/spending/actions/fetchSpending";
+import { fetchFundingSchedulesIfNeeded } from "shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded";
+import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
+import fetchBalances from "shared/balances/actions/fetchBalances";
 
 
 export class FirstTimeSetup extends Component {
@@ -24,11 +29,19 @@ export class FirstTimeSetup extends Component {
     loading: true,
     error: false,
     linkToken: '',
+    longPollAttempts: 0,
+    linkId: 0,
   };
 
   static propTypes = {
     logout: PropTypes.func.isRequired,
     fetchLinks: PropTypes.func.isRequired,
+    fetchLinksIfNeeded: PropTypes.func.isRequired,
+    fetchBankAccounts: PropTypes.func.isRequired,
+    fetchSpending: PropTypes.func.isRequired,
+    fetchFundingSchedulesIfNeeded: PropTypes.func.isRequired,
+    fetchInitialTransactionsIfNeeded: PropTypes.func.isRequired,
+    fetchBalances: PropTypes.func.isRequired,
   }
 
   componentDidMount() {
@@ -53,6 +66,10 @@ export class FirstTimeSetup extends Component {
   }
 
   plaidLinkSuccess = (token, metadata) => {
+    this.setState({
+      loading: true,
+    });
+
     request().post('/plaid/link/token/callback', {
       publicToken: token,
       institutionId: metadata.institution.institution_id,
@@ -60,13 +77,66 @@ export class FirstTimeSetup extends Component {
       accountIds: new List(metadata.accounts).map(account => account.id).toArray()
     })
       .then(result => {
-        // TODO Add long polling of the jobId returned in the result to wait for transactions and bank info to be
-        //  retrieved from Plaid.
-        return this.props.fetchLinks();
+        if (result.data.jobId) {
+          // TODO Add long polling based on jobId.
+          return this.props.fetchLinks();
+        }
+
+        this.setState({
+          linkId: result.data.linkId,
+        });
+
+        return this.longPollSetup()
+          .then(() => {
+            return Promise.all([
+              this.props.fetchLinks(),
+              this.props.fetchBankAccounts().then(() => {
+                return Promise.all([
+                  this.props.fetchInitialTransactionsIfNeeded(),
+                  this.props.fetchFundingSchedulesIfNeeded(),
+                  this.props.fetchSpending(),
+                  this.props.fetchBalances(),
+                ]);
+              }),
+            ]);
+          });
       })
       .catch(error => {
         console.error(error);
       })
+  };
+
+  longPollSetup = () => {
+    this.setState(prevState => ({
+      longPollAttempts: prevState.longPollAttempts + 1,
+    }));
+
+    const { longPollAttempts, linkId } = this.state;
+    if (longPollAttempts > 6) {
+      return Promise.resolve();
+    }
+
+    return request().get(`/plaid/link/setup/wait/${ linkId }`)
+      .then(result => {
+        return Promise.resolve();
+      })
+      .catch(error => {
+        if (error.response.status === 408) {
+          return this.longPollSetup();
+        }
+      });
+  };
+
+  nextStep = () => {
+    this.setState(prevState => ({
+      step: prevState.step - 1,
+    }));
+  };
+
+  previousStep = () => {
+    this.setState(prevState => ({
+      step: prevState.step - 1,
+    }));
   };
 
   renderPlaidLink = () => {
@@ -77,7 +147,11 @@ export class FirstTimeSetup extends Component {
 
     if (linkToken.length > 0) {
       return (
-        <PlaidConnectButton token={ linkToken } onSuccess={ this.plaidLinkSuccess }/>
+        <PlaidConnectButton
+          token={ linkToken }
+          onSuccess={ this.plaidLinkSuccess }
+          disabled={ this.state.loading }
+        />
       )
     }
 
@@ -125,18 +199,22 @@ export class FirstTimeSetup extends Component {
           </Typography>
         </Grid>
         <Grid item xs={ 6 }>
-          <Button variant="outlined" onClick={ () => {
-            this.setState(prevState => ({
-              step: prevState.step - 1,
-            }));
-          } }>Back</Button>
+          <Button
+            disabled={ this.state.loading }
+            variant="outlined"
+            onClick={ this.previousStep }
+          >
+            Back
+          </Button>
         </Grid>
         <Grid item xs={ 6 }>
-          <Button style={ { float: 'right' } } onClick={ () => {
-            this.setState(prevState => ({
-              step: prevState.step - 1,
-            }));
-          } }>Continue</Button>
+          <Button
+            disabled={ this.state.loading }
+            style={ { float: 'right' } }
+            onClick={ this.nextStep }
+          >
+            Continue
+          </Button>
         </Grid>
       </Fragment>
     );
@@ -168,5 +246,10 @@ export default connect(
   dispatch => bindActionCreators({
     logout,
     fetchLinks,
+    fetchBankAccounts,
+    fetchSpending,
+    fetchFundingSchedulesIfNeeded,
+    fetchInitialTransactionsIfNeeded,
+    fetchBalances,
   }, dispatch),
 )(withRouter(FirstTimeSetup));

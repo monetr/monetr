@@ -4,7 +4,7 @@ import {
   Card,
   CardActions,
   CardContent,
-  CardHeader,
+  CardHeader, CircularProgress,
   Container,
   Grid,
   Grow,
@@ -34,6 +34,7 @@ export class SignUpView extends Component {
   state = {
     verification: null,
     error: null,
+    loading: false,
   };
 
   static propTypes = {
@@ -51,6 +52,7 @@ export class SignUpView extends Component {
   submitRegister = values => {
     this.setState({
       error: null,
+      loading: true,
     });
     const { verification } = this.state;
     const { bootstrapLogin } = this.props;
@@ -75,12 +77,14 @@ export class SignUpView extends Component {
         if (error.response.data.error) {
           this.setState({
             error: error.response.data.error,
+            loading: false,
           });
           return error;
         }
 
         this.setState({
           error: 'Failed to sign up.',
+          loading: false,
         });
       });
   };
@@ -94,10 +98,11 @@ export class SignUpView extends Component {
     return (
       <Grid item xs={ 12 }>
         <div className="w-full flex justify-center items-center">
-          <ReCAPTCHA
+          { this.state.loading && <CircularProgress /> }
+          { !this.state.loading && <ReCAPTCHA
             sitekey={ ReCAPTCHAKey }
             onChange={ value => this.setState({ verification: value }) }
-          />
+          /> }
         </div>
       </Grid>
     )
