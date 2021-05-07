@@ -116,7 +116,7 @@ api:
   plaid:
     environment: "https://sandbox.plaid.com"
     enableReturningUserExperience: true
-    webhooksEnabled: false # Still working on this for now.
+    webhooksEnabled: true
     webhooksDomain: https://api.staging.monetr.dev
   cors:
     allowedOrigins:
