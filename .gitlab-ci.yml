@@ -320,7 +320,7 @@ Deploy - Acceptance:
   environment:
     name: Acceptance
     url: https://api.acceptance.monetr.dev
-    deployment_tier: acceptance
+    deployment_tier: other
     action: start
     kubernetes:
       namespace: monetr-acceptance
