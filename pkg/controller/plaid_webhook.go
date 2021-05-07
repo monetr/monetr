@@ -182,6 +182,8 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 		case "HISTORICAL_UPDATE":
 		case "DEFAULT_UPDATE":
 		case "TRANSACTIONS_REMOVED":
+			_, err = c.job.TriggerRemoveTransactions(link.AccountId, link.LinkId, hook.RemovedTransactions)
+			return err
 		}
 	}
 

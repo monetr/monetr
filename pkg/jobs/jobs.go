@@ -18,6 +18,7 @@ import (
 
 type JobManager interface {
 	TriggerPullInitialTransactions(accountId, userId, linkId uint64) (jobId string, err error)
+	TriggerRemoveTransactions(accountId, linkId uint64, removedTransactions []string) (jobId string, err error)
 	Close() error
 }
 
@@ -53,6 +54,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	manager.work.Job(PullAccountBalances, manager.pullAccountBalances)
 	manager.work.Job(PullInitialTransactions, manager.pullInitialTransactions)
 	manager.work.Job(PullLatestTransactions, manager.pullLatestTransactions)
+	manager.work.Job(RemoveTransactions, manager.removeTransactions)
 
 	// Every 30 minutes. 0 */30 * * * *
 

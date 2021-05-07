@@ -13,20 +13,19 @@ type Repository interface {
 	AccountId() uint64
 	UserId() uint64
 
+	AddExpenseToTransaction(transaction *models.Transaction, spending *models.Spending) error
 	CreateBankAccounts(bankAccounts ...models.BankAccount) error
-	CreateSpending(expense *models.Spending) error
 	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
 	CreatePlaidLink(link *models.PlaidLink) error
+	CreateSpending(expense *models.Spending) error
 	CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error
+	DeleteTransaction(bankAccountId, transactionId uint64) error
 	GetAccount() (*models.Account, error)
 	GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error)
 	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts() ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
-	GetSpendingById(bankAccountId, expenseId uint64) (*models.Spending, error)
-	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
-	GetSpendingByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
 	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
 	GetIsSetup() (bool, error)
@@ -37,15 +36,20 @@ type Repository interface {
 	GetLinks() ([]models.Link, error)
 	GetMe() (*models.User, error)
 	GetPendingTransactionsForBankAccount(bankAccountId uint64) ([]models.Transaction, error)
+	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
+	GetSpendingByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
+	GetSpendingById(bankAccountId, expenseId uint64) (*models.Spending, error)
 	GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error)
 	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error)
+	GetTransactionsByPlaidTransactionId(linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
 	InsertTransactions(transactions []models.Transaction) error
+	ProcessTransactionSpentFrom(bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
 	UpdateBankAccounts(accounts []models.BankAccount) error
 	UpdateExpenses(bankAccountId uint64, updates []models.Spending) error
-	UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 	UpdateLink(link *models.Link) error
 	UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error
+	UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 }
 
 type UnauthenticatedRepository interface {

@@ -15,6 +15,10 @@ func (m *MockJobManager) TriggerPullInitialTransactions(accountId, userId, linkI
 	return gofakeit.UUID(), nil
 }
 
+func (m *MockJobManager) TriggerRemoveTransactions(accountId, linkId uint64, removedTransactions []string) (jobId string, err error) {
+	return gofakeit.UUID(), nil
+}
+
 func (m *MockJobManager) Close() error {
 	return nil
 }
