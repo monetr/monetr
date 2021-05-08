@@ -311,6 +311,30 @@ pghero-mini:
 	@echo "pghero dashboard is now accessible at: https://pghero.$(LOCAL_DOMAIN)"
 	@echo "#################################################################################"
 
+
+
+###################### VAULT SECRETS ##################################
+VAULT_JSON=$(LOCAL_DIR)/vault-keys.json
+vault-mini:
+	$(KUBECTL) apply -f $(PWD)/minikube/vault.yaml \
+		--namespace $(MINIKUBE_NAMESPACE)
+	@sleep 10
+	make unseal-vault-mini
+	$(KUBECTL) rollout status deploy/vault \
+		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	@echo "#################################################################################"
+	@echo "vault is now accessible at: https://vault.$(LOCAL_DOMAIN)"
+	@echo "root token: $$(cat $(VAULT_JSON) | $(JQ) -r '.root_token')"
+	@echo "#################################################################################"
+
+$(VAULT_JSON):
+	kubectl exec deploy/vault --namespace $(MINIKUBE_NAMESPACE) -- vault operator init -key-shares=1 -key-threshold=1 -format=json > $(VAULT_JSON)
+
+unseal-vault-mini: $(VAULT_JSON)
+	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
+	kubectl exec deploy/vault -- vault operator unseal $(VAULT_UNSEAL_KEY)
+
+###################### gocraft/work UI ##################################
 WORK_IMAGE_NAME=registry.$(LOCAL_DOMAIN)/work
 work-mini:
 	docker build \

@@ -19,8 +19,6 @@ data:
       path = "/home/vault"
     }
 
-    service_registration "kubernetes" {}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -106,6 +104,9 @@ spec:
               name: https-internal
             - containerPort: 8202
               name: http-rep
+          volumeMounts:
+            - name: config
+              mountPath: /vault/config
           readinessProbe:
             # Check status; unsealed vault servers return 0
             # The exit code reflects the seal status:
