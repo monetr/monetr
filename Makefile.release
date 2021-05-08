@@ -1,5 +1,9 @@
 
+ifdef CI
 AUTO_VERSION_TAG=$(shell date -u +%Y.%m.%d)
+else
+AUTO_VERSION_TAG=$(shell date -u +%Y.%m.%d.%H.%M)-hot
+endif
 
 default-release:
 	$(info Version: $(AUTO_VERSION_TAG))
