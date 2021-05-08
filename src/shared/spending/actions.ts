@@ -41,6 +41,25 @@ export interface CreateSpendingSuccess {
   payload: Spending;
 }
 
+export enum DeleteSpending {
+  Request = 'DeleteSpendingRequest',
+  Failure = 'DeleteSpendingFailure',
+  Success = 'DeleteSpendingSuccess',
+}
+
+export interface DeleteSpendingRequest {
+  type: typeof DeleteSpending.Request;
+}
+
+export interface DeleteSpendingFailure {
+  type: typeof DeleteSpending.Failure;
+}
+
+export interface DeleteSpendingSuccess {
+  type: typeof DeleteSpending.Success;
+  payload: Spending;
+}
+
 export const SelectExpense = 'SelectExpense';
 
 export interface SelectExpense {
@@ -83,6 +102,9 @@ export type SpendingActions =
   | CreateSpendingRequest
   | CreateSpendingFailure
   | CreateSpendingSuccess
+  | DeleteSpendingRequest
+  | DeleteSpendingFailure
+  | DeleteSpendingSuccess
   | SelectExpense
   | SelectGoal
   | Transfer

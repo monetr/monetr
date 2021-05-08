@@ -11,9 +11,13 @@ import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFun
 import selectGoal from 'shared/spending/actions/selectGoal';
 import { getSelectedGoal } from 'shared/spending/selectors/getSelectedGoal';
 import EditGoalView from "components/Goals/EditGoalView";
+import deleteSpending from "shared/spending/actions/deleteSpending";
+import fetchBalances from "shared/balances/actions/fetchBalances";
 
 interface WithConnectionPropTypes {
   selectGoal: { (goalId: number | null): void }
+  deleteSpending: (spending: Spending) => Promise<void>;
+  fetchBalances: () => Promise<void>;
   goal: Spending | null;
   fundingSchedule: FundingSchedule | null;
 }
@@ -65,6 +69,19 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
     editGoalOpen: false,
   });
 
+  deleteGoal = () => {
+    const { goal } = this.props;
+    if (!goal) {
+      return Promise.resolve();
+    }
+
+    if (window.confirm(`Are you sure you want to delete goal: ${ goal.name }`)) {
+      return this.props.deleteSpending(goal).then(() => this.props.fetchBalances());
+    }
+
+    return Promise.resolve();
+  };
+
   renderInProgress = () => {
     const { goal, fundingSchedule } = this.props;
 
@@ -95,7 +112,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
               </Typography>
             </div>
             <div className="col-span-1">
-              <IconButton disabled>
+              <IconButton onClick={ this.deleteGoal }>
                 <DeleteOutline/>
               </IconButton>
             </div>
@@ -389,5 +406,7 @@ export default connect(
   },
   {
     selectGoal,
+    deleteSpending,
+    fetchBalances,
   }
 )(GoalDetails);

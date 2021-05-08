@@ -2,6 +2,7 @@ import { LOGOUT } from "shared/authentication/actions";
 import { CHANGE_BANK_ACCOUNT } from 'shared/bankAccounts/actions';
 import {
   CreateSpending,
+  DeleteSpending,
   FETCH_SPENDING_FAILURE,
   FETCH_SPENDING_REQUEST,
   FETCH_SPENDING_SUCCESS,
@@ -40,6 +41,12 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         ...state,
         loading: false,
         items: state.items.setIn([action.payload.bankAccountId, action.payload.spendingId], action.payload),
+      };
+    case DeleteSpending.Success:
+      return {
+        ...state,
+        loading: false,
+        items: state.items.removeIn([action.payload.bankAccountId, action.payload.spendingId]),
       };
     case CHANGE_BANK_ACCOUNT:
       return {
