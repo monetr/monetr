@@ -173,7 +173,6 @@ Deploy - Staging:
     policy: pull
 
 Deploy - Acceptance:
-  when: manual
   only:
     refs:
       - tags
