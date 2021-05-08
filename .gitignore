@@ -6,3 +6,4 @@ node_modules
 .eslintcache
 package-lock.json
 reports
+Notes.md

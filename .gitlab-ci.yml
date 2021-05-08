@@ -13,6 +13,8 @@ workflow:
       when: always
     - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event"'
       when: always
+    - if: $CI_COMMIT_TAG
+      when: always
     - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
       when: never
 
