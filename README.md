@@ -4,6 +4,8 @@
 [![DeepSource](https://deepsource.io/gh/monetr/rest-api.svg/?label=active+issues&show_trend=true&token=4x9L6ApemrQ6x80icvE9cEJl)](https://deepsource.io/gh/monetr/rest-api/?ref=repository-badge)
 [![DeepSource](https://deepsource.io/gh/monetr/rest-api.svg/?label=resolved+issues&show_trend=true&token=4x9L6ApemrQ6x80icvE9cEJl)](https://deepsource.io/gh/monetr/rest-api/?ref=repository-badge)
 
+![image](https://user-images.githubusercontent.com/37967690/117526688-5158fa00-af8c-11eb-9695-6f735605625d.png)
+
 <!-- Test change fasddfasdf -->
 
 This is the REST API behind monetr's budgeting application.
