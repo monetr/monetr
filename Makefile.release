@@ -1,5 +1,11 @@
 
+ifdef CI
 AUTO_VERSION_TAG=$(shell date -u +%Y.%m.%d)
+else
+AUTO_VERSION_TAG=$(shell date -u +%Y.%m.%d.%H.%M)-hot
+endif
+
+
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 
 default-release:
