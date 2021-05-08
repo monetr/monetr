@@ -167,8 +167,8 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 	}
 
 	log = c.log.WithFields(logrus.Fields{
-		"accountId":   link.AccountId,
-		"linkId":      link.LinkId,
+		"accountId": link.AccountId,
+		"linkId":    link.LinkId,
 	})
 
 	log.Trace("processing webhook")
@@ -186,6 +186,13 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 		case "TRANSACTIONS_REMOVED":
 			_, err = c.job.TriggerRemoveTransactions(link.AccountId, link.LinkId, hook.RemovedTransactions)
 			return err
+		}
+	case "ITEM":
+		switch hook.WebhookCode {
+		case "ERROR":
+		case "PENDING_EXPIRATION":
+		case "USER_PERMISSION_REVOKED":
+		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
 		}
 	}
 

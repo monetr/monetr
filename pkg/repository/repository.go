@@ -43,7 +43,7 @@ type Repository interface {
 	GetSpendingById(bankAccountId, expenseId uint64) (*models.Spending, error)
 	GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error)
 	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
-	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error)
+	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)
 	GetTransactionsByPlaidTransactionId(linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
 	InsertTransactions(transactions []models.Transaction) error
 	ProcessTransactionSpentFrom(bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
@@ -52,6 +52,10 @@ type Repository interface {
 	UpdateLink(link *models.Link) error
 	UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error
 	UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error
+
+	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
+	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
+	UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error
 }
 
 type UnauthenticatedRepository interface {

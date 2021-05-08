@@ -114,11 +114,11 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 		}
 
 		// Gather the plaid account Ids so we can precisely query plaid.
-		plaidIdsToBankIds := map[string]uint64{}
+		plaidIdsToBank := map[string]models.BankAccount{}
 		itemBankAccountIds := make([]string, len(bankAccounts))
 		for i, bankAccount := range bankAccounts {
 			itemBankAccountIds[i] = bankAccount.PlaidAccountId
-			plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
+			plaidIdsToBank[bankAccount.PlaidAccountId] = bankAccount
 		}
 
 		log.Tracef("requesting information for %d bank account(s)", len(itemBankAccountIds))
@@ -134,15 +134,47 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 			return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
 		}
 
-		updatedBankAccounts := make([]models.BankAccount, len(result.Accounts))
-		for i, item := range result.Accounts {
-			// TODO (elliotcourant) Maybe add something here to compare balances to the existing account record? If there
-			//  are no changes there is no need to update the account at all.
-			updatedBankAccounts[i] = models.BankAccount{
-				BankAccountId:    plaidIdsToBankIds[item.AccountID],
-				AccountId:        accountId,
-				AvailableBalance: int64(item.Balances.Available * 100),
-				CurrentBalance:   int64(item.Balances.Current * 100),
+		updatedBankAccounts := make([]models.BankAccount, 0, len(result.Accounts))
+		for _, item := range result.Accounts {
+			bankAccount := plaidIdsToBank[item.AccountID]
+			bankLog := log.WithFields(logrus.Fields{
+				"bankAccountId": bankAccount.BankAccountId,
+				"linkId":        bankAccount.LinkId,
+			})
+			shouldUpdate := false
+			available := int64(item.Balances.Available * 100)
+			current := int64(item.Balances.Current * 100)
+
+			if bankAccount.CurrentBalance != current {
+				bankLog = bankLog.WithField("currentBalanceChanged", true)
+				shouldUpdate = true
+			} else {
+				bankLog = bankLog.WithField("currentBalanceChanged", false)
+			}
+
+			if bankAccount.AvailableBalance != available {
+				bankLog = bankLog.WithField("availableBalanceChanged", true)
+				shouldUpdate = true
+			} else {
+				bankLog = bankLog.WithField("availableBalanceChanged", false)
+			}
+
+			bankLog = bankLog.WithField("willUpdate", shouldUpdate)
+
+			if shouldUpdate {
+				bankLog.Info("updating bank account balances")
+			} else {
+				bankLog.Trace("balances do not need to be updated")
+			}
+
+			if shouldUpdate {
+				updatedBankAccounts = append(updatedBankAccounts, models.BankAccount{
+					BankAccountId:    bankAccount.BankAccountId,
+					AccountId:        accountId,
+					AvailableBalance: available,
+					CurrentBalance:   current,
+					LastUpdated:      start.UTC(),
+				})
 			}
 		}
 

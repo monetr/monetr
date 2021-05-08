@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"time"
@@ -75,12 +76,26 @@ func (r *repositoryBase) GetSpendingById(bankAccountId, spendingId uint64) (*mod
 }
 
 func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error {
-	result, err := r.txn.ModelContext(ctx, &models.Spending{}).
+	span := sentry.StartSpan(ctx, "Delete Spending")
+	defer span.Finish()
+
+	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
+		Set(`"spending_id" = NULL`).
+		Set(`"spending_amount" = NULL`).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."spending_id" = ?`, spendingId).
+		Update()
+	if err != nil {
+		return errors.Wrap(err, "failed to remove spending from any transactions")
+	}
+
+	result, err := r.txn.ModelContext(span.Context(), &models.Spending{}).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
 		Where(`"spending"."spending_id" = ?`, spendingId).
 		Delete()
-	if err != nil{
+	if err != nil {
 		return errors.Wrap(err, "failed to delete spending")
 	}
 

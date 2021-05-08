@@ -7,6 +7,7 @@ import (
 	_ "github.com/monetrapp/rest-api/pkg/swag"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (c *Controller) handleBankAccounts(p iris.Party) {
@@ -92,6 +93,7 @@ func (c *Controller) postBankAccounts(ctx *context.Context) {
 	bankAccount.BankAccountId = 0
 	bankAccount.Name = strings.TrimSpace(bankAccount.Name)
 	bankAccount.Mask = strings.TrimSpace(bankAccount.Mask)
+	bankAccount.LastUpdated = time.Now().UTC()
 
 	// TODO (elliotcourant) Add proper bank account types that the user can specify. Make them required.
 	bankAccount.Type = strings.TrimSpace(bankAccount.Type)

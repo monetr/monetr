@@ -1,12 +1,15 @@
 package jobs
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"time"
 )
 
@@ -18,17 +21,29 @@ const (
 func (j *jobManagerBase) TriggerPullLatestTransactions(accountId, linkId uint64, numberOfTransactions int64) (jobId string, err error) {
 	log := j.log.WithFields(logrus.Fields{
 		"accountId": accountId,
-		"linkId": linkId,
+		"linkId":    linkId,
 	})
 
 	log.Infof("queueing pull latest transactions for account")
 	job, err := j.queue.EnqueueUnique(PullLatestTransactions, map[string]interface{}{
-		"accountId":           accountId,
-		"linkId":              linkId,
+		"accountId":            accountId,
+		"linkId":               linkId,
 		"numberOfTransactions": numberOfTransactions,
 	})
 	if err != nil {
-		return "", errors.Wrap(err, "failed to enqueue transaction removal")
+		log.WithError(err).Error("failed to enqueue pulling latest transactions")
+		return "", errors.Wrap(err, "failed to enqueue pulling latest transactions")
+	}
+	log = log.WithField("pullLatestTransactionsJobId", job.ID)
+
+	log.Infof("queueing account balances update for account")
+	job, err = j.queue.EnqueueUnique(PullAccountBalances, map[string]interface{}{
+		"accountId": accountId,
+		"linkId":    linkId,
+	})
+	if err != nil {
+		log.WithError(err).Error("failed to enqueue pulling account balances")
+		return "", errors.Wrap(err, "failed to enqueue pulling account balances")
 	}
 
 	return job.ID, nil
@@ -69,6 +84,9 @@ func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
+	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Latest Transactions"))
+	defer span.Finish()
+
 	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
@@ -79,6 +97,8 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		return err
 	}
 
+	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
+
 	defer func() {
 		if j.stats != nil {
 			j.stats.JobFinished(PullAccountBalances, accountId, start)
@@ -86,6 +106,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
+	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(linkId)
@@ -151,63 +172,70 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			plaidTransactionIds[i] = transaction.ID
 		}
 
-		transactionIds, err := repo.GetTransactionsByPlaidId(linkId, plaidTransactionIds)
+		transactionsByPlaidId, err := repo.GetTransactionsByPlaidId(linkId, plaidTransactionIds)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transaction ids for updating plaid transactions")
 			return err
 		}
 
-		transactionsToUpdate := make([]models.Transaction, 0)
+		transactionsToUpdate := make([]*models.Transaction, 0)
 		transactionsToInsert := make([]models.Transaction, 0)
 		now := time.Now().UTC()
 		for _, plaidTransaction := range transactions {
 			amount := int64(plaidTransaction.Amount * 100)
 
-			existingTransaction, ok := transactionIds[plaidTransaction.ID]
+			date, _ := time.Parse("2006-01-02", plaidTransaction.Date)
+			var authorizedDate *time.Time
+			if plaidTransaction.AuthorizedDate != "" {
+				authDate, _ := time.Parse("2006-01-02", plaidTransaction.AuthorizedDate)
+				authorizedDate = &authDate
+			}
+
+			var pendingPlaidTransactionId *string
+			if plaidTransaction.PendingTransactionID != "" {
+				pendingPlaidTransactionId = &plaidTransaction.PendingTransactionID
+			}
+
+			existingTransaction, ok := transactionsByPlaidId[plaidTransaction.ID]
 			if !ok {
-				date, _ := time.Parse("2006-01-02", plaidTransaction.Date)
-				var authorizedDate *time.Time
-				if plaidTransaction.AuthorizedDate != "" {
-					authDate, _ := time.Parse("2006-01-02", plaidTransaction.AuthorizedDate)
-					authorizedDate = &authDate
-				}
 				transactionsToInsert = append(transactionsToInsert, models.Transaction{
-					AccountId:            accountId,
-					BankAccountId:        plaidIdsToBankIds[plaidTransaction.AccountID],
-					PlaidTransactionId:   plaidTransaction.ID,
-					Amount:               amount,
-					SpendingId:           nil,
-					Spending:             nil,
-					Categories:           plaidTransaction.Category,
-					OriginalCategories:   plaidTransaction.Category,
-					Date:                 date,
-					AuthorizedDate:       authorizedDate,
-					Name:                 plaidTransaction.Name,
-					OriginalName:         plaidTransaction.Name,
-					MerchantName:         plaidTransaction.MerchantName,
-					OriginalMerchantName: plaidTransaction.MerchantName,
-					IsPending:            plaidTransaction.Pending,
-					CreatedAt:            now,
+					AccountId:                 accountId,
+					BankAccountId:             plaidIdsToBankIds[plaidTransaction.AccountID],
+					PlaidTransactionId:        plaidTransaction.ID,
+					Amount:                    amount,
+					SpendingId:                nil,
+					Spending:                  nil,
+					Categories:                plaidTransaction.Category,
+					OriginalCategories:        plaidTransaction.Category,
+					Date:                      date,
+					AuthorizedDate:            authorizedDate,
+					Name:                      plaidTransaction.Name,
+					OriginalName:              plaidTransaction.Name,
+					MerchantName:              plaidTransaction.MerchantName,
+					OriginalMerchantName:      plaidTransaction.MerchantName,
+					IsPending:                 plaidTransaction.Pending,
+					CreatedAt:                 now,
+					PendingPlaidTransactionId: pendingPlaidTransactionId,
 				})
 				continue
 			}
 
-			if amount == existingTransaction.Amount {
-				continue
-			}
+			// TODO If a transaction amount can change, we need to handle spending allocation.
+			//  If a transaction is spent from a spending object, we need to make sure to update that spent amount to
+			//  properly reflect the new transaction amount if it is less than, if it is greater than then do nothing?
+			existingTransaction.Amount = amount
+			existingTransaction.IsPending = plaidTransaction.Pending
+			existingTransaction.AuthorizedDate = authorizedDate
+			existingTransaction.PendingPlaidTransactionId = pendingPlaidTransactionId
 
-			transactionsToUpdate = append(transactionsToUpdate, models.Transaction{
-				TransactionId:      existingTransaction.TransactionId,
-				AccountId:          accountId,
-				BankAccountId:      existingTransaction.BankAccountId,
-				PlaidTransactionId: plaidTransaction.ID,
-				Amount:             amount,
-				IsPending:          plaidTransaction.Pending,
-			})
+			transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
 		}
 
 		if len(transactionsToUpdate) > 0 {
-			// Update the transactions
+			if err = repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
+				log.WithError(err).Errorf("failed to update transactions for job")
+				return err
+			}
 		}
 
 		if len(transactionsToInsert) > 0 {

@@ -190,6 +190,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
+	now := time.Now().UTC()
 	accounts := make([]models.BankAccount, len(plaidAccounts.Accounts))
 	for i, plaidAccount := range plaidAccounts.Accounts {
 		accounts[i] = models.BankAccount{
@@ -204,6 +205,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 			PlaidOfficialName: plaidAccount.OfficialName,
 			Type:              plaidAccount.Type,
 			SubType:           plaidAccount.Subtype,
+			LastUpdated:       now,
 		}
 	}
 	if err = repo.CreateBankAccounts(accounts...); err != nil {

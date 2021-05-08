@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 )
@@ -33,13 +35,8 @@ func (r *repositoryBase) GetPendingTransactionsForBankAccount(bankAccountId uint
 	return result, nil
 }
 
-func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]TransactionUpdateId, error) {
-	type Transaction struct {
-		tableName          string `pg:"transactions"`
-		PlaidTransactionId string `pg:"plaid_transaction_id"`
-		TransactionUpdateId
-	}
-	var items []Transaction
+func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
+	var items []models.Transaction
 	err := r.txn.Model(&items).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
@@ -51,9 +48,9 @@ func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactio
 		return nil, errors.Wrap(err, "failed to retrieve transaction Ids for plaid Ids")
 	}
 
-	result := map[string]TransactionUpdateId{}
+	result := map[string]models.Transaction{}
 	for _, item := range items {
-		result[item.PlaidTransactionId] = item.TransactionUpdateId
+		result[item.PlaidTransactionId] = item
 	}
 
 	return result, nil
@@ -113,6 +110,34 @@ func (r *repositoryBase) UpdateTransaction(bankAccountId uint64, transaction *mo
 	if err != nil {
 		return errors.Wrap(err, "failed to update transaction")
 	}
+
+	return nil
+}
+
+// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is doing a
+// bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
+func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error {
+	span := sentry.StartSpan(ctx, "Update Transactions")
+	defer span.Finish()
+
+	for i := range transactions {
+		transactions[i].AccountId = r.AccountId()
+	}
+
+	result, err := r.txn.ModelContext(span.Context(), &transactions).
+		WherePK().
+		Update(&transactions)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to update transactions")
+	}
+
+	if affected := result.RowsAffected(); affected != len(transactions) {
+		span.Status = sentry.SpanStatusDataLoss
+		return errors.Errorf("not all transactions updated, expected: %d updated: %d", len(transactions), affected)
+	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }
