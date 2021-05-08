@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/kataras/iris/v12"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
@@ -127,7 +127,7 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 			return nil, errors.Wrap(err, "failed to create key function")
 		}
 
-		return jwkKeyFunc.KeyFunc(token)
+		return jwkKeyFunc.KeyFuncF3T(token)
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")

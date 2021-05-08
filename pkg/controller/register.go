@@ -2,7 +2,7 @@ package controller
 
 import (
 	"context"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
@@ -322,13 +322,15 @@ func (c *Controller) generateRegistrationToken(registrationId string) (string, e
 	claims := &RegistrationClaims{
 		RegistrationId: registrationId,
 		StandardClaims: jwt.StandardClaims{
-			Audience:  c.configuration.APIDomainName,
+			Audience:  []string{
+				c.configuration.APIDomainName,
+			},
 			ExpiresAt: now.Add(7 * 24 * time.Hour).Unix(),
 			Id:        "",
 			IssuedAt:  now.Unix(),
 			Issuer:    c.configuration.APIDomainName,
 			NotBefore: now.Unix(),
-			Subject:   "harderThanItNeedsToBe - registration",
+			Subject:   "monetr - registration",
 		},
 	}
 

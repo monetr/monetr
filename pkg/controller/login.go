@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
@@ -128,13 +128,15 @@ func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, e
 		UserId:    userId,
 		AccountId: accountId,
 		StandardClaims: jwt.StandardClaims{
-			Audience:  c.configuration.APIDomainName,
+			Audience: []string{
+				c.configuration.APIDomainName,
+			},
 			ExpiresAt: now.Add(31 * 24 * time.Hour).Unix(),
 			Id:        "",
 			IssuedAt:  now.Unix(),
 			Issuer:    c.configuration.APIDomainName,
 			NotBefore: now.Unix(),
-			Subject:   "harderThanItNeedsToBe",
+			Subject:   "monetr",
 		},
 	}
 

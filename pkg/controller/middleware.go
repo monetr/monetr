@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12/context"
 	"github.com/monetrapp/rest-api/pkg/repository"
