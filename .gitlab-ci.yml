@@ -151,6 +151,7 @@ Yeet Coverage:
   only:
     refs:
       - main
+      - tags
   image: proxy.monetr.dev/docker:19.03.15
   variables:
     DOCKER_HOST: tcp://docker:2375

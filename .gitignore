@@ -15,3 +15,4 @@ pkg/ui/*.txt
 tmp
 local
 values.local.yaml
+Notes.md
