@@ -20,6 +20,7 @@ type Repository interface {
 	CreatePlaidLink(link *models.PlaidLink) error
 	CreateSpending(expense *models.Spending) error
 	CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error
+	DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error
 	DeleteTransaction(bankAccountId, transactionId uint64) error
 	GetAccount() (*models.Account, error)
 	GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error)

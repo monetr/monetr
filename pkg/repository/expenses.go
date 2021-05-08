@@ -73,3 +73,20 @@ func (r *repositoryBase) GetSpendingById(bankAccountId, spendingId uint64) (*mod
 
 	return &result, nil
 }
+
+func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error {
+	result, err := r.txn.ModelContext(ctx, &models.Spending{}).
+		Where(`"spending"."account_id" = ?`, r.AccountId()).
+		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
+		Where(`"spending"."spending_id" = ?`, spendingId).
+		Delete()
+	if err != nil{
+		return errors.Wrap(err, "failed to delete spending")
+	}
+
+	if result.RowsAffected() != 1 {
+		return errors.Errorf("invalid number of spending(s) deleted: %d", result.RowsAffected())
+	}
+
+	return nil
+}

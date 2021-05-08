@@ -15,10 +15,7 @@ func (c *Controller) handleSpending(p iris.Party) {
 	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)
 	p.Post("/{bankAccountId:uint64}/spending/transfer", c.postSpendingTransfer)
 	p.Put("/{bankAccountId:uint64}/spending/{expenseId:uint64}", c.putSpending)
-
-	p.Delete("/{bankAccountId:uint64}/spending/{expenseId:uint64}", func(ctx *context.Context) {
-
-	})
+	p.Delete("/{bankAccountId:uint64}/spending/{spendingId:uint64}", c.deleteSpending)
 }
 
 // List Spending
@@ -422,4 +419,40 @@ func (c *Controller) putSpending(ctx *context.Context) {
 	}
 
 	ctx.JSON(updatedSpending)
+}
+
+// Delete Spending
+// @id delete-spending
+// @tags Spending
+// @summary Delete Spending
+// @description Delete a spending object. This will set any transactions that have spent from this object back to spent from "Safe-To-Spend".
+// @security ApiKeyAuth
+// @accept json
+// @product json
+// @Param bankAccountId path int true "Bank Account ID"
+// @Param spendingId path int true "Spending ID to be deleted"
+// @Router /bank_accounts/{bankAccountId}/spending/{spendingId} [delete]
+// @Success 200
+// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
+// @Failure 500 {object} ApiError "Failed to persist data."
+func (c *Controller) deleteSpending(ctx iris.Context) {
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
+
+	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
+	if spendingId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid spending Id")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	if err := repo.DeleteSpending(c.getContext(ctx), bankAccountId, spendingId); err != nil {
+		c.wrapPgError(ctx, err, "failed to delete spending")
+		return
+	}
+
+	return
 }
