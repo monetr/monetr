@@ -19,6 +19,7 @@ import (
 type JobManager interface {
 	TriggerPullInitialTransactions(accountId, userId, linkId uint64) (jobId string, err error)
 	TriggerRemoveTransactions(accountId, linkId uint64, removedTransactions []string) (jobId string, err error)
+	TriggerPullLatestTransactions(accountId, linkId uint64, numberOfTransactions int64) (jobId string, err error)
 	Close() error
 }
 

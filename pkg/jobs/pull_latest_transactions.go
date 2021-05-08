@@ -15,6 +15,25 @@ const (
 	PullLatestTransactions        = "PullLatestTransactions"
 )
 
+func (j *jobManagerBase) TriggerPullLatestTransactions(accountId, linkId uint64, numberOfTransactions int64) (jobId string, err error) {
+	log := j.log.WithFields(logrus.Fields{
+		"accountId": accountId,
+		"linkId": linkId,
+	})
+
+	log.Infof("queueing pull latest transactions for account")
+	job, err := j.queue.EnqueueUnique(PullLatestTransactions, map[string]interface{}{
+		"accountId":           accountId,
+		"linkId":              linkId,
+		"numberOfTransactions": numberOfTransactions,
+	})
+	if err != nil {
+		return "", errors.Wrap(err, "failed to enqueue transaction removal")
+	}
+
+	return job.ID, nil
+}
+
 func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 	log := j.getLogForJob(job)
 
