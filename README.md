@@ -1,8 +1,8 @@
 # web-ui
 
 ![Gitlab pipeline status (self-hosted)](https://img.shields.io/gitlab/pipeline/monetr/web-ui/main?gitlab_url=https%3A%2F%2Fgitlab.elliotcourant.dev%2Fgithub.com&logo=gitlab)
-[![DeepSource](https://deepsource.io/gh/monetrapp/web-ui.svg/?label=active+issues&show_trend=true&token=xHI8Ef6A6rr1C_LlJ_sxzPzR)](https://deepsource.io/gh/monetrapp/web-ui/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/monetrapp/web-ui.svg/?label=resolved+issues&show_trend=true&token=xHI8Ef6A6rr1C_LlJ_sxzPzR)](https://deepsource.io/gh/monetrapp/web-ui/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/monetr/web-ui.svg/?label=active+issues&show_trend=true&token=xHI8Ef6A6rr1C_LlJ_sxzPzR)](https://deepsource.io/gh/monetr/web-ui/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/monetr/web-ui.svg/?label=resolved+issues&show_trend=true&token=xHI8Ef6A6rr1C_LlJ_sxzPzR)](https://deepsource.io/gh/monetr/web-ui/?ref=repository-badge)
 
 The web app for the budgeting application monetr.
 
@@ -20,5 +20,3 @@ make local-ui
 This will spawn a new tmux window, install any JS dependencies needed and will start the webpack dev server. You can
 then open a browser window to `https://app.monetr.mini` and see the application running. You can make changes to the
 application and see the changes reload.
-
-<!-- Testing Gitlab CI ygsdagfsdardy -->
