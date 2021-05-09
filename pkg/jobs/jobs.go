@@ -5,12 +5,12 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
+	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/pubsub"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"math"
 	"time"
@@ -28,12 +28,12 @@ type jobManagerBase struct {
 	work        *work.WorkerPool
 	queue       *work.Enqueuer
 	db          *pg.DB
-	plaidClient *plaid.Client
+	plaidClient plaid_helper.Client
 	stats       *metrics.Stats
 	ps          pubsub.PublishSubscribe
 }
 
-func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *plaid.Client, stats *metrics.Stats) JobManager {
+func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient plaid_helper.Client, stats *metrics.Stats) JobManager {
 	manager := &jobManagerBase{
 		log: log,
 		// TODO (elliotcourant) Use namespace from config.
@@ -56,6 +56,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	manager.work.Job(PullInitialTransactions, manager.pullInitialTransactions)
 	manager.work.Job(PullLatestTransactions, manager.pullLatestTransactions)
 	manager.work.Job(RemoveTransactions, manager.removeTransactions)
+	manager.work.Job(UpdateInstitutions, manager.updateInstitutions)
 
 	// Every 30 minutes. 0 */30 * * * *
 
@@ -65,6 +66,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient *
 	// Once a day. But also can be triggered by a webhook.
 	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullAccountBalances)
 	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullLatestTransactions)
+	manager.work.PeriodicallyEnqueue("0 0 0 * * *", UpdateInstitutions)
 
 	manager.work.Start()
 	log.Debug("job manager started")

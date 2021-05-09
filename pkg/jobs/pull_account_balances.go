@@ -1,6 +1,8 @@
 package jobs
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
 	"time"
 
@@ -76,6 +78,9 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
+	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Latest Transactions"))
+	defer span.Finish()
+
 	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
@@ -95,7 +100,7 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 	linkId := uint64(job.ArgInt64("linkId"))
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		link, err := repo.GetLink(linkId)
+		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve link details to pull balances")
 			return err
@@ -123,7 +128,8 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 
 		log.Tracef("requesting information for %d bank account(s)", len(itemBankAccountIds))
 
-		result, err := j.plaidClient.GetAccountsWithOptions(
+		result, err := j.plaidClient.GetAccounts(
+			span.Context(),
 			link.PlaidLink.AccessToken,
 			plaid.GetAccountsOptions{
 				AccountIDs: itemBankAccountIds,
@@ -134,8 +140,8 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 			return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
 		}
 
-		updatedBankAccounts := make([]models.BankAccount, 0, len(result.Accounts))
-		for _, item := range result.Accounts {
+		updatedBankAccounts := make([]models.BankAccount, 0, len(result))
+		for _, item := range result {
 			bankAccount := plaidIdsToBank[item.AccountID]
 			bankLog := log.WithFields(logrus.Fields{
 				"bankAccountId": bankAccount.BankAccountId,

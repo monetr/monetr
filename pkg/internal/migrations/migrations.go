@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"github.com/go-pg/migrations/v8"
+	"github.com/monetrapp/rest-api/pkg/internal/migrations/functional"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -14,7 +15,7 @@ type MonetrMigrationsManager struct {
 }
 
 func NewMigrationsManager(log *logrus.Entry, db migrations.DB) (*MonetrMigrationsManager, error) {
-	collection := migrations.NewCollection()
+	collection := migrations.NewCollection(functional.FunctionalMigrations...)
 	if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema"); err != nil {
 		return nil, errors.Wrap(err, "failed to discover embedded sql migrations")
 	}

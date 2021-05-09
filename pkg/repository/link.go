@@ -1,14 +1,26 @@
 package repository
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"time"
 )
 
-func (r *repositoryBase) GetLink(linkId uint64) (*models.Link, error) {
+func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Link, error) {
+	span := sentry.StartSpan(ctx, "Get Link")
+	defer span.Finish()
+	if span.Data == nil {
+		span.Data = map[string]interface{}{}
+	}
+
+	span.SetTag("accountId", r.AccountIdStr())
+
+	span.Data["linkId"] = linkId
+
 	var link models.Link
-	err := r.txn.Model(&link).
+	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
 		Relation("BankAccounts").
 		Where(`"link"."link_id" = ? AND "link"."account_id" = ?`, linkId, r.AccountId()).

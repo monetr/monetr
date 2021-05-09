@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/go-pg/pg/v10"
@@ -32,7 +33,7 @@ type Repository interface {
 	GetFundingStats(ctx context.Context, bankAccountId uint64) (*FundingStats, error)
 	GetIsSetup() (bool, error)
 	GetJob(jobId string) (models.Job, error)
-	GetLink(linkId uint64) (*models.Link, error)
+	GetLink(ctx context.Context, linkId uint64) (*models.Link, error)
 	GetLinkIsManual(linkId uint64) (bool, error)
 	GetLinkIsManualByBankAccountId(bankAccountId uint64) (bool, error)
 	GetLinks() ([]models.Link, error)
@@ -95,6 +96,10 @@ func (r *repositoryBase) UserId() uint64 {
 
 func (r *repositoryBase) AccountId() uint64 {
 	return r.accountId
+}
+
+func (r *repositoryBase) AccountIdStr() string {
+	return strconv.FormatUint(r.AccountId(), 10)
 }
 
 func (r *repositoryBase) GetMe() (*models.User, error) {

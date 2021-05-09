@@ -20,6 +20,8 @@ type Link struct {
 	PlaidLinkId           *uint64      `json:"-" pg:"plaid_link_id,on_delete:SET NULL"`
 	PlaidLink             *PlaidLink   `json:"-" pg:"rel:has-one"`
 	LinkStatus            LinkStatus   `json:"linkStatus" pg:"link_status,notnull,default:0"`
+	InstitutionId         *uint64      `json:"institutionId" pg:"institution_id,on_delete:SET NULL"`
+	Institution           *Institution `json:"institution,omitempty" pg:"rel:has-one"`
 	InstitutionName       string       `json:"institutionName" pg:"institution_name"`
 	CustomInstitutionName string       `json:"customInstitutionName,omitempty" pg:"custom_institution_name"`
 	CreatedAt             time.Time    `json:"createdAt" pg:"created_at,notnull"`

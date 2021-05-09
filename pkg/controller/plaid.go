@@ -255,7 +255,7 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 	})
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	link, err := repo.GetLink(linkId)
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve link")
 		return

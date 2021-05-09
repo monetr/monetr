@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetrapp/rest-api/pkg/logging"
-	"github.com/monetrapp/rest-api/pkg/migrations"
+	"github.com/monetrapp/rest-api/pkg/internal/migrations"
 	"github.com/spf13/cobra"
 )
 

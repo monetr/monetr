@@ -9,10 +9,11 @@ import (
 	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/cache"
 	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/internal/migrations"
+	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/logging"
 	"github.com/monetrapp/rest-api/pkg/metrics"
-	"github.com/monetrapp/rest-api/pkg/migrations"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/cobra"
 	"github.com/stripe/stripe-go/v72"
@@ -126,6 +127,15 @@ func RunServer() error {
 	}
 	defer redisController.Close()
 
+	plaidHelper := plaid_helper.NewPlaidClient(log, plaid.ClientOptions{
+		ClientID:    configuration.Plaid.ClientID,
+		Secret:      configuration.Plaid.ClientSecret,
+		Environment: configuration.Plaid.Environment,
+		HTTPClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+	})
+
 	plaidClient, err := plaid.NewClient(plaid.ClientOptions{
 		ClientID:    configuration.Plaid.ClientID,
 		Secret:      configuration.Plaid.ClientSecret,
@@ -146,7 +156,7 @@ func RunServer() error {
 		log.Debugf("stripe webhooks are enabled and will be sent to: %s", configuration.Stripe.WebhooksDomain)
 	}
 
-	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidClient, stats)
+	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidHelper, stats)
 	defer jobManager.Close()
 
 	app := application.NewApp(configuration, getControllers(

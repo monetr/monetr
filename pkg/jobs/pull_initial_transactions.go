@@ -3,11 +3,11 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 	"time"
 )
 
@@ -16,6 +16,9 @@ const (
 )
 
 func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
+	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Initial Transactions"))
+	defer span.Finish()
+
 	log := j.getLogForJob(job)
 
 	accountId := uint64(job.ArgInt64("accountId"))
@@ -29,7 +32,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 	log = log.WithField("linkId", linkId)
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		link, err := repo.GetLink(linkId)
+		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("cannot pull initial transactions for link provided")
 			return nil
@@ -57,28 +60,14 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			bankAccountIdsByPlaid[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
 		}
 
-		plaidTransactions := make([]plaid.Transaction, 0)
-		var offset int
-		for {
-			log.WithField("offset", offset).Debug("retrieving transactions from plaid")
-			response, err := j.plaidClient.GetTransactionsWithOptions(link.PlaidLink.AccessToken, plaid.GetTransactionsOptions{
-				StartDate:  time.Now().Add(-30 * 24 * time.Hour).Format("2006-01-02"),
-				EndDate:    time.Now().Format("2006-01-02"),
-				AccountIDs: bankAccountIds,
-				Count:      500,
-				Offset:     offset,
-			})
-			if err != nil {
-				log.WithError(err).Error("failed to retrieve some transactions from plaid")
-				break
-			}
-
-			plaidTransactions = append(plaidTransactions, response.Transactions...)
-
-			if len(response.Transactions) < 500 {
-				break
-			}
-		}
+		now := time.Now().UTC()
+		plaidTransactions, err := j.plaidClient.GetAllTransactions(
+			span.Context(),
+			link.PlaidLink.AccessToken,
+			now.Add(-30*24*time.Hour),
+			now,
+			bankAccountIds,
+		)
 
 		if len(plaidTransactions) == 0 {
 			log.Warn("no transactions were retrieved from plaid")
@@ -87,7 +76,6 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 
 		log.Debugf("retreived %d transaction(s) from plaid, processing now", len(plaidTransactions))
 
-		now := time.Now().UTC()
 		transactions := make([]models.Transaction, len(plaidTransactions))
 		for i, plaidTransaction := range plaidTransactions {
 			date, _ := time.Parse("2006-01-02", plaidTransaction.Date)
@@ -131,7 +119,8 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			return err
 		}
 
-		if err = j.ps.Notify(context.Background(),
+		if err = j.ps.Notify(
+			span.Context(),
 			fmt.Sprintf("initial_plaid_link_%d_%d", accountId, link.LinkId),
 			"success",
 		); err != nil {

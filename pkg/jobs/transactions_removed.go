@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/repository"
@@ -27,6 +28,9 @@ func (j *jobManagerBase) TriggerRemoveTransactions(accountId, linkId uint64, rem
 }
 
 func (j *jobManagerBase) removeTransactions(job *work.Job) error {
+	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Remove Transactions"))
+	defer span.Finish()
+
 	start := time.Now()
 	log := j.getLogForJob(job)
 
@@ -49,7 +53,7 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 	linkId := uint64(job.ArgInt64("linkId"))
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		link, err := repo.GetLink(linkId)
+		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve link details to pull transactions")
 			return err

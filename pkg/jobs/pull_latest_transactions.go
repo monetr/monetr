@@ -7,7 +7,6 @@ import (
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
@@ -109,7 +108,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		link, err := repo.GetLink(linkId)
+		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve link details to pull transactions")
 			return err
@@ -137,31 +136,16 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 
 		log.Tracef("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
 
-		transactions := make([]plaid.Transaction, 0)
-		perPage := 200
-		for {
-			result, err := j.plaidClient.GetTransactionsWithOptions(
-				link.PlaidLink.AccessToken,
-				plaid.GetTransactionsOptions{
-					// TODO How do we want to determine our pull latest transactions window.
-					StartDate:  time.Now().Add(-7 * 24 * time.Hour).Format("2006-01-02"),
-					EndDate:    time.Now().Format("2006-01-02"),
-					AccountIDs: itemBankAccountIds,
-					Count:      perPage,
-					Offset:     len(transactions),
-				},
-			)
-			if err != nil {
-				log.WithError(err).Error("failed to retrieve transactions from plaid")
-				return errors.Wrap(err, "failed to retrieve transactions from plaid")
-			}
-
-			transactions = append(transactions, result.Transactions...)
-
-			// If we get a page with fewer transactions than we requested, that means we have reached the end.
-			if len(result.Transactions) < perPage {
-				break
-			}
+		transactions, err := j.plaidClient.GetAllTransactions(
+			span.Context(),
+			link.PlaidLink.AccessToken,
+			time.Now().Add(-7 * 24 * time.Hour),
+			time.Now(),
+			itemBankAccountIds,
+		)
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve transactions from plaid")
+			return errors.Wrap(err, "failed to retrieve transactions from plaid")
 		}
 
 		// TODO Are plaid transaction Ids unique per link, or per bank account?
