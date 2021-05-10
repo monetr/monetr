@@ -129,6 +129,7 @@ export class AuthenticatedApplication extends Component {
               open={ Boolean(this.state.anchorEl) }
               onClose={ this.closeMenu }
             >
+              <MenuItem disabled>About (WIP)</MenuItem>
               <MenuItem onClick={ this.gotoAccount }>My account</MenuItem>
               <MenuItem onClick={ this.doLogout }>Logout</MenuItem>
             </Menu>

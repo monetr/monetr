@@ -38,12 +38,28 @@ export class TransactionDetailView extends Component<WithConnectionPropTypes, St
     });
   };
 
+  renderNoSelection = () => {
+
+    return (
+      <div className="h-full flex justify-center items-center">
+        <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
+          <Typography
+            className="opacity-50 text-center"
+            variant="h6"
+          >
+            Select a transaction to see more information about it...
+          </Typography>
+        </div>
+      </div>
+    )
+  };
+
   render() {
     const { transaction, spending } = this.props;
     const { editSpentFromDialogOpen } = this.state;
 
     if (!transaction) {
-      return null;
+      return this.renderNoSelection();
     }
 
     const spentFrom = spending.get(transaction.spendingId, null);
@@ -91,19 +107,16 @@ export class TransactionDetailView extends Component<WithConnectionPropTypes, St
 
           <div className="grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full">
             <div className="col-span-3 row-span-1">
-              <Typography variant="h5">Categories</Typography>
+              <Typography variant="h5">Category</Typography>
             </div>
             <div className="col-span-3 row-span-1">
               {
                 transaction.categories &&
-                transaction.categories.map(cat => (
-                  <Chip
-                    className="mr-1 mb-1"
-                    key={ cat }
-                    label={ cat }
-                    variant="outlined"
-                  />
-                ))
+                <Chip
+                  className="mr-1 mb-1"
+                  label={ transaction.categories[transaction.categories.length - 1] }
+                  variant="outlined"
+                />
               }
             </div>
             <div className="col-span-1 row-span-2 justify-end flex">

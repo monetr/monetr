@@ -4,7 +4,10 @@
 
 @tailwind utilities;
 
-html, body {height: 100%;}
+html, body {
+    height: 100%;
+    background-color: #b5b5b5;
+}
 
 *:focus {
     outline: none;

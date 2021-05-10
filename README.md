@@ -15,7 +15,8 @@ REST API for details. You will need to run `make init-mini` from the REST API pr
 once that is complete you can run the following command from the WEB UI project directory.
 
 ```bash
-make local-ui
+make deploy-web-ui # Will get the ingress and service setup as well as a dummy pod.
+make local-ui # Will tweak the service to forward to your local webpack dev server.
 ```
 
 This will spawn a new tmux window, install any JS dependencies needed and will start the webpack dev server. You can

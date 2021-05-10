@@ -70,7 +70,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
           </ListItemIcon>
           <div className="grid grid-cols-8 grid-rows-2 grid-flow-col gap-1 w-full">
             <div className="col-span-6">
-              <Typography className="transaction-item-name"><b>{ transaction.getName() }</b></Typography>
+              <Typography className="transaction-item-name"><b>{ transaction.getTitle() }</b></Typography>
             </div>
             <div className="col-span-1">
               <Typography className="opacity-80">

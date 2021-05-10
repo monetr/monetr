@@ -77,11 +77,6 @@ export class FirstTimeSetup extends Component {
       accountIds: new List(metadata.accounts).map(account => account.id).toArray()
     })
       .then(result => {
-        if (result.data.jobId) {
-          // TODO Add long polling based on jobId.
-          return this.props.fetchLinks();
-        }
-
         this.setState({
           linkId: result.data.linkId,
         });

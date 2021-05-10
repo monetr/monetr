@@ -49,6 +49,20 @@ export default class Transaction {
     return this.originalName;
   }
 
+  // getTitle will return a transaction title that can be used in listing transactions. This is meant to return the most
+  // friendly title first, but fallback on other data if a friendly title is not available.
+  getTitle(): string {
+    if (this.name) {
+      return this.name
+    } else if (this.merchantName) {
+      return this.merchantName;
+    } else if (this.originalMerchantName) {
+      return this.originalMerchantName;
+    }
+
+    return this.originalName;
+  }
+
   getOriginalName(): string {
     return this.originalName;
   }

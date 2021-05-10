@@ -1,4 +1,4 @@
-import { Card, List, ListItem, ListItemText, Typography } from "@material-ui/core";
+import { Card, Chip, List, ListItem, Typography } from "@material-ui/core";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { getLinks } from "shared/links/selectors/getLinks";
@@ -22,15 +22,21 @@ export class AccountView extends Component<WithConnectionPropTypes, any> {
                   <Typography
                     variant="h5"
                   >
-                    Linked Bank Accounts
+                    Banks
                   </Typography>
                 </div>
                 <List className="w-full">
                   { this.props.links.map(link => (
                     <ListItem key={ link.linkId } button>
-                      <ListItemText>
-                        { link.getName() }
-                      </ListItemText>
+                      <div className="w-full grid grid-cols-2 grid-flow-col flex self-center items-center">
+                        <div className="col-span-1">
+                          <b>{ link.getName() }</b>
+                        </div>
+                        <div className="col-span-1 flex justify-end">
+                          { link.getIsManual() && <Chip label="Manual"/> }
+                          { !link.getIsManual() && <Chip label="Plaid"/> }
+                        </div>
+                      </div>
                     </ListItem>
                   )).valueSeq().toArray() }
                 </List>
@@ -44,7 +50,7 @@ export class AccountView extends Component<WithConnectionPropTypes, any> {
                       className="opacity-50"
                       variant="h3"
                     >
-                      Account things
+                      Account Things (WIP)
                     </Typography>
                   </div>
                 </div>

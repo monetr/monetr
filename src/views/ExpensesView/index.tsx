@@ -99,6 +99,30 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
 
   render() {
     const { newExpenseDialogOpen, showFundingSchedules } = this.state;
+    const { expenseIds } = this.props;
+
+    if (expenseIds.length === 0) {
+      return (
+        <Fragment>
+          { newExpenseDialogOpen &&
+          <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen />
+          }
+
+          <div className="minus-nav">
+            <div className="flex flex-col h-full p-10 max-h-full">
+              <div className="grid grid-cols-3 gap-4 flex-grow">
+                <div className="col-span-3">
+                  <Card elevation={ 4 } className="w-full expenses-list">
+                    { this.renderExpenseList() }
+                  </Card>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Fragment>
+      )
+    }
+
     return (
       <Fragment>
         { newExpenseDialogOpen &&

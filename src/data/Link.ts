@@ -7,7 +7,7 @@ export enum LinkType {
 export default class Link {
   linkId: number;
   linkType: LinkType;
-  institutionId: string;
+  institutionId: number;
   institutionName: string;
   customInstitutionName?: string;
   createdByUserId: number;

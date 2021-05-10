@@ -13,10 +13,18 @@ export class BalanceNavDisplay extends Component<WithConnectionPropTypes, any> {
   render() {
     return (
       <div className="flex-1 flex justify-center gap-2">
-        <Typography> <b>Available:</b> { this.props.balance.getAvailableString() }</Typography>
-        <Typography> <b>Safe-To-Spend:</b> { this.props.balance.getSafeToSpendString() }</Typography>
-        <Typography> <b>Expenses:</b> { this.props.balance.getExpensesString() }</Typography>
-        <Typography> <b>Goals:</b> { this.props.balance.getGoalsString() }</Typography>
+        <Typography>
+          <b>Safe-To-Spend:</b> { this.props.balance.getSafeToSpendString() }
+        </Typography>
+        <Typography>
+          <b>Expenses:</b> { this.props.balance.getExpensesString() }
+        </Typography>
+        <Typography>
+          <b>Goals:</b> { this.props.balance.getGoalsString() }
+        </Typography>
+        <Typography>
+          <b>Available:</b> { this.props.balance.getAvailableString() }
+        </Typography>
       </div>
     )
   }

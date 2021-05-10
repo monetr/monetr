@@ -1,5 +1,14 @@
 import { Button, Divider, LinearProgress, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
-import { AccountBalance, ArrowBack, ArrowForward, ChevronRight, Event, TrackChanges } from '@material-ui/icons';
+import {
+  AccountBalance,
+  ArrowBack,
+  ArrowForward,
+  ChevronRight,
+  DeleteOutline,
+  Event,
+  SwapHoriz,
+  TrackChanges
+} from '@material-ui/icons';
 import TransferDialog from 'components/Spending/TransferDialog';
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
@@ -11,10 +20,14 @@ import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense
 import EditSpendingAmountDialog from "components/Expenses/EditSpendingAmountDialog";
 import EditExpenseDueDateDialog from "components/Expenses/EditExpenseDueDateDialog";
 import FundingScheduleList from "components/FundingSchedules/FundingScheduleList";
+import fetchBalances from "shared/balances/actions/fetchBalances";
+import deleteSpending from "shared/spending/actions/deleteSpending";
 
 interface WithConnectionPropTypes {
   expense?: Spending;
   fundingSchedules: Map<number, FundingSchedule>;
+  deleteSpending: (spending: Spending) => Promise<void>;
+  fetchBalances: () => Promise<void>;
 }
 
 interface State {
@@ -61,8 +74,21 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
 
   renderNoExpenseSelected = () => {
     return (
-      <FundingScheduleList />
+      <FundingScheduleList/>
     )
+  };
+
+  deleteExpense = () => {
+    const { expense } = this.props;
+    if (!expense) {
+      return Promise.resolve();
+    }
+
+    if (window.confirm(`Are you sure you want to delete expense: ${ expense.name }`)) {
+      return this.props.deleteSpending(expense).then(() => this.props.fetchBalances());
+    }
+
+    return Promise.resolve();
   };
 
   render() {
@@ -233,10 +259,19 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
               </div>
             </ListItem>
           </List>
-          <div className="flex justify-center mb-5">
-            <Button variant="outlined" onClick={ this.openTransferDialog }>
-              Transfer
-            </Button>
+          <div className="grid grid-cols-2 grid-flow-col mb-5">
+            <div className="col-span-1">
+              <Button variant="outlined" color="secondary" className="w-10/12" onClick={ this.deleteExpense }>
+                <DeleteOutline className="mr-2"/>
+                Delete
+              </Button>
+            </div>
+            <div className="col-span-1 flex justify-end">
+              <Button variant="outlined" onClick={ this.openTransferDialog } className="w-10/12">
+                <SwapHoriz className="mr-2"/>
+                Transfer
+              </Button>
+            </div>
           </div>
         </div>
       </Fragment>
@@ -249,5 +284,8 @@ export default connect(
     expense: getSelectedExpense(state),
     fundingSchedules: getFundingSchedules(state),
   }),
-  {}
+  {
+    fetchBalances,
+    deleteSpending,
+  }
 )(ExpenseDetail);
