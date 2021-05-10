@@ -88,6 +88,9 @@ export class AuthenticatedApplication extends Component {
         <Route path="/setup">
           <FirstTimeSetup/>
         </Route>
+        <Route path="/plaid/oauth-return">
+          <Typography>Welcome Back!</Typography>
+        </Route>
         <Route path="/">
           <Redirect to="/setup"/>
         </Route>
