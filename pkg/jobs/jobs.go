@@ -66,7 +66,7 @@ func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient p
 	// Once a day. But also can be triggered by a webhook.
 	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullAccountBalances)
 	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullLatestTransactions)
-	manager.work.PeriodicallyEnqueue("0 0 0 * * *", UpdateInstitutions)
+	//manager.work.PeriodicallyEnqueue("0 0 0 * * *", UpdateInstitutions)
 
 	manager.work.Start()
 	log.Debug("job manager started")

@@ -23,7 +23,7 @@ func (j *jobManagerBase) updateInstitutions(job *work.Job) error {
 		Products: []string{
 			"transactions",
 		},
-		IncludeOptionalMetadata: false, // We don't need metadata each time we request this.
+		IncludeOptionalMetadata: true,
 	})
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve institutions for update")
@@ -51,30 +51,17 @@ func (j *jobManagerBase) updateInstitutions(job *work.Job) error {
 		for _, institution := range institutions {
 			existingInstitution, ok := byPlaidId[institution.ID]
 			if !ok {
-				detailedInstitution, err := j.plaidClient.GetInstitution(
-					span.Context(),
-					institution.ID,
-					true,
-					[]string{"US"},
-				)
-				if err != nil {
-					log.WithField("institutionId", institution.ID).
-						WithError(err).
-						Error("could not retrieve institution metadata, skipping")
-					continue
-				}
-
 				var url, color, logo *string
-				if detailedInstitution.URL != "" {
-					url = &detailedInstitution.URL
+				if institution.URL != "" {
+					url = &institution.URL
 				}
 
-				if detailedInstitution.PrimaryColor != "" {
-					color = &detailedInstitution.PrimaryColor
+				if institution.PrimaryColor != "" {
+					color = &institution.PrimaryColor
 				}
 
-				if detailedInstitution.Logo != "" {
-					logo = &detailedInstitution.Logo
+				if institution.Logo != "" {
+					logo = &institution.Logo
 				}
 
 				institutionsToCreate = append(institutionsToCreate, &models.Institution{
@@ -106,7 +93,7 @@ func (j *jobManagerBase) updateInstitutions(job *work.Job) error {
 		}
 
 		if len(institutionsToCreate) > 0 {
-			log.Infof("creating %d institutions", len(institutionsToUpdate))
+			log.Infof("creating %d institutions", len(institutionsToCreate))
 			if err = repo.CreateInstitutions(span.Context(), institutionsToCreate); err != nil {
 				return err
 			}

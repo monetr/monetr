@@ -33,14 +33,16 @@ func NewPlaidClient(log *logrus.Entry, options plaid.ClientOptions) Client {
 	}
 
 	return &plaidClient{
-		log:    log,
-		client: client,
+		log:               log,
+		client:            client,
+		institutionTicker: time.NewTicker(2400 * time.Millisecond), // Limit our institution API calls to 25 per minute.
 	}
 }
 
 type plaidClient struct {
-	log    *logrus.Entry
-	client *plaid.Client
+	log               *logrus.Entry
+	client            *plaid.Client
+	institutionTicker *time.Ticker
 }
 
 func (p *plaidClient) GetAccounts(ctx context.Context, accessToken string, options plaid.GetAccountsOptions) ([]plaid.Account, error) {
@@ -157,7 +159,7 @@ func (p *plaidClient) GetAllInstitutions(ctx context.Context, countryCodes []str
 	span.Data["countryCodes"] = countryCodes
 	span.Data["options"] = options
 
-	perPage := 100
+	perPage := 500
 	institutions := make([]plaid.Institution, 0)
 	for {
 		total, items, err := p.GetInstitutions(span.Context(), perPage, len(institutions), countryCodes, options)
@@ -202,20 +204,28 @@ func (p *plaidClient) GetInstitutions(ctx context.Context, count, offset int, co
 
 	log.Debug("retrieving plaid institutions")
 
-	result, err := p.client.GetInstitutionsWithOptions(count, offset, countryCodes, options)
-	span.Data["plaidRequestId"] = result.RequestID
-	log = log.WithField("plaidRequestId", result.RequestID)
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		log.WithError(err).Errorf("failed to retrieve plaid institutions")
-		return 0, nil, errors.Wrap(err, "failed to retrieve plaid institutions")
+	rateLimitTimeout := time.NewTimer(30 * time.Second)
+	select {
+	// The institution ticker handles rate limiting for the get institutions endpoint. It makes sure that even
+	// concurrently, we should not be able to exceed our request limit. At least on a single replica.
+	case <-p.institutionTicker.C:
+		result, err := p.client.GetInstitutionsWithOptions(count, offset, countryCodes, options)
+		span.Data["plaidRequestId"] = result.RequestID
+		log = log.WithField("plaidRequestId", result.RequestID)
+		if err != nil {
+			span.Status = sentry.SpanStatusInternalError
+			log.WithError(err).Errorf("failed to retrieve plaid institutions")
+			return 0, nil, errors.Wrap(err, "failed to retrieve plaid institutions")
+		}
+
+		log.Debugf("successfully retrieved %d institutions", len(result.Institutions))
+
+		span.Status = sentry.SpanStatusOK
+
+		return result.Total, result.Institutions, nil
+	case <-rateLimitTimeout.C:
+		return 0, nil, errors.Errorf("timed out waiting for rate limit")
 	}
-
-	log.Debugf("successfully retrieved %d institutions", len(result.Institutions))
-
-	span.Status = sentry.SpanStatusOK
-
-	return result.Total, result.Institutions, nil
 }
 
 func (p *plaidClient) GetWebhookVerificationKey(ctx context.Context, keyId string) (plaid.GetWebhookVerificationKeyResponse, error) {
