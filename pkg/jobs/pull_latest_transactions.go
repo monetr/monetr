@@ -180,6 +180,11 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 				pendingPlaidTransactionId = &plaidTransaction.PendingTransactionID
 			}
 
+			transactionName := plaidTransaction.Name
+			if plaidTransaction.MerchantName != "" {
+				transactionName = plaidTransaction.MerchantName
+			}
+
 			existingTransaction, ok := transactionsByPlaidId[plaidTransaction.ID]
 			if !ok {
 				transactionsToInsert = append(transactionsToInsert, models.Transaction{
@@ -193,7 +198,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 					OriginalCategories:        plaidTransaction.Category,
 					Date:                      date,
 					AuthorizedDate:            authorizedDate,
-					Name:                      plaidTransaction.Name,
+					Name:                      transactionName,
 					OriginalName:              plaidTransaction.Name,
 					MerchantName:              plaidTransaction.MerchantName,
 					OriginalMerchantName:      plaidTransaction.MerchantName,
@@ -211,6 +216,11 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			existingTransaction.IsPending = plaidTransaction.Pending
 			existingTransaction.AuthorizedDate = authorizedDate
 			existingTransaction.PendingPlaidTransactionId = pendingPlaidTransactionId
+
+			// Update old records if we see them to use the merchant name by default.
+			if existingTransaction.Name == plaidTransaction.Name {
+				existingTransaction.Name = transactionName
+			}
 
 			transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
 		}
