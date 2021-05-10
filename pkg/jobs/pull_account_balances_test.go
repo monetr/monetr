@@ -5,10 +5,11 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
+	"github.com/jarcoal/httpmock"
 	"github.com/monetrapp/rest-api/pkg/internal/mock_plaid"
+	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/internal/testutils"
 	"github.com/monetrapp/rest-api/pkg/repository"
-	"github.com/jarcoal/httpmock"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,13 +41,12 @@ func TestPullAccountBalances(t *testing.T) {
 			return nil
 		}), "must retrieve linkId")
 
-		plaidClient, err := plaid.NewClient(plaid.ClientOptions{
+		plaidClient := plaid_helper.NewPlaidClient(log, plaid.ClientOptions{
 			ClientID:    gofakeit.UUID(),
 			Secret:      gofakeit.UUID(),
 			Environment: plaid.Sandbox,
 			HTTPClient:  http.DefaultClient,
 		})
-		require.NoError(t, err, "must create plaid client")
 
 		job := NewJobManager(log, cache, db, plaidClient, nil).(*jobManagerBase)
 		defer require.NoError(t, job.Close(), "must close job manager")
@@ -56,7 +56,7 @@ func TestPullAccountBalances(t *testing.T) {
 		// Mock the plaid get accounts endpoint with our seeded plaid data.
 		mock_plaid.MockGetAccountsExtended(t, plaidData)
 
-		err = job.pullAccountBalances(&work.Job{
+		err := job.pullAccountBalances(&work.Job{
 			Name:       PullAccountBalances,
 			ID:         gofakeit.UUID(),
 			EnqueuedAt: time.Now().Unix(),
