@@ -164,7 +164,8 @@ module.exports = (env, argv) => {
         inject: true,
         appMountId: 'app',
         filename: 'index.html',
-        template: 'public/index.html'
+        template: 'public/index.html',
+        publicPath: "/",
       }),
       new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
       // Makes some environment variables available in index.html.
