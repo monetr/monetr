@@ -6,6 +6,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -51,6 +52,8 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
+	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
+	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(span.Context(), linkId)

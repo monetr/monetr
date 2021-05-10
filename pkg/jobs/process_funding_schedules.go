@@ -1,6 +1,8 @@
 package jobs
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
@@ -63,6 +65,9 @@ func (j *jobManagerBase) enqueueProcessFundingSchedules(job *work.Job) error {
 }
 
 func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
+	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Process Funding Schedules"))
+	defer span.Finish()
+
 	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("processing funding schedules")
@@ -79,8 +84,11 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 		}
 	}()
 
+	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
+
 	bankAccountId := uint64(job.ArgInt64("bankAccountId"))
 	log = log.WithField("bankAccountId", bankAccountId)
+	span.SetTag("bankAccountId", strconv.FormatUint(bankAccountId, 10))
 
 	fundingScheduleIds := make([]uint64, 0)
 	idStrings := job.ArgString("fundingScheduleIds")

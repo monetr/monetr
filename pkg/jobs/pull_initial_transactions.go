@@ -8,6 +8,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
+	"strconv"
 	"time"
 )
 
@@ -28,6 +29,9 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 		log.Error("cannot pull initial transactions without a link Id")
 		return errors.Errorf("cannot pull initial transactions without a link Id")
 	}
+
+	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
+	span.SetTag("linkId", strconv.FormatUint(accountId, 10))
 
 	log = log.WithField("linkId", linkId)
 
