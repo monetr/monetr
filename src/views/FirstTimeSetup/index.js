@@ -36,7 +36,6 @@ export class FirstTimeSetup extends Component {
   static propTypes = {
     logout: PropTypes.func.isRequired,
     fetchLinks: PropTypes.func.isRequired,
-    fetchLinksIfNeeded: PropTypes.func.isRequired,
     fetchBankAccounts: PropTypes.func.isRequired,
     fetchSpending: PropTypes.func.isRequired,
     fetchFundingSchedulesIfNeeded: PropTypes.func.isRequired,
