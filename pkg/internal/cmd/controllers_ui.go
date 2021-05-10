@@ -11,10 +11,12 @@ import (
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/ui"
+	"github.com/sirupsen/logrus"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
 )
 
 func getControllers(
+	log *logrus.Entry,
 	configuration config.Configuration,
 	db *pg.DB,
 	job jobs.JobManager,
@@ -23,7 +25,7 @@ func getControllers(
 	stripeClient *stripe_client.API,
 ) []application.Controller {
 	return []application.Controller{
-		controller.NewController(configuration, db, job, plaidClient, stats, stripeClient),
+		controller.NewController(log, configuration, db, job, plaidClient, stats, stripeClient),
 		ui.NewUIController(),
 	}
 }

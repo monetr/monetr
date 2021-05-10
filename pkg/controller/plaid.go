@@ -276,7 +276,7 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 		}
 	}()
 
-	log.Tracef("waiting for link to be setup on channel: %s", channelName)
+	log.Debugf("waiting for link to be setup on channel: %s", channelName)
 
 	deadLine := time.NewTimer(30 * time.Second)
 	defer deadLine.Stop()

@@ -41,16 +41,10 @@ type Configuration struct {
 	SendGrid         SendGrid
 	Sentry           Sentry
 	Stripe           Stripe
-	MultiPlaidConfig map[PlaidEnvironment]PlaidSingleConfig
 }
 
 type Beta struct {
 	EnableBetaCodes bool
-}
-
-type PlaidSingleConfig struct {
-	ClientID     string
-	ClientSecret string
 }
 
 type JWT struct {
@@ -150,6 +144,7 @@ type Stripe struct {
 	WebhooksEnabled bool
 	WebhooksDomain  string
 	WebhookSecret   string
+	Products        []Product
 }
 
 func LoadConfiguration(configFilePath *string) Configuration {

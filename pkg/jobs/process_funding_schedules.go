@@ -191,7 +191,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 			}
 		}
 
-		log.Tracef("preparing to update %d spending(s)", len(expensesToUpdate))
+		log.Debugf("preparing to update %d spending(s)", len(expensesToUpdate))
 
 		if err := repo.UpdateExpenses(bankAccountId, expensesToUpdate); err != nil {
 			log.WithError(err).Error("failed to update spending")

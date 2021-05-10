@@ -134,7 +134,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
 		}
 
-		log.Tracef("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
+		log.Debugf("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
 
 		transactions, err := j.plaidClient.GetAllTransactions(
 			span.Context(),

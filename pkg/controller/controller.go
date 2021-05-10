@@ -43,6 +43,7 @@ type Controller struct {
 }
 
 func NewController(
+	log *logrus.Entry,
 	configuration config.Configuration,
 	db *pg.DB,
 	job jobs.JobManager,
@@ -50,14 +51,8 @@ func NewController(
 	stats *metrics.Stats,
 	stripeClient *stripe_client.API,
 ) *Controller {
-	logger := logrus.New()
-	level, err := logrus.ParseLevel(configuration.Logging.Level)
-	if err != nil {
-		panic(err)
-	}
-	logger.SetLevel(level)
-	entry := logrus.NewEntry(logger)
 	var captcha recaptcha.ReCAPTCHA
+	var err error
 	if configuration.ReCAPTCHA.Enabled {
 		captcha, err = recaptcha.NewReCAPTCHA(
 			configuration.ReCAPTCHA.PrivateKey,
@@ -74,11 +69,11 @@ func NewController(
 		configuration: configuration,
 		db:            db,
 		plaid:         plaidClient,
-		log:           entry,
+		log:           log,
 		job:           job,
 		stats:         stats,
 		stripeClient:  stripeClient,
-		ps:            pubsub.NewPostgresPubSub(entry, db),
+		ps:            pubsub.NewPostgresPubSub(log, db),
 	}
 }
 

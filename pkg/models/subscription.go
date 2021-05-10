@@ -1,6 +1,8 @@
 package models
 
-import "github.com/stripe/stripe-go/v72"
+import (
+	"github.com/stripe/stripe-go/v72"
+)
 
 type Subscription struct {
 	tableName string `pg:"subscriptions"`

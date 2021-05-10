@@ -126,7 +126,7 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 			plaidIdsToBank[bankAccount.PlaidAccountId] = bankAccount
 		}
 
-		log.Tracef("requesting information for %d bank account(s)", len(itemBankAccountIds))
+		log.Debugf("requesting information for %d bank account(s)", len(itemBankAccountIds))
 
 		result, err := j.plaidClient.GetAccounts(
 			span.Context(),

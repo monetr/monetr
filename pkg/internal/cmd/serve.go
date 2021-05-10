@@ -56,7 +56,7 @@ func RunServer() error {
 
 	configuration := config.LoadConfiguration(configPath)
 
-	log := logging.NewLogger()
+	log := logging.NewLoggerWithLevel(configuration.Logging.Level)
 
 	if configuration.Sentry.Enabled {
 		log.Debug("sentry is enabled, setting up")
@@ -81,6 +81,7 @@ func RunServer() error {
 					event.Request.Cookies = ""
 					if event.Request.Headers != nil {
 						delete(event.Request.Headers, "M-Token")
+						delete(event.Request.Headers, "Cookies")
 					}
 				}
 
@@ -148,6 +149,7 @@ func RunServer() error {
 	defer jobManager.Close()
 
 	app := application.NewApp(configuration, getControllers(
+		log,
 		configuration,
 		db,
 		jobManager,

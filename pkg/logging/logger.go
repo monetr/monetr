@@ -7,12 +7,21 @@ import (
 )
 
 func NewLogger() *logrus.Entry {
+	return NewLoggerWithLevel(logrus.FatalLevel.String())
+}
+
+func NewLoggerWithLevel(levelString string) *logrus.Entry {
 	logger := logrus.New()
-	if os.Getenv("CI") == "" {
-		logger.SetLevel(logrus.TraceLevel)
-	} else {
+	if os.Getenv("CI") != "" {
 		logger.SetLevel(logrus.FatalLevel)
 	}
+
+	level, err := logrus.ParseLevel(levelString)
+	if err != nil {
+		level = logrus.InfoLevel
+	}
+
+	logger.SetLevel(level)
 
 	logger.Formatter = &logrus.TextFormatter{
 		ForceColors:               false,

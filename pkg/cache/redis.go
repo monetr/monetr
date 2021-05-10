@@ -30,7 +30,7 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 
 		// Store our "embedded" redis address for use below.
 		redisAddress = controller.mini.Server().Addr().String()
-		log.Debugf("using miniredis")
+		log.Debug("using miniredis")
 	}
 
 	// Setup the redis pool for running jobs.
@@ -48,7 +48,7 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 		return nil, err
 	}
 
-	log.Tracef("successfully setup redis pool")
+	log.Debug("successfully setup redis pool")
 
 	return controller, nil
 }
@@ -63,7 +63,7 @@ func waitForRedis(log *logrus.Entry, maxAttempts int, pool *redis.Pool) error {
 			continue
 		}
 
-		log.Tracef("response from redis: %v", result)
+		log.Debugf("response from redis: %v", result)
 		return nil
 	}
 
