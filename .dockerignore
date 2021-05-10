@@ -1,0 +1,8 @@
+# Ignore everything
+**
+
+# Allow the golang stuff.
+!/pkg/**
+!/go.mod
+!/go.sum
+

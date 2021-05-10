@@ -4,8 +4,14 @@ DOCKER_IMAGE = rest-api
 default-docker:
 	$(error Please run a specific target)
 
+ifdef CI
 wait-for-docker:
 	@for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
+else
+wait-for-docker:
+	@eval $$(minikube docker-env) && for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
+endif
+
 
 VERSION_TAG = $(shell git rev-parse HEAD)
 BASE_IMAGE = $(DOCKER_REPOSITORY)/$(DOCKER_IMAGE)

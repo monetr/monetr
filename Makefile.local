@@ -105,7 +105,6 @@ setup-certificates: $(LOCAL_DIR)
 	openssl req -new -x509 -addext "subjectAltName = DNS:*.$(LOCAL_DOMAIN)" -key $(KEY_PATH) -out $(CERT_PATH) -days 3650 \
 		-subj /CN=*.$(LOCAL_DOMAIN) || make help-certificates-openssl
 	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(CERT_PATH)
-	(killall Docker && open /Applications/Docker.app) || true
 	mkdir -p $(HOME)/.minikube/certs
 	openssl x509 -in $(CERT_PATH) -out $(HOME)/.minikube/certs/$(LOCAL_DOMAIN).pem
 
@@ -182,15 +181,15 @@ GO_HASH=$(shell find -s $(PWD)/pkg -type f -exec shasum {} \; | shasum | cut -d 
 BASE_IMAGE_NAME = registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
 IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
 build-rest-api-mini: wait-for-docker
-	docker build \
+	eval $$(minikube docker-env) && docker build \
 		--cache-from=$(BASE_IMAGE_NAME):latest \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		-t $(IMAGE_NAME) \
 		-t $(BASE_IMAGE_NAME):latest \
-		-f Dockerfile .
-	docker push $(IMAGE_NAME)
-	docker push $(BASE_IMAGE_NAME):latest
+		-f Dockerfile . && \
+		docker push $(IMAGE_NAME) && \
+		docker push $(BASE_IMAGE_NAME):latest
 	yq e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
 
 deploy-redis:
@@ -258,7 +257,11 @@ local-api:
 	LOCAL_IP=$(LOCAL_IP) $(YQ) e '.subsets[0].addresses[0].ip = strenv(LOCAL_IP)' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
 	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
 	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
-	unset TMUX && tmux new-session 'minikube tunnel --cleanup'
+ifdef TMUX # If the user is already in tmux then just spawn a new session and switch to it.
+	tmux new -s local-api -d 'minikube tunnel --cleanup' && tmux switch -t local-api || true
+else # If the user is not, start a new session and then enter tmux to attach.
+	tmux new -s local-api -d 'minikube tunnel --cleanup' && tmux attach -t local-api || true
+endif
 	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
@@ -337,11 +340,11 @@ unseal-vault-mini: $(VAULT_JSON)
 ###################### gocraft/work UI ##################################
 WORK_IMAGE_NAME=registry.$(LOCAL_DOMAIN)/work
 work-mini:
-	docker build \
+	eval $$(minikube docker-env) && docker build \
 		--cache-from=$(WORK_IMAGE_NAME):latest \
 		-t $(WORK_IMAGE_NAME):latest \
-		-f Dockerfile.work .
-	docker push $(WORK_IMAGE_NAME):latest
+		-f Dockerfile.work . && \
+		docker push $(WORK_IMAGE_NAME):latest
 	$(KUBECTL) apply -f $(PWD)/minikube/work.yaml \
 		--namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/work \
