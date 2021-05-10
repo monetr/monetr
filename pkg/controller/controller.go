@@ -5,6 +5,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/monetrapp/rest-api/pkg/build"
+	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/pubsub"
@@ -18,7 +19,6 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
@@ -32,7 +32,7 @@ type Controller struct {
 	db             *pg.DB
 	configuration  config.Configuration
 	captcha        *recaptcha.ReCAPTCHA
-	plaid          *plaid.Client
+	plaid          plaid_helper.Client
 	smtp           *smtp.Client
 	mailVerifyCode *gotp.HOTP
 	log            *logrus.Entry
@@ -46,7 +46,7 @@ func NewController(
 	configuration config.Configuration,
 	db *pg.DB,
 	job jobs.JobManager,
-	plaidClient *plaid.Client,
+	plaidClient plaid_helper.Client,
 	stats *metrics.Stats,
 	stripeClient *stripe_client.API,
 ) *Controller {

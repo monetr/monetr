@@ -6,8 +6,10 @@ import (
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/monetrapp/rest-api/pkg/controller"
+	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/internal/testutils"
 	"github.com/plaid/plaid-go/plaid"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
@@ -15,10 +17,10 @@ import (
 
 func NewTestApplication(t *testing.T) *httptest.Expect {
 	configuration := config.Configuration{
-		Name:           t.Name(),
-		UIDomainName:   "http://localhost:1234",
-		APIDomainName:  "http://localhost:1235",
-		AllowSignUp:    true,
+		Name:          t.Name(),
+		UIDomainName:  "http://localhost:1234",
+		APIDomainName: "http://localhost:1235",
+		AllowSignUp:   true,
 		JWT: config.JWT{
 			LoginJwtSecret:        gofakeit.UUID(),
 			RegistrationJwtSecret: gofakeit.UUID(),
@@ -41,13 +43,12 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 
 func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httptest.Expect {
 	db := testutils.GetPgDatabase(t)
-	p, err := plaid.NewClient(plaid.ClientOptions{
+	p := plaid_helper.NewPlaidClient(logrus.WithField("test", t.Name()), plaid.ClientOptions{
 		ClientID:    configuration.Plaid.ClientID,
 		Secret:      configuration.Plaid.ClientSecret,
 		Environment: configuration.Plaid.Environment,
 		HTTPClient:  http.DefaultClient,
 	})
-	require.NoError(t, err, "must be able to create plaid client")
 
 	mockJobManager := testutils.NewMockJobManager()
 

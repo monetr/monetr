@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/sirupsen/logrus"
@@ -63,8 +62,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		}
 	}
 
-	plaidSpan := sentry.StartSpan(c.getContext(ctx), "Create Plaid Link Token")
-	token, err := c.plaid.CreateLinkToken(plaid.LinkTokenConfigs{
+	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), plaid.LinkTokenConfigs{
 		User: &plaid.LinkTokenUser{
 			ClientUserID: strconv.FormatUint(userId, 10),
 			LegalName:    legalName,
@@ -90,13 +88,9 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		RedirectUri:           "",
 	})
 	if err != nil {
-		plaidSpan.Status = sentry.SpanStatusInternalError
-		plaidSpan.Finish()
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
 		return
 	}
-	plaidSpan.Status = sentry.SpanStatusOK
-	plaidSpan.Finish()
 
 	ctx.JSON(map[string]interface{}{
 		"linkToken": token.LinkToken,
@@ -130,13 +124,13 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
-	result, err := c.plaid.ExchangePublicToken(callbackRequest.PublicToken)
+	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 		return
 	}
 
-	plaidAccounts, err := c.plaid.GetAccountsWithOptions(result.AccessToken, plaid.GetAccountsOptions{
+	plaidAccounts, err := c.plaid.GetAccounts(c.getContext(ctx), result.AccessToken, plaid.GetAccountsOptions{
 		AccountIDs: callbackRequest.AccountIds,
 	})
 	if err != nil {
@@ -144,7 +138,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
-	if len(plaidAccounts.Accounts) == 0 {
+	if len(plaidAccounts) == 0 {
 		c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
 		return
 	}
@@ -191,8 +185,8 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	now := time.Now().UTC()
-	accounts := make([]models.BankAccount, len(plaidAccounts.Accounts))
-	for i, plaidAccount := range plaidAccounts.Accounts {
+	accounts := make([]models.BankAccount, len(plaidAccounts))
+	for i, plaidAccount := range plaidAccounts {
 		accounts[i] = models.BankAccount{
 			AccountId:         repo.AccountId(),
 			LinkId:            link.LinkId,

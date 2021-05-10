@@ -11,6 +11,8 @@ import (
 )
 
 type Client interface {
+	CreateLinkToken(ctx context.Context, config plaid.LinkTokenConfigs) (*plaid.CreateLinkTokenResponse, error)
+	ExchangePublicToken(ctx context.Context, publicToken string) (*plaid.ExchangePublicTokenResponse, error)
 	GetAccounts(ctx context.Context, accessToken string, options plaid.GetAccountsOptions) ([]plaid.Account, error)
 	GetAllTransactions(ctx context.Context, accessToken string, start, end time.Time, accountIds []string) ([]plaid.Transaction, error)
 	GetAllInstitutions(ctx context.Context, countryCodes []string, options plaid.GetInstitutionsOptions) ([]plaid.Institution, error)
@@ -43,6 +45,44 @@ type plaidClient struct {
 	log               *logrus.Entry
 	client            *plaid.Client
 	institutionTicker *time.Ticker
+}
+
+func (p *plaidClient) CreateLinkToken(ctx context.Context, config plaid.LinkTokenConfigs) (*plaid.CreateLinkTokenResponse, error) {
+	span := sentry.StartSpan(ctx, "Plaid - CreateLinkToken")
+	defer span.Finish()
+	if span.Data == nil {
+		span.Data = map[string]interface{}{}
+	}
+
+	result, err := p.client.CreateLinkToken(config)
+	span.Data["plaidRequestId"] = result.RequestID
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to create link token")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &result, nil
+}
+
+func (p *plaidClient) ExchangePublicToken(ctx context.Context, publicToken string) (*plaid.ExchangePublicTokenResponse, error) {
+	span := sentry.StartSpan(ctx, "Plaid - ExchangePublicToken")
+	defer span.Finish()
+	if span.Data == nil {
+		span.Data = map[string]interface{}{}
+	}
+
+	result, err := p.client.ExchangePublicToken(publicToken)
+	span.Data["plaidRequestId"] = result.RequestID
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to exchange public token")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &result, nil
 }
 
 func (p *plaidClient) GetAccounts(ctx context.Context, accessToken string, options plaid.GetAccountsOptions) ([]plaid.Account, error) {
@@ -231,8 +271,12 @@ func (p *plaidClient) GetInstitutions(ctx context.Context, count, offset int, co
 func (p *plaidClient) GetWebhookVerificationKey(ctx context.Context, keyId string) (plaid.GetWebhookVerificationKeyResponse, error) {
 	span := sentry.StartSpan(ctx, "Plaid - GetWebhookVerificationKey")
 	defer span.Finish()
+	if span.Data == nil {
+		span.Data = map[string]interface{}{}
+	}
 
 	result, err := p.client.GetWebhookVerificationKey(keyId)
+	span.Data["plaidRequestId"] = result.RequestID
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 	} else {
@@ -244,5 +288,6 @@ func (p *plaidClient) GetWebhookVerificationKey(ctx context.Context, keyId strin
 
 func (p *plaidClient) Close() error {
 	p.client = nil
+	p.institutionTicker.Stop()
 	return nil
 }

@@ -7,9 +7,9 @@ import (
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/monetrapp/rest-api/pkg/controller"
+	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
-	"github.com/plaid/plaid-go/plaid"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
 )
 
@@ -17,7 +17,7 @@ func getControllers(
 	configuration config.Configuration,
 	db *pg.DB,
 	job jobs.JobManager,
-	plaidClient *plaid.Client,
+	plaidClient plaid_helper.Client,
 	stats *metrics.Stats,
 	stripeClient *stripe_client.API,
 ) []application.Controller {

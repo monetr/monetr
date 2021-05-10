@@ -136,18 +136,6 @@ func RunServer() error {
 		},
 	})
 
-	plaidClient, err := plaid.NewClient(plaid.ClientOptions{
-		ClientID:    configuration.Plaid.ClientID,
-		Secret:      configuration.Plaid.ClientSecret,
-		Environment: configuration.Plaid.Environment,
-		// TODO Don't use the default HTTP client for the Plaid client.
-		HTTPClient: http.DefaultClient,
-	})
-	if err != nil {
-		log.WithError(err).Fatalf("failed to create plaid client: %+v", err)
-		return err
-	}
-
 	if configuration.Plaid.WebhooksEnabled {
 		log.Debugf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain)
 	}
@@ -163,7 +151,7 @@ func RunServer() error {
 		configuration,
 		db,
 		jobManager,
-		plaidClient,
+		plaidHelper,
 		stats,
 		stripeClient,
 	)...)

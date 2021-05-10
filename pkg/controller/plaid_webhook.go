@@ -102,7 +102,7 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 		log := c.log.WithField("kid", kid)
 		log.Trace("exchanging key Id for public key")
 
-		verificationResponse, err := c.plaid.GetWebhookVerificationKey(kid)
+		verificationResponse, err := c.plaid.GetWebhookVerificationKey(c.getContext(ctx), kid)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to retrieve public verification key")
 		}
