@@ -81,7 +81,7 @@
     "sass": "1.32.12",
     "selector-action": "1.2.0",
     "semver": "7.3.5",
-    "socket.io-client": "4.1.0",
+    "socket.io-client": "4.1.1",
     "terser-webpack-plugin": "5.1.1",
     "ts-pnp": "1.2.0",
     "web-vitals": "1.1.2",

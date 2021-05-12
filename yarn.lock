@@ -10694,10 +10694,10 @@ snapdragon@^0.8.1:
     source-map-resolve "^0.5.0"
     use "^3.1.0"
 
-socket.io-client@4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.1.0.tgz#8b13730715e9f2ac2b378a67519b4edc464a01ce"
-  integrity sha512-L0lCCPTb5xz+KQ3Wrq0077XjJwpaYpjagRvqE5Sg9aXWekfrEqPFvICCUWs7pJqPv7QVN09KoaPKPkVOOetmbw==
+socket.io-client@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/socket.io-client/-/socket.io-client-4.1.1.tgz#2cdd883fcebd4417fda0f1becc72eea0664ece0b"
+  integrity sha512-avzRzFZIkmyNxqvhmm5ns0Itq5dgEkesDPB6Tl0Yben47U08MvdFnVXAuFDULQhDXjuYdCb6QUEILYLUKQEuGg==
   dependencies:
     "@types/component-emitter" "^1.2.10"
     backo2 "~1.0.2"
