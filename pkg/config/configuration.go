@@ -24,23 +24,23 @@ const (
 )
 
 type Configuration struct {
-	Name             string
-	Environment      string
-	UIDomainName     string
-	APIDomainName    string
-	AllowSignUp      bool
-	Beta             Beta
-	CORS             CORS
-	JWT              JWT
-	Logging          Logging
-	Plaid            Plaid
-	PostgreSQL       PostgreSQL
-	ReCAPTCHA        ReCAPTCHA
-	Redis            Redis
-	SMTP             SMTPClient
-	SendGrid         SendGrid
-	Sentry           Sentry
-	Stripe           Stripe
+	Name          string
+	Environment   string
+	UIDomainName  string
+	APIDomainName string
+	AllowSignUp   bool
+	Beta          Beta
+	CORS          CORS
+	JWT           JWT
+	Logging       Logging
+	Plaid         Plaid
+	PostgreSQL    PostgreSQL
+	ReCAPTCHA     ReCAPTCHA
+	Redis         Redis
+	SMTP          SMTPClient
+	SendGrid      SendGrid
+	Sentry        Sentry
+	Stripe        Stripe
 }
 
 type Beta struct {
@@ -144,6 +144,7 @@ type Stripe struct {
 	WebhooksEnabled bool
 	WebhooksDomain  string
 	WebhookSecret   string
+	Prices          []*string
 	Products        []Product
 }
 

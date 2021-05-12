@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"github.com/go-pg/pg/v10"
+	"github.com/gomodule/redigo/redis"
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/monetrapp/rest-api/pkg/controller"
@@ -22,8 +23,9 @@ func getControllers(
 	plaidClient plaid_helper.Client,
 	stats *metrics.Stats,
 	stripeClient *stripe_client.API,
+	cache *redis.Pool,
 ) []application.Controller {
 	return []application.Controller{
-		controller.NewController(log, configuration, db, job, plaidClient, stats, stripeClient),
+		controller.NewController(log, configuration, db, job, plaidClient, stats, stripeClient, cache),
 	}
 }

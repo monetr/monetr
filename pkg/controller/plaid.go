@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
@@ -27,7 +30,8 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 // @Security ApiKeyAuth
 // @Produce json
 // @Router /plaid/token/new [get]
-// @Success 200
+// @Param use_cache query bool false "If true, the API will check and see if a plaid link token already exists for the current user. If one is present then it is returned instead of creating a new link token."
+// @Success 200 {object} swag.PlaidNewLinkTokenResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) newPlaidToken(ctx iris.Context) {
 	// Retrieve the user's details. We need to pass some of these along to
@@ -38,6 +42,70 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 	}
 
 	userId := c.mustGetUserId(ctx)
+
+	log := c.log.WithFields(logrus.Fields{
+		"accountId": me.AccountId,
+		"userId":    me.UserId,
+		"loginId":   me.LoginId,
+	})
+
+	checkCacheForLinkToken := func(ctx context.Context) (linkToken string, _ error) {
+		span := sentry.StartSpan(ctx, "CheckCacheForLinkToken")
+		defer span.Finish()
+
+		cache, err := c.cache.GetContext(ctx)
+		if err != nil {
+			log.WithError(err).Warn("failed to get cache connection")
+			return "", errors.Wrap(err, "failed to get cache connection")
+		}
+		defer cache.Close()
+
+		// Check and see if there is already a plaid link in progress for the current user.
+		result, err := cache.Do("GET", fmt.Sprintf("plaidInProgress_%d", me.UserId))
+		if err != nil {
+			log.WithError(err).Warn("failed to retrieve link token from cache")
+			return "", errors.Wrap(err, "failed to retrieve link token from cache")
+		}
+
+		switch actual := result.(type) {
+		case string:
+			return actual, nil
+		case *string:
+			if actual != nil {
+				return *actual, nil
+			}
+		case []byte:
+			return string(actual), nil
+		}
+
+		return "", nil
+	}
+
+	storeLinkTokenInCache := func(ctx context.Context, linkToken string, expiration time.Time) error {
+		span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
+		defer span.Finish()
+
+		cache, err := c.cache.GetContext(ctx)
+		if err != nil {
+			log.WithError(err).Warn("failed to get cache connection")
+			return errors.Wrap(err, "failed to get cache connection")
+		}
+		defer cache.Close()
+
+		key := fmt.Sprintf("plaidInProgress_%d", me.UserId)
+		return errors.Wrap(cache.Send("SET", key, linkToken, "EXAT", expiration.Unix()), "failed to cache link token")
+	}
+
+	if checkCache, err := ctx.URLParamBool("use_cache"); err == nil && checkCache {
+		if linkToken, err := checkCacheForLinkToken(c.getContext(ctx)); err == nil && len(linkToken) > 0 {
+			log.Info("successfully found existing link token in cache")
+			ctx.JSON(map[string]interface{}{
+				"linkToken": linkToken,
+			})
+			return
+		}
+	}
+
 	plaidProducts := []string{
 		"transactions",
 	}
@@ -62,6 +130,8 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		}
 	}
 
+	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", c.configuration.UIDomainName)
+
 	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), plaid.LinkTokenConfigs{
 		User: &plaid.LinkTokenUser{
 			ClientUserID: strconv.FormatUint(userId, 10),
@@ -85,11 +155,15 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		PaymentInitiation:     nil,
 		Language:              "en",
 		LinkCustomizationName: "",
-		RedirectUri:           "",
+		RedirectUri:           redirectUri,
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
 		return
+	}
+
+	if err = storeLinkTokenInCache(c.getContext(ctx), token.LinkToken, token.Expiration); err != nil {
+		log.WithError(err).Warn("failed to cache link token")
 	}
 
 	ctx.JSON(map[string]interface{}{

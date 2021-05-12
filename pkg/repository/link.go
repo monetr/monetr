@@ -45,23 +45,6 @@ func (r *repositoryBase) GetLinks() ([]models.Link, error) {
 	return result, nil
 }
 
-func (r *repositoryBase) GetLinkByBankAccountId(bankAccountId uint64) (*models.Link, error) {
-	var link models.Link
-	err := r.txn.Model(&link).
-		Relation("PlaidLink").
-		Relation("BankAccounts").
-		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
-		Where(`"link"."account_id" = ?`, r.AccountId()).
-		Where(`"bank_account"."bank_account_id" = ?`, bankAccountId).
-		Limit(1).
-		Select(&link)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to get link by bank account Id")
-	}
-
-	return &link, nil
-}
-
 func (r *repositoryBase) GetLinkIsManual(linkId uint64) (bool, error) {
 	ok, err := r.txn.Model(&models.Link{}).
 		Where(`"link"."account_id" = ?`, r.AccountId()).

@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/stripe/stripe-go/v72"
+	"time"
 )
 
 type Subscription struct {
@@ -14,7 +15,9 @@ type Subscription struct {
 	OwnedByUser          *User                     `json:"ownedByUser,omitempty" pg:"rel:has-one"`
 	StripeSubscriptionId string                    `json:"-" pg:"stripe_subscription_id,notnull"`
 	StripeCustomerId     string                    `json:"-" pg:"stripe_customer_id,notnull"`
-	PriceId              uint64                    `json:"priceId" pg:"price_id,notnull,on_delete:restrict"`
-	Price                *Price                    `json:"price,omitempty" pg:"rel:has-one"`
 	Status               stripe.SubscriptionStatus `json:"status" pg:"status,notnull"`
+	TrialStart           *time.Time                `json:"trialStart" pg:"trial_start"`
+	TrialEnd             *time.Time                `json:"trialEnd" pg:"trial_end"`
+
+	Items []SubscriptionItem `json:"items,omitempty" pg:"rel:has-many"`
 }

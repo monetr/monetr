@@ -1,5 +1,11 @@
 package swag
 
+type PlaidNewLinkTokenResponse struct {
+	// The link token that will be used for the end user to authenticate to their bank using plaid. These tokens do
+	// expire. They are also specific to a single environment. See: https://plaid.com/docs/api/tokens/#linktokencreate
+	LinkToken string `json:"linkToken" example:"link-environment-6da2c37f-6aa0...."`
+}
+
 type PlaidTokenCallbackResponse struct {
 	Success bool    `json:"success"`
 	// LinkId will always be included in a successful response. It can be used when webhooks are enabled to wait for the

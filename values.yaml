@@ -137,4 +137,3 @@ api:
     webhooksEnabled: false
     webhooksDomain: ""
     webhookSecret: ""
-    products: [ ]

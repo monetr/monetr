@@ -156,6 +156,7 @@ func RunServer() error {
 		plaidHelper,
 		stats,
 		stripeClient,
+		redisController.Pool(),
 	)...)
 
 	unixSocket := false

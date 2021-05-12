@@ -136,34 +136,3 @@ api:
     enabled: true
     webhooksEnabled: false # Still working on this for now.
     webhooksDomain: https://api.staging.monetr.dev
-    products:
-      - name: Manual Budgeting
-        description: Create and maintain transactions manually.
-        productCode: manual_budgeting
-        visible: false
-        stripeProductId: prod_JNQhZ0TGnssizX
-        features:
-          - ManualBudgeting
-        prices:
-          - priceCode: manual_monthly
-            stripePriceId: price_1Ikfq3I4uGGnwpgwrjBg3lFy
-            visible: false
-          - priceCode: manual_yearly
-            stripePriceId: price_1IpOIOI4uGGnwpgwEXEepvwR
-            visible: false
-      - name: Linked Budgeting
-        description: Transactions and balances are synced automatically from your bank account.
-        productCode: linked_budgeting
-        stripeProductId: prod_JNQg8WJ8FPKwPN
-        visible: true
-        features:
-          - ManualBudgeting
-          - OneLinkedBankAccount
-        prices:
-          - priceCode: linked_monthly
-            stripePriceId: price_1IkfpMI4uGGnwpgwzbNjTm77
-            visible: false
-          - priceCode: linked_yearly
-            stripePriceId: price_1IpOJ5I4uGGnwpgwNIPKRftP
-            visible: false
-

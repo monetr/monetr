@@ -56,7 +56,7 @@ func (c *Controller) getSpending(ctx *context.Context) {
 // @description Create an spending for the specified bank account.
 // @security ApiKeyAuth
 // @accept json
-// @product json
+// @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param Spending body models.Spending true "New spending"
 // @Router /bank_accounts/{bankAccountId}/spending [post]
@@ -170,7 +170,7 @@ type SpendingTransfer struct {
 // @description Transfer allocated funds to or from a spending object.
 // @security ApiKeyAuth
 // @accept json
-// @product json
+// @produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param Spending body SpendingTransfer true "Transfer"
 // @Router /bank_accounts/{bankAccountId}/spending/transfer [post]
@@ -312,7 +312,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 // @description Update an existing spending object. Some changes may cause the spending object to be recalculated.
 // @security ApiKeyAuth
 // @accept json
-// @product json
+// @produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param Spending body swag.UpdateSpendingRequest true "Updated spending"
 // @Router /bank_accounts/{bankAccountId}/spending [put]
@@ -428,7 +428,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 // @description Delete a spending object. This will set any transactions that have spent from this object back to spent from "Safe-To-Spend".
 // @security ApiKeyAuth
 // @accept json
-// @product json
+// @produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param spendingId path int true "Spending ID to be deleted"
 // @Router /bank_accounts/{bankAccountId}/spending/{spendingId} [delete]

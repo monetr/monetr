@@ -14,11 +14,12 @@ KUBECTL=kubectl
 SPLIT_YAML=kubernetes-split-yaml
 SSHFS=sshfs
 YQ=yq
+VAULT=vault
 
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=work pghero vault ngrok registry app api
+SUBDOMAINS=features work pghero vault ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -361,7 +362,7 @@ VAULT_JSON=$(LOCAL_DIR)/vault-keys.json
 vault-mini:
 	$(KUBECTL) apply -f $(PWD)/minikube/vault.yaml \
 		--namespace $(MINIKUBE_NAMESPACE)
-	@sleep 10
+	@sleep 15
 	make unseal-vault-mini
 	$(KUBECTL) rollout status deploy/vault \
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
@@ -377,6 +378,28 @@ unseal-vault-mini: $(VAULT_JSON)
 	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
 	kubectl exec deploy/vault -- vault operator unseal $(VAULT_UNSEAL_KEY)
 
+vault-certificate-authority:
+	make inner-vault-certificate-authority
+
+VAULT_ADDR=https://vault.$(LOCAL_DOMAIN)
+inner-vault-certificate-authority:
+	$(eval VAULT_TOKEN = $(shell cat $(VAULT_JSON) | $(JQ) -r ".root_token"))
+	$(VAULT) secrets enable pki || true
+	$(VAULT) secrets tune -max-lease-ttl=87600h pki
+	$(VAULT) write -field=certificate pki/root/generate/internal common_name="*" ttl="87600h" > $(LOCAL_DIR)/CA_cert.crt
+	$(VAULT) write pki/config/urls issuing_certificates="$(VAULT_ADDR)/v1/pki/ca" crl_distribution_points="$(VAULT_ADDR)/v1/pki/crl"
+	$(VAULT) secrets enable -path=pki_intermediate pki || true
+	$(VAULT) secrets tune -max-lease-ttl=43800h pki_intermediate
+	$(VAULT) write -format=json pki_intermediate/intermediate/generate/internal common_name="* Intermediate Authority" | $(JQ) -r ".data.csr" > $(LOCAL_DIR)/pki_intermediate.csr
+	$(VAULT) write -format=json pki/root/sign-intermediate csr=@$(LOCAL_DIR)/pki_intermediate.csr format=pem_bundle ttl="43800h" | $(JQ) -r ".data.certificate" > $(LOCAL_DIR)/intermediate.cert.pem
+	$(VAULT) write pki_intermediate/intermediate/set-signed certificate=@$(LOCAL_DIR)/intermediate.cert.pem
+	$(VAULT) write pki_intermediate/roles/pgcluster allowed_domains="postgres.default.svc.cluster.local" allow_subdomains=false allow_bare_domains=true max_ttl="8760h"
+
+clean-vault-mini:
+	rm -rf $(VAULT_JSON)
+	$(KUBECTL) delete -f $(PWD)/minikube/vault.yaml -n $(MINIKUBE_NAMESPACE)
+
+
 ###################### gocraft/work UI ##################################
 WORK_IMAGE_NAME=registry.$(LOCAL_DOMAIN)/work
 work-mini:
@@ -391,4 +414,16 @@ work-mini:
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "gocraft/work dashboard is now accessible at: https://work.$(LOCAL_DOMAIN)"
+	@echo "\033[0;31m#################################################################################\033[0m"
+
+
+###################### Unleash UI ##################################
+features-mini:
+	$(KUBECTL) exec deploy/postgres -- psql -U postgres -c "CREATE DATABASE unleash;" || true
+	$(KUBECTL) apply -f $(PWD)/minikube/unleash.yaml \
+		--namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/unleash \
+		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	@echo "\033[0;31m#################################################################################\033[0m"
+	@echo "unleash dashboard is now accessible at: https://features.$(LOCAL_DOMAIN)"
 	@echo "\033[0;31m#################################################################################\033[0m"

@@ -86,15 +86,13 @@ func (c *Controller) getFundingScheduleStatus(ctx *context.Context) {
 // @Summary Create Funding Schedule
 // @id create-funding-schedule
 // @tags Funding Schedules
-// @summary Create a funding schedule for the specified bank account.
 // @security ApiKeyAuth
 // @accept json
-// @product json
+// @produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param fundingSchedule body models.FundingSchedule true "New Funding Schedule"
 // @Router /bank_accounts/{bankAccountId}/funding_schedules [post]
 // @Success 200 {object} models.FundingSchedule
-// @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postFundingSchedules(ctx *context.Context) {

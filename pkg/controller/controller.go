@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	sentryiris "github.com/getsentry/sentry-go/iris"
+	"github.com/gomodule/redigo/redis"
 	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
@@ -40,6 +41,7 @@ type Controller struct {
 	stats          *metrics.Stats
 	stripeClient   *stripe_client.API
 	ps             pubsub.PublishSubscribe
+	cache          *redis.Pool
 }
 
 func NewController(
@@ -50,6 +52,7 @@ func NewController(
 	plaidClient plaid_helper.Client,
 	stats *metrics.Stats,
 	stripeClient *stripe_client.API,
+	cache *redis.Pool,
 ) *Controller {
 	var captcha recaptcha.ReCAPTCHA
 	var err error
@@ -74,6 +77,7 @@ func NewController(
 		stats:         stats,
 		stripeClient:  stripeClient,
 		ps:            pubsub.NewPostgresPubSub(log, db),
+		cache:         cache,
 	}
 }
 
@@ -152,7 +156,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 			ctx.Next()
 		})
-
 
 		// For the following endpoints we want to have a repository available to us.
 		p.PartyFunc("/", func(repoParty router.Party) {
