@@ -193,6 +193,8 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 		case "PENDING_EXPIRATION":
 		case "USER_PERMISSION_REVOKED":
 		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
+			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
+			return err
 		}
 	}
 
