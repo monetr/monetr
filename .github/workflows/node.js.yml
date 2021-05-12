@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - '!renovate/*'
-      - main
+      - '!main'
   pull_request:
     branches:
       - main
