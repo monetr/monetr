@@ -6,7 +6,7 @@ require (
 	github.com/MicahParks/keyfunc v0.4.0
 	github.com/alicebob/miniredis/v2 v2.14.3
 	github.com/brianvoe/gofakeit/v6 v6.4.1
-	github.com/form3tech-oss/jwt-go v3.2.2+incompatible
+	github.com/form3tech-oss/jwt-go v3.2.3+incompatible
 	github.com/getsentry/sentry-go v0.10.0
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.9.1
