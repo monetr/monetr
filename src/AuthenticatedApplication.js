@@ -30,6 +30,7 @@ import FirstTimeSetup from "views/FirstTimeSetup";
 import GoalsView from "views/GoalsView";
 import TransactionsView from "views/TransactionsView";
 import AccountView from "views/AccountView";
+import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
 
 export class AuthenticatedApplication extends Component {
   state = {
@@ -89,7 +90,7 @@ export class AuthenticatedApplication extends Component {
           <FirstTimeSetup/>
         </Route>
         <Route path="/plaid/oauth-return">
-          <Typography>Welcome Back!</Typography>
+          <OAuthRedirect />
         </Route>
         <Route path="/">
           <Redirect to="/setup"/>

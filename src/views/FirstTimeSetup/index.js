@@ -133,6 +133,13 @@ export class FirstTimeSetup extends Component {
     }));
   };
 
+  onEvent = (thing, stuff) => {
+    console.warn({
+      thing,
+      stuff
+    });
+  }
+
   renderPlaidLink = () => {
     const { loading, linkToken } = this.state;
     if (loading) {
@@ -145,6 +152,9 @@ export class FirstTimeSetup extends Component {
           token={ linkToken }
           onSuccess={ this.plaidLinkSuccess }
           disabled={ this.state.loading }
+          onEvent={ this.onEvent }
+          onExit={ this.onEvent }
+          onLoad={ this.onEvent }
         />
       )
     }

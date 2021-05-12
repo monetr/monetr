@@ -7,21 +7,20 @@ import Cookies from 'js-cookie'
 
 export default function bootstrapLogin(token = null, user = null) {
   return (dispatch, getState) => {
+    // eslint-disable-next-line no-undef
+    const conf = CONFIG;
     if (token) {
       // Trying to switch over to using cookies, but I don't want to break anything at the moment.
-      // eslint-disable-next-line no-undef
-      if (CONFIG.USE_LOCAL_STORAGE) {
+      if (conf.USE_LOCAL_STORAGE) {
         window.localStorage.setItem('M-Token', token);
       } else {
         Cookies.set('M-Token', token, {
-          // eslint-disable-next-line no-undef
-          domain: CONFIG.COOKIE_DOMAIN,
+          domain: conf.COOKIE_DOMAIN,
           secure: true,
         });
       }
     } else {
-      // eslint-disable-next-line no-undef
-      if (CONFIG.USE_LOCAL_STORAGE) {
+      if (conf.USE_LOCAL_STORAGE) {
         token = window.localStorage.getItem('M-Token');
       } else {
         token = Cookies.get('M-Token');
