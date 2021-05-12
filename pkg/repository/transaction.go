@@ -159,7 +159,7 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(linkId uint64, plai
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ?`, linkId).
-		Where(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
+		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve transactions by plaid Id")

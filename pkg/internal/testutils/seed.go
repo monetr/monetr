@@ -30,6 +30,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 	require.NotNil(t, db, "db must not be nil")
 
 	plaidData := &MockPlaidData{
+		PlaidLinks:   map[string]models.PlaidLink{},
 		BankAccounts: map[string]map[string]plaid.Account{},
 	}
 
@@ -129,6 +130,8 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 
 			_, err = txn.Model(&plaidLink).Insert(&plaidLink)
 			require.NoError(t, err, "failed to create plaid link")
+
+			plaidData.PlaidLinks[plaidLink.ItemId] = plaidLink
 
 			withPlaidLink := models.Link{
 				AccountId:       account.AccountId,
