@@ -180,6 +180,8 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
 			return err
 		case "HISTORICAL_UPDATE":
+			_, err = c.job.TriggerPullHistoricalTransactions(link.AccountId, link.LinkId)
+			return err
 		case "DEFAULT_UPDATE":
 			_, err = c.job.TriggerPullLatestTransactions(link.AccountId, link.LinkId, hook.NewTransactions)
 			return err

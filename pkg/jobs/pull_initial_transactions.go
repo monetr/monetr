@@ -36,6 +36,18 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 	log = log.WithField("linkId", linkId)
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
+		account, err := repo.GetAccount()
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve account for job")
+			return err
+		}
+
+		timezone, err := account.GetTimezone()
+		if err != nil {
+			log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
+			timezone = time.UTC
+		}
+
 		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("cannot pull initial transactions for link provided")
@@ -82,10 +94,10 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 
 		transactions := make([]models.Transaction, len(plaidTransactions))
 		for i, plaidTransaction := range plaidTransactions {
-			date, _ := time.Parse("2006-01-02", plaidTransaction.Date)
+			date, _ := time.ParseInLocation("2006-01-02", plaidTransaction.Date, timezone)
 			var authorizedDate *time.Time
 			if plaidTransaction.AuthorizedDate != "" {
-				authDate, _ := time.Parse("2006-01-02", plaidTransaction.AuthorizedDate)
+				authDate, _ := time.ParseInLocation("2006-01-02", plaidTransaction.AuthorizedDate, timezone)
 				authorizedDate = &authDate
 			}
 			transactions[i] = models.Transaction{

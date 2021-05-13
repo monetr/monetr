@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/sirupsen/logrus"
+	"strconv"
 	"time"
 
 	"github.com/gocraft/work"
@@ -78,7 +79,7 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
-	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Latest Transactions"))
+	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Account Balances"))
 	defer span.Finish()
 
 	start := time.Now()
@@ -98,6 +99,8 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
+	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
+	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(span.Context(), linkId)

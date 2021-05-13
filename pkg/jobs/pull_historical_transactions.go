@@ -13,89 +13,41 @@ import (
 )
 
 const (
-	EnqueuePullLatestTransactions = "EnqueuePullLatestTransactions"
-	PullLatestTransactions        = "PullLatestTransactions"
+	PullHistoricalTransactions = "PullHistoricalTransactions"
 )
 
-func (j *jobManagerBase) TriggerPullLatestTransactions(accountId, linkId uint64, numberOfTransactions int64) (jobId string, err error) {
+func (j *jobManagerBase) TriggerPullHistoricalTransactions(accountId, linkId uint64) (jobId string, err error) {
 	log := j.log.WithFields(logrus.Fields{
 		"accountId": accountId,
 		"linkId":    linkId,
 	})
 
-	log.Infof("queueing pull latest transactions for account")
-	job, err := j.queue.EnqueueUnique(PullLatestTransactions, map[string]interface{}{
-		"accountId":            accountId,
-		"linkId":               linkId,
-		"numberOfTransactions": numberOfTransactions,
-	})
-	if err != nil {
-		log.WithError(err).Error("failed to enqueue pulling latest transactions")
-		return "", errors.Wrap(err, "failed to enqueue pulling latest transactions")
-	}
-	log = log.WithField("pullLatestTransactionsJobId", job.ID)
-
-	log.Infof("queueing account balances update for account")
-	job, err = j.queue.EnqueueUnique(PullAccountBalances, map[string]interface{}{
+	log.Infof("queueing pull historical transactions for account")
+	job, err := j.queue.EnqueueUnique(PullHistoricalTransactions, map[string]interface{}{
 		"accountId": accountId,
 		"linkId":    linkId,
 	})
 	if err != nil {
-		log.WithError(err).Error("failed to enqueue pulling account balances")
-		return "", errors.Wrap(err, "failed to enqueue pulling account balances")
+		log.WithError(err).Error("failed to enqueue pulling historical transactions")
+		return "", errors.Wrap(err, "failed to enqueue pulling historical transactions")
 	}
 
 	return job.ID, nil
 }
 
-func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
-	log := j.getLogForJob(job)
-
-	accounts, err := j.getPlaidLinksByAccount()
-	if err != nil {
-		log.WithError(err).Errorf("failed to retrieve bank accounts that need to by synced")
-		return err
-	}
-
-	log.Infof("enqueing %d account(s) to pull latest transactions", len(accounts))
-
-	for _, account := range accounts {
-		for _, linkId := range account.LinkIDs {
-			accountLog := log.WithFields(logrus.Fields{
-				"accountId": account.AccountID,
-				"linkId":    linkId,
-			})
-			accountLog.Trace("enqueueing for latest transactions update")
-			_, err := j.queue.EnqueueUnique(PullLatestTransactions, map[string]interface{}{
-				"accountId": account.AccountID,
-				"linkId":    linkId,
-			})
-			if err != nil {
-				accountLog.WithError(err).Error("could not enqueue account, data will not be synced")
-				continue
-			}
-
-			accountLog.Trace("successfully enqueued account for latest transactions update")
-		}
-	}
-
-	return nil
-}
-
-func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
-	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Latest Transactions"))
+func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
+	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Historical Transactions"))
 	defer span.Finish()
 
 	start := time.Now()
 	log := j.getLogForJob(job)
-	log.Infof("pulling account balances")
+	log.Infof("pulling historical transactions")
 
 	accountId, err := j.getAccountId(job)
 	if err != nil {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
-
 
 	defer func() {
 		if j.stats != nil {
@@ -106,6 +58,8 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 	linkId := uint64(job.ArgInt64("linkId"))
 	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
 	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
+
+	twoYearsAgo := time.Now().Add(-2 * 365 * 24 * time.Hour).UTC()
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		account, err := repo.GetAccount()
@@ -122,7 +76,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 
 		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
-			log.WithError(err).Error("failed to retrieve link details to pull transactions")
+			log.WithError(err).Error("failed to retrieve link details to pull historical transactions")
 			return err
 		}
 
@@ -151,7 +105,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		transactions, err := j.plaidClient.GetAllTransactions(
 			span.Context(),
 			link.PlaidLink.AccessToken,
-			time.Now().Add(-7 * 24 * time.Hour),
+			twoYearsAgo,
 			time.Now(),
 			itemBankAccountIds,
 		)
@@ -160,9 +114,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			return errors.Wrap(err, "failed to retrieve transactions from plaid")
 		}
 
-		// TODO Are plaid transaction Ids unique per link, or per bank account?
-		//  If they are not then this could cause an issue where a user's checking transaction has the same Id as a
-		//  savings account transaction but under the same link. Causing the transaction to get updated improperly.
 		plaidTransactionIds := make([]string, len(transactions))
 		for i, transaction := range transactions {
 			plaidTransactionIds[i] = transaction.ID
@@ -221,9 +172,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 				continue
 			}
 
-			// TODO If a transaction amount can change, we need to handle spending allocation.
-			//  If a transaction is spent from a spending object, we need to make sure to update that spent amount to
-			//  properly reflect the new transaction amount if it is less than, if it is greater than then do nothing?
 			existingTransaction.Amount = amount
 			existingTransaction.IsPending = plaidTransaction.Pending
 			existingTransaction.AuthorizedDate = authorizedDate
