@@ -145,7 +145,6 @@ type Stripe struct {
 	WebhooksDomain  string
 	WebhookSecret   string
 	Prices          []*string
-	Products        []Product
 }
 
 func LoadConfiguration(configFilePath *string) Configuration {

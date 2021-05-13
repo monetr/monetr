@@ -121,6 +121,8 @@ func RunServer() error {
 		log.Info("automatic migrations are disabled")
 	}
 
+
+
 	redisController, err := cache.NewRedisCache(log, configuration.Redis)
 	if err != nil {
 		log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
