@@ -8,7 +8,7 @@ type LoginRequest struct {
 	// Your login password.
 	Password string `json:"password" example:"tHEBeSTPaSsWOrdYoUCaNCOmeUpWiTH"`
 	// ReCAPTCHA value from validation. Required if `verifyLogin` is enabled on the server.
-	Captcha *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..."`
+	Captcha *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
 }
 
 type LoginResponse struct {
@@ -27,18 +27,18 @@ type RegisterRequest struct {
 	FirstName string `json:"firstName" example:"Doug"`
 	// Your last name or "family" name. Whether or not this is required depends on the plaid configuration, when we are
 	// linking bank accounts to users we do need the user's full legal name.
-	LastName *string `json:"lastName" example:"Dimmadome"`
+	LastName *string `json:"lastName" example:"Dimmadome" extensions:"x-nullable"`
 	// Your timezone in the "TZ Database Name" format. This is used for determining when midnight is for funding
 	// schedules to be processed for your account.
 	Timezone string `json:"timezone" example:"America/Chicago"`
 	// ReCAPTCHA value from validation. Required if `verifyRegistration` is enabled on the server.
-	Captcha  *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..."`
+	Captcha  *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
 	// A beta code given to you to test or demo the application. This is primarily used in an environment where it would
 	// cost money to link a bank account with a user. But testing against real bank accounts is necessary. So to prevent
 	// anyone just creating accounts and linking their bank account for free, we use beta codes to verify that they are
 	// someone who is supposed to be there. Leave this null or don't include at all if it is not required by the API
 	// configuration.
-	BetaCode *string `json:"betaCode" example:"F2917D98-024633A8"`
+	BetaCode *string `json:"betaCode" example:"F2917D98-024633A8" extensions:"x-nullable"`
 }
 
 type RegisterResponse struct {

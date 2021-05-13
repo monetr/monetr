@@ -16,7 +16,7 @@ type HealthResponse struct {
 
 	// Release is only present when a deployment was run for a specific tag. This is only found in acceptance and
 	// production.
-	Release *string `json:"release"`
+	Release *string `json:"release" extensions:"x-nullable"`
 
 	// The time the current REST API executable was built. Typically when the container build was initiated.
 	BuildTime time.Time `json:"buildTime"`
