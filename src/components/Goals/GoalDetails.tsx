@@ -13,10 +13,12 @@ import { getSelectedGoal } from 'shared/spending/selectors/getSelectedGoal';
 import EditGoalView from "components/Goals/EditGoalView";
 import deleteSpending from "shared/spending/actions/deleteSpending";
 import fetchBalances from "shared/balances/actions/fetchBalances";
+import updateSpending from "shared/spending/actions/updateSpending";
 
 interface WithConnectionPropTypes {
   selectGoal: { (goalId: number | null): void }
   deleteSpending: (spending: Spending) => Promise<void>;
+  updateSpending: (spending: Spending) => Promise<void>;
   fetchBalances: () => Promise<void>;
   goal: Spending | null;
   fundingSchedule: FundingSchedule | null;
@@ -80,6 +82,20 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
     }
 
     return Promise.resolve();
+  };
+
+  togglePauseGoal = () => {
+    const { goal } = this.props;
+    if (!goal) {
+      return Promise.resolve();
+    }
+
+    const updatedGoal = new Spending({
+      ...goal,
+      isPaused: !goal.isPaused
+    });
+
+    return this.props.updateSpending(updatedGoal);
   };
 
   renderInProgress = () => {
@@ -183,18 +199,31 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
               </Typography>
             </div>
             <div className="col-span-1 row-span-1 flex flex-col justify-center">
-              <Typography
-                className="flex-1 flex justify-center"
-                variant="caption"
-              >
-                <b>{ goal.getNextContributionAmountString() }</b>
-              </Typography>
-              <Typography
-                className="relative flex-1 flex top-1 justify-center"
-                variant="caption"
-              >
-                on { fundingSchedule.name }
-              </Typography>
+              { !goal.isPaused &&
+              <Fragment>
+                <Typography
+                  className="flex-1 flex justify-center"
+                  variant="caption"
+                >
+                  <b>{ goal.getNextContributionAmountString() }</b>
+                </Typography>
+                <Typography
+                  className="relative flex-1 flex top-1 justify-center"
+                  variant="caption"
+                >
+                  on { fundingSchedule.name }
+                </Typography>
+              </Fragment>
+              }
+              { goal.isPaused &&
+              <Fragment>
+                <Typography
+                  className="flex-1 flex justify-center"
+                  variant="body2"
+                >
+                  Paused
+                </Typography>
+              </Fragment> }
             </div>
             <div className="col-span-1 row-span-1 flex flex-col justify-end">
               <Typography
@@ -216,10 +245,10 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
 
         <div className="w-full pt-5 pb-5">
           <Button
-            disabled
+            onClick={ this.togglePauseGoal }
             color="secondary"
           >
-            Pause Goal (WIP)
+            { goal.isPaused ? 'Unpause Goal ' : 'Pause Goal' }
           </Button>
         </div>
         <Divider/>
@@ -408,5 +437,6 @@ export default connect(
     selectGoal,
     deleteSpending,
     fetchBalances,
+    updateSpending,
   }
 )(GoalDetails);

@@ -2,7 +2,7 @@ import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } fr
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
 import moment from 'moment';
-import React, { Component } from 'react';
+import React, { Fragment, Component } from 'react';
 import { connect } from 'react-redux';
 import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
 import selectGoal from 'shared/spending/actions/selectGoal';
@@ -69,7 +69,12 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
           <Typography
             variant="body2"
           >
-            <b>{ goal.getNextContributionAmountString() }</b> on { fundingSchedule.name }
+            { goal.isPaused && 'Paused' }
+            { !goal.isPaused &&
+            <Fragment>
+              <b>{ goal.getNextContributionAmountString() }</b> on { fundingSchedule.name }
+            </Fragment>
+            }
           </Typography>
         </div>
         <div className="col-span-1 flex justify-end">
