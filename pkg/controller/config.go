@@ -11,7 +11,7 @@ import (
 // @description Provides the configuration that should be used by the frontend application or UI.
 // @Produce json
 // @Router /config [get]
-// @Success 200
+// @Success 200 {object} swag.ConfigResponse
 func (c *Controller) configEndpoint(ctx *context.Context) {
 	var config struct {
 		RequireLegalName    bool   `json:"requireLegalName"`

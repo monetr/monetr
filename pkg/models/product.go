@@ -10,6 +10,7 @@ type Product struct {
 	Description     string            `json:"description" pg:"description"`
 	StripeProductId string            `json:"-" pg:"stripe_product_id,notnull"`
 	Features        []feature.Feature `json:"features" pg:"features,notnull,type:'text[]'"`
+	FreeTrialDays   *uint32           `json:"freeTrialDays" pg:"free_trial_days"`
 
 	Prices []Price `json:"prices" pg:"rel:has-many"`
 }

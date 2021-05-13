@@ -9,7 +9,7 @@ import (
 )
 
 func (c *Controller) handleBilling(p iris.Party) {
-	p.Get("/prices", c.getBillingPrices)
+	p.Get("/plans", c.getBillingPlans)
 	p.Post("/create_checkout", c.handlePostCreateCheckout)
 }
 
@@ -21,13 +21,8 @@ func stringP(input string) *string {
 	return &input
 }
 
-func (c *Controller) getBillingPrices(ctx iris.Context) {
-	c.stripeClient.Prices.List(&stripe.PriceListParams{
-		Active:     boolP(true),
-		LookupKeys: nil,
-		Product:    nil,
-		Type:       stringP("recurring"),
-	})
+func (c *Controller) getBillingPlans(ctx iris.Context) {
+
 }
 
 // Create Checkout Session
