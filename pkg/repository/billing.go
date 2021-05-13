@@ -3,10 +3,45 @@ package repository
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
 )
+
+type BillingRepository interface {
+	GetProductsByStripeProductId(ctx context.Context, stripeProductIds []string) ([]models.Product, error)
+}
+
+var (
+	_ BillingRepository = &billingRepositoryBase{}
+)
+
+type billingRepositoryBase struct {
+	db pg.DBI
+}
+
+func NewBillingRepository(db pg.DBI) BillingRepository {
+	return &billingRepositoryBase{
+		db: db,
+	}
+}
+
+func (r *billingRepositoryBase) GetProductsByStripeProductId(ctx context.Context, stripeProductIds []string) ([]models.Product, error) {
+	span := sentry.StartSpan(ctx, "GetProductsByStripeProductId")
+	defer span.Finish()
+
+	result := make([]models.Product, 0)
+	err := r.db.ModelContext(span.Context(), &result).
+		Relation("Prices").
+		WhereIn(`"product"."stripe_product_id" IN (?)`, stripeProductIds).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve products by stripe product Id")
+	}
+
+	return result, nil
+}
 
 func (r *repositoryBase) GetProducts(ctx context.Context) ([]models.Product, error) {
 	span := sentry.StartSpan(ctx, "GetProducts")

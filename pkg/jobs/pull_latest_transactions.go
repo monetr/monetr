@@ -96,7 +96,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		return err
 	}
 
-
 	defer func() {
 		if j.stats != nil {
 			j.stats.JobFinished(PullAccountBalances, accountId, start)
@@ -151,7 +150,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		transactions, err := j.plaidClient.GetAllTransactions(
 			span.Context(),
 			link.PlaidLink.AccessToken,
-			time.Now().Add(-7 * 24 * time.Hour),
+			time.Now().Add(-7*24*time.Hour),
 			time.Now(),
 			itemBankAccountIds,
 		)
@@ -221,9 +220,25 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 				continue
 			}
 
-			// TODO If a transaction amount can change, we need to handle spending allocation.
-			//  If a transaction is spent from a spending object, we need to make sure to update that spent amount to
-			//  properly reflect the new transaction amount if it is less than, if it is greater than then do nothing?
+			var shouldUpdate bool
+			if existingTransaction.Amount != amount {
+				shouldUpdate = true
+			}
+
+			if existingTransaction.IsPending != plaidTransaction.Pending {
+				shouldUpdate = true
+			}
+
+			if existingTransaction.AuthorizedDate == nil && authorizedDate != nil {
+				shouldUpdate = true
+			} else if existingTransaction.AuthorizedDate != nil && authorizedDate != nil && !existingTransaction.AuthorizedDate.Equal(*authorizedDate) {
+				shouldUpdate = true
+			}
+
+			if existingTransaction.PendingPlaidTransactionId != pendingPlaidTransactionId {
+				shouldUpdate = true
+			}
+
 			existingTransaction.Amount = amount
 			existingTransaction.IsPending = plaidTransaction.Pending
 			existingTransaction.AuthorizedDate = authorizedDate
@@ -232,14 +247,18 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			// Update old records if we see them to use the merchant name by default.
 			if existingTransaction.Name == plaidTransaction.Name {
 				existingTransaction.Name = transactionName
+				shouldUpdate = true
 			}
 
 			// Fix timezone of records.
 			if existingTransaction.Date != date {
 				existingTransaction.Date = date
+				shouldUpdate = true
 			}
 
-			transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
+			if shouldUpdate {
+				transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
+			}
 		}
 
 		if len(transactionsToUpdate) > 0 {

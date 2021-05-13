@@ -100,6 +100,12 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 				authDate, _ := time.ParseInLocation("2006-01-02", plaidTransaction.AuthorizedDate, timezone)
 				authorizedDate = &authDate
 			}
+
+			transactionName := plaidTransaction.Name
+			if plaidTransaction.MerchantName != "" {
+				transactionName = plaidTransaction.MerchantName
+			}
+
 			transactions[i] = models.Transaction{
 				AccountId:            repo.AccountId(),
 				BankAccountId:        bankAccountIdsByPlaid[plaidTransaction.AccountID],
@@ -110,7 +116,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 				OriginalCategories:   plaidTransaction.Category,
 				Date:                 date,
 				AuthorizedDate:       authorizedDate,
-				Name:                 plaidTransaction.Name,
+				Name:                 transactionName,
 				OriginalName:         plaidTransaction.Name,
 				MerchantName:         plaidTransaction.MerchantName,
 				OriginalMerchantName: plaidTransaction.MerchantName,

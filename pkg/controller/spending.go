@@ -28,7 +28,7 @@ func (c *Controller) handleSpending(p iris.Party) {
 // @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/spending [get]
-// @Success 200 {array} models.Spending
+// @Success 200 {array} swag.SpendingResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getSpending(ctx *context.Context) {
@@ -58,9 +58,9 @@ func (c *Controller) getSpending(ctx *context.Context) {
 // @accept json
 // @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
-// @Param Spending body models.Spending true "New spending"
+// @Param Spending body swag.NewSpendingRequest true "New spending"
 // @Router /bank_accounts/{bankAccountId}/spending [post]
-// @Success 200 {object} models.Spending
+// @Success 200 {object} swag.SpendingResponse
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
@@ -174,7 +174,7 @@ type SpendingTransfer struct {
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param Spending body SpendingTransfer true "Transfer"
 // @Router /bank_accounts/{bankAccountId}/spending/transfer [post]
-// @Success 200 {array} models.Spending
+// @Success 200 {array} swag.TransferResponse
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
@@ -316,7 +316,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param Spending body swag.UpdateSpendingRequest true "Updated spending"
 // @Router /bank_accounts/{bankAccountId}/spending [put]
-// @Success 200 {object} models.Spending
+// @Success 200 {object} swag.SpendingResponse
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
@@ -388,6 +388,11 @@ func (c *Controller) putSpending(ctx *context.Context) {
 		recalculateSpending = updatedSpending.RecurrenceRule.String() == existingSpending.RecurrenceRule.String()
 	}
 
+	// If the paused status of a spending object changes, recalculate the contributions.
+	if updatedSpending.IsPaused != existingSpending.IsPaused {
+		recalculateSpending = true
+	}
+
 	if recalculateSpending {
 		account, err := repo.GetAccount()
 		if err != nil {
@@ -425,7 +430,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 // @id delete-spending
 // @tags Spending
 // @summary Delete Spending
-// @description Delete a spending object. This will set any transactions that have spent from this object back to spent from "Safe-To-Spend".
+// @description Delete a spending object. This will set any transactions that have spent from this object back to spent from "Safe-To-Spend". If the spending object is successfully deleted, this endpoint simply returns 200 with an empty body.
 // @security ApiKeyAuth
 // @accept json
 // @produce json

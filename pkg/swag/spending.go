@@ -5,9 +5,7 @@ import (
 	"time"
 )
 
-type UpdateSpendingRequest struct {
-	// The spending Id of the goal or expense that you are updating.
-	SpendingId uint64 `json:"spendingId" example:"4364"`
+type AlwaysSpending struct {
 	// The desired funding schedule of the spending. Changing this will trigger a recalculation of the spending object.
 	FundingScheduleId uint64 `json:"fundingScheduleId" example:"8539"`
 	// Human friendly name of the spending object. Something like "Amazon Prime". But can be anything.
@@ -37,4 +35,56 @@ type UpdateSpendingRequest struct {
 	// provided in RFC3339 format with the timezone of the client included. The timezone is important as its used to
 	// calculate the next time this expense recurs.
 	NextRecurrence time.Time `json:"nextRecurrence" example:"2021-05-01T00:00:00-05:00"`
+	// Indicate whether or not this spending object should receive contributions on it's funding schedule occurrence. If
+	// the spending object is paused, the next time its funding schedule occurs, no additional amount will be allocated
+	// to this spending object.
+	IsPaused bool `json:"isPaused"`
+}
+
+type UpdateSpendingRequest struct {
+	AlwaysSpending
+	// The spending Id of the goal or expense that you are updating.
+	SpendingId uint64 `json:"spendingId" example:"4364"`
+}
+
+type NewSpendingRequest struct {
+	AlwaysSpending
+	// Indicates which bank account the spending object is associated with. All spending objects must be associated with
+	// one bank account. This value cannot be changed. It can only be set when the spending object is created.
+	BankAccountId uint64 `json:"bankAccountId" example:"8437"`
+	// The type of spending object this is. This cannot be changed. It can only be set when the spending object is created.
+	// * 0 - Expense, the object will occur on a regular basis based on its recurrence rule. Spending from an expense will always change its next allocation amount.
+	// * 1 - Goal, the object will allocate until it reaches it's target value and then stop. It can be spent from while it is still incomplete without changing the allocation amount.
+	SpendingType models.SpendingType `json:"spendingType" example:"0" enums:"0,1"`
+}
+
+type SpendingResponse struct {
+	NewSpendingRequest
+	// The amount that has been allocated to the spending object. This amount is deducted from the available balance of
+	// the bank account the spending object is associated with. It can be modified by spending a transaction from a
+	// spending object. Or by transferring/allocating funds to a spending object. It cannot be modified directly.
+	CurrentAmount int64 `json:"currentAmount" example:"1395"`
+	// Used amount is only valid for goals at this time. It indicates how much has been spent from the spending object,
+	// and is used to keep track of the goal's progress to its target without affecting the accuracy of the
+	// `currentAmount` field. A goal is complete when the `currentAmount` + `usedAmount` = `targetAmount`.
+	UsedAmount int64 `json:"usedAmount" example:"1043"`
+	// The last time this spending object reset. A spending object is reset each time its `nextRecurrence` date elapses,
+	// the `nextRecurrence` date is then moved to this field. This field is null if a spending object has never elapsed
+	// before. Or if the spending object is a goal. This field is maintained automatically and cannot be modified.
+	LastRecurrence *time.Time `json:"lastRecurrence" example:"2021-04-15T00:00:00-05:00"`
+	// If a spending object cannot reach its `targetAmount` by the date that it is due on its funding schedule alone,
+	// then the spending object is marked as "behind". This means that without manually transferring funds to the
+	// spending object it will not have enough funds to fulfill its target by the due date. This value is calculated
+	// automatically and cannot be changed.
+	IsBehind bool `json:"isBehind" example:"false"`
+	// When the spending object was initially created. This value cannot be changed.
+	DateCreated time.Time `json:"dateCreated" example:"2021-04-04T12:43:23-05:00"`
+}
+
+type TransferResponse struct {
+	// The balance of the bank account after the transferred allocations have been recalculated.
+	Balance BalanceResponse `json:"balance"`
+	// An array of spending objects that were updated during the transfer. By persisting these to the client's memory
+	// the state of the spending objects is properly maintained.
+	Spending []SpendingResponse `json:"spending"`
 }

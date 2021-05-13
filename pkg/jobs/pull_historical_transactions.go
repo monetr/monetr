@@ -172,6 +172,25 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 				continue
 			}
 
+			var shouldUpdate bool
+			if existingTransaction.Amount != amount {
+				shouldUpdate = true
+			}
+
+			if existingTransaction.IsPending != plaidTransaction.Pending {
+				shouldUpdate = true
+			}
+
+			if existingTransaction.AuthorizedDate == nil && authorizedDate != nil {
+				shouldUpdate = true
+			} else if existingTransaction.AuthorizedDate != nil && authorizedDate != nil && !existingTransaction.AuthorizedDate.Equal(*authorizedDate) {
+				shouldUpdate = true
+			}
+
+			if existingTransaction.PendingPlaidTransactionId != pendingPlaidTransactionId {
+				shouldUpdate = true
+			}
+
 			existingTransaction.Amount = amount
 			existingTransaction.IsPending = plaidTransaction.Pending
 			existingTransaction.AuthorizedDate = authorizedDate
@@ -180,14 +199,18 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			// Update old records if we see them to use the merchant name by default.
 			if existingTransaction.Name == plaidTransaction.Name {
 				existingTransaction.Name = transactionName
+				shouldUpdate = true
 			}
 
 			// Fix timezone of records.
 			if existingTransaction.Date != date {
 				existingTransaction.Date = date
+				shouldUpdate = true
 			}
 
-			transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
+			if shouldUpdate {
+				transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
+			}
 		}
 
 		if len(transactionsToUpdate) > 0 {
