@@ -26,8 +26,21 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         loading: false,
       };
     case FETCH_BANK_ACCOUNTS_SUCCESS:
-      // If no bank account is currently selected, and there are bank accounts in our response. Select the first one.
-      const selectedBankAccountId = state.selectedBankAccountId ?? action.payload.first(null)?.bankAccountId;
+      // If there is a bank account selected in redux, use that bank account.
+      let selectedBankAccountId = state.selectedBankAccountId
+        // If there is not, check and see if there is one in local storage that is valid.
+        || +window.localStorage.getItem('selectedBankAccountId');
+
+      const allBankAccounts = state.items.merge(action.payload)
+
+      // If there is a bankAccountId selected, but its not in our list of bank accounts -> then default to the first
+      // bank account we have.
+      if (selectedBankAccountId && !allBankAccounts.has(selectedBankAccountId)) {
+        selectedBankAccountId = allBankAccounts.first(null)?.bankAccountId;
+        // Remove the local storage item since it's not considered accurate.
+        window.localStorage.removeItem('selectedBankAccountId');
+      }
+
       return {
         ...state,
         loaded: true,
