@@ -26,8 +26,8 @@ func NewLoggerWithLevel(levelString string) *logrus.Entry {
 	logger.Formatter = &logrus.TextFormatter{
 		ForceColors:               false,
 		DisableColors:             false,
-		ForceQuote:                false,
-		DisableQuote:              true,
+		ForceQuote:                true,
+		DisableQuote:              false,
 		EnvironmentOverrideColors: false,
 		DisableTimestamp:          true,
 		FullTimestamp:             false,

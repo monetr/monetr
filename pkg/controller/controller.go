@@ -111,6 +111,16 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		})
 	}
 
+	app.UseGlobal(func(ctx iris.Context) {
+		log := c.log.WithFields(logrus.Fields{
+			"requestId": ctx.GetHeader("X-Request-Id"),
+		})
+
+		log.Debug(ctx.RouteName())
+
+		ctx.Next()
+	})
+
 	app.Get("/health", c.getHealth)
 
 	app.PartyFunc(APIPath, func(p router.Party) {

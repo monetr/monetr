@@ -74,7 +74,7 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 		token = ctx.GetHeader(TokenName)
 	} else {
 		// I'm adding this to test stuff in staging. It will be removed later.
-		c.log.Debug("found authentication on cookie")
+		c.log.Trace("found authentication on cookie")
 	}
 
 	if token == "" {
