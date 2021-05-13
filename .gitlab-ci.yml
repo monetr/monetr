@@ -32,6 +32,26 @@ JS Dependencies:
       - ./node_modules
     policy: push
 
+Build:
+  except:
+    refs:
+      - main
+      - tags
+  needs:
+    - "JS Dependencies"
+  stage: Build Javascript
+  image: containers.monetr.dev/node:15.14.0-buster
+  tags:
+    - k8s:shared
+  script:
+    - make build
+  cache:
+    key: ${CI_COMMIT_SHA}
+    paths:
+      - ./build
+      - ./node_modules
+    policy: pull-push
+
 Build - Staging:
   only:
     refs:
