@@ -29,11 +29,11 @@ if (module.hot) {
 
 ReactDOM.render(
   <React.StrictMode>
-    <Provider store={ store }>
-      <Sentry.ErrorBoundary fallback={"A fatal error has occurred"}>
+    <Sentry.ErrorBoundary fallback={"A fatal error has occurred"}>
+      <Provider store={ store }>
         <Root/>
-      </Sentry.ErrorBoundary>
-    </Provider>
+      </Provider>
+    </Sentry.ErrorBoundary>
   </React.StrictMode>,
   document.getElementById('root')
 );
