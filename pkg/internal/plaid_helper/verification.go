@@ -39,7 +39,7 @@ type memoryWebhookVerification struct {
 }
 
 func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyId string) (*keyfunc.JWKS, error) {
-	span := sentry.StartSpan(ctx, "GetVerificationKey")
+	span := sentry.StartSpan(ctx, "Cache - GetVerificationKey")
 	defer span.Finish()
 
 	log := m.log.WithField("keyId", keyId).WithContext(ctx)

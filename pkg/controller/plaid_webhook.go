@@ -1,18 +1,15 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/kataras/iris/v12"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/MicahParks/keyfunc"
 	"github.com/kataras/iris/v12/context"
 )
 
@@ -102,32 +99,12 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 		log := c.log.WithField("kid", kid)
 		log.Trace("exchanging key Id for public key")
 
-		verificationResponse, err := c.plaid.GetWebhookVerificationKey(c.getContext(ctx), kid)
+		keyFunction, err := c.plaidWebhookVerification.GetVerificationKey(c.getContext(ctx), kid)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to retrieve public verification key")
+			return nil, errors.Wrap(err, "failed to get verification key for webhook")
 		}
 
-		var keys = struct {
-			Keys []plaid.WebhookVerificationKey `json:"keys"`
-		}{
-			Keys: []plaid.WebhookVerificationKey{
-				verificationResponse.Key,
-			},
-		}
-
-		encodedKeys, err := json.Marshal(keys)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to convert plaid verification key to json")
-		}
-
-		var jwksJSON json.RawMessage = encodedKeys
-
-		jwkKeyFunc, err := keyfunc.New(jwksJSON)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to create key function")
-		}
-
-		return jwkKeyFunc.KeyFuncF3T(token)
+		return keyFunction.KeyFuncF3T(token)
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")

@@ -30,18 +30,19 @@ const (
 )
 
 type Controller struct {
-	db             *pg.DB
-	configuration  config.Configuration
-	captcha        *recaptcha.ReCAPTCHA
-	plaid          plaid_helper.Client
-	smtp           *smtp.Client
-	mailVerifyCode *gotp.HOTP
-	log            *logrus.Entry
-	job            jobs.JobManager
-	stats          *metrics.Stats
-	stripeClient   *stripe_client.API
-	ps             pubsub.PublishSubscribe
-	cache          *redis.Pool
+	db                       *pg.DB
+	configuration            config.Configuration
+	captcha                  *recaptcha.ReCAPTCHA
+	plaid                    plaid_helper.Client
+	plaidWebhookVerification plaid_helper.WebhookVerification
+	smtp                     *smtp.Client
+	mailVerifyCode           *gotp.HOTP
+	log                      *logrus.Entry
+	job                      jobs.JobManager
+	stats                    *metrics.Stats
+	stripeClient             *stripe_client.API
+	ps                       pubsub.PublishSubscribe
+	cache                    *redis.Pool
 }
 
 func NewController(
@@ -68,16 +69,17 @@ func NewController(
 	}
 
 	return &Controller{
-		captcha:       &captcha,
-		configuration: configuration,
-		db:            db,
-		plaid:         plaidClient,
-		log:           log,
-		job:           job,
-		stats:         stats,
-		stripeClient:  stripeClient,
-		ps:            pubsub.NewPostgresPubSub(log, db),
-		cache:         cache,
+		captcha:                  &captcha,
+		configuration:            configuration,
+		db:                       db,
+		plaid:                    plaidClient,
+		plaidWebhookVerification: plaid_helper.NewMemoryWebhookVerificationCache(log, plaidClient),
+		log:                      log,
+		job:                      job,
+		stats:                    stats,
+		stripeClient:             stripeClient,
+		ps:                       pubsub.NewPostgresPubSub(log, db),
+		cache:                    cache,
 	}
 }
 
