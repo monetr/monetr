@@ -12,8 +12,6 @@ var (
 		&FundingSchedule{},
 		&Spending{},
 		&Transaction{},
-		&Product{},
-		&Price{},
 		&Subscription{},
 	}
 
@@ -29,7 +27,5 @@ var (
 	_ = Spending{}.tableName
 	_ = Transaction{}.tableName
 	_ = User{}.tableName
- 	_ = Price{}.tableName
- 	_ = Product{}.tableName
- 	_ = Subscription{}.tableName
+	_ = Subscription{}.tableName
 )

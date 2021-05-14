@@ -10,7 +10,6 @@ import (
 )
 
 type BillingRepository interface {
-	GetProductsByStripeProductId(ctx context.Context, stripeProductIds []string) ([]models.Product, error)
 }
 
 var (
@@ -27,37 +26,6 @@ func NewBillingRepository(db pg.DBI) BillingRepository {
 	}
 }
 
-func (r *billingRepositoryBase) GetProductsByStripeProductId(ctx context.Context, stripeProductIds []string) ([]models.Product, error) {
-	span := sentry.StartSpan(ctx, "GetProductsByStripeProductId")
-	defer span.Finish()
-
-	result := make([]models.Product, 0)
-	err := r.db.ModelContext(span.Context(), &result).
-		Relation("Prices").
-		WhereIn(`"product"."stripe_product_id" IN (?)`, stripeProductIds).
-		Select(&result)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve products by stripe product Id")
-	}
-
-	return result, nil
-}
-
-func (r *repositoryBase) GetProducts(ctx context.Context) ([]models.Product, error) {
-	span := sentry.StartSpan(ctx, "GetProducts")
-	defer span.Finish()
-
-	result := make([]models.Product, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
-		Relation("Prices").
-		Select(&result)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve products")
-	}
-
-	return result, nil
-}
-
 // GetActiveSubscription will return an account's active subscription (if there is one, if not an error is returned).
 // The subscription object returned will have the Items, Items.Price and Items.Price.Product relations populated.
 func (r *repositoryBase) GetActiveSubscription(ctx context.Context) (*models.Subscription, error) {
@@ -66,9 +34,6 @@ func (r *repositoryBase) GetActiveSubscription(ctx context.Context) (*models.Sub
 
 	var result models.Subscription
 	err := r.txn.ModelContext(span.Context(), &result).
-		Relation("Items").
-		Relation("Items.Price").
-		Relation("Items.Price.Product").
 		Where(`"subscription"."account_id" = ?`, r.AccountId()).
 		Where(`"subscription"."status" = ?`, stripe.SubscriptionStatusActive).
 		Limit(1).
