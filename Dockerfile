@@ -1,4 +1,4 @@
-FROM node:15.14.0-buster AS builder
+FROM node:16.1.0-buster AS builder
 
 COPY ./ /work
 WORKDIR /work
