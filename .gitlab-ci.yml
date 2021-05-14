@@ -21,7 +21,7 @@ workflow:
 JS Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.monetr.dev/node:15.14.0-buster
+  image: containers.monetr.dev/node:16.1.0-buster
   tags:
     - k8s:shared
   script:
@@ -40,7 +40,7 @@ Build:
   needs:
     - "JS Dependencies"
   stage: Build Javascript
-  image: containers.monetr.dev/node:15.14.0-buster
+  image: containers.monetr.dev/node:16.1.0-buster
   tags:
     - k8s:shared
   script:
@@ -61,7 +61,7 @@ Build - Staging:
   stage: Build Javascript
   variables:
     ENVIRONMENT: Staging
-  image: containers.monetr.dev/node:15.14.0-buster
+  image: containers.monetr.dev/node:16.1.0-buster
   tags:
     - k8s:shared
   script:
@@ -82,7 +82,7 @@ Build - Acceptance:
   stage: Build Javascript
   variables:
     ENVIRONMENT: Acceptance
-  image: containers.monetr.dev/node:15.14.0-buster
+  image: containers.monetr.dev/node:16.1.0-buster
   tags:
     - k8s:shared
   script:
@@ -98,7 +98,7 @@ Test:
   needs:
     - "JS Dependencies"
   stage: Test Javascript
-  image: containers.monetr.dev/node:15.14.0-buster
+  image: containers.monetr.dev/node:16.1.0-buster
   tags:
     - k8s:shared
   script:
