@@ -81,6 +81,7 @@ func RunServer() error {
 					event.Request.Cookies = ""
 					if event.Request.Headers != nil {
 						delete(event.Request.Headers, "M-Token")
+						delete(event.Request.Headers, "Cookie")
 						delete(event.Request.Headers, "Cookies")
 					}
 				}
@@ -120,8 +121,6 @@ func RunServer() error {
 	} else {
 		log.Info("automatic migrations are disabled")
 	}
-
-
 
 	redisController, err := cache.NewRedisCache(log, configuration.Redis)
 	if err != nil {

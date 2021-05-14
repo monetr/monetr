@@ -13,11 +13,14 @@ type TransactionUpdateId struct {
 	Amount        int64  `pg:"amount"`
 }
 
-func (r *repositoryBase) InsertTransactions(transactions []models.Transaction) error {
+func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []models.Transaction) error {
+	span := sentry.StartSpan(ctx, "InsertTransactions")
+	defer span.Finish()
+
 	for i := range transactions {
 		transactions[i].AccountId = r.AccountId()
 	}
-	_, err := r.txn.Model(&transactions).Insert(&transactions)
+	_, err := r.txn.ModelContext(span.Context(), &transactions).Insert(&transactions)
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
@@ -142,8 +145,11 @@ func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []
 	return nil
 }
 
-func (r *repositoryBase) DeleteTransaction(bankAccountId, transactionId uint64) error {
-	_, err := r.txn.Model(&models.Transaction{}).
+func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, transactionId uint64) error {
+	span := sentry.StartSpan(ctx, "DeleteTransaction")
+	defer span.Finish()
+
+	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
@@ -152,9 +158,12 @@ func (r *repositoryBase) DeleteTransaction(bankAccountId, transactionId uint64) 
 	return errors.Wrap(err, "failed to delete transaction")
 }
 
-func (r *repositoryBase) GetTransactionsByPlaidTransactionId(linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error) {
+func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error) {
+	span := sentry.StartSpan(ctx, "GetTransactionsByPlaidTransactionId")
+	defer span.Finish()
+
 	result := make([]models.Transaction, 0)
-	err := r.txn.Model(&result).
+	err := r.txn.ModelContext(span.Context(), &result).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -168,7 +177,10 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(linkId uint64, plai
 	return result, nil
 }
 
-func (r *repositoryBase) ProcessTransactionSpentFrom(bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error) {
+func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error) {
+	span := sentry.StartSpan(ctx, "ProcessTransactionSpentFrom")
+	defer span.Finish()
+
 	account, err := r.GetAccount()
 	if err != nil {
 		return nil, err
@@ -254,6 +266,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(bankAccountId uint64, input
 
 		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
 		if err = currentExpense.CalculateNextContribution(
+			span.Context(),
 			account.Timezone,
 			currentExpense.FundingSchedule.NextOccurrence,
 			currentExpense.FundingSchedule.Rule,
@@ -273,7 +286,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(bankAccountId uint64, input
 		// expense.
 		fallthrough
 	case AddExpense:
-		if err = r.AddExpenseToTransaction(input, newExpense); err != nil {
+		if err = r.AddExpenseToTransaction(span.Context(), input, newExpense); err != nil {
 			return nil, err
 		}
 
@@ -284,7 +297,10 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(bankAccountId uint64, input
 	return expenseUpdates, r.UpdateExpenses(bankAccountId, expenseUpdates)
 }
 
-func (r *repositoryBase) AddExpenseToTransaction(transaction *models.Transaction, spending *models.Spending) error {
+func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error {
+	span := sentry.StartSpan(ctx, "AddExpenseToTransaction")
+	defer span.Finish()
+
 	account, err := r.GetAccount()
 	if err != nil {
 		return err
@@ -315,7 +331,8 @@ func (r *repositoryBase) AddExpenseToTransaction(transaction *models.Transaction
 	transaction.SpendingAmount = &allocationAmount
 
 	// Now that we have deducted the amount we need from the spending we need to recalculate it's next contribution.
-	if err := spending.CalculateNextContribution(
+	if err = spending.CalculateNextContribution(
+		span.Context(),
 		account.Timezone,
 		spending.FundingSchedule.NextOccurrence,
 		spending.FundingSchedule.Rule,

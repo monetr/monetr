@@ -79,7 +79,9 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
-	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Account Balances"))
+	hub := sentry.CurrentHub().Clone()
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Account Balances"))
 	defer span.Finish()
 
 	start := time.Now()

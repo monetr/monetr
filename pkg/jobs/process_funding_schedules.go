@@ -65,7 +65,9 @@ func (j *jobManagerBase) enqueueProcessFundingSchedules(job *work.Job) error {
 }
 
 func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
-	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Process Funding Schedules"))
+	hub := sentry.CurrentHub().Clone()
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Process Funding Schedules"))
 	defer span.Finish()
 
 	start := time.Now()
@@ -175,6 +177,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 				//  over-allocating temporarily until the deposit shows properly in Plaid.
 				spending.CurrentAmount += spending.NextContributionAmount
 				if err = (&spending).CalculateNextContribution(
+					span.Context(),
 					account.Timezone,
 					nextFundingOccurrence,
 					fundingSchedule.Rule,

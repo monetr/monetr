@@ -1,8 +1,11 @@
 package models
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/util"
 	"github.com/pkg/errors"
+	"strconv"
 	"time"
 )
 
@@ -50,10 +53,16 @@ func (e Spending) GetProgressAmount() int64 {
 }
 
 func (e *Spending) CalculateNextContribution(
+	ctx context.Context,
 	accountTimezone string,
 	nextContributionDate time.Time,
 	nextContributionRule *Rule,
 ) error {
+	span := sentry.StartSpan(ctx, "CalculateNextContribution")
+	defer span.Finish()
+
+	span.SetTag("spendingId", strconv.FormatUint(e.SpendingId, 10))
+
 	timezone, err := time.LoadLocation(accountTimezone)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse account's timezone")

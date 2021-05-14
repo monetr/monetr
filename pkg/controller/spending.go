@@ -141,6 +141,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 
 	// Once we have all that data we can calculate the new expenses next contribution amount.
 	if err = spending.CalculateNextContribution(
+		c.getContext(ctx),
 		account.Timezone,
 		fundingSchedule.NextOccurrence,
 		fundingSchedule.Rule,
@@ -244,6 +245,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		fromExpense.CurrentAmount -= transfer.Amount
 
 		if err = fromExpense.CalculateNextContribution(
+			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule.NextOccurrence,
 			fundingSchedule.Rule,
@@ -277,6 +279,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		toExpense.CurrentAmount += transfer.Amount
 
 		if err = toExpense.CalculateNextContribution(
+			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule.NextOccurrence,
 			fundingSchedule.Rule,
@@ -411,6 +414,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 		}
 
 		if err = updatedSpending.CalculateNextContribution(
+			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule.NextOccurrence,
 			fundingSchedule.Rule,

@@ -37,7 +37,9 @@ func (j *jobManagerBase) TriggerPullHistoricalTransactions(accountId, linkId uin
 }
 
 func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
-	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Historical Transactions"))
+	hub := sentry.CurrentHub().Clone()
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Historical Transactions"))
 	defer span.Finish()
 
 	start := time.Now()
@@ -226,7 +228,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
 				transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
 			}
-			if err = repo.InsertTransactions(transactionsToInsert); err != nil {
+			if err = repo.InsertTransactions(span.Context(), transactionsToInsert); err != nil {
 				log.WithError(err).Error("failed to insert new transactions")
 				return err
 			}

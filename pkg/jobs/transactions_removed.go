@@ -29,7 +29,9 @@ func (j *jobManagerBase) TriggerRemoveTransactions(accountId, linkId uint64, rem
 }
 
 func (j *jobManagerBase) removeTransactions(job *work.Job) error {
-	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Remove Transactions"))
+	hub := sentry.CurrentHub().Clone()
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Remove Transactions"))
 	defer span.Finish()
 
 	start := time.Now()
@@ -68,7 +70,7 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 			return err
 		}
 
-		transactions, err := repo.GetTransactionsByPlaidTransactionId(linkId, transactionIds)
+		transactions, err := repo.GetTransactionsByPlaidTransactionId(span.Context(), linkId, transactionIds)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transactions by plaid transaction Id for removal")
 			return err
@@ -103,6 +105,7 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 			}
 
 			_, err = repo.ProcessTransactionSpentFrom(
+				span.Context(),
 				existingTransaction.BankAccountId,
 				&updatedTransaction,
 				&existingTransaction,
@@ -113,7 +116,7 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 		}
 
 		for _, transaction := range transactions {
-			if err := repo.DeleteTransaction(transaction.BankAccountId, transaction.TransactionId); err != nil {
+			if err := repo.DeleteTransaction(span.Context(), transaction.BankAccountId, transaction.TransactionId); err != nil {
 				log.WithField("transactionId", transaction.TransactionId).WithError(err).
 					Error("failed to delete transaction")
 				return err

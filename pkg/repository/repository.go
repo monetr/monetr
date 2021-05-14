@@ -14,7 +14,7 @@ type Repository interface {
 	AccountId() uint64
 	UserId() uint64
 
-	AddExpenseToTransaction(transaction *models.Transaction, spending *models.Spending) error
+	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error
 	CreateBankAccounts(bankAccounts ...models.BankAccount) error
 	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
 	CreateLink(link *models.Link) error
@@ -22,7 +22,7 @@ type Repository interface {
 	CreateSpending(expense *models.Spending) error
 	CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error
 	DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error
-	DeleteTransaction(bankAccountId, transactionId uint64) error
+	DeleteTransaction(ctx context.Context, bankAccountId, transactionId uint64) error
 	GetAccount() (*models.Account, error)
 	GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error)
 	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
@@ -45,9 +45,9 @@ type Repository interface {
 	GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error)
 	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)
-	GetTransactionsByPlaidTransactionId(linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
-	InsertTransactions(transactions []models.Transaction) error
-	ProcessTransactionSpentFrom(bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
+	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
+	InsertTransactions(ctx context.Context, transactions []models.Transaction) error
+	ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
 	UpdateBankAccounts(accounts []models.BankAccount) error
 	UpdateExpenses(bankAccountId uint64, updates []models.Spending) error
 	UpdateLink(link *models.Link) error

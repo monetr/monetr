@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/stretchr/testify/assert"
@@ -25,31 +26,34 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 		}
 
 		transaction := models.Transaction{
-			AccountId:                 repo.AccountId(),
-			BankAccountId:             checkingAccount.BankAccountId,
-			PlaidTransactionId:        gofakeit.UUID(),
-			Amount:                    499,
-			Categories:                []string{
+			AccountId:          repo.AccountId(),
+			BankAccountId:      checkingAccount.BankAccountId,
+			PlaidTransactionId: gofakeit.UUID(),
+			Amount:             499,
+			Categories: []string{
 				"Fast Food",
 			},
-			OriginalCategories:        []string{
+			OriginalCategories: []string{
 				"Fast Food",
 			},
-			Date:                      time.Now(),
-			AuthorizedDate:            nil,
-			Name:                      "Wendy's",
-			OriginalName:              "Wendy's",
-			MerchantName:              "Wendy's",
-			OriginalMerchantName:      "Wendy's",
-			IsPending:                 true,
-			CreatedAt:                 time.Now(),
+			Date:                 time.Now(),
+			AuthorizedDate:       nil,
+			Name:                 "Wendy's",
+			OriginalName:         "Wendy's",
+			MerchantName:         "Wendy's",
+			OriginalMerchantName: "Wendy's",
+			IsPending:            true,
+			CreatedAt:            time.Now(),
 		}
 
 		require.NoError(t, repo.CreateTransaction(transaction.BankAccountId, &transaction), "must create transaction")
 
-		byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(checkingAccount.LinkId, []string{
-			transaction.PlaidTransactionId,
-		})
+		byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(context.Background(),
+			checkingAccount.LinkId,
+			[]string{
+				transaction.PlaidTransactionId,
+			},
+		)
 		assert.NoError(t, err, "should be able to retrieve transactions successfully")
 		assert.NotEmpty(t, byPlaidTransaction)
 	})

@@ -18,7 +18,9 @@ const (
 )
 
 func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
-	span := sentry.StartSpan(context.Background(), "Job", sentry.TransactionName("Pull Initial Transactions"))
+	hub := sentry.CurrentHub().Clone()
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Initial Transactions"))
 	defer span.Finish()
 
 	log := j.getLogForJob(job)
@@ -131,7 +133,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			transactions[i], transactions[j] = transactions[j], transactions[i]
 		}
 
-		if err := repo.InsertTransactions(transactions); err != nil {
+		if err := repo.InsertTransactions(span.Context(), transactions); err != nil {
 			log.WithError(err).Error("failed to store initial transactions")
 			return err
 		}
