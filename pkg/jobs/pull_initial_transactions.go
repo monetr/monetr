@@ -7,6 +7,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
+	"github.com/monetrapp/rest-api/pkg/util"
 	"github.com/pkg/errors"
 	"strconv"
 	"time"
@@ -94,10 +95,10 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 
 		transactions := make([]models.Transaction, len(plaidTransactions))
 		for i, plaidTransaction := range plaidTransactions {
-			date, _ := time.ParseInLocation("2006-01-02", plaidTransaction.Date, timezone)
+			date, _ := util.ParseInLocal("2006-01-02", plaidTransaction.Date, timezone)
 			var authorizedDate *time.Time
 			if plaidTransaction.AuthorizedDate != "" {
-				authDate, _ := time.ParseInLocation("2006-01-02", plaidTransaction.AuthorizedDate, timezone)
+				authDate, _ := util.ParseInLocal("2006-01-02", plaidTransaction.AuthorizedDate, timezone)
 				authorizedDate = &authDate
 			}
 

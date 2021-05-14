@@ -1,6 +1,9 @@
 package util
 
-import "time"
+import (
+	"github.com/pkg/errors"
+	"time"
+)
 
 func MidnightInLocal(input time.Time, timezone *time.Location) time.Time {
 	midnight := time.Date(
@@ -30,4 +33,16 @@ func InLocal(input time.Time, timezone *time.Location) time.Time {
 	)
 
 	return midnight
+}
+
+// ParseInLocal parses the time string provided into a time. But ignores any timezone on the time string itself. It
+// assumes that the provided time string is always in the specified timezone. This is helpful when parsing things like
+// dates that have no time information at all.
+func ParseInLocal(format, input string, location *time.Location) (time.Time, error) {
+	date, err := time.Parse(format, input)
+	if err != nil {
+		return date, errors.Wrap(err, "failed to parse time")
+	}
+
+	return InLocal(date, location), nil
 }
