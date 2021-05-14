@@ -108,21 +108,9 @@ func (e *Spending) CalculateNextContribution(
 	}
 
 	// TODO Handle expenses that recur more frequently than they are funded.
-
-	// TODO A Timezone difference that would make the current moment a different day than the server might cause
-	//  problems here. If time.Now() on the server is 01/02/2021 but the user it is already 01/03/2021 then midnight in
-	//  the user's timezone here would evaluate to the midnight of the second, not the third.
-	midnightToday := util.MidnightInLocal(time.Now(), timezone)
-	nextContributionRule.DTStart(midnightToday)
-	contributionDateX := util.MidnightInLocal(nextContributionDate, timezone)
-	for {
-		contributionDateX = util.MidnightInLocal(nextContributionRule.After(contributionDateX, false), timezone)
-		if nextDueDate.Before(contributionDateX) {
-			break
-		}
-
-		numberOfContributions++
-	}
+	nowInTimezone := time.Now().In(timezone)
+	nextContributionRule.DTStart(nowInTimezone)
+	numberOfContributions = len(nextContributionRule.Between(nowInTimezone, nextDueDate, false))
 
 	totalNeeded := e.TargetAmount - progressAmount
 	perContribution := totalNeeded / int64(numberOfContributions)

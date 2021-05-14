@@ -389,8 +389,12 @@ func (c *Controller) putSpending(ctx *context.Context) {
 	}
 
 	// If the paused status of a spending object changes, recalculate the contributions.
-	if updatedSpending.IsPaused != existingSpending.IsPaused {
+	if !updatedSpending.IsPaused && existingSpending.IsPaused {
 		recalculateSpending = true
+	} else if updatedSpending.IsPaused && !existingSpending.IsPaused {
+		// However, if we are pausing contributions, there is no need to do a recalculation no matter what. Since it
+		// will be invalidated when the user unpauses the spending object anyway.
+		recalculateSpending = false
 	}
 
 	if recalculateSpending {
