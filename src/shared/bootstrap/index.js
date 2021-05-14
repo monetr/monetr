@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { NewClient } from 'api/api';
 import request from "shared/util/request";
 import { BOOTSTRAP_FAILED, BOOTSTRAP_FINISHED, BOOTSTRAP_START } from "./actions";
 
@@ -34,7 +34,7 @@ export default function bootstrapApplication() {
       return axios
         .get('/config.json')
         .then(uiConfig => {
-          window.API = axios.create({
+          window.API = NewClient({
             baseURL: uiConfig.data.apiUrl,
             withCredentials: true,
           });
@@ -54,9 +54,9 @@ export default function bootstrapApplication() {
 
     // But if we already know our API URL from our build configuration then there isn't any work we need to do there and
     // we can just use our build time URL.
-    window.API = axios.create({
+    window.API = NewClient({
       // eslint-disable-next-line no-undef
-      baseURL: `${CONFIG.API_URL}`,
+      baseURL: `${ CONFIG.API_URL }`,
       withCredentials: true,
     });
     return request().get('/config')
@@ -65,7 +65,7 @@ export default function bootstrapApplication() {
           ...apiConfig.data,
           ...{
             // eslint-disable-next-line no-undef
-            apiUrl: `${CONFIG.API_URL}`,
+            apiUrl: `${ CONFIG.API_URL }`,
           },
         }));
       });

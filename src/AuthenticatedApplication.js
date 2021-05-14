@@ -1,14 +1,4 @@
-import {
-  AppBar,
-  Backdrop,
-  Button,
-  CircularProgress,
-  IconButton,
-  Menu,
-  MenuItem,
-  Toolbar,
-  Typography
-} from "@material-ui/core";
+import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
 import BankAccountSelector from "components/BankAccountSelector";
@@ -31,6 +21,7 @@ import GoalsView from "views/GoalsView";
 import TransactionsView from "views/TransactionsView";
 import AccountView from "views/AccountView";
 import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
+import { UpdateSubscriptionsView } from "views/Subscriptions/UpdateSubscriptionsView";
 
 export class AuthenticatedApplication extends Component {
   state = {
@@ -90,7 +81,7 @@ export class AuthenticatedApplication extends Component {
           <FirstTimeSetup/>
         </Route>
         <Route path="/plaid/oauth-return">
-          <OAuthRedirect />
+          <OAuthRedirect/>
         </Route>
         <Route path="/">
           <Redirect to="/setup"/>
@@ -169,20 +160,31 @@ export class AuthenticatedApplication extends Component {
     );
   }
 
-  render() {
-    if (this.state.loading) {
-      return (
-        <Backdrop  open={ true }>
-          <CircularProgress color="inherit" />
-        </Backdrop>
-      );
-    }
-
+  renderSubRoutes = () => {
     if (this.props.hasAnyLinks) {
       return this.renderSetup();
     }
 
     return this.renderNotSetup()
+  };
+
+  render() {
+    if (this.state.loading) {
+      return (
+        <Backdrop open={ true }>
+          <CircularProgress color="inherit"/>
+        </Backdrop>
+      );
+    }
+
+    return (
+      <Switch>
+        <Route path="/account/subscription">
+          <UpdateSubscriptionsView/>
+        </Route>
+        { this.renderSubRoutes() }
+      </Switch>
+    );
   }
 }
 

@@ -4,7 +4,8 @@ import {
   Card,
   CardActions,
   CardContent,
-  CardHeader, CircularProgress,
+  CardHeader,
+  CircularProgress,
   Container,
   Grid,
   Grow,
@@ -51,10 +52,15 @@ export class LoginView extends Component {
       captcha: this.state.verification,
     })
       .then(result => {
-        return this.props.bootstrapLogin(result.data.token, result.data.user);
-      })
-      .then(() => {
-        this.props.history.push('/');
+        return this.props.bootstrapLogin(result.data.token, result.data.user)
+          .then(() => {
+            if (result.data.nextUrl) {
+              this.props.history.push(result.data.nextUrl);
+              return
+            }
+
+            this.props.history.push('/');
+          });
       })
       .catch(error => {
         if (error.response.data.error) {
@@ -81,7 +87,7 @@ export class LoginView extends Component {
             sitekey={ ReCAPTCHAKey }
             onChange={ value => this.setState({ verification: value }) }
           /> }
-          { this.state.loading && <CircularProgress /> }
+          { this.state.loading && <CircularProgress/> }
         </div>
       </Grid>
     )

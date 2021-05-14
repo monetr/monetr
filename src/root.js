@@ -2,15 +2,16 @@ import AuthenticatedApplication from "AuthenticatedApplication";
 import PropTypes from "prop-types";
 import React, { PureComponent } from 'react';
 import { connect } from "react-redux";
-import { BrowserRouter as Router, Redirect, Route, Switch, } from "react-router-dom";
+import { Redirect, Route, Switch, withRouter, } from "react-router-dom";
 import { bindActionCreators } from "redux";
 import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
-import { getIsAuthenticated } from "shared/authentication/selectors";
+import { getIsAuthenticated, getSubscriptionIsActive } from "shared/authentication/selectors";
 import bootstrapApplication from "shared/bootstrap";
 import { getIsBootstrapped, getSignUpAllowed } from "shared/bootstrap/selectors";
 import LoginView from "views/Login";
 import SignUpView from "views/SignUp";
 import { Backdrop, CircularProgress } from "@material-ui/core";
+import { BillingRequired } from "views/Subscriptions/BillingRequired";
 
 export class Root extends PureComponent {
   state = {
@@ -18,8 +19,10 @@ export class Root extends PureComponent {
   };
 
   static propTypes = {
+    history: PropTypes.object.isRequired,
     isReady: PropTypes.bool.isRequired,
     isAuthenticated: PropTypes.bool.isRequired,
+    isSubscriptionActive: PropTypes.bool.isRequired,
     allowSignUp: PropTypes.bool.isRequired,
     bootstrapApplication: PropTypes.func.isRequired,
     bootstrapLogin: PropTypes.func.isRequired,
@@ -31,7 +34,14 @@ export class Root extends PureComponent {
 
   attemptBootstrap = () => {
     this.props.bootstrapApplication()
-      .then(() => this.props.bootstrapLogin())
+      .then(() => {
+        return this.props.bootstrapLogin()
+          .then(result => {
+            if (result.data.nextUrl) {
+              this.props.history.push(result.data.nextUrl);
+            }
+          });
+      })
       .catch(error => {
         alert(error);
       })
@@ -44,30 +54,28 @@ export class Root extends PureComponent {
 
   renderUnauthenticated = () => {
     return (
-      <Router>
-        <Switch>
-          <Route path="/login">
-            <LoginView/>
-          </Route>
-          { this.props.allowSignUp &&
-          <Route path="/register">
-            <SignUpView/>
-          </Route>
-          }
-          <Route>
-            <Redirect to={ { pathname: '/login' } }/>
-          </Route>
-        </Switch>
-      </Router>
+      <Switch>
+        <Route path="/login">
+          <LoginView/>
+        </Route>
+        { this.props.allowSignUp &&
+        <Route path="/register">
+          <SignUpView/>
+        </Route>
+        }
+        <Route>
+          <Redirect to={ { pathname: '/login' } }/>
+        </Route>
+      </Switch>
     )
   };
 
   render() {
-    const { isReady, isAuthenticated } = this.props;
+    const { isReady, isAuthenticated, isSubscriptionActive } = this.props;
     if (!isReady || this.state.loading) {
       return (
-        <Backdrop  open={ true }>
-          <CircularProgress color="inherit" />
+        <Backdrop open={ true }>
+          <CircularProgress color="inherit"/>
         </Backdrop>
       );
     }
@@ -76,10 +84,12 @@ export class Root extends PureComponent {
       return this.renderUnauthenticated();
     }
 
+    if (!isSubscriptionActive) {
+      return <BillingRequired />;
+    }
+
     return (
-      <Router>
-        <AuthenticatedApplication/>
-      </Router>
+      <AuthenticatedApplication/>
     )
   }
 }
@@ -88,10 +98,11 @@ export default connect(
   state => ({
     isAuthenticated: getIsAuthenticated(state),
     isReady: getIsBootstrapped(state),
+    isSubscriptionActive: getSubscriptionIsActive(state),
     allowSignUp: getSignUpAllowed(state),
   }),
   dispatch => bindActionCreators({
     bootstrapApplication,
     bootstrapLogin,
   }, dispatch),
-)(Root);
+)(withRouter(Root));

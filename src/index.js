@@ -8,6 +8,7 @@ import "./styles/styles.css";
 import './styles/index.scss';
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
+import { BrowserRouter as Router } from "react-router-dom";
 
 // eslint-disable-next-line no-undef
 if (CONFIG.SENTRY_DSN) {
@@ -31,7 +32,9 @@ ReactDOM.render(
   <React.StrictMode>
     <Sentry.ErrorBoundary fallback={"A fatal error has occurred"}>
       <Provider store={ store }>
-        <Root/>
+        <Router>
+          <Root/>
+        </Router>
       </Provider>
     </Sentry.ErrorBoundary>
   </React.StrictMode>,

@@ -2,8 +2,8 @@ import User from "data/User";
 import request from "shared/util/request";
 import { BOOTSTRAP_LOGIN } from "shared/authentication/actions";
 import { getAPIUrl } from "shared/bootstrap/selectors";
-import axios from "axios";
 import Cookies from 'js-cookie'
+import { NewClient } from "api/api";
 
 export default function bootstrapLogin(token = null, user = null) {
   return (dispatch, getState) => {
@@ -34,6 +34,7 @@ export default function bootstrapLogin(token = null, user = null) {
         type: BOOTSTRAP_LOGIN,
         payload: {
           isAuthenticated: false,
+          isActive: false,
           token: null,
           user: null,
         }
@@ -45,17 +46,12 @@ export default function bootstrapLogin(token = null, user = null) {
 
     // eslint-disable-next-line no-undef
     if (CONFIG.USE_LOCAL_STORAGE) {
-      window.API = axios.create({
+      window.API = NewClient({
         baseURL: apiUrl,
         withCredentials: true,
         headers: {
           'M-Token': token,
         },
-      });
-    } else {
-      window.API = axios.create({
-        baseURL: apiUrl,
-        withCredentials: true,
       });
     }
 
@@ -70,9 +66,12 @@ export default function bootstrapLogin(token = null, user = null) {
             payload: {
               isAuthenticated: true,
               token: token,
+              isActive: result.data.isActive,
               user: new User(result.data.user),
             }
-          })
+          });
+
+          return result;
         })
         .catch(error => {
           Cookies.remove('M-Token');
@@ -86,6 +85,7 @@ export default function bootstrapLogin(token = null, user = null) {
       payload: {
         isAuthenticated: true,
         token: token,
+        isActive: result.data.isActive,
         user: new User(user),
       }
     });
