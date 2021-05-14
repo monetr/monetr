@@ -7,6 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetrapp/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/pubsub"
@@ -41,6 +42,7 @@ type Controller struct {
 	job                      jobs.JobManager
 	stats                    *metrics.Stats
 	stripeClient             *stripe_client.API
+	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
 }
@@ -77,6 +79,7 @@ func NewController(
 		log:                      log,
 		job:                      job,
 		stats:                    stats,
+		stripe:                   stripe_helper.NewStripeHelper(log, configuration.Stripe.APIKey),
 		stripeClient:             stripeClient,
 		ps:                       pubsub.NewPostgresPubSub(log, db),
 		cache:                    cache,
@@ -113,7 +116,9 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		})
 	}
 
-	app.UseGlobal(func(ctx iris.Context) {
+	app.Get("/health", c.getHealth)
+
+	app.Use(func(ctx iris.Context) {
 		log := c.log.WithFields(logrus.Fields{
 			"requestId": ctx.GetHeader("X-Request-Id"),
 		})
@@ -122,8 +127,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		ctx.Next()
 	})
-
-	app.Get("/health", c.getHealth)
 
 	app.PartyFunc(APIPath, func(p router.Party) {
 		p.Use(c.loggingMiddleware)
@@ -193,9 +196,16 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			repoParty.Use(c.authenticationMiddleware)
 
 			repoParty.PartyFunc("/users", c.handleUsers)
-			repoParty.PartyFunc("/links", c.linksController)
-			repoParty.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
+			if c.configuration.Stripe.Enabled {
+				repoParty.PartyFunc("/billing", c.handleBilling)
 
+				// All endpoints after this require verification that the user has an active subscription.
+				if c.configuration.Stripe.BillingEnabled {
+					repoParty.Use(c.requireActiveSubscriptionMiddleware)
+				}
+			}
+
+			repoParty.PartyFunc("/links", c.linksController)
 			repoParty.PartyFunc("/bank_accounts", func(bankParty router.Party) {
 				c.handleBankAccounts(bankParty)
 				c.handleTransactions(bankParty)
@@ -203,7 +213,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				c.handleSpending(bankParty)
 			})
 
-			repoParty.PartyFunc("/jobs", c.handleJobs)
+			repoParty.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
 
 			if c.configuration.Environment != "production" {
 				repoParty.Get("/test/error", func(ctx iris.Context) {
@@ -211,9 +221,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				})
 			}
 
-			if c.configuration.Stripe.Enabled {
-				repoParty.PartyFunc("/billing", c.handleBilling)
-			}
 		})
 	})
 
@@ -248,4 +255,24 @@ func (c *Controller) getHealth(ctx iris.Context) {
 
 func (c *Controller) getContext(ctx iris.Context) context.Context {
 	return ctx.Values().Get(spanContextKey).(context.Context)
+}
+
+func (c *Controller) getLog(ctx iris.Context) *logrus.Entry {
+	log := c.log.WithFields(logrus.Fields{
+		"requestId": ctx.GetHeader("X-Request-Id"),
+	})
+
+	if accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0); accountId > 0 {
+		log = log.WithField("accountId", accountId)
+	}
+
+	if userId := ctx.Values().GetUint64Default(userIdContextKey, 0); userId > 0 {
+		log = log.WithField("userId", userId)
+	}
+
+	if loginId := ctx.Values().GetUint64Default(loginIdContextKey, 0); loginId > 0 {
+		log = log.WithField("loginId", loginId)
+	}
+
+	return log
 }

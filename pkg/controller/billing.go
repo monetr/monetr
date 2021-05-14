@@ -2,7 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"github.com/ahmetb/go-linq/v3"
 	"github.com/kataras/iris/v12"
+	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/swag"
 	"github.com/stripe/stripe-go/v72"
 	"net/http"
@@ -13,16 +16,96 @@ func (c *Controller) handleBilling(p iris.Party) {
 	p.Post("/create_checkout", c.handlePostCreateCheckout)
 }
 
-func boolP(input bool) *bool {
-	return &input
-}
-
-func stringP(input string) *string {
-	return &input
+type Plan struct {
+	Id            string                        `json:"id"`
+	Name          string                        `json:"name"`
+	Description   string                        `json:"description"`
+	UnitPrice     int64                         `json:"unitPrice"`
+	Interval      stripe.PriceRecurringInterval `json:"interval"`
+	IntervalCount int64                         `json:"intervalCount"`
+	FreeTrialDays int32                         `json:"freeTrialDays"`
+	Active        bool                          `json:"active"`
 }
 
 func (c *Controller) getBillingPlans(ctx iris.Context) {
+	log := c.getLog(ctx)
 
+	configuredPlans := c.configuration.Stripe.Plans
+	stripePriceIds := make([]string, len(configuredPlans))
+	for i, plan := range configuredPlans {
+		stripePriceIds[i] = plan.StripePriceId
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	subscription, err := repo.GetActiveSubscription(c.getContext(ctx))
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to check for active subscription")
+		return
+	}
+
+	// If there is a subscription active for the current user and their price is not in our configuration file then that
+	// means they might be on an old price. We will want to add this to our list to retrieve details for.
+	if subscription != nil && !myownsanity.SliceContains(stripePriceIds, subscription.StripePriceId) {
+		log.Debug("account has an old price, will retrieve an additional price from stripe")
+		stripePriceIds = append(stripePriceIds, subscription.StripePriceId)
+	}
+
+	log.Debugf("retrieving %d price(s) from stripe", len(stripePriceIds))
+	stripePrices, err := c.stripe.GetPricesById(c.getContext(ctx), stripePriceIds)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve price details from stripe")
+		return
+	}
+
+	log.Debugf("retrieved %d price(s) from stripe", len(stripePrices))
+	stripeProductIds := make([]string, 0, len(stripePrices))
+	linq.From(stripePrices).
+		SelectT(func(price stripe.Price) string {
+			return price.Product.ID
+		}).
+		Distinct().
+		ToSlice(&stripeProductIds)
+
+	log.Debugf("retrieving %d product(s) from stripe", len(stripeProductIds))
+	stripeProducts, err := c.stripe.GetProductsById(c.getContext(ctx), stripeProductIds)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve product details from stripe")
+		return
+	}
+
+	plans := make([]Plan, len(stripePriceIds))
+	linq.From(stripePrices).
+		JoinT(
+			linq.From(stripeProducts),
+			func(price stripe.Price) string {
+				return price.Product.ID
+			},
+			func(product stripe.Product) string {
+				return product.ID
+			},
+			func(price stripe.Price, product stripe.Product) Plan {
+				configPlan := linq.From(configuredPlans).
+					FirstWithT(func(plan config.Plan) bool {
+						return plan.StripePriceId == price.ID
+					}).(config.Plan)
+
+				return Plan{
+					Id:            price.ID,
+					Name:          product.Name,
+					Description:   product.Description,
+					UnitPrice:     price.UnitAmount,
+					Interval:      price.Recurring.Interval,
+					IntervalCount: price.Recurring.IntervalCount,
+					FreeTrialDays: configPlan.FreeTrialDays,
+					Active:        subscription != nil && subscription.StripePriceId == price.ID,
+				}
+			},
+		).
+		ToSlice(&plans)
+
+	ctx.JSON(plans)
+	return
 }
 
 // Create Checkout Session

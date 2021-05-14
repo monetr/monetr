@@ -16,11 +16,12 @@ import (
 )
 
 const (
-	databaseContextKey  = "_harderDatabase_"
-	accountIdContextKey = "_accountId_"
-	userIdContextKey    = "_userId_"
-	loginIdContextKey   = "_loginId_"
-	spanContextKey      = "_span_"
+	databaseContextKey           = "_harderDatabase_"
+	accountIdContextKey          = "_accountId_"
+	userIdContextKey             = "_userId_"
+	loginIdContextKey            = "_loginId_"
+	subscriptionStatusContextKey = "_subscriptionStatus_"
+	spanContextKey               = "_span_"
 )
 
 func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
@@ -115,6 +116,17 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	ctx.Values().Set(accountIdContextKey, claims.AccountId)
 	ctx.Values().Set(userIdContextKey, claims.UserId)
 	ctx.Values().Set(loginIdContextKey, claims.LoginId)
+	ctx.Values().Set(subscriptionStatusContextKey, claims.SubscriptionStatus)
+
+	ctx.Next()
+}
+
+func (c *Controller) requireActiveSubscriptionMiddleware(ctx *context.Context) {
+	subscriptionStatus := ctx.Values().GetBoolDefault(subscriptionStatusContextKey, false)
+	if !subscriptionStatus {
+		c.returnError(ctx, http.StatusPaymentRequired, "subscription is not active")
+		return
+	}
 
 	ctx.Next()
 }
@@ -123,7 +135,7 @@ func (c *Controller) loggingMiddleware(ctx *context.Context) {
 	ctx.Next()
 
 	if err := ctx.GetErr(); err != nil {
-		c.log.WithContext(ctx.Request().Context()).WithError(err).Errorf("%+v", ctx.GetErr())
+		c.getLog(ctx).WithError(err).Errorf("%s", ctx.GetErr().Error())
 	}
 }
 
@@ -136,7 +148,7 @@ func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (reposit
 	return repository.NewUnauthenticatedRepository(txn), nil
 }
 
-func (c *Controller) mustGetUnauthenticatedRepository(ctx iris.Context) (repository.UnauthenticatedRepository) {
+func (c *Controller) mustGetUnauthenticatedRepository(ctx iris.Context) repository.UnauthenticatedRepository {
 	repo, err := c.getUnauthenticatedRepository(ctx)
 	if err != nil {
 		panic(err)

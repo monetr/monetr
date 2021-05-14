@@ -57,6 +57,12 @@ type Repository interface {
 	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error
+
+	/*
+		Billing methods
+	*/
+
+	GetActiveSubscription(ctx context.Context) (*models.Subscription, error)
 }
 
 type UnauthenticatedRepository interface {

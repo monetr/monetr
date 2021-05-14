@@ -71,7 +71,7 @@ func (s *stripeBase) GetProductsById(ctx context.Context, stripeProductIds []str
 	defer span.Finish()
 
 	productIds := make([]*string, len(stripeProductIds))
-	for i, id := range stripeProductIds { productIds[i] = &id }
+	for i := range stripeProductIds { productIds[i] = &stripeProductIds[i] }
 
 	productIterator := s.client.Products.List(&stripe.ProductListParams{
 		IDs: productIds,

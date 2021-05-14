@@ -6,10 +6,13 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
 )
 
+
 type BillingRepository interface {
+	GetAccount() (*models.Account, error)
 }
 
 var (
@@ -17,7 +20,12 @@ var (
 )
 
 type billingRepositoryBase struct {
-	db pg.DBI
+	log     *logrus.Entry
+	db      pg.DBI
+}
+
+func (b *billingRepositoryBase) GetAccount() (*models.Account, error) {
+	panic("implement me")
 }
 
 func NewBillingRepository(db pg.DBI) BillingRepository {
@@ -38,8 +46,17 @@ func (r *repositoryBase) GetActiveSubscription(ctx context.Context) (*models.Sub
 		Where(`"subscription"."status" = ?`, stripe.SubscriptionStatusActive).
 		Limit(1).
 		Select(&result)
-	if err != nil {
+	switch err {
+	case pg.ErrNoRows:
+		return nil, nil
+	case nil:
+		break
+	default:
 		return nil, errors.Wrap(err, "failed to retrieve an active subscription for the current account")
+	}
+
+	if result.SubscriptionId == 0 {
+		return nil, nil
 	}
 
 	return &result, nil

@@ -34,12 +34,12 @@ type RegistrationClaims struct {
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) registerEndpoint(ctx iris.Context) {
 	var registerRequest struct {
-		Email     string `json:"email"`
-		Password  string `json:"password"`
-		FirstName string `json:"firstName"`
-		LastName  string `json:"lastName"`
-		Timezone  string `json:"timezone"`
-		Captcha   string `json:"captcha"`
+		Email     string  `json:"email"`
+		Password  string  `json:"password"`
+		FirstName string  `json:"firstName"`
+		LastName  string  `json:"lastName"`
+		Timezone  string  `json:"timezone"`
+		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
 	}
 	if err := ctx.ReadJSON(&registerRequest); err != nil {
@@ -55,14 +55,12 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		return
 	}
 
-
 	registerRequest.Email = strings.TrimSpace(registerRequest.Email)
 	registerRequest.Password = strings.TrimSpace(registerRequest.Password)
 	registerRequest.FirstName = strings.TrimSpace(registerRequest.FirstName)
 	if registerRequest.BetaCode != nil {
 		*registerRequest.BetaCode = strings.TrimSpace(*registerRequest.BetaCode)
 	}
-
 
 	if err := c.validateRegistration(
 		registerRequest.Email,
@@ -213,7 +211,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// If we are not requiring email verification to activate an account we can
 	// simply return a token here for the user to be signed in.
-	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
+	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId, !c.configuration.Stripe.BillingEnabled)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create JWT",
@@ -221,14 +219,24 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		return
 	}
 
-	user.Login = login
-	user.Account = account
+	if !c.configuration.Stripe.BillingEnabled {
+		user.Login = login
+		user.Account = account
+
+		ctx.JSON(map[string]interface{}{
+			"nextUrl": "/setup",
+			"token":   token,
+			"user":    user,
+		})
+		return
+	}
 
 	ctx.JSON(map[string]interface{}{
-		"nextUrl": "/setup",
+		"nextUrl": "/account/subscription",
 		"token":   token,
 		"user":    user,
 	})
+
 }
 
 func (c *Controller) verifyEndpoint(ctx iris.Context) {
@@ -271,7 +279,7 @@ func (c *Controller) verifyEndpoint(ctx iris.Context) {
 		return
 	}
 
-	token, err := c.generateToken(user.LoginId, user.UserId, user.AccountId)
+	token, err := c.generateToken(user.LoginId, user.UserId, user.AccountId, true)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create JWT",
@@ -322,7 +330,7 @@ func (c *Controller) generateRegistrationToken(registrationId string) (string, e
 	claims := &RegistrationClaims{
 		RegistrationId: registrationId,
 		StandardClaims: jwt.StandardClaims{
-			Audience:  []string{
+			Audience: []string{
 				c.configuration.APIDomainName,
 			},
 			ExpiresAt: now.Add(7 * 24 * time.Hour).Unix(),

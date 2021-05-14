@@ -1,21 +1,26 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/form3tech-oss/jwt-go"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
 	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
+	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"strings"
 	"time"
 )
 
 type HarderClaims struct {
-	LoginId   uint64 `json:"loginId"`
-	UserId    uint64 `json:"userId"`
-	AccountId uint64 `json:"accountId"`
+	LoginId            uint64 `json:"loginId"`
+	UserId             uint64 `json:"userId"`
+	AccountId          uint64 `json:"accountId"`
+	SubscriptionStatus bool   `json:"subStatus"`
 	jwt.StandardClaims
 }
 
@@ -85,21 +90,68 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		return
 	case 1:
 		user := login.Users[0]
-		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
+
+		if !c.configuration.Stripe.BillingEnabled {
+			token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, true)
+			if err != nil {
+				c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
+				return
+			}
+			// Return their account token.
+			ctx.JSON(map[string]interface{}{
+				"token": token,
+			})
+			return
+		}
+
+		repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, c.db)
+		subscription, err := repo.GetActiveSubscription(c.getContext(ctx))
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to get active subscription")
+			return
+		}
+
+		var subscriptionIsActive bool
+		if subscription == nil {
+			subscriptionIsActive = false
+		} else {
+			switch subscription.Status {
+			case stripe.SubscriptionStatusActive,
+				stripe.SubscriptionStatusTrialing:
+				subscriptionIsActive = true
+			case stripe.SubscriptionStatusPastDue,
+				stripe.SubscriptionStatusUnpaid,
+				stripe.SubscriptionStatusCanceled,
+				stripe.SubscriptionStatusIncomplete,
+				stripe.SubscriptionStatusIncompleteExpired:
+				subscriptionIsActive = false
+			default:
+				sentry.CaptureMessage(fmt.Sprintf("invalid subscription status: %s", subscription.Status))
+				c.returnError(ctx, http.StatusNotImplemented, "invalid subscription status, create a github issue")
+				return
+			}
+		}
+
+		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, subscriptionIsActive)
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
 			return
 		}
-		// Return their account token.
-		ctx.JSON(map[string]interface{}{
+
+		result := map[string]interface{}{
 			"token": token,
-		})
-		return
+		}
+
+		if !subscriptionIsActive {
+			result["nextUrl"] = "/account/subscribe"
+		}
+
+		ctx.JSON(result)
 	default:
 		// If the login has more than one user then we want to generate a temp
 		// JWT that will only grant them access to API endpoints not specific to
 		// an account.
-		token, err := c.generateToken(login.LoginId, 0, 0)
+		token, err := c.generateToken(login.LoginId, 0, 0, true)
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
 			return
@@ -121,7 +173,7 @@ func (c *Controller) validateLogin(email, password string) error {
 	return nil
 }
 
-func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {
+func (c *Controller) generateToken(loginId, userId, accountId uint64, subscriptionActive bool) (string, error) {
 	now := time.Now()
 	claims := &HarderClaims{
 		LoginId:   loginId,
