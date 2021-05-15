@@ -1,42 +1,75 @@
 import React, { Component } from "react";
 import { Button, Card, CardContent, Typography } from "@material-ui/core";
+import BillingPlan from "data/BillingPlan";
+import fetchBillingPlans from "shared/billing/actions/fetchBillingPlans";
 
-
-interface SubscriptionDetails {
-  id: string;
-  name: string;
-  description: string;
-  unitPrice: number;
-  interval: string;
-  intervalCount: number;
-  trialDays: number;
+interface State {
+  loading: boolean;
+  plans: BillingPlan[];
 }
 
-export class UpdateSubscriptionsView extends Component<any, any> {
+export class UpdateSubscriptionsView extends Component<any, State> {
 
-  renderCard = (details: SubscriptionDetails) => {
+  state = {
+    loading: true,
+    plans: [],
+  };
+
+  componentDidMount() {
+    fetchBillingPlans().then(result => {
+      this.setState({
+        plans: result,
+        loading: false,
+      });
+    });
+  }
+
+  selectPlan = (plan: BillingPlan) => () => {
+    console.log(plan);
+  };
+
+  renderCard = (details: BillingPlan) => {
+
+    const price = `$${ (details.unitPrice / 100).toFixed(2) }`;
 
     return (
       <div key={ details.id } className="flex justify-center items-center">
-        <Card className="transition transform hover:shadow-2xl hover:scale-105 w-64 h-64">
+        <Card className="transition transform hover:shadow-2xl hover:scale-105 w-64 h-72">
           <CardContent className="h-full">
-            <Typography variant='h4'>
-              { details.name }
-            </Typography>
-            <Typography variant="body1">
-              { details.description }
-            </Typography>
-            <Typography variant="body1">
-              { details.unitPrice } / { details.interval }
-            </Typography>
-            { (details.trialDays > 0) &&
-              <Typography>
-                { details.trialDays } day free trial
-              </Typography>
-            }
-            <Button className="absolute bottom-2.5" color="primary">
-              Choose
-            </Button>
+            <div className="grid grid-flow-row h-full">
+              <div>
+                <div className="grid grid-flow-col">
+                  <Typography variant='h5'>
+                    <b>{ details.name }</b>
+                  </Typography>
+                  <div className="flex items-center justify-end">
+                    <Typography variant="body1">
+                      <b>{ price }</b> / { details.interval }
+                    </Typography>
+                  </div>
+                </div>
+                <Typography variant="body2">
+                  { details.description }
+                </Typography>
+              </div>
+              <div className="flex items-end grid grid-flow-row">
+                { (details.freeTrialDays > 0) &&
+                <Typography variant="h6" className="w-full text-center">
+                  { details.freeTrialDays } day free trial
+                </Typography>
+                }
+                <Button
+                  className="w-full h-12 "
+                  color="primary"
+                  variant="contained"
+                  onClick={ this.selectPlan(details) }
+                >
+                  <Typography variant="h6">
+                    Choose
+                  </Typography>
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -44,36 +77,14 @@ export class UpdateSubscriptionsView extends Component<any, any> {
   };
 
   render() {
-    const subscriptions: SubscriptionDetails[] = [
-      {
-        id: 'manual',
-        name: 'Manual',
-        description: 'Manually manage transactions and balances.',
-        unitPrice: 199,
-        interval: 'month',
-        intervalCount: 1,
-        trialDays: 30,
-      },
-      {
-        id: 'linked',
-        name: 'Linked',
-        description: 'Link your bank accounts for automatically retrieving transactions and balances.',
-        unitPrice: 499,
-        interval: 'month',
-        intervalCount: 1,
-        trialDays: 0,
-      }
-    ];
-
-
     return (
       <div className="w-full h-full flex justify-center items-center">
         <div className="grid grid-flow-row">
           <Typography className="w-full text-center mb-10" variant="h2">
-            Please pick a plan to continue...
+            { this.state.loading ? 'One moment...' : 'Please pick a plan to continue...' }
           </Typography>
           <div className="w-full grid grid-flow-col gap-10">
-            { subscriptions.map(item => this.renderCard(item)) }
+            { this.state.plans.map(item => this.renderCard(item)) }
           </div>
         </div>
       </div>

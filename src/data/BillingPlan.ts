@@ -11,4 +11,10 @@ export default class BillingPlan {
   intervalCount: number;
   freeTrialDays: number;
   active: boolean;
+
+  constructor(data: Partial<BillingPlan>) {
+    if (data) {
+      Object.assign(this, data);
+    }
+  }
 }
