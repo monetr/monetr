@@ -6,7 +6,12 @@
 
 html, body {
     height: 100%;
-    background-color: #d9d9d9;
+    /*background-color: #d9d9d9;*/
+    background: #e9ecf4;
+    background: -moz-linear-gradient(45deg, #e9ecf4 0%, #dee4ed 100%);
+    background: -webkit-linear-gradient(45deg, #e9ecf4 0%,#dee4ed 100%);
+    background: linear-gradient(45deg, #e9ecf4 0%,#dee4ed 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e9ecf4', endColorstr='#dee4ed',GradientType=1 );
 }
 
 *:focus {
@@ -15,4 +20,8 @@ html, body {
 
 button:focus {
     outline: none;
+}
+
+.smooth-animation {
+    backface-visibility: hidden;
 }

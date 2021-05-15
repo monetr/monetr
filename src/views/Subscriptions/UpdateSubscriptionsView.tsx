@@ -2,17 +2,32 @@ import React, { Component } from "react";
 import { Button, Card, CardContent, Typography } from "@material-ui/core";
 import BillingPlan from "data/BillingPlan";
 import fetchBillingPlans from "shared/billing/actions/fetchBillingPlans";
+import { getStripePublicKey } from "shared/bootstrap/selectors";
+import { connect } from "react-redux";
+import { loadStripe } from '@stripe/stripe-js';
+import { CardElement, Elements, ElementsConsumer } from '@stripe/react-stripe-js';
+
+enum Stage {
+  ChoosePlan,
+  BillingInformation,
+}
 
 interface State {
   loading: boolean;
   plans: BillingPlan[];
+  stage: Stage;
 }
 
-export class UpdateSubscriptionsView extends Component<any, State> {
+interface WithConnectionPropTypes {
+  stripePublicKey: string;
+}
+
+export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, State> {
 
   state = {
     loading: true,
     plans: [],
+    stage: Stage.ChoosePlan,
   };
 
   componentDidMount() {
@@ -25,8 +40,11 @@ export class UpdateSubscriptionsView extends Component<any, State> {
   }
 
   selectPlan = (plan: BillingPlan) => () => {
-    console.log(plan);
+    this.setState({
+      stage: Stage.BillingInformation,
+    });
   };
+
 
   renderCard = (details: BillingPlan) => {
 
@@ -34,7 +52,7 @@ export class UpdateSubscriptionsView extends Component<any, State> {
 
     return (
       <div key={ details.id } className="flex justify-center items-center">
-        <Card className="transition transform hover:shadow-2xl hover:scale-105 w-64 h-72">
+        <Card elevation={ 4 } className="smooth-animation transition transform hover:shadow-2xl w-64 h-72">
           <CardContent className="h-full">
             <div className="grid grid-flow-row h-full">
               <div>
@@ -81,18 +99,54 @@ export class UpdateSubscriptionsView extends Component<any, State> {
     );
   };
 
+  renderPlanSelection = () => (
+    <div className="grid grid-flow-row">
+      <Typography className="w-full text-center mb-10 opacity-50" variant="h2">
+        { this.state.loading ? 'One moment...' : 'Choose a plan that works best for you' }
+      </Typography>
+      <div className="w-full grid grid-flow-col gap-5">
+        { this.state.plans.map(item => this.renderCard(item)) }
+      </div>
+    </div>
+  );
+
+  renderBillingInfo = () => {
+    const stripePromise = loadStripe(this.props.stripePublicKey);
+
+    return (
+      <Elements stripe={ stripePromise }>
+        <ElementsConsumer>
+          { ({ stripe, elements }) => (
+            <div className="w-96 h-64">
+              <CardElement className="h-12"/>
+            </div>
+          ) }
+        </ElementsConsumer>
+      </Elements>
+    );
+  };
+
+  renderContents = () => {
+    switch (this.state.stage) {
+      case Stage.ChoosePlan:
+        return this.renderPlanSelection();
+      case Stage.BillingInformation:
+        return this.renderBillingInfo();
+    }
+  };
+
   render() {
     return (
       <div className="w-full h-full flex justify-center items-center">
-        <div className="grid grid-flow-row">
-          <Typography className="w-full text-center mb-10 opacity-50" variant="h2">
-            { this.state.loading ? 'One moment...' : 'Choose a plan that works best for you' }
-          </Typography>
-          <div className="w-full grid grid-flow-col gap-10">
-            { this.state.plans.map(item => this.renderCard(item)) }
-          </div>
-        </div>
+        { this.renderContents() }
       </div>
     );
   }
 }
+
+export default connect(
+  state => ({
+    stripePublicKey: getStripePublicKey(state),
+  }),
+  {},
+)(UpdateSubscriptionsView);

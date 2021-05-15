@@ -21,7 +21,7 @@ import GoalsView from "views/GoalsView";
 import TransactionsView from "views/TransactionsView";
 import AccountView from "views/AccountView";
 import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
-import { UpdateSubscriptionsView } from "views/Subscriptions/UpdateSubscriptionsView";
+import UpdateSubscriptionsView from "views/Subscriptions/UpdateSubscriptionsView";
 
 export class AuthenticatedApplication extends Component {
   state = {

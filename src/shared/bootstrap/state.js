@@ -12,6 +12,7 @@ export default class BootstrapState extends Record({
   allowSignUp: false,
   allowForgotPassword: false,
   requireBetaCode: false,
+  stripePublicKey: '',
 }) {
 
 }

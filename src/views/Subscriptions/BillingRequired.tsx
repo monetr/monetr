@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Route, Switch } from "react-router-dom";
-import { UpdateSubscriptionsView } from "views/Subscriptions/UpdateSubscriptionsView";
+import UpdateSubscriptionsView from "views/Subscriptions/UpdateSubscriptionsView";
 
 
 export class BillingRequired extends Component<any, any> {

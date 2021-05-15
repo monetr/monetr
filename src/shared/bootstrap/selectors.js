@@ -15,3 +15,5 @@ export const getRequireLegalName = state => state.bootstrap.requireLegalName;
 export const getRequirePhoneNumber = state => state.bootstrap.requirePhoneNumber;
 
 export const getRequireBetaCode = state => state.bootstrap.requireBetaCode;
+
+export const getStripePublicKey = state => state.bootstrap.stripePublicKey;
