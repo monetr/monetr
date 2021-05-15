@@ -54,17 +54,22 @@ export class UpdateSubscriptionsView extends Component<any, State> {
               </div>
               <div className="flex items-end grid grid-flow-row">
                 { (details.freeTrialDays > 0) &&
-                <Typography variant="h6" className="w-full text-center">
+                <Typography
+                  variant="h6"
+                  className="w-full text-center"
+                >
                   { details.freeTrialDays } day free trial
                 </Typography>
                 }
                 <Button
-                  className="w-full h-12 "
+                  className="w-full h-12"
                   color="primary"
                   variant="contained"
                   onClick={ this.selectPlan(details) }
                 >
-                  <Typography variant="h6">
+                  <Typography
+                    variant="h6"
+                  >
                     Choose
                   </Typography>
                 </Button>
@@ -73,21 +78,21 @@ export class UpdateSubscriptionsView extends Component<any, State> {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   };
 
   render() {
     return (
       <div className="w-full h-full flex justify-center items-center">
         <div className="grid grid-flow-row">
-          <Typography className="w-full text-center mb-10" variant="h2">
-            { this.state.loading ? 'One moment...' : 'Please pick a plan to continue...' }
+          <Typography className="w-full text-center mb-10 opacity-50" variant="h2">
+            { this.state.loading ? 'One moment...' : 'Choose a plan that works best for you' }
           </Typography>
           <div className="w-full grid grid-flow-col gap-10">
             { this.state.plans.map(item => this.renderCard(item)) }
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
