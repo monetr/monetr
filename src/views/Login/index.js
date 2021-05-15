@@ -69,7 +69,7 @@ export class LoginView extends Component {
             loading: false,
           });
         } else {
-          alert(error);
+          throw error;
         }
       });
   };

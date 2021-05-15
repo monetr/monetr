@@ -37,13 +37,13 @@ export class Root extends PureComponent {
       .then(() => {
         return this.props.bootstrapLogin()
           .then(result => {
-            if (result.data.nextUrl) {
+            if (result && result.data.nextUrl) {
               this.props.history.push(result.data.nextUrl);
             }
           });
       })
       .catch(error => {
-        alert(error);
+        throw error;
       })
       .finally(() => {
         this.setState({
