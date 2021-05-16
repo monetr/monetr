@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
@@ -99,10 +100,7 @@ func (j *jobManagerBase) TriggerPullInitialTransactions(accountId, userId, linkI
 
 func (j *jobManagerBase) middleware(job *work.Job, next work.NextMiddlewareFunc) error {
 	start := time.Now()
-	log := j.log.WithFields(logrus.Fields{
-		"jobId": job.ID,
-		"name":  job.Name,
-	})
+	log := j.getLogForJob(job)
 	log.Infof("starting job")
 
 	jobData := models.Job{
@@ -142,7 +140,16 @@ func (j *jobManagerBase) middleware(job *work.Job, next work.NextMiddlewareFunc)
 			log.WithError(err).Warn("failed to update job record after running")
 		}
 	}()
-	return next()
+	var err error
+	defer func() {
+		if err != nil {
+			log.WithError(err).Error("job failed to process due to error")
+			sentry.CaptureException(err)
+		}
+	}()
+
+	err = next()
+	return err
 }
 
 func (j *jobManagerBase) getAccountId(job *work.Job) (uint64, error) {
