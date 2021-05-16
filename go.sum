@@ -517,8 +517,6 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f h1:lJqhwddJVYAkyp72a4pwzMClI20xTwL7miDdm2W/KBM=
 github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/profile v1.2.1/go.mod h1:hJw3o1OdXxsrSjjVksARp5W95eeEaEfptyVZyv6JUPA=
-github.com/plaid/plaid-go v0.0.0-20210507192632-6f72eeaab257 h1:O+aMoXcGNQUbnF40AiV108FpkeLgxEQRhwCnuMPMzFQ=
-github.com/plaid/plaid-go v0.0.0-20210507192632-6f72eeaab257/go.mod h1:c7cDT1Lkcr0AgKJGVIG+oCa07jOrrg4Um8nduQ1eQN0=
 github.com/plaid/plaid-go v0.0.0-20210514175636-fef172346e04 h1:mRXaeNIbC/EvFKmCNVMFURbfaSsas9unnv0qFX7bQoQ=
 github.com/plaid/plaid-go v0.0.0-20210514175636-fef172346e04/go.mod h1:c7cDT1Lkcr0AgKJGVIG+oCa07jOrrg4Um8nduQ1eQN0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
