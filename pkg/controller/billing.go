@@ -13,6 +13,7 @@ import (
 
 func (c *Controller) handleBilling(p iris.Party) {
 	p.Get("/plans", c.getBillingPlans)
+	p.Post("/plans", c.postBillingPlans)
 	p.Post("/create_checkout", c.handlePostCreateCheckout)
 }
 
@@ -106,6 +107,10 @@ func (c *Controller) getBillingPlans(ctx iris.Context) {
 
 	ctx.JSON(plans)
 	return
+}
+
+func (c *Controller) postBillingPlans(ctx iris.Context) {
+
 }
 
 // Create Checkout Session

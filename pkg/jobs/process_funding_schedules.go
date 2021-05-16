@@ -94,6 +94,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 
 	fundingScheduleIds := make([]uint64, 0)
 	idStrings := job.ArgString("fundingScheduleIds")
+	log = log.WithField("fundingScheduleIds", idStrings)
 	for _, idString := range strings.Split(idStrings, ",") {
 		id, err := strconv.ParseUint(idString, 10, 64)
 		if err != nil {
@@ -192,6 +193,11 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 				//  thus be invalid?
 				expensesToUpdate = append(expensesToUpdate, spending)
 			}
+		}
+
+		if len(expensesToUpdate) == 0 {
+			log.Info("no spending objects to update for funding schedule")
+			return nil
 		}
 
 		log.Debugf("preparing to update %d spending(s)", len(expensesToUpdate))
