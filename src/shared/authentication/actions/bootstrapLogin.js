@@ -5,7 +5,7 @@ import { getAPIUrl } from "shared/bootstrap/selectors";
 import Cookies from 'js-cookie'
 import { NewClient } from "api/api";
 
-export default function bootstrapLogin(token = null, user = null) {
+export default function bootstrapLogin(token = null, user = null, subscriptionIsActive = true) {
   return (dispatch, getState) => {
     // eslint-disable-next-line no-undef
     const conf = CONFIG;
@@ -85,7 +85,7 @@ export default function bootstrapLogin(token = null, user = null) {
       payload: {
         isAuthenticated: true,
         token: token,
-        isActive: result.data.isActive,
+        isActive: subscriptionIsActive,
         user: new User(user),
       }
     });

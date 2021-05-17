@@ -1,13 +1,15 @@
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
-import { getSpendingById } from "shared/spending/selectors/getSpendingById";
 import Spending from "data/Spending";
-import { Dialog, Snackbar } from "@material-ui/core";
+import { Dialog, DialogContent, DialogContentText, DialogTitle, Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import { Formik, FormikErrors } from "formik";
+import FundingScheduleSelectionList from "components/FundingSchedules/FundingScheduleSelectionList";
+import { getSelectedExpense } from "shared/spending/selectors/getSelectedExpense";
 
 export interface Props {
-  expenseId: number;
+  onClose: () => void;
+  isOpen: boolean;
 }
 
 interface WithConnectionPropTypes extends Props {
@@ -72,7 +74,19 @@ export class EditExpenseFundingScheduleDialog extends Component<WithConnectionPr
              }) => (
             <form onSubmit={ handleSubmit }>
               <Dialog open={ true } maxWidth='xs'>
-
+                <DialogTitle>
+                  Edit funding schedule
+                </DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    Change how frequently you want to contribute to this expense. This might also change how much is
+                    contributed to the expense depending on the new frequency.
+                  </DialogContentText>
+                  <FundingScheduleSelectionList
+                    disabled={ isSubmitting }
+                    onChange={ (value) => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
+                  />
+                </DialogContent>
               </Dialog>
             </form>
           ) }
@@ -84,7 +98,7 @@ export class EditExpenseFundingScheduleDialog extends Component<WithConnectionPr
 
 export default connect(
   (state, props: Props) => ({
-    expense: getSpendingById(props.expenseId)(state),
+    expense: getSelectedExpense(state),
   }),
   {}
 )(EditExpenseFundingScheduleDialog);

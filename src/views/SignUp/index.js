@@ -4,7 +4,8 @@ import {
   Card,
   CardActions,
   CardContent,
-  CardHeader, CircularProgress,
+  CardHeader,
+  CircularProgress,
   Container,
   Grid,
   Grow,
@@ -21,7 +22,8 @@ import { Link as RouterLink, withRouter } from "react-router-dom";
 import { bindActionCreators } from "redux";
 import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
 import {
-  getReCAPTCHAKey, getRequireBetaCode,
+  getReCAPTCHAKey,
+  getRequireBetaCode,
   getRequireLegalName,
   getRequirePhoneNumber,
   getShouldVerifyRegister,
@@ -68,8 +70,14 @@ export class SignUpView extends Component {
     })
       .then(result => {
         if (result.data.token) {
-          return bootstrapLogin(result.data.token, result.data.user)
+          return bootstrapLogin(result.data.token, result.data.user, result.data.isActive)
             .then(() => {
+              if (result && result.data.nextUrl) {
+                console.log(`going to ${ result.data.nextUrl }`);
+                this.props.history.push(result.data.nextUrl);
+                return
+              }
+
               this.props.history.push('/');
             });
         }
@@ -100,7 +108,7 @@ export class SignUpView extends Component {
     return (
       <Grid item xs={ 12 }>
         <div className="w-full flex justify-center items-center">
-          { this.state.loading && <CircularProgress /> }
+          { this.state.loading && <CircularProgress/> }
           { !this.state.loading && <ReCAPTCHA
             sitekey={ ReCAPTCHAKey }
             onChange={ value => this.setState({ verification: value }) }

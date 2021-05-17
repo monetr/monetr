@@ -17,11 +17,12 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
 import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
-import EditSpendingAmountDialog from "components/Expenses/EditSpendingAmountDialog";
+import EditSpendingAmountDialog from "components/Expenses/EditExpenseAmountDialog";
 import EditExpenseDueDateDialog from "components/Expenses/EditExpenseDueDateDialog";
 import FundingScheduleList from "components/FundingSchedules/FundingScheduleList";
 import fetchBalances from "shared/balances/actions/fetchBalances";
 import deleteSpending from "shared/spending/actions/deleteSpending";
+import EditExpenseFundingScheduleDialog from "components/Expenses/EditExpenseFundingScheduleDialog";
 
 interface WithConnectionPropTypes {
   expense?: Spending;
@@ -34,6 +35,7 @@ interface State {
   transferDialogOpen: boolean;
   editAmountDialogOpen: boolean;
   editDueDateDialogOpen: boolean;
+  editFundingScheduleDialogOpen: boolean;
 }
 
 export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
@@ -42,6 +44,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
     transferDialogOpen: false,
     editAmountDialogOpen: false,
     editDueDateDialogOpen: false,
+    editFundingScheduleDialogOpen: false,
   };
 
   openTransferDialog = () => {
@@ -72,6 +75,14 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
     editDueDateDialogOpen: false,
   });
 
+  openEditFundingScheduleDialog = () => this.setState({
+    editFundingScheduleDialogOpen: true,
+  });
+
+  closeEditFundingScheduleDialog = () => this.setState({
+    editFundingScheduleDialogOpen: false,
+  });
+
   renderNoExpenseSelected = () => {
     return (
       <FundingScheduleList/>
@@ -99,7 +110,12 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
 
     const fundingSchedule = this.props.fundingSchedules.get(expense.fundingScheduleId, new FundingSchedule());
 
-    const { transferDialogOpen, editAmountDialogOpen, editDueDateDialogOpen } = this.state;
+    const {
+      transferDialogOpen,
+      editAmountDialogOpen,
+      editDueDateDialogOpen,
+      editFundingScheduleDialogOpen,
+    } = this.state;
 
     return (
       <Fragment>
@@ -111,6 +127,9 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
         }
         { editDueDateDialogOpen &&
         <EditExpenseDueDateDialog isOpen onClose={ this.closeEditDueDateDialog }/>
+        }
+        { editFundingScheduleDialogOpen &&
+        <EditExpenseFundingScheduleDialog onClose={ this.closeEditFundingScheduleDialog } isOpen/>
         }
 
         <div className="w-full pl-5 pr-5 pt-5 expense-detail">
@@ -194,7 +213,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
             </ListItem>
             <Divider/>
 
-            <ListItem button dense>
+            <ListItem button dense onClick={ this.openEditFundingScheduleDialog }>
               <ListItemIcon>
                 <ArrowForward/>
               </ListItemIcon>

@@ -1,11 +1,13 @@
 import React, { Component } from "react";
-import { Button, Card, CardContent, Typography } from "@material-ui/core";
+import { Button, Card, CardActions, CardContent, Paper, Typography } from "@material-ui/core";
 import BillingPlan from "data/BillingPlan";
 import fetchBillingPlans from "shared/billing/actions/fetchBillingPlans";
 import { getStripePublicKey } from "shared/bootstrap/selectors";
 import { connect } from "react-redux";
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeCardElement, StripeCardElementChangeEvent, StripeElements } from '@stripe/stripe-js';
 import { CardElement, Elements, ElementsConsumer } from '@stripe/react-stripe-js';
+import createNewSubscription from "shared/billing/actions/createNewSubscription";
+import logout from "shared/authentication/actions/logout";
 
 enum Stage {
   ChoosePlan,
@@ -16,10 +18,13 @@ interface State {
   loading: boolean;
   plans: BillingPlan[];
   stage: Stage;
+  selectedPlan: BillingPlan | null;
+  cardComplete: boolean;
 }
 
 interface WithConnectionPropTypes {
   stripePublicKey: string;
+  logout: () => void;
 }
 
 export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, State> {
@@ -28,6 +33,8 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
     loading: true,
     plans: [],
     stage: Stage.ChoosePlan,
+    selectedPlan: null,
+    cardComplete: false,
   };
 
   componentDidMount() {
@@ -42,6 +49,7 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
   selectPlan = (plan: BillingPlan) => () => {
     this.setState({
       stage: Stage.BillingInformation,
+      selectedPlan: plan,
     });
   };
 
@@ -100,15 +108,107 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
   };
 
   renderPlanSelection = () => (
-    <div className="grid grid-flow-row">
+    <div className="h-full grid grid-flow-row p-10">
       <Typography className="w-full text-center mb-10 opacity-50" variant="h2">
         { this.state.loading ? 'One moment...' : 'Choose a plan that works best for you' }
       </Typography>
       <div className="w-full grid grid-flow-col gap-5">
         { this.state.plans.map(item => this.renderCard(item)) }
       </div>
+      <div className="h-full w-full flex items-end justify-center opacity-50">
+        <Button
+          onClick={ this.props.logout }
+        >
+          Logout
+        </Button>
+      </div>
     </div>
   );
+
+  stripeOnChange = (event: StripeCardElementChangeEvent) => {
+    this.setState({
+      cardComplete: event.complete,
+    });
+  };
+
+  stripeOnReady = (element: StripeCardElement) => {
+    console.log("ready")
+  };
+
+  stripeOnEscape = () => {
+
+  };
+
+  renderBillingHandler = (stripe: Stripe, elements: StripeElements) => {
+    const { selectedPlan } = this.state;
+    const price = `$${ (selectedPlan.unitPrice / 100).toFixed(2) }`;
+
+    const billingSubscribe = () => {
+      this.setState({
+        loading: true,
+      });
+      const cardElement = elements.getElement(CardElement);
+      stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+      })
+        .then(result => {
+          return createNewSubscription(selectedPlan.id, result.paymentMethod.id);
+        })
+        .then(result => {
+          console.log(result);
+        });
+    };
+
+    return (
+      <Card className="w-96">
+        <CardContent>
+          <div>
+            <Typography variant="h5">Begin your subscription</Typography>
+          </div>
+          <div className="mt-5 mb-5">
+            <Typography>Total due now: <b>{ price }</b></Typography>
+          </div>
+          <div className="">
+            <Typography className="opacity-50">Card</Typography>
+            <Paper className="p-1">
+              <CardElement
+                onChange={ this.stripeOnChange }
+                onReady={ this.stripeOnReady }
+                onEscape={ this.stripeOnEscape }
+                options={ {
+                  style: {
+                    base: {
+                      lineHeight: '30px',
+                      padding: '5px',
+                    }
+                  }
+                } }
+              />
+            </Paper>
+          </div>
+        </CardContent>
+        <CardActions>
+          <Button
+            disabled={ this.state.loading }
+            color="secondary"
+            variant="outlined"
+            className="ml-auto"
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={ !this.state.cardComplete || this.state.loading }
+            color="primary"
+            variant="contained"
+            onClick={ billingSubscribe }
+          >
+            Subscribe
+          </Button>
+        </CardActions>
+      </Card>
+    )
+  };
 
   renderBillingInfo = () => {
     const stripePromise = loadStripe(this.props.stripePublicKey);
@@ -117,9 +217,7 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
       <Elements stripe={ stripePromise }>
         <ElementsConsumer>
           { ({ stripe, elements }) => (
-            <div className="w-96 h-64">
-              <CardElement className="h-12"/>
-            </div>
+            this.renderBillingHandler(stripe, elements)
           ) }
         </ElementsConsumer>
       </Elements>
@@ -148,5 +246,7 @@ export default connect(
   state => ({
     stripePublicKey: getStripePublicKey(state),
   }),
-  {},
+  {
+    logout,
+  },
 )(UpdateSubscriptionsView);

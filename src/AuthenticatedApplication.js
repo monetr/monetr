@@ -54,7 +54,7 @@ export class AuthenticatedApplication extends Component {
         ]);
       }),
     ])
-      .then(() => this.setState({ loading: false }));
+      .finally(() => this.setState({ loading: false }));
   }
 
   openMenu = event => {
