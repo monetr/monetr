@@ -61,3 +61,16 @@ func (r *repositoryBase) GetActiveSubscription(ctx context.Context) (*models.Sub
 
 	return &result, nil
 }
+
+func (r *repositoryBase) CreateSubscription(ctx context.Context, subscription *models.Subscription) error {
+	span := sentry.StartSpan(ctx, "CreateSubscription")
+	defer span.Finish()
+
+	subscription.AccountId = r.AccountId()
+	subscription.OwnedByUserId = r.UserId()
+
+	_, err := r.txn.ModelContext(span.Context(), subscription).
+		Insert(subscription)
+
+	return errors.Wrap(err, "failed to create subscription")
+}

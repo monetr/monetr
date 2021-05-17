@@ -1,16 +1,13 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/form3tech-oss/jwt-go"
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/hash"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"strings"
 	"time"
@@ -111,26 +108,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			return
 		}
 
-		var subscriptionIsActive bool
-		if subscription == nil {
-			subscriptionIsActive = false
-		} else {
-			switch subscription.Status {
-			case stripe.SubscriptionStatusActive,
-				stripe.SubscriptionStatusTrialing:
-				subscriptionIsActive = true
-			case stripe.SubscriptionStatusPastDue,
-				stripe.SubscriptionStatusUnpaid,
-				stripe.SubscriptionStatusCanceled,
-				stripe.SubscriptionStatusIncomplete,
-				stripe.SubscriptionStatusIncompleteExpired:
-				subscriptionIsActive = false
-			default:
-				sentry.CaptureMessage(fmt.Sprintf("invalid subscription status: %s", subscription.Status))
-				c.returnError(ctx, http.StatusNotImplemented, "invalid subscription status, create a github issue")
-				return
-			}
-		}
+		subscriptionIsActive := subscription.IsActive()
 
 		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, subscriptionIsActive)
 		if err != nil {
@@ -176,9 +154,10 @@ func (c *Controller) validateLogin(email, password string) error {
 func (c *Controller) generateToken(loginId, userId, accountId uint64, subscriptionActive bool) (string, error) {
 	now := time.Now()
 	claims := &HarderClaims{
-		LoginId:   loginId,
-		UserId:    userId,
-		AccountId: accountId,
+		LoginId:            loginId,
+		UserId:             userId,
+		AccountId:          accountId,
+		SubscriptionStatus: subscriptionActive,
 		StandardClaims: jwt.StandardClaims{
 			Audience: []string{
 				c.configuration.APIDomainName,

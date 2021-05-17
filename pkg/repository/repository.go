@@ -53,6 +53,7 @@ type Repository interface {
 	UpdateLink(link *models.Link) error
 	UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error
 	UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error
+	UpdateUser(ctx context.Context, user *models.User) error
 
 	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
@@ -63,6 +64,7 @@ type Repository interface {
 	*/
 
 	GetActiveSubscription(ctx context.Context) (*models.Subscription, error)
+	CreateSubscription(ctx context.Context, subscription *models.Subscription) error
 }
 
 type UnauthenticatedRepository interface {

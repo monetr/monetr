@@ -5,6 +5,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/gomodule/redigo/redis"
+	"github.com/monetrapp/rest-api/pkg/billing"
 	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/internal/stripe_helper"
@@ -45,6 +46,7 @@ type Controller struct {
 	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
+	billingHelper            billing.BillingHelper
 }
 
 func NewController(
@@ -83,6 +85,7 @@ func NewController(
 		stripeClient:             stripeClient,
 		ps:                       pubsub.NewPostgresPubSub(log, db),
 		cache:                    cache,
+		billingHelper:            billing.NewBillingHelper(log, cache, db),
 	}
 }
 

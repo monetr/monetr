@@ -144,7 +144,6 @@ type Stripe struct {
 	WebhooksEnabled bool
 	WebhooksDomain  string
 	WebhookSecret   string
-	Prices          []string
 	Plans           []Plan
 	BillingEnabled  bool
 }

@@ -116,14 +116,20 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	ctx.Values().Set(accountIdContextKey, claims.AccountId)
 	ctx.Values().Set(userIdContextKey, claims.UserId)
 	ctx.Values().Set(loginIdContextKey, claims.LoginId)
-	ctx.Values().Set(subscriptionStatusContextKey, claims.SubscriptionStatus)
 
 	ctx.Next()
 }
 
 func (c *Controller) requireActiveSubscriptionMiddleware(ctx *context.Context) {
-	subscriptionStatus := ctx.Values().GetBoolDefault(subscriptionStatusContextKey, false)
-	if !subscriptionStatus {
+	userId, accountId := c.mustGetUserId(ctx), c.mustGetAccountId(ctx)
+
+	active, err := c.billingHelper.GetSubscriptionIsActive(c.getContext(ctx), userId, accountId)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to validate subscription is active")
+		return
+	}
+
+	if !active {
 		c.returnError(ctx, http.StatusPaymentRequired, "subscription is not active")
 		return
 	}

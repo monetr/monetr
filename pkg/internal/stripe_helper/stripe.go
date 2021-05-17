@@ -12,8 +12,12 @@ import (
 )
 
 type Stripe interface {
+	AttachPaymentMethod(ctx context.Context, paymentMethodId, customerId string) (*stripe.PaymentMethod, error)
 	GetPricesById(ctx context.Context, stripePriceIds []string) ([]stripe.Price, error)
 	GetProductsById(ctx context.Context, stripeProductIds []string) ([]stripe.Product, error)
+	CreateSubscription(ctx context.Context, subscription stripe.SubscriptionParams) (*stripe.Subscription, error)
+	CreateCustomer(ctx context.Context, customer stripe.CustomerParams) (*stripe.Customer, error)
+	UpdateCustomer(ctx context.Context, id string, customer stripe.CustomerParams) (*stripe.Customer, error)
 }
 
 var (
@@ -71,7 +75,9 @@ func (s *stripeBase) GetProductsById(ctx context.Context, stripeProductIds []str
 	defer span.Finish()
 
 	productIds := make([]*string, len(stripeProductIds))
-	for i := range stripeProductIds { productIds[i] = &stripeProductIds[i] }
+	for i := range stripeProductIds {
+		productIds[i] = &stripeProductIds[i]
+	}
 
 	productIterator := s.client.Products.List(&stripe.ProductListParams{
 		IDs: productIds,
@@ -93,4 +99,54 @@ func (s *stripeBase) GetProductsById(ctx context.Context, stripeProductIds []str
 	}
 
 	return products, nil
+}
+
+func (s *stripeBase) AttachPaymentMethod(ctx context.Context, paymentMethodId, customerId string) (*stripe.PaymentMethod, error) {
+	span := sentry.StartSpan(ctx, "Stripe - AttachPaymentMethod")
+	defer span.Finish()
+
+	result, err := s.client.PaymentMethods.Attach(paymentMethodId, &stripe.PaymentMethodAttachParams{
+		Customer: &customerId,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to attach payment method")
+	}
+
+	return result, nil
+}
+
+func (s *stripeBase) CreateSubscription(ctx context.Context, subscription stripe.SubscriptionParams) (*stripe.Subscription, error) {
+	span := sentry.StartSpan(ctx, "Stripe - CreateSubscription")
+	defer span.Finish()
+
+	result, err := s.client.Subscriptions.New(&subscription)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create subscription")
+	}
+
+	return result, nil
+}
+
+func (s *stripeBase) CreateCustomer(ctx context.Context, customer stripe.CustomerParams) (*stripe.Customer, error) {
+	span := sentry.StartSpan(ctx, "Stripe - CreateCustomer")
+	defer span.Finish()
+
+	result, err := s.client.Customers.New(&customer)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create customer")
+	}
+
+	return result, nil
+}
+
+func (s *stripeBase) UpdateCustomer(ctx context.Context, id string, customer stripe.CustomerParams) (*stripe.Customer, error) {
+	span := sentry.StartSpan(ctx, "Stripe - UpdateCustomer")
+	defer span.Finish()
+
+	result, err := s.client.Customers.Update(id, &customer)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to update customer")
+	}
+
+	return result, nil
 }

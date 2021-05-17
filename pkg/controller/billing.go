@@ -6,14 +6,16 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/swag"
 	"github.com/stripe/stripe-go/v72"
 	"net/http"
+	"time"
 )
 
 func (c *Controller) handleBilling(p iris.Party) {
 	p.Get("/plans", c.getBillingPlans)
-	p.Post("/plans", c.postBillingPlans)
+	p.Post("/subscribe", c.postSubscribe)
 	p.Post("/create_checkout", c.handlePostCreateCheckout)
 }
 
@@ -109,7 +111,143 @@ func (c *Controller) getBillingPlans(ctx iris.Context) {
 	return
 }
 
-func (c *Controller) postBillingPlans(ctx iris.Context) {
+func (c *Controller) postSubscribe(ctx iris.Context) {
+	log := c.getLog(ctx)
+
+	var subscribeRequest struct {
+		PriceId         string `json:"priceId"`
+		PaymentMethodId string `json:"paymentMethodId"`
+	}
+	if err := ctx.ReadJSON(&subscribeRequest); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	{ // Handle the user potentially already having a subscription.
+		activeSubscription, err := repo.GetActiveSubscription(c.getContext(ctx))
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to validate a subscription does not already exist")
+			return
+		}
+
+		if activeSubscription != nil {
+			c.badRequest(ctx, "an active subscription already exists, cannot create another one")
+			return
+		}
+	}
+
+	var plan config.Plan
+	{ // Validate the price against our configuration.
+		var foundValidPlan bool
+		for _, planItem := range c.configuration.Stripe.Plans {
+			if planItem.StripePriceId == subscribeRequest.PriceId {
+				foundValidPlan = true
+				plan = planItem
+			}
+		}
+
+		if !foundValidPlan {
+			c.badRequest(ctx, "invalid price Id provided")
+			return
+		}
+	}
+
+	me, err := repo.GetMe()
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve user details")
+		return
+	}
+
+	if me.StripeCustomerId == nil {
+		log.Info("user does not have a stripe customer record, creating one")
+		newCustomer, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
+			Email: &me.Login.Email,
+			Name:  stripe.String(me.Login.FirstName + " " + me.Login.LastName),
+		})
+		if err != nil {
+			log.WithError(err).Error("could not create a stripe customer for user")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create a stripe customer for user")
+			return
+		}
+
+		me.StripeCustomerId = &newCustomer.ID
+		log.Debugf("updating user with new stripe customer Id")
+		if err = repo.UpdateUser(c.getContext(ctx), me); err != nil {
+			c.wrapPgError(ctx, err, "could not update user with new stripe customer Id")
+			return
+		}
+	}
+
+	log.Debugf("attaching payment method to stripe customer")
+	paymentMethod, err := c.stripe.AttachPaymentMethod(
+		c.getContext(ctx),
+		subscribeRequest.PaymentMethodId,
+		*me.StripeCustomerId,
+	)
+	if err != nil {
+		log.WithError(err).Error("failed to attach payment method to stripe customer")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not associate payment method")
+		return
+	}
+
+	log.Debugf("updating customer with new default payment method")
+	_, err = c.stripe.UpdateCustomer(c.getContext(ctx), *me.StripeCustomerId, stripe.CustomerParams{
+		InvoiceSettings: &stripe.CustomerInvoiceSettingsParams{
+			DefaultPaymentMethod: &paymentMethod.ID,
+		},
+	})
+	if err != nil {
+		log.WithError(err).Error("failed to update customer's default payment method")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not set customer's default payment method")
+		return
+	}
+
+	subscriptionParams := &stripe.SubscriptionParams{
+		Customer:             me.StripeCustomerId,
+		DefaultPaymentMethod: &paymentMethod.ID,
+		Items: []*stripe.SubscriptionItemsParams{
+			{
+				Plan:     stripe.String(subscribeRequest.PriceId),
+				Quantity: stripe.Int64(1),
+			},
+		},
+		TrialPeriodDays: stripe.Int64(int64(plan.FreeTrialDays)),
+	}
+	subscriptionParams.AddExpand("latest_invoice.payment_intent")
+
+	log.Debugf("creating subscription")
+	stripeSubscription, err := c.stripe.CreateSubscription(c.getContext(ctx), *subscriptionParams)
+	if err != nil {
+		log.WithError(err).Error("failed to create subscription for customer")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create subscription")
+		return
+	}
+
+	var trialStart, trialEnd *time.Time
+	if stripeSubscription.TrialEnd != 0 {
+		trialStart = myownsanity.TimeP(time.Now().UTC())
+		trialEnd = myownsanity.TimeP(time.Unix(stripeSubscription.TrialEnd, 0).UTC())
+	}
+
+	subscription := &models.Subscription{
+		StripeSubscriptionId: stripeSubscription.ID,
+		StripeCustomerId:     *me.StripeCustomerId,
+		StripePriceId:        subscribeRequest.PriceId,
+		Features:             plan.Features,
+		Status:               stripeSubscription.Status,
+		TrialStart:           trialStart,
+		TrialEnd:             trialEnd,
+	}
+
+	if err = repo.CreateSubscription(c.getContext(ctx), subscription); err != nil {
+		log.WithError(err).Error("failed to store subscription details")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store subscription details")
+		return
+	}
+
+
 
 }
 
