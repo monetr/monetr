@@ -18,7 +18,7 @@ if (CONFIG.SENTRY_DSN) {
     // eslint-disable-next-line no-undef
     release: `web-ui@${RELEASE_REVISION}`,
     integrations: [new Integrations.BrowserTracing()],
-    tracesSampleRate: 1.0,
+    tracesSampleRate: 0,
   });
 }
 
