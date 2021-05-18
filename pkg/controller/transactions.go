@@ -4,6 +4,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/sirupsen/logrus"
 	"math"
 	"net/http"
 	"strings"
@@ -198,11 +199,19 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		}
 
 		if existingTransaction.Date != transaction.Date {
+			c.getLog(ctx).WithFields(logrus.Fields{
+				"existingDate": existingTransaction.Date,
+				"newDate":      transaction.Date,
+			}).Warn("cannot change transaction date on non-manual links")
 			c.badRequest(ctx, "cannot change transaction date on non-manual links")
 			return
 		}
 
 		if existingTransaction.AuthorizedDate != transaction.AuthorizedDate {
+			c.getLog(ctx).WithFields(logrus.Fields{
+				"existingAuthorizedDate": existingTransaction.AuthorizedDate,
+				"newAuthorizedDate":      transaction.AuthorizedDate,
+			}).Warn("cannot change transaction authorized date on non-manual links")
 			c.badRequest(ctx, "cannot change transaction authorized date on non-manual links")
 			return
 		}
