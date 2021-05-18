@@ -11,7 +11,7 @@ import (
 
 func (c *Controller) handleFundingSchedules(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/funding_schedules", c.getFundingSchedules)
-	p.Get("/{bankAccountId:uint64}/funding_schedules/stats", c.getFundingSchedules)
+	p.Get("/{bankAccountId:uint64}/funding_schedules/stats", c.getFundingScheduleStats)
 	p.Post("/{bankAccountId:uint64}/funding_schedules", c.postFundingSchedules)
 	p.Put("/{bankAccountId:uint64}/funding_schedules/{fundingScheduleId:uint64}", c.putFundingSchedules)
 	p.Delete("/{bankAccountId:uint64}/funding_schedules/{fundingScheduleId:uint64}", c.deleteFundingSchedules)
@@ -63,7 +63,7 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 // @Success 200 {object} repository.FundingStats
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getFundingScheduleStatus(ctx *context.Context) {
+func (c *Controller) getFundingScheduleStats(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
@@ -77,7 +77,6 @@ func (c *Controller) getFundingScheduleStatus(ctx *context.Context) {
 		c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
 		return
 	}
-
 
 	ctx.JSON(stats)
 }
