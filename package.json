@@ -9,6 +9,6 @@
     "yargs": "17.0.1"
   },
   "devDependencies": {
-    "@types/yargs": "16.0.1"
+    "@types/yargs": "16.0.2"
   }
 }
