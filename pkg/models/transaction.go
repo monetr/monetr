@@ -23,8 +23,8 @@ type Transaction struct {
 	SpendingAmount       *int64     `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
 	Categories           []string   `json:"categories" pg:"categories,type:'text[]'"`
 	OriginalCategories   []string   `json:"originalCategories" pg:"original_categories,type:'text[]'"`
-	Date                 time.Time  `json:"date" pg:"date,notnull,type:'date'"`
-	AuthorizedDate       *time.Time `json:"authorizedDate" pg:"authorized_date,type:'date'"`
+	Date                 time.Time  `json:"date" pg:"date,notnull"`
+	AuthorizedDate       *time.Time `json:"authorizedDate" pg:"authorized_date"`
 	Name                 string     `json:"name,omitempty" pg:"name"`
 	OriginalName         string     `json:"originalName" pg:"original_name,notnull"`
 	MerchantName         string     `json:"merchantName,omitempty" pg:"merchant_name"`
