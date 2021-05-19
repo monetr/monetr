@@ -6,7 +6,7 @@ require (
 	github.com/MicahParks/keyfunc v0.4.0
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/alicebob/miniredis/v2 v2.14.3
+	github.com/alicebob/miniredis/v2 v2.14.4
 	github.com/brianvoe/gofakeit/v6 v6.4.1
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible
 	github.com/getsentry/sentry-go v0.10.0
