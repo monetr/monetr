@@ -11,5 +11,14 @@ func TimesPEqual(a, b *time.Time) bool {
 		return false
 	}
 
+	if a == nil && b == nil {
+		return true
+	}
+
+	// Just to silence editor warning. Neither should be nil at this point.
+	if a == nil || b == nil {
+		return false
+	}
+
 	return a.Equal(*b)
 }
