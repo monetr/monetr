@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/sirupsen/logrus"
 	"math"
@@ -198,7 +199,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 			return
 		}
 
-		if existingTransaction.Date != transaction.Date {
+		if !existingTransaction.Date.Equal(transaction.Date) {
 			c.getLog(ctx).WithFields(logrus.Fields{
 				"existingDate": existingTransaction.Date,
 				"newDate":      transaction.Date,
@@ -207,7 +208,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 			return
 		}
 
-		if existingTransaction.AuthorizedDate != transaction.AuthorizedDate {
+		if !myownsanity.TimesPEqual(existingTransaction.AuthorizedDate, transaction.AuthorizedDate) {
 			c.getLog(ctx).WithFields(logrus.Fields{
 				"existingAuthorizedDate": existingTransaction.AuthorizedDate,
 				"newAuthorizedDate":      transaction.AuthorizedDate,

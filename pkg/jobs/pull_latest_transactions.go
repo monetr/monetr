@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/monetrapp/rest-api/pkg/util"
@@ -232,9 +233,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 				shouldUpdate = true
 			}
 
-			if existingTransaction.AuthorizedDate == nil && authorizedDate != nil {
-				shouldUpdate = true
-			} else if existingTransaction.AuthorizedDate != nil && authorizedDate != nil && !existingTransaction.AuthorizedDate.Equal(*authorizedDate) {
+			if !myownsanity.TimesPEqual(existingTransaction.AuthorizedDate, authorizedDate) {
 				shouldUpdate = true
 			}
 
@@ -254,7 +253,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			}
 
 			// Fix timezone of records.
-			if existingTransaction.Date != date {
+			if !existingTransaction.Date.Equal(date) {
 				existingTransaction.Date = date
 				shouldUpdate = true
 			}
@@ -265,6 +264,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		}
 
 		if len(transactionsToUpdate) > 0 {
+			log.Infof("updating %d transactions", len(transactionsToUpdate))
 			if err = repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
 				log.WithError(err).Errorf("failed to update transactions for job")
 				return err
@@ -272,6 +272,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		}
 
 		if len(transactionsToInsert) > 0 {
+			log.Infof("creating %d transactions", len(transactionsToInsert))
 			// Reverse the list so the oldest records are inserted first.
 			for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
 				transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]

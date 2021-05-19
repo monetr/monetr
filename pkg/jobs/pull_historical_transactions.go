@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/monetrapp/rest-api/pkg/util"
@@ -184,9 +185,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 				shouldUpdate = true
 			}
 
-			if existingTransaction.AuthorizedDate == nil && authorizedDate != nil {
-				shouldUpdate = true
-			} else if existingTransaction.AuthorizedDate != nil && authorizedDate != nil && !existingTransaction.AuthorizedDate.Equal(*authorizedDate) {
+			if !myownsanity.TimesPEqual(existingTransaction.AuthorizedDate, authorizedDate) {
 				shouldUpdate = true
 			}
 
@@ -206,7 +205,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			}
 
 			// Fix timezone of records.
-			if existingTransaction.Date != date {
+			if !existingTransaction.Date.Equal(date) {
 				existingTransaction.Date = date
 				shouldUpdate = true
 			}
