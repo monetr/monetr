@@ -243,6 +243,8 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		return
 	}
 
+	c.getLog(ctx).Debugf("successfully updated transaction")
+
 	ctx.JSON(map[string]interface{}{
 		"transaction": transaction,
 		"spending":    updatedExpenses,
