@@ -10,11 +10,12 @@ OS = $(shell uname -s | tr A-Z a-z)
 HELM=helm
 HOSTESS=hostess
 JQ=jq
-KUBECTL=kubectl
+KUBECTL=minikube kubectl --
 SPLIT_YAML=kubernetes-split-yaml
 SSHFS=sshfs
 YQ=yq
 VAULT=vault
+PGO=$(LOCAL_BIN)/pgo
 
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
@@ -43,7 +44,10 @@ $(LOCAL_BIN):
 	mkdir -p $(LOCAL_BIN)
 
 $(LOCAL_DIR):
-	mkdir -p $(PWD)/local
+	mkdir -p $(LOCAL_DIR)
+
+$(LOCAL_TMP):
+	mkdir -p $(LOCAL_TMP)
 
 info:
 	$(call infoMsg,Creating a minikube cluster for local development at: https://$(LOCAL_DOMAIN))
@@ -188,23 +192,23 @@ $(REGISTER_JWT_SECRET): $(LOCAL_DIR)
 REST_API_IMAGE_REPO=registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
 init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	$(call infoMsg,Setting up a basic helm values file for running the API locally)
-	yq e '.image.repository = "$(REST_API_IMAGE_REPO)"' -i $(VALUES)
-	yq e '.ingress.enabled = true' -i $(VALUES)
-	yq e '.ingress.annotations."kubernetes.io/ingress.class" = "nginx"' -i $(VALUES)
-	yq e '.ingress.hosts[0].host = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
-	yq e '.ingress.hosts[0].paths[0] = {"path": "/"}' -i $(VALUES)
-	yq e '.service.port = 4000' -i $(VALUES)
-	yq e '.api.includeSecrets = true' -i $(VALUES)
-	yq e '.api.uiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
-	yq e '.api.apiDomainName = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	$(YQ) e '.image.repository = "$(REST_API_IMAGE_REPO)"' -i $(VALUES)
+	$(YQ) e '.ingress.enabled = true' -i $(VALUES)
+	$(YQ) e '.ingress.annotations."kubernetes.io/ingress.class" = "nginx"' -i $(VALUES)
+	$(YQ) e '.ingress.hosts[0].host = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	$(YQ) e '.ingress.hosts[0].paths[0] = {"path": "/"}' -i $(VALUES)
+	$(YQ) e '.service.port = 4000' -i $(VALUES)
+	$(YQ) e '.api.includeSecrets = true' -i $(VALUES)
+	$(YQ) e '.api.uiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	$(YQ) e '.api.apiDomainName = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(eval LOGIN_JWT_SECRET_VALUE = $(shell cat $(LOGIN_JWT_SECRET)))
 	export jwt_secret_value=$(LOGIN_JWT_SECRET_VALUE) && yq e '.api.jwt.loginJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
 	$(eval REGISTER_JWT_SECRET_VALUE = $(shell cat $(REGISTER_JWT_SECRET)))
 	export jwt_secret_value=$(REGISTER_JWT_SECRET_VALUE) && yq e '.api.jwt.registrationJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
-	yq e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
-	yq e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
-	yq e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
-	yq e '.api.cors.debug = false' -i $(VALUES)
+	$(YQ) e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	$(YQ) e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	$(YQ) e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	$(YQ) e '.api.cors.debug = false' -i $(VALUES)
 
 local-dependencies-maybe:
 	$(call infoMsg,Getting any dependencies needed to run everything locally)
@@ -255,10 +259,55 @@ deploy-redis:
 	$(KUBECTL) apply -f $(PWD)/minikube/redis.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/redis --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
+USE_PGO_OPERATOR ?=false
+ifeq ($(USE_PGO_OPERATOR),true)
+POSTGRES_OPERATOR_VERSION ?=v4.7.0
+POSTGRES_OPERATOR_CLIENT_SETUP=$(LOCAL_TMP)/pgo_client_setup.sh
+POSTGRES_OPERATOR_BASE_URL=https://raw.githubusercontent.com/CrunchyData/postgres-operator/$(POSTGRES_OPERATOR_VERSION)
+
+POSTGRES_OPERATOR_INSTALLER_YAML=$(LOCAL_TMP)/postgres-operator.yaml
+$(POSTGRES_OPERATOR_INSTALLER_YAML): $(LOCAL_TMP)
+	$(call infoMsg,Downloading Crunchy Data PostgreSQL operator installer yaml)
+	curl $(POSTGRES_OPERATOR_BASE_URL)/installers/kubectl/postgres-operator.yml > $(POSTGRES_OPERATOR_INSTALLER_YAML)
+	sed -i -e 's/namespace: "pgo"/namespace: "$(MINIKUBE_NAMESPACE)"/g' $(POSTGRES_OPERATOR_INSTALLER_YAML)
+	sed -i -e 's/namespace: pgo/namespace: "$(MINIKUBE_NAMESPACE)"/g' $(POSTGRES_OPERATOR_INSTALLER_YAML)
+	$(KUBECTL) apply -f $(POSTGRES_OPERATOR_INSTALLER_YAML) -n $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) wait --for=condition=complete job/pgo-deploy -n $(MINIKUBE_NAMESPACE) --timeout=180s
+	$(KUBECTL) delete -f $(POSTGRES_OPERATOR_INSTALLER_YAML) -n $(MINIKUBE_NAMESPACE)
+
+ifeq ($(OS),linux)
+PGO_BIN_NAME="pgo"
+else ifeq ($(OS),darwin)
+PGO_BIN_NAME="pgo-mac"
+else
+$(error Operating system [$(OS)] is not supported by pgo)
+endif
+
+define kubectl_get_private
+touch "$1" && chmod a-rwx,u+rw "$1" && $(KUBECTL) get > "$1" "${@:2}"
+endef
+
+PGO_DIR=$(LOCAL_TMP)/.pgo
+$(POSTGRES_OPERATOR_CLIENT_SETUP): $(LOCAL_TMP)
+	$(call kubectl_get_private "$(PGO_DIR)/pgouser" secret -n $(MINIKUBE_NAMESPACE) "pgouser-admin" -o 'go-template={{ .data.username | base64decode }}:{{ .data.password | base64decode }}')
+	$(call kubectl_get_private "$(PGO_DIR)/client.crt" secret -n $(MINIKUBE_NAMESPACE) pgo.tls -o 'go-template={{ index .data "tls.crt" | base64decode }}')
+	$(call kubectl_get_private "$(PGO_DIR)/client.key" secret -n $(MINIKUBE_NAMESPACE) pgo.tls -o 'go-template={{ index .data "tls.key" | base64decode }}')
+
+POSTGRES_OPERATOR_BIN_DOWNLOAD=https://github.com/CrunchyData/postgres-operator/releases/download/$(POSTGRES_OPERATOR_VERSION)/$(PGO_BIN_NAME)
+$(PGO): $(LOCAL_BIN)
+	$(call infoMsg,Downloading Crunchy Data PostgreSQL operator client)
+	curl -Lo $(PGO) $(POSTGRES_OPERATOR_BIN_DOWNLOAD)
+
+deploy-postgres: $(LOCAL_TMP) $(POSTGRES_OPERATOR_INSTALLER_YAML)
+	$(call infoMsg,Deploying Crunchy Data PostgreSQL to the minikube cluster)
+	$(KUBECTL) apply -f $(PWD)/minikube/crunchy-postgres.yaml -n $(MINIKUBE_NAMESPACE)
+
+else
 deploy-postgres:
 	$(call infoMsg,Deploying postgres into the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/postgres --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
+endif
 
 values-file: local-dependencies-maybe $(VALUES)
 

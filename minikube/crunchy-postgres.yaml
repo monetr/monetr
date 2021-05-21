@@ -1,0 +1,67 @@
+apiVersion: crunchydata.com/v1
+kind: Pgcluster
+metadata:
+  annotations:
+    current-primary: hippo
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9187'
+  labels:
+    crunchy-pgha-scope: hippo
+    deployment-name: hippo
+    name: hippo
+    pg-cluster: hippo
+    pgouser: admin
+  name: hippo
+spec:
+  BackrestStorage:
+    accessmode: ReadWriteMany
+    matchLabels: ""
+    name: ""
+    size: 1G
+    storageclass: ""
+    storagetype: dynamic
+    supplementalgroups: ""
+  PrimaryStorage:
+    accessmode: ReadWriteOnce
+    matchLabels: ""
+    name: hippo
+    size: 1G
+    storageclass: ""
+    storagetype: dynamic
+    supplementalgroups: ""
+  ReplicaStorage:
+    accessmode: ReadWriteOnce
+    matchLabels: ""
+    name: ""
+    size: 1G
+    storageclass: ""
+    storagetype: dynamic
+    supplementalgroups: ""
+  annotations:
+    postgres:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '9187'
+  ccpimage: crunchy-postgres-ha
+  ccpimageprefix: registry.developers.crunchydata.com/crunchydata
+  ccpimagetag: centos8-13.2-4.7.0
+  clustername: hippo
+  database: postgres
+  exporter: true
+  exporterport: "9187"
+  limits:
+    memory: 512Mi
+    cpu: 500m
+  name: hippo
+  namespace: default
+  pgbadgerport: "10000"
+  pgoimageprefix: registry.developers.crunchydata.com/crunchydata
+  podAntiAffinity:
+    default: preferred
+    pgBackRest: preferred
+    pgBouncer: preferred
+  port: "5432"
+  tolerations: [ ]
+  user: admin
+  replicas: "1"
+  tlsOnly: false
+  serviceType: "ClusterIP"
