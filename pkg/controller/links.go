@@ -57,7 +57,7 @@ func (c *Controller) linksController(p iris.Party) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Router /links [get]
-// @Success 200 {array} models.Link
+// @Success 200 {array} swag.LinkResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getLinks(ctx *context.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -77,14 +77,16 @@ func (c *Controller) getLinks(ctx *context.Context) {
 // @tags Links
 // @description Create a manual link.
 // @Produce json
+// @Accept json
 // @Security ApiKeyAuth
 // @Router /links [post]
-// @Success 200 {object} models.Link
-// @Failure 500 {object} ApiError Something went wrong on our end.
+// @Param newLink body swag.CreateLinkRequest true "New Manual Link"
+// @Success 200 {object} swag.LinkResponse "Newly created manual link"
+// @Failure 400 {object} ApiError "Malformed JSON."
+// @Failure 500 {object} ApiError "Something went wrong on our end."
 func (c *Controller) postLinks(ctx *context.Context) {
 	var link models.Link
 	if err := ctx.ReadJSON(&link); err != nil {
-		// TODO (elliotcourant) Add tests for malformed json.
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
