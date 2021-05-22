@@ -39,7 +39,7 @@
     "eslint-plugin-react-hooks": "4.2.0",
     "eslint-plugin-testing-library": "4.5.0",
     "eslint-webpack-plugin": "2.5.4",
-    "formik": "2.2.7",
+    "formik": "2.2.8",
     "fs-extra": "10.0.0",
     "identity-obj-proxy": "3.0.0",
     "immer": "9.0.2",
