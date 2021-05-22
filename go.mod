@@ -11,7 +11,7 @@ require (
 	github.com/form3tech-oss/jwt-go v3.2.3+incompatible
 	github.com/getsentry/sentry-go v0.10.0
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.9.1
+	github.com/go-pg/pg/v10 v10.9.3
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.4
 	github.com/hashicorp/vault/api v1.1.0
@@ -38,6 +38,5 @@ require (
 	github.com/teambition/rrule-go v1.7.0
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d // indirect
-	golang.org/x/sys v0.0.0-20210415045647-66c3f260301c // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
