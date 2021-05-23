@@ -25,21 +25,6 @@ describe('transaction item', () => {
     expect(queryText('.transaction-item-name')).toBe('Dumb Stuff');
   });
 
-  it('will render with expense', () => {
-    render(<TransactionItem
-      transactionId={ 123 }
-      transaction={ new Transaction({
-        name: 'Dumb Stuff',
-        date: moment(),
-      }) }
-      spending={ new Spending({
-        name: 'Dumb Stuff Budget'
-      }) }
-    />);
-
-    expect(queryText('.transaction-expense-name')).toBe('Spent From Dumb Stuff Budget');
-  });
-
   it('will render a deposit', () => {
     render(<TransactionItem
       transactionId={ 123 }
@@ -50,7 +35,7 @@ describe('transaction item', () => {
       }) }
     />);
 
-    expect(queryText('.transaction-expense-name')).toBe('Deposited Into Safe-To-Spend');
+    expect(queryText('.transaction-expense-name')).toBe("");
     expect(queryText('.amount')).toBe('+ $1.00');
   });
 });
