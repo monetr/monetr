@@ -15,6 +15,13 @@
 
 
 .transactions-item {
+  &.selected {
+    background-color: lighten(#3f51b5, 40%) !important;
+  }
+
+  .MuiTouchRipple-root {
+    color: lighten(#3f51b5, 10%);
+  }
 
   .amount {
     color: red;
