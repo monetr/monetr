@@ -1,15 +1,17 @@
-import { Card, List } from "@material-ui/core";
+import { Card, Divider, List, ListSubheader, Typography } from "@material-ui/core";
 import TransactionDetailView from "components/Transactions/TransactionDetail";
 import TransactionItem from "components/Transactions/TransactionItem";
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import { getTransactionIds } from "shared/transactions/selectors/getTransactionIds";
+import Transaction from "data/Transaction";
+import { getTransactions } from "shared/transactions/selectors/getTransactions";
+import { Map } from 'immutable';
 
 import './styles/TransactionsView.scss';
 
 interface PropTypes {
-  transactionIds: number[];
+  transactions: Map<number, Transaction>;
   fetchInitialTransactionsIfNeeded: {
     (): Promise<void>;
   }
@@ -28,9 +30,28 @@ export class TransactionsView extends Component<PropTypes, any> {
   }
 
   renderTransactions = () => {
-    const { transactionIds } = this.props;
+    const { transactions } = this.props;
 
-    return transactionIds.map(transactionId => this.renderTransaction(transactionId));
+    return transactions
+      .groupBy(transaction => transaction.date.format('MMMM Do'))
+      .map((transactions, group) => (
+        <li key={ group }>
+          <ul>
+            <Fragment>
+              <ListSubheader className="bg-white pl-0 pr-0">
+                <Typography className="ml-2 font-semibold opacity-75 text-base">{ group }</Typography>
+                <Divider/>
+              </ListSubheader>
+            </Fragment>
+            { transactions.map(transaction => (
+              <TransactionItem key={ transaction.transactionId }
+                               transactionId={ transaction.transactionId }
+              />)).valueSeq().toArray() }
+          </ul>
+        </li>
+      ))
+      .valueSeq()
+      .toArray();
   }
 
   renderTransaction = (transactionId: number) => {
@@ -68,7 +89,7 @@ export class TransactionsView extends Component<PropTypes, any> {
 
 export default connect(
   state => ({
-    transactionIds: getTransactionIds(state),
+    transactions: getTransactions(state),
   }),
   {
     fetchInitialTransactionsIfNeeded,
