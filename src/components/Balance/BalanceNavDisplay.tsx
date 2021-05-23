@@ -16,13 +16,13 @@ export class BalanceNavDisplay extends Component<WithConnectionPropTypes, any> {
         <Typography>
           <b>Safe-To-Spend:</b> { this.props.balance.getSafeToSpendString() }
         </Typography>
-        <Typography>
+        <Typography variant="body2">
           <b>Expenses:</b> { this.props.balance.getExpensesString() }
         </Typography>
-        <Typography>
+        <Typography variant="body2">
           <b>Goals:</b> { this.props.balance.getGoalsString() }
         </Typography>
-        <Typography>
+        <Typography variant="body2">
           <b>Available:</b> { this.props.balance.getAvailableString() }
         </Typography>
       </div>

@@ -1,7 +1,7 @@
 import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
-import BankAccountSelector from "components/BankAccountSelector";
+import BankAccountSelector from "components/BankAccounts/BankAccountSelector";
 import PropTypes from "prop-types";
 import React, { Component, Fragment } from 'react';
 import { connect } from "react-redux";
@@ -106,14 +106,12 @@ export class AuthenticatedApplication extends Component {
       <Fragment>
         <AppBar position="static">
           <Toolbar>
+            <BankAccountSelector/>
             <Button to="/transactions" component={ RouterLink } color="inherit">Transactions</Button>
             <Button to="/expenses" component={ RouterLink } color="inherit">Expenses</Button>
             <Button to="/goals" component={ RouterLink } color="inherit">Goals</Button>
             <BalanceNavDisplay/>
             <div style={ { marginLeft: 'auto' } }/>
-            <div style={ { marginRight: '10px', marginLeft: '10px' } }>
-              <BankAccountSelector/>
-            </div>
             <IconButton onClick={ this.openMenu } edge="start" color="inherit" aria-label="menu">
               <MenuIcon/>
             </IconButton>

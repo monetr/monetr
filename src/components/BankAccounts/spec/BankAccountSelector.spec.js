@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react'
-import { BankAccountSelector } from "components/BankAccountSelector/index";
+import { BankAccountSelector } from "components/BankAccounts/BankAccountSelector";
 import { Map } from 'immutable';
 
 describe('bank account selector', () => {

@@ -3,7 +3,7 @@ FROM node:16.2.0-buster AS builder
 COPY ./ /work
 WORKDIR /work
 RUN yarn install
-RUN yarn build-prod
+RUN make build
 
 FROM nginx:1.20.0
 LABEL org.opencontainers.image.source=https://github.com/monetrapp/web-ui

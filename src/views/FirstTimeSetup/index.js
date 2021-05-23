@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Container, Grid, Grow, Paper, Typography } from "@material-ui/core";
+import { Box, Button, CircularProgress, Container, Grid, Grow, Paper, TextField, Typography } from "@material-ui/core";
 import { List } from "immutable";
 import PropTypes from "prop-types";
 import React, { Component, Fragment } from "react";
@@ -14,6 +14,9 @@ import fetchSpending from "shared/spending/actions/fetchSpending";
 import { fetchFundingSchedulesIfNeeded } from "shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded";
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
 import fetchBalances from "shared/balances/actions/fetchBalances";
+import { Formik } from "formik";
+import createLink from "shared/links/actions/createLink";
+import Link, { LinkType } from "data/Link";
 
 
 export class FirstTimeSetup extends Component {
@@ -41,6 +44,7 @@ export class FirstTimeSetup extends Component {
     fetchFundingSchedulesIfNeeded: PropTypes.func.isRequired,
     fetchInitialTransactionsIfNeeded: PropTypes.func.isRequired,
     fetchBalances: PropTypes.func.isRequired,
+    createLink: PropTypes.func.isRequired,
   }
 
   componentDidMount() {
@@ -63,6 +67,31 @@ export class FirstTimeSetup extends Component {
   doCancel = () => {
     this.props.logout();
   }
+
+  setupManualLink = (values, { setSubmitting }) => {
+    this.setState({
+      loading: true,
+    });
+
+    return this.props.createLink(new Link({
+      name: 'Manual',
+      institutionName: 'Manual',
+      linkType: LinkType.Manual,
+    }))
+      .then(result => {
+        return Promise.all([
+          this.props.fetchLinks(),
+          this.props.fetchBankAccounts().then(() => {
+            return Promise.all([
+              this.props.fetchInitialTransactionsIfNeeded(),
+              this.props.fetchFundingSchedulesIfNeeded(),
+              this.props.fetchSpending(),
+              this.props.fetchBalances(),
+            ]);
+          }),
+        ]);
+      })
+  };
 
   plaidLinkSuccess = (token, metadata) => {
     this.setState({
@@ -195,32 +224,68 @@ export class FirstTimeSetup extends Component {
 
   renderManualStep = () => {
     return (
-      <Fragment>
-        <Grid item xs={ 12 }>
-          <Typography variant="h5">Welcome to Harder Than It Needs To Be</Typography>
-          <Typography>
-            What do you want to name the bank for your manual account?
-          </Typography>
-        </Grid>
-        <Grid item xs={ 6 }>
-          <Button
-            disabled={ this.state.loading }
-            variant="outlined"
-            onClick={ this.previousStep }
-          >
-            Back
-          </Button>
-        </Grid>
-        <Grid item xs={ 6 }>
-          <Button
-            disabled={ this.state.loading }
-            style={ { float: 'right' } }
-            onClick={ this.nextStep }
-          >
-            Continue
-          </Button>
-        </Grid>
-      </Fragment>
+      <Formik
+        initialValues={ {
+          name: '',
+        } }
+        onSubmit={ this.setupManualLink }
+      >
+        { ({
+             values,
+             errors,
+             touched,
+             handleChange,
+             handleBlur,
+             handleSubmit,
+             isSubmitting,
+             submitForm,
+           }) => (
+          <Fragment>
+            <Grid item xs={ 12 }>
+              <Typography variant="h5">Welcome to monetr!</Typography>
+              <Typography>
+                What do you want to call your first bank account.
+                <br/>
+                <i>Note: This should be something like "Checking account" as you want to differentiate between separate
+                  accounts even within the same bank for easier management of spending.</i>
+              </Typography>
+            </Grid>
+            <Grid item xs={ 12 }>
+              <TextField
+                fullWidth
+                id="name"
+                label="Name"
+                name="name"
+                value={ values.name }
+                onChange={ handleChange }
+                error={ touched.name && !!errors.name }
+                helperText={ touched.name && errors.name }
+                disabled={ isSubmitting }
+              />
+            </Grid>
+            <Grid item xs={ 6 }>
+              <Button
+                disabled={ this.state.loading }
+                variant="outlined"
+                onClick={ this.previousStep }
+              >
+                Back
+              </Button>
+            </Grid>
+            <Grid item xs={ 6 }>
+              <Button
+                color="primary"
+                variant="outlined"
+                disabled={ this.state.loading }
+                style={ { float: 'right' } }
+                onClick={ submitForm }
+              >
+                Continue
+              </Button>
+            </Grid>
+          </Fragment>
+        ) }
+      </Formik>
     );
   };
 
@@ -255,5 +320,6 @@ export default connect(
     fetchFundingSchedulesIfNeeded,
     fetchInitialTransactionsIfNeeded,
     fetchBalances,
+    createLink,
   }, dispatch),
 )(withRouter(FirstTimeSetup));

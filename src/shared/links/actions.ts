@@ -19,4 +19,30 @@ export interface FetchLinksFailure {
   type: typeof FETCH_LINKS_FAILURE;
 }
 
-export type LinkActions = FetchLinksSuccess | FetchLinksRequest | FetchLinksFailure | Logout
+export enum CreateLinks {
+  Request = 'CreateLinksRequest',
+  Failure = 'CreateLinksFailure',
+  Success = 'CreateLinksSuccess',
+}
+
+export interface CreateLinksRequest {
+  type: typeof CreateLinks.Request;
+}
+
+export interface CreateLinksFailure {
+  type: typeof CreateLinks.Failure;
+}
+
+export interface CreateLinksSuccess {
+  type: typeof CreateLinks.Success;
+  payload: Link;
+}
+
+export type LinkActions =
+  FetchLinksSuccess
+  | FetchLinksRequest
+  | FetchLinksFailure
+  | CreateLinksRequest
+  | CreateLinksFailure
+  | CreateLinksSuccess
+  | Logout
