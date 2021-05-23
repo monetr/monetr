@@ -109,17 +109,10 @@ func (e *Spending) CalculateNextContribution(
 		e.IsBehind = false
 	}
 
-	// If the next time we would contribute to this expense is not behind and has more than one contribution to meet its
-	// target then we need to calculate a partial contribution.
-	numberOfContributions := 0
-	if nextContributionDate.Before(nextDueDate) {
-		numberOfContributions++
-	}
-
 	// TODO Handle expenses that recur more frequently than they are funded.
 	nowInTimezone := time.Now().In(timezone)
-	nextContributionRule.DTStart(nowInTimezone)
-	numberOfContributions = len(nextContributionRule.Between(nowInTimezone, nextDueDate, false))
+	nextContributionRule.DTStart(nextContributionDate)
+	numberOfContributions := len(nextContributionRule.Between(nowInTimezone, nextDueDate, false))
 
 	totalNeeded := e.TargetAmount - progressAmount
 	perContribution := totalNeeded / int64(numberOfContributions)
