@@ -1,4 +1,4 @@
-import { Button, Chip, Divider, ListItem, Typography } from "@material-ui/core";
+import { Chip, Divider, ListItem, Typography } from "@material-ui/core";
 import classnames from 'classnames';
 import Spending from "data/Spending";
 import Transaction from "data/Transaction";
@@ -10,7 +10,7 @@ import { getTransactionById } from "shared/transactions/selectors/getTransaction
 
 import './styles/TransactionItem.scss';
 import { getTransactionIsSelected } from "shared/transactions/selectors/getTransactionIsSelected";
-import { ArrowDropDown } from "@material-ui/icons";
+import SelectButton from "components/SelectyBoi/SelectButton";
 
 interface PropTypes {
   transactionId: number;
@@ -32,42 +32,17 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
       return null;
     }
 
-    if (!spending) {
-      return (
-        <Button className="w-full spending-selector">
-          <div className="w-full flex justify-start">
-            <div className="flex-auto flex justify-start">
-              <span className="opacity-50 mr-1">
-                Spent From
-              </span>
-              <span className="opacity-50">
-                Safe-To-Spend
-              </span>
-            </div>
-            <div className="flex-none spending-dropdown-icon">
-              <ArrowDropDown/>
-            </div>
-          </div>
-        </Button>
-      );
-    }
-
     return (
-      <Button className="w-full spending-selector">
-        <div className="w-full flex justify-start">
-          <div className="flex-auto flex justify-start">
-            <span className="opacity-50 mr-1">
-              Spent From
-            </span>
-            <span>
-              { spending.name }
-            </span>
-          </div>
-          <div className="flex-none spending-dropdown-icon">
-            <ArrowDropDown/>
-          </div>
-        </div>
-      </Button>
+      <SelectButton>
+        <span className="opacity-50 mr-1">
+          Spent From
+        </span>
+        <span className={ classnames('overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap', {
+          'opacity-50': !spending,
+        }) }>
+          { spending ? spending.name : 'Safe-To-Spend' }
+        </span>
+      </SelectButton>
     )
   }
 
@@ -91,7 +66,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, {}> {
             </p>
 
             <p
-              className="flex-auto transaction-expense-name overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap"
+              className="flex-auto transaction-expense-name overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap pr-1"
             >
               { this.getSpentFromString() }
             </p>

@@ -23,31 +23,9 @@
   //  color: lighten(#3f51b5, 10%);
   //}
 
-  .spending-selector {
-    &:hover {
-      border: 1px solid rgba(0, 0, 0, 0.23);
-    }
-
-    &:not(:hover) {
-      border: 1px solid rgba(0, 0, 0, 0.0);
-    }
-
-    padding: 5px 15px;
-
-    .spending-dropdown-icon {
-      opacity: 0;
-      transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-    }
-
-    &:hover {
-      .spending-dropdown-icon {
-        opacity: 50%;
-      }
-    }
-  }
-
   .amount {
     color: red;
+    min-width: 6em;
 
     &.addition {
       color: green;
