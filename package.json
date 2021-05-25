@@ -4,7 +4,7 @@
     "redoc": "2.0.0-rc.53",
     "redoc-cli": "0.11.4",
     "sql-formatter": "4.0.2",
-    "ts-node": "9.1.1",
+    "ts-node": "10.0.0",
     "typescript": "4.2.4",
     "yargs": "17.0.1"
   },
