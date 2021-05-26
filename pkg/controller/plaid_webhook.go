@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/kataras/iris/v12"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
+	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -155,27 +158,35 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 		switch hook.WebhookCode {
 		case "INITIAL_UPDATE":
 			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
-			return err
 		case "HISTORICAL_UPDATE":
 			_, err = c.job.TriggerPullHistoricalTransactions(link.AccountId, link.LinkId)
-			return err
 		case "DEFAULT_UPDATE":
 			_, err = c.job.TriggerPullLatestTransactions(link.AccountId, link.LinkId, hook.NewTransactions)
-			return err
 		case "TRANSACTIONS_REMOVED":
 			_, err = c.job.TriggerRemoveTransactions(link.AccountId, link.LinkId, hook.RemovedTransactions)
-			return err
 		}
 	case "ITEM":
 		switch hook.WebhookCode {
 		case "ERROR":
+			code := hook.Error["error_code"]
+			switch code {
+			case "NO_ACCOUNTS":
+				link.LinkStatus = models.LinkStatusError
+				link.ErrorCode = myownsanity.StringP(code.(string))
+				authenticatedRepo := repository.NewRepositoryFromSession(
+					link.CreatedByUserId,
+					link.AccountId,
+					c.mustGetDatabase(ctx),
+				)
+				log.Warn("link is in an error state, updating")
+				err = authenticatedRepo.UpdateLink(link)
+			}
 		case "PENDING_EXPIRATION":
 		case "USER_PERMISSION_REVOKED":
 		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
 			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
-			return err
 		}
 	}
 
-	return nil
+	return err
 }

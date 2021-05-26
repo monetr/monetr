@@ -31,7 +31,7 @@ type LinkResponse struct {
 	LinkStatus models.LinkStatus `json:"linkStatus" example:"2" enums:"0,1,2"`
 	// If the link error is due to a problem on Plaid's side, then an error code will be included here to help display
 	// helpful messages on the frontend to the user.
-	ErrorCode *string `json:"errorCode" extensions:"x-nullable"`
+	ErrorCode *string `json:"errorCode" extensions:"x-nullable" example:"NO_ACCOUNTS"`
 	// Our internal Id for an institution. This is just an abstraction layer on top of Plaid's institution Id but would
 	// allow us to associate institutions with multiple integrations in the future. It is also meant to keep Plaid Id's
 	// away from the client's view as much as possible.

@@ -145,6 +145,15 @@ func (c *Controller) loggingMiddleware(ctx *context.Context) {
 	}
 }
 
+func (c *Controller) mustGetDatabase(ctx *context.Context) pg.DBI {
+	txn, ok := ctx.Values().Get(databaseContextKey).(*pg.Tx)
+	if !ok {
+		panic("no database on context")
+	}
+
+	return txn
+}
+
 func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (repository.UnauthenticatedRepository, error) {
 	txn, ok := ctx.Values().Get(databaseContextKey).(*pg.Tx)
 	if !ok {
