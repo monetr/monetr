@@ -3,7 +3,7 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { getLinks } from "shared/links/selectors/getLinks";
 import { Map } from 'immutable';
-import Link from "data/Link";
+import Link, { LinkStatus } from "data/Link";
 import AddPlaidDialog from "views/AccountView/AddPlaidDialog";
 
 interface WithConnectionPropTypes {
@@ -57,6 +57,7 @@ export class AccountView extends Component<WithConnectionPropTypes, State> {
                             <b>{ link.getName() }</b>
                           </div>
                           <div className="col-span-1 flex justify-end">
+                            { link.linkStatus === LinkStatus.Error && <Chip label="Error"/> }
                             { link.getIsManual() && <Chip label="Manual"/> }
                             { !link.getIsManual() && <Chip label="Plaid"/> }
                           </div>

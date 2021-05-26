@@ -4,9 +4,18 @@ export enum LinkType {
   Manual = 2,
 }
 
+export enum LinkStatus {
+  Unknown = 0,
+  Pending = 1,
+  Setup = 2,
+  Error = 3,
+}
+
 export default class Link {
   linkId: number;
   linkType: LinkType;
+  linkStatus: LinkStatus;
+  errorCode: string | null;
   institutionId: number;
   institutionName: string;
   customInstitutionName?: string;
