@@ -9,6 +9,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/monetrapp/rest-api/pkg/util"
 	"github.com/pkg/errors"
+	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
@@ -160,6 +161,18 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transactions from plaid")
+			switch plaidErr := errors.Cause(err).(type) {
+			case plaid.Error:
+				switch plaidErr.ErrorType {
+				case "ITEM_ERROR":
+					link.LinkStatus = models.LinkStatusError
+					link.ErrorCode = &plaidErr.ErrorCode
+					if updateErr := repo.UpdateLink(link); updateErr != nil {
+						log.WithError(updateErr).Error("failed to update link to be an error state")
+					}
+				}
+			}
+
 			return errors.Wrap(err, "failed to retrieve transactions from plaid")
 		}
 

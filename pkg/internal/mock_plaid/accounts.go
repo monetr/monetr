@@ -61,7 +61,23 @@ func MockGetAccounts(t *testing.T, accounts []plaid.Account) {
 		require.NoError(t, json.NewDecoder(request.Body).Decode(&getAccountsRequest), "must decode request")
 
 		return map[string]interface{}{
-			"accounts": []string{},
+			"accounts": accounts,
 		}, http.StatusOK
+	})
+}
+
+func MockGetAccountsError(t *testing.T, plaidError plaid.Error) {
+	mock_http_helper.NewHttpMockJsonResponder(t, "POST", Path(t, "/accounts/get"), func(t *testing.T, request *http.Request) (interface{}, int) {
+		var getAccountsRequest struct {
+			ClientId    string `json:"client_id"`
+			Secret      string `json:"secret"`
+			AccessToken string `json:"access_token"`
+			Options     struct {
+				AccountIds []string `json:"account_ids"`
+			} `json:"options"`
+		}
+		require.NoError(t, json.NewDecoder(request.Body).Decode(&getAccountsRequest), "must decode request")
+
+		return plaidError, plaidError.StatusCode
 	})
 }

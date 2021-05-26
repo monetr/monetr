@@ -9,6 +9,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/monetrapp/rest-api/pkg/util"
 	"github.com/pkg/errors"
+	"github.com/plaid/plaid-go/plaid"
 	"strconv"
 	"time"
 )
@@ -87,6 +88,23 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			now,
 			bankAccountIds,
 		)
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve initial transactions")
+
+			switch plaidErr := errors.Cause(err).(type) {
+			case plaid.Error:
+				switch plaidErr.ErrorType {
+				case "ITEM_ERROR":
+					link.LinkStatus = models.LinkStatusError
+					link.ErrorCode = &plaidErr.ErrorCode
+					if updateErr := repo.UpdateLink(link); updateErr != nil {
+						log.WithError(updateErr).Error("failed to update link to be an error state")
+					}
+				}
+			}
+
+			return err
+		}
 
 		if len(plaidTransactions) == 0 {
 			log.Warn("no transactions were retrieved from plaid")

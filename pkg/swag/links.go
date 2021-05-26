@@ -27,7 +27,11 @@ type LinkResponse struct {
 	// * 0 - `Unknown`: Indicates the link is not setup or ready to use, might also indicate there is a problem with the link.
 	// * 1 - `Pending`: The link is not ready to use and is being setup by the Plaid integration.
 	// * 2 - `Setup`: The link is ready to use. This is the default state for manual links.
+	// * 3 - `Error`: The link is in an error state, this can happen if the Plaid link is experiencing problems.
 	LinkStatus models.LinkStatus `json:"linkStatus" example:"2" enums:"0,1,2"`
+	// If the link error is due to a problem on Plaid's side, then an error code will be included here to help display
+	// helpful messages on the frontend to the user.
+	ErrorCode *string `json:"errorCode" extensions:"x-nullable"`
 	// Our internal Id for an institution. This is just an abstraction layer on top of Plaid's institution Id but would
 	// allow us to associate institutions with multiple integrations in the future. It is also meant to keep Plaid Id's
 	// away from the client's view as much as possible.

@@ -142,6 +142,18 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 		)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve bank accounts from plaid")
+			switch plaidErr := errors.Cause(err).(type) {
+			case plaid.Error:
+				switch plaidErr.ErrorType {
+				case "ITEM_ERROR":
+					link.LinkStatus = models.LinkStatusError
+					link.ErrorCode = &plaidErr.ErrorCode
+					if updateErr := repo.UpdateLink(link); updateErr != nil {
+						log.WithError(updateErr).Error("failed to update link to be an error state")
+					}
+				}
+			}
+
 			return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
 		}
 

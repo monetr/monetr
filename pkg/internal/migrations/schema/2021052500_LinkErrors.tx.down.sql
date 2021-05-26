@@ -1,0 +1,1 @@
+ALTER TABLE "links" DROP COLUMN "error_code";

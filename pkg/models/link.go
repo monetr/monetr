@@ -8,6 +8,7 @@ const (
 	LinkStatusUnknown LinkStatus = 0
 	LinkStatusPending LinkStatus = 1
 	LinkStatusSetup   LinkStatus = 2
+	LinkStatusError   LinkStatus = 3
 )
 
 type Link struct {
@@ -20,6 +21,7 @@ type Link struct {
 	PlaidLinkId           *uint64      `json:"-" pg:"plaid_link_id,on_delete:SET NULL"`
 	PlaidLink             *PlaidLink   `json:"-" pg:"rel:has-one"`
 	LinkStatus            LinkStatus   `json:"linkStatus" pg:"link_status,notnull,default:0"`
+	ErrorCode             *string      `json:"errorCode,omitempty" pg:"error_code"`
 	InstitutionId         *uint64      `json:"institutionId" pg:"institution_id,on_delete:SET NULL"`
 	Institution           *Institution `json:"institution,omitempty" pg:"rel:has-one"`
 	InstitutionName       string       `json:"institutionName" pg:"institution_name"`
