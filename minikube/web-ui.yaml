@@ -21,13 +21,10 @@ spec:
     spec:
       containers:
         - name: web-ui
-          image: nginx:1.19.0
-          env:
-            - name: NGINX_PORT
-              value: "30000"
+          image: registry.monetr.mini/web-ui:latest
           ports:
             - name: http
-              containerPort: 30000
+              containerPort: 80
               protocol: TCP
 
 ---
@@ -47,7 +44,6 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-      nodePort: 30000
   selector:
     app.kubernetes.io/name: web-ui
     app.kubernetes.io/instance: web-ui

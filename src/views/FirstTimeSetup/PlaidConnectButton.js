@@ -26,13 +26,22 @@ export const PlaidConnectButton = props => {
     });
   }
 
+  const onClick = () => {
+
+    if (props.onClick) {
+      props.onClick();
+    }
+
+    open();
+  };
+
   return (
     <Button
       disabled={ props.disabled }
       style={ { float: 'right' } }
       color="primary"
       variant="outlined"
-      onClick={ open }>
+      onClick={ onClick }>
       Connect
     </Button>
   )

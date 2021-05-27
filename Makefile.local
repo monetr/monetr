@@ -4,6 +4,9 @@ PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
 ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
 
+LOCAL_DOMAIN=monetr.mini
+WEB_UI_IMAGE_NAME=web-ui
+
 KUBECTL=kubectl
 YQ=$(LOCAL_BIN)/yq
 
@@ -27,7 +30,26 @@ MINIKUBE_NAMESPACE=default
 WEB_UI_NAME=web-ui
 LOCAL_WEB_UI_DEPLOY=$(PWD)/minikube/$(WEB_UI_NAME).yaml
 
-deploy-web-ui:
+
+SRC_HASH=$(shell find -s $(PWD)/src -type f -exec shasum {} \; | shasum | cut -d " " -f 1)
+BASE_IMAGE_NAME = registry.$(LOCAL_DOMAIN)/$(WEB_UI_IMAGE_NAME)
+IMAGE_NAME = $(BASE_IMAGE_NAME):$(SRC_HASH)
+LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +%Y.%m.%d.%H.%M) $$(git config user.email))
+build-web-ui-mini:
+	eval $$(minikube docker-env) && docker build \
+		--cache-from=$(BASE_IMAGE_NAME):latest \
+		--build-arg REVISION=$(RELEASE_REVISION) \
+		--build-arg BUILD_TIME=$(BUILD_TIME) \
+		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
+		-e ENVIRONMENT="local" \
+		-t $(IMAGE_NAME) \
+		-t $(BASE_IMAGE_NAME):latest \
+		-f Dockerfile . && \
+		docker push $(IMAGE_NAME) && \
+		docker push $(BASE_IMAGE_NAME):latest
+#	yq e '.image.tag = "$(SRC_HASH)"' -i $(VALUES)
+
+deploy-web-ui: build-web-ui-mini
 	$(KUBECTL) apply -f $(LOCAL_WEB_UI_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/$(WEB_UI_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 

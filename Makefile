@@ -5,6 +5,7 @@ BUILD_DIR = $(PWD)/build
 PUBLIC_DIR = $(PWD)/public
 
 RELEASE_REVISION=$(shell git rev-parse HEAD)
+BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 ifndef ENVIRONMENT
 	ENVIRONMENT = Local
 endif
