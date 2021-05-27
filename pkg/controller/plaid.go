@@ -20,6 +20,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 	p.Get("/token/new", c.newPlaidToken)
 	p.Put("/update/{linkId:uint64}", c.updatePlaidLink)
 	p.Post("/token/callback", c.plaidTokenCallback)
+	p.Post("/update/callback", c.updatePlaidTokenCallback)
 	p.Get("/setup/wait/{linkId:uint64}", c.waitForPlaid)
 }
 
@@ -243,10 +244,6 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 
 	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", c.configuration.UIDomainName)
 
-	plaidProducts := []string{
-		"transactions",
-	}
-
 	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), plaid.LinkTokenConfigs{
 		User: &plaid.LinkTokenUser{
 			ClientUserID: strconv.FormatUint(me.UserId, 10),
@@ -258,7 +255,6 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 			EmailAddressVerifiedTime: time.Time{},
 		},
 		ClientName: "monetr",
-		Products:   plaidProducts,
 		CountryCodes: []string{
 			"US",
 		},
@@ -283,6 +279,58 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 	ctx.JSON(map[string]interface{}{
 		"linkToken": token.LinkToken,
 	})
+}
+
+func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
+	var callbackRequest struct {
+		LinkId      uint64 `json:"linkId"`
+		PublicToken string `json:"publicToken"`
+	}
+	if err := ctx.ReadJSON(&callbackRequest); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	link, err := repo.GetLink(c.getContext(ctx), callbackRequest.LinkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve link")
+		return
+	}
+
+	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
+		return
+	}
+
+	log := c.getLog(ctx)
+
+	if link.PlaidLink.AccessToken != result.AccessToken {
+		log.Info("access token for link has been updated")
+		link.PlaidLink.AccessToken = result.AccessToken
+		if err = repo.UpdatePlaidLink(c.getContext(ctx), link.PlaidLink); err != nil {
+			c.wrapPgError(ctx, err, "failed to update Plaid link")
+			return
+		}
+	} else {
+		log.Info("access token for link has not changed")
+	}
+
+	link.LinkStatus = models.LinkStatusSetup
+	link.ErrorCode = nil
+	if err = repo.UpdateLink(link); err != nil {
+		c.wrapPgError(ctx, err, "failed to update link status")
+		return
+	}
+
+	_, err = c.job.TriggerPullLatestTransactions(link.AccountId, link.LinkId, 0)
+	if err != nil {
+		log.WithError(err).Warn("failed to trigger pulling latest transactions after updating plaid link")
+	}
+
+	ctx.JSON(link)
 }
 
 // Plaid Token Callback
