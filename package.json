@@ -146,7 +146,7 @@
     "ts-loader": "9.2.2",
     "typescript": "4.3.2",
     "url-loader": "4.1.1",
-    "webpack": "5.37.1",
+    "webpack": "5.38.0",
     "webpack-bundle-analyzer": "4.4.2",
     "webpack-cli": "4.7.0",
     "webpack-dev-server": "3.11.2"
