@@ -18,8 +18,24 @@ import (
 
 func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 	p.Get("/token/new", c.newPlaidToken)
+	p.Put("/update/{linkId:uint64}", c.updatePlaidLink)
 	p.Post("/token/callback", c.plaidTokenCallback)
 	p.Get("/setup/wait/{linkId:uint64}", c.waitForPlaid)
+}
+
+func (c *Controller) storeLinkTokenInCache(ctx context.Context, log *logrus.Entry, userId uint64, linkToken string, expiration time.Time) error {
+	span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
+	defer span.Finish()
+
+	cache, err := c.cache.GetContext(ctx)
+	if err != nil {
+		log.WithError(err).Warn("failed to get cache connection")
+		return errors.Wrap(err, "failed to get cache connection")
+	}
+	defer cache.Close()
+
+	key := fmt.Sprintf("plaidInProgress_%d", userId)
+	return errors.Wrap(cache.Send("SET", key, linkToken, "EXAT", expiration.Unix()), "failed to cache link token")
 }
 
 // New Plaid Token
@@ -39,6 +55,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 	me, err := c.mustGetAuthenticatedRepository(ctx).GetMe()
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
+		return
 	}
 
 	userId := c.mustGetUserId(ctx)
@@ -79,21 +96,6 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		}
 
 		return "", nil
-	}
-
-	storeLinkTokenInCache := func(ctx context.Context, linkToken string, expiration time.Time) error {
-		span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
-		defer span.Finish()
-
-		cache, err := c.cache.GetContext(ctx)
-		if err != nil {
-			log.WithError(err).Warn("failed to get cache connection")
-			return errors.Wrap(err, "failed to get cache connection")
-		}
-		defer cache.Close()
-
-		key := fmt.Sprintf("plaidInProgress_%d", me.UserId)
-		return errors.Wrap(cache.Send("SET", key, linkToken, "EXAT", expiration.Unix()), "failed to cache link token")
 	}
 
 	if checkCache, err := ctx.URLParamBool("use_cache"); err == nil && checkCache {
@@ -148,7 +150,6 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		CountryCodes: []string{
 			"US",
 		},
-		// TODO (elliotcourant) Implement webhook once we are running in kube.
 		Webhook:               webhook,
 		AccountFilters:        nil,
 		CrossAppItemAdd:       nil,
@@ -162,7 +163,120 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		return
 	}
 
-	if err = storeLinkTokenInCache(c.getContext(ctx), token.LinkToken, token.Expiration); err != nil {
+	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.LinkToken, token.Expiration); err != nil {
+		log.WithError(err).Warn("failed to cache link token")
+	}
+
+	ctx.JSON(map[string]interface{}{
+		"linkToken": token.LinkToken,
+	})
+}
+
+// Update Plaid Link
+// @Summary Update Plaid Link
+// @id update-plaid-link
+// @tags Plaid
+// @description Update an existing Plaid link, this can be used to re-authenticate a link if it requires it or to potentially solve an error state.
+// @Security ApiKeyAuth
+// @Produce json
+// @Router /plaid/update/{linkId:uint64} [put]
+// @Param linkId path uint64 true "The Link Id that you wish to put into update mode, must be a Plaid link."
+// @Success 200 {object} swag.PlaidNewLinkTokenResponse
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) updatePlaidLink(ctx iris.Context) {
+	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	if linkId == 0 {
+		c.badRequest(ctx, "must specify a link Id")
+		return
+	}
+
+	log := c.getLog(ctx).WithField("linkId", linkId)
+
+	// Retrieve the user's details. We need to pass some of these along to
+	// plaid as part of the linking process.
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve link")
+		return
+	}
+
+	if link.LinkType != models.PlaidLinkType {
+		c.badRequest(ctx, "cannot update a non-Plaid link")
+		return
+	}
+
+	if link.PlaidLink == nil {
+		c.returnError(ctx, http.StatusInternalServerError, "no Plaid details associated with link")
+		return
+	}
+
+	me, err := repo.GetMe()
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve user details")
+		return
+	}
+
+	legalName := ""
+	if len(me.LastName) > 0 {
+		legalName = fmt.Sprintf("%s %s", me.FirstName, me.LastName)
+	} else {
+		// TODO Handle a missing last name, we need a legal name Plaid.
+		//  Should this be considered an error state?
+	}
+
+	var phoneNumber string
+	if me.Login.PhoneNumber != nil {
+		phoneNumber = me.Login.PhoneNumber.E164()
+	}
+
+	var webhook string
+	if c.configuration.Plaid.WebhooksEnabled {
+		domain := c.configuration.Plaid.WebhooksDomain
+		if domain != "" {
+			webhook = fmt.Sprintf("%s/plaid/webhook", c.configuration.Plaid.WebhooksDomain)
+		} else {
+			log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
+		}
+	}
+
+	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", c.configuration.UIDomainName)
+
+	plaidProducts := []string{
+		"transactions",
+	}
+
+	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), plaid.LinkTokenConfigs{
+		User: &plaid.LinkTokenUser{
+			ClientUserID: strconv.FormatUint(me.UserId, 10),
+			LegalName:    legalName,
+			PhoneNumber:  phoneNumber,
+			EmailAddress: me.Login.Email,
+			// TODO Add in email/phone verification.
+			PhoneNumberVerifiedTime:  time.Time{},
+			EmailAddressVerifiedTime: time.Time{},
+		},
+		ClientName: "monetr",
+		Products:   plaidProducts,
+		CountryCodes: []string{
+			"US",
+		},
+		Webhook:               webhook,
+		AccountFilters:        nil,
+		CrossAppItemAdd:       nil,
+		PaymentInitiation:     nil,
+		Language:              "en",
+		LinkCustomizationName: "",
+		RedirectUri:           redirectUri,
+		AccessToken:           link.PlaidLink.AccessToken,
+	})
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
+		return
+	}
+
+	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.LinkToken, token.Expiration); err != nil {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 

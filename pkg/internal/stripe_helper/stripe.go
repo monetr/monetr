@@ -27,6 +27,7 @@ var (
 type stripeBase struct {
 	log    *logrus.Entry
 	client *stripe_client.API
+	cache  StripeCache
 }
 
 func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
@@ -35,6 +36,7 @@ func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
 		client: stripe_client.New(apiKey, stripe.NewBackends(&http.Client{
 			Timeout: time.Second * 30,
 		})),
+		cache: &noopStripeCache{},
 	}
 }
 
@@ -61,11 +63,17 @@ func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price
 
 	log := s.log.WithField("stripePriceId", id)
 
+	if price, ok := s.cache.GetPriceById(span.Context(), id); ok {
+		return price, nil
+	}
+
 	result, err := s.client.Prices.Get(id, &stripe.PriceParams{})
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve stripe price")
 		return nil, errors.Wrap(err, "failed to retrieve stripe price")
 	}
+
+	s.cache.CachePrice(span.Context(), *result)
 
 	return result, nil
 }

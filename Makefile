@@ -1,12 +1,13 @@
 LOCAL_BIN_DIR = "$(PWD)/bin"
 NODE_MODULES_DIR = "$(PWD)/node_modules"
+NODE_MODULES_BIN = $(NODE_MODULES_PWD)/.bin
 VENDOR_DIR = "$(PWD)/vendor"
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 MONETR_CLI_PACKAGE = "github.com/monetrapp/rest-api/pkg/cmd"
 COVERAGE_TXT = "$(PWD)/coverage.txt"
 
-PATH += "$(GOPATH):$(LOCAL_BIN_DIR)"
+PATH += "$(GOPATH):$(LOCAL_BIN_DIR):$(NODE_MODULES_BIN)"
 
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
@@ -44,6 +45,9 @@ clean:
 .PHONY: docs
 docs:
 	swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
+
+docs-local: docs
+	redoc-cli serve $(PWD)/docs/swagger.yaml
 
 docker:
 	docker build \
