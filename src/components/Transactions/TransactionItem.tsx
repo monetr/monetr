@@ -98,7 +98,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
             horizontal: 'left',
           } }
         >
-          <Paper style={ { width: `${ this.state.width }px` } } className="min-w-96 max-h-96 p-0">
+          <Paper style={ { width: `${ this.state.width }px` } } className="min-w-96 max-h-96 p-0 overflow-auto">
             <SpendingSelectionList value={ transaction.spendingId } onChange={ updateSpentFrom }/>
           </Paper>
         </Popover>
