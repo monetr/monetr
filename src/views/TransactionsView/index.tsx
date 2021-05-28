@@ -68,18 +68,18 @@ export class TransactionsView extends Component<PropTypes, any> {
       <div className="minus-nav">
         <div className="flex flex-col h-full p-10 max-h-full">
           <div className="grid grid-cols-3 gap-4 flex-grow">
-            <div className="col-span-2">
+            <div className="col-span-3">
               <Card elevation={ 4 } className="w-full transaction-list">
                 <List disablePadding className="w-full">
                   { this.renderTransactions() }
                 </List>
               </Card>
             </div>
-            <div className="">
-              <Card elevation={ 4 } className="h-full w-full">
-                <TransactionDetailView/>
-              </Card>
-            </div>
+            {/*<div className="">*/}
+            {/*  <Card elevation={ 4 } className="h-full w-full">*/}
+            {/*    <TransactionDetailView/>*/}
+            {/*  </Card>*/}
+            {/*</div>*/}
           </div>
         </div>
       </div>

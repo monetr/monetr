@@ -1,9 +1,9 @@
 .monetr-select-button {
-  &:hover {
+  &:hover, &.selected {
     border: 1px solid rgba(0, 0, 0, 0.23);
   }
 
-  &:not(:hover) {
+  &:not(:hover):not(.selected) {
     border: 1px solid rgba(0, 0, 0, 0.0);
   }
 
@@ -16,7 +16,7 @@
     transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
   }
 
-  &:hover {
+  &:hover, &.selected {
     .select-dropdown-icon {
       opacity: 50%;
     }
