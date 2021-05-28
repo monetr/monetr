@@ -5,6 +5,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetrapp/rest-api/pkg/util"
 	"github.com/pkg/errors"
+	"math"
 	"strconv"
 	"time"
 )
@@ -92,10 +93,12 @@ func (e *Spending) CalculateNextContribution(
 		nextDueDate = util.MidnightInLocal(e.NextRecurrence, timezone)
 	}
 
+	needed := int64(math.Max(float64(e.TargetAmount-progressAmount), 0))
+
 	// If the next time we would contribute to this expense is after the next time the expense is due, then the expense
 	// has fallen behind. Mark it as behind and set the contribution to be the difference.
 	if nextContributionDate.After(nextDueDate) {
-		e.NextContributionAmount = e.TargetAmount - progressAmount
+		e.NextContributionAmount = needed
 		e.IsBehind = progressAmount < e.TargetAmount
 		return nil
 	} else if nextContributionDate.Equal(nextDueDate) {
@@ -103,7 +106,7 @@ func (e *Spending) CalculateNextContribution(
 		// date if they want a bit of a buffer and we would plan it differently. But we don't want to consider this
 		// "behind".
 		e.IsBehind = false
-		e.NextContributionAmount = e.TargetAmount - progressAmount
+		e.NextContributionAmount = needed
 		return nil
 	} else if progressAmount >= e.TargetAmount {
 		e.IsBehind = false
@@ -114,7 +117,7 @@ func (e *Spending) CalculateNextContribution(
 	nextContributionRule.DTStart(nextContributionDate)
 	numberOfContributions := len(nextContributionRule.Between(nowInTimezone, nextDueDate, false))
 
-	totalNeeded := e.TargetAmount - progressAmount
+	totalNeeded := needed
 	perContribution := totalNeeded / int64(numberOfContributions)
 
 	e.NextContributionAmount = perContribution
