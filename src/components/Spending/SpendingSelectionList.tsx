@@ -60,6 +60,7 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
           {
             spending
               .filter(item => !excludeIds?.includes(item.spendingId))
+              .sortBy(item => item.name)
               .map(item => (
                 <ListItem
                   key={ `${ item.spendingId }` }
