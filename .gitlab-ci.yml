@@ -253,6 +253,7 @@ Dry - Staging:
     kubernetes:
       namespace: monetr-staging
   needs:
+    - "PostgreSQL Tests"
     - "Generate - Staging"
     - "REST API"
   stage: Dry Run
@@ -277,6 +278,7 @@ Dry - Acceptance:
     kubernetes:
       namespace: monetr-acceptance
   needs:
+    - "PostgreSQL Tests"
     - "Generate - Acceptance"
     - "REST API"
   stage: Dry Run

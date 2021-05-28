@@ -32,6 +32,7 @@ type Link struct {
 	UpdatedAt             time.Time    `json:"updatedAt" pg:"updated_at,notnull"`
 	UpdatedByUserId       *uint64      `json:"updatedByUserId" pg:"updated_by_user_id,on_delete:SET NULL"`
 	UpdatedByUser         *User        `json:"updatedByUser,omitempty" pg:"rel:has-one,fk:updated_by_user_id"`
+	LastSuccessfulUpdate  *time.Time   `json:"lastSuccessfulUpdate" pg:"last_successful_update"`
 
 	BankAccounts []BankAccount `json:"-" pg:"rel:has-many"`
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/monetrapp/rest-api/pkg/util"
@@ -171,6 +172,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			return nil // Not good enough of a reason to fail.
 		}
 
-		return nil
+		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
+		return repo.UpdateLink(link)
 	})
 }

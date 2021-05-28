@@ -17,10 +17,10 @@ import (
 )
 
 func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
-	p.Get("/token/new", c.newPlaidToken)
 	p.Put("/update/{linkId:uint64}", c.updatePlaidLink)
-	p.Post("/token/callback", c.plaidTokenCallback)
 	p.Post("/update/callback", c.updatePlaidTokenCallback)
+	p.Get("/token/new", c.newPlaidToken)
+	p.Post("/token/callback", c.plaidTokenCallback)
 	p.Get("/setup/wait/{linkId:uint64}", c.waitForPlaid)
 }
 
@@ -281,6 +281,18 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 	})
 }
 
+// Token Callback for Plaid Link
+// @Summary Updated Token Callback
+// @id updated-token-callback
+// @tags Plaid
+// @Description This is used when handling an update flow for a Plaid link. Rather than returning the public token to the normal callback endpoint, this one should be used instead. This one assumes the link already exists and handles it slightly differently than it would for a new link.
+// @Security ApiKeyAuth
+// @Produce json
+// @Accept json
+// @Param Request body swag.UpdatePlaidTokenCallbackRequest true "Update token callback request."
+// @Router /plaid/update/callback [post]
+// @Success 200 {object} swag.LinkResponse
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 	var callbackRequest struct {
 		LinkId      uint64 `json:"linkId"`
@@ -339,7 +351,9 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 // @tags Plaid
 // @description Receives the public token after a user has authenticated their bank account to exchange with plaid.
 // @Security ApiKeyAuth
+// @Accept json
 // @Produce json
+// @Param Request body swag.NewPlaidTokenCallbackRequest true "New token callback request."
 // @Router /plaid/token/callback [post]
 // @Success 200 {object} swag.PlaidTokenCallbackResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.

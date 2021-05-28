@@ -12,6 +12,7 @@ import (
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -91,7 +92,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Latest Transactions"))
 	defer span.Finish()
 
-	start := time.Now()
+	startTime := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
 
@@ -103,7 +104,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 
 	defer func() {
 		if j.stats != nil {
-			j.stats.JobFinished(PullAccountBalances, accountId, start)
+			j.stats.JobFinished(PullAccountBalances, accountId, startTime)
 		}
 	}()
 
@@ -152,25 +153,44 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 
 		log.Debugf("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
 
+		// Request the last 7 days worth of transactions for update.
+		start := time.Now().Add(-7 * 24 * time.Hour)
+		if link.LastSuccessfulUpdate == nil {
+			// But if there has not been a last successful update set yet, then request the last 30 days to handle this
+			// update.
+			start = time.Now().Add(-30 * 24 * time.Hour)
+		} else if start.After(*link.LastSuccessfulUpdate) {
+			// If we haven't seen an update in longer than 7 days, then use the last successful update date instead.
+			start = *link.LastSuccessfulUpdate
+		}
+		end := time.Now()
+
 		transactions, err := j.plaidClient.GetAllTransactions(
 			span.Context(),
 			link.PlaidLink.AccessToken,
-			time.Now().Add(-7*24*time.Hour),
-			time.Now(),
+			start,
+			end,
 			itemBankAccountIds,
 		)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transactions from plaid")
 			switch plaidErr := errors.Cause(err).(type) {
 			case plaid.Error:
-				switch plaidErr.ErrorType {
-				case "ITEM_ERROR":
-					link.LinkStatus = models.LinkStatusError
-					link.ErrorCode = &plaidErr.ErrorCode
-					if updateErr := repo.UpdateLink(link); updateErr != nil {
-						log.WithError(updateErr).Error("failed to update link to be an error state")
-					}
+				link.LinkStatus = models.LinkStatusError
+				link.ErrorCode = myownsanity.StringP(strings.Join([]string{
+					plaidErr.ErrorType,
+					plaidErr.ErrorCode,
+				}, "."))
+				if updateErr := repo.UpdateLink(link); updateErr != nil {
+					log.WithError(updateErr).Error("failed to update link to be an error state")
+					return err
 				}
+
+				// Don't return an error here, we set the link to an error state and we don't want to have retry logic
+				// for this right now.
+				return nil
+			default:
+				log.Warnf("unknown error type from Plaid client: %T", plaidErr)
 			}
 
 			return errors.Wrap(err, "failed to retrieve transactions from plaid")
@@ -296,6 +316,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			}
 		}
 
-		return nil
+		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
+		return repo.UpdateLink(link)
 	})
 }

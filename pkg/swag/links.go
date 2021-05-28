@@ -55,6 +55,9 @@ type LinkResponse struct {
 	UpdatedByUserId *uint64 `json:"updatedByUserId" example:"89547" extensions:"x-nullable"`
 	// The last time this link was updated. Currently this field is not really maintained, eventually this timestamp
 	// will indicate the last time a sync occurred between monetr and Plaid. Manual links don't change this field at
-	// all.
+	// all. **OLD**
 	UpdatedAt time.Time `json:"updatedAt" example:"2021-05-21T05:24:12.958309Z"`
+	// The last time transactions were successfully retrieved for this link. This date does not indicate the most recent
+	// transaction retrieved, simply the most recent attempt to retrieve transactions that was successful.
+	LastSuccessfulUpdate *time.Time `json:"lastSuccessfulUpdate" example:"2021-05-21T05:24:12.958309Z" extensions:"x-nullable"`
 }

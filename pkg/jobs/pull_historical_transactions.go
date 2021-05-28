@@ -233,6 +233,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			}
 		}
 
-		return nil
+		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
+		return repo.UpdateLink(link)
 	})
 }

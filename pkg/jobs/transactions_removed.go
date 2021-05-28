@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"strconv"
@@ -125,6 +126,7 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 
 		log.Debugf("successfully removed %d transaction(s)", len(transactions))
 
-		return nil
+		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
+		return repo.UpdateLink(link)
 	})
 }

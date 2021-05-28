@@ -39,6 +39,10 @@ func (r *repositoryBase) GetPendingTransactionsForBankAccount(bankAccountId uint
 }
 
 func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
+	if len(plaidTransactionIds) == 0 {
+		return map[string]models.Transaction{}, nil
+	}
+
 	var items []models.Transaction
 	err := r.txn.Model(&items).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
