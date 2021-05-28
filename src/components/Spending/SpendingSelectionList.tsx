@@ -33,7 +33,7 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
 
     return (
       <div className="w-full spending-selection-list">
-        <List>
+        <List className="p-0">
           { !excludeSafeToSpend &&
           <ListItem
             key={ 'safe' }
