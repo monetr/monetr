@@ -12176,10 +12176,10 @@ wbuf@^1.1.0, wbuf@^1.7.3:
   dependencies:
     minimalistic-assert "^1.0.0"
 
-web-vitals@1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/web-vitals/-/web-vitals-1.1.2.tgz#06535308168986096239aa84716e68b4c6ae6d1c"
-  integrity sha512-PFMKIY+bRSXlMxVAQ+m2aw9c/ioUYfDgrYot0YUa+/xa0sakubWhSDyxAKwzymvXVdF4CZI71g06W+mqhzu6ig==
+web-vitals@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/web-vitals/-/web-vitals-2.0.0.tgz#7fcfb5fd2f439c2936822573cb4d5e8e4caaa22b"
+  integrity sha512-aCB1sYxt2eeBufybFRrDQNBg2cOcq2f6Q1He7T+qPHAwpodDXhAoWwBUavwppQQ4kfUcT5eIAfjPc9PdqAxPEw==
 
 webidl-conversions@^4.0.2:
   version "4.0.2"
