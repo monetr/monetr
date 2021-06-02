@@ -94,6 +94,7 @@ start-minikube:
 		--delete-on-failure \
 		--driver=$(MINIKUBE_DRIVER) \
 		--kubernetes-version=$(KUBERNETES_VERSION) \
+		--cni=cilium \
 		--embed-certs
 
 setup-etc-hosts:
@@ -272,44 +273,12 @@ deploy-redis:
 
 USE_PGO_OPERATOR ?=false
 ifeq ($(USE_PGO_OPERATOR),true)
-POSTGRES_OPERATOR_VERSION ?=v4.7.0
-POSTGRES_OPERATOR_CLIENT_SETUP=$(LOCAL_TMP)/pgo_client_setup.sh
-POSTGRES_OPERATOR_BASE_URL=https://raw.githubusercontent.com/CrunchyData/postgres-operator/$(POSTGRES_OPERATOR_VERSION)
+deploy-pgo:
+	$(KUBECTL) apply -f $(PWD)/production/operator/crunchy.yaml -n $(PROD_NAMESPACE)
+	$(KUBECTL) wait --for=condition=complete job/pgo-deploy --timeout=180s -n $(PROD_NAMESPACE)
+	$(KUBECTL) delete -f $(PWD)/production/operator/crunchy.yaml -n $(PROD_NAMESPACE)
 
-POSTGRES_OPERATOR_INSTALLER_YAML=$(LOCAL_TMP)/postgres-operator.yaml
-$(POSTGRES_OPERATOR_INSTALLER_YAML): $(LOCAL_TMP)
-	$(call infoMsg,Downloading Crunchy Data PostgreSQL operator installer yaml)
-	curl $(POSTGRES_OPERATOR_BASE_URL)/installers/kubectl/postgres-operator.yml > $(POSTGRES_OPERATOR_INSTALLER_YAML)
-	sed -i -e 's/namespace: "pgo"/namespace: "$(MINIKUBE_NAMESPACE)"/g' $(POSTGRES_OPERATOR_INSTALLER_YAML)
-	sed -i -e 's/namespace: pgo/namespace: "$(MINIKUBE_NAMESPACE)"/g' $(POSTGRES_OPERATOR_INSTALLER_YAML)
-	$(KUBECTL) apply -f $(POSTGRES_OPERATOR_INSTALLER_YAML) -n $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) wait --for=condition=complete job/pgo-deploy -n $(MINIKUBE_NAMESPACE) --timeout=180s
-	$(KUBECTL) delete -f $(POSTGRES_OPERATOR_INSTALLER_YAML) -n $(MINIKUBE_NAMESPACE)
-
-ifeq ($(OS),linux)
-PGO_BIN_NAME="pgo"
-else ifeq ($(OS),darwin)
-PGO_BIN_NAME="pgo-mac"
-else
-$(error Operating system [$(OS)] is not supported by pgo)
-endif
-
-define kubectl_get_private
-touch "$1" && chmod a-rwx,u+rw "$1" && $(KUBECTL) get > "$1" "${@:2}"
-endef
-
-PGO_DIR=$(LOCAL_TMP)/.pgo
-$(POSTGRES_OPERATOR_CLIENT_SETUP): $(LOCAL_TMP)
-	$(call kubectl_get_private "$(PGO_DIR)/pgouser" secret -n $(MINIKUBE_NAMESPACE) "pgouser-admin" -o 'go-template={{ .data.username | base64decode }}:{{ .data.password | base64decode }}')
-	$(call kubectl_get_private "$(PGO_DIR)/client.crt" secret -n $(MINIKUBE_NAMESPACE) pgo.tls -o 'go-template={{ index .data "tls.crt" | base64decode }}')
-	$(call kubectl_get_private "$(PGO_DIR)/client.key" secret -n $(MINIKUBE_NAMESPACE) pgo.tls -o 'go-template={{ index .data "tls.key" | base64decode }}')
-
-POSTGRES_OPERATOR_BIN_DOWNLOAD=https://github.com/CrunchyData/postgres-operator/releases/download/$(POSTGRES_OPERATOR_VERSION)/$(PGO_BIN_NAME)
-$(PGO): $(LOCAL_BIN)
-	$(call infoMsg,Downloading Crunchy Data PostgreSQL operator client)
-	curl -Lo $(PGO) $(POSTGRES_OPERATOR_BIN_DOWNLOAD)
-
-deploy-postgres: $(LOCAL_TMP) $(POSTGRES_OPERATOR_INSTALLER_YAML)
+deploy-postgres:
 	$(call infoMsg,Deploying Crunchy Data PostgreSQL to the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/crunchy-postgres.yaml -n $(MINIKUBE_NAMESPACE)
 

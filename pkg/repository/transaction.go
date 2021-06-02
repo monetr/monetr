@@ -80,6 +80,27 @@ func (r *repositoryBase) GetTransactions(bankAccountId uint64, limit, offset int
 	return items, nil
 }
 
+func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error) {
+	span := sentry.StartSpan(ctx, "GetTransactionsForSpending")
+	defer span.Finish()
+
+	var items []models.Transaction
+	err := r.txn.ModelContext(span.Context(), &items).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."spending_id" = ?`, spendingId).
+		Limit(limit).
+		Offset(offset).
+		Order(`date DESC`).
+		Order(`transaction_id DESC`).
+		Select(&items)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve transactions for spending")
+	}
+
+	return items, nil
+}
+
 func (r *repositoryBase) GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error) {
 	var result models.Transaction
 	err := r.txn.Model(&result).

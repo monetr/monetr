@@ -46,6 +46,7 @@ type Repository interface {
 	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
+	GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error)
 	InsertTransactions(ctx context.Context, transactions []models.Transaction) error
 	ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
 	UpdateBankAccounts(accounts []models.BankAccount) error
