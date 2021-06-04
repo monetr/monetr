@@ -1,3 +1,6 @@
+import { Moment } from "moment";
+import { parseToMomentMaybe } from "util/parseToMoment";
+
 export enum LinkType {
   Unknown = 0,
   Plaid = 1,
@@ -20,9 +23,15 @@ export default class Link {
   institutionName: string;
   customInstitutionName?: string;
   createdByUserId: number;
+  lastSuccessfulUpdate: Moment | null;
 
   constructor(data: Partial<Link>) {
-    Object.assign(this, data)
+    if (data) {
+      Object.assign(this, {
+        ...data,
+        lastSuccessfulUpdate: parseToMomentMaybe(data.lastSuccessfulUpdate),
+      });
+    }
   }
 
   getName(): string {

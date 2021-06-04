@@ -4,15 +4,20 @@ import { connect } from "react-redux";
 import { Button, Card, Divider, Fab, List, ListItem, ListSubheader, Typography } from "@material-ui/core";
 import BankAccount from "data/BankAccount";
 import { Map } from 'immutable';
-import { AccountBalance, Add } from "@material-ui/icons";
+import { AccountBalance, Add, FiberManualRecord } from "@material-ui/icons";
 import AddBankAccountDialog from "views/AccountView/AddBankAccountDialog";
-import Link from "data/Link";
+import Link, { LinkStatus } from "data/Link";
 import { getLinks } from "shared/links/selectors/getLinks";
 import PlaidIcon from "Plaid/PlaidIcon";
+import Balance from "data/Balance";
+import { getBalances } from "shared/balances/selectors/getBalances";
+import fetchMissingBankAccountBalances from "shared/balances/actions/fetchMissingBankAccountBalances";
 
 interface WithConnectionPropTypes {
   bankAccounts: Map<number, BankAccount>;
   links: Map<number, Link>;
+  balances: Map<number, Balance>;
+  fetchMissingBankAccountBalances: () => Promise<any>;
 }
 
 enum DialogOpen {
@@ -28,6 +33,10 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
   state = {
     dialog: null,
   };
+
+  componentDidMount() {
+    this.props.fetchMissingBankAccountBalances().then(r => {});
+  }
 
   renderContents = () => {
     const { bankAccounts } = this.props;
@@ -78,14 +87,14 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
             .map((accounts, group) => (
               <li key={ group }>
                 <ul>
-                  <ListSubheader className="bg-white pl-0 pr-0 pt-2 bg-gray-50">
+                  <ListSubheader className="pl-0 pr-0 pt-2 bg-gray-50">
                     <div className="flex pb-2">
                       <div className="flex-auto">
                         <Typography className="ml-6 font-semibold text-base">
                           { links.get(group).getName() }
                         </Typography>
                       </div>
-                      { links.get(group).getIsPlaid() && <PlaidIcon className={ 'w-16 flex-none mr-6'} /> }
+                      { links.get(group).getIsPlaid() && this.renderPlaidInfo(links.get(group)) }
                     </div>
                     <Divider/>
                   </ListSubheader>
@@ -109,15 +118,49 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
     );
   };
 
+  renderPlaidInfo = (link: Link) => {
+    return (
+      <div className="flex items-center">
+        { link.linkStatus === LinkStatus.Setup && <FiberManualRecord className="text-green-500 mr-2"/> }
+        { link.linkStatus === LinkStatus.Error && <FiberManualRecord className="text-red-500 mr-2"/> }
+        <Typography className="pr-5 items-center self-center">
+          <span
+            className="font-bold">Last Successful Sync:</span> { link.lastSuccessfulUpdate.format('MMMM Do, h:mm a') }
+        </Typography>
+        <PlaidIcon className={ 'w-16 flex-none mr-6' }/>
+      </div>
+    )
+  }
+
   renderBankAccountItem = (bankAccountId: number) => {
     const bankAccount = this.props.bankAccounts.get(bankAccountId);
+    const balances = this.props.balances.get(bankAccountId, null);
 
     return (
-      <ListItem key={ bankAccountId } button>
-        { bankAccount.name }
-      </ListItem>
+      <Fragment>
+        <ListItem key={ bankAccountId } button>
+          <div className="flex w-full">
+            <Typography className="w-1/3 font-bold overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+              { bankAccount.name }
+            </Typography>
+            <div className="flex-auto flex">
+              <Typography className="w-1/2 m-w-1/2 overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+                <span className="font-semibold">Safe-To-Spend:</span> { balances ? balances.getSafeToSpendString() : '...' }
+              </Typography>
+              <div className="w-1/2 flex">
+                <Typography className="w-1/2 text-sm  overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+                  <span className="font-semibold">Available:</span> { bankAccount.getAvailableBalanceString() }
+                </Typography>
+                <Typography className="w-1/2 text-sm  overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+                  <span className="font-semibold">Current:</span> { bankAccount.getCurrentBalanceString() }
+                </Typography>
+              </div>
+            </div>
+          </div>
+        </ListItem>
+        <Divider/>
+      </Fragment>
     )
-
   }
 
   openDialog = (dialog: DialogOpen) => () => this.setState({
@@ -143,7 +186,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
         { this.renderDialogs() }
         <div className="minus-nav">
           <div className="flex flex-col h-full md:p-10 sm:p-1 max-h-full">
-            <Card elevation={ 4 } className="w-full h-full">
+            <Card elevation={ 4 } className="w-full h-full overflow-y-auto">
               { this.renderContents() }
             </Card>
           </div>
@@ -157,6 +200,9 @@ export default connect(
   state => ({
     bankAccounts: getBankAccounts(state),
     links: getLinks(state),
+    balances: getBalances(state),
   }),
-  {}
+  {
+    fetchMissingBankAccountBalances,
+  }
 )(AllAccountsView);
