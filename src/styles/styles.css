@@ -47,7 +47,6 @@ button:focus {
 }
 
 .MuiPaper-rounded {
-    padding-top: 2px;
     border-radius: 10px !important;
 }
 

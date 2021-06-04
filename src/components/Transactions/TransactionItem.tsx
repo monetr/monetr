@@ -106,10 +106,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
     )
   }
 
-  spentFromPopover = () => {
 
-
-  };
 
   handleClick = () => {
     return this.props.selectTransaction(this.props.transactionId);

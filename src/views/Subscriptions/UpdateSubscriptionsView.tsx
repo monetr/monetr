@@ -157,6 +157,11 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
         })
         .then(result => {
           console.log(result);
+        })
+        .finally(() => {
+          this.setState({
+            loading: false,
+          });
         });
     };
 

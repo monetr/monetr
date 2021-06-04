@@ -1,4 +1,3 @@
-import AuthenticatedApplication from "AuthenticatedApplication";
 import PropTypes from "prop-types";
 import React, { PureComponent } from 'react';
 import { connect } from "react-redux";
@@ -12,6 +11,7 @@ import LoginView from "views/Login";
 import SignUpView from "views/SignUp";
 import { Backdrop, CircularProgress } from "@material-ui/core";
 import { BillingRequired } from "views/Subscriptions/BillingRequired";
+import AuthenticatedApp from "AuthenticatedApp";
 
 export class Root extends PureComponent {
   state = {
@@ -89,7 +89,7 @@ export class Root extends PureComponent {
     }
 
     return (
-      <AuthenticatedApplication/>
+      <AuthenticatedApp />
     )
   }
 }

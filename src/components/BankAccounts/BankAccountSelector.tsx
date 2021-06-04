@@ -16,6 +16,7 @@ import fetchSpending from 'shared/spending/actions/fetchSpending';
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classnames from "classnames";
+import { RouteComponentProps, withRouter } from "react-router-dom";
 
 interface PropTypes {
   selectedBankAccountId: number;
@@ -43,7 +44,7 @@ interface State {
   anchorEl: Element | null;
 }
 
-export class BankAccountSelector extends Component<PropTypes, State> {
+export class BankAccountSelector extends Component<RouteComponentProps & PropTypes, State> {
 
   state = {
     anchorEl: null,
@@ -68,6 +69,11 @@ export class BankAccountSelector extends Component<PropTypes, State> {
     anchorEl: null,
   });
 
+  goToAllAccounts = () => {
+    this.closeMenu();
+    this.props.history.push('/accounts');
+  }
+
   renderBankAccountMenu = (): JSX.Element | JSX.Element[] => {
     const { selectedBankAccountId, bankAccounts } = this.props;
 
@@ -79,8 +85,16 @@ export class BankAccountSelector extends Component<PropTypes, State> {
       </MenuItem>
     );
 
+    const bankAccountsViewButton = (
+      <MenuItem key="viewBankAccounts" onClick={ this.goToAllAccounts }>
+        <Typography>
+          View Bank Accounts
+        </Typography>
+      </MenuItem>
+    );
+
     if (bankAccounts.isEmpty()) {
-      return addBankAccountItem
+      return [addBankAccountItem, bankAccountsViewButton]
     }
 
     let items = bankAccounts
@@ -109,6 +123,7 @@ export class BankAccountSelector extends Component<PropTypes, State> {
 
     items.push(<Divider key="divider" className="w-96"/>);
     items.push(addBankAccountItem);
+    items.push(bankAccountsViewButton);
 
     return items;
   };
@@ -139,7 +154,7 @@ export class BankAccountSelector extends Component<PropTypes, State> {
           >
             { title }
           </Typography>
-          <ArrowDropDown scale={ 1.25 } color="inherit" />
+          <ArrowDropDown scale={ 1.25 } color="inherit"/>
         </Button>
         <Menu
           className="w-96"
@@ -171,4 +186,4 @@ export default connect(
     fetchSpending,
     fetchBalances,
   },
-)(BankAccountSelector);
+)(withRouter(BankAccountSelector));

@@ -1,77 +1,99 @@
-import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
-import BankAccountSelector from "components/BankAccounts/BankAccountSelector";
-import PropTypes from "prop-types";
-import React, { Component, Fragment } from 'react';
-import { connect } from "react-redux";
-import { Link as RouterLink, Redirect, Route, Switch, withRouter } from "react-router-dom";
-import { bindActionCreators } from "redux";
+import React, { Component, Fragment } from "react";
+import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
 import logout from "shared/authentication/actions/logout";
 import fetchBalances from "shared/balances/actions/fetchBalances";
 import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
 import { fetchFundingSchedulesIfNeeded } from "shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded";
-import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
-import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
 import fetchSpending from "shared/spending/actions/fetchSpending";
+import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import ExpensesView from "views/ExpensesView";
-import FirstTimeSetup from "views/FirstTimeSetup";
-import GoalsView from "views/GoalsView";
-import TransactionsView from "views/TransactionsView";
-import AccountView from "views/AccountView";
-import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
+import { Link as RouterLink, Redirect, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from "@material-ui/core";
 import UpdateSubscriptionsView from "views/Subscriptions/UpdateSubscriptionsView";
+import BankAccountSelector from "components/BankAccounts/BankAccountSelector";
+import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
+import MenuIcon from "@material-ui/icons/Menu";
+import TransactionsView from "views/TransactionsView";
+import ExpensesView from "views/ExpensesView";
+import GoalsView from "views/GoalsView";
+import AccountView from "views/AccountView";
+import FirstTimeSetup from "views/FirstTimeSetup";
+import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
+import AllAccountsView from "views/AccountView/AllAccountsView";
 
-export class AuthenticatedApplication extends Component {
+interface WithConnectionPropTypes {
+  logout: () => void;
+  fetchBalances: () => Promise<any>;
+  fetchBankAccounts: () => Promise<any>;
+  fetchFundingSchedulesIfNeeded: () => Promise<any>;
+  fetchInitialTransactionsIfNeeded: () => Promise<any>;
+  fetchLinksIfNeeded: () => Promise<any>;
+  fetchSpending: () => Promise<any>;
+  hasAnyLinks: boolean;
+}
+
+interface State {
+  loading: boolean;
+  menuAnchorEl: Element | null;
+}
+
+export class AuthenticatedApp extends Component<RouteComponentProps & WithConnectionPropTypes, State> {
+
   state = {
     loading: true,
-    anchorEl: null,
-  };
-
-  static propTypes = {
-    logout: PropTypes.func.isRequired,
-    history: PropTypes.object.isRequired,
-    location: PropTypes.instanceOf(Location).isRequired,
-    fetchLinksIfNeeded: PropTypes.func.isRequired,
-    fetchBankAccounts: PropTypes.func.isRequired,
-    fetchSpending: PropTypes.func.isRequired,
-    fetchFundingSchedulesIfNeeded: PropTypes.func.isRequired,
-    hasAnyLinks: PropTypes.bool.isRequired,
-    fetchInitialTransactionsIfNeeded: PropTypes.func.isRequired,
-    fetchBalances: PropTypes.func.isRequired,
+    menuAnchorEl: null,
   };
 
   componentDidMount() {
+    const {
+      fetchBalances,
+      fetchBankAccounts,
+      fetchFundingSchedulesIfNeeded,
+      fetchSpending,
+      fetchLinksIfNeeded,
+      fetchInitialTransactionsIfNeeded,
+    } = this.props;
+
     Promise.all([
-      this.props.fetchLinksIfNeeded(),
-      this.props.fetchBankAccounts().then(() => {
-        return Promise.all([
-          this.props.fetchInitialTransactionsIfNeeded(),
-          this.props.fetchFundingSchedulesIfNeeded(),
-          this.props.fetchSpending(),
-          this.props.fetchBalances(),
-        ]);
-      }),
+      fetchLinksIfNeeded(),
+      fetchBankAccounts().then(() => Promise.all([
+        fetchInitialTransactionsIfNeeded(),
+        fetchFundingSchedulesIfNeeded(),
+        fetchSpending(),
+        fetchBalances(),
+      ])),
     ])
       .finally(() => this.setState({ loading: false }));
   }
 
-  openMenu = event => {
-    this.setState({
-      anchorEl: event.currentTarget,
-    });
-  };
+  openMenu = (event: { currentTarget: Element }) => this.setState({
+    menuAnchorEl: event.currentTarget,
+  });
 
-  closeMenu = () => {
-    this.setState({
-      anchorEl: null,
-    });
-  };
+  closeMenu = () => this.setState({
+    menuAnchorEl: null,
+  });
 
   doLogout = () => {
     this.props.logout();
     this.props.history.push('/login');
+  };
+
+  gotoAccount = () => {
+    this.setState({
+      menuAnchorEl: null,
+    }, () => {
+      this.props.history.push('/account');
+    });
+  };
+
+  renderSubRoutes = () => {
+    if (this.props.hasAnyLinks) {
+      return this.renderSetup();
+    }
+
+    return this.renderNotSetup()
   };
 
   renderNotSetup = () => {
@@ -93,14 +115,6 @@ export class AuthenticatedApplication extends Component {
     )
   };
 
-  gotoAccount = () => {
-    this.setState({
-      anchorEl: null,
-    }, () => {
-      this.props.history.push('/account');
-    });
-  };
-
   renderSetup = () => {
     return (
       <Fragment>
@@ -117,13 +131,14 @@ export class AuthenticatedApplication extends Component {
             </IconButton>
             <Menu
               id="user-menu"
-              anchorEl={ this.state.anchorEl }
+              anchorEl={ this.state.menuAnchorEl }
               keepMounted
-              open={ Boolean(this.state.anchorEl) }
+              open={ Boolean(this.state.menuAnchorEl) }
               onClose={ this.closeMenu }
             >
               <MenuItem disabled>About (WIP)</MenuItem>
               <MenuItem onClick={ this.gotoAccount }>My account</MenuItem>
+              <MenuItem disabled>Billing</MenuItem>
               <MenuItem onClick={ this.doLogout }>Logout</MenuItem>
             </Menu>
           </Toolbar>
@@ -147,6 +162,9 @@ export class AuthenticatedApplication extends Component {
           <Route path="/account">
             <AccountView/>
           </Route>
+          <Route path="/accounts">
+            <AllAccountsView />
+          </Route>
           <Route path="/">
             <Redirect to="/transactions"/>
           </Route>
@@ -157,14 +175,6 @@ export class AuthenticatedApplication extends Component {
       </Fragment>
     );
   }
-
-  renderSubRoutes = () => {
-    if (this.props.hasAnyLinks) {
-      return this.renderSetup();
-    }
-
-    return this.renderNotSetup()
-  };
 
   render() {
     if (this.state.loading) {
@@ -190,13 +200,13 @@ export default connect(
   state => ({
     hasAnyLinks: getHasAnyLinks(state),
   }),
-  dispatch => bindActionCreators({
+  {
     logout,
-    fetchLinksIfNeeded,
-    fetchBankAccounts,
-    fetchSpending,
-    fetchFundingSchedulesIfNeeded,
-    fetchInitialTransactionsIfNeeded,
     fetchBalances,
-  }, dispatch),
-)(withRouter(AuthenticatedApplication));
+    fetchBankAccounts,
+    fetchFundingSchedulesIfNeeded,
+    fetchSpending,
+    fetchLinksIfNeeded,
+    fetchInitialTransactionsIfNeeded,
+  }
+)(withRouter(AuthenticatedApp));

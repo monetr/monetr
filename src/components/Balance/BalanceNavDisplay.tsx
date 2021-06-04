@@ -11,6 +11,10 @@ interface WithConnectionPropTypes {
 export class BalanceNavDisplay extends Component<WithConnectionPropTypes, any> {
 
   render() {
+    if (!this.props.balance) {
+      return null;
+    }
+
     return (
       <div className="flex-1 flex justify-center gap-2">
         <Typography>

@@ -41,7 +41,7 @@ build-web-ui-mini:
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
-		-e ENVIRONMENT="local" \
+		--build-arg ENVIRONMENT="local" \
 		-t $(IMAGE_NAME) \
 		-t $(BASE_IMAGE_NAME):latest \
 		-f Dockerfile . && \

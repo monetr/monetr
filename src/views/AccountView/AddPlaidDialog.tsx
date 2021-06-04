@@ -150,7 +150,7 @@ export class AddPlaidDialog extends Component<WithConnectionProps, State> {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button>Cancel</Button>
+          <Button onClick={ this.props.onClose }>Cancel</Button>
           { this.renderPlaidButton() }
         </DialogActions>
       </Dialog>

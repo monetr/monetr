@@ -4,10 +4,10 @@ import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelec
 
 const balancesByBankAccount = state => state.balances.items;
 
-export const getBalance = createSelector<any, any, Balance>(
+export const getBalance = createSelector<any, any, Balance|null>(
   [getSelectedBankAccountId, balancesByBankAccount],
   (selectedBankAccountId, balances) => {
-    return balances.get(selectedBankAccountId, new Balance());
+    return balances.get(selectedBankAccountId, null);
   },
 );
 
