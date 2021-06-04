@@ -50,6 +50,10 @@ button:focus {
     border-radius: 10px !important;
 }
 
+.MuiButton-root {
+    border-radius: 10px !important;
+}
+
 /*.MuiPaper-root.MuiCard-root {*/
 /*    background: rgba(255, 255, 255, 0.4);*/
 /*    !*backdrop-filter: blur(4px);*!*/

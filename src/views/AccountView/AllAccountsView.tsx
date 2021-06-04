@@ -1,14 +1,18 @@
 import React, { Component, Fragment } from "react";
 import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
 import { connect } from "react-redux";
-import { Button, Card, List, ListItem, Typography } from "@material-ui/core";
+import { Button, Card, Divider, Fab, List, ListItem, ListSubheader, Typography } from "@material-ui/core";
 import BankAccount from "data/BankAccount";
 import { Map } from 'immutable';
-import { AccountBalance } from "@material-ui/icons";
+import { AccountBalance, Add } from "@material-ui/icons";
 import AddBankAccountDialog from "views/AccountView/AddBankAccountDialog";
+import Link from "data/Link";
+import { getLinks } from "shared/links/selectors/getLinks";
+import PlaidIcon from "Plaid/PlaidIcon";
 
 interface WithConnectionPropTypes {
   bankAccounts: Map<number, BankAccount>;
+  links: Map<number, Link>;
 }
 
 enum DialogOpen {
@@ -64,18 +68,57 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
   );
 
   renderBankAccountList = () => {
-    const { bankAccounts } = this.props;
+    const { bankAccounts, links } = this.props;
 
     return (
-      <List>
-        { bankAccounts.map(item => (
-          <ListItem key={ item.bankAccountId }>
-            { item.name }
-          </ListItem>
-        )).valueSeq().toArray() }
-      </List>
+      <Fragment>
+        <List disablePadding>
+          { bankAccounts
+            .groupBy(item => item.linkId)
+            .map((accounts, group) => (
+              <li key={ group }>
+                <ul>
+                  <ListSubheader className="bg-white pl-0 pr-0 pt-2 bg-gray-50">
+                    <div className="flex pb-2">
+                      <div className="flex-auto">
+                        <Typography className="ml-6 font-semibold text-base">
+                          { links.get(group).getName() }
+                        </Typography>
+                      </div>
+                      { links.get(group).getIsPlaid() && <PlaidIcon className={ 'w-16 flex-none mr-6'} /> }
+                    </div>
+                    <Divider/>
+                  </ListSubheader>
+                  { accounts.map(item => this.renderBankAccountItem(item.bankAccountId)).valueSeq().toArray() }
+                </ul>
+              </li>
+            ))
+            .valueSeq()
+            .toArray()
+          }
+        </List>
+        <Fab
+          color="primary"
+          aria-label="add"
+          className="absolute bottom-16 right-16"
+          onClick={ this.openDialog(DialogOpen.CreateBankAccount) }
+        >
+          <Add/>
+        </Fab>
+      </Fragment>
     );
   };
+
+  renderBankAccountItem = (bankAccountId: number) => {
+    const bankAccount = this.props.bankAccounts.get(bankAccountId);
+
+    return (
+      <ListItem key={ bankAccountId } button>
+        { bankAccount.name }
+      </ListItem>
+    )
+
+  }
 
   openDialog = (dialog: DialogOpen) => () => this.setState({
     dialog,
@@ -113,6 +156,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
 export default connect(
   state => ({
     bankAccounts: getBankAccounts(state),
+    links: getLinks(state),
   }),
   {}
 )(AllAccountsView);

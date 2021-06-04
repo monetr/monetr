@@ -32,4 +32,8 @@ export default class Link {
   getIsManual(): boolean {
     return this.linkType === LinkType.Manual;
   }
+
+  getIsPlaid(): boolean {
+    return this.linkType === LinkType.Plaid;
+  }
 }

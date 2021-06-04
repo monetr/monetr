@@ -157,7 +157,7 @@ export class BankAccountSelector extends Component<RouteComponentProps & PropTyp
           <ArrowDropDown scale={ 1.25 } color="inherit"/>
         </Button>
         <Menu
-          className="w-96"
+          className="w-96 pt-0 pb-0"
           id="bank-account-menu"
           anchorEl={ this.state.anchorEl }
           keepMounted
