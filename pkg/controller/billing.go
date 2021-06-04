@@ -8,6 +8,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/swag"
+	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"time"
@@ -16,6 +17,7 @@ import (
 func (c *Controller) handleBilling(p iris.Party) {
 	p.Get("/plans", c.getBillingPlans)
 	p.Post("/subscribe", c.postSubscribe)
+	p.Get("/subscription", c.getSubscription)
 	p.Post("/create_checkout", c.handlePostCreateCheckout)
 }
 
@@ -187,6 +189,18 @@ func (c *Controller) postSubscribe(ctx iris.Context) {
 		*me.StripeCustomerId,
 	)
 	if err != nil {
+		switch stripError := errors.Cause(err).(type) {
+		case *stripe.Error:
+			switch stripError.Code {
+			case "card_declined":
+				ctx.StatusCode(http.StatusBadRequest)
+				ctx.JSON(map[string]interface{}{
+					"error": "Your card was declined.",
+				})
+				return
+			}
+		}
+
 		log.WithError(err).Error("failed to attach payment method to stripe customer")
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not associate payment method")
 		return
@@ -249,6 +263,22 @@ func (c *Controller) postSubscribe(ctx iris.Context) {
 
 
 
+}
+
+func (c *Controller) getSubscription(ctx iris.Context) {
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	activeSubscription, err := repo.GetActiveSubscription(c.getContext(ctx))
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve active subscription")
+		return
+	}
+
+	if activeSubscription == nil {
+		c.returnError(ctx, http.StatusBadRequest, "no active subscription")
+		return
+	}
+
+	ctx.JSON(activeSubscription)
 }
 
 // Create Checkout Session

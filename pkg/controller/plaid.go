@@ -35,8 +35,23 @@ func (c *Controller) storeLinkTokenInCache(ctx context.Context, log *logrus.Entr
 	}
 	defer cache.Close()
 
-	key := fmt.Sprintf("plaidInProgress_%d", userId)
+	key := fmt.Sprintf("plaid:in_progress:%d", userId)
 	return errors.Wrap(cache.Send("SET", key, linkToken, "EXAT", expiration.Unix()), "failed to cache link token")
+}
+
+func (c *Controller) removeLinkTokenFromCache(ctx context.Context, log *logrus.Entry, userId uint64) error {
+	span := sentry.StartSpan(ctx, "RemoteLinkTokenFromCache")
+	defer span.Finish()
+
+	cache, err := c.cache.GetContext(ctx)
+	if err != nil {
+		log.WithError(err).Warn("failed to get cache connection")
+		return errors.Wrap(err, "failed to get cache connection")
+	}
+	defer cache.Close()
+
+	key := fmt.Sprintf("plaid:in_progress:%d", userId)
+	return errors.Wrap(cache.Send("DEL", key), "failed to remove link token from cache")
 }
 
 // New Plaid Token
@@ -79,7 +94,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		defer cache.Close()
 
 		// Check and see if there is already a plaid link in progress for the current user.
-		result, err := cache.Do("GET", fmt.Sprintf("plaidInProgress_%d", me.UserId))
+		result, err := cache.Do("GET", fmt.Sprintf("plaid:in_progress:%d", me.UserId))
 		if err != nil {
 			log.WithError(err).Warn("failed to retrieve link token from cache")
 			return "", errors.Wrap(err, "failed to retrieve link token from cache")
@@ -367,6 +382,12 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	if err := ctx.ReadJSON(&callbackRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
 		return
+	}
+
+	log := c.getLog(ctx)
+
+	if err := c.removeLinkTokenFromCache(c.getContext(ctx), log, c.mustGetUserId(ctx)); err != nil {
+		log.WithError(err).Warn("failed to remove link token from cache")
 	}
 
 	if len(callbackRequest.AccountIds) == 0 {

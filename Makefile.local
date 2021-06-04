@@ -94,7 +94,6 @@ start-minikube:
 		--delete-on-failure \
 		--driver=$(MINIKUBE_DRIVER) \
 		--kubernetes-version=$(KUBERNETES_VERSION) \
-		--cni=cilium \
 		--embed-certs
 
 setup-etc-hosts:
@@ -357,6 +356,10 @@ endif
 	@echo "run: make reconfigure-webhooks"
 	@echo "to apply config changes for the ngrok url"
 	@echo "\033[0;31m#################################################################################\033[0m"
+
+configure-stripe-webhooks:
+	yq e '.api.stripe.webhooksEnabled = true' -i $(VALUES)
+	make deploy-mini-application
 
 reconfigure-webhooks:
 	export WEBHOOKS_DOMAIN=$$(curl -s "https://ngrok.$(LOCAL_DOMAIN)/api/tunnels" | $(JQ) '.tunnels[0].public_url' - -r) && \
