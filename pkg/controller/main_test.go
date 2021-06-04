@@ -1,7 +1,9 @@
 package controller_test
 
 import (
+	"github.com/alicebob/miniredis/v2"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/gomodule/redigo/redis"
 	"github.com/kataras/iris/v12/httptest"
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/config"
@@ -52,7 +54,22 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 
 	mockJobManager := testutils.NewMockJobManager()
 
-	c := controller.NewController(testutils.GetLog(t), configuration, db, mockJobManager, p, nil, nil, nil)
+	miniRedis := miniredis.NewMiniRedis()
+	require.NoError(t, miniRedis.Start())
+	redisPool := &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", miniRedis.Server().Addr().String())
+		},
+	}
+
+	t.Cleanup(func() {
+		require.NoError(t, redisPool.Close())
+		miniRedis.Close()
+	})
+
+
+
+	c := controller.NewController(testutils.GetLog(t), configuration, db, mockJobManager, p, nil, nil, redisPool)
 	app := application.NewApp(configuration, c)
 	return httptest.New(t, app)
 }
