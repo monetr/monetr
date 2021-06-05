@@ -133,7 +133,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
         { link.linkStatus === LinkStatus.Error && <FiberManualRecord className="text-red-500 mr-2"/> }
         <Typography className="pr-5 items-center self-center">
           <span
-            className="font-bold">Last Successful Sync:</span> { link.lastSuccessfulUpdate.format('MMMM Do, h:mm a') }
+            className="font-bold">Last Successful Sync:</span> { link.lastSuccessfulUpdate ? link.lastSuccessfulUpdate.format('MMMM Do, h:mm a') : 'N/A' }
         </Typography>
         <PlaidIcon className={ 'w-16 flex-none mr-6' }/>
       </div>
