@@ -21,7 +21,7 @@ PGO=$(LOCAL_BIN)/pgo
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=features work pgadmin pghero vault ngrok registry app api
+SUBDOMAINS=mail features work pgadmin pghero vault ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -458,4 +458,20 @@ features-mini:
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "unleash dashboard is now accessible at: https://features.$(LOCAL_DOMAIN)"
+	@echo "\033[0;31m#################################################################################\033[0m"
+
+
+###################### Mailhog UI ##################################
+mail-mini:
+	$(KUBECTL) apply -f $(PWD)/minikube/mailhog.yaml \
+		--namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/mail \
+		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	$(YQ) e '.api.smtp.enabled = true' -i $(VALUES)
+	$(YQ) e '.api.smtp.username = "restapi"' -i $(VALUES)
+	$(YQ) e '.api.smtp.password = "mailPassword"' -i $(VALUES)
+	$(YQ) e '.api.smtp.host = "mail.default.svc.cluster.local"' -i $(VALUES)
+	$(YQ) e '.api.smtp.port = 1025' -i $(VALUES)
+	@echo "\033[0;31m#################################################################################\033[0m"
+	@echo "mailhog is now accessible at: https://mail.$(LOCAL_DOMAIN)"
 	@echo "\033[0;31m#################################################################################\033[0m"

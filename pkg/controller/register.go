@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
+	"github.com/monetrapp/rest-api/pkg/communication"
 	"github.com/monetrapp/rest-api/pkg/hash"
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
@@ -200,13 +202,20 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		}
 	}
 
+	log := c.getLog(ctx)
+
 	// If SMTP is enabled and we are verifying emails then we want to create a
 	// registration record and send the user a verification email.
 	if c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails {
-		ctx.JSON(map[string]interface{}{
-			"needsVerification": true,
-		})
-		return
+		if err = c.email.Send(c.getContext(ctx), communication.SendEmailRequest{
+			From:    fmt.Sprintf("no-reply@%s", "monetr.mini"),
+			To:      registerRequest.Email,
+			Subject: "Verify your email address",
+			IsHTML:  true,
+			Content: "<html><body><h1>Hello World!</h1></body></html>",
+		}); err != nil {
+			log.WithError(err).Warn("failed to send verification email for new user registration")
+		}
 	}
 
 	// If we are not requiring email verification to activate an account we can

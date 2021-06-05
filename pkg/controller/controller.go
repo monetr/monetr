@@ -7,6 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetrapp/rest-api/pkg/billing"
 	"github.com/monetrapp/rest-api/pkg/build"
+	"github.com/monetrapp/rest-api/pkg/communication"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
@@ -47,6 +48,7 @@ type Controller struct {
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
 	billingHelper            billing.BillingHelper
+	email                    communication.Communication
 }
 
 func NewController(
@@ -86,6 +88,7 @@ func NewController(
 		ps:                       pubsub.NewPostgresPubSub(log, db),
 		cache:                    cache,
 		billingHelper:            billing.NewBillingHelper(log, cache, db),
+		email:                    communication.NewSMTPCommunication(log, configuration.SMTP),
 	}
 }
 
