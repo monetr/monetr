@@ -475,3 +475,10 @@ mail-mini:
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "mailhog is now accessible at: https://mail.$(LOCAL_DOMAIN)"
 	@echo "\033[0;31m#################################################################################\033[0m"
+
+
+###################### Sharded Redis ##################################
+twem-mini:
+	$(KUBECTL) apply -f $(PWD)/minikube/twemproxy.yaml --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status statefulset/twem --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	$(YQ) e '.api.redis.address = "twem.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
