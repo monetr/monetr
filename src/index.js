@@ -9,6 +9,7 @@ import './styles/index.scss';
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 import { BrowserRouter as Router } from "react-router-dom";
+import { createMuiTheme, MuiThemeProvider, Typography } from "@material-ui/core";
 
 // eslint-disable-next-line no-undef
 if (CONFIG.SENTRY_DSN) {
@@ -16,7 +17,7 @@ if (CONFIG.SENTRY_DSN) {
     // eslint-disable-next-line no-undef
     dsn: CONFIG.SENTRY_DSN,
     // eslint-disable-next-line no-undef
-    release: `web-ui@${RELEASE_REVISION}`,
+    release: `web-ui@${ RELEASE_REVISION }`,
     integrations: [new Integrations.BrowserTracing()],
     tracesSampleRate: 0,
   });
@@ -28,12 +29,30 @@ if (module.hot) {
   module.hot.accept()
 }
 
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#4E1AA0'
+    },
+    secondary: {
+      main: '#FF5798'
+    }
+  }
+});
+
 ReactDOM.render(
   <React.StrictMode>
-    <Sentry.ErrorBoundary fallback={"A fatal error has occurred"}>
+    <Sentry.ErrorBoundary fallback={ "A fatal error has occurred" }>
       <Provider store={ store }>
         <Router>
-          <Root/>
+          <MuiThemeProvider theme={ theme }>
+            <Root/>
+            <Typography
+              className="absolute bottom-1 w-full text-center opacity-30 inline"
+            >
+              © { new Date().getFullYear() } monetr LLC
+            </Typography>
+          </MuiThemeProvider>
         </Router>
       </Provider>
     </Sentry.ErrorBoundary>

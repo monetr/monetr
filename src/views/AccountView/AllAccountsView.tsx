@@ -35,7 +35,8 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
   };
 
   componentDidMount() {
-    this.props.fetchMissingBankAccountBalances().then(r => {});
+    this.props.fetchMissingBankAccountBalances().then(r => {
+    });
   }
 
   renderContents = () => {
@@ -84,6 +85,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
         <List disablePadding>
           { bankAccounts
             .groupBy(item => item.linkId)
+            .sortBy((_, linkId) => links.get(linkId).getName())
             .map((accounts, group) => (
               <li key={ group }>
                 <ul>
@@ -98,7 +100,13 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
                     </div>
                     <Divider/>
                   </ListSubheader>
-                  { accounts.map(item => this.renderBankAccountItem(item.bankAccountId)).valueSeq().toArray() }
+                  {
+                    accounts
+                      .sortBy(item => item.name)
+                      .map(item => this.renderBankAccountItem(item.bankAccountId))
+                      .valueSeq()
+                      .toArray()
+                  }
                 </ul>
               </li>
             ))
@@ -109,7 +117,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
         <Fab
           color="primary"
           aria-label="add"
-          className="absolute bottom-16 right-16"
+          className="absolute bottom-16 right-16 z-50"
           onClick={ this.openDialog(DialogOpen.CreateBankAccount) }
         >
           <Add/>
@@ -145,7 +153,8 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
             </Typography>
             <div className="flex-auto flex">
               <Typography className="w-1/2 m-w-1/2 overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
-                <span className="font-semibold">Safe-To-Spend:</span> { balances ? balances.getSafeToSpendString() : '...' }
+                <span
+                  className="font-semibold">Safe-To-Spend:</span> { balances ? balances.getSafeToSpendString() : '...' }
               </Typography>
               <div className="w-1/2 flex">
                 <Typography className="w-1/2 text-sm  overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
