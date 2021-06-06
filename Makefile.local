@@ -117,47 +117,20 @@ KEY_PATH=$(LOCAL_CERTS)/$(LOCAL_DOMAIN).key
 CERT_PATH=$(LOCAL_CERTS)/$(LOCAL_DOMAIN).crt
 clean-certificates:
 	$(call infoMsg,Checking to see if our TLS certificate is in the trusted keychain)
-	(sudo security find-certificate -c $(LOCAL_DOMAIN) && make remove-certificate) || true
 	rm -rf $(LOCAL_CERTS) || true
 	rm -rf $(HOME)/.minikube/certs/$(LOCAL_DOMAIN).pem || true
-
-remove-certificate:
-	$(call infoMsg,Local development certificate is registered; it will be removed)
-	(sudo security delete-certificate -c *.$(LOCAL_DOMAIN) && exit 0) || true && echo ""
-	sudo security find-certificate -c $(LOCAL_DOMAIN) && true
-	$(call warningMsg,Unable to delete certificate; you can delete it manually in the Keychain Access application; it should show as: $(LOCAL_DOMAIN))
 
 NGINX_DEPLOYMENT=ingress-nginx-controller
 NGINX_NAMESPACE=$(shell $(KUBECTL) get deploy --all-namespaces --field-selector "metadata.name"=$(NGINX_DEPLOYMENT) -o yaml | $(YQ) e '.items[0].metadata.namespace' -)
 TLS_SECRET_NAME=monetr-tls
 setup-certificates: $(LOCAL_DIR)
 	mkdir -p $(LOCAL_CERTS)
-	openssl genrsa -out $(KEY_PATH) 2048
-	$(call infoMsg,Generating a certificate authority to be used locally for https)
-	openssl req -new -x509 -addext "subjectAltName = DNS:*.$(LOCAL_DOMAIN)" -key $(KEY_PATH) -out $(CERT_PATH) -days 3650 \
-		-subj /CN=*.$(LOCAL_DOMAIN) || make help-certificates-openssl
+	$(MKCERT) -install
+	$(MKCERT) -key-file $(KEY_PATH) -cert-file $(CERT_PATH) $(LOCAL_DOMAIN) *.$(LOCAL_DOMAIN)
 	$(call infoMsg,Adding the certificate authority to the trusted certificate keychain; this can be undone by running: make clean-certificate)
-	sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(CERT_PATH)
 	mkdir -p $(HOME)/.minikube/certs
 	$(call infoMsg,Generating a TLS certificate from the authority for: $(LOCAL_DOMAIN))
-	openssl x509 -in $(CERT_PATH) -out $(HOME)/.minikube/certs/$(LOCAL_DOMAIN).pem
-
-help-certificates-openssl:
-	@echo "============================================================="
-	@echo "It looks like there was a problem generating the certificate."
-	@echo "This can be due to using a version of openssl that is included with macOS."
-	@echo "You can check you version by running:"
-	@echo ""
-	@echo "$ openssl version"
-	@echo ""
-	@echo "If you see something like LibreSSL 2.8.3 then you'll need to install a different version of openssl"
-	@echo "If you have brew installed you can simply install the correct version using"
-	@echo ""
-	@echo "$ brew install openssl && brew link openssl"
-	@echo ""
-	@echo "You may also need to put the brew openssl first in your path"
-	@echo "More information on this can be found here: https://security.stackexchange.com/a/183973"
-	exit 100
+	openssl x509 -inform PEM -in $(CERT_PATH) > $(HOME)/.minikube/certs/$(LOCAL_DOMAIN).pem
 
 deploy-certificate:
 	rm -rf $(LOCAL_TMP)/nginx-*.json || true
@@ -259,11 +232,13 @@ dependencies-yq:
 
 MKCERT_REPO=https://github.com/FiloSottile/mkcert
 MKCERT_DIR=$(LOCAL_TMP)/$(MKCERT)
-dependencies-mkcert: $(LOCAL_TMP)
+dependencies-mkcert: $(LOCAL_TMP) $(LOCAL_BIN)
 	$(call infoMsg,Installing $(MKCERT) to $(LOCAL_BIN)/$(MKCERT))
 	rm -rf $(MKCERT_DIR) || true
 	git clone https://github.com/FiloSottile/mkcert $(MKCERT_DIR)
 	cd $(MKCERT_DIR) && go build -ldflags "-X main.Version=$$(git describe --tags)"
+	cp $(MKCERT_DIR)/$(MKCERT) $(LOCAL_BIN)/$(MKCERT)
+	rm -rf $(MKCERT_DIR) || true
 
 deploy-redis:
 	$(call infoMsg,Deploying redis into the minikube cluster)
@@ -287,6 +262,13 @@ deploy-postgres:
 	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/postgres --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 endif
+
+SHELL_IMAGE=ghcr.io/elliotcourant/dotfiles/ubuntu:latest
+shell:
+	$(KUBECTL) run shell-$(shell date +%Y%m%d%H%M%s) \
+		--image-pull-policy=Always \
+		--rm -ti --image=$(SHELL_IMAGE) \
+	 	-n $(MINIKUBE_NAMESPACE) --
 
 values-file: local-dependencies-maybe $(VALUES)
 
