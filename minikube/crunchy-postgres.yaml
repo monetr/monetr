@@ -2,16 +2,16 @@ apiVersion: crunchydata.com/v1
 kind: Pgcluster
 metadata:
   annotations:
-    current-primary: hippo
+    current-primary: postgres
     prometheus.io/scrape: 'true'
     prometheus.io/port: '9187'
   labels:
-    crunchy-pgha-scope: hippo
-    deployment-name: hippo
-    name: hippo
-    pg-cluster: hippo
+    crunchy-pgha-scope: postgres
+    deployment-name: postgres
+    name: postgres
+    pg-cluster: postgres
     pgouser: admin
-  name: hippo
+  name: postgres
 spec:
   BackrestStorage:
     accessmode: ReadWriteMany
@@ -24,7 +24,7 @@ spec:
   PrimaryStorage:
     accessmode: ReadWriteOnce
     matchLabels: ""
-    name: hippo
+    name: postgres
     size: 1G
     storageclass: ""
     storagetype: dynamic
@@ -43,17 +43,18 @@ spec:
       prometheus.io/port: '9187'
   ccpimage: crunchy-postgres-ha
   ccpimageprefix: registry.developers.crunchydata.com/crunchydata
-  ccpimagetag: centos8-13.2-4.7.0
-  clustername: hippo
+  ccpimagetag: centos8-13.3-4.7.0
+  clustername: postgres
   database: postgres
   exporter: true
   exporterport: "9187"
   limits:
-    memory: 512Mi
-    cpu: 500m
-  name: hippo
+    memory: 128Mi
+    cpu: 100m
+  name: postgres
   namespace: default
   pgbadgerport: "10000"
+  pgBadger: true
   pgoimageprefix: registry.developers.crunchydata.com/crunchydata
   podAntiAffinity:
     default: preferred
@@ -63,5 +64,9 @@ spec:
   tolerations: [ ]
   user: admin
   replicas: "1"
-  tlsOnly: false
+  tlsOnly: true
+  tls:
+    caSecret: postgres-server-tls
+    tlsSecret: postgres-server-tls
+    replicationTLSSecret: postgres-replica-tls
   serviceType: "ClusterIP"

@@ -72,6 +72,9 @@ tolerations: [ ]
 
 affinity: { }
 
+extraVolumes: [ ]
+extraVolumeMounts: [ ]
+
 api:
   customEnv: [ ]
   includeSecrets: false
@@ -93,6 +96,7 @@ api:
     username: postgres
     password: ""
     database: postgres
+    certificatePath: ""
   smtp:
     enabled: false
   sendGrid:

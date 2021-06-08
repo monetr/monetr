@@ -74,6 +74,10 @@ init-mini: info local-dependencies-maybe
 	make setup-certificates
 	(minikube status | grep "minikube start") && make start-minikube
 	make setup-hosts
+	make update-coredns
+	make deploy-certmanager
+	make deploy-crunchy
+	make deploy-certificate-authority
 	make setup-registry
 	make deploy-redis
 	make deploy-postgres
@@ -179,7 +183,17 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	export jwt_secret_value=$(LOGIN_JWT_SECRET_VALUE) && yq e '.api.jwt.loginJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
 	$(eval REGISTER_JWT_SECRET_VALUE = $(shell cat $(REGISTER_JWT_SECRET)))
 	export jwt_secret_value=$(REGISTER_JWT_SECRET_VALUE) && yq e '.api.jwt.registrationJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
-	$(YQ) e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	$(YQ) e '.api.postgreSql.address = "postgres.monetr.in"' -i $(VALUES)
+	$(YQ) e '.api.postgreSql.caCertificatePath = "/tls/ca.crt"' -i $(VALUES)
+	$(YQ) e '.api.postgreSql.certificatePath = "/tls/tls.crt"' -i $(VALUES)
+	$(YQ) e '.api.postgreSql.keyPath = "/tls/tls.key"' -i $(VALUES)
+	$(YQ) e '.extraVolumes[0].name = "ssl"' -i $(VALUES)
+	$(YQ) e '.extraVolumes[0].secret.secretName = "postgres-api-tls"' -i $(VALUES)
+	$(YQ) e '.extraVolumeMounts[0].name = "ssl"' -i $(VALUES)
+	$(YQ) e '.extraVolumeMounts[0].mountPath = "/tls"' -i $(VALUES)
+	$(YQ) e '.api.customEnv[0].name = "MONETR_PG_PASSWORD"' -i $(VALUES)
+	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.key = "password"' -i $(VALUES)
+	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.name = "postgres-postgres-secret"' -i $(VALUES)
 	$(YQ) e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.cors.debug = false' -i $(VALUES)
@@ -240,28 +254,74 @@ dependencies-mkcert: $(LOCAL_TMP) $(LOCAL_BIN)
 	cp $(MKCERT_DIR)/$(MKCERT) $(LOCAL_BIN)/$(MKCERT)
 	rm -rf $(MKCERT_DIR) || true
 
+update-coredns:
+	$(call infoMsg,Updating CoreDNS config)
+	$(KUBECTL) apply -f $(PWD)/minikube/coredns-config.yaml --namespace=kube-system
+	$(KUBECTL) rollout restart deploy/coredns --namespace=kube-system
+	$(KUBECTL) rollout status deploy/coredns --namespace=kube-system --timeout=180s
+
+CERT_MANAGER_VERSION=v1.3.1
+CERT_MANAGER_URL=https://github.com/jetstack/cert-manager/releases/download/$(CERT_MANAGER_VERSION)/cert-manager.yaml
+CERT_MANAGER_NAMESPACE=cert-manager
+deploy-certmanager:
+	$(call infoMsg,Deploying cert-manager)
+	$(KUBECTL) apply -f $(CERT_MANAGER_URL)
+	$(KUBECTL) rollout status deploy/cert-manager --namespace $(CERT_MANAGER_NAMESPACE) --timeout=60s
+	$(KUBECTL) rollout status deploy/cert-manager-cainjector --namespace $(CERT_MANAGER_NAMESPACE) --timeout=60s
+	$(KUBECTL) rollout status deploy/cert-manager-webhook --namespace $(CERT_MANAGER_NAMESPACE) --timeout=60s
+
+ROOT_CA_KEY=$(LOCAL_DIR)/root.key
+$(ROOT_CA_KEY):
+	@if [ ! -f "$(ROOT_CA_KEY)" ]; then make _generate-$(ROOT_CA_KEY); fi
+
+_generate-$(ROOT_CA_KEY): $(LOCAL_DIR)
+	$(call infoMsg,Generating new root CA key)
+	openssl ecparam -genkey -name secp521r1 -noout -out $(ROOT_CA_KEY)
+
+ROOT_CA_CRT=$(LOCAL_DIR)/root.crt
+$(ROOT_CA_CRT):
+	@if [ ! -f "$(ROOT_CA_CRT)" ]; then make _generate-$(ROOT_CA_CRT); fi
+
+_generate-$(ROOT_CA_CRT): $(LOCAL_DIR) $(ROOT_CA_KEY)
+	$(call infoMsg,Generating new root CA certificate)
+	openssl req -x509 -new -SHA256 -nodes \
+		-key $(ROOT_CA_KEY) \
+		-days 365 \
+		-out $(ROOT_CA_CRT) \
+		-subj "/C=US/ST=Minnesota/L=Lindstrom/O=monetr LLC/OU=Engineering/CN=monetr.in"
+
+deploy-certificate-authority: $(ROOT_CA_KEY) $(ROOT_CA_CRT)
+	$(call infoMsg,Installing custom certificate authority)
+	$(KUBECTL) create secret generic monetr-ca \
+		--from-file=tls.crt=$(ROOT_CA_CRT) \
+		--from-file=tls.key=$(ROOT_CA_KEY) \
+		--namespace=$(MINIKUBE_NAMESPACE) \
+		--dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) create secret generic monetr-ca-crt \
+		--from-file=ca.crt=$(ROOT_CA_CRT) \
+		--namespace=$(MINIKUBE_NAMESPACE) \
+		--dry-run=client -o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) apply -f $(PWD)/minikube/ca-issuer.yaml --namespace=$(MINIKUBE_NAMESPACE)
+	make postgres-certificates
+
+postgres-certificates:
+	$(call infoMsg,Generating PostgreSQL TLS certificates)
+	$(KUBECTL) apply -f $(PWD)/minikube/postgres-certificate.yaml --namespace $(MINIKUBE_NAMESPACE)
+
+deploy-crunchy:
+	$(call infoMsg,Deploying crunchy data postgres operator)
+	$(KUBECTL) apply -f $(PWD)/minikube/crunchy.yaml --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) wait --for=condition=complete job/pgo-deploy --timeout=180s -n $(MINIKUBE_NAMESPACE)
+
+
 deploy-redis:
 	$(call infoMsg,Deploying redis into the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/redis.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/redis --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
-USE_PGO_OPERATOR ?=false
-ifeq ($(USE_PGO_OPERATOR),true)
-deploy-pgo:
-	$(KUBECTL) apply -f $(PWD)/production/operator/crunchy.yaml -n $(PROD_NAMESPACE)
-	$(KUBECTL) wait --for=condition=complete job/pgo-deploy --timeout=180s -n $(PROD_NAMESPACE)
-	$(KUBECTL) delete -f $(PWD)/production/operator/crunchy.yaml -n $(PROD_NAMESPACE)
-
 deploy-postgres:
 	$(call infoMsg,Deploying Crunchy Data PostgreSQL to the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/crunchy-postgres.yaml -n $(MINIKUBE_NAMESPACE)
-
-else
-deploy-postgres:
-	$(call infoMsg,Deploying postgres into the minikube cluster)
-	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/postgres --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
-endif
 
 SHELL_IMAGE=ghcr.io/elliotcourant/dotfiles/ubuntu:latest
 shell:

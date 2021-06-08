@@ -53,11 +53,14 @@ type JWT struct {
 }
 
 type PostgreSQL struct {
-	Address  string
-	Port     int
-	Username string
-	Password string
-	Database string
+	Address           string
+	Port              int
+	Username          string
+	Password          string
+	Database          string
+	CACertificatePath string
+	KeyPath           string
+	CertificatePath   string
 }
 
 type SMTPClient struct {
@@ -218,6 +221,9 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("PostgreSQL.Username", "MONETR_PG_USERNAME")
 	v.BindEnv("PostgreSQL.Password", "MONETR_PG_PASSWORD")
 	v.BindEnv("PostgreSQL.Database", "MONETR_PG_DATABASE")
+	v.BindEnv("PostgreSQL.CACertificatePath", "MONETR_PG_CA_PATH")
+	v.BindEnv("PostgreSQL.CertificatePath", "MONETR_PG_CERT_PATH")
+	v.BindEnv("PostgreSQL.KeyPath", "MONETR_PG_KEY_PATH")
 	v.BindEnv("ReCAPTCHA.Enabled", "MONETR_CAPTCHA_ENABLED")
 	v.BindEnv("ReCAPTCHA.PublicKey", "MONETR_CAPTCHA_PUBLIC_KEY")
 	v.BindEnv("ReCAPTCHA.PrivateKey", "MONETR_CAPTCHA_PRIVATE_KEY")

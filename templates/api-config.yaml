@@ -22,6 +22,9 @@ data:
   MONETR_PG_ADDRESS: {{ quote .Values.api.postgreSql.address }}
   MONETR_PG_PORT: {{ quote .Values.api.postgreSql.port }}
   MONETR_PG_DATABASE: {{ quote .Values.api.postgreSql.database }}
+  MONETR_PG_CA_PATH: {{ quote .Values.api.postgreSql.caCertificatePath }}
+  MONETR_PG_CERT_PATH: {{ quote .Values.api.postgreSql.certificatePath }}
+  MONETR_PG_KEY_PATH: {{ quote .Values.api.postgreSql.keyPath }}
   MONETR_CAPTCHA_ENABLED: {{ quote .Values.api.reCaptcha.enabled }}
   MONETR_CAPTCHA_VERIFY_LOGIN: {{ quote .Values.api.reCaptcha.verifyLogin }}
   MONETR_CAPTCHA_VERIFY_REGISTER: {{ quote .Values.api.reCaptcha.verifyRegister }}
@@ -48,10 +51,10 @@ data:
     {{- if .Values.api.sendGrid.templates }}
     sendGrid:
       templates:
-        {{- toYaml .Values.api.sendGrid.templates | nindent 8 }}
+    {{- toYaml .Values.api.sendGrid.templates | nindent 8 }}
     {{- end }}
     {{- if .Values.api.stripe.products }}
     stripe:
       products:
-        {{- toYaml .Values.api.stripe.products | nindent 8 }}
-    {{- end }}
+    {{- toYaml .Values.api.stripe.products | nindent 8 }}
+  {{- end }}

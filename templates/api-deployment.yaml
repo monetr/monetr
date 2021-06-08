@@ -64,6 +64,9 @@ spec:
           volumeMounts:
             - mountPath: /etc/monetr
               name: config-file
+            {{- if .Values.extraVolumeMounts }}
+            {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }}
           resources:
       {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
@@ -74,6 +77,9 @@ spec:
         - name: config-file
           configMap:
             name: {{ include "api.fullname" . }}-config-file
+        {{- if .Values.extraVolumes }}
+        {{- toYaml .Values.extraVolumes | nindent 8 }}
+        {{- end }}
       {{- with .Values.affinity }}
       affinity:
       {{- toYaml . | nindent 8 }}

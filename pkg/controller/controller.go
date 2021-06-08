@@ -242,6 +242,9 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 // @Success 200 {object} swag.HealthResponse
 func (c *Controller) getHealth(ctx iris.Context) {
 	err := c.db.Ping(ctx.Request().Context())
+	if err != nil {
+		c.getLog(ctx).WithError(err).Warn("failed to ping database")
+	}
 
 	result := map[string]interface{}{
 		"dbHealthy":  err == nil,

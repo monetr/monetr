@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"context"
+	"crypto/rand"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
@@ -9,18 +13,23 @@ import (
 	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/cache"
 	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetrapp/rest-api/pkg/internal/certhelper"
 	"github.com/monetrapp/rest-api/pkg/internal/migrations"
+	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/logging"
 	"github.com/monetrapp/rest-api/pkg/metrics"
+	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/cobra"
 	"github.com/stripe/stripe-go/v72"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -110,11 +119,135 @@ func RunServer() error {
 		Password:        configuration.PostgreSQL.Password,
 		Database:        configuration.PostgreSQL.Database,
 		ApplicationName: "monetr",
-		// TODO Add support for TLS with PostgreSQL.
 	}
 
-	db := pg.Connect(pgOptions)
+	var tlsConfiguration *tls.Config
+
+	if configuration.PostgreSQL.CACertificatePath != "" {
+		pgOptions.MaxConnAge = 9 * time.Minute
+		{
+			caCert, err := ioutil.ReadFile(configuration.PostgreSQL.CACertificatePath)
+			if err != nil {
+				log.WithError(err).Errorf("failed to load ca certificate")
+				return errors.Wrap(err, "failed to load ca certificate")
+			}
+
+			caCertPool := x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(caCert)
+
+			tlsConfiguration = &tls.Config{
+				Rand:               rand.Reader,
+				InsecureSkipVerify: false,
+				RootCAs:            caCertPool,
+				ServerName:         configuration.PostgreSQL.Address,
+				Renegotiation:      tls.RenegotiateFreelyAsClient,
+			}
+
+			if configuration.PostgreSQL.KeyPath != "" {
+				tlsCert, err := tls.LoadX509KeyPair(
+					configuration.PostgreSQL.CertificatePath,
+					configuration.PostgreSQL.KeyPath,
+				)
+				if err != nil {
+					log.WithError(err).Errorf("failed to load client certificate")
+					return errors.Wrap(err, "failed to load client certificate")
+				}
+				tlsConfiguration.Certificates = []tls.Certificate{
+					tlsCert,
+				}
+			}
+		}
+
+		pgOptions.TLSConfig = tlsConfiguration
+	}
+
+	var db *pg.DB
+	db = pg.Connect(pgOptions)
 	db.AddQueryHook(logging.NewPostgresHooks(log, stats))
+	pgOptions.OnConnect = func(ctx context.Context, cn *pg.Conn) error {
+		log.Debugf("new connection with cert")
+
+		return nil
+	}
+
+	if configuration.PostgreSQL.CACertificatePath != "" {
+		paths := make([]string, 0, 1)
+		for _, path := range []string{
+			configuration.PostgreSQL.CACertificatePath,
+			configuration.PostgreSQL.KeyPath,
+			configuration.PostgreSQL.CertificatePath,
+		} {
+			directory := filepath.Dir(path)
+			if !myownsanity.SliceContains(paths, directory) {
+				paths = append(paths, directory)
+			}
+		}
+
+		watchCertificate, err := certhelper.NewFileCertificateHelper(
+			log,
+			paths,
+			func(path string) error {
+				log.Info("reloading TLS certificates")
+
+				tlsConfig := &tls.Config{
+					Rand:               rand.Reader,
+					InsecureSkipVerify: false,
+					RootCAs:            nil,
+					ServerName:         configuration.PostgreSQL.Address,
+					Renegotiation:      tls.RenegotiateFreelyAsClient,
+				}
+
+				{
+					caCert, err := ioutil.ReadFile(configuration.PostgreSQL.CACertificatePath)
+					if err != nil {
+						log.WithError(err).Errorf("failed to load updated ca certificate")
+						return errors.Wrap(err, "failed to load updated ca certificate")
+					}
+
+					caCertPool := x509.NewCertPool()
+					caCertPool.AppendCertsFromPEM(caCert)
+
+					log.Debugf("new ca certificate loaded, swapping")
+
+					tlsConfig.RootCAs = caCertPool
+				}
+
+				{
+					if configuration.PostgreSQL.KeyPath != "" {
+						tlsCert, err := tls.LoadX509KeyPair(
+							configuration.PostgreSQL.CertificatePath,
+							configuration.PostgreSQL.KeyPath,
+						)
+						if err != nil {
+							log.WithError(err).Errorf("failed to load client certificate")
+							return errors.Wrap(err, "failed to load client certificate")
+						}
+
+						tlsConfig.Certificates = []tls.Certificate{
+							tlsCert,
+						}
+					}
+				}
+
+				db.Options().TLSConfig = tlsConfig
+
+				//newPointer := unsafe.Pointer(tlsConfig)
+				//existingPointer := (*unsafe.Pointer)(unsafe.Pointer(tlsConfiguration))
+				//atomic.SwapPointer(existingPointer, newPointer)
+
+				log.Debugf("successfully swapped ca certificate")
+
+				return nil
+			},
+		)
+		if err != nil {
+			log.WithError(err).Errorf("failed to setup certificate watcher")
+			return errors.Wrap(err, "failed to setup certificate watcher")
+		}
+		watchCertificate.Start()
+
+		defer watchCertificate.Stop()
+	}
 
 	if migrateDatabase {
 		migrations.RunMigrations(log, db)

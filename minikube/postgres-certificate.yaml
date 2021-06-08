@@ -1,0 +1,213 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: postgres-server-tls
+spec:
+  # Secret names are always required.
+  secretName: postgres-server-tls
+  duration: 1h
+  renewBefore: 10m
+  subject:
+    organizations:
+      - monetr LLC
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: postgres.monetr.in
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - server auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - postgres.monetr.in
+    - postgres-pgbouncer.monetr.in
+  uris:
+    - spiffe://monetr.in/ns/default/sa/postgres
+  # Issuer references are always required.
+  issuerRef:
+    name: monetr-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: postgres-replica-tls
+spec:
+  # Secret names are always required.
+  secretName: postgres-replica-tls
+  duration: 1h
+  renewBefore: 10m
+  subject:
+    organizations:
+      - monetr LLC
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: primaryuser
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - client auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - postgres.monetr.in
+  uris:
+    - spiffe://monetr.in/ns/default/sa/postgres
+  # Issuer references are always required.
+  issuerRef:
+    name: monetr-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: postgres-api-tls
+spec:
+  # Secret names are always required.
+  secretName: postgres-api-tls
+  duration: 1h
+  renewBefore: 10m
+  subject:
+    organizations:
+      - monetr LLC
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: postgres
+  isCA: false
+  emailAddresses:
+    - admin@monetr.mini
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - client auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - postgres.monetr.in
+#  uris:
+#    - spiffe://monetr.in/ns/default/sa/postgres
+  # Issuer references are always required.
+  issuerRef:
+    name: monetr-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: roll-pg-certificates
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: roll-pg-certificates
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/exec
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - delete
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: roll-pg-certificates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: roll-pg-certificates
+subjects:
+  - kind: ServiceAccount
+    name: roll-pg-certificates
+    namespace: default
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: roll-pg-certificates
+  labels:
+    job: roll-pg-certificates
+spec:
+  schedule: "*/9 * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        job: roll-pg-certificates
+    spec:
+      template:
+        metadata:
+          labels:
+            job: roll-pg-certificates
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: roll-pg-certificates
+          containers:
+            - name: hello
+              image: bitnami/kubectl
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - kubectl get po -l pgo-pg-database=true --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs -L1 -I {} bash -c 'kubectl exec {} -c database -- sh -c "pkill -1 -f /pgdata" && echo "Updated {}"'
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: clean-up-jobs
+  labels:
+    job: clean-up-jobs
+spec:
+  schedule: "0 */2 * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        job: clean-up-jobs
+    spec:
+      template:
+        metadata:
+          labels:
+            job: clean-up-jobs
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: roll-pg-certificates
+          containers:
+            - name: hello
+              image: bitnami/kubectl
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - kubectl get po --field-selector=status.phase==Succeeded --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs -L1 -I {} kubectl delete pod {}
