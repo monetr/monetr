@@ -20,7 +20,16 @@ type postgresPlaidSecretProvider struct {
 func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64, accessToken string) error {
 	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId [POSTGRES]")
 	defer span.Finish()
-	panic("implement me")
+
+	_, err := p.db.ModelContext(span.Context(), &plaidLinkWithToken{}).
+		Set(`"access_token" = ?`, accessToken).
+		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
+		Update()
+	if err != nil {
+		return errors.Wrap(err, "failed to update access token")
+	}
+
+	return nil
 }
 
 func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64) (accessToken string, err error) {

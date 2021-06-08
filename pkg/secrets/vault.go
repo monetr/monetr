@@ -17,13 +17,14 @@ type vaultPlaidSecretsProvider struct {
 }
 
 func (v *vaultPlaidSecretsProvider) UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64, accessToken string) error {
-	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId")
+	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId [VAULT]")
 	defer span.Finish()
+
 	panic("implement me")
 }
 
 func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64) (accessToken string, err error) {
-	span := sentry.StartSpan(ctx, "GetAccessTokenForPlaidLinkId")
+	span := sentry.StartSpan(ctx, "GetAccessTokenForPlaidLinkId [VAULT]")
 	defer span.Finish()
 
 	result, err := v.client.Logical().Read(v.buildPath(accountId, plaidLinkId))
