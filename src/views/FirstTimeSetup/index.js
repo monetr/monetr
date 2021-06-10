@@ -68,7 +68,7 @@ export class FirstTimeSetup extends Component {
     this.props.logout();
   }
 
-  setupManualLink = (values, { setSubmitting }) => {
+  setupManualLink = () => {
     this.setState({
       loading: true,
     });
@@ -90,7 +90,7 @@ export class FirstTimeSetup extends Component {
             ]);
           }),
         ]);
-      })
+      });
   };
 
   plaidLinkSuccess = (token, metadata) => {
@@ -209,11 +209,7 @@ export class FirstTimeSetup extends Component {
           <Button variant="outlined" onClick={ this.doCancel }>Cancel</Button>
         </Grid>
         <Grid item xs={ 3 }>
-          <Button variant="outlined" onClick={ () => {
-            this.setState({
-              step: this.STEP.MANUAL,
-            });
-          } }>Manual</Button>
+          <Button variant="outlined" onClick={ this.setupManualLink }>Manual</Button>
         </Grid>
         <Grid item xs={ 3 }>
           { this.renderPlaidLink() }

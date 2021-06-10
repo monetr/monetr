@@ -27,20 +27,24 @@ interface WithConnectionPropTypes extends PropTypes {
 }
 
 interface State {
-  anchorEl: Element | null;
-  width: number | null;
+  spentFromAnchorEl: Element | null;
+  spentFromWidth: number | null;
+  nameAnchorEl: Element | null;
+  nameWidth: number | null;
 }
 
 export class TransactionItem extends Component<WithConnectionPropTypes, State> {
 
   state = {
-    anchorEl: null,
-    width: 0,
+    spentFromAnchorEl: null,
+    spentFromWidth: 0,
+    nameAnchorEl: null,
+    nameWidth: 0,
   };
 
   getSpentFromString() {
     const { spending, transaction, updateTransaction } = this.props;
-    const { anchorEl } = this.state;
+    const { spentFromAnchorEl } = this.state;
 
     if (transaction.getIsAddition()) {
       return null;
@@ -64,15 +68,24 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
 
     const openPopover = (event: { currentTarget: Element }) => {
       this.setState({
-        anchorEl: event.currentTarget,
-        width: event.currentTarget.clientWidth,
+        spentFromAnchorEl: event.currentTarget,
+        spentFromWidth: event.currentTarget.clientWidth,
+        nameAnchorEl: null,
+        nameWidth: null,
       });
     };
+
+    const closePopover = () => this.setState({
+      spentFromAnchorEl: null,
+      spentFromWidth: null,
+      nameAnchorEl: null,
+      nameWidth: null,
+    });
 
     return (
       <Fragment>
         <SelectButton
-          open={ Boolean(anchorEl) }
+          open={ Boolean(spentFromAnchorEl) }
           onClick={ openPopover }
         >
           <span className="opacity-50 mr-1">
@@ -86,9 +99,9 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
         </SelectButton>
         <Popover
           id={ `transaction-spent-from-popover-${ transaction.transactionId }` }
-          open={ Boolean(anchorEl) }
-          anchorEl={ anchorEl }
-          onClose={ () => this.setState({ anchorEl: null }) }
+          open={ Boolean(spentFromAnchorEl) }
+          anchorEl={ spentFromAnchorEl }
+          onClose={ closePopover }
           anchorOrigin={ {
             vertical: 'bottom',
             horizontal: 'left',
@@ -98,7 +111,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
             horizontal: 'left',
           } }
         >
-          <Paper style={ { width: `${ this.state.width }px` } } className="min-w-96 max-h-96 p-0 overflow-auto">
+          <Paper style={ { width: `${ this.state.spentFromWidth }px` } } className="min-w-96 max-h-96 p-0 overflow-auto">
             <SpendingSelectionList value={ transaction.spendingId } onChange={ updateSpentFrom }/>
           </Paper>
         </Popover>
@@ -106,7 +119,61 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
     )
   }
 
+  renderTransactionName = () => {
+    const { transaction } = this.props;
+    const { nameAnchorEl, nameWidth } = this.state;
 
+    const openPopover = (event: { currentTarget: Element }) => {
+      this.setState({
+        spentFromAnchorEl: null,
+        spentFromWidth: null,
+        nameAnchorEl: event.currentTarget,
+        nameWidth: event.currentTarget.clientWidth,
+      });
+    };
+
+    const closePopover = () => this.setState({
+      spentFromAnchorEl: null,
+      spentFromWidth: null,
+      nameAnchorEl: null,
+      nameWidth: null,
+    });
+
+    return (
+      <Fragment>
+        <SelectButton
+          open={ Boolean(nameAnchorEl) }
+          onClick={ openPopover }
+        >
+          <span className={ classnames('overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap') }>
+            { transaction.getTitle() }
+          </span>
+        </SelectButton>
+        <Popover
+          id={ `transaction-name-popover-${ transaction.transactionId }` }
+          open={ Boolean(nameAnchorEl) }
+          anchorEl={ nameAnchorEl }
+          onClose={ closePopover }
+          anchorOrigin={ {
+            vertical: 'bottom',
+            horizontal: 'left',
+          } }
+          transformOrigin={ {
+            vertical: 'top',
+            horizontal: 'left',
+          } }
+        >
+          <Paper style={ { width: `${ nameWidth }px` } } className="min-w-96 max-h-96 p-0 overflow-auto p-2">
+            <div>
+              <p className="text-lg font-semibold w-full">Original Transaction Name:</p>
+              <Divider />
+              <span className="text-lg">{ transaction.originalName }</span>
+            </div>
+          </Paper>
+        </Popover>
+      </Fragment>
+    )
+  };
 
   handleClick = () => {
     return this.props.selectTransaction(this.props.transactionId);
@@ -124,11 +191,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
             <p
               className="flex-shrink w-2/5 transaction-item-name overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap font-semibold place-self-center pr-1"
             >
-              <SelectButton>
-                <span className={ classnames('overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap') }>
-                { transaction.getTitle() }
-                </span>
-              </SelectButton>
+              { this.renderTransactionName() }
             </p>
 
             <p

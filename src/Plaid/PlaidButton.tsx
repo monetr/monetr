@@ -56,10 +56,11 @@ export default class PlaidButton extends Component<PropTypes, State> {
   state = {
     token: null,
     loading: true,
+    disabled: false,
   };
 
   componentDidMount() {
-    const url = `/plaid/link/token/new${ this.props.useCache ? '?use_cache=true' : ''}`
+    const url = `/plaid/link/token/new${ this.props.useCache ? '?use_cache=true' : '' }`
     request().get(url)
       .then(result => {
         this.setState({
@@ -68,21 +69,24 @@ export default class PlaidButton extends Component<PropTypes, State> {
         });
       })
       .catch(error => {
-        alert(error);
+        console.error(error);
+        this.setState({
+          loading: false,
+          disabled: true,
+        })
       });
   }
 
   render() {
-
-    const disabled = this.state.loading || this.props.disabled;
+    const disabled = this.state.loading || this.props.disabled || this.state.disabled;
     const props: ButtonProps = {
       ...this.props,
       disabled: disabled,
       children: (
         <Fragment>
-          { this.state.loading && <CircularProgress size="1em" thickness={5} className={ classnames('mr-2', {
+          { this.state.loading && <CircularProgress size="1em" thickness={ 5 } className={ classnames('mr-2', {
             'opacity-50': disabled,
-          }) } /> }
+          }) }/> }
           { this.props.children }
         </Fragment>
       ),

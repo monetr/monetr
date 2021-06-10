@@ -50,7 +50,8 @@ ReactDOM.render(
             <Typography
               className="absolute bottom-1 w-full text-center opacity-30 inline"
             >
-              © { new Date().getFullYear() } monetr LLC
+              {/* eslint-disable-next-line no-undef */}
+              © { new Date().getFullYear() } monetr LLC - { RELEASE_REVISION.slice(RELEASE_REVISION.length - 8) }
             </Typography>
           </MuiThemeProvider>
         </Router>

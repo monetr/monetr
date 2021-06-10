@@ -21,11 +21,15 @@ export default class SelectButton extends Component<Props, any> {
       }) } onClick={ onClick }
               disabled={ disabled }>
         <div className="w-full flex justify-start overflow-hidden">
-          <div className="flex-auto flex justify-start overflow-hidden">
+          <div className="flex-auto flex justify-start overflow-hidden normal-case text-lg">
             { children }
           </div>
           <div className="flex-none select-dropdown-icon">
-            <ArrowDropDown/>
+            <ArrowDropDown
+              className={ classnames('transform transition transition-transform duration-200', {
+                'rotate-180': open,
+              }) }
+            />
           </div>
         </div>
       </Button>

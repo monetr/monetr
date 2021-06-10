@@ -7,6 +7,7 @@ import { List } from "immutable";
 import request from "shared/util/request";
 import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
 import fetchLinks from "shared/links/actions/fetchLinks";
+import AddManualBankAccountDialog from "views/AccountView/AddManualBankAccountDialog";
 
 export interface PropTypes {
   open: boolean;
@@ -22,6 +23,7 @@ interface State {
   loading: boolean;
   linkId: number | null;
   longPollAttempts: number;
+  manualDialogOpen: boolean;
 }
 
 class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
@@ -30,6 +32,7 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
     loading: false,
     linkId: null,
     longPollAttempts: 0,
+    manualDialogOpen: false,
   };
 
   onPlaidSuccess = (token: string, metadata: any) => {
@@ -57,7 +60,9 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
           });
       })
       .catch(error => {
-        alert(error);
+        this.setState({
+          loading: false,
+        })
       })
       .finally(() => {
         this.props.onClose();
@@ -91,11 +96,32 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
     });
   }
 
+  openManualDialog = () => this.setState({
+    manualDialogOpen: true,
+  });
+
+  closeManualDialog = () => this.setState({
+    manualDialogOpen: false,
+  });
+
+  renderDialogs = () => {
+    const { manualDialogOpen } = this.state;
+
+    if (manualDialogOpen) {
+      return <AddManualBankAccountDialog open={ true } onClose={ this.closeManualDialog } />
+    }
+
+    return null;
+  }
+
   render() {
     const { open, onClose } = this.props;
 
     return (
       <Fragment>
+
+        { this.renderDialogs() }
+
         <Dialog open={ open } disableEnforceFocus={ true } maxWidth="xs">
           <DialogTitle>
             <div className="flex items-center">
@@ -125,7 +151,10 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
               >
                 Connect My Bank Account
               </PlaidButton>
-              <Button variant="outlined">
+              <Button
+                variant="outlined"
+                onClick={ this.openManualDialog }
+              >
                 Create Manual Bank Account
               </Button>
             </div>
