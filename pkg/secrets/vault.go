@@ -3,6 +3,7 @@ package secrets
 import (
 	"context"
 	"fmt"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
@@ -20,7 +21,20 @@ func (v *vaultPlaidSecretsProvider) UpdateAccessTokenForPlaidLinkId(ctx context.
 	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId [VAULT]")
 	defer span.Finish()
 
-	panic("implement me")
+	path := v.buildPath(accountId, plaidLinkId)
+
+	result, err := v.client.Logical().Read(path)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve existing data")
+	}
+
+	result.Data["access_token"] = accessToken
+
+	if _, err = v.client.Logical().Write(path, result.Data); err != nil {
+		return errors.Wrap(err, "failed to update access token")
+	}
+
+	return nil
 }
 
 func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64) (accessToken string, err error) {
