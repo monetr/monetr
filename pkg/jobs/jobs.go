@@ -149,6 +149,9 @@ func (j *jobManagerBase) middleware(job *work.Job, next work.NextMiddlewareFunc)
 	}()
 
 	err = next()
+	if err != nil {
+		sentry.CaptureException(err)
+	}
 	return err
 }
 
