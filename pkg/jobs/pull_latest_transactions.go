@@ -87,12 +87,6 @@ func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
-	hub := sentry.CurrentHub().Clone()
-	ctx := sentry.SetHubOnContext(context.Background(), hub)
-	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Latest Transactions"))
-	defer span.Finish()
-
-	startTime := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
 
@@ -101,6 +95,18 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
+
+	hub := sentry.CurrentHub().Clone()
+	hub.WithScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID: strconv.FormatUint(accountId, 10),
+		})
+	})
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Latest Transactions"))
+	defer span.Finish()
+
+	startTime := time.Now()
 
 	defer func() {
 		if j.stats != nil {
@@ -130,6 +136,8 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			log.WithError(err).Error("failed to retrieve link details to pull transactions")
 			return err
 		}
+
+		log = log.WithField("linkId", link.LinkId)
 
 		if link.PlaidLink == nil {
 			err = errors.Errorf("cannot pull account balanaces for link without plaid info")
@@ -190,15 +198,12 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 				// for this right now.
 				return nil
 			default:
-				log.Warnf("unknown error type from Plaid client: %T", plaidErr)
+				log.WithError(err).Warnf("unknown error type from Plaid client: %T", plaidErr)
 			}
 
 			return errors.Wrap(err, "failed to retrieve transactions from plaid")
 		}
 
-		// TODO Are plaid transaction Ids unique per link, or per bank account?
-		//  If they are not then this could cause an issue where a user's checking transaction has the same Id as a
-		//  savings account transaction but under the same link. Causing the transaction to get updated improperly.
 		plaidTransactionIds := make([]string, len(transactions))
 		for i, transaction := range transactions {
 			plaidTransactionIds[i] = transaction.ID

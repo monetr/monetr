@@ -65,6 +65,8 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 			return err
 		}
 
+		log = log.WithField("linkId", link.LinkId)
+
 		if link.PlaidLink == nil {
 			err = errors.Errorf("cannot pull account balanaces for link without plaid info")
 			log.WithError(err).Errorf("failed to pull transactions")
