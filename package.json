@@ -60,7 +60,7 @@
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-normalize": "10.0.0",
     "postcss-preset-env": "6.7.0",
-    "postcss-safe-parser": "5.0.2",
+    "postcss-safe-parser": "6.0.0",
     "prompts": "2.4.1",
     "prop-types": "15.7.2",
     "react": "17.0.2",
