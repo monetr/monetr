@@ -124,7 +124,11 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			}
 
 			transactionName := plaidTransaction.Name
-			if plaidTransaction.MerchantName != "" {
+
+			// We only want to make the transaction name be the merchant name if the merchant name is shorter. This is
+			// due to something I observed with a dominos transaction, where the merchant was improperly parsed and the
+			// transaction ended up being called `Mnuslindstrom` rather than `Domino's`. This should fix that problem.
+			if plaidTransaction.MerchantName != "" && len(plaidTransaction.MerchantName) < len(transactionName) {
 				transactionName = plaidTransaction.MerchantName
 			}
 

@@ -26,6 +26,7 @@ type Transaction struct {
 	Date                 time.Time  `json:"date" pg:"date,notnull"`
 	AuthorizedDate       *time.Time `json:"authorizedDate" pg:"authorized_date"`
 	Name                 string     `json:"name,omitempty" pg:"name"`
+	CustomName           *string    `json:"customName" pg:"custom_name"`
 	OriginalName         string     `json:"originalName" pg:"original_name,notnull"`
 	MerchantName         string     `json:"merchantName,omitempty" pg:"merchant_name"`
 	OriginalMerchantName string     `json:"originalMerchantName" pg:"original_merchant_name"`

@@ -148,7 +148,11 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			}
 
 			transactionName := plaidTransaction.Name
-			if plaidTransaction.MerchantName != "" {
+
+			// We only want to make the transaction name be the merchant name if the merchant name is shorter. This is
+			// due to something I observed with a dominos transaction, where the merchant was improperly parsed and the
+			// transaction ended up being called `Mnuslindstrom` rather than `Domino's`. This should fix that problem.
+			if plaidTransaction.MerchantName != "" && len(plaidTransaction.MerchantName) < len(transactionName) {
 				transactionName = plaidTransaction.MerchantName
 			}
 
@@ -198,8 +202,8 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			existingTransaction.AuthorizedDate = authorizedDate
 			existingTransaction.PendingPlaidTransactionId = pendingPlaidTransactionId
 
-			// Update old records if we see them to use the merchant name by default.
-			if existingTransaction.Name == plaidTransaction.Name {
+			// Update old transactions calculated name as we can.
+			if existingTransaction.Name != transactionName {
 				existingTransaction.Name = transactionName
 				shouldUpdate = true
 			}
