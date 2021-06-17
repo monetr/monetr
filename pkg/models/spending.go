@@ -2,12 +2,13 @@ package models
 
 import (
 	"context"
-	"github.com/getsentry/sentry-go"
-	"github.com/monetrapp/rest-api/pkg/util"
-	"github.com/pkg/errors"
 	"math"
 	"strconv"
 	"time"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/monetrapp/rest-api/pkg/util"
+	"github.com/pkg/errors"
 )
 
 type SpendingType uint8

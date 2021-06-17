@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/monetrapp/rest-api/pkg/build"
 	"github.com/monetrapp/rest-api/pkg/internal/cmd"
-	"log"
 )
 
 var (

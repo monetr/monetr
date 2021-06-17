@@ -2,6 +2,10 @@ package jobs
 
 import (
 	"context"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
@@ -11,9 +15,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (
