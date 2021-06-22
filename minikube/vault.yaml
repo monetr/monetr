@@ -1,3 +1,79 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-server-tls
+spec:
+  # Secret names are always required.
+  secretName: vault-server-tls
+  duration: 1h
+  renewBefore: 10m
+  subject:
+    organizations:
+      - monetr LLC
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: vault.monetr.in
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - server auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - vault.monetr.in
+  uris:
+    - spiffe://monetr.in/ns/default/sa/vault
+  # Issuer references are always required.
+  issuerRef:
+    name: monetr-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-client-tls
+spec:
+  # Secret names are always required.
+  secretName: vault-client-tls
+  duration: 1h
+  renewBefore: 10m
+  subject:
+    organizations:
+      - monetr LLC
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: vault.monetr.in
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - client auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - vault.monetr.in
+  uris:
+    - spiffe://monetr.in/ns/default/sa/vault
+  # Issuer references are always required.
+  issuerRef:
+    name: monetr-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -11,13 +87,29 @@ data:
     ui = true
 
     listener "tcp" {
-      tls_disable = 1
       address = "[::]:8200"
       cluster_address = "[::]:8201"
+      tls_cert_file = "/vault/tls/tls.crt"
+      tls_key_file = "/vault/tls/tls.key"
+      tls_client_ca_file = "/vault/tls/ca.crt"
     }
     storage "file" {
       path = "/home/vault"
     }
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vault-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1G
+  storageClassName: standard
+  volumeMode: Filesystem
 
 ---
 apiVersion: apps/v1
@@ -42,11 +134,15 @@ spec:
         app.kubernetes.io/instance: vault
     spec:
       volumes:
+        - name: tls
+          secret:
+            secretName: vault-server-tls
         - name: config
           configMap:
             name: vault-config
         - name: home
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: vault-pvc
       containers:
         - name: vault
           image: "vault:1.7.1"
@@ -82,9 +178,15 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: VAULT_ADDR
-              value: "http://127.0.0.1:8200"
+              value: "https://127.0.0.1:8200"
             - name: VAULT_API_ADDR
-              value: "http://$(POD_IP):8200"
+              value: "https://$(POD_IP):8200"
+            - name: VAULT_CACERT
+              value: /vault/tls/ca.crt
+            - name: VAULT_CLIENT_CERT
+              value: /vault/tls/tls.crt
+            - name: VAULT_CLIENT_KEY
+              value: /vault/tls/tls.key
             - name: SKIP_CHOWN
               value: "true"
             - name: SKIP_SETCAP
@@ -107,6 +209,10 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /vault/config
+            - name: tls
+              mountPath: /vault/tls
+            - name: home
+              mountPath: /home/vault
           readinessProbe:
             # Check status; unsealed vault servers return 0
             # The exit code reflects the seal status:
@@ -114,7 +220,7 @@ spec:
             #   1 - error
             #   2 - sealed
             exec:
-              command: ["/bin/sh", "-ec", "vault status -tls-skip-verify"]
+              command: [ "/bin/sh", "-ec", "vault status -tls-skip-verify" ]
             failureThreshold: 2
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -124,7 +230,7 @@ spec:
             httpGet:
               path: "/v1/sys/health?standbyok=true"
               port: 8200
-              scheme: HTTP
+              scheme: HTTPS
             failureThreshold: 2
             initialDelaySeconds: 60
             periodSeconds: 5
@@ -178,6 +284,10 @@ metadata:
     app.kubernetes.io/instance: vault
   annotations:
     kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-ssl-secret: default/vault-client-tls
+    nginx.ingress.kubernetes.io/proxy-ssl-verify: "true"
+    nginx.ingress.kubernetes.io/proxy-ssl-name: vault.monetr.in
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
     - host: "vault.monetr.mini"
@@ -187,3 +297,89 @@ spec:
             backend:
               serviceName: vault
               servicePort: 8200
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: roll-vault-certificates
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: roll-vault-certificates
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/exec
+    verbs:
+      - get
+      - list
+      - create
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: roll-vault-certificates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: roll-vault-certificates
+subjects:
+  - kind: ServiceAccount
+    name: roll-vault-certificates
+    namespace: default
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: roll-vault-certificates
+  labels:
+    job: roll-vault-certificates
+spec:
+  schedule: "*/9 * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        job: roll-vault-certificates
+    spec:
+      template:
+        metadata:
+          labels:
+            job: roll-vault-certificates
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: roll-vault-certificates
+          containers:
+            - name: hello
+              image: bitnami/kubectl
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - kubectl get po -l app=vault --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs -L1 -I {} bash -c 'kubectl exec {} -c vault -- sh -c "pkill -1 -f vault" && echo "Updated {}"'
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-authentication
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: vault-role-tokenreview-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: vault-authentication
+    namespace: default

@@ -32,7 +32,7 @@ func (h *PostgresHooks) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (
 		return ctx, nil
 	}
 	if strings.TrimSpace(strings.ToLower(string(query))) != "select 1" {
-		h.log.Trace(string(query))
+		h.log.Trace(strings.TrimSpace(string(query)))
 	}
 
 	return ctx, nil

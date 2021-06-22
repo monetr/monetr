@@ -21,7 +21,7 @@ PGO=$(LOCAL_BIN)/pgo
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=mail features work pgadmin pghero vault ngrok registry app api
+SUBDOMAINS=kms mail features work pgadmin pghero vault ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -81,7 +81,9 @@ init-mini: info local-dependencies-maybe
 	make setup-registry
 	make deploy-redis
 	make deploy-postgres
+	make vault-mini
 	make deploy-mini-application
+	make vault-token
 	$(call infoMsg,Local environment is setup; you should be able to access the API at: https://api.$(LOCAL_DOMAIN))
 
 MINIKUBE_NAMESPACE=default
@@ -436,43 +438,44 @@ VAULT_JSON=$(LOCAL_DIR)/vault-keys.json
 vault-mini:
 	$(KUBECTL) apply -f $(PWD)/minikube/vault.yaml \
 		--namespace $(MINIKUBE_NAMESPACE)
-	@sleep 15
 	make unseal-vault-mini
 	$(KUBECTL) rollout status deploy/vault \
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	make vault-terraform
+	make vault-token
+
+vault-token: $(VAULT_JSON)
+vault-token: $(eval VAULT_TOKEN=$(shell stat $(LOCAL_BIN)/$(JQ) && cat $(VAULT_JSON) | $(PWD)/bin/$(JQ) -r '.root_token'))
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "vault is now accessible at: https://vault.$(LOCAL_DOMAIN)"
 	@echo "root token: $$(cat $(VAULT_JSON) | $(JQ) -r '.root_token')"
 	@echo "\033[0;31m#################################################################################\033[0m"
 
+vault-terraform: $(VAULT_JSON)
+	export VAULT_TOKEN=$$(cat $(VAULT_JSON) | $(LOCAL_BIN)/$(JQ) -r '.root_token') && \
+	export TF_VAR_kubernetes_address=https://$$(minikube ip):8443 && \
+	export TF_VAR_kubernetes_certificate_b64=$$($(KUBECTL) config view --raw -o json | $(LOCAL_BIN)/$(JQ) -r '.clusters[] | select(.name == "'$(shell $(KUBECTL) config current-context)'") | .cluster."certificate-authority-data"') && \
+	export TF_VAR_kubernetes_reviewer_jwt=$$($(KUBECTL) get secret $(shell $(KUBECTL) get serviceaccount vault-authentication -o yaml | $(LOCAL_BIN)/$(YQ) e '.secrets[0].name' -) -o yaml | $(LOCAL_BIN)/$(YQ) e '.data.token' - | base64 -d) && \
+		cd $(PWD)/minikube/vault && terraform init && terraform apply -auto-approve=true
+
+
+define waitForContainer
+while [[ $$($(KUBECTL) get pod $$($(KUBECTL) get pod -l $1 --namespace $(MINIKUBE_NAMESPACE) -o 'jsonpath={.items[0].metadata.name}') -o 'jsonpath={.status.phase}') != "Running" ]]; do echo "Waiting for container..." && sleep 1; done
+endef
+
 $(VAULT_JSON):
-	kubectl exec deploy/vault --namespace $(MINIKUBE_NAMESPACE) -- vault operator init -key-shares=1 -key-threshold=1 -format=json > $(VAULT_JSON)
+	$(call infoMsg,Waiting for vault to be running.)
+	$(call waitForContainer,app.kubernetes.io/name=vault,vault)
+	$(call infoMsg,Initializing vault.)
+	$(KUBECTL) exec deploy/vault --namespace $(MINIKUBE_NAMESPACE) -- vault operator init -key-shares=1 -key-threshold=1 --tls-skip-verify -format=json > $(VAULT_JSON)
 
 unseal-vault-mini: $(VAULT_JSON)
 	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
-	kubectl exec deploy/vault -- vault operator unseal $(VAULT_UNSEAL_KEY)
-
-vault-certificate-authority:
-	make inner-vault-certificate-authority
-
-VAULT_ADDR=https://vault.$(LOCAL_DOMAIN)
-inner-vault-certificate-authority:
-	$(eval VAULT_TOKEN = $(shell cat $(VAULT_JSON) | $(JQ) -r ".root_token"))
-	$(VAULT) secrets enable pki || true
-	$(VAULT) secrets tune -max-lease-ttl=87600h pki
-	$(VAULT) write -field=certificate pki/root/generate/internal common_name="*" ttl="87600h" > $(LOCAL_DIR)/CA_cert.crt
-	$(VAULT) write pki/config/urls issuing_certificates="$(VAULT_ADDR)/v1/pki/ca" crl_distribution_points="$(VAULT_ADDR)/v1/pki/crl"
-	$(VAULT) secrets enable -path=pki_intermediate pki || true
-	$(VAULT) secrets tune -max-lease-ttl=43800h pki_intermediate
-	$(VAULT) write -format=json pki_intermediate/intermediate/generate/internal common_name="* Intermediate Authority" | $(JQ) -r ".data.csr" > $(LOCAL_DIR)/pki_intermediate.csr
-	$(VAULT) write -format=json pki/root/sign-intermediate csr=@$(LOCAL_DIR)/pki_intermediate.csr format=pem_bundle ttl="43800h" | $(JQ) -r ".data.certificate" > $(LOCAL_DIR)/intermediate.cert.pem
-	$(VAULT) write pki_intermediate/intermediate/set-signed certificate=@$(LOCAL_DIR)/intermediate.cert.pem
-	$(VAULT) write pki_intermediate/roles/pgcluster allowed_domains="postgres.default.svc.cluster.local" allow_subdomains=false allow_bare_domains=true max_ttl="8760h"
+	$(KUBECTL) exec deploy/vault -- vault status --tls-skip-verify || $(KUBECTL) exec deploy/vault -- vault operator unseal --tls-skip-verify $(VAULT_UNSEAL_KEY)
 
 clean-vault-mini:
 	rm -rf $(VAULT_JSON)
 	$(KUBECTL) delete -f $(PWD)/minikube/vault.yaml -n $(MINIKUBE_NAMESPACE)
-
 
 ###################### gocraft/work UI ##################################
 WORK_IMAGE_NAME=registry.$(LOCAL_DOMAIN)/work

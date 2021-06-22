@@ -119,6 +119,7 @@ func RunServer() error {
 		Password:        configuration.PostgreSQL.Password,
 		Database:        configuration.PostgreSQL.Database,
 		ApplicationName: "monetr",
+		MaxConnAge:      9 * time.Minute,
 	}
 
 	var tlsConfiguration *tls.Config
