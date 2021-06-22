@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/viper"
+	"time"
 )
 
 const EnvironmentPrefix = "MONETR"
@@ -41,6 +42,7 @@ type Configuration struct {
 	SendGrid      SendGrid
 	Sentry        Sentry
 	Stripe        Stripe
+	Vault         Vault
 }
 
 type Beta struct {
@@ -151,6 +153,21 @@ type Stripe struct {
 	BillingEnabled  bool
 }
 
+type Vault struct {
+	Enabled            bool
+	Address            string
+	Auth               string
+	Token              string
+	TokenFile          string
+	Role               string
+	CertificatePath    string
+	KeyPath            string
+	CACertificatePath  string
+	InsecureSkipVerify bool
+	Timeout            time.Duration
+	IdleConnTimeout    time.Duration
+}
+
 func LoadConfiguration(configFilePath *string) Configuration {
 	v := viper.GetViper()
 
@@ -194,6 +211,9 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("SMTP.Enabled", false)
 	v.SetDefault("ReCAPTCHA.Enabled", false)
 	v.SetDefault("Logging.Level", "info")
+	v.SetDefault("Vault.Auth", "kubernetes")
+	v.SetDefault("Vault.Timeout", 30*time.Second)
+	v.SetDefault("Vault.IdleConnTimeout", 9*time.Minute)
 }
 
 func setupEnv(v *viper.Viper) {
@@ -243,4 +263,16 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Stripe.WebhooksEnabled", "MONETR_STRIPE_WEBHOOKS_ENABLED")
 	v.BindEnv("Stripe.WebhooksDomain", "MONETR_STRIPE_WEBHOOKS_DOMAIN")
 	v.BindEnv("Stripe.WebhookSecret", "MONETR_STRIPE_WEBHOOK_SECRET")
+	v.BindEnv("Vault.Enabled", "MONETR_VAULT_ENABLED")
+	v.BindEnv("Vault.Address", "MONETR_VAULT_ADDRESS")
+	v.BindEnv("Vault.Auth", "MONETR_VAULT_AUTH")
+	v.BindEnv("Vault.Token", "MONETR_VAULT_TOKEN")
+	v.BindEnv("Vault.TokenFile", "MONETR_VAULT_TOKEN_FILE")
+	v.BindEnv("Vault.Role", "MONETR_VAULT_ROLE")
+	v.BindEnv("Vault.CertificatePath", "MONETR_VAULT_TLS_CERT_PATH")
+	v.BindEnv("Vault.KeyPath", "MONETR_VAULT_TLS_KEY_PATH")
+	v.BindEnv("Vault.CACertificatePath", "MONETR_VAULT_TLS_CA_PATH")
+	v.BindEnv("Vault.InsecureSkipVerify", "MONETR_VAULT_INSECURE_SKIP_VERIFY")
+	v.BindEnv("Vault.Timeout", "MONETR_VAULT_TIMEOUT")
+	v.BindEnv("Vault.IdleConnTimeout", "MONETR_VAULT_IDLE_CONN_TIMEOUT")
 }

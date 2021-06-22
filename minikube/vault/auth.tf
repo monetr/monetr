@@ -8,4 +8,5 @@ resource "vault_kubernetes_auth_backend_config" "example" {
   kubernetes_ca_cert = base64decode(var.kubernetes_certificate_b64)
   token_reviewer_jwt = var.kubernetes_reviewer_jwt
   issuer = "kubernetes.io/serviceaccount"
+  disable_iss_validation = true
 }

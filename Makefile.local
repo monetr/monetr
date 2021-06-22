@@ -199,6 +199,7 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	$(YQ) e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.cors.debug = false' -i $(VALUES)
+	$(YQ) e '.serviceAccountName = "rest-api"' -i $(VALUES)
 
 local-dependencies-maybe:
 	$(call infoMsg,Getting any dependencies needed to run everything locally)
@@ -460,7 +461,7 @@ vault-terraform: $(VAULT_JSON)
 
 
 define waitForContainer
-while [[ $$($(KUBECTL) get pod $$($(KUBECTL) get pod -l $1 --namespace $(MINIKUBE_NAMESPACE) -o 'jsonpath={.items[0].metadata.name}') -o 'jsonpath={.status.phase}') != "Running" ]]; do echo "Waiting for container..." && sleep 1; done
+while [[ $$($(KUBECTL) get pod $$($(KUBECTL) get pod -l $1 --namespace $(MINIKUBE_NAMESPACE) -o 'jsonpath={.items[0].metadata.name}') -o 'jsonpath={.status.phase}') != "Running" ]]; do echo "Waiting for container..." && sleep 5; done
 endef
 
 $(VAULT_JSON):
@@ -470,7 +471,7 @@ $(VAULT_JSON):
 	$(KUBECTL) exec deploy/vault --namespace $(MINIKUBE_NAMESPACE) -- vault operator init -key-shares=1 -key-threshold=1 --tls-skip-verify -format=json > $(VAULT_JSON)
 
 unseal-vault-mini: $(VAULT_JSON)
-	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
+	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(LOCAL_BIN)/$(JQ) -r ".unseal_keys_b64[]"))
 	$(KUBECTL) exec deploy/vault -- vault status --tls-skip-verify || $(KUBECTL) exec deploy/vault -- vault operator unseal --tls-skip-verify $(VAULT_UNSEAL_KEY)
 
 clean-vault-mini:

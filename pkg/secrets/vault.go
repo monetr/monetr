@@ -52,7 +52,7 @@ func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Con
 }
 
 func (v *vaultPlaidSecretsProvider) buildPath(accountId, plaidLinkId uint64) string {
-	return fmt.Sprintf("customers/plaid/%X/%X", accountId, plaidLinkId)
+	return fmt.Sprintf("customers/plaid/data/%X/%X", accountId, plaidLinkId)
 }
 
 func (v *vaultPlaidSecretsProvider) Close() error {

@@ -96,8 +96,8 @@ api:
     username: postgres
     password: ""
     database: postgres
-    certificatePath: ""
     caCertificatePath: ""
+    certificatePath: ""
     keyPath: ""
   smtp:
     enabled: false
@@ -143,3 +143,11 @@ api:
     webhooksEnabled: false
     webhooksDomain: ""
     webhookSecret: ""
+  vault:
+    enabled: false
+    address: ""
+    role: "default"
+    caCertificatePath: ""
+    certificatePath: ""
+    keyPath: ""
+

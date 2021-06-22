@@ -17,6 +17,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/internal/migrations"
 	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetrapp/rest-api/pkg/internal/vault_helper"
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/logging"
 	"github.com/monetrapp/rest-api/pkg/metrics"
@@ -66,6 +67,23 @@ func RunServer() error {
 	configuration := config.LoadConfiguration(configPath)
 
 	log := logging.NewLoggerWithLevel(configuration.Logging.Level)
+
+	var vault vault_helper.VaultHelper
+	if configuration.Vault.Enabled {
+		client, err := vault_helper.NewVaultHelper(log, vault_helper.Config{
+			Address:         "http://vault.monetr.in:443",
+			Role:            "rest-api",
+			Auth:            "kubernetes",
+			Timeout:         30 * time.Second,
+			IdleConnTimeout: 9 * time.Minute,
+		})
+		if err != nil {
+			log.WithError(err).Fatalf("failed to create vault helper")
+			return err
+		}
+
+		vault = client
+	}
 
 	if configuration.Sentry.Enabled {
 		log.Debug("sentry is enabled, setting up")
@@ -292,6 +310,7 @@ func RunServer() error {
 		stats,
 		stripeClient,
 		redisController.Pool(),
+		vault,
 	)...)
 
 	unixSocket := false
