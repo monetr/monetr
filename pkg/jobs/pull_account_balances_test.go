@@ -7,6 +7,7 @@ import (
 	"github.com/gocraft/work"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetrapp/rest-api/pkg/internal/mock_plaid"
+	"github.com/monetrapp/rest-api/pkg/internal/mock_secrets"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/internal/testutils"
 	"github.com/monetrapp/rest-api/pkg/repository"
@@ -48,7 +49,12 @@ func TestPullAccountBalances(t *testing.T) {
 			HTTPClient:  http.DefaultClient,
 		})
 
-		job := NewJobManager(log, cache, db, plaidClient, nil).(*jobManagerBase)
+		plaidSecrets := mock_secrets.NewMockPlaidSecrets()
+		for accessToken, data := range plaidData.PlaidTokens {
+			plaidSecrets = plaidSecrets.WithSecret(account.AccountId, data.ItemId, accessToken)
+		}
+
+		job := NewJobManager(log, cache, db, plaidClient, nil, plaidSecrets).(*jobManagerBase)
 		defer require.NoError(t, job.Close(), "must close job manager")
 
 		// TODO (elliotcourant) Tweak the plaid data balances before we make our request. This way we can add proper

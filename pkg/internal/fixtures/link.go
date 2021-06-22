@@ -22,7 +22,6 @@ func PlaidLink(t *testing.T) (*models.Link, *models.PlaidLink) {
 			CustomInstitutionName: "Personal Bank",
 		}, &models.PlaidLink{
 			ItemId:      gofakeit.UUID(),
-			AccessToken: gofakeit.UUID(),
 			Products: []string{
 				"transactions",
 			},

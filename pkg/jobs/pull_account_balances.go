@@ -119,6 +119,12 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 			return err
 		}
 
+		accessToken, err := j.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), accountId, link.PlaidLink.ItemId)
+		if err != nil {
+			log.WithError(err).Errorf("failed to retrieve access token for link")
+			return err
+		}
+
 		bankAccounts, err := repo.GetBankAccountsByLinkId(linkId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve bank account details to pull balances")
@@ -137,7 +143,7 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 
 		result, err := j.plaidClient.GetAccounts(
 			span.Context(),
-			link.PlaidLink.AccessToken,
+			accessToken,
 			plaid.GetAccountsOptions{
 				AccountIDs: itemBankAccountIds,
 			},

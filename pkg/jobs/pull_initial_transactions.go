@@ -69,6 +69,12 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			return nil
 		}
 
+		accessToken, err := j.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), accountId, link.PlaidLink.ItemId)
+		if err != nil {
+			log.WithError(err).Errorf("failed to retrieve access token for link")
+			return err
+		}
+
 		if len(link.BankAccounts) == 0 {
 			log.Error("no bank accounts for plaid link")
 			return nil
@@ -84,7 +90,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 		now := time.Now().UTC()
 		plaidTransactions, err := j.plaidClient.GetAllTransactions(
 			span.Context(),
-			link.PlaidLink.AccessToken,
+			accessToken,
 			now.Add(-30*24*time.Hour),
 			now,
 			bankAccountIds,

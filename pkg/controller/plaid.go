@@ -257,6 +257,13 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		}
 	}
 
+	accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId)
+	if err != nil {
+		log.WithError(err).Errorf("failed to retrieve current access token")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve current access token")
+		return
+	}
+
 	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", c.configuration.UIDomainName)
 
 	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), plaid.LinkTokenConfigs{
@@ -280,7 +287,7 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		Language:              "en",
 		LinkCustomizationName: "",
 		RedirectUri:           redirectUri,
-		AccessToken:           link.PlaidLink.AccessToken,
+		AccessToken:           accessToken,
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
@@ -334,11 +341,25 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 
 	log := c.getLog(ctx)
 
-	if link.PlaidLink.AccessToken != result.AccessToken {
+	currentAccessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(
+		c.getContext(ctx),
+		repo.AccountId(),
+		link.PlaidLink.ItemId,
+	)
+	if err != nil {
+		log.WithError(err).Warn("failed to retrieve access token for existing plaid link")
+	}
+
+	if currentAccessToken != result.AccessToken {
 		log.Info("access token for link has been updated")
-		link.PlaidLink.AccessToken = result.AccessToken
-		if err = repo.UpdatePlaidLink(c.getContext(ctx), link.PlaidLink); err != nil {
-			c.wrapPgError(ctx, err, "failed to update Plaid link")
+		if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
+			c.getContext(ctx),
+			repo.AccountId(),
+			link.PlaidLink.ItemId,
+			result.AccessToken,
+		); err != nil {
+			log.WithError(err).Warn("failed to store updated access token")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
 			return
 		}
 	} else {
@@ -426,9 +447,19 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		}
 	}
 
+	if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
+		c.getContext(ctx),
+		repo.AccountId(),
+		result.ItemID,
+		result.AccessToken,
+	); err != nil {
+		log.WithError(err).Errorf("failed to store access token")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
+		return
+	}
+
 	plaidLink := models.PlaidLink{
-		ItemId:      result.ItemID,
-		AccessToken: result.AccessToken,
+		ItemId: result.ItemID,
 		Products: []string{
 			// TODO (elliotcourant) Make this based on what product's we sent in the create link token request.
 			"transactions",
@@ -437,7 +468,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
 	}
-	if err := repo.CreatePlaidLink(&plaidLink); err != nil {
+	if err = repo.CreatePlaidLink(&plaidLink); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
 		return
 	}

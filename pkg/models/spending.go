@@ -111,6 +111,9 @@ func (e *Spending) CalculateNextContribution(
 		return nil
 	} else if progressAmount >= e.TargetAmount {
 		e.IsBehind = false
+	} else {
+		// Fix weird edge case where this isn't being unset.
+		e.IsBehind = false
 	}
 
 	// TODO Handle expenses that recur more frequently than they are funded.

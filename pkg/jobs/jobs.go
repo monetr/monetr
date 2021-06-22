@@ -11,6 +11,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/monetrapp/rest-api/pkg/pubsub"
 	"github.com/monetrapp/rest-api/pkg/repository"
+	"github.com/monetrapp/rest-api/pkg/secrets"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"math"
@@ -26,25 +27,34 @@ type JobManager interface {
 }
 
 type jobManagerBase struct {
-	log         *logrus.Entry
-	work        *work.WorkerPool
-	queue       *work.Enqueuer
-	db          *pg.DB
-	plaidClient plaid_helper.Client
-	stats       *metrics.Stats
-	ps          pubsub.PublishSubscribe
+	log          *logrus.Entry
+	work         *work.WorkerPool
+	queue        *work.Enqueuer
+	db           *pg.DB
+	plaidClient  plaid_helper.Client
+	plaidSecrets secrets.PlaidSecretsProvider
+	stats        *metrics.Stats
+	ps           pubsub.PublishSubscribe
 }
 
-func NewJobManager(log *logrus.Entry, pool *redis.Pool, db *pg.DB, plaidClient plaid_helper.Client, stats *metrics.Stats) JobManager {
+func NewJobManager(
+	log *logrus.Entry,
+	pool *redis.Pool,
+	db *pg.DB,
+	plaidClient plaid_helper.Client,
+	stats *metrics.Stats,
+	plaidSecrets secrets.PlaidSecretsProvider,
+) JobManager {
 	manager := &jobManagerBase{
 		log: log,
 		// TODO (elliotcourant) Use namespace from config.
-		work:        work.NewWorkerPool(struct{}{}, 4, "harder", pool),
-		queue:       work.NewEnqueuer("harder", pool),
-		db:          db,
-		plaidClient: plaidClient,
-		stats:       stats,
-		ps:          pubsub.NewPostgresPubSub(log, db),
+		work:         work.NewWorkerPool(struct{}{}, 4, "harder", pool),
+		queue:        work.NewEnqueuer("harder", pool),
+		db:           db,
+		plaidClient:  plaidClient,
+		plaidSecrets: plaidSecrets,
+		stats:        stats,
+		ps:           pubsub.NewPostgresPubSub(log, db),
 	}
 
 	manager.work.Middleware(manager.middleware)

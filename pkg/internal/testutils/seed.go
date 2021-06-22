@@ -30,6 +30,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 	require.NotNil(t, db, "db must not be nil")
 
 	plaidData := &MockPlaidData{
+		PlaidTokens:  map[string]models.PlaidToken{},
 		PlaidLinks:   map[string]models.PlaidLink{},
 		BankAccounts: map[string]map[string]plaid.Account{},
 	}
@@ -121,7 +122,6 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 		if options&WithPlaidAccount > 0 {
 			plaidLink := models.PlaidLink{
 				ItemId:          gofakeit.UUID(),
-				AccessToken:     gofakeit.UUID(),
 				Products:        []string{"transactions"},
 				WebhookUrl:      "",
 				InstitutionId:   "123",
@@ -132,6 +132,13 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 			require.NoError(t, err, "failed to create plaid link")
 
 			plaidData.PlaidLinks[plaidLink.ItemId] = plaidLink
+
+			accessToken := gofakeit.UUID()
+			plaidData.PlaidTokens[accessToken] = models.PlaidToken{
+				ItemId:      plaidLink.ItemId,
+				AccountId:   account.AccountId,
+				AccessToken: accessToken,
+			}
 
 			withPlaidLink := models.Link{
 				AccountId:       account.AccountId,
@@ -180,7 +187,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				},
 			}
 
-			plaidData.BankAccounts[plaidLink.AccessToken] = map[string]plaid.Account{
+			plaidData.BankAccounts[accessToken] = map[string]plaid.Account{
 				checkingAccountId: {
 					AccountID: checkingAccountId,
 					Balances: plaid.AccountBalances{

@@ -3,9 +3,10 @@ package secrets
 import (
 	"context"
 	"fmt"
+	"github.com/monetrapp/rest-api/pkg/internal/vault_helper"
+	"github.com/sirupsen/logrus"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
 )
 
@@ -14,47 +15,55 @@ var (
 )
 
 type vaultPlaidSecretsProvider struct {
-	client *api.Client
+	log    *logrus.Entry
+	client vault_helper.VaultHelper
 }
 
-func (v *vaultPlaidSecretsProvider) UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64, accessToken string) error {
+func NewVaultPlaidSecretsProvider(log *logrus.Entry, client vault_helper.VaultHelper) PlaidSecretsProvider {
+	return &vaultPlaidSecretsProvider{
+		log:    log,
+		client: client,
+	}
+}
+
+func (v *vaultPlaidSecretsProvider) UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId uint64, plaidItemId string, accessToken string) error {
 	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId [VAULT]")
 	defer span.Finish()
 
-	path := v.buildPath(accountId, plaidLinkId)
+	path := v.buildPath(accountId, plaidItemId)
 
-	result, err := v.client.Logical().Read(path)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve existing data")
-	}
-
-	result.Data["access_token"] = accessToken
-
-	if _, err = v.client.Logical().Write(path, result.Data); err != nil {
-		return errors.Wrap(err, "failed to update access token")
+	if err := v.client.WriteKV(span.Context(), path, map[string]interface{}{
+		"access_token": accessToken,
+	}); err != nil {
+		return errors.Wrap(err, "failed to store access token in vault")
 	}
 
 	return nil
 }
 
-func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64) (accessToken string, err error) {
+func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId uint64, plaidItemId string) (accessToken string, _ error) {
 	span := sentry.StartSpan(ctx, "GetAccessTokenForPlaidLinkId [VAULT]")
 	defer span.Finish()
 
-	result, err := v.client.Logical().Read(v.buildPath(accountId, plaidLinkId))
+	result, err := v.client.ReadKV(span.Context(), v.buildPath(accountId, plaidItemId))
 	if err != nil {
-		return "", errors.Wrap(err, "failed to retrieve access token")
+		return "", errors.Wrap(err, "failed to read access token from vault")
 	}
 
-	fmt.Sprint(result)
+	if result.Data != nil {
+		var ok bool
+		if accessToken, ok = result.Data["access_token"].(string); ok {
+			return accessToken, nil
+		}
+	}
 
-	panic("implement me")
+	return "", errors.Errorf("access token could not be found")
 }
 
-func (v *vaultPlaidSecretsProvider) buildPath(accountId, plaidLinkId uint64) string {
-	return fmt.Sprintf("customers/plaid/data/%X/%X", accountId, plaidLinkId)
+func (v *vaultPlaidSecretsProvider) buildPath(accountId uint64, plaidLinkId string) string {
+	return fmt.Sprintf("secret/customers/plaid/data/%X/%s", accountId, plaidLinkId)
 }
 
 func (v *vaultPlaidSecretsProvider) Close() error {
-	panic("implement me")
+	return nil
 }

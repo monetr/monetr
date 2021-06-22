@@ -25,10 +25,20 @@ func getControllers(
 	stats *metrics.Stats,
 	stripeClient *stripe_client.API,
 	cache *redis.Pool,
-	vault vault_helper.VaultHelper,
+	plaidSecrets secrets.PlaidSecretsProvider,
 ) []application.Controller {
 	return []application.Controller{
-		controller.NewController(log, configuration, db, job, plaidClient, stats, stripeClient, cache),
+		controller.NewController(
+			log,
+			configuration,
+			db,
+			job,
+			plaidClient,
+			stats,
+			stripeClient,
+			cache,
+			plaidSecrets,
+		),
 		ui.NewUIController(),
 	}
 }

@@ -21,6 +21,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/logging"
 	"github.com/monetrapp/rest-api/pkg/metrics"
+	"github.com/monetrapp/rest-api/pkg/secrets"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/cobra"
@@ -156,7 +157,7 @@ func RunServer() error {
 
 			tlsConfiguration = &tls.Config{
 				Rand:               rand.Reader,
-				InsecureSkipVerify: false,
+				InsecureSkipVerify: true,
 				RootCAs:            caCertPool,
 				ServerName:         configuration.PostgreSQL.Address,
 				Renegotiation:      tls.RenegotiateFreelyAsClient,
@@ -210,7 +211,7 @@ func RunServer() error {
 
 				tlsConfig := &tls.Config{
 					Rand:               rand.Reader,
-					InsecureSkipVerify: false,
+					InsecureSkipVerify: true,
 					RootCAs:            nil,
 					ServerName:         configuration.PostgreSQL.Address,
 					Renegotiation:      tls.RenegotiateFreelyAsClient,
@@ -298,7 +299,14 @@ func RunServer() error {
 		log.Debugf("stripe webhooks are enabled and will be sent to: %s", configuration.Stripe.WebhooksDomain)
 	}
 
-	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidHelper, stats)
+	var plaidSecrets secrets.PlaidSecretsProvider
+	if configuration.Vault.Enabled {
+		plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
+	} else {
+		plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db)
+	}
+
+	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidHelper, stats, plaidSecrets)
 	defer jobManager.Close()
 
 	app := application.NewApp(configuration, getControllers(
@@ -310,7 +318,7 @@ func RunServer() error {
 		stats,
 		stripeClient,
 		redisController.Pool(),
-		vault,
+		plaidSecrets,
 	)...)
 
 	unixSocket := false

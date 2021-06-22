@@ -8,6 +8,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/application"
 	"github.com/monetrapp/rest-api/pkg/config"
 	"github.com/monetrapp/rest-api/pkg/controller"
+	"github.com/monetrapp/rest-api/pkg/internal/mock_secrets"
 	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetrapp/rest-api/pkg/internal/testutils"
 	"github.com/plaid/plaid-go/plaid"
@@ -67,9 +68,17 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		miniRedis.Close()
 	})
 
-
-
-	c := controller.NewController(testutils.GetLog(t), configuration, db, mockJobManager, p, nil, nil, redisPool)
+	c := controller.NewController(
+		testutils.GetLog(t),
+		configuration,
+		db,
+		mockJobManager,
+		p,
+		nil,
+		nil,
+		redisPool,
+		mock_secrets.NewMockPlaidSecrets(),
+	)
 	app := application.NewApp(configuration, c)
 	return httptest.New(t, app)
 }

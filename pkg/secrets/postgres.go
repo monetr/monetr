@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetrapp/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -17,13 +18,21 @@ type postgresPlaidSecretProvider struct {
 	db  pg.DBI
 }
 
-func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64, accessToken string) error {
+func NewPostgresPlaidSecretsProvider(log *logrus.Entry, db pg.DBI) PlaidSecretsProvider {
+	return &postgresPlaidSecretProvider{
+		log: log,
+		db:  db,
+	}
+}
+
+func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId uint64, plaidItemId, accessToken string) error {
 	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId [POSTGRES]")
 	defer span.Finish()
 
-	_, err := p.db.ModelContext(span.Context(), &plaidLinkWithToken{}).
+	_, err := p.db.ModelContext(span.Context(), &models.PlaidToken{}).
 		Set(`"access_token" = ?`, accessToken).
-		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
+		Where(`"plaid_token"."item_id" = ?`, plaidItemId).
+		Where(`"plaid_token"."account_id" = ?`, accountId).
 		Update()
 	if err != nil {
 		return errors.Wrap(err, "failed to update access token")
@@ -32,16 +41,14 @@ func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx contex
 	return nil
 }
 
-func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId, plaidLinkId uint64) (accessToken string, err error) {
+func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId uint64, plaidItemId string) (accessToken string, err error) {
 	span := sentry.StartSpan(ctx, "GetAccessTokenForPlaidLinkId [POSTGRES]")
 	defer span.Finish()
 
-	var result plaidLinkWithToken
+	var result models.PlaidToken
 	err = p.db.ModelContext(span.Context(), &result).
-		Join(`INNER JOIN "links" AS "link"`).
-		JoinOn(`"link"."plaid_link_id" = "plaid_link"."plaid_link_id"`).
-		Where(`"link"."account_id" = ?`, accountId).
-		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
+		Where(`"plaid_token"."account_id" = ?`, accountId).
+		Where(`"plaid_token"."item_id" = ?`, plaidItemId).
 		Limit(1).
 		Select(&result)
 	if err != nil {
@@ -52,5 +59,5 @@ func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.C
 }
 
 func (p *postgresPlaidSecretProvider) Close() error {
-	panic("implement me")
+	return nil
 }

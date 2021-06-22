@@ -13,6 +13,7 @@ import (
 	"github.com/monetrapp/rest-api/pkg/jobs"
 	"github.com/monetrapp/rest-api/pkg/metrics"
 	"github.com/monetrapp/rest-api/pkg/pubsub"
+	"github.com/monetrapp/rest-api/pkg/secrets"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
 	"net/http"
 	"net/smtp"
@@ -38,6 +39,7 @@ type Controller struct {
 	captcha                  *recaptcha.ReCAPTCHA
 	plaid                    plaid_helper.Client
 	plaidWebhookVerification plaid_helper.WebhookVerification
+	plaidSecrets             secrets.PlaidSecretsProvider
 	smtp                     *smtp.Client
 	mailVerifyCode           *gotp.HOTP
 	log                      *logrus.Entry
@@ -60,6 +62,7 @@ func NewController(
 	stats *metrics.Stats,
 	stripeClient *stripe_client.API,
 	cache *redis.Pool,
+	plaidSecrets secrets.PlaidSecretsProvider,
 ) *Controller {
 	var captcha recaptcha.ReCAPTCHA
 	var err error
@@ -80,6 +83,7 @@ func NewController(
 		db:                       db,
 		plaid:                    plaidClient,
 		plaidWebhookVerification: plaid_helper.NewMemoryWebhookVerificationCache(log, plaidClient),
+		plaidSecrets:             plaidSecrets,
 		log:                      log,
 		job:                      job,
 		stats:                    stats,
