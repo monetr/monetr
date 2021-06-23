@@ -15,7 +15,7 @@
     "@stripe/stripe-js": "1.15.1",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "5.14.1",
-    "@testing-library/react": "11.2.7",
+    "@testing-library/react": "12.0.0",
     "@testing-library/user-event": "13.1.9",
     "@typescript-eslint/eslint-plugin": "4.28.0",
     "@typescript-eslint/parser": "4.28.0",
