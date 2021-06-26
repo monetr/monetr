@@ -6,33 +6,34 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
-	"github.com/kataras/iris/v12"
-	"github.com/monetrapp/rest-api/pkg/application"
-	"github.com/monetrapp/rest-api/pkg/build"
-	"github.com/monetrapp/rest-api/pkg/cache"
-	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/monetrapp/rest-api/pkg/internal/certhelper"
-	"github.com/monetrapp/rest-api/pkg/internal/migrations"
-	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
-	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
-	"github.com/monetrapp/rest-api/pkg/internal/vault_helper"
-	"github.com/monetrapp/rest-api/pkg/jobs"
-	"github.com/monetrapp/rest-api/pkg/logging"
-	"github.com/monetrapp/rest-api/pkg/metrics"
-	"github.com/monetrapp/rest-api/pkg/secrets"
-	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
-	"github.com/spf13/cobra"
-	"github.com/stripe/stripe-go/v72"
-	stripe_client "github.com/stripe/stripe-go/v72/client"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
+	"github.com/kataras/iris/v12"
+	"github.com/monetr/rest-api/pkg/application"
+	"github.com/monetr/rest-api/pkg/billing"
+	"github.com/monetr/rest-api/pkg/build"
+	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/internal/certhelper"
+	"github.com/monetr/rest-api/pkg/internal/migrations"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
+	"github.com/monetr/rest-api/pkg/internal/vault_helper"
+	"github.com/monetr/rest-api/pkg/jobs"
+	"github.com/monetr/rest-api/pkg/logging"
+	"github.com/monetr/rest-api/pkg/metrics"
+	"github.com/monetr/rest-api/pkg/secrets"
+	"github.com/pkg/errors"
+	"github.com/plaid/plaid-go/plaid"
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -121,12 +122,6 @@ func RunServer() error {
 			log.WithError(err).Error("failed to init sentry")
 		}
 		defer sentry.Flush(10 * time.Second)
-	}
-
-	var stripeClient *stripe_client.API
-	if configuration.Stripe.Enabled {
-		log.Trace("stripe is enabled, creating client")
-		stripeClient = stripe_client.New(configuration.Stripe.APIKey, stripe.NewBackends(http.DefaultClient))
 	}
 
 	pgOptions := &pg.Options{
@@ -251,10 +246,6 @@ func RunServer() error {
 
 				db.Options().TLSConfig = tlsConfig
 
-				//newPointer := unsafe.Pointer(tlsConfig)
-				//existingPointer := (*unsafe.Pointer)(unsafe.Pointer(tlsConfiguration))
-				//atomic.SwapPointer(existingPointer, newPointer)
-
 				log.Debugf("successfully swapped ca certificate")
 
 				return nil
@@ -282,6 +273,27 @@ func RunServer() error {
 	}
 	defer redisController.Close()
 
+	redisCache := cache.NewCache(log, redisController.Pool())
+
+	var stripe stripe_helper.Stripe
+	var basicPaywall billing.BasicPayWall
+	if configuration.Stripe.Enabled {
+		log.Trace("stripe is enabled, creating client")
+		stripe = stripe_helper.NewStripeHelperWithCache(
+			log,
+			configuration.Stripe.APIKey,
+			redisCache,
+		)
+
+		accountRepo := billing.NewAccountRepository(
+			log,
+			redisCache,
+			db,
+		)
+
+		basicPaywall = billing.NewBasicPaywall(log, accountRepo)
+	}
+
 	plaidHelper := plaid_helper.NewPlaidClient(log, plaid.ClientOptions{
 		ClientID:    configuration.Plaid.ClientID,
 		Secret:      configuration.Plaid.ClientSecret,
@@ -306,7 +318,14 @@ func RunServer() error {
 		plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db)
 	}
 
-	jobManager := jobs.NewJobManager(log, redisController.Pool(), db, plaidHelper, stats, plaidSecrets)
+	jobManager := jobs.NewJobManager(
+		log,
+		redisController.Pool(),
+		db,
+		plaidHelper,
+		stats,
+		plaidSecrets,
+	)
 	defer jobManager.Close()
 
 	app := application.NewApp(configuration, getControllers(
@@ -316,9 +335,10 @@ func RunServer() error {
 		jobManager,
 		plaidHelper,
 		stats,
-		stripeClient,
+		stripe,
 		redisController.Pool(),
 		plaidSecrets,
+		basicPaywall,
 	)...)
 
 	unixSocket := false

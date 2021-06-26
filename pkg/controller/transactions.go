@@ -3,8 +3,8 @@ package controller
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
-	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/sirupsen/logrus"
 	"math"
 	"net/http"

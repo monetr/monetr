@@ -6,12 +6,12 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
-	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
-	"github.com/monetrapp/rest-api/pkg/metrics"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/pubsub"
-	"github.com/monetrapp/rest-api/pkg/repository"
-	"github.com/monetrapp/rest-api/pkg/secrets"
+	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/metrics"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/pubsub"
+	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"math"
@@ -19,10 +19,10 @@ import (
 )
 
 type JobManager interface {
-	TriggerPullInitialTransactions(accountId, userId, linkId uint64) (jobId string, err error)
-	TriggerRemoveTransactions(accountId, linkId uint64, removedTransactions []string) (jobId string, err error)
-	TriggerPullLatestTransactions(accountId, linkId uint64, numberOfTransactions int64) (jobId string, err error)
 	TriggerPullHistoricalTransactions(accountId, linkId uint64) (jobId string, err error)
+	TriggerPullInitialTransactions(accountId, userId, linkId uint64) (jobId string, err error)
+	TriggerPullLatestTransactions(accountId, linkId uint64, numberOfTransactions int64) (jobId string, err error)
+	TriggerRemoveTransactions(accountId, linkId uint64, removedTransactions []string) (jobId string, err error)
 	Close() error
 }
 

@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
-	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
-	"github.com/monetrapp/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"strconv"
 	"strings"
@@ -35,7 +35,6 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Remove Transactions"))
 	defer span.Finish()
 
-	start := time.Now()
 	log := j.getLogForJob(job)
 
 	transactionIds := strings.Split(job.ArgString("removedTransactions"), ",")
@@ -47,12 +46,6 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
-
-	defer func() {
-		if j.stats != nil {
-			j.stats.JobFinished(RemoveTransactions, accountId, start)
-		}
-	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
 	span.SetTag("accountId", strconv.FormatUint(accountId, 10))

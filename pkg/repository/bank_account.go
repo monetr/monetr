@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 )
 

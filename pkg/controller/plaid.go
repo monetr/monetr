@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"

@@ -5,12 +5,14 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gomodule/redigo/redis"
 	"github.com/kataras/iris/v12/httptest"
-	"github.com/monetrapp/rest-api/pkg/application"
-	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/monetrapp/rest-api/pkg/controller"
-	"github.com/monetrapp/rest-api/pkg/internal/mock_secrets"
-	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
-	"github.com/monetrapp/rest-api/pkg/internal/testutils"
+	"github.com/monetr/rest-api/pkg/application"
+	"github.com/monetr/rest-api/pkg/billing"
+	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/controller"
+	"github.com/monetr/rest-api/pkg/internal/mock_secrets"
+	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/testutils"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -18,8 +20,8 @@ import (
 	"testing"
 )
 
-func NewTestApplication(t *testing.T) *httptest.Expect {
-	configuration := config.Configuration{
+func NewTestApplicationConfig(t *testing.T) config.Configuration {
+	return config.Configuration{
 		Name:          t.Name(),
 		UIDomainName:  "http://localhost:1234",
 		APIDomainName: "http://localhost:1235",
@@ -41,6 +43,10 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 			Level: "fatal",
 		},
 	}
+}
+
+func NewTestApplication(t *testing.T) *httptest.Expect {
+	configuration := NewTestApplicationConfig(t)
 	return NewTestApplicationWithConfig(t, configuration)
 }
 
@@ -68,8 +74,10 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		miniRedis.Close()
 	})
 
+	log := testutils.GetLog(t)
+
 	c := controller.NewController(
-		testutils.GetLog(t),
+		log,
 		configuration,
 		db,
 		mockJobManager,
@@ -78,6 +86,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		nil,
 		redisPool,
 		mock_secrets.NewMockPlaidSecrets(),
+		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
 	)
 	app := application.NewApp(configuration, c)
 	return httptest.New(t, app)

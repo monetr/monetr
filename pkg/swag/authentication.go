@@ -1,6 +1,6 @@
 package swag
 
-import "github.com/monetrapp/rest-api/pkg/models"
+import "github.com/monetr/rest-api/pkg/models"
 
 type LoginRequest struct {
 	// The email associated with our login. Is unique and case-insensitive.

@@ -4,7 +4,7 @@ NODE_MODULES_BIN = $(NODE_MODULES_PWD)/.bin
 VENDOR_DIR = "$(PWD)/vendor"
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
-MONETR_CLI_PACKAGE = "github.com/monetrapp/rest-api/pkg/cmd"
+MONETR_CLI_PACKAGE = "github.com/monetr/rest-api/pkg/cmd"
 COVERAGE_TXT = "$(PWD)/coverage.txt"
 
 PATH += "$(GOPATH):$(LOCAL_BIN_DIR):$(NODE_MODULES_BIN)"

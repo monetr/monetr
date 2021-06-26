@@ -3,7 +3,7 @@ package fixtures
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"testing"
 )
 

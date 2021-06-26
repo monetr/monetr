@@ -5,13 +5,13 @@ package cmd
 import (
 	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
-	"github.com/monetrapp/rest-api/pkg/application"
-	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/monetrapp/rest-api/pkg/controller"
-	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
-	"github.com/monetrapp/rest-api/pkg/jobs"
-	"github.com/monetrapp/rest-api/pkg/metrics"
-	"github.com/monetrapp/rest-api/pkg/ui"
+	"github.com/monetr/rest-api/pkg/application"
+	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/controller"
+	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/jobs"
+	"github.com/monetr/rest-api/pkg/metrics"
+	"github.com/monetr/rest-api/pkg/ui"
 	"github.com/sirupsen/logrus"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
 )
@@ -26,6 +26,7 @@ func getControllers(
 	stripeClient *stripe_client.API,
 	cache *redis.Pool,
 	plaidSecrets secrets.PlaidSecretsProvider,
+	basicPaywall billing.BasicPayWall,
 ) []application.Controller {
 	return []application.Controller{
 		controller.NewController(
@@ -38,6 +39,7 @@ func getControllers(
 			stripeClient,
 			cache,
 			plaidSecrets,
+			basicPaywall,
 		),
 		ui.NewUIController(),
 	}

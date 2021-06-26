@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"fmt"
-	"github.com/getsentry/sentry-go"
+	"net/http"
+
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/stripe/stripe-go/v72"
-	"net/http"
 )
 
 func (c *Controller) handleUsers(p router.Party) {
@@ -32,7 +30,7 @@ func (c *Controller) getMe(ctx *context.Context) {
 		return
 	}
 
-	if !c.configuration.Stripe.BillingEnabled {
+	if !c.configuration.Stripe.IsBillingEnabled() {
 		ctx.JSON(map[string]interface{}{
 			"user":     user,
 			"isSetup":  isSetup,
@@ -41,31 +39,10 @@ func (c *Controller) getMe(ctx *context.Context) {
 		return
 	}
 
-	subscription, err := repo.GetActiveSubscription(c.getContext(ctx))
+	subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to get active subscription")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not verify subscription is active")
 		return
-	}
-
-	var subscriptionIsActive bool
-	if subscription == nil {
-		subscriptionIsActive = false
-	} else {
-		switch subscription.Status {
-		case stripe.SubscriptionStatusActive,
-			stripe.SubscriptionStatusTrialing:
-			subscriptionIsActive = true
-		case stripe.SubscriptionStatusPastDue,
-			stripe.SubscriptionStatusUnpaid,
-			stripe.SubscriptionStatusCanceled,
-			stripe.SubscriptionStatusIncomplete,
-			stripe.SubscriptionStatusIncompleteExpired:
-			subscriptionIsActive = false
-		default:
-			sentry.CaptureMessage(fmt.Sprintf("invalid subscription status: %s", subscription.Status))
-			c.returnError(ctx, http.StatusNotImplemented, "invalid subscription status, create a github issue")
-			return
-		}
 	}
 
 	if !subscriptionIsActive {

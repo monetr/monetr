@@ -3,8 +3,8 @@ package controller
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
-	"github.com/monetrapp/rest-api/pkg/models"
-	_ "github.com/monetrapp/rest-api/pkg/swag"
+	"github.com/monetr/rest-api/pkg/models"
+	_ "github.com/monetr/rest-api/pkg/swag"
 	"net/http"
 	"strings"
 	"time"

@@ -2,10 +2,9 @@ package stripe_helper
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/getsentry/sentry-go"
-	"github.com/gomodule/redigo/redis"
+	"github.com/monetr/rest-api/pkg/cache"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
 	"time"
@@ -14,7 +13,6 @@ import (
 type StripeCache interface {
 	GetPriceById(ctx context.Context, id string) (*stripe.Price, bool)
 	CachePrice(ctx context.Context, price stripe.Price) bool
-	Close() error
 }
 
 var (
@@ -38,7 +36,14 @@ func (n *noopStripeCache) Close() error {
 
 type redisStripeCache struct {
 	log   *logrus.Entry
-	cache redis.Conn
+	cache cache.Cache
+}
+
+func NewRedisStripeCache(log *logrus.Entry, cacheClient cache.Cache) StripeCache {
+	return &redisStripeCache{
+		log:   log,
+		cache: cacheClient,
+	}
 }
 
 func (r *redisStripeCache) GetPriceById(ctx context.Context, id string) (*stripe.Price, bool) {
@@ -47,33 +52,20 @@ func (r *redisStripeCache) GetPriceById(ctx context.Context, id string) (*stripe
 
 	log := r.log.WithField("stripePriceId", id)
 
-	log.Trace("checking redis cache for Stripe price")
-	result, err := r.cache.Do("GET", r.cacheKey(id))
-	if err != nil {
-		log.WithError(err).Warn("failed to retrieve Stripe price from cache")
+	log.Trace("checking redis cache for stripe price")
+	var result stripe.Price
+	if err := r.cache.GetEz(span.Context(), r.cacheKey(id), &result); err != nil {
+		r.log.WithError(err).Warn("failed to retrieve stripe price from cache")
 		return nil, false
 	}
 
-	var data []byte
-	switch actual := result.(type) {
-	case []byte:
-		data = actual
-	case string:
-		data = []byte(actual)
-	case *string:
-		data = []byte(*actual)
-	default:
-		log.Warnf("invalid type returned from redis cache: %T", actual)
+	if result.ID == "" {
 		return nil, false
 	}
 
-	var price stripe.Price
-	if err = json.Unmarshal(data, &price); err != nil {
-		log.WithError(err).Warnf("failed to unmarshal Stripe price from redis cache")
-		return nil, false
-	}
+	log.Trace("cache hit for stripe price")
 
-	return &price, true
+	return &result, true
 }
 
 func (r *redisStripeCache) CachePrice(ctx context.Context, price stripe.Price) bool {
@@ -82,24 +74,13 @@ func (r *redisStripeCache) CachePrice(ctx context.Context, price stripe.Price) b
 
 	log := r.log.WithField("stripePriceId", price.ID)
 
-	log.Trace("storing Stripe price in redis cache")
-
-	data, err := json.Marshal(price)
-	if err != nil {
-		log.WithError(err).Warn("failed to marshal Stripe price for redis cache")
-		return false
-	}
-
-	if err = r.cache.Send("SET", r.cacheKey(price.ID), data, "EXAT", time.Now().Add(1*time.Hour)); err != nil {
-		log.WithError(err).Warn("failed to store Stripe price in redis cache")
+	log.Trace("storing stripe price in redis cache")
+	if err := r.cache.SetEzTTL(span.Context(), r.cacheKey(price.ID), price, 1*time.Hour); err != nil {
+		log.WithError(err).Warn("failed to store stripe price in cache")
 		return false
 	}
 
 	return true
-}
-
-func (r *redisStripeCache) Close() error {
-	return r.cache.Close()
 }
 
 func (r *redisStripeCache) cacheKey(id string) string {

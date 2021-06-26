@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/monetrapp/rest-api/pkg/util"
+	"github.com/monetr/rest-api/pkg/util"
 	"github.com/kataras/iris/v12/context"
 	"github.com/pkg/errors"
 	"time"

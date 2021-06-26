@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
-	"github.com/monetrapp/rest-api/pkg/internal/mock_stripe"
-	"github.com/monetrapp/rest-api/pkg/internal/testutils"
+	"github.com/monetr/rest-api/pkg/internal/mock_stripe"
+	"github.com/monetr/rest-api/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

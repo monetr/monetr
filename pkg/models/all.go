@@ -12,7 +12,6 @@ var (
 		&FundingSchedule{},
 		&Spending{},
 		&Transaction{},
-		&Subscription{},
 	}
 
 	// This silences any warnings about the tableName field not being used. It's used via reflection in our ORM to
@@ -27,5 +26,4 @@ var (
 	_ = Spending{}.tableName
 	_ = Transaction{}.tableName
 	_ = User{}.tableName
-	_ = Subscription{}.tableName
 )

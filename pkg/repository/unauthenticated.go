@@ -2,13 +2,14 @@ package repository
 
 import (
 	"context"
-	"github.com/getsentry/sentry-go"
-	"github.com/monetrapp/rest-api/pkg/hash"
 	"strings"
 	"time"
 
+	"github.com/getsentry/sentry-go"
+	"github.com/monetr/rest-api/pkg/hash"
+
 	"github.com/go-pg/pg/v10"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 )
 
@@ -51,6 +52,18 @@ func (u *unauthenticatedRepo) CreateAccount(timezone *time.Location) (*models.Ac
 	}
 	_, err := u.txn.Model(account).Insert(account)
 	return account, errors.Wrap(err, "failed to create account")
+}
+
+func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *models.Account) error {
+	span := sentry.StartSpan(ctx, "Create Account")
+	defer span.Finish()
+
+	// Make sure that the Id is not being specified by the caller of this method. Will ensure that the caller cannot
+	// specify the accountId and overwrite something.
+	account.AccountId = 0
+
+	_, err := u.txn.ModelContext(span.Context(), account).Insert(account)
+	return errors.Wrap(err, "failed to create account")
 }
 
 func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, user *models.User) error {

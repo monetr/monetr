@@ -4,10 +4,10 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
-	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/repository"
-	"github.com/monetrapp/rest-api/pkg/util"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"strconv"
@@ -43,7 +43,6 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Historical Transactions"))
 	defer span.Finish()
 
-	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling historical transactions")
 
@@ -52,12 +51,6 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
-
-	defer func() {
-		if j.stats != nil {
-			j.stats.JobFinished(PullAccountBalances, accountId, start)
-		}
-	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
 	span.SetTag("linkId", strconv.FormatUint(linkId, 10))

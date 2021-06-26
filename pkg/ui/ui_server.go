@@ -7,8 +7,8 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/monetrapp/rest-api/pkg/application"
-	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/application"
+	"github.com/monetr/rest-api/pkg/config"
 	"net/http"
 )
 

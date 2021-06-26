@@ -64,7 +64,7 @@ spec:
   tolerations: [ ]
   user: admin
   replicas: "1"
-  tlsOnly: true
+  tlsOnly: false
   tls:
     caSecret: postgres-server-tls
     tlsSecret: postgres-server-tls

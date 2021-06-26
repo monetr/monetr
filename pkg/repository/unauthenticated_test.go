@@ -2,8 +2,8 @@ package repository
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetrapp/rest-api/pkg/internal/testutils"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

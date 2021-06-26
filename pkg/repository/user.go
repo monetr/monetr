@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 )
 

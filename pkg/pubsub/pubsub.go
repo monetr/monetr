@@ -3,6 +3,7 @@ package pubsub
 import (
 	"context"
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -16,6 +17,10 @@ type (
 
 	PublishSubscribe interface {
 		Subscribe(ctx context.Context, channel string) (Listener, error)
+		Publisher
+	}
+
+	Publisher interface {
 		Notify(ctx context.Context, channel, payload string) error
 	}
 
@@ -80,7 +85,15 @@ func (p *postgresPubSub) Subscribe(ctx context.Context, channel string) (Listene
 }
 
 func (p *postgresPubSub) Notify(ctx context.Context, channel, payload string) error {
-	_, err := p.db.ExecContext(ctx, fmt.Sprintf(`NOTIFY %s, ?`, channel), payload)
+	span := sentry.StartSpan(ctx, "PubSub - Notify")
+	defer span.Finish()
+
+	p.log.
+		WithContext(span.Context()).
+		WithField("channel", channel).
+		Debug("sending notification on channel")
+
+	_, err := p.db.ExecContext(span.Context(), fmt.Sprintf(`NOTIFY "%s", ?`, channel), payload)
 
 	return errors.Wrap(err, "failed to notify channel")
 }

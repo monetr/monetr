@@ -11,7 +11,7 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12/context"
-	"github.com/monetrapp/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 )
 
@@ -121,9 +121,9 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 }
 
 func (c *Controller) requireActiveSubscriptionMiddleware(ctx *context.Context) {
-	userId, accountId := c.mustGetUserId(ctx), c.mustGetAccountId(ctx)
+	accountId := c.mustGetAccountId(ctx)
 
-	active, err := c.billingHelper.GetSubscriptionIsActive(c.getContext(ctx), userId, accountId)
+	active, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), accountId)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to validate subscription is active")
 		return
