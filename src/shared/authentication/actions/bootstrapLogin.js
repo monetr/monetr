@@ -74,7 +74,10 @@ export default function bootstrapLogin(token = null, user = null, subscriptionIs
           return result;
         })
         .catch(error => {
-          Cookies.remove('M-Token');
+          Cookies.remove('M-Token', {
+            domain: conf.COOKIE_DOMAIN,
+            secure: true,
+          });
           window.localStorage.removeItem('M-Token');
           console.error(error);
         });

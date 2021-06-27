@@ -17,3 +17,7 @@ export const getRequirePhoneNumber = state => state.bootstrap.requirePhoneNumber
 export const getRequireBetaCode = state => state.bootstrap.requireBetaCode;
 
 export const getStripePublicKey = state => state.bootstrap.stripePublicKey;
+
+export const getInitialPlan = state => state.bootstrap.initialPlan || null;
+
+export const getBillingEnabled = state => state.bootstrap.billingEnabled;

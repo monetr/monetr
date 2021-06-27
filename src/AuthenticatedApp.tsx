@@ -21,6 +21,10 @@ import AccountView from "views/AccountView";
 import FirstTimeSetup from "views/FirstTimeSetup";
 import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
 import AllAccountsView from "views/AccountView/AllAccountsView";
+import AfterCheckout from "views/Subscriptions/AfterCheckout";
+import Logout from "views/Authentication/Logout";
+import InitialPlaidSetup from "views/Setup/InitialPlaidSetup";
+import request from "shared/util/request";
 
 interface WithConnectionPropTypes {
   logout: () => void;
@@ -75,6 +79,16 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
     menuAnchorEl: null,
   });
 
+  manageBilling = () => {
+    return request().get(`/billing/portal`)
+      .then(result => {
+        window.location.assign(result.data.url);
+      })
+      .catch(error => {
+        alert(error);
+      });
+  };
+
   doLogout = () => {
     this.props.logout();
     this.props.history.push('/login');
@@ -99,8 +113,11 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
   renderNotSetup = () => {
     return (
       <Switch>
+        <Route path="/logout">
+          <Logout />
+        </Route>
         <Route path="/setup">
-          <FirstTimeSetup/>
+          <InitialPlaidSetup />
         </Route>
         <Route path="/plaid/oauth-return">
           <OAuthRedirect/>
@@ -138,7 +155,7 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
             >
               <MenuItem disabled>About (WIP)</MenuItem>
               <MenuItem onClick={ this.gotoAccount }>My account</MenuItem>
-              <MenuItem disabled>Billing</MenuItem>
+              <MenuItem onClick={ this.manageBilling }>Billing</MenuItem>
               <MenuItem onClick={ this.doLogout }>Logout</MenuItem>
             </Menu>
           </Toolbar>
@@ -149,6 +166,9 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
           </Route>
           <Route path="/login">
             <Redirect to="/"/>
+          </Route>
+          <Route path="/logout">
+            <Logout />
           </Route>
           <Route path="/transactions">
             <TransactionsView/>
@@ -163,7 +183,7 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
             <AccountView/>
           </Route>
           <Route path="/accounts">
-            <AllAccountsView />
+            <AllAccountsView/>
           </Route>
           <Route path="/">
             <Redirect to="/transactions"/>
@@ -187,8 +207,8 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
 
     return (
       <Switch>
-        <Route path="/account/subscription">
-          <UpdateSubscriptionsView/>
+        <Route path="/account/subscribe/after">
+          <AfterCheckout/>
         </Route>
         { this.renderSubRoutes() }
       </Switch>

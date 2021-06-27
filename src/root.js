@@ -7,10 +7,10 @@ import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
 import { getIsAuthenticated, getSubscriptionIsActive } from "shared/authentication/selectors";
 import bootstrapApplication from "shared/bootstrap";
 import { getIsBootstrapped, getSignUpAllowed } from "shared/bootstrap/selectors";
-import LoginView from "views/Login";
-import SignUpView from "views/SignUp";
+import LoginView from "views/Authentication/LoginView";
+import SignUpView from "views/Authentication/SignUpView";
 import { Backdrop, CircularProgress } from "@material-ui/core";
-import { BillingRequired } from "views/Subscriptions/BillingRequired";
+import BillingRequired from "views/Subscriptions/BillingRequired";
 import AuthenticatedApp from "AuthenticatedApp";
 
 export class Root extends PureComponent {
@@ -36,11 +36,6 @@ export class Root extends PureComponent {
     this.props.bootstrapApplication()
       .then(() => {
         return this.props.bootstrapLogin()
-          .then(result => {
-            if (result && result.data.nextUrl) {
-              this.props.history.push(result.data.nextUrl);
-            }
-          });
       })
       .catch(error => {
         throw error;
@@ -85,11 +80,11 @@ export class Root extends PureComponent {
     }
 
     if (!isSubscriptionActive) {
-      return <BillingRequired />;
+      return <BillingRequired/>;
     }
 
     return (
-      <AuthenticatedApp />
+      <AuthenticatedApp/>
     )
   }
 }
