@@ -9,7 +9,7 @@ WORKDIR /work
 RUN yarn install
 RUN make build ENVIRONMENT=$ENVIRONMENT
 
-FROM nginx:1.21.0
+FROM nginx:1.21.1
 LABEL org.opencontainers.image.source=https://github.com/monetrapp/web-ui
 EXPOSE 80
 COPY --from=builder /work/build /usr/share/nginx/html
