@@ -1,4 +1,4 @@
-FROM node:16.2.0-buster AS builder
+FROM node:16.4.2-buster AS builder
 
 ARG ENVIRONMENT
 ENV ENVIRONMENT=$ENVIRONMENT
