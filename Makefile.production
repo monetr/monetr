@@ -16,9 +16,12 @@ $(BUILD): $(NODE_MODULES)
 	cp $(PUBLIC_DIR)/logo*.png $(BUILD_DIR)/
 	cp $(PUBLIC_DIR)/manifest.json $(BUILD_DIR)/
 
-deploy-$(ENVIRONMENT): $(BUILD)
+$(ENV_LOWER): $(BUILD)
+	@echo "Preparing to deploy to $(DOMAIN) - $(ENV_LOWER)..."
 	gsutil cp -e -r -z js $(BUILD)/* gs://$(DOMAIN)/
-	gsutil cp -e -r -z js $(BUILD)/* gs://$(DOMAIN)/
+	@echo "Successfully deployed $(DOMAIN) - $(ENV_LOWER)... Cleaning up old files..."
+	gsutil ls gs://$(DOMAIN) | grep -E ".js|.js." | grep -v '.json' | grep -v $(RELEASE_REVISION) | awk '{print $0}' | xargs -I{} gsutil rm {}
+	@echo "Deployment and cleanup complete!"
 
 
 

@@ -1,18 +1,9 @@
 steps:
   - name: 'gcr.io/production-315018/github.com/monetr/build-containers/ubuntu:20.04'
     entrypoint: 'make'
-    args:
-      - 'dependencies'
-  - name: 'gcr.io/production-315018/github.com/monetr/build-containers/ubuntu:20.04'
-    entrypoint: 'make'
     args: [
-        'build',
+        'production',
         'ENVIRONMENT=Production',
-    ]
-  - name: 'gcr.io/production-315018/github.com/monetr/build-containers/ubuntu:20.04'
-    entrypoint: 'gsutil'
-    args: [ 'cp',
-            '-e', '-r', '-z', 'js', '/workspace/build/*', 'gs://monetr.app/'
     ]
 options:
   env:

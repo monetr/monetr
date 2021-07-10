@@ -45,3 +45,6 @@ debug-ci:
 		-v $(PWD):/build \
 		-it containers.monetr.dev/node:15.14.0-buster \
 		/bin/bash
+
+
+include Makefile.$(ENV_LOWER)
