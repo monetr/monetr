@@ -9,11 +9,11 @@ steps:
         'build',
         'ENVIRONMENT=Production',
     ]
-artifacts:
-  objects:
-    location: 'gs://monetr.app/'
-    paths:
-      - '/workspace/build/*'
+  - name: 'gcr.io/production-315018/github.com/monetr/build-containers/ubuntu:20.04'
+    entrypoint: 'gsutil'
+    args: [ 'cp',
+            '-e', '-r', '-z', 'js', '/workspace/build/*', 'gs://monetr.app/'
+    ]
 options:
   env:
     - 'PWD=/workspace'
