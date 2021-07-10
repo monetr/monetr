@@ -41,14 +41,15 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		Captcha  string `json:"captcha"`
 	}
 	if err := ctx.ReadJSON(&loginRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to decode login request")
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
 		return
 	}
 
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateCaptchaMaybe(c.getContext(ctx), loginRequest.Captcha); err != nil {
+
+	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 		return
 	}

@@ -73,8 +73,11 @@ type SMTPClient struct {
 	Password string
 	Host     string
 	Port     int
-
 	VerifyEmails bool
+}
+
+func (s SMTPClient) ShouldVerifyEmails() bool {
+	return s.Enabled && s.VerifyEmails
 }
 
 type SendGrid struct {
@@ -91,6 +94,14 @@ type ReCAPTCHA struct {
 
 	VerifyLogin    bool
 	VerifyRegister bool
+}
+
+func (r ReCAPTCHA) ShouldVerifyLogin() bool {
+	return r.Enabled && r.VerifyLogin
+}
+
+func (r ReCAPTCHA) ShouldVerifyRegistration() bool {
+	return r.Enabled && r.VerifyRegister
 }
 
 type Plaid struct {

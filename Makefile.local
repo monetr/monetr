@@ -84,8 +84,8 @@ init-mini: info local-dependencies-maybe
 	make deploy-redis
 	make deploy-postgres
 	make vault-mini
-	make deploy-mini-application
 	make mail-mini
+	make deploy-mini-application
 	make vault-token
 	$(call infoMsg,Local environment is setup; you should be able to access the API at: https://api.$(LOCAL_DOMAIN))
 
@@ -511,7 +511,7 @@ work-mini:
 	@echo "\033[0;31m#################################################################################\033[0m"
 
 ###################### Mailhog UI ##################################
-mail-mini:
+mail-mini: $(VALUES)
 	$(KUBECTL) apply -f $(PWD)/minikube/mailhog.yaml \
 		--namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/mail \

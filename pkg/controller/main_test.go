@@ -12,6 +12,7 @@ import (
 	"github.com/monetr/rest-api/pkg/controller"
 	"github.com/monetr/rest-api/pkg/internal/mock_secrets"
 	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/internal/testutils"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
@@ -83,7 +84,7 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		mockJobManager,
 		p,
 		nil,
-		nil,
+		stripe_helper.NewStripeHelper(log, gofakeit.UUID()),
 		redisPool,
 		mock_secrets.NewMockPlaidSecrets(),
 		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
@@ -93,6 +94,11 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 }
 
 func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
+	_, _, token := register(t, e)
+	return token
+}
+
+func register(t *testing.T, e *httptest.Expect) (email, password, token string) {
 	var registerRequest struct {
 		Email     string `json:"email"`
 		Password  string `json:"password"`
@@ -109,8 +115,13 @@ func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
 		Expect()
 
 	response.Status(http.StatusOK)
-	token := response.JSON().Path("$.token").String().Raw()
+	token = response.JSON().Path("$.token").String().Raw()
 	require.NotEmpty(t, token, "token cannot be empty")
 
-	return token
+	return registerRequest.Email, registerRequest.Password, token
+}
+
+func GivenIHaveLogin(t *testing.T, e *httptest.Expect) (email, password string) {
+	email, password, _ = register(t, e)
+	return
 }

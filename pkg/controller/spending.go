@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-// @tag.name Expenses
+// @tag.name Spending
+// @tag.description Spending endpoints handle the underlying spending object. The spending object is used to represent a goal or an expense.
 func (c *Controller) handleSpending(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/spending", c.getSpending)
 	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)

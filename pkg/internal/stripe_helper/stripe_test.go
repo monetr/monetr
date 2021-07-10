@@ -10,6 +10,26 @@ import (
 	"testing"
 )
 
+func TestStripeBase_CreateCustomer(t *testing.T) {
+	t.Run("mock success", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.Deactivate()
+
+		mock_stripe.MockStripeGetPriceSuccess(t)
+
+		client := NewStripeHelper(testutils.GetLog(t), gofakeit.UUID())
+
+		prices, err := client.GetPricesById(context.Background(), []string{
+			mock_stripe.FakeStripePriceId(t),
+			mock_stripe.FakeStripePriceId(t),
+			mock_stripe.FakeStripePriceId(t),
+		})
+		assert.NoError(t, err, "should retrieve prices by id")
+		assert.NotNil(t, prices, "should not be nil")
+		assert.Len(t, prices, 3, "should have 3 prices")
+	})
+}
+
 func TestStripeBase_GetPricesById(t *testing.T) {
 	t.Run("mock success", func(t *testing.T) {
 		httpmock.Activate()

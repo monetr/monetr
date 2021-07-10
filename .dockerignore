@@ -1,5 +1,6 @@
 # Ignore everything
 **
+node_modules
 
 # Allow the golang stuff.
 !/pkg/**

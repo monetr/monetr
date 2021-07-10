@@ -55,7 +55,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
-	if err := c.validateCaptchaMaybe(c.getContext(ctx), registerRequest.Captcha); err != nil {
+	if err := c.validateRegistrationCaptcha(c.getContext(ctx), registerRequest.Captcha); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 		return
 	}
@@ -214,7 +214,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// If SMTP is enabled and we are verifying emails then we want to create a
 	// registration record and send the user a verification email.
-	if c.configuration.SMTP.Enabled && c.configuration.SMTP.VerifyEmails {
+	if c.configuration.SMTP.ShouldVerifyEmails() {
 		if err = c.email.Send(c.getContext(ctx), communication.SendEmailRequest{
 			From:    fmt.Sprintf("no-reply@%s", "monetr.mini"),
 			To:      registerRequest.Email,
@@ -328,12 +328,25 @@ func (c *Controller) validateRegistration(email, password, firstName string) err
 	return nil
 }
 
-func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) error {
-	if !c.configuration.ReCAPTCHA.Enabled {
+func (c *Controller) validateLoginCaptcha(ctx context.Context, captcha string) error {
+	if !c.configuration.ReCAPTCHA.ShouldVerifyLogin() {
 		// If it is disabled then we don't need to do anything.
 		return nil
 	}
 
+	return c.validateCaptchaMaybe(ctx, captcha)
+}
+
+func (c *Controller) validateRegistrationCaptcha(ctx context.Context, captcha string) error {
+	if !c.configuration.ReCAPTCHA.ShouldVerifyRegistration() {
+		// If it is disabled then we don't need to do anything.
+		return nil
+	}
+
+	return c.validateCaptchaMaybe(ctx, captcha)
+}
+
+func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) error {
 	if captcha == "" {
 		return errors.Errorf("captcha is not valid")
 	}
