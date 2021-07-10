@@ -394,6 +394,20 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 // @Success 200 {object} swag.PlaidTokenCallbackResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) plaidTokenCallback(ctx iris.Context) {
+	data := sentry.GetHubFromContext(c.getContext(ctx))
+	defer data.Flush(5 * time.Second)
+
+	data.AddBreadcrumb(&sentry.Breadcrumb{
+		Type:     "http",
+		Category: "xhr",
+		Data: map[string]interface{}{
+			"url":    ctx.Request().URL.String(),
+			"method": ctx.Method(),
+		},
+		Level:     "debug",
+		Timestamp: time.Now(),
+	}, &sentry.BreadcrumbHint{})
+
 	var callbackRequest struct {
 		PublicToken     string   `json:"publicToken"`
 		InstitutionId   string   `json:"institutionId"`
@@ -412,10 +426,18 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	if len(callbackRequest.AccountIds) == 0 {
+		data.AddBreadcrumb(&sentry.Breadcrumb{
+			Type:      "error",
+			Category:  "error",
+			Level:     "error",
+			Message:   "no accounts were selected in plaid token callback",
+			Timestamp: time.Now(),
+		}, &sentry.BreadcrumbHint{})
 		c.returnError(ctx, http.StatusBadRequest, "must select at least one account")
 		return
 	}
 
+	log.Debug("exchanging public token for plaid access token")
 	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
