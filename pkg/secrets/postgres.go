@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -29,11 +29,14 @@ func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx contex
 	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId [POSTGRES]")
 	defer span.Finish()
 
-	_, err := p.db.ModelContext(span.Context(), &models.PlaidToken{}).
-		Set(`"access_token" = ?`, accessToken).
-		Where(`"plaid_token"."item_id" = ?`, plaidItemId).
-		Where(`"plaid_token"."account_id" = ?`, accountId).
-		Update()
+	token := models.PlaidToken{
+		ItemId:      plaidItemId,
+		AccountId:   accountId,
+		AccessToken: accessToken,
+	}
+	_, err := p.db.ModelContext(span.Context(), &token).
+		OnConflict(`(item_id, account_id) DO UPDATE`).
+		Insert(&token)
 	if err != nil {
 		return errors.Wrap(err, "failed to update access token")
 	}

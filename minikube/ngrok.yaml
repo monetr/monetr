@@ -33,6 +33,8 @@ spec:
                 secretKeyRef:
                   key: NGROK_AUTH # Is created by the make command.
                   name: ngrok-auth-secret
+            - name: NGROK_HOSTNAME
+              value: monetr.ngrok.io
           ports:
             - name: http
               containerPort: 4040

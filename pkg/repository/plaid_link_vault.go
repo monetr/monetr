@@ -4,7 +4,7 @@ package repository
 
 import (
 	"fmt"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 )
 

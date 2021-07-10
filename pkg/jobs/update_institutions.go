@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/plaid/plaid-go/plaid"
 )
 

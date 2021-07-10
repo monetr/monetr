@@ -3,7 +3,7 @@ package mock_stripe
 import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetrapp/rest-api/pkg/internal/mock_http_helper"
+	"github.com/monetr/rest-api/pkg/internal/mock_http_helper"
 	"github.com/stripe/stripe-go/v72"
 	"math/rand"
 	"net/http"

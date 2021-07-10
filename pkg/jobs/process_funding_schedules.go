@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/repository"
-	"github.com/monetrapp/rest-api/pkg/util"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"strconv"
@@ -70,7 +70,6 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Process Funding Schedules"))
 	defer span.Finish()
 
-	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("processing funding schedules")
 
@@ -79,12 +78,6 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
-
-	defer func() {
-		if j.stats != nil {
-			j.stats.JobFinished(PullAccountBalances, accountId, start)
-		}
-	}()
 
 	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
 

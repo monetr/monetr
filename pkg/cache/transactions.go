@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/getsentry/sentry-go"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/sirupsen/logrus"
 	"time"
 )

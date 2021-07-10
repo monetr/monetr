@@ -1,16 +1,16 @@
 package controller
 
 import (
-	"github.com/form3tech-oss/jwt-go"
-	"github.com/go-pg/pg/v10"
-	"github.com/kataras/iris/v12"
-	"github.com/monetrapp/rest-api/pkg/hash"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/repository"
-	"github.com/pkg/errors"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/form3tech-oss/jwt-go"
+	"github.com/go-pg/pg/v10"
+	"github.com/kataras/iris/v12"
+	"github.com/monetr/rest-api/pkg/hash"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/pkg/errors"
 )
 
 type HarderClaims struct {
@@ -88,7 +88,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	case 1:
 		user := login.Users[0]
 
-		if !c.configuration.Stripe.BillingEnabled {
+		if !c.configuration.Stripe.IsBillingEnabled() {
 			token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, true)
 			if err != nil {
 				c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
@@ -96,19 +96,17 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			}
 			// Return their account token.
 			ctx.JSON(map[string]interface{}{
-				"token": token,
+				"token":    token,
+				"isActive": true,
 			})
 			return
 		}
 
-		repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, c.db)
-		subscription, err := repo.GetActiveSubscription(c.getContext(ctx))
+		subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to get active subscription")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to ")
 			return
 		}
-
-		subscriptionIsActive := subscription.IsActive()
 
 		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, subscriptionIsActive)
 		if err != nil {

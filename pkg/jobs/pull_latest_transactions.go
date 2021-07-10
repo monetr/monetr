@@ -8,10 +8,10 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
-	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/repository"
-	"github.com/monetrapp/rest-api/pkg/util"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
@@ -106,14 +106,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Latest Transactions"))
 	defer span.Finish()
-
-	startTime := time.Now()
-
-	defer func() {
-		if j.stats != nil {
-			j.stats.JobFinished(PullAccountBalances, accountId, startTime)
-		}
-	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
 	span.SetTag("linkId", strconv.FormatUint(linkId, 10))

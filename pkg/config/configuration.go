@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/viper"
-	"time"
 )
 
 const EnvironmentPrefix = "MONETR"
@@ -149,8 +150,14 @@ type Stripe struct {
 	WebhooksEnabled bool
 	WebhooksDomain  string
 	WebhookSecret   string
+	InitialPlan     *Plan
 	Plans           []Plan
 	BillingEnabled  bool
+}
+
+// IsBillingEnabled will return true if both Stripe and Billing are enabled. It will return false any other time.
+func (s Stripe) IsBillingEnabled() bool {
+	return s.Enabled && s.BillingEnabled
 }
 
 type Vault struct {

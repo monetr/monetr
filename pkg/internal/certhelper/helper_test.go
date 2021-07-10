@@ -1,7 +1,7 @@
 package certhelper
 
 import (
-	"github.com/monetrapp/rest-api/pkg/internal/testutils"
+	"github.com/monetr/rest-api/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"

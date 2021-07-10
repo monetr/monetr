@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/gocraft/work"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 )
@@ -93,12 +93,6 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
-
-	defer func() {
-		if j.stats != nil {
-			j.stats.JobFinished(PullAccountBalances, accountId, start)
-		}
-	}()
 
 	linkId := uint64(job.ArgInt64("linkId"))
 	span.SetTag("linkId", strconv.FormatUint(linkId, 10))

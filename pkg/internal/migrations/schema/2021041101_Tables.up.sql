@@ -162,28 +162,3 @@ CREATE TABLE IF NOT EXISTS "transactions"
     CONSTRAINT "fk_transactions_bank_accounts_bank_account_id_account_id" FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
     CONSTRAINT "fk_transactions_spending_spending_id_account_id_bank_account_id" FOREIGN KEY ("spending_id", "account_id", "bank_account_id") REFERENCES "spending" ("spending_id", "account_id", "bank_account_id")
 );
-
-INSERT INTO "logins" ("login_id",
-                      "email",
-                      "password_hash",
-                      "phone_number",
-                      "is_enabled",
-                      "is_email_verified",
-                      "is_phone_verified")
-VALUES (-1,
-        'support@harderthanitneedstobe.com',
-        '',
-        DEFAULT,
-        FALSE,
-        FALSE,
-        FALSE);
-
-INSERT INTO "accounts" ("account_id", "timezone")
-VALUES (-1, 'UTC');
-
-INSERT INTO "users" ("user_id",
-                     "login_id",
-                     "account_id",
-                     "first_name",
-                     "last_name")
-VALUES (-1, -1, -1, 'System', 'Bot');

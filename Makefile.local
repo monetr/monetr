@@ -9,7 +9,7 @@ OS = $(shell uname -s | tr A-Z a-z)
 # Tools used to run the application locally
 HELM=helm
 HOSTESS=hostess
-JQ=jq
+JQ=$(LOCAL_BIN)/jq
 KUBECTL=minikube kubectl --
 SPLIT_YAML=kubernetes-split-yaml
 SSHFS=sshfs
@@ -21,7 +21,7 @@ PGO=$(LOCAL_BIN)/pgo
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=kms mail features work pgadmin pghero vault ngrok registry app api
+SUBDOMAINS=kms mail work pgadmin pghero vault ngrok registry app api
 
 INTERNAL_DNS=/etc/resolver/monetr.in
 
@@ -62,7 +62,7 @@ stop-mini:
 	minikube stop || true
 	$(call infoMsg,Removing our hostnames from /etc/hosts)
 	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) rm $$subdomain.$(LOCAL_DOMAIN) || true; done
-	rm -rf $(INTERNAL_DNS) || true
+	sudo rm -rf $(INTERNAL_DNS) || true
 
 clean-mini: stop-mini clean-certificates
 	$(call infoMsg,Deleting the contents of the stopped cluster; makes sure our environment is clean the next time)
@@ -79,13 +79,13 @@ init-mini: info local-dependencies-maybe
 	make setup-hosts
 	make update-coredns
 	make deploy-certmanager
-	make deploy-crunchy
 	make deploy-certificate-authority
 	make setup-registry
 	make deploy-redis
 	make deploy-postgres
 	make vault-mini
 	make deploy-mini-application
+	make mail-mini
 	make vault-token
 	$(call infoMsg,Local environment is setup; you should be able to access the API at: https://api.$(LOCAL_DOMAIN))
 
@@ -189,6 +189,12 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	$(eval REGISTER_JWT_SECRET_VALUE = $(shell cat $(REGISTER_JWT_SECRET)))
 	export jwt_secret_value=$(REGISTER_JWT_SECRET_VALUE) && yq e '.api.jwt.registrationJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
 	$(YQ) e '.api.postgreSql.address = "postgres.monetr.in"' -i $(VALUES)
+	$(YQ) e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	$(YQ) e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	$(YQ) e '.api.cors.debug = false' -i $(VALUES)
+	$(YQ) e '.serviceAccountName = "rest-api"' -i $(VALUES)
+
+pg-tls-values:
 	$(YQ) e '.api.postgreSql.caCertificatePath = "/tls/ca.crt"' -i $(VALUES)
 	$(YQ) e '.api.postgreSql.certificatePath = "/tls/tls.crt"' -i $(VALUES)
 	$(YQ) e '.api.postgreSql.keyPath = "/tls/tls.key"' -i $(VALUES)
@@ -199,16 +205,12 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 	$(YQ) e '.api.customEnv[0].name = "MONETR_PG_PASSWORD"' -i $(VALUES)
 	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.key = "password"' -i $(VALUES)
 	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.name = "postgres-postgres-secret"' -i $(VALUES)
-	$(YQ) e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
-	$(YQ) e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
-	$(YQ) e '.api.cors.debug = false' -i $(VALUES)
-	$(YQ) e '.serviceAccountName = "rest-api"' -i $(VALUES)
 
 local-dependencies-maybe:
 	$(call infoMsg,Getting any dependencies needed to run everything locally)
 	which minikube || make dependencies-minikube
 	which $(HOSTESS) || make dependencies-hostess
-	which $(JQ) || make dependencies-jq
+	stat $(JQ) || make dependencies-jq
 	which $(HELM) || make dependencies-helm
 	which $(SPLIT_YAML) || make dependencies-split-yaml
 	which $(YQ) || make dependencies-yq
@@ -231,10 +233,10 @@ dependencies-hostess:
 JQ_URL=https://github.com/stedolan/jq/releases/download/jq-1.6/jq-osx-$(ARCH)
 JQ_DIR=$(LOCAL_TMP)/$(JQ)
 dependencies-jq:
-	$(call infoMsg,Installing $(JQ) to $(LOCAL_BIN)/$(JQ))
-	rm -rf $(LOCAL_BIN)/$(JQ) || true
-	curl -L $(JQ_URL) -o $(LOCAL_BIN)/$(JQ)
-	sudo chmod +x $(LOCAL_BIN)/$(JQ)
+	$(call infoMsg,Installing $(JQ))
+	rm -rf $(JQ) || true
+	curl -L $(JQ_URL) -o $(JQ)
+	sudo chmod +x $(JQ)
 
 YQ_VERSION=v4.7.1
 YQ_BINARY=yq_$(OS)_$(ARCH)
@@ -327,7 +329,8 @@ deploy-redis:
 
 deploy-postgres:
 	$(call infoMsg,Deploying Crunchy Data PostgreSQL to the minikube cluster)
-	$(KUBECTL) apply -f $(PWD)/minikube/crunchy-postgres.yaml -n $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml -n $(MINIKUBE_NAMESPACE)
+	#$(KUBECTL) apply -f $(PWD)/minikube/crunchy-postgres.yaml -n $(MINIKUBE_NAMESPACE)
 
 SHELL_IMAGE=ghcr.io/elliotcourant/dotfiles/ubuntu:latest
 shell:
@@ -449,8 +452,6 @@ pghero-mini:
 	@echo "pghero dashboard is now accessible at: https://pghero.$(LOCAL_DOMAIN)"
 	@echo "\033[0;31m#################################################################################\033[0m"
 
-
-
 ###################### VAULT SECRETS ##################################
 VAULT_JSON=$(LOCAL_DIR)/vault-keys.json
 vault-mini:
@@ -463,19 +464,17 @@ vault-mini:
 	make vault-token
 
 vault-token: $(VAULT_JSON)
-vault-token: $(eval VAULT_TOKEN=$(shell stat $(LOCAL_BIN)/$(JQ) && cat $(VAULT_JSON) | $(PWD)/bin/$(JQ) -r '.root_token'))
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "vault is now accessible at: https://vault.$(LOCAL_DOMAIN)"
 	@echo "root token: $$(cat $(VAULT_JSON) | $(JQ) -r '.root_token')"
 	@echo "\033[0;31m#################################################################################\033[0m"
 
 vault-terraform: $(VAULT_JSON)
-	export VAULT_TOKEN=$$(cat $(VAULT_JSON) | $(LOCAL_BIN)/$(JQ) -r '.root_token') && \
+	export VAULT_TOKEN=$$(cat $(VAULT_JSON) | $(JQ) -r '.root_token') && \
 	export TF_VAR_kubernetes_address=https://$$(minikube ip):8443 && \
-	export TF_VAR_kubernetes_certificate_b64=$$($(KUBECTL) config view --raw -o json | $(LOCAL_BIN)/$(JQ) -r '.clusters[] | select(.name == "'$(shell $(KUBECTL) config current-context)'") | .cluster."certificate-authority-data"') && \
+	export TF_VAR_kubernetes_certificate_b64=$$($(KUBECTL) config view --raw -o json | $(JQ) -r '.clusters[] | select(.name == "'$(shell $(KUBECTL) config current-context)'") | .cluster."certificate-authority-data"') && \
 	export TF_VAR_kubernetes_reviewer_jwt=$$($(KUBECTL) get secret $(shell $(KUBECTL) get serviceaccount vault-authentication -o yaml | $(LOCAL_BIN)/$(YQ) e '.secrets[0].name' -) -o yaml | $(LOCAL_BIN)/$(YQ) e '.data.token' - | base64 -d) && \
 		cd $(PWD)/minikube/vault && terraform init && terraform apply -auto-approve=true
-
 
 define waitForContainer
 while [[ $$($(KUBECTL) get pod $$($(KUBECTL) get pod -l $1 --namespace $(MINIKUBE_NAMESPACE) -o 'jsonpath={.items[0].metadata.name}') -o 'jsonpath={.status.phase}') != "Running" ]]; do echo "Waiting for container..." && sleep 5; done
@@ -488,7 +487,7 @@ $(VAULT_JSON):
 	$(KUBECTL) exec deploy/vault --namespace $(MINIKUBE_NAMESPACE) -- vault operator init -key-shares=1 -key-threshold=1 --tls-skip-verify -format=json > $(VAULT_JSON)
 
 unseal-vault-mini: $(VAULT_JSON)
-	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(LOCAL_BIN)/$(JQ) -r ".unseal_keys_b64[]"))
+	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
 	$(KUBECTL) exec deploy/vault -- vault status --tls-skip-verify || $(KUBECTL) exec deploy/vault -- vault operator unseal --tls-skip-verify $(VAULT_UNSEAL_KEY)
 
 clean-vault-mini:
@@ -510,19 +509,6 @@ work-mini:
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "gocraft/work dashboard is now accessible at: https://work.$(LOCAL_DOMAIN)"
 	@echo "\033[0;31m#################################################################################\033[0m"
-
-
-###################### Unleash UI ##################################
-features-mini:
-	$(KUBECTL) exec deploy/postgres -- psql -U postgres -c "CREATE DATABASE unleash;" || true
-	$(KUBECTL) apply -f $(PWD)/minikube/unleash.yaml \
-		--namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/unleash \
-		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
-	@echo "\033[0;31m#################################################################################\033[0m"
-	@echo "unleash dashboard is now accessible at: https://features.$(LOCAL_DOMAIN)"
-	@echo "\033[0;31m#################################################################################\033[0m"
-
 
 ###################### Mailhog UI ##################################
 mail-mini:

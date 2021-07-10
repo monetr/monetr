@@ -3,7 +3,7 @@ package secrets
 import (
 	"context"
 	"fmt"
-	"github.com/monetrapp/rest-api/pkg/internal/vault_helper"
+	"github.com/monetr/rest-api/pkg/internal/vault_helper"
 	"github.com/sirupsen/logrus"
 
 	"github.com/getsentry/sentry-go"

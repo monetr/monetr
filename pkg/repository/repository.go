@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
-	"github.com/monetrapp/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 )
 
@@ -60,18 +60,12 @@ type Repository interface {
 	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error
-
-	/*
-		Billing methods
-	*/
-
-	GetActiveSubscription(ctx context.Context) (*models.Subscription, error)
-	CreateSubscription(ctx context.Context, subscription *models.Subscription) error
 }
 
 type UnauthenticatedRepository interface {
 	CreateLogin(email, hashedPassword string, firstName, lastName string, isEnabled bool) (*models.Login, error)
 	CreateAccount(timezone *time.Location) (*models.Account, error)
+	CreateAccountV2(ctx context.Context, account *models.Account) error
 	CreateUser(loginId, accountId uint64, user *models.User) error
 
 	// VerifyRegistration takes a registrationId and will finalize the registration record. If the registration has

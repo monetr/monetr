@@ -1,4 +1,4 @@
-module github.com/monetrapp/rest-api
+module github.com/monetr/rest-api
 
 go 1.16
 
@@ -35,6 +35,7 @@ require (
 	github.com/stripe/stripe-go/v72 v72.55.0
 	github.com/swaggo/swag v1.7.0
 	github.com/teambition/rrule-go v1.7.0
+	github.com/vmihailenco/msgpack/v5 v5.3.1
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0

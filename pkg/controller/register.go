@@ -3,17 +3,19 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/form3tech-oss/jwt-go"
-	"github.com/getsentry/sentry-go"
-	"github.com/kataras/iris/v12"
-	"github.com/monetrapp/rest-api/pkg/communication"
-	"github.com/monetrapp/rest-api/pkg/hash"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/form3tech-oss/jwt-go"
+	"github.com/getsentry/sentry-go"
+	"github.com/kataras/iris/v12"
+	"github.com/monetr/rest-api/pkg/build"
+	"github.com/monetr/rest-api/pkg/communication"
+	"github.com/monetr/rest-api/pkg/hash"
+	"github.com/monetr/rest-api/pkg/models"
+	"github.com/pkg/errors"
+	"github.com/stripe/stripe-go/v72"
 )
 
 type RegistrationClaims struct {
@@ -43,6 +45,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		Timezone  string  `json:"timezone"`
 		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
+		Agree     bool    `json:"agree"`
 	}
 	if err := ctx.ReadJSON(&registerRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid register JSON")
@@ -110,33 +113,6 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// TODO (elliotcourant) Add stuff to verify email address by sending an
 	//  email.
 
-	// TODO Verify that a login with the same email does not already exist BEFORE creating stripe customer.
-	var stripeCustomerId *string
-	if c.configuration.Stripe.Enabled {
-		stripeSpan := sentry.StartSpan(c.getContext(ctx), "Create Stripe Customer")
-		c.log.Debug("creating stripe customer for new user")
-		name := registerRequest.FirstName + " " + registerRequest.LastName
-		result, err := c.stripeClient.Customers.New(&stripe.CustomerParams{
-			Email: &registerRequest.Email,
-			Name:  &name,
-			Params: stripe.Params{
-				Metadata: map[string]string{
-					"environment": c.configuration.Environment,
-				},
-			},
-		})
-		if err != nil {
-			stripeSpan.Status = sentry.SpanStatusInternalError
-			stripeSpan.Finish()
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
-			return
-		}
-		stripeSpan.Status = sentry.SpanStatusOK
-		stripeSpan.Finish()
-
-		stripeCustomerId = &result.ID
-	}
-
 	// Hash the user's password so that we can store it securely.
 	hashedPassword := hash.HashPassword(
 		registerRequest.Email, registerRequest.Password,
@@ -160,11 +136,43 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		return
 	}
 
+	var stripeCustomerId *string
+	if c.configuration.Stripe.Enabled {
+		stripeSpan := sentry.StartSpan(c.getContext(ctx), "Create Stripe Customer")
+		c.log.Debug("creating stripe customer for new user")
+		name := registerRequest.FirstName + " " + registerRequest.LastName
+		result, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
+			Email: &registerRequest.Email,
+			Name:  &name,
+			Params: stripe.Params{
+				Metadata: map[string]string{
+					"environment": c.configuration.Environment,
+					"revision":    build.Revision,
+					"release":     build.Release,
+				},
+			},
+		})
+		if err != nil {
+			stripeSpan.Status = sentry.SpanStatusInternalError
+			stripeSpan.Finish()
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
+			return
+		}
+		stripeSpan.Status = sentry.SpanStatusOK
+		stripeSpan.Finish()
+
+		stripeCustomerId = &result.ID
+	}
+
+	account := models.Account{
+		Timezone:             timezone.String(),
+		StripeCustomerId:     stripeCustomerId,
+		StripeSubscriptionId: nil,
+	}
 	// Now that the login exists we can create the account, at the time of
 	// writing this we are only using the local time zone of the server, but in
 	// the future I want to have it somehow use the user's timezone.
-	account, err := repository.CreateAccount(timezone)
-	if err != nil {
+	if err = repository.CreateAccountV2(c.getContext(ctx), &account); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create account",
 		)
@@ -220,7 +228,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// If we are not requiring email verification to activate an account we can
 	// simply return a token here for the user to be signed in.
-	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId, !c.configuration.Stripe.BillingEnabled)
+	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId, !c.configuration.Stripe.IsBillingEnabled())
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create JWT",
@@ -228,24 +236,26 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		return
 	}
 
-	if !c.configuration.Stripe.BillingEnabled {
+	if !c.configuration.Stripe.IsBillingEnabled() {
 		user.Login = login
-		user.Account = account
+		user.Account = &account
 
 		ctx.JSON(map[string]interface{}{
-			"nextUrl": "/setup",
-			"token":   token,
-			"user":    user,
+			"nextUrl":  "/setup",
+			"token":    token,
+			"user":     user,
+			"isActive": true,
 		})
 		return
 	}
 
 	ctx.JSON(map[string]interface{}{
-		"nextUrl": "/account/subscription",
-		"token":   token,
-		"user":    user,
+		"nextUrl":  "/account/subscription",
+		"token":    token,
+		"user":     user,
+		"isActive": false,
 	})
-
+	return
 }
 
 func (c *Controller) verifyEndpoint(ctx iris.Context) {

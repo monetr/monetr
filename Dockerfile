@@ -7,7 +7,7 @@ ARG RELEASE
 COPY ./ /build
 WORKDIR /build
 RUN go get ./...
-RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.buildtime=$BUILD_TIME -X main.release=$RELEASE" -o /bin/monetr github.com/monetrapp/rest-api/pkg/cmd
+RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.buildtime=$BUILD_TIME -X main.release=$RELEASE" -o /bin/monetr github.com/monetr/rest-api/pkg/cmd
 
 FROM ubuntu:20.04
 

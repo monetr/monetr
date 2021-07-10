@@ -908,7 +908,7 @@ spec:
             - name: PGADMIN_DEFAULT_EMAIL
               value: admin@monetr.mini
             - name: PGADMIN_DEFAULT_PASSWORD
-              value: iAmAnAdmin
+              value: password
             - name: PGADMIN_DISABLE_POSTFIX
               value: "true"
             - name: PGADMIN_SERVER_JSON_FILE

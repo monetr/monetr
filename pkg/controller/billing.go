@@ -2,290 +2,27 @@ package controller
 
 import (
 	"fmt"
-	"github.com/ahmetb/go-linq/v3"
-	"github.com/kataras/iris/v12"
-	"github.com/monetrapp/rest-api/pkg/config"
-	"github.com/monetrapp/rest-api/pkg/internal/myownsanity"
-	"github.com/monetrapp/rest-api/pkg/models"
-	"github.com/monetrapp/rest-api/pkg/swag"
-	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"time"
+
+	"github.com/kataras/iris/v12"
+	"github.com/monetr/rest-api/pkg/build"
+	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/swag"
+	"github.com/stripe/stripe-go/v72"
 )
 
 func (c *Controller) handleBilling(p iris.Party) {
-	p.Get("/plans", c.getBillingPlans)
-	p.Post("/subscribe", c.postSubscribe)
-	p.Get("/subscription", c.getSubscription)
 	p.Post("/create_checkout", c.handlePostCreateCheckout)
-}
-
-type Plan struct {
-	Id            string                        `json:"id"`
-	Name          string                        `json:"name"`
-	Description   string                        `json:"description"`
-	UnitPrice     int64                         `json:"unitPrice"`
-	Interval      stripe.PriceRecurringInterval `json:"interval"`
-	IntervalCount int64                         `json:"intervalCount"`
-	FreeTrialDays int32                         `json:"freeTrialDays"`
-	Active        bool                          `json:"active"`
-}
-
-func (c *Controller) getBillingPlans(ctx iris.Context) {
-	log := c.getLog(ctx)
-
-	configuredPlans := c.configuration.Stripe.Plans
-	stripePriceIds := make([]string, len(configuredPlans))
-	for i, plan := range configuredPlans {
-		stripePriceIds[i] = plan.StripePriceId
-	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-
-	subscription, err := repo.GetActiveSubscription(c.getContext(ctx))
-	if err != nil {
-		c.wrapPgError(ctx, err, "failed to check for active subscription")
-		return
-	}
-
-	// If there is a subscription active for the current user and their price is not in our configuration file then that
-	// means they might be on an old price. We will want to add this to our list to retrieve details for.
-	if subscription != nil && !myownsanity.SliceContains(stripePriceIds, subscription.StripePriceId) {
-		log.Debug("account has an old price, will retrieve an additional price from stripe")
-		stripePriceIds = append(stripePriceIds, subscription.StripePriceId)
-	}
-
-	log.Debugf("retrieving %d price(s) from stripe", len(stripePriceIds))
-	stripePrices, err := c.stripe.GetPricesById(c.getContext(ctx), stripePriceIds)
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve price details from stripe")
-		return
-	}
-
-	log.Debugf("retrieved %d price(s) from stripe", len(stripePrices))
-	stripeProductIds := make([]string, 0, len(stripePrices))
-	linq.From(stripePrices).
-		SelectT(func(price stripe.Price) string {
-			return price.Product.ID
-		}).
-		Distinct().
-		ToSlice(&stripeProductIds)
-
-	log.Debugf("retrieving %d product(s) from stripe", len(stripeProductIds))
-	stripeProducts, err := c.stripe.GetProductsById(c.getContext(ctx), stripeProductIds)
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve product details from stripe")
-		return
-	}
-
-	plans := make([]Plan, len(stripePriceIds))
-	linq.From(stripePrices).
-		JoinT(
-			linq.From(stripeProducts),
-			func(price stripe.Price) string {
-				return price.Product.ID
-			},
-			func(product stripe.Product) string {
-				return product.ID
-			},
-			func(price stripe.Price, product stripe.Product) Plan {
-				configPlan := linq.From(configuredPlans).
-					FirstWithT(func(plan config.Plan) bool {
-						return plan.StripePriceId == price.ID
-					}).(config.Plan)
-
-				return Plan{
-					Id:            price.ID,
-					Name:          product.Name,
-					Description:   product.Description,
-					UnitPrice:     price.UnitAmount,
-					Interval:      price.Recurring.Interval,
-					IntervalCount: price.Recurring.IntervalCount,
-					FreeTrialDays: configPlan.FreeTrialDays,
-					Active:        subscription != nil && subscription.StripePriceId == price.ID,
-				}
-			},
-		).
-		ToSlice(&plans)
-
-	ctx.JSON(plans)
-	return
-}
-
-func (c *Controller) postSubscribe(ctx iris.Context) {
-	log := c.getLog(ctx)
-
-	var subscribeRequest struct {
-		PriceId         string `json:"priceId"`
-		PaymentMethodId string `json:"paymentMethodId"`
-	}
-	if err := ctx.ReadJSON(&subscribeRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
-	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-
-	{ // Handle the user potentially already having a subscription.
-		activeSubscription, err := repo.GetActiveSubscription(c.getContext(ctx))
-		if err != nil {
-			c.wrapPgError(ctx, err, "failed to validate a subscription does not already exist")
-			return
-		}
-
-		if activeSubscription != nil {
-			c.badRequest(ctx, "an active subscription already exists, cannot create another one")
-			return
-		}
-	}
-
-	var plan config.Plan
-	{ // Validate the price against our configuration.
-		var foundValidPlan bool
-		for _, planItem := range c.configuration.Stripe.Plans {
-			if planItem.StripePriceId == subscribeRequest.PriceId {
-				foundValidPlan = true
-				plan = planItem
-			}
-		}
-
-		if !foundValidPlan {
-			c.badRequest(ctx, "invalid price Id provided")
-			return
-		}
-	}
-
-	me, err := repo.GetMe()
-	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve user details")
-		return
-	}
-
-	if me.StripeCustomerId == nil {
-		log.Info("user does not have a stripe customer record, creating one")
-		newCustomer, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
-			Email: &me.Login.Email,
-			Name:  stripe.String(me.Login.FirstName + " " + me.Login.LastName),
-		})
-		if err != nil {
-			log.WithError(err).Error("could not create a stripe customer for user")
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create a stripe customer for user")
-			return
-		}
-
-		me.StripeCustomerId = &newCustomer.ID
-		log.Debugf("updating user with new stripe customer Id")
-		if err = repo.UpdateUser(c.getContext(ctx), me); err != nil {
-			c.wrapPgError(ctx, err, "could not update user with new stripe customer Id")
-			return
-		}
-	}
-
-	log.Debugf("attaching payment method to stripe customer")
-	paymentMethod, err := c.stripe.AttachPaymentMethod(
-		c.getContext(ctx),
-		subscribeRequest.PaymentMethodId,
-		*me.StripeCustomerId,
-	)
-	if err != nil {
-		switch stripError := errors.Cause(err).(type) {
-		case *stripe.Error:
-			switch stripError.Code {
-			case "card_declined":
-				ctx.StatusCode(http.StatusBadRequest)
-				ctx.JSON(map[string]interface{}{
-					"error": "Your card was declined.",
-				})
-				return
-			}
-		}
-
-		log.WithError(err).Error("failed to attach payment method to stripe customer")
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not associate payment method")
-		return
-	}
-
-	log.Debugf("updating customer with new default payment method")
-	_, err = c.stripe.UpdateCustomer(c.getContext(ctx), *me.StripeCustomerId, stripe.CustomerParams{
-		InvoiceSettings: &stripe.CustomerInvoiceSettingsParams{
-			DefaultPaymentMethod: &paymentMethod.ID,
-		},
-	})
-	if err != nil {
-		log.WithError(err).Error("failed to update customer's default payment method")
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not set customer's default payment method")
-		return
-	}
-
-	subscriptionParams := &stripe.SubscriptionParams{
-		Customer:             me.StripeCustomerId,
-		DefaultPaymentMethod: &paymentMethod.ID,
-		Items: []*stripe.SubscriptionItemsParams{
-			{
-				Plan:     stripe.String(subscribeRequest.PriceId),
-				Quantity: stripe.Int64(1),
-			},
-		},
-		TrialPeriodDays: stripe.Int64(int64(plan.FreeTrialDays)),
-	}
-	subscriptionParams.AddExpand("latest_invoice.payment_intent")
-
-	log.Debugf("creating subscription")
-	stripeSubscription, err := c.stripe.CreateSubscription(c.getContext(ctx), *subscriptionParams)
-	if err != nil {
-		log.WithError(err).Error("failed to create subscription for customer")
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create subscription")
-		return
-	}
-
-	var trialStart, trialEnd *time.Time
-	if stripeSubscription.TrialEnd != 0 {
-		trialStart = myownsanity.TimeP(time.Now().UTC())
-		trialEnd = myownsanity.TimeP(time.Unix(stripeSubscription.TrialEnd, 0).UTC())
-	}
-
-	subscription := &models.Subscription{
-		StripeSubscriptionId: stripeSubscription.ID,
-		StripeCustomerId:     *me.StripeCustomerId,
-		StripePriceId:        subscribeRequest.PriceId,
-		Features:             plan.Features,
-		Status:               stripeSubscription.Status,
-		TrialStart:           trialStart,
-		TrialEnd:             trialEnd,
-	}
-
-	if err = repo.CreateSubscription(c.getContext(ctx), subscription); err != nil {
-		log.WithError(err).Error("failed to store subscription details")
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store subscription details")
-		return
-	}
-
-
-
-}
-
-func (c *Controller) getSubscription(ctx iris.Context) {
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	activeSubscription, err := repo.GetActiveSubscription(c.getContext(ctx))
-	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve active subscription")
-		return
-	}
-
-	if activeSubscription == nil {
-		c.returnError(ctx, http.StatusBadRequest, "no active subscription")
-		return
-	}
-
-	ctx.JSON(activeSubscription)
+	p.Get("/portal", c.handleGetStripePortal)
+	p.Get("/wait", c.waitForSubscription)
 }
 
 // Create Checkout Session
 // @Summary Create Checkout Session
 // @id create-checkout-session
 // @tags Billing
-// @description Create a checkout session for the user to enter billing information in and for us to associate it with a new subscription object.
+// @description Create a checkout session for Stripe. This is used to manage new subscriptions to monetr and offload the complexity of managing subscriptions. **Note:** You cannot create a checkout session if you have an active subscrption.
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
@@ -295,42 +32,119 @@ func (c *Controller) getSubscription(ctx iris.Context) {
 // @Failure 400 {object} ApiError Invalid request.
 // @Failure 500 {object} ApiError Something went wrong on our end or when communicating with Stripe.
 func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
+	isActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), c.mustGetAccountId(ctx))
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify there is not already an active subscription")
+		return
+	}
+
+	// If the customer already has an active subscription we do not want them to try to use this at this time. I don't
+	// know how stripe handles this off the top of my head at the time of writing this. But I've setup an endpoint to
+	// manage the subscriptions that already exist via the stripe portal. So existing subscriptions should be managed
+	// there instead.
+	if isActive {
+		c.badRequest(ctx, "there is already an active subscription for your account")
+		return
+	}
+
 	var request swag.CreateCheckoutSessionRequest
 	if err := ctx.ReadJSON(&request); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
 
+	log := c.getLog(ctx)
+
+	var plan config.Plan
+	if request.PriceId == "" && c.configuration.Stripe.InitialPlan != nil {
+		request.PriceId = c.configuration.Stripe.InitialPlan.StripePriceId
+		plan = *c.configuration.Stripe.InitialPlan
+	} else {
+		if request.PriceId == "" {
+			c.badRequest(ctx, "must provide a price id")
+			return
+		}
+
+		{ // Validate the price against our configuration.
+			var foundValidPlan bool
+			for _, planItem := range c.configuration.Stripe.Plans {
+				if planItem.StripePriceId == request.PriceId {
+					foundValidPlan = true
+					plan = planItem
+					break
+				}
+			}
+
+			if !foundValidPlan {
+				c.badRequest(ctx, "invalid price Id provided")
+				return
+			}
+		}
+	}
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve account")
+		return
+	}
+
 	me, err := repo.GetMe()
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve current user details")
 		return
 	}
 
-	cancelUrl := fmt.Sprintf("https://%s/billing/cancel", c.configuration.UIDomainName)
-	successUrl := fmt.Sprintf("https://%s/billing", c.configuration.UIDomainName)
-	var email *string
-	if me.Login != nil {
-		email = &me.Login.Email
+	// Check to see if the account does not already have a stripe customer Id. If they don't have one then we want to
+	// create one.
+	if account.StripeCustomerId == nil {
+		log.Warn("attempting to create a checkout session for an account with no customer, customer will be created")
+		name := me.FirstName + " " + me.LastName
+		customer, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
+			Email: &me.Login.Email,
+			Name:  &name,
+			Params: stripe.Params{
+				Metadata: map[string]string{
+					"environment": c.configuration.Environment,
+					"revision":    build.Revision,
+					"release":     build.Release,
+				},
+			},
+		})
+		if err != nil {
+			log.WithError(err).Error("failed to create stripe customer for checkout")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
+			return
+		}
+
+		account.StripeCustomerId = &customer.ID
+		if err = c.accounts.UpdateAccount(c.getContext(ctx), account); err != nil {
+			log.WithError(err).Error("failed to update account with new customer Id")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to update account with new customer Id")
+			return
+		}
+
+		log.Info("successfully created stripe customer for account")
 	}
 
-	// TODO Lookup the stripe price using the provided price Id.
-	var priceId string
+	successUrl := fmt.Sprintf("https://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}", c.configuration.UIDomainName)
+	cancelUrl := fmt.Sprintf("https://%s/account/subscribe", c.configuration.UIDomainName)
+	if request.CancelPath != nil {
+		cancelUrl = fmt.Sprintf("https://%s%s", c.configuration.UIDomainName, *request.CancelPath)
+	}
 
 	checkoutParams := &stripe.CheckoutSessionParams{
-		SuccessURL:        &successUrl,
-		CancelURL:         &cancelUrl,
-		ClientReferenceID: nil,
-		Customer:          me.StripeCustomerId,
-		CustomerEmail:     email,
-		Discounts:         nil,
+		SuccessURL: &successUrl,
+		CancelURL:  &cancelUrl,
+		Customer:   account.StripeCustomerId,
+		Discounts:  nil,
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				// Number of bank accounts?
 				Amount:   nil,
-				Quantity: nil,
-				Price:    &priceId,
+				Quantity: stripe.Int64(1),
+				Price:    &plan.StripePriceId,
 			},
 		},
 		PaymentMethodTypes: stripe.StringSlice([]string{
@@ -343,7 +157,23 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		ShippingAddressCollection: nil,
 		ShippingRates:             nil,
 		SubmitType:                nil,
-		SubscriptionData:          nil,
+		SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
+			Coupon:          nil,
+			DefaultTaxRates: nil,
+			Metadata: map[string]string{
+				"environment": c.configuration.Environment,
+				"revision":    build.Revision,
+				"release":     build.Release,
+			},
+			TransferData:    nil,
+			TrialEnd:        nil,
+			TrialFromPlan:   nil,
+			TrialPeriodDays: nil,
+		},
+	}
+
+	if plan.FreeTrialDays > 0 {
+		checkoutParams.SubscriptionData.TrialPeriodDays = stripe.Int64(int64(plan.FreeTrialDays))
 	}
 
 	result, err := c.stripeClient.CheckoutSessions.New(checkoutParams)
@@ -355,4 +185,106 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	ctx.JSON(swag.CreateCheckoutSessionResponse{
 		SessionId: result.ID,
 	})
+}
+
+// Get Stripe Portal
+// @id get-stripe-portal
+// @tags Billing
+// @Summary Get Stripe Portal
+// @description Create a Stripe portal session for managing the subscription and return the session Id to the client. The client can then redirect the user to this session to manage the monetr subscription completely within Stripe.
+// @Security ApiKeyAuth
+// @Produce json
+// @Router /billing/portal [get]
+// @Success 200 {array} swag.CreatePortalSessionResponse
+// @Failure 402 {object} SubscriptionNotActiveError Returned if the user does not have an active subscription, this endpoint can only be used to update or cancel active subscriptions.
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) handleGetStripePortal(ctx iris.Context) {
+	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify subscription is active")
+		return
+	}
+
+	if !account.IsSubscriptionActive() {
+		c.returnError(ctx, http.StatusPaymentRequired, "subscription is not active")
+		return
+	}
+
+	returnUrl := ctx.GetReferrer().Raw
+	if returnUrl == "" {
+		returnUrl = fmt.Sprintf("https://%s", c.configuration.UIDomainName)
+	}
+
+	params := &stripe.BillingPortalSessionParams{
+		Configuration: nil,
+		Customer:      account.StripeCustomerId,
+		OnBehalfOf:    nil,
+		ReturnURL:     stripe.String(returnUrl),
+	}
+
+	session, err := c.stripe.NewPortalSession(c.getContext(ctx), params)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create new stripe portal session")
+		return
+	}
+
+	ctx.JSON(swag.CreatePortalSessionResponse{
+		URL: session.URL,
+	})
+}
+
+// Wait For Stripe Subscription
+// @Summary Wait For Stripe Subscription
+// @id wait-for-stripe-subscription
+// @tags Billing
+// @description Long poll endpoint to check to see if the subscription is activated yet. It will return 200 if the subscription is active. Otherwise it will block for 30 seconds and then return 408 if nothing has changed.
+// @Security ApiKeyAuth
+// @Router /billing/wait [get]
+// @Success 200
+// @Success 408
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) waitForSubscription(ctx iris.Context) {
+	log := c.getLog(ctx)
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	account, err := repo.GetAccount()
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve account data")
+		return
+	}
+
+	if account.IsSubscriptionActive() {
+		log.Trace("account has active subscription, nothing to be done")
+		return
+	}
+
+	channelName := fmt.Sprintf("account:%d:subscription:activated", account.AccountId)
+	log = log.WithField("channel", channelName)
+
+	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to listen on channel")
+		return
+	}
+	defer func() {
+		if err = listener.Close(); err != nil {
+			log.WithError(err).Error("failed to gracefully close listener")
+		}
+	}()
+
+	log.Debug("waiting for account to be activated channel")
+
+	deadLine := time.NewTimer(30 * time.Second)
+	defer deadLine.Stop()
+
+	select {
+	case <-deadLine.C:
+		ctx.StatusCode(http.StatusRequestTimeout)
+		log.Trace("timed out waiting for account/subscription to be setup")
+		return
+	case <-listener.Channel():
+		// Just exit successfully, any message on this channel is considered a success.
+		log.Trace("subscription activated successfully")
+		return
+	}
 }

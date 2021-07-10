@@ -2,28 +2,30 @@ package controller
 
 import (
 	"context"
-	"github.com/getsentry/sentry-go"
-	sentryiris "github.com/getsentry/sentry-go/iris"
-	"github.com/gomodule/redigo/redis"
-	"github.com/monetrapp/rest-api/pkg/billing"
-	"github.com/monetrapp/rest-api/pkg/build"
-	"github.com/monetrapp/rest-api/pkg/communication"
-	"github.com/monetrapp/rest-api/pkg/internal/plaid_helper"
-	"github.com/monetrapp/rest-api/pkg/internal/stripe_helper"
-	"github.com/monetrapp/rest-api/pkg/jobs"
-	"github.com/monetrapp/rest-api/pkg/metrics"
-	"github.com/monetrapp/rest-api/pkg/pubsub"
-	"github.com/monetrapp/rest-api/pkg/secrets"
-	stripe_client "github.com/stripe/stripe-go/v72/client"
 	"net/http"
 	"net/smtp"
 	"strings"
 	"time"
 
+	"github.com/getsentry/sentry-go"
+	sentryiris "github.com/getsentry/sentry-go/iris"
+	"github.com/gomodule/redigo/redis"
+	"github.com/monetr/rest-api/pkg/billing"
+	"github.com/monetr/rest-api/pkg/build"
+	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/rest-api/pkg/communication"
+	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
+	"github.com/monetr/rest-api/pkg/jobs"
+	"github.com/monetr/rest-api/pkg/metrics"
+	"github.com/monetr/rest-api/pkg/pubsub"
+	"github.com/monetr/rest-api/pkg/secrets"
+	stripe_client "github.com/stripe/stripe-go/v72/client"
+
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/monetrapp/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/config"
 	"github.com/sirupsen/logrus"
 	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
@@ -49,8 +51,10 @@ type Controller struct {
 	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
-	billingHelper            billing.BillingHelper
 	email                    communication.Communication
+	accounts                 billing.AccountRepository
+	paywall                  billing.BasicPayWall
+	stripeWebhooks           billing.StripeWebhookHandler
 }
 
 func NewController(
@@ -60,9 +64,10 @@ func NewController(
 	job jobs.JobManager,
 	plaidClient plaid_helper.Client,
 	stats *metrics.Stats,
-	stripeClient *stripe_client.API,
-	cache *redis.Pool,
+	stripe stripe_helper.Stripe,
+	cachePool *redis.Pool,
 	plaidSecrets secrets.PlaidSecretsProvider,
+	basicPaywall billing.BasicPayWall,
 ) *Controller {
 	var captcha recaptcha.ReCAPTCHA
 	var err error
@@ -87,12 +92,14 @@ func NewController(
 		log:                      log,
 		job:                      job,
 		stats:                    stats,
-		stripe:                   stripe_helper.NewStripeHelper(log, configuration.Stripe.APIKey),
-		stripeClient:             stripeClient,
+		stripe:                   stripe,
+		stripeClient:             stripe_client.New(configuration.Stripe.APIKey, nil),
 		ps:                       pubsub.NewPostgresPubSub(log, db),
-		cache:                    cache,
-		billingHelper:            billing.NewBillingHelper(log, cache, db),
+		cache:                    cachePool,
 		email:                    communication.NewSMTPCommunication(log, configuration.SMTP),
+		accounts:                 billing.NewAccountRepository(log, cache.NewCache(log, cachePool), db),
+		paywall:                  basicPaywall,
+		stripeWebhooks:           billing.NewStripeWebhookHandler(log, cache.NewCache(log, cachePool), db),
 	}
 }
 
@@ -101,10 +108,10 @@ func NewController(
 // @description This is the REST API for our budgeting application.
 
 // @contact.name Support
-// @contact.url http://github.com/monetrapp/rest-api
+// @contact.url http://github.com/monetr/rest-api
 
 // @license.name Business Source License 1.1
-// @license.url https://github.com/monetrapp/rest-api/blob/main/LICENSE
+// @license.url https://github.com/monetr/rest-api/blob/main/LICENSE
 
 // @host api.monetr.app
 
@@ -210,7 +217,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				repoParty.PartyFunc("/billing", c.handleBilling)
 
 				// All endpoints after this require verification that the user has an active subscription.
-				if c.configuration.Stripe.BillingEnabled {
+				if c.configuration.Stripe.IsBillingEnabled() {
 					repoParty.Use(c.requireActiveSubscriptionMiddleware)
 				}
 			}

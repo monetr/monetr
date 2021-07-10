@@ -216,6 +216,8 @@ func (v *vaultBase) authenticate() error {
 	log := v.log.WithField("method", v.config.Auth)
 
 	switch v.config.Auth {
+	case "token":
+		v.client.SetToken(v.config.Token)
 	case "kubernetes":
 		log.Trace("authenticating to vault")
 		var token string
