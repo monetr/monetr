@@ -1,0 +1,3 @@
+ENVIRONMENT=Production
+ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
+

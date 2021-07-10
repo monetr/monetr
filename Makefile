@@ -76,11 +76,11 @@ include Makefile.github-actions
 endif
 
 include Makefile.release
-include Makefile.tinker
 include Makefile.deploy
 include Makefile.docker
 
 ifndef CI
+include Makefile.tinker
 include Makefile.local
 endif
 
