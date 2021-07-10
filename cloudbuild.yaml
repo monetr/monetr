@@ -13,7 +13,7 @@ artifacts:
   objects:
     location: 'gs://monetr.app'
     paths:
-      - 'build'
+      - '/workspace/build'
 options:
   env:
     - 'PWD=/workspace'
