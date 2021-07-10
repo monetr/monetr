@@ -15,6 +15,8 @@ dependencies:
 	yarn install
 
 clean:
+	rm -rf $(PWD)/node_modules || true
+	rm -rf $(PWD)/build || true
 	rm -rf $(BUILD_DIR)/* || true
 
 big-clean: clean
