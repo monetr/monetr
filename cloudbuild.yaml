@@ -11,9 +11,9 @@ steps:
     ]
 artifacts:
   objects:
-    location: 'gs://monetr.app'
+    location: 'gs://monetr.app/'
     paths:
-      - '/workspace/build'
+      - '/workspace/build/*'
 options:
   env:
     - 'PWD=/workspace'
