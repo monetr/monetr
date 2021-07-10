@@ -1,13 +1,22 @@
-import React, { Component } from "react";
-import { Button, Card, CardActions, CardContent, Paper, Typography } from "@material-ui/core";
+import React, { Component, Fragment } from "react";
+import { Button, Card, CardActions, CardContent, Paper, Snackbar, Typography } from "@material-ui/core";
 import BillingPlan from "data/BillingPlan";
 import fetchBillingPlans from "shared/billing/actions/fetchBillingPlans";
 import { getStripePublicKey } from "shared/bootstrap/selectors";
 import { connect } from "react-redux";
-import { loadStripe, Stripe, StripeCardElement, StripeCardElementChangeEvent, StripeElements } from '@stripe/stripe-js';
+import {
+  loadStripe,
+  RedirectToCheckoutOptions,
+  Stripe,
+  StripeCardElement,
+  StripeCardElementChangeEvent,
+  StripeElements
+} from '@stripe/stripe-js';
 import { CardElement, Elements, ElementsConsumer } from '@stripe/react-stripe-js';
 import createNewSubscription from "shared/billing/actions/createNewSubscription";
 import logout from "shared/authentication/actions/logout";
+import { Alert, AlertTitle } from "@material-ui/lab";
+import request from "shared/util/request";
 
 enum Stage {
   ChoosePlan,
@@ -20,6 +29,7 @@ interface State {
   stage: Stage;
   selectedPlan: BillingPlan | null;
   cardComplete: boolean;
+  error: string | null;
 }
 
 interface WithConnectionPropTypes {
@@ -35,6 +45,7 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
     stage: Stage.ChoosePlan,
     selectedPlan: null,
     cardComplete: false,
+    error: null,
   };
 
   componentDidMount() {
@@ -47,63 +58,89 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
   }
 
   selectPlan = (plan: BillingPlan) => () => {
-    this.setState({
-      stage: Stage.BillingInformation,
-      selectedPlan: plan,
-    });
+    return this.doStripeCheckout(plan);
+    // this.setState({
+    //   stage: Stage.BillingInformation,
+    //   selectedPlan: plan,
+    // });
   };
 
+  cancelSubscribe = () => this.setState({
+    stage: Stage.ChoosePlan,
+    selectedPlan: null,
+  });
+
+  doStripeCheckout = (plan: BillingPlan) => {
+    return request().post(`/billing/create_checkout`, {
+      priceId: plan.id,
+    })
+      .then(result => {
+        return loadStripe(this.props.stripePublicKey).then(stripe => {
+          const options: RedirectToCheckoutOptions = {
+            sessionId: result.data.sessionId,
+          };
+
+          return stripe.redirectToCheckout(options);
+        });
+      })
+      .catch(error => this.setState({
+        error: error?.response?.data?.error || error,
+      }));
+  };
 
   renderCard = (details: BillingPlan) => {
 
     const price = `$${ (details.unitPrice / 100).toFixed(2) }`;
 
     return (
-      <div key={ details.id } className="flex justify-center items-center">
-        <Card elevation={ 4 } className="smooth-animation transition transform hover:shadow-2xl w-64 h-72">
-          <CardContent className="h-full">
-            <div className="grid grid-flow-row h-full">
-              <div>
-                <div className="grid grid-flow-col">
-                  <Typography variant='h5'>
-                    <b>{ details.name }</b>
-                  </Typography>
-                  <div className="flex items-center justify-end">
-                    <Typography variant="body1">
-                      <b>{ price }</b> / { details.interval }
+      <Fragment>
+        { this.renderErrorMaybe() }
+        <div key={ details.id } className="flex justify-center items-center">
+          <Card elevation={ 4 } className="smooth-animation transition transform hover:shadow-2xl w-64 h-72">
+            <CardContent className="h-full">
+              <div className="grid grid-flow-row h-full">
+                <div>
+                  <div className="grid grid-flow-col">
+                    <Typography variant='h5'>
+                      <b>{ details.name }</b>
                     </Typography>
+                    <div className="flex items-center justify-end">
+                      <Typography variant="body1">
+                        <b>{ price }</b> / { details.interval }
+                      </Typography>
+                    </div>
                   </div>
+                  <Typography variant="body2">
+                    { details.description }
+                  </Typography>
                 </div>
-                <Typography variant="body2">
-                  { details.description }
-                </Typography>
-              </div>
-              <div className="flex items-end grid grid-flow-row">
-                { (details.freeTrialDays > 0) &&
-                <Typography
-                  variant="h6"
-                  className="w-full text-center"
-                >
-                  { details.freeTrialDays } day free trial
-                </Typography>
-                }
-                <Button
-                  className="w-full h-12"
-                  color="primary"
-                  variant="contained"
-                  onClick={ this.selectPlan(details) }
-                >
+                <div className="flex items-end grid grid-flow-row">
+                  { (details.freeTrialDays > 0) &&
                   <Typography
                     variant="h6"
+                    className="w-full text-center"
                   >
-                    Choose
+                    { details.freeTrialDays } day free trial
                   </Typography>
-                </Button>
+                  }
+                  <Button
+                    className="w-full h-12"
+                    color="primary"
+                    variant="contained"
+                    onClick={ this.selectPlan(details) }
+                  >
+                    <Typography
+                      variant="h6"
+                    >
+                      Choose
+                    </Typography>
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Fragment>
     );
   };
 
@@ -139,6 +176,22 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
 
   };
 
+  renderErrorMaybe = () => {
+    const { error } = this.state;
+    if (!error) {
+      return null;
+    }
+
+    return (
+      <Snackbar open autoHideDuration={ 10000 }>
+        <Alert variant="filled" severity="error">
+          <AlertTitle>Error</AlertTitle>
+          { this.state.error }
+        </Alert>
+      </Snackbar>
+    );
+  };
+
   renderBillingHandler = (stripe: Stripe, elements: StripeElements) => {
     const { selectedPlan } = this.state;
     const price = `$${ (selectedPlan.unitPrice / 100).toFixed(2) }`;
@@ -158,6 +211,9 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
         .then(result => {
           console.log(result);
         })
+        .catch(error => this.setState({
+          error: error?.response?.data?.error || error,
+        }))
         .finally(() => {
           this.setState({
             loading: false,
@@ -166,52 +222,56 @@ export class UpdateSubscriptionsView extends Component<WithConnectionPropTypes, 
     };
 
     return (
-      <Card className="w-96">
-        <CardContent>
-          <div>
-            <Typography variant="h5">Begin your subscription</Typography>
-          </div>
-          <div className="mt-5 mb-5">
-            <Typography>Total due now: <b>{ price }</b></Typography>
-          </div>
-          <div className="">
-            <Typography className="opacity-50">Card</Typography>
-            <Paper className="p-1">
-              <CardElement
-                onChange={ this.stripeOnChange }
-                onReady={ this.stripeOnReady }
-                onEscape={ this.stripeOnEscape }
-                options={ {
-                  style: {
-                    base: {
-                      lineHeight: '30px',
-                      padding: '5px',
+      <Fragment>
+        { this.renderErrorMaybe() }
+        <Card className="w-1/3">
+          <CardContent>
+            <div>
+              <Typography variant="h5">Begin your subscription</Typography>
+            </div>
+            <div className="mt-5 mb-5">
+              <Typography>Total due now: <b>{ price }</b></Typography>
+            </div>
+            <div className="">
+              <Typography className="opacity-60">Card</Typography>
+              <Paper className="p-1 pl-2">
+                <CardElement
+                  onChange={ this.stripeOnChange }
+                  onReady={ this.stripeOnReady }
+                  onEscape={ this.stripeOnEscape }
+                  options={ {
+                    style: {
+                      base: {
+                        lineHeight: '30px',
+                        padding: '10px',
+                      }
                     }
-                  }
-                } }
-              />
-            </Paper>
-          </div>
-        </CardContent>
-        <CardActions>
-          <Button
-            disabled={ this.state.loading }
-            color="secondary"
-            variant="outlined"
-            className="ml-auto"
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={ !this.state.cardComplete || this.state.loading }
-            color="primary"
-            variant="contained"
-            onClick={ billingSubscribe }
-          >
-            Subscribe
-          </Button>
-        </CardActions>
-      </Card>
+                  } }
+                />
+              </Paper>
+            </div>
+          </CardContent>
+          <CardActions>
+            <Button
+              disabled={ this.state.loading }
+              color="secondary"
+              variant="outlined"
+              className="ml-auto"
+              onClick={ this.cancelSubscribe }
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={ !this.state.cardComplete || this.state.loading }
+              color="primary"
+              variant="contained"
+              onClick={ billingSubscribe }
+            >
+              Subscribe
+            </Button>
+          </CardActions>
+        </Card>
+      </Fragment>
     )
   };
 

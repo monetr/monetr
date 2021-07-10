@@ -49,7 +49,7 @@ build-web-ui-mini:
 		docker push $(BASE_IMAGE_NAME):latest
 #	yq e '.image.tag = "$(SRC_HASH)"' -i $(VALUES)
 
-deploy-web-ui: build-web-ui-mini
+deploy-web-ui:
 	$(KUBECTL) apply -f $(LOCAL_WEB_UI_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/$(WEB_UI_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 

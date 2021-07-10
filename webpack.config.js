@@ -7,7 +7,6 @@ const InterpolateHtmlPlugin = require("react-dev-utils/InterpolateHtmlPlugin");
 const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
 const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
-const ignoredFiles = require('react-dev-utils/ignoredFiles');
 const redirectServedPath = require('react-dev-utils/redirectServedPathMiddleware');
 const yaml = require('js-yaml');
 
@@ -85,8 +84,15 @@ module.exports = (env, argv) => {
           ]
         },
         {
-          test: /\.svg$/,
-          use: 'file-loader'
+          test: /\.(svg)$/,
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                name: 'images/[hash]-[name].[ext]'
+              }
+            },
+          ],
         },
         {
           test: /\.png$/,
@@ -117,7 +123,8 @@ module.exports = (env, argv) => {
         '.js',
         '.jsx',
         '.tsx',
-        '.ts'
+        '.ts',
+        '.svg'
       ],
       alias: {
         'react-dom': '@hot-loader/react-dom'

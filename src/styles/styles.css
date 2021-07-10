@@ -6,12 +6,6 @@
 
 html, body {
     height: 100%;
-    /*background-color: #d9d9d9;*/
-    background: #f7f8fb;
-    background: -moz-linear-gradient(45deg, #f7f8fb 0%, #d7dbe6 100%);
-    background: -webkit-linear-gradient(45deg, #f7f8fb 0%, #d7dbe6 100%);
-    background: linear-gradient(45deg, #f7f8fb 0%, #d7dbe6 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f7f8fb', endColorstr='#d7dbe6', GradientType=1);
 }
 
 /* custom scrollbar */
@@ -54,7 +48,3 @@ button:focus {
     border-radius: 10px !important;
 }
 
-/*.MuiPaper-root.MuiCard-root {*/
-/*    background: rgba(255, 255, 255, 0.4);*/
-/*    !*backdrop-filter: blur(4px);*!*/
-/*}*/
