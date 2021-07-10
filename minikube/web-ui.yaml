@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: web-ui
-          image: nginx
+          image: registry.monetr.mini/web-ui:latest
           ports:
             - name: http
               containerPort: 80

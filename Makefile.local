@@ -35,21 +35,17 @@ SRC_HASH=$(shell find -s $(PWD)/src -type f -exec shasum {} \; | shasum | cut -d
 BASE_IMAGE_NAME = registry.$(LOCAL_DOMAIN)/$(WEB_UI_IMAGE_NAME)
 IMAGE_NAME = $(BASE_IMAGE_NAME):$(SRC_HASH)
 LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +%Y.%m.%d.%H.%M) $$(git config user.email))
-build-web-ui-mini:
+build-web-ui-mini: build
 	eval $$(minikube docker-env) && docker build \
 		--cache-from=$(BASE_IMAGE_NAME):latest \
-		--build-arg REVISION=$(RELEASE_REVISION) \
-		--build-arg BUILD_TIME=$(BUILD_TIME) \
-		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
-		--build-arg ENVIRONMENT="local" \
 		-t $(IMAGE_NAME) \
 		-t $(BASE_IMAGE_NAME):latest \
-		-f Dockerfile . && \
+		-f Dockerfile.local . && \
 		docker push $(IMAGE_NAME) && \
 		docker push $(BASE_IMAGE_NAME):latest
 #	yq e '.image.tag = "$(SRC_HASH)"' -i $(VALUES)
 
-deploy-web-ui:
+deploy-web-ui: build-web-ui-mini
 	$(KUBECTL) apply -f $(LOCAL_WEB_UI_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/$(WEB_UI_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
