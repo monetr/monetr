@@ -1,9 +1,10 @@
 package logging
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
 	"sort"
+
+	"github.com/sirupsen/logrus"
 )
 
 func NewLogger() *logrus.Entry {
