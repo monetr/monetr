@@ -16,7 +16,5 @@ jobs:
           ref: 'main'
       - name: fetch
         run: git fetch --prune --unshallow
-      - name: Get commit hash
-        run: go run github.com/monetr/rest-api/tools/releaser
-      - name: Commit Info
-        run: git show $(go run github.com/monetr/rest-api/tools/releaser)
+      - name: Push to production
+        run: git push origin $(go run github.com/monetr/rest-api/tools/releaser):production
