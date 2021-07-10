@@ -2,7 +2,7 @@ name: Production
 
 on:
   schedule:
-    - cron: 0 23 * * *
+    - cron: 0 18 * * * # Noon in central time.
   workflow_dispatch: { }
 
 jobs:
