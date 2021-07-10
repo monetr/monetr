@@ -38,8 +38,11 @@ func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx contex
 		OnConflict(`(item_id, account_id) DO UPDATE`).
 		Insert(&token)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update access token")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }

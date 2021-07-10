@@ -7,8 +7,3 @@ ALTER TABLE "accounts" ADD CONSTRAINT "uq_accounts_stripe_subscription_id" UNIQU
 ALTER TABLE "accounts" ADD COLUMN "subscription_active_until" TIMESTAMPTZ NULL;
 
 DROP TABLE "subscriptions";
-
--- Just clean up from an old idea.
-DELETE FROM "logins" WHERE login_id = -1;
-DELETE FROM "users" WHERE user_id = -1;
-DELETE FROM "accounts" WHERE account_id = -1;

@@ -71,3 +71,4 @@ dry:
 
 deploy:
 	kubectl apply -f $(ENVIRONMENT_DIR) -n $(NAMESPACE)
+	kubectl rollout status deploy/rest-api -n $(NAMESPACE) --timeout=120s
