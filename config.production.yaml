@@ -2,3 +2,4 @@ BOOTSTRAP_CONFIG_JSON: false
 USE_LOCAL_STORAGE: false
 ENVIRONMENT: "Production"
 API_URL: "https://api.monetr.app"
+COOKIE_DOMAIN: ".monetr.app"
