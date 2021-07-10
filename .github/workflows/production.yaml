@@ -1,0 +1,20 @@
+name: Production
+
+on:
+  schedule:
+    - cron: 0 23 * * *
+  workflow_dispatch: { }
+
+jobs:
+  release-production:
+    name: Production
+    runs-on: ubuntu-latest
+    container: golang:1.16.3
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: 'main'
+      - name: Get commit hash
+        run: go run github.com/monetr/rest-api/tools/releaser
+      - name: Commit Info
+        run: git show $(go run github.com/monetr/rest-api/tools/releaser)
