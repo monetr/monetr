@@ -48,7 +48,7 @@ module.exports = (env, argv) => {
     ],
     output: {
       path: path.resolve(__dirname, 'build'),
-      filename: '[name].[chunkhash].js'
+      filename: `[name].${process.env.RELEASE_REVISION || '[chunkhash]'}.js`
     },
     module: {
       rules: [

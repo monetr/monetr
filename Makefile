@@ -23,7 +23,9 @@ big-clean: clean
 start: dependencies
 	RELEASE_REVISION=$(RELEASE_REVISION) MONETR_ENV=local yarn start
 
+.PHONY: build
 build:
+	mkdir -p $(BUILD_DIR)
 	RELEASE_REVISION=$(RELEASE_REVISION) MONETR_ENV=$(ENV_LOWER) yarn build:production
 	cp $(PUBLIC_DIR)/favicon.ico $(BUILD_DIR)/
 	cp $(PUBLIC_DIR)/logo*.png $(BUILD_DIR)/
