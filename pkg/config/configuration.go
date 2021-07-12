@@ -281,6 +281,7 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Stripe.WebhooksEnabled", "MONETR_STRIPE_WEBHOOKS_ENABLED")
 	v.BindEnv("Stripe.WebhooksDomain", "MONETR_STRIPE_WEBHOOKS_DOMAIN")
 	v.BindEnv("Stripe.WebhookSecret", "MONETR_STRIPE_WEBHOOK_SECRET")
+	v.BindEnv("Stripe.BillingEnabled", "MONETR_STRIPE_BILLING_ENABLED")
 	v.BindEnv("Vault.Enabled", "MONETR_VAULT_ENABLED")
 	v.BindEnv("Vault.Address", "MONETR_VAULT_ADDRESS")
 	v.BindEnv("Vault.Auth", "MONETR_VAULT_AUTH")

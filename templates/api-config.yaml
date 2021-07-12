@@ -38,6 +38,7 @@ data:
   MONETR_STRIPE_ENABLED: {{ quote .Values.api.stripe.enabled }}
   MONETR_STRIPE_WEBHOOKS_ENABLED: {{ quote .Values.api.stripe.webhooksEnabled }}
   MONETR_STRIPE_WEBHOOKS_DOMAIN: {{ quote .Values.api.stripe.webhooksDomain }}
+  MONETR_STRIPE_BILLING_ENABLED: {{ quote .Values.api.stripe.billingEnabled }}
 
 ---
 kind: ConfigMap
@@ -53,8 +54,8 @@ data:
       templates:
     {{- toYaml .Values.api.sendGrid.templates | nindent 8 }}
     {{- end }}
-    {{- if .Values.api.stripe.products }}
+    {{- if .Values.api.stripe.initialPlan }}
     stripe:
-      products:
-    {{- toYaml .Values.api.stripe.products | nindent 8 }}
+      initialPlan:
+    {{- toYaml .Values.api.stripe.initialPlan | nindent 8 }}
   {{- end }}
