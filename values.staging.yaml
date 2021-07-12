@@ -96,7 +96,7 @@ api:
   uiDomainName: app.staging.monetr.dev
   apiDomainName: api.staging.monetr.dev
   allowSignUp: true
-  enableWebhooks: false # Will be deprecated soon.
+  enableWebhooks: true # Will be deprecated soon.
   postgreSql:
     address: alsatian.monetr-staging.svc.cluster.local
     port: 5432
@@ -134,5 +134,13 @@ api:
     traceSampleRate: 1.0
   stripe:
     enabled: true
-    webhooksEnabled: false # Still working on this for now.
+    webhooksEnabled: true # Still working on this for now.
     webhooksDomain: https://api.staging.monetr.dev
+    billingEnabled: true
+    initialPlan:
+      freeTrialDays: 7
+      stripePriceId: price_1JCW9iI4uGGnwpgwCxOjrbmB
+      features:
+        - ManualBudgeting
+        - LinkedBudgeting
+
