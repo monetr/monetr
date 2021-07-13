@@ -95,7 +95,14 @@ func (p *postgresAccountRepository) GetAccountByCustomerId(ctx context.Context, 
 		Where(`"account"."stripe_customer_id" = ?`, stripeCustomerId).
 		Limit(1).
 		Select(&account); err != nil {
+
 		span.Status = sentry.SpanStatusInternalError
+		if span.Data == nil {
+			span.Data = map[string]interface{}{}
+		}
+
+		span.Data["stripeCustomerId"] = stripeCustomerId
+
 		return nil, errors.Wrap(err, "failed to retrieve account by customer Id")
 	}
 
