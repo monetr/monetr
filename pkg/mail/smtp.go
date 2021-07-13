@@ -1,4 +1,4 @@
-package communication
+package mail
 
 import (
 	"bytes"

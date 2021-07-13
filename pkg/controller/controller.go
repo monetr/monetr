@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"github.com/monetr/rest-api/pkg/mail"
 	"net/http"
 	"net/smtp"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"github.com/monetr/rest-api/pkg/billing"
 	"github.com/monetr/rest-api/pkg/build"
 	"github.com/monetr/rest-api/pkg/cache"
-	"github.com/monetr/rest-api/pkg/communication"
 	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
@@ -51,7 +51,7 @@ type Controller struct {
 	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
-	email                    communication.Communication
+	email                    mail.Communication
 	accounts                 billing.AccountRepository
 	paywall                  billing.BasicPayWall
 	stripeWebhooks           billing.StripeWebhookHandler
@@ -96,7 +96,7 @@ func NewController(
 		stripeClient:             stripe_client.New(configuration.Stripe.APIKey, nil),
 		ps:                       pubsub.NewPostgresPubSub(log, db),
 		cache:                    cachePool,
-		email:                    communication.NewSMTPCommunication(log, configuration.SMTP),
+		email:                    mail.NewSMTPCommunication(log, configuration.SMTP),
 		accounts:                 billing.NewAccountRepository(log, cache.NewCache(log, cachePool), db),
 		paywall:                  basicPaywall,
 		stripeWebhooks:           billing.NewStripeWebhookHandler(log, cache.NewCache(log, cachePool), db),

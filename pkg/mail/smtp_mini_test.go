@@ -1,6 +1,6 @@
 //+build mini
 
-package communication
+package mail
 
 import (
 	"context"

@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/monetr/rest-api/pkg/mail"
 	"net/http"
 	"strings"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/rest-api/pkg/build"
-	"github.com/monetr/rest-api/pkg/communication"
 	"github.com/monetr/rest-api/pkg/hash"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
@@ -215,7 +215,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// If SMTP is enabled and we are verifying emails then we want to create a
 	// registration record and send the user a verification email.
 	if c.configuration.SMTP.ShouldVerifyEmails() {
-		if err = c.email.Send(c.getContext(ctx), communication.SendEmailRequest{
+		if err = c.email.Send(c.getContext(ctx), mail.SendEmailRequest{
 			From:    fmt.Sprintf("no-reply@%s", "monetr.mini"),
 			To:      registerRequest.Email,
 			Subject: "Verify your email address",
