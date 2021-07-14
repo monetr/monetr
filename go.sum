@@ -704,6 +704,8 @@ github.com/stripe/stripe-go/v72 v72.55.0 h1:y5qdbQ/vobf9oi8ot5YUBUDVnBn9T2IRTWHa
 github.com/stripe/stripe-go/v72 v72.55.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/stripe/stripe-go/v72 v72.56.0 h1:1Nilf7LJYaU+K+f4nM9+q6SNmP7ic/H/xNEJeJYPp8w=
 github.com/stripe/stripe-go/v72 v72.56.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
+github.com/stripe/stripe-go/v72 v72.57.0 h1:ZMM3vfwNel6w8LaxE4RviJYVyF6l3Ng/vG7Qc1HtoT8=
+github.com/stripe/stripe-go/v72 v72.57.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/subosito/gotenv v1.2.0 h1:Slr1R9HxAlEKefgq5jn9U+DnETlIUa6HfgEzj0g5d7s=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/swaggo/swag v1.7.0 h1:5bCA/MTLQoIqDXXyHfOpMeDvL9j68OY/udlK4pQoo4E=
