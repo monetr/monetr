@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
@@ -80,6 +81,7 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 
 func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 	hub := sentry.CurrentHub().Clone()
+
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Account Balances"))
 	defer span.Finish()
@@ -95,8 +97,18 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 	}
 
 	linkId := uint64(job.ArgInt64("linkId"))
-	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
-	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
+
+	accountIdStr := strconv.FormatUint(accountId, 10)
+	linkIdStr := strconv.FormatUint(linkId, 10)
+
+	hub.Scope().SetUser(sentry.User{
+		ID: accountIdStr,
+	})
+	hub.Scope().SetTag("accountId", accountIdStr)
+	hub.Scope().SetTag("linkId", linkIdStr)
+
+	span.SetTag("linkId", linkIdStr)
+	span.SetTag("accountId", accountIdStr)
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(span.Context(), linkId)
@@ -110,13 +122,14 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 		if link.PlaidLink == nil {
 			err = errors.Errorf("cannot pull account balanaces for link without plaid info")
 			log.WithError(err).Errorf("failed to pull balances")
-			return err
+			return nil
 		}
 
 		accessToken, err := j.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), accountId, link.PlaidLink.ItemId)
-		if err != nil {
+		if err != nil || accessToken == "" {
 			log.WithError(err).Errorf("failed to retrieve access token for link")
-			return err
+			crumbs.Error(span.Context(), "Could not retrieve Plaid access token for link", "plaid", nil)
+			return nil
 		}
 
 		bankAccounts, err := repo.GetBankAccountsByLinkId(span.Context(), linkId)

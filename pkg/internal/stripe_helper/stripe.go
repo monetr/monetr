@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
@@ -152,10 +153,21 @@ func (s *stripeBase) CreateCustomer(ctx context.Context, customer stripe.Custome
 
 	result, err := s.client.Customers.New(&customer)
 	if err != nil {
-		return nil, s.wrapStripeError(span.Context(), err, "failed to create customer")
+		err = s.wrapStripeError(span.Context(), err, "failed to create customer")
 	}
 
-	return result, nil
+	crumbs.HTTP(span.Context(),
+		"Creating Stripe Customer",
+		"stripe",
+		"https://api.stripe.com/v1/customers",
+		"POST",
+		result.APIResource.LastResponse.StatusCode,
+		map[string]interface{}{
+			"Request-Id": result.APIResource.LastResponse.RequestID,
+		},
+	)
+
+	return result, err
 }
 
 func (s *stripeBase) UpdateCustomer(ctx context.Context, id string, customer stripe.CustomerParams) (*stripe.Customer, error) {

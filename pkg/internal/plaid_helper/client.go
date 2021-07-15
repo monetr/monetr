@@ -50,20 +50,19 @@ type plaidClient struct {
 func (p *plaidClient) CreateLinkToken(ctx context.Context, config plaid.LinkTokenConfigs) (*plaid.CreateLinkTokenResponse, error) {
 	span := sentry.StartSpan(ctx, "Plaid - CreateLinkToken")
 	defer span.Finish()
-	if span.Data == nil {
-		span.Data = map[string]interface{}{}
-	}
+
+	span.Data = map[string]interface{}{}
 
 	result, err := p.client.CreateLinkToken(config)
 	span.Data["plaidRequestId"] = result.RequestID
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		return nil, errors.Wrap(err, "failed to create link token")
+		err = errors.Wrap(err, "failed to create link token")
+	} else {
+		span.Status = sentry.SpanStatusOK
 	}
 
-	span.Status = sentry.SpanStatusOK
-
-	return &result, nil
+	return &result, err
 }
 
 func (p *plaidClient) ExchangePublicToken(ctx context.Context, publicToken string) (*plaid.ExchangePublicTokenResponse, error) {

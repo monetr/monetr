@@ -7,6 +7,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/go-pg/pg/v10"
@@ -21,7 +22,8 @@ const (
 	userIdContextKey             = "_userId_"
 	loginIdContextKey            = "_loginId_"
 	subscriptionStatusContextKey = "_subscriptionStatus_"
-	spanContextKey               = "_span_"
+	spanContextKey               = "_spanContext_"
+	spanKey                      = "_span_"
 )
 
 func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
@@ -70,12 +72,36 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	var token string
 
-	token = ctx.GetCookie("M-Token", context.CookieSecure)
-	if token == "" {
-		token = ctx.GetHeader(TokenName)
-	} else {
-		// I'm adding this to test stuff in staging. It will be removed later.
-		c.log.Trace("found authentication on cookie")
+	data := map[string]interface{}{
+		"source": "none",
+	}
+
+	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+		defer func() {
+			var message string
+			if ctx.GetErr() == nil {
+				message = "Successfully authenticated"
+				data["accountId"] = c.mustGetAccountId(ctx)
+				data["userId"] = c.mustGetUserId(ctx)
+			} else {
+				message = "Request did not have valid credentials"
+			}
+
+			hub.AddBreadcrumb(&sentry.Breadcrumb{
+				Type:      "debug",
+				Category:  "debug",
+				Message:   message,
+				Data:      data,
+				Level:     sentry.LevelDebug,
+				Timestamp: time.Now(),
+			}, nil)
+		}()
+	}
+
+	if token = ctx.GetCookie(TokenName, context.CookieSecure); token != "" {
+		data["source"] = "cookie"
+	} else if token = ctx.GetHeader(TokenName); token != "" {
+		data["source"] = "header"
 	}
 
 	if token == "" {
@@ -106,9 +132,10 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	// way we can grab it later if there is an error.
 	if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
 		hub.Scope().SetUser(sentry.User{
-			ID:        strconv.FormatUint(claims.UserId, 10),
+			ID:        strconv.FormatUint(claims.AccountId, 10),
 			IPAddress: ctx.GetHeader("X-Forwarded-For"),
 		})
+		hub.Scope().SetTag("userId", strconv.FormatUint(claims.UserId, 10))
 		hub.Scope().SetTag("accountId", strconv.FormatUint(claims.AccountId, 10))
 		hub.Scope().SetTag("loginId", strconv.FormatUint(claims.LoginId, 10))
 	}

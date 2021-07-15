@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/monetr/rest-api/pkg/models"
@@ -66,14 +67,17 @@ func (c *Controller) getSpending(ctx *context.Context) {
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postSpending(ctx *context.Context) {
+	requestSpan := c.getSpan(ctx)
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		requestSpan.Status = sentry.SpanStatusInvalidArgument
+		c.badRequest(ctx, "must specify valid bank account Id")
 		return
 	}
 
 	spending := &models.Spending{}
 	if err := ctx.ReadJSON(spending); err != nil {
+		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
@@ -84,11 +88,13 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	spending.Description = strings.TrimSpace(spending.Description)
 
 	if spending.Name == "" {
-		c.returnError(ctx, http.StatusBadRequest, "spending must have a name")
+		requestSpan.Status = sentry.SpanStatusInvalidArgument
+		c.badRequest(ctx, "spending must have a name")
 		return
 	}
 
 	if spending.TargetAmount <= 0 {
+		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		c.badRequest(ctx, "target amount must be greater than 0")
 		return
 	}
@@ -99,6 +105,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	// schedule. This also helps us validate that the user has provided a valid funding schedule id.
 	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, spending.FundingScheduleId)
 	if err != nil {
+		requestSpan.Status = sentry.SpanStatusNotFound
 		c.wrapPgError(ctx, err, "could not find funding schedule specified")
 		return
 	}
@@ -107,6 +114,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	// timezone.
 	account, err := repo.GetAccount(c.getContext(ctx))
 	if err != nil {
+		requestSpan.Status = sentry.SpanStatusNotFound
 		c.wrapPgError(ctx, err, "failed to retrieve account details")
 		return
 	}
@@ -123,6 +131,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		// If the spending is a goal, then we don't need the rule at all.
 		next = spending.NextRecurrence
 		if next.Before(time.Now()) {
+			requestSpan.Status = sentry.SpanStatusInvalidArgument
 			c.badRequest(ctx, "due date cannot be in the past")
 			return
 		}
@@ -134,6 +143,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	// Make sure that the next recurrence date is properly in the user's timezone.
 	nextRecurrence, err := c.midnightInLocal(ctx, next)
 	if err != nil {
+		requestSpan.Status = sentry.SpanStatusInternalError
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
 		return
 	}
@@ -147,11 +157,13 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		fundingSchedule.NextOccurrence,
 		fundingSchedule.Rule,
 	); err != nil {
+		requestSpan.Status = sentry.SpanStatusInternalError
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
 		return
 	}
 
 	if err = repo.CreateSpending(c.getContext(ctx), spending); err != nil {
+		requestSpan.Status = sentry.SpanStatusInternalError
 		c.wrapPgError(ctx, err, "failed to create spending")
 		return
 	}

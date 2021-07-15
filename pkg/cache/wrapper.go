@@ -131,7 +131,10 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 		return nil, errors.WithStack(ErrBlankKey)
 	}
 
-	span.SetTag("key", key)
+	span.Status = sentry.SpanStatusOK
+	span.Data = map[string]interface{}{
+		"key": key,
+	}
 
 	result, err := r.do(span.Context(), "GET", key)
 	if err != nil {
@@ -181,7 +184,10 @@ func (r *redisCache) Delete(ctx context.Context, key string) error {
 		return errors.WithStack(ErrBlankKey)
 	}
 
-	span.SetTag("key", key)
+	span.Status = sentry.SpanStatusOK
+	span.Data = map[string]interface{}{
+		"key": key,
+	}
 
 	return errors.Wrap(r.send(span.Context(), "DEL", key), "failed to delete item from cache")
 }

@@ -194,6 +194,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				)
 				defer span.Finish()
 
+				ctx.Values().Set(spanKey, span)
 				ctx.Values().Set(spanContextKey, span.Context())
 
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
@@ -299,6 +300,10 @@ func (c *Controller) getHealth(ctx iris.Context) {
 
 func (c *Controller) getContext(ctx iris.Context) context.Context {
 	return ctx.Values().Get(spanContextKey).(context.Context)
+}
+
+func (c *Controller) getSpan(ctx iris.Context) *sentry.Span {
+	return ctx.Values().Get(spanKey).(*sentry.Span)
 }
 
 func (c *Controller) getLog(ctx iris.Context) *logrus.Entry {
