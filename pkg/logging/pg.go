@@ -81,7 +81,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 			if event.Err == nil {
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
 					Type:      "query",
-					Category:  "started",
+					Category:  "postgres",
 					Message:   queryString,
 					Data:      map[string]interface{}{},
 					Level:     "debug",
@@ -90,7 +90,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 			} else {
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
 					Type:     "query",
-					Category: "started",
+					Category: "postgres",
 					Message:  queryString,
 					Data: map[string]interface{}{
 						"error": event.Err.Error(),
