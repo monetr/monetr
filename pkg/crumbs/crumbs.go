@@ -3,9 +3,15 @@ package crumbs
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
+	"github.com/pkg/errors"
 	"net/http"
 	"time"
 )
+
+func WrapError(ctx context.Context, err error, message string) error {
+	Error(ctx, message, "error", nil)
+	return errors.Wrap(err, message)
+}
 
 func Error(ctx context.Context, message, category string, data map[string]interface{}) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {

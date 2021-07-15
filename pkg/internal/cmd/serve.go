@@ -104,6 +104,7 @@ func RunServer() error {
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
+
 			BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
 				// Make sure user authentication doesn't make its way into sentry.
 				if event.Request != nil {
@@ -121,6 +122,17 @@ func RunServer() error {
 		if err != nil {
 			log.WithError(err).Error("failed to init sentry")
 		}
+
+		sentry.ConfigureScope(func(scope *sentry.Scope) {
+			scope.AddEventProcessor(func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+				event.Request.Cookies = ""
+				delete(event.Request.Headers, "Cookies")
+				delete(event.Request.Headers, "M-Token")
+				delete(event.Request.Headers, "Authorization")
+				return event
+			})
+		})
+
 		defer sentry.Flush(10 * time.Second)
 	}
 

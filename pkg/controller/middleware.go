@@ -70,6 +70,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 }
 
 func (c *Controller) authenticationMiddleware(ctx *context.Context) {
+	now := time.Now()
 	var token string
 
 	data := map[string]interface{}{
@@ -80,20 +81,20 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 		defer func() {
 			var message string
 			if ctx.GetErr() == nil {
-				message = "Successfully authenticated"
+				message = "M-Token is valid"
 				data["accountId"] = c.mustGetAccountId(ctx)
 				data["userId"] = c.mustGetUserId(ctx)
 			} else {
-				message = "Request did not have valid credentials"
+				message = "Request did not have valid M-Token"
 			}
 
 			hub.AddBreadcrumb(&sentry.Breadcrumb{
 				Type:      "debug",
-				Category:  "debug",
+				Category:  "authentication",
 				Message:   message,
 				Data:      data,
 				Level:     sentry.LevelDebug,
-				Timestamp: time.Now(),
+				Timestamp: now,
 			}, nil)
 		}()
 	}

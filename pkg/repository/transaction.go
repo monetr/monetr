@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 )
@@ -64,8 +65,18 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 }
 
 func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error) {
+	span := sentry.StartSpan(ctx, "GetTransactions")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+		"limit":         limit,
+		"offset":        offset,
+	}
+
 	var items []models.Transaction
-	err := r.txn.Model(&items).
+	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Limit(limit).
@@ -74,8 +85,11 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 		Order(`transaction_id DESC`).
 		Select(&items)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to retrieve transactions")
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return items, nil
 }
