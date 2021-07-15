@@ -34,7 +34,7 @@ func TestPullAccountBalances(t *testing.T) {
 		var linkId uint64
 		require.NoError(t, db.RunInTransaction(context.Background(), func(txn *pg.Tx) error {
 			repo := repository.NewRepositoryFromSession(account.UserId, account.AccountId, txn)
-			links, err := repo.GetLinks()
+			links, err := repo.GetLinks(context.Background())
 			require.NoError(t, err, "must retrieve links for account")
 			require.Len(t, links, 1, "should have exactly one link")
 

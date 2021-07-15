@@ -140,7 +140,7 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 	repo := c.mustGetUnauthenticatedRepository(ctx)
 
 	log.Trace("retrieving link for webhook")
-	link, err := repo.GetLinksForItem(hook.ItemId)
+	link, err := repo.GetLinksForItem(c.getContext(ctx), hook.ItemId)
 	if err != nil {
 		log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
 		return err
@@ -179,7 +179,7 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 					c.mustGetDatabase(ctx),
 				)
 				log.Warn("link is in an error state, updating")
-				err = authenticatedRepo.UpdateLink(link)
+				err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
 			}
 		case "PENDING_EXPIRATION":
 		case "USER_PERMISSION_REVOKED":

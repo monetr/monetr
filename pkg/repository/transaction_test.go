@@ -14,7 +14,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		repo := GetTestAuthenticatedRepository(t)
 
-		bankAccounts, err := repo.GetBankAccounts()
+		bankAccounts, err := repo.GetBankAccounts(context.Background())
 		require.NoError(t, err, "must be able to retrieve bank accounts")
 
 		var checkingAccount models.BankAccount
@@ -46,7 +46,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			CreatedAt:            time.Now(),
 		}
 
-		require.NoError(t, repo.CreateTransaction(transaction.BankAccountId, &transaction), "must create transaction")
+		require.NoError(t, repo.CreateTransaction(context.Background(), transaction.BankAccountId, &transaction), "must create transaction")
 
 		byPlaidTransaction, err := repo.GetTransactionsByPlaidTransactionId(context.Background(),
 			checkingAccount.LinkId,

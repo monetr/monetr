@@ -98,7 +98,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 	}
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		account, err := repo.GetAccount()
+		account, err := repo.GetAccount(span.Context())
 		if err != nil {
 			log.WithError(err).Error("could not retrieve account for funding schedule processing")
 			return err
@@ -117,7 +117,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 				"fundingScheduleId": fundingScheduleId,
 			})
 
-			fundingSchedule, err := repo.GetFundingSchedule(bankAccountId, fundingScheduleId)
+			fundingSchedule, err := repo.GetFundingSchedule(span.Context(), bankAccountId, fundingScheduleId)
 			if err != nil {
 				fundingLog.WithError(err).Error("failed to retrieve funding schedule for processing")
 				return err
@@ -131,7 +131,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 			// Calculate the next time this funding schedule will happen. We need this for calculating how much each
 			// expense will need the next time we do this processing.
 			nextFundingOccurrence := util.MidnightInLocal(fundingSchedule.Rule.After(time.Now(), false), timezone)
-			if err = repo.UpdateNextFundingScheduleDate(fundingScheduleId, nextFundingOccurrence); err != nil {
+			if err = repo.UpdateNextFundingScheduleDate(span.Context(), fundingScheduleId, nextFundingOccurrence); err != nil {
 				fundingLog.WithError(err).Error("failed to set the next occurrence for funding schedule")
 				return err
 			}
@@ -140,7 +140,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 			// logs to find a problem.
 			fundingLog = fundingLog.WithField("fundingScheduleName", fundingSchedule.Name)
 
-			expenses, err := repo.GetSpendingByFundingSchedule(bankAccountId, fundingScheduleId)
+			expenses, err := repo.GetSpendingByFundingSchedule(span.Context(), bankAccountId, fundingScheduleId)
 			if err != nil {
 				fundingLog.WithError(err).Error("failed to retrieve expenses for processing")
 				return err
@@ -195,7 +195,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 
 		log.Debugf("preparing to update %d spending(s)", len(expensesToUpdate))
 
-		if err := repo.UpdateExpenses(bankAccountId, expensesToUpdate); err != nil {
+		if err := repo.UpdateSpending(span.Context(), bankAccountId, expensesToUpdate); err != nil {
 			log.WithError(err).Error("failed to update spending")
 			return err
 		}

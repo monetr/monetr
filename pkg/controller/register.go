@@ -123,6 +123,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// is enabled and we want to verify emails then the user is disabled
 	// initially.
 	login, err := repository.CreateLogin(
+		c.getContext(ctx),
 		registerRequest.Email,
 		hashedPassword,
 		registerRequest.FirstName,
@@ -190,6 +191,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// Now that we have an accountId we can create the user object which will
 	// bind the login and the account together.
 	err = repository.CreateUser(
+		c.getContext(ctx),
 		login.LoginId,
 		account.AccountId,
 		&user,

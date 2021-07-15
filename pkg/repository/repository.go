@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
 	"strconv"
 	"time"
 
@@ -15,46 +16,45 @@ type Repository interface {
 	UserId() uint64
 
 	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error
-	CreateBankAccounts(bankAccounts ...models.BankAccount) error
-	CreateFundingSchedule(fundingSchedule *models.FundingSchedule) error
-	CreateLink(link *models.Link) error
-	CreatePlaidLink(link *models.PlaidLink) error
-	CreateSpending(expense *models.Spending) error
-	CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error
+	CreateBankAccounts(ctx context.Context, bankAccounts ...models.BankAccount) error
+	CreateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error
+	CreateLink(ctx context.Context, link *models.Link) error
+	CreatePlaidLink(ctx context.Context, link *models.PlaidLink) error
+	CreateSpending(ctx context.Context, expense *models.Spending) error
+	CreateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error
 	DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error
 	DeleteTransaction(ctx context.Context, bankAccountId, transactionId uint64) error
-	GetAccount() (*models.Account, error)
+	GetAccount(ctx context.Context) (*models.Account, error)
 	GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error)
-	GetBankAccount(bankAccountId uint64) (*models.BankAccount, error)
-	GetBankAccounts() ([]models.BankAccount, error)
-	GetBankAccountsByLinkId(linkId uint64) ([]models.BankAccount, error)
-	GetFundingSchedule(bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
-	GetFundingSchedules(bankAccountId uint64) ([]models.FundingSchedule, error)
+	GetBankAccount(ctx context.Context, bankAccountId uint64) (*models.BankAccount, error)
+	GetBankAccounts(ctx context.Context) ([]models.BankAccount, error)
+	GetBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.BankAccount, error)
+	GetFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
+	GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error)
 	GetFundingStats(ctx context.Context, bankAccountId uint64) (*FundingStats, error)
-	GetIsSetup() (bool, error)
-	GetJob(jobId string) (models.Job, error)
+	GetIsSetup(ctx context.Context) (bool, error)
 	GetLink(ctx context.Context, linkId uint64) (*models.Link, error)
-	GetLinkIsManual(linkId uint64) (bool, error)
-	GetLinkIsManualByBankAccountId(bankAccountId uint64) (bool, error)
-	GetLinks() ([]models.Link, error)
-	GetMe() (*models.User, error)
-	GetPendingTransactionsForBankAccount(bankAccountId uint64) ([]models.Transaction, error)
+	GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error)
+	GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error)
+	GetLinks(ctx context.Context) ([]models.Link, error)
+	GetMe(ctx context.Context) (*models.User, error)
+	GetPendingTransactionsForBankAccount(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error)
 	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
-	GetSpendingByFundingSchedule(bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
-	GetSpendingById(bankAccountId, expenseId uint64) (*models.Spending, error)
-	GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error)
-	GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
-	GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)
+	GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
+	GetSpendingById(ctx context.Context, bankAccountId, expenseId uint64) (*models.Spending, error)
+	GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error)
+	GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
+	GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
 	GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error)
 	InsertTransactions(ctx context.Context, transactions []models.Transaction) error
 	ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
-	UpdateBankAccounts(accounts []models.BankAccount) error
-	UpdateExpenses(bankAccountId uint64, updates []models.Spending) error
-	UpdateLink(link *models.Link) error
-	UpdateNextFundingScheduleDate(fundingScheduleId uint64, nextOccurrence time.Time) error
+	UpdateBankAccounts(ctx context.Context, accounts []models.BankAccount) error
+	UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error
+	UpdateLink(ctx context.Context, link *models.Link) error
+	UpdateNextFundingScheduleDate(ctx context.Context, fundingScheduleId uint64, nextOccurrence time.Time) error
 	UpdatePlaidLink(ctx context.Context, plaidLink *models.PlaidLink) error
-	UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error
+	UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error
 	UpdateUser(ctx context.Context, user *models.User) error
 
 	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
@@ -63,15 +63,14 @@ type Repository interface {
 }
 
 type UnauthenticatedRepository interface {
-	CreateLogin(email, hashedPassword string, firstName, lastName string, isEnabled bool) (*models.Login, error)
-	CreateAccount(timezone *time.Location) (*models.Account, error)
+	CreateLogin(ctx context.Context, email, hashedPassword string, firstName, lastName string, isEnabled bool) (*models.Login, error)
 	CreateAccountV2(ctx context.Context, account *models.Account) error
-	CreateUser(loginId, accountId uint64, user *models.User) error
+	CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error
 
 	// VerifyRegistration takes a registrationId and will finalize the registration record. If the registration has
 	// already been completed an error is returned.
 	VerifyRegistration(registrationId string) (*models.User, error)
-	GetLinksForItem(itemId string) (*models.Link, error)
+	GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error)
 	ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error)
 	UseBetaCode(ctx context.Context, betaId, usedBy uint64) error
 }
@@ -106,9 +105,17 @@ func (r *repositoryBase) AccountIdStr() string {
 	return strconv.FormatUint(r.AccountId(), 10)
 }
 
-func (r *repositoryBase) GetMe() (*models.User, error) {
+func (r *repositoryBase) GetMe(ctx context.Context) (*models.User, error) {
+	span := sentry.StartSpan(ctx, "GetMe")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId": r.AccountId(),
+		"userId":    r.UserId(),
+	}
+
 	var user models.User
-	err := r.txn.Model(&user).
+	err := r.txn.ModelContext(span.Context(), &user).
 		Relation("Login").
 		Relation("Account").
 		Where(`"user"."user_id" = ? AND "user"."account_id" = ?`, r.userId, r.accountId).
@@ -116,26 +123,23 @@ func (r *repositoryBase) GetMe() (*models.User, error) {
 		Select(&user)
 	switch err {
 	case pg.ErrNoRows:
+		span.Status = sentry.SpanStatusNotFound
 		return nil, errors.Errorf("user does not exist")
 	case nil:
 		break
 	default:
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrapf(err, "failed to retrieve user")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return &user, nil
 }
 
-func (r *repositoryBase) GetIsSetup() (bool, error) {
+func (r *repositoryBase) GetIsSetup(ctx context.Context) (bool, error) {
 	return r.txn.Model(&models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Exists()
 }
 
-func (r *repositoryBase) GetBankAccounts() ([]models.BankAccount, error) {
-	var result []models.BankAccount
-	err := r.txn.Model(&result).
-		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
-		Select(&result)
-	return result, errors.Wrap(err, "failed to retrieve bank accounts")
-}

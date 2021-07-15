@@ -68,7 +68,7 @@ func (c *Controller) removeLinkTokenFromCache(ctx context.Context, log *logrus.E
 func (c *Controller) newPlaidToken(ctx iris.Context) {
 	// Retrieve the user's details. We need to pass some of these along to
 	// plaid as part of the linking process.
-	me, err := c.mustGetAuthenticatedRepository(ctx).GetMe()
+	me, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
 		return
@@ -228,7 +228,7 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		return
 	}
 
-	me, err := repo.GetMe()
+	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve user details")
 		return
@@ -368,7 +368,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 
 	link.LinkStatus = models.LinkStatusSetup
 	link.ErrorCode = nil
-	if err = repo.UpdateLink(link); err != nil {
+	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
 		c.wrapPgError(ctx, err, "failed to update link status")
 		return
 	}
@@ -469,7 +469,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
 	}
-	if err = repo.CreatePlaidLink(&plaidLink); err != nil {
+	if err = repo.CreatePlaidLink(c.getContext(ctx), &plaidLink); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
 		return
 	}
@@ -482,7 +482,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		InstitutionName: callbackRequest.InstitutionName,
 		CreatedByUserId: repo.UserId(),
 	}
-	if err = repo.CreateLink(&link); err != nil {
+	if err = repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
 		return
 	}
@@ -505,7 +505,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 			LastUpdated:       now,
 		}
 	}
-	if err = repo.CreateBankAccounts(accounts...); err != nil {
+	if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
 		return
 	}

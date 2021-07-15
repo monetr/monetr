@@ -18,13 +18,13 @@ func (c *Controller) getMe(ctx *context.Context) {
 		return
 	}
 
-	user, err := repo.GetMe()
+	user, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "cannot retrieve user details")
 		return
 	}
 
-	isSetup, err := repo.GetIsSetup()
+	isSetup, err := repo.GetIsSetup(c.getContext(ctx))
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine if account is setup")
 		return

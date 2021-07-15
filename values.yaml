@@ -138,6 +138,7 @@ api:
     traceSampleRate: 0.0
   stripe:
     enabled: false
+    billingEnabled: false
     apiKey: ""
     publicKey: ""
     webhooksEnabled: false

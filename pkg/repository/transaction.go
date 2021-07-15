@@ -24,7 +24,7 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
-func (r *repositoryBase) GetPendingTransactionsForBankAccount(bankAccountId uint64) ([]models.Transaction, error) {
+func (r *repositoryBase) GetPendingTransactionsForBankAccount(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error) {
 	var result []models.Transaction
 	err := r.txn.Model(&result).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -38,7 +38,7 @@ func (r *repositoryBase) GetPendingTransactionsForBankAccount(bankAccountId uint
 	return result, nil
 }
 
-func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
+func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
 	if len(plaidTransactionIds) == 0 {
 		return map[string]models.Transaction{}, nil
 	}
@@ -63,7 +63,7 @@ func (r *repositoryBase) GetTransactionsByPlaidId(linkId uint64, plaidTransactio
 	return result, nil
 }
 
-func (r *repositoryBase) GetTransactions(bankAccountId uint64, limit, offset int) ([]models.Transaction, error) {
+func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error) {
 	var items []models.Transaction
 	err := r.txn.Model(&items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -101,7 +101,7 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 	return items, nil
 }
 
-func (r *repositoryBase) GetTransaction(bankAccountId, transactionId uint64) (*models.Transaction, error) {
+func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error) {
 	var result models.Transaction
 	err := r.txn.Model(&result).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -115,7 +115,7 @@ func (r *repositoryBase) GetTransaction(bankAccountId, transactionId uint64) (*m
 	return &result, nil
 }
 
-func (r *repositoryBase) CreateTransaction(bankAccountId uint64, transaction *models.Transaction) error {
+func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
 	transaction.AccountId = r.AccountId()
 	transaction.BankAccountId = bankAccountId
 
@@ -127,7 +127,7 @@ func (r *repositoryBase) CreateTransaction(bankAccountId uint64, transaction *mo
 	return nil
 }
 
-func (r *repositoryBase) UpdateTransaction(bankAccountId uint64, transaction *models.Transaction) error {
+func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
 	transaction.AccountId = r.AccountId()
 
 	_, err := r.txn.Model(transaction).
@@ -206,7 +206,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	span := sentry.StartSpan(ctx, "ProcessTransactionSpentFrom")
 	defer span.Finish()
 
-	account, err := r.GetAccount()
+	account, err := r.GetAccount(span.Context())
 	if err != nil {
 		return nil, err
 	}
@@ -249,12 +249,12 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	var currentErr, newErr error
 	switch expensePlan {
 	case AddExpense:
-		newExpense, newErr = r.GetSpendingById(bankAccountId, newSpendingId)
+		newExpense, newErr = r.GetSpendingById(span.Context(), bankAccountId, newSpendingId)
 	case ChangeExpense:
-		currentExpense, currentErr = r.GetSpendingById(bankAccountId, existingSpendingId)
-		newExpense, newErr = r.GetSpendingById(bankAccountId, newSpendingId)
+		currentExpense, currentErr = r.GetSpendingById(span.Context(), bankAccountId, existingSpendingId)
+		newExpense, newErr = r.GetSpendingById(span.Context(), bankAccountId, newSpendingId)
 	case RemoveExpense:
-		currentExpense, currentErr = r.GetSpendingById(bankAccountId, existingSpendingId)
+		currentExpense, currentErr = r.GetSpendingById(span.Context(), bankAccountId, existingSpendingId)
 	}
 
 	// If we failed to retrieve either of the expenses then something is wrong and we need to stop.
@@ -319,14 +319,14 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		expenseUpdates = append(expenseUpdates, *newExpense)
 	}
 
-	return expenseUpdates, r.UpdateExpenses(bankAccountId, expenseUpdates)
+	return expenseUpdates, r.UpdateSpending(span.Context(), bankAccountId, expenseUpdates)
 }
 
 func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error {
 	span := sentry.StartSpan(ctx, "AddExpenseToTransaction")
 	defer span.Finish()
 
-	account, err := r.GetAccount()
+	account, err := r.GetAccount(span.Context())
 	if err != nil {
 		return err
 	}

@@ -16,6 +16,7 @@ type Controller interface {
 func NewApp(configuration config.Configuration, controllers ...Controller) *iris.Application {
 	app := iris.New()
 
+	app.Configure(iris.WithoutBanner)
 
 	// This will properly display IP addresses as most of the time the API will not be able to see
 	// the real IP due to being behind several networking layers. Masquerade only works so much and

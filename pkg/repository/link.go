@@ -11,13 +11,12 @@ import (
 func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Link, error) {
 	span := sentry.StartSpan(ctx, "Get Link")
 	defer span.Finish()
-	if span.Data == nil {
-		span.Data = map[string]interface{}{}
+	span.Data = map[string]interface{}{
+		"accountId": r.AccountId(),
+		"linkId":    linkId,
 	}
 
 	span.SetTag("accountId", r.AccountIdStr())
-
-	span.Data["linkId"] = linkId
 
 	var link models.Link
 	err := r.txn.ModelContext(span.Context(), &link).
@@ -33,7 +32,7 @@ func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Li
 	return &link, nil
 }
 
-func (r *repositoryBase) GetLinks() ([]models.Link, error) {
+func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 	var result []models.Link
 	err := r.txn.Model(&result).
 		Where(`"link"."account_id" = ?`, r.accountId).
@@ -45,7 +44,7 @@ func (r *repositoryBase) GetLinks() ([]models.Link, error) {
 	return result, nil
 }
 
-func (r *repositoryBase) GetLinkIsManual(linkId uint64) (bool, error) {
+func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error) {
 	ok, err := r.txn.Model(&models.Link{}).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
@@ -58,7 +57,7 @@ func (r *repositoryBase) GetLinkIsManual(linkId uint64) (bool, error) {
 	return ok, nil
 }
 
-func (r *repositoryBase) GetLinkIsManualByBankAccountId(bankAccountId uint64) (bool, error) {
+func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error) {
 	ok, err := r.txn.Model(&models.Link{}).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."link_id" = "link"."link_id" AND "bank_account"."account_id" = "link"."account_id"`).
@@ -73,7 +72,7 @@ func (r *repositoryBase) GetLinkIsManualByBankAccountId(bankAccountId uint64) (b
 	return ok, nil
 }
 
-func (r *repositoryBase) CreateLink(link *models.Link) error {
+func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) error {
 	userId := r.UserId()
 	now := time.Now().UTC()
 	link.AccountId = r.AccountId()
@@ -86,7 +85,7 @@ func (r *repositoryBase) CreateLink(link *models.Link) error {
 	return errors.Wrap(err, "failed to insert link")
 }
 
-func (r *repositoryBase) UpdateLink(link *models.Link) error {
+func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) error {
 	userId := r.UserId()
 	link.AccountId = r.AccountId()
 	link.UpdatedByUserId = &userId

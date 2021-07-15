@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/getsentry/sentry-go"
 	"github.com/pkg/errors"
 )
 
@@ -18,15 +19,21 @@ type Balances struct {
 }
 
 func (r *repositoryBase) GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error) {
+	span := sentry.StartSpan(ctx, "GetBalances")
+	defer span.Finish()
+
 	var balance Balances
-	err := r.txn.ModelContext(ctx, &balance).
+	err := r.txn.ModelContext(span.Context(), &balance).
 		Where(`"balances"."account_id" = ?`, r.AccountId()).
 		Where(`"balances"."bank_account_id" = ?`, bankAccountId).
 		Limit(1).
 		Select(&balance)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve balances")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return &balance, nil
 }

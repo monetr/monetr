@@ -41,7 +41,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 	log = log.WithField("linkId", linkId)
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		account, err := repo.GetAccount()
+		account, err := repo.GetAccount(span.Context())
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve account for job")
 			return err
@@ -104,7 +104,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 				case "ITEM_ERROR":
 					link.LinkStatus = models.LinkStatusError
 					link.ErrorCode = &plaidErr.ErrorCode
-					if updateErr := repo.UpdateLink(link); updateErr != nil {
+					if updateErr := repo.UpdateLink(span.Context(), link); updateErr != nil {
 						log.WithError(updateErr).Error("failed to update link to be an error state")
 					}
 				}
@@ -162,13 +162,14 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			transactions[i], transactions[j] = transactions[j], transactions[i]
 		}
 
-		if err := repo.InsertTransactions(span.Context(), transactions); err != nil {
+		if err = repo.InsertTransactions(span.Context(), transactions); err != nil {
 			log.WithError(err).Error("failed to store initial transactions")
 			return err
 		}
 
 		link.LinkStatus = models.LinkStatusSetup
-		if err = repo.UpdateLink(link); err != nil {
+		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
+		if err = repo.UpdateLink(span.Context(), link); err != nil {
 			log.WithError(err).Error("failed to update link status")
 			return err
 		}
@@ -182,7 +183,6 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) error {
 			return nil // Not good enough of a reason to fail.
 		}
 
-		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
-		return repo.UpdateLink(link)
+		return nil
 	})
 }

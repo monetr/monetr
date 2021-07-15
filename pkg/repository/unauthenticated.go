@@ -22,6 +22,7 @@ type unauthenticatedRepo struct {
 }
 
 func (u *unauthenticatedRepo) CreateLogin(
+	ctx context.Context,
 	email, hashedPassword string, firstName, lastName string, isEnabled bool,
 ) (*models.Login, error) {
 	login := &models.Login{
@@ -46,14 +47,6 @@ func (u *unauthenticatedRepo) CreateLogin(
 	return login, errors.Wrap(err, "failed to create login")
 }
 
-func (u *unauthenticatedRepo) CreateAccount(timezone *time.Location) (*models.Account, error) {
-	account := &models.Account{
-		Timezone: timezone.String(),
-	}
-	_, err := u.txn.Model(account).Insert(account)
-	return account, errors.Wrap(err, "failed to create account")
-}
-
 func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *models.Account) error {
 	span := sentry.StartSpan(ctx, "Create Account")
 	defer span.Finish()
@@ -66,7 +59,7 @@ func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *mode
 	return errors.Wrap(err, "failed to create account")
 }
 
-func (u *unauthenticatedRepo) CreateUser(loginId, accountId uint64, user *models.User) error {
+func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error {
 	user.UserId = 0
 	user.AccountId = accountId
 	user.LoginId = loginId
@@ -82,7 +75,7 @@ func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models
 	panic("not implemented")
 }
 
-func (u *unauthenticatedRepo) GetLinksForItem(itemId string) (*models.Link, error) {
+func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error) {
 	var link models.Link
 	err := u.txn.Model(&link).
 		Relation("PlaidLink").

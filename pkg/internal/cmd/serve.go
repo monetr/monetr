@@ -343,6 +343,17 @@ func RunServer() error {
 
 	unixSocket := false
 
+	idleConnsClosed := make(chan struct{})
+	iris.RegisterOnInterrupt(func() {
+		log.Info("shutting down")
+		timeout := 10 * time.Second
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		// close all hosts.
+		app.Shutdown(ctx)
+		close(idleConnsClosed)
+	})
+
 	if unixSocket {
 		workingDirectory, err := os.Getwd()
 		if err != nil {
@@ -359,6 +370,10 @@ func RunServer() error {
 		return app.Run(iris.Listener(listener))
 	} else {
 		// TODO Allow listen port to be changed via config.
-		return app.Listen(":4000")
+		app.Listen(":4000", iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
 	}
+
+	<-idleConnsClosed
+
+	return nil
 }

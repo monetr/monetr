@@ -97,7 +97,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 
 	// We need to calculate what the next contribution will be for this new spending. So we need to retrieve it's funding
 	// schedule. This also helps us validate that the user has provided a valid funding schedule id.
-	fundingSchedule, err := repo.GetFundingSchedule(bankAccountId, spending.FundingScheduleId)
+	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, spending.FundingScheduleId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "could not find funding schedule specified")
 		return
@@ -105,7 +105,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 
 	// We also need to know the current account's timezone, as contributions are made at midnight in that user's
 	// timezone.
-	account, err := repo.GetAccount()
+	account, err := repo.GetAccount(c.getContext(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve account details")
 		return
@@ -151,7 +151,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		return
 	}
 
-	if err = repo.CreateSpending(spending); err != nil {
+	if err = repo.CreateSpending(c.getContext(ctx), spending); err != nil {
 		c.wrapPgError(ctx, err, "failed to create spending")
 		return
 	}
@@ -214,7 +214,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 
 	spendingToUpdate := make([]models.Spending, 0)
 
-	account, err := repo.GetAccount()
+	account, err := repo.GetAccount(c.getContext(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
 		return
@@ -226,7 +226,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
 		return
 	} else if transfer.FromSpendingId != nil {
-		fromExpense, err := repo.GetSpendingById(bankAccountId, *transfer.FromSpendingId)
+		fromExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.FromSpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
 			return
@@ -237,7 +237,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 			return
 		}
 
-		fundingSchedule, err = repo.GetFundingSchedule(bankAccountId, fromExpense.FundingScheduleId)
+		fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fromExpense.FundingScheduleId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to retrieve funding schedule for source goal/expense")
 			return
@@ -261,7 +261,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	// If we are transferring the allocated funds to another spending object then we need to update that object. If we
 	// are transferring it back to "Safe to spend" then we can just subtract the allocation from the source.
 	if transfer.ToSpendingId != nil {
-		toExpense, err := repo.GetSpendingById(bankAccountId, *transfer.ToSpendingId)
+		toExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.ToSpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to get destination goal/expense for transfer")
 			return
@@ -270,7 +270,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		// If the funding schedule that we already have put aside is not the same as the one we need for this spending
 		// then we need to retrieve the proper one.
 		if fundingSchedule == nil || fundingSchedule.FundingScheduleId != toExpense.FundingScheduleId {
-			fundingSchedule, err = repo.GetFundingSchedule(bankAccountId, toExpense.FundingScheduleId)
+			fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, toExpense.FundingScheduleId)
 			if err != nil {
 				c.wrapPgError(ctx, err, "failed to retrieve funding schedule for destination goal/expense")
 				return
@@ -292,7 +292,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		spendingToUpdate = append(spendingToUpdate, *toExpense)
 	}
 
-	if err = repo.UpdateExpenses(bankAccountId, spendingToUpdate); err != nil {
+	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spendingToUpdate); err != nil {
 		c.wrapPgError(ctx, err, "failed to update spending for transfer")
 		return
 	}
@@ -344,7 +344,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	existingSpending, err := repo.GetSpendingById(bankAccountId, updatedSpending.SpendingId)
+	existingSpending, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, updatedSpending.SpendingId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to find existing spending")
 		return
@@ -402,13 +402,13 @@ func (c *Controller) putSpending(ctx *context.Context) {
 	}
 
 	if recalculateSpending {
-		account, err := repo.GetAccount()
+		account, err := repo.GetAccount(c.getContext(ctx))
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to retrieve account details")
 			return
 		}
 
-		fundingSchedule, err := repo.GetFundingSchedule(bankAccountId, updatedSpending.FundingScheduleId)
+		fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, updatedSpending.FundingScheduleId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
 			return
@@ -425,7 +425,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 		}
 	}
 
-	if err = repo.UpdateExpenses(bankAccountId, []models.Spending{
+	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []models.Spending{
 		*updatedSpending,
 	}); err != nil {
 		c.wrapPgError(ctx, err, "failed to update spending")

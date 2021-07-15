@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (r *repositoryBase) CreatePlaidLink(link *models.PlaidLink) error {
+func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
 	_, err := r.txn.Model(link).Insert(link)
 	return errors.Wrap(err, "failed to create plaid link")
 }

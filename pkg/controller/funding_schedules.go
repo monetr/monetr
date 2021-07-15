@@ -38,7 +38,7 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	fundingSchedules, err := repo.GetFundingSchedules(bankAccountId)
+	fundingSchedules, err := repo.GetFundingSchedules(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
 		return
@@ -135,7 +135,7 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 	// It has never occurred so this needs to be nil.
 	fundingSchedule.LastOccurrence = nil
 
-	if err := repo.CreateFundingSchedule(&fundingSchedule); err != nil {
+	if err = repo.CreateFundingSchedule(c.getContext(ctx), &fundingSchedule); err != nil {
 		c.wrapPgError(ctx, err, "failed to create funding schedule")
 		return
 	}

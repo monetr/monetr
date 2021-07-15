@@ -29,7 +29,7 @@ func (c *Controller) linksController(p iris.Party) {
 func (c *Controller) getLinks(ctx iris.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	links, err := repo.GetLinks()
+	links, err := repo.GetLinks(c.getContext(ctx))
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve links")
 		return
@@ -65,7 +65,7 @@ func (c *Controller) postLinks(ctx iris.Context) {
 	link.LinkStatus = models.LinkStatusSetup
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	if err := repo.CreateLink(&link); err != nil {
+	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create manual link")
 		return
 	}
@@ -98,7 +98,7 @@ func (c *Controller) putLinks(ctx iris.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	if err := repo.UpdateLink(&link); err != nil {
+	if err := repo.UpdateLink(c.getContext(ctx), &link); err != nil {
 		c.wrapPgError(ctx, err, "could not update link")
 		return
 	}

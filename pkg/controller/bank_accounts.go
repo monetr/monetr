@@ -27,8 +27,7 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 // @Success 200 {array} models.BankAccount
 func (c *Controller) getBankAccounts(ctx *context.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
-
-	bankAccounts, err := repo.GetBankAccounts()
+	bankAccounts, err := repo.GetBankAccounts(c.getContext(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve bank accounts")
 		return
@@ -108,7 +107,7 @@ func (c *Controller) postBankAccounts(ctx *context.Context) {
 
 	// Bank accounts can only be created this way when they are associated with a link that allows manual
 	// management. If the link they specified does not, then a bank account cannot be created for this link.
-	isManual, err := repo.GetLinkIsManual(bankAccount.LinkId)
+	isManual, err := repo.GetLinkIsManual(c.getContext(ctx), bankAccount.LinkId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "could not validate link is manual")
 		return
@@ -119,7 +118,7 @@ func (c *Controller) postBankAccounts(ctx *context.Context) {
 		return
 	}
 
-	if err := repo.CreateBankAccounts(bankAccount); err != nil {
+	if err := repo.CreateBankAccounts(c.getContext(ctx), bankAccount); err != nil {
 		c.wrapPgError(ctx, err, "could not create bank account")
 		return
 	}

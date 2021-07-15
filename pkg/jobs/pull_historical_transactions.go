@@ -59,7 +59,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 	twoYearsAgo := time.Now().Add(-2 * 365 * 24 * time.Hour).UTC()
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		account, err := repo.GetAccount()
+		account, err := repo.GetAccount(span.Context())
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve account for job")
 			return err
@@ -89,7 +89,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			return err
 		}
 
-		bankAccounts, err := repo.GetBankAccountsByLinkId(linkId)
+		bankAccounts, err := repo.GetBankAccountsByLinkId(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve bank account details to pull transactions")
 			return err
@@ -122,7 +122,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			plaidTransactionIds[i] = transaction.ID
 		}
 
-		transactionsByPlaidId, err := repo.GetTransactionsByPlaidId(linkId, plaidTransactionIds)
+		transactionsByPlaidId, err := repo.GetTransactionsByPlaidId(span.Context(), linkId, plaidTransactionIds)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transaction ids for updating plaid transactions")
 			return err
@@ -237,6 +237,6 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 		}
 
 		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
-		return repo.UpdateLink(link)
+		return repo.UpdateLink(span.Context(), link)
 	})
 }

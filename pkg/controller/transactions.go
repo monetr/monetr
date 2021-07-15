@@ -48,7 +48,7 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	transactions, err := repo.GetTransactions(bankAccountId, limit, offset)
+	transactions, err := repo.GetTransactions(c.getContext(ctx), bankAccountId, limit, offset)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve transactions")
 		return
@@ -77,7 +77,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	isManual, err := repo.GetLinkIsManualByBankAccountId(bankAccountId)
+	isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to validate if link is manual")
 		return
@@ -112,7 +112,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 	var updatedExpense *models.Spending
 
 	if transaction.SpendingId != nil && *transaction.SpendingId > 0 {
-		updatedExpense, err = repo.GetSpendingById(bankAccountId, *transaction.SpendingId)
+		updatedExpense, err = repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transaction.SpendingId)
 		if err != nil {
 			c.wrapPgError(ctx, err, "could not get expense provided for transaction")
 			return
@@ -123,7 +123,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 			return
 		}
 
-		if err = repo.UpdateExpenses(bankAccountId, []models.Spending{
+		if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []models.Spending{
 			*updatedExpense,
 		}); err != nil {
 			c.wrapPgError(ctx, err, "failed to update expense for transaction")
@@ -131,7 +131,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 		}
 	}
 
-	if err = repo.CreateTransaction(bankAccountId, &transaction); err != nil {
+	if err = repo.CreateTransaction(c.getContext(ctx), bankAccountId, &transaction); err != nil {
 		c.wrapPgError(ctx, err, "could not create transaction")
 		return
 	}
@@ -173,13 +173,13 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	isManual, err := repo.GetLinkIsManualByBankAccountId(bankAccountId)
+	isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to validate if link is manual")
 		return
 	}
 
-	existingTransaction, err := repo.GetTransaction(bankAccountId, transactionId)
+	existingTransaction, err := repo.GetTransaction(c.getContext(ctx), bankAccountId, transactionId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve existing transaction for update")
 		return
@@ -232,7 +232,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 	//  I think with the way I've built this so far there might be some issues where if a field is missing during a PUT,
 	//  like the name field; we might update the name to be blank?
 
-	if err = repo.UpdateTransaction(bankAccountId, &transaction); err != nil {
+	if err = repo.UpdateTransaction(c.getContext(ctx), bankAccountId, &transaction); err != nil {
 		c.wrapPgError(ctx, err, "could not update transaction")
 		return
 	}
@@ -267,7 +267,7 @@ func (c *Controller) deleteTransactions(ctx *context.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	isManual, err := repo.GetLinkIsManualByBankAccountId(bankAccountId)
+	isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to validate if link is manual")
 		return

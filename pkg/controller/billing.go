@@ -90,7 +90,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		return
 	}
 
-	me, err := repo.GetMe()
+	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve current user details")
 		return
@@ -247,7 +247,7 @@ func (c *Controller) waitForSubscription(ctx iris.Context) {
 	log := c.getLog(ctx)
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	account, err := repo.GetAccount()
+	account, err := repo.GetAccount(c.getContext(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve account data")
 		return

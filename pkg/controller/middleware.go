@@ -31,7 +31,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 	case "GET", "OPTIONS":
 		dbi = c.db
 	case "POST", "PUT", "DELETE":
-		txn, err := c.db.BeginContext(ctx.Request().Context())
+		txn, err := c.db.BeginContext(c.getContext(ctx))
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to begin transaction")
 			return
@@ -41,12 +41,12 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 			// TODO (elliotcourant) Add proper logging here that the request has failed
 			//  and we are rolling back the transaction.
 			if ctx.GetErr() != nil {
-				if err := txn.RollbackContext(ctx.Request().Context()); err != nil {
+				if err := txn.RollbackContext(c.getContext(ctx)); err != nil {
 					// Rollback
 					c.log.WithError(err).Errorf("failed to rollback request")
 				}
 			} else {
-				if err = txn.CommitContext(ctx.Request().Context()); err != nil {
+				if err = txn.CommitContext(c.getContext(ctx)); err != nil {
 					// failed to commit
 					fmt.Println(err)
 				}

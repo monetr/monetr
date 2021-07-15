@@ -119,7 +119,7 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 			return err
 		}
 
-		bankAccounts, err := repo.GetBankAccountsByLinkId(linkId)
+		bankAccounts, err := repo.GetBankAccountsByLinkId(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve bank account details to pull balances")
 			return err
@@ -150,7 +150,7 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 				case "ITEM_ERROR":
 					link.LinkStatus = models.LinkStatusError
 					link.ErrorCode = &plaidErr.ErrorCode
-					if updateErr := repo.UpdateLink(link); updateErr != nil {
+					if updateErr := repo.UpdateLink(span.Context(), link); updateErr != nil {
 						log.WithError(updateErr).Error("failed to update link to be an error state")
 					}
 				}
@@ -203,7 +203,7 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 			}
 		}
 
-		if err := repo.UpdateBankAccounts(updatedBankAccounts); err != nil {
+		if err := repo.UpdateBankAccounts(span.Context(), updatedBankAccounts); err != nil {
 			log.WithError(err).Error("failed to update bank account balances")
 			return err
 		}

@@ -149,10 +149,18 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(c.loggingMiddleware)
 		p.OnAnyErrorCode(func(ctx iris.Context) {
 			if err := ctx.GetErr(); err != nil {
-				if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
-					_ = hub.CaptureException(err)
+				if spanContext := c.getContext(ctx); spanContext != nil {
+					if hub := sentry.GetHubFromContext(spanContext); hub != nil {
+						_ = hub.CaptureException(err)
+					} else {
+						sentry.CaptureException(err)
+					}
 				} else {
-					sentry.CaptureException(err)
+					if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+						_ = hub.CaptureException(err)
+					} else {
+						sentry.CaptureException(err)
+					}
 				}
 
 				ctx.JSON(map[string]interface{}{
@@ -178,7 +186,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
 				tracingCtx := sentry.SetHubOnContext(ctx.Request().Context(), hub)
 				name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
-				span := sentry.StartSpan(tracingCtx, ctx.Method(), sentry.TransactionName(name))
+				span := sentry.StartSpan(
+					tracingCtx,
+					ctx.Method(),
+					sentry.TransactionName(name),
+					sentry.ContinueFromRequest(ctx.Request()),
+				)
 				defer span.Finish()
 
 				ctx.Values().Set(spanContextKey, span.Context())

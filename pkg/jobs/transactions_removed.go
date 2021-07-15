@@ -122,6 +122,6 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 		log.Debugf("successfully removed %d transaction(s)", len(transactions))
 
 		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
-		return repo.UpdateLink(link)
+		return repo.UpdateLink(span.Context(), link)
 	})
 }
