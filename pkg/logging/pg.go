@@ -74,22 +74,45 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 		"stmt": queryType,
 	}).Inc()
 
-	unformattedQuery, err := event.UnformattedQuery()
-	if err == nil && len(unformattedQuery) > 0 {
-		span := sentry.StartSpan(ctx, queryType)
-		span.StartTime = event.StartTime
-		span.Data = map[string]interface{}{
-			"query": string(unformattedQuery),
-		}
-		span.SetTag("Query", queryType)
+	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		unformattedQuery, err := event.UnformattedQuery()
+		if err == nil && len(unformattedQuery) > 0 {
+			queryString := string(unformattedQuery)
+			if event.Err == nil {
+				hub.AddBreadcrumb(&sentry.Breadcrumb{
+					Type:      "query",
+					Category:  "started",
+					Message:   queryString,
+					Data:      map[string]interface{}{},
+					Level:     "debug",
+					Timestamp: event.StartTime,
+				}, nil)
+			} else {
+				hub.AddBreadcrumb(&sentry.Breadcrumb{
+					Type:     "query",
+					Category: "started",
+					Message:  queryString,
+					Data: map[string]interface{}{
+						"error": event.Err.Error(),
+					},
+					Level:     "error",
+					Timestamp: event.StartTime,
+				}, nil)
+			}
 
-		if event.Err == nil {
-			span.Status = sentry.SpanStatusOK
-		} else {
-			span.Status = sentry.SpanStatusInternalError
-		}
+			span := sentry.StartSpan(ctx, queryType)
+			span.StartTime = event.StartTime
+			span.Description = queryString
+			span.SetTag("query", queryType)
 
-		defer span.Finish()
+			if event.Err == nil {
+				span.Status = sentry.SpanStatusOK
+			} else {
+				span.Status = sentry.SpanStatusInternalError
+			}
+
+			defer span.Finish()
+		}
 	}
 
 	return nil

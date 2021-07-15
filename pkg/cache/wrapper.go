@@ -127,6 +127,7 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 	defer span.Finish()
 
 	if key == "" {
+		span.Status = sentry.SpanStatusInvalidArgument
 		return nil, errors.WithStack(ErrBlankKey)
 	}
 
@@ -134,17 +135,24 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 
 	result, err := r.do(span.Context(), "GET", key)
 	if err != nil {
+		span.SetTag("cache", "failure")
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve item from cache")
 	}
 
 	switch raw := result.(type) {
 	case nil:
+		span.SetTag("cache", "miss")
+		span.Status = sentry.SpanStatusNotFound
 		return nil, nil
 	case string:
+		span.SetTag("cache", "hit")
 		return []byte(raw), nil
 	case []byte:
+		span.SetTag("cache", "hit")
 		return raw, nil
 	default:
+		span.Status = sentry.SpanStatusUnimplemented
 		panic(fmt.Sprintf("unsupported cache value type: %T", raw))
 	}
 }
