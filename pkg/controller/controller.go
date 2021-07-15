@@ -195,6 +195,17 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				defer span.Finish()
 
 				ctx.Values().Set(spanContextKey, span.Context())
+
+				hub.AddBreadcrumb(&sentry.Breadcrumb{
+					Type:     "http",
+					Category: "api",
+					Data: map[string]interface{}{
+						"url":    ctx.Request().URL.String(),
+						"method": ctx.Method(),
+					},
+					Level:     "info",
+					Timestamp: time.Now(),
+				}, nil)
 			} else {
 				ctx.Values().Set(spanContextKey, ctx.Request().Context())
 			}

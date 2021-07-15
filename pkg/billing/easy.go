@@ -152,9 +152,40 @@ func NewBasicPaywall(log *logrus.Entry, repo AccountRepository) BasicPayWall {
 // possible for it to return a stale response within a few seconds. But in general it should be acceptable. When an
 // account is updated -> its cache is invalidated. There is likely a very small window where an invalid state could be
 // evaluated but it should be fine.
-func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountId uint64) (bool, error) {
+func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountId uint64) (active bool, err error) {
 	span := sentry.StartSpan(ctx, "Billing - GetSubscriptionIsActive")
 	defer span.Finish()
+
+	defer func() {
+		if hub := sentry.GetHubFromContext(ctx); hub != nil {
+			level := sentry.LevelDebug
+			crumbType := "debug"
+			if err != nil {
+				crumbType = "error"
+				level = sentry.LevelError
+			}
+
+			var message string
+			if active {
+				message = "Subscription is active"
+			} else if err == nil {
+				message = "Subscription is not active"
+			} else {
+				message = "There was a problem verifying whether or not the subscription was active"
+			}
+
+			hub.AddBreadcrumb(&sentry.Breadcrumb{
+				Type:     crumbType,
+				Category: "subscription",
+				Message:  message,
+				Data: map[string]interface{}{
+					"accountId": accountId,
+				},
+				Level:     level,
+				Timestamp: time.Now(),
+			}, nil)
+		}
+	}()
 
 	log := b.log.WithContext(span.Context()).WithField("accountId", accountId)
 
