@@ -78,6 +78,10 @@ func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
 		return errors.WithStack(ErrBlankKey)
 	}
 
+	span.Data = map[string]interface{}{
+		"key": key,
+	}
+
 	return errors.Wrap(r.send(span.Context(), "SET", key, value), "failed to store item in cache")
 }
 
@@ -87,6 +91,10 @@ func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifet
 
 	if key == "" {
 		return errors.WithStack(ErrBlankKey)
+	}
+
+	span.Data = map[string]interface{}{
+		"key": key,
 	}
 
 	return errors.Wrap(

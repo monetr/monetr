@@ -175,12 +175,9 @@ func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountI
 			}
 
 			hub.AddBreadcrumb(&sentry.Breadcrumb{
-				Type:     crumbType,
-				Category: "subscription",
-				Message:  message,
-				Data: map[string]interface{}{
-					"accountId": accountId,
-				},
+				Type:      crumbType,
+				Category:  "subscription",
+				Message:   message,
 				Level:     level,
 				Timestamp: time.Now(),
 			}, nil)
