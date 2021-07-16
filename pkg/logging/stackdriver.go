@@ -8,8 +8,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
-	"log"
-	"time"
 )
 
 var (
@@ -96,32 +94,4 @@ func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error
 	s.logger.Log(googleEntry)
 
 	return s.inner.Format(entry)
-}
-
-func init() {
-	ctx := context.Background()
-
-	// Sets your Google Cloud Platform project ID.
-	projectID := "YOUR_PROJECT_ID"
-	client, err := logging.NewClient(ctx, projectID)
-	if err != nil {
-		log.Fatalf("Failed to create client: %v", err)
-	}
-	defer client.Close()
-
-	client.Logger("rest-api").Log(logging.Entry{
-		Timestamp:      time.Time{},
-		Severity:       0,
-		Payload:        nil,
-		Labels:         nil,
-		InsertID:       "",
-		HTTPRequest:    nil,
-		Operation:      nil,
-		LogName:        "",
-		Resource:       nil,
-		Trace:          "",
-		SpanID:         "",
-		TraceSampled:   false,
-		SourceLocation: nil,
-	})
 }
