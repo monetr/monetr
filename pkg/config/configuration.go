@@ -67,12 +67,12 @@ type PostgreSQL struct {
 }
 
 type SMTPClient struct {
-	Enabled  bool
-	Identity string
-	Username string
-	Password string
-	Host     string
-	Port     int
+	Enabled      bool
+	Identity     string
+	Username     string
+	Password     string
+	Host         string
+	Port         int
 	VerifyEmails bool
 }
 
@@ -144,7 +144,14 @@ type Redis struct {
 }
 
 type Logging struct {
-	Level string
+	Level       string
+	StackDriver StackDriverLogging
+}
+
+type StackDriverLogging struct {
+	Enabled   bool
+	ProjectID string
+	LogName   string
 }
 
 type Sentry struct {

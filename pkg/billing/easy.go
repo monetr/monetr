@@ -3,6 +3,7 @@ package billing
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -234,6 +235,14 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 	if err != nil {
 		log.WithError(err).Errorf("failed to retrieve account by stripe customer Id")
 		return errors.Wrap(err, "failed to retrieve account by stripe customer Id")
+	}
+
+	// Set the user for this event, this way webhooks are properly associated with the destination user in our
+	// application.
+	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		hub.Scope().SetUser(sentry.User{
+			ID: strconv.FormatUint(account.AccountId, 10),
+		})
 	}
 
 	log = log.WithField("accountId", account.AccountId)

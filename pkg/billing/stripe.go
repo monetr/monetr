@@ -6,6 +6,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/pubsub"
@@ -51,6 +52,12 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 	})
 
 	log.Debug("handling webhook from stripe")
+
+	crumbs.Debug(span.Context(), "Handling Stripe webhook.", map[string]interface{}{
+		"eventId":  event.ID,
+		"liveMode": event.Livemode,
+		"type":     event.Type,
+	})
 
 	switch event.Type {
 	case "checkout.session.completed":

@@ -58,3 +58,12 @@ func NewLoggerWithLevel(levelString string) *logrus.Entry {
 	}
 	return logrus.NewEntry(logger)
 }
+
+type Config struct {
+	Level     logrus.Level
+	Formatter logrus.Formatter
+}
+
+func NewLoggerV2(config Config) *logrus.Entry {
+	return nil
+}
