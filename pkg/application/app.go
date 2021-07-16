@@ -57,6 +57,8 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *iris
 			"Cookies",
 			"Content-Type",
 			"M-Token",
+			"sentry-trace",
+			"Authorization",
 		},
 		ExposedHeaders:     nil,
 		MaxAge:             0,
