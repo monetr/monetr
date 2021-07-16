@@ -2,8 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -11,11 +13,23 @@ import (
 // wrapPgError will wrap and return an error to the client. But will try to infer a status code from the error it is
 // given. If it cannot infer a status code, an InternalServerError is used.
 func (c *Controller) wrapPgError(ctx *context.Context, err error, msg string, args ...interface{}) {
+
 	switch errors.Cause(err) {
 	case pg.ErrNoRows:
+		span := sentry.StartSpan(c.getContext(ctx), "PG Error")
+		defer span.Finish()
+
+		span.Status = sentry.SpanStatusInternalError
+
 		ctx.SetErr(errors.Errorf("%s: record does not exist", fmt.Sprintf(msg, args...)))
 		ctx.StatusCode(http.StatusNotFound)
 		ctx.StopExecution()
+
+		span.Description = ctx.GetErr().Error()
+
+		crumbs.Error(c.getContext(ctx), fmt.Sprintf(msg, args...), c.configuration.APIDomainName, map[string]interface{}{
+			"error": ctx.GetErr().Error(),
+		})
 	default:
 		switch actualErr := errors.Cause(err).(type) {
 		case pg.Error:
@@ -25,6 +39,8 @@ func (c *Controller) wrapPgError(ctx *context.Context, err error, msg string, ar
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, msg, args...)
 		}
 	}
+
+
 }
 
 func (c *Controller) sanitizePgError(err pg.Error) (error, int) {
@@ -38,15 +54,37 @@ func (c *Controller) sanitizePgError(err pg.Error) (error, int) {
 }
 
 func (c *Controller) wrapAndReturnError(ctx *context.Context, err error, status int, msg string, args ...interface{}) {
+	span := sentry.StartSpan(c.getContext(ctx), "Error")
+	defer span.Finish()
+
+	span.Status = sentry.SpanStatusInternalError
+
 	ctx.SetErr(errors.Wrapf(err, msg, args...))
 	ctx.StatusCode(status)
 	ctx.StopExecution()
+
+	span.Description = ctx.GetErr().Error()
+
+	crumbs.Error(c.getContext(ctx), fmt.Sprintf(msg, args...), c.configuration.APIDomainName, map[string]interface{}{
+		"error": ctx.GetErr().Error(),
+	})
 }
 
 func (c *Controller) returnError(ctx *context.Context, status int, msg string, args ...interface{}) {
+	span := sentry.StartSpan(c.getContext(ctx), "Error")
+	defer span.Finish()
+
+	span.Status = sentry.SpanStatusInternalError
+
 	ctx.SetErr(errors.Errorf(msg, args...))
 	ctx.StatusCode(status)
 	ctx.StopExecution()
+
+	span.Description = ctx.GetErr().Error()
+
+	crumbs.Error(c.getContext(ctx), fmt.Sprintf(msg, args...), c.configuration.APIDomainName, map[string]interface{}{
+		"error": ctx.GetErr().Error(),
+	})
 }
 
 func (c *Controller) badRequest(ctx *context.Context, msg string, args ...interface{}) {

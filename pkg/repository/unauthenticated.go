@@ -25,12 +25,14 @@ func (u *unauthenticatedRepo) CreateLogin(
 	ctx context.Context,
 	email, hashedPassword string, firstName, lastName string, isEnabled bool,
 ) (*models.Login, error) {
-	login := &models.Login{
-		Email:        strings.ToLower(email),
+	login := &models.LoginWithHash{
+		Login: models.Login{
+			Email:     strings.ToLower(email),
+			FirstName: firstName,
+			LastName:  lastName,
+			IsEnabled: isEnabled,
+		},
 		PasswordHash: hashedPassword,
-		FirstName:    firstName,
-		LastName:     lastName,
-		IsEnabled:    isEnabled,
 	}
 	count, err := u.txn.Model(login).
 		Where(`"login"."email" = ?`, email).
@@ -44,7 +46,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 	}
 
 	_, err = u.txn.Model(login).Insert(login)
-	return login, errors.Wrap(err, "failed to create login")
+	return &login.Login, errors.Wrap(err, "failed to create login")
 }
 
 func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *models.Account) error {

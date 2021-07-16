@@ -69,7 +69,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 	ctx.Next()
 }
 
-func (c *Controller) authenticationMiddleware(ctx *context.Context) {
+func (c *Controller) authenticateUser(ctx *context.Context) (err error) {
 	now := time.Now()
 	var token string
 
@@ -80,7 +80,7 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
 		defer func() {
 			var message string
-			if ctx.GetErr() == nil {
+			if err == nil {
 				message = "M-Token is valid"
 				data["accountId"] = c.mustGetAccountId(ctx)
 				data["userId"] = c.mustGetUserId(ctx)
@@ -106,8 +106,7 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	}
 
 	if token == "" {
-		c.returnError(ctx, http.StatusForbidden, "unauthorized")
-		return
+		return errors.Errorf("token must be provided")
 	}
 
 	var claims HarderClaims
@@ -120,13 +119,11 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 		return []byte(c.configuration.JWT.LoginJwtSecret), nil
 	})
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")
-		return
+		return errors.Wrap(err, "failed to validate token")
 	}
 
 	if !result.Valid {
-		c.returnError(ctx, http.StatusForbidden, "unauthorized")
-		return
+		return errors.Errorf("token is not valid")
 	}
 
 	// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
@@ -145,6 +142,16 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	ctx.Values().Set(userIdContextKey, claims.UserId)
 	ctx.Values().Set(loginIdContextKey, claims.LoginId)
 
+	return nil
+}
+
+func (c *Controller) authenticationMiddleware(ctx *context.Context) {
+	if err := c.authenticateUser(ctx); err != nil {
+		ctx.SetErr(err)
+		ctx.StatusCode(http.StatusForbidden)
+		return
+	}
+
 	ctx.Next()
 }
 
@@ -158,6 +165,7 @@ func (c *Controller) requireActiveSubscriptionMiddleware(ctx *context.Context) {
 	}
 
 	if !active {
+		c.getSpan(ctx).Status = sentry.SpanStatusPermissionDenied
 		c.returnError(ctx, http.StatusPaymentRequired, "subscription is not active")
 		return
 	}

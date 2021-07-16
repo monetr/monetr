@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"github.com/monetr/rest-api/pkg/mail"
 	"net/http"
 	"net/smtp"
@@ -183,15 +184,26 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		// Trace API calls to sentry
 		p.Use(func(ctx iris.Context) {
+			var span *sentry.Span
 			if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
 				tracingCtx := sentry.SetHubOnContext(ctx.Request().Context(), hub)
 				name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
-				span := sentry.StartSpan(
+				span = sentry.StartSpan(
 					tracingCtx,
 					ctx.Method(),
 					sentry.TransactionName(name),
 					sentry.ContinueFromRequest(ctx.Request()),
 				)
+				span.Description = strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
+				defer func() {
+					if span.Status == sentry.SpanStatusUndefined {
+						if ctx.GetErr() != nil {
+							span.Status = sentry.SpanStatusInternalError
+						} else {
+							span.Status = sentry.SpanStatusOK
+						}
+					}
+				}()
 				defer span.Finish()
 
 				ctx.Values().Set(spanKey, span)
@@ -199,11 +211,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
 					Type:     "http",
-					Category: "api",
+					Category: c.configuration.APIDomainName,
 					Data: map[string]interface{}{
 						"url":    ctx.Request().URL.String(),
 						"method": ctx.Method(),
 					},
+					Message:   fmt.Sprintf("%s %s", ctx.Method(), ctx.Request().URL.String()),
 					Level:     "info",
 					Timestamp: time.Now(),
 				}, nil)
@@ -212,6 +225,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			}
 
 			ctx.Next()
+
+			if span != nil {
+				if ctx.GetErr() != nil && span.Status == sentry.SpanStatusUndefined {
+					span.Status = sentry.SpanStatusInternalError
+				}
+			}
 		})
 
 		// For the following endpoints we want to have a repository available to us.
@@ -262,7 +281,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 					c.badRequest(ctx, "this endpoint is meant to be used to test error reporting to sentry")
 				})
 			}
-
 		})
 	})
 

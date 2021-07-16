@@ -59,6 +59,8 @@ func (p *postgresAccountRepository) GetAccount(ctx context.Context, accountId ui
 	span := sentry.StartSpan(ctx, "Billing - GetAccount")
 	defer span.Finish()
 
+	span.Status = sentry.SpanStatusOK
+
 	log := p.log.WithContext(span.Context()).WithField("accountId", accountId)
 
 	var account models.Account
@@ -167,9 +169,9 @@ func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountI
 
 			var message string
 			if active {
-				message = "Subscription is active"
+				message = "Subscription is active."
 			} else if err == nil {
-				message = "Subscription is not active"
+				message = "Subscription is not active, the current endpoint may require an active subscription."
 			} else {
 				message = "There was a problem verifying whether or not the subscription was active"
 			}
@@ -190,8 +192,11 @@ func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountI
 
 	account, err := b.accounts.GetAccount(span.Context(), accountId)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return false, errors.Wrap(err, "cannot determine if account subscription is active")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return account.IsSubscriptionActive(), nil
 }

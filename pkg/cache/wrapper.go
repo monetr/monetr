@@ -78,9 +78,7 @@ func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
 		return errors.WithStack(ErrBlankKey)
 	}
 
-	span.Data = map[string]interface{}{
-		"key": key,
-	}
+	span.Description = key
 
 	return errors.Wrap(r.send(span.Context(), "SET", key, value), "failed to store item in cache")
 }
@@ -93,9 +91,7 @@ func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifet
 		return errors.WithStack(ErrBlankKey)
 	}
 
-	span.Data = map[string]interface{}{
-		"key": key,
-	}
+	span.Description = key
 
 	return errors.Wrap(
 		r.send(
@@ -110,6 +106,8 @@ func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) 
 	span := sentry.StartSpan(ctx, "Redis - SetEz")
 	defer span.Finish()
 
+	span.Description = key
+
 	data, err := msgpack.Marshal(object)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal item to be cached")
@@ -121,6 +119,8 @@ func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) 
 func (r *redisCache) SetEzTTL(ctx context.Context, key string, object interface{}, lifetime time.Duration) error {
 	span := sentry.StartSpan(ctx, "Redis - SetEzTTL")
 	defer span.Finish()
+
+	span.Description = key
 
 	data, err := msgpack.Marshal(object)
 	if err != nil {
@@ -140,9 +140,7 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 	}
 
 	span.Status = sentry.SpanStatusOK
-	span.Data = map[string]interface{}{
-		"key": key,
-	}
+	span.Description = key
 
 	result, err := r.do(span.Context(), "GET", key)
 	if err != nil {
@@ -172,8 +170,13 @@ func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) 
 	span := sentry.StartSpan(ctx, "Redis - GetEz")
 	defer span.Finish()
 
+	span.Status = sentry.SpanStatusOK
+
+	span.Description = key
+
 	data, err := r.Get(span.Context(), key)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return err
 	}
 
@@ -181,7 +184,12 @@ func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) 
 		return nil
 	}
 
-	return errors.Wrap(msgpack.Unmarshal(data, output), "failed to unmarshal from cache")
+	if err = msgpack.Unmarshal(data, output); err != nil {
+		span.Status = sentry.SpanStatusDataLoss
+		return errors.Wrap(err, "failed to unmarshal from cache")
+	}
+
+	return nil
 }
 
 func (r *redisCache) Delete(ctx context.Context, key string) error {
@@ -192,10 +200,8 @@ func (r *redisCache) Delete(ctx context.Context, key string) error {
 		return errors.WithStack(ErrBlankKey)
 	}
 
+	span.Description = key
 	span.Status = sentry.SpanStatusOK
-	span.Data = map[string]interface{}{
-		"key": key,
-	}
 
 	return errors.Wrap(r.send(span.Context(), "DEL", key), "failed to delete item from cache")
 }

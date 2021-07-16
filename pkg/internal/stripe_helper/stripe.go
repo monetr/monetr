@@ -21,6 +21,7 @@ type Stripe interface {
 	UpdateCustomer(ctx context.Context, id string, customer stripe.CustomerParams) (*stripe.Customer, error)
 	GetCustomer(ctx context.Context, id string) (*stripe.Customer, error)
 	GetSubscription(ctx context.Context, stripeSubscriptionId string) (*stripe.Subscription, error)
+	NewCheckoutSession(ctx context.Context, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error)
 	NewPortalSession(ctx context.Context, params *stripe.BillingPortalSessionParams) (*stripe.BillingPortalSession, error)
 }
 
@@ -151,8 +152,11 @@ func (s *stripeBase) CreateCustomer(ctx context.Context, customer stripe.Custome
 	span := sentry.StartSpan(ctx, "Stripe - CreateCustomer")
 	defer span.Finish()
 
+	span.Status = sentry.SpanStatusOK
+
 	result, err := s.client.Customers.New(&customer)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		err = s.wrapStripeError(span.Context(), err, "failed to create customer")
 	}
 
@@ -206,6 +210,32 @@ func (s *stripeBase) NewPortalSession(ctx context.Context, params *stripe.Billin
 	return result, nil
 }
 
+func (s *stripeBase) NewCheckoutSession(ctx context.Context, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error) {
+	span := sentry.StartSpan(ctx, "Stripe - NewCheckoutSession")
+	defer span.Finish()
+
+	span.Status = sentry.SpanStatusOK
+
+	result, err := s.client.CheckoutSessions.New(params)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		err = s.wrapStripeError(span.Context(), err, "failed to create billing portal session")
+	}
+
+	crumbs.HTTP(span.Context(),
+		"Create Checkout Session",
+		"stripe",
+		"https://api.stripe.com/v1/checkout/sessions",
+		"POST",
+		result.APIResource.LastResponse.StatusCode,
+		map[string]interface{}{
+			"Request-Id": result.APIResource.LastResponse.RequestID,
+		},
+	)
+
+	return result, err
+}
+
 const (
 	cardDeclined = "card_declined"
 )
@@ -227,7 +257,7 @@ func (s *stripeBase) wrapStripeError(ctx context.Context, input error, msg strin
 		case cardDeclined:
 			return errors.Wrap(ErrCardDeclined, msg)
 		default:
-			return errors.Errorf("%s: %s", msg, err.Msg)
+			return errors.Wrap(input, msg)
 		}
 	default:
 		return errors.Wrap(err, msg)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"net/http"
 	"time"
 
@@ -82,6 +83,11 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		}
 	}
 
+	crumbs.Debug(c.getContext(ctx), "Creating checkout session for price", map[string]interface{}{
+		"priceId":       plan.StripePriceId,
+		"freeTrialDays": plan.FreeTrialDays,
+	})
+
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
@@ -99,6 +105,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	// Check to see if the account does not already have a stripe customer Id. If they don't have one then we want to
 	// create one.
 	if account.StripeCustomerId == nil {
+		crumbs.Debug(c.getContext(ctx), "Account does not have a Stripe Customer ID, a customer will be created.", nil)
 		log.Warn("attempting to create a checkout session for an account with no customer, customer will be created")
 		name := me.FirstName + " " + me.LastName
 		customer, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
@@ -133,6 +140,11 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	if request.CancelPath != nil {
 		cancelUrl = fmt.Sprintf("https://%s%s", c.configuration.UIDomainName, *request.CancelPath)
 	}
+
+	crumbs.Debug(c.getContext(ctx), "Creating Stripe Checkout Session", map[string]interface{}{
+		"successUrl": successUrl,
+		"cancelUrl":  cancelUrl,
+	})
 
 	checkoutParams := &stripe.CheckoutSessionParams{
 		SuccessURL: &successUrl,
@@ -176,7 +188,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		checkoutParams.SubscriptionData.TrialPeriodDays = stripe.Int64(int64(plan.FreeTrialDays))
 	}
 
-	result, err := c.stripeClient.CheckoutSessions.New(checkoutParams)
+	result, err := c.stripe.NewCheckoutSession(c.getContext(ctx), checkoutParams)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create checkout session")
 		return
