@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "redoc": "2.0.0-rc.54",
+    "redoc": "2.0.0-rc.55",
     "redoc-cli": "0.12.1",
     "sql-formatter": "4.0.2",
     "ts-node": "10.1.0",
