@@ -16,6 +16,8 @@ type Login struct {
 }
 
 type LoginWithHash struct {
+	tableName string `pg:"logins"`
+
 	Login
 	PasswordHash string `json:"-" pg:"password_hash,notnull"`
 }

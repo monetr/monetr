@@ -149,6 +149,7 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	if err := c.authenticateUser(ctx); err != nil {
 		ctx.SetErr(err)
 		ctx.StatusCode(http.StatusForbidden)
+		ctx.StopExecution()
 		return
 	}
 

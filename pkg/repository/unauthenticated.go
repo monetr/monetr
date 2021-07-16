@@ -35,7 +35,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 		PasswordHash: hashedPassword,
 	}
 	count, err := u.txn.Model(login).
-		Where(`"login"."email" = ?`, email).
+		Where(`"email" = ?`, email).
 		Count()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to verify if email is unique")
