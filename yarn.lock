@@ -1193,11 +1193,6 @@ postcss-value-parser@^4.0.2:
   resolved "https://registry.yarnpkg.com/postcss-value-parser/-/postcss-value-parser-4.1.0.tgz#443f6a20ced6481a2bda4fa8532a6e55d789a2cb"
   integrity sha512-97DXOFbQJhk71ne5/Mt6cOu6yxsSfM0QGQyl0L25Gca4yGWEGJaig7l7gbCX623VqTBNGLRLaVUCnNkcedlRSQ==
 
-prismjs@^1.23.0:
-  version "1.24.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.24.0.tgz#0409c30068a6c52c89ef7f1089b3ca4de56be2ac"
-  integrity sha512-SqV5GRsNqnzCL8k5dfAjCNhUrF3pR0A9lTDSCUZeh/LIshheXJEaP0hwLz2t4XHivd2J/v2HR+gRnigzeKe3cQ==
-
 prismjs@^1.24.0:
   version "1.24.1"
   resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.24.1.tgz#c4d7895c4d6500289482fa8936d9cdd192684036"
@@ -1333,10 +1328,10 @@ readdirp@~3.5.0:
   dependencies:
     picomatch "^2.2.1"
 
-redoc-cli@0.12.1:
-  version "0.12.1"
-  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.12.1.tgz#38a459b33e8e83c899d5aa902b3d73c960356e4c"
-  integrity sha512-Ew8ByEayRBZgG9iLv2ZO+h3ZMz55naz1jA1CPt6Vm0xcSbVNYb7ubnbHhSvUGshc2bGu8Je74k1veFZZqXjBeQ==
+redoc-cli@0.12.2:
+  version "0.12.2"
+  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.12.2.tgz#d81195961783bb00b020cd93bd19ead348411d70"
+  integrity sha512-GyOCEr1g+U/Js7lgHj+0vH9L2uCwbc0m9CJrlb099qp6jzmxnJQ6sC85BiN9DOwr4/fsQfVhoNpWQSkkpFBo5Q==
   dependencies:
     chokidar "^3.5.1"
     handlebars "^4.7.7"
@@ -1346,40 +1341,9 @@ redoc-cli@0.12.1:
     node-libs-browser "^2.2.1"
     react "^17.0.1"
     react-dom "^17.0.1"
-    redoc "2.0.0-rc.54"
+    redoc "2.0.0-rc.55"
     styled-components "^5.3.0"
     yargs "^17.0.1"
-
-redoc@2.0.0-rc.54:
-  version "2.0.0-rc.54"
-  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.54.tgz#004d993d72d726b1aeb6c90ad1c303945f4ec5ba"
-  integrity sha512-xwukaWdoktkDAoQuhajekdC54+/lSLwIUqJCNSTVEjeYEuZPq2tFUj9H5SBt8/YSq5UF/zOmDQrXPWMgildQpQ==
-  dependencies:
-    "@babel/runtime" "^7.14.0"
-    "@redocly/openapi-core" "^1.0.0-beta.50"
-    "@redocly/react-dropdown-aria" "^2.0.11"
-    "@types/node" "^15.6.1"
-    classnames "^2.3.1"
-    decko "^1.2.0"
-    dompurify "^2.2.8"
-    eventemitter3 "^4.0.7"
-    json-pointer "^0.6.1"
-    lunr "^2.3.9"
-    mark.js "^8.11.1"
-    marked "^0.7.0"
-    memoize-one "^5.2.1"
-    mobx-react "^7.2.0"
-    openapi-sampler "^1.0.1"
-    path-browserify "^1.0.1"
-    perfect-scrollbar "^1.5.1"
-    polished "^4.1.3"
-    prismjs "^1.23.0"
-    prop-types "^15.7.2"
-    react-tabs "^3.2.2"
-    slugify "~1.4.7"
-    stickyfill "^1.1.1"
-    swagger2openapi "^7.0.6"
-    url-template "^2.0.8"
 
 redoc@2.0.0-rc.55:
   version "2.0.0-rc.55"
