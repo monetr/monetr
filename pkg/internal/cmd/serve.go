@@ -114,6 +114,7 @@ func RunServer() error {
 						delete(event.Request.Headers, "Cookie")
 						delete(event.Request.Headers, "Cookies")
 						delete(event.Request.Headers, "M-Token")
+						delete(event.Request.Headers, "Plaid-Verification")
 						delete(event.Request.Headers, "Stripe-Signature")
 					}
 				}
@@ -134,6 +135,7 @@ func RunServer() error {
 						delete(event.Request.Headers, "Cookie")
 						delete(event.Request.Headers, "Cookies")
 						delete(event.Request.Headers, "M-Token")
+						delete(event.Request.Headers, "Plaid-Verification")
 						delete(event.Request.Headers, "Stripe-Signature")
 					}
 				}
