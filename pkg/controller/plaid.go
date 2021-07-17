@@ -595,3 +595,16 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 		return
 	}
 }
+
+// Remove Plaid Link
+// @Summary Remove Plaid Link
+// @id remove-plaid-link
+// @tags Plaid
+// @description Remove a Plaid link from your account, this will revoke the access_token associated with the specified link.
+// @Security ApiKeyAuth
+// @Router /plaid/remove/{linkId:uint64} [delete]
+// @Success 200
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) removePlaidLink(ctx iris.Context) {
+
+}

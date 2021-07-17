@@ -110,10 +110,11 @@ func RunServer() error {
 				if event.Request != nil {
 					event.Request.Cookies = ""
 					if event.Request.Headers != nil {
-						delete(event.Request.Headers, "M-Token")
+						delete(event.Request.Headers, "Authorization")
 						delete(event.Request.Headers, "Cookie")
 						delete(event.Request.Headers, "Cookies")
-						delete(event.Request.Headers, "Authorization")
+						delete(event.Request.Headers, "M-Token")
+						delete(event.Request.Headers, "Stripe-Signature")
 					}
 				}
 
@@ -126,11 +127,16 @@ func RunServer() error {
 
 		sentry.ConfigureScope(func(scope *sentry.Scope) {
 			scope.AddEventProcessor(func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
-				event.Request.Cookies = ""
-				delete(event.Request.Headers, "Cookie")
-				delete(event.Request.Headers, "Cookies")
-				delete(event.Request.Headers, "M-Token")
-				delete(event.Request.Headers, "Authorization")
+				if event.Request != nil {
+					event.Request.Cookies = ""
+					if event.Request.Headers != nil {
+						delete(event.Request.Headers, "Authorization")
+						delete(event.Request.Headers, "Cookie")
+						delete(event.Request.Headers, "Cookies")
+						delete(event.Request.Headers, "M-Token")
+						delete(event.Request.Headers, "Stripe-Signature")
+					}
+				}
 				return event
 			})
 		})

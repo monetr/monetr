@@ -270,9 +270,7 @@ func (p *plaidClient) GetInstitutions(ctx context.Context, count, offset int, co
 func (p *plaidClient) GetWebhookVerificationKey(ctx context.Context, keyId string) (plaid.GetWebhookVerificationKeyResponse, error) {
 	span := sentry.StartSpan(ctx, "Plaid - GetWebhookVerificationKey")
 	defer span.Finish()
-	if span.Data == nil {
-		span.Data = map[string]interface{}{}
-	}
+	span.Data = map[string]interface{}{}
 
 	result, err := p.client.GetWebhookVerificationKey(keyId)
 	span.Data["plaidRequestId"] = result.RequestID
