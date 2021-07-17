@@ -112,10 +112,10 @@ func (c *Controller) putLinks(ctx iris.Context) {
 // @id delete-manual-link
 // @tags Links
 // @description Remove a manual link from your account. This will remove
-//  - All bank accounts associated with this link.
-//  - All spending objects associated with each of those bank accounts.
-//  - All transactions for the those bank accounts.
-//  This cannot be undone and data cannot be recovered.
+// @description - All bank accounts associated with this link.
+// @description - All spending objects associated with each of those bank accounts.
+// @description - All transactions for the those bank accounts.
+// @description This cannot be undone and data cannot be recovered.
 // @Security ApiKeyAuth
 // @Produce json
 // @Param linkId path int true "Link ID"
