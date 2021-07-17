@@ -13,6 +13,7 @@ func (c *Controller) linksController(p iris.Party) {
 	p.Get("/", c.getLinks)
 	p.Post("/", c.postLinks)
 	p.Put("/{linkId:uint64}", c.putLinks)
+	p.Delete("/{linkId:uint64}", c.deleteLink)
 }
 
 // List all links
@@ -104,4 +105,42 @@ func (c *Controller) putLinks(ctx iris.Context) {
 	}
 
 	ctx.JSON(link)
+}
+
+// Delete Manual Link
+// @Summary Delete Manual Link
+// @id delete-manual-link
+// @tags Links
+// @description Remove a manual link from your account. This will remove
+//  - All bank accounts associated with this link.
+//  - All spending objects associated with each of those bank accounts.
+//  - All transactions for the those bank accounts.
+//  This cannot be undone and data cannot be recovered.
+// @Security ApiKeyAuth
+// @Produce json
+// @Param linkId path int true "Link ID"
+// @Router /links/{linkId} [delete]
+// @Success 200
+// @Failure 400 {object} ApiError A bad request can be returned if you attempt to delete a link that is not manual.
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) deleteLink(ctx iris.Context) {
+	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	if linkId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to update")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve the specified link")
+		return
+	}
+
+	if link.LinkType != models.ManualLinkType {
+		c.badRequest(ctx, "cannot delete a non-manual link")
+		return
+	}
+
+	// TODO Queue the link and its sub-objects for deletion.
 }
