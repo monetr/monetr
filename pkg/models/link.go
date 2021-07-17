@@ -5,10 +5,12 @@ import "time"
 type LinkStatus uint8
 
 const (
-	LinkStatusUnknown LinkStatus = 0
-	LinkStatusPending LinkStatus = 1
-	LinkStatusSetup   LinkStatus = 2
-	LinkStatusError   LinkStatus = 3
+	LinkStatusUnknown           LinkStatus = 0
+	LinkStatusPending           LinkStatus = 1
+	LinkStatusSetup             LinkStatus = 2
+	LinkStatusError             LinkStatus = 3
+	LinkStatusPendingExpiration LinkStatus = 4
+	LinkStatusRevoked           LinkStatus = 5
 )
 
 type Link struct {
@@ -22,6 +24,7 @@ type Link struct {
 	PlaidLink             *PlaidLink   `json:"-" pg:"rel:has-one"`
 	LinkStatus            LinkStatus   `json:"linkStatus" pg:"link_status,notnull,default:0"`
 	ErrorCode             *string      `json:"errorCode,omitempty" pg:"error_code"`
+	ExpirationDate        *time.Time   `json:"expirationDate" pg:"expiration_date"`
 	InstitutionId         *uint64      `json:"institutionId" pg:"institution_id,on_delete:SET NULL"`
 	Institution           *Institution `json:"institution,omitempty" pg:"rel:has-one"`
 	InstitutionName       string       `json:"institutionName" pg:"institution_name"`

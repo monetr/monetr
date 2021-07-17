@@ -3,13 +3,16 @@ package controller
 import (
 	"fmt"
 	"github.com/form3tech-oss/jwt-go"
+	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,13 +20,14 @@ import (
 )
 
 type PlaidWebhook struct {
-	WebhookType         string                 `json:"webhook_type"`
-	WebhookCode         string                 `json:"webhook_code"`
-	ItemId              string                 `json:"item_id"`
-	Error               map[string]interface{} `json:"error"`
-	NewWebhookURL       string                 `json:"new_webhook_url"`
-	NewTransactions     int64                  `json:"new_transactions"`
-	RemovedTransactions []string               `json:"removed_transactions"`
+	WebhookType           string                 `json:"webhook_type"`
+	WebhookCode           string                 `json:"webhook_code"`
+	ItemId                string                 `json:"item_id"`
+	Error                 map[string]interface{} `json:"error"`
+	NewWebhookURL         string                 `json:"new_webhook_url"`
+	NewTransactions       int64                  `json:"new_transactions"`
+	RemovedTransactions   []string               `json:"removed_transactions"`
+	ConsentExpirationTime *time.Time             `json:"consent_expiration_time"`
 }
 
 type PlaidClaims struct {
@@ -137,13 +141,45 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 		"webhookCode": hook.WebhookCode,
 	})
 
+	crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", map[string]interface{}{
+		"type":   hook.WebhookType,
+		"code":   hook.WebhookCode,
+		"itemId": hook.ItemId,
+	})
+
+	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+		hub.ConfigureScope(func(scope *sentry.Scope) {
+			scope.SetTag("webhook", "plaid")
+			scope.SetTag("plaid.item_id", hook.ItemId)
+			scope.SetTag("plaid.webhook.type", hook.WebhookType)
+			scope.SetTag("plaid.webhook.code", hook.WebhookCode)
+		})
+	}
+
 	repo := c.mustGetUnauthenticatedRepository(ctx)
 
 	log.Trace("retrieving link for webhook")
 	link, err := repo.GetLinksForItem(c.getContext(ctx), hook.ItemId)
 	if err != nil {
+		crumbs.Error(c.getContext(ctx),
+			"Failed to retrieve a link for the item Id provided by the Plaid webhook.",
+			"plaid",
+			map[string]interface{}{
+				"itemId": hook.ItemId,
+			},
+		)
 		log.WithError(err).Errorf("failed to retrieve link for item Id in webhook")
 		return err
+	}
+
+	// Set the user for this webhook for sentry.
+	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+		hub.ConfigureScope(func(scope *sentry.Scope) {
+			scope.SetUser(sentry.User{
+				ID: strconv.FormatUint(link.AccountId, 10),
+			})
+			scope.SetTag("linkId", strconv.FormatUint(link.LinkId, 10))
+		})
 	}
 
 	log = c.log.WithFields(logrus.Fields{
@@ -152,6 +188,16 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 	})
 
 	log.Trace("processing webhook")
+
+	authenticatedRepo := repository.NewRepositoryFromSession(
+		link.CreatedByUserId,
+		link.AccountId,
+		c.mustGetDatabase(ctx),
+	)
+
+	if hook.Error != nil {
+		crumbs.Warn(c.getContext(ctx), "Webhook has an error", "plaid", hook.Error)
+	}
 
 	switch hook.WebhookType {
 	case "TRANSACTIONS":
@@ -164,28 +210,34 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 			_, err = c.job.TriggerPullLatestTransactions(link.AccountId, link.LinkId, hook.NewTransactions)
 		case "TRANSACTIONS_REMOVED":
 			_, err = c.job.TriggerRemoveTransactions(link.AccountId, link.LinkId, hook.RemovedTransactions)
+		default:
+			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}
 	case "ITEM":
 		switch hook.WebhookCode {
 		case "ERROR":
 			code := hook.Error["error_code"]
-			switch code {
-			case "NO_ACCOUNTS":
-				link.LinkStatus = models.LinkStatusError
-				link.ErrorCode = myownsanity.StringP(code.(string))
-				authenticatedRepo := repository.NewRepositoryFromSession(
-					link.CreatedByUserId,
-					link.AccountId,
-					c.mustGetDatabase(ctx),
-				)
-				log.Warn("link is in an error state, updating")
-				err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
-			}
+			link.LinkStatus = models.LinkStatusError
+			link.ErrorCode = myownsanity.StringP(code.(string))
+			log.Warn("link is in an error state, updating")
+			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
 		case "PENDING_EXPIRATION":
+			link.LinkStatus = models.LinkStatusPendingExpiration
+			link.ExpirationDate = hook.ConsentExpirationTime
+			log.Warn("link is pending expiration")
+			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
 		case "USER_PERMISSION_REVOKED":
+			code := hook.Error["error_code"]
+			link.LinkStatus = models.LinkStatusRevoked
+			link.ErrorCode = myownsanity.StringP(code.(string))
+			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
 		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
 			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
+		default:
+			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}
+	default:
+		crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 	}
 
 	return err

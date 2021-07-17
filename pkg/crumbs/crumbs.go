@@ -26,6 +26,19 @@ func Error(ctx context.Context, message, category string, data map[string]interf
 	}
 }
 
+func Warn(ctx context.Context, message, category string, data map[string]interface{}) {
+	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		hub.AddBreadcrumb(&sentry.Breadcrumb{
+			Type:      "warning",
+			Category:  category,
+			Message:   message,
+			Data:      data,
+			Level:     sentry.LevelWarning,
+			Timestamp: time.Now(),
+		}, nil)
+	}
+}
+
 func Debug(ctx context.Context, message string, data map[string]interface{}) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.AddBreadcrumb(&sentry.Breadcrumb{
