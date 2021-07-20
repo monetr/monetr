@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/monetr/rest-api/pkg/crumbs"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/kataras/iris/v12"
@@ -116,6 +117,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 					"environment": c.configuration.Environment,
 					"revision":    build.Revision,
 					"release":     build.Release,
+					"accountId":   strconv.FormatUint(me.AccountId, 10),
 				},
 			},
 		})
@@ -147,10 +149,11 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	})
 
 	checkoutParams := &stripe.CheckoutSessionParams{
-		SuccessURL: &successUrl,
-		CancelURL:  &cancelUrl,
-		Customer:   account.StripeCustomerId,
-		Discounts:  nil,
+		AllowPromotionCodes: stripe.Bool(true),
+		SuccessURL:          &successUrl,
+		CancelURL:           &cancelUrl,
+		Customer:            account.StripeCustomerId,
+		Discounts:           nil,
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				// Number of bank accounts?
@@ -176,6 +179,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 				"environment": c.configuration.Environment,
 				"revision":    build.Revision,
 				"release":     build.Release,
+				"accountId":   strconv.FormatUint(me.AccountId, 10),
 			},
 			TransferData:    nil,
 			TrialEnd:        nil,
