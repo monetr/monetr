@@ -149,7 +149,7 @@ api:
     billingEnabled: true
     initialPlan:
       freeTrialDays: 1
-      stripePriceId: price_1JFNSxI4uGGnwpgwgdgZZeJA
+      stripePriceId: price_1JFQFuI4uGGnwpgwquHOo34s
       features:
         - ManualBudgeting
         - LinkedBudgeting
