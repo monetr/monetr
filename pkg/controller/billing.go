@@ -184,7 +184,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		},
 	}
 
-	if plan.FreeTrialDays > 0 {
+	if plan.FreeTrialDays > 0 && account.StripeSubscriptionId == nil {
 		checkoutParams.SubscriptionData.TrialPeriodDays = stripe.Int64(int64(plan.FreeTrialDays))
 	}
 

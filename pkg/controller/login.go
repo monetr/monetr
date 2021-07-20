@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"github.com/getsentry/sentry-go"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -17,7 +19,6 @@ type HarderClaims struct {
 	LoginId            uint64 `json:"loginId"`
 	UserId             uint64 `json:"userId"`
 	AccountId          uint64 `json:"accountId"`
-	SubscriptionStatus bool   `json:"subStatus"`
 	jwt.StandardClaims
 }
 
@@ -89,6 +90,14 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	case 1:
 		user := login.Users[0]
 
+		if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+			hub.ConfigureScope(func(scope *sentry.Scope) {
+				scope.SetUser(sentry.User{
+					ID: strconv.FormatUint(user.AccountId, 10),
+				})
+			})
+		}
+
 		if !c.configuration.Stripe.IsBillingEnabled() {
 			token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, true)
 			if err != nil {
@@ -156,7 +165,6 @@ func (c *Controller) generateToken(loginId, userId, accountId uint64, subscripti
 		LoginId:            loginId,
 		UserId:             userId,
 		AccountId:          accountId,
-		SubscriptionStatus: subscriptionActive,
 		StandardClaims: jwt.StandardClaims{
 			Audience: []string{
 				c.configuration.APIDomainName,

@@ -98,7 +98,7 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 	}
 
 	hub := sentry.CurrentHub().Clone()
-	hub.WithScope(func(scope *sentry.Scope) {
+	hub.ConfigureScope(func(scope *sentry.Scope) {
 		scope.SetUser(sentry.User{
 			ID: strconv.FormatUint(accountId, 10),
 		})
