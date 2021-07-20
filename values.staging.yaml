@@ -148,8 +148,8 @@ api:
     webhooksDomain: https://api.staging.monetr.dev
     billingEnabled: true
     initialPlan:
-      freeTrialDays: 7
-      stripePriceId: price_1JCW9iI4uGGnwpgwCxOjrbmB
+      freeTrialDays: 1
+      stripePriceId: price_1JFNSxI4uGGnwpgwgdgZZeJA
       features:
         - ManualBudgeting
         - LinkedBudgeting
