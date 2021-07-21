@@ -105,12 +105,10 @@ func (p *plaidClient) GetAccounts(ctx context.Context, accessToken string, optio
 func (p *plaidClient) GetAllTransactions(ctx context.Context, accessToken string, start, end time.Time, accountIds []string) ([]plaid.Transaction, error) {
 	span := sentry.StartSpan(ctx, "Plaid - GetAllTransactions")
 	defer span.Finish()
-	if span.Data == nil {
-		span.Data = map[string]interface{}{}
+	span.Data = map[string]interface{}{
+		"start": start,
+		"end":   end,
 	}
-
-	span.Data["start"] = start
-	span.Data["end"] = start
 	if len(accountIds) > 0 {
 		span.Data["accountIds"] = accountIds
 	}
@@ -150,11 +148,9 @@ func (p *plaidClient) GetAllTransactions(ctx context.Context, accessToken string
 func (p *plaidClient) GetTransactions(ctx context.Context, accessToken string, options plaid.GetTransactionsOptions) (total int, _ []plaid.Transaction, _ error) {
 	span := sentry.StartSpan(ctx, "Plaid - GetTransactions")
 	defer span.Finish()
-	if span.Data == nil {
-		span.Data = map[string]interface{}{}
+	span.Data = map[string]interface{}{
+		"options": options,
 	}
-
-	span.Data["options"] = options
 
 	result, err := p.client.GetTransactionsWithOptions(accessToken, options)
 	span.Data["plaidRequestId"] = result.RequestID
