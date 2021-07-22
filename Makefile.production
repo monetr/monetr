@@ -20,7 +20,7 @@ $(ENV_LOWER): $(BUILD)
 	@echo "Preparing to deploy to $(DOMAIN) - $(ENV_LOWER)..."
 	gsutil cp -e -r -z js $(BUILD)/* gs://$(DOMAIN)/
 	@echo "Successfully deployed $(DOMAIN) - $(ENV_LOWER)... Cleaning up old files..."
-	gsutil ls gs://$(DOMAIN) | grep -E ".js|.js." | grep -v '.json' | grep -v $(RELEASE_REVISION) | awk '{print $0}' | xargs -I{} gsutil rm {}
+	gsutil ls gs://$(DOMAIN) | grep -E ".js|.js." | grep -v '.json' | grep -v $(RELEASE_REVISION) | awk '{print $0}' | xargs -I{} gsutil rm {} || true
 	@echo "Deployment and cleanup complete!"
 
 

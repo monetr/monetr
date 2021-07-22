@@ -2,7 +2,7 @@ steps:
   - name: 'gcr.io/$PROJECT_ID/github.com/monetr/build-containers/ubuntu:20.04'
     entrypoint: 'make'
     args: [
-        'production',
+        'dog',
         'ENVIRONMENT=Dog',
         'DOMAIN=my.monetr.dog',
     ]
