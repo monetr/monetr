@@ -28,3 +28,4 @@ pre-clean:
 release: get-tags-maybe pre-clean notes
 	gh release delete $(AUTO_VERSION_TAG) -y || true
 	gh release create $(AUTO_VERSION_TAG) -p -F Notes.md --target $(RELEASE_REVISION) -t $(AUTO_VERSION_TAG)
+	git pull
