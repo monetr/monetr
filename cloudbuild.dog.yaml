@@ -1,0 +1,11 @@
+steps:
+  - name: 'gcr.io/production-315018/github.com/monetr/build-containers/ubuntu:20.04'
+    entrypoint: 'make'
+    args: [
+        'production',
+        'ENVIRONMENT=Dog',
+        'DOMAIN=my.monetr.dog',
+    ]
+options:
+  env:
+    - 'PWD=/workspace'
