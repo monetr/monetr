@@ -37,6 +37,6 @@ require (
 	github.com/teambition/rrule-go v1.7.0
 	github.com/vmihailenco/msgpack/v5 v5.3.4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	google.golang.org/genproto v0.0.0-20210719143636-1d5a45f8e492
+	google.golang.org/genproto v0.0.0-20210722135532-667f2b7c528f
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
