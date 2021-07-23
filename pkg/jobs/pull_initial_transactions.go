@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
-	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
@@ -80,16 +79,6 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 
 		if link.PlaidLink == nil {
 			log.Error("provided link does not have any plaid credentials")
-			return nil
-		}
-
-		switch link.LinkStatus {
-		case models.LinkStatusSetup, models.LinkStatusPendingExpiration:
-			break
-		default:
-			crumbs.Warn(span.Context(), "Link is not in a state where data can be retrieved", "plaid", map[string]interface{}{
-				"status": link.LinkStatus,
-			})
 			return nil
 		}
 
@@ -198,9 +187,11 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 			return err
 		}
 
+		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", accountId, link.LinkId)
+
 		if err = j.ps.Notify(
 			span.Context(),
-			fmt.Sprintf("initial_plaid_link_%d_%d", accountId, link.LinkId),
+			channelName,
 			"success",
 		); err != nil {
 			log.WithError(err).Error("failed to publish link status to pubsub")

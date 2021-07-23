@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -560,10 +561,11 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 
 	// If the link is done just return.
 	if link.LinkStatus == models.LinkStatusSetup {
+		crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
 		return
 	}
 
-	channelName := fmt.Sprintf("initial_plaid_link_%d_%d", c.mustGetAccountId(ctx), linkId)
+	channelName := fmt.Sprintf("initial:plaid:link:%d:%d", link.AccountId, link.LinkId)
 
 	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {
@@ -579,7 +581,14 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 		}
 	}()
 
+	crumbs.Debug(c.getContext(ctx), "Waiting for notification on channel", map[string]interface{}{
+		"channel": channelName,
+	})
+
 	log.Debugf("waiting for link to be setup on channel: %s", channelName)
+
+	span := sentry.StartSpan(c.getContext(ctx), "Wait For Notification")
+	defer span.Finish()
 
 	deadLine := time.NewTimer(30 * time.Second)
 	defer deadLine.Stop()
