@@ -194,7 +194,7 @@ Generate - Staging:
     deployment_tier: staging
     action: prepare
     kubernetes:
-      namespace: monetr-staging  
+      namespace: monetr-staging
   script:
     - make generate ENVIRONMENT=${ENVIRONMENT}
   cache:
@@ -317,6 +317,7 @@ Deploy - Staging:
     ENVIRONMENT: Staging
   script:
     - make deploy ENVIRONMENT=${ENVIRONMENT}
+    - sentry-cli releases --org monetr deploys ${CI_COMMIT_SHA} new -e ${ENVIRONMENT}
 
 Deploy - Acceptance:
   only:
@@ -341,3 +342,4 @@ Deploy - Acceptance:
     ENVIRONMENT: Acceptance
   script:
     - make deploy ENVIRONMENT=${ENVIRONMENT}
+    - sentry-cli releases --org monetr deploys ${CI_COMMIT_TAG} new -e ${ENVIRONMENT}
