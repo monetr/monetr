@@ -317,6 +317,7 @@ Deploy - Staging:
     ENVIRONMENT: Staging
   script:
     - make deploy ENVIRONMENT=${ENVIRONMENT}
+    - sentry-cli releases new -p ${CI_PROJECT_NAME} ${CI_COMMIT_SHA}
     - sentry-cli releases --org monetr deploys ${CI_COMMIT_SHA} new -e ${ENVIRONMENT}
     - sentry-cli releases set-commits --auto ${CI_COMMIT_SHA}
 
@@ -343,5 +344,6 @@ Deploy - Acceptance:
     ENVIRONMENT: Acceptance
   script:
     - make deploy ENVIRONMENT=${ENVIRONMENT}
+    - sentry-cli releases new -p ${CI_PROJECT_NAME} ${CI_COMMIT_TAG}
     - sentry-cli releases --org monetr deploys ${CI_COMMIT_TAG} new -e ${ENVIRONMENT}
     - sentry-cli releases set-commits --auto ${CI_COMMIT_TAG}
