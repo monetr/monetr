@@ -35,6 +35,8 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 
 	// Setup the redis pool for running jobs.
 	controller.pool = &redis.Pool{
+		MaxIdle:   10,
+		MaxActive: 50,
 		Dial: func() (redis.Conn, error) {
 			// TODO (elliotcourant) Eventually support other networks besides
 			//  tcp? Can redis even run on a unix socket?
