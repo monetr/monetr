@@ -3,6 +3,7 @@ package billing
 import (
 	"context"
 	"fmt"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"strconv"
 	"time"
 
@@ -35,7 +36,16 @@ type BasicPayWall interface {
 // BasicBilling is used by the Stripe webhooks to maintain a subscription's status within our application. As the status
 // of subscription's change or update these functions can be used to keep the status up to date within monetr.
 type BasicBilling interface {
-	UpdateSubscription(ctx context.Context, customerId, subscriptionId string, activeUntil *time.Time) error
+	// UpdateSubscription will set the Stripe customer Id and subscription Id on the account object. It will also set
+	// the active until date for the account. The date can be nil. If the date is nil or in the past, the subscription
+	// is considered cancelled. A timestamp should also be provided. The timestamp is used to fix race conditions in the
+	// webhooks received from Stripe. If the provided timestamp is less than the timestamp of the last change applied
+	// to the account, then the change is not applied. The change in subscription is only applied when the provided
+	// timestamp is after the timestamp of the previously applied change. This helps solve a problem where sometimes a
+	// webhook for a subscription being created (which would have an incomplete status) can be delivered after a update
+	// webhook for the same subscription (which would indicate an active status) causing the subscription to incorrectly
+	// show as inactive.
+	UpdateSubscription(ctx context.Context, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error
 }
 
 var (
@@ -220,7 +230,7 @@ func NewBasicBilling(log *logrus.Entry, repo AccountRepository, notifications pu
 	}
 }
 
-func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, subscriptionId string, activeUntil *time.Time) error {
+func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error {
 	span := sentry.StartSpan(ctx, "Billing - UpdateSubscription")
 	defer span.Finish()
 
@@ -240,8 +250,10 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 	// Set the user for this event, this way webhooks are properly associated with the destination user in our
 	// application.
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
-		hub.Scope().SetUser(sentry.User{
-			ID: strconv.FormatUint(account.AccountId, 10),
+		hub.ConfigureScope(func(scope *sentry.Scope) {
+			scope.SetUser(sentry.User{
+				ID: strconv.FormatUint(account.AccountId, 10),
+			})
 		})
 	}
 
@@ -249,8 +261,44 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 
 	currentlyActive := account.IsSubscriptionActive()
 
+	// If the timestamp for the last webhook is not nil, and the provided timestamp is not after (<= basically) then
+	//
+	if account.StripeWebhookLatestTimestamp != nil {
+		if timestamp.Before(*account.StripeWebhookLatestTimestamp) {
+			crumbs.Debug(span.Context(), "Provided timestamp is older than the current subscription timestamp", map[string]interface{}{
+				"stored":   *account.StripeWebhookLatestTimestamp,
+				"provided": timestamp,
+			})
+			return nil
+		} else if timestamp.Equal(*account.StripeWebhookLatestTimestamp) {
+			crumbs.Warn(span.Context(), "Provided timestamp is equal to the current subscription timestamp", "stripe", map[string]interface{}{
+				"stored":   *account.StripeWebhookLatestTimestamp,
+				"provided": timestamp,
+			})
+			// Set the user for this event, this way webhooks are properly associated with the destination user in our
+			// application.
+			if hub := sentry.GetHubFromContext(ctx); hub != nil {
+				hub.ConfigureScope(func(scope *sentry.Scope) {
+					scope.SetTag("potentialBug", "true")
+				})
+			}
+
+			return nil
+		}
+
+		crumbs.Debug(span.Context(), "Provided timestamp is after the current subscription timestamp, change will be applied", map[string]interface{}{
+			"stored":   *account.StripeWebhookLatestTimestamp,
+			"provided": timestamp,
+		})
+	} else {
+		crumbs.Debug(span.Context(), "Current subscription timestamp is nil, webhook will be accepted", map[string]interface{}{
+			"provided": timestamp,
+		})
+	}
+
 	account.StripeSubscriptionId = &subscriptionId
 	account.SubscriptionActiveUntil = activeUntil
+	account.StripeWebhookLatestTimestamp = &timestamp
 
 	// Check to see if the subscription status of the account has changed with this update to be.
 	if account.IsSubscriptionActive() != currentlyActive {

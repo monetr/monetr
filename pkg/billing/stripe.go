@@ -76,10 +76,12 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 			validUntil = myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
 		}
 
-		if err := b.billing.UpdateSubscription(span.Context(),
+		if err := b.billing.UpdateSubscription(
+			span.Context(),
 			subscription.Customer.ID,
 			subscription.ID,
 			validUntil,
+			time.Unix(event.Created, 0),
 		); err != nil {
 			log.WithError(err).Errorf("failed to update subscription")
 			return errors.Wrap(err, "failed to update subscription")
