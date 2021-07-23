@@ -16,7 +16,11 @@ var (
 func main() {
 	build.Revision = buildRevision
 	build.BuildTime = buildtime
-	build.Release = release
+	if release == "" {
+		build.Release = buildRevision
+	} else {
+		build.Release = release
+	}
 	// This is going to be the final actual program that is distributed.
 	if err := cmd.RootCommand.Execute(); err != nil {
 		log.Fatalf("failed: %+v", err)
