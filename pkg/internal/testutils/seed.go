@@ -145,6 +145,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 			withPlaidLink := models.Link{
 				AccountId:       account.AccountId,
 				LinkType:        models.PlaidLinkType,
+				LinkStatus:      models.LinkStatusSetup,
 				PlaidLinkId:     &plaidLink.PlaidLinkID,
 				InstitutionName: gofakeit.Company() + " Bank",
 				CreatedAt:       now,

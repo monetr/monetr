@@ -2,8 +2,10 @@ package jobs
 
 import (
 	"context"
+	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/monetr/rest-api/pkg/util"
@@ -64,7 +66,7 @@ func (j *jobManagerBase) enqueueProcessFundingSchedules(job *work.Job) error {
 
 }
 
-func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
+func (j *jobManagerBase) processFundingSchedules(job *work.Job) (err error) {
 	hub := sentry.CurrentHub().Clone()
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Process Funding Schedules"))
@@ -73,17 +75,20 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 	log := j.getLogForJob(job)
 	log.Infof("processing funding schedules")
 
+	defer func() {
+		if err != nil {
+			hub.CaptureException(err)
+		}
+	}()
+
 	accountId, err := j.getAccountId(job)
 	if err != nil {
 		log.WithError(err).Error("could not run job, no account Id")
 		return err
 	}
 
-	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
-
 	bankAccountId := uint64(job.ArgInt64("bankAccountId"))
 	log = log.WithField("bankAccountId", bankAccountId)
-	span.SetTag("bankAccountId", strconv.FormatUint(bankAccountId, 10))
 
 	fundingScheduleIds := make([]uint64, 0)
 	idStrings := job.ArgString("fundingScheduleIds")
@@ -96,6 +101,16 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 
 		fundingScheduleIds = append(fundingScheduleIds, id)
 	}
+
+	hub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID:       strconv.FormatUint(accountId, 10),
+			Username: fmt.Sprintf("account:%d", accountId),
+		})
+		scope.SetTag("accountId", strconv.FormatUint(accountId, 10))
+		scope.SetTag("bankAccountId", strconv.FormatUint(bankAccountId, 10))
+		scope.SetTag("jobId", job.ID)
+	})
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		account, err := repo.GetAccount(span.Context())
@@ -124,6 +139,10 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 			}
 
 			if time.Now().Before(fundingSchedule.NextOccurrence) {
+				crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{
+					"fundingScheduleId": fundingScheduleId,
+					"nextOccurrence":    fundingSchedule.NextOccurrence,
+				})
 				fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
 				continue
 			}
@@ -146,56 +165,77 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) error {
 				return err
 			}
 
-			for _, spending := range expenses {
-				spendingLog := fundingLog.WithFields(logrus.Fields{
-					"spendingId":   spending.SpendingId,
-					"spendingName": spending.Name,
+			switch len(expenses) {
+			case 0:
+				crumbs.Debug(span.Context(), "There are no spending objects associated with this funding schedule", map[string]interface{}{
+					"fundingScheduleId": fundingScheduleId,
 				})
+			default:
+				for _, spending := range expenses {
+					spendingLog := fundingLog.WithFields(logrus.Fields{
+						"spendingId":   spending.SpendingId,
+						"spendingName": spending.Name,
+					})
 
-				if spending.IsPaused {
-					spendingLog.Debug("skipping funding spending item, it is paused")
-					continue
+					if spending.IsPaused {
+						crumbs.Debug(span.Context(), "Spending object is paused, it will be skipped", map[string]interface{}{
+							"fundingScheduleId": fundingScheduleId,
+							"spendingId":        spending.SpendingId,
+						})
+						spendingLog.Debug("skipping funding spending item, it is paused")
+						continue
+					}
+
+					progressAmount := spending.GetProgressAmount()
+
+					if spending.TargetAmount <= progressAmount {
+						crumbs.Debug(span.Context(), "Spending object already has target amount, it will be skipped", map[string]interface{}{
+							"fundingScheduleId": fundingScheduleId,
+							"spendingId":        spending.SpendingId,
+						})
+						spendingLog.Trace("skipping spending, target amount is already achieved")
+						continue
+					}
+
+					// TODO Take safe-to-spend into account when allocating to expenses.
+					//  As of writing this I am not going to consider that balance. I'm going to assume that the user has
+					//  enough money in their account at the time of this running that this will accurately reflect a real
+					//  allocated balance. This can be impacted though by a delay in a deposit showing in Plaid and thus us
+					//  over-allocating temporarily until the deposit shows properly in Plaid.
+					spending.CurrentAmount += spending.NextContributionAmount
+					if err = (&spending).CalculateNextContribution(
+						span.Context(),
+						account.Timezone,
+						nextFundingOccurrence,
+						fundingSchedule.Rule,
+					); err != nil {
+						crumbs.Error(span.Context(), "Failed to calculate next contribution for spending", "spending", map[string]interface{}{
+							"fundingScheduleId": fundingScheduleId,
+							"spendingId":        spending.SpendingId,
+						})
+						spendingLog.WithError(err).Error("failed to calculate next contribution for spending")
+						return err
+					}
+
+					expensesToUpdate = append(expensesToUpdate, spending)
 				}
-
-				progressAmount := spending.GetProgressAmount()
-
-				if spending.TargetAmount <= progressAmount {
-					spendingLog.Trace("skipping spending, target amount is already achieved")
-					continue
-				}
-
-				// TODO Take safe-to-spend into account when allocating to expenses.
-				//  As of writing this I am not going to consider that balance. I'm going to assume that the user has
-				//  enough money in their account at the time of this running that this will accurately reflect a real
-				//  allocated balance. This can be impacted though by a delay in a deposit showing in Plaid and thus us
-				//  over-allocating temporarily until the deposit shows properly in Plaid.
-				spending.CurrentAmount += spending.NextContributionAmount
-				if err = (&spending).CalculateNextContribution(
-					span.Context(),
-					account.Timezone,
-					nextFundingOccurrence,
-					fundingSchedule.Rule,
-				); err != nil {
-					spendingLog.WithError(err).Error("failed to calculate next contribution for spending")
-					return err
-				}
-
-				// TODO This might cause some weird pointer behaviors.
-				//  If I remember correctly using a variable that is from a "for" loop will cause issues as that
-				//  variable actually changes with each iteration? So will this cause the appended value to change and
-				//  thus be invalid?
-				expensesToUpdate = append(expensesToUpdate, spending)
 			}
+
 		}
 
 		if len(expensesToUpdate) == 0 {
+			crumbs.Debug(span.Context(), "No spending objects to update for funding schedule", nil)
 			log.Info("no spending objects to update for funding schedule")
 			return nil
 		}
 
 		log.Debugf("preparing to update %d spending(s)", len(expensesToUpdate))
 
-		if err := repo.UpdateSpending(span.Context(), bankAccountId, expensesToUpdate); err != nil {
+		crumbs.Debug(span.Context(), "Updating spending objects with recalculated contributions", map[string]interface{}{
+			"count": len(expensesToUpdate),
+		})
+
+		if err = repo.UpdateSpending(span.Context(), bankAccountId, expensesToUpdate); err != nil {
 			log.WithError(err).Error("failed to update spending")
 			return err
 		}

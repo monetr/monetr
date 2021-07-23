@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/sirupsen/logrus"
@@ -79,9 +80,8 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 	return nil
 }
 
-func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
+func (j *jobManagerBase) pullAccountBalances(job *work.Job) (err error) {
 	hub := sentry.CurrentHub().Clone()
-
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Account Balances"))
 	defer span.Finish()
@@ -89,6 +89,12 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
+
+	defer func() {
+		if err != nil {
+			hub.CaptureException(err)
+		}
+	}()
 
 	accountId, err := j.getAccountId(job)
 	if err != nil {
@@ -98,17 +104,15 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 
 	linkId := uint64(job.ArgInt64("linkId"))
 
-	accountIdStr := strconv.FormatUint(accountId, 10)
-	linkIdStr := strconv.FormatUint(linkId, 10)
-
-	hub.Scope().SetUser(sentry.User{
-		ID: accountIdStr,
+	hub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID:       strconv.FormatUint(accountId, 10),
+			Username: fmt.Sprintf("account:%d", accountId),
+		})
+		scope.SetTag("accountId", strconv.FormatUint(accountId, 10))
+		scope.SetTag("linkId", strconv.FormatUint(linkId, 10))
+		scope.SetTag("jobId", job.ID)
 	})
-	hub.Scope().SetTag("accountId", accountIdStr)
-	hub.Scope().SetTag("linkId", linkIdStr)
-
-	span.SetTag("linkId", linkIdStr)
-	span.SetTag("accountId", accountIdStr)
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(span.Context(), linkId)
@@ -122,6 +126,16 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) error {
 		if link.PlaidLink == nil {
 			err = errors.Errorf("cannot pull account balanaces for link without plaid info")
 			log.WithError(err).Errorf("failed to pull balances")
+			return nil
+		}
+
+		switch link.LinkStatus {
+		case models.LinkStatusSetup, models.LinkStatusPendingExpiration:
+			break
+		default:
+			crumbs.Warn(span.Context(), "Link is not in a state where data can be retrieved", "plaid", map[string]interface{}{
+				"status": link.LinkStatus,
+			})
 			return nil
 		}
 

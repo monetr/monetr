@@ -2,8 +2,10 @@ package jobs
 
 import (
 	"context"
+	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
@@ -37,11 +39,17 @@ func (j *jobManagerBase) TriggerPullHistoricalTransactions(accountId, linkId uin
 	return job.ID, nil
 }
 
-func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
+func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) (err error) {
 	hub := sentry.CurrentHub().Clone()
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Historical Transactions"))
 	defer span.Finish()
+
+	defer func() {
+		if err != nil {
+			hub.CaptureException(err)
+		}
+	}()
 
 	log := j.getLogForJob(job)
 	log.Infof("pulling historical transactions")
@@ -53,8 +61,16 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 	}
 
 	linkId := uint64(job.ArgInt64("linkId"))
-	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
-	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
+
+	hub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID:       strconv.FormatUint(accountId, 10),
+			Username: fmt.Sprintf("account:%d", accountId),
+		})
+		scope.SetTag("accountId", strconv.FormatUint(accountId, 10))
+		scope.SetTag("linkId", strconv.FormatUint(linkId, 10))
+		scope.SetTag("jobId", job.ID)
+	})
 
 	twoYearsAgo := time.Now().Add(-2 * 365 * 24 * time.Hour).UTC()
 
@@ -81,6 +97,16 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) error {
 			err = errors.Errorf("cannot pull account balanaces for link without plaid info")
 			log.WithError(err).Errorf("failed to pull transactions")
 			return err
+		}
+
+		switch link.LinkStatus {
+		case models.LinkStatusSetup, models.LinkStatusPendingExpiration:
+			break
+		default:
+			crumbs.Warn(span.Context(), "Link is not in a state where data can be retrieved", "plaid", map[string]interface{}{
+				"status": link.LinkStatus,
+			})
+			return nil
 		}
 
 		accessToken, err := j.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), accountId, link.PlaidLink.ItemId)

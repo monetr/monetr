@@ -2,6 +2,8 @@ package jobs
 
 import (
 	"context"
+	"fmt"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"strconv"
 	"strings"
 	"time"
@@ -87,9 +89,20 @@ func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 	return nil
 }
 
-func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
+func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
+
+	hub := sentry.CurrentHub().Clone()
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Latest Transactions"))
+	defer span.Finish()
+
+	defer func() {
+		if err != nil {
+			hub.CaptureException(err)
+		}
+	}()
 
 	accountId, err := j.getAccountId(job)
 	if err != nil {
@@ -97,19 +110,17 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 		return err
 	}
 
-	hub := sentry.CurrentHub().Clone()
+	linkId := uint64(job.ArgInt64("linkId"))
+
 	hub.ConfigureScope(func(scope *sentry.Scope) {
 		scope.SetUser(sentry.User{
-			ID: strconv.FormatUint(accountId, 10),
+			ID:       strconv.FormatUint(accountId, 10),
+			Username: fmt.Sprintf("account:%d", accountId),
 		})
+		scope.SetTag("accountId", strconv.FormatUint(accountId, 10))
+		scope.SetTag("linkId", strconv.FormatUint(linkId, 10))
+		scope.SetTag("jobId", job.ID)
 	})
-	ctx := sentry.SetHubOnContext(context.Background(), hub)
-	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Latest Transactions"))
-	defer span.Finish()
-
-	linkId := uint64(job.ArgInt64("linkId"))
-	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
-	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		account, err := repo.GetAccount(span.Context())
@@ -136,6 +147,16 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) error {
 			err = errors.Errorf("cannot pull account balanaces for link without plaid info")
 			log.WithError(err).Errorf("failed to pull transactions")
 			return err
+		}
+
+		switch link.LinkStatus {
+		case models.LinkStatusSetup, models.LinkStatusPendingExpiration:
+			break
+		default:
+			crumbs.Warn(span.Context(), "Link is not in a state where data can be retrieved", "plaid", map[string]interface{}{
+				"status": link.LinkStatus,
+			})
+			return nil
 		}
 
 		accessToken, err := j.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), accountId, link.PlaidLink.ItemId)

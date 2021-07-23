@@ -60,6 +60,8 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 		"type":     event.Type,
 	})
 
+	timestamp := time.Unix(event.Created, 0)
+
 	switch event.Type {
 	case "checkout.session.completed":
 		log.Debugf("checkout session completed")
@@ -81,7 +83,7 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 			subscription.Customer.ID,
 			subscription.ID,
 			validUntil,
-			time.Unix(event.Created, 0),
+			timestamp,
 		); err != nil {
 			log.WithError(err).Errorf("failed to update subscription")
 			return errors.Wrap(err, "failed to update subscription")
@@ -98,8 +100,13 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 
 		account, err := b.repo.GetAccountByCustomerId(span.Context(), customer.ID)
 		if err != nil {
-			log.WithError(err).Errorf("failed to retrieve account by customer Id")
-			return errors.Wrap(err, "failed to retrieve account by customer Id")
+			log.WithError(err).Warn("failed to retrieve account by customer Id")
+			crumbs.Warn(span.Context(), "Failed to retrieve an account for this provided customer Id", "stripe", map[string]interface{}{
+				"customerId": customer.ID,
+			})
+
+			// We don't want this to be treated as an error. There is nothing we can do about it.
+			return nil
 		}
 
 		if hub := sentry.GetHubFromContext(span.Context()); hub != nil {
@@ -110,6 +117,13 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 
 		// Remove the stripe customer Id from the account record.
 		account.StripeCustomerId = nil
+
+		// The subscription would be canceled at this point, and we would need to create a new one. This does mean that
+		// the customer would lose access to their invoices and stuff. But this is a result of deleting a customer
+		// record entirely.
+		account.StripeSubscriptionId = nil
+		account.StripeWebhookLatestTimestamp = &timestamp
+
 		if err = b.repo.UpdateAccount(span.Context(), account); err != nil {
 			log.WithError(err).Errorf("failed to remove customer Id from account")
 			return errors.Wrap(err, "failed to remove customer Id from account")

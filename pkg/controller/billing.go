@@ -226,6 +226,41 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 		return
 	}
 
+	if account.StripeCustomerId == nil {
+		crumbs.Debug(c.getContext(ctx), "Account does not have a Stripe customer, a new one will be created.", nil)
+
+		me, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
+		if err != nil {
+			crumbs.Error(c.getContext(ctx), "Failed to retrieve the current user to create a Stripe customer", "error", nil)
+			c.wrapPgError(ctx, err, "failed to retrieve current user details")
+			return
+		}
+
+		name := me.Login.FirstName + " " + me.Login.LastName
+		customer, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
+			Email: &me.Login.Email,
+			Name:  &name,
+			Params: stripe.Params{
+				Metadata: map[string]string{
+					"environment": c.configuration.Environment,
+					"revision":    build.Revision,
+					"release":     build.Release,
+				},
+			},
+		})
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve current user details")
+			return
+		}
+
+		account.StripeCustomerId = &customer.ID
+
+		if err = c.accounts.UpdateAccount(c.getContext(ctx), account); err != nil {
+			c.wrapPgError(ctx, err, "failed to store stripe customer Id")
+			return
+		}
+	}
+
 	returnUrl := ctx.GetReferrer().Raw
 	if returnUrl == "" {
 		returnUrl = fmt.Sprintf("https://%s", c.configuration.UIDomainName)

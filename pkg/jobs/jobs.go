@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"context"
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
@@ -150,19 +149,8 @@ func (j *jobManagerBase) middleware(job *work.Job, next work.NextMiddlewareFunc)
 			log.WithError(err).Warn("failed to update job record after running")
 		}
 	}()
-	var err error
-	defer func() {
-		if err != nil {
-			log.WithError(err).Error("job failed to process due to error")
-			sentry.CaptureException(err)
-		}
-	}()
 
-	err = next()
-	if err != nil {
-		sentry.CaptureException(err)
-	}
-	return err
+	return next()
 }
 
 func (j *jobManagerBase) getAccountId(job *work.Job) (uint64, error) {

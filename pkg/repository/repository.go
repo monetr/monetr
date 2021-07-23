@@ -11,9 +11,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Repository interface {
+type BaseRepository interface {
 	AccountId() uint64
-	UserId() uint64
 
 	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error
 	CreateBankAccounts(ctx context.Context, bankAccounts ...models.BankAccount) error
@@ -37,7 +36,6 @@ type Repository interface {
 	GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error)
 	GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error)
 	GetLinks(ctx context.Context) ([]models.Link, error)
-	GetMe(ctx context.Context) (*models.User, error)
 	GetPendingTransactionsForBankAccount(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error)
 	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
 	GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
@@ -55,11 +53,18 @@ type Repository interface {
 	UpdateNextFundingScheduleDate(ctx context.Context, fundingScheduleId uint64, nextOccurrence time.Time) error
 	UpdatePlaidLink(ctx context.Context, plaidLink *models.PlaidLink) error
 	UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error
-	UpdateUser(ctx context.Context, user *models.User) error
 
 	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error
+}
+
+type Repository interface {
+	BaseRepository
+	UserId() uint64
+
+	GetMe(ctx context.Context) (*models.User, error)
+	UpdateUser(ctx context.Context, user *models.User) error
 }
 
 type UnauthenticatedRepository interface {
@@ -142,4 +147,3 @@ func (r *repositoryBase) GetIsSetup(ctx context.Context) (bool, error) {
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Exists()
 }
-
