@@ -131,6 +131,7 @@ func (c *Controller) authenticateUser(ctx *context.Context) (err error) {
 	if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
 		hub.Scope().SetUser(sentry.User{
 			ID:        strconv.FormatUint(claims.AccountId, 10),
+			Username:  fmt.Sprintf("account:%d", claims.AccountId),
 			IPAddress: ctx.GetHeader("X-Forwarded-For"),
 		})
 		hub.Scope().SetTag("userId", strconv.FormatUint(claims.UserId, 10))
