@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
+	"strconv"
 	"time"
 )
 
@@ -82,6 +83,34 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 		); err != nil {
 			log.WithError(err).Errorf("failed to update subscription")
 			return errors.Wrap(err, "failed to update subscription")
+		}
+
+		return nil
+	case "customer.deleted":
+		log.Info("handling customer deleted webhook")
+		var customer stripe.Customer
+		if err := json.Unmarshal(event.Data.Raw, &customer); err != nil {
+			log.WithError(err).Errorf("failed to extract customer from json")
+			return errors.Wrap(err, "failed to extract customer from json")
+		}
+
+		account, err := b.repo.GetAccountByCustomerId(span.Context(), customer.ID)
+		if err != nil {
+			log.WithError(err).Errorf("failed to retrieve account by customer Id")
+			return errors.Wrap(err, "failed to retrieve account by customer Id")
+		}
+
+		if hub := sentry.GetHubFromContext(span.Context()); hub != nil {
+			hub.Scope().SetUser(sentry.User{
+				ID: strconv.FormatUint(account.AccountId, 10),
+			})
+		}
+
+		// Remove the stripe customer Id from the account record.
+		account.StripeCustomerId = nil
+		if err = b.repo.UpdateAccount(span.Context(), account); err != nil {
+			log.WithError(err).Errorf("failed to remove customer Id from account")
+			return errors.Wrap(err, "failed to remove customer Id from account")
 		}
 
 		return nil

@@ -1,5 +1,9 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
+  - id: 'build-docker'
+    waitFor: [ '-' ]
+    name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/github.com/monetr/rest-api:$COMMIT_SHA', '.' ]
-  - name: 'gcr.io/cloud-builders/docker'
+  - id: 'push-docker'
+    waitFor: [ 'build-docker' ]
+    name: 'gcr.io/cloud-builders/docker'
     args: [ 'push', 'gcr.io/$PROJECT_ID/github.com/monetr/rest-api:$COMMIT_SHA' ]
