@@ -15,8 +15,8 @@ export interface PropTypes {
 }
 
 interface WithConnectionPropTypes extends PropTypes {
-  fetchLinks: () => void;
-  fetchBankAccounts: () => void;
+  fetchLinks: () => Promise<void>;
+  fetchBankAccounts: () => Promise<void>;
 }
 
 interface State {
@@ -53,10 +53,7 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
 
         return this.longPollSetup()
           .then(() => {
-            return Promise.all([
-              this.props.fetchLinks(),
-              this.props.fetchBankAccounts(),
-            ]);
+            return this.props.fetchLinks().then(() => this.props.fetchBankAccounts());
           });
       })
       .catch(error => {
