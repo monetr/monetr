@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import React, { PureComponent } from 'react';
 import { connect } from "react-redux";
+import * as Sentry from "@sentry/react";
 import { Redirect, Route, Switch, withRouter, } from "react-router-dom";
 import { bindActionCreators } from "redux";
 import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
@@ -100,4 +101,4 @@ export default connect(
     bootstrapApplication,
     bootstrapLogin,
   }, dispatch),
-)(withRouter(Root));
+)(withRouter(Sentry.withProfiler(Root)));

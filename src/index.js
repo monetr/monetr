@@ -18,7 +18,12 @@ if (CONFIG.SENTRY_DSN) {
     dsn: CONFIG.SENTRY_DSN,
     // eslint-disable-next-line no-undef
     release: `web-ui@${ RELEASE_REVISION }`,
-    integrations: [new Integrations.BrowserTracing()],
+    integrations: [new Integrations.BrowserTracing({
+      tracingOrigins: [
+        // eslint-disable-next-line no-undef
+        CONFIG.API_DOMAIN,
+      ]
+    })],
     tracesSampleRate: 1,
   });
 }

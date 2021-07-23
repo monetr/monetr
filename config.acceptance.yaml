@@ -2,5 +2,6 @@ BOOTSTRAP_CONFIG_JSON: false
 USE_LOCAL_STORAGE: false
 ENVIRONMENT: "Acceptance"
 COOKIE_DOMAIN: ".acceptance.monetr.dev"
+API_DOMAIN: api.acceptance.monetr.dev
 API_URL: "https://api.acceptance.monetr.dev"
 SENTRY_DSN: https://3af2bafd7e774e96b4ca1f33b147875c@o579049.ingest.sentry.io/5735387

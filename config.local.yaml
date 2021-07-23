@@ -1,5 +1,6 @@
 BOOTSTRAP_CONFIG_JSON: false
 USE_LOCAL_STORAGE: false
 ENVIRONMENT: "Local"
+API_DOMAIN: api.monetr.mini
 API_URL: "https://api.monetr.mini"
 COOKIE_DOMAIN: "monetr.mini"

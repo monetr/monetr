@@ -4,5 +4,6 @@ module.export = global.CONFIG = {
   COOKIE_DOMAIN: '',
   ENVIRONMENT: "Testing",
   API_URL: "http://localhost:4000",
+  API_DOMAIN: "localhost:4000",
   SENTRY_DSN: null,
 };
