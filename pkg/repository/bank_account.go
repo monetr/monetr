@@ -8,8 +8,15 @@ import (
 )
 
 func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAccount, error) {
+	span := sentry.StartSpan(ctx, "GetBankAccounts")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId": r.AccountId(),
+	}
+
 	var result []models.BankAccount
-	err := r.txn.Model(&result).
+	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")

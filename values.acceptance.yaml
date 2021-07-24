@@ -93,6 +93,16 @@ api:
         secretKeyRef:
           key: MONETR_STRIPE_API_KEY
           name: monetr-acceptance-stripe
+    - name: MONETR_STRIPE_PUBLIC_KEY
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_STRIPE_PUBLIC_KEY
+          name: monetr-acceptance-stripe
+    - name: MONETR_STRIPE_WEBHOOK_SECRET
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_STRIPE_WEBHOOK_SECRET
+          name: monetr-acceptance-stripe
   uiDomainName: acceptance.monetr.dev
   apiDomainName: api.acceptance.monetr.dev
   allowSignUp: true
@@ -136,5 +146,11 @@ api:
     traceSampleRate: 1.0
   stripe:
     enabled: true
-    webhooksEnabled: false # Still working on this for now.
+    webhooksEnabled: true # Still working on this for now.
     webhooksDomain: https://api.acceptance.monetr.dev
+    billingEnabled: true
+    initialPlan:
+      stripePriceId: price_1JGYV0I4uGGnwpgw3kkur7ze
+      features:
+        - ManualBudgeting
+        - LinkedBudgeting
