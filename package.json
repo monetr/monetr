@@ -50,7 +50,7 @@
     "jest-circus": "26.6.3",
     "jest-resolve": "26.6.2",
     "jest-watch-typeahead": "0.6.4",
-    "js-cookie": "2.2.1",
+    "js-cookie": "3.0.0",
     "js-yaml": "4.1.0",
     "mini-css-extract-plugin": "2.1.0",
     "moment": "2.29.1",
