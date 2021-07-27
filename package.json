@@ -87,7 +87,7 @@
     "terser-webpack-plugin": "5.1.4",
     "ts-pnp": "1.2.0",
     "web-vitals": "2.1.0",
-    "webpack-manifest-plugin": "3.1.1",
+    "webpack-manifest-plugin": "3.2.0",
     "workbox-webpack-plugin": "6.1.5"
   },
   "scripts": {
