@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"context"
+	"fmt"
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
@@ -48,8 +49,15 @@ func (j *jobManagerBase) removeTransactions(job *work.Job) error {
 	}
 
 	linkId := uint64(job.ArgInt64("linkId"))
-	span.SetTag("accountId", strconv.FormatUint(accountId, 10))
-	span.SetTag("linkId", strconv.FormatUint(linkId, 10))
+	hub.ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetUser(sentry.User{
+			ID:       strconv.FormatUint(accountId, 10),
+			Username: fmt.Sprintf("account:%d", accountId),
+		})
+		scope.SetTag("accountId", strconv.FormatUint(accountId, 10))
+		scope.SetTag("linkId", strconv.FormatUint(linkId, 10))
+		scope.SetTag("jobId", job.ID)
+	})
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(span.Context(), linkId)

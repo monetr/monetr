@@ -8,8 +8,7 @@ import (
 )
 
 func (c *Controller) midnightInLocal(ctx *context.Context, input time.Time) (time.Time, error) {
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	account, err := repo.GetAccount(c.getContext(ctx))
+	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		return input, errors.Wrap(err, "failed to retrieve account's timezone")
 	}

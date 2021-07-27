@@ -226,7 +226,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 
 	spendingToUpdate := make([]models.Spending, 0)
 
-	account, err := repo.GetAccount(c.getContext(ctx))
+	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
 		return

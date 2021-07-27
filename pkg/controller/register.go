@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/monetr/rest-api/pkg/mail"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -178,6 +179,15 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 			"failed to create account",
 		)
 		return
+	}
+
+	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+		hub.ConfigureScope(func(scope *sentry.Scope) {
+			scope.SetUser(sentry.User{
+				ID:       strconv.FormatUint(account.AccountId, 10),
+				Username: fmt.Sprintf("account:%d", account.AccountId),
+			})
+		})
 	}
 
 	user := models.User{

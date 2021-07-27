@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/getsentry/sentry-go"
 	"net/http"
 	"strconv"
@@ -16,9 +17,9 @@ import (
 )
 
 type HarderClaims struct {
-	LoginId            uint64 `json:"loginId"`
-	UserId             uint64 `json:"userId"`
-	AccountId          uint64 `json:"accountId"`
+	LoginId   uint64 `json:"loginId"`
+	UserId    uint64 `json:"userId"`
+	AccountId uint64 `json:"accountId"`
 	jwt.StandardClaims
 }
 
@@ -93,7 +94,8 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
 			hub.ConfigureScope(func(scope *sentry.Scope) {
 				scope.SetUser(sentry.User{
-					ID: strconv.FormatUint(user.AccountId, 10),
+					ID:       strconv.FormatUint(user.AccountId, 10),
+					Username: fmt.Sprintf("account:%d", user.AccountId),
 				})
 			})
 		}
@@ -162,9 +164,9 @@ func (c *Controller) validateLogin(email, password string) error {
 func (c *Controller) generateToken(loginId, userId, accountId uint64, subscriptionActive bool) (string, error) {
 	now := time.Now()
 	claims := &HarderClaims{
-		LoginId:            loginId,
-		UserId:             userId,
-		AccountId:          accountId,
+		LoginId:   loginId,
+		UserId:    userId,
+		AccountId: accountId,
 		StandardClaims: jwt.StandardClaims{
 			Audience: []string{
 				c.configuration.APIDomainName,
