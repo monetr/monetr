@@ -176,8 +176,10 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
 		hub.ConfigureScope(func(scope *sentry.Scope) {
 			scope.SetUser(sentry.User{
-				ID: strconv.FormatUint(link.AccountId, 10),
+				ID:       strconv.FormatUint(link.AccountId, 10),
+				Username: fmt.Sprintf("account:%d", link.AccountId),
 			})
+			scope.SetTag("accountId", strconv.FormatUint(link.AccountId, 10))
 			scope.SetTag("linkId", strconv.FormatUint(link.LinkId, 10))
 		})
 	}
