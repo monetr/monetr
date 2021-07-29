@@ -12699,10 +12699,10 @@ webpack-log@^2.0.0:
     ansi-colors "^3.0.0"
     uuid "^3.3.2"
 
-webpack-manifest-plugin@4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/webpack-manifest-plugin/-/webpack-manifest-plugin-4.0.1.tgz#425e37caf7580fc02a4650d8405387e91299b233"
-  integrity sha512-b4SLlTkvXEZQh0M/HUH1z9jiwdapjsMbOqlHJH/0/Ic9dpGHmf+X36GeOpFqn8Oz64RucaOKwVSmsNhfw3Cr2w==
+webpack-manifest-plugin@4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/webpack-manifest-plugin/-/webpack-manifest-plugin-4.0.2.tgz#a7ee46219a6c820a5cdae0f7ddb7cb04837448fb"
+  integrity sha512-Ld6j05pRblXAVoX8xdXFDsc/s97cFnR1FOmQawhTSlp6F6aeU1Jia5aqTmDpkueaAz8g9sXpgSOqmEgVAR61Xw==
   dependencies:
     tapable "^2.0.0"
     webpack-sources "^2.2.0"
