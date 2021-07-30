@@ -163,7 +163,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 // @Param transactionId path int true "TransactionId "
 // @Param Transaction body swag.UpdateTransactionRequest true "Updated transaction"
 // @Router /bank_accounts/{bankAccountId}/transactions/{transactionId} [post]
-// @Success 200 {array} swag.TransactionResponse
+// @Success 200 {array} swag.TransactionUpdateResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) putTransactions(ctx *context.Context) {
