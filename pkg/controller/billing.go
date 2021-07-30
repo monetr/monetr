@@ -58,11 +58,16 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	log := c.getLog(ctx)
 
 	var plan config.Plan
-	if request.PriceId == "" && c.configuration.Stripe.InitialPlan != nil {
-		request.PriceId = c.configuration.Stripe.InitialPlan.StripePriceId
+	var priceId string
+	if request.PriceId != nil {
+		priceId = *request.PriceId
+	}
+
+	if priceId == "" && c.configuration.Stripe.InitialPlan != nil {
+		priceId = c.configuration.Stripe.InitialPlan.StripePriceId
 		plan = *c.configuration.Stripe.InitialPlan
 	} else {
-		if request.PriceId == "" {
+		if priceId == "" {
 			c.badRequest(ctx, "must provide a price id")
 			return
 		}
@@ -70,7 +75,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		{ // Validate the price against our configuration.
 			var foundValidPlan bool
 			for _, planItem := range c.configuration.Stripe.Plans {
-				if planItem.StripePriceId == request.PriceId {
+				if planItem.StripePriceId == priceId {
 					foundValidPlan = true
 					plan = planItem
 					break

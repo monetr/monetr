@@ -3,7 +3,7 @@ package swag
 type CreateCheckoutSessionRequest struct {
 	// Specify a specific Stripe Price ID to be used when creating the checkout session. If this is left blank then
 	// the default price will be used for the checkout session.
-	PriceId    string  `json:"priceId"`
+	PriceId *string `json:"priceId" example:"price_1JFQFuI4uGGnwpgwquHOo34s" extensions:"x-nullable"`
 	// The path that the user should be returned to if they exit the checkout session.
 	CancelPath *string `json:"cancelPath"`
 }
