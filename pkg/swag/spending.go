@@ -21,7 +21,7 @@ type AlwaysSpending struct {
 	// transaction is spent from this spending object the allocation system will still allocate more funds to this
 	// expense if the transaction was spent before it is technically due AND the funding schedule occurs before the
 	// specified next recurrence date. Changing this amount will recalculate contributions to this spending object.
-	TargetAmount int64 `json:"targetAmount" example:"1395" validate:"required" minimum:"0.01"`
+	TargetAmount int64 `json:"targetAmount" example:"1395" validate:"required" minimum:"1"`
 	// Recurrence rule telling the budgeting system how often this expense should be used. This helps the budgeting
 	// system recalculate the next recurrence date each time an expense's recurrence date is reached. More information
 	// about the format of the rule can be found here: https://tools.ietf.org/html/rfc5545

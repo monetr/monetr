@@ -23,14 +23,16 @@ func (c *Controller) handleTransactions(p iris.Party) {
 // @Summary List Transactions
 // @ID list-transactions
 // @tags Transactions
-// @description Lists the transactions for the specified bank account Id. Transactions are returned sorted by the date they were authorized (descending) and then by their numeric Id (descending). This means that transactions that were first seen later will be higher in the list than they may have actually occurred.
+// @description Lists the transactions for the specified bank account Id. Transactions are returned sorted by the date
+// @description they were authorized (descending) and then by their numeric Id (descending). This means that
+// @description transactions that were first seen later will be higher in the list than they may have actually occurred.
 // @Security ApiKeyAuth
 // @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Param limit query int false "Specifies the number of transactions to return in the result, default is 25. Max is 100."
 // @Param offset query int false "The number of transactions to skip before returning any."
 // @Router /bank_accounts/{bankAccountId}/transactions [get]
-// @Success 200 {array} models.Transaction
+// @Success 200 {array} swag.TransactionResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactions(ctx *context.Context) {
@@ -149,6 +151,21 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 	ctx.JSON(returnedObject)
 }
 
+// Update Transaction
+// @Summary Update Transaction
+// @ID update-transactions
+// @tags Transactions
+// @description Updates the provided transaction.
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Param bankAccountId path int true "Bank Account ID"
+// @Param transactionId path int true "TransactionId "
+// @Param Transaction body swag.UpdateTransactionRequest true "Updated transaction"
+// @Router /bank_accounts/{bankAccountId}/transactions/{transactionId} [post]
+// @Success 200 {array} swag.TransactionResponse
+// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) putTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {

@@ -174,7 +174,7 @@ func RunServer() error {
 
 			tlsConfiguration = &tls.Config{
 				Rand:               rand.Reader,
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: configuration.PostgreSQL.InsecureSkipVerify,
 				RootCAs:            caCertPool,
 				ServerName:         configuration.PostgreSQL.Address,
 				Renegotiation:      tls.RenegotiateFreelyAsClient,
@@ -228,7 +228,7 @@ func RunServer() error {
 
 				tlsConfig := &tls.Config{
 					Rand:               rand.Reader,
-					InsecureSkipVerify: true,
+					InsecureSkipVerify: configuration.PostgreSQL.InsecureSkipVerify,
 					RootCAs:            nil,
 					ServerName:         configuration.PostgreSQL.Address,
 					Renegotiation:      tls.RenegotiateFreelyAsClient,

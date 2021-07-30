@@ -138,6 +138,11 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) (err error) {
 				return err
 			}
 
+			if !fundingSchedule.CalculateNextOccurrence(span.Context(), timezone) {
+				fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
+				continue
+			}
+
 			if time.Now().Before(fundingSchedule.NextOccurrence) {
 				crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{
 					"fundingScheduleId": fundingScheduleId,

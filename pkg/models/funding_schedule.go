@@ -1,6 +1,10 @@
 package models
 
 import (
+	"context"
+	"github.com/getsentry/sentry-go"
+	"github.com/monetr/rest-api/pkg/crumbs"
+	"github.com/monetr/rest-api/pkg/util"
 	"time"
 )
 
@@ -17,4 +21,32 @@ type FundingSchedule struct {
 	Rule              *Rule        `json:"rule" pg:"rule,notnull,type:'text'" swaggertype:"string" example:"FREQ=MONTHLY;BYMONTHDAY=15,-1"`
 	LastOccurrence    *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
 	NextOccurrence    time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
+}
+
+func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone *time.Location) bool {
+	span := sentry.StartSpan(ctx, "CalculateNextOccurrence")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"fundingScheduleId": f.FundingScheduleId,
+		"timezone":          timezone.String(),
+	}
+
+	now := time.Now()
+
+	if now.Before(f.NextOccurrence) {
+		crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{
+			"fundingScheduleId": f.FundingScheduleId,
+			"nextOccurrence":    f.NextOccurrence,
+		})
+		return false
+	}
+
+	nextFundingOccurrence := util.MidnightInLocal(f.Rule.After(now, false), timezone)
+
+	current := f.NextOccurrence
+	f.LastOccurrence = &current
+	f.NextOccurrence = nextFundingOccurrence
+
+	return true
 }

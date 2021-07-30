@@ -89,6 +89,7 @@ func (r *repositoryBase) UpdateNextFundingScheduleDate(ctx context.Context, fund
 	}
 
 	_, err := r.txn.ModelContext(span.Context(), &models.FundingSchedule{}).
+		Set(`"last_occurrence" = "next_occurrence"`).
 		Set(`"next_occurrence" = ?`, nextOccurrence).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).

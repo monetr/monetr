@@ -7,7 +7,7 @@ name = "go"
 enabled = true
 
   [analyzers.meta]
-  import_paths = ["github.com/monetrapp/rest-api"]
+  import_paths = ["github.com/monetr/rest-api"]
 
 [[analyzers]]
 name = "test-coverage"

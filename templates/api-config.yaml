@@ -22,6 +22,7 @@ data:
   MONETR_PG_ADDRESS: {{ quote .Values.api.postgreSql.address }}
   MONETR_PG_PORT: {{ quote .Values.api.postgreSql.port }}
   MONETR_PG_DATABASE: {{ quote .Values.api.postgreSql.database }}
+  MONETR_PG_INSECURE_SKIP_VERIFY: {{ quote .Values.api.postgreSql.insecureSkipVerify }}
   MONETR_PG_CA_PATH: {{ quote .Values.api.postgreSql.caCertificatePath }}
   MONETR_PG_CERT_PATH: {{ quote .Values.api.postgreSql.certificatePath }}
   MONETR_PG_KEY_PATH: {{ quote .Values.api.postgreSql.keyPath }}

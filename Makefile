@@ -58,15 +58,6 @@ docker:
 docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
 
-clean-development:
-	docker-compose -f ./docker-compose.development.yaml rm --stop --force || true
-
-compose-development: docker docker-work-web-ui
-	docker-compose  -f ./docker-compose.development.yaml up
-
-compose-development-lite:
-	docker-compose  -f ./docker-compose.development.yaml up
-
 ifdef GITLAB_CI
 include Makefile.gitlab-ci
 endif

@@ -240,7 +240,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// If we are not requiring email verification to activate an account we can
 	// simply return a token here for the user to be signed in.
-	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId, !c.configuration.Stripe.IsBillingEnabled())
+	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create JWT",
@@ -310,7 +310,7 @@ func (c *Controller) verifyEndpoint(ctx iris.Context) {
 		return
 	}
 
-	token, err := c.generateToken(user.LoginId, user.UserId, user.AccountId, true)
+	token, err := c.generateToken(user.LoginId, user.UserId, user.AccountId)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create JWT",

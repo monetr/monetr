@@ -203,8 +203,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 							span.Status = sentry.SpanStatusOK
 						}
 					}
+					span.Finish()
 				}()
-				defer span.Finish()
 
 				ctx.Values().Set(spanKey, span)
 				ctx.Values().Set(spanContextKey, span.Context())
@@ -251,7 +251,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			repoParty.PartyFunc("/authentication", func(repoParty router.Party) {
 				repoParty.Post("/login", c.loginEndpoint)
 				repoParty.Post("/register", c.registerEndpoint)
-				repoParty.Post("/verify", c.verifyEndpoint)
+				//repoParty.Post("/verify", c.verifyEndpoint)
 			})
 
 			repoParty.Use(c.authenticationMiddleware)

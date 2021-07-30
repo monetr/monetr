@@ -25,6 +25,9 @@ func (u *unauthenticatedRepo) CreateLogin(
 	ctx context.Context,
 	email, hashedPassword string, firstName, lastName string, isEnabled bool,
 ) (*models.Login, error) {
+	span := sentry.StartSpan(ctx, "CreateLogin")
+	defer span.Finish()
+
 	login := &models.LoginWithHash{
 		Login: models.Login{
 			Email:     strings.ToLower(email),
@@ -34,23 +37,29 @@ func (u *unauthenticatedRepo) CreateLogin(
 		},
 		PasswordHash: hashedPassword,
 	}
-	count, err := u.txn.Model(login).
+	count, err := u.txn.ModelContext(span.Context(), login).
 		Where(`"email" = ?`, email).
 		Count()
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to verify if email is unique")
 	}
 
 	if count != 0 {
+		span.Status = sentry.SpanStatusInvalidArgument
 		return nil, errors.Errorf("a login with the same email already exists")
 	}
 
-	_, err = u.txn.Model(login).Insert(login)
+	_, err = u.txn.ModelContext(span.Context(), login).Insert(login)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+	}
+
 	return &login.Login, errors.Wrap(err, "failed to create login")
 }
 
 func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *models.Account) error {
-	span := sentry.StartSpan(ctx, "Create Account")
+	span := sentry.StartSpan(ctx, "CreateAccount")
 	defer span.Finish()
 
 	// Make sure that the Id is not being specified by the caller of this method. Will ensure that the caller cannot
@@ -62,13 +71,24 @@ func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *mode
 }
 
 func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error {
+	span := sentry.StartSpan(ctx, "CreateAccount")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"loginId":   loginId,
+		"accountId": accountId,
+	}
+
 	user.UserId = 0
 	user.AccountId = accountId
 	user.LoginId = loginId
 
-	if _, err := u.txn.Model(user).Insert(user); err != nil {
+	if _, err := u.txn.ModelContext(span.Context(), user).Insert(user); err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create user")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }
@@ -78,19 +98,30 @@ func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models
 }
 
 func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error) {
+	span := sentry.StartSpan(ctx, "GetLinksForItem")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"itemId": itemId,
+	}
+
 	var link models.Link
-	err := u.txn.Model(&link).
+	err := u.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
 		Where(`"plaid_link"."item_id" = ?`, itemId).
 		Limit(1).
 		Select(&link)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve plaid link")
 	}
 
 	if link.PlaidLink == nil {
+		span.Status = sentry.SpanStatusNotFound
 		return nil, errors.Errorf("failed to retrieve link for item id")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return &link, nil
 }
@@ -121,7 +152,7 @@ func (u *unauthenticatedRepo) ValidateBetaCode(ctx context.Context, betaCode str
 }
 
 func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy uint64) error {
-	span := sentry.StartSpan(ctx, "Validate Beta Code")
+	span := sentry.StartSpan(ctx, "Use Beta Code")
 	defer span.Finish()
 	result, err := u.txn.ModelContext(span.Context(), &models.Beta{}).
 		Set(`"used_by_user_id" = ?`, usedBy).

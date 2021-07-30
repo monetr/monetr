@@ -44,8 +44,16 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 		return map[string]models.Transaction{}, nil
 	}
 
+	span := sentry.StartSpan(ctx, "GetTransactionsByPlaidId")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"linkId":              linkId,
+		"plaidTransactionIds": plaidTransactionIds,
+	}
+
 	var items []models.Transaction
-	err := r.txn.Model(&items).
+	err := r.txn.ModelContext(span.Context(), &items).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -53,8 +61,11 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
 		Select(&items)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction Ids for plaid Ids")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	result := map[string]models.Transaction{}
 	for _, item := range items {
@@ -116,42 +127,73 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 }
 
 func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error) {
+	span := sentry.StartSpan(ctx, "GetTransaction")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"bankAccountId": bankAccountId,
+		"transactionId": transactionId,
+	}
+
 	var result models.Transaction
-	err := r.txn.Model(&result).
+	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
 		Select(&result)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return &result, nil
 }
 
 func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
+	span := sentry.StartSpan(ctx, "CreateTransaction")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"bankAccountId": bankAccountId,
+	}
+
 	transaction.AccountId = r.AccountId()
 	transaction.BankAccountId = bankAccountId
 
-	_, err := r.txn.Model(transaction).Insert(transaction)
+	_, err := r.txn.ModelContext(span.Context(), transaction).Insert(transaction)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create transaction")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }
 
 func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
+	span := sentry.StartSpan(ctx, "UpdateTransaction")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"bankAccountId": bankAccountId,
+	}
+
 	transaction.AccountId = r.AccountId()
 
-	_, err := r.txn.Model(transaction).
+	_, err := r.txn.ModelContext(span.Context(), transaction).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		WherePK().
 		Update(&transaction)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update transaction")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return nil
 }
@@ -159,7 +201,7 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ui
 // UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is doing a
 // bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error {
-	span := sentry.StartSpan(ctx, "Update Transactions")
+	span := sentry.StartSpan(ctx, "UpdateTransactions")
 	defer span.Finish()
 
 	for i := range transactions {

@@ -96,6 +96,7 @@ api:
     username: postgres
     password: ""
     database: postgres
+    insecureSkipVerify: false
     caCertificatePath: ""
     certificatePath: ""
     keyPath: ""

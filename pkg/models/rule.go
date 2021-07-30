@@ -22,6 +22,17 @@ type Rule struct {
 	rrule.RRule
 }
 
+func NewRule(input string) (*Rule, error) {
+	rule, err := rrule.StrToRRule(input)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse rule")
+	}
+
+	return &Rule{
+		RRule: *rule,
+	}, nil
+}
+
 func (r *Rule) UnmarshalJSON(input []byte) error {
 	rule, err := rrule.StrToRRule(strings.Trim(string(input), `"`))
 	if err != nil {

@@ -101,7 +101,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		}
 
 		if !c.configuration.Stripe.IsBillingEnabled() {
-			token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, true)
+			token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
 			if err != nil {
 				c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
 				return
@@ -120,7 +120,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			return
 		}
 
-		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId, subscriptionIsActive)
+		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
 			return
@@ -139,7 +139,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		// If the login has more than one user then we want to generate a temp
 		// JWT that will only grant them access to API endpoints not specific to
 		// an account.
-		token, err := c.generateToken(login.LoginId, 0, 0, true)
+		token, err := c.generateToken(login.LoginId, 0, 0)
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
 			return
@@ -161,7 +161,7 @@ func (c *Controller) validateLogin(email, password string) error {
 	return nil
 }
 
-func (c *Controller) generateToken(loginId, userId, accountId uint64, subscriptionActive bool) (string, error) {
+func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {
 	now := time.Now()
 	claims := &HarderClaims{
 		LoginId:   loginId,
