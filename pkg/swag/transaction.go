@@ -3,7 +3,8 @@ package swag
 import "time"
 
 type AlwaysTransaction struct {
-	// The amount of the transaction in cents. This is used when a transaction is "spent-from" a spending object.
+	// The amount of the transaction in cents. This is used when a transaction is "spent-from" a spending object.Validate
+	//
 	// **NOTE**: `amount` cannot be updated on transactions that were created from Plaid.
 	Amount int64 `json:"amount" validate:"required" minimum:"1"`
 	// The expense or goal's spending Id that this transaction was spent from. When this is updated the spending amount
@@ -20,11 +21,13 @@ type AlwaysTransaction struct {
 	// Date is the date the transaction was created. This date cannot change on this particular transaction Id, but if
 	// the transaction is in a `Pending` state then when the transaction clears a new transaction can be created and
 	// this transaction would be deleted. This can change the `date` field when this occurs.
+	//
 	// **NOTE**: `date` cannot be updated on transactions that were created from Plaid.
 	Date time.Time `json:"date" example:"2021-04-15T00:00:00-05:00"`
 	// Authorized date comes from Plaid, but to my knowledge will not be populated in this API until we support UK
 	// banks.
 	// > This field is only populated for UK institutions. For institutions in other countries, will be null.
+	//
 	// https://plaid.com/docs/api/products/#transactions-get-response-authorized-datetime_transactions
 	// **NOTE**: `date` cannot be updated on transactions that were created from Plaid.
 	AuthorizedDate *time.Time `json:"authorizedDate"`
