@@ -39,7 +39,10 @@ type AlwaysTransaction struct {
 	MerchantName string `json:"merchantName,omitempty"`
 	// Indicates whether or not the transaction is pending. Pending transactions are deleted when they clear their
 	// pending status and if the transaction completes, a new transaction with a non-pending status is created. If the
-	// transaction clears its pending status but is not complete (refunded), then it is simply deleted.
+	// transaction clears its pending status but is not complete (refunded), then it is simply deleted. This is only
+	// the case with Plaid transactions, manual transactions can be updated between pending and non-pending in place.
+	//
+	// **NOTE**: `isPending` cannot be updated on transactions that were created from Plaid.
 	IsPending bool `json:"isPending" example:"true"`
 }
 
