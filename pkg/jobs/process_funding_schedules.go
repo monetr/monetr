@@ -8,12 +8,10 @@ import (
 	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
-	"github.com/monetr/rest-api/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
-	"time"
 )
 
 const (
@@ -143,19 +141,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) (err error) {
 				continue
 			}
 
-			if time.Now().Before(fundingSchedule.NextOccurrence) {
-				crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{
-					"fundingScheduleId": fundingScheduleId,
-					"nextOccurrence":    fundingSchedule.NextOccurrence,
-				})
-				fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
-				continue
-			}
-
-			// Calculate the next time this funding schedule will happen. We need this for calculating how much each
-			// expense will need the next time we do this processing.
-			nextFundingOccurrence := util.MidnightInLocal(fundingSchedule.Rule.After(time.Now(), false), timezone)
-			if err = repo.UpdateNextFundingScheduleDate(span.Context(), fundingScheduleId, nextFundingOccurrence); err != nil {
+			if err = repo.UpdateNextFundingScheduleDate(span.Context(), fundingScheduleId, fundingSchedule.NextOccurrence); err != nil {
 				fundingLog.WithError(err).Error("failed to set the next occurrence for funding schedule")
 				return err
 			}
@@ -211,7 +197,7 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) (err error) {
 					if err = (&spending).CalculateNextContribution(
 						span.Context(),
 						account.Timezone,
-						nextFundingOccurrence,
+						fundingSchedule.NextOccurrence,
 						fundingSchedule.Rule,
 					); err != nil {
 						crumbs.Error(span.Context(), "Failed to calculate next contribution for spending", "spending", map[string]interface{}{
