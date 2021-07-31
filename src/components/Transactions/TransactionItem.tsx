@@ -1,4 +1,4 @@
-import { Chip, Divider, ListItem, Paper, Popover, Typography } from "@material-ui/core";
+import { Button, Chip, Divider, ListItem, Paper, Popover, Typography } from "@material-ui/core";
 import classnames from 'classnames';
 import Spending from "data/Spending";
 import Transaction from "data/Transaction";
@@ -164,7 +164,17 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
           } }
         >
           <Paper style={ { width: `${ nameWidth }px` } } className="min-w-96 max-h-96 p-0 overflow-auto p-2">
-            <div>
+            <div className="pb-1 pt-1 flex flex-row">
+              <div className="flex-auto">
+                <p className="text-lg font-semibold w-full">Name:</p>
+                <Divider />
+                <span className="text-lg">{ transaction.getTitle() }</span>
+              </div>
+              <div className="flex-none h-full">
+                <Button>Test</Button>
+              </div>
+            </div>
+            <div className="pb-1 pt-1">
               <p className="text-lg font-semibold w-full">Original Transaction Name:</p>
               <Divider />
               <span className="text-lg">{ transaction.originalName }</span>

@@ -77,6 +77,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
   };
 
   submit = (values: LoginValues, helpers: FormikHelpers<LoginValues>): Promise<void> => {
+    helpers.setSubmitting(true);
     this.setState({
       error: null,
       loading: true,
@@ -108,6 +109,9 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
         }
 
         throw error;
+      })
+      .finally(() =>{
+        helpers.setSubmitting(false);
       });
   };
 
