@@ -137,6 +137,10 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) (err error) {
 			}
 
 			if !fundingSchedule.CalculateNextOccurrence(span.Context(), timezone) {
+				crumbs.Error(span.Context(), "bug: funding schedule for processing occurs in the future", "bug", map[string]interface{}{
+					"nextOccurrence": fundingSchedule.NextOccurrence,
+				})
+				span.Status = sentry.SpanStatusInvalidArgument
 				fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
 				continue
 			}
@@ -145,10 +149,6 @@ func (j *jobManagerBase) processFundingSchedules(job *work.Job) (err error) {
 				fundingLog.WithError(err).Error("failed to set the next occurrence for funding schedule")
 				return err
 			}
-
-			// Add the funding schedule name to our logging just to make things a bit easier if we have to go look at
-			// logs to find a problem.
-			fundingLog = fundingLog.WithField("fundingScheduleName", fundingSchedule.Name)
 
 			expenses, err := repo.GetSpendingByFundingSchedule(span.Context(), bankAccountId, fundingScheduleId)
 			if err != nil {
