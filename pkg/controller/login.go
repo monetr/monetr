@@ -100,12 +100,13 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			})
 		}
 
+		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
+			return
+		}
+
 		if !c.configuration.Stripe.IsBillingEnabled() {
-			token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
-			if err != nil {
-				c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
-				return
-			}
 			// Return their account token.
 			ctx.JSON(map[string]interface{}{
 				"token":    token,
@@ -116,13 +117,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 		subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to ")
-			return
-		}
-
-		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
-		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
 			return
 		}
 
@@ -132,6 +127,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 		if !subscriptionIsActive {
 			result["nextUrl"] = "/account/subscribe"
+			result["isActive"] = false
 		}
 
 		ctx.JSON(result)
