@@ -469,12 +469,12 @@ vault-token: $(VAULT_JSON)
 	@echo "root token: $$(cat $(VAULT_JSON) | $(JQ) -r '.root_token')"
 	@echo "\033[0;31m#################################################################################\033[0m"
 
-vault-terraform: $(VAULT_JSON)
+vault-terraform: $(VAULT_JSON) $(wildcard $(PWD)/minikube/vault/*.tf)
 	export VAULT_TOKEN=$$(cat $(VAULT_JSON) | $(JQ) -r '.root_token') && \
 	export TF_VAR_kubernetes_address=https://$$(minikube ip):8443 && \
 	export TF_VAR_kubernetes_certificate_b64=$$($(KUBECTL) config view --raw -o json | $(JQ) -r '.clusters[] | select(.name == "'$(shell $(KUBECTL) config current-context)'") | .cluster."certificate-authority-data"') && \
 	export TF_VAR_kubernetes_reviewer_jwt=$$($(KUBECTL) get secret $(shell $(KUBECTL) get serviceaccount vault-authentication -o yaml | $(LOCAL_BIN)/$(YQ) e '.secrets[0].name' -) -o yaml | $(LOCAL_BIN)/$(YQ) e '.data.token' - | base64 -d) && \
-		cd $(PWD)/minikube/vault && terraform init && terraform apply -auto-approve=true
+		cd $(PWD)/minikube/vault && terraform init -upgrade && terraform apply -auto-approve=true
 
 define waitForContainer
 while [[ $$($(KUBECTL) get pod $$($(KUBECTL) get pod -l $1 --namespace $(MINIKUBE_NAMESPACE) -o 'jsonpath={.items[0].metadata.name}') -o 'jsonpath={.status.phase}') != "Running" ]]; do echo "Waiting for container..." && sleep 5; done
