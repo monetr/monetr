@@ -18,13 +18,16 @@ if (CONFIG.SENTRY_DSN) {
     dsn: CONFIG.SENTRY_DSN,
     // eslint-disable-next-line no-undef
     release: `web-ui@${ RELEASE_REVISION }`,
-    integrations: [new Integrations.BrowserTracing({
-      tracingOrigins: [
-        // eslint-disable-next-line no-undef
-        CONFIG.API_DOMAIN,
-      ]
-    })],
+    integrations: [
+      new Integrations.BrowserTracing({
+        tracingOrigins: [
+          // eslint-disable-next-line no-undef
+          CONFIG.API_DOMAIN,
+        ]
+      }),
+    ],
     tracesSampleRate: 1,
+    autoSessionTracking: true
   });
 }
 
@@ -37,10 +40,12 @@ if (module.hot) {
 const theme = createMuiTheme({
   palette: {
     primary: {
-      main: '#4E1AA0'
+      main: '#4E1AA0',
+      contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#FF5798'
+      main: '#FF5798',
+      contrastText: '#FFFFFF',
     }
   }
 });
@@ -55,8 +60,8 @@ ReactDOM.render(
             <Typography
               className="absolute bottom-1 w-full text-center opacity-30 inline"
             >
-              {/* eslint-disable-next-line no-undef */}
-              © { new Date().getFullYear() } monetr LLC - { RELEASE_REVISION.slice(RELEASE_REVISION.length - 8) }
+              {/* eslint-disable-next-line no-undef */ }
+              © { new Date().getFullYear() } monetr LLC - { RELEASE_REVISION.slice(0, 8) }
             </Typography>
           </MuiThemeProvider>
         </Router>
