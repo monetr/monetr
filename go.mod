@@ -34,7 +34,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.59.0
 	github.com/swaggo/swag v1.7.0
-	github.com/teambition/rrule-go v1.7.0
+	github.com/teambition/rrule-go v1.7.1
 	github.com/vmihailenco/msgpack/v5 v5.3.4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	google.golang.org/genproto v0.0.0-20210803142424-70bd63adacf2
