@@ -32,6 +32,7 @@ func (c *Controller) handleSpending(p iris.Party) {
 // @Router /bank_accounts/{bankAccountId}/spending [get]
 // @Success 200 {array} swag.SpendingResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getSpending(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
@@ -65,6 +66,7 @@ func (c *Controller) getSpending(ctx *context.Context) {
 // @Success 200 {object} swag.SpendingResponse
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postSpending(ctx *context.Context) {
 	requestSpan := c.getSpan(ctx)
@@ -191,6 +193,7 @@ type SpendingTransfer struct {
 // @Success 200 {array} swag.TransferResponse
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
@@ -335,6 +338,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 // @Success 200 {object} swag.SpendingResponse
 // @Failure 400 {object} InvalidBankAccountIdError "Invalid Bank Account ID."
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) putSpending(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)

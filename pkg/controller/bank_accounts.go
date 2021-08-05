@@ -25,6 +25,8 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 // @Security ApiKeyAuth
 // @Router /bank_accounts [get]
 // @Success 200 {array} models.BankAccount
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getBankAccounts(ctx *context.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	bankAccounts, err := repo.GetBankAccounts(c.getContext(ctx))
@@ -47,6 +49,7 @@ func (c *Controller) getBankAccounts(ctx *context.Context) {
 // @Router /bank_accounts/{bankAccountId}/balances [get]
 // @Success 200 {object} repository.Balances
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getBalances(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
@@ -77,6 +80,8 @@ func (c *Controller) getBalances(ctx *context.Context) {
 // @Param newBankAccount body swag.BankAccountCreateRequest true "New Bank Account"
 // @Router /bank_accounts [post]
 // @Success 200 {object} models.BankAccount
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) postBankAccounts(ctx *context.Context) {
 	var bankAccount models.BankAccount
 	if err := ctx.ReadJSON(&bankAccount); err != nil {

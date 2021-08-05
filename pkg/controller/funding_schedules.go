@@ -28,6 +28,7 @@ func (c *Controller) handleFundingSchedules(p iris.Party) {
 // @Router /bank_accounts/{bankAccountId}/funding_schedules [get]
 // @Success 200 {array} models.FundingSchedule
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getFundingSchedules(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
@@ -62,6 +63,7 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 // @Router /bank_accounts/{bankAccountId}/funding_schedules/stats [get]
 // @Success 200 {object} repository.FundingStats
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getFundingScheduleStats(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
@@ -93,6 +95,7 @@ func (c *Controller) getFundingScheduleStats(ctx *context.Context) {
 // @Router /bank_accounts/{bankAccountId}/funding_schedules [post]
 // @Success 200 {object} models.FundingSchedule
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) postFundingSchedules(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)

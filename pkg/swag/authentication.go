@@ -14,6 +14,16 @@ type LoginRequest struct {
 type LoginResponse struct {
 	// A JWT that can be used to make authenticated requests for the user.
 	Token string `json:"token" example:"eyJhbGciOiJI..."`
+	// Indicates whether or not the user that has been authenticated has an active subscription. The UI will use this to
+	// redirect the user to a payment page if their subscription is not active. If this field is not present then
+	// billing is either not enabled. Or the user's subscription is active and no action needs to be taken.
+	IsActive bool `json:"isActive" example:"true" extensions:"x-nullable"`
+	// Next URL is provided by the API if the user needs to be redirected immediately after authenticating. This is used
+	// in conjunction with the `isActive` field for directing users to the payment page gracefully. If this field is not
+	// present then billing is either not enabled. Or the user's subscription is active and no action needs to be taken.
+	// It is possible that this field may be used in the future independent of `isActive` so logic should be build for
+	// it regardless of the `isActive` field's presence.
+	NextUrl string `json:"nextUrl" example:"/account/subscribe" extensions:"x-nullable"`
 }
 
 type RegisterRequest struct {
@@ -32,7 +42,7 @@ type RegisterRequest struct {
 	// schedules to be processed for your account.
 	Timezone string `json:"timezone" example:"America/Chicago"`
 	// ReCAPTCHA value from validation. Required if `verifyRegistration` is enabled on the server.
-	Captcha  *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
+	Captcha *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
 	// A beta code given to you to test or demo the application. This is primarily used in an environment where it would
 	// cost money to link a bank account with a user. But testing against real bank accounts is necessary. So to prevent
 	// anyone just creating accounts and linking their bank account for free, we use beta codes to verify that they are

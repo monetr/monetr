@@ -148,6 +148,10 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	}
 }
 
+func (c *Controller) forgotPassword(ctx iris.Context) {
+
+}
+
 func (c *Controller) validateLogin(email, password string) error {
 	// TODO (elliotcourant) Add some email format validation here.
 	if len(password) < 8 {

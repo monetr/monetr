@@ -34,6 +34,7 @@ func (c *Controller) handleTransactions(p iris.Party) {
 // @Router /bank_accounts/{bankAccountId}/transactions [get]
 // @Success 200 {array} swag.TransactionResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
@@ -165,6 +166,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 // @Router /bank_accounts/{bankAccountId}/transactions/{transactionId} [post]
 // @Success 200 {array} swag.TransactionUpdateResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) putTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
