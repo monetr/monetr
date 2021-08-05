@@ -104,7 +104,6 @@ func RunServer() error {
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
-
 			BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
 				// Make sure user authentication doesn't make its way into sentry.
 				if event.Request != nil {

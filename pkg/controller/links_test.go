@@ -267,7 +267,7 @@ func TestPutLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusNotFound)
-			response.JSON().Path("$.error").String().Equal("could not update link: record does not exist")
+			response.JSON().Path("$.error").String().Equal("failed to retrieve existing link for update: record does not exist")
 		}
 
 		// Now do the same thing with token B for token A's link.
@@ -282,7 +282,7 @@ func TestPutLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusNotFound)
-			response.JSON().Path("$.error").String().Equal("could not update link: record does not exist")
+			response.JSON().Path("$.error").String().Equal("failed to retrieve existing link for update: record does not exist")
 		}
 	})
 }

@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/rest-api/pkg/swag"
 	"net/http"
 	"strings"
 )
@@ -96,7 +97,7 @@ func (c *Controller) putLink(ctx iris.Context) {
 		return
 	}
 
-	var link models.Link
+	var link swag.UpdateLinkRequest
 	if err := ctx.ReadJSON(&link); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
@@ -127,7 +128,7 @@ func (c *Controller) putLink(ctx iris.Context) {
 		return
 	}
 
-	ctx.JSON(link)
+	ctx.JSON(existingLink)
 }
 
 // Convert A Link To Manual
