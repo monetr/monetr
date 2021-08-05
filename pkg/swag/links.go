@@ -12,6 +12,12 @@ type CreateLinkRequest struct {
 	InstitutionName string `json:"institutionName" example:"Manual" validate:"required"`
 }
 
+type UpdateLinkRequest struct {
+	// A custom name for the link's institution that can be set by the end user. Once a link is created the institution
+	// name cannot be changed directly. But the custom institution name can.
+	CustomInstitutionName string `json:"customInstitutionName" example:"US Bank"`
+}
+
 type LinkResponse struct {
 	// Our unique identifier for a link. This is globally unique across all accounts.
 	LinkId uint64 `json:"linkId" example:"1245"`
@@ -36,14 +42,12 @@ type LinkResponse struct {
 	// allow us to associate institutions with multiple integrations in the future. It is also meant to keep Plaid Id's
 	// away from the client's view as much as possible.
 	InstitutionId *uint64 `json:"institutionId" example:"5328" extensions:"x-nullable"`
+	UpdateLinkRequest
 	// The institution name for this link. With the Plaid integration, each link represents a single bank account login
 	// with an institution. So if you link your monetr account with your U.S. Bank account you would have one link for
 	// U.S. Bank, and your accounts with that bank would show as bank account's under that link. Manual links are
 	// intended to be a single "Manual" link per account, with any manually managed bank accounts underneath it.
 	InstitutionName string `json:"institutionName" example:"U.S. Bank"`
-	// A custom name for the link's institution that can be set by the end user. Once a link is created the institution
-	// name cannot be changed directly. But the custom institution name can.
-	CustomInstitutionName string `json:"customInstitutionName" example:"US Bank"`
 	// The unique user Id of the user who created this link. If that user is deleted then any links that that user
 	// created are also deleted. In an "ownership" sort of way. If a user links their bank account and has that shared
 	// with someone else; but then the user deletes their user. We do not want the other user to still have access to

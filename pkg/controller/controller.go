@@ -186,6 +186,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(func(ctx iris.Context) {
 			var span *sentry.Span
 			if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+				if requestId := ctx.GetHeader("X-Request-Id"); requestId != "" {
+					hub.ConfigureScope(func(scope *sentry.Scope) {
+						scope.SetTag("requestId", requestId)
+					})
+				}
+
 				tracingCtx := sentry.SetHubOnContext(ctx.Request().Context(), hub)
 				name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
 				span = sentry.StartSpan(
@@ -225,12 +231,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			}
 
 			ctx.Next()
-
-			if span != nil {
-				if ctx.GetErr() != nil && span.Status == sentry.SpanStatusUndefined {
-					span.Status = sentry.SpanStatusInternalError
-				}
-			}
 		})
 
 		// For the following endpoints we want to have a repository available to us.

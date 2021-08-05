@@ -5,14 +5,14 @@ import (
 	"github.com/monetr/rest-api/pkg/models"
 	"net/http"
 	"strings"
-	"time"
 )
 
 func (c *Controller) linksController(p iris.Party) {
 	// GET will list all the links in the current account.
 	p.Get("/", c.getLinks)
 	p.Post("/", c.postLinks)
-	p.Put("/{linkId:uint64}", c.putLinks)
+	p.Put("/{linkId:uint64}", c.putLink)
+	p.Put("/convert/{linkId:uint64}", c.convertLink)
 	p.Delete("/{linkId:uint64}", c.deleteLink)
 }
 
@@ -74,7 +74,22 @@ func (c *Controller) postLinks(ctx iris.Context) {
 	ctx.JSON(link)
 }
 
-func (c *Controller) putLinks(ctx iris.Context) {
+// Update Link
+// @Summary Update Link
+// @id update-link
+// @tags Links
+// @description Update an existing link.
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /links/{linkId} [put]
+// @Param linkId path int true "Link ID"
+// @Param newLink body swag.UpdateLinkRequest true "Updated Link"
+// @Success 200 {object} swag.LinkResponse "Updated link object after changes."
+// @Success 304 {object} swag.LinkResponse "If no updates were made then the link object is returned unchanged."
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 500 {object} ApiError "Something went wrong on our end."
+func (c *Controller) putLink(ctx iris.Context) {
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
 	if linkId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to update")
@@ -87,20 +102,73 @@ func (c *Controller) putLinks(ctx iris.Context) {
 		return
 	}
 
-	link.LinkId = linkId
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	existingLink, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve existing link for update")
+		return
+	}
 
-	// We are not going to update default value or null fields. So we can simply clear these fields out to make sure
-	// the user does not overwrite them somehow.
-	link.CreatedByUserId = 0 // Make sure they don't change the created by userId.
-	link.CreatedAt = time.Time{}
-	link.InstitutionName = "" // This cannot be changed. If the user wants to set a name then they need to change the custom one.
-	link.LinkType = 0         // Make sure they don't change the link type. This can be changed, but not by the user.
-	link.PlaidLinkId = nil    // Make sure they don't change the plaidLink.
+	hasUpdate := false
+
+	if link.CustomInstitutionName != "" {
+		existingLink.CustomInstitutionName = link.CustomInstitutionName
+		hasUpdate = true
+	}
+
+	if !hasUpdate {
+		ctx.JSON(&existingLink)
+		ctx.StatusCode(http.StatusNotModified)
+		return
+	}
+
+	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
+		c.wrapPgError(ctx, err, "could not update link")
+		return
+	}
+
+	ctx.JSON(link)
+}
+
+// Convert A Link To Manual
+// @Summary Convert A Link To Manual
+// @id convert-link
+// @tags Links
+// @description Convert an existing link into a manual one.
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /links/convert/{linkId} [put]
+// @Param linkId path int true "Link ID"
+// @Param newLink body swag.CreateLinkRequest true "New Manual Link"
+// @Success 200 {object} swag.LinkResponse "New link object after being converted to a manual link."
+// @Failure 400 {object} ApiError "The link specified is already a manual link."
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 500 {object} ApiError "Something went wrong on our end."
+func (c *Controller) convertLink(ctx iris.Context) {
+	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	if linkId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to convert")
+		return
+	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	if err := repo.UpdateLink(c.getContext(ctx), &link); err != nil {
-		c.wrapPgError(ctx, err, "could not update link")
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not retrieve link to convert")
+		return
+	}
+
+	if link.LinkType == models.ManualLinkType {
+		c.badRequest(ctx, "link is already manual")
+		return
+	}
+
+	link.LinkType = models.ManualLinkType
+	link.LinkStatus = models.LinkStatusSetup
+
+	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
+		c.wrapPgError(ctx, err, "failed to convert link to manual")
 		return
 	}
 
