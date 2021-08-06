@@ -60,8 +60,22 @@ func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Con
 	return "", errors.Errorf("access token could not be found")
 }
 
-func (v *vaultPlaidSecretsProvider) buildPath(accountId uint64, plaidLinkId string) string {
-	return fmt.Sprintf("secret/customers/plaid/data/%X/%s", accountId, plaidLinkId)
+func (v *vaultPlaidSecretsProvider) RemoveAccessTokenForPlaidLink(ctx context.Context, accountId uint64, plaidItemId string) error {
+	span := sentry.StartSpan(ctx, "RemoveAccessTokenForPlaidLink [VAULT]")
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"itemId": plaidItemId,
+	}
+
+	if err := v.client.DeleteKV(span.Context(), v.buildPath(accountId, plaidItemId)); err != nil {
+		return errors.Wrap(err, "failed to remove Plaid access token")
+	}
+
+	return nil
+}
+
+func (v *vaultPlaidSecretsProvider) buildPath(accountId uint64, plaidItemId string) string {
+	return fmt.Sprintf("secret/customers/plaid/data/%X/%s", accountId, plaidItemId)
 }
 
 func (v *vaultPlaidSecretsProvider) Close() error {

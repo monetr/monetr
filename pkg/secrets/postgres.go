@@ -67,6 +67,26 @@ func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.C
 	return result.AccessToken, nil
 }
 
+func (p *postgresPlaidSecretProvider) RemoveAccessTokenForPlaidLink(ctx context.Context, accountId uint64, plaidItemId string) error {
+	span := sentry.StartSpan(ctx, "GetAccessTokenForPlaidLinkId [POSTGRES]")
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"itemId": plaidItemId,
+	}
+
+	_, err := p.db.ModelContext(span.Context(), &models.PlaidToken{}).
+		Where(`"plaid_token"."account_id" = ?`, accountId).
+		Where(`"plaid_token"."item_id" = ?`, plaidItemId).
+		Limit(1).
+		Delete()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to delete plaid access token")
+	}
+
+	return nil
+}
+
 func (p *postgresPlaidSecretProvider) Close() error {
 	return nil
 }

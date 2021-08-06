@@ -14,8 +14,8 @@ import (
 	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/monetr/rest-api/pkg/jobs"
 	"github.com/plaid/plaid-go/plaid"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
@@ -41,7 +41,7 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 			Debug: false,
 		},
 		Logging: config.Logging{
-			Level: "fatal",
+			Level: "trace",
 		},
 	}
 }
@@ -52,15 +52,14 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 }
 
 func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httptest.Expect {
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	p := plaid_helper.NewPlaidClient(logrus.WithField("test", t.Name()), plaid.ClientOptions{
+	plaidClient := plaid_helper.NewPlaidClient(log, plaid.ClientOptions{
 		ClientID:    configuration.Plaid.ClientID,
 		Secret:      configuration.Plaid.ClientSecret,
 		Environment: configuration.Plaid.Environment,
 		HTTPClient:  http.DefaultClient,
 	})
-
-	mockJobManager := testutils.NewMockJobManager()
 
 	miniRedis := miniredis.NewMiniRedis()
 	require.NoError(t, miniRedis.Start())
@@ -74,19 +73,27 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		require.NoError(t, redisPool.Close())
 		miniRedis.Close()
 	})
+	plaidSecrets := mock_secrets.NewMockPlaidSecrets()
 
-	log := testutils.GetLog(t)
+	mockJobManager := jobs.NewNonDistributedJobManager(
+		log,
+		redisPool,
+		db,
+		plaidClient,
+		nil,
+		plaidSecrets,
+	)
 
 	c := controller.NewController(
 		log,
 		configuration,
 		db,
 		mockJobManager,
-		p,
+		plaidClient,
 		nil,
 		stripe_helper.NewStripeHelper(log, gofakeit.UUID()),
 		redisPool,
-		mock_secrets.NewMockPlaidSecrets(),
+		plaidSecrets,
 		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
 	)
 	app := application.NewApp(configuration, c)

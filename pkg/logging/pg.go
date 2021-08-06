@@ -78,12 +78,14 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 		unformattedQuery, err := event.UnformattedQuery()
 		if err == nil && len(unformattedQuery) > 0 {
 			queryString := string(unformattedQuery)
+
 			if event.Err == nil {
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
-					Type:      "query",
-					Category:  "postgres",
-					Message:   queryString,
-					Data:      map[string]interface{}{},
+					Type:     "query",
+					Category: "postgres",
+					Message:  queryString,
+					Data: map[string]interface{}{
+					},
 					Level:     "debug",
 					Timestamp: event.StartTime,
 				}, nil)
@@ -93,7 +95,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 					Category: "postgres",
 					Message:  queryString,
 					Data: map[string]interface{}{
-						"error": event.Err.Error(),
+						"error":        event.Err.Error(),
 					},
 					Level:     "error",
 					Timestamp: event.StartTime,

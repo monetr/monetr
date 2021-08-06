@@ -46,6 +46,10 @@ func (m *MockPlaidSecrets) GetAccessTokenForPlaidLinkId(ctx context.Context, acc
 	return accessToken, nil
 }
 
+func (m *MockPlaidSecrets) RemoveAccessTokenForPlaidLink(ctx context.Context, accountId uint64, plaidItemId string) error {
+	panic("implement me")
+}
+
 func (m *MockPlaidSecrets) Close() error {
 	return nil
 }
