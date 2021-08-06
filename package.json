@@ -88,7 +88,7 @@
     "ts-pnp": "1.2.0",
     "web-vitals": "2.1.0",
     "webpack-manifest-plugin": "4.0.2",
-    "workbox-webpack-plugin": "6.2.0"
+    "workbox-webpack-plugin": "6.2.2"
   },
   "scripts": {
     "build": "MONETR_ENV=${MONETR_ENV:=production} webpack",
