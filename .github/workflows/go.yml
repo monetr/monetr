@@ -10,7 +10,7 @@ jobs:
   build:
     name: Go
     runs-on: ubuntu-latest
-    container: golang:1.16.3
+    container: golang:1.17.0
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
