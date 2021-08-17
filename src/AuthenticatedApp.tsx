@@ -10,7 +10,6 @@ import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchI
 import { Link as RouterLink, Redirect, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from "@material-ui/core";
-import UpdateSubscriptionsView from "views/Subscriptions/UpdateSubscriptionsView";
 import BankAccountSelector from "components/BankAccounts/BankAccountSelector";
 import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
 import MenuIcon from "@material-ui/icons/Menu";
@@ -18,13 +17,13 @@ import TransactionsView from "views/TransactionsView";
 import ExpensesView from "views/ExpensesView";
 import GoalsView from "views/GoalsView";
 import AccountView from "views/AccountView";
-import FirstTimeSetup from "views/FirstTimeSetup";
 import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
 import AllAccountsView from "views/AccountView/AllAccountsView";
 import AfterCheckout from "views/Subscriptions/AfterCheckout";
 import Logout from "views/Authentication/Logout";
 import InitialPlaidSetup from "views/Setup/InitialPlaidSetup";
 import request from "shared/util/request";
+import { CreditCard, ExitToApp } from "@material-ui/icons";
 
 interface WithConnectionPropTypes {
   logout: () => void;
@@ -114,10 +113,10 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
     return (
       <Switch>
         <Route path="/logout">
-          <Logout />
+          <Logout/>
         </Route>
         <Route path="/setup">
-          <InitialPlaidSetup />
+          <InitialPlaidSetup/>
         </Route>
         <Route path="/plaid/oauth-return">
           <OAuthRedirect/>
@@ -153,10 +152,18 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
               open={ Boolean(this.state.menuAnchorEl) }
               onClose={ this.closeMenu }
             >
-              <MenuItem disabled>About (WIP)</MenuItem>
-              <MenuItem onClick={ this.gotoAccount }>My account</MenuItem>
-              <MenuItem onClick={ this.manageBilling }>Billing</MenuItem>
-              <MenuItem onClick={ this.doLogout }>Logout</MenuItem>
+              <MenuItem
+                onClick={ this.manageBilling }
+              >
+                <CreditCard className="mr-2"/>
+                Billing
+              </MenuItem>
+              <MenuItem
+                onClick={ this.doLogout }
+              >
+                <ExitToApp className="mr-2"/>
+                Logout
+              </MenuItem>
             </Menu>
           </Toolbar>
         </AppBar>
@@ -168,7 +175,7 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
             <Redirect to="/"/>
           </Route>
           <Route path="/logout">
-            <Logout />
+            <Logout/>
           </Route>
           <Route path="/transactions">
             <TransactionsView/>

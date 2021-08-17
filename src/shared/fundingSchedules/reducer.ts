@@ -1,6 +1,10 @@
 import { LOGOUT } from "shared/authentication/actions";
 import { CreateFundingSchedule, FetchFundingSchedules, FundingScheduleActions } from "shared/fundingSchedules/actions";
 import FundingScheduleState from "shared/fundingSchedules/state";
+import { RemoveLink } from "shared/links/actions";
+import FundingSchedule from "data/FundingSchedule";
+import { Map } from 'immutable';
+import BankAccount from "data/BankAccount";
 
 export default function reducer(state: FundingScheduleState = new FundingScheduleState(), action: FundingScheduleActions): FundingScheduleState {
   switch (action.type) {
@@ -33,6 +37,17 @@ export default function reducer(state: FundingScheduleState = new FundingSchedul
           action.payload.fundingScheduleId,
         ], action.payload),
       };
+    case RemoveLink.Success:
+      return {
+        ...state,
+        loading: false,
+        // This is a bit goofy. Basically when we remove a link we are returned the link itself, and all of the bank
+        // accounts associated with that link. We then look at all of our funding schedules, but only return those that
+        // do not belong to bank accounts that are in that payload. The ones in the payload are being removed.
+        items: state.items.filter((fundingSchedule: Map<number, FundingSchedule>, bankAccountId: number): boolean => {
+          return !action.payload.bankAccounts.find((bankAccount: BankAccount) => bankAccount.linkId === bankAccountId)
+        }),
+      }
     case LOGOUT:
       return new FundingScheduleState();
     default:

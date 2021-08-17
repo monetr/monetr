@@ -1,6 +1,7 @@
 import FundingSchedule from "data/FundingSchedule";
 import { Map } from 'immutable';
 import { Logout } from "shared/authentication/actions";
+import { RemoveLinkSuccess } from "shared/links/actions";
 
 export enum FetchFundingSchedules {
   Request = 'FetchFundingSchedulesRequest',
@@ -47,4 +48,5 @@ export type FundingScheduleActions =
   | CreateFundingScheduleRequest
   | CreateFundingScheduleFailure
   | CreateFundingScheduleSuccess
+  | RemoveLinkSuccess
   | Logout

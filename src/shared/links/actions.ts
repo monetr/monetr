@@ -1,6 +1,7 @@
 import Link from "data/Link";
 import { Logout } from "shared/authentication/actions";
 import { Map } from 'immutable';
+import BankAccount from "data/BankAccount";
 
 export const FETCH_LINKS_REQUEST = 'FETCH_LINKS_REQUEST';
 export const FETCH_LINKS_SUCCESS = 'FETCH_LINKS_SUCCESS';
@@ -38,6 +39,28 @@ export interface CreateLinksSuccess {
   payload: Link;
 }
 
+export enum RemoveLink {
+  Request = 'RemoveLinkRequest',
+  Failure = 'RemoveLinkFailure',
+  Success = 'RemoveLinkSuccess',
+}
+
+export interface RemoveLinkRequest {
+  type: typeof RemoveLink.Request;
+}
+
+export interface RemoveLinkFailure {
+  type: typeof RemoveLink.Failure;
+}
+
+export interface RemoveLinkSuccess {
+  type: typeof RemoveLink.Success;
+  payload: {
+    link: Link;
+    bankAccounts: BankAccount[];
+  };
+}
+
 export type LinkActions =
   FetchLinksSuccess
   | FetchLinksRequest
@@ -45,4 +68,7 @@ export type LinkActions =
   | CreateLinksRequest
   | CreateLinksFailure
   | CreateLinksSuccess
+  | RemoveLinkRequest
+  | RemoveLinkFailure
+  | RemoveLinkSuccess
   | Logout

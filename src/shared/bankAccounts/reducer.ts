@@ -7,6 +7,8 @@ import {
   FETCH_BANK_ACCOUNTS_SUCCESS
 } from "shared/bankAccounts/actions";
 import BankAccountsState from "shared/bankAccounts/state";
+import { RemoveLink } from "shared/links/actions";
+import BankAccount from "data/BankAccount";
 
 export default function reducer(state: BankAccountsState = new BankAccountsState(), action: BankAccountActions) {
   switch (action.type) {
@@ -47,6 +49,17 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         loading: false,
         selectedBankAccountId: selectedBankAccountId,
         items: state.items.merge(action.payload)
+      }
+    case RemoveLink.Success:
+      return {
+        ...state,
+        loading: false,
+        // This is a bit goofy. Basically when we remove a link we are returned the link itself, and all of the bank
+        // accounts associated with that link. We are basically doing a reverse intersection here (read exclusion) to
+        // remove the bank accounts that would be removed as part of this link being removed.
+        items: state.items.filter((_: BankAccount, bankAccountId: number): boolean => {
+          return !action.payload.bankAccounts.find((bankAccount: BankAccount) => bankAccount.linkId === bankAccountId)
+        }),
       }
     case LOGOUT:
       return new BankAccountsState();

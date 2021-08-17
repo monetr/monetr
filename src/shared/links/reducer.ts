@@ -4,7 +4,8 @@ import {
   FETCH_LINKS_FAILURE,
   FETCH_LINKS_REQUEST,
   FETCH_LINKS_SUCCESS,
-  LinkActions
+  LinkActions,
+  RemoveLink
 } from "shared/links/actions";
 import { LOGOUT } from "shared/authentication/actions";
 
@@ -33,6 +34,13 @@ export default function reducer(state: LinksState = new LinksState(), action: Li
         loaded: true,
         loading: false,
         items: state.items.set(action.payload.linkId, action.payload)
+      };
+    case RemoveLink.Success:
+      return {
+        ...state,
+        loaded: true,
+        loading: false,
+        items: state.items.remove(action.payload.link.linkId),
       };
     case LOGOUT:
       return new LinksState();
