@@ -3,13 +3,14 @@ import { Map } from "immutable";
 import BankAccount from "data/BankAccount";
 import Link, { LinkStatus } from "data/Link";
 import Balance from "data/Balance";
-import { Divider, IconButton, ListItem, ListSubheader, Menu, MenuItem, Typography } from "@material-ui/core";
+import { Divider, IconButton, ListItem, ListSubheader, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
 import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, Remove } from "@material-ui/icons";
 import PlaidIcon from "Plaid/PlaidIcon";
 import { getBankAccountsByLinkId } from "shared/bankAccounts/selectors/getBankAccountsByLinkId";
 import { connect } from "react-redux";
 import { getBalances } from "shared/balances/selectors/getBalances";
 import RemoveLinkConfirmationDialog from "views/AccountView/RemoveLinkConfirmationDialog";
+import { UpdatePlaidAccountDialog } from "views/AccountView/UpdatePlaidAccountDialog";
 
 interface PropTypes {
   link: Link;
@@ -22,6 +23,7 @@ interface WithConnectionPropTypes extends PropTypes {
 
 enum DialogOpen {
   RemoveLinkDialog,
+  UpdateLinkDialog,
 }
 
 interface State {
@@ -36,13 +38,39 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
     menuAnchorEl: null,
   };
 
+  renderPlaidStatus = (): React.ReactNode => {
+    const { link } = this.props;
+
+    switch (link.linkStatus) {
+      case LinkStatus.Setup:
+        return (
+          <Tooltip title="This link is working properly.">
+            <FiberManualRecord className="text-green-500 mr-2"/>
+          </Tooltip>
+        );
+      case LinkStatus.Pending:
+        return (
+          <Tooltip title="This link has not been completely setup yet.">
+            <FiberManualRecord className="text-yellow-500 mr-2"/>
+          </Tooltip>
+        );
+      case LinkStatus.Error:
+        return (
+          <Tooltip title={ link.getErrorMessage() }>
+            <FiberManualRecord className="text-red-500 mr-2"/>
+          </Tooltip>
+        );
+      case LinkStatus.Unknown:
+        return <FiberManualRecord className="text-gray-500 mr-2"/>;
+    }
+  };
+
   renderPlaidInfo = (): React.ReactNode => {
     const { link } = this.props;
 
     return (
       <div className="flex items-center">
-        { link.linkStatus === LinkStatus.Setup && <FiberManualRecord className="text-green-500 mr-2"/> }
-        { link.linkStatus === LinkStatus.Error && <FiberManualRecord className="text-red-500 mr-2"/> }
+        { this.renderPlaidStatus() }
         <Typography className="pr-5 items-center self-center">
           <span
             className="font-bold">Last Successful Sync:</span> { link.lastSuccessfulUpdate ? link.lastSuccessfulUpdate.format('MMMM Do, h:mm a') : 'N/A' }
@@ -104,8 +132,13 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
 
     switch (dialog) {
       case DialogOpen.RemoveLinkDialog:
-        return <RemoveLinkConfirmationDialog open={ true } onClose={ this.closeDialog }
-                                             linkId={ this.props.link.linkId }/>;
+        return <RemoveLinkConfirmationDialog
+          open
+          onClose={ this.closeDialog }
+          linkId={ this.props.link.linkId }
+        />;
+      case DialogOpen.UpdateLinkDialog:
+        return <UpdatePlaidAccountDialog open onClose={ this.closeDialog } linkId={ this.props.link.linkId }/>;
       default:
         return null;
     }
@@ -138,19 +171,20 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
                   open={ Boolean(this.state.menuAnchorEl) }
                   onClose={ this.closeMenu }
                 >
+                  { link.getIsPlaid() && link.linkStatus === LinkStatus.Error &&
+                  <MenuItem
+                    onClick={ this.openDialog(DialogOpen.UpdateLinkDialog) }
+                    className="text-yellow-600"
+                  >
+                    <Autorenew className="mr-2"/>
+                    Reauthenticate
+                  </MenuItem>
+                  }
                   { link.getIsPlaid() &&
-                  <Fragment>
-                    { link.linkStatus === LinkStatus.Error &&
-                    <MenuItem>
-                      <Autorenew className="mr-2"/>
-                      Reauthenticate
-                    </MenuItem>
-                    }
-                    <MenuItem>
-                      <CloudOff className="mr-2"/>
-                      Convert To Manual Link
-                    </MenuItem>
-                  </Fragment>
+                  <MenuItem>
+                    <CloudOff className="mr-2"/>
+                    Convert To Manual Link
+                  </MenuItem>
                   }
                   <MenuItem>
                     <Edit className="mr-2"/>

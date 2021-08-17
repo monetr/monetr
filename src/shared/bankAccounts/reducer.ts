@@ -51,15 +51,17 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         items: state.items.merge(action.payload)
       }
     case RemoveLink.Success:
+      // This is a bit goofy. Basically when we remove a link we are returned the link itself, and all of the bank
+      // accounts associated with that link. We are basically doing a reverse intersection here (read exclusion) to
+      // remove the bank accounts that would be removed as part of this link being removed.
+      const newBankAccountsSet = state.items.filter((_: BankAccount, bankAccountId: number): boolean => {
+        return !action.payload.bankAccounts.has(bankAccountId);
+      });
       return {
         ...state,
         loading: false,
-        // This is a bit goofy. Basically when we remove a link we are returned the link itself, and all of the bank
-        // accounts associated with that link. We are basically doing a reverse intersection here (read exclusion) to
-        // remove the bank accounts that would be removed as part of this link being removed.
-        items: state.items.filter((_: BankAccount, bankAccountId: number): boolean => {
-          return !action.payload.bankAccounts.find((bankAccount: BankAccount) => bankAccount.linkId === bankAccountId)
-        }),
+        selectedBankAccountId: !newBankAccountsSet.has(state.selectedBankAccountId) ? newBankAccountsSet.first()?.bankAccountId || null : state.selectedBankAccountId,
+        items: newBankAccountsSet,
       }
     case LOGOUT:
       return new BankAccountsState();

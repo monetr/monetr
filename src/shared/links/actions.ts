@@ -57,7 +57,7 @@ export interface RemoveLinkSuccess {
   type: typeof RemoveLink.Success;
   payload: {
     link: Link;
-    bankAccounts: BankAccount[];
+    bankAccounts: Map<number, BankAccount>;
   };
 }
 

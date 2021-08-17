@@ -35,6 +35,16 @@ export default function reducer(state: LinksState = new LinksState(), action: Li
         loading: false,
         items: state.items.set(action.payload.linkId, action.payload)
       };
+    case RemoveLink.Request:
+      return {
+        ...state,
+        loading: true,
+      };
+    case RemoveLink.Failure:
+      return {
+        ...state,
+        loading: false,
+      };
     case RemoveLink.Success:
       return {
         ...state,

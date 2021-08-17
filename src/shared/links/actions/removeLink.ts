@@ -29,7 +29,7 @@ export default function removeLink(link: Link): ActionWithState {
           type: RemoveLink.Success,
           payload: {
             link,
-            bankAccounts: bankAccounts.valueSeq().toArray(),
+            bankAccounts: bankAccounts,
           }
         });
       })

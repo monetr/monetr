@@ -14,6 +14,10 @@ export enum LinkStatus {
   Error = 3,
 }
 
+export const errorMessages = {
+  'ITEM_LOGIN_REQUIRED': `This link's authentication has expired and needs to be re-authenticated.`
+};
+
 export default class Link {
   linkId: number;
   linkType: LinkType;
@@ -44,5 +48,13 @@ export default class Link {
 
   getIsPlaid(): boolean {
     return this.linkType === LinkType.Plaid;
+  }
+
+  getIsError(): boolean {
+    return this.linkStatus === LinkStatus.Error || this.errorCode != null;
+  }
+
+  getErrorMessage(): string | null {
+    return errorMessages[this.errorCode] || null;
   }
 }
