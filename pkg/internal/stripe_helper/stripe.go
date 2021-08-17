@@ -46,11 +46,22 @@ func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
 }
 
 func NewStripeHelperWithCache(log *logrus.Entry, apiKey string, cacheClient cache.Cache) Stripe {
+	httpClient := &http.Client{
+		Timeout: time.Second * 30,
+	}
+
+	config := &stripe.BackendConfig{
+		HTTPClient:    httpClient,
+		LeveledLogger: log,
+	}
+
 	return &stripeBase{
 		log: log,
-		client: stripe_client.New(apiKey, stripe.NewBackends(&http.Client{
-			Timeout: time.Second * 30,
-		})),
+		client: stripe_client.New(apiKey, &stripe.Backends{
+			API:     stripe.GetBackendWithConfig(stripe.APIBackend, config),
+			Connect: stripe.GetBackendWithConfig(stripe.ConnectBackend, config),
+			Uploads: stripe.GetBackendWithConfig(stripe.UploadsBackend, config),
+		}),
 		cache: NewRedisStripeCache(log, cacheClient),
 	}
 }

@@ -18,6 +18,17 @@ type ApiError struct {
 	Error string `json:"error" example:"something went wrong on our end"`
 }
 
+type LinkNotFoundError struct {
+	// This error is returned when the user attempts to retrieve a link that does not exist or belong to their account.
+	Error string `json:"error" example:"failed to retrieve link: record does not exist"`
+}
+
+type InvalidLinkIdError struct {
+	// Contains an error telling the user that they must provide a valid link Id for this request.
+	Error string `json:"error" example:"must specify a link Id to retrieve"`
+}
+
 type InvalidBankAccountIdError struct {
+	// Contains an error telling the user that they must provide a valid bank account Id for this request.
 	Error string `json:"error" example:"invalid bank account Id provided"`
 }

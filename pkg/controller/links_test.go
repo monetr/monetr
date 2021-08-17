@@ -132,6 +132,70 @@ func TestGetLink(t *testing.T) {
 		response.Status(http.StatusForbidden)
 		response.JSON().Path("$.error").String().Equal("token must be provided")
 	})
+	
+	t.Run("precise", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		institutionName := "U.S. Bank"
+
+		link := models.Link{
+			LinkType:              models.ManualLinkType,
+			InstitutionName:       institutionName,
+			CustomInstitutionName: institutionName,
+		}
+
+		{ // Create the link.
+			response := e.POST("/links").
+				WithHeader("M-Token", token).
+				WithJSON(link).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").Number().Gt(0)
+			response.JSON().Path("$.institutionName").String().Equal(institutionName)
+			response.JSON().Path("$.customInstitutionName").String().Equal(institutionName)
+
+			link.LinkId = uint64(response.JSON().Path("$.linkId").Number().Raw())
+		}
+
+		{ // Retrieve the link and make sure the linkId matches.
+			response := e.GET(fmt.Sprintf("/links/%d", link.LinkId)).
+				WithHeader("M-Token", token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").Equal(link.LinkId)
+		}
+	})
+
+	t.Run("precise not found", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		{ // Try to retrieve a link that does not exist for this user.
+			response := e.GET(fmt.Sprintf("/links/%d", math.MaxInt64)).
+				WithHeader("M-Token", token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").Equal("failed to retrieve link: record does not exist")
+		}
+	})
+
+	t.Run("precise bad Id", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		{ // Try to retrieve a link that does not exist for this user.
+			response := e.GET("/links/0").
+				WithHeader("M-Token", token).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").Equal("must specify a link Id to retrieve")
+		}
+	})
 }
 
 func TestPutLink(t *testing.T) {
@@ -283,6 +347,60 @@ func TestPutLink(t *testing.T) {
 
 			response.Status(http.StatusNotFound)
 			response.JSON().Path("$.error").String().Equal("failed to retrieve existing link for update: record does not exist")
+		}
+	})
+}
+
+func TestDeleteLink(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		institutionName := "U.S. Bank"
+
+		link := models.Link{
+			LinkType:              models.ManualLinkType,
+			InstitutionName:       institutionName,
+			CustomInstitutionName: institutionName,
+		}
+
+		{ // Create the link.
+			response := e.POST("/links").
+				WithHeader("M-Token", token).
+				WithJSON(link).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.linkId").Number().Gt(0)
+			response.JSON().Path("$.institutionName").String().Equal(institutionName)
+			response.JSON().Path("$.customInstitutionName").String().Equal(institutionName)
+
+			link.LinkId = uint64(response.JSON().Path("$.linkId").Number().Raw())
+		}
+
+		{ // Try to retrieve the link before it's been deleted.
+			response := e.GET(fmt.Sprintf("/links/%d", link.LinkId)).
+				WithHeader("M-Token", token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Try to delete it.
+			response := e.DELETE(fmt.Sprintf("/links/%d", link.LinkId)).
+				WithHeader("M-Token", token).
+				Expect()
+
+			response.Status(http.StatusOK)
+		}
+
+		{ // Try to retrieve the link after it's been deleted.
+			response := e.GET(fmt.Sprintf("/links/%d", link.LinkId)).
+				WithHeader("M-Token", token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").Equal("failed to retrieve link: record does not exist")
 		}
 	})
 }

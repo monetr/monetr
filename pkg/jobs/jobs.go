@@ -2,6 +2,9 @@ package jobs
 
 import (
 	"context"
+	"math"
+	"time"
+
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
@@ -13,8 +16,6 @@ import (
 	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"math"
-	"time"
 )
 
 type JobManager interface {
@@ -22,8 +23,15 @@ type JobManager interface {
 	TriggerPullInitialTransactions(accountId, userId, linkId uint64) (jobId string, err error)
 	TriggerPullLatestTransactions(accountId, linkId uint64, numberOfTransactions int64) (jobId string, err error)
 	TriggerRemoveTransactions(accountId, linkId uint64, removedTransactions []string) (jobId string, err error)
+	TriggerRemoveLink(accountId, userId, linkId uint64) (jobId string, err error)
 	Close() error
 }
+
+var (
+	_ JobManager = &jobManagerBase{}
+	_ JobManager = &nonDistributedJobManager{}
+)
+
 
 type jobManagerBase struct {
 	log          *logrus.Entry
@@ -34,6 +42,27 @@ type jobManagerBase struct {
 	plaidSecrets secrets.PlaidSecretsProvider
 	stats        *metrics.Stats
 	ps           pubsub.PublishSubscribe
+}
+
+func NewNonDistributedJobManager(
+	log *logrus.Entry,
+	pool *redis.Pool,
+	db *pg.DB,
+	plaidClient plaid_helper.Client,
+	stats *metrics.Stats,
+	plaidSecrets secrets.PlaidSecretsProvider,
+) JobManager {
+	manager := &nonDistributedJobManager{
+		log: log,
+		// TODO (elliotcourant) Use namespace from config.
+		db:           db,
+		plaidClient:  plaidClient,
+		plaidSecrets: plaidSecrets,
+		stats:        stats,
+		ps:           pubsub.NewPostgresPubSub(log, db),
+	}
+
+	return manager
 }
 
 func NewJobManager(
@@ -69,6 +98,7 @@ func NewJobManager(
 	manager.work.Job(PullHistoricalTransactions, manager.pullHistoricalTransactions)
 	manager.work.Job(RemoveTransactions, manager.removeTransactions)
 	manager.work.Job(UpdateInstitutions, manager.updateInstitutions)
+	manager.work.Job(RemoveLink, manager.removeLink)
 
 	// Every 30 minutes. 0 */30 * * * *
 

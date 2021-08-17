@@ -535,12 +535,11 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 // @tags Plaid
 // @description Long poll endpoint that will timeout if data has not yet been pulled. Or will return 200 if data is ready.
 // @Security ApiKeyAuth
-// @Param linkId path string true "Link ID for the plaid link that is being setup. NOTE: Not Plaid's ID, this is a numeric ID we assign to the object that is returned from the callback endpoint."
+// @Param linkId path int true "Link ID for the plaid link that is being setup. NOTE: Not Plaid's ID, this is a numeric ID we assign to the object that is returned from the callback endpoint."
 // @Router /plaid/link/setup/wait/{linkId:uint64} [get]
 // @Success 200
 // @Success 408
 func (c *Controller) waitForPlaid(ctx iris.Context) {
-	// TODO Make the waitForPlaid endpoint handle both linkId and jobId.
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
 	if linkId == 0 {
 		c.badRequest(ctx, "must specify a job Id")
@@ -603,17 +602,4 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 		log.Trace("link setup successfully")
 		return
 	}
-}
-
-// Remove Plaid Link
-// @Summary Remove Plaid Link
-// @id remove-plaid-link
-// @tags Plaid
-// @description Remove a Plaid link from your account, this will revoke the access_token associated with the specified link.
-// @Security ApiKeyAuth
-// @Router /plaid/remove/{linkId:uint64} [delete]
-// @Success 200
-// @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) removePlaidLink(ctx iris.Context) {
-
 }
