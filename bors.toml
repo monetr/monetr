@@ -1,6 +1,6 @@
 status = [
     "ci/gitlab/gitlab.elliotcourant.dev",
-    "Test / Go",
+    "Test",
     "Docker"
 ]
 
