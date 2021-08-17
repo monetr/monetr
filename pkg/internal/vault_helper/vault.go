@@ -35,6 +35,7 @@ type Config struct {
 type VaultHelper interface {
 	WriteKV(ctx context.Context, key string, value map[string]interface{}) error
 	ReadKV(ctx context.Context, key string) (*api.Secret, error)
+	DeleteKV(ctx context.Context, key string) error
 	Close() error
 }
 
@@ -267,6 +268,9 @@ func (v *vaultBase) authenticate() error {
 func (v *vaultBase) WriteKV(ctx context.Context, key string, value map[string]interface{}) error {
 	span := sentry.StartSpan(ctx, "Vault - WriteKV")
 	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"key": key,
+	}
 
 	log := v.log.WithField("key", key).WithContext(span.Context())
 
@@ -285,8 +289,41 @@ func (v *vaultBase) WriteKV(ctx context.Context, key string, value map[string]in
 func (v *vaultBase) ReadKV(ctx context.Context, key string) (*api.Secret, error) {
 	span := sentry.StartSpan(ctx, "Vault - ReadKV")
 	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"key": key,
+	}
 
-	panic("implement me")
+	log := v.log.WithField("key", key).WithContext(span.Context())
+
+	log.Trace("reading secret")
+
+	secret, err := v.client.Logical().Read(key)
+	if err != nil {
+		log.WithError(err).Errorf("failed to read secret from vault")
+		return nil, errors.Wrap(err, "failed to read secret")
+	}
+
+	return secret, nil
+}
+
+func (v *vaultBase) DeleteKV(ctx context.Context, key string) error {
+	span := sentry.StartSpan(ctx, "Vault - DeleteKV")
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"key": key,
+	}
+
+	log := v.log.WithField("key", key).WithContext(span.Context())
+
+	log.Trace("deleting secret")
+
+	_, err := v.client.Logical().Delete(key)
+	if err != nil {
+		log.WithError(err).Errorf("failed to delete secret from vault")
+		return errors.Wrap(err, "failed to delete secret")
+	}
+
+	return nil
 }
 
 func (v *vaultBase) Close() error {

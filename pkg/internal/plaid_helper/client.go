@@ -19,6 +19,7 @@ type Client interface {
 	GetInstitutions(ctx context.Context, count, offset int, countryCodes []string, options plaid.GetInstitutionsOptions) (total int, _ []plaid.Institution, _ error)
 	GetInstitution(ctx context.Context, institutionId string, includeMetadata bool, countryCodes []string) (*plaid.Institution, error)
 	GetWebhookVerificationKey(ctx context.Context, keyId string) (plaid.GetWebhookVerificationKeyResponse, error)
+	RemoveItem(ctx context.Context, accessToken string) error
 	Close() error
 }
 
@@ -277,6 +278,22 @@ func (p *plaidClient) GetWebhookVerificationKey(ctx context.Context, keyId strin
 	}
 
 	return result, errors.Wrap(err, "failed to retrieve webhook verification key")
+}
+
+func (p *plaidClient) RemoveItem(ctx context.Context, accessToken string) error {
+	span := sentry.StartSpan(ctx, "Plaid - RemoveItem")
+	defer span.Finish()
+	span.Data = map[string]interface{}{}
+
+	result, err := p.client.RemoveItem(accessToken)
+	span.Data["plaidRequestId"] = result.RequestID
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+	} else {
+		span.Status = sentry.SpanStatusOK
+	}
+
+	return errors.Wrap(err, "failed to remove Plaid item")
 }
 
 func (p *plaidClient) Close() error {

@@ -1,20 +1,27 @@
 package controller
 
 import (
+	"fmt"
+	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
+	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/swag"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func (c *Controller) linksController(p iris.Party) {
 	// GET will list all the links in the current account.
 	p.Get("/", c.getLinks)
+	p.Get("/{linkId:uint64}", c.getLink)
 	p.Post("/", c.postLinks)
 	p.Put("/{linkId:uint64}", c.putLink)
 	p.Put("/convert/{linkId:uint64}", c.convertLink)
 	p.Delete("/{linkId:uint64}", c.deleteLink)
+	p.Get("/wait/{linkId:uint64}", c.waitForDeleteLink)
 }
 
 // List all links
@@ -34,6 +41,38 @@ func (c *Controller) getLinks(ctx iris.Context) {
 	links, err := repo.GetLinks(c.getContext(ctx))
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve links")
+		return
+	}
+
+	ctx.JSON(links)
+}
+
+// Get Link
+// @Summary Get Link
+// @id get-link
+// @tags Links
+// @description Retrieve a single specific link using the link's unique Id.
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /links/{linkId} [get]
+// @Param linkId path int true "Link ID"
+// @Success 200 {object} swag.LinkResponse
+// @Failure 400 {object} InvalidLinkIdError The provided link Id is not valid.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 404 {object} LinkNotFoundError The link could not be found.
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) getLink(ctx iris.Context) {
+	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	if linkId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to retrieve")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	links, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve link")
 		return
 	}
 
@@ -89,6 +128,7 @@ func (c *Controller) postLinks(ctx iris.Context) {
 // @Success 200 {object} swag.LinkResponse "Updated link object after changes."
 // @Success 304 {object} swag.LinkResponse "If no updates were made then the link object is returned unchanged."
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 404 {object} LinkNotFoundError The link could not be found.
 // @Failure 500 {object} ApiError "Something went wrong on our end."
 func (c *Controller) putLink(ctx iris.Context) {
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
@@ -180,17 +220,21 @@ func (c *Controller) convertLink(ctx iris.Context) {
 // @Summary Delete Manual Link
 // @id delete-manual-link
 // @tags Links
-// @description Remove a manual link from your account. This will remove
+// @description Remove a link from your account. This will remove
 // @description - All bank accounts associated with this link.
 // @description - All spending objects associated with each of those bank accounts.
 // @description - All transactions for the those bank accounts.
 // @description This cannot be undone and data cannot be recovered.
+// @description If the link specified is a Plaid link, then the access_token associated with that link will also be
+// @description revoked. Link data is deleted in the background, so if you need to "wait" for all of the link's data to
+// @description be properly deleted. Then you should poll the `/link/wait` endpoint.
 // @Security ApiKeyAuth
 // @Produce json
-// @Param linkId path int true "Link ID"
+// @Param linkId path int true "Link ID for the plaid link that is being setup. NOTE: Not Plaid's ID, this is a numeric ID we assign to the object that is returned from the callback endpoint."
 // @Router /links/{linkId} [delete]
 // @Success 200
-// @Failure 400 {object} ApiError A bad request can be returned if you attempt to delete a link that is not manual.
+// @Failure 400 {object} ApiError A bad request can be returned if the link you specified is not valid.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) deleteLink(ctx iris.Context) {
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
@@ -206,10 +250,132 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 		return
 	}
 
-	if link.LinkType != models.ManualLinkType {
-		c.badRequest(ctx, "cannot delete a non-manual link")
+	if link.LinkType == models.PlaidLinkType {
+		if link.PlaidLink == nil {
+			crumbs.Error(c.getContext(ctx), "BUG: Plaid Link object was missing on the link object", "bug", map[string]interface{}{
+				"linkId": link.LinkId,
+			})
+			c.returnError(ctx, http.StatusInternalServerError, "missing plaid data to remove link")
+			return
+		}
+
+		accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId)
+		if err != nil {
+			crumbs.Error(c.getContext(ctx), "Failed to retrieve access token for plaid link.", "secrets", map[string]interface{}{
+				"linkId": link.LinkId,
+				"itemId": link.PlaidLink.ItemId,
+			})
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
+			return
+		}
+
+		if err = c.plaid.RemoveItem(c.getContext(ctx), accessToken); err != nil {
+			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]interface{}{
+				"linkId": link.LinkId,
+				"itemId": link.PlaidLink.ItemId,
+				"error":  err.Error(),
+			})
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
+			return
+		}
+
+		if err = c.plaidSecrets.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId); err != nil {
+			crumbs.Error(c.getContext(ctx), "Failed to remove access token", "secrets", map[string]interface{}{
+				"linkId": link.LinkId,
+				"itemId": link.PlaidLink.ItemId,
+				"error":  err.Error(),
+			})
+			// We don't want to stop the request here, it does suck that we weren't able to remove the access token, but
+			// at this point the user could not retry this request. So we have to commit to it. If a stray access token
+			// is left over then that is okay. We could add a job later to do periodic cleanup if this becomes an issue.
+		}
+	}
+
+	jobId, err := c.job.TriggerRemoveLink(repo.AccountId(), repo.UserId(), link.LinkId)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to queue link removal job")
 		return
 	}
 
-	// TODO Queue the link and its sub-objects for deletion.
+	crumbs.Debug(c.getContext(ctx), "Link removal job has been queued", map[string]interface{}{
+		"jobId": jobId,
+	})
+}
+
+// Wait For Link Deletion
+// @Summary Wait For Link Deletion
+// @id wait-for-link-deletion
+// @tags Links
+// @description This endpoint is used to "wait" for all of the data associated with a link to be deleted. If the link is
+// @description is already deleted then a simple **200** is returned to the caller. If the link is not deleted then this
+// @description endpoint will block for up to 30 seconds at a time while it waits for the link to be removed. If it is
+// @description removed while the endpoint is blocking then it will return 200 at that time.
+// @Security ApiKeyAuth
+// @Param linkId path int true "Link ID for the link that was/is being removed."
+// @Router /link/wait/{linkId:uint64} [get]
+// @Success 200
+// @Success 408
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) waitForDeleteLink(ctx iris.Context) {
+	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	if linkId == 0 {
+		c.badRequest(ctx, "must specify a job Id")
+		return
+	}
+
+	log := c.getLog(ctx).WithFields(logrus.Fields{
+		"linkId": linkId,
+	})
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve link")
+		return
+	}
+
+	// If the link is done just return.
+	if link.LinkStatus == models.LinkStatusSetup {
+		crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
+		return
+	}
+
+	channelName := fmt.Sprintf("link:remove:%d:%d", repo.AccountId(), linkId)
+
+	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to listen on channel")
+		return
+	}
+	defer func() {
+		if err = listener.Close(); err != nil {
+			log.WithFields(logrus.Fields{
+				"accountId": c.mustGetAccountId(ctx),
+				"linkId":    linkId,
+			}).WithError(err).Error("failed to gracefully close listener")
+		}
+	}()
+
+	crumbs.Debug(c.getContext(ctx), "Waiting for notification on channel", map[string]interface{}{
+		"channel": channelName,
+	})
+
+	log.Debugf("waiting for link to be removed on channel: %s", channelName)
+
+	span := sentry.StartSpan(c.getContext(ctx), "Wait For Notification")
+	defer span.Finish()
+
+	deadLine := time.NewTimer(30 * time.Second)
+	defer deadLine.Stop()
+
+	select {
+	case <-deadLine.C:
+		ctx.StatusCode(http.StatusRequestTimeout)
+		log.Trace("timed out waiting for link to be removed")
+		return
+	case <-listener.Channel():
+		// Just exit successfully, any message on this channel is considered a success.
+		log.Trace("link removed successfully")
+		return
+	}
 }
