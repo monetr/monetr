@@ -5,9 +5,9 @@ on:
     branches:
       - '!renovate/*'
       - main
-  pull_request:
-    branches:
-      - main
+#  pull_request:
+#    branches:
+#      - main
 
 jobs:
   docker:
