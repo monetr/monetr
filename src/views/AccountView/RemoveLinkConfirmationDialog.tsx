@@ -15,6 +15,7 @@ import { connect } from "react-redux";
 import { Close } from "@material-ui/icons";
 import removeLink from "shared/links/actions/removeLink";
 import { Alert } from "@material-ui/lab";
+import classnames from "classnames";
 
 interface PropTypes {
   open: boolean;
@@ -114,7 +115,9 @@ class RemoveLinkConfirmationDialog extends Component<WithConnectionPropTypes, St
             <Button
               disabled={ loading }
               onClick={ this.doRemoveLink }
-              className="text-red-500"
+              className={ classnames({
+                "text-red-500": !loading,
+              }) }
             >
               Remove
             </Button>
