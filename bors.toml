@@ -1,5 +1,7 @@
 status = [
-    "ci/gitlab/gitlab.elliotcourant.dev"
+    "ci/gitlab/gitlab.elliotcourant.dev",
+    "Test",
+    "Docker"
 ]
 
 [committer]

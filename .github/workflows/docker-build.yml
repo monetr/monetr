@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - '!renovate/*'
-      - main
       - staging
       - trying
 #  pull_request:
