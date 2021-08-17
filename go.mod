@@ -16,6 +16,7 @@ require (
 	github.com/go-pg/pg/v10 v10.10.3
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.5
+	github.com/google/go-github/v38 v38.1.0
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d
 	github.com/jarcoal/httpmock v1.0.8

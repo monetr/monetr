@@ -24,7 +24,7 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 // @Produce json
 // @Security ApiKeyAuth
 // @Router /bank_accounts [get]
-// @Success 200 {array} models.BankAccount
+// @Success 200 {array} swag.BankAccountResponse
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getBankAccounts(ctx *context.Context) {
@@ -77,9 +77,9 @@ func (c *Controller) getBalances(ctx *context.Context) {
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Param newBankAccount body swag.BankAccountCreateRequest true "New Bank Account"
+// @Param newBankAccount body swag.CreateBankAccountRequest true "New Bank Account"
 // @Router /bank_accounts [post]
-// @Success 200 {object} models.BankAccount
+// @Success 200 {object} swag.BankAccountResponse
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) postBankAccounts(ctx *context.Context) {
@@ -98,10 +98,6 @@ func (c *Controller) postBankAccounts(ctx *context.Context) {
 	bankAccount.Name = strings.TrimSpace(bankAccount.Name)
 	bankAccount.Mask = strings.TrimSpace(bankAccount.Mask)
 	bankAccount.LastUpdated = time.Now().UTC()
-
-	// TODO (elliotcourant) Add proper bank account types that the user can specify. Make them required.
-	bankAccount.Type = strings.TrimSpace(bankAccount.Type)
-	bankAccount.SubType = strings.TrimSpace(bankAccount.SubType)
 
 	if bankAccount.Name == "" {
 		c.returnError(ctx, http.StatusBadRequest, "bank account must have a name")

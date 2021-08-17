@@ -12,6 +12,7 @@ import (
 	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"strconv"
 )
 
 const (
@@ -32,6 +33,7 @@ func (j *jobManagerBase) TriggerRemoveLink(accountId, userId, linkId uint64) (jo
 }
 
 type RemoveLinkJob struct {
+	jobId     string
 	accountId uint64
 	linkId    uint64
 	userId    uint64
@@ -43,6 +45,19 @@ type RemoveLinkJob struct {
 func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Remove Link"))
 	defer span.Finish()
+
+	span.SetTag("jobId", r.jobId)
+	span.SetTag("linkId", strconv.FormatUint(r.linkId, 10))
+	span.SetTag("accountId", strconv.FormatUint(r.accountId, 10))
+
+	if hub := sentry.GetHubFromContext(span.Context()); hub != nil {
+		hub.ConfigureScope(func(scope *sentry.Scope) {
+			scope.SetUser(sentry.User{
+				ID:       strconv.FormatUint(r.accountId, 10),
+				Username: fmt.Sprintf("account:%d", r.accountId),
+			})
+		})
+	}
 
 	log := r.log
 
@@ -124,6 +139,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 				log.WithField("removed", result.RowsAffected()).Info("removed bank account(s)")
 			}
 		} else {
+			crumbs.Debug(span.Context(), "There were no bank accounts associated with this link.", map[string]interface{}{})
 			log.Info("no bank accounts associated with link, deleting link")
 		}
 
@@ -187,6 +203,7 @@ func (j *jobManagerBase) newRemoveLinkJob(job *work.Job) (*RemoveLinkJob, error)
 	})
 
 	runner := &RemoveLinkJob{
+		jobId:     job.ID,
 		accountId: accountId,
 		linkId:    linkId,
 		userId:    userId,

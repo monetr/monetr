@@ -240,6 +240,36 @@ Generate - Acceptance:
       - $CI_PROJECT_DIR/generated
     expire_in: 7 days
 
+Generate - Dog:
+  needs: [ ]
+  stage: Prepare
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - k8s:shared
+    - arch:amd64
+  variables:
+    GOFLAGS: ''
+    ENVIRONMENT: Dog
+  environment:
+    name: Dog
+    url: https://api.monetr.dog
+    deployment_tier: other
+    action: prepare
+    kubernetes:
+      namespace: monetr-acceptance
+  script:
+    - make generate ENVIRONMENT=${ENVIRONMENT}
+  cache:
+    key: k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}
+    paths:
+      - $CI_PROJECT_DIR/generated/${ENVIRONMENT}
+    policy: push
+  artifacts:
+    name: "k8s-${CI_COMMIT_SHA}-${ENVIRONMENT}"
+    paths:
+      - $CI_PROJECT_DIR/generated
+    expire_in: 7 days
+
 Dry - Staging:
   only:
     refs:

@@ -10,6 +10,7 @@ import (
 
 var (
 	repoDirectory = flag.String("directory", "./", "repository directory for release")
+	sinceArg      = flag.Duration("since", -24*time.Hour, "specify how far back to look")
 )
 
 func main() {
@@ -25,7 +26,7 @@ func main() {
 		panic(err)
 	}
 
-	since := time.Now().Add(-24 * time.Hour)
+	since := time.Now().Add(*sinceArg)
 
 	iter, err := repo.Log(&git.LogOptions{
 		Order: git.LogOrderCommitterTime,
