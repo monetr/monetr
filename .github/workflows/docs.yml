@@ -2,7 +2,7 @@ name: Documentation
 
 on:
   pull_request:
-    branches: [ staging ]
+    branches: [ staging, trying ]
 
 jobs:
   build:

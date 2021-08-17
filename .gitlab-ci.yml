@@ -2,7 +2,7 @@
 # exception for staging branches that bors creates.
 workflow:
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying"'
       when: always
     - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
       when: never
