@@ -7,3 +7,7 @@ steps:
     waitFor: [ 'build-docker' ]
     name: 'gcr.io/cloud-builders/docker'
     args: [ 'push', 'gcr.io/$PROJECT_ID/github.com/monetr/rest-api:$COMMIT_SHA' ]
+  - id: 'test-gcloud'
+    waitFor: [ 'build-docker' ]
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    args: [ 'gcloud', 'container', 'clusters', 'list' ]
