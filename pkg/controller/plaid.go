@@ -501,8 +501,8 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 			Mask:              plaidAccount.Mask,
 			PlaidName:         plaidAccount.Name,
 			PlaidOfficialName: plaidAccount.OfficialName,
-			Type:              plaidAccount.Type,
-			SubType:           plaidAccount.Subtype,
+			Type:              models.BankAccountType(plaidAccount.Type),
+			SubType:           models.BankAccountSubType(plaidAccount.Subtype),
 			LastUpdated:       now,
 		}
 	}
