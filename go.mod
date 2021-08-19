@@ -9,7 +9,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.15.1
 	github.com/brianvoe/gofakeit/v6 v6.7.0
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
-	github.com/fsnotify/fsnotify v1.4.9
+	github.com/fsnotify/fsnotify v1.5.0
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-pg/migrations/v8 v8.1.0
@@ -39,6 +39,6 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/oauth2 v0.0.0-20210817223510-7df4dd6e12ab
-	google.golang.org/genproto v0.0.0-20210816143620-e15ff196659d
+	google.golang.org/genproto v0.0.0-20210818220304-27ea9cc85d9f
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
