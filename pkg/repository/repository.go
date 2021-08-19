@@ -40,6 +40,7 @@ type BaseRepository interface {
 	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
 	GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
 	GetSpendingById(ctx context.Context, bankAccountId, expenseId uint64) (*models.Spending, error)
+	GetSpendingExists(ctx context.Context, bankAccountId, spendingId uint64) (bool, error)
 	GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error)
 	GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)

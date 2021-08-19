@@ -109,6 +109,14 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 	span := sentry.StartSpan(ctx, "GetTransactionsForSpending")
 	defer span.Finish()
 
+	span.Data = map[string]interface{}{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+		"spendingId":    spendingId,
+		"limit":         limit,
+		"offset":        offset,
+	}
+
 	var items []models.Transaction
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -120,8 +128,11 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 		Order(`transaction_id DESC`).
 		Select(&items)
 	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transactions for spending")
 	}
+
+	span.Status = sentry.SpanStatusOK
 
 	return items, nil
 }

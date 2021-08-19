@@ -32,6 +32,31 @@ func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) 
 	return result, nil
 }
 
+func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId, spendingId uint64) (bool, error) {
+	span := sentry.StartSpan(ctx, "GetSpendingExists")
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+		"spendingId":    spendingId,
+	}
+
+	ok, err := r.txn.ModelContext(span.Context(), &models.Spending{}).
+		Where(`"spending"."account_id" = ?`, r.AccountId()).
+		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
+		Where(`"spending"."spending_id" = ?`, spendingId).
+		Limit(1).
+		Exists()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+	} else {
+		span.Status = sentry.SpanStatusOK
+	}
+
+	return ok, errors.Wrap(err, "failed to verify spending object exists")
+}
+
 func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error) {
 	span := sentry.StartSpan(ctx, "GetSpendingByFundingSchedule")
 	defer span.Finish()

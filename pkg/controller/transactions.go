@@ -46,6 +46,19 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 	limit := ctx.URLParamIntDefault("limit", 25)
 	offset := ctx.URLParamIntDefault("offset", 0)
 
+	if limit < 1 {
+		c.badRequest(ctx, "limit must be at least 1")
+		return
+	} else if limit > 100 {
+		c.badRequest(ctx, "limit cannot be greater than 100")
+		return
+	}
+
+	if offset < 0 {
+		c.badRequest(ctx, "offset cannot be less than 0")
+		return
+	}
+
 	// Only let a maximum of 100 transactions be requested at a time.
 	limit = int(math.Min(100, float64(limit)))
 
@@ -67,8 +80,72 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 	ctx.JSON(transactions)
 }
 
+// List Transactions For Spending
+// @Summary List Transactions For Spending
+// @ID list-transactions-for-spending
+// @tags Transactions
+// @description Lists the transactions for the specified spending Id within the specified bank account Id.
+// @Security ApiKeyAuth
+// @Produce json
+// @Param bankAccountId path int true "Bank Account ID"
+// @Param spendingId path int true "Spending ID"
+// @Param limit query int false "Specifies the number of transactions to return in the result, default is 25. Max is 100."
+// @Param offset query int false "The number of transactions to skip before returning any."
+// @Router /bank_accounts/{bankAccountId}/transactions/{spendingId} [get]
+// @Success 200 {array} swag.TransactionResponse
+// @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID, Spending ID, Limit or Offset.
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 404 {object} SpendingNotFoundError Invalid Spending ID provided.
+// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactionsForSpending(ctx *context.Context) {
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.badRequest(ctx, "must specify a valid bank account Id")
+		return
+	}
 
+	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
+	if spendingId == 0 {
+		c.badRequest(ctx, "must specify a valid spending Id")
+		return
+	}
+
+	limit := ctx.URLParamIntDefault("limit", 5)
+	offset := ctx.URLParamIntDefault("offset", 0)
+
+	if limit < 1 {
+		c.badRequest(ctx, "limit must be at least 1")
+		return
+	} else if limit > 100 {
+		c.badRequest(ctx, "limit cannot be greater than 100")
+		return
+	}
+
+	if offset < 0 {
+		c.badRequest(ctx, "offset cannot be less than 0")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	ok, err := repo.GetSpendingExists(c.getContext(ctx), bankAccountId, spendingId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to verify spending exists")
+		return
+	}
+
+	if !ok {
+		c.returnError(ctx, http.StatusNotFound, "spending object does not exist")
+		return
+	}
+
+	transactions, err := repo.GetTransactionsForSpending(c.getContext(ctx), bankAccountId, spendingId, limit, offset)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve transactions for spending")
+		return
+	}
+
+	ctx.JSON(transactions)
 }
 
 func (c *Controller) postTransactions(ctx *context.Context) {
