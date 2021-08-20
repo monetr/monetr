@@ -35,10 +35,10 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.61.0
 	github.com/swaggo/swag v1.7.1
-	github.com/teambition/rrule-go v1.7.1
+	github.com/teambition/rrule-go v1.7.2
 	github.com/vmihailenco/msgpack/v5 v5.3.4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	golang.org/x/oauth2 v0.0.0-20210817223510-7df4dd6e12ab
+	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 	google.golang.org/genproto v0.0.0-20210819152826-bb2f42df81c9
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
