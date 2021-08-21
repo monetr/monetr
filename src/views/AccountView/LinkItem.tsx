@@ -45,23 +45,23 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
       case LinkStatus.Setup:
         return (
           <Tooltip title="This link is working properly.">
-            <FiberManualRecord className="text-green-500 mr-2"/>
+            <FiberManualRecord className="mr-2 text-green-500"/>
           </Tooltip>
         );
       case LinkStatus.Pending:
         return (
           <Tooltip title="This link has not been completely setup yet.">
-            <FiberManualRecord className="text-yellow-500 mr-2"/>
+            <FiberManualRecord className="mr-2 text-yellow-500"/>
           </Tooltip>
         );
       case LinkStatus.Error:
         return (
           <Tooltip title={ link.getErrorMessage() }>
-            <FiberManualRecord className="text-red-500 mr-2"/>
+            <FiberManualRecord className="mr-2 text-red-500"/>
           </Tooltip>
         );
       case LinkStatus.Unknown:
-        return <FiberManualRecord className="text-gray-500 mr-2"/>;
+        return <FiberManualRecord className="mr-2 text-gray-500"/>;
     }
   };
 
@@ -71,7 +71,7 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
     return (
       <div className="flex items-center">
         { this.renderPlaidStatus() }
-        <Typography className="pr-5 items-center self-center">
+        <Typography className="items-center self-center pr-5">
           <span
             className="font-bold">Last Successful Sync:</span> { link.lastSuccessfulUpdate ? link.lastSuccessfulUpdate.format('MMMM Do, h:mm a') : 'N/A' }
         </Typography>
@@ -88,19 +88,19 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
       <Fragment>
         <ListItem key={ bankAccountId } button>
           <div className="flex w-full">
-            <Typography className="w-1/3 font-bold overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+            <Typography className="w-1/3 overflow-hidden font-bold overflow-ellipsis flex-nowrap whitespace-nowrap">
               { bankAccount.name }
             </Typography>
-            <div className="flex-auto flex">
-              <Typography className="w-1/2 m-w-1/2 overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+            <div className="flex flex-auto">
+              <Typography className="w-1/2 overflow-hidden m-w-1/2 overflow-ellipsis flex-nowrap whitespace-nowrap">
                 <span
                   className="font-semibold">Safe-To-Spend:</span> { balances ? balances.getSafeToSpendString() : '...' }
               </Typography>
-              <div className="w-1/2 flex">
-                <Typography className="w-1/2 text-sm  overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+              <div className="flex w-1/2">
+                <Typography className="w-1/2 overflow-hidden text-sm overflow-ellipsis flex-nowrap whitespace-nowrap">
                   <span className="font-semibold">Available:</span> { bankAccount.getAvailableBalanceString() }
                 </Typography>
-                <Typography className="w-1/2 text-sm  overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap">
+                <Typography className="w-1/2 overflow-hidden text-sm overflow-ellipsis flex-nowrap whitespace-nowrap">
                   <span className="font-semibold">Current:</span> { bankAccount.getCurrentBalanceString() }
                 </Typography>
               </div>
@@ -127,7 +127,7 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
 
   closeDialog = () => this.setState({ dialog: null });
 
-  renderDialogs = () => {
+  renderDialogs = (): React.ReactNode | null => {
     const { dialog } = this.state;
 
     switch (dialog) {
@@ -153,10 +153,10 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
 
         <li>
           <ul>
-            <ListSubheader className="pl-0 pr-2 pt-2 bg-gray-50">
+            <ListSubheader className="pt-2 pl-0 pr-2 bg-gray-50">
               <div className="flex pb-2">
-                <div className="flex-auto items-center self-center">
-                  <Typography className="ml-6 font-semibold text-xl h-full">
+                <div className="items-center self-center flex-auto">
+                  <Typography className="h-full ml-6 text-xl font-semibold">
                     { link.getName() }
                   </Typography>
                 </div>
@@ -200,8 +200,8 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
             </ListSubheader>
             {
               bankAccounts
-                .sortBy(item => item.name)
-                .map(item => this.renderBankAccountItem(item.bankAccountId))
+                .sortBy((item: BankAccount) => item.name)
+                .map((item: BankAccount) => this.renderBankAccountItem(item.bankAccountId))
                 .valueSeq()
                 .toArray()
             }

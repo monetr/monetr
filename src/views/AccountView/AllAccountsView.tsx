@@ -1,18 +1,18 @@
 import React, { Component, Fragment } from "react";
-import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
 import { connect } from "react-redux";
-import { Button, Card, Divider, Fab, IconButton, List, ListItem, ListSubheader, Typography } from "@material-ui/core";
-import BankAccount from "data/BankAccount";
-import { Map } from 'immutable';
-import { AccountBalance, Add, FiberManualRecord, MoreVert } from "@material-ui/icons";
+
 import AddBankAccountDialog from "views/AccountView/AddBankAccountDialog";
-import Link, { LinkStatus } from "data/Link";
-import { getLinks } from "shared/links/selectors/getLinks";
-import PlaidIcon from "Plaid/PlaidIcon";
 import Balance from "data/Balance";
-import { getBalances } from "shared/balances/selectors/getBalances";
-import fetchMissingBankAccountBalances from "shared/balances/actions/fetchMissingBankAccountBalances";
+import BankAccount from "data/BankAccount";
+import Link from "data/Link";
 import LinkItem from "views/AccountView/LinkItem";
+import fetchMissingBankAccountBalances from "shared/balances/actions/fetchMissingBankAccountBalances";
+import { AccountBalance, Add } from "@material-ui/icons";
+import { Button, Card, Fab, List, Typography } from "@material-ui/core";
+import { Map } from 'immutable';
+import { getBalances } from "shared/balances/selectors/getBalances";
+import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
+import { getLinks } from "shared/links/selectors/getLinks";
 
 interface WithConnectionPropTypes {
   bankAccounts: Map<number, BankAccount>;
@@ -38,11 +38,12 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
   };
 
   componentDidMount() {
-    this.props.fetchMissingBankAccountBalances().then(r => {
+    this.props.fetchMissingBankAccountBalances().catch(error => {
+      console.error(error);
     });
   }
 
-  renderContents = () => {
+  renderContents = (): React.ReactNode => {
     const { bankAccounts } = this.props;
     if (bankAccounts.isEmpty()) {
       return this.renderNoBankAccounts();
@@ -51,13 +52,13 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
     return this.renderBankAccountList();
   };
 
-  renderNoBankAccounts = () => (
-    <div className="h-full flex justify-center items-center">
+  renderNoBankAccounts = (): React.ReactNode => (
+    <div className="flex items-center justify-center h-full">
       <div className="grid grid-cols-1 grid-rows-3 grid-flow-col gap-2">
-        <AccountBalance className="h-32 w-full self-center opacity-40"/>
+        <AccountBalance className="self-center w-full h-32 opacity-40"/>
         <div className="flex items-center">
           <Typography
-            className="opacity-50 text-center"
+            className="text-center opacity-50"
             variant="h3"
           >
             You don't have any bank accounts yet...
@@ -80,17 +81,20 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
     </div>
   );
 
-  renderBankAccountList = () => {
+  renderBankAccountList = (): React.ReactNode => {
     const { bankAccounts, links } = this.props;
 
     return (
       <Fragment>
         <List disablePadding>
           { bankAccounts
-            .groupBy(item => item.linkId)
-            .sortBy((_, linkId) => links.get(linkId).getName())
-            .map((accounts, group) => (
-              <LinkItem key={ group } link={ links.get(group) } />
+            .groupBy((item: BankAccount) => item.linkId)
+            .sortBy((_, linkId: number) => links.get(linkId).getName())
+            .map((_, linkId: number) => (
+              <LinkItem
+                key={ linkId }
+                link={ links.get(linkId) }
+              />
             ))
             .valueSeq()
             .toArray()
@@ -99,7 +103,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
         <Fab
           color="primary"
           aria-label="add"
-          className="absolute bottom-16 right-16 z-50"
+          className="absolute z-50 bottom-16 right-16"
           onClick={ this.openDialog(DialogOpen.CreateBankAccount) }
         >
           <Add/>
@@ -114,7 +118,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
 
   closeDialog = () => this.setState({ dialog: null });
 
-  renderDialogs = () => {
+  renderDialogs = (): React.ReactNode | null => {
     const { dialog } = this.state;
 
     switch (dialog) {
@@ -130,7 +134,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
       <Fragment>
         { this.renderDialogs() }
         <div className="minus-nav">
-          <div className="flex flex-col h-full md:p-10 sm:p-1 max-h-full">
+          <div className="flex flex-col h-full max-h-full md:p-10 sm:p-1">
             <Card elevation={ 4 } className="w-full h-full overflow-y-auto">
               { this.renderContents() }
             </Card>

@@ -88,7 +88,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
           open={ Boolean(spentFromAnchorEl) }
           onClick={ openPopover }
         >
-          <span className="opacity-50 mr-1">
+          <span className="mr-1 opacity-50">
             Spent From
           </span>
           <span className={ classnames('overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap', {
@@ -111,8 +111,14 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
             horizontal: 'left',
           } }
         >
-          <Paper style={ { width: `${ this.state.spentFromWidth }px` } } className="min-w-96 max-h-96 p-0 overflow-auto">
-            <SpendingSelectionList value={ transaction.spendingId } onChange={ updateSpentFrom }/>
+          <Paper
+            style={ { width: `${ this.state.spentFromWidth }px` } } 
+            className="p-0 overflow-auto min-w-96 max-h-96"
+          >
+            <SpendingSelectionList 
+              value={ transaction.spendingId } 
+              onChange={ updateSpentFrom }
+            />
           </Paper>
         </Popover>
       </Fragment>
@@ -163,10 +169,10 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
             horizontal: 'left',
           } }
         >
-          <Paper style={ { width: `${ nameWidth }px` } } className="min-w-96 max-h-96 p-0 overflow-auto p-2">
-            <div className="pb-1 pt-1 flex flex-row">
+          <Paper style={ { width: `${ nameWidth }px` } } className="p-0 p-2 overflow-auto min-w-96 max-h-96">
+            <div className="flex flex-row pt-1 pb-1">
               <div className="flex-auto">
-                <p className="text-lg font-semibold w-full">Name:</p>
+                <p className="w-full text-lg font-semibold">Name:</p>
                 <Divider />
                 <span className="text-lg">{ transaction.getTitle() }</span>
               </div>
@@ -174,8 +180,8 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
                 <Button>Test</Button>
               </div>
             </div>
-            <div className="pb-1 pt-1">
-              <p className="text-lg font-semibold w-full">Original Transaction Name:</p>
+            <div className="pt-1 pb-1">
+              <p className="w-full text-lg font-semibold">Original Transaction Name:</p>
               <Divider />
               <span className="text-lg">{ transaction.originalName }</span>
             </div>
@@ -197,21 +203,21 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
         <ListItem className={ classnames('transactions-item h-12', {
           'selected': false,
         }) } role="transaction-row">
-          <div className="w-full flex flex-row">
+          <div className="flex flex-row w-full">
             <p
-              className="flex-shrink w-2/5 transaction-item-name overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap font-semibold place-self-center pr-1"
+              className="flex-shrink w-2/5 pr-1 overflow-hidden font-semibold transaction-item-name overflow-ellipsis flex-nowrap whitespace-nowrap place-self-center"
             >
               { this.renderTransactionName() }
             </p>
 
             <p
-              className="flex-auto transaction-expense-name overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap pr-1"
+              className="flex-auto pr-1 overflow-hidden transaction-expense-name overflow-ellipsis flex-nowrap whitespace-nowrap"
             >
               { this.getSpentFromString() }
             </p>
-            <div className="flex-none w-1/5 flex items-center">
-              { transaction.isPending && <Chip label="Pending" className="align-middle self-center"/> }
-              <div className="w-full flex justify-end">
+            <div className="flex items-center flex-none w-1/5">
+              { transaction.isPending && <Chip label="Pending" className="self-center align-middle"/> }
+              <div className="flex justify-end w-full">
                 <Typography className={ classnames('amount align-middle self-center place-self-center', {
                   'addition': transaction.getIsAddition(),
                 }) }>

@@ -1,8 +1,9 @@
-import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
-import Spending from 'data/Spending';
-import { Map } from 'immutable';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+
+import Spending from 'data/Spending';
+import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
+import { Map } from 'immutable';
 import { getSpending } from 'shared/spending/selectors/getSpending';
 
 export interface PropTypes {
@@ -49,7 +50,7 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
                 disabled={ !!disabled }
               />
             </ListItemIcon>
-            <div className="grid grid-cols-3 grid-rows-1 grid-flow-col gap-1 w-full">
+            <div className="w-full grid grid-cols-3 grid-rows-1 grid-flow-col gap-1">
               <div className="col-span-3">
                 <Typography>Safe To Spend</Typography>
               </div>
@@ -76,16 +77,18 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
                       disabled={ !!disabled }
                     />
                   </ListItemIcon>
-                  <div className="grid grid-cols-3 grid-rows-1 grid-flow-col gap-1 w-full">
+                  <div className="w-full grid grid-cols-3 grid-rows-1 grid-flow-col gap-1">
                     <div className="col-span-2">
                       <Typography>{ item.name }</Typography>
                     </div>
-                    <div className="col-span-1 flex justify-end">
+                    <div className="flex justify-end col-span-1">
                       <Typography>{ item.getCurrentAmountString() }</Typography>
                     </div>
                   </div>
                 </ListItem>
-              )).valueSeq().toArray()
+              ))
+              .valueSeq()
+              .toArray()
           }
         </List>
       </div>
