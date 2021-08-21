@@ -17,7 +17,12 @@ func NewHttpMockJsonResponder(
 	headersFn func(t *testing.T, request *http.Request, response interface{}, status int) map[string][]string,
 ) {
 	httpmock.RegisterResponder(method, path, func(request *http.Request) (*http.Response, error) {
-		result, status := handler(t, request)
+		var result interface{}
+		var status int
+		require.NotPanics(t, func() {
+			result, status = handler(t, request)
+		}, "handle must not panic")
+
 		body := bytes.NewBuffer(nil)
 		require.NoError(t, json.NewEncoder(body).Encode(result), "must encode response body")
 		response := &http.Response{
@@ -28,6 +33,11 @@ func NewHttpMockJsonResponder(
 			Body:          ioutil.NopCloser(body),
 			ContentLength: int64(body.Len()),
 			Request:       request,
+			Header: map[string][]string{
+				"Content-Type": {
+					"application/json",
+				},
+			},
 		}
 
 		headers := headersFn(t, request, result, status)

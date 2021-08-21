@@ -6,15 +6,16 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/jarcoal/httpmock"
+	"github.com/monetr/rest-api/pkg/config"
 	"github.com/monetr/rest-api/pkg/internal/mock_plaid"
 	"github.com/monetr/rest-api/pkg/internal/mock_secrets"
-	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/internal/testutils"
 	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
 	"testing"
 	"time"
 )
@@ -42,11 +43,12 @@ func TestPullAccountBalances(t *testing.T) {
 			return nil
 		}), "must retrieve linkId")
 
-		plaidClient := plaid_helper.NewPlaidClient(log, plaid.ClientOptions{
-			ClientID:    gofakeit.UUID(),
-			Secret:      gofakeit.UUID(),
-			Environment: plaid.Sandbox,
-			HTTPClient:  http.DefaultClient,
+		secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		plaidRepo := repository.NewPlaidRepository(db)
+		plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, config.Plaid{
+			ClientID:                      gofakeit.UUID(),
+			ClientSecret:                  gofakeit.UUID(),
+			Environment:                   plaid.Sandbox,
 		})
 
 		plaidSecrets := mock_secrets.NewMockPlaidSecrets()

@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/mail"
 	"net/http"
 	"net/smtp"
@@ -19,7 +20,6 @@ import (
 	"github.com/monetr/rest-api/pkg/build"
 	"github.com/monetr/rest-api/pkg/cache"
 	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
 	"github.com/monetr/rest-api/pkg/metrics"
@@ -38,8 +38,8 @@ type Controller struct {
 	db                       *pg.DB
 	configuration            config.Configuration
 	captcha                  *recaptcha.ReCAPTCHA
-	plaid                    plaid_helper.Client
-	plaidWebhookVerification plaid_helper.WebhookVerification
+	plaid                    platypus.Platypus
+	plaidWebhookVerification platypus.WebhookVerification
 	plaidSecrets             secrets.PlaidSecretsProvider
 	smtp                     *smtp.Client
 	mailVerifyCode           *gotp.HOTP
@@ -61,7 +61,7 @@ func NewController(
 	configuration config.Configuration,
 	db *pg.DB,
 	job jobs.JobManager,
-	plaidClient plaid_helper.Client,
+	plaidClient platypus.Platypus,
 	stats *metrics.Stats,
 	stripe stripe_helper.Stripe,
 	cachePool *redis.Pool,
@@ -85,12 +85,14 @@ func NewController(
 	pubSub := pubsub.NewPostgresPubSub(log, db)
 	basicBilling := billing.NewBasicBilling(log, accountsRepo, pubSub)
 
+	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(log, plaidClient, 5*time.Minute)
+
 	return &Controller{
 		captcha:                  &captcha,
 		configuration:            configuration,
 		db:                       db,
 		plaid:                    plaidClient,
-		plaidWebhookVerification: plaid_helper.NewMemoryWebhookVerificationCache(log, plaidClient),
+		plaidWebhookVerification: plaidWebhookVerification,
 		plaidSecrets:             plaidSecrets,
 		log:                      log,
 		job:                      job,

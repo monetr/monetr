@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/metrics"
 	"github.com/monetr/rest-api/pkg/pubsub"
 	"github.com/monetr/rest-api/pkg/secrets"
@@ -15,7 +15,7 @@ import (
 type nonDistributedJobManager struct {
 	log          *logrus.Entry
 	db           *pg.DB
-	plaidClient  plaid_helper.Client
+	plaidClient  platypus.Platypus
 	plaidSecrets secrets.PlaidSecretsProvider
 	stats        *metrics.Stats
 	ps           pubsub.PublishSubscribe

@@ -19,6 +19,7 @@ data:
   MONETR_PLAID_RETURNING_EXPERIENCE: {{ quote .Values.api.plaid.enableReturningUserExperience }}
   MONETR_PLAID_WEBHOOKS_ENABLED: {{ quote .Values.api.plaid.webhooksEnabled }}
   MONETR_PLAID_WEBHOOKS_DOMAIN: {{ quote .Values.api.plaid.webhooksDomain }}
+  MONETR_PLAID_OAUTH_DOMAIN: {{ quote .Values.api.plaid.oauthDomain }}
   MONETR_PG_ADDRESS: {{ quote .Values.api.postgreSql.address }}
   MONETR_PG_PORT: {{ quote .Values.api.postgreSql.port }}
   MONETR_PG_DATABASE: {{ quote .Values.api.postgreSql.database }}

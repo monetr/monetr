@@ -6,6 +6,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/rest-api/pkg/hash"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
@@ -32,7 +33,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 	plaidData := &MockPlaidData{
 		PlaidTokens:  map[string]models.PlaidToken{},
 		PlaidLinks:   map[string]models.PlaidLink{},
-		BankAccounts: map[string]map[string]plaid.Account{},
+		BankAccounts: map[string]map[string]plaid.AccountBase{},
 	}
 
 	var user models.User
@@ -190,38 +191,37 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				},
 			}
 
-			plaidData.BankAccounts[accessToken] = map[string]plaid.Account{
+			checkingAccountSubType := plaid.ACCOUNTSUBTYPE_CHECKING
+			savingAccountSubType := plaid.ACCOUNTSUBTYPE_SAVINGS
+
+			plaidData.BankAccounts[accessToken] = map[string]plaid.AccountBase{
 				checkingAccountId: {
-					AccountID: checkingAccountId,
-					Balances: plaid.AccountBalances{
-						Available:              float64(checkingBalance) / 100,
-						Current:                float64(checkingBalance) / 100,
-						Limit:                  0,
-						ISOCurrencyCode:        "USD",
-						UnofficialCurrencyCode: "",
+					AccountId: checkingAccountId,
+					Balances: plaid.AccountBalance{
+						Available:              *plaid.NewNullableFloat32(myownsanity.Float32P(float32(checkingBalance) / 100)),
+						Current:                *plaid.NewNullableFloat32(myownsanity.Float32P(float32(checkingBalance) / 100)),
+						IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP("USD")),
+						UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP("USD")),
 					},
-					Mask:               "1234",
-					Name:               "Checking Account",
-					OfficialName:       "Checking",
-					Subtype:            "depository",
-					Type:               "checking",
-					VerificationStatus: "",
+					Mask:         *plaid.NewNullableString(myownsanity.StringP("1234")),
+					Name:         "Checking Account",
+					OfficialName: *plaid.NewNullableString(myownsanity.StringP("Checking")),
+					Type:         plaid.ACCOUNTTYPE_DEPOSITORY,
+					Subtype:      *plaid.NewNullableAccountSubtype(&checkingAccountSubType),
 				},
 				savingsAccountId: {
-					AccountID: savingsAccountId,
-					Balances: plaid.AccountBalances{
-						Available:              float64(savingBalance) / 100,
-						Current:                float64(savingBalance) / 100,
-						Limit:                  0,
-						ISOCurrencyCode:        "USD",
-						UnofficialCurrencyCode: "",
+					AccountId: savingsAccountId,
+					Balances: plaid.AccountBalance{
+						Available:              *plaid.NewNullableFloat32(myownsanity.Float32P(float32(savingBalance) / 100)),
+						Current:                *plaid.NewNullableFloat32(myownsanity.Float32P(float32(savingBalance) / 100)),
+						IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP("USD")),
+						UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP("USD")),
 					},
-					Mask:               "2345",
-					Name:               "Savings Account",
-					OfficialName:       "Savings",
-					Subtype:            "depository",
-					Type:               "saving",
-					VerificationStatus: "",
+					Mask:         *plaid.NewNullableString(myownsanity.StringP("2345")),
+					Name:         "Savings Account",
+					OfficialName: *plaid.NewNullableString(myownsanity.StringP("Savings")),
+					Type:         plaid.ACCOUNTTYPE_DEPOSITORY,
+					Subtype:      *plaid.NewNullableAccountSubtype(&savingAccountSubType),
 				},
 			}
 

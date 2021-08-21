@@ -1,0 +1,102 @@
+name: GitHub
+
+on:
+  push:
+    branches:
+      - staging
+      - trying
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    container: golang:1.17.0
+    env:
+      POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: ""
+      POSTGRES_USER: api-testing
+      POSTGRES_DB: test-db
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_USER: api-testing
+          POSTGRES_DB: test-db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Dependencies
+        run: make dependencies
+      - name: Build
+        run: make build
+      - name: Setup Schema
+        run: make apply-schema-ci
+      - name: Test
+        run: make test
+  pg-test:
+    name: PostgreSQL Test
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/pgtest:latest
+    env:
+      POSTGRES_HOST: postgres
+      POSTGRES_PASSWORD: ""
+      POSTGRES_USER: postgres
+      POSTGRES_DB: test-db
+      POSTGRES_HOST_AUTH_METHOD: trust
+    services:
+      postgres:
+        image: ghcr.io/monetr/pgtest:latest
+        env:
+          POSTGRES_HOST: postgres
+          POSTGRES_PASSWORD: ""
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test-db
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Test
+        run: make pg_test
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v2
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: '/junit.xml'
+          check_name: 'PostgreSQL Test Summary'
+  docs-generate:
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/build-containers/ubuntu:20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: yarn install
+      - run: make dependencies
+      - run: make docs
+      - run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
+  docker:
+    needs:
+      - test
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build Image
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: false
+          tags: containers.monetr.dev/rest-api
+

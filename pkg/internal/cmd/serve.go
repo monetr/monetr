@@ -6,13 +6,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
-	"net"
-	"net/http"
-	"os"
-	"path/filepath"
-	"time"
-
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
@@ -24,16 +17,21 @@ import (
 	"github.com/monetr/rest-api/pkg/internal/certhelper"
 	"github.com/monetr/rest-api/pkg/internal/migrations"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
-	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/internal/vault_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
 	"github.com/monetr/rest-api/pkg/logging"
 	"github.com/monetr/rest-api/pkg/metrics"
+	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"net"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 func init() {
@@ -73,11 +71,13 @@ func RunServer() error {
 	var vault vault_helper.VaultHelper
 	if configuration.Vault.Enabled {
 		client, err := vault_helper.NewVaultHelper(log, vault_helper.Config{
-			Address:         "http://vault.monetr.in:443",
-			Role:            "rest-api",
-			Auth:            "kubernetes",
+			Address:         configuration.Vault.Address,
+			Role:            configuration.Vault.Role,
+			Auth:            configuration.Vault.Auth,
 			Timeout:         30 * time.Second,
 			IdleConnTimeout: 9 * time.Minute,
+			Username:        configuration.Vault.Username,
+			Password:        configuration.Vault.Password,
 		})
 		if err != nil {
 			log.WithError(err).Fatalf("failed to create vault helper")
@@ -315,15 +315,6 @@ func RunServer() error {
 		basicPaywall = billing.NewBasicPaywall(log, accountRepo)
 	}
 
-	plaidHelper := plaid_helper.NewPlaidClient(log, plaid.ClientOptions{
-		ClientID:    configuration.Plaid.ClientID,
-		Secret:      configuration.Plaid.ClientSecret,
-		Environment: configuration.Plaid.Environment,
-		HTTPClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
-	})
-
 	if configuration.Plaid.WebhooksEnabled {
 		log.Debugf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain)
 	}
@@ -339,11 +330,13 @@ func RunServer() error {
 		plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db)
 	}
 
+	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
+
 	jobManager := jobs.NewJobManager(
 		log,
 		redisController.Pool(),
 		db,
-		plaidHelper,
+		plaidClient,
 		stats,
 		plaidSecrets,
 	)
@@ -354,7 +347,7 @@ func RunServer() error {
 		configuration,
 		db,
 		jobManager,
-		plaidHelper,
+		plaidClient,
 		stats,
 		stripe,
 		redisController.Pool(),

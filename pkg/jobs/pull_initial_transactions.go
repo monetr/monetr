@@ -8,9 +8,7 @@ import (
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
-	"github.com/monetr/rest-api/pkg/util"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 	"strconv"
 	"time"
 )
@@ -54,18 +52,6 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 	})
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		account, err := repo.GetAccount(span.Context())
-		if err != nil {
-			log.WithError(err).Error("failed to retrieve account for job")
-			return err
-		}
-
-		timezone, err := account.GetTimezone()
-		if err != nil {
-			log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
-			timezone = time.UTC
-		}
-
 		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("cannot pull initial transactions for link provided")
@@ -93,37 +79,24 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 			return nil
 		}
 
-		bankAccountIdsByPlaid := map[string]uint64{}
+		plaidIdsToBankIds := map[string]uint64{}
 		bankAccountIds := make([]string, len(link.BankAccounts))
 		for i, bankAccount := range link.BankAccounts {
 			bankAccountIds[i] = bankAccount.PlaidAccountId
-			bankAccountIdsByPlaid[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
+			plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
 		}
 
 		now := time.Now().UTC()
-		plaidTransactions, err := j.plaidClient.GetAllTransactions(
-			span.Context(),
-			accessToken,
-			now.Add(-30*24*time.Hour),
-			now,
-			bankAccountIds,
-		)
+		platypus, err := j.plaidClient.NewClient(span.Context(), link, accessToken)
 		if err != nil {
-			log.WithError(err).Error("failed to retrieve initial transactions")
-
-			switch plaidErr := errors.Cause(err).(type) {
-			case plaid.Error:
-				switch plaidErr.ErrorType {
-				case "ITEM_ERROR":
-					link.LinkStatus = models.LinkStatusError
-					link.ErrorCode = &plaidErr.ErrorCode
-					if updateErr := repo.UpdateLink(span.Context(), link); updateErr != nil {
-						log.WithError(updateErr).Error("failed to update link to be an error state")
-					}
-				}
-			}
-
+			log.WithError(err).Error("failed to create plaid client for link")
 			return err
+		}
+
+		plaidTransactions, err := platypus.GetAllTransactions(span.Context(), now.Add(-30*24*time.Hour), now, bankAccountIds)
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve initial transactions from plaid")
+			return errors.Wrap(err, "failed to retrieve initial transactions from plaid")
 		}
 
 		if len(plaidTransactions) == 0 {
@@ -133,50 +106,15 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 
 		log.Debugf("retreived %d transaction(s) from plaid, processing now", len(plaidTransactions))
 
-		transactions := make([]models.Transaction, len(plaidTransactions))
-		for i, plaidTransaction := range plaidTransactions {
-			date, _ := util.ParseInLocal("2006-01-02", plaidTransaction.Date, timezone)
-			var authorizedDate *time.Time
-			if plaidTransaction.AuthorizedDate != "" {
-				authDate, _ := util.ParseInLocal("2006-01-02", plaidTransaction.AuthorizedDate, timezone)
-				authorizedDate = &authDate
-			}
-
-			transactionName := plaidTransaction.Name
-
-			// We only want to make the transaction name be the merchant name if the merchant name is shorter. This is
-			// due to something I observed with a dominos transaction, where the merchant was improperly parsed and the
-			// transaction ended up being called `Mnuslindstrom` rather than `Domino's`. This should fix that problem.
-			if plaidTransaction.MerchantName != "" && len(plaidTransaction.MerchantName) < len(transactionName) {
-				transactionName = plaidTransaction.MerchantName
-			}
-
-			transactions[i] = models.Transaction{
-				AccountId:            repo.AccountId(),
-				BankAccountId:        bankAccountIdsByPlaid[plaidTransaction.AccountID],
-				PlaidTransactionId:   plaidTransaction.ID,
-				Amount:               int64(plaidTransaction.Amount * 100),
-				SpendingId:           nil,
-				Categories:           plaidTransaction.Category,
-				OriginalCategories:   plaidTransaction.Category,
-				Date:                 date,
-				AuthorizedDate:       authorizedDate,
-				Name:                 transactionName,
-				OriginalName:         plaidTransaction.Name,
-				MerchantName:         plaidTransaction.MerchantName,
-				OriginalMerchantName: plaidTransaction.MerchantName,
-				IsPending:            plaidTransaction.Pending,
-				CreatedAt:            now,
-			}
-		}
-
-		// Reverse the list so the oldest records are inserted first.
-		for i, j := 0, len(transactions)-1; i < j; i, j = i+1, j-1 {
-			transactions[i], transactions[j] = transactions[j], transactions[i]
-		}
-
-		if err = repo.InsertTransactions(span.Context(), transactions); err != nil {
-			log.WithError(err).Error("failed to store initial transactions")
+		if err = j.upsertTransactions(
+			span.Context(),
+			log,
+			repo,
+			link,
+			plaidIdsToBankIds,
+			plaidTransactions,
+		); err != nil {
+			log.WithError(err).Error("failed to upsert transactions from plaid")
 			return err
 		}
 

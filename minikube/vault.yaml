@@ -268,7 +268,7 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-    - port: 443
+    - port: 80
       targetPort: http
       protocol: TCP
       name: http
@@ -300,7 +300,7 @@ spec:
           - path: /
             backend:
               serviceName: vault
-              servicePort: 443
+              servicePort: 80
 
 ---
 apiVersion: v1

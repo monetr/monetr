@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/monetr/rest-api/pkg/crumbs"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -13,9 +12,7 @@ import (
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
-	"github.com/monetr/rest-api/pkg/util"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -123,18 +120,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
 	})
 
 	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
-		account, err := repo.GetAccount(span.Context())
-		if err != nil {
-			log.WithError(err).Error("failed to retrieve account for job")
-			return err
-		}
-
-		timezone, err := account.GetTimezone()
-		if err != nil {
-			log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
-			timezone = time.UTC
-		}
-
 		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve link details to pull transactions")
@@ -193,156 +178,28 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
 		}
 		end := time.Now()
 
-		transactions, err := j.plaidClient.GetAllTransactions(
-			span.Context(),
-			accessToken,
-			start,
-			end,
-			itemBankAccountIds,
-		)
+		platypus, err := j.plaidClient.NewClient(span.Context(), link, accessToken)
 		if err != nil {
-			log.WithError(err).Error("failed to retrieve transactions from plaid")
-			switch plaidErr := errors.Cause(err).(type) {
-			case plaid.Error:
-				link.LinkStatus = models.LinkStatusError
-				link.ErrorCode = myownsanity.StringP(strings.Join([]string{
-					plaidErr.ErrorType,
-					plaidErr.ErrorCode,
-				}, "."))
-				if updateErr := repo.UpdateLink(span.Context(), link); updateErr != nil {
-					log.WithError(updateErr).Error("failed to update link to be an error state")
-					return err
-				}
-
-				// Don't return an error here, we set the link to an error state and we don't want to have retry logic
-				// for this right now.
-				return nil
-			default:
-				log.WithError(err).Warnf("unknown error type from Plaid client: %T", plaidErr)
-			}
-
-			return errors.Wrap(err, "failed to retrieve transactions from plaid")
-		}
-
-		plaidTransactionIds := make([]string, len(transactions))
-		for i, transaction := range transactions {
-			plaidTransactionIds[i] = transaction.ID
-		}
-
-		transactionsByPlaidId, err := repo.GetTransactionsByPlaidId(span.Context(), linkId, plaidTransactionIds)
-		if err != nil {
-			log.WithError(err).Error("failed to retrieve transaction ids for updating plaid transactions")
+			log.WithError(err).Error("failed to create plaid client for link")
 			return err
 		}
 
-		transactionsToUpdate := make([]*models.Transaction, 0)
-		transactionsToInsert := make([]models.Transaction, 0)
-		now := time.Now().UTC()
-		for _, plaidTransaction := range transactions {
-			amount := int64(plaidTransaction.Amount * 100)
-
-			date, _ := util.ParseInLocal("2006-01-02", plaidTransaction.Date, timezone)
-			var authorizedDate *time.Time
-			if plaidTransaction.AuthorizedDate != "" {
-				authDate, _ := util.ParseInLocal("2006-01-02", plaidTransaction.AuthorizedDate, timezone)
-				authorizedDate = &authDate
-			}
-
-			var pendingPlaidTransactionId *string
-			if plaidTransaction.PendingTransactionID != "" {
-				pendingPlaidTransactionId = &plaidTransaction.PendingTransactionID
-			}
-
-			transactionName := plaidTransaction.Name
-
-			// We only want to make the transaction name be the merchant name if the merchant name is shorter. This is
-			// due to something I observed with a dominos transaction, where the merchant was improperly parsed and the
-			// transaction ended up being called `Mnuslindstrom` rather than `Domino's`. This should fix that problem.
-			if plaidTransaction.MerchantName != "" && len(plaidTransaction.MerchantName) < len(transactionName) {
-				transactionName = plaidTransaction.MerchantName
-			}
-
-			existingTransaction, ok := transactionsByPlaidId[plaidTransaction.ID]
-			if !ok {
-				transactionsToInsert = append(transactionsToInsert, models.Transaction{
-					AccountId:                 accountId,
-					BankAccountId:             plaidIdsToBankIds[plaidTransaction.AccountID],
-					PlaidTransactionId:        plaidTransaction.ID,
-					Amount:                    amount,
-					SpendingId:                nil,
-					Spending:                  nil,
-					Categories:                plaidTransaction.Category,
-					OriginalCategories:        plaidTransaction.Category,
-					Date:                      date,
-					AuthorizedDate:            authorizedDate,
-					Name:                      transactionName,
-					OriginalName:              plaidTransaction.Name,
-					MerchantName:              plaidTransaction.MerchantName,
-					OriginalMerchantName:      plaidTransaction.MerchantName,
-					IsPending:                 plaidTransaction.Pending,
-					CreatedAt:                 now,
-					PendingPlaidTransactionId: pendingPlaidTransactionId,
-				})
-				continue
-			}
-
-			var shouldUpdate bool
-			if existingTransaction.Amount != amount {
-				shouldUpdate = true
-			}
-
-			if existingTransaction.IsPending != plaidTransaction.Pending {
-				shouldUpdate = true
-			}
-
-			if !myownsanity.TimesPEqual(existingTransaction.AuthorizedDate, authorizedDate) {
-				shouldUpdate = true
-			}
-
-			if existingTransaction.PendingPlaidTransactionId != pendingPlaidTransactionId {
-				shouldUpdate = true
-			}
-
-			existingTransaction.Amount = amount
-			existingTransaction.IsPending = plaidTransaction.Pending
-			existingTransaction.AuthorizedDate = authorizedDate
-			existingTransaction.PendingPlaidTransactionId = pendingPlaidTransactionId
-
-			// Update old transactions calculated name as we can.
-			if existingTransaction.Name != transactionName {
-				existingTransaction.Name = transactionName
-				shouldUpdate = true
-			}
-
-			// Fix timezone of records.
-			if !existingTransaction.Date.Equal(date) {
-				existingTransaction.Date = date
-				shouldUpdate = true
-			}
-
-			if shouldUpdate {
-				transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
-			}
+		transactions, err := platypus.GetAllTransactions(span.Context(), start, end, itemBankAccountIds)
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve transactions from plaid")
+			return errors.Wrap(err, "failed to retrieve transactions from plaid")
 		}
 
-		if len(transactionsToUpdate) > 0 {
-			log.Infof("updating %d transactions", len(transactionsToUpdate))
-			if err = repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
-				log.WithError(err).Errorf("failed to update transactions for job")
-				return err
-			}
-		}
-
-		if len(transactionsToInsert) > 0 {
-			log.Infof("creating %d transactions", len(transactionsToInsert))
-			// Reverse the list so the oldest records are inserted first.
-			for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
-				transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
-			}
-			if err = repo.InsertTransactions(span.Context(), transactionsToInsert); err != nil {
-				log.WithError(err).Error("failed to insert new transactions")
-				return err
-			}
+		if err = j.upsertTransactions(
+			span.Context(),
+			log,
+			repo,
+			link,
+			plaidIdsToBankIds,
+			transactions,
+		); err != nil {
+			log.WithError(err).Error("failed to upsert transactions from plaid")
+			return err
 		}
 
 		link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())

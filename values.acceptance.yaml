@@ -129,7 +129,8 @@ api:
     environment: "https://development.plaid.com"
     enableReturningUserExperience: true
     webhooksEnabled: true
-    webhooksDomain: https://api.acceptance.monetr.dev
+    webhooksDomain: api.acceptance.monetr.dev
+    oauthDomain: app.acceptance.monetr.dev
   cors:
     allowedOrigins:
       - "https://acceptance.monetr.dev"

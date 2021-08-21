@@ -6,6 +6,8 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/rest-api/pkg/crumbs"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -14,7 +16,6 @@ import (
 	"time"
 
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/plaid/plaid-go/plaid"
 )
 
 func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
@@ -125,67 +126,35 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		}
 	}
 
-	plaidProducts := []string{
-		"transactions",
-	}
-
 	legalName := ""
 	if len(me.LastName) > 0 {
 		legalName = fmt.Sprintf("%s %s", me.FirstName, me.LastName)
 	}
 
-	var phoneNumber string
+	var phoneNumber *string
 	if me.Login.PhoneNumber != nil {
-		phoneNumber = me.Login.PhoneNumber.E164()
+		phoneNumber = myownsanity.StringP(me.Login.PhoneNumber.E164())
 	}
 
-	var webhook string
-	if c.configuration.Plaid.WebhooksEnabled {
-		domain := c.configuration.Plaid.WebhooksDomain
-		if domain != "" {
-			webhook = fmt.Sprintf("%s/plaid/webhook", c.configuration.Plaid.WebhooksDomain)
-		} else {
-			c.log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
-		}
-	}
-
-	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", c.configuration.UIDomainName)
-
-	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), plaid.LinkTokenConfigs{
-		User: &plaid.LinkTokenUser{
-			ClientUserID: strconv.FormatUint(userId, 10),
-			LegalName:    legalName,
-			PhoneNumber:  phoneNumber,
-			EmailAddress: me.Login.Email,
-			// TODO (elliotcourant) I'm going to leave these be for now but we need
-			//  to loop back and add this once email/phone verification is working.
-			PhoneNumberVerifiedTime:  time.Time{},
-			EmailAddressVerifiedTime: time.Time{},
-		},
-		ClientName: "monetr",
-		Products:   plaidProducts,
-		CountryCodes: []string{
-			"US",
-		},
-		Webhook:               webhook,
-		AccountFilters:        nil,
-		CrossAppItemAdd:       nil,
-		PaymentInitiation:     nil,
-		Language:              "en",
-		LinkCustomizationName: "",
-		RedirectUri:           redirectUri,
+	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), platypus.LinkTokenOptions{
+		ClientUserID:             strconv.FormatUint(userId, 10),
+		LegalName:                legalName,
+		PhoneNumber:              phoneNumber,
+		PhoneNumberVerifiedTime:  nil,
+		EmailAddress:             me.Login.Email,
+		EmailAddressVerifiedTime: nil,
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
 		return
 	}
 
-	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.LinkToken, token.Expiration); err != nil {
+	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.Token(), token.Expiration()); err != nil {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
 	ctx.JSON(map[string]interface{}{
-		"linkToken": token.LinkToken,
+		"linkToken": token.Token(),
 	})
 }
 
@@ -235,72 +204,24 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		return
 	}
 
-	legalName := ""
-	if len(me.LastName) > 0 {
-		legalName = fmt.Sprintf("%s %s", me.FirstName, me.LastName)
-	} else {
-		// TODO Handle a missing last name, we need a legal name Plaid.
-		//  Should this be considered an error state?
-	}
-
-	var phoneNumber string
-	if me.Login.PhoneNumber != nil {
-		phoneNumber = me.Login.PhoneNumber.E164()
-	}
-
-	var webhook string
-	if c.configuration.Plaid.WebhooksEnabled {
-		domain := c.configuration.Plaid.WebhooksDomain
-		if domain != "" {
-			webhook = fmt.Sprintf("%s/plaid/webhook", c.configuration.Plaid.WebhooksDomain)
-		} else {
-			log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
-		}
-	}
-
-	accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId)
+	client, err := c.plaid.NewClientFromLink(c.getContext(ctx), me.AccountId, linkId)
 	if err != nil {
-		log.WithError(err).Errorf("failed to retrieve current access token")
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve current access token")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client for link")
 		return
 	}
 
-	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", c.configuration.UIDomainName)
-
-	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), plaid.LinkTokenConfigs{
-		User: &plaid.LinkTokenUser{
-			ClientUserID: strconv.FormatUint(me.UserId, 10),
-			LegalName:    legalName,
-			PhoneNumber:  phoneNumber,
-			EmailAddress: me.Login.Email,
-			// TODO Add in email/phone verification.
-			PhoneNumberVerifiedTime:  time.Time{},
-			EmailAddressVerifiedTime: time.Time{},
-		},
-		ClientName: "monetr",
-		CountryCodes: []string{
-			"US",
-		},
-		Webhook:               webhook,
-		AccountFilters:        nil,
-		CrossAppItemAdd:       nil,
-		PaymentInitiation:     nil,
-		Language:              "en",
-		LinkCustomizationName: "",
-		RedirectUri:           redirectUri,
-		AccessToken:           accessToken,
-	})
+	token, err := client.UpdateItem(c.getContext(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token to update Plaid link")
 		return
 	}
 
-	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.LinkToken, token.Expiration); err != nil {
+	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.Token(), token.Expiration()); err != nil {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
 	ctx.JSON(map[string]interface{}{
-		"linkToken": token.LinkToken,
+		"linkToken": token.Token(),
 	})
 }
 
@@ -424,19 +345,6 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
-	plaidAccounts, err := c.plaid.GetAccounts(c.getContext(ctx), result.AccessToken, plaid.GetAccountsOptions{
-		AccountIDs: callbackRequest.AccountIds,
-	})
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve accounts")
-		return
-	}
-
-	if len(plaidAccounts) == 0 {
-		c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
-		return
-	}
-
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	var webhook string
@@ -452,7 +360,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
 		c.getContext(ctx),
 		repo.AccountId(),
-		result.ItemID,
+		result.ItemId,
 		result.AccessToken,
 	); err != nil {
 		log.WithError(err).Errorf("failed to store access token")
@@ -461,7 +369,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	plaidLink := models.PlaidLink{
-		ItemId: result.ItemID,
+		ItemId: result.ItemId,
 		Products: []string{
 			// TODO (elliotcourant) Make this based on what product's we sent in the create link token request.
 			"transactions",
@@ -488,22 +396,42 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
+	// Create a plaid client for the new link.
+	client, err := c.plaid.NewClient(c.getContext(ctx), &link, result.AccessToken)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client")
+		return
+	}
+
+	// Then use that client to retrieve that link's bank accounts.
+	plaidAccounts, err := client.GetAccounts(c.getContext(ctx), callbackRequest.AccountIds...)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve accounts")
+		return
+	}
+
+	if len(plaidAccounts) == 0 {
+		c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
+		return
+	}
+
 	now := time.Now().UTC()
 	accounts := make([]models.BankAccount, len(plaidAccounts))
 	for i, plaidAccount := range plaidAccounts {
 		accounts[i] = models.BankAccount{
 			AccountId:         repo.AccountId(),
 			LinkId:            link.LinkId,
-			PlaidAccountId:    plaidAccount.AccountID,
-			AvailableBalance:  int64(plaidAccount.Balances.Available * 100),
-			CurrentBalance:    int64(plaidAccount.Balances.Current * 100),
-			Name:              plaidAccount.Name,
-			Mask:              plaidAccount.Mask,
-			PlaidName:         plaidAccount.Name,
-			PlaidOfficialName: plaidAccount.OfficialName,
-			Type:              models.BankAccountType(plaidAccount.Type),
-			SubType:           models.BankAccountSubType(plaidAccount.Subtype),
-			LastUpdated:       now,
+			PlaidAccountId:    plaidAccount.GetAccountId(),
+			AvailableBalance:  plaidAccount.GetBalances().GetAvailable(),
+			CurrentBalance:    plaidAccount.GetBalances().GetCurrent(),
+			Name:              plaidAccount.GetName(),
+			Mask:              plaidAccount.GetMask(),
+			PlaidName:         plaidAccount.GetName(),
+			PlaidOfficialName: plaidAccount.GetOfficialName(),
+			// THIS MIGHT BREAK SOMETHING.
+			//Type:              models.BankAccountType(plaidAccount.Type),
+			//SubType:           models.BankAccountSubType(plaidAccount.Subtype),
+			LastUpdated: now,
 		}
 	}
 	if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {

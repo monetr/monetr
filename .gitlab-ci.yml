@@ -2,7 +2,7 @@
 # exception for staging branches that bors creates.
 workflow:
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying" || $CI_COMMIT_BRANCH == "dog" || $CI_COMMIT_BRANCH == "acceptance"'
       when: always
     - if: '$CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying"'
       when: never
@@ -12,8 +12,8 @@ workflow:
       when: never
     - if: $CI_COMMIT_TAG
       when: always
-    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
-      when: never
+#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
+#      when: never
 
 stages:
   - Release
@@ -47,7 +47,7 @@ Release Testing:
 Go Dependencies:
   needs: [ ]
   stage: Dependencies
-  image: containers.monetr.dev/golang:1.16.3
+  image: containers.monetr.dev/golang:1.17.0
   tags:
     - k8s:shared
     - arch:amd64
@@ -63,7 +63,7 @@ Binary:
   needs:
     - "Go Dependencies"
   stage: Build
-  image: containers.monetr.dev/golang:1.16.3
+  image: containers.monetr.dev/golang:1.17.0
   tags:
     - k8s:shared
     - arch:amd64
@@ -89,7 +89,7 @@ Go Tests:
     POSTGRES_DB: test-db
     POSTGRES_HOST_AUTH_METHOD: trust
   stage: Test
-  image: containers.monetr.dev/golang:1.16.3
+  image: containers.monetr.dev/golang:1.17.0
   tags:
     - k8s:shared
     - arch:amd64
@@ -154,6 +154,7 @@ Yeet Coverage:
     refs:
       - main
       - tags
+      - acceptance
   image: proxy.monetr.dev/docker:19.03.15
   variables:
     DOCKER_HOST: tcp://docker:2375
@@ -241,6 +242,9 @@ Generate - Acceptance:
     expire_in: 7 days
 
 Generate - Dog:
+  only:
+    refs:
+      - dog
   needs: [ ]
   stage: Prepare
   image: containers.monetr.dev/ubuntu:20.04
@@ -301,7 +305,7 @@ Dry - Staging:
 Dry - Acceptance:
   only:
     refs:
-      - tags
+      - accceptance
   environment:
     name: Acceptance
     url: https://api.acceptance.monetr.dev
@@ -356,7 +360,7 @@ Deploy - Staging:
 Deploy - Acceptance:
   only:
     refs:
-      - tags
+      - accceptance
   environment:
     name: Acceptance
     url: https://api.acceptance.monetr.dev

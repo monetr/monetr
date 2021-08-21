@@ -1,5 +1,16 @@
 data "vault_policy_document" "rest-api-policy" {
   rule {
+    path = "${vault_mount.plaid-client-secrets.path}/*"
+    capabilities = [
+      "create",
+      "read",
+      "update",
+      "delete",
+    ]
+    description = "Allow the REST API to manage client secrets."
+  }
+
+  rule {
     path = "${vault_mount.plaid-client-secrets.path}/data/*"
     capabilities = [
       "create",

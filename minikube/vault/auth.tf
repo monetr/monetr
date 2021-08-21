@@ -10,3 +10,20 @@ resource "vault_kubernetes_auth_backend_config" "example" {
   issuer = "kubernetes.io/serviceaccount"
   disable_iss_validation = true
 }
+
+resource "vault_auth_backend" "userpass" {
+  type = "userpass"
+}
+
+resource "vault_generic_endpoint" "monetr-user" {
+  depends_on           = [vault_auth_backend.userpass]
+  path                 = "auth/userpass/users/monetr"
+  ignore_absent_fields = true
+
+  data_json = jsonencode({
+    policies = [
+      vault_policy.rest-api-service-policy.name,
+    ]
+    password = "password"
+  })
+}
