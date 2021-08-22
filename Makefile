@@ -21,12 +21,12 @@ ifndef POSTGRES_HOST
 POSTGRES_HOST=localhost
 endif
 
-default: dependencies build test
+default: build test
 
-dependencies:
+dependencies: go.mod go.sum
 	go get ./...
 
-build:
+build: dependencies $(wildcard $(PWD)/pkg/**/*.go)
 	go build -o $(LOCAL_BIN_DIR)/monetr $(MONETR_CLI_PACKAGE)
 
 test:

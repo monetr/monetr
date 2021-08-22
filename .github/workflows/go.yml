@@ -30,10 +30,8 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v2
-      - name: Dependencies
-        run: make dependencies
-      - name: Build
-        run: make build
+      - name: Depdendencies, Build, Licenses
+        run: make license
       - name: Setup Schema
         run: make apply-schema-ci
       - name: Test

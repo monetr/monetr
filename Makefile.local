@@ -13,6 +13,7 @@ JQ=$(LOCAL_BIN)/jq
 KUBECTL=minikube kubectl --
 SPLIT_YAML=kubernetes-split-yaml
 YQ=$(LOCAL_BIN)/yq
+LICENSE=$(LOCAL_BIN)/golicense
 VAULT=vault
 MKCERT=mkcert
 PGO=$(LOCAL_BIN)/pgo
@@ -266,6 +267,18 @@ install-$(YQ): $(LOCAL_BIN) $(LOCAL_TMP)
 	tar -xzf $(YQ_DIR).tar.gz -C $(YQ_DIR)
 	mv $(YQ_DIR)/yq_$(OS)_$(ARCH) $(YQ)
 	rm -rf $(YQ_DIR) || true
+
+$(LICENSE):
+	@if [ ! -f "$(LICENSE)" ]; then make install-$(LICENSE); fi
+
+LICENSE_REPO=https://github.com/mitchellh/golicense.git
+LICENSE_TMP=$(LOCAL_TMP)/golicense
+install-$(LICENSE): $(LOCAL_BIN) $(LOCAL_TMP)
+	$(call infoMsg,Installing golicense to $(LICENSE))
+	rm -rf $(LICENSE_TMP) || true
+	git clone $(LICENSE_REPO) $(LICENSE_TMP)
+	cd $(LICENSE_TMP) && go build -o $(LICENSE) .
+	rm -rf $(LICENSE_TMP) || true
 
 
 MKCERT_REPO=https://github.com/FiloSottile/mkcert
@@ -541,5 +554,9 @@ mail-mini: $(VALUES) $(YQ)
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "mailhog is now accessible at: https://mail.$(LOCAL_DOMAIN)"
 	@echo "\033[0;31m#################################################################################\033[0m"
+
+license: $(LICENSE) build
+	- $(LICENSE) $(PWD)/licenses.hcl $(LOCAL_BIN)/monetr
+
 
 
