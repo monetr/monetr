@@ -1,7 +1,7 @@
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
 NODE_MODULES_DIR = $(PWD)/node_modules
-NODE_MODULES_BIN = $(NODE_MODULES_PWD)/.bin
+NODE_MODULES_BIN = $(NODE_MODULES_DIR)/.bin
 VENDOR_DIR = $(PWD)/vendor
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
@@ -9,7 +9,7 @@ MONETR_CLI_PACKAGE = github.com/monetr/rest-api/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 LICENSE=$(LOCAL_BIN)/golicense
 
-PATH += "$(GOPATH):$(LOCAL_BIN):$(NODE_MODULES_BIN)"
+PATH+=\b:$(GOPATH)/bin:$(LOCAL_BIN):$(NODE_MODULES_BIN)
 
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
@@ -45,6 +45,7 @@ build: dependencies $(wildcard $(PWD)/pkg/**/*.go)
 	go build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
 
 test:
+	$(call infoMsg,Running go tests for monetr rest-api)
 ifndef CI
 	go run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 endif
@@ -52,6 +53,7 @@ endif
 	go tool cover -func=$(COVERAGE_TXT)
 
 clean:
+	echo $$PATH
 	rm -rf $(LOCAL_BIN) || true
 	rm -rf $(COVERAGE_TXT) || true
 	rm -rf $(NODE_MODULES_DIR) || true
@@ -75,13 +77,30 @@ docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
 
 $(LOCAL_BIN):
-	mkdir -p $(LOCAL_BIN)
+	mkdir $(LOCAL_BIN)
 
 $(LOCAL_TMP):
-	mkdir -p $(LOCAL_TMP)
+	mkdir $(LOCAL_TMP)
+
+$(LICENSE):
+	@if [ ! -f "$(LICENSE)" ]; then make install-$(LICENSE); fi
+
+LICENSE_REPO=https://github.com/mitchellh/golicense.git
+LICENSE_TMP=$(LOCAL_TMP)/golicense
+install-$(LICENSE): $(LOCAL_BIN) $(LOCAL_TMP)
+	$(call infoMsg,Installing golicense to $(LICENSE))
+	rm -rf $(LICENSE_TMP) || true
+	git clone $(LICENSE_REPO) $(LICENSE_TMP)
+	cd $(LICENSE_TMP) && go build -o $(LICENSE) .
+	rm -rf $(LICENSE_TMP) || true
+
+license: $(LICENSE) build
+	$(call infoMsg,Checking dependencies for open source licenses)
+	- $(LICENSE) $(PWD)/licenses.hcl $(LOCAL_BIN)/monetr
 
 ifdef GITLAB_CI
 include Makefile.gitlab-ci
+include Makefile.deploy
 endif
 
 ifdef GITHUB_ACTION
@@ -89,7 +108,6 @@ include Makefile.github-actions
 endif
 
 include Makefile.release
-include Makefile.deploy
 include Makefile.docker
 
 ifndef CI
@@ -107,18 +125,3 @@ migrate:
 beta-code: migrate
 	@go run $(MONETR_CLI_PACKAGE) beta new-code -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
 
-$(LICENSE):
-	@if [ ! -f "$(LICENSE)" ]; then make install-$(LICENSE); fi
-
-LICENSE_REPO=https://github.com/mitchellh/golicense.git
-LICENSE_TMP=$(LOCAL_TMP)/golicense
-install-$(LICENSE): $(LOCAL_BIN) $(LOCAL_TMP)
-	$(call infoMsg,Installing golicense to $(LICENSE))
-	rm -rf $(LICENSE_TMP) || true
-	git clone $(LICENSE_REPO) $(LICENSE_TMP)
-	cd $(LICENSE_TMP) && go build -o $(LICENSE) .
-	rm -rf $(LICENSE_TMP) || true
-
-license: $(LICENSE) build
-	$(call infoMsg,Checking dependencies for open source licenses)
-	- $(LICENSE) $(PWD)/licenses.hcl $(LOCAL_BIN)/monetr

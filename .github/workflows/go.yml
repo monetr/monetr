@@ -30,9 +30,19 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v2
-      - name: Depdendencies, Build, Licenses
-        run: make license
+      - name: Dependencies
+        run: make dependencies
+      - name: Build
+        run: make build
       - name: Setup Schema
         run: make apply-schema-ci
       - name: Test
         run: make test
+  license:
+    name: License
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/build-containers/ubuntu:20.04-2021.08.17
+    steps:
+      - uses: actions/checkout@v2
+      - name: Licenses
+        run: make license
