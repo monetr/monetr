@@ -94,9 +94,15 @@ install-$(LICENSE): $(LOCAL_BIN) $(LOCAL_TMP)
 	cd $(LICENSE_TMP) && go build -o $(LICENSE) .
 	rm -rf $(LICENSE_TMP) || true
 
+.PHONY: license
+ifdef GITHUB_TOKEN
 license: $(LICENSE) build
 	$(call infoMsg,Checking dependencies for open source licenses)
 	- $(LICENSE) $(PWD)/licenses.hcl $(LOCAL_BIN)/monetr
+else
+license:
+	$(call warningMsg,GITHUB_TOKEN is required to check licenses)
+endif
 
 ifdef GITLAB_CI
 include Makefile.gitlab-ci
