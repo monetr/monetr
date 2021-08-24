@@ -109,7 +109,7 @@ func (c *Controller) authenticateUser(ctx *context.Context) (err error) {
 		return errors.Errorf("token must be provided")
 	}
 
-	var claims HarderClaims
+	var claims MonetrClaims
 	result, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

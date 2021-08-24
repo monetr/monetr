@@ -2,21 +2,21 @@ package controller
 
 import (
 	"fmt"
-	"github.com/getsentry/sentry-go"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/form3tech-oss/jwt-go"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/rest-api/pkg/hash"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
+	"net/http"
+	"net/mail"
+	"strconv"
+	"strings"
+	"time"
 )
 
-type HarderClaims struct {
+type MonetrClaims struct {
 	LoginId   uint64 `json:"loginId"`
 	UserId    uint64 `json:"userId"`
 	AccountId uint64 `json:"accountId"`
@@ -148,14 +148,18 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	}
 }
 
-func (c *Controller) forgotPassword(ctx iris.Context) {
-
-}
-
 func (c *Controller) validateLogin(email, password string) error {
-	// TODO (elliotcourant) Add some email format validation here.
 	if len(password) < 8 {
 		return errors.New("password must be at least 8 characters")
+	}
+
+	address, err := mail.ParseAddress(email)
+	if err != nil {
+		return errors.New("email address provided is not valid")
+	}
+
+	if strings.ToLower(address.Address) != strings.ToLower(email) {
+		return errors.New("email address provided is not valid")
 	}
 
 	return nil
@@ -163,7 +167,7 @@ func (c *Controller) validateLogin(email, password string) error {
 
 func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {
 	now := time.Now()
-	claims := &HarderClaims{
+	claims := &MonetrClaims{
 		LoginId:   loginId,
 		UserId:    userId,
 		AccountId: accountId,

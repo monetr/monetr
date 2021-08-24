@@ -164,7 +164,7 @@ func NewBasicPaywall(log *logrus.Entry, repo AccountRepository) BasicPayWall {
 // GetSubscriptionIsActive will retrieve the account data from the AccountRepository interface. This means it is
 // possible for it to return a stale response within a few seconds. But in general it should be acceptable. When an
 // account is updated -> its cache is invalidated. There is likely a very small window where an invalid state could be
-// evaluated but it should be fine.
+// evaluated, but it should be fine.
 func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountId uint64) (active bool, err error) {
 	span := sentry.StartSpan(ctx, "Billing - GetSubscriptionIsActive")
 	defer span.Finish()
@@ -252,7 +252,8 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.ConfigureScope(func(scope *sentry.Scope) {
 			scope.SetUser(sentry.User{
-				ID: strconv.FormatUint(account.AccountId, 10),
+				ID:       strconv.FormatUint(account.AccountId, 10),
+				Username: fmt.Sprintf("account:%d", account.AccountId),
 			})
 		})
 	}
@@ -300,6 +301,11 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 	account.SubscriptionActiveUntil = activeUntil
 	account.StripeWebhookLatestTimestamp = &timestamp
 
+	if err = b.repo.UpdateAccount(span.Context(), account); err != nil {
+		log.WithError(err).Errorf("failed to update account subscription status")
+		return errors.Wrap(err, "failed to update account subscription status")
+	}
+
 	// Check to see if the subscription status of the account has changed with this update to be.
 	if account.IsSubscriptionActive() != currentlyActive {
 		// If it has check to see if it was previously active.
@@ -322,11 +328,6 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 				log.WithError(err).Warn("failed to send updated notification")
 			}
 		}
-	}
-
-	if err = b.repo.UpdateAccount(span.Context(), account); err != nil {
-		log.WithError(err).Errorf("failed to update account subscription status")
-		return errors.Wrap(err, "failed to update account subscription status")
 	}
 
 	return nil

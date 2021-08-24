@@ -91,7 +91,7 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 // @Param spendingId path int true "Spending ID"
 // @Param limit query int false "Specifies the number of transactions to return in the result, default is 25. Max is 100."
 // @Param offset query int false "The number of transactions to skip before returning any."
-// @Router /bank_accounts/{bankAccountId}/transactions/{spendingId} [get]
+// @Router /bank_accounts/{bankAccountId}/transactions/spending/{spendingId} [get]
 // @Success 200 {array} swag.TransactionResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID, Spending ID, Limit or Offset.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
