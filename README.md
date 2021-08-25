@@ -4,6 +4,7 @@
 [![Node.js CI](https://github.com/monetr/web-ui/actions/workflows/node.js.yml/badge.svg)](https://github.com/monetr/web-ui/actions/workflows/node.js.yml)
 [![DeepSource](https://deepsource.io/gh/monetr/web-ui.svg/?label=active+issues&show_trend=true&token=xHI8Ef6A6rr1C_LlJ_sxzPzR)](https://deepsource.io/gh/monetr/web-ui/?ref=repository-badge)
 [![DeepSource](https://deepsource.io/gh/monetr/web-ui.svg/?label=resolved+issues&show_trend=true&token=xHI8Ef6A6rr1C_LlJ_sxzPzR)](https://deepsource.io/gh/monetr/web-ui/?ref=repository-badge)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Fweb-ui.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Fweb-ui?ref=badge_shield)
 
 The web app for the budgeting application monetr.
 
@@ -22,3 +23,7 @@ make local-ui # Will tweak the service to forward to your local webpack dev serv
 This will spawn a new tmux window, install any JS dependencies needed and will start the webpack dev server. You can
 then open a browser window to `https://app.monetr.mini` and see the application running. You can make changes to the
 application and see the changes reload.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Fweb-ui.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Fweb-ui?ref=badge_large)
