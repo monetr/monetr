@@ -1,0 +1,8 @@
+status = [
+    "Test",
+    "Docker"
+]
+
+[committer]
+name = "bors[bot]"
+email = "me@elliotcourant.dev"
