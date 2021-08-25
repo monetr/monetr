@@ -9,11 +9,11 @@ require (
 	github.com/alicebob/miniredis/v2 v2.15.1
 	github.com/brianvoe/gofakeit/v6 v6.7.1
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
-	github.com/fsnotify/fsnotify v1.5.0
+	github.com/fsnotify/fsnotify v1.5.1
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.10.3
+	github.com/go-pg/pg/v10 v10.10.4
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.5
 	github.com/google/go-github/v38 v38.1.0
