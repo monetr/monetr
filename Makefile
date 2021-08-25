@@ -11,7 +11,7 @@ ifndef ENVIRONMENT
 endif
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
-dependencies:
+dependencies: package.json
 	yarn install
 
 clean:
@@ -26,7 +26,7 @@ start: dependencies
 	RELEASE_REVISION=$(RELEASE_REVISION) MONETR_ENV=local yarn start
 
 .PHONY: build
-build:
+build: dependencies
 	mkdir -p $(BUILD_DIR)
 	RELEASE_REVISION=$(RELEASE_REVISION) MONETR_ENV=$(ENV_LOWER) yarn build:production
 	cp $(PUBLIC_DIR)/favicon.ico $(BUILD_DIR)/
