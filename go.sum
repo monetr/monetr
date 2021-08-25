@@ -254,6 +254,8 @@ github.com/go-pg/migrations/v8 v8.1.0/go.mod h1:o+CN1u572XHphEHZyK6tqyg2GDkRvL2b
 github.com/go-pg/pg/v10 v10.4.0/go.mod h1:BfgPoQnD2wXNd986RYEHzikqv9iE875PrFaZ9vXvtNM=
 github.com/go-pg/pg/v10 v10.10.3 h1:WobSfk5I+v7XwD1h9x2B7n4slDzjdBIonJ5PID95Aag=
 github.com/go-pg/pg/v10 v10.10.3/go.mod h1:EmoJGYErc+stNN/1Jf+o4csXuprjxcRztBnn6cHe38E=
+github.com/go-pg/pg/v10 v10.10.4 h1:ahPbvQHeQuKl7sxhsMdCpV23igkfPEu9hfMrB3cPhjY=
+github.com/go-pg/pg/v10 v10.10.4/go.mod h1:EmoJGYErc+stNN/1Jf+o4csXuprjxcRztBnn6cHe38E=
 github.com/go-pg/zerochecker v0.2.0 h1:pp7f72c3DobMWOb2ErtZsnrPaSvHd2W4o9//8HtF4mU=
 github.com/go-pg/zerochecker v0.2.0/go.mod h1:NJZ4wKL0NmTtz0GKCoJ8kym6Xn/EQzXRl2OnAe7MmDo=
 github.com/go-redis/redis/v8 v8.4.0/go.mod h1:A1tbYoHSa1fXwN+//ljcCYYJeLmVrwL9hbQN45Jdy0M=
