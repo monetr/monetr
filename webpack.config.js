@@ -133,33 +133,36 @@ module.exports = (env, argv) => {
     },
     devtool: 'inline-source-map',
     devServer: {
-      disableHostCheck: true,
-      contentBase: './public',
+      allowedHosts: 'all',
+      static: {
+        directory: path.resolve(__dirname, 'public')
+      },
       historyApiFallback: true,
-      hot: true,
+      hot: "only",
       host: '0.0.0.0',
       port: 30000,
-      transportMode: 'ws',
-      sockHost: 'app.monetr.mini',
-      sockPort: 443,
-      before(app, server) {
+      webSocketServer: 'ws',
+      client: {
+        webSocketURL:  'wss://app.monetr.mini/ws',
+      },
+      onBeforeSetupMiddleware: function (devServer) {
         // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
         // middlewares before `redirectServedPath` otherwise will not have any effect
         // This lets us fetch source contents from webpack for the error overlay
-        app.use(evalSourceMapMiddleware(server));
+        devServer.app.use(evalSourceMapMiddleware(devServer.server));
         // This lets us open files from the runtime error overlay.
-        app.use(errorOverlayMiddleware());
+        devServer.app.use(errorOverlayMiddleware());
       },
-      after(app) {
+      onAfterSetupMiddleware: function (devServer) {
         // Redirect to `PUBLIC_URL` or `homepage` from `package.json` if url not match
-        app.use(redirectServedPath("/"));
+        devServer.app.use(redirectServedPath("/"));
 
         // This service worker file is effectively a 'no-op' that will reset any
         // previous service worker registered for the same host:port combination.
         // We do this in development to avoid hitting the production cache if
         // it used the same host and port.
         // https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
-        app.use(noopServiceWorkerMiddleware("/"));
+        devServer.app.use(noopServiceWorkerMiddleware("/"));
       },
     },
     plugins: [
