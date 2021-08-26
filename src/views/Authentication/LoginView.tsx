@@ -200,6 +200,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                         onChange={ handleChange }
                         value={ values.email }
                         variant="outlined"
+                        autoComplete="username"
                       />
                     </div>
                     <div className="w-full pt-2.5 pb-2.5">
@@ -216,6 +217,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                         type="password"
                         value={ values.password }
                         variant="outlined"
+                        autoComplete="current-password"
                       />
                     </div>
                   </div>

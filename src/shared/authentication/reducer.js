@@ -5,11 +5,15 @@ import * as Sentry from "@sentry/browser";
 export default function reducer(state = new AuthenticationState(), action) {
   switch (action.type) {
     case BOOTSTRAP_LOGIN:
-      const accountId = action.payload.user.accountId.toString(10)
-      Sentry.setUser({
-        id: accountId,
-        username: `account:${ accountId }`
-      });
+      // If the user is null then we are not logged in, just return the state.
+      if (action.payload.user) {
+        const accountId = action.payload.user.accountId.toString(10)
+        Sentry.setUser({
+          id: accountId,
+          username: `account:${ accountId }`
+        });
+      }
+
       return state.merge({
         ...action.payload,
       });

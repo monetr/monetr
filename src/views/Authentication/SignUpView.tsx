@@ -279,6 +279,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                         onChange={ handleChange }
                         value={ values.email }
                         variant="outlined"
+                        autoComplete="username"
                       />
                     </div>
                     <div className="w-full pb-1.5 pt-1.5 grid grid-flow-row gap-2 sm:grid-flow-col">
@@ -323,6 +324,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                         type="password"
                         value={ values.password }
                         variant="outlined"
+                        autoComplete="new-password"
                       />
                       <TextField
                         className="w-full"
@@ -337,6 +339,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                         type="password"
                         value={ values.verifyPassword }
                         variant="outlined"
+                        autoComplete="new-password"
                       />
                     </div>
                     { this.props.requireBetaCode &&
