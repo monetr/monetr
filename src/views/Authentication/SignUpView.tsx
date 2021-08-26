@@ -279,6 +279,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                         onChange={ handleChange }
                         value={ values.email }
                         variant="outlined"
+                        autoComplete="username"
                       />
                     </div>
                     <div className="w-full pb-1.5 pt-1.5 grid grid-flow-row gap-2 sm:grid-flow-col">
@@ -323,6 +324,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                         type="password"
                         value={ values.password }
                         variant="outlined"
+                        autoComplete="new-password"
                       />
                       <TextField
                         className="w-full"
@@ -337,6 +339,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                         type="password"
                         value={ values.verifyPassword }
                         variant="outlined"
+                        autoComplete="new-password"
                       />
                     </div>
                     { this.props.requireBetaCode &&
@@ -379,7 +382,16 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                   </div>
                   <div className="w-full pt-1.5 flex justify-center pb-10">
                     <Button
-                      className="w-1/2 min-w-max"
+                      className="w-1/2 mr-1 min-w-max"
+                      color="secondary"
+                      disabled={ isSubmitting }
+                      onClick={ () => this.props.history.push('/login') }
+                      variant="outlined"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="w-1/2 ml-1 min-w-max"
                       color="primary"
                       disabled={ isSubmitting || this.cannotSubmit(values) }
                       onClick={ submitForm }

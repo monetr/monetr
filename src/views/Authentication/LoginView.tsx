@@ -188,6 +188,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                   <div className="w-full">
                     <div className="w-full pb-2.5">
                       <TextField
+                        autoComplete="username"
                         autoFocus
                         className="w-full"
                         disabled={ isSubmitting }
@@ -204,6 +205,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                     </div>
                     <div className="w-full pt-2.5 pb-2.5">
                       <TextField
+                        autoComplete="current-password"
                         className="w-full"
                         disabled={ isSubmitting }
                         error={ touched.password && !!errors.password }
