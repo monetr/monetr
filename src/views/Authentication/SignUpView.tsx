@@ -29,6 +29,7 @@ import {
 } from "@material-ui/core";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import { Formik, FormikHelpers } from "formik";
+import verifyEmailAddress from "util/verifyEmailAddress";
 
 interface SignUpValues {
   agree: boolean;
@@ -83,8 +84,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     let errors: Partial<SignUpValues> = {};
 
     if (values.email) {
-      const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (!re.test(values.email.toLowerCase())) {
+      if (!verifyEmailAddress(values.email)) {
         errors['email'] = 'Please provide a valid email address.';
       }
     }

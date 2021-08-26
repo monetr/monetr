@@ -14,6 +14,7 @@ import { Button, CircularProgress, Snackbar, TextField } from "@material-ui/core
 import { Formik, FormikHelpers } from "formik";
 
 import Logo from 'assets';
+import verifyEmailAddress from "util/verifyEmailAddress";
 
 
 interface LoginValues {
@@ -61,8 +62,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
     let errors: Partial<LoginValues> = {};
 
     if (values.email) {
-      const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (!re.test(values.email.toLowerCase())) {
+      if (!verifyEmailAddress(values.email)) {
         errors['email'] = 'Please provide a valid email address.';
       }
     }
