@@ -382,7 +382,16 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                   </div>
                   <div className="w-full pt-1.5 flex justify-center pb-10">
                     <Button
-                      className="w-1/2 min-w-max"
+                      className="w-1/2 mr-1 min-w-max"
+                      color="secondary"
+                      disabled={ isSubmitting }
+                      onClick={ () => this.props.history.push('/login') }
+                      variant="outlined"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      className="w-1/2 ml-1 min-w-max"
                       color="primary"
                       disabled={ isSubmitting || this.cannotSubmit(values) }
                       onClick={ submitForm }
