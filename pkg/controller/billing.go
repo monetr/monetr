@@ -3,6 +3,8 @@ package controller
 import (
 	"fmt"
 	"github.com/monetr/rest-api/pkg/crumbs"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,8 +18,8 @@ import (
 
 func (c *Controller) handleBilling(p iris.Party) {
 	p.Post("/create_checkout", c.handlePostCreateCheckout)
+	p.Get("/checkout/{checkoutSessionId:string}", c.handleGetAfterCheckout)
 	p.Get("/portal", c.handleGetStripePortal)
-	p.Get("/wait", c.waitForSubscription)
 }
 
 // Create Checkout Session
@@ -208,6 +210,90 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	})
 }
 
+// Retrieve Post-Checkout Session Details
+// @Summary Get Post-Checkout Session Details
+// @id get-post-checkout-session-details
+// @tags Billing
+// @description After completing a checkout session, retrieve the outcome of the checkout session and persist it immediately.
+// @Produce json
+// @Security ApiKeyAuth
+// @Router /billing/checkout/{checkoutSessionId} [get]
+// @Param checkoutSessionId path string true "Stripe Checkout Session ID"
+// @Success 200 {object} swag.AfterCheckoutResponse
+// @Failure 400 {object} ApiError Invalid request.
+// @Failure 500 {object} ApiError Something went wrong on our end or when communicating with Stripe.
+func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
+	checkoutSessionId := ctx.Params().GetStringTrim("checkoutSessionId")
+	if checkoutSessionId == "" {
+		c.badRequest(ctx, "checkout session Id is required")
+		return
+	}
+
+	checkoutSession, err := c.stripe.GetCheckoutSession(c.getContext(ctx), checkoutSessionId)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not retrieve Stripe checkout session")
+		return
+	}
+
+	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve account details")
+		return
+	}
+
+	stripeCustomerId := ""
+	if account.StripeCustomerId != nil {
+		stripeCustomerId = *account.StripeCustomerId
+	}
+
+	if checkoutSession.Customer.ID != stripeCustomerId {
+		crumbs.Warn(c.getContext(ctx), "BUG: The Stripe customer Id for this account does not match the one from the checkout session", "bug", map[string]interface{}{
+			"accountCustomerId":         account.StripeCustomerId,
+			"checkoutSessionCustomerId": checkoutSession.Customer.ID,
+		})
+	}
+
+	// Now retrieve the subscription status for the latest subscription.
+	subscription, err := c.stripe.GetSubscription(c.getContext(ctx), checkoutSession.Subscription.ID)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve subscription details from stripe")
+		return
+	}
+
+	// This is implemented here and in the stripe webhook handler. Eventually this should be moved so that this logic
+	// is only implemented in a single place, but I don't think right now is the time to do that.
+	var validUntil *time.Time
+	if stripe_helper.SubscriptionIsActive(*subscription) {
+		validUntil = myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
+	}
+
+	if err = c.billing.UpdateCustomerSubscription(
+		c.getContext(ctx),
+		account,
+		subscription.Customer.ID,
+		subscription.ID,
+		validUntil,
+		time.Now(),
+	); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to update subscription state")
+		return
+	}
+
+	if stripe_helper.SubscriptionIsActive(*subscription) {
+		ctx.JSON(map[string]interface{}{
+			"nextUrl":  "/",
+			"isActive": true,
+		})
+		return
+	}
+
+	ctx.JSON(map[string]interface{}{
+		"message":  "Subscription is not active.",
+		"nextUrl":  "/account/subscribe",
+		"isActive": false,
+	})
+}
+
 // Get Stripe Portal
 // @id get-stripe-portal
 // @tags Billing
@@ -287,60 +373,4 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 	ctx.JSON(swag.CreatePortalSessionResponse{
 		URL: session.URL,
 	})
-}
-
-// Wait For Stripe Subscription
-// @Summary Wait For Stripe Subscription
-// @id wait-for-stripe-subscription
-// @tags Billing
-// @description Long poll endpoint to check to see if the subscription is activated yet. It will return 200 if the subscription is active. Otherwise it will block for 30 seconds and then return 408 if nothing has changed.
-// @Security ApiKeyAuth
-// @Router /billing/wait [get]
-// @Success 200
-// @Success 408
-// @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) waitForSubscription(ctx iris.Context) {
-	log := c.getLog(ctx)
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
-	account, err := repo.GetAccount(c.getContext(ctx))
-	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve account data")
-		return
-	}
-
-	if account.IsSubscriptionActive() {
-		log.Trace("account has active subscription, nothing to be done")
-		return
-	}
-
-	channelName := fmt.Sprintf("account:%d:subscription:activated", account.AccountId)
-	log = log.WithField("channel", channelName)
-
-	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
-	if err != nil {
-		c.wrapPgError(ctx, err, "failed to listen on channel")
-		return
-	}
-	defer func() {
-		if err = listener.Close(); err != nil {
-			log.WithError(err).Error("failed to gracefully close listener")
-		}
-	}()
-
-	log.Debug("waiting for account to be activated channel")
-
-	deadLine := time.NewTimer(30 * time.Second)
-	defer deadLine.Stop()
-
-	select {
-	case <-deadLine.C:
-		ctx.StatusCode(http.StatusRequestTimeout)
-		log.Trace("timed out waiting for account/subscription to be setup")
-		return
-	case <-listener.Channel():
-		// Just exit successfully, any message on this channel is considered a success.
-		log.Trace("subscription activated successfully")
-		return
-	}
 }

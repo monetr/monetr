@@ -6,7 +6,9 @@ import (
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/rest-api/pkg/internal/mock_stripe"
 	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stripe/stripe-go/v72"
 	"testing"
 )
 
@@ -121,5 +123,43 @@ func TestStripeBase_GetProductsById(t *testing.T) {
 		assert.NoError(t, err, "should return an error")
 		assert.NotNil(t, products, "should not be nil")
 		assert.Len(t, products, 1, "should return one product")
+	})
+}
+
+func TestStripeBase_GetCheckoutSession(t *testing.T) {
+	t.Run("mock success", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.Deactivate()
+
+		stripeMock := mock_stripe.NewMockStripeHelper(t)
+		stripeMock.MockGetCheckoutSession(t)
+
+		var checkoutSessionId string
+		{
+			var checkoutSession stripe.CheckoutSession
+			stripeMock.CreateCheckoutSession(t, &checkoutSession)
+			checkoutSessionId = checkoutSession.ID
+		}
+
+		client := NewStripeHelper(testutils.GetLog(t), gofakeit.UUID())
+
+		checkoutSession, err := client.GetCheckoutSession(context.Background(), checkoutSessionId)
+		assert.NoError(t, err, "should retrieve checkout session by id")
+		assert.NotNil(t, checkoutSession, "should not be nil")
+		assert.Equal(t, checkoutSessionId, checkoutSession.ID, "ID must match")
+	})
+
+	t.Run("mock blank Id", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.Deactivate()
+
+		stripeMock := mock_stripe.NewMockStripeHelper(t)
+		stripeMock.MockGetCheckoutSession(t)
+
+		client := NewStripeHelper(testutils.GetLog(t), gofakeit.UUID())
+
+		checkoutSession, err := client.GetCheckoutSession(context.Background(), "")
+		assert.IsType(t, &stripe.Error{}, errors.Cause(err), "should be a stripe error")
+		assert.Nil(t, checkoutSession, "checkout session should be nil")
 	})
 }

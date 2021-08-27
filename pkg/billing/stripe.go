@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
-	"github.com/monetr/rest-api/pkg/cache"
 	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
@@ -32,14 +30,17 @@ type baseStripeWebhookHandler struct {
 	billingNotifications pubsub.PublishSubscribe
 }
 
-func NewStripeWebhookHandler(log *logrus.Entry, cacheClient cache.Cache, db *pg.DB) StripeWebhookHandler {
-	repo := NewAccountRepository(log, cacheClient, db)
-	ps := pubsub.NewPostgresPubSub(log, db)
+func NewStripeWebhookHandler(
+	log *logrus.Entry,
+	accountRepo AccountRepository,
+	billing BasicBilling,
+	publisher pubsub.PublishSubscribe,
+) StripeWebhookHandler {
 	return &baseStripeWebhookHandler{
 		log:                  log,
-		repo:                 repo,
-		billing:              NewBasicBilling(log, repo, ps),
-		billingNotifications: ps,
+		repo:                 accountRepo,
+		billing:              billing,
+		billingNotifications: publisher,
 	}
 }
 

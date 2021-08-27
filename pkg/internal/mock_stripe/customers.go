@@ -11,18 +11,17 @@ import (
 	"time"
 )
 
-func MockStripeCreateCustomerSuccess(t *testing.T) {
+func (m *MockStripeHelper) MockStripeCreateCustomerSuccess(t *testing.T) {
 	mock_http_helper.NewHttpMockJsonResponder(t,
 		"POST", "/v1/customers",
 		func(t *testing.T, request *http.Request) (interface{}, int) {
-
 			body, err := ioutil.ReadAll(request.Body)
 			require.NoError(t, err, "failed to read request body")
 
 			form, err := url.ParseQuery(string(body))
 			require.NoError(t, err, "failed to parse body")
 
-			return stripe.Customer{
+			customer := stripe.Customer{
 				Balance:             0,
 				Created:             time.Now().Unix(),
 				Currency:            "USD",
@@ -48,7 +47,22 @@ func MockStripeCreateCustomerSuccess(t *testing.T) {
 				Tax:                 nil,
 				TaxExempt:           "",
 				TaxIDs:              nil,
-			}, http.StatusOK
+			}
+			m.CreateCustomer(t, &customer)
+
+			return customer, http.StatusOK
 		},
+		StripeHeaders,
 	)
+}
+
+func (m *MockStripeHelper) CreateCustomer(t *testing.T, customer *stripe.Customer) {
+	for { // Make sure the customer ID is unique
+		customer.ID = FakeStripeCustomerId(t)
+		if _, ok := m.customers[customer.ID]; !ok {
+			break
+		}
+	}
+
+	m.customers[customer.ID] = *customer
 }

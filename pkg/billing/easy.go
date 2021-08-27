@@ -46,6 +46,10 @@ type BasicBilling interface {
 	// webhook for the same subscription (which would indicate an active status) causing the subscription to incorrectly
 	// show as inactive.
 	UpdateSubscription(ctx context.Context, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error
+	// UpdateCustomerSubscription does the same thing that UpdateSubscription does, but does not require that the
+	// stripe customerId match any customerId stored. Instead, it will take the provided account and update the customer
+	// ID and store it on the account with the new subscription data.
+	UpdateCustomerSubscription(ctx context.Context, account *models.Account, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error
 }
 
 var (
@@ -247,6 +251,19 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 		return errors.Wrap(err, "failed to retrieve account by stripe customer Id")
 	}
 
+	return b.UpdateCustomerSubscription(span.Context(), account, customerId, subscriptionId, activeUntil, timestamp)
+}
+
+func (b *baseBasicBilling) UpdateCustomerSubscription(ctx context.Context, account *models.Account, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error {
+	span := sentry.StartSpan(ctx, "Billing - UpdateCustomerSubscription")
+	defer span.Finish()
+
+	log := b.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"customerId":     customerId,
+		"subscriptionId": subscriptionId,
+		"accountId":      account.AccountId,
+	})
+
 	// Set the user for this event, this way webhooks are properly associated with the destination user in our
 	// application.
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
@@ -258,12 +275,10 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 		})
 	}
 
-	log = log.WithField("accountId", account.AccountId)
-
 	currentlyActive := account.IsSubscriptionActive()
 
 	// If the timestamp for the last webhook is not nil, and the provided timestamp is not after (<= basically) then
-	//
+	// perform the update. This is to solve potential race conditions in the order we receive webhooks from Stripe.
 	if account.StripeWebhookLatestTimestamp != nil {
 		if timestamp.Before(*account.StripeWebhookLatestTimestamp) {
 			crumbs.Debug(span.Context(), "Provided timestamp is older than the current subscription timestamp", map[string]interface{}{
@@ -297,11 +312,12 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 		})
 	}
 
+	account.StripeCustomerId = &customerId
 	account.StripeSubscriptionId = &subscriptionId
 	account.SubscriptionActiveUntil = activeUntil
 	account.StripeWebhookLatestTimestamp = &timestamp
 
-	if err = b.repo.UpdateAccount(span.Context(), account); err != nil {
+	if err := b.repo.UpdateAccount(span.Context(), account); err != nil {
 		log.WithError(err).Errorf("failed to update account subscription status")
 		return errors.Wrap(err, "failed to update account subscription status")
 	}
@@ -313,18 +329,18 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 		activatedChannelName := fmt.Sprintf("account:%d:subscription:activated", account.AccountId)
 		canceledChannelName := fmt.Sprintf("account:%d:subscription:canceled", account.AccountId)
 
-		if err = b.notify.Notify(span.Context(), updatedChannelName, "0"); err != nil {
+		if err := b.notify.Notify(span.Context(), updatedChannelName, "0"); err != nil {
 			log.WithError(err).WithField("channel", updatedChannelName).Warn("failed to send updated notification")
 		}
 
 		if currentlyActive {
 			log.Info("account subscription is no longer active")
-			if err = b.notify.Notify(span.Context(), canceledChannelName, "0"); err != nil {
+			if err := b.notify.Notify(span.Context(), canceledChannelName, "0"); err != nil {
 				log.WithError(err).Warn("failed to send updated notification")
 			}
 		} else {
 			log.Info("account subscription is now active")
-			if err = b.notify.Notify(span.Context(), activatedChannelName, "0"); err != nil {
+			if err := b.notify.Notify(span.Context(), activatedChannelName, "0"); err != nil {
 				log.WithError(err).Warn("failed to send updated notification")
 			}
 		}

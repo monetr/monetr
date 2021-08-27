@@ -56,6 +56,7 @@ func MockStripeGetPriceSuccess(t *testing.T) {
 				UnitAmountDecimal: 1.99,
 			}, http.StatusOK
 		},
+		StripeHeaders,
 	)
 }
 
@@ -69,5 +70,6 @@ func MockStripeGetPriceNotFound(t *testing.T) {
 
 			return NewResourceMissingError(t, priceId, "price"), http.StatusNotFound
 		},
+		StripeHeaders,
 	)
 }
