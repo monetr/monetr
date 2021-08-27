@@ -112,12 +112,8 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
   renderNotSetup = () => {
     return (
       <Switch>
-        <Route path="/logout">
-          <Logout/>
-        </Route>
-        <Route path="/setup">
-          <InitialPlaidSetup/>
-        </Route>
+        <Route path="/logout" exact component={ Logout } />
+        <Route path="/setup" exact component={ InitialPlaidSetup } />
         <Route path="/plaid/oauth-return">
           <OAuthRedirect/>
         </Route>
@@ -174,24 +170,12 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
           <Route path="/login">
             <Redirect to="/"/>
           </Route>
-          <Route path="/logout">
-            <Logout/>
-          </Route>
-          <Route path="/transactions">
-            <TransactionsView/>
-          </Route>
-          <Route path="/expenses">
-            <ExpensesView/>
-          </Route>
-          <Route path="/goals">
-            <GoalsView/>
-          </Route>
-          <Route path="/account">
-            <AccountView/>
-          </Route>
-          <Route path="/accounts">
-            <AllAccountsView/>
-          </Route>
+          <Route path="/logout" exact component={ Logout } />
+          <Route path="/transactions" exact component={ TransactionsView } />
+          <Route path="/expenses" exact component={ ExpensesView } />
+          <Route path="/goals" exact component={ GoalsView } />
+          <Route path="/account" exact component={ AccountView } />
+          <Route path="/accounts" exact component={ AllAccountsView } />
           <Route path="/">
             <Redirect to="/transactions"/>
           </Route>
@@ -214,9 +198,9 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
 
     return (
       <Switch>
-        <Route path="/account/subscribe/after">
-          <AfterCheckout/>
-        </Route>
+        {/*<Route path="/account/subscribe/after">*/}
+        {/*  <AfterCheckout/>*/}
+        {/*</Route>*/}
         { this.renderSubRoutes() }
       </Switch>
     );
