@@ -14,12 +14,11 @@ import BankAccountSelector from "components/BankAccounts/BankAccountSelector";
 import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
 import MenuIcon from "@material-ui/icons/Menu";
 import TransactionsView from "views/TransactionsView";
-import ExpensesView from "views/ExpensesView";
+import ExpensesView from "views/Expenses/ExpensesView";
 import GoalsView from "views/GoalsView";
 import AccountView from "views/AccountView";
 import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
 import AllAccountsView from "views/AccountView/AllAccountsView";
-import AfterCheckout from "views/Subscriptions/AfterCheckout";
 import Logout from "views/Authentication/Logout";
 import InitialPlaidSetup from "views/Setup/InitialPlaidSetup";
 import request from "shared/util/request";
@@ -198,9 +197,6 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
 
     return (
       <Switch>
-        {/*<Route path="/account/subscribe/after">*/}
-        {/*  <AfterCheckout/>*/}
-        {/*</Route>*/}
         { this.renderSubRoutes() }
       </Switch>
     );

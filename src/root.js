@@ -11,7 +11,7 @@ import { getIsBootstrapped, getSignUpAllowed } from "shared/bootstrap/selectors"
 import LoginView from "views/Authentication/LoginView";
 import SignUpView from "views/Authentication/SignUpView";
 import { Backdrop, CircularProgress } from "@material-ui/core";
-import BillingRequired from "views/Subscriptions/BillingRequired";
+import BillingRequiredRouter from "views/Subscriptions/BillingRequiredRouter";
 import AuthenticatedApp from "AuthenticatedApp";
 
 export class Root extends PureComponent {
@@ -81,7 +81,7 @@ export class Root extends PureComponent {
     }
 
     if (!isSubscriptionActive) {
-      return <BillingRequired/>;
+      return <BillingRequiredRouter/>;
     }
 
     return (
