@@ -11,22 +11,20 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	sentryiris "github.com/getsentry/sentry-go/iris"
+	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetr/rest-api/pkg/billing"
 	"github.com/monetr/rest-api/pkg/build"
 	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/rest-api/pkg/config"
 	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
 	"github.com/monetr/rest-api/pkg/metrics"
 	"github.com/monetr/rest-api/pkg/pubsub"
 	"github.com/monetr/rest-api/pkg/secrets"
-	stripe_client "github.com/stripe/stripe-go/v72/client"
-
-	"github.com/go-pg/pg/v10"
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/router"
-	"github.com/monetr/rest-api/pkg/config"
 	"github.com/sirupsen/logrus"
 	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
@@ -48,13 +46,13 @@ type Controller struct {
 	log                      *logrus.Entry
 	job                      jobs.JobManager
 	stats                    *metrics.Stats
-	stripeClient             *stripe_client.API
 	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
 	email                    mail.Communication
 	accounts                 billing.AccountRepository
 	paywall                  billing.BasicPayWall
+	billing                  billing.BasicBilling
 	stripeWebhooks           billing.StripeWebhookHandler
 }
 
@@ -83,6 +81,10 @@ func NewController(
 		}
 	}
 
+	accountsRepo := billing.NewAccountRepository(log, cache.NewCache(log, cachePool), db)
+	pubSub := pubsub.NewPostgresPubSub(log, db)
+	basicBilling := billing.NewBasicBilling(log, accountsRepo, pubSub)
+
 	return &Controller{
 		captcha:                  &captcha,
 		configuration:            configuration,
@@ -94,13 +96,13 @@ func NewController(
 		job:                      job,
 		stats:                    stats,
 		stripe:                   stripe,
-		stripeClient:             stripe_client.New(configuration.Stripe.APIKey, nil),
-		ps:                       pubsub.NewPostgresPubSub(log, db),
+		ps:                       pubSub,
 		cache:                    cachePool,
 		email:                    mail.NewSMTPCommunication(log, configuration.SMTP),
-		accounts:                 billing.NewAccountRepository(log, cache.NewCache(log, cachePool), db),
+		accounts:                 accountsRepo,
 		paywall:                  basicPaywall,
-		stripeWebhooks:           billing.NewStripeWebhookHandler(log, cache.NewCache(log, cachePool), db),
+		billing:                  basicBilling,
+		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
 	}
 }
 

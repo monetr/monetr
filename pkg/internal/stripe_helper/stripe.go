@@ -5,6 +5,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/rest-api/pkg/cache"
 	"github.com/monetr/rest-api/pkg/crumbs"
+	"github.com/monetr/rest-api/pkg/internal/round"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
@@ -22,6 +23,7 @@ type Stripe interface {
 	GetCustomer(ctx context.Context, id string) (*stripe.Customer, error)
 	GetSubscription(ctx context.Context, stripeSubscriptionId string) (*stripe.Subscription, error)
 	NewCheckoutSession(ctx context.Context, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error)
+	GetCheckoutSession(ctx context.Context, checkoutSessionId string) (*stripe.CheckoutSession, error)
 	NewPortalSession(ctx context.Context, params *stripe.BillingPortalSessionParams) (*stripe.BillingPortalSession, error)
 }
 
@@ -36,34 +38,77 @@ type stripeBase struct {
 }
 
 func NewStripeHelper(log *logrus.Entry, apiKey string) Stripe {
-	return &stripeBase{
-		log: log,
-		client: stripe_client.New(apiKey, stripe.NewBackends(&http.Client{
-			Timeout: time.Second * 30,
-		})),
-		cache: &noopStripeCache{},
-	}
-}
-
-func NewStripeHelperWithCache(log *logrus.Entry, apiKey string, cacheClient cache.Cache) Stripe {
-	httpClient := &http.Client{
-		Timeout: time.Second * 30,
+	base := &stripeBase{
+		log:    log,
+		client: nil,
+		cache:  &noopStripeCache{},
 	}
 
 	config := &stripe.BackendConfig{
-		HTTPClient:    httpClient,
+		HTTPClient: &http.Client{
+			Transport: round.NewObservabilityRoundTripper(http.DefaultTransport, base.stripeRoundTripper),
+			Timeout:   time.Second * 30,
+		},
 		LeveledLogger: log,
 	}
 
-	return &stripeBase{
-		log: log,
-		client: stripe_client.New(apiKey, &stripe.Backends{
-			API:     stripe.GetBackendWithConfig(stripe.APIBackend, config),
-			Connect: stripe.GetBackendWithConfig(stripe.ConnectBackend, config),
-			Uploads: stripe.GetBackendWithConfig(stripe.UploadsBackend, config),
-		}),
-		cache: NewRedisStripeCache(log, cacheClient),
+	base.client = stripe_client.New(apiKey, &stripe.Backends{
+		API:     stripe.GetBackendWithConfig(stripe.APIBackend, config),
+		Connect: stripe.GetBackendWithConfig(stripe.ConnectBackend, config),
+		Uploads: stripe.GetBackendWithConfig(stripe.UploadsBackend, config),
+	})
+
+	return base
+}
+
+func NewStripeHelperWithCache(log *logrus.Entry, apiKey string, cacheClient cache.Cache) Stripe {
+	base := &stripeBase{
+		log:    log,
+		client: nil,
+		cache:  NewRedisStripeCache(log, cacheClient),
 	}
+
+	config := &stripe.BackendConfig{
+		HTTPClient: &http.Client{
+			Transport: round.NewObservabilityRoundTripper(http.DefaultTransport, base.stripeRoundTripper),
+			Timeout:   time.Second * 30,
+		},
+		LeveledLogger: log,
+	}
+
+	base.client = stripe_client.New(apiKey, &stripe.Backends{
+		API:     stripe.GetBackendWithConfig(stripe.APIBackend, config),
+		Connect: stripe.GetBackendWithConfig(stripe.ConnectBackend, config),
+		Uploads: stripe.GetBackendWithConfig(stripe.UploadsBackend, config),
+	})
+
+	return base
+}
+
+func (s *stripeBase) stripeRoundTripper(
+	ctx context.Context,
+	request *http.Request,
+	response *http.Response,
+	err error,
+) {
+	var statusCode int
+	var requestId string
+	if response != nil {
+		statusCode = response.StatusCode
+		requestId = response.Header.Get("Request-Id")
+	}
+	// If you get a nil reference panic here during testing, its probably because you forgot to mock a certain endpoint.
+	// Check to see if the error is a "no responder found" error.
+	crumbs.HTTP(ctx,
+		"Stripe API Call",
+		"stripe",
+		request.URL.String(),
+		request.Method,
+		statusCode,
+		map[string]interface{}{
+			"Request-Id": requestId,
+		},
+	)
 }
 
 func (s *stripeBase) GetPricesById(ctx context.Context, stripePriceIds []string) ([]stripe.Price, error) {
@@ -93,10 +138,14 @@ func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price
 		return price, nil
 	}
 
-	result, err := s.client.Prices.Get(id, &stripe.PriceParams{})
+	result, err := s.client.Prices.Get(id, &stripe.PriceParams{
+		Params: stripe.Params{
+			Context: span.Context(),
+		},
+	})
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve stripe price")
-		return nil, s.wrapStripeError(span.Context(), err, "failed to retrieve stripe price")
+		return nil, errors.Wrap(err, "failed to retrieve stripe price")
 	}
 
 	s.cache.CachePrice(span.Context(), *result)
@@ -114,13 +163,16 @@ func (s *stripeBase) GetProductsById(ctx context.Context, stripeProductIds []str
 	}
 
 	productIterator := s.client.Products.List(&stripe.ProductListParams{
+		ListParams: stripe.ListParams{
+			Context: span.Context(),
+		},
 		IDs: productIds,
 	})
 
 	products := make([]stripe.Product, 0)
 	for {
 		if err := productIterator.Err(); err != nil {
-			return nil, s.wrapStripeError(span.Context(), err, "failed to retrieve stripe products")
+			return nil, errors.Wrap(err, "failed to iterate over products")
 		}
 
 		if !productIterator.Next() {
@@ -135,25 +187,17 @@ func (s *stripeBase) GetProductsById(ctx context.Context, stripeProductIds []str
 	return products, nil
 }
 
-func (s *stripeBase) CreateSubscription(ctx context.Context, subscription stripe.SubscriptionParams) (*stripe.Subscription, error) {
-	span := sentry.StartSpan(ctx, "Stripe - CreateSubscription")
-	defer span.Finish()
-
-	result, err := s.client.Subscriptions.New(&subscription)
-	if err != nil {
-		return nil, s.wrapStripeError(span.Context(), err, "failed to create subscription")
-	}
-
-	return result, nil
-}
-
 func (s *stripeBase) GetSubscription(ctx context.Context, stripeSubscriptionId string) (*stripe.Subscription, error) {
 	span := sentry.StartSpan(ctx, "Stripe - GetSubscription")
 	defer span.Finish()
 
-	result, err := s.client.Subscriptions.Get(stripeSubscriptionId, &stripe.SubscriptionParams{})
+	result, err := s.client.Subscriptions.Get(stripeSubscriptionId, &stripe.SubscriptionParams{
+		Params: stripe.Params{
+			Context: span.Context(),
+		},
+	})
 	if err != nil {
-		return nil, s.wrapStripeError(span.Context(), err, "failed to create customer")
+		return nil, errors.Wrap(err, "failed to retrieve subscription")
 	}
 
 	return result, nil
@@ -165,22 +209,13 @@ func (s *stripeBase) CreateCustomer(ctx context.Context, customer stripe.Custome
 
 	span.Status = sentry.SpanStatusOK
 
+	customer.Context = span.Context()
+
 	result, err := s.client.Customers.New(&customer)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		err = s.wrapStripeError(span.Context(), err, "failed to create customer")
+		return nil, errors.Wrap(err, "failed to create customer")
 	}
-
-	crumbs.HTTP(span.Context(),
-		"Creating Stripe Customer",
-		"stripe",
-		"https://api.stripe.com/v1/customers",
-		"POST",
-		result.APIResource.LastResponse.StatusCode,
-		map[string]interface{}{
-			"Request-Id": result.APIResource.LastResponse.RequestID,
-		},
-	)
 
 	return result, err
 }
@@ -189,9 +224,11 @@ func (s *stripeBase) UpdateCustomer(ctx context.Context, id string, customer str
 	span := sentry.StartSpan(ctx, "Stripe - UpdateCustomer")
 	defer span.Finish()
 
+	customer.Context = span.Context()
+
 	result, err := s.client.Customers.Update(id, &customer)
 	if err != nil {
-		return nil, s.wrapStripeError(span.Context(), err, "failed to update customer")
+		return nil, errors.Wrap(err, "failed to update customer")
 	}
 
 	return result, nil
@@ -201,9 +238,13 @@ func (s *stripeBase) GetCustomer(ctx context.Context, id string) (*stripe.Custom
 	span := sentry.StartSpan(ctx, "Stripe - UpdateCustomer")
 	defer span.Finish()
 
-	result, err := s.client.Customers.Get(id, &stripe.CustomerParams{})
+	result, err := s.client.Customers.Get(id, &stripe.CustomerParams{
+		Params: stripe.Params{
+			Context: span.Context(),
+		},
+	})
 	if err != nil {
-		return nil, s.wrapStripeError(span.Context(), err, "failed to retrieve customer")
+		return nil, errors.Wrap(err, "failed to retrieve customer")
 	}
 
 	return result, nil
@@ -213,9 +254,11 @@ func (s *stripeBase) NewPortalSession(ctx context.Context, params *stripe.Billin
 	span := sentry.StartSpan(ctx, "Stripe - NewPortalSession")
 	defer span.Finish()
 
+	params.Context = span.Context()
+
 	result, err := s.client.BillingPortalSessions.New(params)
 	if err != nil {
-		return nil, s.wrapStripeError(span.Context(), err, "failed to create billing portal session")
+		return nil, errors.Wrap(err, "failed to create billing portal session")
 	}
 
 	return result, nil
@@ -227,50 +270,46 @@ func (s *stripeBase) NewCheckoutSession(ctx context.Context, params *stripe.Chec
 
 	span.Status = sentry.SpanStatusOK
 
+	params.Context = span.Context()
+
 	result, err := s.client.CheckoutSessions.New(params)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		err = s.wrapStripeError(span.Context(), err, "failed to create billing portal session")
+		return nil, errors.Wrap(err, "failed to create new checkout session")
 	}
 
-	crumbs.HTTP(span.Context(),
-		"Create Checkout Session",
-		"stripe",
-		"https://api.stripe.com/v1/checkout/sessions",
-		"POST",
-		result.APIResource.LastResponse.StatusCode,
-		map[string]interface{}{
-			"Request-Id": result.APIResource.LastResponse.RequestID,
-		},
-	)
+	if result != nil {
+		span.Data = map[string]interface{}{
+			"checkoutSessionId": result.ID,
+		}
+	} else {
+		span.Data = map[string]interface{}{
+			"checkoutSessionId": nil,
+		}
+	}
 
 	return result, err
 }
 
-const (
-	cardDeclined = "card_declined"
-)
+func (s *stripeBase) GetCheckoutSession(ctx context.Context, checkoutSessionId string) (*stripe.CheckoutSession, error) {
+	span := sentry.StartSpan(ctx, "Stripe - GetCheckoutSession")
+	defer span.Finish()
 
-var (
-	ErrCardDeclined = errors.New("card was declined")
-)
-
-func (s *stripeBase) wrapStripeError(ctx context.Context, input error, msg string) error {
-	log := logrus.WithContext(ctx)
-
-	switch err := input.(type) {
-	case nil:
-		return nil
-	case *stripe.Error:
-		log = log.WithField("stripeRequestId", err.RequestID)
-
-		switch err.Code {
-		case cardDeclined:
-			return errors.Wrap(ErrCardDeclined, msg)
-		default:
-			return errors.Wrap(input, msg)
-		}
-	default:
-		return errors.Wrap(err, msg)
+	span.Data = map[string]interface{}{
+		"checkoutSessionId": checkoutSessionId,
 	}
+
+	span.Status = sentry.SpanStatusOK
+
+	result, err := s.client.CheckoutSessions.Get(checkoutSessionId, &stripe.CheckoutSessionParams{
+		Params: stripe.Params{
+			Context: span.Context(),
+		},
+	})
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve stripe checkout session")
+	}
+
+	return result, err
 }

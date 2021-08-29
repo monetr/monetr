@@ -16,35 +16,34 @@ import (
 func MockExchangePublicToken(t *testing.T) string {
 	publicToken := gofakeit.UUID()
 
-	mock_http_helper.NewHttpMockJsonResponder(t, "POST", Path(t, "/item/public_token/exchange"), func(t *testing.T, request *http.Request) (interface{}, int) {
-		var exchangeRequest struct {
-			ClientID    string `json:"client_id"`
-			Secret      string `json:"secret"`
-			PublicToken string `json:"public_token"`
-		}
-		require.NoError(t, json.NewDecoder(request.Body).Decode(&exchangeRequest), "must decode request")
+	mock_http_helper.NewHttpMockJsonResponder(
+		t,
+		"POST", Path(t, "/item/public_token/exchange"),
+		func(t *testing.T, request *http.Request) (interface{}, int) {
+			var exchangeRequest struct {
+				ClientID    string `json:"client_id"`
+				Secret      string `json:"secret"`
+				PublicToken string `json:"public_token"`
+			}
+			require.NoError(t, json.NewDecoder(request.Body).Decode(&exchangeRequest), "must decode request")
 
-		if exchangeRequest.PublicToken != publicToken {
-			return plaid.Error{
-				APIResponse: plaid.APIResponse{
-					RequestID: gofakeit.UUID(),
-				},
-				ErrorType:      "INVALID_REQUEST",
-				ErrorCode:      "1234",
-				ErrorMessage:   "public_token is not valid",
-				DisplayMessage: "public_token is not valid",
-				StatusCode:     http.StatusBadRequest,
-			}, http.StatusBadRequest
-		}
+			if exchangeRequest.PublicToken != publicToken {
+				return plaid.Error{
+					ErrorType:      "INVALID_REQUEST",
+					ErrorCode:      "1234",
+					ErrorMessage:   "public_token is not valid",
+					DisplayMessage: "public_token is not valid",
+					StatusCode:     http.StatusBadRequest,
+				}, http.StatusBadRequest
+			}
 
-		return plaid.ExchangePublicTokenResponse{
-			APIResponse: plaid.APIResponse{
-				RequestID: gofakeit.UUID(),
-			},
-			AccessToken: gofakeit.UUID(),
-			ItemID:      gofakeit.UUID(),
-		}, http.StatusOK
-	})
+			return plaid.ExchangePublicTokenResponse{
+				AccessToken: gofakeit.UUID(),
+				ItemID:      gofakeit.UUID(),
+			}, http.StatusOK
+		},
+		PlaidHeaders,
+	)
 
 	return publicToken
 }

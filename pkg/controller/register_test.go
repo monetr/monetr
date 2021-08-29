@@ -2,6 +2,9 @@ package controller_test
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/jarcoal/httpmock"
+	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/internal/mock_stripe"
 	"net/http"
 	"testing"
 )
@@ -26,6 +29,8 @@ func TestRegister(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.token").String().NotEmpty()
+		response.JSON().Path("$.nextUrl").String().Equal("/setup")
+		response.JSON().Path("$.isActive").Boolean().True()
 		response.JSON().Path("$.user").Object().NotEmpty()
 		response.JSON().Path("$.user.login").Object().NotEmpty()
 		response.JSON().Path("$.user.account").Object().NotEmpty()
@@ -118,5 +123,51 @@ func TestRegister(t *testing.T) {
 			response.Status(http.StatusInternalServerError)
 			response.JSON().Path("$.error").Equal("failed to create login: a login with the same email already exists")
 		}
+	})
+	
+	t.Run("with billing", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		stripeMock := mock_stripe.NewMockStripeHelper(t)
+		stripeMock.MockStripeCreateCustomerSuccess(t)
+
+		conf := NewTestApplicationConfig(t)
+		conf.Stripe.Enabled = true
+		conf.Stripe.BillingEnabled = true
+		conf.Stripe.APIKey = gofakeit.UUID()
+		conf.Stripe.InitialPlan = &config.Plan{
+			FreeTrialDays: 0,
+			Visible:       true,
+			StripePriceId: mock_stripe.FakeStripePriceId(t),
+			Default:       true,
+		}
+
+		e := NewTestApplicationWithConfig(t, conf)
+
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+		}
+		registerRequest.Email = gofakeit.Email()
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+
+		response := e.POST(`/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.token").String().NotEmpty()
+		response.JSON().Path("$.isActive").Boolean().False()
+		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe")
+		response.JSON().Path("$.user").Object().NotEmpty()
+		response.JSON().Path("$.user.login").Object().NotEmpty()
+		response.JSON().Path("$.user.account").Object().NotEmpty()
+
+		stripeMock.AssertNCustomersCreated(t, 1)
 	})
 }

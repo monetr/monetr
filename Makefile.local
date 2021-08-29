@@ -20,8 +20,6 @@ PGO=$(LOCAL_BIN)/pgo
 LOCAL_DOMAIN=monetr.mini
 SUBDOMAINS=kms mail work pgadmin pghero vault ngrok registry app api
 
-INTERNAL_DNS=/etc/resolver/monetr.in
-
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
 REGISTER_JWT_SECRET=$(LOCAL_DIR)/register_jwt_secret.txt
@@ -43,7 +41,6 @@ stop-mini: $(HOSTESS)
 	minikube stop || true
 	$(call infoMsg,Removing our hostnames from /etc/hosts)
 	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) rm $$subdomain.$(LOCAL_DOMAIN) || true; done
-	sudo rm -rf $(INTERNAL_DNS) || true
 
 clean-mini: stop-mini clean-certificates
 	$(call infoMsg,Deleting the contents of the stopped cluster; makes sure our environment is clean the next time)
@@ -375,16 +372,9 @@ local-postgres-certs:
 	$(KUBECTL) get secret postgres-api-tls -o jsonpath='{.data.tls\.crt}' -n $(MINIKUBE_NAMESPACE) | base64 -d > $(LOCAL_DIR)/postgres/tls.crt
 	$(KUBECTL) get secret postgres-api-tls -o jsonpath='{.data.tls\.key}' -n $(MINIKUBE_NAMESPACE) | base64 -d > $(LOCAL_DIR)/postgres/tls.key
 
-internal-dns:
-	$(eval DNS_SERVER=$(shell $(KUBECTL) get svc kube-dns -n kube-system -o jsonpath='{.spec.clusterIP}'))
-	echo "" > $(INTERNAL_DNS) && \
-		echo "nameserver $(DNS_SERVER)" >> $(INTERNAL_DNS) && \
-		echo "search_order 2" >> $(INTERNAL_DNS)
-
 ###################### DEBUGGING THE REST API ##################################
 local-api: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
 local-api: $(YQ)
-	sudo make internal-dns
 	LOCAL_IP=$(LOCAL_IP) $(YQ) e '.subsets[0].addresses[0].ip = strenv(LOCAL_IP)' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
 	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
 	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
@@ -397,7 +387,6 @@ endif
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
-	rm -rf $(INTERNAL_DNS) || true
 
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
 webhooks-mini:

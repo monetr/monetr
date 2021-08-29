@@ -72,6 +72,7 @@ func MockStripeListProductsSuccess(t *testing.T) {
 				Data: products,
 			}, http.StatusOK
 		},
+		StripeHeaders,
 	)
 }
 
@@ -81,5 +82,6 @@ func MockStripeListProductsFailure(t *testing.T) {
 		func(t *testing.T, request *http.Request) (interface{}, int) {
 			return NewInternalServerError(t, "product"), http.StatusInternalServerError
 		},
+		StripeHeaders,
 	)
 }

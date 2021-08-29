@@ -10,7 +10,12 @@ import (
 	"testing"
 )
 
-func NewHttpMockJsonResponder(t *testing.T, method, path string, handler func(t *testing.T, request *http.Request) (interface{}, int)) {
+func NewHttpMockJsonResponder(
+	t *testing.T,
+	method, path string,
+	handler func(t *testing.T, request *http.Request) (interface{}, int),
+	headersFn func(t *testing.T, request *http.Request, response interface{}, status int) map[string][]string,
+) {
 	httpmock.RegisterResponder(method, path, func(request *http.Request) (*http.Response, error) {
 		result, status := handler(t, request)
 		body := bytes.NewBuffer(nil)
@@ -24,6 +29,17 @@ func NewHttpMockJsonResponder(t *testing.T, method, path string, handler func(t 
 			ContentLength: int64(body.Len()),
 			Request:       request,
 		}
+
+		headers := headersFn(t, request, result, status)
+		if headers == nil {
+			headers = map[string][]string{}
+		}
+		headers["Content-Type"] = []string{
+			"application/json",
+		}
+
+		response.Header = headers
+
 		return response, nil
 	})
 }

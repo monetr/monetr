@@ -48,6 +48,7 @@ func MockStripeAttachPaymentMethodSuccess(t *testing.T) {
 				Type:     "card",
 			}, http.StatusOK
 		},
+		StripeHeaders,
 	)
 }
 
@@ -70,6 +71,7 @@ func MockStripeAttachPaymentMethodBadCustomerError(t *testing.T) {
 
 			return NewResourceMissingError(t, customerId, "customer"), http.StatusBadRequest
 		},
+		StripeHeaders,
 	)
 }
 
@@ -113,6 +115,7 @@ func mockStripeAttachPaymentMethodError(t *testing.T, stripeError StripeError, s
 
 			return stripeError, statusCode
 		},
+		StripeHeaders,
 	)
 }
 

@@ -76,7 +76,9 @@ func TestLogin(t *testing.T) {
 		config.Stripe.BillingEnabled = true
 		e := NewTestApplicationWithConfig(t, config)
 
-		mock_stripe.MockStripeCreateCustomerSuccess(t)
+		stripeMock := mock_stripe.NewMockStripeHelper(t)
+
+		stripeMock.MockStripeCreateCustomerSuccess(t)
 
 		email, password := GivenIHaveLogin(t, e)
 
@@ -90,6 +92,8 @@ func TestLogin(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.token").String().NotEmpty()
 		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe")
+
+		stripeMock.AssertNCustomersCreated(t, 1)
 	})
 
 	t.Run("bad password", func(t *testing.T) {

@@ -248,10 +248,10 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		return
 	}
 
-	if !c.configuration.Stripe.IsBillingEnabled() {
-		user.Login = login
-		user.Account = &account
+	user.Login = login
+	user.Account = &account
 
+	if !c.configuration.Stripe.IsBillingEnabled() {
 		ctx.JSON(map[string]interface{}{
 			"nextUrl":  "/setup",
 			"token":    token,
@@ -262,7 +262,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	}
 
 	ctx.JSON(map[string]interface{}{
-		"nextUrl":  "/account/subscription",
+		"nextUrl":  "/account/subscribe",
 		"token":    token,
 		"user":     user,
 		"isActive": false,

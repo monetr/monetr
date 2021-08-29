@@ -30,3 +30,21 @@ func FakeStripeCustomerId(t *testing.T) string {
 	require.NotEmpty(t, id, "stripe customer id cannot be empty")
 	return id
 }
+
+func FakeStripeCheckoutSessionId(t *testing.T) string {
+	id := fmt.Sprintf("cs_%s", testutils.MustGenerateRandomString(t, 14))
+	require.NotEmpty(t, id, "stripe checkout session id cannot be empty")
+	return id
+}
+
+func FakeStripeSubscriptionId(t *testing.T) string {
+	id := fmt.Sprintf("sub_%s", testutils.MustGenerateRandomString(t, 14))
+	require.NotEmpty(t, id, "stripe subscription id cannot be empty")
+	return id
+}
+
+func FakeStripeRequestId(t *testing.T) string {
+	id := fmt.Sprintf("req_%s", testutils.MustGenerateRandomString(t, 14))
+	require.NotEmpty(t, id, "stripe request id cannot be empty")
+	return id
+}

@@ -1,7 +1,6 @@
 package logging
 
 import (
-	"os"
 	"sort"
 
 	"github.com/sirupsen/logrus"
@@ -13,9 +12,6 @@ func NewLogger() *logrus.Entry {
 
 func NewLoggerWithLevel(levelString string) *logrus.Entry {
 	logger := logrus.New()
-	if os.Getenv("CI") != "" {
-		logger.SetLevel(logrus.FatalLevel)
-	}
 
 	level, err := logrus.ParseLevel(levelString)
 	if err != nil {
