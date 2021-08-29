@@ -6,48 +6,44 @@ import Logo from 'assets';
 import request from "shared/util/request";
 
 import { CircularProgress, Typography } from "@material-ui/core";
+import activateSubscription from "shared/authentication/actions/activateSubscription";
 
 interface State {
   loading: boolean;
-  longPollAttempts: number;
 }
 
-class AfterCheckout extends Component<RouteComponentProps, State> {
+interface WithConnectionProps extends RouteComponentProps {
+  activateSubscription: () => void;
+}
+
+class AfterCheckout extends Component<WithConnectionProps, State> {
 
   state = {
     loading: true,
-    longPollAttempts: 0,
   };
 
   componentDidMount() {
     // This component is meant as a loading state for after the user has come back from the stripe checkout session.
     // As soon as the component mounts start the polling and wait for the subscription.
-    this.longPollSetup();
+    this.setupFromCheckout();
   }
 
-  longPollSetup = () => {
-    this.setState(prevState => ({
-      longPollAttempts: prevState.longPollAttempts + 1,
-    }));
-
-    const { longPollAttempts } = this.state;
-    if (longPollAttempts > 6) {
-      return Promise.resolve();
-    }
-
-    return request().get(`/billing/wait`)
-      .then(() => {
-        this.props.history.push('/setup');
-        return Promise.resolve();
-      })
-      .catch(error => {
-        if (error.response.status === 408) {
-          return this.longPollSetup();
+  setupFromCheckout = () => {
+    const params = new URLSearchParams(this.props.location.search);
+    const checkoutSessionId  = params.get('session');
+    return request().get(`/billing/checkout/${checkoutSessionId}`)
+      .then(result => {
+        const { data } = result;
+        if (data.isActive) {
+          this.props.activateSubscription();
+          this.props.history.push('/');
+          return;
         }
 
-        console.warn(error);
-
-        throw error;
+        alert('subscription is not active');
+      })
+      .catch(error => {
+        console.log(error);
       });
   };
 
@@ -77,5 +73,7 @@ class AfterCheckout extends Component<RouteComponentProps, State> {
 
 export default connect(
   _ => ({}),
-  {}
+  {
+    activateSubscription,
+  }
 )(withRouter(AfterCheckout));

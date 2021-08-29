@@ -1,4 +1,4 @@
-import { BOOTSTRAP_LOGIN, LOGOUT } from "shared/authentication/actions";
+import { ACTIVATE_SUBSCRIPTION, BOOTSTRAP_LOGIN, LOGOUT } from "shared/authentication/actions";
 import AuthenticationState from "shared/authentication/state";
 import * as Sentry from "@sentry/browser";
 
@@ -16,6 +16,10 @@ export default function reducer(state = new AuthenticationState(), action) {
 
       return state.merge({
         ...action.payload,
+      });
+    case ACTIVATE_SUBSCRIPTION:
+      return state.merge({
+        isActive: true,
       });
     case LOGOUT:
       Sentry.configureScope(scope => scope.setUser(null));
