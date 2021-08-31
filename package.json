@@ -43,7 +43,7 @@
     "formik": "2.2.9",
     "fs-extra": "10.0.0",
     "identity-obj-proxy": "3.0.0",
-    "immer": "9.0.5",
+    "immer": "9.0.6",
     "immutable": "4.0.0-rc.14",
     "ini": "2.0.0",
     "is-svg": "4.3.1",
