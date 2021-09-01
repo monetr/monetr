@@ -33,7 +33,7 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
-	github.com/stripe/stripe-go/v72 v72.62.0
+	github.com/stripe/stripe-go/v72 v72.63.0
 	github.com/swaggo/swag v1.7.1
 	github.com/teambition/rrule-go v1.7.2
 	github.com/vmihailenco/msgpack/v5 v5.3.4
