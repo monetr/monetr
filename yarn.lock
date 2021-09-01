@@ -5794,10 +5794,10 @@ eslint-module-utils@^2.6.2:
     debug "^3.2.7"
     pkg-dir "^2.0.0"
 
-eslint-plugin-flowtype@5.9.1:
-  version "5.9.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-5.9.1.tgz#21ae5c5063cb87d80ad740611761b0cfeea0738f"
-  integrity sha512-ncUBL9lbhrcOlM5p6xQJT2c0z9co/FlP0mXdva6FrkvtzOoN7wdc8ioASonEpcWffOxnJPFPI8N0sHCavE6NAg==
+eslint-plugin-flowtype@5.9.2:
+  version "5.9.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-5.9.2.tgz#aac08cd26ee4da79cba0e40c3877bb4d96a74ebc"
+  integrity sha512-qxE/eo9DCN7800MIB/O1ToOiFuOPOlaMJWQY2BEm69oY7RCm3s2X1z4CdgtFvDDWf9RSSugZm1KRhdBMBueKbg==
   dependencies:
     lodash "^4.17.15"
     string-natural-compare "^3.0.1"
@@ -12681,10 +12681,10 @@ webpack-dev-middleware@^5.0.0:
     range-parser "^1.2.1"
     schema-utils "^3.0.0"
 
-webpack-dev-server@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/webpack-dev-server/-/webpack-dev-server-4.0.0.tgz#fb4906e91182154bba54a66e6e06f84c1e3c0a80"
-  integrity sha512-ya5cjoBSf3LqrshZn2HMaRZQx8YRNBE+tx+CQNFGaLLHrvs4Y1aik0sl5SFhLz2cW1O9/NtyaZhthc+8UiuvkQ==
+webpack-dev-server@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/webpack-dev-server/-/webpack-dev-server-4.1.0.tgz#1c7a7b77bdafec334a8b81d26c586f793001b5ca"
+  integrity sha512-PnnoCHuLKxH3vYff2EbORntD0Pd+MKclDIO8AcKsDVRToqY9/oeIwwUs5alA2B5OPgXJhaDNkBJAmb0OaWZFJA==
   dependencies:
     ansi-html "^0.0.7"
     bonjour "^3.5.0"
