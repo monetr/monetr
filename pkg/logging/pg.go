@@ -9,6 +9,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"strings"
+	"time"
 )
 
 var (
@@ -40,6 +41,7 @@ func (h *PostgresHooks) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (
 }
 
 func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) error {
+	endTime := time.Now()
 	var queryType string
 	switch query := event.Query.(type) {
 	case string:
@@ -78,6 +80,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 		unformattedQuery, err := event.UnformattedQuery()
 		if err == nil && len(unformattedQuery) > 0 {
 			queryString := string(unformattedQuery)
+			queryTime := endTime.Sub(event.StartTime)
 
 			if event.Err == nil {
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
@@ -85,6 +88,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 					Category: "postgres",
 					Message:  queryString,
 					Data: map[string]interface{}{
+						"queryTime": queryTime,
 					},
 					Level:     "debug",
 					Timestamp: event.StartTime,
@@ -95,7 +99,8 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 					Category: "postgres",
 					Message:  queryString,
 					Data: map[string]interface{}{
-						"error":        event.Err.Error(),
+						"queryTime": queryTime,
+						"error":     event.Err.Error(),
 					},
 					Level:     "error",
 					Timestamp: event.StartTime,

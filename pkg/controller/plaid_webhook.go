@@ -141,11 +141,20 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 		"webhookCode": hook.WebhookCode,
 	})
 
-	crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", map[string]interface{}{
-		"type":   hook.WebhookType,
-		"code":   hook.WebhookCode,
-		"itemId": hook.ItemId,
-	})
+	{
+		fields := map[string]interface{}{
+			"type":   hook.WebhookType,
+			"code":   hook.WebhookCode,
+			"itemId": hook.ItemId,
+		}
+		switch strings.ToUpper(fmt.Sprintf("%s.%s", hook.WebhookType, hook.WebhookCode)) {
+		case "TRANSACTIONS.DEFAULT_UPDATE":
+			fields["newTransactions"] = hook.NewTransactions
+		case "TRANSACTIONS.TRANSACTIONS_REMOVED":
+			fields["removedTransactions"] = hook.RemovedTransactions
+		}
+		crumbs.Debug(c.getContext(ctx), "Handling webhook from Plaid.", fields)
+	}
 
 	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
 		hub.ConfigureScope(func(scope *sentry.Scope) {
