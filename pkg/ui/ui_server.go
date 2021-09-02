@@ -3,7 +3,6 @@
 package ui
 
 import (
-	"fmt"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
@@ -26,16 +25,11 @@ func NewUIController() *UIController {
 
 func (c *UIController) RegisterRoutes(app *iris.Application) {
 	app.PartyFunc("/", func(p router.Party) {
-		p.Any("/api", func(ctx *context.Context) {
+		p.Any("/api/*", func(ctx *context.Context) {
 			ctx.Next()
 			ctx.StatusCode(http.StatusNotFound)
 			return
 		})
-
-		routes := p.HandleDir("/", http.FS(builtUi), iris.DirOptions{
-			IndexName: "index.html",
-		})
-		fmt.Sprint(routes)
 
 		p.Get("/config.json", func(ctx *context.Context) {
 			ctx.JSONP(map[string]interface{}{
@@ -43,7 +37,13 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 			})
 		})
 
-		p.Get("/*", func(ctx *context.Context) {
+		fileHandler := iris.FileServer(http.FS(builtUi), iris.DirOptions{
+			IndexName: "index.html",
+			SPA:       true,
+		})
+
+		app.Get("/*", func(ctx iris.Context) {
+			fileHandler(ctx)
 		})
 	})
 }

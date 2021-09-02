@@ -136,8 +136,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		})
 	}
 
-	app.Get("/health", c.getHealth)
-
 	app.Use(func(ctx iris.Context) {
 		log := c.log.WithFields(logrus.Fields{
 			"requestId": ctx.GetHeader("X-Request-Id"),
@@ -149,6 +147,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 	})
 
 	app.PartyFunc(APIPath, func(p router.Party) {
+		p.Get("/health", c.getHealth)
+
 		p.Use(c.loggingMiddleware)
 		p.OnAnyErrorCode(func(ctx iris.Context) {
 			if err := ctx.GetErr(); err != nil {
