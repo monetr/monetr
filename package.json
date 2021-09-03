@@ -84,7 +84,7 @@
     "sass": "1.39.0",
     "selector-action": "1.2.0",
     "semver": "7.3.5",
-    "terser-webpack-plugin": "5.2.2",
+    "terser-webpack-plugin": "5.2.3",
     "ts-pnp": "1.2.0",
     "web-vitals": "2.1.0",
     "webpack-manifest-plugin": "4.0.2",
@@ -148,7 +148,7 @@
     "ts-loader": "9.2.5",
     "typescript": "4.4.2",
     "url-loader": "4.1.1",
-    "webpack": "5.51.2",
+    "webpack": "5.52.0",
     "webpack-bundle-analyzer": "4.4.2",
     "webpack-cli": "4.8.0",
     "webpack-dev-server": "4.1.0"
