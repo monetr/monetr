@@ -5944,10 +5944,10 @@ eslint-plugin-react@7.25.1:
     resolve "^2.0.0-next.3"
     string.prototype.matchall "^4.0.5"
 
-eslint-plugin-testing-library@4.12.1:
-  version "4.12.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-4.12.1.tgz#133467e6f78b79cc55a567c021a3f962d93cdfa2"
-  integrity sha512-4RCUJ1MPjZPoOlYhVB5eOVzKjiq7FfiSp0j/JDUI4HGGEyLM9f01Zpk16fCOpITxS8qaFTex8xSH64vDUm8j7g==
+eslint-plugin-testing-library@4.12.2:
+  version "4.12.2"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-testing-library/-/eslint-plugin-testing-library-4.12.2.tgz#b99e7694b1ef20bb090e1f62eb5c8214f2919dc2"
+  integrity sha512-lcysxW7I3oXmZIyFP2N1dFMPfuB3qyl3iDcDboCl7U+TAaeG9OOycNSkZUAsDWQLsfEtXYmRbwTH98qSgk6peA==
   dependencies:
     "@typescript-eslint/experimental-utils" "^4.30.0"
 
@@ -10377,10 +10377,10 @@ prelude-ls@~1.1.2:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.1.2.tgz#21932a549f5e52ffd9a827f570e04be62a97da54"
   integrity sha1-IZMqVJ9eUv/ZqCf1cOBL5iqX2lQ=
 
-prettier@2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.3.2.tgz#ef280a05ec253712e486233db5c6f23441e7342d"
-  integrity sha512-lnJzDfJ66zkMy58OL5/NY5zp70S7Nz6KqcKkXYzn2tMVrNxvbqaBpg7H3qHaLxCJ5lNMsGuM8+ohS7cZrthdLQ==
+prettier@2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.4.0.tgz#85bdfe0f70c3e777cf13a4ffff39713ca6f64cba"
+  integrity sha512-DsEPLY1dE5HF3BxCRBmD4uYZ+5DCbvatnolqTqcxEgKVZnL2kUfyu7b8pPQ5+hTBkdhU9SLUmK0/pHb07RE4WQ==
 
 pretty-bytes@^5.3.0, pretty-bytes@^5.4.1:
   version "5.6.0"
