@@ -5,7 +5,6 @@ go 1.16
 require (
 	cloud.google.com/go/logging v1.4.2
 	github.com/MicahParks/keyfunc v0.4.0
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/alicebob/miniredis/v2 v2.15.1
 	github.com/brianvoe/gofakeit/v6 v6.7.1
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
@@ -17,6 +16,7 @@ require (
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.5
 	github.com/google/go-github/v38 v38.1.0
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/vault/api v1.1.1
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d
 	github.com/jarcoal/httpmock v1.0.8
@@ -34,11 +34,11 @@ require (
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.64.1
-	github.com/swaggo/swag v1.7.1
 	github.com/teambition/rrule-go v1.7.2
 	github.com/vmihailenco/msgpack/v5 v5.3.4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
+	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
-	google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
+	google.golang.org/genproto v0.0.0-20210909211513-a8c4777a87af
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
