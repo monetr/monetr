@@ -14,7 +14,8 @@ push: $(RELEASER)
 push: LAST_COMMIT=$(shell $(RELEASER) --since=-$(SINCE))
 push:
 	$(call infoMsg,Commit(s) on their way to '$(ENV_LOWER)' in the last $(SINCE))
-	@git --no-pager log $$(git describe --tags --abbrev=0)..$(LAST_COMMIT)
+	git --no-pager log $$(git describe --tags --abbrev=0)..$(LAST_COMMIT)
+	$(call infoMsg,Pushing commit(s) to '$(ENV_LOWER)')
 	git push origin $(LAST_COMMIT):$(ENV_LOWER)
 
 default-release:
