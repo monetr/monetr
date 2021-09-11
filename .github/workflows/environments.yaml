@@ -16,7 +16,7 @@ jobs:
           ref: 'main'
       - name: fetch
         run: git fetch --prune --unshallow
-      - name: Push To Dog Food
+      - name: Push To Acceptance
         run: git push origin $(go run github.com/monetr/rest-api/tools/releaser --since=-24h):acceptance
   release-dog:
     name: Dog Food

@@ -1,6 +1,9 @@
 package controller_test
 
 import (
+	"net/http"
+	"testing"
+
 	"github.com/alicebob/miniredis/v2"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gomodule/redigo/redis"
@@ -19,8 +22,6 @@ import (
 	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"testing"
 )
 
 func NewTestApplicationConfig(t *testing.T) config.Configuration {
@@ -34,7 +35,7 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 			RegistrationJwtSecret: gofakeit.UUID(),
 		},
 		PostgreSQL: config.PostgreSQL{},
-		SMTP:       config.SMTPClient{},
+		EMail:      config.Email{},
 		ReCAPTCHA:  config.ReCAPTCHA{},
 		Plaid: config.Plaid{
 			ClientID:     gofakeit.UUID(),

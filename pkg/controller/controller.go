@@ -3,8 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/monetr/rest-api/pkg/internal/platypus"
-	"github.com/monetr/rest-api/pkg/mail"
 	"net/http"
 	"net/smtp"
 	"strings"
@@ -20,6 +18,7 @@ import (
 	"github.com/monetr/rest-api/pkg/build"
 	"github.com/monetr/rest-api/pkg/cache"
 	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
 	"github.com/monetr/rest-api/pkg/metrics"
@@ -49,7 +48,6 @@ type Controller struct {
 	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
-	email                    mail.Communication
 	accounts                 billing.AccountRepository
 	paywall                  billing.BasicPayWall
 	billing                  billing.BasicBilling
@@ -100,7 +98,6 @@ func NewController(
 		stripe:                   stripe,
 		ps:                       pubSub,
 		cache:                    cachePool,
-		email:                    mail.NewSMTPCommunication(log, configuration.SMTP),
 		accounts:                 accountsRepo,
 		paywall:                  basicPaywall,
 		billing:                  basicBilling,
