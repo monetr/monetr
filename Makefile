@@ -11,6 +11,16 @@ ifndef ENVIRONMENT
 endif
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
+# Just a shorthand to print some colored text, makes it easier to read and tell the developer what all the makefile is
+# doing since its doing a ton.
+define infoMsg
+	@echo "\033[0;32m[$@] $(1)\033[0m"
+endef
+
+define warningMsg
+	@echo "\033[1;33m[$@] $(1)\033[0m"
+endef
+
 dependencies: package.json
 	yarn install
 
@@ -51,6 +61,3 @@ debug-ci:
 
 include Makefile.$(ENV_LOWER)
 
-tag:
-	GOBIN=$(PWD)/bin go install github.com/monetr/rest-api/tools/releaser@main
-	$(PWD)/bin/releaser --since=-24h

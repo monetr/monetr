@@ -1,8 +1,9 @@
 name: Daily Release
 
 on:
-  schedule:
-    - cron: 0 23 * * *
+  push:
+    branches:
+      - acceptance
   workflow_dispatch: { }
 
 jobs:
@@ -12,5 +13,5 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: 'main'
+          ref: 'acceptance'
       - run: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} make release
