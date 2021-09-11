@@ -3,15 +3,16 @@ package mock_plaid
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/rest-api/pkg/internal/mock_http_helper"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/internal/testutils"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"strings"
-	"testing"
 )
 
 func BankAccountFixture(t *testing.T) plaid.AccountBase {
@@ -82,8 +83,8 @@ func MockGetAccountsExtended(t *testing.T, plaidData *testutils.MockPlaidData) {
 		func(t *testing.T, request *http.Request) (interface{}, int) {
 			accessToken := ValidatePlaidAuthentication(t, request, RequireAccessToken)
 			var getAccountsRequest struct {
-				Options     struct {
-					 AccountIds []string `json:"account_ids"`
+				Options struct {
+					AccountIds []string `json:"account_ids"`
 				} `json:"options"`
 			}
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&getAccountsRequest), "must decode request")
@@ -99,7 +100,7 @@ func MockGetAccountsExtended(t *testing.T, plaidData *testutils.MockPlaidData) {
 			for _, accountId := range getAccountsRequest.Options.AccountIds {
 				account, ok := accounts[accountId]
 				if !ok {
-					 panic("bad account id handling not yet implemented")
+					panic("bad account id handling not yet implemented")
 				}
 
 				response.Accounts = append(response.Accounts, account)

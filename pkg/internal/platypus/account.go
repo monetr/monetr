@@ -16,6 +16,10 @@ type (
 		GetName() string
 		// GetOfficialName will return the name of the account specified by the financial institution itself.
 		GetOfficialName() string
+		// GetType will return the plaid type of the account. For our use case this is typically "depository".
+		GetType() string
+		// GetSubType will return the sub-type of the account. This can be something like "checking" or "savings".
+		GetSubType() string
 	}
 
 	BankAccountBalances interface {
@@ -91,6 +95,8 @@ func NewPlaidBankAccount(bankAccount plaid.AccountBase) (PlaidBankAccount, error
 		Mask:         bankAccount.GetMask(),
 		Name:         bankAccount.GetName(),
 		OfficialName: bankAccount.GetOfficialName(),
+		Type:         string(bankAccount.GetType()),
+		SubType:      string(bankAccount.GetSubtype()),
 	}, nil
 }
 
@@ -100,6 +106,8 @@ type PlaidBankAccount struct {
 	Mask         string
 	Name         string
 	OfficialName string
+	Type         string
+	SubType      string
 }
 
 func (p PlaidBankAccount) GetAccountId() string {
@@ -120,4 +128,12 @@ func (p PlaidBankAccount) GetName() string {
 
 func (p PlaidBankAccount) GetOfficialName() string {
 	return p.OfficialName
+}
+
+func (p PlaidBankAccount) GetType() string {
+	return p.Type
+}
+
+func (p PlaidBankAccount) GetSubType() string {
+	return p.SubType
 }

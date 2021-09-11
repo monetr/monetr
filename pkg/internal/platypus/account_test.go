@@ -75,6 +75,8 @@ func TestNewPlaidBankAccount(t *testing.T) {
 		assert.EqualValues(t, "1234", bank.GetMask(), "mask must match")
 		assert.EqualValues(t, "Checking Account", bank.GetName(), "name must match")
 		assert.EqualValues(t, "CHECKING - 1234", bank.GetOfficialName(), "official name must match")
+		assert.EqualValues(t, "depository", bank.GetType(), "account type must match")
+		assert.EqualValues(t, "checking", bank.GetSubType(), "account sub-type must match")
 
 		assert.IsType(t, PlaidBankAccountBalances{}, bank.GetBalances(), "must return plaid bank account balances")
 	})

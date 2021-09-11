@@ -3,6 +3,10 @@ package controller
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/rest-api/pkg/crumbs"
@@ -11,9 +15,6 @@ import (
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/kataras/iris/v12/core/router"
 )
@@ -428,10 +429,9 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 			Mask:              plaidAccount.GetMask(),
 			PlaidName:         plaidAccount.GetName(),
 			PlaidOfficialName: plaidAccount.GetOfficialName(),
-			// THIS MIGHT BREAK SOMETHING.
-			//Type:              models.BankAccountType(plaidAccount.Type),
-			//SubType:           models.BankAccountSubType(plaidAccount.Subtype),
-			LastUpdated: now,
+			Type:              models.BankAccountType(plaidAccount.GetType()),
+			SubType:           models.BankAccountSubType(plaidAccount.GetSubType()),
+			LastUpdated:       now,
 		}
 	}
 	if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {

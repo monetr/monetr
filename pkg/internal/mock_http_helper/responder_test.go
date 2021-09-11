@@ -2,11 +2,12 @@ package mock_http_helper
 
 import (
 	"encoding/json"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewHttpMockJsonResponder(t *testing.T) {
@@ -25,6 +26,7 @@ func TestNewHttpMockJsonResponder(t *testing.T) {
 	response, err := http.Get(url)
 	assert.NoError(t, err, "http get request must succeed")
 	assert.Equal(t, http.StatusOK, response.StatusCode, "status code must be 200")
+	assert.Equal(t, "application/json", response.Header.Get("Content-Type"), "content type should always be json")
 
 	body, err := ioutil.ReadAll(response.Body)
 	assert.NoError(t, err, "must be able to read the response body")
@@ -36,4 +38,5 @@ func TestNewHttpMockJsonResponder(t *testing.T) {
 
 	assert.EqualValues(t, 123, result["value"], "value must match")
 	assert.Len(t, result, 1, "must only have one key")
+
 }

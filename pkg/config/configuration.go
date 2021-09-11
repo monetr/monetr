@@ -127,7 +127,11 @@ type Plaid struct {
 
 	WebhooksEnabled bool
 	WebhooksDomain  string
-	OAuthDomain     string
+	// OAuthDomain is used to specify the domain name that the user will be brought to upon returning to monetr after
+	// authenticating to a bank that requires OAuth. This will typically be a UI domain name and should not include a
+	// protocol or a path. The protocol is auto inserted as `https` as it is the only protocol supported. The path is
+	// currently hard coded until a need for different paths arises?
+	OAuthDomain string
 }
 
 type CORS struct {

@@ -1,4 +1,7 @@
 data "vault_policy_document" "rest-api-policy" {
+  // There are two rules here because I still have no idea what I'm doing when it comes to trying to provision this
+  // stuff. I'm getting permissions errors for both paths so this is likely to change in the future. But again this
+  // is only used for local development against vault.
   rule {
     path = "${vault_mount.plaid-client-secrets.path}/*"
     capabilities = [

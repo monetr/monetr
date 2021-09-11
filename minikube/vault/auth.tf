@@ -15,6 +15,10 @@ resource "vault_auth_backend" "userpass" {
   type = "userpass"
 }
 
+// monetr-user is just a basic user-password authentication for the API. This is to be used when trying to debug
+// permissions or trying to dignose issues outside of Kubernetes. As it is easier to provision access using a
+// username and password than it is to try to use the Kubernetes authentication, outside kube.
+// The user is "monetr", the password is "password".
 resource "vault_generic_endpoint" "monetr-user" {
   depends_on           = [vault_auth_backend.userpass]
   path                 = "auth/userpass/users/monetr"

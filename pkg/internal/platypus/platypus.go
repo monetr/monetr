@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/rest-api/pkg/config"
 	"github.com/monetr/rest-api/pkg/crumbs"
@@ -14,8 +17,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"time"
 )
 
 var (
@@ -52,6 +53,11 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 
 		data := map[string]interface{}{}
 
+		// With plaid responses we can actually still use the body of the response :tada:. The request Id is also stored on
+		// the response body itself in most of my testing. I could have sworn the documentation cited X-Request-Id as being
+		// a possible source for it, but I have not seen that yet. This bit of code extracts the body into a map. I know to
+		// some degree of certainty that the response will always be an object and not an array. So a map with a string key
+		// is safe. I can then extract the request Id and store that with my logging and diagnostic data.
 		{
 			var extractedResponseBody map[string]interface{}
 			if e := json.NewDecoder(response.Body).Decode(&extractedResponseBody); e == nil {
@@ -59,16 +65,21 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 					requestId = extractedResponseBody["request_id"].(string)
 				}
 
+				// But if our request was not successful, then I also want to yoink that body and throw it into my diagnostic
+				// data as well. This will help me if I ever need to track down bugs with Plaid's API or problems with requests
+				// that I am making incorrectly.
 				if response.StatusCode != http.StatusOK {
 					data["body"] = extractedResponseBody
 				}
 			}
 		}
 
-		data["X-RequestId"] = requestId
+		{ // Make sure we put the request ID everywhere, this is easily the most important diagnostic data we need.
+			data["X-RequestId"] = requestId
+			span.Data["plaidRequestId"] = requestId
+			span.SetTag("plaidRequestId", requestId)
+		}
 
-		span.Data["plaidRequestId"] = requestId
-		span.SetTag("plaidRequestId", requestId)
 		crumbs.HTTP(
 			span.Context(),
 			message,
@@ -79,11 +90,13 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 			data,
 		)
 	}
+
+	// Properly set the span status for this request.
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
+	} else {
+		span.Status = sentry.SpanStatusOK
 	}
-
-	span.Status = sentry.SpanStatusOK
 
 	return errors.Wrap(err, errorMessage)
 }
