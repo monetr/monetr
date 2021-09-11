@@ -111,8 +111,9 @@ api:
     address: alsatian.monetr-staging.svc.cluster.local
     port: 5432
     database: monetr
-  smtp:
+  email:
     enabled: false
+    domain: staging.monetr.dev
   sendGrid:
     enabled: false
     apiKey: ""

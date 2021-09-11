@@ -113,8 +113,9 @@ api:
     address: newfoundland.monetr-acceptance.svc.cluster.local
     port: 5432
     database: monetr
-  smtp:
+  email:
     enabled: false
+    domain: acceptance.monetr.dev
   sendGrid:
     enabled: false
     apiKey: ""

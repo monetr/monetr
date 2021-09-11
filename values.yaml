@@ -113,14 +113,9 @@ api:
     caCertificatePath: ""
     certificatePath: ""
     keyPath: ""
-  smtp:
+  email:
     enabled: false
-  sendGrid:
-    enabled: false
-    apiKey: ""
-    templates:
-      verifyEmailTemplate: ""
-      forgotPasswordTemplate: ""
+    domain: localhost
   reCaptcha:
     enabled: false
     privateKey: ""

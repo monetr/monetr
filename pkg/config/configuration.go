@@ -39,8 +39,7 @@ type Configuration struct {
 	PostgreSQL    PostgreSQL
 	ReCAPTCHA     ReCAPTCHA
 	Redis         Redis
-	SMTP          SMTPClient
-	SendGrid      SendGrid
+	EMail         Email
 	Sentry        Sentry
 	Stripe        Stripe
 	Vault         Vault
@@ -67,24 +66,30 @@ type PostgreSQL struct {
 	CertificatePath    string
 }
 
-type SMTPClient struct {
-	Enabled      bool
-	Identity     string
-	Username     string
-	Password     string
-	Host         string
-	Port         int
+type Email struct {
+	// Enabled controls whether the API can send emails at all. In order to support things like forgot password links or
+	// email verification this must be enabled.
+	Enabled bool
+	// If you want to verify email addresses when a new user signs up then this should be enabled. This will require a
+	// user to verify that they own (or at least have proper access to) the email address that they used when they
+	// signed up.
 	VerifyEmails bool
+	// Domain specifies the actual domain name used to send emails. Emails will always be sent from `no-reply@{domain}`.
+	Domain string
+	// Email is sent via SMTP. If you want to send emails it is required to include an SMTP configuration.
+	SMTP SMTPClient
 }
 
-func (s SMTPClient) ShouldVerifyEmails() bool {
+type SMTPClient struct {
+	Identity string
+	Username string
+	Password string
+	Host     string
+	Port     int
+}
+
+func (s Email) ShouldVerifyEmails() bool {
 	return s.Enabled && s.VerifyEmails
-}
-
-type SendGrid struct {
-	Enabled   bool
-	APIKey    string
-	Templates map[SendGridTemplate]string
 }
 
 type ReCAPTCHA struct {
@@ -240,7 +245,6 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Username", "postgres")
 	v.SetDefault("PostgreSQL.Database", "postgres")
-	v.SetDefault("SMTP.Enabled", false)
 	v.SetDefault("ReCAPTCHA.Enabled", false)
 	v.SetDefault("Logging.Level", "info")
 	v.SetDefault("Vault.Auth", "kubernetes")

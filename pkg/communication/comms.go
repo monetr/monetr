@@ -3,10 +3,12 @@ package communication
 import (
 	"bytes"
 	"context"
+	"fmt"
+
+	"github.com/monetr/rest-api/pkg/config"
 	"github.com/monetr/rest-api/pkg/mail"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/config"
 	"github.com/monetr/rest-api/pkg/internal/email_templates"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/pkg/errors"
@@ -23,10 +25,17 @@ type UserCommunication interface {
 }
 
 type userCommunicationBase struct {
-	log                *logrus.Entry
-	mailConfig         config.SMTPClient
-	registrationSecret string
-	mail               mail.Communication
+	log     *logrus.Entry
+	options config.Email
+	mail    mail.Communication
+}
+
+func NewUserCommunication(log *logrus.Entry, options config.Email, client mail.Communication) UserCommunication {
+	return &userCommunicationBase{
+		log:     log,
+		options: options,
+		mail:    client,
+	}
 }
 
 func (u *userCommunicationBase) SendVerificationEmail(ctx context.Context, params VerifyEmailParams) error {
@@ -45,7 +54,7 @@ func (u *userCommunicationBase) SendVerificationEmail(ctx context.Context, param
 	log.Debug("sending verification email")
 
 	if err = u.mail.Send(span.Context(), mail.SendEmailRequest{
-		From:    "no-reply@monetr.app", // TODO Change this to the UI domain name.
+		From:    fmt.Sprintf("no-reply@%s", u.options.Domain),
 		To:      params.Login.Email,
 		Subject: "Verify Your Email Address",
 		Content: emailContent,
