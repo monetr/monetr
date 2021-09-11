@@ -50,3 +50,7 @@ debug-ci:
 
 
 include Makefile.$(ENV_LOWER)
+
+tag:
+	GOBIN=$(PWD)/bin go install github.com/monetr/rest-api/tools/releaser@main
+	$(PWD)/bin/releaser --since=-24h
