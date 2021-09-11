@@ -127,6 +127,11 @@ type Plaid struct {
 
 	WebhooksEnabled bool
 	WebhooksDomain  string
+	// OAuthDomain is used to specify the domain name that the user will be brought to upon returning to monetr after
+	// authenticating to a bank that requires OAuth. This will typically be a UI domain name and should not include a
+	// protocol or a path. The protocol is auto inserted as `https` as it is the only protocol supported. The path is
+	// currently hard coded until a need for different paths arises?
+	OAuthDomain string
 }
 
 type CORS struct {
@@ -185,6 +190,7 @@ type Vault struct {
 	Auth               string
 	Token              string
 	TokenFile          string
+	Username, Password string
 	Role               string
 	CertificatePath    string
 	KeyPath            string
@@ -262,6 +268,7 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Plaid.EnableReturningUserExperience", "MONETR_PLAID_RETURNING_EXPERIENCE")
 	v.BindEnv("Plaid.WebhooksEnabled", "MONETR_PLAID_WEBHOOKS_ENABLED")
 	v.BindEnv("Plaid.WebhooksDomain", "MONETR_PLAID_WEBHOOKS_DOMAIN")
+	v.BindEnv("Plaid.OAuthDomain", "MONETR_PLAID_OAUTH_DOMAIN")
 	v.BindEnv("PostgreSQL.Address", "MONETR_PG_ADDRESS")
 	v.BindEnv("PostgreSQL.Port", "MONETR_PG_PORT")
 	v.BindEnv("PostgreSQL.Username", "MONETR_PG_USERNAME")

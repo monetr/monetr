@@ -13,7 +13,6 @@ import (
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
 )
 
 const (
@@ -162,40 +161,31 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) (err error) {
 
 		log.Debugf("requesting information for %d bank account(s)", len(itemBankAccountIds))
 
-		result, err := j.plaidClient.GetAccounts(
+		platypus, err := j.plaidClient.NewClient(span.Context(), link, accessToken)
+		if err != nil {
+			log.WithError(err).Error("failed to create plaid client")
+			return err
+		}
+
+		result, err := platypus.GetAccounts(
 			span.Context(),
-			accessToken,
-			plaid.GetAccountsOptions{
-				AccountIDs: itemBankAccountIds,
-			},
+			itemBankAccountIds...,
 		)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve bank accounts from plaid")
-			switch plaidErr := errors.Cause(err).(type) {
-			case plaid.Error:
-				switch plaidErr.ErrorType {
-				case "ITEM_ERROR":
-					link.LinkStatus = models.LinkStatusError
-					link.ErrorCode = &plaidErr.ErrorCode
-					if updateErr := repo.UpdateLink(span.Context(), link); updateErr != nil {
-						log.WithError(updateErr).Error("failed to update link to be an error state")
-					}
-				}
-			}
-
 			return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
 		}
 
 		updatedBankAccounts := make([]models.BankAccount, 0, len(result))
 		for _, item := range result {
-			bankAccount := plaidIdsToBank[item.AccountID]
+			bankAccount := plaidIdsToBank[item.GetAccountId()]
 			bankLog := log.WithFields(logrus.Fields{
 				"bankAccountId": bankAccount.BankAccountId,
 				"linkId":        bankAccount.LinkId,
 			})
 			shouldUpdate := false
-			available := int64(item.Balances.Available * 100)
-			current := int64(item.Balances.Current * 100)
+			available := item.GetBalances().GetAvailable()
+			current := item.GetBalances().GetCurrent()
 
 			if bankAccount.CurrentBalance != current {
 				bankLog = bankLog.WithField("currentBalanceChanged", true)

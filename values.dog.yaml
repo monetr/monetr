@@ -5,7 +5,7 @@ image:
   pullPolicy: Always
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
-imagePullSecrets: []
+imagePullSecrets: [ ]
 
 podAnnotations:
   monetr.dev/branch: "" # Branch of the deployment will be put here
@@ -108,7 +108,7 @@ api:
   beta:
     enableBetaCodes: true
   postgreSql:
-    address: newfoundland.monetr-acceptance.svc.cluster.local
+    address: postgres.google.acceptance.monetr.in
     port: 5432
     database: monetr
   smtp:
@@ -127,14 +127,15 @@ api:
     environment: "https://development.plaid.com"
     enableReturningUserExperience: true
     webhooksEnabled: true
-    webhooksDomain: https://api.monetr.dog
+    webhooksDomain: api.monetr.dog
+    oauthDomain: ui.monetr.dog
   cors:
     allowedOrigins:
       - "https://monetr.dog"
     debug: false
   redis:
     enabled: true
-    address: redis.monetr-acceptance.svc.cluster.local
+    address: redis.redis.kluster.monetr.in
     port: 6379
   logging:
     level: debug

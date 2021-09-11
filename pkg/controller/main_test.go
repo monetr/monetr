@@ -11,10 +11,12 @@ import (
 	"github.com/monetr/rest-api/pkg/config"
 	"github.com/monetr/rest-api/pkg/controller"
 	"github.com/monetr/rest-api/pkg/internal/mock_secrets"
-	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/internal/testutils"
 	"github.com/monetr/rest-api/pkg/jobs"
+	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -35,7 +37,9 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 		SMTP:       config.SMTPClient{},
 		ReCAPTCHA:  config.ReCAPTCHA{},
 		Plaid: config.Plaid{
-			Environment: plaid.Sandbox,
+			ClientID:     gofakeit.UUID(),
+			ClientSecret: gofakeit.UUID(),
+			Environment:  plaid.Sandbox,
 		},
 		CORS: config.CORS{
 			Debug: false,
@@ -54,12 +58,9 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httptest.Expect {
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	plaidClient := plaid_helper.NewPlaidClient(log, plaid.ClientOptions{
-		ClientID:    configuration.Plaid.ClientID,
-		Secret:      configuration.Plaid.ClientSecret,
-		Environment: configuration.Plaid.Environment,
-		HTTPClient:  http.DefaultClient,
-	})
+	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+	plaidRepo := repository.NewPlaidRepository(db)
+	plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, configuration.Plaid)
 
 	miniRedis := miniredis.NewMiniRedis()
 	require.NoError(t, miniRedis.Start())

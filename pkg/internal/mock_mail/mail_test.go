@@ -25,7 +25,7 @@ func TestMockMailCommunication_Send(t *testing.T) {
 		assert.Len(t, mockMail.Sent, 1, "should have added request to list")
 	})
 
-	t.Run("simple", func(t *testing.T) {
+	t.Run("none sent", func(t *testing.T) {
 		mockMail := NewMockMail()
 
 		mockMail.ShouldFail = true

@@ -24,6 +24,7 @@ type Config struct {
 	Auth               string
 	Token              string
 	TokenFile          string
+	Username, Password string
 	Timeout            time.Duration
 	TLSCertificatePath string
 	TLSKeyPath         string
@@ -217,6 +218,24 @@ func (v *vaultBase) authenticate() error {
 	log := v.log.WithField("method", v.config.Auth)
 
 	switch v.config.Auth {
+	case "userpass":
+		log.Trace("authenticating to vault")
+		result, err := v.client.Logical().Write("auth/userpass/login/"+v.config.Username, map[string]interface{}{
+			"password": v.config.Password,
+			"role": v.config.Role,
+		})
+		if err != nil {
+			log.WithError(err).Errorf("failed to authenticate to vault")
+			return errors.Wrap(err, "failed to authenticate to vault")
+		}
+
+		if result.Auth == nil {
+			log.WithError(err).Fatalf("no authentication returned from vault")
+			return errors.Errorf("no authentication returned from vault")
+		}
+
+		v.client.SetToken(result.Auth.ClientToken)
+		log.Trace("successfully authenticated to vault")
 	case "token":
 		v.client.SetToken(v.config.Token)
 	case "kubernetes":

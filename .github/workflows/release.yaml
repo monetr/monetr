@@ -1,8 +1,9 @@
 name: Daily Release
 
 on:
-  schedule:
-    - cron: 0 23 * * *
+  push:
+    branches:
+      - acceptance
   workflow_dispatch: { }
 
 jobs:

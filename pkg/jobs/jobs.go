@@ -2,13 +2,13 @@ package jobs
 
 import (
 	"context"
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"math"
 	"time"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
-	"github.com/monetr/rest-api/pkg/internal/plaid_helper"
 	"github.com/monetr/rest-api/pkg/metrics"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/pubsub"
@@ -32,13 +32,12 @@ var (
 	_ JobManager = &nonDistributedJobManager{}
 )
 
-
 type jobManagerBase struct {
 	log          *logrus.Entry
 	work         *work.WorkerPool
 	queue        *work.Enqueuer
 	db           *pg.DB
-	plaidClient  plaid_helper.Client
+	plaidClient  platypus.Platypus
 	plaidSecrets secrets.PlaidSecretsProvider
 	stats        *metrics.Stats
 	ps           pubsub.PublishSubscribe
@@ -48,7 +47,7 @@ func NewNonDistributedJobManager(
 	log *logrus.Entry,
 	pool *redis.Pool,
 	db *pg.DB,
-	plaidClient plaid_helper.Client,
+	plaidClient platypus.Platypus,
 	stats *metrics.Stats,
 	plaidSecrets secrets.PlaidSecretsProvider,
 ) JobManager {
@@ -69,7 +68,7 @@ func NewJobManager(
 	log *logrus.Entry,
 	pool *redis.Pool,
 	db *pg.DB,
-	plaidClient plaid_helper.Client,
+	plaidClient platypus.Platypus,
 	stats *metrics.Stats,
 	plaidSecrets secrets.PlaidSecretsProvider,
 ) JobManager {
@@ -97,7 +96,6 @@ func NewJobManager(
 	manager.work.Job(PullLatestTransactions, manager.pullLatestTransactions)
 	manager.work.Job(PullHistoricalTransactions, manager.pullHistoricalTransactions)
 	manager.work.Job(RemoveTransactions, manager.removeTransactions)
-	manager.work.Job(UpdateInstitutions, manager.updateInstitutions)
 	manager.work.Job(RemoveLink, manager.removeLink)
 
 	// Every 30 minutes. 0 */30 * * * *

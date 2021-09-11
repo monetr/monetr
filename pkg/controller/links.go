@@ -2,15 +2,16 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/swag"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strings"
-	"time"
 )
 
 func (c *Controller) linksController(p iris.Party) {
@@ -269,7 +270,13 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 			return
 		}
 
-		if err = c.plaid.RemoveItem(c.getContext(ctx), accessToken); err != nil {
+		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
+			return
+		}
+
+		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]interface{}{
 				"linkId": link.LinkId,
 				"itemId": link.PlaidLink.ItemId,

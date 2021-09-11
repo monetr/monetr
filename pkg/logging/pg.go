@@ -88,7 +88,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 					Category: "postgres",
 					Message:  queryString,
 					Data: map[string]interface{}{
-						"queryTime": queryTime,
+						"queryTime": queryTime.String(),
 					},
 					Level:     "debug",
 					Timestamp: event.StartTime,
@@ -99,7 +99,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 					Category: "postgres",
 					Message:  queryString,
 					Data: map[string]interface{}{
-						"queryTime": queryTime,
+						"queryTime": queryTime.String(),
 						"error":     event.Err.Error(),
 					},
 					Level:     "error",

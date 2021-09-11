@@ -6,10 +6,22 @@ on:
   workflow_dispatch: { }
 
 jobs:
+  release-acceptance:
+    name: Acceptance
+    runs-on: ubuntu-latest
+    container: golang:1.17.1
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: 'main'
+      - name: fetch
+        run: git fetch --prune --unshallow
+      - name: Push To Dog Food
+        run: git push origin $(go run github.com/monetr/rest-api/tools/releaser --since=-24h):acceptance
   release-dog:
     name: Dog Food
     runs-on: ubuntu-latest
-    container: golang:1.16.3
+    container: golang:1.17.1
     steps:
       - uses: actions/checkout@v2
         with:
@@ -21,7 +33,7 @@ jobs:
   release-production:
     name: Production
     runs-on: ubuntu-latest
-    container: golang:1.16.3
+    container: golang:1.17.1
     steps:
       - uses: actions/checkout@v2
         with:
