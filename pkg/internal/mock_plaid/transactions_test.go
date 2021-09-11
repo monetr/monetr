@@ -1,9 +1,10 @@
 package mock_plaid
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerateTransactions(t *testing.T) {
@@ -16,7 +17,7 @@ func TestGenerateTransactions(t *testing.T) {
 		end := time.Now()
 		start := time.Now().Add(-25 * time.Hour)
 		transactions := GenerateTransactions(t, start, end, numberOfTransactions, bankAccounts)
-		assert.Len(t, transactions, len(bankAccounts) * numberOfTransactions)
+		assert.Len(t, transactions, len(bankAccounts)*numberOfTransactions)
 		assert.Equal(t, end.Format("2006-01-02"), transactions[0].GetDate(), "date of first transaction should be end")
 		assert.Equal(t, start.Format("2006-01-02"), transactions[len(transactions)-1].GetDate(), "date of last transaction should be start")
 	})
@@ -27,10 +28,10 @@ func TestGenerateTransactions(t *testing.T) {
 			"1234",
 			"5678",
 		}
-		end := time.Now()
-		start := time.Now().Add((-30 * 24 * time.Hour) + (-1 * time.Hour))
+		end := time.Now().UTC()
+		start := time.Now().UTC().Add(-30 * 24 * time.Hour)
 		transactions := GenerateTransactions(t, start, end, numberOfTransactions, bankAccounts)
-		assert.Len(t, transactions, len(bankAccounts) * numberOfTransactions)
+		assert.Len(t, transactions, len(bankAccounts)*numberOfTransactions)
 		assert.Equal(t, end.Format("2006-01-02"), transactions[0].GetDate(), "date of first transaction should be end")
 		assert.Equal(t, start.Format("2006-01-02"), transactions[len(transactions)-1].GetDate(), "date of last transaction should be start")
 	})
