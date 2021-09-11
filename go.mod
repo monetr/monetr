@@ -5,7 +5,7 @@ go 1.17
 require (
 	cloud.google.com/go/logging v1.4.2
 	github.com/MicahParks/keyfunc v0.4.0
-	github.com/OneOfOne/xxhash v1.2.2
+	github.com/OneOfOne/xxhash v1.2.8
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/alicebob/miniredis/v2 v2.15.1
 	github.com/brianvoe/gofakeit/v6 v6.7.1
