@@ -81,14 +81,14 @@
     "resolve": "1.20.0",
     "resolve-url-loader": "4.0.0",
     "rrule": "2.6.8",
-    "sass": "1.39.0",
+    "sass": "1.39.2",
     "selector-action": "1.2.0",
     "semver": "7.3.5",
     "terser-webpack-plugin": "5.2.4",
     "ts-pnp": "1.2.0",
     "web-vitals": "2.1.0",
     "webpack-manifest-plugin": "4.0.2",
-    "workbox-webpack-plugin": "6.2.4"
+    "workbox-webpack-plugin": "6.3.0"
   },
   "scripts": {
     "build": "MONETR_ENV=${MONETR_ENV:=production} webpack",
