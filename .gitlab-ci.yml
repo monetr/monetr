@@ -44,7 +44,7 @@ Build:
   stage: Build Javascript
   image: containers.monetr.dev/node:16.1.0-buster
   tags:
-    - k8s:shared
+    - make build ENVIRONMENT=$ENVIRONMENT
   script:
     - make build
   cache:
@@ -69,7 +69,7 @@ Build - Staging:
   script:
     - make build
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: ${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
       - ./build
       - ./node_modules
@@ -90,7 +90,7 @@ Build - Acceptance:
   script:
     - make build
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: ${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
       - ./build
       - ./node_modules
@@ -140,32 +140,6 @@ Yeet Coverage:
       - ./coverage.txt
     policy: pull
 
-.docker_template: &docker_template
-  only:
-    refs:
-      - main
-  image: proxy.monetr.dev/docker:19.03.15
-  variables:
-    DOCKER_HOST: tcp://docker:2375
-    DOCKER_TLS_CERTDIR: ""
-  services:
-    - name: proxy.monetr.dev/docker:19.03.15-dind
-      command: [ "--registry-mirror", "https://proxy.monetr.dev" ]
-      alias: docker
-  tags:
-    - k8s:shared-docker
-    - arch:amd64
-  before_script:
-    - apk add make git
-
-Docker:
-  when: manual
-  needs: []
-  stage: Publish Container
-  <<: [ *docker_template ]
-  script:
-    - make docker-build
-
 Deploy - Staging:
   only:
     refs:
@@ -189,7 +163,7 @@ Deploy - Staging:
   script:
     - make deploy
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: ${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
       - ./build
     policy: pull
@@ -214,7 +188,7 @@ Deploy - Acceptance:
   script:
     - make deploy
   cache:
-    key: ${CI_COMMIT_SHA}
+    key: ${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
       - ./build
     policy: pull
