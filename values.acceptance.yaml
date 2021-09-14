@@ -131,7 +131,7 @@ api:
     enableReturningUserExperience: true
     webhooksEnabled: true
     webhooksDomain: api.acceptance.monetr.dev
-    oauthDomain: app.acceptance.monetr.dev
+    oauthDomain: acceptance.monetr.dev
   cors:
     allowedOrigins:
       - "https://acceptance.monetr.dev"
