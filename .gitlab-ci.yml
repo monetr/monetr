@@ -305,7 +305,7 @@ Dry - Staging:
 Dry - Acceptance:
   only:
     refs:
-      - accceptance
+      - tags
   environment:
     name: Acceptance
     url: https://api.acceptance.monetr.dev
@@ -360,7 +360,7 @@ Deploy - Staging:
 Deploy - Acceptance:
   only:
     refs:
-      - accceptance
+      - tags
   environment:
     name: Acceptance
     url: https://api.acceptance.monetr.dev
