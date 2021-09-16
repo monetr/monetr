@@ -11,6 +11,14 @@ data:
   MONETR_ALLOW_SIGN_UP: {{ quote .Values.api.allowSignUp }}
   MONETR_ENABLE_WEBHOOKS: {{ quote .Values.api.enableWebhooks }}
   MONETR_ENABLE_BETA_CODES: {{ quote .Values.api.beta.enableBetaCodes }}
+  MONETR_EMAIL_ENABLED: {{ quote .Values.api.email.enabled }}
+  MONETR_EMAIL_DOMAIN: {{ quote .Values.api.email.domain }}
+  MONETR_EMAIL_VERIFICATION_ENABLED: {{ quote .Values.api.email.verification.enabled }}
+  MONETR_EMAIL_VERIFICATION_TOKEN_LIFETIME: {{ quote .Values.api.email.verification.tokenLifetime }}
+  MONETR_EMAIL_SMTP_IDENTITY: {{ quote .Values.api.email.smtp.identity }}
+  MONETR_EMAIL_SMTP_USERNAME: {{ quote .Values.api.email.smtp.username }}
+  MONETR_EMAIL_SMTP_HOST: {{ quote .Values.api.email.smtp.host }}
+  MONETR_EMAIL_SMTP_PORT: {{ quote .Values.api.email.smtp.port }}
   MONETR_CORS_ALLOWED_ORIGINS: {{ join "," .Values.api.cors.allowedOrigins }}
   MONETR_CORS_DEBUG: {{ quote .Values.api.cors.debug }}
   MONETR_LOG_LEVEL: {{ quote .Values.api.logging.level }}

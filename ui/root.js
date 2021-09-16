@@ -13,6 +13,8 @@ import SignUpView from "views/Authentication/SignUpView";
 import { Backdrop, CircularProgress } from "@material-ui/core";
 import BillingRequiredRouter from "views/Subscriptions/BillingRequiredRouter";
 import AuthenticatedApp from "AuthenticatedApp";
+import VerifyEmail from "views/Authentication/VerifyEmail";
+import ResendVerification from "views/Authentication/ResendVerification";
 
 export class Root extends PureComponent {
   state = {
@@ -59,6 +61,8 @@ export class Root extends PureComponent {
           <SignUpView/>
         </Route>
         }
+        <Route path="/verify/email" exact component={ VerifyEmail } />
+        <Route path="/verify/email/resend" exact component={ ResendVerification } />
         <Route>
           <Redirect to={ { pathname: '/login' } }/>
         </Route>

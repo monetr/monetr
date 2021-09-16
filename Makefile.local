@@ -60,13 +60,12 @@ init-mini: info
 	$(MAKE) deploy-mini-application
 	$(MAKE) vault-token
 	$(call infoMsg,Local environment is setup; you should be able to access the API at: https://api.$(LOCAL_DOMAIN))
-#	$(MAKE) setup-registry
 
 MINIKUBE_NAMESPACE=default
 MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
 MINIKUBE_MEMORY=8192 # 8GB of memory. Reduce if this is too high for your computer. Could be reduced to 2GB
 MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
-KUBERNETES_VERSION=v1.19.0
+MINIKUBE_KUBERNETES_VERSION=v1.19.0
 start-minikube:
 	$(info Starting minikube)
 	minikube start \
@@ -75,8 +74,9 @@ start-minikube:
 		--memory=$(MINIKUBE_MEMORY) \
 		--delete-on-failure \
 		--driver=$(MINIKUBE_DRIVER) \
-		--kubernetes-version=$(KUBERNETES_VERSION) \
+		--kubernetes-version=$(MINIKUBE_KUBERNETES_VERSION) \
 		--embed-certs
+	minikube update-context
 
 setup-etc-hosts: $(HOSTESS)
 	$(call infoMsg,Registering hosts with your /etc/hosts file; these are removed upon running: make clean-mini)
@@ -160,6 +160,7 @@ init-mini-values: $(YQ) $(HELM)
 	$(YQ) e '.ingress.enabled = false' -i $(VALUES)
 	$(YQ) e '.uiService = true' -i $(VALUES)
 	$(YQ) e '.service.port = 4000' -i $(VALUES)
+	$(YQ) e '.service.separateUIAndAPI = true' -i $(VALUES)
 	$(YQ) e '.api.includeSecrets = true' -i $(VALUES)
 	$(YQ) e '.api.uiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.apiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
@@ -309,8 +310,9 @@ build-rest-api-mini: LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +
 build-rest-api-mini: MINIKUBE_IP=$(shell minikube ip)
 build-rest-api-mini: BASE_IMAGE_NAME=$(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME)
 build-rest-api-mini: IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
-build-rest-api-mini: wait-for-docker $(YQ) $(CONTAINER_BINARY)
+build-rest-api-mini: wait-for-docker $(YQ)
 	eval $$(minikube docker-env) && docker build \
+		--build-arg GOFLAGS="-tags=mini" \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
@@ -406,12 +408,20 @@ vault-token: $(VAULT_JSON) $(JQ)
 	@echo "root token: $$(cat $(VAULT_JSON) | $(JQ) -r '.root_token')"
 	@echo "\033[0;31m#################################################################################\033[0m"
 
-vault-terraform: $(VAULT_JSON) $(wildcard $(PWD)/minikube/vault/*.tf) $(JQ)
-	export VAULT_TOKEN=$$(cat $(VAULT_JSON) | $(JQ) -r '.root_token') && \
-	export TF_VAR_kubernetes_address=https://$$(minikube ip):8443 && \
-	export TF_VAR_kubernetes_certificate_b64=$$($(KUBECTL) config view --raw -o json | $(JQ) -r '.clusters[] | select(.name == "'$(shell $(KUBECTL) config current-context)'") | .cluster."certificate-authority-data"') && \
-	export TF_VAR_kubernetes_reviewer_jwt=$$($(KUBECTL) get secret $(shell $(KUBECTL) get serviceaccount vault-authentication -o yaml | $(LOCAL_BIN)/$(YQ) e '.secrets[0].name' -) -o yaml | $(LOCAL_BIN)/$(YQ) e '.data.token' - | base64 -d) && \
-		cd $(PWD)/minikube/vault && terraform init -upgrade && terraform apply -auto-approve=true
+vault-terraform: $(VAULT_JSON) $(wildcard $(PWD)/minikube/vault/*.tf)
+vault-terraform: $(JQ)
+vault-terraform: VAULT_TOKEN=$(shell cat $(VAULT_JSON) | $(JQ) -r '.root_token')
+vault-terraform: KUBE_ADDR=$(shell minikube ip)
+vault-terraform: KUBE_CTX=$(shell $(KUBECTL) config current-context)
+vault-terraform: KUBE_CERT_B64=$(shell $(KUBECTL) config view --raw -o json | $(JQ) -r '.clusters[] | select(.name == "$(KUBE_CTX)") | .cluster."certificate-authority-data"')
+vault-terraform: SERVICE_ACCOUNT_SECRET_NAME=$(shell $(KUBECTL) get serviceaccount vault-authentication -o yaml | $(YQ) e '.secrets[0].name' -)
+vault-terraform: REVIEWER_JWT=$(shell $(KUBECTL) get secret $(SERVICE_ACCOUNT_SECRET_NAME) -o yaml | $(YQ) e '.data.token' - | base64 -d)
+vault-terraform:
+	export VAULT_TOKEN=$(VAULT_TOKEN) && \
+	export TF_VAR_kubernetes_address="https://$(KUBE_ADDR):8443" && \
+	export TF_VAR_kubernetes_certificate_b64=$(KUBE_CERT_B64) && \
+	export TF_VAR_kubernetes_reviewer_jwt=$(REVIEWER_JWT) && \
+	cd $(PWD)/minikube/vault && terraform init -upgrade && terraform apply -auto-approve=true
 
 define waitForContainer
 while [[ $$($(KUBECTL) get pod $$($(KUBECTL) get pod -l $1 --namespace $(MINIKUBE_NAMESPACE) -o 'jsonpath={.items[0].metadata.name}') -o 'jsonpath={.status.phase}') != "Running" ]]; do echo "Waiting for container..." && sleep 5; done

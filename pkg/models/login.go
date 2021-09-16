@@ -1,5 +1,9 @@
 package models
 
+import (
+	"time"
+)
+
 type Login struct {
 	tableName string `pg:"logins"`
 
@@ -10,6 +14,7 @@ type Login struct {
 	PhoneNumber     *PhoneNumber `json:"-" pg:"phone_number,type:'text'"`
 	IsEnabled       bool         `json:"-" pg:"is_enabled,notnull,use_zero"`
 	IsEmailVerified bool         `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
+	EmailVerifiedAt *time.Time   `json:"emailVerifiedAt" pg:"email_verified_at"`
 	IsPhoneVerified bool         `json:"isPhoneVerified" pg:"is_phone_verified,notnull,use_zero"`
 
 	Users []User `json:"-" pg:"rel:has-many"`
@@ -20,4 +25,8 @@ type LoginWithHash struct {
 
 	Login
 	PasswordHash string `json:"-" pg:"password_hash,notnull"`
+}
+
+func (l Login) GetEmailIsVerified() bool {
+	return l.IsEmailVerified && l.EmailVerifiedAt != nil
 }

@@ -109,6 +109,16 @@ api:
         secretKeyRef:
           key: MONETR_STRIPE_WEBHOOK_SECRET
           name: monetr-staging-stripe
+    - name: MONETR_EMAIL_SMTP_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_EMAIL_SMTP_PASSWORD
+          name: monetr-staging-email
+    - name: MONETR_EMAIL_VERIFICATION_TOKEN_SECRET
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_EMAIL_VERIFICATION_TOKEN_SECRET
+          name: monetr-staging-email
   uiDomainName: app.staging.monetr.dev
   apiDomainName: api.staging.monetr.dev
   allowSignUp: true
@@ -119,7 +129,14 @@ api:
     database: monetr
   email:
     enabled: false
-    domain: staging.monetr.dev
+    domain: monetr.dev
+    verification:
+      enabled: true
+      tokenLifetime: 30m
+    smtp:
+      username: apikey
+      host: smtp.sendgrid.net
+      port: 25
   sendGrid:
     enabled: false
     apiKey: ""

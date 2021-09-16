@@ -2,12 +2,13 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12/context"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 // wrapPgError will wrap and return an error to the client. But will try to infer a status code from the error it is
@@ -39,7 +40,6 @@ func (c *Controller) wrapPgError(ctx *context.Context, err error, msg string, ar
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, msg, args...)
 		}
 	}
-
 
 }
 

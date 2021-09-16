@@ -43,6 +43,7 @@ interface SignUpValues {
 
 interface State {
   error: string | null;
+  message: string | null;
   loading: boolean;
   verification: string | null;
 }
@@ -62,6 +63,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     verification: null,
     loading: false,
     error: null,
+    message: null,
   };
 
   renderErrorMaybe = () => {
@@ -79,6 +81,21 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
       </Snackbar>
     );
   };
+
+  renderMessageMaybe = (): React.ReactNode => {
+    const { message } = this.state;
+    if (!message) {
+      return null;
+    }
+
+    return (
+      <Snackbar open autoHideDuration={ 10000 }>
+        <Alert variant="filled" severity="info">
+          { this.state.message }
+        </Alert>
+      </Snackbar>
+    );
+  }
 
   validateInput = (values: SignUpValues): Partial<SignUpValues> | null => {
     let errors: Partial<SignUpValues> = {};
@@ -153,6 +170,12 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
             });
         }
 
+        if (result.data.message) {
+          this.setState({
+            message: result.data.message,
+          });
+        }
+
         return Promise.resolve();
       })
       .catch(error => {
@@ -185,8 +208,8 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     return (
       <div className="w-full flex justify-center items-center pt-1.5 pb-1.5">
         { !this.state.loading && <ReCAPTCHA
-          sitekey={ ReCAPTCHAKey }
-          onChange={ value => this.setState({ verification: value }) }
+            sitekey={ ReCAPTCHAKey }
+            onChange={ value => this.setState({ verification: value }) }
         /> }
         { this.state.loading && <CircularProgress/> }
       </div>
@@ -242,6 +265,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
 
     return (
       <Fragment>
+        { this.renderMessageMaybe() }
         { this.renderErrorMaybe() }
         <Formik
           initialValues={ initialValues }
@@ -344,20 +368,20 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                     </div>
                     { this.props.requireBetaCode &&
                     <div className="w-full pt-1.5 pb-1.5">
-                      <TextField
-                        className="w-full"
-                        disabled={ isSubmitting }
-                        error={ touched.betaCode && !!errors.betaCode }
-                        helperText={ (touched.betaCode && errors.betaCode) ? errors.betaCode : null }
-                        id="login-betaCode"
-                        label="Beta Code"
-                        name="betaCode"
-                        onBlur={ handleBlur }
-                        onChange={ handleChange }
-                        type="betaCode"
-                        value={ values.betaCode }
-                        variant="outlined"
-                      />
+                        <TextField
+                            className="w-full"
+                            disabled={ isSubmitting }
+                            error={ touched.betaCode && !!errors.betaCode }
+                            helperText={ (touched.betaCode && errors.betaCode) ? errors.betaCode : null }
+                            id="login-betaCode"
+                            label="Beta Code"
+                            name="betaCode"
+                            onBlur={ handleBlur }
+                            onChange={ handleChange }
+                            type="betaCode"
+                            value={ values.betaCode }
+                            variant="outlined"
+                        />
                     </div>
                     }
                   </div>
@@ -399,11 +423,11 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                       variant="contained"
                     >
                       { isSubmitting && <CircularProgress
-                        className={ classnames('mr-2', {
-                          'opacity-50': isSubmitting,
-                        }) }
-                        size="1em"
-                        thickness={ 5 }
+                          className={ classnames('mr-2', {
+                            'opacity-50': isSubmitting,
+                          }) }
+                          size="1em"
+                          thickness={ 5 }
                       /> }
                       { this.renderSignUpText(isSubmitting) }
                     </Button>

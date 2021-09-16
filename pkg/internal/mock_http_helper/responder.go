@@ -3,11 +3,12 @@ package mock_http_helper
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/require"
 )
 
 func NewHttpMockJsonResponder(
@@ -40,7 +41,11 @@ func NewHttpMockJsonResponder(
 			},
 		}
 
-		headers := headersFn(t, request, result, status)
+		var headers map[string][]string
+		if headersFn != nil {
+			headers = headersFn(t, request, result, status)
+		}
+
 		if headers == nil {
 			headers = map[string][]string{}
 		}

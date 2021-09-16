@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -11,19 +10,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
-	seedLogin := func(t *testing.T, login models.Login) {
-		loginWithPassword := models.LoginWithHash{
-			Login:        login,
-			PasswordHash: gofakeit.Generate("?????????????????????"),
-		}
-
-		db := testutils.GetPgDatabase(t)
-		result, err := db.Model(&loginWithPassword).Insert(&loginWithPassword)
-		assert.NoError(t, err, "must insert login for test")
-		assert.Equal(t, 1, result.RowsAffected(), "must affect 1 row for the insert")
+func seedLogin(t *testing.T, login *models.Login) {
+	loginWithPassword := models.LoginWithHash{
+		Login:        *login,
+		PasswordHash: gofakeit.Generate("?????????????????????"),
 	}
 
+	db := testutils.GetPgDatabase(t)
+	result, err := db.Model(&loginWithPassword).Insert(&loginWithPassword)
+	assert.NoError(t, err, "must insert login for test")
+	assert.Equal(t, 1, result.RowsAffected(), "must affect 1 row for the insert")
+
+	login.LoginId = loginWithPassword.LoginId
+}
+
+func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 	assertEmailVerified := func(t *testing.T, emailAddress string, verified bool) {
 		db := testutils.GetPgDatabase(t)
 		exists, err := db.Model(&models.Login{}).
@@ -38,9 +39,9 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 
-		emailAddress := fmt.Sprintf("%s@monetr.mini", gofakeit.UUID())
+		emailAddress := testutils.GetUniqueEmail(t)
 
-		seedLogin(t, models.Login{
+		seedLogin(t, &models.Login{
 			Email:           emailAddress,
 			FirstName:       gofakeit.FirstName(),
 			LastName:        gofakeit.LastName(),
@@ -62,7 +63,7 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 	t.Run("login with email does not exist", func(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 
-		emailAddress := fmt.Sprintf("%s@monetr.mini", gofakeit.UUID())
+		emailAddress := testutils.GetUniqueEmail(t)
 
 		log := testutils.GetLog(t)
 		emailVerification := NewEmailRepository(log, db)
@@ -74,9 +75,9 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 	t.Run("email already verified", func(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 
-		emailAddress := fmt.Sprintf("%s@monetr.mini", gofakeit.UUID())
+		emailAddress := testutils.GetUniqueEmail(t)
 
-		seedLogin(t, models.Login{
+		seedLogin(t, &models.Login{
 			Email:           emailAddress,
 			FirstName:       gofakeit.FirstName(),
 			LastName:        gofakeit.LastName(),
@@ -98,9 +99,9 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 	t.Run("login not enabled", func(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 
-		emailAddress := fmt.Sprintf("%s@monetr.mini", gofakeit.UUID())
+		emailAddress := testutils.GetUniqueEmail(t)
 
-		seedLogin(t, models.Login{
+		seedLogin(t, &models.Login{
 			Email:           emailAddress,
 			FirstName:       gofakeit.FirstName(),
 			LastName:        gofakeit.LastName(),
@@ -117,5 +118,41 @@ func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
 		assert.EqualError(t, err, "email cannot be verified")
 
 		assertEmailVerified(t, emailAddress, EmailNotVerified)
+	})
+}
+
+func TestEmailRepositoryBase_GetLoginForEmail(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		db := testutils.GetPgDatabase(t)
+
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		originalLogin := &models.Login{
+			Email:     emailAddress,
+			FirstName: gofakeit.FirstName(),
+			LastName:  gofakeit.LastName(),
+		}
+		seedLogin(t, originalLogin)
+
+		log := testutils.GetLog(t)
+		emailVerification := NewEmailRepository(log, db)
+
+		login, err := emailVerification.GetLoginForEmail(context.Background(), emailAddress)
+		assert.NoError(t, err, "must retrieve login for email successfully")
+		assert.NotNil(t, login, "login result should not be nil")
+		assert.Equal(t, originalLogin.LoginId, login.LoginId, "login Id should match expected")
+	})
+	
+	t.Run("email does not exist", func(t *testing.T) {
+		db := testutils.GetPgDatabase(t)
+
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		log := testutils.GetLog(t)
+		emailVerification := NewEmailRepository(log, db)
+
+		login, err := emailVerification.GetLoginForEmail(context.Background(), emailAddress)
+		assert.EqualError(t, err, "failed to retrieve login by email: pg: no rows in result set")
+		assert.Nil(t, login, "login result should be nil")
 	})
 }

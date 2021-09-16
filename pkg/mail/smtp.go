@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/smtp"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/smtp"
 )
 
 type SendEmailRequest struct {

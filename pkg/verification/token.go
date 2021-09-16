@@ -30,6 +30,12 @@ type jwtEmailVerificationTokenGenerator struct {
 	secret string
 }
 
+func NewJWTEmailVerification(secret string) EmailVerificationTokenGenerator {
+	return jwtEmailVerificationTokenGenerator{
+		secret: secret,
+	}
+}
+
 func (j jwtEmailVerificationTokenGenerator) GenerateToken(ctx context.Context, emailAddress string, lifetime time.Duration) (token string, err error) {
 	span := sentry.StartSpan(ctx, "JWTEmailVerification - GenerateToken")
 	defer span.Finish()
@@ -39,6 +45,10 @@ func (j jwtEmailVerificationTokenGenerator) GenerateToken(ctx context.Context, e
 	}
 
 	emailAddress = strings.ToLower(strings.TrimSpace(emailAddress))
+	if emailAddress == "" {
+		return token, errors.New("email address cannot be empty or whitespace")
+	}
+
 	checksum := md5.Sum([]byte(emailAddress))
 	id := fmt.Sprintf("%X", string(checksum[:]))
 
@@ -83,10 +93,6 @@ func (j jwtEmailVerificationTokenGenerator) ValidateToken(ctx context.Context, t
 
 	if len(claims.Audience) != 1 {
 		return emailAddress, errors.New("invalid audience on token")
-	}
-
-	if time.Unix(claims.ExpiresAt, 0).Before(time.Now()) {
-		return emailAddress, errors.New("token is expired")
 	}
 
 	emailAddress = claims.Audience[0]
