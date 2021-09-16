@@ -2,14 +2,15 @@ package testutils
 
 import (
 	"context"
+	"os"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/rest-api/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
 var (

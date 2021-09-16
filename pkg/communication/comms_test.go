@@ -16,8 +16,11 @@ import (
 func TestUserCommunicationBase_SendVerificationEmail(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		smtpMock := mock_mail.NewMockMail()
-		options := config.Email{
-			Domain: "monetr.mini",
+		options := config.Configuration{
+			UIDomainName: "monetr.mini",
+			Email: config.Email{
+				Domain: "monetr.mini",
+			},
 		}
 		log := testutils.GetLog(t)
 
@@ -43,8 +46,11 @@ func TestUserCommunicationBase_SendVerificationEmail(t *testing.T) {
 	t.Run("failure", func(t *testing.T) {
 		smtpMock := mock_mail.NewMockMail()
 		smtpMock.ShouldFail = true
-		options := config.Email{
-			Domain: "monetr.mini",
+		options := config.Configuration{
+			UIDomainName: "monetr.mini",
+			Email: config.Email{
+				Domain: "monetr.mini",
+			},
 		}
 		log := testutils.GetLog(t)
 

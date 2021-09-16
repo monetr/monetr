@@ -42,7 +42,7 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 
 	// We can only allow forgot password if SMTP is enabled. Otherwise we have
 	// no way of sending an email to the user.
-	if c.configuration.EMail.Enabled {
+	if c.configuration.Email.Enabled {
 		configuration.AllowForgotPassword = true
 	}
 

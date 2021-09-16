@@ -17,6 +17,7 @@ import (
 	"github.com/monetr/rest-api/pkg/billing"
 	"github.com/monetr/rest-api/pkg/build"
 	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/rest-api/pkg/communication"
 	"github.com/monetr/rest-api/pkg/config"
 	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
@@ -52,6 +53,7 @@ type Controller struct {
 	paywall                  billing.BasicPayWall
 	billing                  billing.BasicBilling
 	stripeWebhooks           billing.StripeWebhookHandler
+	communication            communication.UserCommunication
 }
 
 func NewController(

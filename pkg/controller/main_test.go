@@ -35,7 +35,7 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 			RegistrationJwtSecret: gofakeit.UUID(),
 		},
 		PostgreSQL: config.PostgreSQL{},
-		EMail:      config.Email{},
+		Email:      config.Email{},
 		ReCAPTCHA:  config.ReCAPTCHA{},
 		Plaid: config.Plaid{
 			ClientID:     gofakeit.UUID(),

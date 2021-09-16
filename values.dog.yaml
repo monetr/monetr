@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: gcr.io/acceptance-320515/github.com/monetr/rest-api
+  repository: gcr.io/dogfood-326023/github.com/monetr/rest-api
   pullPolicy: Always
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
@@ -108,7 +108,7 @@ api:
   beta:
     enableBetaCodes: true
   postgreSql:
-    address: postgres.google.acceptance.monetr.in
+    address: postgres.google.dog.monetr.in
     port: 5432
     database: monetr
   email:

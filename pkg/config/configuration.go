@@ -39,10 +39,14 @@ type Configuration struct {
 	PostgreSQL    PostgreSQL
 	ReCAPTCHA     ReCAPTCHA
 	Redis         Redis
-	EMail         Email
+	Email         Email
 	Sentry        Sentry
 	Stripe        Stripe
 	Vault         Vault
+}
+
+func (c Configuration) GetUIDomainName() string {
+	return c.UIDomainName
 }
 
 type Beta struct {
@@ -64,6 +68,10 @@ type PostgreSQL struct {
 	CACertificatePath  string
 	KeyPath            string
 	CertificatePath    string
+}
+
+func (c Configuration) GetEmail() Email {
+	return c.Email
 }
 
 type Email struct {

@@ -20,17 +20,26 @@ type VerifyEmailParams struct {
 	VerifyURL string
 }
 
+var (
+	_ Configuration = config.Configuration{}
+)
+
+type Configuration interface {
+	GetUIDomainName() string
+	GetEmail() config.Email
+}
+
 type UserCommunication interface {
 	SendVerificationEmail(ctx context.Context, params VerifyEmailParams) error
 }
 
 type userCommunicationBase struct {
 	log     *logrus.Entry
-	options config.Email
+	options Configuration
 	mail    mail.Communication
 }
 
-func NewUserCommunication(log *logrus.Entry, options config.Email, client mail.Communication) UserCommunication {
+func NewUserCommunication(log *logrus.Entry, options Configuration, client mail.Communication) UserCommunication {
 	return &userCommunicationBase{
 		log:     log,
 		options: options,
@@ -54,7 +63,7 @@ func (u *userCommunicationBase) SendVerificationEmail(ctx context.Context, param
 	log.Debug("sending verification email")
 
 	if err = u.mail.Send(span.Context(), mail.SendEmailRequest{
-		From:    fmt.Sprintf("no-reply@%s", u.options.Domain),
+		From:    fmt.Sprintf("no-reply@%s", u.options.GetEmail().Domain),
 		To:      params.Login.Email,
 		Subject: "Verify Your Email Address",
 		Content: emailContent,

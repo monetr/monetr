@@ -128,7 +128,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		hashedPassword,
 		registerRequest.FirstName,
 		registerRequest.LastName,
-		!(c.configuration.EMail.ShouldVerifyEmails()), // Set isEnabled to true if we are not verifying emails.
+		!(c.configuration.Email.ShouldVerifyEmails()), // Set isEnabled to true if we are not verifying emails.
 	)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
@@ -225,7 +225,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// If SMTP is enabled and we are verifying emails then we want to create a
 	// registration record and send the user a verification email.
-	if c.configuration.EMail.ShouldVerifyEmails() {
+	if c.configuration.Email.ShouldVerifyEmails() {
 		log.Debug("TODO send email here")
 	}
 
