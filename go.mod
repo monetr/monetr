@@ -42,7 +42,7 @@ require (
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
-	google.golang.org/genproto v0.0.0-20210915214522-86cf1236ec46
+	google.golang.org/genproto v0.0.0-20210916144049-3192f974c780
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
