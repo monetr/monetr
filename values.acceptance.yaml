@@ -109,6 +109,16 @@ api:
         secretKeyRef:
           key: MONETR_STRIPE_WEBHOOK_SECRET
           name: monetr-acceptance-stripe
+    - name: MONETR_EMAIL_SMTP_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_EMAIL_SMTP_PASSWORD
+          name: monetr-acceptance-email
+    - name: MONETR_EMAIL_VERIFICATION_TOKEN_SECRET
+      valueFrom:
+        secretKeyRef:
+          key: MONETR_EMAIL_VERIFICATION_TOKEN_SECRET
+          name: monetr-acceptance-email
   uiDomainName: acceptance.monetr.dev
   apiDomainName: api.acceptance.monetr.dev
   allowSignUp: true
@@ -121,13 +131,14 @@ api:
     database: monetr
   email:
     enabled: false
-    domain: acceptance.monetr.dev
-  sendGrid:
-    enabled: false
-    apiKey: ""
-    templates:
-      verifyEmailTemplate: ""
-      forgotPasswordTemplate: ""
+    domain: monetr.dev
+    verification:
+      enabled: true
+      tokenLifetime: 30m
+    smtp:
+      username: apikey
+      host: smtp.sendgrid.net
+      port: 25
   reCaptcha:
     enabled: true
     verifyLogin: true

@@ -22,6 +22,7 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 		RequirePhoneNumber  bool         `json:"requirePhoneNumber"`
 		VerifyLogin         bool         `json:"verifyLogin"`
 		VerifyRegister      bool         `json:"verifyRegister"`
+		VerifyEmailAddress  bool         `json:"verifyEmailAddress"`
 		ReCAPTCHAKey        string       `json:"ReCAPTCHAKey,omitempty"`
 		StripePublicKey     string       `json:"stripePublicKey,omitempty"`
 		AllowSignUp         bool         `json:"allowSignUp"`
@@ -45,6 +46,8 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 	if c.configuration.Email.Enabled {
 		configuration.AllowForgotPassword = true
 	}
+
+	configuration.VerifyEmailAddress = c.configuration.Email.ShouldVerifyEmails()
 
 	configuration.AllowSignUp = c.configuration.AllowSignUp
 

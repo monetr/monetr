@@ -22,9 +22,13 @@ import (
 	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
+	"github.com/monetr/rest-api/pkg/mail"
 	"github.com/monetr/rest-api/pkg/metrics"
 	"github.com/monetr/rest-api/pkg/pubsub"
+	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/monetr/rest-api/pkg/secrets"
+	"github.com/monetr/rest-api/pkg/verification"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
@@ -54,6 +58,7 @@ type Controller struct {
 	billing                  billing.BasicBilling
 	stripeWebhooks           billing.StripeWebhookHandler
 	communication            communication.UserCommunication
+	emailVerification        verification.Verification
 }
 
 func NewController(
@@ -67,6 +72,7 @@ func NewController(
 	cachePool *redis.Pool,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	basicPaywall billing.BasicPayWall,
+	smtpCommunication mail.Communication,
 ) *Controller {
 	var captcha recaptcha.ReCAPTCHA
 	var err error
@@ -87,6 +93,25 @@ func NewController(
 
 	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(log, plaidClient, 5*time.Minute)
 
+	var emailVerification verification.Verification
+	if configuration.Email.ShouldVerifyEmails() {
+		emailVerification = verification.NewEmailVerification(
+			log,
+			configuration.Email.Verification.TokenLifetime,
+			repository.NewEmailRepository(log, db),
+			verification.NewJWTEmailVerification(configuration.Email.Verification.TokenSecret),
+		)
+	}
+
+	var userCommunication communication.UserCommunication
+	if configuration.Email.Enabled {
+		userCommunication = communication.NewUserCommunication(
+			log,
+			configuration,
+			smtpCommunication,
+		)
+	}
+
 	return &Controller{
 		captcha:                  &captcha,
 		configuration:            configuration,
@@ -104,6 +129,8 @@ func NewController(
 		paywall:                  basicPaywall,
 		billing:                  basicBilling,
 		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
+		communication:            userCommunication,
+		emailVerification:        emailVerification,
 	}
 }
 
@@ -153,19 +180,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(c.loggingMiddleware)
 		p.OnAnyErrorCode(func(ctx iris.Context) {
 			if err := ctx.GetErr(); err != nil {
-				if spanContext := c.getContext(ctx); spanContext != nil {
-					if hub := sentry.GetHubFromContext(spanContext); hub != nil {
-						_ = hub.CaptureException(err)
-					} else {
-						sentry.CaptureException(err)
-					}
-				} else {
-					if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
-						_ = hub.CaptureException(err)
-					} else {
-						sentry.CaptureException(err)
-					}
-				}
+				c.reportError(ctx, err)
 
 				ctx.JSON(map[string]interface{}{
 					"error": err.Error(),
@@ -179,6 +194,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 					"error": "the requested path does not exist",
 				})
 			} else {
+				c.reportError(ctx, err)
 				ctx.JSON(map[string]interface{}{
 					"error": err.Error(),
 				})
@@ -251,11 +267,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 			repoParty.Get("/config", c.configEndpoint)
 
-			repoParty.PartyFunc("/authentication", func(repoParty router.Party) {
-				repoParty.Post("/login", c.loginEndpoint)
-				repoParty.Post("/register", c.registerEndpoint)
-				//repoParty.Post("/verify", c.verifyEndpoint)
-			})
+			repoParty.PartyFunc("/authentication", c.handleAuthentication)
 
 			repoParty.Use(c.authenticationMiddleware)
 
@@ -345,4 +357,29 @@ func (c *Controller) getLog(ctx iris.Context) *logrus.Entry {
 	}
 
 	return log
+}
+
+// reportWrappedError just includes an errors.Wrapf around reportError.
+func (c *Controller) reportWrappedError(ctx iris.Context, err error, message string, args ...interface{}) {
+	c.reportError(ctx, errors.Wrapf(err, message, args...))
+}
+
+// reportError is a simple wrapper to report errors to sentry.io. It is meant to be used to keep track of errors that
+// we encounter that we might not want to return to the end user. But might still need in order to diagnose issues.
+func (c *Controller) reportError(ctx iris.Context, err error) {
+	if spanContext := c.getContext(ctx); spanContext != nil {
+		if hub := sentry.GetHubFromContext(spanContext); hub != nil {
+			_ = hub.CaptureException(err)
+			hub.Scope().SetLevel(sentry.LevelError)
+		} else {
+			sentry.CaptureException(err)
+		}
+	} else {
+		if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+			_ = hub.CaptureException(err)
+			hub.Scope().SetLevel(sentry.LevelError)
+		} else {
+			sentry.CaptureException(err)
+		}
+	}
 }

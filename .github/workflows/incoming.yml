@@ -96,6 +96,20 @@ jobs:
       - run: make dependencies
       - run: make docs
       - run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
+  kube-validate:
+    name: Kubernetes Validate
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/build-containers/ubuntu:20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make kubeval
+  kube-lint:
+    name: Kubernetes lint
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/build-containers/ubuntu:20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make kubelint
   container:
     needs:
       - "test"

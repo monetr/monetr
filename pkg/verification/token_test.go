@@ -67,7 +67,7 @@ func TestJwtEmailVerificationTokenGenerator_ValidateToken(t *testing.T) {
 
 		emailResult, err := generator.ValidateToken(context.Background(), token)
 		assert.NoError(t, err, "should not receive an error, token should be valid")
-		assert.Equal(t, emailResult, emailResult, "resulting email should match")
+		assert.Equal(t, email, emailResult, "resulting email should match")
 	})
 
 	t.Run("expired token", func(t *testing.T) {
@@ -76,16 +76,39 @@ func TestJwtEmailVerificationTokenGenerator_ValidateToken(t *testing.T) {
 		}
 
 		email := gofakeit.Email()
-		// If this test ever fails with an expiration error, then it is not able to complete within 1 second of the
-		// token being generated.
 		token, err := generator.GenerateToken(context.Background(), email, time.Second)
 		assert.NoError(t, err, "must be able to generate a token without error")
 		assert.NotEmpty(t, token, "token must not be blank")
 
-		time.Sleep(time.Second)
+		time.Sleep(2 * time.Second)
 
 		emailResult, err := generator.ValidateToken(context.Background(), token)
-		assert.EqualError(t, err, "token is expired", "should receive a token is expired error")
-		assert.Equal(t, emailResult, emailResult, "resulting email should match even if its expired")
+		assert.EqualError(t, err, "invalid token: token is expired by 1s", "should receive a token is expired error")
+		assert.Empty(t, emailResult, "email should not be returned if the token is expired")
+	})
+	
+	t.Run("invalid token", func(t *testing.T) {
+		email := gofakeit.Email()
+
+		var badToken string
+		{ // Generate a token using one secret.
+			generator := jwtEmailVerificationTokenGenerator{
+				secret: gofakeit.Generate("????????????????"),
+			}
+			token, err := generator.GenerateToken(context.Background(), email, time.Minute)
+			assert.NoError(t, err, "must be able to generate a token without error")
+			assert.NotEmpty(t, token, "token must not be blank")
+
+			badToken = token
+		}
+
+		{ // Then try to validate the token with a different secret.
+			generator := jwtEmailVerificationTokenGenerator{
+				secret: gofakeit.Generate("????????????????"),
+			}
+			emailResult, err := generator.ValidateToken(context.Background(), badToken)
+			assert.EqualError(t, err, "invalid token: signature is invalid", "should receive a token is invalid error regarding the signature")
+			assert.Equal(t, emailResult, emailResult, "resulting email should match even if its expired")
+		}
 	})
 }

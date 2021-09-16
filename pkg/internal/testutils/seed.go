@@ -2,7 +2,9 @@ package testutils
 
 import (
 	"context"
-	"fmt"
+	"testing"
+	"time"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/rest-api/pkg/hash"
@@ -10,9 +12,6 @@ import (
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
-	"strings"
-	"testing"
-	"time"
 )
 
 type SeedAccountOption uint8
@@ -22,10 +21,6 @@ const (
 	WithManualAccount SeedAccountOption = 1
 	WithPlaidAccount  SeedAccountOption = 2
 )
-
-func GivenIHaveAnEmail(t *testing.T) string {
-	return fmt.Sprintf("%s@testing.harderthanitneedstobe.com", strings.ReplaceAll(gofakeit.UUID(), "-", ""))
-}
 
 func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.User, *MockPlaidData) {
 	require.NotNil(t, db, "db must not be nil")
@@ -38,7 +33,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 
 	var user models.User
 	err := db.RunInTransaction(context.Background(), func(txn *pg.Tx) error {
-		email := GivenIHaveAnEmail(t)
+		email := GetUniqueEmail(t)
 		login := models.LoginWithHash{
 			Login: models.Login{
 				Email:           email,

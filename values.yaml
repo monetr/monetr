@@ -21,12 +21,12 @@ podAnnotations: { }
 podSecurityContext: { }
 # fsGroup: 2000
 
-securityContext: { }
+securityContext:
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
 # capabilities:
 #   drop:
 #   - ALL
-# readOnlyRootFilesystem: true
-# runAsNonRoot: true
 # runAsUser: 1000
 
 service:
@@ -122,6 +122,16 @@ api:
   email:
     enabled: false
     domain: localhost
+    verification:
+      enabled: false
+      tokenLifetime: 1h
+      tokenSecret: abc123
+    smtp:
+      identity: ""
+      username: "no-reply"
+      password: "email-password"
+      host: "smtp.gmail.com"
+      port: 1025
   reCaptcha:
     enabled: false
     privateKey: ""

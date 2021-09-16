@@ -23,17 +23,18 @@ type unauthenticatedRepo struct {
 
 func (u *unauthenticatedRepo) CreateLogin(
 	ctx context.Context,
-	email, hashedPassword string, firstName, lastName string, isEnabled bool,
+	email, hashedPassword string, firstName, lastName string,
 ) (*models.Login, error) {
 	span := sentry.StartSpan(ctx, "CreateLogin")
 	defer span.Finish()
 
 	login := &models.LoginWithHash{
 		Login: models.Login{
-			Email:     strings.ToLower(email),
-			FirstName: firstName,
-			LastName:  lastName,
-			IsEnabled: isEnabled,
+			Email:           strings.ToLower(email),
+			FirstName:       firstName,
+			LastName:        lastName,
+			IsEnabled:       true,
+			IsEmailVerified: EmailNotVerified, // Always insert false.
 		},
 		PasswordHash: hashedPassword,
 	}
@@ -91,10 +92,6 @@ func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId
 	span.Status = sentry.SpanStatusOK
 
 	return nil
-}
-
-func (u *unauthenticatedRepo) VerifyRegistration(registrationId string) (*models.User, error) {
-	panic("not implemented")
 }
 
 func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error) {

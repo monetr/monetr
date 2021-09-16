@@ -27,6 +27,19 @@ variables:
   GO111MODULE: 'on'
   GOFLAGS: '-mod=vendor'
 
+Release Testing:
+  only:
+    refs:
+      - tags
+  allow_failure: true
+  needs: [ ]
+  stage: Release
+  image: containers.monetr.dev/ubuntu:20.04
+  tags:
+    - k8s:shared
+  script:
+    - git --no-pager log --oneline $(git describe --tags --abbrev=0 @^)..@
+
 Go Dependencies:
   needs: [ ]
   stage: Dependencies
@@ -162,9 +175,9 @@ REST API:
     - make docker-push
 
 Generate - Staging:
-  except:
+  only:
     refs:
-      - tags
+      - main
   needs: [ ]
   stage: Prepare
   image: containers.monetr.dev/ubuntu:20.04
@@ -261,9 +274,6 @@ Dry - Staging:
   only:
     refs:
       - main
-  except:
-    refs:
-      - tags
   environment:
     name: Staging
     url: https://api.staging.monetr.dev
@@ -314,9 +324,6 @@ Deploy - Staging:
   only:
     refs:
       - main
-  except:
-    refs:
-      - tags
   environment:
     name: Staging
     url: https://api.staging.monetr.dev

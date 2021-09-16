@@ -69,13 +69,9 @@ type Repository interface {
 }
 
 type UnauthenticatedRepository interface {
-	CreateLogin(ctx context.Context, email, hashedPassword string, firstName, lastName string, isEnabled bool) (*models.Login, error)
+	CreateLogin(ctx context.Context, email, hashedPassword string, firstName, lastName string) (*models.Login, error)
 	CreateAccountV2(ctx context.Context, account *models.Account) error
 	CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error
-
-	// VerifyRegistration takes a registrationId and will finalize the registration record. If the registration has
-	// already been completed an error is returned.
-	VerifyRegistration(registrationId string) (*models.User, error)
 	GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error)
 	ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error)
 	UseBetaCode(ctx context.Context, betaId, usedBy uint64) error

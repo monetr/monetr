@@ -1,4 +1,5 @@
-//+build ui
+//go:build ui
+// +build ui
 
 package cmd
 
@@ -12,6 +13,7 @@ import (
 	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
+	"github.com/monetr/rest-api/pkg/mail"
 	"github.com/monetr/rest-api/pkg/metrics"
 	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/monetr/rest-api/pkg/ui"
@@ -29,6 +31,7 @@ func getControllers(
 	cache *redis.Pool,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	basicPaywall billing.BasicPayWall,
+	smtpCommunication mail.Communication,
 ) []application.Controller {
 	return []application.Controller{
 		controller.NewController(
@@ -42,6 +45,7 @@ func getControllers(
 			cache,
 			plaidSecrets,
 			basicPaywall,
+			smtpCommunication,
 		),
 		ui.NewUIController(),
 	}

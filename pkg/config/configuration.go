@@ -77,15 +77,23 @@ func (c Configuration) GetEmail() Email {
 type Email struct {
 	// Enabled controls whether the API can send emails at all. In order to support things like forgot password links or
 	// email verification this must be enabled.
-	Enabled bool
-	// If you want to verify email addresses when a new user signs up then this should be enabled. This will require a
-	// user to verify that they own (or at least have proper access to) the email address that they used when they
-	// signed up.
-	VerifyEmails bool
+	Enabled      bool
+	Verification EmailVerification
 	// Domain specifies the actual domain name used to send emails. Emails will always be sent from `no-reply@{domain}`.
 	Domain string
 	// Email is sent via SMTP. If you want to send emails it is required to include an SMTP configuration.
 	SMTP SMTPClient
+}
+
+type EmailVerification struct {
+	// If you want to verify email addresses when a new user signs up then this should be enabled. This will require a
+	// user to verify that they own (or at least have proper access to) the email address that they used when they
+	// signed up.
+	Enabled bool
+	// Specify the amount of time that an email verification link is valid.
+	TokenLifetime time.Duration
+	// The secret used to generate verification tokens and validate them.
+	TokenSecret string
 }
 
 type SMTPClient struct {
@@ -97,7 +105,7 @@ type SMTPClient struct {
 }
 
 func (s Email) ShouldVerifyEmails() bool {
-	return s.Enabled && s.VerifyEmails
+	return s.Enabled && s.Verification.Enabled
 }
 
 type ReCAPTCHA struct {
@@ -249,15 +257,16 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("UIDomainName", "localhost:3000")
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
-	v.SetDefault("PostgreSQL.Port", 5432)
-	v.SetDefault("PostgreSQL.Address", "localhost")
-	v.SetDefault("PostgreSQL.Username", "postgres")
-	v.SetDefault("PostgreSQL.Database", "postgres")
-	v.SetDefault("ReCAPTCHA.Enabled", false)
+	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Level", "info")
+	v.SetDefault("PostgreSQL.Address", "localhost")
+	v.SetDefault("PostgreSQL.Database", "postgres")
+	v.SetDefault("PostgreSQL.Port", 5432)
+	v.SetDefault("PostgreSQL.Username", "postgres")
+	v.SetDefault("ReCAPTCHA.Enabled", false)
 	v.SetDefault("Vault.Auth", "kubernetes")
-	v.SetDefault("Vault.Timeout", 30*time.Second)
 	v.SetDefault("Vault.IdleConnTimeout", 9*time.Minute)
+	v.SetDefault("Vault.Timeout", 30*time.Second)
 }
 
 func setupEnv(v *viper.Viper) {
@@ -270,6 +279,16 @@ func setupEnv(v *viper.Viper) {
 	v.BindEnv("Beta.EnableBetaCodes", "MONETR_ENABLE_BETA_CODES")
 	v.BindEnv("Cors.AllowedOrigins", "MONETR_CORS_ALLOWED_ORIGINS")
 	v.BindEnv("Cors.Debug", "MONETR_CORS_DEBUG")
+	v.BindEnv("Email.Enabled", "MONETR_EMAIL_ENABLED")
+	v.BindEnv("Email.Domain", "MONETR_EMAIL_DOMAIN")
+	v.BindEnv("Email.Verification.Enabled", "MONETR_EMAIL_VERIFICATION_ENABLED")
+	v.BindEnv("Email.Verification.TokenLifetime", "MONETR_EMAIL_VERIFICATION_TOKEN_LIFETIME")
+	v.BindEnv("Email.Verification.TokenSecret", "MONETR_EMAIL_VERIFICATION_TOKEN_SECRET")
+	v.BindEnv("Email.SMTP.Identity", "MONETR_EMAIL_SMTP_IDENTITY")
+	v.BindEnv("Email.SMTP.Username", "MONETR_EMAIL_SMTP_USERNAME")
+	v.BindEnv("Email.SMTP.Password", "MONETR_EMAIL_SMTP_PASSWORD")
+	v.BindEnv("Email.SMTP.Host", "MONETR_EMAIL_SMTP_HOST")
+	v.BindEnv("Email.SMTP.Port", "MONETR_EMAIL_SMTP_PORT")
 	v.BindEnv("JWT.LoginJwtSecret", "MONETR_JWT_LOGIN_SECRET")
 	v.BindEnv("JWT.RegistrationJwtSecret", "MONETR_JWT_REGISTRATION_SECRET")
 	v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")

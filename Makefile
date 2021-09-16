@@ -8,6 +8,8 @@ RELEASE_REVISION=$(shell git rev-parse HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/rest-api/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
+KUBERNETES_VERSION=1.18.5
+
 ARCH=amd64
 OS=$(shell uname -s | tr A-Z a-z)
 
@@ -17,7 +19,6 @@ ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 GENERATED_YAML=$(PWD)/generated/$(ENV_LOWER)
 
 PATH+=\b:$(GOPATH)/bin:$(LOCAL_BIN):$(NODE_MODULES_BIN)
-
 
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres

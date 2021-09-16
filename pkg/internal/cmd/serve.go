@@ -6,6 +6,12 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"io/ioutil"
+	"net"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
@@ -22,16 +28,12 @@ import (
 	"github.com/monetr/rest-api/pkg/internal/vault_helper"
 	"github.com/monetr/rest-api/pkg/jobs"
 	"github.com/monetr/rest-api/pkg/logging"
+	"github.com/monetr/rest-api/pkg/mail"
 	"github.com/monetr/rest-api/pkg/metrics"
 	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/monetr/rest-api/pkg/secrets"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"net"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 func init() {
@@ -332,6 +334,11 @@ func RunServer() error {
 
 	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
 
+	var smtpClient mail.Communication
+	if configuration.Email.Enabled {
+		smtpClient = mail.NewSMTPCommunication(log, configuration.Email.SMTP)
+	}
+
 	jobManager := jobs.NewJobManager(
 		log,
 		redisController.Pool(),
@@ -353,6 +360,7 @@ func RunServer() error {
 		redisController.Pool(),
 		plaidSecrets,
 		basicPaywall,
+		smtpClient,
 	)...)
 
 	unixSocket := false
