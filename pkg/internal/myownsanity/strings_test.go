@@ -38,3 +38,25 @@ func TestSliceContains(t *testing.T) {
 	assert.True(t, SliceContains(data, "Item #1"), "should contain item #1")
 	assert.False(t, SliceContains(data, "Item #3"), "should contain item #3")
 }
+
+func TestStringPEqual(t *testing.T) {
+	{
+		var a, b string = "a", "b"
+		assert.False(t, StringPEqual(&a, &b), "should not be equal")
+	}
+
+	{
+		var a, b string = "a", "a"
+		assert.True(t, StringPEqual(&a, &b), "should be equal")
+	}
+
+	{
+		a := "a"
+		assert.False(t, StringPEqual(&a, nil), "should not be equal")
+	}
+
+	{
+		b := "b"
+		assert.False(t, StringPEqual(nil, &b), "should not be equal")
+	}
+}

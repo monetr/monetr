@@ -1,9 +1,11 @@
 package platypus
 
 import (
+	"time"
+
+	"github.com/monetr/rest-api/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
-	"time"
 )
 
 type Transaction interface {
@@ -83,7 +85,7 @@ func (p PlaidTransaction) GetDate() time.Time {
 }
 
 func (p PlaidTransaction) GetDateLocal(timezone *time.Location) time.Time {
-	return p.Date.In(timezone)
+	return util.InLocal(p.Date, timezone)
 }
 
 func (p PlaidTransaction) GetISOCurrencyCode() string {

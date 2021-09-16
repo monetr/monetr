@@ -2,12 +2,14 @@ package jobs
 
 import (
 	"context"
+	"time"
+
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"github.com/monetr/rest-api/pkg/models"
 	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 func (j *jobManagerBase) upsertTransactions(
@@ -93,8 +95,7 @@ func (j *jobManagerBase) upsertTransactions(
 			shouldUpdate = true
 		}
 
-		// This won't work quite right, I need to compare the values, not the pointers.
-		if existingTransaction.PendingPlaidTransactionId != plaidTransaction.GetPendingTransactionId() {
+		if !myownsanity.StringPEqual(existingTransaction.PendingPlaidTransactionId, plaidTransaction.GetPendingTransactionId()) {
 			shouldUpdate = true
 		}
 
