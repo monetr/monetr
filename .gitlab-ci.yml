@@ -44,7 +44,7 @@ Build:
   stage: Build Javascript
   image: containers.monetr.dev/node:16.1.0-buster
   tags:
-    - make build ENVIRONMENT=$ENVIRONMENT
+    - k8s:shared
   script:
     - make build
   cache:
@@ -67,7 +67,7 @@ Build - Staging:
   tags:
     - k8s:shared
   script:
-    - make build
+    - make build ENVIRONMENT=$ENVIRONMENT
   cache:
     key: ${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
@@ -88,7 +88,7 @@ Build - Acceptance:
   tags:
     - k8s:shared
   script:
-    - make build
+    - make build ENVIRONMENT=$ENVIRONMENT
   cache:
     key: ${CI_COMMIT_SHA}-${ENVIRONMENT}
     paths:
