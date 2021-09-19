@@ -7,7 +7,8 @@ OS = $(shell uname -s | tr A-Z a-z)
 LOCAL_DOMAIN=monetr.mini
 WEB_UI_IMAGE_NAME=web-ui
 
-KUBECTL=kubectl
+MINIKUBE=minikube
+KUBECTL=$(MINIKUBE) kubectl --
 YQ=$(LOCAL_BIN)/yq
 
 $(LOCAL_BIN):

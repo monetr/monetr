@@ -14,6 +14,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: 'main'
+          token: ${{ secrets.PUSH_TOKEN }}
       - name: fetch
         run: git fetch --prune --unshallow
       - name: Push To Acceptance
@@ -26,6 +27,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: 'main'
+          token: ${{ secrets.PUSH_TOKEN }}
       - name: fetch
         run: git fetch --prune --unshallow
       - name: Push To Dog Food
@@ -38,6 +40,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: 'dog'
+          token: ${{ secrets.PUSH_TOKEN }}
       - name: fetch
         run: git fetch --prune --unshallow
       - name: Push To Production
