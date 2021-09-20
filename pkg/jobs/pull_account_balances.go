@@ -3,11 +3,12 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/rest-api/pkg/crumbs"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 
 	"github.com/gocraft/work"
 	"github.com/monetr/rest-api/pkg/models"
@@ -80,6 +81,12 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullAccountBalances(job *work.Job) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			sentry.CaptureException(errors.Errorf("pull account balances failure: %+v", err))
+		}
+	}()
+
 	hub := sentry.CurrentHub().Clone()
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Account Balances"))

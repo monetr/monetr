@@ -2,9 +2,10 @@ package jobs
 
 import (
 	"context"
-	"github.com/monetr/rest-api/pkg/internal/platypus"
 	"math"
 	"time"
+
+	"github.com/monetr/rest-api/pkg/internal/platypus"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
@@ -104,8 +105,9 @@ func NewJobManager(
 	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueueProcessFundingSchedules)
 
 	// Once a day. But also can be triggered by a webhook.
-	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullAccountBalances)
-	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullLatestTransactions)
+	// Once A day. 0 0 0 * * *
+	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullAccountBalances)
+	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullLatestTransactions)
 	//manager.work.PeriodicallyEnqueue("0 0 0 * * *", UpdateInstitutions)
 
 	manager.work.Start()

@@ -3,14 +3,15 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetr/rest-api/pkg/internal/myownsanity"
 	"github.com/monetr/rest-api/pkg/repository"
 	"github.com/pkg/errors"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const (
@@ -31,6 +32,12 @@ func (j *jobManagerBase) TriggerRemoveTransactions(accountId, linkId uint64, rem
 }
 
 func (j *jobManagerBase) removeTransactions(job *work.Job) error {
+	defer func() {
+		if err := recover(); err != nil {
+			sentry.CaptureException(errors.Errorf("remove transactions failure: %+v", err))
+		}
+	}()
+
 	hub := sentry.CurrentHub().Clone()
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Remove Transactions"))

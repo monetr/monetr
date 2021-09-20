@@ -3,9 +3,10 @@ package jobs
 import (
 	"context"
 	"fmt"
-	"github.com/monetr/rest-api/pkg/crumbs"
 	"strconv"
 	"time"
+
+	"github.com/monetr/rest-api/pkg/crumbs"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
@@ -87,6 +88,12 @@ func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			sentry.CaptureException(errors.Errorf("pull latest transactions failure: %+v", err))
+		}
+	}()
+
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
 
