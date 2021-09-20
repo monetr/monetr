@@ -59,4 +59,6 @@ func TestStringPEqual(t *testing.T) {
 		b := "b"
 		assert.False(t, StringPEqual(nil, &b), "should not be equal")
 	}
+
+	assert.True(t, StringPEqual(nil, nil), "should be equal")
 }

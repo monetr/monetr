@@ -168,8 +168,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
 			plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
 		}
 
-		log.Debugf("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
-
 		// Request the last 7 days worth of transactions for update.
 		start := time.Now().Add(-7 * 24 * time.Hour)
 		if link.LastSuccessfulUpdate == nil {
@@ -188,11 +186,14 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
 			return err
 		}
 
+		log.Debugf("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
 		transactions, err := platypus.GetAllTransactions(span.Context(), start, end, itemBankAccountIds)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve transactions from plaid")
 			return errors.Wrap(err, "failed to retrieve transactions from plaid")
 		}
+
+		log.Debugf("retrieved %d transactions", len(transactions))
 
 		if err = j.upsertTransactions(
 			span.Context(),

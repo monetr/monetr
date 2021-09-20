@@ -31,6 +31,9 @@ func StringPEqual(a, b *string) bool {
 	if a != nil && b == nil {
 		return false
 	}
+	if a == nil && b == nil {
+		return true
+	}
 
 	return *a == *b
 }

@@ -46,6 +46,8 @@ func (j *jobManagerBase) upsertTransactions(
 		return err
 	}
 
+	log.Debugf("found %d existing transactions", len(transactionsByPlaidId))
+
 	transactionsToUpdate := make([]*models.Transaction, 0)
 	transactionsToInsert := make([]models.Transaction, 0)
 	now := time.Now().UTC()
