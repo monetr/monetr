@@ -88,19 +88,16 @@ func (j *jobManagerBase) enqueuePullLatestTransactions(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
-	defer func() {
-		if err := recover(); err != nil {
-			sentry.CaptureException(errors.Errorf("pull latest transactions failure: %+v", err))
-		}
-	}()
-
-	log := j.getLogForJob(job)
-	log.Infof("pulling account balances")
-
 	hub := sentry.CurrentHub().Clone()
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Latest Transactions"))
 	defer span.Finish()
+
+	defer j.recover(span.Context())
+
+	log := j.getLogForJob(job)
+	log.Infof("pulling account balances")
+
 
 	defer func() {
 		if err != nil {

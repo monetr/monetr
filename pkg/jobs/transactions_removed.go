@@ -32,16 +32,12 @@ func (j *jobManagerBase) TriggerRemoveTransactions(accountId, linkId uint64, rem
 }
 
 func (j *jobManagerBase) removeTransactions(job *work.Job) error {
-	defer func() {
-		if err := recover(); err != nil {
-			sentry.CaptureException(errors.Errorf("remove transactions failure: %+v", err))
-		}
-	}()
-
 	hub := sentry.CurrentHub().Clone()
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
 	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Remove Transactions"))
 	defer span.Finish()
+
+	defer j.recover(span.Context())
 
 	log := j.getLogForJob(job)
 

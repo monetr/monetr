@@ -5,6 +5,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/monetr/rest-api/pkg/internal/platypus"
 
 	"github.com/go-pg/pg/v10"
@@ -233,4 +234,14 @@ func (j *jobManagerBase) getJobHelperRepository(job *work.Job, wrapper func(repo
 func (j *jobManagerBase) Close() error {
 	j.work.Stop()
 	return nil
+}
+
+func (j *jobManagerBase) recover(ctx context.Context) {
+	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		if err := recover(); err != nil {
+			hub.RecoverWithContext(ctx, err)
+		}
+	} else {
+		sentry.RecoverWithContext(ctx)
+	}
 }

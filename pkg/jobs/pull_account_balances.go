@@ -81,16 +81,19 @@ func (j *jobManagerBase) enqueuePullAccountBalances(job *work.Job) error {
 }
 
 func (j *jobManagerBase) pullAccountBalances(job *work.Job) (err error) {
+	hub := sentry.CurrentHub().Clone()
+	ctx := sentry.SetHubOnContext(context.Background(), hub)
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Account Balances"))
+	defer span.Finish()
+
+	defer j.recover(span.Context())
+
 	defer func() {
 		if err := recover(); err != nil {
 			sentry.CaptureException(errors.Errorf("pull account balances failure: %+v", err))
 		}
 	}()
 
-	hub := sentry.CurrentHub().Clone()
-	ctx := sentry.SetHubOnContext(context.Background(), hub)
-	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Account Balances"))
-	defer span.Finish()
 
 	start := time.Now()
 	log := j.getLogForJob(job)
