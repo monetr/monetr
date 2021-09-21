@@ -45,6 +45,7 @@ clean-mini: stop-mini clean-certificates
 	rm -rf $(PWD)/local || true
 	rm -rf $(LOCAL_TMP) || true
 	rm -rf $(LOCAL_BIN) || true
+	$(MAKE) clean
 
 init-mini: info
 	$(call infoMsg,Setting stuff up)
@@ -67,7 +68,7 @@ MINIKUBE_NAMESPACE=default
 MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
 MINIKUBE_MEMORY=8192 # 8GB of memory. Reduce if this is too high for your computer. Could be reduced to 2GB
 MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
-KUBERNETES_VERSION=v1.18.15
+KUBERNETES_VERSION=v1.19.0
 start-minikube:
 	$(info Starting minikube)
 	minikube start \
@@ -84,9 +85,9 @@ setup-etc-hosts: $(HOSTESS)
 	$(eval MINIKUBE_IP = $(shell minikube ip))
 	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) add $$subdomain.$(LOCAL_DOMAIN) $(MINIKUBE_IP); done
 
+setup-hosts: MINIKUBE_IP=$(shell minikube ip)
+setup-hosts: MINIKUBE_SSH_KEY=$(shell minikube ssh-key)
 setup-hosts: setup-etc-hosts
-	$(eval MINIKUBE_IP = $(shell minikube ip))
-	$(eval MINIKUBE_SSH_KEY = $(shell minikube ssh-key))
 	@sleep 5
 	$(call infoMsg,Adding 'registry.$(LOCAL_DOMAIN)' to minikube's VM's /etc/hosts file )
 	ssh -o "IdentitiesOnly=yes" \

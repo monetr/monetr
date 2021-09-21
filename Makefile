@@ -71,6 +71,9 @@ clean:
 	-rm -rf $(NODE_MODULES_DIR)
 	-rm -rf $(VENDOR_DIR)
 	-rm -rf $(LOCAL_TMP)
+	-rm -rf $(PWD)/generated
+	-rm -rf $(PWD)/docs
+	-rm -rf $(PWD)/Notes.md
 
 docs: $(SWAG) $(APP_GO_FILES)
 	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \
@@ -104,14 +107,15 @@ endif
 generate: OUTPUT_DIR = $(PWD)/generated/$(ENV_LOWER)
 generate: IMAGE_TAG=$(shell git rev-parse HEAD)
 generate: VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml
-generate: $(HELM) $(SPLIT_YAML)
+generate: $(HELM) $(SPLIT_YAML) $(VALUES_FILE) $(wildcard $(PWD)/templates/*)
 	$(call infoMsg,Generating Kubernetes yaml using Helm output to:  $(OUTPUT_DIR))
 	$(call infoMsg,Environment:                                      $(ENVIRONMENT))
 	$(call infoMsg,Using values file:                                $(VALUES_FILE))
-	$(HELM) template rest-api ./ \
+	-rm -rfd $(OUTPUT_DIR) # Clean up the output dir beforehand.
+	$(HELM) template rest-api $(PWD) \
 		--dry-run \
 		--set image.tag="$(IMAGE_TAG)" \
-		--set podAnnotations."monetr\.dev/date"="$(shell date)" \
+		--set podAnnotations."monetr\.dev/date"="$(BUILD_TIME)" \
 		--set podAnnotations."monetr\.dev/sha"="$(IMAGE_TAG)" \
 		--values=values.$(ENV_LOWER).yaml | $(SPLIT_YAML) --outdir $(OUTPUT_DIR) -
 
