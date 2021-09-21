@@ -107,8 +107,8 @@ func NewJobManager(
 
 	// Once a day. But also can be triggered by a webhook.
 	// Once A day. 0 0 0 * * *
-	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullAccountBalances)
-	manager.work.PeriodicallyEnqueue("0 0 * * * *", EnqueuePullLatestTransactions)
+	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullAccountBalances)
+	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullLatestTransactions)
 	//manager.work.PeriodicallyEnqueue("0 0 0 * * *", UpdateInstitutions)
 
 	manager.work.Start()
