@@ -35,7 +35,13 @@ resources:
     memory: 128Mi
 
 nodeSelector:
+  kubernetes.io/os: linux
   kubernetes.io/arch: amd64
+
+disruption:
+  enabled: true
+  maxUnavailable: 1
+  minAvailable: 1
 
 api:
   name: monetr (dog)

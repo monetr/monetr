@@ -1,68 +1,7 @@
-LOCAL_TMP = $(PWD)/tmp
-LOCAL_BIN = $(PWD)/bin
-PATH:=$(PATH):$(LOCAL_BIN)
-HELM_VERSION = 3.5.4
-ARCH = amd64
-OS = $(shell uname -s | tr A-Z a-z)
-
-ifndef ENVIRONMENT
-ENVIRONMENT = Staging
-endif
-
-ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
-
 default-deploy:
 	echo "Please run a specific target."
 
-clean-deploy:
-	rm -rf $(LOCAL_BIN) || true
-	rm -rf $(LOCAL_TMP) || true
-
-SPLIT_YAML = kubernetes-split-yaml
-HELM = helm
-dependencies-maybe:
-	which $(SPLIT_YAML) || make dependencies-split-yaml
-	which $(HELM) || make dependencies-helm
-	rm -rf $(LOCAL_TMP) || true
-
-directories-maybe:
-	mkdir -p $(LOCAL_TMP)
-	mkdir -p $(LOCAL_BIN)
-
-SPLIT_YAML_REPO = https://github.com/mogensen/kubernetes-split-yaml.git
-dependencies-split-yaml: directories-maybe
-	$(eval SPLIT_YAML_DIR := "$(LOCAL_TMP)/$(SPLIT_YAML)")
-	rm -rfd $(SPLIT_YAML_DIR) || true
-	git clone $(SPLIT_YAML_REPO) $(SPLIT_YAML_DIR)
-	cd $(SPLIT_YAML_DIR) && go build ./...
-	cp $(SPLIT_YAML_DIR)/$(SPLIT_YAML) $(LOCAL_BIN)/$(SPLIT_YAML)
-	rm -rfd $(SPLIT_YAML_DIR)
-
-HELM_DIR = $(LOCAL_TMP)/$(HELM)
-HELM_TAR = $(HELM_DIR)/$(HELM).tar.gz
-HELM_URL = "https://get.helm.sh/helm-v$(HELM_VERSION)-$(OS)-$(ARCH).tar.gz"
-HELM_BIN_DIR = $(OS)-$(ARCH)
-dependencies-helm: directories-maybe
-	rm -rf $(HELM_DIR) || true
-	mkdir -p $(HELM_DIR)
-	curl -SsL $(HELM_URL) --output $(HELM_TAR)
-	tar -xzf $(HELM_TAR) -C $(HELM_DIR)
-	cp $(HELM_DIR)/$(HELM_BIN_DIR)/$(HELM) $(LOCAL_BIN)/$(HELM)
-	rm -rf $(HELM_DIR)
-
-ENVIRONMENT_DIR = $(PWD)/generated/$(ENV_LOWER)
-IMAGE_TAG = $(shell git rev-parse HEAD)
-generate: dependencies-maybe
-	$(eval REPO_SHA = $(shell git rev-parse HEAD))
-	$(eval REPO_NAME = $(shell git config --get remote.origin.url))
-	helm template rest-api ./ \
-		--dry-run \
-		--set image.tag="$(IMAGE_TAG)" \
-		--set podAnnotations."monetr\.dev/date"="$(shell date)" \
-		--set podAnnotations."monetr\.dev/sha"="$(REPO_SHA)" \
-		--values=values.$(ENV_LOWER).yaml | kubernetes-split-yaml \
-		--outdir $(ENVIRONMENT_DIR) -
-
+ENVIRONMENT_DIR=$(PWD)/generated/$(ENV_LOWER)
 NAMESPACE = monetr-$(ENV_LOWER)
 dry:
 	kubectl apply -f $(ENVIRONMENT_DIR) -n $(NAMESPACE) --dry-run=server

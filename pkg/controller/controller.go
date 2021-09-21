@@ -113,11 +113,11 @@ func NewController(
 
 // @contact.name Support
 // @contact.url http://github.com/monetr/rest-api
-
 // @license.name Business Source License 1.1
 // @license.url https://github.com/monetr/rest-api/blob/main/LICENSE
-
 // @host api.monetr.app
+
+
 
 // @tag.name Funding Schedules
 // @tag.description Funding Schedules are created by the user to tell us when money should be taken from their account to fund their goals and expenses.

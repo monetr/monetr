@@ -7,7 +7,12 @@ BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/rest-api/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
-LICENSE=$(LOCAL_BIN)/golicense
+
+ifndef ENVIRONMENT
+ENVIRONMENT = Staging
+endif
+
+ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
 PATH+=\b:$(GOPATH)/bin:$(LOCAL_BIN):$(NODE_MODULES_BIN)
 
@@ -33,18 +38,26 @@ define warningMsg
 	@echo "\033[1;33m[$@] $(1)\033[0m"
 endef
 
+GO_SRC_DIR=$(PWD)/pkg
+ALL_GO_FILES=$(wildcard $(GO_SRC_DIR)/**/*.go)
+APP_GO_FILES=$(filter-out $(GO_SRC_DIR)/**/*_test.go, $(ALL_GO_FILES))
+TEST_GO_FILES=$(wildcard $(GO_SRC_DIR)/**/*_test.go)
 
-default: build test
+GO_DEPS=go.mod go.sum
 
-dependencies: go.mod go.sum
+include $(PWD)/scripts/*.mk
+
+default: build
+
+dependencies: $(GO_DEPS)
 	$(call infoMsg,Installing dependencies for monetrs rest-api)
 	go get ./...
 
-build: dependencies $(wildcard $(PWD)/pkg/**/*.go)
+build: dependencies $(APP_GO_FILES)
 	$(call infoMsg,Building rest-api binary)
 	go build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
 
-test:
+test: dependencies $(ALL_GO_FILES)
 	$(call infoMsg,Running go tests for monetr rest-api)
 ifndef CI
 	go run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
@@ -53,56 +66,54 @@ endif
 	go tool cover -func=$(COVERAGE_TXT)
 
 clean:
-	echo $$PATH
-	rm -rf $(LOCAL_BIN) || true
-	rm -rf $(COVERAGE_TXT) || true
-	rm -rf $(NODE_MODULES_DIR) || true
-	rm -rf $(VENDOR_DIR) || true
-	rm -rf $(LOCAL_TMP) || true
+	-rm -rf $(LOCAL_BIN)
+	-rm -rf $(COVERAGE_TXT)
+	-rm -rf $(NODE_MODULES_DIR)
+	-rm -rf $(VENDOR_DIR)
+	-rm -rf $(LOCAL_TMP)
 
-.PHONY: docs
-docs:
-	swag init -d pkg/controller -g controller.go --parseDependency --parseDepth 5 --parseInternal
+docs: $(SWAG) $(APP_GO_FILES)
+	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \
+		--parseDependency \
+		--parseDepth 5 \
+		--parseInternal \
+		--output $(PWD)/docs
 
 docs-local: docs
 	redoc-cli serve $(PWD)/docs/swagger.yaml
 
-docker:
+docker: Dockerfile $(APP_GO_FILES)
 	docker build \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
-		-t harder-rest-api -f Dockerfile .
+		-t monetr-rest-api -f Dockerfile .
 
 docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
 
-$(LOCAL_BIN):
-	mkdir $(LOCAL_BIN)
-
-$(LOCAL_TMP):
-	mkdir $(LOCAL_TMP)
-
-$(LICENSE):
-	@if [ ! -f "$(LICENSE)" ]; then make install-$(LICENSE); fi
-
-LICENSE_REPO=https://github.com/mitchellh/golicense.git
-LICENSE_TMP=$(LOCAL_TMP)/golicense
-install-$(LICENSE): $(LOCAL_BIN) $(LOCAL_TMP)
-	$(call infoMsg,Installing golicense to $(LICENSE))
-	rm -rf $(LICENSE_TMP) || true
-	git clone $(LICENSE_REPO) $(LICENSE_TMP)
-	cd $(LICENSE_TMP) && go build -o $(LICENSE) .
-	rm -rf $(LICENSE_TMP) || true
-
-.PHONY: license
 ifdef GITHUB_TOKEN
 license: $(LICENSE) build
 	$(call infoMsg,Checking dependencies for open source licenses)
-	- $(LICENSE) $(PWD)/licenses.hcl $(LOCAL_BIN)/monetr
+	-$(LICENSE) $(PWD)/licenses.hcl $(LOCAL_BIN)/monetr
 else
+.PHONY: license
 license:
 	$(call warningMsg,GITHUB_TOKEN is required to check licenses)
 endif
+
+generate: OUTPUT_DIR = $(PWD)/generated/$(ENV_LOWER)
+generate: IMAGE_TAG=$(shell git rev-parse HEAD)
+generate: VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml
+generate: $(HELM) $(SPLIT_YAML)
+	$(call infoMsg,Generating Kubernetes yaml using Helm output to:  $(OUTPUT_DIR))
+	$(call infoMsg,Environment:                                      $(ENVIRONMENT))
+	$(call infoMsg,Using values file:                                $(VALUES_FILE))
+	$(HELM) template rest-api ./ \
+		--dry-run \
+		--set image.tag="$(IMAGE_TAG)" \
+		--set podAnnotations."monetr\.dev/date"="$(shell date)" \
+		--set podAnnotations."monetr\.dev/sha"="$(IMAGE_TAG)" \
+		--values=values.$(ENV_LOWER).yaml | $(SPLIT_YAML) --outdir $(OUTPUT_DIR) -
 
 ifdef GITLAB_CI
 include Makefile.gitlab-ci

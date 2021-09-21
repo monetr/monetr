@@ -5,14 +5,10 @@ ARCH = amd64
 OS = $(shell uname -s | tr A-Z a-z)
 
 # Tools used to run the application locally
-HELM=helm
-HOSTESS=$(LOCAL_BIN)/hostess
 JQ=$(LOCAL_BIN)/jq
 KUBECTL=minikube kubectl --
-SPLIT_YAML=kubernetes-split-yaml
 YQ=$(LOCAL_BIN)/yq
 VAULT=vault
-MKCERT=mkcert
 PGO=$(LOCAL_BIN)/pgo
 
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
@@ -50,7 +46,7 @@ clean-mini: stop-mini clean-certificates
 	rm -rf $(LOCAL_TMP) || true
 	rm -rf $(LOCAL_BIN) || true
 
-init-mini: info local-dependencies-maybe
+init-mini: info
 	$(call infoMsg,Setting stuff up)
 	$(MAKE) setup-certificates
 	(minikube status | grep "minikube start") && $(MAKE) start-minikube
@@ -108,7 +104,7 @@ clean-certificates:
 
 NGINX_DEPLOYMENT=ingress-nginx-controller
 TLS_SECRET_NAME=monetr-tls
-setup-certificates: $(LOCAL_DIR)
+setup-certificates: $(LOCAL_DIR) $(MKCERT)
 	mkdir -p $(LOCAL_CERTS)
 	$(MKCERT) -install
 	$(MKCERT) -key-file $(KEY_PATH) -cert-file $(CERT_PATH) $(LOCAL_DOMAIN) *.$(LOCAL_DOMAIN)
@@ -186,31 +182,12 @@ pg-tls-values: $(YQ)
 	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.key = "password"' -i $(VALUES)
 	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.name = "postgres-postgres-secret"' -i $(VALUES)
 
-local-dependencies-maybe:
-	$(call infoMsg,Getting any dependencies needed to run everything locally)
-	which minikube || $(MAKE) dependencies-minikube
-	which $(HELM) || $(MAKE) dependencies-helm
-	which $(SPLIT_YAML) || $(MAKE) dependencies-split-yaml
-	which $(MKCERT) || $(MAKE) dependencies-mkcert
-
 MINIKUBE_VERSION=latest
 dependencies-minikube:
 	rm -rf $(PWD)/minikube-$(OS)-$(ARCH) || true
 	curl -LO https://storage.googleapis.com/minikube/releases/$(MINIKUBE_VERSION)/minikube-$(OS)-$(ARCH)
 	sudo install minikube-$(OS)-$(ARCH) $(LOCAL_BIN)/minikube
 	rm -rf $(PWD)/minikube-$(OS)-$(ARCH)
-
-HOSTESS_REPO=https://github.com/cbednarski/hostess
-$(HOSTESS):
-	@if [ ! -f "$(HOSTESS)" ]; then make install-$(HOSTESS); fi
-
-HOSTESS_DIR=$(LOCAL_TMP)/hostess
-install-$(HOSTESS): $(LOCAL_BIN) $(LOCAL_TMP)
-	$(call infoMsg,Installing hostess to $(HOSTESS))
-	rm -rf $(HOSTESS_DIR) || true
-	git clone $(HOSTESS_REPO) $(HOSTESS_DIR)
-	cd $(HOSTESS_DIR) && go build -o $(HOSTESS) .
-	rm -rf $(HOSTESS_DIR)
 
 ifeq ($(OS),darwin)
 JQ_OS=osx
@@ -245,17 +222,6 @@ install-$(YQ): $(LOCAL_BIN) $(LOCAL_TMP)
 	tar -xzf $(YQ_DIR).tar.gz -C $(YQ_DIR)
 	mv $(YQ_DIR)/yq_$(OS)_$(ARCH) $(YQ)
 	rm -rf $(YQ_DIR) || true
-
-
-MKCERT_REPO=https://github.com/FiloSottile/mkcert
-MKCERT_DIR=$(LOCAL_TMP)/$(MKCERT)
-dependencies-mkcert: $(LOCAL_TMP) $(LOCAL_BIN)
-	$(call infoMsg,Installing $(MKCERT) to $(LOCAL_BIN)/$(MKCERT))
-	rm -rf $(MKCERT_DIR) || true
-	git clone https://github.com/FiloSottile/mkcert $(MKCERT_DIR)
-	cd $(MKCERT_DIR) && go build -ldflags "-X main.Version=$$(git describe --tags)"
-	cp $(MKCERT_DIR)/$(MKCERT) $(LOCAL_BIN)/$(MKCERT)
-	rm -rf $(MKCERT_DIR) || true
 
 update-coredns:
 	$(call infoMsg,Updating CoreDNS config)
@@ -334,8 +300,6 @@ shell:
 		--rm -ti --image=$(SHELL_IMAGE) \
 	 	-n $(MINIKUBE_NAMESPACE) --
 
-values-file: local-dependencies-maybe $(VALUES)
-
 $(LOCAL_REST_API_DEPLOY):
 	mkdir -p $(LOCAL_REST_API_DEPLOY)
 
@@ -356,7 +320,7 @@ build-rest-api-mini: wait-for-docker $(YQ)
 		docker push $(BASE_IMAGE_NAME):latest
 	$(YQ) e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
 
-deploy-mini-application: $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini $(YQ)
+deploy-mini-application: $(HELM) $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini $(YQ)
 	$(eval CONFIG_HASH = $(shell md5 -q $(VALUES)))
 	CONFIG_HASH=$(CONFIG_HASH) $(YQ) e '.podAnnotations.configHash = strenv(CONFIG_HASH)' -i $(VALUES)
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
