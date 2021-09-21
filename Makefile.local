@@ -1,8 +1,6 @@
 LOCAL_DIR=$(PWD)/local
 LOCAL_CERTS = $(LOCAL_DIR)/certs
 PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
-ARCH = amd64
-OS = $(shell uname -s | tr A-Z a-z)
 
 # Tools used to run the application locally
 JQ=$(LOCAL_BIN)/jq

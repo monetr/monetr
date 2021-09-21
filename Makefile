@@ -8,6 +8,9 @@ RELEASE_REVISION=$(shell git rev-parse HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/rest-api/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
+ARCH=amd64
+OS=$(shell uname -s | tr A-Z a-z)
+
 ifndef ENVIRONMENT
 ENVIRONMENT = Staging
 endif
