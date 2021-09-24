@@ -39,7 +39,7 @@ nodeSelector:
   kubernetes.io/arch: amd64
 
 disruption:
-  enabled: true
+  enabled: false
   maxUnavailable: 1
   minAvailable: 1
 
