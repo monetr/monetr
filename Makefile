@@ -11,13 +11,13 @@ COVERAGE_TXT = $(PWD)/coverage.txt
 ARCH=amd64
 OS=$(shell uname -s | tr A-Z a-z)
 
-ifndef ENVIRONMENT
-ENVIRONMENT = Staging
-endif
-
+ENVIRONMENT ?= $(shell echo $${BUIlDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT:-Local})
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
+GENERATED_YAML=$(PWD)/generated/$(ENV_LOWER)
+
 PATH+=\b:$(GOPATH)/bin:$(LOCAL_BIN):$(NODE_MODULES_BIN)
+
 
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
@@ -33,6 +33,7 @@ endif
 
 # Just a shorthand to print some colored text, makes it easier to read and tell the developer what all the makefile is
 # doing since its doing a ton.
+ifndef BUILDKITE
 define infoMsg
 	@echo "\033[0;32m[$@] $(1)\033[0m"
 endef
@@ -40,6 +41,15 @@ endef
 define warningMsg
 	@echo "\033[1;33m[$@] $(1)\033[0m"
 endef
+else
+define infoMsg
+	@echo "INFO [$@] $(1)"
+endef
+
+define warningMsg
+	@echo "WARN [$@] $(1)"
+endef
+endif
 
 GO_SRC_DIR=$(PWD)/pkg
 ALL_GO_FILES=$(wildcard $(GO_SRC_DIR)/**/*.go)
@@ -52,21 +62,21 @@ include $(PWD)/scripts/*.mk
 
 default: build
 
-dependencies: $(GO_DEPS)
+dependencies: $(GO) $(GO_DEPS)
 	$(call infoMsg,Installing dependencies for monetrs rest-api)
-	go get ./...
+	$(GO) get $(GO_SRC_DIR)/...
 
-build: dependencies $(APP_GO_FILES)
+build: $(GO) dependencies $(APP_GO_FILES)
 	$(call infoMsg,Building rest-api binary)
-	go build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
+	$(GO) build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
 
-test: dependencies $(ALL_GO_FILES)
+test: $(GO) dependencies $(ALL_GO_FILES)
 	$(call infoMsg,Running go tests for monetr rest-api)
 ifndef CI
-	go run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
+	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 endif
-	go test -race -v -coverprofile=$(COVERAGE_TXT) -covermode=atomic ./...
-	go tool cover -func=$(COVERAGE_TXT)
+	$(GO) test -race -v -coverprofile=$(COVERAGE_TXT) -covermode=atomic ./...
+	$(GO) tool cover -func=$(COVERAGE_TXT)
 
 clean:
 	-rm -rf $(LOCAL_BIN)
@@ -107,20 +117,26 @@ license:
 	$(call warningMsg,GITHUB_TOKEN is required to check licenses)
 endif
 
-generate: OUTPUT_DIR = $(PWD)/generated/$(ENV_LOWER)
-generate: IMAGE_TAG=$(shell git rev-parse HEAD)
-generate: VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml
-generate: $(HELM) $(SPLIT_YAML) $(VALUES_FILE) $(wildcard $(PWD)/templates/*)
-	$(call infoMsg,Generating Kubernetes yaml using Helm output to:  $(OUTPUT_DIR))
+VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml
+VALUES_FILES=$(PWD)/values.yaml $(VALUES_FILE)
+
+TEMPLATE_FILES=$(PWD)/templates/*
+
+$(GENERATED_YAML): $(VALUES_FILES) $(TEMPLATE_FILES)
+$(GENERATED_YAML): IMAGE_TAG=$(shell git rev-parse HEAD)
+$(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
+	$(call infoMsg,Generating Kubernetes yaml using Helm output to:  $(GENERATED_YAML))
 	$(call infoMsg,Environment:                                      $(ENVIRONMENT))
 	$(call infoMsg,Using values file:                                $(VALUES_FILE))
-	-rm -rfd $(OUTPUT_DIR) # Clean up the output dir beforehand.
+	-rm -rf $(GENERATED_YAML)
 	$(HELM) template rest-api $(PWD) \
 		--dry-run \
 		--set image.tag="$(IMAGE_TAG)" \
 		--set podAnnotations."monetr\.dev/date"="$(BUILD_TIME)" \
 		--set podAnnotations."monetr\.dev/sha"="$(IMAGE_TAG)" \
-		--values=values.$(ENV_LOWER).yaml | $(SPLIT_YAML) --outdir $(OUTPUT_DIR) -
+		--values=values.$(ENV_LOWER).yaml | $(SPLIT_YAML) --outdir $(GENERATED_YAML) -
+
+generate: $(GENERATED_YAML)
 
 ifdef GITLAB_CI
 include Makefile.gitlab-ci
@@ -149,16 +165,20 @@ include Makefile.docker
 
 ifndef CI
 include Makefile.tinker
+
+ifeq ($(ENV_LOWER),local)
 include Makefile.local
+endif
+
 endif
 
 ifndef POSTGRES_PORT
 POSTGRES_PORT=5432
 endif
 
-migrate:
-	@go run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
+migrate: $(GO)
+	@$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
 
-beta-code: migrate
-	@go run $(MONETR_CLI_PACKAGE) beta new-code -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
+beta-code: $(GO) migrate
+	@$(GO) run $(MONETR_CLI_PACKAGE) beta new-code -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
 

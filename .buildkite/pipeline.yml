@@ -1,0 +1,9 @@
+steps:
+  - command:
+      - make dry
+      - make deploy
+    label: "Deployment"
+    env:
+      ENVIRONMENT: ${BUILDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT}
+    agents:
+      environment: "${BUILDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT}"
