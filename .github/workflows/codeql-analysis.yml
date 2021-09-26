@@ -23,7 +23,7 @@ on:
 jobs:
   analyze:
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.ref }}-${{ github.job }}
       cancel-in-progress: true
     name: Analyze
     runs-on: ubuntu-latest
