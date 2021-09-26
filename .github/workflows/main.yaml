@@ -128,4 +128,4 @@ jobs:
           target_url: https://api.staging.monetr.dev
           environment: staging
           auto_merge: false
-          ref: "${{ env.GITHUB_SHA }}"
+          ref: "${{ github.sha }}"
