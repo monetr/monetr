@@ -90,11 +90,11 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           build-args: |
-            REVISION=${{ env.GITHUB_SHA }}
+            REVISION=${{ github.sha }}
             BUILD_TIME=${{ steps.timestamp.outputs.date }}
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: monetr/rest-api:${{ env.GITHUB_SHA }}
+          tags: "monetr/rest-api:${{ github.sha }}"
   docs-deploy:
     needs:
       - test
