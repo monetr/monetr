@@ -78,17 +78,23 @@ jobs:
     name: Container
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Build and push ghcr.io
-        uses: docker/build-push-action@v1
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Container Timestamp
+        id: timestamp
+        run: echo "::set-output name=date::$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          dockerfile: Dockerfile
-          path: .
-          tags: ${{ env.GITHUB_SHA }}
-          repository: monetr/rest-api
+          build-args: |
+            REVISION=${{ env.GITHUB_SHA }}
+            BUILD_TIME=${{ steps.timestamp.outputs.date }}
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: monetr/rest-api:${{ env.GITHUB_SHA }}
   docs-deploy:
     needs:
       - test

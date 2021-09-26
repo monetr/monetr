@@ -1,10 +1,19 @@
-name: GitHub
+name: Pull Request
 
 on:
   push:
     branches:
       - staging
       - trying
+
+permissions:
+  actions: read
+  deployments: none
+  issues: none
+  packages: none
+  pull-requests: none
+  repository-projects: none
+  security-events: none
 
 jobs:
   test:
@@ -82,11 +91,11 @@ jobs:
       - run: make dependencies
       - run: make docs
       - run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
-  docker:
+  container:
     needs:
-      - test
+      - "test"
       - "pg-test"
-    name: Docker
+    name: Container
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

@@ -1,6 +1,11 @@
-
 staging:
   environment: staging
   production_environment: false
-  required_contexts: []
+  required_contexts: [ ]
+  auto_merge: false
+
+acceptance:
+  environment: acceptance
+  production_environment: false
+  required_contexts: [ ]
   auto_merge: false
