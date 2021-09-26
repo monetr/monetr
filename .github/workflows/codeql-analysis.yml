@@ -22,9 +22,6 @@ on:
 
 jobs:
   analyze:
-    concurrency:
-      group: ${{ github.ref }}-${{ github.job }}
-      cancel-in-progress: true
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
