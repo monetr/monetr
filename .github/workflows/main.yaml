@@ -71,6 +71,24 @@ jobs:
         with:
           report_paths: '/junit.xml'
           check_name: 'PostgreSQL Test Summary'
+  container:
+    needs:
+      - "test"
+      - "pg-test"
+    name: Container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and push ghcr.io
+        uses: docker/build-push-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile: Dockerfile
+          path: .
+          tags: ${{ env.GITHUB_SHA }}
+          repository: monetr/rest-api
   docs-deploy:
     needs:
       - test

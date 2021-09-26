@@ -85,6 +85,7 @@ jobs:
   docker:
     needs:
       - test
+      - "pg-test"
     name: Docker
     runs-on: ubuntu-latest
     steps:
