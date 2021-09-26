@@ -9,7 +9,7 @@ jobs:
   test:
     timeout-minutes: 15
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.ref }}
       cancel-in-progress: true
     name: Test
     runs-on: ubuntu-latest
@@ -44,7 +44,7 @@ jobs:
   pg-test:
     timeout-minutes: 10
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.ref }}
       cancel-in-progress: true
     name: PostgreSQL Test
     runs-on: ubuntu-latest
@@ -92,7 +92,7 @@ jobs:
   container:
     timeout-minutes: 45
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.ref }}
       cancel-in-progress: true
     needs:
       - "test"
@@ -122,7 +122,7 @@ jobs:
           tags: "ghcr.io/monetr/rest-api:${{ github.sha }}"
   docs-deploy:
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.ref }}
       cancel-in-progress: true
     needs:
       - test
@@ -142,7 +142,7 @@ jobs:
           folder: docs
   staging:
     concurrency:
-      group: ${{ github.head_ref }}
+      group: ${{ github.ref }}
       cancel-in-progress: true
     needs:
       - "test"
