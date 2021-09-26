@@ -100,7 +100,7 @@ jobs:
         with:
           build-args: |
             REVISION=${{ github.sha }}
-            BUILD_TIME=${{ step.timestamp.outputs.build_time }}
+            BUILD_TIME=${{ steps.timestamp.outputs.build_time }}
           push: true
           platforms: "linux/amd64,linux/arm64,linux/arm/v7"
           tags: "ghcr.io/monetr/rest-api:${{ github.sha }}"
