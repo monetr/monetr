@@ -106,3 +106,20 @@ jobs:
         with:
           branch: gh-pages
           folder: docs
+  staging:
+    needs:
+      - "test"
+      - "pg-test"
+      - "container"
+    name: Staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create Staging Deployment
+        id: deployment
+        with:
+          token: "${{ github.token }}"
+          target_url: https://api.staging.monetr.dev
+          environment: staging
+          auto_merge: false
+          ref: "${{ env.GITHUB_SHA }}"
