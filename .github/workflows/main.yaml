@@ -7,6 +7,10 @@ on:
 
 jobs:
   test:
+    timeout-minutes: 15
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
     name: Test
     runs-on: ubuntu-latest
     container: golang:1.17.0
@@ -38,6 +42,10 @@ jobs:
       - name: Test
         run: make test
   pg-test:
+    timeout-minutes: 10
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
     name: PostgreSQL Test
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/pgtest:latest
@@ -71,10 +79,30 @@ jobs:
         with:
           report_paths: '/junit.xml'
           check_name: 'PostgreSQL Test Summary'
-  container:
+  timestamp:
     needs:
       - "test"
       - "pg-test"
+    name: Timestamp
+    runs-on: ubuntu-latest
+    steps:
+      - name: Container Timestamp
+        id: timestamp
+        run: echo "::set-output name=build_time::$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  container:
+    timeout-minutes: 45
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
+    needs:
+      - "test"
+      - "pg-test"
+      - "timestamp"
+    strategy:
+      matrix:
+        arch:
+          - "linux/amd64"
+          - "linux/arm64"
     name: Container
     runs-on: ubuntu-latest
     steps:
@@ -82,20 +110,20 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Container Timestamp
-        id: timestamp
-        run: echo "::set-output name=date::$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           build-args: |
             REVISION=${{ github.sha }}
-            BUILD_TIME=${{ steps.timestamp.outputs.date }}
+            BUILD_TIME=${{ needs.timestamp.outputs.build_time }}
           push: true
-          platforms: linux/amd64,linux/arm64
-          tags: "monetr/rest-api:${{ github.sha }}"
+          platforms: ${{ matrix.arch }}
+          tags: "ghcr.io/monetr/rest-api:${{ github.sha }}"
   docs-deploy:
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
     needs:
       - test
     name: Deploy Documentation
@@ -113,6 +141,9 @@ jobs:
           branch: gh-pages
           folder: docs
   staging:
+    concurrency:
+      group: ${{ github.head_ref }}
+      cancel-in-progress: true
     needs:
       - "test"
       - "pg-test"
