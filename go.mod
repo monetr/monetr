@@ -13,7 +13,7 @@ require (
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.10.5
+	github.com/go-pg/pg/v10 v10.10.6
 	github.com/gocraft/work v0.5.1
 	github.com/gomodule/redigo v1.8.5
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -37,7 +37,7 @@ require (
 	github.com/teambition/rrule-go v1.7.2
 	github.com/vmihailenco/msgpack/v5 v5.3.4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
@@ -141,7 +141,7 @@ require (
 	golang.org/x/net v0.0.0-20210913180222-943fd674d43e // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20210910150752-751e447fb3d0 // indirect
+	golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/api v0.56.0 // indirect
