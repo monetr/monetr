@@ -6,7 +6,7 @@ on:
   workflow_dispatch: { }
 
 jobs:
-  determine-commit:
+  commits:
     # Determine the commits that need to be deployed to each environment.
     name: Determine Commit
     runs-on: ubuntu-latest
@@ -25,7 +25,7 @@ jobs:
 
   test:
     needs:
-      - "determine-commit"
+      - "commits"
     timeout-minutes: 15
     name: Test
     runs-on: ubuntu-latest
@@ -62,7 +62,7 @@ jobs:
 
   pg-test:
     needs:
-      - "determine-commit"
+      - "commits"
     timeout-minutes: 10
     name: PostgreSQL Test
     runs-on: ubuntu-latest
@@ -103,7 +103,7 @@ jobs:
   container:
     timeout-minutes: 60
     needs:
-      - "determine-commit"
+      - "commits"
       - "test"
       - "pg-test"
     name: Container
@@ -138,7 +138,7 @@ jobs:
 
   acceptance:
     needs:
-      - "determine-commit"
+      - "commits"
       - "test"
       - "pg-test"
       - "container"
@@ -157,7 +157,7 @@ jobs:
 
   release-acceptance:
     needs:
-      - "determine-commit"
+      - "commits"
       - "test"
       - "pg-test"
       - "container"
