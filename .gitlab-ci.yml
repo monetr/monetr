@@ -2,18 +2,14 @@
 # exception for staging branches that bors creates.
 workflow:
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying" || $CI_COMMIT_BRANCH == "dog" || $CI_COMMIT_BRANCH == "acceptance"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
-      when: never
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
     - if: '$CI_PIPELINE_SOURCE == "external_pull_request_event"'
       when: never
     - if: $CI_COMMIT_TAG
       when: always
-#    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
-#      when: never
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH != "main"'
+      when: never
 
 stages:
   - Release
@@ -30,19 +26,6 @@ stages:
 variables:
   GO111MODULE: 'on'
   GOFLAGS: '-mod=vendor'
-
-Release Testing:
-  only:
-    refs:
-      - tags
-  allow_failure: true
-  needs: [ ]
-  stage: Release
-  image: containers.monetr.dev/ubuntu:20.04
-  tags:
-    - k8s:shared
-  script:
-    - git --no-pager log --oneline $(git describe --tags --abbrev=0 @^)..@
 
 Go Dependencies:
   needs: [ ]

@@ -111,8 +111,6 @@ jobs:
       - "pg-test"
     name: Google Container
     runs-on: ubuntu-latest
-    environment:
-      name: acceptance
     steps:
       - uses: actions/checkout@v2
         with:
@@ -126,7 +124,7 @@ jobs:
         with:
           registry: us-docker.pkg.dev
           username: _json_key
-          password: ${{ secrets.GAR_JSON_KEY }}
+          password: ${{ secrets.ACCEPTANCE_GAR_JSON_KEY }}
       - name: Container Timestamp
         id: timestamp
         run: echo "::set-output name=build_time::$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
