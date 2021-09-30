@@ -23,7 +23,7 @@ install-$(CURL):
 	apt-get install -y curl
 else
 # If we are not on debian then we need a different script. I'm not sure what it would need to be.
-$(error I dont know how to install curl on your OS)
+#$(error I dont know how to install curl on your OS)
 endif
 else
 # If we are not on linux then I have no idea what I'd need to do to get curl.
