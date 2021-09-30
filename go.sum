@@ -739,6 +739,8 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stripe/stripe-go/v72 v72.65.0 h1:eWGJf2ywSt0rTVZE4mze7narqP/6sAHnOcjDXvBneD4=
 github.com/stripe/stripe-go/v72 v72.65.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
+github.com/stripe/stripe-go/v72 v72.67.0 h1:urktl6kc7/Pbh8+pzHfBYfyzyUpwthgD/cqP9EwNYso=
+github.com/stripe/stripe-go/v72 v72.67.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/subosito/gotenv v1.2.0 h1:Slr1R9HxAlEKefgq5jn9U+DnETlIUa6HfgEzj0g5d7s=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/tdewolff/minify/v2 v2.9.10/go.mod h1:U1Nc+/YBSB0FPEarqcgkYH3Ep4DNyyIbOyl5P4eWMuo=
