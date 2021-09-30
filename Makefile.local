@@ -122,6 +122,7 @@ _deploy-certificate:
 	$(KUBECTL) -n $(NGINX_NAMESPACE) create secret tls $(TLS_SECRET_NAME) --key $(KEY_PATH) --cert $(CERT_PATH) \
 		--dry-run=client \
 		-o yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=90s
 	$(KUBECTL) get deploy/$(NGINX_DEPLOYMENT) \
 		--namespace=$(NGINX_NAMESPACE) -o json > $(LOCAL_TMP)/nginx-args.json
 	$(JQ) '.spec.template.spec.containers[0].args |= . + ["--default-ssl-certificate=$$(POD_NAMESPACE)/$(TLS_SECRET_NAME)"]' \
@@ -135,10 +136,6 @@ setup-registry:
 	$(KUBECTL) apply -f $(PWD)/minikube/registry.yaml
 	$(KUBECTL) rollout status deploy/registry
 
-# We want to check and see if the values file exists or is up to date.
-$(VALUES):
-	if [ ! -f "$(VALUES)" ]; then $(HELM) show values $(PWD) > $(VALUES) && $(MAKE) init-mini-values; fi
-
 $(LOGIN_JWT_SECRET): $(LOCAL_DIR)
 	if [ -f "$(LOGIN_JWT_SECRET)" ]; then exit 0; fi
 	$(call infoMsg,Login JWT secret has not been generated, creating it now)
@@ -147,9 +144,17 @@ $(LOGIN_JWT_SECRET): $(LOCAL_DIR)
 $(REGISTER_JWT_SECRET): $(LOCAL_DIR)
 	if [ ! -f "$(REGISTER_JWT_SECRET)" ]; then echo "Register JWT secret has not been generated, creating now" && sleep 1 && (date | md5 > $(REGISTER_JWT_SECRET)); fi
 
-REST_API_IMAGE_REPO=registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
-init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET) $(YQ)
+# We want to check and see if the values file exists or is up to date.
+$(VALUES):
+	if [ ! -f "$(VALUES)" ]; then $(MAKE) init-mini-values; fi
+
+init-mini-values: REST_API_IMAGE_REPO=registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
+init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
+init-mini-values: LOGIN_JWT_SECRET_VALUE=$(shell cat $(LOGIN_JWT_SECRET))
+init-mini-values: REGISTER_JWT_SECRET_VALUE=$(shell cat $(REGISTER_JWT_SECRET))
+init-mini-values: $(YQ) $(HELM)
 	$(call infoMsg,Setting up a basic helm values file for running the API locally)
+	if [ ! -f "$(VALUES)" ]; then $(HELM) show values $(PWD) > $(VALUES); fi
 	$(YQ) e '.image.repository = "$(REST_API_IMAGE_REPO)"' -i $(VALUES)
 	$(YQ) e '.ingress.enabled = true' -i $(VALUES)
 	$(YQ) e '.ingress.annotations."kubernetes.io/ingress.class" = "nginx"' -i $(VALUES)
@@ -159,11 +164,9 @@ init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET) $(YQ)
 	$(YQ) e '.api.includeSecrets = true' -i $(VALUES)
 	$(YQ) e '.api.uiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.apiDomainName = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
-	$(eval LOGIN_JWT_SECRET_VALUE = $(shell cat $(LOGIN_JWT_SECRET)))
-	export jwt_secret_value=$(LOGIN_JWT_SECRET_VALUE) && yq e '.api.jwt.loginJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
-	$(eval REGISTER_JWT_SECRET_VALUE = $(shell cat $(REGISTER_JWT_SECRET)))
-	export jwt_secret_value=$(REGISTER_JWT_SECRET_VALUE) && yq e '.api.jwt.registrationJwtSecret = strenv(jwt_secret_value)' -i $(VALUES)
-	$(YQ) e '.api.postgreSql.address = "postgres.monetr.in"' -i $(VALUES)
+	$(YQ) e '.api.jwt.loginJwtSecret = "$(LOGIN_JWT_SECRET_VALUE)"' -i $(VALUES)
+	$(YQ) e '.api.jwt.registrationJwtSecret = "$(REGISTER_JWT_SECRET_VALUE)"' -i $(VALUES)
+	$(YQ) e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.cors.debug = false' -i $(VALUES)
@@ -319,9 +322,10 @@ build-rest-api-mini: wait-for-docker $(YQ)
 		docker push $(BASE_IMAGE_NAME):latest
 	$(YQ) e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
 
-deploy-mini-application: $(HELM) $(VALUES) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini $(YQ)
-	$(eval CONFIG_HASH = $(shell md5 -q $(VALUES)))
-	CONFIG_HASH=$(CONFIG_HASH) $(YQ) e '.podAnnotations.configHash = strenv(CONFIG_HASH)' -i $(VALUES)
+deploy-mini-application: $(VALUES)
+deploy-mini-application: CONFIG_HASH=$(shell md5 -q $(VALUES))
+deploy-mini-application: $(HELM) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini $(YQ) $(SPLIT_YAML)
+	$(YQ) e '.podAnnotations.configHash = "$(CONFIG_HASH)"' -i $(VALUES)
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
  		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -

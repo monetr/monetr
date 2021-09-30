@@ -51,13 +51,8 @@ metadata:
   {{- include "api.labels" . | nindent 4 }}
 data:
   config.yaml: |
-    {{- if .Values.api.sendGrid.templates }}
-    sendGrid:
-      templates:
-    {{- toYaml .Values.api.sendGrid.templates | nindent 8 }}
-    {{- end }}
     {{- if .Values.api.stripe.initialPlan }}
     stripe:
       initialPlan:
     {{- toYaml .Values.api.stripe.initialPlan | nindent 8 }}
-  {{- end }}
+    {{- end }}
