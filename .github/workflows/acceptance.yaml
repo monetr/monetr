@@ -1,4 +1,4 @@
-name: Environment
+name: Acceptance Deploy
 
 on:
   schedule:
