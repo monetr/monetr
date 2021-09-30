@@ -5,6 +5,9 @@ on:
     - cron: 0 17 * * * # Noon in central time.
   workflow_dispatch: { }
 
+env:
+  PROJECT_ID: acceptance-327322
+
 jobs:
   commits:
     # Determine the commits that need to be deployed to each environment.
@@ -106,8 +109,10 @@ jobs:
       - "commits"
       - "test"
       - "pg-test"
-    name: Container
+    name: Google Container
     runs-on: ubuntu-latest
+    environment:
+      name: acceptance
     steps:
       - uses: actions/checkout@v2
         with:
@@ -116,12 +121,12 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      - name: Login to GitHub Container Registry
+      - name: Login to Google Artifact Registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: us-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.GAR_JSON_KEY }}
       - name: Container Timestamp
         id: timestamp
         run: echo "::set-output name=build_time::$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
@@ -129,12 +134,13 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
+          context: .
           build-args: |
             REVISION=${{ needs.commits.outputs.acceptance_commit }}
             BUILD_TIME=${{ steps.timestamp.outputs.build_time }}
           push: true
           platforms: "linux/amd64"
-          tags: "ghcr.io/monetr/rest-api:${{ needs.commits.outputs.acceptance_commit }}"
+          tags: "us-docker.pkg.dev/${{ env.PROJECT_ID }}/monetr-containers/rest-api:${{ needs.commits.outputs.acceptance_commit }}"
 
   acceptance:
     needs:

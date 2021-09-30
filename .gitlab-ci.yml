@@ -3,7 +3,7 @@
 workflow:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying" || $CI_COMMIT_BRANCH == "dog" || $CI_COMMIT_BRANCH == "acceptance"'
-      when: always
+      when: never
     - if: '$CI_COMMIT_BRANCH == "staging" || $CI_COMMIT_BRANCH == "trying"'
       when: never
     - if: '$CI_COMMIT_BRANCH =~ /(.tmp)/'
