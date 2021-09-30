@@ -1,8 +1,0 @@
-status = [
-    "Test",
-    "Container"
-]
-
-[committer]
-name = "bors[bot]"
-email = "me@elliotcourant.dev"

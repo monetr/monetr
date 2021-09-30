@@ -1,10 +1,9 @@
-name: Pull Request
+name: PR
 
 on:
-  push:
+  pull_request:
     branches:
-      - staging
-      - trying
+      - main
 
 permissions:
   actions: read
@@ -19,7 +18,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container: golang:1.17.0
+    container: golang:1.17.1
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
