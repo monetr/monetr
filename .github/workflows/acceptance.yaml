@@ -19,7 +19,7 @@ jobs:
         run: git fetch --prune --unshallow
       - name: Determine Acceptance Commit
         id: acceptance
-        run: echo "::set-output name=acceptance_commit::$(go run github.com/monetr/rest-api/tools/releaser --since=-24h)
+        run: echo "::set-output name=acceptance_commit::$(go run github.com/monetr/rest-api/tools/releaser --since=-24h)"
     outputs:
       acceptance_commit: "${{ steps.acceptance.outputs.acceptance_commit }}"
 
