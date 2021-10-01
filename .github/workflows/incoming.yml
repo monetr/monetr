@@ -18,7 +18,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container: golang:1.17.1
+    container: ghcr.io/monetr/build-containers/golang:1.17.0
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
