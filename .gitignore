@@ -17,4 +17,5 @@ local
 values.local.yaml
 Notes.md
 *terraform*
-rest-api.xml
+rest-api-junit.xml
+rest-api-tests.json
