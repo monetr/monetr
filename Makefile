@@ -16,8 +16,6 @@ ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
 GENERATED_YAML=$(PWD)/generated/$(ENV_LOWER)
 
-#PATH+=\b:$(LOCAL_BIN):$(NODE_MODULES_BIN)
-
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
 endif
@@ -30,15 +28,19 @@ ifndef POSTGRES_HOST
 POSTGRES_HOST=localhost
 endif
 
+GREEN=\033[0;32m
+YELLOW=\033[1;33m
+RESET=\033[0m
+
 # Just a shorthand to print some colored text, makes it easier to read and tell the developer what all the makefile is
 # doing since its doing a ton.
 ifndef BUILDKITE
 define infoMsg
-	@echo "\033[0;32m[$@] $(1)\033[0m"
+	@echo "$(GREEN)[$@] $(1)$(RESET)"
 endef
 
 define warningMsg
-	@echo "\033[1;33m[$@] $(1)\033[0m"
+	@echo "$(YELLOW)[$@] $(1)$(RESET)"
 endef
 else
 define infoMsg
