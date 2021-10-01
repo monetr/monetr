@@ -16,8 +16,7 @@ ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
 GENERATED_YAML=$(PWD)/generated/$(ENV_LOWER)
 
-PATH+=\b:$(GOPATH)/bin:$(LOCAL_BIN):$(NODE_MODULES_BIN)
-
+#PATH+=\b:$(LOCAL_BIN):$(NODE_MODULES_BIN)
 
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
@@ -98,7 +97,7 @@ docs: $(SWAG) $(APP_GO_FILES)
 		--output $(PWD)/docs
 
 docs-local: docs
-	redoc-cli serve $(PWD)/docs/swagger.yaml
+	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
 
 docker: Dockerfile $(APP_GO_FILES)
 	docker build \
