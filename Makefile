@@ -70,12 +70,12 @@ build: $(GO) dependencies $(APP_GO_FILES)
 	$(call infoMsg,Building rest-api binary)
 	$(GO) build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
 
-test: $(GO) dependencies $(ALL_GO_FILES)
+test: $(GO) dependencies $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr rest-api)
 ifndef CI
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 endif
-	$(GO) test -race -v -coverprofile=$(COVERAGE_TXT) -covermode=atomic $(GO_SRC_DIR)/...
+	$(GOTESTSUM) --junitfile $(PWD)/rest-api.xml -- -race -v -coverprofile=$(COVERAGE_TXT) -covermode=atomic $(GO_SRC_DIR)/...
 	$(GO) tool cover -func=$(COVERAGE_TXT)
 
 clean:
@@ -182,3 +182,4 @@ migrate: $(GO)
 beta-code: $(GO) migrate
 	@$(GO) run $(MONETR_CLI_PACKAGE) beta new-code -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
 
+all: build test generate lint

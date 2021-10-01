@@ -159,6 +159,24 @@ install-$(GCLOUD): $(LOCAL_BIN) $(LOCAL_TMP) $(CURL)
 	tar -xzf $(GCLOUD_TAR) -C $(LOCAL_BIN)
 	rm -rf $(GCLOUD_TAR)
 
+GOTESTSUM=$(LOCAL_BIN)/gotestsum
+$(GOTESTSUM):
+	@if [ ! -f "$(GOTESTSUM)" ]; then $(MAKE) install-$(GOTESTSUM); fi
+
+install-$(GOTESTSUM): GOTESTSUM_VERSION=1.7.0
+install-$(GOTESTSUM): GOTESTSUM_URL="https://github.com/gotestyourself/gotestsum/releases/download/v$(GOTESTSUM_VERSION)/gotestsum_$(GOTESTSUM_VERSION)_$(OS)_$(ARCH).tar.gz"
+install-$(GOTESTSUM): GOTESTSUM_DIR=$(LOCAL_TMP)/gotestsum
+install-$(GOTESTSUM): GOTESTSUM_TAR=$(GOTESTSUM_DIR).tar.gz
+install-$(GOTESTSUM): $(LOCAL_BIN) $(LOCAL_TMP) $(CURL)
+	$(call infoMsg,Installing gotestsum to $(GOTESTSUM))
+	-rm -rf $(GOTESTSUM_DIR)
+	mkdir -p $(GOTESTSUM_DIR)
+	curl -SsL $(GOTESTSUM_URL) --output $(GOTESTSUM_TAR)
+	tar -xzf $(GOTESTSUM_TAR) -C $(GOTESTSUM_DIR)
+	cp $(GOTESTSUM_DIR)/gotestsum $(GOTESTSUM)
+	rm -rf $(GOTESTSUM_DIR)
+	rm -rf $(GOTESTSUM_TAR)
+
 ifneq ($(ENV_LOWER),local)
 KUBECTL=$(LOCAL_BIN)/kubectl
 $(KUBECTL):
