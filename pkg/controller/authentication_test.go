@@ -1,12 +1,13 @@
 package controller_test
 
 import (
+	"net/http"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/rest-api/pkg/internal/mock_stripe"
 	"github.com/monetr/rest-api/pkg/swag"
-	"net/http"
-	"testing"
 )
 
 func TestLogin(t *testing.T) {

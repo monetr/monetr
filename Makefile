@@ -75,7 +75,9 @@ test: $(GO) dependencies $(ALL_GO_FILES) $(GOTESTSUM)
 ifndef CI
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 endif
-	$(GOTESTSUM) --junitfile $(PWD)/rest-api.xml -- -race -v -coverprofile=$(COVERAGE_TXT) -covermode=atomic $(GO_SRC_DIR)/...
+	$(GOTESTSUM) --junitfile $(PWD)/rest-api.xml --format testname -- -race -v \
+		-coverprofile=$(COVERAGE_TXT) \
+		-covermode=atomic $(GO_SRC_DIR)/...
 	$(GO) tool cover -func=$(COVERAGE_TXT)
 
 clean:
