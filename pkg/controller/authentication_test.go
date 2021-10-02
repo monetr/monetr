@@ -92,7 +92,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.token").String().NotEmpty()
-		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe/failure")
+		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe")
 
 		stripeMock.AssertNCustomersCreated(t, 1)
 	})
