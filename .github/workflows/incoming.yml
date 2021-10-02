@@ -227,11 +227,10 @@ jobs:
         run: |
           docker load --input ${{ github.workspace }}/rest-api.container.tar
           docker image ls -a
-      - uses: azure/container-scan@v0
-        name: Scan Image
-        continue-on-error: true
+      - uses: anchore/scan-action@v3
         with:
-          image-name: 'containers.monetr.dev/rest-api:${{ github.sha }}'
+          image: 'containers.monetr.dev/rest-api:${{ github.sha }}'
+          fail-build: false
 
 
 
