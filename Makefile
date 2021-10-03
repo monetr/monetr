@@ -14,8 +14,7 @@ OS=$(shell uname -s | tr A-Z a-z)
 ENVIRONMENT ?= $(shell echo $${BUIlDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT:-Local})
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
-GENERATED=$(PWD)/generated
-GENERATED_YAML=$(GENERATED)/$(ENV_LOWER)
+GENERATED_YAML=$(PWD)/generated/$(ENV_LOWER)
 
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
@@ -128,11 +127,12 @@ TEMPLATE_FILES=$(PWD)/templates/*
 
 $(GENERATED_YAML): $(VALUES_FILES) $(TEMPLATE_FILES)
 $(GENERATED_YAML): IMAGE_TAG=$(shell git rev-parse HEAD)
-$(GENERATED_YAML): $(HELM) $(SPLIT_YAML) $(GENERATED)
+$(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 	$(call infoMsg,Generating Kubernetes yaml using Helm output to:  $(GENERATED_YAML))
 	$(call infoMsg,Environment:                                      $(ENVIRONMENT))
 	$(call infoMsg,Using values file:                                $(VALUES_FILE))
 	-rm -rf $(GENERATED_YAML)
+	-mkdir -p $(GENERATED_YAML)
 	$(HELM) template rest-api $(PWD) \
 		--dry-run \
 		--set image.tag="$(IMAGE_TAG)" \

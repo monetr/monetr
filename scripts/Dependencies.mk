@@ -4,9 +4,6 @@ $(LOCAL_BIN):
 $(LOCAL_TMP):
 	@if [ ! -f "$(LOCAL_TMP)" ]; then mkdir -p $(LOCAL_TMP); fi
 
-$(GENERATED):
-	@if [ ! -f "$(GENERATED)" ]; then mkdir -p $(GENERATED); fi
-
 CURL=$(shell which curl)
 
 # If curl is not installed then we have some basic stuff to install it.
