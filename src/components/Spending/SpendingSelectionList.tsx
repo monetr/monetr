@@ -61,7 +61,7 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
           {
             spending
               .filter(item => !excludeIds?.includes(item.spendingId))
-              .sortBy(item => item.name)
+              .sortBy(item => item.name.toLowerCase()) // Sort without case sensitivity.
               .map(item => (
                 <ListItem
                   key={ `${ item.spendingId }` }
