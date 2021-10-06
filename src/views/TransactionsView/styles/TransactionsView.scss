@@ -1,0 +1,14 @@
+.minus-nav {
+  height: -webkit-calc(100vh - 64px);
+  height: -moz-calc(100vh - 64px);
+  height: calc(100vh - 64px);
+}
+
+// This makes it so that the transaction list will always fit inside the view. It is the height of the screen minus the
+// height of the nav bar (64px) minus the 2.5em of padding (5em).
+.transaction-list {
+  height: calc(100vh - 64px - 5em);
+  max-height: calc(100vh - 64px - 5em);
+  overflow-y: auto !important;
+  overflow-x: unset !important;
+}

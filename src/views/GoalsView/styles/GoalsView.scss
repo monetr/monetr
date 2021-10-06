@@ -1,0 +1,6 @@
+.goals-list {
+  height: calc(100vh - 64px - 5em);
+  max-height: calc(100vh - 64px - 5em);
+  overflow-y: auto !important;
+  overflow-x: unset !important;
+}

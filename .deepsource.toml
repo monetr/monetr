@@ -1,6 +1,9 @@
 version = 1
 
-test_patterns = ["**/*_test.go"]
+test_patterns = [
+  "**/*_test.go",
+  "**/*.spec.js"
+]
 
 [[analyzers]]
 name = "go"
@@ -8,6 +11,8 @@ enabled = true
 
   [analyzers.meta]
   import_paths = ["github.com/monetr/rest-api"]
+
+exclude_patterns = ["**/*.min.js"]
 
 [[analyzers]]
 name = "test-coverage"
@@ -18,7 +23,26 @@ name = "docker"
 enabled = true
 
   [analyzers.meta]
-  dockerfile_paths = ["Dockerfile","Dockerfile.work"]
+  dockerfile_paths = [
+    "Dockerfile",
+    "Dockerfile.api",
+    "Dockerfile.ui",
+    "Dockerfile.work",
+  ]
+
+[[analyzers]]
+name = "javascript"
+enabled = true
+
+  [analyzers.meta]
+  environment = [
+    "nodejs",
+    "browser",
+    "jest"
+  ]
+  plugins = ["react"]
+  style_guide = "airbnb"
+  dialect = "flow"
 
 [[analyzers]]
 name = "sql"
