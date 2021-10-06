@@ -22,3 +22,6 @@ build
 .eslintcache
 package-lock.json
 reports
+
+rest-api-junit.xml
+rest-api-tests.json
