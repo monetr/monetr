@@ -94,6 +94,11 @@ cloudSqlProxy:
     # Defaults: MySQL: 3306, Postgres: 5432, SQLServer: 1433
     - "-instances=<INSTANCE_CONNECTION_NAME>=tcp:<DB_PORT>"
 
+# If monolith deployment is enabled, then the application is deployed where the UI and API are served from a single pod.
+# This pod can still be scaled up and down as much as necessary, but allows for a single container to be deployed as
+# opposed to multiple.
+monolithDeployment: false
+
 api:
   customEnv: [ ]
   includeSecrets: false
