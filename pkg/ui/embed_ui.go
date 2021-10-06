@@ -2,8 +2,9 @@
 
 package ui
 
-import "embed"
+import (
+	"embed"
+)
 
-//go:embed *.js
-//go:embed *.html
+//go:embed static/**
 var builtUi embed.FS

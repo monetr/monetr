@@ -44,10 +44,10 @@ module.exports = (env, argv) => {
     target: 'web',
     entry: [
       'react-hot-loader/patch',
-      './src/index.js'
+      './ui/index.js'
     ],
     output: {
-      path: path.resolve(__dirname, 'build'),
+      path: process.env.MONETR_ENV !== 'local' ? path.resolve(__dirname, 'pkg/ui/static') : path.resolve(__dirname, 'build'),
       filename: `[name].${process.env.RELEASE_REVISION || '[chunkhash]'}.js`
     },
     module: {
@@ -129,7 +129,7 @@ module.exports = (env, argv) => {
       alias: {
         'react-dom': '@hot-loader/react-dom'
       },
-      modules: [path.resolve(__dirname, 'src'), 'node_modules'],
+      modules: [path.resolve(__dirname, 'ui'), 'node_modules'],
     },
     devtool: 'inline-source-map',
     devServer: {

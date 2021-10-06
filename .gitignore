@@ -9,9 +9,7 @@ node_modules
 generated
 values.mayview.yaml
 redoc-static.html
-pkg/ui/*.js
-pkg/ui/*.html
-pkg/ui/*.txt
+pkg/ui/static
 tmp
 local
 values.local.yaml
