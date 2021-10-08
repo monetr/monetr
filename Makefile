@@ -101,9 +101,8 @@ endef
 
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(HASH_DIR)
-$(NODE_MODULES): NODE_MODULES_HASH=$(HASH_DIR)/$(shell md5sum ** $(NODE_MODULES)/**/** 2>/dev/null | $(call hash,-))
+$(NODE_MODULES): NODE_MODULES_HASH=$(HASH_DIR)/$(shell md5sum $(PWD)/package.json 2>/dev/null | $(call hash,-))
 $(NODE_MODULES):
-	@echo "Node Modules Hash: $(STATIC_HASH)"
 	@if [ ! -f "$(NODE_MODULES_HASH)" ]; then make $(NODE_MODULES)-install && touch $(NODE_MODULES_HASH); fi
 
 $(NODE_MODULES)-install:
@@ -111,11 +110,8 @@ $(NODE_MODULES)-install:
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 $(STATIC_DIR): $(NODE_MODULES) $(HASH_DIR)
-$(STATIC_DIR): UI_HASH=$(shell md5sum ** $(UI_SRC_DIR)/**/** 2>/dev/null | $(call hash,-))
-$(STATIC_DIR): NODE_MODULES_HASH=$(shell md5sum ** $(NODE_MODULES)/**/** 2>/dev/null | $(call hash,-))
-$(STATIC_DIR): STATIC_HASH=$(HASH_DIR)/$(shell echo "$(UI_HASH)|$(NODE_MODULES_HASH)" | $(call hash,-))
+$(STATIC_DIR): STATIC_HASH=$(HASH_DIR)/$(shell md5sum $(UI_SRC_DIR)/**/** 2>/dev/null | $(call hash,-))
 $(STATIC_DIR):
-	@echo "Static Files Hash: $(STATIC_HASH)"
 	@if [ ! -f "$(STATIC_HASH)" ]; then make $(STATIC_DIR)-build && touch $(STATIC_HASH); fi
 
 $(STATIC_DIR)-build:
