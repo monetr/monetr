@@ -87,9 +87,6 @@ $(HASH_DIR):
 $(NODE_MODULES)-install:
 	yarn install -d
 
-dependencies: $(GO) $(GO_DEPS)
-	$(call infoMsg,Installing dependencies for monetrs rest-api)
-	$(GO) get $(GO_SRC_DIR)/...
 
 PATH+=\b:$(NODE_MODULES)/.bin
 
@@ -100,33 +97,29 @@ endef
 
 
 NODE_MODULES=$(PWD)/node_modules
-$(NODE_MODULES): $(HASH_DIR)
-$(NODE_MODULES): NODE_MODULES_HASH=$(HASH_DIR)/$(shell md5sum $(PWD)/package.json 2>/dev/null | $(call hash,-))
-$(NODE_MODULES):
-	@if [ ! -f "$(NODE_MODULES_HASH)" ]; then make $(NODE_MODULES)-install && touch $(NODE_MODULES_HASH); fi
-
-$(NODE_MODULES)-install:
+$(NODE_MODULES): package.json
 	yarn install -d
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
-$(STATIC_DIR): $(NODE_MODULES) $(HASH_DIR)
-$(STATIC_DIR): STATIC_HASH=$(HASH_DIR)/$(shell md5sum $(UI_SRC_DIR)/**/** 2>/dev/null | $(call hash,-))
-$(STATIC_DIR):
-	@if [ ! -f "$(STATIC_HASH)" ]; then make $(STATIC_DIR)-build && touch $(STATIC_HASH); fi
-
-$(STATIC_DIR)-build:
-	-rm -rf $(GO_SRC_DIR)/ui/static
+$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES)
+	-rm -rf $(GO_SRC_DIR)/ui/static/*
 	RELEASE_REVISION=$(RELEASE_REVISION) yarn build-dev
+
+GOMODULES=$(GOPATH)/pkd/mod
+$(GOMODULES): $(GO) $(GO_DEPS) $(STATIC_DIR)
+	$(call infoMsg,Installing dependencies for monetrs rest-api)
+	$(GO) get $(GO_SRC_DIR)/...
 
 build-ui: $(STATIC_DIR)
 
-build: $(GO) $(STATIC_DIR) dependencies $(APP_GO_FILES)
-	$(call infoMsg,Generating anything needed for binary)
-	$(GO) install golang.org/x/tools/cmd/stringer
+BINARY=$(LOCAL_BIN)/monetr
+$(BINARY): $(GO) $(STATIC_DIR) $(GOMODULES) $(APP_GO_FILES)
 	$(call infoMsg,Building monetr binary)
 	$(GO) build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
 
-test: $(GO) dependencies $(ALL_GO_FILES) $(GOTESTSUM)
+build: $(BINARY)
+
+test: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr rest-api)
 ifndef CI
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
@@ -157,10 +150,10 @@ docs: $(SWAG) $(APP_GO_FILES)
 docs-local: docs
 	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
 
-docker: Dockerfile.monolith build
+docker: Dockerfile.monolith $(BINARY)
 	docker $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
-		-t monetr -f $(PWD)/Dockerfile.monetr $(PWD)
+		-t monetr -f $(PWD)/Dockerfile.monolith .
 
 docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .

@@ -1,9 +1,9 @@
 FROM ubuntu:20.04
 
-ARG REVISION
 
 RUN apt-get update && apt-get install -y tzdata ca-certificates
 
+ARG REVISION
 LABEL org.opencontainers.image.url=https://github.com/monetr/monetr
 LABEL org.opencontainers.image.source=https://github.com/monetr/monetr
 LABEL org.opencontainers.image.authors=elliot.courant@monetr.app
