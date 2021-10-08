@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"

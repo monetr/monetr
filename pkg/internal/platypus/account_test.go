@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/assert"
 )

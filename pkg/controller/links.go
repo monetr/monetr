@@ -8,9 +8,9 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
-	"github.com/monetr/rest-api/pkg/crumbs"
-	"github.com/monetr/rest-api/pkg/models"
-	"github.com/monetr/rest-api/pkg/swag"
+	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/swag"
 	"github.com/sirupsen/logrus"
 )
 

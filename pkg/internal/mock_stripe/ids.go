@@ -2,7 +2,7 @@ package mock_stripe
 
 import (
 	"fmt"
-	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

@@ -5,7 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/smtp"

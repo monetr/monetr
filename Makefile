@@ -1,12 +1,12 @@
+PWD=$(shell git rev-parse --show-toplevel)
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
-NODE_MODULES_DIR = $(PWD)/node_modules
-NODE_MODULES_BIN = $(NODE_MODULES_DIR)/.bin
 VENDOR_DIR = $(PWD)/vendor
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
-MONETR_CLI_PACKAGE = github.com/monetr/rest-api/pkg/cmd
+MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
+
 
 ARCH=amd64
 OS=$(shell uname -s | tr A-Z a-z)
@@ -15,6 +15,16 @@ ENVIRONMENT ?= $(shell echo $${BUIlDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT:-Local})
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
 GENERATED_YAML=$(PWD)/generated/$(ENV_LOWER)
+
+ifeq ($(NO_CACHE),true)
+DOCKER_CACHE=--no-cache
+endif
+
+DOCKER_OPTIONS=
+
+ifeq ($(DEBUG),true)
+DOCKER_OPTIONS += --debug
+endif
 
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
@@ -53,22 +63,71 @@ endef
 endif
 
 GO_SRC_DIR=$(PWD)/pkg
-ALL_GO_FILES=$(wildcard $(GO_SRC_DIR)/**/*.go)
+ALL_GO_FILES=$(filter-out $(GO_SRC_DIR)/ui/static, $(wildcard $(GO_SRC_DIR)/**/*.go))
 APP_GO_FILES=$(filter-out $(GO_SRC_DIR)/**/*_test.go, $(ALL_GO_FILES))
 TEST_GO_FILES=$(wildcard $(GO_SRC_DIR)/**/*_test.go)
 
-GO_DEPS=go.mod go.sum
+UI_SRC_DIR=$(PWD)/ui
+ALL_UI_FILES=$(shell find $(UI_SRC_DIR) -type f)
+APP_UI_FILES=$(filter-out *.spec.*, $(ALL_UI_FILES))
+TEST_UI_FILES=$(shell find $(UI_SRC_DIR) -type f -name '*.spec.*')
+
+GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
+UI_DEPS=$(PWD)/package.json
 
 include $(PWD)/scripts/*.mk
 
 default: build
 
+HASH_DIR=$(PWD)/tmp/hashes
+$(HASH_DIR):
+	mkdir -p $(HASH_DIR)
+
+
+$(NODE_MODULES)-install:
+	yarn install -d
+
 dependencies: $(GO) $(GO_DEPS)
 	$(call infoMsg,Installing dependencies for monetrs rest-api)
 	$(GO) get $(GO_SRC_DIR)/...
 
-build: $(GO) dependencies $(APP_GO_FILES)
-	$(call infoMsg,Building rest-api binary)
+PATH+=\b:$(NODE_MODULES)/.bin
+
+
+define hash
+md5sum $1 | cut -d " " -f 1
+endef
+
+
+NODE_MODULES=$(PWD)/node_modules
+$(NODE_MODULES): $(HASH_DIR)
+$(NODE_MODULES): NODE_MODULES_HASH=$(HASH_DIR)/$(shell md5sum ** $(NODE_MODULES)/**/** 2>/dev/null | $(call hash,-))
+$(NODE_MODULES):
+	@echo "Node Modules Hash: $(STATIC_HASH)"
+	@if [ ! -f "$(NODE_MODULES_HASH)" ]; then make $(NODE_MODULES)-install && touch $(NODE_MODULES_HASH); fi
+
+$(NODE_MODULES)-install:
+	yarn install -d
+
+STATIC_DIR=$(GO_SRC_DIR)/ui/static
+$(STATIC_DIR): $(NODE_MODULES) $(HASH_DIR)
+$(STATIC_DIR): UI_HASH=$(shell md5sum ** $(UI_SRC_DIR)/**/** 2>/dev/null | $(call hash,-))
+$(STATIC_DIR): NODE_MODULES_HASH=$(shell md5sum ** $(NODE_MODULES)/**/** 2>/dev/null | $(call hash,-))
+$(STATIC_DIR): STATIC_HASH=$(HASH_DIR)/$(shell echo "$(UI_HASH)|$(NODE_MODULES_HASH)" | $(call hash,-))
+$(STATIC_DIR):
+	@echo "Static Files Hash: $(STATIC_HASH)"
+	@if [ ! -f "$(STATIC_HASH)" ]; then make $(STATIC_DIR)-build && touch $(STATIC_HASH); fi
+
+$(STATIC_DIR)-build:
+	-rm -rf $(GO_SRC_DIR)/ui/static
+	RELEASE_REVISION=$(RELEASE_REVISION) yarn build-dev
+
+build-ui: $(STATIC_DIR)
+
+build: $(GO) $(STATIC_DIR) dependencies $(APP_GO_FILES)
+	$(call infoMsg,Generating anything needed for binary)
+	$(GO) install golang.org/x/tools/cmd/stringer
+	$(call infoMsg,Building monetr binary)
 	$(GO) build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
 
 test: $(GO) dependencies $(ALL_GO_FILES) $(GOTESTSUM)
@@ -84,12 +143,13 @@ endif
 clean:
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
-	-rm -rf $(NODE_MODULES_DIR)
+	-rm -rf $(NODE_MODULES)
 	-rm -rf $(VENDOR_DIR)
 	-rm -rf $(LOCAL_TMP)
 	-rm -rf $(PWD)/generated
 	-rm -rf $(PWD)/docs
 	-rm -rf $(PWD)/Notes.md
+	-rm -rf $(GO_SRC_DIR)/ui/static
 
 docs: $(SWAG) $(APP_GO_FILES)
 	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \
@@ -101,11 +161,10 @@ docs: $(SWAG) $(APP_GO_FILES)
 docs-local: docs
 	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
 
-docker: Dockerfile $(APP_GO_FILES)
-	docker build \
+docker: Dockerfile.monolith build
+	docker $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
-		--build-arg BUILD_TIME=$(BUILD_TIME) \
-		-t monetr-rest-api -f Dockerfile .
+		-t monetr -f $(PWD)/Dockerfile.monetr $(PWD)
 
 docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
@@ -143,12 +202,12 @@ $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 generate: $(GENERATED_YAML)
 
 ifdef GITLAB_CI
-include Makefile.gitlab-ci
-include Makefile.deploy
+include $(PWD)/Makefile.gitlab-ci
+include $(PWD)/Makefile.deploy
 endif
 
 ifdef GITHUB_ACTION
-include Makefile.github-actions
+include $(PWD)/Makefile.github-actions
 endif
 
 # PostgreSQL tests currently only work in CI pipelines.
@@ -164,14 +223,14 @@ pg_test:
 	-JUNIT_OUTPUT_FILE=$(JUNIT_OUTPUT_FILE) pg_prove -h $(POSTGRES_HOST) -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f -c $(PWD)/tests/pg/*.sql --verbose --harness TAP::Harness::JUnit
 endif
 
-include Makefile.release
-include Makefile.docker
+include $(PWD)/Makefile.release
+include $(PWD)/Makefile.docker
 
 ifndef CI
-include Makefile.tinker
+include $(PWD)/Makefile.tinker
 
 ifeq ($(ENV_LOWER),local)
-include Makefile.local
+include $(PWD)/Makefile.local
 endif
 
 endif

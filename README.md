@@ -1,8 +1,8 @@
 # rest-api
 
-![Gitlab pipeline status (self-hosted)](https://img.shields.io/gitlab/pipeline/monetr/rest-api/main?gitlab_url=https%3A%2F%2Fgitlab.elliotcourant.dev%2Fgithub.com&logo=gitlab)
-[![DeepSource](https://deepsource.io/gh/monetr/rest-api.svg/?label=active+issues&show_trend=true&token=4x9L6ApemrQ6x80icvE9cEJl)](https://deepsource.io/gh/monetr/rest-api/?ref=repository-badge)
-[![DeepSource](https://deepsource.io/gh/monetr/rest-api.svg/?label=resolved+issues&show_trend=true&token=4x9L6ApemrQ6x80icvE9cEJl)](https://deepsource.io/gh/monetr/rest-api/?ref=repository-badge)
+![Gitlab pipeline status (self-hosted)](https://img.shields.io/gitlab/pipeline/monetr/monetr/main?gitlab_url=https%3A%2F%2Fgitlab.elliotcourant.dev%2Fgithub.com&logo=gitlab)
+[![DeepSource](https://deepsource.io/gh/monetr/monetr.svg/?label=active+issues&show_trend=true&token=4x9L6ApemrQ6x80icvE9cEJl)](https://deepsource.io/gh/monetr/monetr/?ref=repository-badge)
+[![DeepSource](https://deepsource.io/gh/monetr/monetr.svg/?label=resolved+issues&show_trend=true&token=4x9L6ApemrQ6x80icvE9cEJl)](https://deepsource.io/gh/monetr/monetr/?ref=repository-badge)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Frest-api.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Frest-api?ref=badge_shield)
 
 ![image](https://user-images.githubusercontent.com/37967690/117526688-5158fa00-af8c-11eb-9695-6f735605625d.png)

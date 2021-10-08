@@ -3,7 +3,7 @@ package verification
 import (
 	"context"
 
-	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/monetr/pkg/repository"
 	"github.com/sirupsen/logrus"
 )
 

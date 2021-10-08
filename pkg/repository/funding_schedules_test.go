@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"

@@ -3,7 +3,7 @@ package platypus
 import (
 	"time"
 
-	"github.com/monetr/rest-api/pkg/util"
+	"github.com/monetr/monetr/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 )

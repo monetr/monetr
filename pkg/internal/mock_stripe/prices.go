@@ -2,7 +2,7 @@ package mock_stripe
 
 import (
 	"fmt"
-	"github.com/monetr/rest-api/pkg/internal/mock_http_helper"
+	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/stretchr/testify/require"
 	"github.com/stripe/stripe-go/v72"
 	"net/http"

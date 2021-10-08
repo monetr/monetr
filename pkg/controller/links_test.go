@@ -2,7 +2,7 @@ package controller_test
 
 import (
 	"fmt"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 	"math"
 	"net/http"
 	"testing"

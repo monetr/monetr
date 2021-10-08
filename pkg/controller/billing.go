@@ -2,17 +2,17 @@ package controller
 
 import (
 	"fmt"
-	"github.com/monetr/rest-api/pkg/crumbs"
-	"github.com/monetr/rest-api/pkg/internal/myownsanity"
-	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
+	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/internal/stripe_helper"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/kataras/iris/v12"
-	"github.com/monetr/rest-api/pkg/build"
-	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/swag"
+	"github.com/monetr/monetr/pkg/build"
+	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/swag"
 	"github.com/stripe/stripe-go/v72"
 )
 

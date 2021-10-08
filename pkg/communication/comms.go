@@ -5,12 +5,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/mail"
+	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/mail"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/internal/email_templates"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/internal/email_templates"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/monetr/rest-api/pkg/build"
-	"github.com/monetr/rest-api/pkg/internal/cmd"
+	"github.com/monetr/monetr/pkg/build"
+	"github.com/monetr/monetr/pkg/internal/cmd"
 )
 
 var (

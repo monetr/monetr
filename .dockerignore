@@ -1,12 +1,18 @@
-node_modules
 bin
 tmp
 # Ignore everything
 **
-node_modules
 
 # Allow the golang stuff.
 !/pkg/**
 !/go.mod
 !/go.sum
+
+!/ui/**
+!/public/**
+!/package.json
+!/yarn.lock
+!/node_modules/**
+!/tsconfig.json
+!/*.js
 

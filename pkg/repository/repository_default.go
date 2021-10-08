@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 )
 
 type repositoryBase struct {

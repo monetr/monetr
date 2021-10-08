@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/monetr/rest-api
+  repository: ghcr.io/monetr/monetr
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -98,6 +98,8 @@ cloudSqlProxy:
 # This pod can still be scaled up and down as much as necessary, but allows for a single container to be deployed as
 # opposed to multiple.
 monolithDeployment: false
+
+uiService: true
 
 api:
   customEnv: [ ]

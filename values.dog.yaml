@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: gcr.io/dogfood-326023/github.com/monetr/rest-api
+  repository: gcr.io/dogfood-326023/github.com/monetr/monetr
   pullPolicy: Always
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 

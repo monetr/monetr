@@ -2,7 +2,7 @@ package migrations
 
 import (
 	"github.com/go-pg/migrations/v8"
-	"github.com/monetr/rest-api/pkg/internal/migrations/functional"
+	"github.com/monetr/monetr/pkg/internal/migrations/functional"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"net/http"

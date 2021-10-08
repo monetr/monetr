@@ -3,15 +3,15 @@ package billing
 import (
 	"context"
 	"fmt"
-	"github.com/monetr/rest-api/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/rest-api/pkg/cache"
-	"github.com/monetr/rest-api/pkg/models"
-	"github.com/monetr/rest-api/pkg/pubsub"
+	"github.com/monetr/monetr/pkg/cache"
+	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

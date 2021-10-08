@@ -6,8 +6,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
-	"github.com/monetr/rest-api/pkg/internal/mock_stripe"
-	"github.com/monetr/rest-api/pkg/swag"
+	"github.com/monetr/monetr/pkg/internal/mock_stripe"
+	"github.com/monetr/monetr/pkg/swag"
 )
 
 func TestLogin(t *testing.T) {

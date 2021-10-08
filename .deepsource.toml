@@ -10,7 +10,7 @@ name = "go"
 enabled = true
 
   [analyzers.meta]
-  import_paths = ["github.com/monetr/rest-api"]
+  import_paths = ["github.com/monetr/monetr"]
 
 exclude_patterns = ["**/*.min.js"]
 

@@ -110,7 +110,7 @@ jobs:
             BUILD_TIME=${{ steps.timestamp.outputs.build_time }}
           push: true
           platforms: "linux/amd64"
-          tags: "ghcr.io/monetr/rest-api:${{ github.sha }}"
+          tags: "ghcr.io/monetr/monetr:${{ github.sha }}"
   docs-deploy:
     needs:
       - "test"

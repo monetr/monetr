@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/logging"
 	"context"
 	"fmt"
-	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"

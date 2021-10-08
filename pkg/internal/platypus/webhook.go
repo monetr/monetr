@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/MicahParks/keyfunc"
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"

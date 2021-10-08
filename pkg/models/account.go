@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/monetr/rest-api/pkg/feature"
+	"github.com/monetr/monetr/pkg/feature"
 	"github.com/pkg/errors"
 )
 

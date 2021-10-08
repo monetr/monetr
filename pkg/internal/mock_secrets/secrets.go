@@ -3,7 +3,7 @@ package mock_secrets
 import (
 	"context"
 	"fmt"
-	"github.com/monetr/rest-api/pkg/secrets"
+	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/pkg/errors"
 )
 

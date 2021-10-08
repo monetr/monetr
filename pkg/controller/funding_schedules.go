@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 	"net/http"
 	"strings"
 	"time"

@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/go-pg/pg/v10"
-	"github.com/monetr/rest-api/pkg/logging"
-	"github.com/monetr/rest-api/pkg/internal/migrations"
+	"github.com/monetr/monetr/pkg/internal/migrations"
+	"github.com/monetr/monetr/pkg/logging"
 	"github.com/spf13/cobra"
 )
 

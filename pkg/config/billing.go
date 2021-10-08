@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/monetr/rest-api/pkg/feature"
+	"github.com/monetr/monetr/pkg/feature"
 )
 
 type Plan struct {

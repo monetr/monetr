@@ -53,7 +53,6 @@ init-mini: info
 	$(MAKE) update-coredns
 	$(MAKE) deploy-certmanager
 	$(MAKE) deploy-certificate-authority
-	$(MAKE) setup-registry
 	$(MAKE) deploy-redis
 	$(MAKE) deploy-postgres
 	$(MAKE) vault-mini
@@ -61,6 +60,7 @@ init-mini: info
 	$(MAKE) deploy-mini-application
 	$(MAKE) vault-token
 	$(call infoMsg,Local environment is setup; you should be able to access the API at: https://api.$(LOCAL_DOMAIN))
+#	$(MAKE) setup-registry
 
 MINIKUBE_NAMESPACE=default
 MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
@@ -70,7 +70,7 @@ KUBERNETES_VERSION=v1.19.0
 start-minikube:
 	$(info Starting minikube)
 	minikube start \
-		--addons=ingress \
+		--addons=ingress,registry \
 		--cpus=$(MINIKUBE_CPUS) \
 		--memory=$(MINIKUBE_MEMORY) \
 		--delete-on-failure \
@@ -148,7 +148,8 @@ $(REGISTER_JWT_SECRET): $(LOCAL_DIR)
 $(VALUES):
 	if [ ! -f "$(VALUES)" ]; then $(MAKE) init-mini-values; fi
 
-init-mini-values: REST_API_IMAGE_REPO=registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
+init-mini-values: MINIKUBE_IP=$(shell minikube ip)
+init-mini-values: REST_API_IMAGE_REPO=$(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME)
 init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 init-mini-values: LOGIN_JWT_SECRET_VALUE=$(shell cat $(LOGIN_JWT_SECRET))
 init-mini-values: REGISTER_JWT_SECRET_VALUE=$(shell cat $(REGISTER_JWT_SECRET))
@@ -156,14 +157,12 @@ init-mini-values: $(YQ) $(HELM)
 	$(call infoMsg,Setting up a basic helm values file for running the API locally)
 	if [ ! -f "$(VALUES)" ]; then $(HELM) show values $(PWD) > $(VALUES); fi
 	$(YQ) e '.image.repository = "$(REST_API_IMAGE_REPO)"' -i $(VALUES)
-	$(YQ) e '.ingress.enabled = true' -i $(VALUES)
-	$(YQ) e '.ingress.annotations."kubernetes.io/ingress.class" = "nginx"' -i $(VALUES)
-	$(YQ) e '.ingress.hosts[0].host = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
-	$(YQ) e '.ingress.hosts[0].paths[0] = {"path": "/"}' -i $(VALUES)
+	$(YQ) e '.ingress.enabled = false' -i $(VALUES)
+	$(YQ) e '.uiService = true' -i $(VALUES)
 	$(YQ) e '.service.port = 4000' -i $(VALUES)
 	$(YQ) e '.api.includeSecrets = true' -i $(VALUES)
 	$(YQ) e '.api.uiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
-	$(YQ) e '.api.apiDomainName = "api.$(LOCAL_DOMAIN)"' -i $(VALUES)
+	$(YQ) e '.api.apiDomainName = "app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.jwt.loginJwtSecret = "$(LOGIN_JWT_SECRET_VALUE)"' -i $(VALUES)
 	$(YQ) e '.api.jwt.registrationJwtSecret = "$(REGISTER_JWT_SECRET_VALUE)"' -i $(VALUES)
 	$(YQ) e '.api.postgreSql.address = "postgres.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
@@ -305,26 +304,24 @@ shell:
 $(LOCAL_REST_API_DEPLOY):
 	mkdir -p $(LOCAL_REST_API_DEPLOY)
 
-GO_HASH=$(shell find -s $(PWD)/pkg -type f -exec shasum {} \; | shasum | cut -d " " -f 1)
-BASE_IMAGE_NAME = registry.$(LOCAL_DOMAIN)/$(REST_API_IMAGE_NAME)
-IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
-LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +%Y.%m.%d.%H.%M) $$(git config user.email))
+build-rest-api-mini: GO_HASH=$(shell find -s $(PWD)/pkg -type f -exec shasum {} \; | shasum | cut -d " " -f 1)
+build-rest-api-mini: LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +%Y.%m.%d.%H.%M) $$(git config user.email))
+build-rest-api-mini: MINIKUBE_IP=$(shell minikube ip)
+build-rest-api-mini: BASE_IMAGE_NAME=$(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME)
+build-rest-api-mini: IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
 build-rest-api-mini: wait-for-docker $(YQ)
 	eval $$(minikube docker-env) && docker build \
-		--cache-from=$(BASE_IMAGE_NAME):latest \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
 		-t $(IMAGE_NAME) \
-		-t $(BASE_IMAGE_NAME):latest \
-		-f Dockerfile . && \
-		docker push $(IMAGE_NAME) && \
-		docker push $(BASE_IMAGE_NAME):latest
+		-f Dockerfile .
 	$(YQ) e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
 
 deploy-mini-application: $(VALUES)
 deploy-mini-application: CONFIG_HASH=$(shell md5 -q $(VALUES))
 deploy-mini-application: $(HELM) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini $(YQ) $(SPLIT_YAML)
+	$(KUBECTL) apply -f $(PWD)/minikube/ingress.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(YQ) e '.podAnnotations.configHash = "$(CONFIG_HASH)"' -i $(VALUES)
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
@@ -339,21 +336,6 @@ local-postgres-certs:
 	$(KUBECTL) get secret postgres-api-tls -o jsonpath='{.data.tls\.crt}' -n $(MINIKUBE_NAMESPACE) | base64 -d > $(LOCAL_DIR)/postgres/tls.crt
 	$(KUBECTL) get secret postgres-api-tls -o jsonpath='{.data.tls\.key}' -n $(MINIKUBE_NAMESPACE) | base64 -d > $(LOCAL_DIR)/postgres/tls.key
 
-###################### DEBUGGING THE REST API ##################################
-local-api: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
-local-api: $(YQ)
-	LOCAL_IP=$(LOCAL_IP) $(YQ) e '.subsets[0].addresses[0].ip = strenv(LOCAL_IP)' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
-	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
-	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
-ifdef TMUX # If the user is already in tmux then just spawn a new session and switch to it.
-	tmux new -s local-api -d 'minikube tunnel --cleanup' && tmux switch -t local-api || true
-else # If the user is not, start a new session and then enter tmux to attach.
-	tmux new -s local-api -d 'minikube tunnel --cleanup' && tmux attach -t local-api || true
-endif
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
 webhooks-mini:
@@ -479,3 +461,38 @@ mail-mini: $(VALUES) $(YQ)
 	@echo "\033[0;31m#################################################################################\033[0m"
 	@echo "mailhog is now accessible at: https://mail.$(LOCAL_DOMAIN)"
 	@echo "\033[0;31m#################################################################################\033[0m"
+
+
+
+
+
+
+
+
+
+####################### DEBUGGING THE REST API ##################################
+local-api: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
+local-api: $(YQ)
+	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
+	$(call warningMsg,Setting up minikube tunnel for local API development; use CTRL-C to stop tunnel and cleanup.)
+	-bash -c "trap '$(MAKE) local-api-down' EXIT; minikube tunnel --cleanup"
+
+local-api-down:
+	$(call warningMsg,Cleaning up tunnel for local API development)
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+
+local-ui: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
+local-ui: $(YQ) $(NODE_MODULES)
+	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/ui-endpoint.yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	-bash -c "trap '$(MAKE) local-ui-down' EXIT; yarn start"
+
+local-ui-down:
+	$(call warningMsg,Cleaning up tunnel for local UI development)
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-ui --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)

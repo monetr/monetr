@@ -6,7 +6,7 @@ import (
 	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
-	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/monetr/pkg/config"
 )
 
 type Controller interface {

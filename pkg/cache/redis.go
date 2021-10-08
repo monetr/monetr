@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
-	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"time"

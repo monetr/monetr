@@ -2,7 +2,7 @@ package fixtures
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 	"testing"
 )
 

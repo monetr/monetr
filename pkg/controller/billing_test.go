@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
-	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/internal/mock_stripe"
-	"github.com/monetr/rest-api/pkg/swag"
+	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/internal/mock_stripe"
+	"github.com/monetr/monetr/pkg/swag"
 	"net/http"
 	"testing"
 )

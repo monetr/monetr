@@ -1,13 +1,11 @@
-//+build ui
-
 package ui
 
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/monetr/rest-api/pkg/application"
-	"github.com/monetr/rest-api/pkg/config"
+	"github.com/monetr/monetr/pkg/application"
+	"github.com/monetr/monetr/pkg/config"
 	"net/http"
 )
 
@@ -37,10 +35,13 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 			})
 		})
 
-		fileHandler := iris.FileServer(http.FS(builtUi), iris.DirOptions{
-			IndexName: "index.html",
-			SPA:       true,
-		})
+		fileHandler := iris.FileServer(
+			NewFileSystem("static", http.FS(builtUi)),
+			iris.DirOptions{
+				IndexName: "index.html",
+				SPA:       true,
+			},
+		)
 
 		app.Get("/*", func(ctx iris.Context) {
 			fileHandler(ctx)

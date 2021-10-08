@@ -3,9 +3,9 @@ package stripe_helper
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/cache"
-	"github.com/monetr/rest-api/pkg/crumbs"
-	"github.com/monetr/rest-api/pkg/internal/round"
+	"github.com/monetr/monetr/pkg/cache"
+	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/round"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"

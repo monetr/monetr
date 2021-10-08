@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: monetr
+  labels:
+    app: monetr
+    name: monetr
+    app.kubernetes.io/name: monetr
+    app.kubernetes.io/instance: monetr
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: "app.monetr.mini"
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              serviceName: monetr-api
+              servicePort: 4000
+    - host: "app.monetr.mini"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: monetr-ui
+              servicePort: 4000

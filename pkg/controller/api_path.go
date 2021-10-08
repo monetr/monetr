@@ -1,5 +1,3 @@
-//+build !ui
-
 package controller
 
-const APIPath = "/"
+const APIPath = "/api"

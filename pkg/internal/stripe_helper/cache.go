@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/cache"
+	"github.com/monetr/monetr/pkg/cache"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
 	"time"

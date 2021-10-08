@@ -9,8 +9,8 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
-	"github.com/monetr/rest-api/pkg/internal/myownsanity"
-	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 )
 

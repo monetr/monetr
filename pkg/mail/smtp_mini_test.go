@@ -5,8 +5,8 @@ package mail
 import (
 	"context"
 	"fmt"
-	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

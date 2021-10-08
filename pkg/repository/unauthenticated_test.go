@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/rest-api/pkg/internal/testutils"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

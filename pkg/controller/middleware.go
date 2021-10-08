@@ -12,7 +12,7 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12/context"
-	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 )
 

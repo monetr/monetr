@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
 

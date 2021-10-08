@@ -2,7 +2,7 @@ package mock_mail
 
 import (
 	"context"
-	"github.com/monetr/rest-api/pkg/mail"
+	"github.com/monetr/monetr/pkg/mail"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

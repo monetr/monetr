@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/sirupsen/logrus"
 
 	"github.com/gocraft/work"
-	"github.com/monetr/rest-api/pkg/models"
-	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 )
 

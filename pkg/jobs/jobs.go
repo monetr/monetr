@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/internal/platypus"
+	"github.com/monetr/monetr/pkg/internal/platypus"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
 	"github.com/gomodule/redigo/redis"
-	"github.com/monetr/rest-api/pkg/metrics"
-	"github.com/monetr/rest-api/pkg/models"
-	"github.com/monetr/rest-api/pkg/pubsub"
-	"github.com/monetr/rest-api/pkg/repository"
-	"github.com/monetr/rest-api/pkg/secrets"
+	"github.com/monetr/monetr/pkg/metrics"
+	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/pubsub"
+	"github.com/monetr/monetr/pkg/repository"
+	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )

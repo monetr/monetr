@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/internal/myownsanity"
-	"github.com/monetr/rest-api/pkg/internal/platypus"
-	"github.com/monetr/rest-api/pkg/models"
-	"github.com/monetr/rest-api/pkg/repository"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/internal/platypus"
+	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/repository"
 	"github.com/sirupsen/logrus"
 )
 

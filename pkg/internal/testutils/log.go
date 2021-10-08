@@ -2,7 +2,7 @@ package testutils
 
 import (
 	"bytes"
-	"github.com/monetr/rest-api/pkg/logging"
+	"github.com/monetr/monetr/pkg/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"os"

@@ -9,10 +9,10 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
-	"github.com/monetr/rest-api/pkg/crumbs"
-	"github.com/monetr/rest-api/pkg/internal/myownsanity"
-	"github.com/monetr/rest-api/pkg/internal/platypus"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/internal/platypus"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 

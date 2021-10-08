@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/kataras/iris/v12/context"
-	"github.com/monetr/rest-api/pkg/util"
+	"github.com/monetr/monetr/pkg/util"
 	"github.com/pkg/errors"
 	"time"
 )

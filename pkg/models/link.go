@@ -4,7 +4,7 @@ import "time"
 
 type LinkStatus uint8
 
-//go:generate go run golang.org/x/tools/cmd/stringer -type=LinkStatus -output=link.strings.go
+//go:generate stringer -type=LinkStatus -output=link.strings.go
 const (
 	LinkStatusUnknown           LinkStatus = 0
 	LinkStatusPending           LinkStatus = 1

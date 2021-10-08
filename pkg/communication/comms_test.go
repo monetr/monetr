@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/internal/mock_mail"
-	"github.com/monetr/rest-api/pkg/internal/testutils"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/internal/mock_mail"
+	"github.com/monetr/monetr/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
 )
 

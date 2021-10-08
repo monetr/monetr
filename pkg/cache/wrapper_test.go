@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
-	"github.com/monetr/rest-api/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

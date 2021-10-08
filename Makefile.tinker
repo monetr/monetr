@@ -3,6 +3,6 @@ tinker-docs:
 	docker rm tinker-docs || true
 	docker run -it \
 		--name tinker-docs \
-		--mount type=bind,source="$(PWD)/",target=/build/monetr/rest-api \
+		--mount type=bind,source="$(PWD)/",target=/build/monetr/monetr \
 		containers.monetr.dev/ubuntu:20.04 \
 		/bin/bash

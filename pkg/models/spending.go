@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/util"
+	"github.com/monetr/monetr/pkg/util"
 	"github.com/pkg/errors"
 )
 

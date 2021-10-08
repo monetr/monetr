@@ -38,8 +38,6 @@ module.exports = (env, argv) => {
     env.PUBLIC_URL = ''
   }
 
-  let buildConfig = GetBuildConfigYaml(process.env.MONETR_ENV)
-
   const config = {
     target: 'web',
     entry: [
@@ -47,7 +45,7 @@ module.exports = (env, argv) => {
       './ui/index.js'
     ],
     output: {
-      path: process.env.MONETR_ENV !== 'local' ? path.resolve(__dirname, 'pkg/ui/static') : path.resolve(__dirname, 'build'),
+      path: path.resolve(__dirname, 'pkg/ui/static'),
       filename: `[name].${process.env.RELEASE_REVISION || '[chunkhash]'}.js`
     },
     module: {
@@ -167,7 +165,7 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new webpack.DefinePlugin({
-        CONFIG: JSON.stringify(buildConfig),
+        CONFIG: JSON.stringify({}),
         RELEASE_REVISION: JSON.stringify(process.env.RELEASE_REVISION),
       }),
       new HtmlWebpackPlugin({

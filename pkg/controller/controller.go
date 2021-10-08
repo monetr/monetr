@@ -14,17 +14,17 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/monetr/rest-api/pkg/billing"
-	"github.com/monetr/rest-api/pkg/build"
-	"github.com/monetr/rest-api/pkg/cache"
-	"github.com/monetr/rest-api/pkg/communication"
-	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/internal/platypus"
-	"github.com/monetr/rest-api/pkg/internal/stripe_helper"
-	"github.com/monetr/rest-api/pkg/jobs"
-	"github.com/monetr/rest-api/pkg/metrics"
-	"github.com/monetr/rest-api/pkg/pubsub"
-	"github.com/monetr/rest-api/pkg/secrets"
+	"github.com/monetr/monetr/pkg/billing"
+	"github.com/monetr/monetr/pkg/build"
+	"github.com/monetr/monetr/pkg/cache"
+	"github.com/monetr/monetr/pkg/communication"
+	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/internal/platypus"
+	"github.com/monetr/monetr/pkg/internal/stripe_helper"
+	"github.com/monetr/monetr/pkg/jobs"
+	"github.com/monetr/monetr/pkg/metrics"
+	"github.com/monetr/monetr/pkg/pubsub"
+	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/sirupsen/logrus"
 	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
@@ -112,9 +112,9 @@ func NewController(
 // @description This is the REST API for our budgeting application.
 
 // @contact.name Support
-// @contact.url http://github.com/monetr/rest-api
+// @contact.url http://github.com/monetr/monetr
 // @license.name Business Source License 1.1
-// @license.url https://github.com/monetr/rest-api/blob/main/LICENSE
+// @license.url https://github.com/monetr/monetr/blob/main/LICENSE
 // @host api.monetr.app
 
 

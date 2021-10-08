@@ -1,7 +1,7 @@
 package testutils
 
 import (
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/plaid/plaid-go/plaid"
 )
 

@@ -1,7 +1,7 @@
 package controller_test
 
 import (
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/models"
 	"net/http"
 	"testing"
 )

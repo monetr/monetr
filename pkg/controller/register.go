@@ -11,9 +11,9 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
-	"github.com/monetr/rest-api/pkg/build"
-	"github.com/monetr/rest-api/pkg/hash"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/build"
+	"github.com/monetr/monetr/pkg/hash"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
 )

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/rest-api/pkg/internal/mock_http_helper"
+	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
 )

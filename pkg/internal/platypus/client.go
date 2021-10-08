@@ -3,9 +3,9 @@ package platypus
 import (
 	"context"
 	"fmt"
-	"github.com/monetr/rest-api/pkg/config"
-	"github.com/monetr/rest-api/pkg/crumbs"
-	"github.com/monetr/rest-api/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"strconv"
 	"time"
 

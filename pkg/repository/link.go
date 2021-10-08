@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/rest-api/pkg/crumbs"
-	"github.com/monetr/rest-api/pkg/models"
+	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"time"
 )
