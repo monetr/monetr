@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
 
-
 RUN apt-get update && apt-get install -y tzdata ca-certificates
 
 ARG REVISION
@@ -13,9 +12,11 @@ LABEL org.opencontainers.image.licenses="BSL-1.1"
 LABEL org.opencontainers.image.title="monetr"
 LABEL org.opencontainers.image.description="monetr's budgeting application"
 
-COPY ./bin/monetr /usr/bin/monetr
+RUN echo "Platform: $TARGETPLATFORM Arch: $TARGETARCH"
+
+#COPY ./bin/monetr /usr/bin/monetr
 
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
 ENTRYPOINT ["/usr/bin/monetr"]
-CMD ["serve", "--migrate=true"]
+CMD ["serve"]

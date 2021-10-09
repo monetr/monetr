@@ -1,26 +1,13 @@
-FROM node:16.10.0 AS ui
-
-COPY ./ /build
-WORKDIR /build
-RUN ls /build
-RUN yarn install
-RUN yarn build
-
-FROM golang:1.17.1 AS builder
-
-ARG REVISION
-ARG BUILD_TIME
-ARG RELEASE
-
-COPY --from=ui /build /build
-WORKDIR /build
-RUN go get ./...
-RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.buildtime=$BUILD_TIME -X main.release=$RELEASE" -o /bin/monetr github.com/monetr/monetr/pkg/cmd
-
 FROM ubuntu:20.04
 
 RUN apt-get update && apt-get install -y tzdata ca-certificates
 
+EXPOSE 4000
+VOLUME ["/etc/monetr"]
+ENTRYPOINT ["/usr/bin/monetr"]
+CMD ["serve"]
+
+ARG REVISION
 LABEL org.opencontainers.image.url=https://github.com/monetr/monetr
 LABEL org.opencontainers.image.source=https://github.com/monetr/monetr
 LABEL org.opencontainers.image.authors=elliot.courant@monetr.app
@@ -30,9 +17,4 @@ LABEL org.opencontainers.image.licenses="BSL-1.1"
 LABEL org.opencontainers.image.title="monetr"
 LABEL org.opencontainers.image.description="monetr's budgeting application"
 
-COPY --from=builder /bin/monetr /usr/bin/monetr
-
-EXPOSE 4000
-VOLUME ["/etc/monetr"]
-ENTRYPOINT ["/usr/bin/monetr"]
-CMD ["serve", "--migrate=true"]
+COPY ./bin/monetr /usr/bin/monetr

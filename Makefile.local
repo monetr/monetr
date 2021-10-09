@@ -309,13 +309,13 @@ build-rest-api-mini: LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +
 build-rest-api-mini: MINIKUBE_IP=$(shell minikube ip)
 build-rest-api-mini: BASE_IMAGE_NAME=$(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME)
 build-rest-api-mini: IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
-build-rest-api-mini: wait-for-docker $(YQ)
+build-rest-api-mini: wait-for-docker $(YQ) $(BINARY)
 	eval $$(minikube docker-env) && docker build \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
 		-t $(IMAGE_NAME) \
-		-f Dockerfile .
+		-f Dockerfile.monolith .
 	$(YQ) e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
 
 deploy-mini-application: $(VALUES)

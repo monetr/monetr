@@ -73,7 +73,7 @@ APP_UI_FILES=$(filter-out *.spec.*, $(ALL_UI_FILES))
 TEST_UI_FILES=$(shell find $(UI_SRC_DIR) -type f -name '*.spec.*')
 
 GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
-UI_DEPS=$(PWD)/package.json
+UI_DEPS=$(PWD)/package.json $(PWD)/yarn.lock
 
 include $(PWD)/scripts/*.mk
 
@@ -97,18 +97,20 @@ endef
 
 
 NODE_MODULES=$(PWD)/node_modules
-$(NODE_MODULES): package.json
+$(NODE_MODULES): $(UI_DEPS)
 	yarn install -d
+	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES)
 	-rm -rf $(GO_SRC_DIR)/ui/static/*
 	RELEASE_REVISION=$(RELEASE_REVISION) yarn build-dev
 
-GOMODULES=$(GOPATH)/pkd/mod
+GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS) $(STATIC_DIR)
 	$(call infoMsg,Installing dependencies for monetrs rest-api)
 	$(GO) get $(GO_SRC_DIR)/...
+	touch -a -m $(GOMODULES)
 
 build-ui: $(STATIC_DIR)
 
@@ -118,6 +120,10 @@ $(BINARY): $(GO) $(STATIC_DIR) $(GOMODULES) $(APP_GO_FILES)
 	$(GO) build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
 
 build: $(BINARY)
+
+build-linux: $(eval export GOOS=linux)
+build-linux: $(eval export GOARCH=amd64)
+build-linux: $(BINARY)
 
 test: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr rest-api)
@@ -150,10 +156,15 @@ docs: $(SWAG) $(APP_GO_FILES)
 docs-local: docs
 	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
 
-docker: Dockerfile.monolith $(BINARY)
+CONTAINER=$(PWD)/build/monetr.container.tar
+$(CONTAINER): $(PWD)/Dockerfile $(BINARY)
+	mkdir -p $(PWD)/build
 	docker $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
-		-t monetr -f $(PWD)/Dockerfile.monolith .
+		--output type=tar,dest=$(CONTAINER) \
+		-t monetr -f $(PWD)/Dockerfile .
+
+docker: $(CONTAINER)
 
 docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
