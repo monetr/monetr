@@ -102,9 +102,15 @@ $(NODE_MODULES): $(UI_DEPS)
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
-$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES)
+PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
+$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES)
 	-rm -rf $(GO_SRC_DIR)/ui/static/*
 	RELEASE_REVISION=$(RELEASE_REVISION) yarn build-dev
+	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
+	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
+	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png
+	cp $(PWD)/public/manifest.json $(STATIC_DIR)/manifest.json
+	cp $(PWD)/public/robots.txt $(STATIC_DIR)/robots.txt
 
 GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS) $(STATIC_DIR)
