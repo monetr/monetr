@@ -17,4 +17,4 @@ LABEL org.opencontainers.image.licenses="BSL-1.1"
 LABEL org.opencontainers.image.title="monetr"
 LABEL org.opencontainers.image.description="monetr's budgeting application"
 
-COPY ./bin/monetr /usr/bin/monetr
+COPY ./build/monetr /usr/bin/monetr

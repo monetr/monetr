@@ -117,13 +117,19 @@ build-ui: $(STATIC_DIR)
 BINARY=$(LOCAL_BIN)/monetr
 $(BINARY): $(GO) $(STATIC_DIR) $(GOMODULES) $(APP_GO_FILES)
 	$(call infoMsg,Building monetr binary)
-	$(GO) build -o $(LOCAL_BIN)/monetr $(MONETR_CLI_PACKAGE)
+	$(GO) build -o $(BINARY) $(MONETR_CLI_PACKAGE)
+
+
+BUILD_DIR=$(PWD)/build
+$(BUILD_DIR):
+	mkdir -p $(PWD)/build
+
+CONTAINER_BINARY=$(BUILD_DIR)/monetr
+$(CONTAINER_BINARY): $(BUILD_DIR) $(GO) $(STATIC_DIR) $(GOMODULES) $(APP_GO_FILES)
+	$(call infoMsg,Building monetr binary for container)
+	GOOS=linux GOARCH=$(ARCH) $(GO) build -o $(CONTAINER_BINARY) $(MONETR_CLI_PACKAGE)
 
 build: $(BINARY)
-
-build-linux: $(eval export GOOS=linux)
-build-linux: $(eval export GOARCH=amd64)
-build-linux: $(BINARY)
 
 test: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr rest-api)
@@ -143,6 +149,7 @@ clean:
 	-rm -rf $(LOCAL_TMP)
 	-rm -rf $(PWD)/generated
 	-rm -rf $(PWD)/docs
+	-rm -rf $(PWD)/build
 	-rm -rf $(PWD)/Notes.md
 	-rm -rf $(GO_SRC_DIR)/ui/static
 
@@ -156,9 +163,8 @@ docs: $(SWAG) $(APP_GO_FILES)
 docs-local: docs
 	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
 
-CONTAINER=$(PWD)/build/monetr.container.tar
-$(CONTAINER): $(PWD)/Dockerfile $(BINARY)
-	mkdir -p $(PWD)/build
+CONTAINER=$(BUILD_DIR)/monetr.container.tar
+$(CONTAINER): $(BUILD_DIR) $(PWD)/Dockerfile $(PWD)/.dockerignore $(CONTAINER_BINARY)
 	docker $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--output type=tar,dest=$(CONTAINER) \
