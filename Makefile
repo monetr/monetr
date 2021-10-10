@@ -185,12 +185,13 @@ license:
 	$(call warningMsg,GITHUB_TOKEN is required to check licenses)
 endif
 
+CHART_FILE=$(PWD)/Chart.yaml
 VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml
 VALUES_FILES=$(PWD)/values.yaml $(VALUES_FILE)
 
 TEMPLATE_FILES=$(PWD)/templates/*
 
-$(GENERATED_YAML): $(VALUES_FILES) $(TEMPLATE_FILES)
+$(GENERATED_YAML): $(CHART_FILE) $(VALUES_FILES) $(TEMPLATE_FILES)
 $(GENERATED_YAML): IMAGE_TAG=$(shell git rev-parse HEAD)
 $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 	$(call infoMsg,Generating Kubernetes yaml using Helm output to:  $(GENERATED_YAML))
@@ -198,7 +199,7 @@ $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 	$(call infoMsg,Using values file:                                $(VALUES_FILE))
 	-rm -rf $(GENERATED_YAML)
 	-mkdir -p $(GENERATED_YAML)
-	$(HELM) template rest-api $(PWD) \
+	$(HELM) template monetr $(PWD) \
 		--dry-run \
 		--set image.tag="$(IMAGE_TAG)" \
 		--set podAnnotations."monetr\.dev/date"="$(BUILD_TIME)" \

@@ -35,7 +35,7 @@ export default function bootstrapApplication() {
         .get('/config.json')
         .then(uiConfig => {
           window.API = NewClient({
-            baseURL: uiConfig.data.apiUrl,
+            baseURL: uiConfig.data.apiUrl || '/api',
             withCredentials: true,
           });
           return request().get('/config')
@@ -56,7 +56,7 @@ export default function bootstrapApplication() {
     // we can just use our build time URL.
     window.API = NewClient({
       // eslint-disable-next-line no-undef
-      baseURL: `${ CONFIG.API_URL }`,
+      baseURL: `${ CONFIG.API_URL || '/api' }`,
       withCredentials: true,
     });
     return request().get('/config')
