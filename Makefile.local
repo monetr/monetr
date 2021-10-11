@@ -20,7 +20,7 @@ REGISTER_JWT_SECRET=$(LOCAL_DIR)/register_jwt_secret.txt
 
 LOCAL_REST_API_DEPLOY=$(LOCAL_DIR)/rest-api-yaml
 
-REST_API_IMAGE_NAME=rest-api
+REST_API_IMAGE_NAME=monetr
 
 $(LOCAL_DIR):
 	mkdir -p $(LOCAL_DIR)
@@ -326,9 +326,9 @@ deploy-mini-application: $(HELM) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini $(
 	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
  		--dry-run \
  		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) || true
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-api --namespace $(MINIKUBE_NAMESPACE) || true
 	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/rest-api --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
+	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
 local-postgres-certs:
 	mkdir -p $(LOCAL_DIR)/postgres
@@ -467,14 +467,45 @@ mail-mini: $(VALUES) $(YQ)
 
 
 
+.PHONY: local _local_ local-down
+local: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
+local: $(YQ)
+	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
+	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/ui-endpoint.yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-api -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.spec.ports[0].targetPort = 30000' - | $(KUBECTL) apply -f -
+	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
+ifdef TMUX
+	$(call warningMsg,Setting up minikube tunnel and webpack dev server in a separate session; if you want to stop this kill the monetr-local tmux session and run make local-down.)
+	$(MAKE) _local_
+else
+	$(call warningMsg,Setting up minikube tunnel and webpack dev server for local development; use CTRL-C to stop and cleanup.)
+	-bash -c "trap '$(MAKE) local-down' EXIT; $(MAKE) _local_"
+endif
 
+local-down:
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-api --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-ui --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 
+_local_:
+	-tmux has-session -t monetr-local && tmux kill-session -t monetr-local
+ifndef TMUX
+	tmux new -d -s monetr-local 'yarn start' \; attach -t monetr-local \; \
+		split-window 'minikube tunnel --cleanup=true' \;
+else
+	tmux new -d -s monetr-local 'yarn start' \; switch -t monetr-local \; \
+		split-window 'minikube tunnel --cleanup=true' \;
+endif
 
 ####################### DEBUGGING THE REST API ##################################
 local-api: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
 local-api: $(YQ)
 	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
-	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME) -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-api -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
 	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
 	$(call warningMsg,Setting up minikube tunnel for local API development; use CTRL-C to stop tunnel and cleanup.)
 	-bash -c "trap '$(MAKE) local-api-down' EXIT; minikube tunnel --cleanup"

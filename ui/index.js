@@ -9,7 +9,7 @@ import './styles/index.scss';
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 import { BrowserRouter as Router } from "react-router-dom";
-import { createMuiTheme, MuiThemeProvider, Typography } from "@material-ui/core";
+import {createMuiTheme, createTheme, MuiThemeProvider, Typography} from "@material-ui/core";
 
 // eslint-disable-next-line no-undef
 if (CONFIG.SENTRY_DSN) {
@@ -37,7 +37,7 @@ if (module.hot) {
   module.hot.accept()
 }
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     primary: {
       main: '#4E1AA0',
@@ -57,12 +57,14 @@ ReactDOM.render(
         <Router>
           <MuiThemeProvider theme={ theme }>
             <Root/>
-            <Typography
-              className="absolute bottom-1 w-full text-center opacity-30 inline"
-            >
-              {/* eslint-disable-next-line no-undef */ }
-              © { new Date().getFullYear() } monetr LLC - { RELEASE_REVISION.slice(0, 8) }
-            </Typography>
+            { RELEASE_REVISION && // If the release_revision variable is not specified then don't try to render this.
+              <Typography
+                className="absolute bottom-1 w-full text-center opacity-30 inline"
+              >
+                {/* eslint-disable-next-line no-undef */ }
+                © { new Date().getFullYear() } monetr LLC - { RELEASE_REVISION.slice(0, 8) }
+              </Typography>
+            }
           </MuiThemeProvider>
         </Router>
       </Provider>

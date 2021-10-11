@@ -101,6 +101,9 @@ monolithDeployment: false
 
 uiService: true
 
+databaseMigrations:
+  initContainer: true
+
 api:
   customEnv: [ ]
   includeSecrets: false

@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/migrations"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/logging"
 	"github.com/spf13/cobra"
 )
@@ -13,11 +15,12 @@ func init() {
 	DatabaseCommand.AddCommand(MigrateCommand)
 	DatabaseCommand.AddCommand(DatabaseVersionCommand)
 
-	DatabaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "H", "localhost", "PostgreSQL host address.")
-	DatabaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 5432, "PostgreSQL port.")
+	DatabaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "H", "", "PostgreSQL host address.")
+	DatabaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 0, "PostgreSQL port.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "postgres", "PostgreSQL user.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "postgres", "PostgreSQL database.")
+	DatabaseCommand.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use, if omitted ./config.yaml or /etc/monetr/config.yaml will be used.")
 }
 
 var (
@@ -34,7 +37,7 @@ var (
 		Short: "Run database migrations against your PostgreSQL.",
 		Long:  "Updates your PostgreSQL database to the latest schema version for monetr.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLogger()
+			log := logging.NewLoggerWithLevel("info")
 
 			options := getDatabaseCommandConfiguration()
 
@@ -109,11 +112,24 @@ var (
 )
 
 func getDatabaseCommandConfiguration() *pg.Options {
+	var configPath *string
+	if len(configFilePath) > 0 {
+		configPath = &configFilePath
+	}
+
+	configuration := config.LoadConfiguration(configPath)
+
+	address := myownsanity.CoalesceStrings(postgresAddress, configuration.PostgreSQL.Address, "localhost")
+	port := myownsanity.CoalesceInts(postgresPort, configuration.PostgreSQL.Port, 5432)
+	username := myownsanity.CoalesceStrings(postgresUsername, configuration.PostgreSQL.Username, "postgres")
+	password := myownsanity.CoalesceStrings(postgresPassword, configuration.PostgreSQL.Password)
+	database := myownsanity.CoalesceStrings(postgresDatabase, configuration.PostgreSQL.Database)
+
 	options := &pg.Options{
-		Addr:            fmt.Sprintf("%s:%d", postgresAddress, postgresPort),
-		User:            postgresUsername,
-		Password:        postgresPassword,
-		Database:        postgresDatabase,
+		Addr:            fmt.Sprintf("%s:%d", address, port),
+		User:            username,
+		Password:        password,
+		Database:        database,
 		ApplicationName: "monetr",
 	}
 

@@ -29,6 +29,38 @@ spec:
       {{- end}}
       securityContext:
       {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.databaseMigrations.initContainer }}
+      initContainers:
+        - name: migrations
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - "/usr/bin/monetr"
+          args:
+            - "database"
+            - "migrate"
+          envFrom:
+            - configMapRef:
+                name: {{ include "api.fullname" . }}
+            {{- if .Values.api.includeSecrets }}
+            - secretRef:
+                name: {{ include "api.fullname" . }}
+          {{- end }}
+          {{- if .Values.api.customEnv }}
+          env:
+          {{- toYaml .Values.api.customEnv | nindent 10 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /etc/monetr
+              name: config-file
+          {{- if .Values.extraVolumeMounts }}
+          {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
+          {{- end }}
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -73,7 +105,7 @@ spec:
             {{- toYaml .Values.extraVolumeMounts | nindent 12 }}
           {{- end }}
           resources:
-      {{- toYaml .Values.resources | nindent 12 }}
+          {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}

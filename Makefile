@@ -63,9 +63,9 @@ endef
 endif
 
 GO_SRC_DIR=$(PWD)/pkg
-ALL_GO_FILES=$(filter-out $(GO_SRC_DIR)/ui/static, $(wildcard $(GO_SRC_DIR)/**/*.go))
-APP_GO_FILES=$(filter-out $(GO_SRC_DIR)/**/*_test.go, $(ALL_GO_FILES))
-TEST_GO_FILES=$(wildcard $(GO_SRC_DIR)/**/*_test.go)
+ALL_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*.go')
+APP_GO_FILES=$(filter-out *_test.go, $(ALL_GO_FILES))
+TEST_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*_test.go')
 
 UI_SRC_DIR=$(PWD)/ui
 ALL_UI_FILES=$(shell find $(UI_SRC_DIR) -type f)

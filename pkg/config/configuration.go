@@ -147,6 +147,10 @@ type Plaid struct {
 	OAuthDomain string
 }
 
+func (p Plaid) GetWebhooksURL() string {
+	return fmt.Sprintf("%s/api/plaid/webhook", p.WebhooksDomain)
+}
+
 type CORS struct {
 	AllowedOrigins []string
 	Debug          bool

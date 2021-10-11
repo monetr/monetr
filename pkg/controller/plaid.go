@@ -350,11 +350,9 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 
 	var webhook string
 	if c.configuration.Plaid.WebhooksEnabled {
-		domain := c.configuration.Plaid.WebhooksDomain
-		if domain != "" {
-			webhook = fmt.Sprintf("%s/plaid/webhook", c.configuration.Plaid.WebhooksDomain)
-		} else {
-			c.log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
+		webhook = c.configuration.Plaid.GetWebhooksURL()
+		if webhook == "" {
+			log.Errorf("plaid webhooks are enabled, but they cannot be registered with without a domain")
 		}
 	}
 
