@@ -117,6 +117,10 @@ $(GOMODULES): $(GO) $(GO_DEPS)
 	$(GO) get -t $(GO_SRC_DIR)/...
 	touch -a -m $(GOMODULES)
 
+go-dependencies: $(GOMODULES)
+
+ui-dependencies: $(NODE_MODULES)
+
 dependencies: $(GOMODULES) $(NODE_MODULES)
 
 build-ui: $(STATIC_DIR)

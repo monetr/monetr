@@ -6,28 +6,88 @@ on:
       - main
 
 jobs:
-  node_test:
-    name: Node Test
+  go_dependencies:
+    name: Go Dependencies
     runs-on: ubuntu-latest
+    container: golang:1.17.1
     steps:
       - uses: actions/checkout@v2
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+      - name: Dependencies
+        run: make go-dependencies
+      - uses: actions/cache@v2
         with:
-          node-version: 16.x
-      - run: yarn install
-      - run: yarn test
-  go_test:
-    timeout-minutes: 15
-    name: Go Test
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+  ui_dependencies:
+    name: UI Dependencies
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.17.1
-    strategy:
-      matrix:
-        postgres:
-          - postgres:12
-          - postgres:13
-          - postgres:14
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - name: Dependencies
+        run: make ui-dependencies
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
+
+  build_ui:
+    needs:
+      - ui_dependencies
+    name: Build UI
+    runs-on: ubuntu-latest
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
+      - name: Build
+        run: yarn build:production
+      - uses: actions/upload-artifact@v2
+        with:
+          name: '${{ github.sha }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
+          retention-days: 7
+
+  build_binary:
+    needs:
+      - go_dependencies
+      - build_ui
+    name: Build Binary
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/build-containers/golang:1.17.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build
+        run: make build
+
+  test_go:
+    needs:
+      - go_dependencies
+    name: Test Go
+    runs-on: ubuntu-latest
+    container: golang:1.17.1
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
@@ -35,7 +95,7 @@ jobs:
       POSTGRES_DB: test-db
     services:
       postgres:
-        image: ${{ matrix.postgres }}
+        image: postgres:13
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
@@ -47,12 +107,48 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Schema
-        run: make apply-schema-ci
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Test
         run: make test
-  pg-test:
-    timeout-minutes: 10
+      - uses: actions/upload-artifact@v2
+        name: Upload Test JUnit Artifacts
+        if: always()
+        with:
+          name: '${{ github.sha }}-rest-api-junit'
+          path: '${{ github.workspace }}/rest-api-junit.xml'
+          retention-days: 7
+      - name: Annotate tests
+        if: always()
+        uses: guyarb/golang-test-annotations@v0.5.0
+        with:
+          test-results: '${{ github.workspace }}/rest-api-tests.json'
+
+  test_ui:
+    needs:
+      - ui_dependencies
+    name: Test UI
+    runs-on: ubuntu-latest
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
+      - name: Test
+        run: yarn test
+
+  pg_test:
     name: PostgreSQL Test
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/pgtest:latest
@@ -80,27 +176,89 @@ jobs:
       - uses: actions/checkout@v2
       - name: Test
         run: make pg_test
+      - uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: '${{ github.sha }}-postgres-junit'
+          path: '${{ github.workspace }}/postgres-junit.xml'
+          retention-days: 7
+
+  junit:
+    needs:
+      - test
+      - pg_test
+    name: JUnit Report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        name: Download Go JUnit Artifacts
+        with:
+          name: '${{ github.sha }}-rest-api-junit'
+          path: '${{ github.workspace }}/junit'
+      - uses: actions/download-artifact@v2
+        name: Download PostgreSQL JUnit Artifacts
+        with:
+          name: '${{ github.sha }}-postgres-junit'
+          path: '${{ github.workspace }}/junit'
+      - name: Debugging
+        run: |
+          ls ${{ github.workspace }}
+          ls ${{ github.workspace }}/junit
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v2
         if: always() # always run even if the previous step fails
         with:
-          report_paths: '/junit.xml'
-          check_name: 'PostgreSQL Test Summary'
-  docs-deploy:
+          report_paths: '${{ github.workspace }}/**/*-junit.xml'
+          check_name: 'Test Summary'
+
+  docs-generate:
     needs:
-      - "go_test"
-      - "pg-test"
-    name: Deploy Documentation
+      - dependencies
+    name: Generate Documentation
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/build-containers/ubuntu:20.04
     steps:
       - uses: actions/checkout@v2
       - run: yarn install
-      - run: make dependencies
-      - run: make docs
-      - run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+      - uses: actions/cache@v2
         with:
-          branch: gh-pages
-          folder: docs
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - run: make docs
+      - name: Generate Documentation Static Site
+        run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
+      - uses: actions/upload-artifact@v2
+        name: Upload Documentation As Artifact
+        with:
+          name: '${{ github.sha }}-docs'
+          path: '${{ github.workspace }}/docs'
+          retention-days: 7
+
+  container:
+    needs:
+      - "go_dependencies"
+      - "ui_dependencies"
+      - "test_go"
+      - "test_ui"
+      - "build_ui"
+      - "build_binary"
+      - "pg_test"
+    name: Container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build Image
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: 'containers.monetr.dev/rest-api:${{ github.sha }}'
+          outputs: 'type=docker,dest=${{ github.workspace }}/rest-api.container.tar'
