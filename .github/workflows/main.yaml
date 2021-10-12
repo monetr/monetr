@@ -55,7 +55,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ui-
       - name: Build
-        run: yarn build:production
+        run: make build-ui
       - uses: actions/upload-artifact@v2
         with:
           name: '${{ github.sha }}-ui'
@@ -79,6 +79,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - uses: actions/download-artifact@v2
+        name: Download Compiled UI Artifacts
+        with:
+          name: '${{ github.sha }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
       - name: Build
         run: make build
 
