@@ -88,7 +88,7 @@ $(NODE_MODULES)-install:
 	yarn install -d
 
 
-PATH+=\b:$(NODE_MODULES)/.bin
+#PATH+=\b:$(NODE_MODULES)/.bin
 
 
 define hash
@@ -104,6 +104,7 @@ $(NODE_MODULES): $(UI_DEPS)
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
 $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES)
+	git clean -f -X $(STATIC_DIR)
 	RELEASE_REVISION=$(RELEASE_REVISION) yarn build-dev
 	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
 	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
@@ -158,7 +159,8 @@ clean:
 	-rm -rf $(PWD)/docs
 	-rm -rf $(PWD)/build
 	-rm -rf $(PWD)/Notes.md
-	-rm -rf $(GO_SRC_DIR)/ui/static
+	-git clean -f -X $(STATIC_DIR)
+
 
 docs: $(SWAG) $(APP_GO_FILES)
 	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \
