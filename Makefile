@@ -188,7 +188,7 @@ docs-local: docs
 
 CONTAINER=$(BUILD_DIR)/monetr.container.tar
 $(CONTAINER): $(BUILD_DIR) $(PWD)/Dockerfile $(PWD)/.dockerignore $(CONTAINER_BINARY)
-	docker $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
+	docker buildx $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--output type=tar,dest=$(CONTAINER) \
 		-t monetr -f $(PWD)/Dockerfile .

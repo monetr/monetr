@@ -5,15 +5,16 @@ on:
     branches:
       - main
 
+
 jobs:
-  dependencies:
-    name: Dependencies
+  go_dependencies:
+    name: Go Dependencies
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.17.0
+    container: golang:1.17.1
     steps:
       - uses: actions/checkout@v2
       - name: Dependencies
-        run: make dependencies
+        run: make go-dependencies
       - uses: actions/cache@v2
         with:
           path: |
@@ -21,14 +22,60 @@ jobs:
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
           restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
             ${{ runner.os }}-go-
 
-  build:
+  ui_dependencies:
+    name: UI Dependencies
+    runs-on: ubuntu-latest
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - name: Dependencies
+        run: make ui-dependencies
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
+
+  build_ui:
     needs:
-      - dependencies
-    name: Build
+      - ui_dependencies
+    name: Build UI
+    runs-on: ubuntu-latest
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
+      - name: Build
+        run: make build-ui
+      - uses: actions/upload-artifact@v2
+        with:
+          name: '${{ github.sha }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
+          retention-days: 7
+
+  build_binary:
+    needs:
+      - go_dependencies
+      - build_ui
+    name: Build Binary
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/build-containers/golang:1.17.0
+    strategy:
+      matrix:
+        architecture:
+          - amd64
+          - arm64
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -38,16 +85,29 @@ jobs:
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
           restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
             ${{ runner.os }}-go-
+      - uses: actions/download-artifact@v2
+        name: Download Compiled UI Artifacts
+        with:
+          name: '${{ github.sha }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Debugging
+        run: ls $GITHUB_WORKSPACE/pkg/ui/static
       - name: Build
-        run: make build
+        run: GOARCH=${{ matrix.architecture }} make build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: '${{ github.sha }}-binary-${{ matrix.architecture }}'
+          path: '${{ github.workspace }}/bin/monetr'
+          retention-days: 7
 
-  test:
+  go_test:
     needs:
-      - dependencies
-    name: Test
+      - go_dependencies
+    name: Test Go
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.17.0
+    container: golang:1.17.1
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
@@ -74,9 +134,10 @@ jobs:
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
           restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
             ${{ runner.os }}-go-
       - name: Test
-        run: make test
+        run: make test-go
       - uses: actions/upload-artifact@v2
         name: Upload Test JUnit Artifacts
         if: always()
@@ -90,7 +151,25 @@ jobs:
         with:
           test-results: '${{ github.workspace }}/rest-api-tests.json'
 
-  pg-test:
+  ui_test:
+    needs:
+      - ui_dependencies
+    name: Test UI
+    runs-on: ubuntu-latest
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
+      - name: Test
+        run: make test-ui
+
+  pg_test:
     name: PostgreSQL Test
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/pgtest:latest
@@ -127,8 +206,8 @@ jobs:
 
   junit:
     needs:
-      - test
-      - pg-test
+      - go_test
+      - pg_test
     name: JUnit Report
     runs-on: ubuntu-latest
     steps:
@@ -156,7 +235,8 @@ jobs:
 
   docs-generate:
     needs:
-      - dependencies
+      - go_dependencies
+      - ui_dependencies
     name: Generate Documentation
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/build-containers/ubuntu:20.04
@@ -170,7 +250,15 @@ jobs:
             ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
           restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
             ${{ runner.os }}-go-
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
       - run: make docs
       - name: Generate Documentation Static Site
         run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
@@ -183,21 +271,28 @@ jobs:
 
   container:
     needs:
-      - "dependencies"
-      - "test"
-      - "build"
-      - "pg-test"
+      - "go_dependencies"
+      - "ui_dependencies"
+      - "go_test"
+      - "ui_test"
+      - "build_ui"
+      - "build_binary"
+      - "pg_test"
     name: Container
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - uses: actions/download-artifact@v2
+        name: Download Compiled monetr Binary
+        with:
+          name: '${{ github.sha }}-binary-amd64'
+          path: '${{ github.workspace }}/build'
       - name: Build Image
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
           push: false
-          tags: 'containers.monetr.dev/rest-api:${{ github.sha }}'
-          outputs: 'type=docker,dest=${{ github.workspace }}/rest-api.container.tar'
+          tags: 'ghcr.io/monetr/monetr:${{ github.sha }}'

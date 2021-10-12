@@ -70,6 +70,11 @@ jobs:
     name: Build Binary
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/build-containers/golang:1.17.0
+    strategy:
+      matrix:
+        architecture:
+          - amd64
+          - arm64
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -89,10 +94,10 @@ jobs:
       - name: Debugging
         run: ls $GITHUB_WORKSPACE/pkg/ui/static
       - name: Build
-        run: make build
+        run: GOARCH=${{ matrix.architecture }} make build
       - uses: actions/upload-artifact@v2
         with:
-          name: '${{ github.sha }}-binary'
+          name: '${{ github.sha }}-binary-${{ matrix.architecture }}'
           path: '${{ github.workspace }}/bin/monetr'
           retention-days: 7
 
@@ -281,7 +286,7 @@ jobs:
       - uses: actions/download-artifact@v2
         name: Download Compiled monetr Binary
         with:
-          name: '${{ github.sha }}-binary'
+          name: '${{ github.sha }}-binary-amd64'
           path: '${{ github.workspace }}/build'
       - name: Build Image
         id: docker_build
@@ -289,5 +294,4 @@ jobs:
         with:
           context: .
           push: false
-          tags: 'containers.monetr.dev/monetr:${{ github.sha }}'
-          outputs: 'type=docker,dest=${{ github.workspace }}/monetr.container.tar'
+          tags: 'ghcr.io/monetr/monetr:${{ github.sha }}'
