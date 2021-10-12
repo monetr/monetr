@@ -92,7 +92,7 @@
     "workbox-webpack-plugin": "6.3.0"
   },
   "scripts": {
-    "build": "MONETR_ENV=${MONETR_ENV:=production} webpack ",
+    "build": "webpack",
     "build:staging": "MONETR_ENV=staging yarn build:production",
     "build:production": "yarn build --mode production",
     "build-dev": "webpack --mode development",
@@ -151,7 +151,7 @@
     "url-loader": "4.1.1",
     "webpack": "5.56.1",
     "webpack-bundle-analyzer": "4.4.2",
-    "webpack-cli": "4.8.0",
+    "webpack-cli": "4.9.0",
     "webpack-dev-server": "4.3.1"
   },
   "jest": {

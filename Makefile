@@ -97,14 +97,17 @@ endef
 
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
-	yarn install -d
+	yarn install
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
 $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES)
+$(STATIC_DIR): YARN_BIN=$(shell yarn bin)
+$(STATIC_DIR):
+	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
-	RELEASE_REVISION=$(RELEASE_REVISION) yarn build-dev
+	RELEASE_REVISION=$(RELEASE_REVISION) $(YARN_BIN)/webpack --mode production
 	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
 	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
 	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png
