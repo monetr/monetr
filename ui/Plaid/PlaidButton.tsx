@@ -1,8 +1,9 @@
 import React, { Component, Fragment } from "react";
-import { Button, ButtonProps, CircularProgress } from "@material-ui/core";
+import { Button, ButtonProps, CircularProgress, Snackbar } from "@material-ui/core";
 import { usePlaidLink } from "react-plaid-link";
 import request from "shared/util/request";
 import classnames from "classnames";
+import { Alert, AlertTitle } from '@material-ui/lab';
 
 export interface PropTypes extends ButtonProps {
   useCache?: boolean;
@@ -49,6 +50,7 @@ interface State {
   token: string | null;
   disabled?: boolean;
   loading: boolean;
+  error: string | null;
 }
 
 export default class PlaidButton extends Component<PropTypes, State> {
@@ -57,6 +59,7 @@ export default class PlaidButton extends Component<PropTypes, State> {
     token: null,
     loading: true,
     disabled: false,
+    error: null,
   };
 
   componentDidMount() {
@@ -69,15 +72,16 @@ export default class PlaidButton extends Component<PropTypes, State> {
         });
       })
       .catch(error => {
-        console.error(error);
+        console.error({ error });
         this.setState({
           loading: false,
           disabled: true,
+          error: error?.response?.data?.error || 'Could not connect to Plaid, an unknown error occurred.'
         })
       });
   }
 
-  render() {
+  renderButton = (): React.ReactNode => {
     const disabled = this.state.loading || this.props.disabled || this.state.disabled;
     const props: ButtonProps = {
       ...this.props,
@@ -107,6 +111,32 @@ export default class PlaidButton extends Component<PropTypes, State> {
         onLoad={ this.props.onLoad }
         { ...props }
       />
+    )
+  };
+
+  renderErrorMaybe = (): React.ReactNode => {
+    const { error } = this.state;
+
+    if (!error) {
+      return null;
+    }
+
+    return (
+      <Snackbar open autoHideDuration={ 10000 }>
+        <Alert variant="filled" severity="error">
+          <AlertTitle>Error</AlertTitle>
+          { error }
+        </Alert>
+      </Snackbar>
+    );
+  };
+
+  render() {
+    return (
+      <Fragment>
+        { this.renderErrorMaybe() }
+        { this.renderButton() }
+      </Fragment>
     )
   }
 }

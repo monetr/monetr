@@ -118,6 +118,8 @@ $(GOMODULES): $(GO) $(GO_DEPS) $(STATIC_DIR)
 	$(GO) get $(GO_SRC_DIR)/...
 	touch -a -m $(GOMODULES)
 
+dependencies: $(GOMODULES) $(NODE_MODULES)
+
 build-ui: $(STATIC_DIR)
 
 BINARY=$(LOCAL_BIN)/monetr
