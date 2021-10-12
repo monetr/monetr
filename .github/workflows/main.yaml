@@ -214,7 +214,8 @@ jobs:
 
   docs-generate:
     needs:
-      - dependencies
+      - go_dependencies
+      - ui_dependencies
     name: Generate Documentation
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/build-containers/ubuntu:20.04
@@ -229,6 +230,13 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-
       - run: make docs
       - name: Generate Documentation Static Site
         run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
