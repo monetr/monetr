@@ -129,7 +129,10 @@ dependencies: $(GOMODULES) $(NODE_MODULES)
 build-ui: $(STATIC_DIR)
 
 BINARY=$(LOCAL_BIN)/monetr
-$(BINARY): $(GO) $(STATIC_DIR) $(GOMODULES) $(APP_GO_FILES)
+$(BINARY): $(GO) $(APP_GO_FILES)
+ifndef CI
+$(BINARY): $(STATIC_DIR) $(GOMODULES)
+endif
 	$(call infoMsg,Building monetr binary)
 	$(GO) build -o $(BINARY) $(MONETR_CLI_PACKAGE)
 
