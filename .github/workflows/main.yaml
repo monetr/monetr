@@ -163,9 +163,6 @@ jobs:
           - postgres:12
           - postgres:13
           - postgres:14
-        arch:
-          - amd64
-          - arm64
     container: ${{ matrix.golang }}
     env:
       POSTGRES_HOST: postgres
