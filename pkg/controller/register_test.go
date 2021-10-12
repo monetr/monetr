@@ -23,7 +23,7 @@ func TestRegister(t *testing.T) {
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
 
-		response := e.POST(`/authentication/register`).
+		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
 			Expect()
 
@@ -49,7 +49,7 @@ func TestRegister(t *testing.T) {
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
 
-		response := e.POST(`/authentication/register`).
+		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
 			Expect()
 
@@ -72,7 +72,7 @@ func TestRegister(t *testing.T) {
 		registerRequest.LastName = gofakeit.LastName()
 		registerRequest.Timezone = "going for broke"
 
-		response := e.POST(`/authentication/register`).
+		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
 			Expect()
 
@@ -82,7 +82,7 @@ func TestRegister(t *testing.T) {
 
 	t.Run("invalid json", func(t *testing.T) {
 		e := NewTestApplication(t)
-		response := e.POST(`/authentication/register`).
+		response := e.POST(`/api/authentication/register`).
 			WithBytes([]byte("I am not a valid json body")).
 			Expect()
 
@@ -104,7 +104,7 @@ func TestRegister(t *testing.T) {
 		registerRequest.LastName = gofakeit.LastName()
 
 		{
-			response := e.POST(`/authentication/register`).
+			response := e.POST(`/api/authentication/register`).
 				WithJSON(registerRequest).
 				Expect()
 
@@ -116,7 +116,7 @@ func TestRegister(t *testing.T) {
 		}
 
 		{ // Send the same register request again, this time it should result in an error.
-			response := e.POST(`/authentication/register`).
+			response := e.POST(`/api/authentication/register`).
 				WithJSON(registerRequest).
 				Expect()
 
@@ -156,7 +156,7 @@ func TestRegister(t *testing.T) {
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
 
-		response := e.POST(`/authentication/register`).
+		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
 			Expect()
 

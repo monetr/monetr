@@ -119,7 +119,7 @@ func register(t *testing.T, e *httptest.Expect) (email, password, token string) 
 	registerRequest.FirstName = gofakeit.FirstName()
 	registerRequest.LastName = gofakeit.LastName()
 
-	response := e.POST(`/authentication/register`).
+	response := e.POST(`/api/authentication/register`).
 		WithJSON(registerRequest).
 		Expect()
 

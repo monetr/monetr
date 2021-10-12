@@ -43,7 +43,7 @@ func TestGetAfterCheckout(t *testing.T) {
 
 		var checkoutSessionId string
 		{ // Create a checkout session
-			result := e.POST("/billing/create_checkout").
+			result := e.POST("/api/billing/create_checkout").
 				WithHeader("M-Token", token).
 				WithJSON(swag.CreateCheckoutSessionRequest{
 					PriceId:    nil,
@@ -60,7 +60,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		stripeMock.CompleteCheckoutSession(t, checkoutSessionId)
 
 		{ // Then do the callback from the frontend to complete the checkout session for our application.
-			result := e.GET(fmt.Sprintf("/billing/checkout/%s", checkoutSessionId)).
+			result := e.GET(fmt.Sprintf("/api/billing/checkout/%s", checkoutSessionId)).
 				WithHeader("M-Token", token).
 				Expect()
 

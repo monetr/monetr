@@ -15,7 +15,7 @@ func TestLogin(t *testing.T) {
 		e := NewTestApplication(t)
 		email, password := GivenIHaveLogin(t, e)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithJSON(swag.LoginRequest{
 				Email:    email,
 				Password: password,
@@ -29,7 +29,7 @@ func TestLogin(t *testing.T) {
 	t.Run("invalid email", func(t *testing.T) {
 		e := NewTestApplication(t)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithJSON(swag.LoginRequest{
 				Email:    "notan.email",
 				Password: "atLeastThisIsAPassword",
@@ -43,7 +43,7 @@ func TestLogin(t *testing.T) {
 	t.Run("invalid email weird parser", func(t *testing.T) {
 		e := NewTestApplication(t)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithJSON(swag.LoginRequest{
 				Email:    "Barry Gibbs <bg@example.com>",
 				Password: "atLeastThisIsAPassword",
@@ -57,7 +57,7 @@ func TestLogin(t *testing.T) {
 	t.Run("password to short", func(t *testing.T) {
 		e := NewTestApplication(t)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithJSON(swag.LoginRequest{
 				Email:    "example@example.com",
 				Password: "short",
@@ -83,7 +83,7 @@ func TestLogin(t *testing.T) {
 
 		email, password := GivenIHaveLogin(t, e)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithJSON(swag.LoginRequest{
 				Email:    email,
 				Password: password,
@@ -100,7 +100,7 @@ func TestLogin(t *testing.T) {
 	t.Run("bad password", func(t *testing.T) {
 		e := NewTestApplication(t)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithJSON(swag.LoginRequest{
 				Email:    gofakeit.Email(),
 				Password: "badPassword",
@@ -121,7 +121,7 @@ func TestLogin(t *testing.T) {
 		e := NewTestApplicationWithConfig(t, config)
 		email, password := GivenIHaveLogin(t, e)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithJSON(swag.LoginRequest{
 				Email:    email,
 				Password: password,
@@ -135,7 +135,7 @@ func TestLogin(t *testing.T) {
 	t.Run("malformed json", func(t *testing.T) {
 		e := NewTestApplication(t)
 
-		response := e.POST("/authentication/login").
+		response := e.POST("/api/authentication/login").
 			WithBytes([]byte("{bad json}")).
 			Expect()
 

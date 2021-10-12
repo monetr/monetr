@@ -11,7 +11,7 @@ func TestPostTransactions(t *testing.T) {
 		e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.POST("/bank_accounts/1234/transactions").
+		response := e.POST("/api/bank_accounts/1234/transactions").
 			WithHeader("M-Token", token).
 			WithJSON(models.Transaction{
 				BankAccountId: 1234,

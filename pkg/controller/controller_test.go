@@ -7,7 +7,7 @@ import (
 
 func TestGetHealth(t *testing.T) {
 	e := NewTestApplication(t)
-	response := e.GET("/health").Expect()
+	response := e.GET("/api/health").Expect()
 
 	response.Status(http.StatusOK)
 	response.JSON().Path("$.dbHealthy").Boolean().True()

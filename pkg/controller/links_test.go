@@ -22,7 +22,7 @@ func TestPostLink(t *testing.T) {
 			UpdatedAt:             time.Now().Add(1 * time.Hour),
 		}
 
-		response := e.POST("/links").
+		response := e.POST("/api/links").
 			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
@@ -45,7 +45,7 @@ func TestPostLink(t *testing.T) {
 			UpdatedAt:             time.Now().Add(1 * time.Hour),
 		}
 
-		response := e.POST("/links").
+		response := e.POST("/api/links").
 			WithJSON(link).
 			Expect()
 
@@ -73,7 +73,7 @@ func TestGetLink(t *testing.T) {
 		// tokenB. This will help verify that we do not expose data from someone else's login.
 		var linkAID uint64
 		{
-			response := e.POST("/links").
+			response := e.POST("/api/links").
 				WithHeader("M-Token", tokenA).
 				WithJSON(link).
 				Expect()
@@ -88,7 +88,7 @@ func TestGetLink(t *testing.T) {
 
 		// Create a link for tokenB too. This way we can do a GET request for both tokens to test each scenario.
 		{
-			response := e.POST("/links").
+			response := e.POST("/api/links").
 				WithHeader("M-Token", tokenB).
 				WithJSON(link).
 				Expect()
@@ -102,7 +102,7 @@ func TestGetLink(t *testing.T) {
 
 		// Now we want to test GET with token A.
 		{
-			response := e.GET("/links").
+			response := e.GET("/api/links").
 				WithHeader("M-Token", tokenA).
 				Expect()
 
@@ -113,7 +113,7 @@ func TestGetLink(t *testing.T) {
 
 		// Now we want to test GET with token B.
 		{
-			response := e.GET("/links").
+			response := e.GET("/api/links").
 				WithHeader("M-Token", tokenB).
 				Expect()
 
@@ -126,7 +126,7 @@ func TestGetLink(t *testing.T) {
 
 	t.Run("unauthenticated", func(t *testing.T) {
 		e := NewTestApplication(t)
-		response := e.GET("/links").
+		response := e.GET("/api/links").
 			Expect()
 
 		response.Status(http.StatusForbidden)
@@ -146,7 +146,7 @@ func TestGetLink(t *testing.T) {
 		}
 
 		{ // Create the link.
-			response := e.POST("/links").
+			response := e.POST("/api/links").
 				WithHeader("M-Token", token).
 				WithJSON(link).
 				Expect()
@@ -160,7 +160,7 @@ func TestGetLink(t *testing.T) {
 		}
 
 		{ // Retrieve the link and make sure the linkId matches.
-			response := e.GET(fmt.Sprintf("/links/%d", link.LinkId)).
+			response := e.GET(fmt.Sprintf("/api/links/%d", link.LinkId)).
 				WithHeader("M-Token", token).
 				Expect()
 
@@ -174,7 +174,7 @@ func TestGetLink(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		{ // Try to retrieve a link that does not exist for this user.
-			response := e.GET(fmt.Sprintf("/links/%d", math.MaxInt64)).
+			response := e.GET(fmt.Sprintf("/api/links/%d", math.MaxInt64)).
 				WithHeader("M-Token", token).
 				Expect()
 
@@ -188,7 +188,7 @@ func TestGetLink(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		{ // Try to retrieve a link that does not exist for this user.
-			response := e.GET("/links/0").
+			response := e.GET("/api/links/0").
 				WithHeader("M-Token", token).
 				Expect()
 
@@ -211,7 +211,7 @@ func TestPutLink(t *testing.T) {
 			CustomInstitutionName: institutionName,
 		}
 
-		response := e.POST("/links").
+		response := e.POST("/api/links").
 			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
@@ -227,7 +227,7 @@ func TestPutLink(t *testing.T) {
 		link.CustomInstitutionName = "New Name"
 		link.InstitutionName = "New Name"
 
-		updated := e.PUT(fmt.Sprintf("/links/%d", linkId)).
+		updated := e.PUT(fmt.Sprintf("/api/links/%d", linkId)).
 			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
@@ -252,7 +252,7 @@ func TestPutLink(t *testing.T) {
 			CustomInstitutionName: institutionName,
 		}
 
-		response := e.POST("/links").
+		response := e.POST("/api/links").
 			WithHeader("M-Token", token).
 			WithJSON(link).
 			Expect()
@@ -269,7 +269,7 @@ func TestPutLink(t *testing.T) {
 		link.InstitutionName = "New Name"
 
 		// Try to perform an update without a token.
-		updated := e.PUT(fmt.Sprintf("/links/%d", linkId)).
+		updated := e.PUT(fmt.Sprintf("/api/links/%d", linkId)).
 			WithJSON(link).
 			Expect()
 
@@ -291,7 +291,7 @@ func TestPutLink(t *testing.T) {
 		// tokenB. This will help verify that we do not expose data from someone else's login.
 		var linkAID, linkBID uint64
 		{
-			response := e.POST("/links").
+			response := e.POST("/api/links").
 				WithHeader("M-Token", tokenA).
 				WithJSON(link).
 				Expect()
@@ -306,7 +306,7 @@ func TestPutLink(t *testing.T) {
 
 		// Create a link for tokenB too. This way we can do a GET request for both tokens to test each scenario.
 		{
-			response := e.POST("/links").
+			response := e.POST("/api/links").
 				WithHeader("M-Token", tokenB).
 				WithJSON(link).
 				Expect()
@@ -325,7 +325,7 @@ func TestPutLink(t *testing.T) {
 				LinkId:                linkBID,
 				CustomInstitutionName: "I have changed",
 			}
-			response := e.PUT(fmt.Sprintf("/links/%d", link.LinkId)).
+			response := e.PUT(fmt.Sprintf("/api/links/%d", link.LinkId)).
 				WithHeader("M-Token", tokenA).
 				WithJSON(link).
 				Expect()
@@ -340,7 +340,7 @@ func TestPutLink(t *testing.T) {
 				LinkId:                linkAID,
 				CustomInstitutionName: "I have changed",
 			}
-			response := e.PUT(fmt.Sprintf("/links/%d", link.LinkId)).
+			response := e.PUT(fmt.Sprintf("/api/links/%d", link.LinkId)).
 				WithHeader("M-Token", tokenB).
 				WithJSON(link).
 				Expect()
@@ -365,7 +365,7 @@ func TestDeleteLink(t *testing.T) {
 		}
 
 		{ // Create the link.
-			response := e.POST("/links").
+			response := e.POST("/api/links").
 				WithHeader("M-Token", token).
 				WithJSON(link).
 				Expect()
@@ -379,7 +379,7 @@ func TestDeleteLink(t *testing.T) {
 		}
 
 		{ // Try to retrieve the link before it's been deleted.
-			response := e.GET(fmt.Sprintf("/links/%d", link.LinkId)).
+			response := e.GET(fmt.Sprintf("/api/links/%d", link.LinkId)).
 				WithHeader("M-Token", token).
 				Expect()
 
@@ -387,7 +387,7 @@ func TestDeleteLink(t *testing.T) {
 		}
 
 		{ // Try to delete it.
-			response := e.DELETE(fmt.Sprintf("/links/%d", link.LinkId)).
+			response := e.DELETE(fmt.Sprintf("/api/links/%d", link.LinkId)).
 				WithHeader("M-Token", token).
 				Expect()
 
@@ -395,7 +395,7 @@ func TestDeleteLink(t *testing.T) {
 		}
 
 		{ // Try to retrieve the link after it's been deleted.
-			response := e.GET(fmt.Sprintf("/links/%d", link.LinkId)).
+			response := e.GET(fmt.Sprintf("/api/links/%d", link.LinkId)).
 				WithHeader("M-Token", token).
 				Expect()
 
