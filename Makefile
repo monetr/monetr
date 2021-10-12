@@ -7,7 +7,6 @@ RELEASE_REVISION=$(shell git rev-parse HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
-
 ARCH=amd64
 OS=$(shell uname -s | tr A-Z a-z)
 
@@ -115,7 +114,7 @@ $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES)
 GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS)
 	$(call infoMsg,Installing dependencies for monetrs rest-api)
-	$(GO) get $(GO_SRC_DIR)/...
+	$(GO) get -t $(GO_SRC_DIR)/...
 	touch -a -m $(GOMODULES)
 
 dependencies: $(GOMODULES) $(NODE_MODULES)
@@ -141,10 +140,9 @@ build: $(BINARY)
 
 test: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr rest-api)
-ifndef CI
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
-endif
-	$(GOTESTSUM) --junitfile $(PWD)/rest-api.xml --format testname -- -race -v \
+	$(GOTESTSUM) --junitfile $(PWD)/rest-api-junit.xml --jsonfile $(PWD)/rest-api-tests.json --format testname -- \
+		-race -v \
 		-coverprofile=$(COVERAGE_TXT) \
 		-covermode=atomic $(GO_SRC_DIR)/...
 	$(GO) tool cover -func=$(COVERAGE_TXT)
@@ -229,14 +227,18 @@ endif
 # PostgreSQL tests currently only work in CI pipelines.
 ifdef CI
 PG_TEST_EXTENSION_QUERY = "CREATE EXTENSION pgtap;"
-JUNIT_OUTPUT_FILE=/junit.xml
+JUNIT_OUTPUT_FILE=$(PWD)/postgres-junit.xml
 pg_test:
 	@for FILE in $(PWD)/schema/*.up.sql; do \
 		echo "Applying $$FILE"; \
   		psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -h $(POSTGRES_HOST) -f $$FILE || exit 1; \
   	done;
 	psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -h $(POSTGRES_HOST) -c $(PG_TEST_EXTENSION_QUERY)
-	-JUNIT_OUTPUT_FILE=$(JUNIT_OUTPUT_FILE) pg_prove -h $(POSTGRES_HOST) -U $(POSTGRES_USER) -d $(POSTGRES_DB) -f -c $(PWD)/tests/pg/*.sql --verbose --harness TAP::Harness::JUnit
+	-JUNIT_OUTPUT_FILE=$(JUNIT_OUTPUT_FILE) pg_prove \
+		-h $(POSTGRES_HOST) \
+		-U $(POSTGRES_USER) \
+		-d $(POSTGRES_DB) -f \
+		-c $(PWD)/tests/pg/*.sql --verbose --harness TAP::Harness::JUnit
 endif
 
 include $(PWD)/Makefile.release
