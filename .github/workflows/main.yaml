@@ -82,7 +82,7 @@ jobs:
       - name: Build
         run: make build
 
-  test_go:
+  go_test:
     needs:
       - go_dependencies
     name: Test Go
@@ -130,7 +130,7 @@ jobs:
         with:
           test-results: '${{ github.workspace }}/rest-api-tests.json'
 
-  test_ui:
+  ui_test:
     needs:
       - ui_dependencies
     name: Test UI
@@ -185,7 +185,7 @@ jobs:
 
   junit:
     needs:
-      - test
+      - go_test
       - pg_test
     name: JUnit Report
     runs-on: ubuntu-latest
@@ -243,8 +243,8 @@ jobs:
     needs:
       - "go_dependencies"
       - "ui_dependencies"
-      - "test_go"
-      - "test_ui"
+      - "go_test"
+      - "ui_test"
       - "build_ui"
       - "build_binary"
       - "pg_test"
