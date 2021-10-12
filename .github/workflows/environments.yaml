@@ -1,8 +1,8 @@
 name: Environment
 
 on:
-  schedule:
-    - cron: 0 17 * * * # Noon in central time.
+#  schedule:
+#    - cron: 0 17 * * * # Noon in central time.
   workflow_dispatch: { }
 
 jobs:
