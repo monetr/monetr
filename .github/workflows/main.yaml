@@ -86,6 +86,8 @@ jobs:
         with:
           name: '${{ github.sha }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Debugging
+        run: ls $GITHUB_WORKSPACE/pkg/ui/static
       - name: Build
         run: make build
       - uses: actions/upload-artifact@v2
@@ -280,7 +282,7 @@ jobs:
         name: Download Compiled monetr Binary
         with:
           name: '${{ github.sha }}-binary'
-          path: '${{ github.workspace }}/bin'
+          path: '${{ github.workspace }}/build'
       - name: Build Image
         id: docker_build
         uses: docker/build-push-action@v2
