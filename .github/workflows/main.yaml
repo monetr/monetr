@@ -10,10 +10,13 @@ jobs:
     timeout-minutes: 15
     name: Test
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.17.0
+    container: ghcr.io/monetr/build-containers/golang:1.17.1
     strategy:
       matrix:
-        postgres: [13, 14]
+        postgres:
+          - postgres:12
+          - postgres:13
+          - postgres:14
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
@@ -21,7 +24,7 @@ jobs:
       POSTGRES_DB: test-db
     services:
       postgres:
-        image: postgres:${{ matrix.postgres }}
+        image: ${{ matrix.postgres }}
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
