@@ -38,7 +38,7 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.4
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	google.golang.org/genproto v0.0.0-20211001223012-bfb93cce50d9
+	google.golang.org/genproto v0.0.0-20211013025323-ce878158c4d4
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
