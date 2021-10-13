@@ -12,7 +12,7 @@
     "@sentry/browser": "6.13.3",
     "@sentry/react": "6.13.3",
     "@sentry/tracing": "6.13.3",
-    "@stripe/react-stripe-js": "1.5.0",
+    "@stripe/react-stripe-js": "1.6.0",
     "@stripe/stripe-js": "1.19.1",
     "@svgr/webpack": "5.5.0",
     "@testing-library/jest-dom": "5.14.1",
