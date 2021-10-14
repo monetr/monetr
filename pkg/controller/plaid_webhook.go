@@ -2,21 +2,21 @@ package controller
 
 import (
 	"fmt"
-	"github.com/form3tech-oss/jwt-go"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/getsentry/sentry-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/context"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
-
-	"github.com/kataras/iris/v12/context"
 )
 
 type PlaidWebhook struct {
@@ -111,7 +111,7 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 			return nil, errors.Wrap(err, "failed to get verification key for webhook")
 		}
 
-		return keyFunction.KeyFuncF3T(token)
+		return keyFunction.Keyfunc(token)
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")
