@@ -1,9 +1,8 @@
-//+build !vault
-
 package repository
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"

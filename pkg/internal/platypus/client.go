@@ -3,11 +3,12 @@ package platypus
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"strconv"
-	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/plaid/plaid-go/plaid"
@@ -19,6 +20,7 @@ type (
 		GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error)
 		GetAllTransactions(ctx context.Context, start, end time.Time, accountIds []string) ([]Transaction, error)
 		UpdateItem(ctx context.Context) (LinkToken, error)
+		UpdateWebhook(ctx context.Context, newWebhooksURL string) error
 		RemoveItem(ctx context.Context) error
 	}
 )
@@ -231,6 +233,39 @@ func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
 		LinkToken: result.LinkToken,
 		Expires:   result.Expiration,
 	}, nil
+}
+
+func (p *PlaidClient) UpdateWebhook(ctx context.Context, newWebhooksURL string) error {
+	span := sentry.StartSpan(ctx, "Plaid - UpdateWebhook")
+	defer span.Finish()
+
+	log := p.getLog(span)
+
+	log.Trace("updating webhook URL")
+
+	// Build the get accounts request.
+	request := p.client.PlaidApi.
+		ItemWebhookUpdate(span.Context()).
+		ItemWebhookUpdateRequest(plaid.ItemWebhookUpdateRequest{
+			AccessToken: p.accessToken,
+			Webhook:     newWebhooksURL,
+		})
+
+	// Send the request.
+	_, response, err := request.Execute()
+	// And handle the response.
+	if err = after(
+		span,
+		response,
+		err,
+		"Updating Plaid Item Webhook URL",
+		"failed to update Plaid Item webhook URL",
+	); err != nil {
+		log.WithError(err).Errorf("failed to update Plaid Item webhook URL")
+		return err
+	}
+
+	return nil
 }
 
 func (p *PlaidClient) RemoveItem(ctx context.Context) error {
