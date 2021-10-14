@@ -34,11 +34,22 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.77.0
 	github.com/teambition/rrule-go v1.7.2
+	github.com/uptrace/bun v1.0.19
+	github.com/uptrace/bun/dialect/mysqldialect v1.0.19
+	github.com/uptrace/bun/dialect/pgdialect v1.0.19
+	github.com/uptrace/bun/dialect/sqlitedialect v1.0.19
+	github.com/uptrace/bun/driver/pgdriver v1.0.19
+	github.com/uptrace/bun/driver/sqliteshim v1.0.19
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	google.golang.org/genproto v0.0.0-20211112145013-271947fe86fd // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
+)
+
+require (
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/uptrace/bun/extra/bundebug v1.0.14
 )
 
 require (
@@ -58,7 +69,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
-	github.com/fatih/color v1.9.0 // indirect
+	github.com/fatih/color v1.13.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/go-pg/zerochecker v0.2.0 // indirect
@@ -97,11 +108,13 @@ require (
 	github.com/kataras/pio v0.0.10 // indirect
 	github.com/kataras/sitemap v0.0.5 // indirect
 	github.com/kataras/tunnel v0.0.3 // indirect
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
-	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
+	github.com/mattn/go-sqlite3 v1.14.9 // indirect
+	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.16 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -112,11 +125,12 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
-	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
+	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
@@ -125,6 +139,7 @@ require (
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/tdewolff/minify/v2 v2.9.22 // indirect
 	github.com/tdewolff/parse/v2 v2.5.22 // indirect
@@ -144,11 +159,14 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/net v0.0.0-20211201190559-0a0e4e1bb54c // indirect
+	golang.org/x/mod v0.5.1 // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
+	golang.org/x/tools v0.1.7 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.41.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
@@ -157,6 +175,16 @@ require (
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	lukechampine.com/uint128 v1.1.1 // indirect
 	mellium.im/sasl v0.2.1 // indirect
+	modernc.org/cc/v3 v3.35.18 // indirect
+	modernc.org/ccgo/v3 v3.12.78 // indirect
+	modernc.org/libc v1.11.86 // indirect
+	modernc.org/mathutil v1.4.1 // indirect
+	modernc.org/memory v1.0.5 // indirect
+	modernc.org/opt v0.1.1 // indirect
+	modernc.org/sqlite v1.14.1 // indirect
+	modernc.org/strutil v1.1.1 // indirect
+	modernc.org/token v1.0.0 // indirect
 	moul.io/http2curl v1.0.1-0.20190925090545-5cd742060b0e // indirect
 )

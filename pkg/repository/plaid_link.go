@@ -5,26 +5,26 @@ package repository
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
-	_, err := r.txn.Model(link).Insert(link)
+	span := sentry.StartSpan(ctx, "CreatePlaidLink")
+	defer span.Finish()
+
+	_, err := r.db.NewInsert().Model(link).Exec(span.Context(), link)
 	return errors.Wrap(err, "failed to create plaid link")
 }
 
 func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
 	span := sentry.StartSpan(ctx, "UpdatePlaidLink")
 	defer span.Finish()
-	if span.Data == nil {
-		span.Data = map[string]interface{}{}
-	}
 
-	span.SetTag("accountId", r.AccountIdStr())
-	_, err := r.txn.ModelContext(span.Context(), link).WherePK().Update(link)
+	_, err := r.db.NewUpdate().Model(link).WherePK().Exec(span.Context(), link)
 	return errors.Wrap(err, "failed to update Plaid link")
 }
 
@@ -33,14 +33,14 @@ type PlaidRepository interface {
 	GetLink(ctx context.Context, accountId, linkId uint64) (*models.Link, error)
 }
 
-func NewPlaidRepository(db pg.DBI) PlaidRepository {
+func NewPlaidRepository(db bun.IDB) PlaidRepository {
 	return &plaidRepositoryBase{
-		txn: db,
+		db: db,
 	}
 }
 
 type plaidRepositoryBase struct {
-	txn pg.DBI
+	db bun.IDB
 }
 
 func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string) (*models.Link, error) {
@@ -52,12 +52,13 @@ func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string
 	}
 
 	var link models.Link
-	err := r.txn.ModelContext(span.Context(), &link).
+	err := r.db.NewSelect().
+		Model(&link).
 		Relation("PlaidLink").
 		Relation("BankAccounts").
-		Where(`"plaid_link"."item_id" = ?`, itemId).
+		Where(`plaid_link.item_id = ?`, itemId).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context(), &link)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve link by item Id")
 	}
@@ -75,13 +76,14 @@ func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId, linkId uin
 	}
 
 	var link models.Link
-	err := r.txn.ModelContext(span.Context(), &link).
+	err := r.db.NewSelect().
+		Model(&link).
 		Relation("PlaidLink").
 		Relation("BankAccounts").
-		Where(`"link"."account_id" = ?`, accountId).
-		Where(`"link"."link_id" = ?`, linkId).
+		Where(`link.account_id = ?`, accountId).
+		Where(`link.link_id = ?`, linkId).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context(), &link)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve link")
 	}

@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type TransactionUpdateId struct {
@@ -21,22 +23,8 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	for i := range transactions {
 		transactions[i].AccountId = r.AccountId()
 	}
-	_, err := r.txn.ModelContext(span.Context(), &transactions).Insert(&transactions)
+	_, err := r.db.NewInsert().Model(&transactions).Exec(span.Context(), &transactions)
 	return errors.Wrap(err, "failed to insert transactions")
-}
-
-func (r *repositoryBase) GetPendingTransactionsForBankAccount(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error) {
-	var result []models.Transaction
-	err := r.txn.Model(&result).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction"."is_pending" = ?`, true).
-		Select(&result)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not retrieve pending transactions for bank account")
-	}
-
-	return result, nil
 }
 
 func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
@@ -53,13 +41,14 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 	}
 
 	var items []models.Transaction
-	err := r.txn.ModelContext(span.Context(), &items).
-		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
-		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"bank_account"."link_id" = ?`, linkId).
-		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
-		Select(&items)
+	err := r.db.NewSelect().
+		Model(&items).
+		Join(`INNER JOIN bank_accounts AS bank_account`).
+		JoinOn(`bank_account.bank_account_id = transaction.bank_account_id AND bank_account.account_id = transaction.account_id`).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`bank_account.link_id = ?`, linkId).
+		Where(`transaction.plaid_transaction_id IN (?)`, bun.In(plaidTransactionIds)).
+		Scan(span.Context(), &items)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction Ids for plaid Ids")
@@ -87,14 +76,15 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 	}
 
 	var items []models.Transaction
-	err := r.txn.ModelContext(span.Context(), &items).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+	err := r.db.NewSelect().
+		Model(&items).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`transaction.bank_account_id = ?`, bankAccountId).
 		Limit(limit).
 		Offset(offset).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
-		Select(&items)
+		Scan(span.Context(), &items)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
@@ -118,15 +108,16 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 	}
 
 	var items []models.Transaction
-	err := r.txn.ModelContext(span.Context(), &items).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction"."spending_id" = ?`, spendingId).
+	err := r.db.NewSelect().
+		Model(&items).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`transaction.bank_account_id = ?`, bankAccountId).
+		Where(`transaction.spending_id = ?`, spendingId).
 		Limit(limit).
 		Offset(offset).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`).
-		Select(&items)
+		Scan(span.Context(), &items)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transactions for spending")
@@ -147,11 +138,13 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, tran
 	}
 
 	var result models.Transaction
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction"."transaction_id" = ?`, transactionId).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`transaction.bank_account_id = ?`, bankAccountId).
+		Where(`transaction.transaction_id = ?`, transactionId).
+		Limit(1).
+		Scan(span.Context(), &result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve transaction")
@@ -173,7 +166,9 @@ func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId ui
 	transaction.AccountId = r.AccountId()
 	transaction.BankAccountId = bankAccountId
 
-	_, err := r.txn.ModelContext(span.Context(), transaction).Insert(transaction)
+	_, err := r.db.NewInsert().
+		Model(transaction).
+		Exec(span.Context(), transaction)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create transaction")
@@ -194,11 +189,12 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ui
 
 	transaction.AccountId = r.AccountId()
 
-	_, err := r.txn.ModelContext(span.Context(), transaction).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		WherePK().
-		Update(&transaction)
+	_, err := r.db.NewUpdate().
+		Model(transaction).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`transaction.bank_account_id = ?`, bankAccountId).
+		WherePK(). // TODO Will this double up on query predicates?
+		Exec(span.Context(), transaction)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update transaction")
@@ -219,15 +215,21 @@ func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []
 		transactions[i].AccountId = r.AccountId()
 	}
 
-	result, err := r.txn.ModelContext(span.Context(), &transactions).
+	result, err := r.db.NewUpdate().
+		Model(&transactions).
 		WherePK().
-		Update(&transactions)
+		Exec(span.Context(), &transactions)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update transactions")
 	}
 
-	if affected := result.RowsAffected(); affected != len(transactions) {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		span.Status = sentry.SpanStatusDataLoss
+		return errors.Wrap(err, "failed to determine number of transactions updated")
+	}
+	if affected != int64(len(transactions)) {
 		span.Status = sentry.SpanStatusDataLoss
 		return errors.Errorf("not all transactions updated, expected: %d updated: %d", len(transactions), affected)
 	}
@@ -241,11 +243,12 @@ func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, t
 	span := sentry.StartSpan(ctx, "DeleteTransaction")
 	defer span.Finish()
 
-	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction"."transaction_id" = ?`, transactionId).
-		Delete()
+	_, err := r.db.NewDelete().
+		Model(&models.Transaction{}).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`transaction.bank_account_id = ?`, bankAccountId).
+		Where(`transaction.transaction_id = ?`, transactionId).
+		Exec(span.Context())
 
 	return errors.Wrap(err, "failed to delete transaction")
 }
@@ -255,13 +258,14 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context
 	defer span.Finish()
 
 	result := make([]models.Transaction, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
-		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
-		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"bank_account"."link_id" = ?`, linkId).
-		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Join(`INNER JOIN bank_accounts AS bank_account`).
+		JoinOn(`bank_account.bank_account_id = transaction.bank_account_id AND bank_account.account_id = transaction.account_id`).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`bank_account.link_id = ?`, linkId).
+		Where(`transaction.plaid_transaction_id IN (?)`, bun.In(plaidTransactionIds)).
+		Scan(span.Context(), &result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve transactions by plaid Id")
 	}

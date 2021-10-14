@@ -104,28 +104,93 @@ jobs:
           retention-days: 7
 
   go_test:
-    needs:
-      - go_dependencies
+    needs: [ ]
     name: Test Go
     runs-on: ubuntu-latest
     container: golang:1.17.4
+    strategy:
+      fail-fast: false
+      matrix:
+        database:
+          - image: mysql:5.6
+            name: mysql
+            dsn: "api-testing:@tcp(database:3306)/test-db?tls=false"
+            options: >-
+              --health-cmd "mysqladmin ping"
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+          - image: mysql:5.7
+            name: mysql
+            dsn: "api-testing:@tcp(database:3306)/test-db?tls=false"
+            options: >-
+              --health-cmd "mysqladmin ping"
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+          - image: mysql:8.0
+            name: mysql
+            dsn: "api-testing:@tcp(database:3306)/test-db?tls=false"
+            options: >-
+              --health-cmd "mysqladmin ping"
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+          - image: postgres:12
+            name: postgres
+            dsn: ""
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+          - image: postgres:13
+            name: postgres
+            dsn: ""
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+          - image: postgres:14
+            name: postgres
+            dsn: ""
+            options: >-
+              --health-cmd pg_isready
+              --health-interval 10s
+              --health-timeout 5s
+              --health-retries 5
+          - image: busybox
+            name: sqlite
+            dsn: ":memory:"
+            options: >-
+              -e BUSYBOX=true
+              --entrypoint tail -f /dev/null
     env:
-      POSTGRES_HOST: postgres
+      DATABASE: "${{ matrix.database.name }}"
+      DSN: "${{ matrix.database.dsn }}"
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      POSTGRES_HOST: database
       POSTGRES_PASSWORD: ""
+      MYSQL_USER: api-testing
       POSTGRES_USER: api-testing
+      MYSQL_DATABASE: test-db
       POSTGRES_DB: test-db
     services:
-      postgres:
-        image: postgres:13
+      database:
+        image: "${{ matrix.database.image }}"
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: ""
+          POSTGRES_HOST: database
+          POSTGRES_PASSWORD: ""
+          MYSQL_USER: api-testing
           POSTGRES_USER: api-testing
+          MYSQL_DATABASE: test-db
           POSTGRES_DB: test-db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+        options: "${{ matrix.database.options }}"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2

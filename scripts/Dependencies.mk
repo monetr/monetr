@@ -269,3 +269,13 @@ install-$(KUBECTL): $(LOCAL_BIN)
 	curl -L $(KUBECTL_URL) --output $(KUBECTL)
 	chmod +x $(KUBECTL)
 endif
+
+PODMAN_COMPOSE=$(LOCAL_BIN)/podman-compose
+$(PODMAN_COMPOSE):
+	@if [ ! -f "$(PODMAN_COMPOSE)" ]; then $(MAKE) install-$(PODMAN_COMPOSE); fi
+
+install-$(PODMAN_COMPOSE): $(CURL)
+install-$(PODMAN_COMPOSE): COMPOSE_URL = "https://raw.githubusercontent.com/containers/podman-compose/devel/podman_compose.py"
+install-$(PODMAN_COMPOSE): $(LOCAL_BIN)
+	$(CURL) -o $(PODMAN_COMPOSE) $(COMPOSE_URL)
+	chmod +x $(PODMAN_COMPOSE)

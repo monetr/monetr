@@ -7,8 +7,8 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/hash"
+	"github.com/uptrace/bun"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 )
@@ -18,7 +18,7 @@ var (
 )
 
 type unauthenticatedRepo struct {
-	txn pg.DBI
+	db bun.IDB
 }
 
 func (u *unauthenticatedRepo) CreateLogin(
@@ -38,9 +38,10 @@ func (u *unauthenticatedRepo) CreateLogin(
 		},
 		PasswordHash: hashedPassword,
 	}
-	count, err := u.txn.ModelContext(span.Context(), login).
-		Where(`"email" = ?`, email).
-		Count()
+	count, err := u.db.NewSelect().
+		Model(login).
+		Where(`email = ?`, email).
+		Count(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to verify if email is unique")
@@ -51,7 +52,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 		return nil, errors.Errorf("a login with the same email already exists")
 	}
 
-	_, err = u.txn.ModelContext(span.Context(), login).Insert(login)
+	_, err = u.db.NewInsert().Model(login).Exec(span.Context(), login)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 	}
@@ -67,7 +68,7 @@ func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *mode
 	// specify the accountId and overwrite something.
 	account.AccountId = 0
 
-	_, err := u.txn.ModelContext(span.Context(), account).Insert(account)
+	_, err := u.db.NewInsert().Model(account).Exec(span.Context(), account)
 	return errors.Wrap(err, "failed to create account")
 }
 
@@ -84,7 +85,8 @@ func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId
 	user.AccountId = accountId
 	user.LoginId = loginId
 
-	if _, err := u.txn.ModelContext(span.Context(), user).Insert(user); err != nil {
+
+	if _, err := u.db.NewInsert().Model(user).Exec(span.Context(), user); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create user")
 	}
@@ -107,11 +109,12 @@ func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string
 	}
 
 	var link models.Link
-	err := u.txn.ModelContext(span.Context(), &link).
+	err := u.db.NewSelect().
+		Model(&link).
 		Relation("PlaidLink").
 		Where(`"plaid_link"."item_id" = ?`, itemId).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context(), &link)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve plaid link")
@@ -132,11 +135,12 @@ func (u *unauthenticatedRepo) ValidateBetaCode(ctx context.Context, betaCode str
 	defer span.Finish()
 	var beta models.Beta
 	hashedCode := hash.HashPassword(strings.ToLower(betaCode), betaCode)
-	err := u.txn.ModelContext(span.Context(), &beta).
-		Where(`"beta"."code_hash" = ?`, hashedCode).
-		Where(`"beta"."used_by_user_id" IS NULL`).
+	err := u.db.NewSelect().
+		Model(&beta).
+		Where(`beta.code_hash = ?`, hashedCode).
+		Where(`beta.used_by_user_id IS NULL`).
 		Limit(1).
-		Select(&beta)
+		Scan(span.Context(), &beta)
 	if err != nil {
 		span.Status = sentry.SpanStatusNotFound
 		return nil, errors.Wrap(err, "failed to validate beta code")
@@ -155,18 +159,25 @@ func (u *unauthenticatedRepo) ValidateBetaCode(ctx context.Context, betaCode str
 func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy uint64) error {
 	span := sentry.StartSpan(ctx, "Use Beta Code")
 	defer span.Finish()
-	result, err := u.txn.ModelContext(span.Context(), &models.Beta{}).
-		Set(`"used_by_user_id" = ?`, usedBy).
-		Where(`"beta"."beta_id" = ?`, betaId).
-		Update()
+	result, err := u.db.NewUpdate().
+		Model(&models.Beta{}).
+		Set(`used_by_user_id = ?`, usedBy).
+		Where(`beta.beta_id = ?`, betaId).
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to use beta code")
 	}
 
-	if result.RowsAffected() != 1 {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		span.Status = sentry.SpanStatusDataLoss
+		return errors.Wrap(err, "failed to determine rows affected for beta code usage")
+	}
+
+	if affected != 1 {
 		span.Status = sentry.SpanStatusInvalidArgument
-		return errors.Errorf("invalid number of beta codes used: %d", result.RowsAffected())
+		return errors.Errorf("invalid number of beta codes used: %d", affected)
 	}
 
 	span.Status = sentry.SpanStatusOK

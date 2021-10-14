@@ -1,1 +1,0 @@
-ALTER TABLE "transactions" ADD COLUMN "custom_name" TEXT NULL;

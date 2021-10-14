@@ -1,1 +1,0 @@
-ALTER TABLE "logins" DROP COLUMN "password_reset_at";

@@ -1,1 +1,0 @@
-ALTER TABLE "accounts" ADD COLUMN "stripe_webhook_latest_timestamp" TIMESTAMPTZ NULL;

@@ -206,6 +206,13 @@ test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
 	$(call infoMsg,Running go tests for monetrs UI)
 	yarn test --coverage
 
+TESTING_COMPOSE=$(PWD)/docker-compose.testing.yaml
+testing-db: $(PODMAN_COMPOSE) $(TESTING_COMPOSE)
+	-trap "$(MAKE) testing-db-down" SIGINT && $(shell which python3) $(PODMAN_COMPOSE) -f $(TESTING_COMPOSE) up
+
+testing-db-down: $(PODMAN_COMPOSE) $(TESTING_COMPOSE)
+	$(shell which python3) $(PODMAN_COMPOSE) -f $(TESTING_COMPOSE) down
+
 test: test-go test-ui
 
 clean:

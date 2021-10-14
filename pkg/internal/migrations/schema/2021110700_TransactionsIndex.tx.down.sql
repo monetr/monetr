@@ -1,1 +1,0 @@
-DROP INDEX "ix_transactions_opt_order";

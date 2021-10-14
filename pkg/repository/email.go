@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/uptrace/bun"
 )
 
 type EmailVerification = bool
@@ -30,10 +30,10 @@ var (
 
 type emailRepositoryBase struct {
 	log *logrus.Entry
-	db  pg.DBI
+	db  bun.IDB
 }
 
-func NewEmailRepository(log *logrus.Entry, db pg.DBI) EmailRepository {
+func NewEmailRepository(log *logrus.Entry, db bun.IDB) EmailRepository {
 	return &emailRepositoryBase{
 		log: log,
 		db:  db,
@@ -45,10 +45,11 @@ func getLoginForEmail(ctx context.Context, db pg.DBI, emailAddress string) (*mod
 	defer span.Finish()
 
 	var login models.Login
-	err := db.ModelContext(span.Context(), &login).
-		Where(`"login"."email" = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
+	err := db.NewSelect().
+		Model(&login).
+		Where(`login.email = ?`, strings.ToLower(emailAddress)).
 		Limit(1).
-		Select(&login)
+		Scan(span.Context(), &login)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve login by email")
 	}
@@ -65,19 +66,22 @@ func (e *emailRepositoryBase) SetEmailVerified(ctx context.Context, emailAddress
 	defer span.Finish()
 
 	var login models.Login
-	result, err := e.db.ModelContext(span.Context(), &login).
-		Set(`"is_email_verified" = ?`, EmailVerified).               // Change the verification to true.
-		Set(`"email_verified_at" = ?`, time.Now().UTC()).            // Set the verified at time to now.
-		Where(`"login"."email" = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
-		Where(`"login"."is_enabled" = ?`, true).                     // Only if the login is actually enabled.
-		Where(`"login"."is_email_verified" = ?`, EmailNotVerified).  // And only if the login is not already verified.
-		Limit(1).
-		Update()
+	result, err := e.db.NewUpdate().
+		Set(`is_email_verified = ?`, EmailVerified).             // Change the verification to true.
+		Set(`email_verified_at = ?`, time.Now().UTC()).          // Set the verified at time to now.
+		Where(`login.email = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
+		Where(`login.is_enabled = ?`, true).                     // Only if the login is actually enabled.
+		Where(`login.is_email_verified = ?`, EmailNotVerified).  // And only if the login is not already verified.
+		Exec(span.Context(), &login)
 	if err != nil {
 		return errors.Wrap(err, "failed to verify email")
 	}
 
-	if result.RowsAffected() != 1 {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "failed to make sure only one login was updated")
+	}
+	if affected != 1 {
 		return errors.New("email cannot be verified")
 	}
 

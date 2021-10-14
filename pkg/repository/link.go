@@ -19,12 +19,13 @@ func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Li
 	}
 
 	var link models.Link
-	err := r.txn.ModelContext(span.Context(), &link).
+	err := r.db.NewSelect().
+		Model(&link).
 		Relation("PlaidLink").
 		Relation("BankAccounts").
-		Where(`"link"."link_id" = ? AND "link"."account_id" = ?`, linkId, r.AccountId()).
+		Where(`link.link_id = ? AND link.account_id = ?`, linkId, r.AccountId()).
 		Limit(1).
-		Select(&link)
+		Scan(span.Context(), &link)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get link")
 	}
@@ -37,9 +38,10 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 	defer span.Finish()
 
 	var result []models.Link
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"link"."account_id" = ?`, r.accountId).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`link.account_id = ?`, r.AccountId()).
+		Scan(span.Context(), &result)
 	if err != nil {
 		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
 	}
@@ -51,10 +53,11 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 	span := sentry.StartSpan(ctx, "GetLinks")
 	defer span.Finish()
 
-	count, err := r.txn.ModelContext(span.Context(), &models.Link{}).
-		Where(`"link"."account_id" = ?`, r.accountId).
-		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-		Count()
+	count, err := r.db.NewSelect().
+		Model(&models.Link{}).
+		Where(`link.account_id = ?`, r.AccountId()).
+		Where(`link.link_type = ?`, models.PlaidLinkType).
+		Count(span.Context())
 	if err != nil {
 		return count, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
 	}
@@ -70,11 +73,12 @@ func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bo
 		"linkId": linkId,
 	}
 
-	ok, err := r.txn.ModelContext(span.Context(), &models.Link{}).
-		Where(`"link"."account_id" = ?`, r.AccountId()).
-		Where(`"link"."link_id" = ?`, linkId).
-		Where(`"link"."link_type" = ?`, models.ManualLinkType).
-		Exists()
+	ok, err := r.db.NewSelect().
+		Model(&models.Link{}).
+		Where(`link.account_id = ?`, r.AccountId()).
+		Where(`link.link_id = ?`, linkId).
+		Where(`link.link_type = ?`, models.ManualLinkType).
+		Exists(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return false, crumbs.WrapError(span.Context(), err, "failed to get link is manual")
@@ -93,13 +97,14 @@ func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, ban
 		"bankAccountId": bankAccountId,
 	}
 
-	ok, err := r.txn.ModelContext(span.Context(), &models.Link{}).
-		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
-		JoinOn(`"bank_account"."link_id" = "link"."link_id" AND "bank_account"."account_id" = "link"."account_id"`).
-		Where(`"link"."account_id" = ?`, r.AccountId()).
-		Where(`"bank_account"."bank_account_id" = ?`, bankAccountId).
-		Where(`"link"."link_type" = ?`, models.ManualLinkType).
-		Exists()
+	ok, err := r.db.NewSelect().
+		Model(&models.Link{}).
+		Join(`INNER JOIN bank_accounts AS bank_account`).
+		JoinOn(`bank_account.link_id = link.link_id AND bank_account.account_id = link.account_id`).
+		Where(`link.account_id = ?`, r.AccountId()).
+		Where(`bank_account.bank_account_id = ?`, bankAccountId).
+		Where(`link.link_type = ?`, models.ManualLinkType).
+		Exists(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return false, crumbs.WrapError(span.Context(), err, "failed to get link by bank account Id")
@@ -121,7 +126,7 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) erro
 	link.CreatedAt = now
 	link.UpdatedAt = now
 
-	_, err := r.txn.ModelContext(span.Context(), link).Insert(link)
+	_, err := r.db.NewInsert().Model(link).Exec(span.Context(), link)
 	return errors.Wrap(err, "failed to insert link")
 }
 
@@ -132,6 +137,7 @@ func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) erro
 	link.AccountId = r.AccountId()
 	link.UpdatedAt = time.Now().UTC()
 
-	_, err := r.txn.ModelContext(span.Context(), link).WherePK().Returning(`*`).UpdateNotZero(link)
+	// TODO might need to add stuff for returning.
+	_, err := r.db.NewUpdate().Model(link).WherePK().OmitZero().Exec(span.Context(), &link)
 	return errors.Wrap(err, "failed to update link")
 }

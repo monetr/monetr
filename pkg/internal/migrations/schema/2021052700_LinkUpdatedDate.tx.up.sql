@@ -1,1 +1,0 @@
-ALTER TABLE "links" ADD COLUMN "last_successful_update" TIMESTAMPTZ NULL;

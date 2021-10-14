@@ -2,10 +2,11 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
-	"time"
 )
 
 func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error) {
@@ -18,10 +19,11 @@ func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId 
 	}
 
 	result := make([]models.FundingSchedule, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
-		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`funding_schedule.account_id = ?`, r.AccountId()).
+		Where(`funding_schedule.bank_account_id = ?`, bankAccountId).
+		Scan(span.Context(), result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve funding schedules")
@@ -43,12 +45,13 @@ func (r *repositoryBase) GetFundingSchedule(ctx context.Context, bankAccountId, 
 	}
 
 	var result models.FundingSchedule
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
-		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
-		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`funding_schedule.account_id = ?`, r.AccountId()).
+		Where(`funding_schedule.bank_account_id = ?`, bankAccountId).
+		Where(`funding_schedule.funding_schedule_id = ?`, fundingScheduleId).
 		Limit(1).
-		Select(&result)
+		Scan(span.Context(), &result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "could not retrieve funding schedule")
@@ -69,7 +72,7 @@ func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSched
 	}
 
 	fundingSchedule.AccountId = r.AccountId()
-	if _, err := r.txn.ModelContext(span.Context(), fundingSchedule).Insert(fundingSchedule); err != nil {
+	if _, err := r.db.NewInsert().Model(fundingSchedule).Exec(span.Context(), fundingSchedule); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create funding schedule")
 	}
@@ -88,12 +91,13 @@ func (r *repositoryBase) UpdateNextFundingScheduleDate(ctx context.Context, fund
 		"fundingScheduleId": fundingScheduleId,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &models.FundingSchedule{}).
-		Set(`"last_occurrence" = "next_occurrence"`).
-		Set(`"next_occurrence" = ?`, nextOccurrence).
-		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
-		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
-		Update()
+	_, err := r.db.NewUpdate().
+		Model(&models.FundingSchedule{}).
+		Set(`last_occurrence = next_occurrence`).
+		Set(`next_occurrence = ?`, nextOccurrence).
+		Where(`funding_schedule.account_id = ?`, r.AccountId()).
+		Where(`funding_schedule.funding_schedule_id = ?`, fundingScheduleId).
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to set next occurrence")

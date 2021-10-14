@@ -1,0 +1,25 @@
+version: '3'
+services:
+  postgres:
+    image: "postgres:14"
+    hostname: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: monetr
+      POSTGRES_PASSWORD: ""
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: monetr
+  mysql:
+    image: "mysql:5.6"
+    hostname: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_PASSWORD: "password"
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_USER: monetr
+      MYSQL_DATABASE: monetr
+      MYSQL_ROOT_HOST: "%"
