@@ -87,11 +87,11 @@ spec:
               protocol: TCP
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: http
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: http
           volumeMounts:
             - mountPath: /etc/monetr
