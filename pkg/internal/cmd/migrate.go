@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/migrations"
@@ -17,9 +18,9 @@ func init() {
 
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresAddress, "host", "H", "", "PostgreSQL host address.")
 	DatabaseCommand.PersistentFlags().IntVarP(&postgresPort, "port", "P", 0, "PostgreSQL port.")
-	DatabaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "postgres", "PostgreSQL user.")
+	DatabaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "", "PostgreSQL user.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
-	DatabaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "postgres", "PostgreSQL database.")
+	DatabaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "", "PostgreSQL database.")
 	DatabaseCommand.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use, if omitted ./config.yaml or /etc/monetr/config.yaml will be used.")
 }
 
@@ -123,7 +124,7 @@ func getDatabaseCommandConfiguration() *pg.Options {
 	port := myownsanity.CoalesceInts(postgresPort, configuration.PostgreSQL.Port, 5432)
 	username := myownsanity.CoalesceStrings(postgresUsername, configuration.PostgreSQL.Username, "postgres")
 	password := myownsanity.CoalesceStrings(postgresPassword, configuration.PostgreSQL.Password)
-	database := myownsanity.CoalesceStrings(postgresDatabase, configuration.PostgreSQL.Database)
+	database := myownsanity.CoalesceStrings(postgresDatabase, configuration.PostgreSQL.Database, "postgres")
 
 	options := &pg.Options{
 		Addr:            fmt.Sprintf("%s:%d", address, port),
