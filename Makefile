@@ -187,7 +187,7 @@ docs-local: docs
 	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
 
 CONTAINER=$(BUILD_DIR)/monetr.container.tar
-$(CONTAINER): $(BUILD_DIR) $(PWD)/Dockerfile $(PWD)/.dockerignore $(CONTAINER_BINARY)
+$(CONTAINER): $(BUILD_DIR) $(PWD)/Dockerfile $(PWD)/.dockerignore $(APP_GO_FILES) $(STATIC_DIR)
 	docker buildx $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--output type=tar,dest=$(CONTAINER) \
