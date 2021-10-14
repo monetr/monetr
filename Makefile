@@ -231,11 +231,6 @@ $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 
 generate: $(GENERATED_YAML)
 
-ifdef GITLAB_CI
-include $(PWD)/Makefile.gitlab-ci
-include $(PWD)/Makefile.deploy
-endif
-
 ifdef GITHUB_ACTION
 include $(PWD)/Makefile.github-actions
 endif
