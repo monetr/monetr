@@ -85,11 +85,6 @@ spec:
             - name: metrics
               containerPort: {{ .Values.api.metricsPort }}
               protocol: TCP
-            {{- if .Values.monolithDeployment }}
-            - name: ui
-              containerPort: 3000
-              protocol: TCP
-          {{- end }}
           livenessProbe:
             httpGet:
               path: /health

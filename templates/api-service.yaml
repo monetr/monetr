@@ -1,7 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
+  {{ if .Values.service.separateUIAndAPI }}
   name: {{ include "api.name" . }}-api
+  {{ else }}
+  name: {{ include "api.name" . }}
+  {{ end }}
   labels:
     {{- include "api.labels" . | nindent 4 }}
 spec:
@@ -14,8 +18,8 @@ spec:
   selector:
     {{- include "api.selectorLabels" . | nindent 4 }}
 
+{{ if .Values.service.separateUIAndAPI }}
 ---
-{{ if .Values.uiService }}
 apiVersion: v1
 kind: Service
 metadata:
