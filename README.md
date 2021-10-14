@@ -1,5 +1,6 @@
 # rest-api
 
+[![GitHub](https://github.com/monetr/monetr/actions/workflows/main.yaml/badge.svg?event=push)](https://github.com/monetr/monetr/actions/workflows/main.yaml)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr?ref=badge_shield)
 
 ![image](https://user-images.githubusercontent.com/37967690/117526688-5158fa00-af8c-11eb-9695-6f735605625d.png)
