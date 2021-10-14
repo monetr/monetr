@@ -28,6 +28,7 @@
     "camelcase": "6.2.0",
     "case-sensitive-paths-webpack-plugin": "2.4.0",
     "classnames": "2.3.1",
+    "css-what": "5.0.1",
     "dotenv": "10.0.0",
     "dotenv-expand": "5.1.0",
     "eslint": "8.0.0",
