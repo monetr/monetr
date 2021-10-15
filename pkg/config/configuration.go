@@ -148,7 +148,7 @@ type Plaid struct {
 }
 
 func (p Plaid) GetWebhooksURL() string {
-	return fmt.Sprintf("%s/api/plaid/webhook", p.WebhooksDomain)
+	return fmt.Sprintf("https://%s/api/plaid/webhook", p.WebhooksDomain)
 }
 
 type CORS struct {

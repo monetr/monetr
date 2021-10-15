@@ -148,7 +148,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		if p.config.WebhooksDomain == "" {
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
-			webhooksUrl = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/webhook", p.config.WebhooksDomain))
+			webhooksUrl = myownsanity.StringP(p.config.GetWebhooksURL())
 		}
 	}
 

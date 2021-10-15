@@ -3,11 +3,12 @@ package platypus
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"strconv"
-	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/plaid/plaid-go/plaid"
@@ -196,7 +197,7 @@ func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
 		if p.config.WebhooksDomain == "" {
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
-			webhooksUrl = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/webhook", p.config.WebhooksDomain))
+			webhooksUrl = myownsanity.StringP(p.config.GetWebhooksURL())
 		}
 	}
 
