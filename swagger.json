@@ -5,11 +5,11 @@
         "title": "monetr's REST API",
         "contact": {
             "name": "Support",
-            "url": "http://github.com/monetr/rest-api"
+            "url": "http://github.com/monetr/monetr"
         },
         "license": {
             "name": "Business Source License 1.1",
-            "url": "https://github.com/monetr/rest-api/blob/main/LICENSE"
+            "url": "https://github.com/monetr/monetr/blob/main/LICENSE"
         },
         "version": "0.0"
     },

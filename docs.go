@@ -19,11 +19,11 @@ var doc = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Support",
-            "url": "http://github.com/monetr/rest-api"
+            "url": "http://github.com/monetr/monetr"
         },
         "license": {
             "name": "Business Source License 1.1",
-            "url": "https://github.com/monetr/rest-api/blob/main/LICENSE"
+            "url": "https://github.com/monetr/monetr/blob/main/LICENSE"
         },
         "version": "{{.Version}}"
     },
@@ -2985,5 +2985,5 @@ func (s *s) ReadDoc() string {
 }
 
 func init() {
-	swag.Register(swag.Name, &s{})
+	swag.Register("swagger", &s{})
 }

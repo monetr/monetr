@@ -1241,11 +1241,11 @@ host: api.monetr.app
 info:
   contact:
     name: Support
-    url: http://github.com/monetr/rest-api
+    url: http://github.com/monetr/monetr
   description: This is the REST API for our budgeting application.
   license:
     name: Business Source License 1.1
-    url: https://github.com/monetr/rest-api/blob/main/LICENSE
+    url: https://github.com/monetr/monetr/blob/main/LICENSE
   title: monetr's REST API
   version: "0.0"
 paths:
