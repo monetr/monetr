@@ -87,7 +87,7 @@ jobs:
             ${{ runner.os }}-ui-
       - name: Build
         run: |
-          echo "${{ jobs.release_please.outputs.version }}
+          echo "${{ needs.release_please.outputs.version }}
           make build-ui
       - uses: actions/upload-artifact@v2
         with:
