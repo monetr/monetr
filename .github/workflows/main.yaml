@@ -6,15 +6,6 @@ on:
       - main
 
 jobs:
-  release-please:
-    name: Release Please Bot
-    runs-on: ubuntu-latest
-    steps:
-      - uses: GoogleCloudPlatform/release-please-action@v2
-        with:
-          release-type: simple
-          package-name: monetr
-
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
