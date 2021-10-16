@@ -27,31 +27,10 @@ jobs:
           git tag -a ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }} -m "Release ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
           git push origin ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
 
-  go_dependencies:
-    needs:
-      - release_please
-    if: ${{ needs.release_please.outputs.release_created }}
-    name: Go Dependencies
-    runs-on: ubuntu-latest
-    container: golang:1.17.1
-    steps:
-      - uses: actions/checkout@v2
-      - name: Dependencies
-        run: make go-dependencies
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
-            ${{ runner.os }}-go-
-
   ui_dependencies:
     needs:
       - release_please
-    if: ${{ needs.release_please.outputs.release_created }}
+    #    if: ${{ needs.release_please.outputs.release_created }}
     name: UI Dependencies
     runs-on: ubuntu-latest
     container: node:16.11.0
@@ -87,7 +66,7 @@ jobs:
             ${{ runner.os }}-ui-
       - name: Build
         run: |
-          echo "${{ needs.release_please.outputs.version }}
+          echo "${{ needs.release_please.outputs.version }}"
           make build-ui
       - uses: actions/upload-artifact@v2
         with:
@@ -95,3 +74,37 @@ jobs:
           path: '${{ github.workspace }}/pkg/ui/static/'
           retention-days: 7
 
+  container:
+    needs:
+      - "release_please"
+      - "build_ui"
+    name: Container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v2
+        name: Download Compiled UI Artifacts
+        with:
+          name: '${{ github.sha }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Build Image
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: RELEASE=${{ needs.release_please.outputs.version }},REVISION=${{ github.sha }}
+          tags: |
+            ghcr.io/monetr/monetr:latest
+            ghcr.io/monetr/monetr:${{ needs.release_please.outputs.version }}

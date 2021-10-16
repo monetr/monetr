@@ -29,5 +29,6 @@ LABEL org.opencontainers.image.vendor="monetr"
 LABEL org.opencontainers.image.licenses="BSL-1.1"
 LABEL org.opencontainers.image.title="monetr"
 LABEL org.opencontainers.image.description="monetr's budgeting application"
+LABEL org.opencontainers.image.version=$RELEASE
 
 COPY --from=builder /bin/monetr /usr/bin/monetr
