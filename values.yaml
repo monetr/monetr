@@ -182,4 +182,6 @@ api:
     caCertificatePath: ""
     certificatePath: ""
     keyPath: ""
+    token: ""
+    tokenFile: ""
 

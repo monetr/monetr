@@ -3,6 +3,7 @@ package secrets
 import (
 	"context"
 	"fmt"
+
 	"github.com/monetr/monetr/pkg/internal/vault_helper"
 	"github.com/sirupsen/logrus"
 
@@ -54,6 +55,12 @@ func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Con
 		var ok bool
 		if accessToken, ok = result.Data["access_token"].(string); ok {
 			return accessToken, nil
+		}
+
+		if data, ok := result.Data["data"].(map[string]interface{}); ok {
+			if accessToken, ok = data["access_token"].(string); ok {
+				return accessToken, nil
+			}
 		}
 	}
 

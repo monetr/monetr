@@ -76,6 +76,8 @@ func RunServer() error {
 			Address:         configuration.Vault.Address,
 			Role:            configuration.Vault.Role,
 			Auth:            configuration.Vault.Auth,
+			Token:           configuration.Vault.Token,
+			TokenFile:       configuration.Vault.TokenFile,
 			Timeout:         30 * time.Second,
 			IdleConnTimeout: 9 * time.Minute,
 			Username:        configuration.Vault.Username,

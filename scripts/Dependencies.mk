@@ -208,6 +208,41 @@ install-$(GOTESTSUM): $(LOCAL_BIN) $(LOCAL_TMP) $(CURL)
 	rm -rf $(GOTESTSUM_DIR)
 	rm -rf $(GOTESTSUM_TAR)
 
+JQ=$(LOCAL_BIN)/jq
+$(JQ):
+	@if [ ! -f "$(JQ)" ]; then $(MAKE) install-$(JQ); fi
+
+ifeq ($(OS),darwin)
+install-$(JQ): JQ_OS=osx
+else
+install-$(JQ): JQ_OS=linux
+endif
+install-$(JQ): JQ_VERSION=1.6
+install-$(JQ): JQ_URL = "https://github.com/stedolan/jq/releases/download/jq-$(JQ_VERSION)/jq-$(JQ_OS)-$(ARCH)"
+install-$(JQ): $(LOCAL_BIN)
+	$(call infoMsg,Installing jq to $(JQ))
+	curl -L $(JQ_URL) -o $(JQ)
+	sudo chmod +x $(JQ)
+
+
+YQ=$(LOCAL_BIN)/yq
+$(YQ):
+	@if [ ! -f "$(YQ)" ]; then make install-$(YQ); fi
+
+install-$(YQ): YQ_VERSION=v4.7.1
+install-$(YQ): YQ_BINARY=yq_$(OS)_$(ARCH)
+install-$(YQ): YQ_URL = "https://github.com/mikefarah/yq/releases/download/$(YQ_VERSION)/$(YQ_BINARY).tar.gz"
+install-$(YQ): YQ_DIR=$(LOCAL_TMP)/yq
+install-$(YQ): $(LOCAL_BIN) $(LOCAL_TMP)
+	$(call infoMsg,Installing yq to $(YQ))
+	-rm -rf $(YQ_DIR)
+	mkdir -p $(YQ_DIR)
+	curl -L $(YQ_URL) -o $(YQ_DIR).tar.gz
+	tar -xzf $(YQ_DIR).tar.gz -C $(YQ_DIR)
+	mv $(YQ_DIR)/yq_$(OS)_$(ARCH) $(YQ)
+	-rm -rf $(YQ_DIR)
+	-rm -rf $(YQ_DIR).tar.gz
+
 ifneq ($(ENV_LOWER),local)
 KUBECTL=$(LOCAL_BIN)/kubectl
 $(KUBECTL):

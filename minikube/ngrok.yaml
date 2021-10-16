@@ -25,7 +25,7 @@ spec:
           imagePullPolicy: Always
           env:
             - name: NGROK_PORT
-              value: "rest-api.default.svc.cluster.local:4000"
+              value: "monetr-api.default.svc.cluster.local:4000"
             - name: NGROK_DEBUG
               value: "true"
             - name: NGROK_AUTH

@@ -5,7 +5,6 @@ PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
 # Tools used to run the application locally
 JQ=$(LOCAL_BIN)/jq
 KUBECTL=minikube kubectl --
-YQ=$(LOCAL_BIN)/yq
 VAULT=vault
 PGO=$(LOCAL_BIN)/pgo
 
@@ -59,7 +58,7 @@ init-mini: info
 	$(MAKE) mail-mini
 	$(MAKE) deploy-mini-application
 	$(MAKE) vault-token
-	$(call infoMsg,Local environment is setup; you should be able to access the API at: https://api.$(LOCAL_DOMAIN))
+	$(call infoMsg,Local environment is setup; you should be able to access monetr at: https://app.$(LOCAL_DOMAIN))
 
 MINIKUBE_NAMESPACE=default
 MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
@@ -131,15 +130,8 @@ _deploy-certificate:
 	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=90s
 	rm -rf $(LOCAL_TMP)/nginx-*.json || true
 
-setup-registry:
-	$(call infoMsg,Deploying a container registry into the minikube cluster to store built images easily)
-	$(KUBECTL) apply -f $(PWD)/minikube/registry.yaml
-	$(KUBECTL) rollout status deploy/registry
-
 $(LOGIN_JWT_SECRET): $(LOCAL_DIR)
-	if [ -f "$(LOGIN_JWT_SECRET)" ]; then exit 0; fi
-	$(call infoMsg,Login JWT secret has not been generated, creating it now)
-	sleep 1 && (date | md5 > $(LOGIN_JWT_SECRET))
+	if [ ! -f "$(LOGIN_JWT_SECRET)" ]; then echo "Register JWT secret has not been generated, creating now" && sleep 1 && (date | md5 > $(LOGIN_JWT_SECRET)); fi
 
 $(REGISTER_JWT_SECRET): $(LOCAL_DIR)
 	if [ ! -f "$(REGISTER_JWT_SECRET)" ]; then echo "Register JWT secret has not been generated, creating now" && sleep 1 && (date | md5 > $(REGISTER_JWT_SECRET)); fi
@@ -184,46 +176,12 @@ pg-tls-values: $(YQ)
 	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.key = "password"' -i $(VALUES)
 	$(YQ) e '.api.customEnv[0].valueFrom.secretKeyRef.name = "postgres-postgres-secret"' -i $(VALUES)
 
-MINIKUBE_VERSION=latest
+dependencies-minikube: MINIKUBE_VERSION=latest
 dependencies-minikube:
 	rm -rf $(PWD)/minikube-$(OS)-$(ARCH) || true
 	curl -LO https://storage.googleapis.com/minikube/releases/$(MINIKUBE_VERSION)/minikube-$(OS)-$(ARCH)
 	sudo install minikube-$(OS)-$(ARCH) $(LOCAL_BIN)/minikube
 	rm -rf $(PWD)/minikube-$(OS)-$(ARCH)
-
-ifeq ($(OS),darwin)
-JQ_OS=osx
-else
-JQ_OS=linux
-endif
-
-JQ_URL=https://github.com/stedolan/jq/releases/download/jq-1.6/jq-$(JQ_OS)-$(ARCH)
-JQ_DIR=$(LOCAL_TMP)/jq
-$(JQ):
-	@if [ ! -f "$(JQ)" ]; then make install-$(JQ); fi
-
-install-$(JQ): $(LOCAL_BIN) $(LOCAL_TMP)
-	$(call infoMsg,Installing $(JQ))
-	rm -rf $(JQ) || true
-	curl -L $(JQ_URL) -o $(JQ)
-	sudo chmod +x $(JQ)
-
-YQ_VERSION=v4.7.1
-YQ_BINARY=yq_$(OS)_$(ARCH)
-YQ_URL=https://github.com/mikefarah/yq/releases/download/$(YQ_VERSION)/$(YQ_BINARY).tar.gz
-YQ_DIR=$(LOCAL_TMP)/yq
-
-$(YQ):
-	@if [ ! -f "$(YQ)" ]; then make install-$(YQ); fi
-
-install-$(YQ): $(LOCAL_BIN) $(LOCAL_TMP)
-	$(call infoMsg,Installing yq to $(YQ))
-	rm -rf $(YQ_DIR) || true
-	mkdir -p $(YQ_DIR)
-	curl -L $(YQ_URL) -o $(YQ_DIR).tar.gz
-	tar -xzf $(YQ_DIR).tar.gz -C $(YQ_DIR)
-	mv $(YQ_DIR)/yq_$(OS)_$(ARCH) $(YQ)
-	rm -rf $(YQ_DIR) || true
 
 update-coredns:
 	$(call infoMsg,Updating CoreDNS config)
@@ -279,12 +237,6 @@ postgres-certificates:
 	$(call infoMsg,Generating PostgreSQL TLS certificates)
 	$(KUBECTL) apply -f $(PWD)/minikube/postgres-certificate.yaml --namespace $(MINIKUBE_NAMESPACE)
 
-deploy-crunchy:
-	$(call infoMsg,Deploying crunchy data postgres operator)
-	$(KUBECTL) apply -f $(PWD)/minikube/crunchy.yaml --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) wait --for=condition=complete job/pgo-deploy --timeout=180s -n $(MINIKUBE_NAMESPACE)
-
-
 deploy-redis:
 	$(call infoMsg,Deploying redis into the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/redis.yaml --namespace $(MINIKUBE_NAMESPACE)
@@ -293,7 +245,6 @@ deploy-redis:
 deploy-postgres:
 	$(call infoMsg,Deploying Crunchy Data PostgreSQL to the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml -n $(MINIKUBE_NAMESPACE)
-	#$(KUBECTL) apply -f $(PWD)/minikube/crunchy-postgres.yaml -n $(MINIKUBE_NAMESPACE)
 
 SHELL_IMAGE=ghcr.io/elliotcourant/dotfiles/ubuntu:latest
 shell:
@@ -310,7 +261,7 @@ build-rest-api-mini: LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +
 build-rest-api-mini: MINIKUBE_IP=$(shell minikube ip)
 build-rest-api-mini: BASE_IMAGE_NAME=$(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME)
 build-rest-api-mini: IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
-build-rest-api-mini: wait-for-docker $(YQ)
+build-rest-api-mini: wait-for-docker $(YQ) $(STATIC_DIR)
 	eval $$(minikube docker-env) && docker build \
 		--build-arg GOFLAGS="-tags=mini" \
 		--build-arg REVISION=$(RELEASE_REVISION) \
@@ -365,10 +316,10 @@ configure-stripe-webhooks:
 	$(MAKE) deploy-mini-application
 
 reconfigure-webhooks: $(JQ)
-reconfigure-webhooks: WEBHOOKS_DOMAIN = $(shell curl -s "https://ngrok.$(LOCAL_DOMAIN)/api/tunnels" | $(JQ) '.tunnels[0].public_url' - -r)
+reconfigure-webhooks: NGROK_DOMAIN = $(shell curl -s "https://ngrok.$(LOCAL_DOMAIN)/api/tunnels" | $(JQ) '.tunnels[] | select( .name =="command_line").public_url' - -r)
+reconfigure-webhooks: WEBHOOKS_DOMAIN=$(subst https://,,$(NGROK_DOMAIN))
 reconfigure-webhooks: $(YQ)
 	$(YQ) e '.api.plaid.webhooksDomain = "$(WEBHOOKS_DOMAIN)"' -i $(VALUES) && \
-	$(YQ) e '.api.stripe.webhooksDomain = "$(WEBHOOKS_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.stripe.webhooksEnabled = true' -i $(VALUES)
 	$(YQ) e '.api.plaid.webhooksEnabled = true' -i $(VALUES)
 	$(MAKE) deploy-mini-application
@@ -401,6 +352,7 @@ vault-mini:
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	$(MAKE) vault-terraform
 	$(MAKE) vault-token
+	$(MAKE) $(VAULT_SERVICE_ACCOUNT)
 
 vault-token: $(VAULT_JSON) $(JQ)
 	@echo "\033[0;31m#################################################################################\033[0m"
@@ -413,7 +365,7 @@ vault-terraform: $(JQ)
 vault-terraform: VAULT_TOKEN=$(shell cat $(VAULT_JSON) | $(JQ) -r '.root_token')
 vault-terraform: KUBE_ADDR=$(shell minikube ip)
 vault-terraform: KUBE_CTX=$(shell $(KUBECTL) config current-context)
-vault-terraform: KUBE_CERT_B64=$(shell $(KUBECTL) config view --raw -o json | $(JQ) -r '.clusters[] | select(.name == "$(KUBE_CTX)") | .cluster."certificate-authority-data"')
+vault-terraform: KUBE_CERT_B64=$(shell cat $(HOME)/.minikube/ca.crt | base64)
 vault-terraform: SERVICE_ACCOUNT_SECRET_NAME=$(shell $(KUBECTL) get serviceaccount vault-authentication -o yaml | $(YQ) e '.secrets[0].name' -)
 vault-terraform: REVIEWER_JWT=$(shell $(KUBECTL) get secret $(SERVICE_ACCOUNT_SECRET_NAME) -o yaml | $(YQ) e '.data.token' - | base64 -d)
 vault-terraform:
@@ -433,9 +385,22 @@ $(VAULT_JSON):
 	$(call infoMsg,Initializing vault.)
 	$(KUBECTL) exec deploy/vault --namespace $(MINIKUBE_NAMESPACE) -- vault operator init -key-shares=1 -key-threshold=1 --tls-skip-verify -format=json > $(VAULT_JSON)
 
+VAULT_SERVICE_ACCOUNT=$(LOCAL_DIR)/vault-service-account-token
+$(VAULT_SERVICE_ACCOUNT): $(YQ)
+$(VAULT_SERVICE_ACCOUNT): SECRET_NAME=$(shell $(KUBECTL) get serviceaccounts rest-api --namespace $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.secrets[0].name' -)
+$(VAULT_SERVICE_ACCOUNT): TOKEN=$(shell $(KUBECTL) get secrets $(SECRET_NAME) --namespace $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.data.token' - | base64 -d)
+$(VAULT_SERVICE_ACCOUNT): $(LOCAL_DIR)
+	echo "$(TOKEN)" >> $(VAULT_SERVICE_ACCOUNT)
+
 unseal-vault-mini: $(VAULT_JSON) $(JQ)
 	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
 	$(KUBECTL) exec deploy/vault -- vault status --tls-skip-verify || $(KUBECTL) exec deploy/vault -- vault operator unseal --tls-skip-verify $(VAULT_UNSEAL_KEY)
+
+configure-vault: $(VAULT_JSON) $(YQ) $(VALUES)
+	$(YQ) e '.api.vault.enabled = true' -i $(VALUES)
+	$(YQ) e '.api.vault.address = "vault.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	$(YQ) e '.api.vault.role = "rest-api"' -i $(VALUES)
+	$(MAKE) deploy-mini-application
 
 clean-vault-mini:
 	rm -rf $(VAULT_JSON)
@@ -510,30 +475,3 @@ else
 	tmux new -d -s monetr-local 'yarn start' \; switch -t monetr-local \; \
 		split-window 'minikube tunnel --cleanup=true' \;
 endif
-
-####################### DEBUGGING THE REST API ##################################
-local-api: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
-local-api: $(YQ)
-	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
-	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-api -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
-	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
-	$(call warningMsg,Setting up minikube tunnel for local API development; use CTRL-C to stop tunnel and cleanup.)
-	-bash -c "trap '$(MAKE) local-api-down' EXIT; minikube tunnel --cleanup"
-
-local-api-down:
-	$(call warningMsg,Cleaning up tunnel for local API development)
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
-
-local-ui: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
-local-ui: $(YQ) $(NODE_MODULES)
-	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/ui-endpoint.yaml | $(KUBECTL) apply -f -
-	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
-	-bash -c "trap '$(MAKE) local-ui-down' EXIT; yarn start"
-
-local-ui-down:
-	$(call warningMsg,Cleaning up tunnel for local UI development)
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-ui --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)

@@ -1,28 +1,29 @@
-import React, { Component, Fragment } from "react";
-import { getHasAnyLinks } from "shared/links/selectors/getHasAnyLinks";
-import logout from "shared/authentication/actions/logout";
-import fetchBalances from "shared/balances/actions/fetchBalances";
-import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
-import { fetchFundingSchedulesIfNeeded } from "shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded";
-import fetchSpending from "shared/spending/actions/fetchSpending";
-import fetchLinksIfNeeded from "shared/links/actions/fetchLinksIfNeeded";
-import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import { Link as RouterLink, Redirect, Route, RouteComponentProps, Switch, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from "@material-ui/core";
-import BankAccountSelector from "components/BankAccounts/BankAccountSelector";
-import BalanceNavDisplay from "components/Balance/BalanceNavDisplay";
-import MenuIcon from "@material-ui/icons/Menu";
-import TransactionsView from "views/TransactionsView";
-import ExpensesView from "views/Expenses/ExpensesView";
-import GoalsView from "views/GoalsView";
-import AccountView from "views/AccountView";
-import OAuthRedirect from "views/FirstTimeSetup/OAuthRedirect";
-import AllAccountsView from "views/AccountView/AllAccountsView";
-import Logout from "views/Authentication/Logout";
-import InitialPlaidSetup from "views/Setup/InitialPlaidSetup";
-import request from "shared/util/request";
-import { CreditCard, ExitToApp } from "@material-ui/icons";
+import React, { Component, Fragment } from 'react';
+import { getBillingEnabled } from 'shared/bootstrap/selectors';
+import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
+import logout from 'shared/authentication/actions/logout';
+import fetchBalances from 'shared/balances/actions/fetchBalances';
+import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
+import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
+import fetchSpending from 'shared/spending/actions/fetchSpending';
+import fetchLinksIfNeeded from 'shared/links/actions/fetchLinksIfNeeded';
+import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import { Link as RouterLink, Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from '@material-ui/core';
+import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
+import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
+import MenuIcon from '@material-ui/icons/Menu';
+import TransactionsView from 'views/TransactionsView';
+import ExpensesView from 'views/Expenses/ExpensesView';
+import GoalsView from 'views/GoalsView';
+import AccountView from 'views/AccountView';
+import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
+import AllAccountsView from 'views/AccountView/AllAccountsView';
+import Logout from 'views/Authentication/Logout';
+import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
+import request from 'shared/util/request';
+import { CreditCard, ExitToApp } from '@material-ui/icons';
 
 interface WithConnectionPropTypes {
   logout: () => void;
@@ -33,6 +34,7 @@ interface WithConnectionPropTypes {
   fetchLinksIfNeeded: () => Promise<any>;
   fetchSpending: () => Promise<any>;
   hasAnyLinks: boolean;
+  billingEnabled: boolean;
 }
 
 interface State {
@@ -111,8 +113,8 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
   renderNotSetup = () => {
     return (
       <Switch>
-        <Route path="/logout" exact component={ Logout } />
-        <Route path="/setup" exact component={ InitialPlaidSetup } />
+        <Route path="/logout" exact component={ Logout }/>
+        <Route path="/setup" exact component={ InitialPlaidSetup }/>
         <Route path="/plaid/oauth-return">
           <OAuthRedirect/>
         </Route>
@@ -147,12 +149,15 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
               open={ Boolean(this.state.menuAnchorEl) }
               onClose={ this.closeMenu }
             >
+              { this.props.billingEnabled &&
               <MenuItem
                 onClick={ this.manageBilling }
               >
                 <CreditCard className="mr-2"/>
                 Billing
               </MenuItem>
+              }
+
               <MenuItem
                 onClick={ this.doLogout }
               >
@@ -169,12 +174,12 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
           <Route path="/login">
             <Redirect to="/"/>
           </Route>
-          <Route path="/logout" exact component={ Logout } />
-          <Route path="/transactions" exact component={ TransactionsView } />
-          <Route path="/expenses" exact component={ ExpensesView } />
-          <Route path="/goals" exact component={ GoalsView } />
-          <Route path="/account" exact component={ AccountView } />
-          <Route path="/accounts" exact component={ AllAccountsView } />
+          <Route path="/logout" exact component={ Logout }/>
+          <Route path="/transactions" exact component={ TransactionsView }/>
+          <Route path="/expenses" exact component={ ExpensesView }/>
+          <Route path="/goals" exact component={ GoalsView }/>
+          <Route path="/account" exact component={ AccountView }/>
+          <Route path="/accounts" exact component={ AllAccountsView }/>
           <Route path="/">
             <Redirect to="/transactions"/>
           </Route>
@@ -206,6 +211,7 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
 export default connect(
   state => ({
     hasAnyLinks: getHasAnyLinks(state),
+    billingEnabled: getBillingEnabled(state),
   }),
   {
     logout,

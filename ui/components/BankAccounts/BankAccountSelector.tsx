@@ -77,14 +77,6 @@ export class BankAccountSelector extends Component<RouteComponentProps & PropTyp
   renderBankAccountMenu = (): JSX.Element | JSX.Element[] => {
     const { selectedBankAccountId, bankAccounts } = this.props;
 
-    const addBankAccountItem = (
-      <MenuItem key="addBankAccount">
-        <Typography>
-          Add Bank Account (WIP)
-        </Typography>
-      </MenuItem>
-    );
-
     const bankAccountsViewButton = (
       <MenuItem key="viewBankAccounts" onClick={ this.goToAllAccounts }>
         <Typography>
@@ -94,7 +86,7 @@ export class BankAccountSelector extends Component<RouteComponentProps & PropTyp
     );
 
     if (bankAccounts.isEmpty()) {
-      return [addBankAccountItem, bankAccountsViewButton]
+      return [bankAccountsViewButton];
     }
 
     let items = bankAccounts
@@ -122,7 +114,6 @@ export class BankAccountSelector extends Component<RouteComponentProps & PropTyp
       .toArray();
 
     items.push(<Divider key="divider" className="w-96"/>);
-    items.push(addBankAccountItem);
     items.push(bankAccountsViewButton);
 
     return items;
