@@ -1,14 +1,15 @@
 package controller
 
 import (
+	"math"
+	"net/http"
+	"strings"
+
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/sirupsen/logrus"
-	"math"
-	"net/http"
-	"strings"
 )
 
 func (c *Controller) handleTransactions(p iris.Party) {
@@ -238,12 +239,13 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 // @Accept json
 // @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
-// @Param transactionId path int true "TransactionId "
+// @Param transactionId path int true "Transaction ID"
 // @Param Transaction body swag.UpdateTransactionRequest true "Updated transaction"
 // @Router /bank_accounts/{bankAccountId}/transactions/{transactionId} [post]
 // @Success 200 {array} swag.TransactionUpdateResponse
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 404 {object} ApiError Specified transaction does not exist.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) putTransactions(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
@@ -254,7 +256,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 
 	transactionId := ctx.Params().GetUint64Default("transactionId", 0)
 	if transactionId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid transaction Id")
+		c.returnError(ctx, http.StatusBadRequest, "must specify a valid transaction Id")
 		return
 	}
 
@@ -341,11 +343,16 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 
 	c.getLog(ctx).Debugf("successfully updated transaction")
 
-	ctx.JSON(map[string]interface{}{
+	result := map[string]interface{}{
 		"transaction": transaction,
-		"spending":    updatedExpenses,
 		"balance":     balance,
-	})
+	}
+
+	if updatedExpenses != nil {
+		result["spending"] = updatedExpenses
+	}
+
+	ctx.JSON(result)
 }
 
 func (c *Controller) deleteTransactions(ctx *context.Context) {

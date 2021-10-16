@@ -89,7 +89,7 @@ type TransactionUpdateResponse struct {
 	Transaction TransactionResponse `json:"transaction"`
 	// Will contain up to two spending objects. Includes the spending objects that were updated if the `spendingId`
 	// field of the transaction was changed in the request.
-	Spending []SpendingResponse `json:"updatedExpenses"`
+	Spending []SpendingResponse `json:"spending,omitempty"`
 	// The new balances for the bank account that the transaction belongs to. This is returned so that the UI can easily
 	// see the affects of updating a transaction's spending object right away.
 	Balance BalanceResponse `json:"balance"`
