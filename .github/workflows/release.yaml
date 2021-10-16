@@ -6,9 +6,12 @@ on:
       - main
 
 jobs:
-  release-please:
+  release_please:
     name: Release Please
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
     steps:
       - uses: GoogleCloudPlatform/release-please-action@v2
         id: release
@@ -23,4 +26,68 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git tag -a ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }} -m "Release ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
           git push origin ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+
+  go_dependencies:
+    if: ${{ jobs.release_please.outputs.release_created }}
+    name: Go Dependencies
+    runs-on: ubuntu-latest
+    container: golang:1.17.1
+    steps:
+      - uses: actions/checkout@v2
+      - name: Dependencies
+        run: make go-dependencies
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+            ${{ runner.os }}-go-
+
+  ui_dependencies:
+    if: ${{ jobs.release_please.outputs.release_created }}
+    name: UI Dependencies
+    runs-on: ubuntu-latest
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - name: Dependencies
+        run: make ui-dependencies
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ runner.os }}-ui-
+
+  build_ui:
+    needs:
+      - release_please
+      - ui_dependencies
+    name: Build UI
+    runs-on: ubuntu-latest
+    container: node:16.11.0
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            $GITHUB_WORKSPACE/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ runner.os }}-ui-
+      - name: Build
+        run: |
+          echo "${{ jobs.release_please.outputs.version }}
+          make build-ui
+      - uses: actions/upload-artifact@v2
+        with:
+          name: '${{ github.sha }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
+          retention-days: 7
 
