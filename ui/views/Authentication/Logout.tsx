@@ -8,7 +8,7 @@ interface PropTypes extends RouteComponentProps {
   logout: () => void;
 }
 
-class Logout extends Component<PropTypes, any> {
+export class Logout extends Component<PropTypes, any> {
 
   componentDidMount() {
     this.props.logout();
