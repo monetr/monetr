@@ -82,7 +82,7 @@ func (v *vaultPlaidSecretsProvider) RemoveAccessTokenForPlaidLink(ctx context.Co
 }
 
 func (v *vaultPlaidSecretsProvider) buildPath(accountId uint64, plaidItemId string) string {
-	return fmt.Sprintf("secret/customers/plaid/data/%X/%s", accountId, plaidItemId)
+	return fmt.Sprintf("customers/plaid/data/%d/%s", accountId, plaidItemId)
 }
 
 func (v *vaultPlaidSecretsProvider) Close() error {
