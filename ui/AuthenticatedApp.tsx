@@ -14,7 +14,7 @@ import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem,
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
 import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
 import MenuIcon from '@material-ui/icons/Menu';
-import TransactionsView from 'views/TransactionsView';
+import TransactionsView from 'views/Transactions/TransactionsView';
 import ExpensesView from 'views/Expenses/ExpensesView';
 import GoalsView from 'views/GoalsView';
 import AccountView from 'views/AccountView';
