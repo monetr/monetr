@@ -1,15 +1,15 @@
-import React, { Component, Fragment } from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import { Formik, FormikHelpers } from "formik";
-import { Button, CircularProgress, Snackbar, TextField } from "@material-ui/core";
-import classnames from "classnames";
-import CaptchaMaybe from "views/Captcha/CaptchaMaybe";
-import { Alert, AlertTitle } from "@material-ui/lab";
-import verifyEmailAddress from "util/verifyEmailAddress";
+import React, { Component, Fragment } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { Formik, FormikHelpers } from 'formik';
+import { Button, CircularProgress, Snackbar, TextField } from '@material-ui/core';
+import classnames from 'classnames';
+import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import verifyEmailAddress from 'util/verifyEmailAddress';
 import Logo from 'assets';
-import request from "shared/util/request";
-import { getReCAPTCHAKey } from "shared/bootstrap/selectors";
+import request from 'shared/util/request';
+import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
 
 interface ResendValues {
   email: string | null;

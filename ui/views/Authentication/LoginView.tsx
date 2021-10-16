@@ -1,15 +1,12 @@
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
-import { Link as RouterLink, RouteComponentProps, withRouter } from "react-router-dom";
-
-import User from "data/User";
-import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
-import request from "shared/util/request";
-import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from "shared/bootstrap/selectors";
-
-import ReCAPTCHA from "react-google-recaptcha";
-import classnames from "classnames";
-import { Alert, AlertTitle } from "@material-ui/lab";
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
+import { Link as RouterLink, RouteComponentProps, withRouter } from 'react-router-dom';
+import User from 'data/User';
+import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
+import request from 'shared/util/request';
+import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
+import classnames from 'classnames';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import {
   Button,
   CircularProgress,
@@ -20,13 +17,12 @@ import {
   DialogTitle,
   Snackbar,
   TextField
-} from "@material-ui/core";
-import { Formik, FormikHelpers } from "formik";
+} from '@material-ui/core';
+import { Formik, FormikHelpers } from 'formik';
+import verifyEmailAddress from 'util/verifyEmailAddress';
+import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 
 import Logo from 'assets';
-import verifyEmailAddress from "util/verifyEmailAddress";
-import CaptchaMaybe from "views/Captcha/CaptchaMaybe";
-
 
 interface LoginValues {
   email: string | null;
@@ -211,29 +207,29 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                     <img src={ Logo } className="w-1/3"/>
                   </div>
                   { this.props.allowSignUp && (
-                      <div>
-                        <div className="w-full pb-2.5">
-                          <Button
-                              className="w-full"
-                              color="secondary"
-                              component={ RouterLink }
-                              disabled={ isSubmitting }
-                              to="/register"
-                              variant="contained"
-                          >
-                            Sign Up For monetr
-                          </Button>
-                        </div>
-                        <div className="w-full opacity-50 pb-2.5">
-                          <div className="relative w-full border-t border-gray-400 top-5"/>
-                          <div className="relative flex justify-center inline w-full">
+                    <div>
+                      <div className="w-full pb-2.5">
+                        <Button
+                          className="w-full"
+                          color="secondary"
+                          component={ RouterLink }
+                          disabled={ isSubmitting }
+                          to="/register"
+                          variant="contained"
+                        >
+                          Sign Up For monetr
+                        </Button>
+                      </div>
+                      <div className="w-full opacity-50 pb-2.5">
+                        <div className="relative w-full border-t border-gray-400 top-5"/>
+                        <div className="relative flex justify-center inline w-full">
                         <span className="relative bg-white p-1.5">
                           or sign in with your email
                         </span>
-                          </div>
                         </div>
                       </div>
-                  )}
+                    </div>
+                  ) }
                   <div className="w-full">
                     <div className="w-full pb-2.5">
                       <TextField

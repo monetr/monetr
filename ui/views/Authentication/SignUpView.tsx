@@ -1,22 +1,22 @@
-import React, { Component, Fragment } from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
+import React, { Component, Fragment } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 
-import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
-import request from "shared/util/request";
-import User from "data/User";
+import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
+import request from 'shared/util/request';
+import User from 'data/User';
 import {
   getInitialPlan,
   getReCAPTCHAKey,
   getRequireBetaCode,
   getShouldVerifyRegister,
   getStripePublicKey
-} from "shared/bootstrap/selectors";
+} from 'shared/bootstrap/selectors';
 
 import Logo from 'assets';
 
-import ReCAPTCHA from "react-google-recaptcha";
-import classnames from "classnames";
+import ReCAPTCHA from 'react-google-recaptcha';
+import classnames from 'classnames';
 import {
   Button,
   Checkbox,
@@ -26,10 +26,10 @@ import {
   FormGroup,
   Snackbar,
   TextField
-} from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
-import { Formik, FormikHelpers } from "formik";
-import verifyEmailAddress from "util/verifyEmailAddress";
+} from '@material-ui/core';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import { Formik, FormikHelpers } from 'formik';
+import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface SignUpValues {
   agree: boolean;
@@ -208,8 +208,8 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     return (
       <div className="w-full flex justify-center items-center pt-1.5 pb-1.5">
         { !this.state.loading && <ReCAPTCHA
-            sitekey={ ReCAPTCHAKey }
-            onChange={ value => this.setState({ verification: value }) }
+          sitekey={ ReCAPTCHAKey }
+          onChange={ value => this.setState({ verification: value }) }
         /> }
         { this.state.loading && <CircularProgress/> }
       </div>
@@ -368,20 +368,20 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                     </div>
                     { this.props.requireBetaCode &&
                     <div className="w-full pt-1.5 pb-1.5">
-                        <TextField
-                            className="w-full"
-                            disabled={ isSubmitting }
-                            error={ touched.betaCode && !!errors.betaCode }
-                            helperText={ (touched.betaCode && errors.betaCode) ? errors.betaCode : null }
-                            id="login-betaCode"
-                            label="Beta Code"
-                            name="betaCode"
-                            onBlur={ handleBlur }
-                            onChange={ handleChange }
-                            type="betaCode"
-                            value={ values.betaCode }
-                            variant="outlined"
-                        />
+                      <TextField
+                        className="w-full"
+                        disabled={ isSubmitting }
+                        error={ touched.betaCode && !!errors.betaCode }
+                        helperText={ (touched.betaCode && errors.betaCode) ? errors.betaCode : null }
+                        id="login-betaCode"
+                        label="Beta Code"
+                        name="betaCode"
+                        onBlur={ handleBlur }
+                        onChange={ handleChange }
+                        type="betaCode"
+                        value={ values.betaCode }
+                        variant="outlined"
+                      />
                     </div>
                     }
                   </div>
@@ -423,11 +423,11 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
                       variant="contained"
                     >
                       { isSubmitting && <CircularProgress
-                          className={ classnames('mr-2', {
-                            'opacity-50': isSubmitting,
-                          }) }
-                          size="1em"
-                          thickness={ 5 }
+                        className={ classnames('mr-2', {
+                          'opacity-50': isSubmitting,
+                        }) }
+                        size="1em"
+                        thickness={ 5 }
                       /> }
                       { this.renderSignUpText(isSubmitting) }
                     </Button>
