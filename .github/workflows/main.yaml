@@ -6,6 +6,15 @@ on:
       - main
 
 jobs:
+  release-please:
+    name: Release Please Bot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GoogleCloudPlatform/release-please-action@v2
+        with:
+          release-type: simple
+          package-name: monetr
+
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
@@ -38,6 +47,7 @@ jobs:
             $GITHUB_WORKSPACE/node_modules
           key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
           restore-keys: |
+            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
             ${{ runner.os }}-ui-
 
   build_ui:
@@ -54,6 +64,7 @@ jobs:
             $GITHUB_WORKSPACE/node_modules
           key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
           restore-keys: |
+            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
             ${{ runner.os }}-ui-
       - name: Build
         run: make build-ui
@@ -73,8 +84,11 @@ jobs:
     strategy:
       matrix:
         architecture:
+          - 386
           - amd64
           - arm64
+          - arm/v7
+          - ppc64le
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -211,6 +225,7 @@ jobs:
             $GITHUB_WORKSPACE/node_modules
           key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
           restore-keys: |
+            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
             ${{ runner.os }}-ui-
       - name: Test
         run: make test-ui
@@ -304,6 +319,7 @@ jobs:
             $GITHUB_WORKSPACE/node_modules
           key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
           restore-keys: |
+            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
             ${{ runner.os }}-ui-
       - run: make docs
       - name: Generate Documentation Static Site
@@ -349,3 +365,5 @@ jobs:
           push: false
           platforms: linux/amd64
           tags: 'ghcr.io/monetr/monetr:${{ github.sha }}'
+
+
