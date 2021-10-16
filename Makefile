@@ -184,6 +184,10 @@ docs: $(SWAG) $(APP_GO_FILES)
 		--parseDepth 5 \
 		--parseInternal \
 		--output $(PWD)/docs
+	cp $(PWD)/public/favicon.ico $(PWD)/docs/favicon.ico
+	cp $(PWD)/public/logo192.png $(PWD)/docs/logo192.png
+	cp $(PWD)/public/logo512.png $(PWD)/docs/logo512.png
+	cp $(PWD)/public/manifest.json $(PWD)/docs/manifest.json
 
 docs-local: docs
 	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
