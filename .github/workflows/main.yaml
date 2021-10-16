@@ -75,12 +75,8 @@ jobs:
     strategy:
       matrix:
         architecture:
-          - 386
           - amd64
-          - arm
           - arm64
-          - ppc64
-          - ppc64le
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -355,7 +351,7 @@ jobs:
         with:
           context: .
           push: false
-          platforms: linux/amd64,linux/arm64v8
+          platforms: linux/amd64,linux/arm64
           tags: 'ghcr.io/monetr/monetr:${{ github.sha }}'
 
 

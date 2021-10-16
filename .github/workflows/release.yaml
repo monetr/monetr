@@ -28,7 +28,9 @@ jobs:
           git push origin ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
 
   go_dependencies:
-    if: ${{ jobs.release_please.outputs.release_created }}
+    needs:
+      - release_please
+    if: ${{ needs.release_please.outputs.release_created }}
     name: Go Dependencies
     runs-on: ubuntu-latest
     container: golang:1.17.1
@@ -47,7 +49,9 @@ jobs:
             ${{ runner.os }}-go-
 
   ui_dependencies:
-    if: ${{ jobs.release_please.outputs.release_created }}
+    needs:
+      - release_please
+    if: ${{ needs.release_please.outputs.release_created }}
     name: UI Dependencies
     runs-on: ubuntu-latest
     container: node:16.11.0
