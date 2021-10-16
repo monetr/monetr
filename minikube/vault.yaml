@@ -147,7 +147,7 @@ spec:
             claimName: vault-pvc
       containers:
         - name: vault
-          image: "vault:1.7.1"
+          image: "vault:1.8.4"
           imagePullPolicy: Always
           command:
             - "/bin/sh"
