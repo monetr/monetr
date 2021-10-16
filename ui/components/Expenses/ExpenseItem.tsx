@@ -1,6 +1,7 @@
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@material-ui/core';
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
+import {getActiveElement} from 'formik';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
@@ -38,7 +39,7 @@ export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
             color="primary"
           />
         </ListItemIcon>
-        <div className="grid grid-cols-6 grid-rows-4 grid-flow-col w-full">
+        <div className="w-full grid grid-cols-6 grid-rows-4 grid-flow-col">
           <div className="col-span-4">
             <Typography>
               <b>{ expense.name }</b>
@@ -67,7 +68,7 @@ export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
               { expense.getNextContributionAmountString() }/{ fundingSchedule.name }
             </Typography>
           </div>
-          <div className="col-span-1 row-span-4 flex justify-end align-middle p-5">
+          <div className="flex justify-end p-5 align-middle col-span-1 row-span-4">
             { expense.isBehind &&
             <Chip
               className="self-center"
@@ -76,11 +77,11 @@ export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
             />
             }
           </div>
-          <div className="col-span-1 row-span-4 flex justify-end align-middle">
+          <div className="flex justify-end align-middle col-span-1 row-span-4">
             <LinearProgress
               variant="determinate"
               color="primary"
-              className="w-full self-center"
+              className="self-center w-full"
               value={ Math.min((expense.currentAmount / expense.targetAmount) * 100, 100) }
             />
           </div>
