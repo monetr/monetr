@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
-      version: ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
+      version: "0.0.1" # "${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
     steps:
       - uses: GoogleCloudPlatform/release-please-action@v2
         id: release
@@ -19,6 +19,7 @@ jobs:
           release-type: simple
           package-name: monetr
       - uses: actions/checkout@v2
+        if: ${{ steps.release.outputs.release_created }}
       - name: tag major and minor versions
         if: ${{ steps.release.outputs.release_created }}
         run: |
@@ -27,30 +28,10 @@ jobs:
           git tag -a ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }} -m "Release ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}"
           git push origin ${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}.${{ steps.release.outputs.patch }}
 
-  ui_dependencies:
-    needs:
-      - release_please
-    #    if: ${{ needs.release_please.outputs.release_created }}
-    name: UI Dependencies
-    runs-on: ubuntu-latest
-    container: node:16.11.0
-    steps:
-      - uses: actions/checkout@v2
-      - name: Dependencies
-        run: make ui-dependencies
-      - uses: actions/cache@v2
-        with:
-          path: |
-            $GITHUB_WORKSPACE/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
-            ${{ runner.os }}-ui-
-
   build_ui:
+#    if: ${{ needs.release_please.outputs.release_created }}
     needs:
       - release_please
-      - ui_dependencies
     name: Build UI
     runs-on: ubuntu-latest
     container: node:16.11.0
@@ -67,6 +48,7 @@ jobs:
       - name: Build
         run: |
           echo "${{ needs.release_please.outputs.version }}"
+          make ui-dependencies
           make build-ui
       - uses: actions/upload-artifact@v2
         with:
