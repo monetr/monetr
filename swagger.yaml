@@ -94,6 +94,8 @@ definitions:
     properties:
       email:
         type: string
+      emailVerifiedAt:
+        type: string
       firstName:
         type: string
       isEmailVerified:
@@ -325,6 +327,11 @@ definitions:
           the frontend. Is omitted if stripe is not enabled.
         type: string
         x-nullable: true
+      verifyEmailAddress:
+        description: |-
+          Tells the API client that after a registration the client should handle not being authenticated. Instead, the
+          user would be prompted to verify their email address.
+        type: boolean
       verifyLogin:
         description: Tells the API client that a ReCAPTCHA verification key will be
           required for login API calls.
@@ -779,6 +786,15 @@ definitions:
     type: object
   swag.RegisterResponse:
     properties:
+      message:
+        description: |-
+          Message is included if the register endpoint needs to display something to the end user. Currently this is used
+          to return a message to the user indicating that we have sent them an email to verify they own the provided email
+          address. This field is not always present.
+        example: A verification email has been sent to your email address, please
+          verify your email.
+        type: string
+        x-nullable: true
       nextUrl:
         description: |-
           This is a work in progress field, the end goal being that the API could easily direct the UI to different steps
@@ -786,6 +802,13 @@ definitions:
           expired direct them to a subscription screen. But at the moment it is not used.
         example: /setup
         type: string
+      requireVerification:
+        description: |-
+          `requireVerification` is used by the UI to determine how to handle an "after-sign-up" situation. If verification
+          is not required then the UI can try to follow the path where this endpoint returns a token. If verification is
+          required then the UI should show a message telling the user to check their email.
+        example: true
+        type: boolean
       token:
         description: A JWT that can be used to make authenticated requests for the
           newly created user.
@@ -795,6 +818,21 @@ definitions:
         $ref: '#/definitions/models.User'
         description: The created user and some basic information. This allows the
           UI to skip an API call to the /users/me endpoint.
+    type: object
+  swag.ResendVerificationRequest:
+    properties:
+      captcha:
+        description: |-
+          ReCAPTCHA value from validation. Required if `verifyResend` is enabled on the server. This is used to prevent
+          this endpoint from easily being spammed.
+        example: 03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S...
+        type: string
+        x-nullable: true
+      email:
+        description: |-
+          Specify the email address that you want to resend the verification link to. This must be a valid email address
+          for a login that has not already validated their email.
+        type: string
     type: object
   swag.SpendingResponse:
     properties:
@@ -1237,6 +1275,32 @@ definitions:
     required:
     - amount
     type: object
+  swag.VerifyRequest:
+    properties:
+      token:
+        description: |-
+          A token string extracted from the URL param `?token=` from the email verification link that is sent to user's to
+          make sure that they own or at least have access to their email.
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+    type: object
+  swag.VerifyResponse:
+    properties:
+      message:
+        description: |-
+          Message is used to display a toast to the user upon responding to this API call. Right now this represents a
+          successful message and tells the user they are good to go. But in the future this message could articulate
+          anything to the user.
+        example: Your email is now verified. Please login.
+        type: string
+      nextUrl:
+        description: |-
+          Is used by the UI to direct the user at the end of the verification request. If the verification request is
+          successful (meaning the user's email address is now verified) then this will usually be `/login` to prompt the
+          user to now login using their credentials.
+        example: /login
+        type: string
+    type: object
 host: api.monetr.app
 info:
   contact:
@@ -1275,6 +1339,10 @@ paths:
             $ref: '#/definitions/controller.ApiError'
         "403":
           description: Forbidden
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+        "428":
+          description: Precondition Required
           schema:
             $ref: '#/definitions/controller.ApiError'
         "500":
@@ -1319,6 +1387,75 @@ paths:
           schema:
             $ref: '#/definitions/controller.ApiError'
       summary: Register
+      tags:
+      - Authentication
+  /authentication/verify:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Consumes a verification token to confirm that an email does belong to a user. Verification tokens cannot
+        be retrieved from the API, they are generated when a user signs up; and a link including the token is
+        sent to their email address.
+      operationId: verify-email
+      parameters:
+      - description: Verify Token
+        in: body
+        name: Token
+        required: true
+        schema:
+          $ref: '#/definitions/swag.VerifyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/swag.VerifyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      summary: Verify Email
+      tags:
+      - Authentication
+  /authentication/verify/resend:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint is used to generate a new verification token and email it to an address to verify that the
+        email address is owned by a user. This endpoint only works with addresses that are associated with a
+        login, and will return a successful status code **if** the provided email is associated with a login and
+        the email is not already verified. All other situations will return a bad request, even if the email is
+        valid or if the email is not associated. This is to prevent someone from being able to have relatively
+        easy access to an endpoint that would let them see what email addresses are associated with active users.
+      operationId: resend-verification-email
+      parameters:
+      - description: Resend Verification Request
+        in: body
+        name: Token
+        required: true
+        schema:
+          $ref: '#/definitions/swag.ResendVerificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      summary: Resend Verification Email
       tags:
       - Authentication
   /bank_accounts:

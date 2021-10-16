@@ -59,6 +59,12 @@
                             "$ref": "#/definitions/controller.ApiError"
                         }
                     },
+                    "428": {
+                        "description": "Precondition Required",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -108,6 +114,97 @@
                     },
                     "403": {
                         "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/authentication/verify": {
+            "post": {
+                "description": "Consumes a verification token to confirm that an email does belong to a user. Verification tokens cannot\nbe retrieved from the API, they are generated when a user signs up; and a link including the token is\nsent to their email address.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Verify Email",
+                "operationId": "verify-email",
+                "parameters": [
+                    {
+                        "description": "Verify Token",
+                        "name": "Token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/swag.VerifyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/swag.VerifyResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/authentication/verify/resend": {
+            "post": {
+                "description": "This endpoint is used to generate a new verification token and email it to an address to verify that the\nemail address is owned by a user. This endpoint only works with addresses that are associated with a\nlogin, and will return a successful status code **if** the provided email is associated with a login and\nthe email is not already verified. All other situations will return a bad request, even if the email is\nvalid or if the email is not associated. This is to prevent someone from being able to have relatively\neasy access to an endpoint that would let them see what email addresses are associated with active users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Resend Verification Email",
+                "operationId": "resend-verification-email",
+                "parameters": [
+                    {
+                        "description": "Resend Verification Request",
+                        "name": "Token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/swag.ResendVerificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/controller.ApiError"
                         }
@@ -1865,6 +1962,9 @@
                 "email": {
                     "type": "string"
                 },
+                "emailVerifiedAt": {
+                    "type": "string"
+                },
                 "firstName": {
                     "type": "string"
                 },
@@ -2106,6 +2206,10 @@
                     "description": "The public key for Stripe, will be used for stripe elements on the frontend. Is omitted if stripe is not enabled.",
                     "type": "string",
                     "x-nullable": true
+                },
+                "verifyEmailAddress": {
+                    "description": "Tells the API client that after a registration the client should handle not being authenticated. Instead, the\nuser would be prompted to verify their email address.",
+                    "type": "boolean"
                 },
                 "verifyLogin": {
                     "description": "Tells the API client that a ReCAPTCHA verification key will be required for login API calls.",
@@ -2526,10 +2630,21 @@
         "swag.RegisterResponse": {
             "type": "object",
             "properties": {
+                "message": {
+                    "description": "Message is included if the register endpoint needs to display something to the end user. Currently this is used\nto return a message to the user indicating that we have sent them an email to verify they own the provided email\naddress. This field is not always present.",
+                    "type": "string",
+                    "x-nullable": true,
+                    "example": "A verification email has been sent to your email address, please verify your email."
+                },
                 "nextUrl": {
                     "description": "This is a work in progress field, the end goal being that the API could easily direct the UI to different steps\nbased on the state of a user. If they require MFA then direct them to an MFA screen. If their subscription is\nexpired direct them to a subscription screen. But at the moment it is not used.",
                     "type": "string",
                     "example": "/setup"
+                },
+                "requireVerification": {
+                    "description": "`requireVerification` is used by the UI to determine how to handle an \"after-sign-up\" situation. If verification\nis not required then the UI can try to follow the path where this endpoint returns a token. If verification is\nrequired then the UI should show a message telling the user to check their email.",
+                    "type": "boolean",
+                    "example": true
                 },
                 "token": {
                     "description": "A JWT that can be used to make authenticated requests for the newly created user.",
@@ -2539,6 +2654,21 @@
                 "user": {
                     "description": "The created user and some basic information. This allows the UI to skip an API call to the /users/me endpoint.",
                     "$ref": "#/definitions/models.User"
+                }
+            }
+        },
+        "swag.ResendVerificationRequest": {
+            "type": "object",
+            "properties": {
+                "captcha": {
+                    "description": "ReCAPTCHA value from validation. Required if `verifyResend` is enabled on the server. This is used to prevent\nthis endpoint from easily being spammed.",
+                    "type": "string",
+                    "x-nullable": true,
+                    "example": "03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..."
+                },
+                "email": {
+                    "description": "Specify the email address that you want to resend the verification link to. This must be a valid email address\nfor a login that has not already validated their email.",
+                    "type": "string"
                 }
             }
         },
@@ -2900,6 +3030,31 @@
                     "type": "integer",
                     "x-nullable": true,
                     "example": 54312
+                }
+            }
+        },
+        "swag.VerifyRequest": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "description": "A token string extracted from the URL param `?token=` from the email verification link that is sent to user's to\nmake sure that they own or at least have access to their email.",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIs..."
+                }
+            }
+        },
+        "swag.VerifyResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "Message is used to display a toast to the user upon responding to this API call. Right now this represents a\nsuccessful message and tells the user they are good to go. But in the future this message could articulate\nanything to the user.",
+                    "type": "string",
+                    "example": "Your email is now verified. Please login."
+                },
+                "nextUrl": {
+                    "description": "Is used by the UI to direct the user at the end of the verification request. If the verification request is\nsuccessful (meaning the user's email address is now verified) then this will usually be `/login` to prompt the\nuser to now login using their credentials.",
+                    "type": "string",
+                    "example": "/login"
                 }
             }
         }
