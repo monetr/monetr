@@ -2,36 +2,14 @@ const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ModuleNotFoundPlugin = require("react-dev-utils/ModuleNotFoundPlugin");
-const fs = require('fs');
 const InterpolateHtmlPlugin = require("react-dev-utils/InterpolateHtmlPlugin");
 const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
 const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
 const redirectServedPath = require('react-dev-utils/redirectServedPathMiddleware');
-const yaml = require('js-yaml');
 
 const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
-
-const GetBuildConfigYaml = (environment = 'local') => {
-  const fileName = `config.${ environment }.yaml`
-
-  console.log(`Reading: ${ fileName }`);
-
-  let configuration = {};
-
-  try {
-    configuration = {
-      ...configuration,
-      ...yaml.load(fs.readFileSync(fileName, 'utf8')),
-    };
-  } catch (err) {
-    // Do nothing
-    console.error(err);
-  }
-
-  return configuration;
-}
 
 module.exports = (env, argv) => {
   if (!env.PUBLIC_URL) {

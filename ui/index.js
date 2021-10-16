@@ -9,7 +9,7 @@ import './styles/index.scss';
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 import { BrowserRouter as Router } from "react-router-dom";
-import {createMuiTheme, createTheme, MuiThemeProvider, Typography} from "@material-ui/core";
+import { createTheme, MuiThemeProvider, Typography } from "@material-ui/core";
 
 // eslint-disable-next-line no-undef
 if (CONFIG.SENTRY_DSN) {
@@ -59,7 +59,7 @@ ReactDOM.render(
             <Root/>
             { RELEASE_REVISION && // If the release_revision variable is not specified then don't try to render this.
               <Typography
-                className="absolute bottom-1 w-full text-center opacity-30 inline"
+                className="absolute inline w-full text-center bottom-1 opacity-30"
               >
                 {/* eslint-disable-next-line no-undef */ }
                 © { new Date().getFullYear() } monetr LLC - { RELEASE_REVISION.slice(0, 8) }
