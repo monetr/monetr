@@ -1,8 +1,8 @@
-import { Component } from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
+import { Component } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 
-import logout from "shared/authentication/actions/logout";
+import logout from 'shared/authentication/actions/logout';
 
 interface PropTypes extends RouteComponentProps {
   logout: () => void;

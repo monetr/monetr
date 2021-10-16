@@ -3,6 +3,7 @@ package controller_test
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/brianvoe/gofakeit/v6"
@@ -13,6 +14,7 @@ import (
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/controller"
+	"github.com/monetr/monetr/pkg/internal/mock_mail"
 	"github.com/monetr/monetr/pkg/internal/mock_secrets"
 	"github.com/monetr/monetr/pkg/internal/platypus"
 	"github.com/monetr/monetr/pkg/internal/stripe_helper"
@@ -27,16 +29,25 @@ import (
 func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	return config.Configuration{
 		Name:          t.Name(),
-		UIDomainName:  "http://localhost:1234",
-		APIDomainName: "http://localhost:1235",
+		UIDomainName:  "ui.monetr.mini",
+		APIDomainName: "api.monetr.mini",
 		AllowSignUp:   true,
 		JWT: config.JWT{
 			LoginJwtSecret:        gofakeit.UUID(),
 			RegistrationJwtSecret: gofakeit.UUID(),
 		},
 		PostgreSQL: config.PostgreSQL{},
-		Email:      config.Email{},
-		ReCAPTCHA:  config.ReCAPTCHA{},
+		Email: config.Email{
+			Enabled: false,
+			Verification: config.EmailVerification{
+				Enabled:       false,
+				TokenLifetime: 10 * time.Second,
+				TokenSecret:   gofakeit.Generate("????????????????"),
+			},
+			Domain: "monetr.mini",
+			SMTP:   config.SMTPClient{},
+		},
+		ReCAPTCHA: config.ReCAPTCHA{},
 		Plaid: config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
@@ -56,7 +67,11 @@ func NewTestApplication(t *testing.T) *httptest.Expect {
 	return NewTestApplicationWithConfig(t, configuration)
 }
 
-func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httptest.Expect {
+type TestApp struct {
+	Mail *mock_mail.MockMailCommunication
+}
+
+func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httptest.Expect) {
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db)
@@ -86,6 +101,8 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		plaidSecrets,
 	)
 
+	mockMail := mock_mail.NewMockMail()
+
 	c := controller.NewController(
 		log,
 		configuration,
@@ -97,24 +114,34 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 		redisPool,
 		plaidSecrets,
 		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
+		mockMail,
 	)
 	app := application.NewApp(configuration, c)
-	return httptest.New(t, app)
+	return &TestApp{
+		Mail: mockMail,
+	}, httptest.New(t, app)
+}
+
+func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httptest.Expect {
+	_, e := NewTestApplicationExWithConfig(t, configuration)
+	return e
 }
 
 func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
-	_, _, token := register(t, e)
-	return token
+	_, _, result := register(t, e)
+	require.Contains(t, result, "token", "result must contain token")
+	require.IsType(t, string(""), result["token"], "token must be a string")
+	return result["token"].(string)
 }
 
-func register(t *testing.T, e *httptest.Expect) (email, password, token string) {
+func register(t *testing.T, e *httptest.Expect) (email, password string, result map[string]interface{}) {
 	var registerRequest struct {
 		Email     string `json:"email"`
 		Password  string `json:"password"`
 		FirstName string `json:"firstName"`
 		LastName  string `json:"lastName"`
 	}
-	registerRequest.Email = testutils.GivenIHaveAnEmail(t)
+	registerRequest.Email = testutils.GetUniqueEmail(t)
 	registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 	registerRequest.FirstName = gofakeit.FirstName()
 	registerRequest.LastName = gofakeit.LastName()
@@ -124,13 +151,12 @@ func register(t *testing.T, e *httptest.Expect) (email, password, token string) 
 		Expect()
 
 	response.Status(http.StatusOK)
-	token = response.JSON().Path("$.token").String().Raw()
-	require.NotEmpty(t, token, "token cannot be empty")
-
-	return registerRequest.Email, registerRequest.Password, token
+	return registerRequest.Email, registerRequest.Password, response.JSON().Object().Raw()
 }
 
 func GivenIHaveLogin(t *testing.T, e *httptest.Expect) (email, password string) {
 	email, password, _ = register(t, e)
+	require.NotEmpty(t, email, "email cannot be empty")
+	require.NotEmpty(t, password, "password cannot be empty")
 	return
 }

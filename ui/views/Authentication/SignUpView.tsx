@@ -1,22 +1,22 @@
-import React, { Component, Fragment } from "react";
-import { RouteComponentProps, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
+import React, { Component, Fragment } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 
-import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
-import request from "shared/util/request";
-import User from "data/User";
+import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
+import request from 'shared/util/request';
+import User from 'data/User';
 import {
   getInitialPlan,
   getReCAPTCHAKey,
   getRequireBetaCode,
   getShouldVerifyRegister,
   getStripePublicKey
-} from "shared/bootstrap/selectors";
+} from 'shared/bootstrap/selectors';
 
 import Logo from 'assets';
 
-import ReCAPTCHA from "react-google-recaptcha";
-import classnames from "classnames";
+import ReCAPTCHA from 'react-google-recaptcha';
+import classnames from 'classnames';
 import {
   Button,
   Checkbox,
@@ -26,10 +26,10 @@ import {
   FormGroup,
   Snackbar,
   TextField
-} from "@material-ui/core";
-import { Alert, AlertTitle } from "@material-ui/lab";
-import { Formik, FormikHelpers } from "formik";
-import verifyEmailAddress from "util/verifyEmailAddress";
+} from '@material-ui/core';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import { Formik, FormikHelpers } from 'formik';
+import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface SignUpValues {
   agree: boolean;
@@ -43,6 +43,7 @@ interface SignUpValues {
 
 interface State {
   error: string | null;
+  message: string | null;
   loading: boolean;
   verification: string | null;
 }
@@ -62,6 +63,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     verification: null,
     loading: false,
     error: null,
+    message: null,
   };
 
   renderErrorMaybe = () => {
@@ -79,6 +81,21 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
       </Snackbar>
     );
   };
+
+  renderMessageMaybe = (): React.ReactNode => {
+    const { message } = this.state;
+    if (!message) {
+      return null;
+    }
+
+    return (
+      <Snackbar open autoHideDuration={ 10000 }>
+        <Alert variant="filled" severity="info">
+          { this.state.message }
+        </Alert>
+      </Snackbar>
+    );
+  }
 
   validateInput = (values: SignUpValues): Partial<SignUpValues> | null => {
     let errors: Partial<SignUpValues> = {};
@@ -151,6 +168,12 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
               this.props.history.push('/');
               return Promise.resolve();
             });
+        }
+
+        if (result.data.message) {
+          this.setState({
+            message: result.data.message,
+          });
         }
 
         return Promise.resolve();
@@ -242,6 +265,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
 
     return (
       <Fragment>
+        { this.renderMessageMaybe() }
         { this.renderErrorMaybe() }
         <Formik
           initialValues={ initialValues }

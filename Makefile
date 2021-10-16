@@ -7,6 +7,8 @@ RELEASE_REVISION=$(shell git rev-parse HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
+KUBERNETES_VERSION=1.18.5
+
 ARCH=amd64
 OS=$(shell uname -s | tr A-Z a-z)
 

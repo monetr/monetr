@@ -23,7 +23,6 @@ require (
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/kataras/iris/v12 v12.2.0-alpha4
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/nleeper/goment v1.4.2
 	github.com/nyaruka/phonenumbers v1.0.72
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
@@ -113,6 +112,7 @@ require (
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
+	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.15 // indirect

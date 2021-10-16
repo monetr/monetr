@@ -1,21 +1,28 @@
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
-import { Link as RouterLink, RouteComponentProps, withRouter } from "react-router-dom";
-
-import User from "data/User";
-import bootstrapLogin from "shared/authentication/actions/bootstrapLogin";
-import request from "shared/util/request";
-import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from "shared/bootstrap/selectors";
-
-import ReCAPTCHA from "react-google-recaptcha";
-import classnames from "classnames";
-import { Alert, AlertTitle } from "@material-ui/lab";
-import { Button, CircularProgress, Snackbar, TextField } from "@material-ui/core";
-import { Formik, FormikHelpers } from "formik";
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
+import { Link as RouterLink, RouteComponentProps, withRouter } from 'react-router-dom';
+import User from 'data/User';
+import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
+import request from 'shared/util/request';
+import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
+import classnames from 'classnames';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import {
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Snackbar,
+  TextField
+} from '@material-ui/core';
+import { Formik, FormikHelpers } from 'formik';
+import verifyEmailAddress from 'util/verifyEmailAddress';
+import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 
 import Logo from 'assets';
-import verifyEmailAddress from "util/verifyEmailAddress";
-
 
 interface LoginValues {
   email: string | null;
@@ -26,6 +33,7 @@ interface State {
   error: string | null;
   loading: boolean;
   verification: string | null;
+  resendEmailAddress: string | null;
 }
 
 interface WithConnectionPropTypes extends RouteComponentProps {
@@ -41,6 +49,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
     error: null,
     loading: false,
     verification: null,
+    resendEmailAddress: null,
   };
 
   renderErrorMaybe = () => {
@@ -102,6 +111,18 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
           });
       })
       .catch(error => {
+        switch (error?.response?.status) {
+          case 428: // Email not verified.
+            return this.props.history.push('/verify/email/resend', {
+              'emailAddress': values.email,
+            });
+          case 403: // Invalid login.
+            return this.setState({
+              error: error.response.data.error,
+              loading: false,
+            });
+        }
+
         if (error?.response?.data?.error) {
           return this.setState({
             error: error.response.data.error,
@@ -111,25 +132,43 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
 
         throw error;
       })
-      .finally(() =>{
+      .finally(() => {
         helpers.setSubmitting(false);
       });
   };
 
-  renderCaptchaMaybe = () => {
-    const { verifyLogin, ReCAPTCHAKey } = this.props;
-    if (!verifyLogin) {
+  renderResendVerificationDialogMaybe = () => {
+    const { resendEmailAddress } = this.state;
+
+    if (!resendEmailAddress) {
       return null;
     }
 
+    const closeDialog = () => this.setState({
+      resendEmailAddress: null,
+    });
+
     return (
-      <div className="flex items-center justify-center w-full">
-        { !this.state.loading && <ReCAPTCHA
-          sitekey={ ReCAPTCHAKey }
-          onChange={ value => this.setState({ verification: value }) }
-        /> }
-        { this.state.loading && <CircularProgress/> }
-      </div>
+      <Dialog
+        open
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Resend Email Verification Link</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            It looks like your email address has not been verified. Do you want to resend the email verification link?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={ closeDialog } color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={ closeDialog } color="primary" autoFocus>
+            Resend
+          </Button>
+        </DialogActions>
+      </Dialog>
     )
   };
 
@@ -144,6 +183,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
 
     return (
       <Fragment>
+        { this.renderResendVerificationDialogMaybe() }
         { this.renderErrorMaybe() }
         <Formik
           initialValues={ initialValues }
@@ -167,29 +207,29 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                     <img src={ Logo } className="w-1/3"/>
                   </div>
                   { this.props.allowSignUp && (
-                      <div>
-                        <div className="w-full pb-2.5">
-                          <Button
-                              className="w-full"
-                              color="secondary"
-                              component={ RouterLink }
-                              disabled={ isSubmitting }
-                              to="/register"
-                              variant="contained"
-                          >
-                            Sign Up For monetr
-                          </Button>
-                        </div>
-                        <div className="w-full opacity-50 pb-2.5">
-                          <div className="relative w-full border-t border-gray-400 top-5"/>
-                          <div className="relative flex justify-center inline w-full">
+                    <div>
+                      <div className="w-full pb-2.5">
+                        <Button
+                          className="w-full"
+                          color="secondary"
+                          component={ RouterLink }
+                          disabled={ isSubmitting }
+                          to="/register"
+                          variant="contained"
+                        >
+                          Sign Up For monetr
+                        </Button>
+                      </div>
+                      <div className="w-full opacity-50 pb-2.5">
+                        <div className="relative w-full border-t border-gray-400 top-5"/>
+                        <div className="relative flex justify-center inline w-full">
                         <span className="relative bg-white p-1.5">
                           or sign in with your email
                         </span>
-                          </div>
                         </div>
                       </div>
-                  )}
+                    </div>
+                  ) }
                   <div className="w-full">
                     <div className="w-full pb-2.5">
                       <TextField
@@ -226,7 +266,13 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                       />
                     </div>
                   </div>
-                  { this.renderCaptchaMaybe() }
+                  <CaptchaMaybe
+                    loading={ isSubmitting }
+                    show={ this.props.verifyLogin }
+                    onVerify={ (value) => this.setState({
+                      verification: value,
+                    }) }
+                  />
                   <div className="w-full pt-2.5 mb-10">
                     <Button
                       className="w-full"

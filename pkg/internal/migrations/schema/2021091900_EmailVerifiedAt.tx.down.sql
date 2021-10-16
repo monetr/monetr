@@ -1,0 +1,1 @@
+ALTER TABLE "logins" DROP COLUMN "email_verified_at";

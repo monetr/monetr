@@ -15,6 +15,10 @@ type ConfigResponse struct {
 	// Tells the API client that a ReCAPTCHA verification key will be required for registering a new user.
 	VerifyRegister bool `json:"verifyRegister"`
 
+	// Tells the API client that after a registration the client should handle not being authenticated. Instead, the
+	// user would be prompted to verify their email address.
+	VerifyEmailAddress bool `json:"verifyEmailAddress"`
+
 	// The public ReCAPTCHA key that should be used by the frontend to verify some requests. Is omitted if ReCAPTCHA is
 	// not enabled.
 	ReCAPTCHAKey string `json:"ReCAPTCHAKey" extensions:"x-nullable"`

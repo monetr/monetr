@@ -60,4 +60,38 @@ type RegisterResponse struct {
 	Token string `json:"token" example:"eyJhbGciOiJI..."`
 	// The created user and some basic information. This allows the UI to skip an API call to the /users/me endpoint.
 	User models.User `json:"user"`
+	// Message is included if the register endpoint needs to display something to the end user. Currently this is used
+	// to return a message to the user indicating that we have sent them an email to verify they own the provided email
+	// address. This field is not always present.
+	Message string `json:"message" example:"A verification email has been sent to your email address, please verify your email." extensions:"x-nullable"`
+	// `requireVerification` is used by the UI to determine how to handle an "after-sign-up" situation. If verification
+	// is not required then the UI can try to follow the path where this endpoint returns a token. If verification is
+	// required then the UI should show a message telling the user to check their email.
+	RequireVerification bool `json:"requireVerification" example:"true"`
+}
+
+type VerifyRequest struct {
+	// A token string extracted from the URL param `?token=` from the email verification link that is sent to user's to
+	// make sure that they own or at least have access to their email.
+	Token string `json:"token" example:"eyJhbGciOiJIUzI1NiIs..."`
+}
+
+type VerifyResponse struct {
+	// Is used by the UI to direct the user at the end of the verification request. If the verification request is
+	// successful (meaning the user's email address is now verified) then this will usually be `/login` to prompt the
+	// user to now login using their credentials.
+	NextURL string `json:"nextUrl" example:"/login"`
+	// Message is used to display a toast to the user upon responding to this API call. Right now this represents a
+	// successful message and tells the user they are good to go. But in the future this message could articulate
+	// anything to the user.
+	Message string `json:"message" example:"Your email is now verified. Please login."`
+}
+
+type ResendVerificationRequest struct {
+	// Specify the email address that you want to resend the verification link to. This must be a valid email address
+	// for a login that has not already validated their email.
+	Email string `json:"email"`
+	// ReCAPTCHA value from validation. Required if `verifyResend` is enabled on the server. This is used to prevent
+	// this endpoint from easily being spammed.
+	Captcha *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
 }

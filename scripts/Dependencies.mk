@@ -101,8 +101,8 @@ install-$(SPLIT_YAML): $(LOCAL_TMP) $(LOCAL_BIN) $(GO)
 	$(call infoMsg,Installing kubernetes-split-yaml from $(SPLIT_YAML_REPO) at $(SPLIT_YAML))
 	-rm -rf $(SPLIT_YAML_DIR)
 	git clone $(SPLIT_YAML_REPO) $(SPLIT_YAML_DIR)
-	cd $(SPLIT_YAML_DIR) && $(GO) build -o $(SPLIT_YAML) ./...
-	rm -rf $(SPLIT_YAML_DIR)
+	cd $(SPLIT_YAML_DIR) && go build -o $(SPLIT_YAML) ./...
+	rm -rfd $(SPLIT_YAML_DIR)
 
 SWAG=$(LOCAL_BIN)/swag
 $(SWAG):
@@ -143,6 +143,37 @@ install-$(MKCERT): $(LOCAL_BIN) $(LOCAL_TMP) $(GO)
 	git clone $(MKCERT_REPO) $(MKCERT_DIR)
 	cd $(MKCERT_DIR) && $(GO) build -o $(MKCERT) .
 	rm -rf $(MKCERT_DIR)
+
+KUBEVAL=$(LOCAL_BIN)/kubeval
+$(KUBEVAL):
+	@if [ ! -f "$(KUBEVAL)" ]; then $(MAKE) install-$(KUBEVAL); fi
+
+install-$(KUBEVAL): KUBEVAL_VERSION=latest
+install-$(KUBEVAL): KUBEVAL_URL = "https://github.com/instrumenta/kubeval/releases/$(KUBEVAL_VERSION)/download/kubeval-$(OS)-$(ARCH).tar.gz"
+install-$(KUBEVAL): KUBEVAL_DIR=$(LOCAL_TMP)/kubeval
+install-$(KUBEVAL): KUBEVAL_TAR=$(KUBEVAL_DIR).tar.gz
+install-$(KUBEVAL): $(LOCAL_BIN) $(LOCAL_TMP)
+	$(call infoMsg,Installing kubeval to $(KUBEVAL))
+	-rm -rf $(KUBEVAL_DIR)
+	mkdir -p $(KUBEVAL_DIR)
+	curl -SsL $(KUBEVAL_URL) --output $(KUBEVAL_TAR)
+	tar -xzf $(KUBEVAL_TAR) -C $(KUBEVAL_DIR)
+	cp $(KUBEVAL_DIR)/kubeval $(KUBEVAL)
+	rm -rf $(KUBEVAL_DIR)
+	rm -rf $(KUBEVAL_TAR)
+
+KUBELINT=$(LOCAL_BIN)/kube-linter
+$(KUBELINT):
+	@if [ ! -f "$(KUBELINT)" ]; then $(MAKE) install-$(KUBELINT); fi
+
+install-$(KUBELINT): KUBELINT_REPO = "https://github.com/stackrox/kube-linter.git"
+install-$(KUBELINT): KUBELINT_DIR=$(LOCAL_TMP)/kube-lint
+install-$(KUBELINT): $(LOCAL_BIN) $(LOCAL_TMP)
+	$(call infoMsg,Installing kube-lint to $(KUBELINT))
+	-rm -rf $(KUBELINT_DIR)
+	git clone $(KUBELINT_REPO) $(KUBELINT_DIR)
+	cd $(KUBELINT_DIR) && go build -o $(KUBELINT) golang.stackrox.io/kube-linter/cmd/kube-linter
+	rm -rf $(KUBELINT_DIR)
 
 GCLOUD=$(LOCAL_BIN)/google-cloud-sdk/bin/gcloud
 $(GCLOUD):
@@ -190,15 +221,3 @@ install-$(KUBECTL): $(LOCAL_BIN)
 	curl -L $(KUBECTL_URL) --output $(KUBECTL)
 	chmod +x $(KUBECTL)
 endif
-
-
-buildkite: $(KUBECTL)
-	$(KUBECTL) get po
-
-gcloud: $(GCLOUD)
-	$(GCLOUD) info
-
-PROJECT_ID=acceptance-320515
-cloud-build: $(GCLOUD)
-cloud-build: NAME=$(shell basename `git rev-parse --show-toplevel`)
-cloud-build:; $(GCLOUD) builds submit --project=$(PROJECT_ID) --tag=gcr.io/$(PROJECT_ID)/github.com/monetr/$(NAME):$(RELEASE_REVISION)

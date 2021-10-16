@@ -1,4 +1,4 @@
-// +build !mini
+//go:build !mini
 
 package mail
 
