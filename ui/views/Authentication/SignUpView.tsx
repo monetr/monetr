@@ -66,7 +66,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     message: null,
   };
 
-  renderErrorMaybe = () => {
+  renderErrorMaybe = (): React.ReactNode | null => {
     const { error } = this.state;
     if (!error) {
       return null;
@@ -82,7 +82,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     );
   };
 
-  renderMessageMaybe = (): React.ReactNode => {
+  renderMessageMaybe = (): React.ReactNode | null => {
     const { message } = this.state;
     if (!message) {
       return null;
@@ -97,7 +97,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     );
   }
 
-  validateInput = (values: SignUpValues): Partial<SignUpValues> | null => {
+  validateInput = (values: SignUpValues): Partial<SignUpValues> => {
     let errors: Partial<SignUpValues> = {};
 
     if (values.email) {
@@ -198,7 +198,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
       });
   };
 
-  renderCaptchaMaybe = () => {
+  renderCaptchaMaybe = (): React.ReactNode => {
     const { verifyRegister, ReCAPTCHAKey } = this.props;
 
     if (!verifyRegister) {
@@ -216,7 +216,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     )
   };
 
-  cannotSubmit = (values: SignUpValues) => {
+  cannotSubmit = (values: SignUpValues): boolean => {
     const { verifyRegister } = this.props;
     const { verification } = this.state;
 
@@ -230,7 +230,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     );
   }
 
-  renderSignUpText = (isSubmitting: boolean): JSX.Element | string => {
+  renderSignUpText = (isSubmitting: boolean): React.ReactNode | string => {
     if (isSubmitting) {
       return 'Signing up...'
     }

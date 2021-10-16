@@ -52,7 +52,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
     resendEmailAddress: null,
   };
 
-  renderErrorMaybe = () => {
+  renderErrorMaybe = (): React.ReactNode | null => {
     const { error } = this.state;
     if (!error) {
       return null;
@@ -68,7 +68,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
     );
   };
 
-  validateInput = (values: LoginValues): Partial<LoginValues> | null => {
+  validateInput = (values: LoginValues): Partial<LoginValues> => {
     let errors: Partial<LoginValues> = {};
 
     if (values.email) {
@@ -111,6 +111,8 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
           });
       })
       .catch(error => {
+        const errorMessage = error?.response?.data?.error || 'Failed to authenticate.'
+
         switch (error?.response?.status) {
           case 428: // Email not verified.
             return this.props.history.push('/verify/email/resend', {
@@ -118,26 +120,20 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
             });
           case 403: // Invalid login.
             return this.setState({
-              error: error.response.data.error,
+              error: errorMessage,
               loading: false,
             });
         }
 
-        if (error?.response?.data?.error) {
-          return this.setState({
-            error: error.response.data.error,
-            loading: false,
-          });
-        }
-
-        throw error;
+        return this.setState({
+          error: errorMessage,
+          loading: false,
+        });
       })
-      .finally(() => {
-        helpers.setSubmitting(false);
-      });
+      .finally(() => helpers.setSubmitting(false));
   };
 
-  renderResendVerificationDialogMaybe = () => {
+  renderResendVerificationDialogMaybe = (): React.ReactNode => {
     const { resendEmailAddress } = this.state;
 
     if (!resendEmailAddress) {
