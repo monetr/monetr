@@ -85,7 +85,7 @@ func NewRepositoryFromSession(userId, accountId uint64, database pg.DBI) Reposit
 	}
 }
 
-func NewUnauthenticatedRepository(txn *pg.Tx) UnauthenticatedRepository {
+func NewUnauthenticatedRepository(txn pg.DBI) UnauthenticatedRepository {
 	return &unauthenticatedRepo{
 		txn: txn,
 	}

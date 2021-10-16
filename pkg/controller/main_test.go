@@ -160,3 +160,20 @@ func GivenIHaveLogin(t *testing.T, e *httptest.Expect) (email, password string) 
 	require.NotEmpty(t, password, "password cannot be empty")
 	return
 }
+
+func GivenILogin(t *testing.T, e *httptest.Expect, email, password string) (token string) {
+	var loginRequest struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	loginRequest.Email = email
+	loginRequest.Password = password
+
+	response := e.POST(`/api/authentication/login`).
+		WithJSON(loginRequest).
+		Expect()
+
+	response.Status(http.StatusOK)
+	response.JSON().Object().ContainsKey("token")
+	return response.JSON().Path("$.token").String().Raw()
+}

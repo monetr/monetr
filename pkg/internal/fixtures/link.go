@@ -1,32 +1,57 @@
 package fixtures
 
 import (
+	"context"
 	"fmt"
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/pkg/models"
 	"testing"
+	"time"
+
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/internal/testutils"
+	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/repository"
+	"github.com/stretchr/testify/require"
 )
 
-func ManualLink(t *testing.T) *models.Link {
-	return &models.Link{
-		LinkType:              models.ManualLinkType,
-		InstitutionName:       fmt.Sprintf("%s Bank", gofakeit.Company()),
-		CustomInstitutionName: "Personal Bank",
-	}
-}
+func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
+	db := testutils.GetPgDatabase(t)
 
-func PlaidLink(t *testing.T) (*models.Link, *models.PlaidLink) {
-	return &models.Link{
-			LinkType:              models.ManualLinkType,
-			InstitutionName:       fmt.Sprintf("%s Bank", gofakeit.Company()),
-			CustomInstitutionName: "Personal Bank",
-		}, &models.PlaidLink{
-			ItemId:      gofakeit.UUID(),
-			Products: []string{
-				"transactions",
-			},
-			WebhookUrl:      "",
-			InstitutionId:   "1234",
-			InstitutionName: gofakeit.Company(),
-		}
+	repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
+
+	plaidLink := models.PlaidLink{
+		ItemId: gofakeit.Generate("???????????????????????????????????"),
+		Products: []string{
+			"transactions",
+		},
+		WebhookUrl:      "https://monetr.mini/api/plaid/webhook",
+		InstitutionId:   gofakeit.Generate("ins_######"),
+		InstitutionName: fmt.Sprintf("Bank Of %s", gofakeit.City()),
+	}
+	err := repo.CreatePlaidLink(context.Background(), &plaidLink)
+	require.NoError(t, err, "must be able to seed plaid link")
+
+	link := models.Link{
+		AccountId:             user.AccountId,
+		Account:               user.Account,
+		LinkType:              models.PlaidLinkType,
+		PlaidLinkId:           &plaidLink.PlaidLinkID, // To be filled in later.
+		PlaidLink:             &plaidLink,
+		LinkStatus:            models.LinkStatusSetup,
+		InstitutionName:       plaidLink.InstitutionName,
+		CustomInstitutionName: "",
+		CreatedAt:             time.Now(),
+		CreatedByUserId:       user.UserId,
+		CreatedByUser:         &user,
+		UpdatedAt:             time.Now(),
+		UpdatedByUserId:       &user.UserId,
+		UpdatedByUser:         &user,
+		LastSuccessfulUpdate:  myownsanity.TimeP(time.Now()),
+		BankAccounts:          nil,
+	}
+
+	err = repo.CreateLink(context.Background(), &link)
+	require.NoError(t, err, "must be able to seed link")
+
+	return link
 }

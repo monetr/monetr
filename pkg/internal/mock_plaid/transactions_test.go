@@ -28,8 +28,8 @@ func TestGenerateTransactions(t *testing.T) {
 			"1234",
 			"5678",
 		}
-		end := time.Now().UTC()
-		start := time.Now().UTC().Add(-30 * 24 * time.Hour)
+		end := time.Now().UTC().Truncate(time.Hour)
+		start := time.Now().UTC().Add(-30 * 24 * time.Hour).Truncate(time.Hour)
 		transactions := GenerateTransactions(t, start, end, numberOfTransactions, bankAccounts)
 		assert.Len(t, transactions, len(bankAccounts)*numberOfTransactions)
 		assert.Equal(t, end.Format("2006-01-02"), transactions[0].GetDate(), "date of first transaction should be end")
