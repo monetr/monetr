@@ -1,18 +1,19 @@
-import { Button, Chip, Divider, ListItem, Paper, Popover, Typography } from "@material-ui/core";
+import { Chip, Divider, ListItem, Paper, Popover, Typography } from '@material-ui/core';
 import classnames from 'classnames';
-import Spending from "data/Spending";
-import Transaction from "data/Transaction";
+import TransactionNameEditor from 'components/Transactions/TransactionNameEditor';
+import Spending from 'data/Spending';
+import Transaction from 'data/Transaction';
 import React, { Component, Fragment } from 'react';
-import { connect } from "react-redux";
-import { getSpendingById } from "shared/spending/selectors/getSpendingById";
-import selectTransaction from "shared/transactions/actions/selectTransaction";
-import { getTransactionById } from "shared/transactions/selectors/getTransactionById";
+import { connect } from 'react-redux';
+import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
+import selectTransaction from 'shared/transactions/actions/selectTransaction';
+import { getTransactionById } from 'shared/transactions/selectors/getTransactionById';
+import { getTransactionIsSelected } from 'shared/transactions/selectors/getTransactionIsSelected';
+import SelectButton from 'components/SelectyBoi/SelectButton';
+import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
+import updateTransaction from 'shared/transactions/actions/updateTransaction';
 
 import './styles/TransactionItem.scss';
-import { getTransactionIsSelected } from "shared/transactions/selectors/getTransactionIsSelected";
-import SelectButton from "components/SelectyBoi/SelectButton";
-import SpendingSelectionList from "components/Spending/SpendingSelectionList";
-import updateTransaction from "shared/transactions/actions/updateTransaction";
 
 interface PropTypes {
   transactionId: number;
@@ -112,11 +113,11 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
           } }
         >
           <Paper
-            style={ { width: `${ this.state.spentFromWidth }px` } } 
+            style={ { width: `${ this.state.spentFromWidth }px` } }
             className="p-0 overflow-auto min-w-96 max-h-96"
           >
-            <SpendingSelectionList 
-              value={ transaction.spendingId } 
+            <SpendingSelectionList
+              value={ transaction.spendingId }
               onChange={ updateSpentFrom }
             />
           </Paper>
@@ -124,72 +125,6 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
       </Fragment>
     )
   }
-
-  renderTransactionName = () => {
-    const { transaction } = this.props;
-    const { nameAnchorEl, nameWidth } = this.state;
-
-    const openPopover = (event: { currentTarget: Element }) => {
-      this.setState({
-        spentFromAnchorEl: null,
-        spentFromWidth: null,
-        nameAnchorEl: event.currentTarget,
-        nameWidth: event.currentTarget.clientWidth,
-      });
-    };
-
-    const closePopover = () => this.setState({
-      spentFromAnchorEl: null,
-      spentFromWidth: null,
-      nameAnchorEl: null,
-      nameWidth: null,
-    });
-
-    return (
-      <Fragment>
-        <SelectButton
-          open={ Boolean(nameAnchorEl) }
-          onClick={ openPopover }
-        >
-          <span className={ classnames('overflow-ellipsis overflow-hidden flex-nowrap whitespace-nowrap') }>
-            { transaction.getTitle() }
-          </span>
-        </SelectButton>
-        <Popover
-          id={ `transaction-name-popover-${ transaction.transactionId }` }
-          open={ Boolean(nameAnchorEl) }
-          anchorEl={ nameAnchorEl }
-          onClose={ closePopover }
-          anchorOrigin={ {
-            vertical: 'bottom',
-            horizontal: 'left',
-          } }
-          transformOrigin={ {
-            vertical: 'top',
-            horizontal: 'left',
-          } }
-        >
-          <Paper style={ { width: `${ nameWidth }px` } } className="p-0 p-2 overflow-auto min-w-96 max-h-96">
-            <div className="flex flex-row pt-1 pb-1">
-              <div className="flex-auto">
-                <p className="w-full text-lg font-semibold">Name:</p>
-                <Divider />
-                <span className="text-lg">{ transaction.getTitle() }</span>
-              </div>
-              <div className="flex-none h-full">
-                <Button>Test</Button>
-              </div>
-            </div>
-            <div className="pt-1 pb-1">
-              <p className="w-full text-lg font-semibold">Original Transaction Name:</p>
-              <Divider />
-              <span className="text-lg">{ transaction.originalName }</span>
-            </div>
-          </Paper>
-        </Popover>
-      </Fragment>
-    )
-  };
 
   handleClick = () => {
     return this.props.selectTransaction(this.props.transactionId);
@@ -204,10 +139,8 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
           'selected': false,
         }) } role="transaction-row">
           <div className="flex flex-row w-full">
-            <p
-              className="flex-shrink w-2/5 pr-1 overflow-hidden font-semibold transaction-item-name overflow-ellipsis flex-nowrap whitespace-nowrap place-self-center"
-            >
-              { this.renderTransactionName() }
+            <p className="flex-shrink w-2/5 pr-1 font-semibold transaction-item-name place-self-center">
+              <TransactionNameEditor transactionId={ transaction.transactionId }/>
             </p>
 
             <p

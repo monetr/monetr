@@ -15,13 +15,19 @@
 
 
 .transactions-item {
-  &.selected {
-    background-color: lighten(#3f51b5, 40%) !important;
-  }
 
-  //.MuiTouchRipple-root {
-  //  color: lighten(#3f51b5, 10%);
-  //}
+  // This is for the react-select components for changing the transaction name.
+  .transaction-item-name {
+    .transaction-name-select__control:not(:hover) {
+      &:not(:focus-within) {
+        border-color: transparent;
+
+        .transaction-name-select__indicators {
+          opacity: 0;
+        }
+      }
+    }
+  }
 
   .amount {
     color: red;

@@ -18,7 +18,7 @@ var (
 )
 
 type unauthenticatedRepo struct {
-	txn *pg.Tx
+	txn pg.DBI
 }
 
 func (u *unauthenticatedRepo) CreateLogin(

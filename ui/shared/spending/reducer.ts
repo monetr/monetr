@@ -66,6 +66,10 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         selectedGoalId: state.selectedGoalId === action.goalId ? null : action.goalId,
       };
     case UpdateTransaction.Success: {
+      if (!action.payload.spending) {
+        return state;
+      }
+
       let items = state.items;
       action.payload.spending.forEach(item => {
         items = items.setIn([item.bankAccountId, item.spendingId], item);

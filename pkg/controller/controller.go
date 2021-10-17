@@ -142,7 +142,7 @@ func NewController(
 // @contact.url http://github.com/monetr/monetr
 // @license.name Business Source License 1.1
 // @license.url https://github.com/monetr/monetr/blob/main/LICENSE
-// @host api.monetr.app
+// @host your.monetr.app/api
 
 // @tag.name Funding Schedules
 // @tag.description Funding Schedules are created by the user to tell us when money should be taken from their account to fund their goals and expenses.
@@ -163,7 +163,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 	}
 
 	app.Use(func(ctx iris.Context) {
-		if ctx.Path() == APIPath + "/health" {
+		if ctx.Path() == APIPath+"/health" {
 			ctx.Next()
 			return
 		}
