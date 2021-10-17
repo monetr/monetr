@@ -66,6 +66,7 @@ func TestPutTransactions(t *testing.T) {
 		response.JSON().Path("$.transaction.transactionId").Number().Equal(transaction.TransactionId)
 		response.JSON().Path("$.transaction.name").String().Equal(transaction.Name)
 		response.JSON().Path("$.transaction.name").String().NotEqual(originalTransaction.Name)
+		response.JSON().Path("$.transaction.originalName").String().Equal(originalTransaction.Name)
 		response.JSON().Object().NotContainsKey("spending") // Should not be present for non-balance updates.
 	})
 
