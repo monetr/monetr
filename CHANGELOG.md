@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.0.2](https://www.github.com/monetr/monetr/compare/v0.0.1...v0.0.2) (2021-10-17)
+
+
+### Bug Fixes
+
+* Added `v` prefix to container RELEASE variable. ([8c4c579](https://www.github.com/monetr/monetr/commit/8c4c57983ed15d1443e5d35576cac5361e316642))
+
 ### 0.0.1 (2021-10-16)
 
 
