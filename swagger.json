@@ -13,7 +13,7 @@
         },
         "version": "0.0"
     },
-    "host": "api.monetr.app",
+    "host": "your.monetr.app/api",
     "paths": {
         "/authentication/login": {
             "post": {
@@ -1018,7 +1018,7 @@
                     },
                     {
                         "type": "integer",
-                        "description": "TransactionId ",
+                        "description": "Transaction ID",
                         "name": "transactionId",
                         "in": "path",
                         "required": true
@@ -1053,6 +1053,12 @@
                         "description": "Payment Required",
                         "schema": {
                             "$ref": "#/definitions/controller.SubscriptionNotActiveError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
                         }
                     },
                     "500": {
@@ -2877,16 +2883,16 @@
                     "description": "The new balances for the bank account that the transaction belongs to. This is returned so that the UI can easily\nsee the affects of updating a transaction's spending object right away.",
                     "$ref": "#/definitions/swag.BalanceResponse"
                 },
-                "transaction": {
-                    "description": "The resulting transaction object with any calculated changes applied.",
-                    "$ref": "#/definitions/swag.TransactionResponse"
-                },
-                "updatedExpenses": {
+                "spending": {
                     "description": "Will contain up to two spending objects. Includes the spending objects that were updated if the `spendingId`\nfield of the transaction was changed in the request.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/swag.SpendingResponse"
                     }
+                },
+                "transaction": {
+                    "description": "The resulting transaction object with any calculated changes applied.",
+                    "$ref": "#/definitions/swag.TransactionResponse"
                 }
             }
         },

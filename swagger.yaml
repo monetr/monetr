@@ -1092,17 +1092,17 @@ definitions:
         description: |-
           The new balances for the bank account that the transaction belongs to. This is returned so that the UI can easily
           see the affects of updating a transaction's spending object right away.
-      transaction:
-        $ref: '#/definitions/swag.TransactionResponse'
-        description: The resulting transaction object with any calculated changes
-          applied.
-      updatedExpenses:
+      spending:
         description: |-
           Will contain up to two spending objects. Includes the spending objects that were updated if the `spendingId`
           field of the transaction was changed in the request.
         items:
           $ref: '#/definitions/swag.SpendingResponse'
         type: array
+      transaction:
+        $ref: '#/definitions/swag.TransactionResponse'
+        description: The resulting transaction object with any calculated changes
+          applied.
     type: object
   swag.TransferResponse:
     properties:
@@ -1301,7 +1301,7 @@ definitions:
         example: /login
         type: string
     type: object
-host: api.monetr.app
+host: your.monetr.app/api
 info:
   contact:
     name: Support
@@ -1928,7 +1928,7 @@ paths:
         name: bankAccountId
         required: true
         type: integer
-      - description: 'TransactionId '
+      - description: Transaction ID
         in: path
         name: transactionId
         required: true
@@ -1956,6 +1956,10 @@ paths:
           description: Payment Required
           schema:
             $ref: '#/definitions/controller.SubscriptionNotActiveError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ApiError'
         "500":
           description: Internal Server Error
           schema:

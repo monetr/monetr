@@ -1033,7 +1033,7 @@ var doc = `{
                     },
                     {
                         "type": "integer",
-                        "description": "TransactionId ",
+                        "description": "Transaction ID",
                         "name": "transactionId",
                         "in": "path",
                         "required": true
@@ -1068,6 +1068,12 @@ var doc = `{
                         "description": "Payment Required",
                         "schema": {
                             "$ref": "#/definitions/controller.SubscriptionNotActiveError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
                         }
                     },
                     "500": {
@@ -2892,16 +2898,16 @@ var doc = `{
                     "description": "The new balances for the bank account that the transaction belongs to. This is returned so that the UI can easily\nsee the affects of updating a transaction's spending object right away.",
                     "$ref": "#/definitions/swag.BalanceResponse"
                 },
-                "transaction": {
-                    "description": "The resulting transaction object with any calculated changes applied.",
-                    "$ref": "#/definitions/swag.TransactionResponse"
-                },
-                "updatedExpenses": {
+                "spending": {
                     "description": "Will contain up to two spending objects. Includes the spending objects that were updated if the ` + "`" + `spendingId` + "`" + `\nfield of the transaction was changed in the request.",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/swag.SpendingResponse"
                     }
+                },
+                "transaction": {
+                    "description": "The resulting transaction object with any calculated changes applied.",
+                    "$ref": "#/definitions/swag.TransactionResponse"
                 }
             }
         },
@@ -3101,7 +3107,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "0.0",
-	Host:        "api.monetr.app",
+	Host:        "your.monetr.app/api",
 	BasePath:    "",
 	Schemes:     []string{},
 	Title:       "monetr's REST API",
