@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.0](https://www.github.com/monetr/monetr/compare/v0.0.1...v0.1.0) (2021-10-17)
+
+
+### Features
+
+* Rename transactions from the UI. ([5c372c5](https://www.github.com/monetr/monetr/commit/5c372c5be98765438f0b0d31a065362c3bc90b22))
+
+
+### Bug Fixes
+
+* Added `v` prefix to container RELEASE variable. ([8c4c579](https://www.github.com/monetr/monetr/commit/8c4c57983ed15d1443e5d35576cac5361e316642))
+
 ### 0.0.1 (2021-10-16)
 
 
