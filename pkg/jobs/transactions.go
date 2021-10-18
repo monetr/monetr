@@ -105,12 +105,6 @@ func (j *jobManagerBase) upsertTransactions(
 		existingTransaction.IsPending = plaidTransaction.GetIsPending()
 		existingTransaction.PendingPlaidTransactionId = plaidTransaction.GetPendingTransactionId()
 
-		// Update old transactions calculated name as we can.
-		if existingTransaction.Name != transactionName {
-			existingTransaction.Name = transactionName
-			shouldUpdate = true
-		}
-
 		// Fix timezone of records.
 		if !existingTransaction.Date.Equal(date) {
 			existingTransaction.Date = date
