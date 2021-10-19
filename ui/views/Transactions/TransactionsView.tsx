@@ -38,7 +38,7 @@ export class TransactionsView extends Component<PropTypes, any> {
         <li key={ group }>
           <ul>
             <Fragment>
-              <ListSubheader className="bg-white pl-0 pr-0 pt-1 bg-gray-50 z-0">
+              <ListSubheader className="bg-white pl-0 pr-0 pt-1 bg-gray-50">
                 <Typography className="ml-6 font-semibold opacity-75 text-base">{ group }</Typography>
                 <Divider/>
               </ListSubheader>

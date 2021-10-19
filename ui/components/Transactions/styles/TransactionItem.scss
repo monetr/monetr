@@ -27,6 +27,10 @@
         }
       }
     }
+
+    .transaction-name-select__menu {
+      z-index: 2;
+    }
   }
 
   .amount {
