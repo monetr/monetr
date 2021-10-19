@@ -143,7 +143,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		PhoneNumber:              phoneNumber,
 		PhoneNumberVerifiedTime:  nil,
 		EmailAddress:             me.Login.Email,
-		EmailAddressVerifiedTime: nil,
+		EmailAddressVerifiedTime: me.Login.EmailVerifiedAt,
 	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
