@@ -10,9 +10,7 @@ name = "go"
 enabled = true
 
   [analyzers.meta]
-  import_paths = ["github.com/monetr/monetr"]
-
-exclude_patterns = ["**/*.min.js"]
+  import_root = "github.com/monetr/monetr"
 
 [[analyzers]]
 name = "test-coverage"
@@ -25,9 +23,7 @@ enabled = true
   [analyzers.meta]
   dockerfile_paths = [
     "Dockerfile",
-    "Dockerfile.api",
-    "Dockerfile.ui",
-    "Dockerfile.work",
+    "Dockerfile.work"
   ]
 
 [[analyzers]]
@@ -35,14 +31,7 @@ name = "javascript"
 enabled = true
 
   [analyzers.meta]
-  environment = [
-    "nodejs",
-    "browser",
-    "jest"
-  ]
   plugins = ["react"]
-  style_guide = "airbnb"
-  dialect = "flow"
 
 [[analyzers]]
 name = "sql"
