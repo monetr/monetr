@@ -104,7 +104,7 @@ $(NODE_MODULES): $(UI_DEPS)
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
-$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(PWD)/tsconfig.json
+$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(PWD)/tsconfig.json $(PWD)/webpack.config.js
 $(STATIC_DIR): YARN_BIN=$(shell yarn bin)
 $(STATIC_DIR):
 	$(call infoMsg,Building UI files)

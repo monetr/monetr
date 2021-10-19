@@ -2,8 +2,8 @@ const fs = require('fs');
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ModuleNotFoundPlugin = require("react-dev-utils/ModuleNotFoundPlugin");
-const InterpolateHtmlPlugin = require("react-dev-utils/InterpolateHtmlPlugin");
+const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
+const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
 const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
 const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
@@ -14,18 +14,25 @@ const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 module.exports = (env, argv) => {
   if (!env.PUBLIC_URL) {
-    env.PUBLIC_URL = ''
+    env.PUBLIC_URL = '';
+  }
+
+  let filename = `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js`;
+  if (argv.mode === 'production') {
+    filename = `[name].js`;
   }
 
   const config = {
     target: 'web',
-    entry: [
+    entry: argv.mode === 'production' ? [
+      './ui/index.js'
+    ] : [
       'react-hot-loader/patch',
       './ui/index.js'
     ],
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),
-      filename: `[name].${process.env.RELEASE_REVISION || '[chunkhash]'}.js`
+      filename: filename,
     },
     module: {
       rules: [
@@ -66,7 +73,7 @@ module.exports = (env, argv) => {
             {
               loader: 'file-loader',
               options: {
-                name: 'images/[hash]-[name].[ext]'
+                name: argv.hot ? 'images/[name].[hash].[ext]' : 'images/[name].[ext]',
               }
             },
           ],
@@ -115,12 +122,12 @@ module.exports = (env, argv) => {
         directory: path.resolve(__dirname, 'public')
       },
       historyApiFallback: true,
-      hot: "only",
+      hot: 'only',
       host: '0.0.0.0',
       port: 30000,
       webSocketServer: 'ws',
       client: {
-        webSocketURL:  'wss://app.monetr.mini/ws',
+        webSocketURL: 'wss://app.monetr.mini/ws',
       },
       onBeforeSetupMiddleware: function (devServer) {
         // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
@@ -132,14 +139,14 @@ module.exports = (env, argv) => {
       },
       onAfterSetupMiddleware: function (devServer) {
         // Redirect to `PUBLIC_URL` or `homepage` from `package.json` if url not match
-        devServer.app.use(redirectServedPath("/"));
+        devServer.app.use(redirectServedPath('/'));
 
         // This service worker file is effectively a 'no-op' that will reset any
         // previous service worker registered for the same host:port combination.
         // We do this in development to avoid hitting the production cache if
         // it used the same host and port.
         // https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
-        devServer.app.use(noopServiceWorkerMiddleware("/"));
+        devServer.app.use(noopServiceWorkerMiddleware('/'));
       },
     },
     plugins: [
@@ -152,7 +159,7 @@ module.exports = (env, argv) => {
         appMountId: 'app',
         filename: 'index.html',
         template: 'public/index.html',
-        publicPath: "/",
+        publicPath: '/',
       }),
       new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
       // Makes some environment variables available in index.html.
