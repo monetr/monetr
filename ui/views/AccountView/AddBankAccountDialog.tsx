@@ -87,12 +87,6 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
       });
   };
 
-  onEvent = (thing) => {
-    console.warn({
-      thing,
-    });
-  }
-
   openManualDialog = () => this.setState({
     manualDialogOpen: true,
   });
@@ -139,10 +133,7 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
               <PlaidButton
                 disabled={ this.state.loading }
                 useCache={ true }
-                onSuccess={ this.onPlaidSuccess }
-                onExit={ this.onEvent }
-                onLoad={ this.onEvent }
-                onEvent={ this.onEvent }
+                plaidOnSuccess={ this.onPlaidSuccess }
                 variant="outlined"
                 color="primary"
               >

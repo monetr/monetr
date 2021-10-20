@@ -153,10 +153,7 @@ class InitialPlaidSetup extends Component<WithConnectionPropTypes, State> {
                   className="w-full"
                   color="primary"
                   disabled={ this.state.loading }
-                  onEvent={ this.onEvent }
-                  onExit={ this.onEvent }
-                  onLoad={ this.onEvent }
-                  onSuccess={ this.onPlaidSuccess }
+                  plaidOnSuccess={ this.onPlaidSuccess }
                   variant="outlined"
                 >
                   Get Started with
