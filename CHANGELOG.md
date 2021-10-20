@@ -1,5 +1,37 @@
 # Changelog
 
+### [0.0.2](https://www.github.com/monetr/monetr/compare/v0.0.1...v0.0.2) (2021-10-20)
+
+
+### Features
+
+* Rename transactions from the UI. ([5c372c5](https://www.github.com/monetr/monetr/commit/5c372c5be98765438f0b0d31a065362c3bc90b22))
+* Upgraded Plaid library for the UI to the latest version. ([f7edcd9](https://www.github.com/monetr/monetr/commit/f7edcd9b0091ef32015491e2106a390e19513e28))
+
+
+### Bug Fixes
+
+* Added `v` prefix to container RELEASE variable. ([8c4c579](https://www.github.com/monetr/monetr/commit/8c4c57983ed15d1443e5d35576cac5361e316642))
+* **deps:** update dependency @stripe/stripe-js to v1.20.3 ([4058542](https://www.github.com/monetr/monetr/commit/4058542129691f411c1fb3cb0186307143c4d1a9))
+* **deps:** update dependency @testing-library/user-event to v13.5.0 ([d8fc405](https://www.github.com/monetr/monetr/commit/d8fc4053df43eca921757ae1cb3d6de2afe24d83))
+* **deps:** update dependency eslint-plugin-flowtype to v6.1.1 ([3876946](https://www.github.com/monetr/monetr/commit/3876946fc6c208e8b1cbe2d419ff28f5d68df3bf))
+* **deps:** update dependency eslint-plugin-jest to v25.2.2 ([2064ab6](https://www.github.com/monetr/monetr/commit/2064ab663825915f9f6d5405b63a48f2eb34cf05))
+* **deps:** update dependency react-plaid-link to v3.2.1 ([cb972bf](https://www.github.com/monetr/monetr/commit/cb972bf1511c3eac0e9f88795a3f8c9c2888b798))
+* **deps:** update google.golang.org/genproto commit hash to 63b7e35 ([b734d36](https://www.github.com/monetr/monetr/commit/b734d36ad280f1c185001122a2e1b3b85edcc45c))
+* **deps:** update google.golang.org/genproto commit hash to cf77aa7 ([70c90f0](https://www.github.com/monetr/monetr/commit/70c90f05e06b46f7741ce45a4e09827dc4fc0d2a))
+* **deps:** update module github.com/plaid/plaid-go to v1.5.0 ([c1d97c4](https://www.github.com/monetr/monetr/commit/c1d97c45b0a40a0a5848487644e33039fd6e4cf1))
+* **deps:** update typescript-eslint monorepo to v5.1.0 ([f34e68e](https://www.github.com/monetr/monetr/commit/f34e68efa27f8185c893a87697bd9c69e642439a))
+* Don't overwrite transaction name on update. ([63ba2c9](https://www.github.com/monetr/monetr/commit/63ba2c9702ec5a7cd1ba78c6e39318a45cf17efd)), closes [#96](https://www.github.com/monetr/monetr/issues/96)
+* Fixed issue where the UI file names changed each build. ([bf49a58](https://www.github.com/monetr/monetr/commit/bf49a581888e11ad0ef76a2f524c5791654b5a4a)), closes [#94](https://www.github.com/monetr/monetr/issues/94)
+* Include email address verified time when link with Plaid. ([55fb142](https://www.github.com/monetr/monetr/commit/55fb1427513b87dd7e9a2821aaac3bd9b32a3514))
+* Transaction name dropdown no longer renders infront of date. ([79c8402](https://www.github.com/monetr/monetr/commit/79c8402ee1bf95e0db19b2af46e8b06de26fbd31)), closes [#91](https://www.github.com/monetr/monetr/issues/91)
+* Updating deepsource configuration for new monorepo. ([e67b3ce](https://www.github.com/monetr/monetr/commit/e67b3ce1dfe0fe48ed4b402ce3a2dc3aa4d029b5))
+
+
+### Miscellaneous Chores
+
+* release 0.0.2 ([0ff4273](https://www.github.com/monetr/monetr/commit/0ff427396047bb8f11bb33131d06c4a3b1949f25))
+
 ### 0.0.1 (2021-10-16)
 
 
