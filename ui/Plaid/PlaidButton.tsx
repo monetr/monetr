@@ -1,16 +1,22 @@
-import React, { Component, Fragment } from "react";
-import { Button, ButtonProps, CircularProgress, Snackbar } from "@material-ui/core";
-import { usePlaidLink } from "react-plaid-link";
-import request from "shared/util/request";
-import classnames from "classnames";
+import React, { Component, Fragment } from 'react';
+import { Button, ButtonProps, CircularProgress, Snackbar } from '@material-ui/core';
+import {
+  usePlaidLink,
+  PlaidLinkOptionsWithLinkToken,
+  PlaidLinkOnEvent,
+  PlaidLinkOnLoad,
+  PlaidLinkOnExit, PlaidLinkOnSuccess
+} from 'react-plaid-link';
+import request from 'shared/util/request';
+import classnames from 'classnames';
 import { Alert, AlertTitle } from '@material-ui/lab';
 
 export interface PropTypes extends ButtonProps {
   useCache?: boolean;
-  onSuccess: (token: string, metadata: object) => any;
-  onExit: (event: object) => any;
-  onLoad: (event: object) => any;
-  onEvent: (event: object) => any;
+  plaidOnSuccess: PlaidLinkOnSuccess;
+  plaidOnExit?: PlaidLinkOnExit;
+  plaidOnLoad?: PlaidLinkOnLoad;
+  plaidOnEvent?: PlaidLinkOnEvent;
 }
 
 interface HookedPropTypes extends PropTypes {
@@ -18,12 +24,12 @@ interface HookedPropTypes extends PropTypes {
 }
 
 const HookedPlaidButton = (props: HookedPropTypes) => {
-  const config = {
+  const config: PlaidLinkOptionsWithLinkToken = {
     token: props.token,
-    onSuccess: props.onSuccess,
-    onExit: props.onExit,
-    onLoad: props.onLoad,
-    onEvent: props.onEvent,
+    onSuccess: props.plaidOnSuccess,
+    onExit: props.plaidOnExit,
+    onLoad: props.plaidOnLoad,
+    onEvent: props.plaidOnEvent,
   };
 
   const { error, open } = usePlaidLink(config);
@@ -105,10 +111,10 @@ export default class PlaidButton extends Component<PropTypes, State> {
     return (
       <HookedPlaidButton
         token={ this.state.token }
-        onSuccess={ this.props.onSuccess }
-        onExit={ this.props.onExit }
-        onEvent={ this.props.onEvent }
-        onLoad={ this.props.onLoad }
+        plaidOnSuccess={ this.props.plaidOnSuccess }
+        plaidOnExit={ this.props.plaidOnExit }
+        plaidOnEvent={ this.props.plaidOnEvent }
+        plaidOnLoad={ this.props.plaidOnLoad }
         { ...props }
       />
     )

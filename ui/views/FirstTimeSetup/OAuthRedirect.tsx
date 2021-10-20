@@ -1,16 +1,16 @@
-import React, { Component } from "react";
-import { Card, CardContent, CircularProgress, Typography } from "@material-ui/core";
-import request from "shared/util/request";
-import { List } from "immutable";
-import { OAuthRedirectPlaidLink } from "components/Plaid/OAuthRedirectPlaidLink";
-import { connect } from "react-redux";
-import fetchLinks from "shared/links/actions/fetchLinks";
-import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import fetchBalances from "shared/balances/actions/fetchBalances";
-import { fetchFundingSchedulesIfNeeded } from "shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded";
-import fetchSpending from "shared/spending/actions/fetchSpending";
-import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import React, { Component } from 'react';
+import { Card, CardContent, CircularProgress, Typography } from '@material-ui/core';
+import request from 'shared/util/request';
+import { List } from 'immutable';
+import { OAuthRedirectPlaidLink } from 'components/Plaid/OAuthRedirectPlaidLink';
+import { connect } from 'react-redux';
+import fetchLinks from 'shared/links/actions/fetchLinks';
+import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import fetchBalances from 'shared/balances/actions/fetchBalances';
+import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
+import fetchSpending from 'shared/spending/actions/fetchSpending';
+import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 interface WithConnectionPropTypes extends RouteComponentProps {
   fetchBalances: { (): Promise<void> }
@@ -33,7 +33,7 @@ class OAuthRedirect extends Component<WithConnectionPropTypes, State> {
 
   state = {
     loading: true,
-    linkToken: "",
+    linkToken: '',
     error: null,
     linkId: null,
     longPollAttempts: 0,
@@ -97,7 +97,7 @@ class OAuthRedirect extends Component<WithConnectionPropTypes, State> {
       error,
       metadata,
     });
-    this.props.history.push("/");
+    this.props.history.push('/');
   };
 
   longPollSetup = () => {
@@ -148,10 +148,8 @@ class OAuthRedirect extends Component<WithConnectionPropTypes, State> {
       <div>
         <OAuthRedirectPlaidLink
           linkToken={ linkToken }
-          onSuccess={ this.plaidLinkSuccess }
-          onExit={ this.plaidLinkExit }
-          onEvent={ this.onEvent }
-          onLoad={ this.onEvent }
+          plaidOnSuccess={ this.plaidLinkSuccess }
+          plaidOnExit={ this.plaidLinkExit }
         />
       </div>
     );
