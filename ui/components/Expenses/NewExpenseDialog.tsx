@@ -16,17 +16,17 @@ import {
   StepLabel,
   Stepper,
   TextField
-} from "@material-ui/core";
+} from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
 import Recurrence from 'components/Recurrence/Recurrence';
 import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
 import Spending, { SpendingType } from 'data/Spending';
-import { Formik, FormikErrors } from "formik";
-import moment from "moment";
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
+import { Formik, FormikErrors } from 'formik';
+import moment from 'moment';
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import createSpending from 'shared/spending/actions/createSpending';
 
@@ -65,7 +65,7 @@ interface newExpenseForm {
 const initialValues: newExpenseForm = {
   name: '',
   amount: 0.00,
-  nextOccurrence: moment(),
+  nextOccurrence: moment().add('1 day'),
   recurrenceRule: new Recurrence(),
   fundingScheduleId: 0,
 };
@@ -299,7 +299,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
                         <StepContent>
                           <KeyboardDatePicker
                             fullWidth
-                            minDate={ moment().subtract('1 day') }
+                            minDate={ moment().add('1 day') }
                             name="date"
                             margin="normal"
                             id="date-picker-dialog"

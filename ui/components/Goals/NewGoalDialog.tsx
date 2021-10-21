@@ -60,7 +60,7 @@ interface NewGoalForm {
 const initialValues: NewGoalForm = {
   name: '',
   amount: 0.00,
-  byDate: moment(),
+  byDate: moment().add('1 day'),
   fundingScheduleId: 0,
 }
 
@@ -269,7 +269,7 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, State> {
                         <StepContent>
                           <KeyboardDatePicker
                             fullWidth
-                            minDate={ moment().subtract('1 day') }
+                            minDate={ moment().add('1 day') }
                             name="date"
                             margin="normal"
                             id="date-picker-dialog"
