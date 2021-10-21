@@ -1,12 +1,14 @@
 package ui
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetr/monetr/pkg/application"
 	"github.com/monetr/monetr/pkg/config"
-	"net/http"
 )
 
 var (
@@ -44,6 +46,7 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 		)
 
 		app.Get("/*", func(ctx iris.Context) {
+			ctx.Header("Expires", time.Now().Add(24*time.Hour).Truncate(time.Hour).Format(http.TimeFormat))
 			fileHandler(ctx)
 		})
 	})
