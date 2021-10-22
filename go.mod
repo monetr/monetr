@@ -35,7 +35,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.72.0
 	github.com/teambition/rrule-go v1.7.2
-	github.com/vmihailenco/msgpack/v5 v5.3.4
+	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	google.golang.org/genproto v0.0.0-20211020151524-b7c3a969101a
