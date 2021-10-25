@@ -20,7 +20,7 @@
     "@testing-library/user-event": "13.5.0",
     "@typescript-eslint/eslint-plugin": "5.2.0",
     "@typescript-eslint/parser": "5.2.0",
-    "axios": "0.21.4",
+    "axios": "0.24.0",
     "babel-eslint": "10.1.0",
     "babel-plugin-named-asset-import": "0.3.7",
     "babel-preset-react-app": "10.0.0",
