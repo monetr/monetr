@@ -788,15 +788,26 @@ data:
   servers.json: |-
     {
       "Servers": {
-        "App": {
-          "Name": "Application Database",
-          "Group": "Minikube",
-          "Username": "postgres",
+        "1": {
+          "Name": "monetr",
+          "Group": "Servers",
           "Host": "postgres.default.svc.cluster.local",
-          "Port": 5432
+          "Port": 5432,
+          "PassFile": "/pgadmin4/pgpass",
+          "MaintenanceDB": "postgres",
+          "Username": "postgres",
+          "SSLMode": "disable",
+          "Comment": "monetr primary application database.",
+          "SSLCompression": 0,
+          "Timeout": 10,
+          "UseSSHTunnel": 0,
+          "TunnelPort": "22",
+          "TunnelAuthentication": 0
         }
       }
     }
+  pgpass: |-
+    postgres.default.svcc.cluster.local:5432:postgres:postgres:
 
 ---
 apiVersion: apps/v1
@@ -867,92 +878,3 @@ spec:
     app.kubernetes.io/instance: postgres
 
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: pgadmin
-  labels:
-    app: pgadmin
-    name: pgadmin
-    app.kubernetes.io/name: pgadmin
-    app.kubernetes.io/instance: pgadmin
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: pgadmin
-      app.kubernetes.io/instance: pgadmin
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: pgadmin
-        app.kubernetes.io/instance: pgadmin
-    spec:
-      volumes:
-        - name: servers
-          configMap:
-            name: postgres
-      containers:
-        - name: pgadmin
-          image: "dpage/pgadmin4"
-          imagePullPolicy: Always
-          volumeMounts:
-            - mountPath: /pgadmin4_servers/
-              name: servers
-          ports:
-            - name: admin
-              containerPort: 9000
-          env:
-            - name: PGADMIN_LISTEN_ADDRESS
-              value: 0.0.0.0:9000
-            - name: PGADMIN_DEFAULT_EMAIL
-              value: admin@monetr.mini
-            - name: PGADMIN_DEFAULT_PASSWORD
-              value: password
-            - name: PGADMIN_DISABLE_POSTFIX
-              value: "true"
-            - name: PGADMIN_SERVER_JSON_FILE
-              value: /pgadmin4_servers/servers.json
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: pgadmin
-  labels:
-    app: pgadmin
-    name: pgadmin
-    app.kubernetes.io/name: pgadmin
-    app.kubernetes.io/instance: pgadmin
-spec:
-  type: ClusterIP
-  ports:
-    - port: 9000
-      targetPort: admin
-      protocol: TCP
-      name: admin
-  selector:
-    app.kubernetes.io/name: pgadmin
-    app.kubernetes.io/instance: pgadmin
-
----
-apiVersion: networking.k8s.io/v1beta1
-kind: Ingress
-metadata:
-  name: pgadmin
-  labels:
-    app: pgadmin
-    name: pgadmin
-    app.kubernetes.io/name: pgadmin
-    app.kubernetes.io/instance: pgadmin
-  annotations:
-    kubernetes.io/ingress.class: nginx
-spec:
-  rules:
-    - host: "pgadmin.monetr.mini"
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: pgadmin
-              servicePort: 9000

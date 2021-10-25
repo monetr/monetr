@@ -1,0 +1,140 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-server-tls
+spec:
+  # Secret names are always required.
+  secretName: vault-server-tls
+  duration: 1h
+  renewBefore: 10m
+  subject:
+    organizations:
+      - monetr LLC
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: vault.monetr.in
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - server auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - vault.monetr.in
+  uris:
+    - spiffe://monetr.in/ns/default/sa/vault
+  # Issuer references are always required.
+  issuerRef:
+    name: monetr-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-client-tls
+spec:
+  # Secret names are always required.
+  secretName: vault-client-tls
+  duration: 1h
+  renewBefore: 10m
+  subject:
+    organizations:
+      - monetr LLC
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: vault.monetr.in
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - client auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - vault.monetr.in
+  uris:
+    - spiffe://monetr.in/ns/default/sa/vault
+  # Issuer references are always required.
+  issuerRef:
+    name: monetr-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: roll-vault-certificates
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: roll-vault-certificates
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/exec
+    verbs:
+      - get
+      - list
+      - create
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: roll-vault-certificates
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: roll-vault-certificates
+subjects:
+  - kind: ServiceAccount
+    name: roll-vault-certificates
+    namespace: default
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: roll-vault-certificates
+  labels:
+    job: roll-vault-certificates
+spec:
+  schedule: "*/9 * * * *"
+  jobTemplate:
+    metadata:
+      labels:
+        job: roll-vault-certificates
+    spec:
+      template:
+        metadata:
+          labels:
+            job: roll-vault-certificates
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: roll-vault-certificates
+          containers:
+            - name: hello
+              image: bitnami/kubectl
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - kubectl get po -l app=vault --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' | xargs -L1 -I {} bash -c 'kubectl exec {} -c vault -- sh -c "pkill -1 -f vault" && echo "Updated {}"'
