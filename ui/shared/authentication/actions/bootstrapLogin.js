@@ -1,9 +1,9 @@
-import User from "data/User";
-import request from "shared/util/request";
-import { BOOTSTRAP_LOGIN } from "shared/authentication/actions";
-import { getAPIUrl } from "shared/bootstrap/selectors";
-import Cookies from 'js-cookie'
-import { NewClient } from "api/api";
+import User from 'data/User';
+import request from 'shared/util/request';
+import { BOOTSTRAP_LOGIN } from 'shared/authentication/actions';
+import { getAPIUrl } from 'shared/bootstrap/selectors';
+import Cookies from 'js-cookie';
+import { NewClient } from 'api/api';
 
 export default function bootstrapLogin(token = null, user = null, subscriptionIsActive = true) {
   return (dispatch, getState) => {
@@ -17,6 +17,7 @@ export default function bootstrapLogin(token = null, user = null, subscriptionIs
         Cookies.set('M-Token', token, {
           domain: conf.COOKIE_DOMAIN,
           secure: true,
+          expires: 7,
         });
       }
     } else {
@@ -54,7 +55,6 @@ export default function bootstrapLogin(token = null, user = null, subscriptionIs
         },
       });
     }
-
 
     if (!user) {
       // If we do have the token but we don't have the user info then we need to retrieve it using an API call to get
