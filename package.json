@@ -73,7 +73,7 @@
     "react-hot-loader": "4.13.0",
     "react-plaid-link": "3.2.1",
     "react-recaptcha": "2.3.10",
-    "react-redux": "7.2.5",
+    "react-redux": "7.2.6",
     "react-refresh": "0.10.0",
     "react-router-dom": "5.3.0",
     "react-select": "5.1.0",
