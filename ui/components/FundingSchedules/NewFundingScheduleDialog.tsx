@@ -24,6 +24,7 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
 import createFundingSchedule from "shared/fundingSchedules/actions/createFundingSchedule";
+import { State } from 'store';
 
 enum NewFundingScheduleStep {
   Name,
@@ -41,7 +42,7 @@ interface WithConnectionPropTypes extends PropTypes {
   createFundingSchedule: { (fundingSchedule: FundingSchedule): Promise<FundingSchedule> }
 }
 
-interface State {
+interface ComponentState {
   step: NewFundingScheduleStep;
   error?: string;
 }
@@ -58,7 +59,7 @@ const initialValues: newFundingScheduleForm = {
   recurrenceRule: new Recurrence(),
 };
 
-export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes, State> {
+export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes, ComponentState> {
 
   state = {
     step: NewFundingScheduleStep.Name,
@@ -283,7 +284,7 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
 }
 
 export default connect(
-  state => ({
+  (state: State) => ({
     bankAccountId: getSelectedBankAccountId(state),
   }),
   {

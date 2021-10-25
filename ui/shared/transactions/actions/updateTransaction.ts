@@ -1,18 +1,14 @@
 import Balance from 'data/Balance';
 import Spending from 'data/Spending';
 import Transaction from 'data/Transaction';
-import { Dispatch } from 'redux';
 import { FetchBalances } from 'shared/balances/actions';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { UpdateTransaction } from 'shared/transactions/actions';
 import request from 'shared/util/request';
-
-interface GetState {
-  (): object
-}
+import { Dispatch, State } from 'store';
 
 interface ActionWithState {
-  (dispatch: Dispatch, getState: GetState): Promise<void>
+  (dispatch: Dispatch, getState: () => State): Promise<void>
 }
 
 export default function updateTransaction(transaction: Transaction): ActionWithState {

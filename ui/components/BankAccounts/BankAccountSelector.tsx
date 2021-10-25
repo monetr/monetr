@@ -17,6 +17,7 @@ import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchI
 import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
 import classnames from "classnames";
 import { RouteComponentProps, withRouter } from "react-router-dom";
+import { State } from 'store';
 
 interface PropTypes {
   selectedBankAccountId: number;
@@ -40,11 +41,11 @@ interface SelectEvent {
   value: number | string;
 }
 
-interface State {
+interface ComponentState {
   anchorEl: Element | null;
 }
 
-export class BankAccountSelector extends Component<RouteComponentProps & PropTypes, State> {
+export class BankAccountSelector extends Component<RouteComponentProps & PropTypes, ComponentState> {
 
   state = {
     anchorEl: null,
@@ -163,7 +164,7 @@ export class BankAccountSelector extends Component<RouteComponentProps & PropTyp
 }
 
 export default connect(
-  state => ({
+  (state: State) => ({
     selectedBankAccountId: getSelectedBankAccountId(state),
     bankAccounts: getBankAccounts(state),
     bankAccountsLoading: getBankAccountsLoading(state),

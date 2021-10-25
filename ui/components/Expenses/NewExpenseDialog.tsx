@@ -29,6 +29,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import createSpending from 'shared/spending/actions/createSpending';
+import { State } from 'store';
 
 enum NewExpenseStep {
   Name,
@@ -48,7 +49,7 @@ export interface WithConnectionPropTypes extends PropTypes {
   createSpending: { (spending: Spending): Promise<any> }
 }
 
-interface State {
+interface ComponentState {
   step: NewExpenseStep;
   canNextStep: boolean;
   error?: string;
@@ -70,7 +71,7 @@ const initialValues: newExpenseForm = {
   fundingScheduleId: 0,
 };
 
-class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
+class NewExpenseDialog extends Component<WithConnectionPropTypes, ComponentState> {
 
   state = {
     step: NewExpenseStep.Name,
@@ -351,7 +352,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  (state, props: PropTypes) => ({
+  (state: State, props: PropTypes) => ({
     bankAccountId: getSelectedBankAccountId(state),
   }),
   {

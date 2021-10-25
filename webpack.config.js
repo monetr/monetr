@@ -25,10 +25,10 @@ module.exports = (env, argv) => {
   const config = {
     target: 'web',
     entry: argv.mode === 'production' ? [
-      './ui/index.js'
+      './ui/index.tsx'
     ] : [
       'react-hot-loader/patch',
-      './ui/index.js'
+      './ui/index.tsx'
     ],
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),

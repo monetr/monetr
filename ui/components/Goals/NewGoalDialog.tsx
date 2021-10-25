@@ -27,6 +27,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import createSpending from 'shared/spending/actions/createSpending';
+import { State } from 'store';
 
 export interface PropTypes {
   onClose: { (): void };
@@ -45,7 +46,7 @@ enum NewGoalStep {
   Funding,
 }
 
-interface State {
+interface ComponentState {
   step: NewGoalStep;
   error?: string;
 }
@@ -64,7 +65,7 @@ const initialValues: NewGoalForm = {
   fundingScheduleId: 0,
 }
 
-export class NewGoalDialog extends Component<WithConnectionPropTypes, State> {
+export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentState> {
 
   state = {
     step: NewGoalStep.Name,
@@ -309,7 +310,7 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  (state) => ({
+  (state: State) => ({
     bankAccountId: getSelectedBankAccountId(state),
   }),
   {

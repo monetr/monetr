@@ -1,16 +1,12 @@
 import Balance from 'data/Balance';
 import Spending from 'data/Spending';
-import { Dispatch } from 'redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { Transfer } from 'shared/spending/actions';
 import request from 'shared/util/request';
-
-interface GetState {
-  (): object
-}
+import { Dispatch, State } from 'store';
 
 interface ActionWithState {
-  (dispatch: Dispatch, getState: GetState): Promise<void>
+  (dispatch: Dispatch, getState: () => State): Promise<void>
 }
 
 export default function transfer(from: number | null, to: number | null, amount: number): ActionWithState {

@@ -1,16 +1,12 @@
 import FundingSchedule from "data/FundingSchedule";
 import { Map } from 'immutable';
-import { Dispatch } from "redux";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
 import { FetchFundingSchedules } from "shared/fundingSchedules/actions";
 import request from "shared/util/request";
-
-interface GetState {
-  (): object
-}
+import { Dispatch, State } from 'store';
 
 interface ActionWithState {
-  (dispatch: Dispatch, getState: GetState): Promise<void>
+  (dispatch: Dispatch, getState: () => State): Promise<void>
 }
 
 export function fetchFundingSchedulesIfNeeded(): ActionWithState {

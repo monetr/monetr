@@ -1,18 +1,19 @@
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
+import { State } from 'store';
 
-import AddBankAccountDialog from "views/AccountView/AddBankAccountDialog";
-import Balance from "data/Balance";
-import BankAccount from "data/BankAccount";
-import Link from "data/Link";
-import LinkItem from "views/AccountView/LinkItem";
-import fetchMissingBankAccountBalances from "shared/balances/actions/fetchMissingBankAccountBalances";
-import { AccountBalance, Add } from "@material-ui/icons";
-import { Button, Card, Fab, List, Typography } from "@material-ui/core";
+import AddBankAccountDialog from 'views/AccountView/AddBankAccountDialog';
+import Balance from 'data/Balance';
+import BankAccount from 'data/BankAccount';
+import Link from 'data/Link';
+import LinkItem from 'views/AccountView/LinkItem';
+import fetchMissingBankAccountBalances from 'shared/balances/actions/fetchMissingBankAccountBalances';
+import { AccountBalance, Add } from '@material-ui/icons';
+import { Button, Card, Fab, List, Typography } from '@material-ui/core';
 import { Map } from 'immutable';
-import { getBalances } from "shared/balances/selectors/getBalances";
-import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
-import { getLinks } from "shared/links/selectors/getLinks";
+import { getBalances } from 'shared/balances/selectors/getBalances';
+import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
+import { getLinks } from 'shared/links/selectors/getLinks';
 
 interface WithConnectionPropTypes {
   bankAccounts: Map<number, BankAccount>;
@@ -25,12 +26,12 @@ enum DialogOpen {
   CreateBankAccount,
 }
 
-interface State {
+interface ComponentState {
   dialog: DialogOpen | null;
   menuAnchorEl: Element | null;
 }
 
-class AllAccountsView extends Component<WithConnectionPropTypes, State> {
+class AllAccountsView extends Component<WithConnectionPropTypes, ComponentState> {
 
   state = {
     dialog: null,
@@ -146,7 +147,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  state => ({
+  (state: State) => ({
     bankAccounts: getBankAccounts(state),
     links: getLinks(state),
     balances: getBalances(state),
