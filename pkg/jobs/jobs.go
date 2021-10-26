@@ -92,13 +92,14 @@ func NewJobManager(
 	manager.work.Job(EnqueuePullAccountBalances, manager.enqueuePullAccountBalances)
 	manager.work.Job(EnqueuePullLatestTransactions, manager.enqueuePullLatestTransactions)
 
+	manager.work.Job(CleanupJobsTable, manager.cleanupJobsTable)
 	manager.work.Job(ProcessFundingSchedules, manager.processFundingSchedules)
 	manager.work.Job(PullAccountBalances, manager.pullAccountBalances)
+	manager.work.Job(PullHistoricalTransactions, manager.pullHistoricalTransactions)
 	manager.work.Job(PullInitialTransactions, manager.pullInitialTransactions)
 	manager.work.Job(PullLatestTransactions, manager.pullLatestTransactions)
-	manager.work.Job(PullHistoricalTransactions, manager.pullHistoricalTransactions)
-	manager.work.Job(RemoveTransactions, manager.removeTransactions)
 	manager.work.Job(RemoveLink, manager.removeLink)
+	manager.work.Job(RemoveTransactions, manager.removeTransactions)
 
 	// Every 30 minutes. 0 */30 * * * *
 
@@ -109,7 +110,9 @@ func NewJobManager(
 	// Once A day. 0 0 0 * * *
 	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullAccountBalances)
 	manager.work.PeriodicallyEnqueue("0 0 0 * * *", EnqueuePullLatestTransactions)
-	//manager.work.PeriodicallyEnqueue("0 0 0 * * *", UpdateInstitutions)
+
+	// Once a day at 8AM
+	manager.work.PeriodicallyEnqueue("0 0 8 * * *", CleanupJobsTable)
 
 	manager.work.Start()
 	log.Debug("job manager started")
