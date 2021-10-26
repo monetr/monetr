@@ -1,5 +1,31 @@
 # Changelog
 
+### [0.0.3](https://www.github.com/monetr/monetr/compare/v0.0.2...v0.0.3) (2021-10-26)
+
+
+### Bug Fixes
+
+* Added Expires header to the static content handler. ([a70aeac](https://www.github.com/monetr/monetr/commit/a70aeacf9358e0c8d55f3320c20edb90b23f422e))
+* Added job to cleanup old job records. ([21b89c3](https://www.github.com/monetr/monetr/commit/21b89c388e7a9c0707ec375609c00cdaf26bad67)), closes [#107](https://www.github.com/monetr/monetr/issues/107)
+* **deps:** update dependency axios to v0.24.0 ([533ff66](https://www.github.com/monetr/monetr/commit/533ff667ad8b277e4524b46a51b1457e89196be8))
+* **deps:** update dependency eslint to v8.1.0 ([936a687](https://www.github.com/monetr/monetr/commit/936a687f8e54a538a7061534e8a17c7eb3a90108))
+* **deps:** update dependency eslint-plugin-flowtype to v7 ([31cd3ec](https://www.github.com/monetr/monetr/commit/31cd3ec3f9974629370c2c47af78e707a1dc447b))
+* **deps:** update dependency eslint-plugin-flowtype to v8 ([8bd650f](https://www.github.com/monetr/monetr/commit/8bd650f112ce6c9fc5243f2fbb74fcc14769251d))
+* **deps:** update dependency eslint-plugin-testing-library to v5 ([eef5f26](https://www.github.com/monetr/monetr/commit/eef5f26687a9a2f5a9e55ac7ac2b595f2d1f8456))
+* **deps:** update dependency mini-css-extract-plugin to v2.4.3 ([ab4e977](https://www.github.com/monetr/monetr/commit/ab4e97701b6d8a9f0ac6a63a6aa9234aa52f456e))
+* **deps:** update dependency react-redux to v7.2.6 ([81a1e64](https://www.github.com/monetr/monetr/commit/81a1e64a68d0b3ecbe37d729b53c8b5bfb3d3a1f))
+* **deps:** update dependency redux-thunk to v2.4.0 ([8b81839](https://www.github.com/monetr/monetr/commit/8b81839f0410a4c78d66a16072b53364b36a25ba))
+* **deps:** update dependency sass to v1.43.3 ([409d550](https://www.github.com/monetr/monetr/commit/409d550b6c3fe604082a7b89dba148286eecbf5a))
+* **deps:** update google.golang.org/genproto commit hash to 2b14602 ([a48f491](https://www.github.com/monetr/monetr/commit/a48f491dff4df26c023f59cb842741097e86fb5c))
+* **deps:** update google.golang.org/genproto commit hash to b7c3a96 ([9f123f4](https://www.github.com/monetr/monetr/commit/9f123f41c0b9d00ba145e4ef731ab1ecafcf38cc))
+* **deps:** update module github.com/alicebob/miniredis/v2 to v2.16.0 ([1e38d10](https://www.github.com/monetr/monetr/commit/1e38d104e6fd4858782f85e878f1b4460a96d943))
+* **deps:** update module github.com/nyaruka/phonenumbers to v1.0.73 ([5ee8433](https://www.github.com/monetr/monetr/commit/5ee8433b606936c173db6d209221044dd3249467))
+* **deps:** update module github.com/stripe/stripe-go/v72 to v72.72.0 ([11297ed](https://www.github.com/monetr/monetr/commit/11297edaaf07392ef60b2da32f80bf6f2c42fa48))
+* **deps:** update module github.com/vmihailenco/msgpack/v5 to v5.3.5 ([cc5440f](https://www.github.com/monetr/monetr/commit/cc5440f6ec75c38ce67075c71e506262ecf9e514))
+* **deps:** update typescript-eslint monorepo to v5.2.0 ([253bde7](https://www.github.com/monetr/monetr/commit/253bde70d2d7a3ea4dff35df0b717652b99c1536))
+* Keep cookies longer than the browser being closed. ([130083b](https://www.github.com/monetr/monetr/commit/130083bbc55c3d25e9122bd64f607b158689d9b2))
+* You can no longer select the current date when creating an expense or goal. ([c5d0615](https://www.github.com/monetr/monetr/commit/c5d061553a3119605f224e7a26a485d7cf79ec52))
+
 ### [0.0.2](https://www.github.com/monetr/monetr/compare/v0.0.1...v0.0.2) (2021-10-20)
 
 
