@@ -5,7 +5,6 @@ import reportWebVitals from './reportWebVitals';
 import Root from './root';
 import './styles/styles.css';
 import './styles/index.scss';
-import * as Sentry from '@sentry/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { createTheme, MuiThemeProvider, Typography } from '@material-ui/core';
 import { store } from 'store';
