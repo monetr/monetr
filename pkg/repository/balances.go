@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/pkg/errors"
 )
@@ -44,14 +45,12 @@ type FundingStats struct {
 	AccountId               uint64 `json:"-" pg:"account_id"`
 	BankAccountId           uint64 `json:"bankAccountId" pg:"bank_account_id"`
 	FundingScheduleId       uint64 `json:"fundingScheduleId" pg:"funding_schedule_id"`
-	NumberOfExpenses        int64  `json:"numberOfExpenses" pg:"number_of_expenses"`
-	NumberOfGoals           int64  `json:"numberOfGoals" pg:"number_of_goals"`
 	NextExpenseContribution int64  `json:"nextExpenseContribution" pg:"next_expense_contribution"`
 	NextGoalContribution    int64  `json:"nextGoalContribution" pg:"next_goal_contribution"`
 }
 
-func (r *repositoryBase) GetFundingStats(ctx context.Context, bankAccountId uint64) (*FundingStats, error) {
-	var stats FundingStats
+func (r *repositoryBase) GetFundingStats(ctx context.Context, bankAccountId uint64) ([]FundingStats, error) {
+	stats := make([]FundingStats, 0)
 	err := r.txn.ModelContext(ctx, &stats).
 		Where(`"funding_stats"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_stats"."bank_account_id" = ?`, bankAccountId).
@@ -60,5 +59,5 @@ func (r *repositoryBase) GetFundingStats(ctx context.Context, bankAccountId uint
 		return nil, errors.Wrap(err, "failed to retrieve funding status")
 	}
 
-	return &stats, nil
+	return stats, nil
 }

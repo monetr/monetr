@@ -1,3 +1,3 @@
-import { State } from 'store';
+import { AppState } from 'store';
 
-export const getBankAccountsLoading = (state: State): boolean => state.bankAccounts.loading;
+export const getBankAccountsLoading = (state: AppState): boolean => state.bankAccounts.loading;

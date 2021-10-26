@@ -18,7 +18,7 @@ import {
   Snackbar,
   TextField
 } from '@material-ui/core';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, FormikHelpers, FormikValues } from 'formik';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 
@@ -168,6 +168,37 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
     )
   };
 
+  renderBottomButtons = (
+    isSubmitting: boolean,
+    disableForVerification: boolean,
+    values: LoginValues,
+    submitForm: () => Promise<any>,
+  ): React.ReactNode => {
+    return (
+      <div>
+        <div className="w-full pt-2.5 pb-2.5">
+          <Button
+            className="w-full"
+            color="primary"
+            disabled={ isSubmitting || (!values.password || !values.email || !disableForVerification) }
+            onClick={ submitForm }
+            type="submit"
+            variant="contained"
+          >
+            { isSubmitting && <CircularProgress
+              className={ classnames('mr-2', {
+                'opacity-50': isSubmitting,
+              }) }
+              size="1em"
+              thickness={ 5 }
+            /> }
+            { isSubmitting ? 'Signing In...' : 'Sign In' }
+          </Button>
+        </div>
+      </div>
+    )
+  };
+
   render() {
 
     const initialValues: LoginValues = {
@@ -269,25 +300,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                       verification: value,
                     }) }
                   />
-                  <div className="w-full pt-2.5 mb-10">
-                    <Button
-                      className="w-full"
-                      color="primary"
-                      disabled={ isSubmitting || (!values.password || !values.email || !disableForVerification) }
-                      onClick={ submitForm }
-                      type="submit"
-                      variant="contained"
-                    >
-                      { isSubmitting && <CircularProgress
-                        className={ classnames('mr-2', {
-                          'opacity-50': isSubmitting,
-                        }) }
-                        size="1em"
-                        thickness={ 5 }
-                      /> }
-                      { isSubmitting ? 'Signing In...' : 'Sign In' }
-                    </Button>
-                  </div>
+                  { this.renderBottomButtons(isSubmitting, disableForVerification, values, submitForm) }
                 </div>
               </div>
             </form>

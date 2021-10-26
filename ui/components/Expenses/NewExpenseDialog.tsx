@@ -29,7 +29,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import createSpending from 'shared/spending/actions/createSpending';
-import { State } from 'store';
+import { AppState } from 'store';
 
 enum NewExpenseStep {
   Name,
@@ -352,7 +352,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, ComponentState
 }
 
 export default connect(
-  (state: State, props: PropTypes) => ({
+  (state: AppState, props: PropTypes) => ({
     bankAccountId: getSelectedBankAccountId(state),
   }),
   {

@@ -27,7 +27,7 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import createSpending from 'shared/spending/actions/createSpending';
-import { State } from 'store';
+import { AppState } from 'store';
 
 export interface PropTypes {
   onClose: { (): void };
@@ -310,7 +310,7 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentS
 }
 
 export default connect(
-  (state: State) => ({
+  (state: AppState) => ({
     bankAccountId: getSelectedBankAccountId(state),
   }),
   {

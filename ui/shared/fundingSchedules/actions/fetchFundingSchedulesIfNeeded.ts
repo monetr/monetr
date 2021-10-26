@@ -3,10 +3,10 @@ import { Map } from 'immutable';
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
 import { FetchFundingSchedules } from "shared/fundingSchedules/actions";
 import request from "shared/util/request";
-import { Dispatch, State } from 'store';
+import { AppDispatch, AppState } from 'store';
 
 interface ActionWithState {
-  (dispatch: Dispatch, getState: () => State): Promise<void>
+  (dispatch: AppDispatch, getState: () => AppState): Promise<void>
 }
 
 export function fetchFundingSchedulesIfNeeded(): ActionWithState {

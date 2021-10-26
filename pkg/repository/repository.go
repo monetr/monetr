@@ -30,7 +30,7 @@ type BaseRepository interface {
 	GetBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.BankAccount, error)
 	GetFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error)
-	GetFundingStats(ctx context.Context, bankAccountId uint64) (*FundingStats, error)
+	GetFundingStats(ctx context.Context, bankAccountId uint64) ([]FundingStats, error)
 	GetIsSetup(ctx context.Context) (bool, error)
 	GetLink(ctx context.Context, linkId uint64) (*models.Link, error)
 	GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error)

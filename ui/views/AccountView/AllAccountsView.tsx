@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
-import { State } from 'store';
+import { AppState } from 'store';
 
 import AddBankAccountDialog from 'views/AccountView/AddBankAccountDialog';
 import Balance from 'data/Balance';
@@ -147,7 +147,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, ComponentState>
 }
 
 export default connect(
-  (state: State) => ({
+  (state: AppState) => ({
     bankAccounts: getBankAccounts(state),
     links: getLinks(state),
     balances: getBalances(state),

@@ -8,6 +8,7 @@ import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFun
 import selectExpense from 'shared/spending/actions/selectExpense';
 import { getExpenseIsSelected } from 'shared/spending/selectors/getExpenseIsSelected';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
+import { AppState } from 'store';
 
 export interface PropTypes {
   expenseId: number;
@@ -20,7 +21,7 @@ interface WithConnectionPropTypes extends PropTypes {
   selectExpense: { (expenseId: number): void };
 }
 
-export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
+export class ExpenseItem extends Component<WithConnectionPropTypes> {
 
   onClick = () => {
     return this.props.selectExpense(this.props.expenseId);
@@ -92,7 +93,7 @@ export class ExpenseItem extends Component<WithConnectionPropTypes, any> {
 }
 
 export default connect(
-  (state, props: PropTypes) => {
+  (state: AppState, props: PropTypes) => {
     const expense = getSpendingById(props.expenseId)(state);
     const isSelected = getExpenseIsSelected(props.expenseId)(state);
 

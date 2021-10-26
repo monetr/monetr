@@ -3,10 +3,10 @@ import Spending from 'data/Spending';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { Transfer } from 'shared/spending/actions';
 import request from 'shared/util/request';
-import { Dispatch, State } from 'store';
+import { AppDispatch, AppState } from 'store';
 
 interface ActionWithState {
-  (dispatch: Dispatch, getState: () => State): Promise<void>
+  (dispatch: AppDispatch, getState: () => AppState): Promise<void>
 }
 
 export default function transfer(from: number | null, to: number | null, amount: number): ActionWithState {

@@ -5,10 +5,10 @@ import { FetchBalances } from 'shared/balances/actions';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { UpdateTransaction } from 'shared/transactions/actions';
 import request from 'shared/util/request';
-import { Dispatch, State } from 'store';
+import { AppDispatch, AppState } from 'store';
 
 interface ActionWithState {
-  (dispatch: Dispatch, getState: () => State): Promise<void>
+  (dispatch: AppDispatch, getState: () => AppState): Promise<void>
 }
 
 export default function updateTransaction(transaction: Transaction): ActionWithState {

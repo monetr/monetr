@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
-	"github.com/monetr/monetr/pkg/models"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/context"
+	"github.com/monetr/monetr/pkg/models"
 )
 
 func (c *Controller) handleFundingSchedules(p iris.Party) {
@@ -61,7 +62,7 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 // @Produce json
 // @Param bankAccountId path int true "Bank Account ID"
 // @Router /bank_accounts/{bankAccountId}/funding_schedules/stats [get]
-// @Success 200 {object} repository.FundingStats
+// @Success 200 {array} repository.FundingStats
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.

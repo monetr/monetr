@@ -13,18 +13,21 @@ const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 module.exports = (env, argv) => {
+  const isDevelopment = process.env.NODE_ENV !== 'production';
+
   if (!env.PUBLIC_URL) {
     env.PUBLIC_URL = '';
   }
 
   let filename = `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js`;
-  if (argv.mode === 'production') {
+  if (!isDevelopment) {
     filename = `[name].js`;
   }
 
   const config = {
+    mode: isDevelopment ? 'development' : undefined,
     target: 'web',
-    entry: argv.mode === 'production' ? [
+    entry: !isDevelopment ? [
       './ui/index.tsx'
     ] : [
       'react-hot-loader/patch',
@@ -99,7 +102,7 @@ module.exports = (env, argv) => {
               }
             }
           ]
-        }
+        },
       ]
     },
     resolve: {
@@ -126,8 +129,11 @@ module.exports = (env, argv) => {
       host: '0.0.0.0',
       port: 30000,
       webSocketServer: 'ws',
+      liveReload: true,
       client: {
+        webSocketTransport: 'ws',
         webSocketURL: 'wss://app.monetr.mini/ws',
+        progress: true,
       },
       onBeforeSetupMiddleware: function (devServer) {
         // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
@@ -172,7 +178,7 @@ module.exports = (env, argv) => {
       // new webpack.optimize.ModuleConcatenationPlugin(),
       // I'm stupid and don't know how to make this better. So just uncomment this when you need it.
       // new WebpackBundleAnalyzer(),
-    ],
+    ].filter(Boolean),
     optimization: {
       runtimeChunk: 'single',
       splitChunks: {
@@ -201,7 +207,7 @@ module.exports = (env, argv) => {
 
   if (argv.hot) {
     // Cannot use 'contenthash' when hot reloading is enabled.
-    config.output.filename = '[name].[hash].js';
+    config.output.filename = '[name].[fullhash].js';
   }
 
   return config;

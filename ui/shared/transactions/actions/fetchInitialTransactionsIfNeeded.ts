@@ -7,10 +7,10 @@ import {
 } from "shared/transactions/actions";
 import { getHasAnyTransactions } from "shared/transactions/selectors/getHasAnyTransactions";
 import request from "shared/util/request";
-import { Dispatch, State } from 'store';
+import { AppDispatch, AppState } from 'store';
 
 interface ActionWithState {
-  (dispatch: Dispatch, getState: () => State): Promise<void>
+  (dispatch: AppDispatch, getState: () => AppState): Promise<void>
 }
 
 export default function fetchInitialTransactionsIfNeeded(): ActionWithState {

@@ -1,5 +1,5 @@
 {
-  "name": "web-ui",
+  "name": "monetr",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -8,7 +8,6 @@
     "@material-ui/icons": "4.11.2",
     "@material-ui/lab": "4.0.0-alpha.60",
     "@material-ui/pickers": "3.3.10",
-    "@pmmmwh/react-refresh-webpack-plugin": "0.5.1",
     "@sentry/browser": "6.13.3",
     "@sentry/react": "6.13.3",
     "@sentry/tracing": "6.13.3",
@@ -74,7 +73,6 @@
     "react-plaid-link": "3.2.1",
     "react-recaptcha": "2.3.10",
     "react-redux": "7.2.6",
-    "react-refresh": "0.10.0",
     "react-router-dom": "5.3.0",
     "react-select": "5.1.0",
     "redux": "4.1.1",

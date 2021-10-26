@@ -1,7 +1,6 @@
 FROM golang:1.17.2 as builder
 
 ARG REVISION
-ARG BUILD_TIME
 ARG RELEASE
 ARG GOFLAGS
 
@@ -10,7 +9,7 @@ WORKDIR /build
 
 ENV GOFLAGS=$GOFLAGS
 RUN go get ./...
-RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.buildtime=$BUILD_TIME -X main.release=$RELEASE" -o /bin/monetr github.com/monetr/monetr/pkg/cmd
+RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.release=$RELEASE" -o /bin/monetr github.com/monetr/monetr/pkg/cmd
 
 FROM ubuntu:20.04
 
