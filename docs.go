@@ -524,7 +524,10 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repository.FundingStats"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/repository.FundingStats"
+                            }
                         }
                     },
                     "400": {
@@ -2065,12 +2068,6 @@ var doc = `{
                     "type": "integer"
                 },
                 "nextGoalContribution": {
-                    "type": "integer"
-                },
-                "numberOfExpenses": {
-                    "type": "integer"
-                },
-                "numberOfGoals": {
                     "type": "integer"
                 }
             }

@@ -149,10 +149,6 @@ definitions:
         type: integer
       nextGoalContribution:
         type: integer
-      numberOfExpenses:
-        type: integer
-      numberOfGoals:
-        type: integer
     type: object
   swag.AfterCheckoutResponse:
     properties:
@@ -1647,7 +1643,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/repository.FundingStats'
+            items:
+              $ref: '#/definitions/repository.FundingStats'
+            type: array
         "400":
           description: Bad Request
           schema:

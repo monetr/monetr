@@ -509,7 +509,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/repository.FundingStats"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/repository.FundingStats"
+                            }
                         }
                     },
                     "400": {
@@ -2050,12 +2053,6 @@
                     "type": "integer"
                 },
                 "nextGoalContribution": {
-                    "type": "integer"
-                },
-                "numberOfExpenses": {
-                    "type": "integer"
-                },
-                "numberOfGoals": {
                     "type": "integer"
                 }
             }
