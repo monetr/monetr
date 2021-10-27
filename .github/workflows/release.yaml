@@ -119,7 +119,7 @@ jobs:
       - uses: actions/download-artifact@v2
         name: Download Compiled UI Artifacts
         with:
-          name: '${{ github.sha }}-ui'
+          name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
       - name: Build Image
         id: docker_build
