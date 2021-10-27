@@ -27,6 +27,7 @@ const (
 
 type Configuration struct {
 	Name          string
+	ListenPort    int
 	Environment   string
 	UIDomainName  string
 	APIDomainName string
@@ -257,6 +258,7 @@ func LoadConfiguration(configFilePath *string) Configuration {
 
 func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Name", "monetr")
+	v.SetDefault("ListenPort", 4000)
 	v.SetDefault("Environment", "development")
 	v.SetDefault("UIDomainName", "localhost:3000")
 	v.SetDefault("APIDomainName", "localhost:4000")
@@ -275,6 +277,7 @@ func setupDefaults(v *viper.Viper) {
 
 func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Name", "MONETR_NAME")
+	_ = v.BindEnv("ListenPort", "MONETR_PORT")
 	_ = v.BindEnv("Environment", "MONETR_ENVIRONMENT")
 	_ = v.BindEnv("UIDomainName", "MONETR_UI_DOMAIN_NAME")
 	_ = v.BindEnv("APIDomainName", "MONETR_API_DOMAIN_NAME")
