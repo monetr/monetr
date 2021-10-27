@@ -8,9 +8,6 @@ RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
-rel:
-	@echo $(RELEASE_REVISION) - $(RELEASE_VERSION)
-
 KUBERNETES_VERSION=1.18.5
 
 ARCH ?= amd64
