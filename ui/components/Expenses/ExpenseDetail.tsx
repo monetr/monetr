@@ -150,7 +150,7 @@ export class ExpenseDetail extends Component<WithConnectionPropTypes, State> {
             </div>
             <div className="col-span-3">
               <Typography>
-                { expense.nextRecurrence.format('MMM Do') } - { expense.description }
+                { expense.getNextOccurrenceString() } - { expense.description }
               </Typography>
             </div>
             <div className="col-span-3">

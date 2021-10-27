@@ -1,7 +1,8 @@
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@material-ui/core';
 import FundingSchedule from 'data/FundingSchedule';
 import Spending from 'data/Spending';
-import {getActiveElement} from 'formik';
+import { getActiveElement } from 'formik';
+import moment from 'moment';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
@@ -58,7 +59,7 @@ export class ExpenseItem extends Component<WithConnectionPropTypes> {
             <Typography
               variant="body1"
             >
-              { expense.nextRecurrence.format('MMM Do') }
+              { expense.getNextOccurrenceString() }
               { expense.description && ` - ${ expense.description }` }
             </Typography>
           </div>

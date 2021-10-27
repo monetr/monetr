@@ -1,5 +1,5 @@
-import { Moment } from "moment";
-import { parseToMoment, parseToMomentMaybe } from "util/parseToMoment";
+import moment, { Moment } from 'moment';
+import { parseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export enum SpendingType {
   Expense = 0,
@@ -33,6 +33,15 @@ export default class Spending {
         dateCreated: parseToMoment(data.dateCreated),
       });
     }
+  }
+
+  // getNextOccurrence string will return a friendly date string representing the next time this spending object is due.
+  // If the next time the spending object is due is a different year than the current one; then the year will be
+  // appended to the end of the date string.
+  getNextOccurrenceString(): string {
+    return this.nextRecurrence.year() === moment().year() ?
+      this.nextRecurrence.format('MMM Do') :
+      this.nextRecurrence.format('MMM Do, YYYY');
   }
 
   getTargetAmountString(): string {

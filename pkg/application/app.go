@@ -36,11 +36,9 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *iris
 		ctx.Next()
 	})
 
-	if configuration.Sentry.Enabled {
-		app.Use(sentryiris.New(sentryiris.Options{
-			Repanic: false,
-		}))
-	}
+	app.Use(sentryiris.New(sentryiris.Options{
+		Repanic: false,
+	}))
 
 	app.UseRouter(cors.New(cors.Options{
 		AllowedOrigins:  configuration.CORS.AllowedOrigins,
