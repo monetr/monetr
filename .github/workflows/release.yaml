@@ -54,7 +54,9 @@ jobs:
     name: Build Binary
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/build-containers/golang:1.17.0
+    continue-on-error: true
     strategy:
+      fail-fast: false
       matrix:
         os:
           - linux
@@ -84,12 +86,11 @@ jobs:
       - name: Build
         run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
       - name: Upload Binaries to Release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: '${{ github.workspace }}/bin/monetr'
-          asset_name: monetr-${{ matrix.os }}-${{ matrix.architecture }}
-          tag: 'v${{ needs.release_please.outputs.version }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mv ${{ github.workspace }}/bin/monetr ${{ github.workspace }}/bin/monetr-${{ matrix.os }}-${{ matrix.architecture }}
+          gh release upload v${{ needs.release_please.outputs.version }} ${{ github.workspace }}/bin/monetr-${{ matrix.os }}-${{ matrix.architecture }} --clobber
 
   container:
     if: ${{ needs.release_please.outputs.release_created }}
