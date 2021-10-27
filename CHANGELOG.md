@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.0.5](https://www.github.com/monetr/monetr/compare/v0.0.4...v0.0.5) (2021-10-27)
+
+
+### Features
+
+* Added ability to change listen port via config. ([c9481cd](https://www.github.com/monetr/monetr/commit/c9481cdbf7f4f56f0df4fb32b350997c057e977c))
+
+
+### Miscellaneous Chores
+
+* release 0.0.5 ([3958271](https://www.github.com/monetr/monetr/commit/395827115e102a5a870657be3f2efa6d0b02ddc1))
+
 ### [0.0.4](https://www.github.com/monetr/monetr/compare/v0.0.3...v0.0.4) (2021-10-27)
 
 
