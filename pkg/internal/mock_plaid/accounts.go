@@ -47,7 +47,7 @@ func BankAccountFixture(t *testing.T) plaid.AccountBase {
 	case plaid.ACCOUNTTYPE_LOAN:
 		accountSubType = plaid.AccountSubtype(gofakeit.RandomString([]string{
 			string(plaid.ACCOUNTSUBTYPE_AUTO),
-			string(plaid.ACCOUNTSUBTYPE_HOME),
+			string(plaid.ACCOUNTSUBTYPE_MORTGAGE),
 		}))
 	}
 
