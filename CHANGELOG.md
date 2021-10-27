@@ -8,6 +8,14 @@
 * Fixed release flow for multiple OS's. Assets. ([757030c](https://www.github.com/monetr/monetr/commit/757030ca8ee7a5a0f0291d47314c3621b63ded3e))
 * Hopefully fixed the GitHub release assets uploading. ([a3aa79c](https://www.github.com/monetr/monetr/commit/a3aa79c023b4ca042a33b449cddd81c12775aa77))
 
+### [0.0.6](https://www.github.com/monetr/monetr/compare/v0.0.5...v0.0.6) (2021-10-27)
+
+
+### Bug Fixes
+
+* Fixed release flow for multiple OS's. Assets. ([757030c](https://www.github.com/monetr/monetr/commit/757030ca8ee7a5a0f0291d47314c3621b63ded3e))
+* Hopefully fixed the GitHub release assets uploading. ([a3aa79c](https://www.github.com/monetr/monetr/commit/a3aa79c023b4ca042a33b449cddd81c12775aa77))
+
 ### [0.0.5](https://www.github.com/monetr/monetr/compare/v0.0.4...v0.0.5) (2021-10-27)
 
 
