@@ -145,7 +145,7 @@
     "prettier": "2.4.1",
     "redoc-cli": "0.13.0",
     "redux-devtools-extension": "2.13.9",
-    "sass-loader": "12.2.0",
+    "sass-loader": "12.3.0",
     "style-loader": "3.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",
     "ts-loader": "9.2.6",
