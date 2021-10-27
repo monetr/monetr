@@ -167,6 +167,14 @@ $(BINARY_TAR):
 
 tar: $(BINARY_TAR)
 
+ifdef GITHUB_ACTION
+release-asset: $(BINARY_TAR)
+release-asset: GH=$(shell which gh)
+release-asset:
+	$(GH) release upload $(RELEASE_VERSION) $(BINARY_TAR) --clobber
+endif
+
+
 test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr REST API)
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
