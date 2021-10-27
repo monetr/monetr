@@ -3,23 +3,19 @@ package logging
 import (
 	"sort"
 
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/sirupsen/logrus"
 )
 
-func NewLogger() *logrus.Entry {
-	return NewLoggerWithLevel(logrus.FatalLevel.String())
-}
-
-func NewLoggerWithLevel(levelString string) *logrus.Entry {
+func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 	logger := logrus.New()
 
-	level, err := logrus.ParseLevel(levelString)
+	level, err := logrus.ParseLevel(configuration.Level)
 	if err != nil {
 		level = logrus.InfoLevel
 	}
 
 	logger.SetLevel(level)
-
 	logger.Formatter = &logrus.TextFormatter{
 		ForceColors:               false,
 		DisableColors:             false,
@@ -52,10 +48,26 @@ func NewLoggerWithLevel(levelString string) *logrus.Entry {
 		FieldMap:               nil,
 		CallerPrettyfier:       nil,
 	}
+
+	if configuration.StackDriver.Enabled {
+		formatter, err := NewStackDriverFormatterWrapper(logger.Formatter, configuration.StackDriver)
+		if err == nil {
+			logger.WithError(err).Errorf("failed to create stack driver wrapper")
+			return logrus.NewEntry(logger)
+		}
+
+		logger.Formatter = formatter
+	}
+
 	return logrus.NewEntry(logger)
 }
 
-type Config struct {
-	Level     logrus.Level
-	Formatter logrus.Formatter
+func NewLogger() *logrus.Entry {
+	return NewLoggerWithLevel(logrus.FatalLevel.String())
+}
+
+func NewLoggerWithLevel(levelString string) *logrus.Entry {
+	return NewLoggerWithConfig(config.Logging{
+		Level: levelString,
+	})
 }
