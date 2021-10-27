@@ -43,9 +43,53 @@ jobs:
           make build-ui
       - uses: actions/upload-artifact@v2
         with:
-          name: '${{ github.sha }}-ui'
+          name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
           retention-days: 7
+
+  build_binary:
+    needs:
+      - release_please
+      - build_ui
+    name: Build Binary
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/build-containers/golang:1.17.0
+    strategy:
+      matrix:
+        os:
+          - linux
+          - darwin
+        architecture:
+          - amd64
+          - arm64
+        include:
+          - os: windows
+            architecture: amd64
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+            ${{ runner.os }}-go-
+      - uses: actions/download-artifact@v2
+        name: Download Compiled UI Artifacts
+        with:
+          name: '${{ needs.release_please.outputs.version }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Build
+        run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
+      - name: Upload Binaries to Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: '${{ github.workspace }}/bin/monetr'
+          asset_name: monetr-${{ matrix.os }}-${{ matrix.architecture }}
+          tag: 'v${{ needs.release_please.outputs.version }}'
 
   container:
     if: ${{ needs.release_please.outputs.release_created }}

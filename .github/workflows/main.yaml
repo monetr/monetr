@@ -74,9 +74,15 @@ jobs:
     container: ghcr.io/monetr/build-containers/golang:1.17.0
     strategy:
       matrix:
+        os:
+          - linux
+          - darwin
         architecture:
           - amd64
           - arm64
+        include:
+          - os: windows
+            architecture: amd64
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -93,13 +99,11 @@ jobs:
         with:
           name: '${{ github.sha }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
-      - name: Debugging
-        run: ls $GITHUB_WORKSPACE/pkg/ui/static
       - name: Build
-        run: GOARCH=${{ matrix.architecture }} make build
+        run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
       - uses: actions/upload-artifact@v2
         with:
-          name: '${{ github.sha }}-binary-${{ matrix.architecture }}'
+          name: '${{ github.sha }}-binary-${{ matrix.os }}-${{ matrix.architecture }}'
           path: '${{ github.workspace }}/bin/monetr'
           retention-days: 7
 
