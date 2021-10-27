@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.0.4](https://www.github.com/monetr/monetr/compare/v0.0.3...v0.0.4) (2021-10-27)
+
+
+### Bug Fixes
+
+* Added some super basic logging improvements. ([491c404](https://www.github.com/monetr/monetr/commit/491c404afeb6dc1444f08c96a5d825dea1ee7c6a))
+* Added year to spending objects that are due a different year. ([bff0c7b](https://www.github.com/monetr/monetr/commit/bff0c7b6359d06ce1648a1307cbe04d0021ed07e)), closes [#147](https://www.github.com/monetr/monetr/issues/147)
+* **deps:** update dependency eslint-webpack-plugin to v3.1.0 ([04902f7](https://www.github.com/monetr/monetr/commit/04902f7c40d750f901a5cca0779b7f391a31dfd8))
+* **deps:** update dependency sass to v1.43.4 ([369f1ac](https://www.github.com/monetr/monetr/commit/369f1ac92dcbb2cd5c39d57ab29d4d91ba6cae5a))
+* **deps:** update google.golang.org/genproto commit hash to 4688e4c ([b528a1b](https://www.github.com/monetr/monetr/commit/b528a1bdf39b2a4fe258292edfb97f5a2cafcd77))
+* **deps:** update module github.com/plaid/plaid-go to v1.6.0 ([81bc574](https://www.github.com/monetr/monetr/commit/81bc574d32664711d138870842ae784398b9b7f9))
+* Removed `plaid.ACCOUNTSUBTYPE_HOME` due to plaid upgrade. ([d04efaf](https://www.github.com/monetr/monetr/commit/d04efaf1cf2482f5470d7130d81c898f53923883))
+
 ### [0.0.3](https://www.github.com/monetr/monetr/compare/v0.0.2...v0.0.3) (2021-10-26)
 
 
