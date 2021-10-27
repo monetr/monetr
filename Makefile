@@ -4,13 +4,17 @@ LOCAL_BIN = $(PWD)/bin
 VENDOR_DIR = $(PWD)/vendor
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
+RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1`)
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
+rel:
+	@echo $(RELEASE_REVISION) - $(RELEASE_VERSION)
+
 KUBERNETES_VERSION=1.18.5
 
-ARCH=amd64
-OS=$(shell uname -s | tr A-Z a-z)
+ARCH ?= amd64
+OS ?= $(shell uname -s | tr A-Z a-z)
 
 ENVIRONMENT ?= $(shell echo $${BUIlDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT:-Local})
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
@@ -130,14 +134,22 @@ dependencies: $(GOMODULES) $(NODE_MODULES)
 
 build-ui: $(STATIC_DIR)
 
-BINARY=$(LOCAL_BIN)/monetr
+GOOS ?= $(OS)
+GOARCH ?= amd64
+
+ifeq ($(GOOS),windows)
+BINARY_FILE_NAME=monetr.exe
+else
+BINARY_FILE_NAME=monetr
+endif
+
+BINARY=$(LOCAL_BIN)/$(BINARY_FILE_NAME)
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
 $(BINARY): $(STATIC_DIR) $(GOMODULES)
 endif
-	$(call infoMsg,Building monetr binary)
+	$(call infoMsg,Building monetr binary for: $(GOOS)/$(GOARCH))
 	$(GO) build -o $(BINARY) $(MONETR_CLI_PACKAGE)
-
 
 BUILD_DIR=$(PWD)/build
 $(BUILD_DIR):
@@ -149,6 +161,14 @@ $(CONTAINER_BINARY): $(BUILD_DIR) $(GO) $(STATIC_DIR) $(GOMODULES) $(APP_GO_FILE
 	GOOS=linux GOARCH=$(ARCH) $(GO) build -o $(CONTAINER_BINARY) $(MONETR_CLI_PACKAGE)
 
 build: $(BINARY)
+
+BINARY_TAR=$(PWD)/bin/monetr-$(RELEASE_VERSION)-$(GOOS)-$(GOARCH).tar.gz
+$(BINARY_TAR): $(BINARY)
+$(BINARY_TAR): TAR=$(shell which tar)
+$(BINARY_TAR):
+	cd $(LOCAL_BIN) && $(TAR) -czf $(BINARY_TAR) $(BINARY_FILE_NAME)
+
+tar: $(BINARY_TAR)
 
 test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr REST API)

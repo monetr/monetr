@@ -84,13 +84,13 @@ jobs:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
       - name: Build
-        run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
+        run: |
+          RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make tar
       - name: Upload Binaries to Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mv ${{ github.workspace }}/bin/monetr ${{ github.workspace }}/bin/monetr-${{ matrix.os }}-${{ matrix.architecture }}
-          gh release upload v${{ needs.release_please.outputs.version }} ${{ github.workspace }}/bin/monetr-${{ matrix.os }}-${{ matrix.architecture }} --clobber
+          gh release upload v${{ needs.release_please.outputs.version }} ${{ github.workspace }}/bin/monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz --clobber
 
   container:
     if: ${{ needs.release_please.outputs.release_created }}
