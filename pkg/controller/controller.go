@@ -45,6 +45,7 @@ type Controller struct {
 	plaid                    platypus.Platypus
 	plaidWebhookVerification platypus.WebhookVerification
 	plaidSecrets             secrets.PlaidSecretsProvider
+	plaidInstitutions        platypus.PlaidInstitutions
 	smtp                     *smtp.Client
 	mailVerifyCode           *gotp.HOTP
 	log                      *logrus.Entry
@@ -87,7 +88,9 @@ func NewController(
 		}
 	}
 
-	accountsRepo := billing.NewAccountRepository(log, cache.NewCache(log, cachePool), db)
+	caching := cache.NewCache(log, cachePool)
+
+	accountsRepo := billing.NewAccountRepository(log, caching, db)
 	pubSub := pubsub.NewPostgresPubSub(log, db)
 	basicBilling := billing.NewBasicBilling(log, accountsRepo, pubSub)
 
@@ -119,6 +122,7 @@ func NewController(
 		plaid:                    plaidClient,
 		plaidWebhookVerification: plaidWebhookVerification,
 		plaidSecrets:             plaidSecrets,
+		plaidInstitutions:        platypus.NewPlaidInstitutionWrapper(log, plaidClient, caching),
 		log:                      log,
 		job:                      job,
 		stats:                    stats,
