@@ -1,4 +1,4 @@
-import { Button, Divider, Menu, MenuItem, Typography } from "@material-ui/core";
+import { Button, Divider, Menu, MenuItem, Typography } from '@material-ui/core';
 import BankAccount from 'data/BankAccount';
 import Link from 'data/Link';
 import { Map } from 'immutable';
@@ -6,17 +6,17 @@ import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
 import setSelectedBankAccountId from 'shared/bankAccounts/actions/setSelectedBankAccountId';
-import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
-import { getBankAccountsLoading } from "shared/bankAccounts/selectors/getBankAccountsLoading";
+import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
+import { getBankAccountsLoading } from 'shared/bankAccounts/selectors/getBankAccountsLoading';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
-import { getLinks } from "shared/links/selectors/getLinks";
-import { getLinksLoading } from "shared/links/selectors/getLinksLoading";
+import { getLinks } from 'shared/links/selectors/getLinks';
+import { getLinksLoading } from 'shared/links/selectors/getLinksLoading';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
-import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import { ArrowDropDown, CheckCircle } from "@material-ui/icons";
-import classnames from "classnames";
-import { RouteComponentProps, withRouter } from "react-router-dom";
+import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import { ArrowDropDown, CheckCircle } from '@material-ui/icons';
+import classnames from 'classnames';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AppState } from 'store';
 
 interface PropTypes {
@@ -51,7 +51,7 @@ export class BankAccountSelector extends Component<RouteComponentProps & PropTyp
     anchorEl: null,
   };
 
-  changeBankAccount = (bankAccountId: number) => () => {
+  changeBankAccount = (bankAccountId: number) => (): Promise<[void, void, void, void]> => {
     this.props.setSelectedBankAccountId(bankAccountId);
     this.closeMenu();
     return Promise.all([
@@ -127,7 +127,7 @@ export class BankAccountSelector extends Component<RouteComponentProps & PropTyp
       return null;
     }
 
-    let title = "Select A Bank Account";
+    let title = 'Select A Bank Account';
     if (selectedBankAccountId) {
       title = bankAccounts.get(selectedBankAccountId, null)?.name;
     }
