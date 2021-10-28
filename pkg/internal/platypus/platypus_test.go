@@ -2,6 +2,8 @@ package platypus
 
 import (
 	"context"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/pkg/config"
@@ -9,7 +11,6 @@ import (
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestPlaid_CreateLinkToken(t *testing.T) {
@@ -34,7 +35,6 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 			PhoneNumberVerifiedTime:  nil,
 			EmailAddress:             gofakeit.Email(),
 			EmailAddressVerifiedTime: nil,
-			RedirectURI:              "",
 			UpdateMode:               false,
 		})
 		assert.NoError(t, err, "should not return an error creating a link token")

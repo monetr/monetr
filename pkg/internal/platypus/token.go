@@ -1,8 +1,9 @@
 package platypus
 
 import (
-	"github.com/plaid/plaid-go/plaid"
 	"time"
+
+	"github.com/plaid/plaid-go/plaid"
 )
 
 type ItemToken struct {
@@ -24,7 +25,6 @@ type LinkTokenOptions struct {
 	PhoneNumberVerifiedTime  *time.Time
 	EmailAddress             string
 	EmailAddressVerifiedTime *time.Time
-	RedirectURI              string
 	UpdateMode               bool
 }
 
