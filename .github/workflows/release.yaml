@@ -105,6 +105,7 @@ jobs:
     name: Upload Artifacts
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
         name: Download linux/amd64
         with:
