@@ -110,7 +110,7 @@ $(STATIC_DIR): YARN_BIN=$(shell yarn bin)
 $(STATIC_DIR):
 	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
-	RELEASE_REVISION=$(RELEASE_REVISION) $(YARN_BIN)/webpack --mode production
+	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(YARN_BIN)/webpack --mode production
 	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
 	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
 	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png

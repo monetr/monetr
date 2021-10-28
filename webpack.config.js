@@ -28,10 +28,10 @@ module.exports = (env, argv) => {
     mode: isDevelopment ? 'development' : undefined,
     target: 'web',
     entry: !isDevelopment ? [
-      './ui/GoalsView.tsx'
+      './ui/index.tsx'
     ] : [
       'react-hot-loader/patch',
-      './ui/GoalsView.tsx'
+      './ui/index.tsx'
     ],
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),
@@ -159,6 +159,7 @@ module.exports = (env, argv) => {
       new webpack.DefinePlugin({
         CONFIG: JSON.stringify({}),
         RELEASE_REVISION: JSON.stringify(process.env.RELEASE_REVISION),
+        RELEASE_VERSION: JSON.stringify(process.env.RELEASE_VERSION),
       }),
       new HtmlWebpackPlugin({
         inject: true,
