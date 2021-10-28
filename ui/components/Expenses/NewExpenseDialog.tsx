@@ -66,7 +66,7 @@ interface newExpenseForm {
 const initialValues: newExpenseForm = {
   name: '',
   amount: 0.00,
-  nextOccurrence: moment().add('1 day'),
+  nextOccurrence: moment().add(1, 'day'),
   recurrenceRule: new Recurrence(),
   fundingScheduleId: 0,
 };
@@ -300,7 +300,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, ComponentState
                         <StepContent>
                           <KeyboardDatePicker
                             fullWidth
-                            minDate={ moment().add('1 day') }
+                            minDate={ moment().add(1, 'day') }
                             name="date"
                             margin="normal"
                             id="date-picker-dialog"

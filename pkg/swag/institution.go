@@ -18,5 +18,4 @@ type InstitutionResponse struct {
 }
 
 type InstitutionStatusResponse struct {
-	Transactions
 }
