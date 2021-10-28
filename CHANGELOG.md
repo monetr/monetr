@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.0.8](https://www.github.com/monetr/monetr/compare/v0.0.7...v0.0.8) (2021-10-28)
+
+
+### Bug Fixes
+
+* Allow configuring port for prometheus metrics. ([279edee](https://www.github.com/monetr/monetr/commit/279edeea06832e11646d7625f3c12c35b079fa4a))
+* Cleaned up old files, trying to get actions working still. ([fc938ae](https://www.github.com/monetr/monetr/commit/fc938ae670db304070f0e514da389f67b4ec3fa3))
+
 ### [0.0.7](https://www.github.com/monetr/monetr/compare/v0.0.6...v0.0.7) (2021-10-27)
 
 
