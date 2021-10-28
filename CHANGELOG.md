@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.0.9](https://www.github.com/monetr/monetr/compare/v0.0.8...v0.0.9) (2021-10-28)
+
+
+### Bug Fixes
+
+* Added proper port config to helm chart. ([04c3a55](https://www.github.com/monetr/monetr/commit/04c3a55dd26405119f4eddbc1d4b7d57b08fe7e0))
+* **deps:** update dependency redux to v4.1.2 ([9a1f280](https://www.github.com/monetr/monetr/commit/9a1f280846488d86d866866c82da5e88a407c6c9))
+* **deps:** update module github.com/hashicorp/vault/api to v1.3.0 ([88e53b4](https://www.github.com/monetr/monetr/commit/88e53b43e903f17840099dfeafd2c28268031f40))
+* Fixed build that broke due to refactor. ([ba560c5](https://www.github.com/monetr/monetr/commit/ba560c5ee171f9a73d58f2c9c183bfa20735f0a0))
+* Hopefully fixing the release asset pipeline. ([4ce4b17](https://www.github.com/monetr/monetr/commit/4ce4b17d7eb95246557398134b84dc40a374e2f2))
+* Improved testing around Plaid create links. ([f80b2a8](https://www.github.com/monetr/monetr/commit/f80b2a898b92b3d7b09e90b1121bd7646e91513e))
+* Removed unused RedirectURI param for creating links. ([3a99c64](https://www.github.com/monetr/monetr/commit/3a99c64c01913d18a9dbf20889349e56667a07cd))
+
 ### [0.0.8](https://www.github.com/monetr/monetr/compare/v0.0.7...v0.0.8) (2021-10-28)
 
 
