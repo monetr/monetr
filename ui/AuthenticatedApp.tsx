@@ -16,8 +16,7 @@ import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
 import MenuIcon from '@material-ui/icons/Menu';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import ExpensesView from 'views/Expenses/ExpensesView';
-import GoalsView from 'views/GoalsView';
-import AccountView from 'views/AccountView';
+import GoalsView from 'views/Goals/GoalsView';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import AllAccountsView from 'views/AccountView/AllAccountsView';
 import Logout from 'views/Authentication/Logout';
@@ -178,7 +177,6 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
           <Route path="/transactions" exact component={ TransactionsView }/>
           <Route path="/expenses" exact component={ ExpensesView }/>
           <Route path="/goals" exact component={ GoalsView }/>
-          <Route path="/account" exact component={ AccountView }/>
           <Route path="/accounts" exact component={ AllAccountsView }/>
           <Route path="/">
             <Redirect to="/transactions"/>

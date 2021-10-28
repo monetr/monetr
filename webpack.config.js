@@ -28,10 +28,10 @@ module.exports = (env, argv) => {
     mode: isDevelopment ? 'development' : undefined,
     target: 'web',
     entry: !isDevelopment ? [
-      './ui/index.tsx'
+      './ui/GoalsView.tsx'
     ] : [
       'react-hot-loader/patch',
-      './ui/index.tsx'
+      './ui/GoalsView.tsx'
     ],
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),

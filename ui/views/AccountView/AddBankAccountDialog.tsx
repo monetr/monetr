@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@material-ui/core";
 import { connect } from "react-redux";
 import { Close } from "@material-ui/icons";
-import PlaidButton from "Plaid/PlaidButton";
+import PlaidButton from "components/Plaid/PlaidButton";
 import { List } from "immutable";
 import request from "shared/util/request";
 import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";

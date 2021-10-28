@@ -5,7 +5,7 @@ import Link, { LinkStatus } from "data/Link";
 import Balance from "data/Balance";
 import { Divider, IconButton, ListItem, ListSubheader, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
 import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, Remove } from "@material-ui/icons";
-import PlaidIcon from "Plaid/PlaidIcon";
+import PlaidIcon from "components/Plaid/PlaidIcon";
 import { getBankAccountsByLinkId } from "shared/bankAccounts/selectors/getBankAccountsByLinkId";
 import { connect } from "react-redux";
 import { getBalances } from "shared/balances/selectors/getBalances";

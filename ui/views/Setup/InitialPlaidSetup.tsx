@@ -2,8 +2,8 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 
 import Logo from 'assets';
-import PlaidButton from "Plaid/PlaidButton";
-import PlaidIcon from "Plaid/PlaidIcon";
+import PlaidButton from "components/Plaid/PlaidButton";
+import PlaidIcon from "components/Plaid/PlaidIcon";
 import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
 import fetchLinks from "shared/links/actions/fetchLinks";
 import logout from "shared/authentication/actions/logout";
