@@ -75,7 +75,7 @@
     "react-redux": "7.2.6",
     "react-router-dom": "5.3.0",
     "react-select": "5.1.0",
-    "redux": "4.1.1",
+    "redux": "4.1.2",
     "redux-thunk": "2.4.0",
     "reselect": "4.0.0",
     "resolve": "1.20.0",
