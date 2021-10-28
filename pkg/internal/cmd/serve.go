@@ -56,11 +56,6 @@ var (
 )
 
 func RunServer() error {
-	stats := metrics.NewStats()
-	// TODO Allow stats port to be configurable.
-	stats.Listen(":9000")
-	defer stats.Close()
-
 	var configPath *string
 	if len(configFilePath) > 0 {
 		configPath = &configFilePath
@@ -68,7 +63,11 @@ func RunServer() error {
 
 	configuration := config.LoadConfiguration(configPath)
 
-	log := logging.NewLoggerWithLevel(configuration.Logging.Level)
+	stats := metrics.NewStats()
+	stats.Listen(fmt.Sprintf(":%d", configuration.StatsPort))
+	defer stats.Close()
+
+	log := logging.NewLoggerWithConfig(configuration.Logging)
 
 	var vault vault_helper.VaultHelper
 	if configuration.Vault.Enabled {
