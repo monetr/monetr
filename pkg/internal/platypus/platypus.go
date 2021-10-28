@@ -91,14 +91,23 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 		)
 	}
 
-	// Properly set the span status for this request.
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-	} else {
+	switch e := err.(type) {
+	case nil:
 		span.Status = sentry.SpanStatusOK
+	case plaid.GenericOpenAPIError:
+		span.Status = sentry.SpanStatusInternalError
+		var plaidError plaid.Error
+		if jsonErr := json.Unmarshal(e.Body(), &plaidError); jsonErr != nil {
+			return errors.Wrap(err, errorMessage)
+		}
+
+		return errors.Wrap(errors.Errorf("plaid API call failed with %s - %s", plaidError.ErrorType, plaidError.ErrorCode), errorMessage)
+	default:
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, errorMessage)
 	}
 
-	return errors.Wrap(err, errorMessage)
+	return nil
 }
 
 var (
