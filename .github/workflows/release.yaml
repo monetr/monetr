@@ -110,27 +110,27 @@ jobs:
         name: Download linux/amd64
         with:
           name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
-          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
+          path: '/tmp'
       - uses: actions/download-artifact@v2
         name: Download linux/arm64
         with:
           name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
-          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
+          path: '/tmp'
       - uses: actions/download-artifact@v2
         name: Download darwin/amd64
         with:
           name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
-          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
+          path: '/tmp'
       - uses: actions/download-artifact@v2
         name: Download darwin/arm64
         with:
           name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
-          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
+          path: '/tmp'
       - uses: actions/download-artifact@v2
         name: Download windows/amd64
         with:
           name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
-          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
+          path: '/tmp'
       - name: Upload Artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
