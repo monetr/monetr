@@ -11,7 +11,7 @@ PGO=$(LOCAL_BIN)/pgo
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=kms mail work pgadmin pghero vault ngrok registry app api
+SUBDOMAINS=redis kms mail work pgadmin pghero vault ngrok registry app api
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -59,6 +59,7 @@ init-mini: info
 	$(call infoMsg,    Email:                                    https://mail.$(LOCAL_DOMAIN))
 	$(call infoMsg,    Secrets:                                  https://vault.$(LOCAL_DOMAIN))
 	$(call infoMsg,    PGAdmin:                                  https://pgadmin.$(LOCAL_DOMAIN))
+	$(call infoMsg,    Redis:                                    https://redis.$(LOCAL_DOMAIN))
 	$(call infoMsg,)
 	$(call infoMsg,To develop monetr locally; run the following command in the base directory of the repository:)
 	$(call infoMsg,  $ make local)

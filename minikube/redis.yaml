@@ -47,3 +47,79 @@ spec:
   selector:
     app.kubernetes.io/name: redis
     app.kubernetes.io/instance: redis
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-commander
+  labels:
+    app: redis-commander
+    name: redis-commander
+    app.kubernetes.io/name: redis-commander
+    app.kubernetes.io/instance: redis-commander
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis-commander
+      app.kubernetes.io/instance: redis-commander
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis-commander
+        app.kubernetes.io/instance: redis-commander
+    spec:
+      containers:
+        - name: redis-commander
+          image: "rediscommander/redis-commander"
+          imagePullPolicy: Always
+          ports:
+            - name: redis-commander
+              containerPort: 8081
+          env:
+            - name: REDIS_HOST
+              value: redis.default.svc.cluster.local
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-commander
+  labels:
+    app: redis-commander
+    name: redis-commander
+    app.kubernetes.io/name: redis-commander
+    app.kubernetes.io/instance: redis-commander
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8081
+      targetPort: redis-commander
+      protocol: TCP
+      name: redis-commander
+  selector:
+    app.kubernetes.io/name: redis-commander
+    app.kubernetes.io/instance: redis-commander
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: redis-commander
+  labels:
+    app: redis-commander
+    name: redis-commander
+    app.kubernetes.io/name: redis-commander
+    app.kubernetes.io/instance: redis-commander
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: "redis.monetr.mini"
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: redis-commander
+              servicePort: 8081

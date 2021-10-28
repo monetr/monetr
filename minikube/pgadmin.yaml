@@ -801,8 +801,6 @@ data:
         ENABLE_PSQL = True
 
 ---
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
