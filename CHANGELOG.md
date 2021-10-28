@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.0.10](https://www.github.com/monetr/monetr/compare/v0.0.9...v0.0.10) (2021-10-28)
+
+
+### Bug Fixes
+
+* Checkout repository for the `gh` CLI for artifacts. ([b223497](https://www.github.com/monetr/monetr/commit/b2234970e0f4ec55a8a68f07e1fdf16fb4b3dbd6))
+
 ### [0.0.9](https://www.github.com/monetr/monetr/compare/v0.0.8...v0.0.9) (2021-10-28)
 
 
