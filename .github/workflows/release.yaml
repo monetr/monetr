@@ -40,7 +40,7 @@ jobs:
         run: |
           echo "${{ needs.release_please.outputs.version }}"
           make ui-dependencies
-          make build-ui
+          RELEASE_VERSION=v${{ needs.release_please.outputs.version }} make build-ui
       - uses: actions/upload-artifact@v2
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
@@ -48,6 +48,7 @@ jobs:
           retention-days: 7
 
   build_binary:
+    if: ${{ needs.release_please.outputs.release_created }}
     needs:
       - release_please
       - build_ui
@@ -85,13 +86,59 @@ jobs:
           path: '${{ github.workspace }}/pkg/ui/static/'
       - name: Build # I hate so much that I have to do this, but GitHub actions are awful at network connections.
         uses: nick-invision/retry@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           timeout_minutes: 10
           max_attempts: 3
           command: |
-            RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make release-asset
+            RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make tar
+      - uses: actions/upload-artifact@v2
+        with:
+          name: 'monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
+          path: '${{ github.workspace }}/bin/monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
+          retention-days: 7
+
+  upload-artifacts:
+    needs:
+      - release_please
+      - build_ui
+      - build_binary
+    name: Upload Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v2
+        name: Download linux/amd64
+        with:
+          name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
+          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
+      - uses: actions/download-artifact@v2
+        name: Download linux/arm64
+        with:
+          name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
+          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
+      - uses: actions/download-artifact@v2
+        name: Download darwin/amd64
+        with:
+          name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
+          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
+      - uses: actions/download-artifact@v2
+        name: Download darwin/arm64
+        with:
+          name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
+          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
+      - uses: actions/download-artifact@v2
+        name: Download windows/amd64
+        with:
+          name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
+          path: '/tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
+      - name: Upload Artifacts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz --clobber
+          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz --clobber
+          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz --clobber
+          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz --clobber
+          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
 
   container:
     if: ${{ needs.release_please.outputs.release_created }}
