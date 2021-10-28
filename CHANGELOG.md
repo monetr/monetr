@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.0.7](https://www.github.com/monetr/monetr/compare/v0.0.6...v0.0.7) (2021-10-27)
+
+
+### Bug Fixes
+
+* Hopefully fixed release asset uploading in pipelines. ([b6af463](https://www.github.com/monetr/monetr/commit/b6af4638d1322409fca494fa01675263d9b7f2db))
+
 ### [0.0.6](https://www.github.com/monetr/monetr/compare/v0.0.5...v0.0.6) (2021-10-27)
 
 
