@@ -103,9 +103,9 @@ api:
   customEnv: [ ]
   includeSecrets: false
   listenPort: 4000
-  metricsPort: 9000
+  statsPort: 9000
   name: monetr
-  uiDomainName: localhost:3000
+  uiDomainName: localhost:4000
   apiDomainName: localhost:4000
   allowSignUp: true
   enableWebhooks: false

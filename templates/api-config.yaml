@@ -6,6 +6,8 @@ metadata:
   {{- include "api.labels" . | nindent 4 }}
 data:
   MONETR_NAME: {{ quote .Values.api.name }}
+  MONETR_PORT: {{ quote .Values.api.listenPort }}
+  MONETR_STATS_PORT: {{ quote .Values.api.statsPort }}
   MONETR_UI_DOMAIN_NAME: {{ quote .Values.api.uiDomainName }}
   MONETR_API_DOMAIN_NAME: {{ quote .Values.api.apiDomainName }}
   MONETR_ALLOW_SIGN_UP: {{ quote .Values.api.allowSignUp }}
