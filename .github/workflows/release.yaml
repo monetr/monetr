@@ -83,11 +83,15 @@ jobs:
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
-      - name: Build
+      - name: Build # I hate so much that I have to do this, but GitHub actions are awful at network connections.
+        uses: nick-invision/retry@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make release-asset
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: |
+            RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make release-asset
 
   container:
     if: ${{ needs.release_please.outputs.release_created }}
