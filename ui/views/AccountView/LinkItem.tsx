@@ -1,16 +1,16 @@
-import React, { Component, Fragment } from "react";
-import { Map } from "immutable";
-import BankAccount from "data/BankAccount";
-import Link, { LinkStatus } from "data/Link";
-import Balance from "data/Balance";
-import { Divider, IconButton, ListItem, ListSubheader, Menu, MenuItem, Tooltip, Typography } from "@material-ui/core";
-import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, Remove } from "@material-ui/icons";
-import PlaidIcon from "components/Plaid/PlaidIcon";
-import { getBankAccountsByLinkId } from "shared/bankAccounts/selectors/getBankAccountsByLinkId";
-import { connect } from "react-redux";
-import { getBalances } from "shared/balances/selectors/getBalances";
-import RemoveLinkConfirmationDialog from "views/AccountView/RemoveLinkConfirmationDialog";
-import { UpdatePlaidAccountDialog } from "views/AccountView/UpdatePlaidAccountDialog";
+import React, { Component, Fragment } from 'react';
+import { Map } from 'immutable';
+import BankAccount from 'data/BankAccount';
+import Link, { LinkStatus } from 'data/Link';
+import Balance from 'data/Balance';
+import { Divider, IconButton, ListItem, ListSubheader, Menu, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, Remove } from '@material-ui/icons';
+import PlaidIcon from 'components/Plaid/PlaidIcon';
+import { getBankAccountsByLinkId } from 'shared/bankAccounts/selectors/getBankAccountsByLinkId';
+import { connect } from 'react-redux';
+import { getBalances } from 'shared/balances/selectors/getBalances';
+import RemoveLinkConfirmationDialog from 'views/AccountView/RemoveLinkConfirmationDialog';
+import { UpdatePlaidAccountDialog } from 'views/AccountView/UpdatePlaidAccountDialog';
 
 interface PropTypes {
   link: Link;
@@ -153,7 +153,7 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
 
         <li>
           <ul>
-            <ListSubheader className="pt-2 pl-0 pr-2 bg-gray-50">
+            <ListSubheader className="pt-2 pl-0 pr-2">
               <div className="flex pb-2">
                 <div className="items-center self-center flex-auto">
                   <Typography className="h-full ml-6 text-xl font-semibold">

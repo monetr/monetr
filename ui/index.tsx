@@ -9,7 +9,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { createTheme, CssBaseline, MuiThemeProvider, Typography } from '@material-ui/core';
 import { store } from 'store';
 
-const darkMode = false;
+const darkMode = window.localStorage.getItem('darkMode') === 'true';
 
 const theme = createTheme({
   shape: {
