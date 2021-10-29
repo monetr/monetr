@@ -146,7 +146,7 @@ ifndef CI
 $(BINARY): $(STATIC_DIR) $(GOMODULES)
 endif
 	$(call infoMsg,Building monetr binary for: $(GOOS)/$(GOARCH))
-	$(GO) build -o $(BINARY) $(MONETR_CLI_PACKAGE)
+	$(GO) build -ldflags "-X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
 
 BUILD_DIR=$(PWD)/build
 $(BUILD_DIR):
