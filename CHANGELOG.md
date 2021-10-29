@@ -1,5 +1,15 @@
 # Changelog
 
+### [0.0.11](https://www.github.com/monetr/monetr/compare/v0.0.10...v0.0.11) (2021-10-29)
+
+
+### Bug Fixes
+
+* Cleaned up unused transaction components. ([9517f7e](https://www.github.com/monetr/monetr/commit/9517f7e9133bb1c2bbfa5cc4bce8c95e8e7e13be))
+* **deps:** update dependency eslint-plugin-flowtype to v8.0.3 ([02b3db6](https://www.github.com/monetr/monetr/commit/02b3db647d28a5b443636ff1231e3bf25a86fbd7))
+* Fixed failing test from removed component. ([c118105](https://www.github.com/monetr/monetr/commit/c118105ef75a3f10c5031b58f4df2db2214c0ab4))
+* Fixing funding stats view again. Should be correct now. ([5983c35](https://www.github.com/monetr/monetr/commit/5983c350459854ac2d60338d2cc7240312283162))
+
 ### [0.0.10](https://www.github.com/monetr/monetr/compare/v0.0.9...v0.0.10) (2021-10-28)
 
 
