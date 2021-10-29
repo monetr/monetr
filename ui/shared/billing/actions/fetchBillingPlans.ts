@@ -1,5 +1,5 @@
 import request from "shared/util/request";
-import BillingPlan from "data/BillingPlan";
+import BillingPlan from "models/BillingPlan";
 
 
 export default function fetchBillingPlans(): Promise<BillingPlan[]> {

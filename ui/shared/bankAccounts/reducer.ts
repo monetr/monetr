@@ -8,7 +8,7 @@ import {
 } from "shared/bankAccounts/actions";
 import BankAccountsState from "shared/bankAccounts/state";
 import { RemoveLink } from "shared/links/actions";
-import BankAccount from "data/BankAccount";
+import BankAccount from "models/BankAccount";
 
 export default function reducer(state: BankAccountsState = new BankAccountsState(), action: BankAccountActions) {
   switch (action.type) {

@@ -1,5 +1,5 @@
 import { Typography } from '@material-ui/core';
-import Balance from 'data/Balance';
+import Balance from 'models/Balance';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getBalance } from 'shared/balances/selectors/getBalance';

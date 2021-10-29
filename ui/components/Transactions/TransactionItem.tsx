@@ -1,8 +1,8 @@
 import { Chip, Divider, ListItem, Paper, Popover, Typography } from '@material-ui/core';
 import classnames from 'classnames';
 import TransactionNameEditor from 'components/Transactions/TransactionNameEditor';
-import Spending from 'data/Spending';
-import Transaction from 'data/Transaction';
+import Spending from 'models/Spending';
+import Transaction from 'models/Transaction';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';

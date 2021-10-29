@@ -1,5 +1,5 @@
 import { Map } from 'immutable';
-import BankAccount from "data/BankAccount";
+import BankAccount from "models/BankAccount";
 
 export default class BankAccountsState {
   constructor() {

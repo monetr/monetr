@@ -1,6 +1,6 @@
 import { Button, Divider, Menu, MenuItem, Typography } from '@material-ui/core';
-import BankAccount from 'data/BankAccount';
-import Link from 'data/Link';
+import BankAccount from 'models/BankAccount';
+import Link from 'models/Link';
 import { Map } from 'immutable';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';

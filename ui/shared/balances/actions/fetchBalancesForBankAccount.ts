@@ -1,4 +1,4 @@
-import Balance from 'data/Balance';
+import Balance from 'models/Balance';
 import { Dispatch } from 'redux';
 import { FetchBalances } from 'shared/balances/actions';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';

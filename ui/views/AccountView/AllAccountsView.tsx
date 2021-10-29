@@ -3,9 +3,9 @@ import { connect } from 'react-redux';
 import { AppState } from 'store';
 
 import AddBankAccountDialog from 'views/AccountView/AddBankAccountDialog';
-import Balance from 'data/Balance';
-import BankAccount from 'data/BankAccount';
-import Link from 'data/Link';
+import Balance from 'models/Balance';
+import BankAccount from 'models/BankAccount';
+import Link from 'models/Link';
 import LinkItem from 'views/AccountView/LinkItem';
 import fetchMissingBankAccountBalances from 'shared/balances/actions/fetchMissingBankAccountBalances';
 import { AccountBalance, Add } from '@material-ui/icons';

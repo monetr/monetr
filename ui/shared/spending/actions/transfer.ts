@@ -1,5 +1,5 @@
-import Balance from 'data/Balance';
-import Spending from 'data/Spending';
+import Balance from 'models/Balance';
+import Spending from 'models/Spending';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { Transfer } from 'shared/spending/actions';
 import request from 'shared/util/request';

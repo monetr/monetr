@@ -1,4 +1,4 @@
-import Transaction from "data/Transaction";
+import Transaction from "models/Transaction";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
 import {
   FETCH_TRANSACTIONS_FAILURE,

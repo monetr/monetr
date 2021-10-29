@@ -1,4 +1,4 @@
-import Transaction from "data/Transaction";
+import Transaction from "models/Transaction";
 import { OrderedMap } from "immutable";
 import { LOGOUT } from "shared/authentication/actions";
 import { CHANGE_BANK_ACCOUNT } from "shared/bankAccounts/actions";

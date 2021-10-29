@@ -1,6 +1,6 @@
-import Balance from 'data/Balance';
-import Spending from 'data/Spending';
-import Transaction from 'data/Transaction';
+import Balance from 'models/Balance';
+import Spending from 'models/Spending';
+import Transaction from 'models/Transaction';
 import { FetchBalances } from 'shared/balances/actions';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { UpdateTransaction } from 'shared/transactions/actions';

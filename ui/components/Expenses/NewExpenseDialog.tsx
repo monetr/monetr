@@ -22,7 +22,7 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
 import Recurrence from 'components/Recurrence/Recurrence';
 import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
-import Spending, { SpendingType } from 'data/Spending';
+import Spending, { SpendingType } from 'models/Spending';
 import { Formik, FormikErrors } from 'formik';
 import moment from 'moment';
 import React, { Component, Fragment } from 'react';

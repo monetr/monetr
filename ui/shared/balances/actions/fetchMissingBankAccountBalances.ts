@@ -3,7 +3,7 @@ import fetchBalancesForBankAccount from "shared/balances/actions/fetchBalancesFo
 import { getBankAccounts } from "shared/bankAccounts/selectors/getBankAccounts";
 import { Dispatch } from "redux";
 import { getBalances } from "shared/balances/selectors/getBalances";
-import BankAccount from "data/BankAccount";
+import BankAccount from "models/BankAccount";
 
 
 export default function fetchMissingBankAccountBalances() {

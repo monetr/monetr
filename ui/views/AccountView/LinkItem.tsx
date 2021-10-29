@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
 import { Map } from 'immutable';
-import BankAccount from 'data/BankAccount';
-import Link, { LinkStatus } from 'data/Link';
-import Balance from 'data/Balance';
+import BankAccount from 'models/BankAccount';
+import Link, { LinkStatus } from 'models/Link';
+import Balance from 'models/Balance';
 import { Divider, IconButton, ListItem, ListSubheader, Menu, MenuItem, Tooltip, Typography } from '@material-ui/core';
 import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, Remove } from '@material-ui/icons';
 import PlaidIcon from 'components/Plaid/PlaidIcon';

@@ -1,5 +1,5 @@
 import { Dispatch } from "redux";
-import Link from "data/Link";
+import Link from "models/Link";
 import request from "shared/util/request";
 import { CreateLinks } from "shared/links/actions";
 

@@ -2,9 +2,9 @@ import { LOGOUT } from "shared/authentication/actions";
 import { CreateFundingSchedule, FetchFundingSchedules, FundingScheduleActions } from "shared/fundingSchedules/actions";
 import FundingScheduleState from "shared/fundingSchedules/state";
 import { RemoveLink } from "shared/links/actions";
-import FundingSchedule from "data/FundingSchedule";
+import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
-import BankAccount from "data/BankAccount";
+import BankAccount from "models/BankAccount";
 
 export default function reducer(state: FundingScheduleState = new FundingScheduleState(), action: FundingScheduleActions): FundingScheduleState {
   switch (action.type) {

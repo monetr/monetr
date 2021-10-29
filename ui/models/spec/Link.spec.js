@@ -1,4 +1,4 @@
-import Link, { LinkType } from "data/Link";
+import Link, { LinkType } from "models/Link";
 
 
 describe('links', () => {

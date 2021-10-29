@@ -1,6 +1,6 @@
 import { createSelector } from "reselect";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
-import Transaction from "data/Transaction";
+import Transaction from "models/Transaction";
 import { OrderedMap } from "immutable";
 
 const getTransactionsByBankAccount = state => state.transactions.items;

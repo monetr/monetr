@@ -2,7 +2,7 @@ import TextWithLine from 'components/TextWithLine';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { Link as RouterLink, RouteComponentProps, withRouter } from 'react-router-dom';
-import User from 'data/User';
+import User from 'models/User';
 import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import request from 'shared/util/request';
 import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';

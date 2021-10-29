@@ -16,7 +16,7 @@ import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchI
 import fetchBalances from "shared/balances/actions/fetchBalances";
 import { Formik } from "formik";
 import createLink from "shared/links/actions/createLink";
-import Link, { LinkType } from "data/Link";
+import Link, { LinkType } from "models/Link";
 
 
 export class FirstTimeSetup extends Component {

@@ -3,7 +3,7 @@ import TransactionItem from "components/Transactions/TransactionItem";
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import Transaction from "data/Transaction";
+import Transaction from "models/Transaction";
 import { getTransactions } from "shared/transactions/selectors/getTransactions";
 import { Map } from 'immutable';
 

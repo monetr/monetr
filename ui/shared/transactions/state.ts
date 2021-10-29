@@ -1,5 +1,5 @@
 import { Map, OrderedMap } from "immutable";
-import Transaction from 'data/Transaction';
+import Transaction from 'models/Transaction';
 
 export default class TransactionState {
   items: Map<number, OrderedMap<number, Transaction>>;

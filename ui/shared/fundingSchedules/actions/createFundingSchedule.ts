@@ -1,4 +1,4 @@
-import FundingSchedule from "data/FundingSchedule";
+import FundingSchedule from "models/FundingSchedule";
 import { Dispatch } from "redux";
 import { CreateFundingSchedule } from "shared/fundingSchedules/actions";
 import request from "shared/util/request";

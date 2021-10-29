@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
 import React, { Component, Fragment } from "react";
-import Spending from "data/Spending";
+import Spending from "models/Spending";
 import { Formik, FormikErrors, FormikHelpers, FormikProps } from "formik";
 import { getSelectedGoal } from "shared/spending/selectors/getSelectedGoal";
 import {
@@ -21,7 +21,7 @@ import updateSpending from "shared/spending/actions/updateSpending";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { getFundingSchedules } from "shared/fundingSchedules/selectors/getFundingSchedules";
-import FundingSchedule from "data/FundingSchedule";
+import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
 
 export interface PropTypes {

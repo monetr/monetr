@@ -1,10 +1,11 @@
-import axios from "axios";
-import Spending from "data/Spending";
-import { CHANGE_BANK_ACCOUNT } from "shared/bankAccounts/actions";
-import { FETCH_SPENDING_SUCCESS } from "shared/spending/actions";
-import fetchSpending from "shared/spending/actions/fetchSpending";
-import { mockAxiosGetOnce } from "testutils/axios";
-import { createTestStore } from "testutils/store";
+import axios from 'axios';
+import Spending from 'models/Spending';
+import { CHANGE_BANK_ACCOUNT } from 'shared/bankAccounts/actions';
+import { FETCH_SPENDING_SUCCESS } from 'shared/spending/actions';
+import fetchSpending from 'shared/spending/actions/fetchSpending';
+import { mockAxiosGetOnce } from 'testutils/axios';
+import { createTestStore } from 'testutils/store';
+import moment from 'moment';
 
 jest.mock('axios');
 
@@ -26,7 +27,9 @@ describe('fetchSpending', () => {
         new Spending({
           spendingId: 123,
           bankAccountId: 345,
-          name: 'Test'
+          name: 'Test',
+          nextRecurrence: moment().add(1, 'day'),
+          dateCreated: moment(),
         })
       ]
     };

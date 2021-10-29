@@ -1,4 +1,4 @@
-import Balance from 'data/Balance';
+import Balance from 'models/Balance';
 import { Map } from 'immutable';
 
 export default class BalancesState {

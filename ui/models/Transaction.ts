@@ -1,5 +1,5 @@
 import moment from "moment";
-import { parseToMoment, parseToMomentMaybe } from "util/parseToMoment";
+import { mustParseToMoment, parseToMomentMaybe } from "util/parseToMoment";
 
 export default class Transaction {
   transactionId: number;
@@ -22,9 +22,9 @@ export default class Transaction {
     if (data) {
       Object.assign(this, {
         ...data,
-        date: parseToMoment(data.date),
+        date: mustParseToMoment(data.date),
         authorizedDate: parseToMomentMaybe(data.authorizedDate),
-        createdAt: parseToMoment(data.createdAt),
+        createdAt: mustParseToMoment(data.createdAt),
       });
     }
   }

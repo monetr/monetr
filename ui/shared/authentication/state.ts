@@ -1,4 +1,4 @@
-import User from 'data/User';
+import User from 'models/User';
 
 export default class AuthenticationState {
   isAuthenticated: boolean;

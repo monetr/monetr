@@ -1,4 +1,4 @@
-import User from 'data/User';
+import User from 'models/User';
 import request from 'shared/util/request';
 import { BOOTSTRAP_LOGIN } from 'shared/authentication/actions';
 import { getAPIUrl } from 'shared/bootstrap/selectors';

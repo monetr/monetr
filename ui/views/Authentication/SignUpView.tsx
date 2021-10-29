@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import request from 'shared/util/request';
-import User from 'data/User';
+import User from 'models/User';
 import {
   getInitialPlan,
   getReCAPTCHAKey,

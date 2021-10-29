@@ -1,5 +1,5 @@
-import Spending from 'data/Spending';
-import Transaction from "data/Transaction";
+import Spending from 'models/Spending';
+import Transaction from "models/Transaction";
 import { Logout } from "shared/authentication/actions";
 import { ChangeBankAccount } from "shared/bankAccounts/actions";
 
