@@ -39,12 +39,3 @@ button:focus {
 .smooth-animation {
     backface-visibility: hidden;
 }
-
-.MuiPaper-rounded {
-    border-radius: 10px !important;
-}
-
-.MuiButton-root {
-    border-radius: 10px !important;
-}
-

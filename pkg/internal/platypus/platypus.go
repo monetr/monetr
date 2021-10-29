@@ -285,6 +285,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 		InstitutionsGetById(span.Context()).
 		InstitutionsGetByIdRequest(plaid.InstitutionsGetByIdRequest{
 			InstitutionId: institutionId,
+			CountryCodes:  PlaidCountries,
 			Options: &plaid.InstitutionsGetByIdRequestOptions{
 				IncludeOptionalMetadata:          myownsanity.BoolP(true),
 				IncludeStatus:                    myownsanity.BoolP(true),

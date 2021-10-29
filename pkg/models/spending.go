@@ -74,9 +74,9 @@ func (e *Spending) CalculateNextContribution(
 	// representation of the target amount minus the current amount allocated to the expense. But goals work a bit
 	// differently because the allocated amount can fluctuate throughout the life of the goal. When a transaction is
 	// spent from a goal it deducts from the current amount, but adds to the used amount. This is to keep track of how
-	// much the goal has actually progress while maintaining existing patterns for calculating allocations. As a result
-	// for us to know how much a goal needs, we need to subtract the current amount plus the used amount from the target
-	// for goals.
+	// much the goal has actually progressed while maintaining existing patterns for calculating allocations. As a
+	// result for us to know how much a goal needs, we need to subtract the current amount plus the used amount from the
+	// target for goals.
 	progressAmount := e.GetProgressAmount()
 
 	nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
@@ -121,9 +121,17 @@ func (e *Spending) CalculateNextContribution(
 	nextContributionRule.DTStart(nextContributionDate)
 	numberOfContributions := len(nextContributionRule.Between(nowInTimezone, nextDueDate, false))
 
-	totalNeeded := needed
-	perContribution := totalNeeded / int64(numberOfContributions)
+	if numberOfContributions == 0 {
+		// This is a bit weird, I'm not sure what causes this yet off the top of my head. I ran into while testing when
+		// I made the due date the 29th, and the next payday the 28th. (Note: it was the 28th at the time). And it
+		// caused this to break. Pretty sure this is just a bug with the funding schedule next contribution date being
+		// in the past, but this is a short term fix for now. This also acts as a slight safety net for a divide by 0
+		// error.
+		e.NextContributionAmount = needed
+	} else {
+		perContribution := needed / int64(numberOfContributions)
+		e.NextContributionAmount = perContribution
+	}
 
-	e.NextContributionAmount = perContribution
 	return nil
 }

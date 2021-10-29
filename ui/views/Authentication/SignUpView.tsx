@@ -30,6 +30,7 @@ import {
 import { Alert, AlertTitle } from '@material-ui/lab';
 import { Formik, FormikHelpers } from 'formik';
 import verifyEmailAddress from 'util/verifyEmailAddress';
+import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
 
 interface SignUpValues {
   agree: boolean;
@@ -46,6 +47,7 @@ interface State {
   message: string | null;
   loading: boolean;
   verification: string | null;
+  successful: boolean;
 }
 
 interface WithConnectionPropTypes extends RouteComponentProps {
@@ -64,6 +66,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     loading: false,
     error: null,
     message: null,
+    successful: false,
   };
 
   renderErrorMaybe = (): React.ReactNode | null => {
@@ -89,7 +92,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
     }
 
     return (
-      <Snackbar open autoHideDuration={ 10000 }>
+      <Snackbar open autoHideDuration={ 10000 } onClose={ () => this.setState({ message: null }) }>
         <Alert variant="filled" severity="info">
           { this.state.message }
         </Alert>
@@ -168,6 +171,12 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
               this.props.history.push('/');
               return Promise.resolve();
             });
+        }
+
+        if (result.data.requireVerification) {
+          this.setState({
+            successful: true,
+          });
         }
 
         if (result.data.message) {
@@ -253,6 +262,12 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
   };
 
   render() {
+    const { successful } = this.state;
+
+    if (successful) {
+      return <AfterEmailVerificationSent/>;
+    }
+
     const initialValues: SignUpValues = {
       agree: false,
       betaCode: '',

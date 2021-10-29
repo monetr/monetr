@@ -128,7 +128,10 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 
 	// If the next occurrence is not specified then assume that the rule is relative to now. If it is specified though
 	// then do nothing, and the subsequent occurrence will be calculated relative to the provided date.
-	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) {
+	// We also calculate the next occurrence if the provided occurrence is in the past. This technically should not
+	// happen via the UI. But it is currently possible for someone to select the current day in the UI. Which then gets
+	// adjusted for midnight that day, which will always be in the past for the user.
+	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) || time.Now().After(fundingSchedule.NextOccurrence) {
 		fundingSchedule.NextOccurrence, err = c.midnightInLocal(ctx, fundingSchedule.Rule.After(time.Now(), false))
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine next occurrence")

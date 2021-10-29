@@ -23,7 +23,7 @@ func (c *Controller) linksController(p iris.Party) {
 	p.Put("/convert/{linkId:uint64}", c.convertLink)
 	p.Delete("/{linkId:uint64}", c.deleteLink)
 	p.Get("/wait/{linkId:uint64}", c.waitForDeleteLink)
-	p.Get("/{linkId:uint64}/institution")
+	p.Get("/{linkId:uint64}/institution", c.getLinkInstitutionStatus)
 }
 
 // List all links
@@ -430,5 +430,6 @@ func (c *Controller) getLinkInstitutionStatus(ctx iris.Context) {
 		return
 	}
 
-	fmt.Sprint(plaidInstitution)
+	response := swag.NewInstitutionResponse(plaidInstitution)
+	ctx.JSON(response)
 }

@@ -1,3 +1,4 @@
+import TextWithLine from 'components/TextWithLine';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { Link as RouterLink, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -59,7 +60,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
     }
 
     return (
-      <Snackbar open autoHideDuration={ 10000 }>
+      <Snackbar open={ !!error } autoHideDuration={ 10000 } onClose={ () => this.setState({ error: null }) }>
         <Alert variant="filled" severity="error">
           <AlertTitle>Error</AlertTitle>
           { this.state.error }
@@ -248,12 +249,9 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
                         </Button>
                       </div>
                       <div className="w-full opacity-50 pb-2.5">
-                        <div className="relative w-full border-t border-gray-400 top-5"/>
-                        <div className="relative flex justify-center inline w-full">
-                        <span className="relative bg-white p-1.5">
+                        <TextWithLine>
                           or sign in with your email
-                        </span>
-                        </div>
+                        </TextWithLine>
                       </div>
                     </div>
                   ) }
