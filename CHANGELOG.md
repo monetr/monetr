@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.0.12](https://www.github.com/monetr/monetr/compare/v0.0.11...v0.0.12) (2021-10-29)
+
+
+### Bug Fixes
+
+* Added build version and revision to generic binary builds. ([f015e7c](https://www.github.com/monetr/monetr/commit/f015e7cfddd86f62e13ec6798287d05e7089669e))
+* Clean apt cache in container image. ([cda274c](https://www.github.com/monetr/monetr/commit/cda274c6482dcf5c2dbcfbdfff95382bac483482))
+
 ### [0.0.11](https://www.github.com/monetr/monetr/compare/v0.0.10...v0.0.11) (2021-10-29)
 
 
