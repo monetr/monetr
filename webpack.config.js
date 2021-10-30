@@ -2,12 +2,8 @@ const fs = require('fs');
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
-const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
-const errorOverlayMiddleware = require('react-dev-utils/errorOverlayMiddleware');
-const evalSourceMapMiddleware = require('react-dev-utils/evalSourceMapMiddleware');
-const noopServiceWorkerMiddleware = require('react-dev-utils/noopServiceWorkerMiddleware');
-const redirectServedPath = require('react-dev-utils/redirectServedPathMiddleware');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const ReactRefreshTypeScript = require('react-refresh-typescript');
 
 const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
@@ -36,13 +32,21 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),
       filename: filename,
+      sourceMapFilename: "[name].js.map"
     },
     module: {
       rules: [
         {
           test: /\.(js|jsx)$/,
-          use: 'babel-loader',
-          exclude: /node_modules/
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: require.resolve('babel-loader'),
+              options: {
+                plugins: [isDevelopment && require.resolve('react-refresh/babel')].filter(Boolean),
+              },
+            },
+          ],
         },
         {
           test: /\.css$/,
@@ -59,8 +63,18 @@ module.exports = (env, argv) => {
         },
         {
           test: /\.ts(x)?$/,
-          loader: 'ts-loader',
-          exclude: /node_modules/
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: require.resolve('ts-loader'),
+              options: {
+                getCustomTransformers: () => ({
+                  before: [isDevelopment && ReactRefreshTypeScript()].filter(Boolean),
+                }),
+                transpileOnly: isDevelopment,
+              },
+            },
+          ],
         },
         {
           test: /\.scss$/,
@@ -135,25 +149,6 @@ module.exports = (env, argv) => {
         webSocketURL: 'wss://app.monetr.mini/ws',
         progress: true,
       },
-      onBeforeSetupMiddleware: function (devServer) {
-        // Keep `evalSourceMapMiddleware` and `errorOverlayMiddleware`
-        // middlewares before `redirectServedPath` otherwise will not have any effect
-        // This lets us fetch source contents from webpack for the error overlay
-        devServer.app.use(evalSourceMapMiddleware(devServer.server));
-        // This lets us open files from the runtime error overlay.
-        devServer.app.use(errorOverlayMiddleware());
-      },
-      onAfterSetupMiddleware: function (devServer) {
-        // Redirect to `PUBLIC_URL` or `homepage` from `package.json` if url not match
-        devServer.app.use(redirectServedPath('/'));
-
-        // This service worker file is effectively a 'no-op' that will reset any
-        // previous service worker registered for the same host:port combination.
-        // We do this in development to avoid hitting the production cache if
-        // it used the same host and port.
-        // https://github.com/facebook/create-react-app/issues/2272#issuecomment-302832432
-        devServer.app.use(noopServiceWorkerMiddleware('/'));
-      },
     },
     plugins: [
       new webpack.DefinePlugin({
@@ -169,16 +164,13 @@ module.exports = (env, argv) => {
         publicPath: '/',
       }),
       new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /en/),
-      // Makes some environment variables available in index.html.
-      // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
-      // <link rel="icon" href="%PUBLIC_URL%/favicon.ico">
-      // It will be an empty string unless you specify "homepage"
-      // in `package.json`, in which case it will be the pathname of that URL.
-      new InterpolateHtmlPlugin(HtmlWebpackPlugin, env),
-      new ModuleNotFoundPlugin(resolveApp('.')),
-      // new webpack.optimize.ModuleConcatenationPlugin(),
-      // I'm stupid and don't know how to make this better. So just uncomment this when you need it.
-      // new WebpackBundleAnalyzer(),
+      isDevelopment && new webpack.HotModuleReplacementPlugin(),
+      isDevelopment && new ReactRefreshWebpackPlugin({
+        overlay: false,
+      }),
+      new webpack.LoaderOptionsPlugin({
+        minimize: false,
+      })
     ].filter(Boolean),
     optimization: {
       runtimeChunk: 'single',
