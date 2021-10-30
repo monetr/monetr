@@ -186,7 +186,7 @@ test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 
 test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
 	$(call infoMsg,Running go tests for monetrs UI)
-	yarn test
+	yarn test --coverage
 
 test: test-go test-ui
 

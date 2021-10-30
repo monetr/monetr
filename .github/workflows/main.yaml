@@ -155,6 +155,14 @@ jobs:
         uses: guyarb/golang-test-annotations@v0.5.0
         with:
           test-results: '${{ github.workspace }}/rest-api-tests.json'
+      - name: CodeCov
+        if: always()
+        uses: codecov/codecov-action@v2
+        with:
+          files: '${{ github.workspace }}/coverage.txt'
+          flags: unittests # optional
+          name: API
+          verbose: true
 
   go_test_extended:
     needs:
@@ -221,6 +229,14 @@ jobs:
             ${{ runner.os }}-ui-
       - name: Test
         run: make test-ui
+      - name: CodeCov
+        if: always()
+        uses: codecov/codecov-action@v2
+        with:
+          files: '${{ github.workspace }}/coverage/clover.xml'
+          flags: unittests # optional
+          name: UI
+          verbose: true
 
   pg_test:
     name: PostgreSQL Test
