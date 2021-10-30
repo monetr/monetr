@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.0](https://www.github.com/monetr/monetr/compare/v0.0.11...v0.1.0) (2021-10-30)
+
+
+### Features
+
+* Added API endpoint to retrieve institution details via Link ID. ([7f96d6c](https://www.github.com/monetr/monetr/commit/7f96d6c1c9e345061b81e34efca41ecd644bb9c3))
+* Added basic toggling of dark mode via local storage. ([c2c4728](https://www.github.com/monetr/monetr/commit/c2c47284a77a60ab64b931246b8195349e5f8518))
+* Added CodeCov report to github actions. ([48c4cf3](https://www.github.com/monetr/monetr/commit/48c4cf37d751487524aff4d746b1863419d5adee))
+* Adding support for institution statuses. ([73a59e8](https://www.github.com/monetr/monetr/commit/73a59e8b472af881dfef355e83bb1500bff052a0))
+
+
+### Bug Fixes
+
+* Actually fixed expenses being created on the current day. ([6155d91](https://www.github.com/monetr/monetr/commit/6155d91e2859a71abd20044d6479c433d1cf1ba0))
+* Added build version and revision to generic binary builds. ([f015e7c](https://www.github.com/monetr/monetr/commit/f015e7cfddd86f62e13ec6798287d05e7089669e))
+* Clean apt cache in container image. ([cda274c](https://www.github.com/monetr/monetr/commit/cda274c6482dcf5c2dbcfbdfff95382bac483482))
+* Fixed helm template stats port issue. Improved local dev. ([224326d](https://www.github.com/monetr/monetr/commit/224326d53e7a5f7ddb9844d0e78f2579be8bd150))
+* Refactored typescript models, fixed webpack. ([bc538d3](https://www.github.com/monetr/monetr/commit/bc538d39e727e9fa1d5e593ad855293056cf85e1))
+
 ### [0.0.11](https://www.github.com/monetr/monetr/compare/v0.0.10...v0.0.11) (2021-10-29)
 
 
