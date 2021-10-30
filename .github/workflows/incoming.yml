@@ -149,14 +149,13 @@ jobs:
         uses: guyarb/golang-test-annotations@v0.5.0
         with:
           test-results: '${{ github.workspace }}/rest-api-tests.json'
-      - name: CodeCov
+      - uses: actions/upload-artifact@v2
+        name: Upload Go Test Coverage Artifacts
         if: always()
-        uses: codecov/codecov-action@v2
         with:
-          files: '${{ github.workspace }}/coverage.txt'
-          flags: unittests # optional
-          name: API
-          verbose: true
+          name: '${{ github.sha }}-go-coverage'
+          path: '${{ github.workspace }}/coverage.txt'
+          retention-days: 1
 
   go_test_extended:
     needs:
@@ -222,14 +221,13 @@ jobs:
             ${{ runner.os }}-ui-
       - name: Test
         run: make test-ui
-      - name: CodeCov
+      - uses: actions/upload-artifact@v2
+        name: Upload UI Test Coverage Artifacts
         if: always()
-        uses: codecov/codecov-action@v2
         with:
-          files: '${{ github.workspace }}/coverage/clover.xml'
-          flags: unittests # optional
-          name: UI
-          verbose: true
+          name: '${{ github.sha }}-ui-coverage'
+          path: '${{ github.workspace }}/coverage/clover.xml'
+          retention-days: 1
 
   pg_test:
     name: PostgreSQL Test
@@ -265,6 +263,31 @@ jobs:
           name: '${{ github.sha }}-postgres-junit'
           path: '${{ github.workspace }}/postgres-junit.xml'
           retention-days: 7
+
+  codecov:
+    name: CodeCov
+    needs:
+      - go_test
+      - ui_test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        name: Download Go Coverage Artifacts
+        with:
+          name: '${{ github.sha }}-go-coverage'
+          path: '${{ github.workspace }}/coverage'
+      - uses: actions/download-artifact@v2
+        name: Download UI Coverage Artifacts
+        with:
+          name: '${{ github.sha }}-ui-coverage'
+          path: '${{ github.workspace }}/coverage'
+      - name: CodeCov
+        if: always()
+        uses: codecov/codecov-action@v2
+        with:
+          files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
+          name: monetr
 
   junit:
     needs:
