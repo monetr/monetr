@@ -139,9 +139,9 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
           'selected': false,
         }) } role="transaction-row">
           <div className="flex flex-row w-full">
-            <p className="flex-shrink w-2/5 pr-1 font-semibold transaction-item-name place-self-center">
+            <div className="flex-shrink w-2/5 pr-1 font-semibold transaction-item-name place-self-center">
               <TransactionNameEditor transactionId={ transaction.transactionId }/>
-            </p>
+            </div>
 
             <p
               className="flex-auto pr-1 overflow-hidden transaction-expense-name overflow-ellipsis flex-nowrap whitespace-nowrap"
