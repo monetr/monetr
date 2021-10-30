@@ -10,10 +10,10 @@ import fetchLinksIfNeeded from 'shared/links/actions/fetchLinksIfNeeded';
 import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import { Link as RouterLink, Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from '@material-ui/core';
+import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from '@mui/material';
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
 import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
-import MenuIcon from '@material-ui/icons/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import ExpensesView from 'views/Expenses/ExpensesView';
 import GoalsView from 'views/Goals/GoalsView';
@@ -22,7 +22,7 @@ import AllAccountsView from 'views/AccountView/AllAccountsView';
 import Logout from 'views/Authentication/Logout';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 import request from 'shared/util/request';
-import { CreditCard, ExitToApp } from '@material-ui/icons';
+import { CreditCard, ExitToApp } from '@mui/icons-material';
 
 interface WithConnectionPropTypes {
   logout: () => void;

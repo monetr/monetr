@@ -18,6 +18,8 @@ import Logo from 'assets';
 import ReCAPTCHA from 'react-google-recaptcha';
 import classnames from 'classnames';
 import {
+  Alert,
+  AlertTitle,
   Button,
   Checkbox,
   CircularProgress,
@@ -26,8 +28,7 @@ import {
   FormGroup,
   Snackbar,
   TextField
-} from '@material-ui/core';
-import { Alert, AlertTitle } from '@material-ui/lab';
+} from '@mui/material';
 import { Formik, FormikHelpers } from 'formik';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';

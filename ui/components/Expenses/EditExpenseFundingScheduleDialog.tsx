@@ -1,8 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import Spending from "models/Spending";
-import { Dialog, DialogContent, DialogContentText, DialogTitle, Snackbar } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
+import { Alert, Dialog, DialogContent, DialogContentText, DialogTitle, Snackbar } from "@mui/material";
 import { Formik, FormikErrors } from "formik";
 import FundingScheduleSelectionList from "components/FundingSchedules/FundingScheduleSelectionList";
 import { getSelectedExpense } from "shared/spending/selectors/getSelectedExpense";

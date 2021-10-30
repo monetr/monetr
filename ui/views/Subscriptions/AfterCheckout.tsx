@@ -5,7 +5,7 @@ import { RouteComponentProps, withRouter } from "react-router-dom";
 import Logo from 'assets';
 import request from "shared/util/request";
 
-import { CircularProgress, Typography } from "@material-ui/core";
+import { CircularProgress, Typography } from "@mui/material";
 import activateSubscription from "shared/authentication/actions/activateSubscription";
 
 interface State {

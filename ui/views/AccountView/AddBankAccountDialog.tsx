@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
-import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@material-ui/core";
+import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
 import { connect } from "react-redux";
-import { Close } from "@material-ui/icons";
+import { Close } from "@mui/icons-material";
 import PlaidButton from "components/Plaid/PlaidButton";
 import { List } from "immutable";
 import request from "shared/util/request";

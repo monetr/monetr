@@ -1,5 +1,7 @@
-import MomentUtils from "@date-io/moment";
+import MomentUtils from '@date-io/moment';
+import { DatePicker } from '@mui/lab';
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -12,18 +14,16 @@ import {
   StepLabel,
   Stepper,
   TextField
-} from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import Recurrence from "components/Recurrence/Recurrence";
-import { RecurrenceList } from "components/Recurrence/RecurrenceList";
-import FundingSchedule from "models/FundingSchedule";
-import { Formik, FormikErrors } from "formik";
-import moment from "moment";
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
-import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
-import createFundingSchedule from "shared/fundingSchedules/actions/createFundingSchedule";
+} from '@mui/material';
+import Recurrence from 'components/Recurrence/Recurrence';
+import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
+import FundingSchedule from 'models/FundingSchedule';
+import { Formik, FormikErrors } from 'formik';
+import moment from 'moment';
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
+import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
+import createFundingSchedule from 'shared/fundingSchedules/actions/createFundingSchedule';
 import { AppState } from 'store';
 
 enum NewFundingScheduleStep {
@@ -55,7 +55,7 @@ interface newFundingScheduleForm {
 
 const initialValues: newFundingScheduleForm = {
   name: '',
-  nextOccurrence: moment(),
+  nextOccurrence: moment().add(1, 'day').startOf('day'),
   recurrenceRule: new Recurrence(),
 };
 
@@ -93,7 +93,6 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
         });
       });
   };
-
 
   nextStep = () => {
     return this.setState(prevState => ({
@@ -205,77 +204,67 @@ export class NewFundingScheduleDialog extends Component<WithConnectionPropTypes,
              submitForm,
            }) => (
           <form onSubmit={ handleSubmit }>
-            <MuiPickersUtilsProvider utils={ MomentUtils }>
-              <Dialog open={ isOpen } maxWidth="sm" className="new-funding-schedule">
-                <DialogTitle>
-                  Create a new funding schedule
-                </DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    Funding schedules let us know when you will get paid so we can automatically allocate money towards
-                    your budgets.
-                  </DialogContentText>
-                  { this.renderErrorMaybe() }
-                  <div>
-                    <Stepper activeStep={ step } orientation="vertical">
-                      <Step key="What do you want to call this funding schedule?">
-                        <StepLabel>What do you want to call this funding schedule?</StepLabel>
-                        <StepContent>
-                          <TextField
-                            autoFocus
-                            className="w-full"
-                            disabled={ isSubmitting }
-                            error={ touched.name && !!errors.name }
-                            helperText={ (touched.name && errors.name) ? errors.name : null }
-                            id="new-funding-schedule-name"
-                            label="Name"
-                            name="name"
-                            onBlur={ handleBlur }
-                            onChange={ handleChange }
-                            value={ values.name }
-                          />
-                        </StepContent>
-                      </Step>
-                      <Step key="When do you get paid next?">
-                        <StepLabel>When do you get paid next?</StepLabel>
-                        <StepContent>
-                          <KeyboardDatePicker
-                            data-testid="new-funding-schedule-date-picker"
-                            fullWidth
-                            minDate={ moment().subtract('1 day') }
-                            name="date"
-                            margin="normal"
-                            id="date-picker-dialog"
-                            label="Date"
-                            format="MM/DD/yyyy"
-                            value={ values.nextOccurrence }
-                            onChange={ (value) => setFieldValue('nextOccurrence', value.startOf('day')) }
-                            KeyboardButtonProps={ {
-                              'aria-label': 'change date',
-                            } }
-                          />
-                        </StepContent>
-                      </Step>
-                      <Step key="How often do you get paid?">
-                        <StepLabel>How often do you get paid?</StepLabel>
-                        <StepContent>
-                          { (step === NewFundingScheduleStep.Recurrence || values.nextOccurrence) &&
-                          <RecurrenceList
-                            disabled={ isSubmitting }
-                            date={ values.nextOccurrence }
-                            onChange={ (value) => setFieldValue('recurrenceRule', value) }
-                          />
-                          }
-                        </StepContent>
-                      </Step>
-                    </Stepper>
-                  </div>
-                </DialogContent>
-                <DialogActions>
-                  { this.renderActions(isSubmitting, submitForm) }
-                </DialogActions>
-              </Dialog>
-            </MuiPickersUtilsProvider>
+            <Dialog open={ isOpen } maxWidth="sm" className="new-funding-schedule">
+              <DialogTitle>
+                Create a new funding schedule
+              </DialogTitle>
+              <DialogContent>
+                <DialogContentText>
+                  Funding schedules let us know when you will get paid so we can automatically allocate money towards
+                  your budgets.
+                </DialogContentText>
+                { this.renderErrorMaybe() }
+                <div>
+                  <Stepper activeStep={ step } orientation="vertical">
+                    <Step key="What do you want to call this funding schedule?">
+                      <StepLabel>What do you want to call this funding schedule?</StepLabel>
+                      <StepContent>
+                        <TextField
+                          autoFocus
+                          className="w-full"
+                          disabled={ isSubmitting }
+                          error={ touched.name && !!errors.name }
+                          helperText={ (touched.name && errors.name) ? errors.name : null }
+                          id="new-funding-schedule-name"
+                          label="Name"
+                          name="name"
+                          onBlur={ handleBlur }
+                          onChange={ handleChange }
+                          value={ values.name }
+                        />
+                      </StepContent>
+                    </Step>
+                    <Step key="When do you get paid next?">
+                      <StepLabel>When do you get paid next?</StepLabel>
+                      <StepContent>
+                        <DatePicker
+                          minDate={ moment().startOf('day').add(1, 'day') }
+                          onChange={ (value) => setFieldValue('nextOccurrence', value.startOf('day')) }
+                          inputFormat="MM/DD/yyyy"
+                          value={ values.nextOccurrence }
+                          renderInput={ (params) => <TextField fullWidth { ...params } /> }
+                        />
+                      </StepContent>
+                    </Step>
+                    <Step key="How often do you get paid?">
+                      <StepLabel>How often do you get paid?</StepLabel>
+                      <StepContent>
+                        { (step === NewFundingScheduleStep.Recurrence || values.nextOccurrence) &&
+                        <RecurrenceList
+                          disabled={ isSubmitting }
+                          date={ values.nextOccurrence }
+                          onChange={ (value) => setFieldValue('recurrenceRule', value) }
+                        />
+                        }
+                      </StepContent>
+                    </Step>
+                  </Stepper>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                { this.renderActions(isSubmitting, submitForm) }
+              </DialogActions>
+            </Dialog>
           </form>
         ) }
       </Formik>

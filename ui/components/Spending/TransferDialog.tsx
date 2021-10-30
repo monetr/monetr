@@ -13,9 +13,9 @@ import {
   InputAdornment,
   InputLabel,
   Typography
-} from "@material-ui/core";
-import AccordionSummary from '@material-ui/core/AccordionSummary';
-import { SwapVert } from '@material-ui/icons';
+} from "@mui/material";
+import AccordionSummary from '@mui/material/AccordionSummary';
+import { SwapVert } from '@mui/icons-material';
 import classNames from 'classnames';
 import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
 import Balance from 'models/Balance';

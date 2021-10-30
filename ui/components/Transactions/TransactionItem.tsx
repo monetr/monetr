@@ -1,4 +1,4 @@
-import { Chip, Divider, ListItem, Paper, Popover, Typography } from '@material-ui/core';
+import { Chip, Divider, ListItem, Paper, Popover, Typography } from '@mui/material';
 import classnames from 'classnames';
 import TransactionNameEditor from 'components/Transactions/TransactionNameEditor';
 import Spending from 'models/Spending';

@@ -10,7 +10,7 @@ import bootstrapApplication from "shared/bootstrap";
 import { getIsBootstrapped, getSignUpAllowed } from "shared/bootstrap/selectors";
 import LoginView from "views/Authentication/LoginView";
 import SignUpView from "views/Authentication/SignUpView";
-import { Backdrop, CircularProgress } from "@material-ui/core";
+import { Backdrop, CircularProgress } from "@mui/material";
 import BillingRequiredRouter from "views/Subscriptions/BillingRequiredRouter";
 import AuthenticatedApp from "AuthenticatedApp";
 import VerifyEmail from "views/Authentication/VerifyEmail";

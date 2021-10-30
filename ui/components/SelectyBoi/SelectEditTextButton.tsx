@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { Button } from "@material-ui/core";
-import { ArrowDropDown } from "@material-ui/icons";
+import { Button } from "@mui/material";
+import { ArrowDropDown } from "@mui/icons-material";
 
 import './styles/SelectButton.scss';
 import classnames from "classnames";

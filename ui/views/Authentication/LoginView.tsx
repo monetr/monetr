@@ -7,8 +7,9 @@ import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import request from 'shared/util/request';
 import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
 import classnames from 'classnames';
-import { Alert, AlertTitle } from '@material-ui/lab';
 import {
+  Alert,
+  AlertTitle,
   Button,
   CircularProgress,
   Dialog,
@@ -18,7 +19,7 @@ import {
   DialogTitle,
   Snackbar,
   TextField
-} from '@material-ui/core';
+} from '@mui/material';
 import { Formik, FormikHelpers, FormikValues } from 'formik';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';

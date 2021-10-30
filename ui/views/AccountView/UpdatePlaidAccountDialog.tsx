@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import request from "shared/util/request";
 import { PlaidConnectButton } from "views/FirstTimeSetup/PlaidConnectButton";
 

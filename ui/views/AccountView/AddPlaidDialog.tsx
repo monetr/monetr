@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogTitle,
   Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import { PlaidConnectButton } from "views/FirstTimeSetup/PlaidConnectButton";
 import { List } from "immutable";
 import { connect } from "react-redux";

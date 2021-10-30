@@ -1,5 +1,5 @@
-import { Button, Card, Divider, IconButton, LinearProgress, List, ListItem, Typography } from '@material-ui/core';
-import { ArrowBack, DeleteOutline } from '@material-ui/icons';
+import { Button, Card, Divider, IconButton, LinearProgress, List, ListItem, Typography } from '@mui/material';
+import { ArrowBack, DeleteOutline } from '@mui/icons-material';
 import NewGoalDialog from 'components/Goals/NewGoalDialog';
 import TransferDialog from 'components/Spending/TransferDialog';
 import FundingSchedule from 'models/FundingSchedule';

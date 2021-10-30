@@ -1,4 +1,4 @@
-import { Button, Checkbox, Divider, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
+import { Button, Checkbox, Divider, List, ListItem, ListItemIcon, Typography } from '@mui/material';
 import NewFundingScheduleDialog from 'components/FundingSchedules/NewFundingScheduleDialog';
 import FundingSchedule from 'models/FundingSchedule';
 import { Map } from 'immutable';
@@ -59,7 +59,7 @@ export class FundingScheduleSelectionList extends Component<WithConnectionPropTy
           isOpen={ this.state.newFundingScheduleDialogOpen }
         />
         <Button
-          className="w-full"
+          className="w-full mb-2.5"
           variant="outlined"
           color="primary"
           onClick={ this.openNewFundingScheduleDialog }

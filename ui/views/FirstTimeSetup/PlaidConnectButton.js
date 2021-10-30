@@ -1,4 +1,4 @@
-import { Button } from "@material-ui/core";
+import { Button } from "@mui/material";
 import React from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import * as Sentry from "@sentry/react";

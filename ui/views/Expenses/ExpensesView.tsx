@@ -1,4 +1,4 @@
-import { Button, Card, Divider, List, Typography } from "@material-ui/core";
+import { Button, Card, Divider, List, Typography } from "@mui/material";
 import ExpenseDetail from 'components/Expenses/ExpenseDetail';
 import ExpenseItem from 'components/Expenses/ExpenseItem';
 import NewExpenseDialog from "components/Expenses/NewExpenseDialog";

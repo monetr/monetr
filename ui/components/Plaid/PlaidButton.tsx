@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { Button, ButtonProps, CircularProgress, Snackbar } from '@material-ui/core';
+import { Alert, AlertTitle, Button, ButtonProps, CircularProgress, Snackbar } from '@mui/material';
 import {
   usePlaidLink,
   PlaidLinkOptionsWithLinkToken,
@@ -9,7 +9,6 @@ import {
 } from 'react-plaid-link';
 import request from 'shared/util/request';
 import classnames from 'classnames';
-import { Alert, AlertTitle } from '@material-ui/lab';
 
 export interface PropTypes extends ButtonProps {
   useCache?: boolean;

@@ -1,4 +1,4 @@
-import { Card, Divider, List, ListSubheader, Typography } from "@material-ui/core";
+import { Card, Divider, List, ListSubheader, Typography } from "@mui/material";
 import TransactionItem from "components/Transactions/TransactionItem";
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";

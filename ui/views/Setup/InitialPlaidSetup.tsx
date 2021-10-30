@@ -10,7 +10,7 @@ import logout from "shared/authentication/actions/logout";
 import request from "shared/util/request";
 import { getBillingEnabled } from "shared/bootstrap/selectors";
 
-import { Button, Typography } from "@material-ui/core";
+import { Button, Typography } from "@mui/material";
 import { List } from "immutable";
 
 interface WithConnectionPropTypes {

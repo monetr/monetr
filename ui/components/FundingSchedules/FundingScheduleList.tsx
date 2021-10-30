@@ -1,5 +1,5 @@
-import { Button, ButtonGroup, Divider, IconButton, List, ListItem, Typography } from "@material-ui/core";
-import { ChevronRight } from '@material-ui/icons';
+import { Button, ButtonGroup, Divider, IconButton, List, ListItem, Typography } from "@mui/material";
+import { ChevronRight } from '@mui/icons-material';
 import NewFundingScheduleDialog from "components/FundingSchedules/NewFundingScheduleDialog";
 import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';

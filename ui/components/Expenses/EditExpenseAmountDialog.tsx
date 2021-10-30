@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { Formik, FormikErrors, FormikHelpers } from "formik";
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -12,8 +13,7 @@ import {
   InputAdornment,
   InputLabel,
   Snackbar
-} from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
+} from "@mui/material";
 import { connect } from "react-redux";
 import { getSelectedExpense } from "shared/spending/selectors/getSelectedExpense";
 import Spending from "models/Spending";

@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
-import { Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@material-ui/core";
-import { Close } from "@material-ui/icons";
+import { Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Close } from "@mui/icons-material";
 import { connect } from "react-redux";
 import { getLinks } from "shared/links/selectors/getLinks";
 

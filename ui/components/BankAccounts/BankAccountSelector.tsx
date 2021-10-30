@@ -1,4 +1,4 @@
-import { Button, Divider, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Button, Divider, Menu, MenuItem, Typography } from '@mui/material';
 import BankAccount from 'models/BankAccount';
 import Link from 'models/Link';
 import { Map } from 'immutable';
@@ -14,7 +14,7 @@ import { getLinks } from 'shared/links/selectors/getLinks';
 import { getLinksLoading } from 'shared/links/selectors/getLinksLoading';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
 import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import { ArrowDropDown, CheckCircle } from '@material-ui/icons';
+import { ArrowDropDown, CheckCircle } from '@mui/icons-material';
 import classnames from 'classnames';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { AppState } from 'store';

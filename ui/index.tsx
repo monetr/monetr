@@ -6,8 +6,10 @@ import Root from './root';
 import './styles/styles.css';
 import './styles/index.scss';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { createTheme, CssBaseline, MuiThemeProvider, Typography } from '@material-ui/core';
+import { createTheme, CssBaseline, ThemeProvider, Typography } from '@mui/material';
 import { store } from 'store';
+import AdapterMoment from '@mui/lab/AdapterMoment';
+import { LocalizationProvider } from '@mui/lab'
 
 const darkMode = window.localStorage.getItem('darkMode') === 'true';
 
@@ -16,7 +18,7 @@ const theme = createTheme({
     borderRadius: 10,
   },
   palette: {
-    type: darkMode ? 'dark' : 'light',
+    mode: darkMode ? 'dark' : 'light',
     primary: {
       main: darkMode ? '#712ddd' : '#4E1AA0',
       contrastText: '#FFFFFF',
@@ -35,15 +37,17 @@ ReactDOM.render(
   <React.StrictMode>
     <Provider store={ store }>
       <Router>
-        <MuiThemeProvider theme={ theme }>
-          <CssBaseline/>
-          <Root/>
-          <Typography
-            className="absolute inline w-full text-center bottom-1 opacity-30"
-          >
-            © { new Date().getFullYear() } monetr LLC
-          </Typography>
-        </MuiThemeProvider>
+        <ThemeProvider theme={ theme }>
+          <LocalizationProvider dateAdapter={ AdapterMoment }>
+            <CssBaseline/>
+            <Root/>
+            <Typography
+              className="absolute inline w-full text-center bottom-1 opacity-30"
+            >
+              © { new Date().getFullYear() } monetr LLC
+            </Typography>
+          </LocalizationProvider>
+        </ThemeProvider>
       </Router>
     </Provider>
   </React.StrictMode>,

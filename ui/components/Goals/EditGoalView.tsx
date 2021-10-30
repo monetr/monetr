@@ -1,3 +1,4 @@
+import { DatePicker } from '@mui/lab';
 import { connect } from "react-redux";
 import React, { Component, Fragment } from "react";
 import Spending from "models/Spending";
@@ -12,13 +13,12 @@ import {
   InputAdornment,
   InputLabel,
   MenuItem,
-  Select,
+  Select, TextField,
   Typography
-} from "@material-ui/core";
-import { ArrowBack, DeleteOutline } from "@material-ui/icons";
+} from '@mui/material';
+import { ArrowBack, DeleteOutline } from "@mui/icons-material";
 import moment from "moment";
 import updateSpending from "shared/spending/actions/updateSpending";
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { getFundingSchedules } from "shared/fundingSchedules/selectors/getFundingSchedules";
 import FundingSchedule from "models/FundingSchedule";
@@ -143,21 +143,13 @@ export class EditGoalView extends Component<WithConnectionPropTypes, any> {
             startAdornment={ <InputAdornment position="start">$</InputAdornment> }
           />
         </FormControl>
-        <KeyboardDatePicker
+        <DatePicker
           className="mt-5"
-          fullWidth
-          minDate={ moment().subtract('1 day') }
-          name="date"
-          margin="normal"
-          id="date-picker-dialog"
-          label="When do you need it by?"
-          format="MM/DD/yyyy"
+          minDate={ moment().startOf('day').add(1, 'day') }
+          onChange={ (value) => formik.setFieldValue('dueDate', value.startOf('day')) }
+          inputFormat="MM/DD/yyyy"
           value={ formik.values.dueDate }
-          onChange={ (value) => formik.setFieldValue('dueDate', value) }
-          disabled={ formik.isSubmitting }
-          KeyboardButtonProps={ {
-            'aria-label': 'change date',
-          } }
+          renderInput={ (params) => <TextField fullWidth { ...params } /> }
         />
         <FormControl fullWidth className="mt-5">
           <InputLabel id="edit-funding-schedule-label">Funding Schedule</InputLabel>
@@ -205,9 +197,7 @@ export class EditGoalView extends Component<WithConnectionPropTypes, any> {
         >
           { (formik: FormikProps<editGoalForm>) => (
             <form onSubmit={ formik.handleSubmit } className="h-full flex flex-col justify-between">
-              <MuiPickersUtilsProvider utils={ MomentUtils }>
-                { this.renderContents(formik) }
-              </MuiPickersUtilsProvider>
+              { this.renderContents(formik) }
               <div>
                 <Button
                   className="w-full"

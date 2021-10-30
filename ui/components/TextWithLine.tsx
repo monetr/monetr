@@ -1,7 +1,8 @@
-import { WithTheme, withTheme } from '@material-ui/core';
+import { Theme } from '@mui/material';
+import { WithTheme, withTheme } from '@mui/styles';
 import React, { Component, Fragment } from 'react';
 
-interface PropTypes extends WithTheme {
+interface PropTypes extends WithTheme<Theme> {
   children: React.ReactNode;
 }
 
@@ -25,4 +26,4 @@ class TextWithLine extends Component<PropTypes> {
   }
 }
 
-export default withTheme(TextWithLine);
+export default withTheme<Theme, typeof TextWithLine>(TextWithLine);

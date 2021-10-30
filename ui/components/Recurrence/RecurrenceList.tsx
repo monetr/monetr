@@ -1,4 +1,4 @@
-import { Checkbox, List as ListUI, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import { Checkbox, List as ListUI, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import getRecurrencesForDate from "components/Recurrence/getRecurrencesForDate";
 import Recurrence from "components/Recurrence/Recurrence";
 

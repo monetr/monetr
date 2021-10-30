@@ -1,4 +1,4 @@
-import { Button, Card, Divider, List, Typography } from '@material-ui/core';
+import { Button, Card, Divider, List, Typography } from '@mui/material';
 import GoalDetails from 'components/Goals/GoalDetails';
 import GoalRow from 'components/Goals/GoalRow';
 import NewGoalDialog from 'components/Goals/NewGoalDialog';

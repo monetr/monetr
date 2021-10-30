@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, CardContent, CircularProgress, Typography } from '@material-ui/core';
+import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import request from 'shared/util/request';
 import { List } from 'immutable';
 import { OAuthRedirectPlaidLink } from 'components/Plaid/OAuthRedirectPlaidLink';

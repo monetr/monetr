@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import Spending from 'models/Spending';
-import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
+import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
 import { Map } from 'immutable';
 import { getSpending } from 'shared/spending/selectors/getSpending';
 

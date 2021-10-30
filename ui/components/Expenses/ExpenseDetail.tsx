@@ -1,4 +1,4 @@
-import { Button, Divider, LinearProgress, List, ListItem, ListItemIcon, Typography } from '@material-ui/core';
+import { Button, Divider, LinearProgress, List, ListItem, ListItemIcon, Typography } from '@mui/material';
 import {
   AccountBalance,
   ArrowBack,
@@ -8,7 +8,7 @@ import {
   Event,
   SwapHoriz,
   TrackChanges
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import TransferDialog from 'components/Spending/TransferDialog';
 import FundingSchedule from 'models/FundingSchedule';
 import Spending from 'models/Spending';

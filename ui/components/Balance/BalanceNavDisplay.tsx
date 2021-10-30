@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import Balance from 'models/Balance';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';

@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react";
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -8,13 +9,12 @@ import {
   IconButton,
   Snackbar,
   Typography
-} from "@material-ui/core";
+} from "@mui/material";
 import Link from "models/Link";
 import { getLink } from "shared/links/selectors/getLink";
 import { connect } from "react-redux";
-import { Close } from "@material-ui/icons";
+import { Close } from "@mui/icons-material";
 import removeLink from "shared/links/actions/removeLink";
-import { Alert } from "@material-ui/lab";
 import classnames from "classnames";
 
 interface PropTypes {

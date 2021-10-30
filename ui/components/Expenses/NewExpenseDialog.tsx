@@ -1,5 +1,7 @@
 import MomentUtils from '@date-io/moment';
+import { DatePicker } from '@mui/lab';
 import {
+  Alert,
   Button,
   Dialog,
   DialogActions,
@@ -16,9 +18,7 @@ import {
   StepLabel,
   Stepper,
   TextField
-} from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
-import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+} from '@mui/material';
 import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
 import Recurrence from 'components/Recurrence/Recurrence';
 import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
@@ -247,103 +247,94 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, ComponentState
              submitForm,
            }) => (
           <form onSubmit={ handleSubmit }>
-            <MuiPickersUtilsProvider utils={ MomentUtils }>
-              <Dialog open={ isOpen } maxWidth="sm">
-                <DialogTitle>
-                  Create a new expense
-                </DialogTitle>
-                <DialogContent>
-                  { this.renderErrorMaybe() }
-                  <DialogContentText>
-                    Expenses let you budget for things that happen on a regular basis automatically. Money is allocated
-                    to expenses whenever you get paid so that you don't have to pay something from a single paycheck.
-                  </DialogContentText>
-                  <div>
-                    <Stepper activeStep={ step } orientation="vertical">
-                      <Step key="What is your expense for?">
-                        <StepLabel>What is your expense for?</StepLabel>
-                        <StepContent>
-                          <TextField
-                            error={ touched.name && !!errors.name }
-                            helperText={ (touched.name && errors.name) ? errors.name : null }
-                            autoFocus
-                            id="new-expense-name"
-                            name="name"
-                            className="w-full"
-                            label="Name"
-                            onChange={ handleChange }
+            <Dialog open={ isOpen } maxWidth="sm">
+              <DialogTitle>
+                Create a new expense
+              </DialogTitle>
+              <DialogContent>
+                { this.renderErrorMaybe() }
+                <DialogContentText>
+                  Expenses let you budget for things that happen on a regular basis automatically. Money is allocated
+                  to expenses whenever you get paid so that you don't have to pay something from a single paycheck.
+                </DialogContentText>
+                <div>
+                  <Stepper activeStep={ step } orientation="vertical">
+                    <Step key="What is your expense for?">
+                      <StepLabel>What is your expense for?</StepLabel>
+                      <StepContent>
+                        <TextField
+                          error={ touched.name && !!errors.name }
+                          helperText={ (touched.name && errors.name) ? errors.name : null }
+                          autoFocus
+                          id="new-expense-name"
+                          name="name"
+                          className="w-full"
+                          label="Name"
+                          onChange={ handleChange }
+                          onBlur={ handleBlur }
+                          value={ values.name }
+                          disabled={ isSubmitting }
+                        />
+                      </StepContent>
+                    </Step>
+                    <Step key="How much do you need?">
+                      <StepLabel>How much do you need?</StepLabel>
+                      <StepContent>
+                        <FormControl fullWidth>
+                          <InputLabel htmlFor="new-expense-amount">Amount</InputLabel>
+                          <Input
+                            id="new-expense-amount"
+                            name="amount"
+                            value={ values.amount }
                             onBlur={ handleBlur }
-                            value={ values.name }
+                            onChange={ handleChange }
                             disabled={ isSubmitting }
+                            startAdornment={ <InputAdornment position="start">$</InputAdornment> }
                           />
-                        </StepContent>
-                      </Step>
-                      <Step key="How much do you need?">
-                        <StepLabel>How much do you need?</StepLabel>
-                        <StepContent>
-                          <FormControl fullWidth>
-                            <InputLabel htmlFor="new-expense-amount">Amount</InputLabel>
-                            <Input
-                              id="new-expense-amount"
-                              name="amount"
-                              value={ values.amount }
-                              onBlur={ handleBlur }
-                              onChange={ handleChange }
-                              disabled={ isSubmitting }
-                              startAdornment={ <InputAdornment position="start">$</InputAdornment> }
-                            />
-                          </FormControl>
-                        </StepContent>
-                      </Step>
-                      <Step key="When do you need it next?">
-                        <StepLabel>When do you need it next?</StepLabel>
-                        <StepContent>
-                          <KeyboardDatePicker
-                            fullWidth
-                            minDate={ moment().add(1, 'day') }
-                            name="date"
-                            margin="normal"
-                            id="date-picker-dialog"
-                            label="Date picker dialog"
-                            format="MM/DD/yyyy"
-                            value={ values.nextOccurrence }
-                            onChange={ (value) => setFieldValue('nextOccurrence', value) }
-                            KeyboardButtonProps={ {
-                              'aria-label': 'change date',
-                            } }
-                          />
-                        </StepContent>
-                      </Step>
-                      <Step key="How frequently do you need it?">
-                        <StepLabel>How frequently do you need it?</StepLabel>
-                        <StepContent>
-                          { (step === NewExpenseStep.Recurrence || values.nextOccurrence) &&
-                          <RecurrenceList
-                            disabled={ isSubmitting }
-                            date={ values.nextOccurrence }
-                            onChange={ (value) => setFieldValue('recurrenceRule', value) }
-                          />
-                          }
-                        </StepContent>
-                      </Step>
-                      <Step key="How do you want to fund it?">
-                        <StepLabel>How do you want to fund it?</StepLabel>
-                        <StepContent>
-                          <div className="mt-5"/>
-                          <FundingScheduleSelectionList
-                            disabled={ isSubmitting }
-                            onChange={ (value) => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
-                          />
-                        </StepContent>
-                      </Step>
-                    </Stepper>
-                  </div>
-                </DialogContent>
-                <DialogActions>
-                  { this.renderActions(isSubmitting, submitForm) }
-                </DialogActions>
-              </Dialog>
-            </MuiPickersUtilsProvider>
+                        </FormControl>
+                      </StepContent>
+                    </Step>
+                    <Step key="When do you need it next?">
+                      <StepLabel>When do you need it next?</StepLabel>
+                      <StepContent>
+                        <DatePicker
+                          minDate={ moment().startOf('day').add(1, 'day') }
+                          onChange={ (value) => setFieldValue('nextOccurrence', value.startOf('day')) }
+                          inputFormat="MM/DD/yyyy"
+                          value={ values.nextOccurrence }
+                          renderInput={ (params) => <TextField fullWidth { ...params } /> }
+                        />
+                      </StepContent>
+                    </Step>
+                    <Step key="How frequently do you need it?">
+                      <StepLabel>How frequently do you need it?</StepLabel>
+                      <StepContent>
+                        { (step === NewExpenseStep.Recurrence || values.nextOccurrence) &&
+                        <RecurrenceList
+                          disabled={ isSubmitting }
+                          date={ values.nextOccurrence }
+                          onChange={ (value) => setFieldValue('recurrenceRule', value) }
+                        />
+                        }
+                      </StepContent>
+                    </Step>
+                    <Step key="How do you want to fund it?">
+                      <StepLabel>How do you want to fund it?</StepLabel>
+                      <StepContent>
+                        <div className="mt-5"/>
+                        <FundingScheduleSelectionList
+                          disabled={ isSubmitting }
+                          onChange={ (value) => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
+                        />
+                      </StepContent>
+                    </Step>
+                  </Stepper>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                { this.renderActions(isSubmitting, submitForm) }
+              </DialogActions>
+            </Dialog>
           </form>
         ) }
       </Formik>

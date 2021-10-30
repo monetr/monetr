@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { getReCAPTCHAKey } from "shared/bootstrap/selectors";
 import React, { Component } from "react";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import ReCAPTCHA from "react-google-recaptcha";
 
 export interface PropTypes {
