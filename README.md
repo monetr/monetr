@@ -8,8 +8,14 @@
   <img width="460" height="300" src="https://raw.githubusercontent.com/monetr/monetr/main/ui/assets/logo.svg">
 </p>
 
-monetr is a budgeting application that aims to allow people to more easily plan their recurring expenses. It is 
+monetr is a budgeting application that aims to allow people to more easily plan their recurring expenses. It is
 completely free to self-host (documentation to come), but requires a Plaid account in order to communicate with banks.
+
+---
+
+Basic API documentation is currently available at https://docs.monetr.dev
+
+This documentation is auto-generated from comments in the API code.
 
 
 ## License
