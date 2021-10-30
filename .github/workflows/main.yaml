@@ -104,7 +104,10 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: '${{ github.sha }}-binary-${{ matrix.os }}-${{ matrix.architecture }}'
-          path: '${{ github.workspace }}/bin/monetr'
+          path: |
+            ${{ github.workspace }}/bin/monetr
+            ${{ github.workspace }}/bin/monetr.exe
+          if-no-files-found: ignore
           retention-days: 7
 
   go_test:
