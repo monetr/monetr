@@ -1314,6 +1314,50 @@ var doc = `{
                 }
             }
         },
+        "/link/{linkId:uint64}/institution": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve's the details of the institution associated with the link. This is only available for links\ncreated by Plaid.",
+                "tags": [
+                    "Links"
+                ],
+                "summary": "Get Link Institution Details",
+                "operationId": "get-link-institution-details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Link ID.",
+                        "name": "linkId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/swag.InstitutionResponse"
+                        }
+                    },
+                    "402": {
+                        "description": "Payment Required",
+                        "schema": {
+                            "$ref": "#/definitions/controller.SubscriptionNotActiveError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/links": {
             "get": {
                 "security": [
@@ -2363,6 +2407,60 @@ var doc = `{
                 "revision": {
                     "description": "The Git SHA code for the commit of the deployed REST API.",
                     "type": "string"
+                }
+            }
+        },
+        "swag.InstitutionPlaidIncident": {
+            "type": "object",
+            "properties": {
+                "end": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "swag.InstitutionResponse": {
+            "type": "object",
+            "properties": {
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "primaryColor": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/swag.InstitutionStatusResponse"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "swag.InstitutionStatusResponse": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "boolean"
+                },
+                "login": {
+                    "type": "boolean"
+                },
+                "plaidIncidents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/swag.InstitutionPlaidIncident"
+                    }
+                },
+                "transactions": {
+                    "type": "boolean"
                 }
             }
         },

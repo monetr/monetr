@@ -469,6 +469,41 @@ definitions:
         description: The Git SHA code for the commit of the deployed REST API.
         type: string
     type: object
+  swag.InstitutionPlaidIncident:
+    properties:
+      end:
+        type: string
+      start:
+        type: string
+      title:
+        type: string
+    type: object
+  swag.InstitutionResponse:
+    properties:
+      logo:
+        type: string
+      name:
+        type: string
+      primaryColor:
+        type: string
+      status:
+        $ref: '#/definitions/swag.InstitutionStatusResponse'
+      url:
+        type: string
+    type: object
+  swag.InstitutionStatusResponse:
+    properties:
+      balance:
+        type: boolean
+      login:
+        type: boolean
+      plaidIncidents:
+        items:
+          $ref: '#/definitions/swag.InstitutionPlaidIncident'
+        type: array
+      transactions:
+        type: boolean
+    type: object
   swag.LinkResponse:
     properties:
       createdAt:
@@ -2147,6 +2182,36 @@ paths:
       summary: Check API Health
       tags:
       - Health
+  /link/{linkId:uint64}/institution:
+    get:
+      description: |-
+        Retrieve's the details of the institution associated with the link. This is only available for links
+        created by Plaid.
+      operationId: get-link-institution-details
+      parameters:
+      - description: Link ID.
+        in: path
+        name: linkId
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/swag.InstitutionResponse'
+        "402":
+          description: Payment Required
+          schema:
+            $ref: '#/definitions/controller.SubscriptionNotActiveError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Link Institution Details
+      tags:
+      - Links
   /link/wait/{linkId:uint64}:
     get:
       description: |-
