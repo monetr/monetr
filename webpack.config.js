@@ -13,7 +13,7 @@ const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 module.exports = (env, argv) => {
-  const isDevelopment = process.env.NODE_ENV !== 'production';
+  const isDevelopment = !(process.env.NODE_ENV === 'production' || argv.mode === 'production');
 
   if (!env.PUBLIC_URL) {
     env.PUBLIC_URL = '';
@@ -25,7 +25,7 @@ module.exports = (env, argv) => {
   }
 
   const config = {
-    mode: isDevelopment ? 'development' : undefined,
+    mode: isDevelopment ? 'development' : 'production',
     target: 'web',
     entry: !isDevelopment ? [
       './ui/index.tsx'

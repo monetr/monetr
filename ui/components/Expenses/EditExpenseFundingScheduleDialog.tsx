@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
-import Spending from "data/Spending";
+import Spending from "models/Spending";
 import { Dialog, DialogContent, DialogContentText, DialogTitle, Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import { Formik, FormikErrors } from "formik";

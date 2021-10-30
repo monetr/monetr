@@ -1,4 +1,4 @@
-import Spending from "data/Spending";
+import Spending from "models/Spending";
 import { Map } from 'immutable';
 import { Dispatch } from "redux";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";

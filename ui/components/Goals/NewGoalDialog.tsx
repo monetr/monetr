@@ -20,7 +20,7 @@ import {
 import { Alert } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
-import Spending, { SpendingType } from 'data/Spending';
+import Spending, { SpendingType } from 'models/Spending';
 import { Formik, FormikHelpers } from "formik";
 import moment from 'moment';
 import React, { Component, Fragment } from 'react';

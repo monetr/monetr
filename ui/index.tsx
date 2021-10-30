@@ -6,24 +6,27 @@ import Root from './root';
 import './styles/styles.css';
 import './styles/index.scss';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { createTheme, MuiThemeProvider, Typography } from '@material-ui/core';
+import { createTheme, CssBaseline, MuiThemeProvider, Typography } from '@material-ui/core';
 import { store } from 'store';
 
-// {/* eslint-disable-next-line no-undef */
-// }
-// if (module.hot) {
-//   module.hot.accept()
-// }
+const darkMode = window.localStorage.getItem('darkMode') === 'true';
 
 const theme = createTheme({
+  shape: {
+    borderRadius: 10,
+  },
   palette: {
+    type: darkMode ? 'dark' : 'light',
     primary: {
-      main: '#4E1AA0',
+      main: darkMode ? '#712ddd' : '#4E1AA0',
       contrastText: '#FFFFFF',
     },
     secondary: {
       main: '#FF5798',
       contrastText: '#FFFFFF',
+    },
+    background: {
+      default: darkMode ? '#2f2f2f' : '#FFFFFF',
     }
   }
 });
@@ -33,6 +36,7 @@ ReactDOM.render(
     <Provider store={ store }>
       <Router>
         <MuiThemeProvider theme={ theme }>
+          <CssBaseline/>
           <Root/>
           <Typography
             className="absolute inline w-full text-center bottom-1 opacity-30"

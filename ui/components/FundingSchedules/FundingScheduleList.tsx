@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, Divider, IconButton, List, ListItem, Typography } from "@material-ui/core";
 import { ChevronRight } from '@material-ui/icons';
 import NewFundingScheduleDialog from "components/FundingSchedules/NewFundingScheduleDialog";
-import FundingSchedule from "data/FundingSchedule";
+import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
 import React, { Component } from "react";
 import { connect } from "react-redux";

@@ -1,14 +1,19 @@
-import moment from "moment";
+import moment from 'moment';
 
-export const APIDateFormat = "YYYY-MM-DDTHH:mm:ssZ";
+export const APIDateFormat = 'YYYY-MM-DDTHH:mm:ssZ';
 
-export function parseToMoment(input: string | moment.Moment): moment.Moment {
-  return moment(input, APIDateFormat)
+export function mustParseToMoment(input: string | moment.Moment): moment.Moment {
+  const result = moment(input, APIDateFormat);
+  if (result.isValid()) {
+    return result;
+  }
+
+  throw new Error('input to mustParseToMoment was not a valid date time');
 }
 
-export function parseToMomentMaybe(input?: string | moment.Moment): moment.Moment | null {
+export function parseToMomentMaybe(input: string | moment.Moment | null): moment.Moment | null {
   if (input) {
-    return parseToMoment(input);
+    return mustParseToMoment(input);
   }
 
   return null;

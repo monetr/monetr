@@ -1,4 +1,4 @@
-import Balance from 'data/Balance';
+import Balance from 'models/Balance';
 import { Logout } from 'shared/authentication/actions';
 import { Transfer } from 'shared/spending/actions';
 

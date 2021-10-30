@@ -1,5 +1,5 @@
 import moment, { Moment } from 'moment';
-import { parseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
+import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export enum SpendingType {
   Expense = 0,
@@ -17,20 +17,20 @@ export default class Spending {
   currentAmount: number;
   usedAmount: number;
   recurrenceRule: string;
-  lastRecurrence?: Moment;
-  nextRecurrence: Moment;
+  lastRecurrence: Moment | null;
+  nextRecurrence: Moment | null;
   nextContributionAmount: number;
   isBehind: boolean;
   isPaused: boolean;
-  dateCreated: Moment;
+  dateCreated: Moment | null;
 
   constructor(data?: Partial<Spending>) {
     if (data) {
       Object.assign(this, {
         ...data,
         lastRecurrence: parseToMomentMaybe(data.lastRecurrence),
-        nextRecurrence: parseToMoment(data.nextRecurrence),
-        dateCreated: parseToMoment(data.dateCreated),
+        nextRecurrence: parseToMomentMaybe(data.nextRecurrence),
+        dateCreated: parseToMomentMaybe(data.dateCreated),
       });
     }
   }

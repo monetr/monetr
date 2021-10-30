@@ -83,7 +83,7 @@ spec:
               containerPort: {{ .Values.api.listenPort }}
               protocol: TCP
             - name: metrics
-              containerPort: {{ .Values.api.metricsPort }}
+              containerPort: {{ .Values.api.statsPort }}
               protocol: TCP
           livenessProbe:
             httpGet:

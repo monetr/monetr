@@ -8,3 +8,6 @@ brew 'hyperkit'
 
 # Required to build images.
 cask 'docker'
+
+# Required for make local
+brew 'tmux'

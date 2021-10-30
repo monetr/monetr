@@ -154,7 +154,7 @@ class InitialPlaidSetup extends Component<WithConnectionPropTypes, State> {
                   color="primary"
                   disabled={ this.state.loading }
                   plaidOnSuccess={ this.onPlaidSuccess }
-                  variant="outlined"
+                  variant="contained"
                 >
                   Get Started with
                   <PlaidIcon className="flex-none w-16 ml-2"/>

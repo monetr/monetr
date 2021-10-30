@@ -1,7 +1,7 @@
 import { Dispatch } from "redux";
 import { RemoveLink } from "shared/links/actions";
 import request from "shared/util/request";
-import Link from "data/Link";
+import Link from "models/Link";
 import { getBankAccountsByLinkId } from "shared/bankAccounts/selectors/getBankAccountsByLinkId";
 
 interface ActionWithState {

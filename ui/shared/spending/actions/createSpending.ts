@@ -1,4 +1,4 @@
-import Spending from 'data/Spending';
+import Spending from 'models/Spending';
 import { Dispatch } from 'redux';
 import { CreateSpending } from 'shared/spending/actions';
 import request from 'shared/util/request';

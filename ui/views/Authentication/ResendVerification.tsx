@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Formik, FormikHelpers } from 'formik';
 import { Button, CircularProgress, Snackbar, TextField } from '@material-ui/core';
 import classnames from 'classnames';
+import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import verifyEmailAddress from 'util/verifyEmailAddress';
@@ -89,6 +90,12 @@ class ResendVerification extends Component<WithConnectionPropTypes, State> {
   };
 
   render() {
+    const { done } = this.state;
+
+    if (done) {
+      return <AfterEmailVerificationSent/>;
+    }
+
     const { state: routeState } = this.props.location;
     const initialValues: ResendValues = {
       email: (routeState && routeState['emailAddress']) || null,

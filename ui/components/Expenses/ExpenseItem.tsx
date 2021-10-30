@@ -1,6 +1,6 @@
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@material-ui/core';
-import FundingSchedule from 'data/FundingSchedule';
-import Spending from 'data/Spending';
+import FundingSchedule from 'models/FundingSchedule';
+import Spending from 'models/Spending';
 import { getActiveElement } from 'formik';
 import moment from 'moment';
 import React, { Component } from 'react';

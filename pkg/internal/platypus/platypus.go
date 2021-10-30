@@ -34,6 +34,7 @@ type (
 		CreateLinkToken(ctx context.Context, options LinkTokenOptions) (LinkToken, error)
 		ExchangePublicToken(ctx context.Context, publicToken string) (*ItemToken, error)
 		GetWebhookVerificationKey(ctx context.Context, keyId string) (*WebhookVerificationKey, error)
+		GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error)
 		NewClientFromItemId(ctx context.Context, itemId string) (Client, error)
 		NewClientFromLink(ctx context.Context, accountId uint64, linkId uint64) (Client, error)
 		NewClient(ctx context.Context, link *models.Link, accessToken string) (Client, error)
@@ -272,6 +273,40 @@ func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*W
 	}
 
 	return &webhook, nil
+}
+
+func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error) {
+	span := sentry.StartSpan(ctx, "Plaid - GetInstitution")
+	defer span.Finish()
+
+	log := p.log
+
+	request := p.client.PlaidApi.
+		InstitutionsGetById(span.Context()).
+		InstitutionsGetByIdRequest(plaid.InstitutionsGetByIdRequest{
+			InstitutionId: institutionId,
+			CountryCodes:  PlaidCountries,
+			Options: &plaid.InstitutionsGetByIdRequestOptions{
+				IncludeOptionalMetadata:          myownsanity.BoolP(true),
+				IncludeStatus:                    myownsanity.BoolP(true),
+				IncludeAuthMetadata:              myownsanity.BoolP(false),
+				IncludePaymentInitiationMetadata: myownsanity.BoolP(false),
+			},
+		})
+
+	result, response, err := request.Execute()
+	if err = after(
+		span,
+		response,
+		err,
+		"Retrieving Plaid institution status",
+		"failed to retrieve Plaid institution status",
+	); err != nil {
+		log.WithError(err).Errorf("failed to retrieve Plaid institution status")
+		return nil, err
+	}
+
+	return &result.Institution, nil
 }
 
 func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client, error) {

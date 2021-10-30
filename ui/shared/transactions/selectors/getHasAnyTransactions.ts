@@ -1,4 +1,4 @@
-import Transaction from "data/Transaction";
+import Transaction from "models/Transaction";
 import { Map, OrderedMap } from "immutable";
 import { createSelector } from "reselect";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";

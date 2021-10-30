@@ -1,5 +1,5 @@
 import { Moment } from "moment";
-import { parseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
+import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export default class FundingSchedule {
   fundingScheduleId: number;
@@ -15,7 +15,7 @@ export default class FundingSchedule {
       Object.assign(this, {
         ...data,
         lastOccurrence: parseToMomentMaybe(data.lastOccurrence),
-        nextOccurrence: parseToMoment(data.nextOccurrence),
+        nextOccurrence: mustParseToMoment(data.nextOccurrence),
       });
     }
   }

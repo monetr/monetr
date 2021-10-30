@@ -2,7 +2,7 @@ import { FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS } from "s
 import request from "shared/util/request";
 
 import { Map } from 'immutable';
-import Link from "data/Link";
+import Link from "models/Link";
 
 
 export const fetchLinksRequest = {

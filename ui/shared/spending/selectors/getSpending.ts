@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { Map } from 'immutable';
-import Spending from 'data/Spending';
+import Spending from 'models/Spending';
 import { AppState } from 'store';
 
 const getExpensesByBankAccount = (state: AppState): Map<number, Map<number, Spending>> => state.spending.items;

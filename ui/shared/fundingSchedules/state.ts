@@ -1,4 +1,4 @@
-import FundingSchedule from "data/FundingSchedule";
+import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
 
 

@@ -1,4 +1,4 @@
-import Spending from "data/Spending";
+import Spending from "models/Spending";
 import { Map } from 'immutable';
 
 export default class SpendingState {

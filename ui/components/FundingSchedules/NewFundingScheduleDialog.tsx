@@ -17,7 +17,7 @@ import { Alert } from "@material-ui/lab";
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import Recurrence from "components/Recurrence/Recurrence";
 import { RecurrenceList } from "components/Recurrence/RecurrenceList";
-import FundingSchedule from "data/FundingSchedule";
+import FundingSchedule from "models/FundingSchedule";
 import { Formik, FormikErrors } from "formik";
 import moment from "moment";
 import React, { Component, Fragment } from "react";

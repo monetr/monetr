@@ -16,7 +16,7 @@ import {
 import { Alert } from "@material-ui/lab";
 import { connect } from "react-redux";
 import { getSelectedExpense } from "shared/spending/selectors/getSelectedExpense";
-import Spending from "data/Spending";
+import Spending from "models/Spending";
 import updateSpending from "shared/spending/actions/updateSpending";
 
 

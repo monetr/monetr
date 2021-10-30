@@ -1,4 +1,4 @@
-import BankAccount from "data/BankAccount";
+import BankAccount from "models/BankAccount";
 import { Map } from 'immutable';
 import { Logout } from "shared/authentication/actions";
 import { RemoveLinkSuccess } from "shared/links/actions";

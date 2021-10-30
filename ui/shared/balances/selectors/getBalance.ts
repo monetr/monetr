@@ -1,4 +1,4 @@
-import Balance from 'data/Balance';
+import Balance from 'models/Balance';
 import { createSelector } from 'reselect';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { getBalances } from "shared/balances/selectors/getBalances";

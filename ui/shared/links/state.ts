@@ -1,6 +1,6 @@
-import { Map } from "immutable";
-import Link from "data/Link";
-
+import { Map } from 'immutable';
+import Institution from 'models/Institution';
+import Link from 'models/Link';
 
 export default class LinksState {
   constructor() {
@@ -8,6 +8,7 @@ export default class LinksState {
   }
 
   items: Map<number, Link>;
+  institutions: Map<number, Institution>;
   loaded: boolean;
   loading: boolean;
 }

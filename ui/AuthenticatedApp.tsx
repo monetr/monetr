@@ -158,6 +158,12 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
               }
 
               <MenuItem
+                onClick={ () => window.localStorage.setItem('darkMode', `${ window.localStorage.getItem('darkMode') !== 'true' }`) }
+              >
+                Toggle Dark Mode (Requires Reload)
+              </MenuItem>
+
+              <MenuItem
                 onClick={ this.doLogout }
               >
                 <ExitToApp className="mr-2"/>

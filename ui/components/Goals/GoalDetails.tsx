@@ -2,8 +2,8 @@ import { Button, Card, Divider, IconButton, LinearProgress, List, ListItem, Typo
 import { ArrowBack, DeleteOutline } from '@material-ui/icons';
 import NewGoalDialog from 'components/Goals/NewGoalDialog';
 import TransferDialog from 'components/Spending/TransferDialog';
-import FundingSchedule from 'data/FundingSchedule';
-import Spending from 'data/Spending';
+import FundingSchedule from 'models/FundingSchedule';
+import Spending from 'models/Spending';
 import moment from 'moment';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';

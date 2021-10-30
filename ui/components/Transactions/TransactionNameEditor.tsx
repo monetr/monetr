@@ -1,4 +1,4 @@
-import Transaction from 'data/Transaction';
+import Transaction from 'models/Transaction';
 import React, { Component } from "react";
 import { connect } from 'react-redux';
 import { ActionMeta, OnChangeValue, Theme } from 'react-select';

@@ -23,6 +23,7 @@ func (c *Controller) linksController(p iris.Party) {
 	p.Put("/convert/{linkId:uint64}", c.convertLink)
 	p.Delete("/{linkId:uint64}", c.deleteLink)
 	p.Get("/wait/{linkId:uint64}", c.waitForDeleteLink)
+	p.Get("/{linkId:uint64}/institution", c.getLinkInstitutionStatus)
 }
 
 // List all links
@@ -385,4 +386,50 @@ func (c *Controller) waitForDeleteLink(ctx iris.Context) {
 		log.Trace("link removed successfully")
 		return
 	}
+}
+
+// Retrieve information about the link's institution
+// @Summary Get Link Institution Details
+// @id get-link-institution-details
+// @tags Links
+// @description Retrieve's the details of the institution associated with the link. This is only available for links
+// @description created by Plaid.
+// @Security ApiKeyAuth
+// @Param linkId path int true "Link ID."
+// @Router /link/{linkId:uint64}/institution [get]
+// @Success 200 {object} swag.InstitutionResponse
+// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) getLinkInstitutionStatus(ctx iris.Context) {
+	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	if linkId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLink(c.getContext(ctx), linkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve the specified link")
+		return
+	}
+
+	if link.LinkType != models.PlaidLinkType {
+		c.badRequest(ctx, "link is not a Plaid link")
+		return
+	}
+
+	if link.PlaidLink == nil {
+		c.returnError(ctx, http.StatusInternalServerError, "plaid details were missing on the link object")
+		return
+	}
+
+	plaidInstitution, err := c.plaidInstitutions.GetInstitution(c.getContext(ctx), link.PlaidLink.InstitutionId)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve institution details")
+		return
+	}
+
+	response := swag.NewInstitutionResponse(plaidInstitution)
+	ctx.JSON(response)
 }

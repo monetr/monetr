@@ -22,7 +22,7 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
 import Recurrence from 'components/Recurrence/Recurrence';
 import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
-import Spending, { SpendingType } from 'data/Spending';
+import Spending, { SpendingType } from 'models/Spending';
 import { Formik, FormikErrors } from 'formik';
 import moment from 'moment';
 import React, { Component, Fragment } from 'react';
@@ -66,7 +66,7 @@ interface newExpenseForm {
 const initialValues: newExpenseForm = {
   name: '',
   amount: 0.00,
-  nextOccurrence: moment().add('1 day'),
+  nextOccurrence: moment().add(1, 'day'),
   recurrenceRule: new Recurrence(),
   fundingScheduleId: 0,
 };
@@ -300,7 +300,7 @@ class NewExpenseDialog extends Component<WithConnectionPropTypes, ComponentState
                         <StepContent>
                           <KeyboardDatePicker
                             fullWidth
-                            minDate={ moment().add('1 day') }
+                            minDate={ moment().add(1, 'day') }
                             name="date"
                             margin="normal"
                             id="date-picker-dialog"

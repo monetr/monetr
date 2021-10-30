@@ -10,8 +10,8 @@ import {
   TrackChanges
 } from '@material-ui/icons';
 import TransferDialog from 'components/Spending/TransferDialog';
-import FundingSchedule from 'data/FundingSchedule';
-import Spending from 'data/Spending';
+import FundingSchedule from 'models/FundingSchedule';
+import Spending from 'models/Spending';
 import { Map } from 'immutable';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';

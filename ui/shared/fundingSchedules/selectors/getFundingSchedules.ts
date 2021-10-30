@@ -1,4 +1,4 @@
-import FundingSchedule from "data/FundingSchedule";
+import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
 import { createSelector } from "reselect";
 import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";

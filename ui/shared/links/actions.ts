@@ -1,7 +1,7 @@
-import Link from "data/Link";
+import Link from "models/Link";
 import { Logout } from "shared/authentication/actions";
 import { Map } from 'immutable';
-import BankAccount from "data/BankAccount";
+import BankAccount from "models/BankAccount";
 
 export const FETCH_LINKS_REQUEST = 'FETCH_LINKS_REQUEST';
 export const FETCH_LINKS_SUCCESS = 'FETCH_LINKS_SUCCESS';

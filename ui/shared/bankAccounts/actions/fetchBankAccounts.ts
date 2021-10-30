@@ -4,7 +4,7 @@ import {
   FETCH_BANK_ACCOUNTS_SUCCESS
 } from "shared/bankAccounts/actions";
 import request from "shared/util/request";
-import BankAccount from "data/BankAccount";
+import BankAccount from "models/BankAccount";
 import { Map } from 'immutable';
 
 export const fetchBankAccountsRequest = {

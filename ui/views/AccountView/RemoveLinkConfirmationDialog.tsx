@@ -9,7 +9,7 @@ import {
   Snackbar,
   Typography
 } from "@material-ui/core";
-import Link from "data/Link";
+import Link from "models/Link";
 import { getLink } from "shared/links/selectors/getLink";
 import { connect } from "react-redux";
 import { Close } from "@material-ui/icons";

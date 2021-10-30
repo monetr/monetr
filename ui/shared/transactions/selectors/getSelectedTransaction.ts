@@ -1,4 +1,4 @@
-import Transaction from "data/Transaction";
+import Transaction from "models/Transaction";
 import { OrderedMap } from "immutable";
 import { createSelector } from "reselect";
 import { getTransactions } from "shared/transactions/selectors/getTransactions";
