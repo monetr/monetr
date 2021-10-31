@@ -1,7 +1,6 @@
 PWD=$(shell git rev-parse --show-toplevel)
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
-VENDOR_DIR = $(PWD)/vendor
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1`)
@@ -89,14 +88,9 @@ $(HASH_DIR):
 $(NODE_MODULES)-install:
 	yarn install -d
 
-
-#PATH+=\b:$(NODE_MODULES)/.bin
-
-
 define hash
 md5sum $1 | cut -d " " -f 1
 endef
-
 
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
@@ -174,7 +168,6 @@ release-asset:
 	$(GH) release upload $(RELEASE_VERSION) $(BINARY_TAR) --clobber
 endif
 
-
 test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr REST API)
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
@@ -194,7 +187,6 @@ clean:
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
 	-rm -rf $(NODE_MODULES)
-	-rm -rf $(VENDOR_DIR)
 	-rm -rf $(LOCAL_TMP)
 	-rm -rf $(PWD)/generated
 	-rm -rf $(PWD)/docs
