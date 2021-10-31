@@ -1,13 +1,21 @@
-import React, { Component, Fragment } from "react";
-import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
-import { connect } from "react-redux";
-import { Close } from "@mui/icons-material";
-import PlaidButton from "components/Plaid/PlaidButton";
-import { List } from "immutable";
-import request from "shared/util/request";
-import fetchBankAccounts from "shared/bankAccounts/actions/fetchBankAccounts";
-import fetchLinks from "shared/links/actions/fetchLinks";
-import AddManualBankAccountDialog from "views/AccountView/AddManualBankAccountDialog";
+import Link from 'models/Link';
+import React, { Component, Fragment } from 'react';
+import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
+import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
+import { connect } from 'react-redux';
+import { Close } from '@mui/icons-material';
+import PlaidButton from 'components/Plaid/PlaidButton';
+import { List } from 'immutable';
+import detectDuplicateLink from 'shared/links/actions/detectDuplicateLink';
+import plaidLinkTokenCallback from 'shared/links/actions/plaidLinkTokenCallback';
+import { getLinksByInstitutionId } from 'shared/links/selectors/getLinksByInstitutionId';
+import request from 'shared/util/request';
+import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
+import fetchLinks from 'shared/links/actions/fetchLinks';
+import { AppState } from 'store';
+import AddManualBankAccountDialog from 'views/AccountView/AddManualBankAccountDialog';
+import { Map } from 'immutable';
+import DuplicateInstitutionDialog from 'views/AccountView/DuplicateInstitutionDialog';
 
 export interface PropTypes {
   open: boolean;
@@ -17,6 +25,8 @@ export interface PropTypes {
 interface WithConnectionPropTypes extends PropTypes {
   fetchLinks: () => Promise<void>;
   fetchBankAccounts: () => Promise<void>;
+  detectDuplicateLink: (metadata: PlaidLinkOnSuccessMetadata) => boolean;
+  linksByInstitutionId: Map<string, Link[]>;
 }
 
 interface State {
@@ -24,6 +34,11 @@ interface State {
   linkId: number | null;
   longPollAttempts: number;
   manualDialogOpen: boolean;
+  duplicateDialogOpen: boolean;
+  callback: {
+    token: string;
+    metadata: PlaidLinkOnSuccessMetadata;
+  } | null;
 }
 
 class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
@@ -33,22 +48,44 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
     linkId: null,
     longPollAttempts: 0,
     manualDialogOpen: false,
+    duplicateDialogOpen: false,
+    callback: null,
   };
 
-  onPlaidSuccess = (token: string, metadata: any) => {
+  onPlaidSuccess = (token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> => {
+    const { detectDuplicateLink } = this.props;
     this.setState({
       loading: true,
+      callback: {
+        token,
+        metadata,
+      },
     });
 
-    return request().post('/plaid/link/token/callback', {
-      publicToken: token,
-      institutionId: metadata.institution.institution_id,
-      institutionName: metadata.institution.name,
-      accountIds: List(metadata.accounts).map((account: { id: string }) => account.id).toArray()
+    if (detectDuplicateLink(metadata)) {
+      this.setState({
+        duplicateDialogOpen: true,
+      });
+      return Promise.resolve();
+    }
+
+    return this.afterPlaidLink();
+  }
+
+  afterPlaidLink = () => {
+    this.setState({
+      duplicateDialogOpen: false,
     })
+    const { callback: { token, metadata } } = this.state;
+    return plaidLinkTokenCallback(
+      token,
+      metadata.institution.institution_id,
+      metadata.institution.name,
+      List(metadata.accounts).map((account: { id: string }) => account.id).toArray(),
+    )
       .then(result => {
         this.setState({
-          linkId: result.data.linkId,
+          linkId: result.linkId,
         });
 
         return this.longPollSetup()
@@ -64,7 +101,7 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
       .finally(() => {
         this.props.onClose();
       });
-  }
+  };
 
   longPollSetup = () => {
     this.setState(prevState => ({
@@ -96,10 +133,18 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
   });
 
   renderDialogs = () => {
-    const { manualDialogOpen } = this.state;
+    const { manualDialogOpen, duplicateDialogOpen } = this.state;
 
     if (manualDialogOpen) {
-      return <AddManualBankAccountDialog open={ true } onClose={ this.closeManualDialog } />
+      return <AddManualBankAccountDialog open={ true } onClose={ this.closeManualDialog }/>
+    }
+
+    if (duplicateDialogOpen) {
+      return <DuplicateInstitutionDialog
+        open={ true }
+        onCancel={ this.props.onClose }
+        onConfirm={ this.afterPlaidLink }
+      />
     }
 
     return null;
@@ -154,9 +199,12 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  state => ({}),
+  (state: AppState) => ({
+    linksByInstitutionId: getLinksByInstitutionId(state),
+  }),
   {
     fetchLinks,
     fetchBankAccounts,
+    detectDuplicateLink,
   }
 )(AddBankAccountDialog);

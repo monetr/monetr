@@ -23,6 +23,16 @@ export const reducers = combineReducers({
 
 export type AppState = ReturnType<typeof reducers>;
 
+export type GetAppState = () => AppState;
+
+export interface AppAction<T> {
+  (dispatch: AppDispatch): T
+}
+
+export interface AppActionWithState<T> {
+  (dispatch: AppDispatch, getState: GetAppState): T
+}
+
 export function configureStore() {
   const composeEnhancer = process.env.NODE_ENV !== 'production' ? composeWithDevTools({
     name: 'Primary',
@@ -41,6 +51,5 @@ export function configureStore() {
 export const store = configureStore();
 
 export type AppDispatch = typeof store.dispatch
-
 
 export default store;

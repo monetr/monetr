@@ -1,20 +1,15 @@
 package repository
 
 import (
-	"context"
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 )
 
 type JobRepository interface {
-	CreateInstitutions(ctx context.Context, institutions []*models.Institution) error
 	GetBankAccountsToSync() ([]models.BankAccount, error)
 	GetBankAccountsWithPendingTransactions() ([]CheckingPendingTransactionsItem, error)
 	GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error)
-	GetInstitutionsByPlaidID(ctx context.Context, plaidIds []string) (map[string]models.Institution, error)
-	UpdateInstitutions(ctx context.Context, institutions []*models.Institution) error
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -36,60 +31,6 @@ func NewJobRepository(txn *pg.Tx) JobRepository {
 	return &jobRepository{
 		txn: txn,
 	}
-}
-
-func (j *jobRepository) GetInstitutionsByPlaidID(ctx context.Context, plaidIds []string) (map[string]models.Institution, error) {
-	span := sentry.StartSpan(ctx, "GetInstitutionByPlaidID")
-	defer span.Finish()
-
-	institutions := make([]models.Institution, 0)
-	err := j.txn.ModelContext(span.Context(), &institutions).
-		WhereIn(`"institution"."plaid_institution_id" IN (?)`, plaidIds).
-		Select(&institutions)
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return nil, errors.Wrap(err, "failed to retrieve institutions by plaid Id")
-	}
-	span.Status = sentry.SpanStatusOK
-
-	byPlaidId := map[string]models.Institution{}
-	for _, institution := range institutions {
-		if institution.PlaidInstitutionId == nil {
-			continue
-		}
-
-		byPlaidId[*institution.PlaidInstitutionId] = institution
-	}
-
-	return byPlaidId, nil
-}
-
-func (j *jobRepository) UpdateInstitutions(ctx context.Context, institutions []*models.Institution) error {
-	span := sentry.StartSpan(ctx, "UpdateInstitutions")
-	defer span.Finish()
-
-	result, err := j.txn.ModelContext(span.Context(), &institutions).
-		WherePK().
-		Update(&institutions)
-	if err != nil {
-		return errors.Wrap(err, "failed to update institutions")
-	}
-
-	if affected := result.RowsAffected(); affected != len(institutions) {
-		return errors.Errorf("unexpected institutions updated, expected: %d updated: %d", len(institutions), affected)
-	}
-
-	return nil
-}
-
-func (j *jobRepository) CreateInstitutions(ctx context.Context, institutions []*models.Institution) error {
-	span := sentry.StartSpan(ctx, "CreateInstitutions")
-	defer span.Finish()
-
-	_, err := j.txn.ModelContext(span.Context(), &institutions).
-		Insert(&institutions)
-
-	return errors.Wrap(err, "failed to create institutions")
 }
 
 func (j *jobRepository) GetBankAccountsToSync() ([]models.BankAccount, error) {

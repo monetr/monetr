@@ -2,11 +2,13 @@ package controller_test
 
 import (
 	"fmt"
-	"github.com/monetr/monetr/pkg/models"
 	"math"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/monetr/monetr/pkg/internal/fixtures"
+	"github.com/monetr/monetr/pkg/models"
 )
 
 func TestPostLink(t *testing.T) {
@@ -83,6 +85,7 @@ func TestGetLink(t *testing.T) {
 			response.JSON().Path("$.linkId").Number().Gt(0)
 			response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
+			response.JSON().Path("$.plaidInstitutionId").Null()
 			linkAID = uint64(response.JSON().Path("$.linkId").Number().Raw())
 		}
 
@@ -132,7 +135,7 @@ func TestGetLink(t *testing.T) {
 		response.Status(http.StatusForbidden)
 		response.JSON().Path("$.error").String().Equal("token must be provided")
 	})
-	
+
 	t.Run("precise", func(t *testing.T) {
 		e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
@@ -195,6 +198,27 @@ func TestGetLink(t *testing.T) {
 			response.Status(http.StatusBadRequest)
 			response.JSON().Path("$.error").Equal("must specify a link Id to retrieve")
 		}
+	})
+
+	t.Run("plaid link", func(t *testing.T) {
+		e := NewTestApplication(t)
+
+		var token string
+		var linkId uint64
+		{
+			user, password := fixtures.GivenIHaveABasicAccount(t)
+			link := fixtures.GivenIHaveAPlaidLink(t, user)
+			linkId = link.LinkId
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.GET("/api/links/{linkId}").
+			WithPath("linkId", linkId).
+			WithHeader("M-Token", token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.plaidInstitutionId").String().NotEmpty()
 	})
 }
 

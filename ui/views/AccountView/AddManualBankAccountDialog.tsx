@@ -1,8 +1,9 @@
-import React, { Component, Fragment } from "react";
-import { Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
-import { Close } from "@mui/icons-material";
-import { connect } from "react-redux";
-import { getLinks } from "shared/links/selectors/getLinks";
+import React, { Component, Fragment } from 'react';
+import { Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
+import { Close } from '@mui/icons-material';
+import { connect } from 'react-redux';
+import { getLinks } from 'shared/links/selectors/getLinks';
+import { AppState } from 'store';
 
 export interface PropTypes {
   open: boolean;
@@ -40,7 +41,7 @@ class AddManualBankAccountDialog extends Component<PropTypes, any> {
 }
 
 export default connect(
-  state => ({
+  (state: AppState) => ({
     links: getLinks(state)
   }),
   {}

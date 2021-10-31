@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from "react";
+import React, { Component, Fragment } from 'react';
 import {
   Alert,
   Button,
@@ -9,13 +9,14 @@ import {
   IconButton,
   Snackbar,
   Typography
-} from "@mui/material";
-import Link from "models/Link";
-import { getLink } from "shared/links/selectors/getLink";
-import { connect } from "react-redux";
-import { Close } from "@mui/icons-material";
-import removeLink from "shared/links/actions/removeLink";
-import classnames from "classnames";
+} from '@mui/material';
+import Link from 'models/Link';
+import { getLink } from 'shared/links/selectors/getLink';
+import { connect } from 'react-redux';
+import { Close } from '@mui/icons-material';
+import removeLink from 'shared/links/actions/removeLink';
+import classnames from 'classnames';
+import { AppState } from 'store';
 
 interface PropTypes {
   open: boolean;
@@ -116,7 +117,7 @@ class RemoveLinkConfirmationDialog extends Component<WithConnectionPropTypes, St
               disabled={ loading }
               onClick={ this.doRemoveLink }
               className={ classnames({
-                "text-red-500": !loading,
+                'text-red-500': !loading,
               }) }
             >
               Remove
@@ -129,7 +130,7 @@ class RemoveLinkConfirmationDialog extends Component<WithConnectionPropTypes, St
 }
 
 export default connect(
-  (state, props: PropTypes) => ({
+  (state: AppState, props: PropTypes) => ({
     link: getLink(props.linkId)(state),
   }),
   {

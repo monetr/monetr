@@ -383,12 +383,13 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	link := models.Link{
-		AccountId:       repo.AccountId(),
-		PlaidLinkId:     &plaidLink.PlaidLinkID,
-		LinkType:        models.PlaidLinkType,
-		LinkStatus:      models.LinkStatusPending,
-		InstitutionName: callbackRequest.InstitutionName,
-		CreatedByUserId: repo.UserId(),
+		AccountId:          repo.AccountId(),
+		PlaidLinkId:        &plaidLink.PlaidLinkID,
+		PlaidInstitutionId: &plaidLink.InstitutionId,
+		LinkType:           models.PlaidLinkType,
+		LinkStatus:         models.LinkStatusPending,
+		InstitutionName:    callbackRequest.InstitutionName,
+		CreatedByUserId:    repo.UserId(),
 	}
 	if err = repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")

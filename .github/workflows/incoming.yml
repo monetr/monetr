@@ -157,53 +157,6 @@ jobs:
           path: '${{ github.workspace }}/coverage.txt'
           retention-days: 1
 
-  go_test_extended:
-    needs:
-      - go_dependencies
-    name: Test Go Extended
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        golang:
-          - golang:1.17.2
-        postgres:
-          - postgres:12
-          - postgres:13
-          - postgres:14
-    container: ${{ matrix.golang }}
-    env:
-      POSTGRES_HOST: postgres
-      POSTGRES_PASSWORD: ""
-      POSTGRES_USER: api-testing
-      POSTGRES_DB: test-db
-    services:
-      postgres:
-        image: ${{ matrix.postgres }}
-        env:
-          POSTGRES_HOST_AUTH_METHOD: trust
-          POSTGRES_USER: api-testing
-          POSTGRES_DB: test-db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
-            ${{ runner.os }}-go-
-      - name: Test
-        env:
-          GOARCH: ${{ matrix.arch }}
-        run: make test-go
-
   ui_test:
     needs:
       - ui_dependencies

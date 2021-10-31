@@ -39,6 +39,7 @@ func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
 		PlaidLink:             &plaidLink,
 		LinkStatus:            models.LinkStatusSetup,
 		InstitutionName:       plaidLink.InstitutionName,
+		PlaidInstitutionId:    myownsanity.StringP(gofakeit.Generate("ins_####")),
 		CustomInstitutionName: "",
 		CreatedAt:             time.Now(),
 		CreatedByUserId:       user.UserId,
