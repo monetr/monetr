@@ -1,5 +1,21 @@
 # Changelog
 
+### [0.1.1](https://www.github.com/monetr/monetr/compare/v0.1.0...v0.1.1) (2021-10-31)
+
+
+### Bug Fixes
+
+* **container:** Delete the apt-get lists after installing something ([edd4a38](https://www.github.com/monetr/monetr/commit/edd4a38859148e5edc1d3bbb649f4fbbc22727be))
+* **container:** Pin apt-get package versions. ([d887f52](https://www.github.com/monetr/monetr/commit/d887f52662857d9c1eb02c6aa37074ab65d053d4))
+* **deps:** Pinned react-refresh. ([c282814](https://www.github.com/monetr/monetr/commit/c282814af1d1adddf287d81dfd215ae14bb29477))
+* **deps:** Updated kataras/iris to the latest version. ([1cb0fed](https://www.github.com/monetr/monetr/commit/1cb0fed806dc163c595ce3c1a80a301505796dec))
+* **deps:** Upgrading to MUI V5. ([adb3294](https://www.github.com/monetr/monetr/commit/adb3294056b6e8def3cb62aca5ba555143f88841))
+* Fixed key error on goals view. ([6f90ab1](https://www.github.com/monetr/monetr/commit/6f90ab160838b29fb084d645d1e58e4701e8dfd1))
+* Improved CodeCov reporting on the main pipeline. ([2725235](https://www.github.com/monetr/monetr/commit/27252352d74936534998f9148f1ae696d65e75d5))
+* Improved CodeCov uploading. ([0368752](https://www.github.com/monetr/monetr/commit/0368752be9fdd7f9ee56f027869c874f5af98bbc))
+* Pinned dependencies for material-ui ([c624908](https://www.github.com/monetr/monetr/commit/c6249086dcf7d8ed98b5e17e56185259bb76efca))
+* **webpack:** Adding react-refresh, refactor webpack config. ([75cdc09](https://www.github.com/monetr/monetr/commit/75cdc090f9f31e54552819c0e8f4f38ff93bb616))
+
 ## [0.1.0](https://www.github.com/monetr/monetr/compare/v0.0.11...v0.1.0) (2021-10-30)
 
 
