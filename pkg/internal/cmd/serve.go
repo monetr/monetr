@@ -328,8 +328,10 @@ func RunServer() error {
 
 	var plaidSecrets secrets.PlaidSecretsProvider
 	if configuration.Vault.Enabled {
+		log.Debugf("secrets will be stored in vault")
 		plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
 	} else {
+		log.Debugf("secrets will be stored in postgres")
 		plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db)
 	}
 

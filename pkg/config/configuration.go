@@ -275,6 +275,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Vault.Auth", "kubernetes")
 	v.SetDefault("Vault.IdleConnTimeout", 9*time.Minute)
 	v.SetDefault("Vault.Timeout", 30*time.Second)
+	v.SetDefault("Vault.TokenFile", "/var/run/secrets/kubernetes.io/serviceaccount/token")
 }
 
 func setupEnv(v *viper.Viper) {

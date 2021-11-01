@@ -51,7 +51,17 @@ data:
   MONETR_STRIPE_WEBHOOKS_ENABLED: {{ quote .Values.api.stripe.webhooksEnabled }}
   MONETR_STRIPE_WEBHOOKS_DOMAIN: {{ quote .Values.api.stripe.webhooksDomain }}
   MONETR_STRIPE_BILLING_ENABLED: {{ quote .Values.api.stripe.billingEnabled }}
-  MONETR_VAULT_TOKEN_FILE: {{ quote .Values.api.vault.tokenFile }}
+  MONETR_VAULT_ENABLED: {{ quote .Values.api.vault.enabled }}
+  {{ if .Values.api.vault.address }}MONETR_VAULT_ADDRESS: {{ quote .Values.api.vault.address }} {{ end }}
+  {{ if .Values.api.vault.auth }}MONETR_VAULT_AUTH: {{ quote .Values.api.vault.auth }} {{ end }}
+  {{ if .Values.api.vault.tokenFile }}MONETR_VAULT_TOKEN_FILE: {{ quote .Values.api.vault.tokenFile }} {{ end }}
+  {{ if .Values.api.vault.role }}MONETR_VAULT_ROLE: {{ quote .Values.api.vault.role }} {{ end }}
+  {{ if .Values.api.vault.certificatePath }}MONETR_VAULT_TLS_CERT_PATH: {{ quote .Values.api.vault.certificatePath }} {{ end }}
+  {{ if .Values.api.vault.keyPath }}MONETR_VAULT_TLS_KEY_PATH: {{ quote .Values.api.vault.keyPath }} {{ end }}
+  {{ if .Values.api.vault.caCertificatePath }}MONETR_VAULT_TLS_CA_PATH: {{ quote .Values.api.vault.caCertificatePath }} {{ end }}
+  MONETR_VAULT_INSECURE_SKIP_VERIFY: {{ quote .Values.api.vault.insecureSkipVerify }}
+  {{ if .Values.api.vault.timeout }}MONETR_VAULT_TIMEOUT: {{ quote .Values.api.vault.timeout }} {{ end }}
+  {{ if .Values.api.vault.idleConnTimeout }}MONETR_VAULT_IDLE_CONN_TIMEOUT: {{ quote .Values.api.vault.idleConnTimeout }} {{ end }}
 
 ---
 kind: ConfigMap

@@ -182,6 +182,10 @@ api:
     caCertificatePath: ""
     certificatePath: ""
     keyPath: ""
+    insecureSkipVerify: false
     token: ""
     tokenFile: ""
+    auth: "kubernetes"
+    timeout: "30s"
+    idleConnTimeout: "9m"
 
