@@ -2488,12 +2488,6 @@ var doc = `{
                     "x-nullable": true,
                     "example": "NO_ACCOUNTS"
                 },
-                "institutionId": {
-                    "description": "Our internal Id for an institution. This is just an abstraction layer on top of Plaid's institution Id but would\nallow us to associate institutions with multiple integrations in the future. It is also meant to keep Plaid Id's\naway from the client's view as much as possible.",
-                    "type": "integer",
-                    "x-nullable": true,
-                    "example": 5328
-                },
                 "institutionName": {
                     "description": "The institution name for this link. With the Plaid integration, each link represents a single bank account login\nwith an institution. So if you link your monetr account with your U.S. Bank account you would have one link for\nU.S. Bank, and your accounts with that bank would show as bank account's under that link. Manual links are\nintended to be a single \"Manual\" link per account, with any manually managed bank accounts underneath it.",
                     "type": "string",
@@ -2516,7 +2510,8 @@ var doc = `{
                     "enum": [
                         0,
                         1,
-                        2
+                        2,
+                        3
                     ],
                     "example": 2
                 },
@@ -2524,10 +2519,17 @@ var doc = `{
                     "description": "The type of link this object is. This indicates whether or not bank accounts within this link are managed\nmanually by an end user, or managed automatically by a Plaid integration.\n* 0 - ` + "`" + `Unknown` + "`" + `: This would indicate an error state with the link.\n* 1 - ` + "`" + `Plaid` + "`" + `: This link is automatically managed by the Plaid integration.\n* 2 - ` + "`" + `Manual` + "`" + `: This link is managed manually by the end user.",
                     "type": "integer",
                     "enum": [
+                        0,
                         1,
                         2
                     ],
                     "example": 2
+                },
+                "plaidInstitutionId": {
+                    "description": "When a link is with Plaid then Plaid's institution ID will be available here. This ID is used to prevent a user\nfrom accidentally adding a duplicate bank account. In the UI, upon authenticating a bank; it should be checked if\nthere is already a link with the same ` + "`" + `plaidInstitutionId` + "`" + `. If there is then a warning should be displayed to the\nuser to let them know that this might be a duplicate add.",
+                    "type": "string",
+                    "x-nullable": true,
+                    "example": "ins_1234"
                 },
                 "updatedAt": {
                     "description": "The last time this link was updated. Currently this field is not really maintained, eventually this timestamp\nwill indicate the last time a sync occurred between monetr and Plaid. Manual links don't change this field at\nall. **OLD**",

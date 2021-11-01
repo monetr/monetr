@@ -532,14 +532,6 @@ definitions:
         example: NO_ACCOUNTS
         type: string
         x-nullable: true
-      institutionId:
-        description: |-
-          Our internal Id for an institution. This is just an abstraction layer on top of Plaid's institution Id but would
-          allow us to associate institutions with multiple integrations in the future. It is also meant to keep Plaid Id's
-          away from the client's view as much as possible.
-        example: 5328
-        type: integer
-        x-nullable: true
       institutionName:
         description: |-
           The institution name for this link. With the Plaid integration, each link represents a single bank account login
@@ -573,6 +565,7 @@ definitions:
         - 0
         - 1
         - 2
+        - 3
         example: 2
         type: integer
       linkType:
@@ -583,10 +576,20 @@ definitions:
           * 1 - `Plaid`: This link is automatically managed by the Plaid integration.
           * 2 - `Manual`: This link is managed manually by the end user.
         enum:
+        - 0
         - 1
         - 2
         example: 2
         type: integer
+      plaidInstitutionId:
+        description: |-
+          When a link is with Plaid then Plaid's institution ID will be available here. This ID is used to prevent a user
+          from accidentally adding a duplicate bank account. In the UI, upon authenticating a bank; it should be checked if
+          there is already a link with the same `plaidInstitutionId`. If there is then a warning should be displayed to the
+          user to let them know that this might be a duplicate add.
+        example: ins_1234
+        type: string
+        x-nullable: true
       updatedAt:
         description: |-
           The last time this link was updated. Currently this field is not really maintained, eventually this timestamp
