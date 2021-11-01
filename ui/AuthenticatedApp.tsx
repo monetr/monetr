@@ -14,6 +14,7 @@ import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem,
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
 import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
 import MenuIcon from '@mui/icons-material/Menu';
+import { AppState } from 'store';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import ExpensesView from 'views/Expenses/ExpensesView';
 import GoalsView from 'views/Goals/GoalsView';
@@ -213,7 +214,7 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
 }
 
 export default connect(
-  state => ({
+  (state: AppState) => ({
     hasAnyLinks: getHasAnyLinks(state),
     billingEnabled: getBillingEnabled(state),
   }),

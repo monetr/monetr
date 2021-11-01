@@ -1,8 +1,9 @@
 package swag
 
 import (
-	"github.com/monetr/monetr/pkg/models"
 	"time"
+
+	"github.com/monetr/monetr/pkg/models"
 )
 
 type CreateLinkRequest struct {
@@ -26,7 +27,7 @@ type LinkResponse struct {
 	// * 0 - `Unknown`: This would indicate an error state with the link.
 	// * 1 - `Plaid`: This link is automatically managed by the Plaid integration.
 	// * 2 - `Manual`: This link is managed manually by the end user.
-	LinkType models.LinkType `json:"linkType" example:"2" enums:"1,2"`
+	LinkType models.LinkType `json:"linkType" example:"2" enums:"0,1,2"`
 	// Status of a link, this is used with the Plaid integration to determine whether or not a link has been completely
 	// setup. If a link is in an Unknown or Pending state then the link has not had it's transactions retrieved yet from
 	// Plaid. Unknown might indicate there is a problem with the link itself.
@@ -34,14 +35,15 @@ type LinkResponse struct {
 	// * 1 - `Pending`: The link is not ready to use and is being setup by the Plaid integration.
 	// * 2 - `Setup`: The link is ready to use. This is the default state for manual links.
 	// * 3 - `Error`: The link is in an error state, this can happen if the Plaid link is experiencing problems.
-	LinkStatus models.LinkStatus `json:"linkStatus" example:"2" enums:"0,1,2"`
+	LinkStatus models.LinkStatus `json:"linkStatus" example:"2" enums:"0,1,2,3"`
 	// If the link error is due to a problem on Plaid's side, then an error code will be included here to help display
 	// helpful messages on the frontend to the user.
 	ErrorCode *string `json:"errorCode" extensions:"x-nullable" example:"NO_ACCOUNTS"`
-	// Our internal Id for an institution. This is just an abstraction layer on top of Plaid's institution Id but would
-	// allow us to associate institutions with multiple integrations in the future. It is also meant to keep Plaid Id's
-	// away from the client's view as much as possible.
-	InstitutionId *uint64 `json:"institutionId" example:"5328" extensions:"x-nullable"`
+	// When a link is with Plaid then Plaid's institution ID will be available here. This ID is used to prevent a user
+	// from accidentally adding a duplicate bank account. In the UI, upon authenticating a bank; it should be checked if
+	// there is already a link with the same `plaidInstitutionId`. If there is then a warning should be displayed to the
+	// user to let them know that this might be a duplicate add.
+	PlaidInstitutionId *string `json:"plaidInstitutionId" example:"ins_1234" extensions:"x-nullable"`
 	UpdateLinkRequest
 	// The institution name for this link. With the Plaid integration, each link represents a single bank account login
 	// with an institution. So if you link your monetr account with your U.S. Bank account you would have one link for

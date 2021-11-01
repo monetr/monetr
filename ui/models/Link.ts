@@ -32,7 +32,7 @@ export default class Link {
   linkType: LinkType;
   linkStatus: LinkStatus;
   errorCode: string | null;
-  institutionId: number;
+  plaidInstitutionId: string | null;
   institutionName: string;
   customInstitutionName?: string;
   createdByUserId: number;

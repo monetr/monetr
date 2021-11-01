@@ -1,8 +1,7 @@
 import Balance from 'models/Balance';
-import { Dispatch } from 'redux';
 import { FetchBalances } from 'shared/balances/actions';
-import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import request from 'shared/util/request';
+import { AppActionWithState, AppDispatch, GetAppState } from 'store';
 
 const fetchBalancesRequest = {
   type: FetchBalances.Request,
@@ -12,8 +11,8 @@ const fetchBalancesFailure = {
   type: FetchBalances.Failure,
 };
 
-export default function fetchBalancesForBankAccount(bankAccountId: number|null) {
-  return (dispatch: Dispatch, getState) => {
+export default function fetchBalancesForBankAccount(bankAccountId: number | null): AppActionWithState<Promise<void>> {
+  return (dispatch: AppDispatch, getState: GetAppState) => {
     if (!bankAccountId) {
       return Promise.resolve();
     }
