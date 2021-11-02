@@ -5,8 +5,9 @@ import (
 )
 
 var (
-	PlaidLanguage  = "en"
-	PlaidCountries = []plaid.CountryCode{
+	PlaidClientName = "monetr"
+	PlaidLanguage   = "en"
+	PlaidCountries  = []plaid.CountryCode{
 		plaid.COUNTRYCODE_US,
 	}
 	PlaidProducts = []plaid.Products{

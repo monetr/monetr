@@ -156,7 +156,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 	request := p.client.PlaidApi.
 		LinkTokenCreate(span.Context()).
 		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
-			ClientName:   "monetr",
+			ClientName:   consts.PlaidClientName,
 			Language:     consts.PlaidLanguage,
 			CountryCodes: consts.PlaidCountries,
 			User: plaid.LinkTokenCreateRequestUser{
