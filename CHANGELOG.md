@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.2.0](https://www.github.com/monetr/monetr/compare/v0.1.1...v0.2.0) (2021-11-02)
+
+
+### Features
+
+* Preventing duplicate item adds. ([76b3036](https://www.github.com/monetr/monetr/commit/76b30367232bbc8edeacdf5521f587c7c4506341)), closes [#193](https://www.github.com/monetr/monetr/issues/193)
+
+
+### Bug Fixes
+
+* Added vault parameters to the helm chart environment variables. ([a14b73d](https://www.github.com/monetr/monetr/commit/a14b73d4aacd8a027413467eb98d6a4e12c2f46b)), closes [#200](https://www.github.com/monetr/monetr/issues/200)
+* **deps:** update dependency react-select to v5.2.0 ([167a102](https://www.github.com/monetr/monetr/commit/167a102cda9df5529efd1443f75dbd51513faa91))
+* **deps:** update module github.com/stripe/stripe-go/v72 to v72.73.0 ([a3aaa68](https://www.github.com/monetr/monetr/commit/a3aaa68cdec986422726216874a535cac03ef6c5))
+* **deps:** update typescript-eslint monorepo to v5.3.0 ([f1aa47e](https://www.github.com/monetr/monetr/commit/f1aa47e2891448c2cf9d1919ec6156352f2125f8))
+* Fixed failing test due to Link table changes. ([2869daa](https://www.github.com/monetr/monetr/commit/2869daa3acd35589b34e449c9dd58034ce6d2685))
+* Fixed vault secret expiring and not being refreshed. ([c10c731](https://www.github.com/monetr/monetr/commit/c10c731c663b6483bac01e61a3adf40256396123))
+* **vault:** Fixed vault authentication not refreshing. ([c989267](https://www.github.com/monetr/monetr/commit/c9892678319ebca8328bf99a9057a478e75bc09b))
+
 ### [0.1.1](https://www.github.com/monetr/monetr/compare/v0.1.0...v0.1.1) (2021-10-31)
 
 
