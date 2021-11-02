@@ -1,9 +1,10 @@
-import request from "shared/util/request";
-import React, { Component } from "react";
-import { loadStripe, RedirectToCheckoutOptions } from "@stripe/stripe-js";
-import { connect } from "react-redux";
-import { getInitialPlan, getStripePublicKey } from "shared/bootstrap/selectors";
-import { RouteComponentProps } from "react-router-dom";
+import request from 'shared/util/request';
+import React, { Component } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { RedirectToCheckoutOptions } from '@stripe/stripe-js/types/stripe-js/checkout';
+import { connect } from 'react-redux';
+import { getInitialPlan, getStripePublicKey } from 'shared/bootstrap/selectors';
+import { RouteComponentProps } from 'react-router-dom';
 
 interface State {
   loading: boolean;
