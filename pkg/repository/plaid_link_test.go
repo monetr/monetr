@@ -2,12 +2,13 @@ package repository
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 func TestPlaidRepositoryBase_GetLink(t *testing.T) {
@@ -33,7 +34,6 @@ func TestPlaidRepositoryBase_GetLink(t *testing.T) {
 		CreatedAt:             time.Now(),
 		CreatedByUserId:       repo.UserId(),
 		UpdatedAt:             time.Now(),
-		UpdatedByUserId:       nil,
 		LastSuccessfulUpdate:  nil,
 	}
 
@@ -83,7 +83,6 @@ func TestPlaidRepositoryBase_GetLinkByItemId(t *testing.T) {
 		CreatedAt:             time.Now(),
 		CreatedByUserId:       repo.UserId(),
 		UpdatedAt:             time.Now(),
-		UpdatedByUserId:       nil,
 		LastSuccessfulUpdate:  nil,
 	}
 
