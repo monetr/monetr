@@ -289,6 +289,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			}
 
 			repoParty.PartyFunc("/links", c.linksController)
+			repoParty.PartyFunc("/institutions", c.institutionsController)
 			repoParty.PartyFunc("/bank_accounts", func(bankParty router.Party) {
 				c.handleBankAccounts(bankParty)
 				c.handleTransactions(bankParty)
