@@ -224,7 +224,6 @@ install-$(JQ): $(LOCAL_BIN)
 	curl -L $(JQ_URL) -o $(JQ)
 	sudo chmod +x $(JQ)
 
-
 YQ=$(LOCAL_BIN)/yq
 $(YQ):
 	@if [ ! -f "$(YQ)" ]; then make install-$(YQ); fi
@@ -242,6 +241,20 @@ install-$(YQ): $(LOCAL_BIN) $(LOCAL_TMP)
 	mv $(YQ_DIR)/yq_$(OS)_$(ARCH) $(YQ)
 	-rm -rf $(YQ_DIR)
 	-rm -rf $(YQ_DIR).tar.gz
+
+TERRAFORM=$(LOCAL_BIN)/terraform
+$(TERRAFORM):
+	@if [ ! -f "$(TERRAFORM)" ]; then make install-$(TERRAFORM); fi
+
+install-$(TERRAFORM): TERRAFORM_VERSION=1.0.10
+install-$(TERRAFORM): TERRAFORM_URL = "https://releases.hashicorp.com/terraform/$(TERRAFORM_VERSION)/terraform_$(TERRAFORM_VERSION)_$(OS)_$(ARCH).zip"
+install-$(TERRAFORM): TERRAFORM_ZIP=$(LOCAL_TMP)/terraform.zip
+install-$(TERRAFORM): $(LOCAL_BIN) $(LOCAL_TMP)
+	$(call infoMsg,Installing terraform to $(TERRAFORM))
+	-rm -rf $(TERRAFORM_ZIP)
+	curl -L $(TERRAFORM_URL) -o $(TERRAFORM_ZIP)
+	unzip $(TERRAFORM_ZIP) -d $(LOCAL_BIN)
+	-rm -rf $(TERRAFORM_ZIP)
 
 ifneq ($(ENV_LOWER),local)
 KUBECTL=$(LOCAL_BIN)/kubectl

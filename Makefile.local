@@ -382,7 +382,7 @@ vault-token: $(VAULT_JSON) $(JQ)
 	@echo "\033[0;31m#################################################################################\033[0m"
 
 vault-terraform: $(VAULT_JSON) $(wildcard $(PWD)/minikube/vault/*.tf)
-vault-terraform: $(JQ)
+vault-terraform: $(JQ) $(TERRAFORM)
 vault-terraform: VAULT_TOKEN=$(shell cat $(VAULT_JSON) | $(JQ) -r '.root_token')
 vault-terraform: KUBE_ADDR=$(shell minikube ip)
 vault-terraform: KUBE_CTX=$(shell $(KUBECTL) config current-context)
@@ -394,7 +394,7 @@ vault-terraform:
 	export TF_VAR_kubernetes_address="https://$(KUBE_ADDR):8443" && \
 	export TF_VAR_kubernetes_certificate_b64=$(KUBE_CERT_B64) && \
 	export TF_VAR_kubernetes_reviewer_jwt=$(REVIEWER_JWT) && \
-	cd $(PWD)/minikube/vault && terraform init -upgrade && terraform apply -auto-approve=true
+	cd $(PWD)/minikube/vault && $(TERRAFORM) init -upgrade && $(TERRAFORM) apply -auto-approve=true
 
 define waitForContainer
 while [[ $$($(KUBECTL) get pod $$($(KUBECTL) get pod -l $1 --namespace $(MINIKUBE_NAMESPACE) -o 'jsonpath={.items[0].metadata.name}') -o 'jsonpath={.status.phase}') != "Running" ]]; do echo "Waiting for container..." && sleep 5; done
@@ -414,7 +414,8 @@ $(VAULT_SERVICE_ACCOUNT): $(LOCAL_DIR)
 	echo "$(TOKEN)" >> $(VAULT_SERVICE_ACCOUNT)
 
 unseal-vault-mini: $(VAULT_JSON) $(JQ)
-	$(eval VAULT_UNSEAL_KEY = $(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
+unseal-vault-mini: VAULT_UNSEAL_KEY=$(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]"))
+unseal-vault-mini:
 	$(KUBECTL) exec deploy/vault -- vault status --tls-skip-verify || $(KUBECTL) exec deploy/vault -- vault operator unseal --tls-skip-verify $(VAULT_UNSEAL_KEY)
 
 configure-vault: $(VAULT_JSON) $(YQ) $(VALUES)
@@ -424,7 +425,7 @@ configure-vault: $(VAULT_JSON) $(YQ) $(VALUES)
 	$(YQ) e 'del(.api.vault.tokenFile)' -i $(VALUES)
 
 clean-vault-mini:
-	rm -rf $(VAULT_JSON)
+	-rm -rf $(VAULT_JSON)
 	$(KUBECTL) delete -f $(PWD)/minikube/vault.yaml -n $(MINIKUBE_NAMESPACE)
 
 ###################### gocraft/work UI ##################################
