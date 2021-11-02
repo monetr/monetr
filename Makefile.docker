@@ -1,6 +1,3 @@
-DOCKER_REPOSITORY = containers.monetr.dev
-DOCKER_IMAGE = rest-api
-
 default-docker:
 	$(error Please run a specific target)
 
@@ -11,27 +8,3 @@ else
 wait-for-docker:
 	@eval $$(minikube docker-env) && for i in 1 2 3 4 5; do (docker info > /dev/null 2>&1) && break || echo "Waiting for docker to start..." && sleep 15; done
 endif
-
-
-VERSION_TAG = $(shell git rev-parse HEAD)
-BASE_IMAGE = $(DOCKER_REPOSITORY)/$(DOCKER_IMAGE)
-SHA_IMAGE_NAME = $(BASE_IMAGE):$(VERSION_TAG)
-LATEST_IMAGE_NAME = $(BASE_IMAGE):latest
-
-ifdef CI_COMMIT_TAG
-GIT_RELEASE=$(CI_COMMIT_TAG)
-endif
-
-docker-build: wait-for-docker
-	docker build \
-		--cache-from=$(LATEST_IMAGE_NAME) \
-		--build-arg REVISION=$(RELEASE_REVISION) \
-		--build-arg BUILD_TIME=$(BUILD_TIME) \
-		--build-arg RELEASE=$(GIT_RELEASE) \
-		-t $(SHA_IMAGE_NAME) \
-		-t $(LATEST_IMAGE_NAME) \
-		-f Dockerfile .
-
-docker-push: docker-build
-	docker push $(SHA_IMAGE_NAME)
-	docker push $(LATEST_IMAGE_NAME)

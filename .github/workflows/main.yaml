@@ -166,53 +166,6 @@ jobs:
           path: '${{ github.workspace }}/coverage.txt'
           retention-days: 1
 
-  go_test_extended:
-    needs:
-      - go_dependencies
-    name: Test Go Extended
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        golang:
-          - golang:1.17.1
-        postgres:
-          - postgres:12
-          - postgres:13
-          - postgres:14
-    container: ${{ matrix.golang }}
-    env:
-      POSTGRES_HOST: postgres
-      POSTGRES_PASSWORD: ""
-      POSTGRES_USER: api-testing
-      POSTGRES_DB: test-db
-    services:
-      postgres:
-        image: ${{ matrix.postgres }}
-        env:
-          POSTGRES_HOST_AUTH_METHOD: trust
-          POSTGRES_USER: api-testing
-          POSTGRES_DB: test-db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
-            ${{ runner.os }}-go-
-      - name: Test
-        env:
-          GOARCH: ${{ matrix.arch }}
-        run: make test-go
-
   ui_test:
     needs:
       - ui_dependencies
@@ -238,41 +191,6 @@ jobs:
           name: '${{ github.sha }}-ui-coverage'
           path: '${{ github.workspace }}/coverage/clover.xml'
           retention-days: 1
-
-  pg_test:
-    name: PostgreSQL Test
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/pgtest:latest
-    env:
-      POSTGRES_HOST: postgres
-      POSTGRES_PASSWORD: ""
-      POSTGRES_USER: postgres
-      POSTGRES_DB: test-db
-      POSTGRES_HOST_AUTH_METHOD: trust
-    services:
-      postgres:
-        image: ghcr.io/monetr/pgtest:latest
-        env:
-          POSTGRES_HOST: postgres
-          POSTGRES_PASSWORD: ""
-          POSTGRES_USER: postgres
-          POSTGRES_DB: test-db
-          POSTGRES_HOST_AUTH_METHOD: trust
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v2
-      - name: Test
-        run: make pg_test
-      - uses: actions/upload-artifact@v2
-        if: always()
-        with:
-          name: '${{ github.sha }}-postgres-junit'
-          path: '${{ github.workspace }}/postgres-junit.xml'
-          retention-days: 7
 
   codecov:
     name: CodeCov
@@ -302,7 +220,6 @@ jobs:
   junit:
     needs:
       - go_test
-      - pg_test
     name: JUnit Report
     runs-on: ubuntu-latest
     steps:
@@ -312,15 +229,6 @@ jobs:
         with:
           name: '${{ github.sha }}-rest-api-junit'
           path: '${{ github.workspace }}/junit'
-      - uses: actions/download-artifact@v2
-        name: Download PostgreSQL JUnit Artifacts
-        with:
-          name: '${{ github.sha }}-postgres-junit'
-          path: '${{ github.workspace }}/junit'
-      - name: Debugging
-        run: |
-          ls ${{ github.workspace }}
-          ls ${{ github.workspace }}/junit
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v2
         if: always() # always run even if the previous step fails
@@ -377,7 +285,6 @@ jobs:
       - "go_test"
       - "ui_test"
       - "build_ui"
-      - "pg_test"
     name: Container
     runs-on: ubuntu-latest
     steps:

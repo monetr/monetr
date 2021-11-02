@@ -80,31 +80,21 @@ include $(PWD)/scripts/*.mk
 
 default: build
 
-HASH_DIR=$(PWD)/tmp/hashes
-$(HASH_DIR):
-	mkdir -p $(HASH_DIR)
-
-
-$(NODE_MODULES)-install:
-	yarn install -d
-
-define hash
-md5sum $1 | cut -d " " -f 1
-endef
-
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
 	yarn install
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
+WEBPACK=$(word 1,$(wildcard $(YARN_BIN)/webpack) $(NODE_MODULES)/.bin/webpack)
+$(WEBPACK): $(NODE_MODULES)
+
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
-$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(PWD)/tsconfig.json $(PWD)/webpack.config.js
-$(STATIC_DIR): YARN_BIN=$(shell yarn bin)
-$(STATIC_DIR):
+UI_CONFIG_FILES=$(PWD)/tsconfig.json $(PWD)/webpack.config.js
+$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(WEBPACK)
 	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
-	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(YARN_BIN)/webpack --mode production
+	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(WEBPACK) --mode production
 	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
 	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
 	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png
@@ -145,11 +135,6 @@ endif
 BUILD_DIR=$(PWD)/build
 $(BUILD_DIR):
 	mkdir -p $(PWD)/build
-
-CONTAINER_BINARY=$(BUILD_DIR)/monetr
-$(CONTAINER_BINARY): $(BUILD_DIR) $(GO) $(STATIC_DIR) $(GOMODULES) $(APP_GO_FILES)
-	$(call infoMsg,Building monetr binary for container)
-	GOOS=linux GOARCH=$(ARCH) $(GO) build -o $(CONTAINER_BINARY) $(MONETR_CLI_PACKAGE)
 
 build: $(BINARY)
 
@@ -194,8 +179,8 @@ clean:
 	-rm -rf $(PWD)/Notes.md
 	-git clean -f -X $(STATIC_DIR)
 
-
-docs: $(SWAG) $(APP_GO_FILES)
+SWAGGER_YAML=$(PWD)/docs/swagger.yaml
+$(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES)
 	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \
 		--parseDependency \
 		--parseDepth 5 \
@@ -206,8 +191,16 @@ docs: $(SWAG) $(APP_GO_FILES)
 	cp $(PWD)/public/logo512.png $(PWD)/docs/logo512.png
 	cp $(PWD)/public/manifest.json $(PWD)/docs/manifest.json
 
-docs-local: docs
-	$(PWD)/node_modules/.bin/redoc-cli serve $(PWD)/docs/swagger.yaml
+docs: $(SWAGGER_YAML)
+
+# redoc-cli is either installed globally and accessible via yarn, or is installed in the node_modules bin dir. This
+# variable will check if the file exists via yarn, and if it does not it will default to the node_modules dir. If the
+# resulting file path does not exist, then the $(NODE_MODULES) target will be run, which will install the redoc-cli.
+REDOC_CLI=$(word 1,$(wildcard $(shell yarn bin)/redoc-cli) $(NODE_MODULES)/.bin/redoc-cli)
+$(REDOC_CLI): $(NODE_MODULES)
+
+docs-local: $(SWAGGER_YAML) $(REDOC_CLI)
+	$(REDOC_CLI) serve $(SWAGGER_YAML)
 
 CONTAINER=$(BUILD_DIR)/monetr.container.tar
 $(CONTAINER): $(BUILD_DIR) $(PWD)/Dockerfile $(PWD)/.dockerignore $(APP_GO_FILES) $(STATIC_DIR)
@@ -222,9 +215,9 @@ docker-work-web-ui:
 	docker build -t workwebui -f Dockerfile.work .
 
 ifdef GITHUB_TOKEN
-license: $(LICENSE) build
+license: $(LICENSE) $(BINARY)
 	$(call infoMsg,Checking dependencies for open source licenses)
-	-$(LICENSE) $(PWD)/licenses.hcl $(LOCAL_BIN)/monetr
+	-$(LICENSE) $(PWD)/licenses.hcl $(BINARY)
 else
 .PHONY: license
 license:
@@ -258,24 +251,6 @@ ifdef GITHUB_ACTION
 include $(PWD)/Makefile.github-actions
 endif
 
-# PostgreSQL tests currently only work in CI pipelines.
-ifdef CI
-PG_TEST_EXTENSION_QUERY = "CREATE EXTENSION pgtap;"
-JUNIT_OUTPUT_FILE=$(PWD)/postgres-junit.xml
-pg_test:
-	@for FILE in $(PWD)/schema/*.up.sql; do \
-		echo "Applying $$FILE"; \
-  		psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -h $(POSTGRES_HOST) -f $$FILE || exit 1; \
-  	done;
-	psql -q -d $(POSTGRES_DB) -U $(POSTGRES_USER) -h $(POSTGRES_HOST) -c $(PG_TEST_EXTENSION_QUERY)
-	-JUNIT_OUTPUT_FILE=$(JUNIT_OUTPUT_FILE) pg_prove \
-		-h $(POSTGRES_HOST) \
-		-U $(POSTGRES_USER) \
-		-d $(POSTGRES_DB) -f \
-		-c $(PWD)/tests/pg/*.sql --verbose --harness TAP::Harness::JUnit
-endif
-
-include $(PWD)/Makefile.release
 include $(PWD)/Makefile.docker
 
 ifndef CI
