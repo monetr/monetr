@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/pkg/internal/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
@@ -20,10 +21,8 @@ func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
 	repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
 
 	plaidLink := models.PlaidLink{
-		ItemId: gofakeit.Generate("???????????????????????????????????"),
-		Products: []string{
-			"transactions",
-		},
+		ItemId:          gofakeit.Generate("???????????????????????????????????"),
+		Products:        consts.PlaidProductStrings(),
 		WebhookUrl:      "https://monetr.mini/api/plaid/webhook",
 		InstitutionId:   gofakeit.Generate("ins_######"),
 		InstitutionName: fmt.Sprintf("Bank Of %s", gofakeit.City()),

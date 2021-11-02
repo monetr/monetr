@@ -10,6 +10,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/platypus"
 	"github.com/monetr/monetr/pkg/models"
@@ -368,11 +369,8 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	plaidLink := models.PlaidLink{
-		ItemId: result.ItemId,
-		Products: []string{
-			// TODO (elliotcourant) Make this based on what product's we sent in the create link token request.
-			"transactions",
-		},
+		ItemId:          result.ItemId,
+		Products:        consts.PlaidProductStrings(),
 		WebhookUrl:      webhook,
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,

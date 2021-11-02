@@ -443,7 +443,7 @@ $(VAULT_SERVICE_ACCOUNT): $(YQ)
 $(VAULT_SERVICE_ACCOUNT): SECRET_NAME=$(shell $(KUBECTL) get serviceaccounts monetr --namespace $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.secrets[0].name' -)
 $(VAULT_SERVICE_ACCOUNT): TOKEN=$(shell $(KUBECTL) get secrets $(SECRET_NAME) --namespace $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.data.token' - | base64 -d)
 $(VAULT_SERVICE_ACCOUNT): $(LOCAL_DIR)
-	echo "$(TOKEN)" >> $(VAULT_SERVICE_ACCOUNT)
+	echo "$(TOKEN)" > $(VAULT_SERVICE_ACCOUNT)
 
 unseal-vault-mini: $(VAULT_JSON) $(JQ)
 unseal-vault-mini: VAULT_UNSEAL_KEY=$(shell cat $(VAULT_JSON) | $(JQ) -r ".unseal_keys_b64[]")

@@ -10,6 +10,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
@@ -17,16 +18,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
-)
-
-var (
-	PlaidLanguage  = "en"
-	PlaidCountries = []plaid.CountryCode{
-		plaid.COUNTRYCODE_US,
-	}
-	PlaidProducts = []plaid.Products{
-		plaid.PRODUCTS_TRANSACTIONS,
-	}
 )
 
 type (
@@ -166,8 +157,8 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 		LinkTokenCreate(span.Context()).
 		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
 			ClientName:   "monetr",
-			Language:     PlaidLanguage,
-			CountryCodes: PlaidCountries,
+			Language:     consts.PlaidLanguage,
+			CountryCodes: consts.PlaidCountries,
 			User: plaid.LinkTokenCreateRequestUser{
 				ClientUserId:             options.ClientUserID,
 				LegalName:                &options.LegalName,
@@ -178,7 +169,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 				Ssn:                      nil,
 				DateOfBirth:              nil,
 			},
-			Products:              &PlaidProducts,
+			Products:              &consts.PlaidProducts,
 			Webhook:               webhooksUrl,
 			AccessToken:           nil,
 			LinkCustomizationName: nil,
@@ -285,7 +276,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 		InstitutionsGetById(span.Context()).
 		InstitutionsGetByIdRequest(plaid.InstitutionsGetByIdRequest{
 			InstitutionId: institutionId,
-			CountryCodes:  PlaidCountries,
+			CountryCodes:  consts.PlaidCountries,
 			Options: &plaid.InstitutionsGetByIdRequestOptions{
 				IncludeOptionalMetadata:          myownsanity.BoolP(true),
 				IncludeStatus:                    myownsanity.BoolP(true),

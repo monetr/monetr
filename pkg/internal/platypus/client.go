@@ -8,6 +8,7 @@ import (
 
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 
 	"github.com/getsentry/sentry-go"
@@ -205,8 +206,8 @@ func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
 		LinkTokenCreate(span.Context()).
 		LinkTokenCreateRequest(plaid.LinkTokenCreateRequest{
 			ClientName:   "monetr",
-			Language:     PlaidLanguage,
-			CountryCodes: PlaidCountries,
+			Language:     consts.PlaidLanguage,
+			CountryCodes: consts.PlaidCountries,
 			User: plaid.LinkTokenCreateRequestUser{
 				ClientUserId: strconv.FormatUint(p.accountId, 10),
 			},
