@@ -2185,18 +2185,16 @@ paths:
       summary: Check API Health
       tags:
       - Health
-  /link/{linkId:uint64}/institution:
+  /institutions/{institutionId}:
     get:
-      description: |-
-        Retrieve's the details of the institution associated with the link. This is only available for links
-        created by Plaid.
-      operationId: get-link-institution-details
+      description: Retrieve Plaid institution details using Plaid's institution ID.
+      operationId: get-institution-details
       parameters:
-      - description: Link ID.
+      - description: Institution ID
         in: path
-        name: linkId
+        name: institutionId
         required: true
-        type: integer
+        type: string
       responses:
         "200":
           description: OK
@@ -2212,9 +2210,9 @@ paths:
             $ref: '#/definitions/controller.ApiError'
       security:
       - ApiKeyAuth: []
-      summary: Get Link Institution Details
+      summary: Get Institution Details
       tags:
-      - Links
+      - Institutions
   /link/wait/{linkId:uint64}:
     get:
       description: |-

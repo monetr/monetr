@@ -1270,6 +1270,50 @@ var doc = `{
                 }
             }
         },
+        "/institutions/{institutionId}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve Plaid institution details using Plaid's institution ID.",
+                "tags": [
+                    "Institutions"
+                ],
+                "summary": "Get Institution Details",
+                "operationId": "get-institution-details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Institution ID",
+                        "name": "institutionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/swag.InstitutionResponse"
+                        }
+                    },
+                    "402": {
+                        "description": "Payment Required",
+                        "schema": {
+                            "$ref": "#/definitions/controller.SubscriptionNotActiveError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/link/wait/{linkId:uint64}": {
             "get": {
                 "security": [
@@ -1304,50 +1348,6 @@ var doc = `{
                     },
                     "408": {
                         "description": ""
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ApiError"
-                        }
-                    }
-                }
-            }
-        },
-        "/link/{linkId:uint64}/institution": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieve's the details of the institution associated with the link. This is only available for links\ncreated by Plaid.",
-                "tags": [
-                    "Links"
-                ],
-                "summary": "Get Link Institution Details",
-                "operationId": "get-link-institution-details",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Link ID.",
-                        "name": "linkId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/swag.InstitutionResponse"
-                        }
-                    },
-                    "402": {
-                        "description": "Payment Required",
-                        "schema": {
-                            "$ref": "#/definitions/controller.SubscriptionNotActiveError"
-                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
