@@ -4,11 +4,13 @@ ARG REVISION
 ARG RELEASE
 ARG GOFLAGS
 
-COPY ./ /build
 WORKDIR /build
 
 ENV GOFLAGS=$GOFLAGS
-RUN go get ./...
+COPY ./go.mod ./go.sum /build/
+RUN go mod download -x
+
+COPY ./ /build
 RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.release=$RELEASE" -o /bin/monetr github.com/monetr/monetr/pkg/cmd
 
 FROM ubuntu:20.04

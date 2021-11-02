@@ -285,7 +285,6 @@ build-rest-api-mini: wait-for-docker $(YQ) $(STATIC_DIR)
 	eval $$(minikube docker-env) && docker build \
 		--build-arg GOFLAGS="-tags=mini" \
 		--build-arg REVISION=$(RELEASE_REVISION) \
-		--build-arg BUILD_TIME=$(BUILD_TIME) \
 		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
 		-t $(IMAGE_NAME) \
 		-f Dockerfile .
