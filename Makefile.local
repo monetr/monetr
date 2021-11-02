@@ -169,7 +169,7 @@ init-mini-values: $(YQ) $(HELM)
 	$(YQ) e '.api.redis.address = "redis.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.cors.allowedOrigins[0] = "https://app.$(LOCAL_DOMAIN)"' -i $(VALUES)
 	$(YQ) e '.api.cors.debug = false' -i $(VALUES)
-	$(YQ) e '.serviceAccountName = "rest-api"' -i $(VALUES)
+	$(YQ) e '.serviceAccountName = "monetr"' -i $(VALUES)
 	$(YQ) e 'del(.api.vault.tokenFile)' -i $(VALUES)
 	$(YQ) e '.api.email.enabled = true' -i $(VALUES)
 	$(YQ) e '.api.email.domain = "monetr.mini"' -i $(VALUES)
@@ -373,6 +373,7 @@ vault-mini:
 	$(MAKE) vault-terraform
 	$(MAKE) vault-token
 	$(MAKE) $(VAULT_SERVICE_ACCOUNT)
+	$(MAKE) configure-vault
 
 vault-token: $(VAULT_JSON) $(JQ)
 	@echo "\033[0;31m#################################################################################\033[0m"
@@ -407,7 +408,7 @@ $(VAULT_JSON):
 
 VAULT_SERVICE_ACCOUNT=$(LOCAL_DIR)/vault-service-account-token
 $(VAULT_SERVICE_ACCOUNT): $(YQ)
-$(VAULT_SERVICE_ACCOUNT): SECRET_NAME=$(shell $(KUBECTL) get serviceaccounts rest-api --namespace $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.secrets[0].name' -)
+$(VAULT_SERVICE_ACCOUNT): SECRET_NAME=$(shell $(KUBECTL) get serviceaccounts monetr --namespace $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.secrets[0].name' -)
 $(VAULT_SERVICE_ACCOUNT): TOKEN=$(shell $(KUBECTL) get secrets $(SECRET_NAME) --namespace $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.data.token' - | base64 -d)
 $(VAULT_SERVICE_ACCOUNT): $(LOCAL_DIR)
 	echo "$(TOKEN)" >> $(VAULT_SERVICE_ACCOUNT)
@@ -418,9 +419,9 @@ unseal-vault-mini: $(VAULT_JSON) $(JQ)
 
 configure-vault: $(VAULT_JSON) $(YQ) $(VALUES)
 	$(YQ) e '.api.vault.enabled = true' -i $(VALUES)
-	$(YQ) e '.api.vault.address = "vault.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
-	$(YQ) e '.api.vault.role = "rest-api"' -i $(VALUES)
-	$(MAKE) deploy-mini-application
+	$(YQ) e '.api.vault.address = "http://vault.$(MINIKUBE_NAMESPACE).svc.cluster.local"' -i $(VALUES)
+	$(YQ) e '.api.vault.role = "monetr"' -i $(VALUES)
+	$(YQ) e 'del(.api.vault.tokenFile)' -i $(VALUES)
 
 clean-vault-mini:
 	rm -rf $(VAULT_JSON)
@@ -453,9 +454,6 @@ mail-mini: $(VALUES) $(YQ)
 	$(YQ) e '.api.smtp.password = "mailPassword"' -i $(VALUES)
 	$(YQ) e '.api.smtp.host = "mail.default.svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.smtp.port = 1025' -i $(VALUES)
-	@echo "\033[0;31m#################################################################################\033[0m"
-	@echo "mailhog is now accessible at: https://mail.$(LOCAL_DOMAIN)"
-	@echo "\033[0;31m#################################################################################\033[0m"
 
 
 

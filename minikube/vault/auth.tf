@@ -26,7 +26,7 @@ resource "vault_generic_endpoint" "monetr-user" {
 
   data_json = jsonencode({
     policies = [
-      vault_policy.rest-api-service-policy.name,
+      vault_policy.monetr.name,
     ]
     password = "password"
   })

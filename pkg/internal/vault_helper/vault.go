@@ -5,17 +5,20 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"io/ioutil"
+	"math"
+	"net"
+	"net/http"
+	"net/url"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/getsentry/sentry-go"
 	"github.com/hashicorp/vault/api"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net"
-	"net/http"
-	"net/url"
-	"sync"
-	"time"
 )
 
 type Config struct {
@@ -45,15 +48,19 @@ var (
 )
 
 type vaultBase struct {
-	host     string
-	config   Config
-	log      *logrus.Entry
-	client   *api.Client
-	usingTLS bool
-	tlsWatch sync.Once
-	lock     sync.RWMutex
-	tls      *tls.Config
-	closer   chan chan error
+	tokenTTL        sync.Once
+	tokenSync       sync.RWMutex
+	tokenExpiration int64
+	tokenCloser     chan chan error
+	host            string
+	config          Config
+	log             *logrus.Entry
+	client          *api.Client
+	usingTLS        bool
+	tlsWatch        sync.Once
+	lock            sync.RWMutex
+	tls             *tls.Config
+	closer          chan chan error
 }
 
 func NewVaultHelper(log *logrus.Entry, config Config) (VaultHelper, error) {
@@ -112,6 +119,9 @@ func NewVaultHelper(log *logrus.Entry, config Config) (VaultHelper, error) {
 	if err = helper.authenticate(); err != nil {
 		return nil, err
 	}
+
+	// Start the authentication worker.
+	helper.authenticationWorker()
 
 	return helper, nil
 }
@@ -214,30 +224,64 @@ func (v *vaultBase) reloadTLS() error {
 	return nil
 }
 
+func (v *vaultBase) authenticationWorker() {
+	v.tokenTTL.Do(func() {
+		log := v.log
+		if atomic.LoadInt64(&v.tokenExpiration) == math.MaxInt64 {
+			log.Info("vault token will never expire, background token refresher will not be started")
+			return
+		}
+
+		go func() {
+			log.Debug("vault token refresh worker has started, tokens will be refreshed before they expire")
+			v.tokenCloser = make(chan chan error, 1)
+
+			// Check to see if the token is going to expire every minute
+			frequency := 1 * time.Minute
+			ticker := time.NewTimer(frequency)
+			for {
+				select {
+				case <-ticker.C:
+					// If the token will expire before we check it next, then refresh the token.
+					if atomic.LoadInt64(&v.tokenExpiration) < time.Now().Add(frequency).Unix() {
+						log.Debug("token will expire before the next check, refreshing token")
+						if err := v.authenticate(); err != nil {
+							log.WithError(err).Error("failed to refresh vault token")
+						}
+					}
+				case promise := <-v.tokenCloser:
+					log.Info("stopping refresh token worker")
+					promise <- nil
+					return
+				}
+			}
+		}()
+	})
+}
+
 func (v *vaultBase) authenticate() error {
+	v.tokenSync.Lock()
+	defer v.tokenSync.Unlock()
 	log := v.log.WithField("method", v.config.Auth)
 
+	var auth *api.SecretAuth
 	switch v.config.Auth {
 	case "userpass":
 		log.Trace("authenticating to vault")
 		result, err := v.client.Logical().Write("auth/userpass/login/"+v.config.Username, map[string]interface{}{
 			"password": v.config.Password,
-			"role": v.config.Role,
+			"role":     v.config.Role,
 		})
 		if err != nil {
 			log.WithError(err).Errorf("failed to authenticate to vault")
 			return errors.Wrap(err, "failed to authenticate to vault")
 		}
-
-		if result.Auth == nil {
-			log.WithError(err).Fatalf("no authentication returned from vault")
-			return errors.Errorf("no authentication returned from vault")
-		}
-
-		v.client.SetToken(result.Auth.ClientToken)
-		log.Trace("successfully authenticated to vault")
+		auth = result.Auth
 	case "token":
-		v.client.SetToken(v.config.Token)
+		auth = &api.SecretAuth{
+			ClientToken:   v.config.Token,
+			LeaseDuration: 0,
+		}
 	case "kubernetes":
 		log.Trace("authenticating to vault")
 		var token string
@@ -269,17 +313,29 @@ func (v *vaultBase) authenticate() error {
 			log.WithError(err).Errorf("failed to authenticate to vault")
 			return errors.Wrap(err, "failed to authenticate to vault")
 		}
-
-		if result.Auth == nil {
-			log.WithError(err).Fatalf("no authentication returned from vault")
-			return errors.Errorf("no authentication returned from vault")
-		}
-
-		v.client.SetToken(result.Auth.ClientToken)
-		log.Trace("successfully authenticated to vault")
+		auth = result.Auth
 	default:
 		return errors.Errorf("%s authentication not implemented", v.config.Auth)
 	}
+
+	if auth == nil {
+		log.Fatalf("no authentication returned from vault")
+		return errors.Errorf("no authentication returned from vault")
+	}
+
+	var nextExpiration int64
+	if auth.LeaseDuration == 0 {
+		// If the token does not expire, store a timestamp so far in the future that we won't ever re-auth
+		nextExpiration = math.MaxInt64
+	} else {
+		// If the token does expire, store the expiration time (minus 10 seconds) to have a safe buffer.
+		nextExpiration = time.Now().Unix() + int64(auth.LeaseDuration) - 10
+	}
+
+	atomic.StoreInt64(&v.tokenExpiration, nextExpiration)
+
+	v.client.SetToken(auth.ClientToken)
+	log.Trace("successfully authenticated to vault")
 
 	return nil
 }
@@ -346,12 +402,26 @@ func (v *vaultBase) DeleteKV(ctx context.Context, key string) error {
 }
 
 func (v *vaultBase) Close() error {
+	var err error
 	if v.closer != nil {
 		promise := make(chan error, 0)
 		v.closer <- promise
 
-		return <-promise
+		err = <-promise
+		if err != nil {
+			v.log.WithError(err).Errorf("failed to close TLS worker")
+		}
 	}
 
-	return nil
+	if v.tokenCloser != nil {
+		promise := make(chan error, 0)
+		v.closer <- promise
+
+		err = <-promise
+		if err != nil {
+			v.log.WithError(err).Errorf("failed to close token refresh worker")
+		}
+	}
+
+	return err
 }

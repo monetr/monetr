@@ -45,8 +45,6 @@ func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
 		CreatedByUserId:       user.UserId,
 		CreatedByUser:         &user,
 		UpdatedAt:             time.Now(),
-		UpdatedByUserId:       &user.UserId,
-		UpdatedByUser:         &user,
 		LastSuccessfulUpdate:  myownsanity.TimeP(time.Now()),
 		BankAccounts:          nil,
 	}

@@ -235,4 +235,4 @@ subjects:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: rest-api
+  name: monetr

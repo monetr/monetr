@@ -2,11 +2,12 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
-	"time"
 )
 
 func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Link, error) {
@@ -102,7 +103,6 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) erro
 	now := time.Now().UTC()
 	link.AccountId = r.AccountId()
 	link.CreatedByUserId = userId
-	link.UpdatedByUserId = &userId
 	link.CreatedAt = now
 	link.UpdatedAt = now
 
@@ -114,9 +114,7 @@ func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) erro
 	span := sentry.StartSpan(ctx, "UpdateLink")
 	defer span.Finish()
 
-	userId := r.UserId()
 	link.AccountId = r.AccountId()
-	link.UpdatedByUserId = &userId
 	link.UpdatedAt = time.Now().UTC()
 
 	_, err := r.txn.ModelContext(span.Context(), link).WherePK().Returning(`*`).UpdateNotZero(link)

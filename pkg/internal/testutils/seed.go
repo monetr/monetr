@@ -78,7 +78,6 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				CreatedAt:       now,
 				CreatedByUserId: user.UserId,
 				UpdatedAt:       now,
-				UpdatedByUserId: &user.UserId,
 			}
 
 			_, err := txn.Model(&manualLink).Insert(&manualLink)
@@ -147,7 +146,6 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				CreatedAt:       now,
 				CreatedByUserId: user.UserId,
 				UpdatedAt:       now,
-				UpdatedByUserId: &user.UserId,
 			}
 
 			_, err = txn.Model(&withPlaidLink).Insert(&withPlaidLink)

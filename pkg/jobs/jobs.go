@@ -184,7 +184,12 @@ func (j *jobManagerBase) middleware(job *work.Job, next work.NextMiddlewareFunc)
 		}
 	}()
 
-	return next()
+	if err := next(); err != nil {
+		log.WithError(err).Errorf("failed to complete job successfully")
+		return err
+	}
+
+	return nil
 }
 
 func (j *jobManagerBase) getAccountId(job *work.Job) (uint64, error) {

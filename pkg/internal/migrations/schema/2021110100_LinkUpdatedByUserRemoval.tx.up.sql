@@ -1,0 +1,1 @@
+ALTER TABLE "links" DROP COLUMN "updated_by_user_id";
