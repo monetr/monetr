@@ -28,6 +28,8 @@ else
         ARCH=arm64
     endif
 endif
+# If we still didn't figure out the architecture, then just default to amd64
+ARCH ?= amd64
 
 ENVIRONMENT ?= $(shell echo $${BUIlDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT:-Local})
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
