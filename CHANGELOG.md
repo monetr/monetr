@@ -1,5 +1,24 @@
 # Changelog
 
+### [0.2.1](https://www.github.com/monetr/monetr/compare/v0.2.0...v0.2.1) (2021-11-02)
+
+
+### Bug Fixes
+
+* Added terraform to local dependencies. ([4221f14](https://www.github.com/monetr/monetr/commit/4221f140954bca7709865e9f5df5d48b7d294c20))
+* **deps:** update dependency @stripe/stripe-js to v1.21.0 ([18e146f](https://www.github.com/monetr/monetr/commit/18e146fa2938e8a4a2150b2ac974abf84d2ce0cd))
+* **deps:** update dependency @testing-library/jest-dom to v5.15.0 ([1506f9f](https://www.github.com/monetr/monetr/commit/1506f9fd5333b5425f46d946701ffccc4afaafad))
+* Ensure `client_name` sent to Plaid is correct. ([6af5f72](https://www.github.com/monetr/monetr/commit/6af5f72238abdc3b725c16b7ff24fe36ca507421)), closes [#185](https://www.github.com/monetr/monetr/issues/185)
+* Ensure `products` parameter of `/link/token/create` is correct. ([28c8fa1](https://www.github.com/monetr/monetr/commit/28c8fa1a4c30d15c71bf41005aecd2102c65d9a8)), closes [#186](https://www.github.com/monetr/monetr/issues/186)
+* Fixed `ARCH` not being set in Makefile. ([7389583](https://www.github.com/monetr/monetr/commit/738958380102816714f76a3c6f3ea2511fcded72))
+* Fixed `make init-mini` vault bug. ([6129da6](https://www.github.com/monetr/monetr/commit/6129da6719e475e1d0f09d35989f0a8f8134460a))
+* Fixed `RedirectToCheckoutOptions` import change in Stripe upgrade. ([b967871](https://www.github.com/monetr/monetr/commit/b9678714d664b2820dbff32fca2aa0aeb4d685a5))
+* Improving Dockerfile build efficiency. ([e9277db](https://www.github.com/monetr/monetr/commit/e9277db2ba2863c17754542668bb2f21070ef7a5))
+* Moved institution details endpoint and allow institution ID param. ([c82e8bd](https://www.github.com/monetr/monetr/commit/c82e8bd6deaff6d5154246b40aaf918f1242ac10))
+* No longer require `docker` for local development. ([7bd3afb](https://www.github.com/monetr/monetr/commit/7bd3afbf23a74310214ae57ff3c55a064ea2bfa4))
+* Removed PostgreSQL tests, makefile and github actions cleanup. ([e0dfab9](https://www.github.com/monetr/monetr/commit/e0dfab907f41d805bb3760c6e4772978b298d4ae))
+* Removed unusued go tools. ([5d6c35b](https://www.github.com/monetr/monetr/commit/5d6c35bdc60f106f827c88d05256061990cf9b54))
+
 ## [0.2.0](https://www.github.com/monetr/monetr/compare/v0.1.1...v0.2.0) (2021-11-02)
 
 
