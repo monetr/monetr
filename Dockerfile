@@ -8,7 +8,7 @@ WORKDIR /build
 
 ENV GOFLAGS=$GOFLAGS
 COPY ./go.mod ./go.sum /build/
-RUN go mod download -x
+RUN go mod download
 
 COPY ./ /build
 RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.release=$RELEASE" -o /bin/monetr github.com/monetr/monetr/pkg/cmd

@@ -1,6 +1,6 @@
 # Ignore everything
 **
 
-!/pkg
-!/go.mod
-!/go.sum
+!pkg
+!go.mod
+!go.sum

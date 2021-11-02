@@ -9,8 +9,25 @@ COVERAGE_TXT = $(PWD)/coverage.txt
 
 KUBERNETES_VERSION=1.18.5
 
-ARCH ?= amd64
-OS ?= $(shell uname -s | tr A-Z a-z)
+ifeq ($(OS),Windows_NT)
+	OS=windows
+	# I'm not sure how arm64 will show up on windows. I also have no idea how this makefile would even work on windows.
+	# It probably wouldn't.
+	ARCH ?= amd64
+else
+	OS ?= $(shell uname -s | tr A-Z a-z)
+    UNAME_P := $(shell uname -p)
+    ifeq ($(UNAME_P),x86_64)
+		ARCH=amd64
+    endif
+    ifneq ($(filter %86,$(UNAME_P)),)
+    	# This can happen on macOS with Intel CPUs, we get an i386 arch.
+		ARCH=amd64
+    endif
+    ifneq ($(filter arm%,$(UNAME_P)),)
+        ARCH=arm64
+    endif
+endif
 
 ENVIRONMENT ?= $(shell echo $${BUIlDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT:-Local})
 ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
@@ -202,8 +219,10 @@ $(REDOC_CLI): $(NODE_MODULES)
 docs-local: $(SWAGGER_YAML) $(REDOC_CLI)
 	$(REDOC_CLI) serve $(SWAGGER_YAML)
 
+DOCKERFILE=$(PWD)/Dockerfile
+DOCKER_DEPS=$(DOCKERFILE) $(PWD)/.dockerignore
 CONTAINER=$(BUILD_DIR)/monetr.container.tar
-$(CONTAINER): $(BUILD_DIR) $(PWD)/Dockerfile $(PWD)/.dockerignore $(APP_GO_FILES) $(STATIC_DIR)
+$(CONTAINER): $(BUILD_DIR) $(DOCKER_DEPS) $(APP_GO_FILES) $(STATIC_DIR)
 	docker buildx $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
 		--build-arg REVISION=$(RELEASE_REVISION) \
 		--output type=tar,dest=$(CONTAINER) \

@@ -21,8 +21,7 @@ spec:
     spec:
       containers:
         - name: work
-          image: registry.monetr.mini/work
-          imagePullPolicy: Always
+          image: "{{IMAGE_NAME}}"
           command:
             - /bin/workwebui
             - -listen=:8080

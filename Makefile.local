@@ -3,23 +3,21 @@ LOCAL_CERTS = $(LOCAL_DIR)/certs
 PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
 
 # Tools used to run the application locally
-JQ=$(LOCAL_BIN)/jq
-KUBECTL=minikube kubectl --
-VAULT=vault
-PGO=$(LOCAL_BIN)/pgo
+MINIKUBE=$(shell which minikube)
+KUBECTL=$(MINIKUBE) kubectl --
 
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=redis kms mail work pgadmin pghero vault ngrok registry app api
+SUBDOMAINS=redis mail work pgadmin pghero vault ngrok app
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
 REGISTER_JWT_SECRET=$(LOCAL_DIR)/register_jwt_secret.txt
 
-LOCAL_REST_API_DEPLOY=$(LOCAL_DIR)/rest-api-yaml
+LOCAL_MONETR_DEPLOY=$(LOCAL_DIR)/monetr-yaml
 
-REST_API_IMAGE_NAME=monetr
+MONETR_IMAGE_NAME=monetr
 
 $(LOCAL_DIR):
 	mkdir -p $(LOCAL_DIR)
@@ -31,26 +29,37 @@ info:
 
 stop-mini: $(HOSTESS)
 	$(call infoMsg,Stoppping the minikube cluster)
-	minikube stop || true
+	-$(MINIKUBE) stop
 	$(call infoMsg,Removing our hostnames from /etc/hosts)
 	for subdomain in $(SUBDOMAINS); do sudo $(HOSTESS) rm $$subdomain.$(LOCAL_DOMAIN) || true; done
 
 clean-mini: stop-mini clean-certificates
 	$(call infoMsg,Deleting the contents of the stopped cluster; makes sure our environment is clean the next time)
-	minikube delete || true
-	rm -rf $(VALUES) || true
-	rm -rf $(PWD)/local || true
-	rm -rf $(LOCAL_TMP) || true
-	rm -rf $(LOCAL_BIN) || true
+	-$(MINIKUBE) delete
+	-rm -rf $(VALUES)
+	-rm -rf $(LOCAL_DIR)
+	-rm -rf $(LOCAL_TMP)
+	-rm -rf $(LOCAL_BIN)
 	$(MAKE) clean
 
 init-mini: info
 	$(call infoMsg,Setting stuff up)
-	(minikube status | grep "minikube start") && $(MAKE) start-minikube
+	($(MINIKUBE) status | grep "minikube start") && $(MAKE) start-minikube
 	$(MAKE) setup-hosts
 	$(MAKE) deploy-services
 	$(MAKE) deploy-mini-application
-	$(MAKE) vault-token
+	$(MAKE) mini-info
+
+# This is a bit of a hack, but on Macs we cannot run the commands needed for minikube's ingress-dns (documented here:
+# https://minikube.sigs.k8s.io/docs/handbook/addons/ingress-dns/#mdns-reloading) because of System Integrity Protection.
+# So we check for the protection, and if it is enabled; then we use the /etc/hosts file instead. And if it is not then
+# we try to run the commands documented.
+# **NOTE** This is not yet used, but it will be in the future.
+CSRUTIL_STATUS=$(shell ((csrutil status | grep enabled) > /dev/null 2>&1 && echo "enabled") || echo "disabled")
+
+mini-info: $(JQ) $(VAULT_JSON)
+mini-info: VAULT_TOKEN=$(shell cat $(VAULT_JSON) | $(JQ) -r '.root_token')
+mini-info:
 	$(call infoMsg,=====================================================================================================)
 	$(call infoMsg,Local environment is setup.)
 	$(call infoMsg,You should be able to access monetr at:       https://app.$(LOCAL_DOMAIN))
@@ -60,24 +69,34 @@ init-mini: info
 	$(call infoMsg,    Secrets:                                  https://vault.$(LOCAL_DOMAIN))
 	$(call infoMsg,    PGAdmin:                                  https://pgadmin.$(LOCAL_DOMAIN))
 	$(call infoMsg,    Redis:                                    https://redis.$(LOCAL_DOMAIN))
+	$(call infoMsg,    gocraft/work UI:                          https://work.$(LOCAL_DOMAIN))
+	$(call infoMsg,)
+	$(call infoMsg,You can login to Vault using the following credentials)
+	$(call infoMsg,    Username: monetr)
+	$(call infoMsg,    Password: password)
+	$(call infoMsg,Or you can use the root Vault token)
+	$(call infoMsg,    Root Token: $(VAULT_TOKEN))
+	$(call infoMsg,To access Vault using the CLI you can run the following command:)
+	$(call infoMsg,  $$ export VAULT_ADDR=https://vault.$(LOCAL_DOMAIN) && export VAULT_TOKEN=$(VAULT_TOKEN))
 	$(call infoMsg,)
 	$(call infoMsg,To develop monetr locally; run the following command in the base directory of the repository:)
-	$(call infoMsg,  $ make local)
+	$(call infoMsg,  $$ make local)
+	$(call infoMsg,This will start a new tmux session that runs yarn and a minikube tunnel. You will need to run the)
+	$(call infoMsg,monetr go package locally though as it is not running in minikube during this.)
+	$(call infoMsg,It is recommended that you run monetr from a debugger, but you can run it any way you prefer.)
 	$(call infoMsg,)
 	$(call infoMsg,If you run into problems or need a clean development environment; run the following command:)
-	$(call infoMsg,  $ make clean-mini)
+	$(call infoMsg,  $$ make clean-mini)
 	$(call infoMsg,This command will clean up all of the resources needed for local development and let you start over.)
+	$(call infoMsg,)
+	$(call infoMsg, System Integrity Protection: $(CSRUTIL_STATUS))
+	$(call infoMsg,)
+	$(call infoMsg,You can see all of these details at any time by running the following command:)
+	$(call infoMsg,  $$ make mini-info)
+	$(call infoMsg,)
 	$(call infoMsg,=====================================================================================================)
 
-
-# This is a bit of a hack, but on Macs we cannot run the commands needed for minikube's ingress-dns (documented here:
-# https://minikube.sigs.k8s.io/docs/handbook/addons/ingress-dns/#mdns-reloading) because of System Integrity Protection.
-# So we check for the protection, and if it is enabled; then we use the /etc/hosts file instead. And if it is not then
-# we try to run the commands documented.
-# **NOTE** This is not yet used, but it will be in the future.
-CSRUTIL_STATUS=$(shell ((csrutil status | grep enabled) > /dev/null 2>&1 && echo "true") || echo "false")
-
-setup-hosts: MINIKUBE_IP=$(shell minikube ip)
+setup-hosts: MINIKUBE_IP=$(shell $(MINIKUBE) ip)
 setup-hosts: $(HOSTESS) deploy-certificate
 	$(call infoMsg,Registering hosts with your /etc/hosts file; these are removed upon running: make clean-mini)
 	$(call infoMsg,This must be done as System Integrity Protection is enabled on your Mac and we cannot use DNS trickery. The hosts file is used instead.)
@@ -125,7 +144,7 @@ MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
 MINIKUBE_KUBERNETES_VERSION=v1.19.0
 start-minikube: $(MONETR_MINIKUBE_CERT)
 	$(info Starting minikube)
-	minikube start \
+	$(MINIKUBE) start \
 		--addons=ingress,ingress-dns,registry \
 		--cpus=$(MINIKUBE_CPUS) \
 		--memory=$(MINIKUBE_MEMORY) \
@@ -133,7 +152,7 @@ start-minikube: $(MONETR_MINIKUBE_CERT)
 		--driver=$(MINIKUBE_DRIVER) \
 		--kubernetes-version=$(MINIKUBE_KUBERNETES_VERSION) \
 		--embed-certs
-	minikube update-context
+	$(MINIKUBE) update-context
 
 
 $(LOGIN_JWT_SECRET): $(LOCAL_DIR)
@@ -146,8 +165,8 @@ $(REGISTER_JWT_SECRET): $(LOCAL_DIR)
 $(VALUES):
 	if [ ! -f "$(VALUES)" ]; then $(MAKE) init-mini-values; fi
 
-init-mini-values: MINIKUBE_IP=$(shell minikube ip)
-init-mini-values: REST_API_IMAGE_REPO = $(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME)
+init-mini-values: MINIKUBE_IP=$(shell $(MINIKUBE) ip)
+init-mini-values: REST_API_IMAGE_REPO = $(MINIKUBE_IP):5000/$(MONETR_IMAGE_NAME)
 init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 init-mini-values: LOGIN_JWT_SECRET_VALUE=$(shell cat $(LOGIN_JWT_SECRET))
 init-mini-values: REGISTER_JWT_SECRET_VALUE=$(shell cat $(REGISTER_JWT_SECRET))
@@ -212,7 +231,7 @@ deploy-certmanager:
 
 ROOT_CA_KEY=$(LOCAL_DIR)/root.key
 $(ROOT_CA_KEY):
-	@if [ ! -f "$(ROOT_CA_KEY)" ]; then make _generate-$(ROOT_CA_KEY); fi
+	@if [ ! -f "$(ROOT_CA_KEY)" ]; then $(MAKE) _generate-$(ROOT_CA_KEY); fi
 
 _generate-$(ROOT_CA_KEY): $(LOCAL_DIR)
 	$(call infoMsg,Generating new root CA key)
@@ -220,7 +239,7 @@ _generate-$(ROOT_CA_KEY): $(LOCAL_DIR)
 
 ROOT_CA_CRT=$(LOCAL_DIR)/root.crt
 $(ROOT_CA_CRT):
-	@if [ ! -f "$(ROOT_CA_CRT)" ]; then make _generate-$(ROOT_CA_CRT); fi
+	@if [ ! -f "$(ROOT_CA_CRT)" ]; then $(MAKE) _generate-$(ROOT_CA_CRT); fi
 
 _generate-$(ROOT_CA_CRT): $(LOCAL_DIR) $(ROOT_CA_KEY)
 	$(call infoMsg,Generating new root CA certificate)
@@ -263,7 +282,19 @@ deploy-pgadmin:
 	$(KUBECTL) apply -f $(PWD)/minikube/pgadmin.yaml -n $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/pgadmin --namespace $(MINIKUBE_NAMESPACE) --timeout=120s
 
-deploy-services: deploy-certmanager update-coredns deploy-redis deploy-postgres mail-mini vault-mini deploy-pgadmin
+MINI_WORK_DOCKER_HASH=$(LOCAL_DIR)/work_docker_hash.txt
+$(MINI_WORK_DOCKER_HASH): $(PWD)/Dockerfile.work
+$(MINI_WORK_DOCKER_HASH): HASH=$(shell md5sum $(PWD)/Dockerfile.work | md5)
+$(MINI_WORK_DOCKER_HASH): MINIKUBE_IP=$(shell $(MINIKUBE) ip)
+$(MINI_WORK_DOCKER_HASH): BASE_IMAGE_NAME = $(MINIKUBE_IP):5000/work:$(HASH)
+$(MINI_WORK_DOCKER_HASH):
+	$(MINIKUBE) image build . -t $(BASE_IMAGE_NAME) -f Dockerfile.work
+	cat $(PWD)/minikube/work.yaml | sed 's/{{IMAGE_NAME}}/$(MINIKUBE_IP):5000\/work:$(HASH)/g' | \
+ 		$(KUBECTL) apply -f - --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/work --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	echo "$(HASH)" > $(MINI_WORK_DOCKER_HASH)
+
+deploy-services: deploy-certmanager update-coredns deploy-redis deploy-postgres mail-mini vault-mini deploy-pgadmin $(MINI_WORK_DOCKER_HASH)
 	$(MAKE) deploy-certificate-authority
 
 SHELL_IMAGE=ghcr.io/elliotcourant/dotfiles/ubuntu:latest
@@ -273,34 +304,36 @@ shell:
 		--rm -ti --image=$(SHELL_IMAGE) \
 	 	-n $(MINIKUBE_NAMESPACE) --
 
-$(LOCAL_REST_API_DEPLOY):
-	mkdir -p $(LOCAL_REST_API_DEPLOY)
+$(LOCAL_MONETR_DEPLOY):
+	mkdir -p $(LOCAL_MONETR_DEPLOY)
 
-build-rest-api-mini: GO_HASH=$(shell find -s $(PWD)/pkg -type f -exec shasum {} \; | shasum | cut -d " " -f 1)
-build-rest-api-mini: LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" $$(date -u +%Y.%m.%d.%H.%M) $$(git config user.email))
-build-rest-api-mini: MINIKUBE_IP=$(shell minikube ip)
-build-rest-api-mini: BASE_IMAGE_NAME=$(MINIKUBE_IP):5000/$(REST_API_IMAGE_NAME)
-build-rest-api-mini: IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
-build-rest-api-mini: wait-for-docker $(YQ) $(STATIC_DIR)
-	eval $$(minikube docker-env) && docker build \
-		--build-arg GOFLAGS="-tags=mini" \
-		--build-arg REVISION=$(RELEASE_REVISION) \
-		--build-arg RELEASE=$(LOCAL_RELEASE_STR) \
-		-t $(IMAGE_NAME) \
-		-f Dockerfile .
+MINI_DOCKER_HASH=$(LOCAL_DIR)/docker_hash.txt
+$(MINI_DOCKER_HASH): $(APP_GO_FILES) $(YQ) $(STATIC_DIR) $(DOCKER_DEPS) $(LOCAL_DIR)
+$(MINI_DOCKER_HASH): STATIC_FILES=$(shell find $(STATIC_DIR) -type f)
+$(MINI_DOCKER_HASH): GO_HASH=$(shell md5sum $(APP_GO_FILES) $(DOCKER_DEPS) $(STATIC_FILES) | md5)
+$(MINI_DOCKER_HASH): LOCAL_RELEASE_STR=$(shell printf "LOCAL-%s-%s" "$(RELEASE_VERSION)" $$(git config user.email))
+$(MINI_DOCKER_HASH): MINIKUBE_IP=$(shell minikube ip)
+$(MINI_DOCKER_HASH): BASE_IMAGE_NAME = $(MINIKUBE_IP):5000/$(MONETR_IMAGE_NAME)
+$(MINI_DOCKER_HASH): IMAGE_NAME = $(BASE_IMAGE_NAME):$(GO_HASH)
+$(MINI_DOCKER_HASH):
+	$(MINIKUBE) image build . -t $(IMAGE_NAME) -f Dockerfile \
+		--build-opt build-arg="GOFLAGS=-tags=mini" \
+		--build-opt build-arg="REVISION=$(RELEASE_REVISION)" \
+		--build-opt build-arg="RELEASE=$(LOCAL_RELEASE_STR)"
 	$(YQ) e '.image.tag = "$(GO_HASH)"' -i $(VALUES)
+	echo "$(GO_HASH)" > $(MINI_DOCKER_HASH)
 
 deploy-mini-application: $(VALUES)
 deploy-mini-application: CONFIG_HASH=$(shell md5 -q $(VALUES))
-deploy-mini-application: $(HELM) $(LOCAL_REST_API_DEPLOY) build-rest-api-mini $(YQ) $(SPLIT_YAML)
+deploy-mini-application: $(HELM) $(LOCAL_MONETR_DEPLOY) $(MINI_DOCKER_HASH) $(YQ) $(SPLIT_YAML)
 	$(KUBECTL) apply -f $(PWD)/minikube/ingress.yaml --namespace $(MINIKUBE_NAMESPACE)
 	$(YQ) e '.podAnnotations.configHash = "$(CONFIG_HASH)"' -i $(VALUES)
-	$(HELM) template $(REST_API_IMAGE_NAME) $(PWD) \
+	$(HELM) template $(MONETR_IMAGE_NAME) $(PWD) \
  		--dry-run \
- 		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_REST_API_DEPLOY) -
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-api --namespace $(MINIKUBE_NAMESPACE) || true
-	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
+ 		--values=$(VALUES) | $(SPLIT_YAML) --outdir $(LOCAL_MONETR_DEPLOY) -
+	$(KUBECTL) delete svc/$(MONETR_IMAGE_NAME)-api --namespace $(MINIKUBE_NAMESPACE) || true
+	$(KUBECTL) apply -f $(LOCAL_MONETR_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/$(MONETR_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=30s
 
 local-postgres-certs:
 	mkdir -p $(LOCAL_DIR)/postgres
@@ -427,22 +460,6 @@ clean-vault-mini:
 	-rm -rf $(VAULT_JSON)
 	$(KUBECTL) delete -f $(PWD)/minikube/vault.yaml -n $(MINIKUBE_NAMESPACE)
 
-###################### gocraft/work UI ##################################
-WORK_IMAGE_NAME=registry.$(LOCAL_DOMAIN)/work
-work-mini:
-	eval $$(minikube docker-env) && docker build \
-		--cache-from=$(WORK_IMAGE_NAME):latest \
-		-t $(WORK_IMAGE_NAME):latest \
-		-f Dockerfile.work . && \
-		docker push $(WORK_IMAGE_NAME):latest
-	$(KUBECTL) apply -f $(PWD)/minikube/work.yaml \
-		--namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/work \
-		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
-	@echo "\033[0;31m#################################################################################\033[0m"
-	@echo "gocraft/work dashboard is now accessible at: https://work.$(LOCAL_DOMAIN)"
-	@echo "\033[0;31m#################################################################################\033[0m"
-
 ###################### Mailhog UI ##################################
 mail-mini: $(VALUES) $(YQ)
 	$(KUBECTL) apply -f $(PWD)/minikube/mailhog.yaml \
@@ -455,20 +472,15 @@ mail-mini: $(VALUES) $(YQ)
 	$(YQ) e '.api.smtp.host = "mail.default.svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.smtp.port = 1025' -i $(VALUES)
 
-
-
-
-
-
 .PHONY: local _local_ local-down
 local: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
 local: $(YQ)
 	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/api-endpoint.yaml | $(KUBECTL) apply -f -
 	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/ui-endpoint.yaml | $(KUBECTL) apply -f -
-	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-api -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
-	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
-	$(KUBECTL) get svc/$(REST_API_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.spec.ports[0].targetPort = 30000' - | $(KUBECTL) apply -f -
-	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) get svc/$(MONETR_IMAGE_NAME)-api -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(MONETR_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(MONETR_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.spec.ports[0].targetPort = 30000' - | $(KUBECTL) apply -f -
+	$(KUBECTL) scale deploy/$(MONETR_IMAGE_NAME) --replicas=0 -n $(MINIKUBE_NAMESPACE)
 ifdef TMUX
 	$(call warningMsg,Setting up minikube tunnel and webpack dev server in a separate session; if you want to stop this kill the monetr-local tmux session and run make local-down.)
 	$(MAKE) _local_
@@ -478,18 +490,18 @@ else
 endif
 
 local-down:
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-api --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) delete svc/$(REST_API_IMAGE_NAME)-ui --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) apply -f $(LOCAL_REST_API_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) scale deploy/$(REST_API_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
-	$(KUBECTL) rollout status deploy/$(REST_API_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
+	$(KUBECTL) delete svc/$(MONETR_IMAGE_NAME)-api --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) delete svc/$(MONETR_IMAGE_NAME)-ui --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) apply -f $(LOCAL_MONETR_DEPLOY) --namespace $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) scale deploy/$(MONETR_IMAGE_NAME) --replicas=1 -n $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/$(MONETR_IMAGE_NAME) --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 
 _local_:
 	-tmux has-session -t monetr-local && tmux kill-session -t monetr-local
 ifndef TMUX
 	tmux new -d -s monetr-local 'yarn start' \; attach -t monetr-local \; \
-		split-window 'minikube tunnel --cleanup=true' \;
+		split-window '$(MINIKUBE) tunnel --cleanup=true' \;
 else
 	tmux new -d -s monetr-local 'yarn start' \; switch -t monetr-local \; \
-		split-window 'minikube tunnel --cleanup=true' \;
+		split-window '$(MINIKUBE) tunnel --cleanup=true' \;
 endif
