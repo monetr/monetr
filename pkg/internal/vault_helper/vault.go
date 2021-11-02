@@ -237,8 +237,8 @@ func (v *vaultBase) authenticationWorker() {
 			v.tokenCloser = make(chan chan error, 1)
 
 			// Check to see if the token is going to expire every minute
-			frequency := 1 * time.Minute
-			ticker := time.NewTimer(frequency)
+			frequency := 30 * time.Second
+			ticker := time.NewTicker(frequency)
 			for {
 				select {
 				case <-ticker.C:
@@ -328,8 +328,9 @@ func (v *vaultBase) authenticate() error {
 		// If the token does not expire, store a timestamp so far in the future that we won't ever re-auth
 		nextExpiration = math.MaxInt64
 	} else {
-		// If the token does expire, store the expiration time (minus 10 seconds) to have a safe buffer.
-		nextExpiration = time.Now().Unix() + int64(auth.LeaseDuration) - 10
+		// If the token does expire, store the expiration time (minus 1 minute) to have a safe buffer.
+		nextExpiration = time.Now().Add(time.Duration(auth.LeaseDuration) * time.Second - 1 * time.Minute).Unix()
+		log.Debugf("vault authentication will refresh by %s", time.Unix(nextExpiration, 0))
 	}
 
 	atomic.StoreInt64(&v.tokenExpiration, nextExpiration)
