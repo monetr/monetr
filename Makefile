@@ -4,6 +4,7 @@ LOCAL_BIN = $(PWD)/bin
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1`)
+CONTAINER_VERSION = $(subst v,,$(RELEASE_VERSION))
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
@@ -252,18 +253,17 @@ VALUES_FILES=$(PWD)/values.yaml $(VALUES_FILE)
 TEMPLATE_FILES=$(PWD)/templates/*
 
 $(GENERATED_YAML): $(CHART_FILE) $(VALUES_FILES) $(TEMPLATE_FILES)
-$(GENERATED_YAML): IMAGE_TAG=$(shell git rev-parse HEAD)
 $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 	$(call infoMsg,Generating Kubernetes yaml using Helm output to:  $(GENERATED_YAML))
 	$(call infoMsg,Environment:                                      $(ENVIRONMENT))
 	$(call infoMsg,Using values file:                                $(VALUES_FILE))
+	$(call infoMsg,Deploying version:                                $(RELEASE_VERSION))
 	-rm -rf $(GENERATED_YAML)
 	-mkdir -p $(GENERATED_YAML)
 	$(HELM) template monetr $(PWD) \
 		--dry-run \
-		--set image.tag="$(IMAGE_TAG)" \
+		--set image.tag="$(CONTAINER_VERSION)" \
 		--set podAnnotations."monetr\.dev/date"="$(BUILD_TIME)" \
-		--set podAnnotations."monetr\.dev/sha"="$(IMAGE_TAG)" \
 		--values=values.$(ENV_LOWER).yaml | $(SPLIT_YAML) --outdir $(GENERATED_YAML) -
 
 generate: $(GENERATED_YAML)
