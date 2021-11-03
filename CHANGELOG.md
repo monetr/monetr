@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.2.2](https://www.github.com/monetr/monetr/compare/v0.2.1...v0.2.2) (2021-11-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @stripe/stripe-js to v1.21.1 ([cb3c740](https://www.github.com/monetr/monetr/commit/cb3c740ca10a784562a7732b7b13c749733f0e03))
+* **deps:** update sentry-javascript monorepo to v6.14.0 ([80649ff](https://www.github.com/monetr/monetr/commit/80649fff5bfc32a7284410cbf7223c697e55dd1e))
+
 ### [0.2.1](https://www.github.com/monetr/monetr/compare/v0.2.0...v0.2.1) (2021-11-02)
 
 
