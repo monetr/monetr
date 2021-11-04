@@ -22,14 +22,19 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *iris
 	// the real IP due to being behind several networking layers. Masquerade only works so much and
 	// I'm not sure of a better way.
 	app.UseGlobal(func(ctx *context.Context) {
+		var ipAddress string
 		if forwardedFor := ctx.GetHeader("X-Forwarded-For"); forwardedFor != "" {
-			ctx.Request().RemoteAddr = forwardedFor
+			ipAddress = forwardedFor
+		} else if realIp := ctx.GetHeader("X-Real-Ip"); realIp != "" {
+			ipAddress = realIp
 		}
+
+		ctx.Request().RemoteAddr = ipAddress
 
 		// This way we still have a way to correlate users even if they are not authenticated.
 		if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
 			hub.Scope().SetUser(sentry.User{
-				IPAddress: ctx.GetHeader("X-Forwarded-For"),
+				IPAddress: ipAddress,
 			})
 		}
 

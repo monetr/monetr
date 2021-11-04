@@ -14,11 +14,11 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
-	"github.com/monetr/monetr/pkg/hash"
-	"github.com/monetr/monetr/pkg/models"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
+	"github.com/monetr/monetr/pkg/hash"
+	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/swag"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
@@ -281,7 +281,6 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	var stripeCustomerId *string
 	if c.configuration.Stripe.Enabled {
-		stripeSpan := sentry.StartSpan(c.getContext(ctx), "Create Stripe Customer")
 		c.log.Debug("creating stripe customer for new user")
 		name := registerRequest.FirstName + " " + registerRequest.LastName
 		result, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
@@ -296,13 +295,9 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 			},
 		})
 		if err != nil {
-			stripeSpan.Status = sentry.SpanStatusInternalError
-			stripeSpan.Finish()
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
 			return
 		}
-		stripeSpan.Status = sentry.SpanStatusOK
-		stripeSpan.Finish()
 
 		stripeCustomerId = &result.ID
 	}
