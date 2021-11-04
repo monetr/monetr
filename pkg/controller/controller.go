@@ -379,6 +379,9 @@ func (c *Controller) reportError(ctx iris.Context, err error) {
 		if hub := sentry.GetHubFromContext(spanContext); hub != nil {
 			_ = hub.CaptureException(err)
 			hub.Scope().SetLevel(sentry.LevelError)
+		} else if hub = sentryiris.GetHubFromContext(ctx); hub != nil {
+			_ = hub.CaptureException(err)
+			hub.Scope().SetLevel(sentry.LevelError)
 		} else {
 			sentry.CaptureException(err)
 		}
