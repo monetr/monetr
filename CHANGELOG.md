@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.3.4](https://www.github.com/monetr/monetr/compare/v0.3.3...v0.3.4) (2021-11-04)
+
+
+### Bug Fixes
+
+* Allow log format to be configured. ([0aacf0a](https://www.github.com/monetr/monetr/commit/0aacf0a5fa8ab865b78233fb8d0a12b06d73042d)), closes [#237](https://www.github.com/monetr/monetr/issues/237)
+* **deps:** update dependency eslint-plugin-jest to v25.2.3 ([90a35f0](https://www.github.com/monetr/monetr/commit/90a35f01e1aca87583f21d2cd38aafc0a18c1a65))
+
 ### [0.3.3](https://www.github.com/monetr/monetr/compare/v0.3.2...v0.3.3) (2021-11-04)
 
 
