@@ -2,6 +2,8 @@ package logging
 
 import (
 	"sort"
+	"strings"
+	"time"
 
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/sirupsen/logrus"
@@ -14,39 +16,54 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 	if err != nil {
 		level = logrus.InfoLevel
 	}
-
 	logger.SetLevel(level)
-	logger.Formatter = &logrus.TextFormatter{
-		ForceColors:               false,
-		DisableColors:             false,
-		ForceQuote:                true,
-		DisableQuote:              false,
-		EnvironmentOverrideColors: false,
-		DisableTimestamp:          true,
-		FullTimestamp:             false,
-		TimestampFormat:           "",
-		DisableSorting:            false,
-		SortingFunc: func(input []string) {
-			if len(input) == 0 {
-				return
-			}
-			keys := make([]string, 0, len(input)-1)
-			for _, key := range input {
-				if key == "msg" {
-					continue
-				}
 
-				keys = append(keys, key)
-			}
-			sort.Strings(keys)
-			keys = append(keys, "msg")
-			copy(input, keys)
-		},
-		DisableLevelTruncation: false,
-		PadLevelText:           true,
-		QuoteEmptyFields:       false,
-		FieldMap:               nil,
-		CallerPrettyfier:       nil,
+	switch strings.ToLower(configuration.Format) {
+	default:
+		fallthrough
+	case "text":
+		logger.Formatter = &logrus.TextFormatter{
+			ForceColors:               false,
+			DisableColors:             false,
+			ForceQuote:                true,
+			DisableQuote:              false,
+			EnvironmentOverrideColors: false,
+			DisableTimestamp:          true,
+			FullTimestamp:             false,
+			TimestampFormat:           "",
+			DisableSorting:            false,
+			SortingFunc: func(input []string) {
+				if len(input) == 0 {
+					return
+				}
+				keys := make([]string, 0, len(input)-1)
+				for _, key := range input {
+					if key == "msg" {
+						continue
+					}
+
+					keys = append(keys, key)
+				}
+				sort.Strings(keys)
+				keys = append(keys, "msg")
+				copy(input, keys)
+			},
+			DisableLevelTruncation: false,
+			PadLevelText:           true,
+			QuoteEmptyFields:       false,
+			FieldMap:               nil,
+			CallerPrettyfier:       nil,
+		}
+	case "json":
+		logger.Formatter = &logrus.JSONFormatter{
+			TimestampFormat:   time.RFC3339,
+			DisableTimestamp:  false,
+			DisableHTMLEscape: false,
+			DataKey:           "",
+			FieldMap:          nil,
+			CallerPrettyfier:  nil,
+			PrettyPrint:       false,
+		}
 	}
 
 	if configuration.StackDriver.Enabled {

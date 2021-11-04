@@ -24,6 +24,7 @@ data:
   MONETR_CORS_ALLOWED_ORIGINS: {{ join "," .Values.api.cors.allowedOrigins }}
   MONETR_CORS_DEBUG: {{ quote .Values.api.cors.debug }}
   MONETR_LOG_LEVEL: {{ quote .Values.api.logging.level }}
+  MONETR_LOG_FORMAT: {{ quote .Values.api.logging.format }}
   MONETR_PLAID_ENVIRONMENT: {{ quote .Values.api.plaid.environment }}
   MONETR_PLAID_BIRTHDATE_PROMPT: {{ quote .Values.api.plaid.birthdatePrompt }}
   MONETR_PLAID_RETURNING_EXPERIENCE: {{ quote .Values.api.plaid.enableReturningUserExperience }}

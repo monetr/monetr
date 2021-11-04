@@ -63,11 +63,11 @@ func RunServer() error {
 
 	configuration := config.LoadConfiguration(configPath)
 
+	log := logging.NewLoggerWithConfig(configuration.Logging)
+
 	stats := metrics.NewStats()
 	stats.Listen(fmt.Sprintf(":%d", configuration.StatsPort))
 	defer stats.Close()
-
-	log := logging.NewLoggerWithConfig(configuration.Logging)
 
 	var vault vault_helper.VaultHelper
 	if configuration.Vault.Enabled {
@@ -103,7 +103,7 @@ func RunServer() error {
 			AttachStacktrace: true,
 			ServerName:       hostname,
 			Dist:             build.Revision,
-			Release:          build.Release,
+			Release:          fmt.Sprintf("monetr@%s", build.Release),
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,

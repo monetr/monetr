@@ -178,6 +178,7 @@ type Redis struct {
 
 type Logging struct {
 	Level       string
+	Format      string
 	StackDriver StackDriverLogging
 }
 
@@ -267,6 +268,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("AllowSignUp", true)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Level", "info")
+	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)
@@ -303,6 +305,7 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("JWT.LoginJwtSecret", "MONETR_JWT_LOGIN_SECRET")
 	_ = v.BindEnv("JWT.RegistrationJwtSecret", "MONETR_JWT_REGISTRATION_SECRET")
 	_ = v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")
+	_ = v.BindEnv("Logging.Format", "MONETR_LOG_FORMAT")
 	_ = v.BindEnv("Plaid.ClientID", "MONETR_PLAID_CLIENT_ID")
 	_ = v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
 	_ = v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")

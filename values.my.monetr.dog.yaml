@@ -102,6 +102,7 @@ api:
     port: 6379
   logging:
     level: trace
+    format: json
   sentry:
     enabled: true
     sampleRate: 1.0
