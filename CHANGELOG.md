@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.3.3](https://www.github.com/monetr/monetr/compare/v0.3.2...v0.3.3) (2021-11-04)
+
+
+### Bug Fixes
+
+* Added Sentry releases to release flow. ([0229715](https://www.github.com/monetr/monetr/commit/0229715fb4a9c139d75979e0e4958295f4550f01)), closes [#232](https://www.github.com/monetr/monetr/issues/232)
+
 ### [0.3.2](https://www.github.com/monetr/monetr/compare/v0.3.1...v0.3.2) (2021-11-04)
 
 
