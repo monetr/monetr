@@ -201,3 +201,13 @@ jobs:
           target_url: https://my.monetr.dog
           environment: my.monetr.dog
           ref: "v${{ needs.release_please.outputs.version }}"
+      - uses: actions/checkout@v2
+      - name: Create Sentry Release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: monetr
+        with:
+          environment: 'my.monetr.dog'
+          version: 'v${{ needs.release_please.outputs.version }}'
