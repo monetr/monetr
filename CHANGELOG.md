@@ -1,5 +1,15 @@
 # Changelog
 
+### [0.3.2](https://www.github.com/monetr/monetr/compare/v0.3.1...v0.3.2) (2021-11-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mini-css-extract-plugin to v2.4.4 ([45a2aa6](https://www.github.com/monetr/monetr/commit/45a2aa64e4cb32ec960071ed4a030735dcd491ed))
+* **deps:** update module github.com/stripe/stripe-go/v72 to v72.73.1 ([cd836a2](https://www.github.com/monetr/monetr/commit/cd836a2b1dfdab12d23cd67332173dd13862a136))
+* Fixed SMTP port used for SendGrid. ([1f4f8fe](https://www.github.com/monetr/monetr/commit/1f4f8feb1208a7d3b495a0dc663051a26ed3108d)), closes [#231](https://www.github.com/monetr/monetr/issues/231)
+* Improve error reporting to sentry for failed requests. ([71b1018](https://www.github.com/monetr/monetr/commit/71b1018b1af9443dc7812160f1d5925b0d0f5f63))
+
 ### [0.3.1](https://www.github.com/monetr/monetr/compare/v0.3.0...v0.3.1) (2021-11-04)
 
 
