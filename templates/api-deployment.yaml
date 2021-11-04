@@ -47,7 +47,10 @@ spec:
             {{- if .Values.api.includeSecrets }}
             - secretRef:
                 name: {{ include "api.fullname" . }}
-          {{- end }}
+            {{- end }}
+            {{- if .Values.customEnvFrom }}
+            {{- toYaml .Values.customEnvFrom | nindent 12 }}
+            {{- end }}
           {{- if .Values.api.customEnv }}
           env:
           {{- toYaml .Values.api.customEnv | nindent 10 }}
@@ -73,7 +76,10 @@ spec:
             {{- if .Values.api.includeSecrets }}
             - secretRef:
                 name: {{ include "api.fullname" . }}
-          {{- end }}
+            {{- end }}
+            {{- if .Values.customEnvFrom }}
+            {{- toYaml .Values.customEnvFrom | nindent 12 }}
+            {{- end }}
           {{- if .Values.api.customEnv }}
           env:
           {{- toYaml .Values.api.customEnv | nindent 10 }}

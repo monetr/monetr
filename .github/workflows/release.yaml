@@ -183,3 +183,21 @@ jobs:
             ghcr.io/monetr/monetr:${{ needs.release_please.outputs.version }}
             monetr/monetr:latest
             monetr/monetr:${{ needs.release_please.outputs.version }}
+
+  deploy:
+    if: ${{ needs.release_please.outputs.release_created }}
+    needs:
+      - "release_please"
+      - "container"
+    name: Deploy my.monetr.dog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create my.monetr.dog Deployment
+        id: deployment
+        with:
+          initial_status: pending
+          token: "${{ github.token }}"
+          target_url: https://my.monetr.dog
+          environment: my.monetr.dog
+          ref: "v${{ needs.release_please.outputs.version }}"

@@ -99,6 +99,8 @@ cloudSqlProxy:
 databaseMigrations:
   initContainer: true
 
+customEnvFrom: []
+
 api:
   customEnv: [ ]
   includeSecrets: false

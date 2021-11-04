@@ -1,11 +1,17 @@
-staging:
-  environment: staging
+my.monetr.dog:
+  environment: my.monetr.dog
   production_environment: false
   required_contexts: [ ]
   auto_merge: false
 
-acceptance:
-  environment: acceptance
+my.monetr.dev:
+  environment: my.monetr.dev
   production_environment: false
+  required_contexts: [ ]
+  auto_merge: false
+
+my.monetr.app:
+  environment: my.monetr.app
+  production_environment: true
   required_contexts: [ ]
   auto_merge: false
