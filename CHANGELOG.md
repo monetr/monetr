@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://www.github.com/monetr/monetr/compare/v0.2.1...v0.3.0) (2021-11-04)
+
+
+### Features
+
+* Added "dogfooding" environment for alpha-testing. ([6f02d2d](https://www.github.com/monetr/monetr/commit/6f02d2d91a0c54fe52a0abfc54c8b351e13c096e))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @stripe/stripe-js to v1.21.1 ([cb3c740](https://www.github.com/monetr/monetr/commit/cb3c740ca10a784562a7732b7b13c749733f0e03))
+* **deps:** update module github.com/plaid/plaid-go to v1.7.0 ([7516299](https://www.github.com/monetr/monetr/commit/75162999fdbb19c0e44be8f43a3dee97826b2469))
+* **deps:** update sentry-javascript monorepo to v6.14.0 ([80649ff](https://www.github.com/monetr/monetr/commit/80649fff5bfc32a7284410cbf7223c697e55dd1e))
+
 ### [0.2.1](https://www.github.com/monetr/monetr/compare/v0.2.0...v0.2.1) (2021-11-02)
 
 
