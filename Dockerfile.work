@@ -4,7 +4,7 @@ COPY ./ /src
 WORKDIR /src
 RUN go get github.com/gocraft/work/cmd/workwebui
 RUN go build -o /bin/workwebui github.com/gocraft/work/cmd/workwebui
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 LABEL org.opencontainers.image.url=https://github.com/monetrapp/rest-api
 LABEL org.opencontainers.image.source=https://github.com/gocraft/work/tree/master/webui
