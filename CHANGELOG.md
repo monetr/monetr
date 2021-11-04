@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.3.1](https://www.github.com/monetr/monetr/compare/v0.3.0...v0.3.1) (2021-11-04)
+
+
+### Bug Fixes
+
+* Added `X-Real-Ip` header to derive client IP address. ([894c1a9](https://www.github.com/monetr/monetr/commit/894c1a98a5d48cffe784bfebe4fb2cd53957f96a))
+
 ## [0.3.0](https://www.github.com/monetr/monetr/compare/v0.2.1...v0.3.0) (2021-11-04)
 
 
