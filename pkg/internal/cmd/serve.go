@@ -103,7 +103,7 @@ func RunServer() error {
 			AttachStacktrace: true,
 			ServerName:       hostname,
 			Dist:             build.Revision,
-			Release:          fmt.Sprintf("monetr@%s", build.Release),
+			Release:          build.Release,
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
