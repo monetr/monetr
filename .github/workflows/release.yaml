@@ -177,7 +177,9 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          build-args: RELEASE=v${{ needs.release_please.outputs.version }},REVISION=${{ github.sha }}
+          build-args: |
+            RELEASE=v${{ needs.release_please.outputs.version }}
+            REVISION=${{ github.sha }}
           tags: |
             ghcr.io/monetr/monetr:latest
             ghcr.io/monetr/monetr:${{ needs.release_please.outputs.version }}
