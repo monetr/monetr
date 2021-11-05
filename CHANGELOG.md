@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.3.5](https://www.github.com/monetr/monetr/compare/v0.3.4...v0.3.5) (2021-11-05)
+
+
+### Bug Fixes
+
+* Fixed incorrect build args for container build. ([3080eb4](https://www.github.com/monetr/monetr/commit/3080eb47c1442b02e80c991b3a2f323c40c6588e)), closes [#241](https://www.github.com/monetr/monetr/issues/241)
+
 ### [0.3.4](https://www.github.com/monetr/monetr/compare/v0.3.3...v0.3.4) (2021-11-04)
 
 
