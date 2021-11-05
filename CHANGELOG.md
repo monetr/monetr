@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.3.6](https://www.github.com/monetr/monetr/compare/v0.3.5...v0.3.6) (2021-11-05)
+
+
+### Bug Fixes
+
+* Reverted change to how release is articulated to Sentry. ([6062475](https://www.github.com/monetr/monetr/commit/60624751d3d9f0074f477b45449d26987026272a))
+
 ### [0.3.5](https://www.github.com/monetr/monetr/compare/v0.3.4...v0.3.5) (2021-11-05)
 
 
