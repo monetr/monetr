@@ -1,17 +1,18 @@
 package controller
 
 import (
+	"context"
 	"fmt"
-	"github.com/getsentry/sentry-go"
-	sentryiris "github.com/getsentry/sentry-go/iris"
-	"github.com/kataras/iris/v12"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/form3tech-oss/jwt-go"
+	"github.com/getsentry/sentry-go"
+	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/go-pg/pg/v10"
-	"github.com/kataras/iris/v12/context"
+	"github.com/kataras/iris/v12"
+	"github.com/monetr/monetr/pkg/internal/ctxkeys"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 )
@@ -26,7 +27,7 @@ const (
 	spanKey                      = "_span_"
 )
 
-func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
+func (c *Controller) setupRepositoryMiddleware(ctx iris.Context) {
 	var cleanup func()
 	var dbi pg.DBI
 	switch ctx.Method() {
@@ -69,7 +70,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx *context.Context) {
 	ctx.Next()
 }
 
-func (c *Controller) authenticateUser(ctx *context.Context) (err error) {
+func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 	now := time.Now()
 	var token string
 
@@ -99,7 +100,7 @@ func (c *Controller) authenticateUser(ctx *context.Context) (err error) {
 		}()
 	}
 
-	if token = ctx.GetCookie(TokenName, context.CookieSecure); token != "" {
+	if token = ctx.GetCookie(TokenName, iris.CookieSecure); token != "" {
 		data["source"] = "cookie"
 	} else if token = ctx.GetHeader(TokenName); token != "" {
 		data["source"] = "header"
@@ -143,10 +144,18 @@ func (c *Controller) authenticateUser(ctx *context.Context) (err error) {
 	ctx.Values().Set(userIdContextKey, claims.UserId)
 	ctx.Values().Set(loginIdContextKey, claims.LoginId)
 
+	{ // Add some basic values onto our context for logging later on.
+		spanContext := ctx.Values().Get(spanContextKey).(context.Context)
+		spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
+		spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
+		spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
+		ctx.Values().Set(spanContextKey, spanContext)
+	}
+
 	return nil
 }
 
-func (c *Controller) authenticationMiddleware(ctx *context.Context) {
+func (c *Controller) authenticationMiddleware(ctx iris.Context) {
 	if err := c.authenticateUser(ctx); err != nil {
 		ctx.SetErr(err)
 		ctx.StatusCode(http.StatusForbidden)
@@ -157,7 +166,7 @@ func (c *Controller) authenticationMiddleware(ctx *context.Context) {
 	ctx.Next()
 }
 
-func (c *Controller) requireActiveSubscriptionMiddleware(ctx *context.Context) {
+func (c *Controller) requireActiveSubscriptionMiddleware(ctx iris.Context) {
 	accountId := c.mustGetAccountId(ctx)
 
 	active, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), accountId)
@@ -175,7 +184,7 @@ func (c *Controller) requireActiveSubscriptionMiddleware(ctx *context.Context) {
 	ctx.Next()
 }
 
-func (c *Controller) loggingMiddleware(ctx *context.Context) {
+func (c *Controller) loggingMiddleware(ctx iris.Context) {
 	ctx.Next()
 
 	if err := ctx.GetErr(); err != nil {
@@ -183,7 +192,7 @@ func (c *Controller) loggingMiddleware(ctx *context.Context) {
 	}
 }
 
-func (c *Controller) mustGetDatabase(ctx *context.Context) pg.DBI {
+func (c *Controller) mustGetDatabase(ctx iris.Context) pg.DBI {
 	txn, ok := ctx.Values().Get(databaseContextKey).(*pg.Tx)
 	if !ok {
 		panic("no database on context")
@@ -192,7 +201,7 @@ func (c *Controller) mustGetDatabase(ctx *context.Context) pg.DBI {
 	return txn
 }
 
-func (c *Controller) getUnauthenticatedRepository(ctx *context.Context) (repository.UnauthenticatedRepository, error) {
+func (c *Controller) getUnauthenticatedRepository(ctx iris.Context) (repository.UnauthenticatedRepository, error) {
 	txn, ok := ctx.Values().Get(databaseContextKey).(*pg.Tx)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
@@ -210,7 +219,7 @@ func (c *Controller) mustGetUnauthenticatedRepository(ctx iris.Context) reposito
 	return repo
 }
 
-func (c *Controller) mustGetUserId(ctx *context.Context) uint64 {
+func (c *Controller) mustGetUserId(ctx iris.Context) uint64 {
 	userId := ctx.Values().GetUint64Default(userIdContextKey, 0)
 	if userId == 0 {
 		panic("unauthorized")
@@ -219,7 +228,7 @@ func (c *Controller) mustGetUserId(ctx *context.Context) uint64 {
 	return userId
 }
 
-func (c *Controller) mustGetAccountId(ctx *context.Context) uint64 {
+func (c *Controller) mustGetAccountId(ctx iris.Context) uint64 {
 	accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0)
 	if accountId == 0 {
 		panic("unauthorized")
@@ -228,7 +237,7 @@ func (c *Controller) mustGetAccountId(ctx *context.Context) uint64 {
 	return accountId
 }
 
-func (c *Controller) getAuthenticatedRepository(ctx *context.Context) (repository.Repository, error) {
+func (c *Controller) getAuthenticatedRepository(ctx iris.Context) (repository.Repository, error) {
 	loginId := ctx.Values().GetUint64Default(loginIdContextKey, 0)
 	if loginId == 0 {
 		return nil, errors.Errorf("not authorized")
@@ -252,7 +261,7 @@ func (c *Controller) getAuthenticatedRepository(ctx *context.Context) (repositor
 	return repository.NewRepositoryFromSession(userId, accountId, txn), nil
 }
 
-func (c *Controller) mustGetAuthenticatedRepository(ctx *context.Context) repository.Repository {
+func (c *Controller) mustGetAuthenticatedRepository(ctx iris.Context) repository.Repository {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
 		panic("unauthorized")

@@ -2,6 +2,9 @@ package stripe_helper
 
 import (
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/crumbs"
@@ -10,8 +13,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
 	stripe_client "github.com/stripe/stripe-go/v72/client"
-	"net/http"
-	"time"
 )
 
 type Stripe interface {
@@ -132,7 +133,7 @@ func (s *stripeBase) GetPriceById(ctx context.Context, id string) (*stripe.Price
 	span := sentry.StartSpan(ctx, "Stripe - GetPriceById")
 	defer span.Finish()
 
-	log := s.log.WithField("stripePriceId", id)
+	log := s.log.WithContext(span.Context()).WithField("stripePriceId", id)
 
 	if price, ok := s.cache.GetPriceById(span.Context(), id); ok {
 		return price, nil

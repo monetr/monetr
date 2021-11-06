@@ -2,14 +2,15 @@ package logging
 
 import (
 	"context"
+	"strings"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
-	"strings"
-	"time"
 )
 
 var (
@@ -34,7 +35,7 @@ func (h *PostgresHooks) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (
 		return ctx, nil
 	}
 	if strings.TrimSpace(strings.ToLower(string(query))) != "select 1" {
-		h.log.Trace(strings.TrimSpace(string(query)))
+		h.log.WithContext(ctx).Trace(strings.TrimSpace(string(query)))
 	}
 
 	return ctx, nil

@@ -19,6 +19,7 @@ import (
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/internal/ctxkeys"
 	"github.com/monetr/monetr/pkg/internal/platypus"
 	"github.com/monetr/monetr/pkg/internal/stripe_helper"
 	"github.com/monetr/monetr/pkg/jobs"
@@ -212,7 +213,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(func(ctx iris.Context) {
 			var span *sentry.Span
 			if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
-				if requestId := ctx.GetHeader("X-Request-Id"); requestId != "" {
+				var requestId string
+				if requestId = ctx.GetHeader("X-Request-Id"); requestId != "" {
 					hub.ConfigureScope(func(scope *sentry.Scope) {
 						scope.SetTag("requestId", requestId)
 					})
@@ -239,7 +241,14 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				}()
 
 				ctx.Values().Set(spanKey, span)
-				ctx.Values().Set(spanContextKey, span.Context())
+
+				{
+					spanContext := span.Context()
+					if requestId != "" { // If there is a request ID, include it on our span context for logging later.
+						spanContext = context.WithValue(span.Context(), ctxkeys.RequestID, requestId)
+					}
+					ctx.Values().Set(spanContextKey, spanContext)
+				}
 
 				hub.AddBreadcrumb(&sentry.Breadcrumb{
 					Type:     "http",

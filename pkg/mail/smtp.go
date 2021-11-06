@@ -88,7 +88,7 @@ func (s *smtpCommunication) Send(ctx context.Context, request SendEmailRequest) 
 		[]string{request.To},
 		builder.Bytes(),
 	); err != nil {
-		s.log.WithError(err).Errorf("failed to send email via SMTP")
+		s.log.WithContext(span.Context()).WithError(err).Errorf("failed to send email via SMTP")
 		return errors.Wrap(err, "failed to send email via SMTP")
 	}
 

@@ -76,6 +76,8 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 		logger.Formatter = formatter
 	}
 
+	logger.Formatter = NewContextFormatterWrapper(logger.Formatter)
+
 	return logrus.NewEntry(logger)
 }
 

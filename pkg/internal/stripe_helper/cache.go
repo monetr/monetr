@@ -3,11 +3,12 @@ package stripe_helper
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
-	"time"
 )
 
 type StripeCache interface {
@@ -50,12 +51,12 @@ func (r *redisStripeCache) GetPriceById(ctx context.Context, id string) (*stripe
 	span := sentry.StartSpan(ctx, "Cache - GetPriceById")
 	defer span.Finish()
 
-	log := r.log.WithField("stripePriceId", id)
+	log := r.log.WithContext(span.Context()).WithField("stripePriceId", id)
 
 	log.Trace("checking redis cache for stripe price")
 	var result stripe.Price
 	if err := r.cache.GetEz(span.Context(), r.cacheKey(id), &result); err != nil {
-		r.log.WithError(err).Warn("failed to retrieve stripe price from cache")
+		log.WithError(err).Warn("failed to retrieve stripe price from cache")
 		return nil, false
 	}
 
@@ -72,7 +73,7 @@ func (r *redisStripeCache) CachePrice(ctx context.Context, price stripe.Price) b
 	span := sentry.StartSpan(ctx, "Cache - GetPriceById")
 	defer span.Finish()
 
-	log := r.log.WithField("stripePriceId", price.ID)
+	log := r.log.WithContext(span.Context()).WithField("stripePriceId", price.ID)
 
 	log.Trace("storing stripe price in redis cache")
 	if err := r.cache.SetEzTTL(span.Context(), r.cacheKey(price.ID), price, 1*time.Hour); err != nil {
