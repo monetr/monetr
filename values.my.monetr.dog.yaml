@@ -75,7 +75,7 @@ api:
     smtp:
       username: apikey
       host: smtp.sendgrid.net
-      port: 25
+      port: 587
   sendGrid:
     enabled: false
     apiKey: ""
