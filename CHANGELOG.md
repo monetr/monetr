@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.3.8](https://www.github.com/monetr/monetr/compare/v0.3.7...v0.3.8) (2021-11-06)
+
+
+### Bug Fixes
+
+* Adjusted SMTP port for sendgrid. ([7ec1502](https://www.github.com/monetr/monetr/commit/7ec1502b53ef3b48d2074aa1634e488d5dbaaa1b))
+
 ### [0.3.7](https://www.github.com/monetr/monetr/compare/v0.3.6...v0.3.7) (2021-11-06)
 
 
