@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.3.9](https://www.github.com/monetr/monetr/compare/v0.3.8...v0.3.9) (2021-11-06)
+
+
+### Bug Fixes
+
+* Significantly improved logging and metadata on log entries. ([7f3d35e](https://www.github.com/monetr/monetr/commit/7f3d35ebba7f79993bc461fd0c26df3607455477))
+
 ### [0.3.8](https://www.github.com/monetr/monetr/compare/v0.3.7...v0.3.8) (2021-11-06)
 
 
