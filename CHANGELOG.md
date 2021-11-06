@@ -1,5 +1,14 @@
 # Changelog
 
+### [0.3.7](https://www.github.com/monetr/monetr/compare/v0.3.6...v0.3.7) (2021-11-06)
+
+
+### Bug Fixes
+
+* **deps:** update dependency eslint to v8.2.0 ([2efd618](https://www.github.com/monetr/monetr/commit/2efd618515fd56941be2aa3828148e89eeae53f8))
+* **deps:** update dependency react-select to v5.2.1 ([fcc63de](https://www.github.com/monetr/monetr/commit/fcc63de8cf80a396a0dd22fe730dc06dead2f211))
+* **deps:** update sentry-javascript monorepo to v6.14.1 ([3e6a737](https://www.github.com/monetr/monetr/commit/3e6a7379647be2b1cf6316fe5d82c6abcdd4cd99))
+
 ### [0.3.6](https://www.github.com/monetr/monetr/compare/v0.3.5...v0.3.6) (2021-11-05)
 
 
