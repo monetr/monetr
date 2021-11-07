@@ -2192,6 +2192,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/swag.HealthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/swag.HealthResponse'
       summary: Check API Health
       tags:
       - Health

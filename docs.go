@@ -1266,6 +1266,12 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/swag.HealthResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/swag.HealthResponse"
+                        }
                     }
                 }
             }
