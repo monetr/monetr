@@ -82,7 +82,7 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 }
 
 func NewLogger() *logrus.Entry {
-	return NewLoggerWithLevel(logrus.FatalLevel.String())
+	return NewLoggerWithLevel(logrus.InfoLevel.String())
 }
 
 func NewLoggerWithLevel(levelString string) *logrus.Entry {
