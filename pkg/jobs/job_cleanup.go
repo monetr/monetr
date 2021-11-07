@@ -18,14 +18,14 @@ const (
 func (j *jobManagerBase) cleanupJobsTable(job *work.Job) (err error) {
 	hub := sentry.CurrentHub().Clone()
 	ctx := sentry.SetHubOnContext(context.Background(), hub)
-	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Pull Account Balances"))
+	span := sentry.StartSpan(ctx, "Job", sentry.TransactionName("Cleanup Jobs Table"))
 	defer span.Finish()
 
 	defer j.recover(span.Context())
 
 	defer func() {
 		if err := recover(); err != nil {
-			sentry.CaptureException(errors.Errorf("pull account balances failure: %+v", err))
+			sentry.CaptureException(errors.Errorf("cleanup jobs failure: %+v", err))
 		}
 	}()
 
