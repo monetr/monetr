@@ -230,7 +230,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				)
 				span.Description = strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
 				defer func() {
-					if span.Status == sentry.SpanStatusUndefined {
+					switch span.Status {
+					case sentry.SpanStatusUndefined, sentry.SpanStatusUnknown:
 						if ctx.GetErr() != nil {
 							span.Status = sentry.SpanStatusInternalError
 						} else {
@@ -307,15 +308,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			})
 
 			repoParty.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)
-
-			if c.configuration.Environment != "production" {
-				repoParty.Get("/test/error", func(ctx iris.Context) {
-					c.badRequest(ctx, "this endpoint is meant to be used to test error reporting to sentry")
-				})
-			}
 		})
 	})
-
 }
 
 // Check API Health
@@ -337,6 +331,7 @@ func (c *Controller) getHealth(ctx iris.Context) {
 		"apiHealthy": true,
 		"revision":   build.Revision,
 		"buildTime":  build.BuildTime,
+		"serverTime": time.Now().UTC(),
 	}
 
 	if build.Release != "" {
@@ -345,11 +340,20 @@ func (c *Controller) getHealth(ctx iris.Context) {
 		result["release"] = nil
 	}
 
+	// If the database cannot be reached then the status code should not be successful.
+	if err != nil {
+		ctx.StatusCode(http.StatusInternalServerError)
+	}
+
 	ctx.JSON(result)
 }
 
 func (c *Controller) getContext(ctx iris.Context) context.Context {
-	return ctx.Values().Get(spanContextKey).(context.Context)
+	if requestContext, ok := ctx.Values().Get(spanContextKey).(context.Context); ok {
+		return requestContext
+	}
+
+	return ctx.Request().Context()
 }
 
 func (c *Controller) getSpan(ctx iris.Context) *sentry.Span {
@@ -357,7 +361,7 @@ func (c *Controller) getSpan(ctx iris.Context) *sentry.Span {
 }
 
 func (c *Controller) getLog(ctx iris.Context) *logrus.Entry {
-	log := c.log.WithFields(logrus.Fields{
+	log := c.log.WithContext(c.getContext(ctx)).WithFields(logrus.Fields{
 		"requestId": ctx.GetHeader("X-Request-Id"),
 	})
 
