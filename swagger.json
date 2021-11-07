@@ -2374,24 +2374,34 @@
             "properties": {
                 "apiHealthy": {
                     "description": "This will always be true. If the API is not healthy then an error is returned to the client or the request will\nsimply not be served.",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "buildTime": {
-                    "description": "The time the current REST API executable was built. Typically when the container build was initiated.",
-                    "type": "string"
+                    "description": "The time the current REST API executable was built. Typically, when the container build was initiated.",
+                    "type": "string",
+                    "example": "2021-11-07T12:11:10Z"
                 },
                 "dbHealthy": {
                     "description": "Indicates whether or not the current API process handling the request can communicate with the PostgreSQL\ndatabase.",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "release": {
                     "description": "Release is only present when a deployment was run for a specific tag. This is only found in acceptance and\nproduction.",
                     "type": "string",
-                    "x-nullable": true
+                    "x-nullable": true,
+                    "example": "v0.3.9"
                 },
                 "revision": {
                     "description": "The Git SHA code for the commit of the deployed REST API.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "c1becbe0654c4d8fde74c349ef7596983361eb7c"
+                },
+                "serverTime": {
+                    "description": "The current time on the server that handled the request. This is always in UTC.",
+                    "type": "string",
+                    "example": "2021-11-07T12:11:10Z"
                 }
             }
         },
