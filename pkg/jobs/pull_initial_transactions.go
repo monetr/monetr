@@ -3,14 +3,15 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
-	"strconv"
-	"time"
 )
 
 const (
@@ -51,7 +52,7 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 		scope.SetTag("jobId", job.ID)
 	})
 
-	return j.getRepositoryForJob(job, func(repo repository.Repository) error {
+	err = j.getRepositoryForJob(job, func(repo repository.Repository) error {
 		link, err := repo.GetLink(span.Context(), linkId)
 		if err != nil {
 			log.WithError(err).Error("cannot pull initial transactions for link provided")
@@ -125,17 +126,20 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 			return err
 		}
 
-		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", accountId, link.LinkId)
-
-		if err = j.ps.Notify(
-			span.Context(),
-			channelName,
-			"success",
-		); err != nil {
-			log.WithError(err).Error("failed to publish link status to pubsub")
-			return nil // Not good enough of a reason to fail.
-		}
-
 		return nil
 	})
+
+	time.Sleep(10 * time.Millisecond)
+
+	channelName := fmt.Sprintf("initial:plaid:link:%d:%d", accountId, linkId)
+
+	if notifyErr := j.ps.Notify(
+		span.Context(),
+		channelName,
+		"success",
+	); notifyErr != nil {
+		log.WithError(notifyErr).Error("failed to publish link status to pubsub")
+	}
+
+	return err
 }
