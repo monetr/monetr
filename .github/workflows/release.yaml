@@ -213,3 +213,4 @@ jobs:
         with:
           environment: 'my.monetr.dog'
           version: 'v${{ needs.release_please.outputs.version }}'
+          sourcemaps: './pkg ./ui'

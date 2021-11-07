@@ -1,0 +1,1 @@
+CREATE INDEX "ix_transactions_opt_order" ON "transactions" ("account_id", "bank_account_id", "date" DESC, "transaction_id" DESC);
