@@ -28,7 +28,7 @@ type (
 		GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error)
 		NewClientFromItemId(ctx context.Context, itemId string) (Client, error)
 		NewClientFromLink(ctx context.Context, accountId uint64, linkId uint64) (Client, error)
-		NewClient(ctx context.Context, link *models.Link, accessToken string) (Client, error)
+		NewClient(ctx context.Context, link *models.Link, accessToken, itemId string) (Client, error)
 		Close() error
 	}
 )
@@ -324,14 +324,24 @@ func (p *Plaid) NewClientFromLink(ctx context.Context, accountId uint64, linkId 
 	return p.newClient(span.Context(), link)
 }
 
-func (p *Plaid) NewClient(ctx context.Context, link *models.Link, accessToken string) (Client, error) {
+func (p *Plaid) NewClient(ctx context.Context, link *models.Link, accessToken, itemId string) (Client, error) {
+	if accessToken == "" {
+		return nil, errors.New("plaid access token is required to create a client")
+	}
+
+	if itemId == "" {
+		return nil, errors.New("plaid itemId is required to create a client")
+	}
+
 	return &PlaidClient{
 		accountId:   link.AccountId,
 		linkId:      link.LinkId,
 		accessToken: accessToken,
+		itemId:      itemId,
 		log: p.log.WithFields(logrus.Fields{
 			"accountId": link.AccountId,
 			"linkId":    link.LinkId,
+			"itemId":    itemId,
 		}),
 		client: p.client,
 		config: p.config,
@@ -355,7 +365,7 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 		return nil, err
 	}
 
-	return p.NewClient(span.Context(), link, accessToken)
+	return p.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
 }
 
 func (p *Plaid) Close() error {

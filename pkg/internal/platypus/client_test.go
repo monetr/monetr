@@ -2,6 +2,9 @@ package platypus
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/pkg/config"
@@ -10,8 +13,6 @@ import (
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestPlaidClient_GetAccount(t *testing.T) {
@@ -41,7 +42,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 			AccountId: accountId,
 		}
 
-		platypus, err := client.NewClient(context.Background(), link, accessToken)
+		platypus, err := client.NewClient(context.Background(), link, accessToken, gofakeit.UUID())
 		assert.NoError(t, err, "should create platypus")
 		assert.NotNil(t, platypus, "should not be nil")
 
@@ -80,7 +81,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 			AccountId: accountId,
 		}
 
-		client, err := platypus.NewClient(context.Background(), link, accessToken)
+		client, err := platypus.NewClient(context.Background(), link, accessToken, gofakeit.UUID())
 		assert.NoError(t, err, "should create platypus")
 		assert.NotNil(t, client, "should not be nil")
 
@@ -119,7 +120,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 			AccountId: accountId,
 		}
 
-		client, err := platypus.NewClient(context.Background(), link, accessToken)
+		client, err := platypus.NewClient(context.Background(), link, accessToken, gofakeit.UUID())
 		assert.NoError(t, err, "should create client")
 		assert.NotNil(t, client, "should not be nil")
 

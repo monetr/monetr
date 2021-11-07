@@ -395,7 +395,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	// Create a plaid client for the new link.
-	client, err := c.plaid.NewClient(c.getContext(ctx), &link, result.AccessToken)
+	client, err := c.plaid.NewClient(c.getContext(ctx), &link, result.AccessToken, result.ItemId)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client")
 		return

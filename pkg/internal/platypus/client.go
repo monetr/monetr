@@ -33,18 +33,24 @@ type PlaidClient struct {
 	accountId   uint64
 	linkId      uint64
 	accessToken string
+	itemId      string
 	log         *logrus.Entry
 	client      *plaid.APIClient
 	config      config.Plaid
 }
 
 func (p *PlaidClient) getLog(span *sentry.Span) *logrus.Entry {
-	return p.log.WithContext(span.Context()).WithField("plaid", span.Op)
+	return p.log.WithContext(span.Context()).WithFields(logrus.Fields{
+		"plaid":  span.Op,
+		"itemId": p.itemId,
+	})
 }
 
 func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error) {
 	span := sentry.StartSpan(ctx, "Plaid - GetAccount")
 	defer span.Finish()
+
+	span.SetTag("itemId", p.itemId)
 
 	log := p.getLog(span)
 
@@ -113,6 +119,8 @@ func (p *PlaidClient) GetAllTransactions(ctx context.Context, start, end time.Ti
 	span := sentry.StartSpan(ctx, "Plaid - GetAllTransactions")
 	defer span.Finish()
 
+	span.SetTag("itemId", p.itemId)
+
 	transactions := make([]Transaction, 0)
 
 	var perPage int32 = 500
@@ -138,6 +146,14 @@ func (p *PlaidClient) GetAllTransactions(ctx context.Context, start, end time.Ti
 func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time, count, offset int32, bankAccountIds []string) ([]Transaction, error) {
 	span := sentry.StartSpan(ctx, "Plaid - GetTransactions")
 	defer span.Finish()
+
+	span.SetTag("itemId", p.itemId)
+
+	span.Data = map[string]interface{}{
+		"accountIds": bankAccountIds,
+		"start":      start.Format("2006-01-02"),
+		"end":        end.Format("2006-01-02"),
+	}
 
 	log := p.getLog(span)
 
@@ -186,6 +202,8 @@ func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time,
 func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
 	span := sentry.StartSpan(ctx, "Plaid - UpdateItem")
 	defer span.Finish()
+
+	span.SetTag("itemId", p.itemId)
 
 	log := p.getLog(span)
 
@@ -238,6 +256,8 @@ func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
 func (p *PlaidClient) RemoveItem(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "Plaid - RemoveItem")
 	defer span.Finish()
+
+	span.SetTag("itemId", p.itemId)
 
 	log := p.getLog(span)
 

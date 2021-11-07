@@ -270,7 +270,7 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 			return
 		}
 
-		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken)
+		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken, link.PlaidLink.ItemId)
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
 			return

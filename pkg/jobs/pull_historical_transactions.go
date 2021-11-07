@@ -3,6 +3,9 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
 	"github.com/monetr/monetr/pkg/crumbs"
@@ -11,8 +14,6 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"time"
 )
 
 const (
@@ -118,7 +119,7 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) (err error) {
 
 		log.Debugf("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
 
-		platypus, err := j.plaidClient.NewClient(span.Context(), link, accessToken)
+		platypus, err := j.plaidClient.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
 		if err != nil {
 			log.WithError(err).Error("failed to create plaid client for link")
 			return err
