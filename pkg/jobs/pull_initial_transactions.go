@@ -129,16 +129,17 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 		return nil
 	})
 
-	time.Sleep(10 * time.Millisecond)
+	{ // Send the notification that the link has been set up.
+		time.Sleep(5 * time.Second)
 
-	channelName := fmt.Sprintf("initial:plaid:link:%d:%d", accountId, linkId)
-
-	if notifyErr := j.ps.Notify(
-		span.Context(),
-		channelName,
-		"success",
-	); notifyErr != nil {
-		log.WithError(notifyErr).Error("failed to publish link status to pubsub")
+		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", accountId, linkId)
+		if notifyErr := j.ps.Notify(
+			span.Context(),
+			channelName,
+			"success",
+		); notifyErr != nil {
+			log.WithError(notifyErr).Error("failed to publish link status to pubsub")
+		}
 	}
 
 	return err

@@ -85,8 +85,8 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
     const balances = this.props.balances.get(bankAccountId, null);
 
     return (
-      <Fragment>
-        <ListItem key={ bankAccountId } button>
+      <Fragment key={ bankAccountId }>
+        <ListItem button>
           <div className="flex w-full">
             <Typography className="w-1/3 overflow-hidden font-bold overflow-ellipsis flex-nowrap whitespace-nowrap">
               { bankAccount.name }
