@@ -1,6 +1,5 @@
-import { Store } from "redux";
-import { configureStore } from "store";
+import { AppStore, configureStore } from 'store';
 
-export function createTestStore(initialState?: any): Store<any, any> {
+export function createTestStore(): AppStore {
   return configureStore();
 }

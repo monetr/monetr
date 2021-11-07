@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetr/monetr/pkg/build"
 )
 
 // Application Configuration
@@ -31,7 +32,12 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 		RequireBetaCode     bool         `json:"requireBetaCode"`
 		InitialPlan         *InitialPlan `json:"initialPlan"`
 		BillingEnabled      bool         `json:"billingEnabled"`
+		Release             string       `json:"release"`
+		Revision            string       `json:"revision"`
 	}
+
+	configuration.Release = build.Release
+	configuration.Revision = build.Revision
 
 	// If ReCAPTCHA is enabled then we want to provide the UI our public key as
 	// well as whether or not we want it to verify logins and registrations.

@@ -18,6 +18,8 @@ export default class BootstrapState extends Record({
     freeTrialDays: 0,
   },
   billingEnabled: false,
+  release: '',
+  revision: '',
 }) {
 
 }

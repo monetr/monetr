@@ -8,7 +8,6 @@ export default class LinksState {
   }
 
   items: Map<number, Link>;
-  institutions: Map<number, Institution>;
   loaded: boolean;
   loading: boolean;
 }
