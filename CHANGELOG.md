@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.0](https://www.github.com/monetr/monetr/compare/v0.3.9...v0.4.0) (2021-11-07)
+
+
+### Features
+
+* Adding support for tax collection via Stripe. ([ef385e5](https://www.github.com/monetr/monetr/commit/ef385e5a9ea232a1ea504ea49544da9c58b8b04d)), closes [#261](https://www.github.com/monetr/monetr/issues/261)
+
+
+### Bug Fixes
+
+* Added failure documentation for `/api/health` ([b7202e4](https://www.github.com/monetr/monetr/commit/b7202e418486d80e5b93f18511d1ce5d1d875098))
+* Added transactions index to improve query performance. ([2e0f0b6](https://www.github.com/monetr/monetr/commit/2e0f0b697054efcac5b8bbf11f19aa00f75b509c)), closes [#265](https://www.github.com/monetr/monetr/issues/265)
+* Fixed (hopefully) stripe requests showing missing implementation. ([6589ee0](https://www.github.com/monetr/monetr/commit/6589ee0281ab05c32869acaa89733d665fc7299e)), closes [#251](https://www.github.com/monetr/monetr/issues/251)
+* Fixed cleanup job name in sentry. ([f67bd17](https://www.github.com/monetr/monetr/commit/f67bd17a0bc4b8362441e42e776002c7ef56d509)), closes [#250](https://www.github.com/monetr/monetr/issues/250)
+* Fixed setup notification sending before ready. ([e1e341f](https://www.github.com/monetr/monetr/commit/e1e341f7fcddf0fa83490d6894ddffbb9c22bbf2)), closes [#262](https://www.github.com/monetr/monetr/issues/262)
+* Improved health endpoint + logging. ([83c2989](https://www.github.com/monetr/monetr/commit/83c29892eceb295b0039a06c4a0fbc064f6e65f6))
+* Tweaked default log level for commands. ([8f4731a](https://www.github.com/monetr/monetr/commit/8f4731a8d699da94360b824bf655afdf7ed51eba))
+* Upgraded container images. ([c8df3b5](https://www.github.com/monetr/monetr/commit/c8df3b5918421387b283a1d0b08c7e6b0539fbcd))
+
 ### [0.3.9](https://www.github.com/monetr/monetr/compare/v0.3.8...v0.3.9) (2021-11-06)
 
 
