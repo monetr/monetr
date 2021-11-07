@@ -94,7 +94,6 @@ func (j *jobManagerBase) pullAccountBalances(job *work.Job) (err error) {
 		}
 	}()
 
-
 	start := time.Now()
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")

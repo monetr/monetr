@@ -38,8 +38,8 @@ var (
 )
 
 type PlaidLinkToken struct {
-	LinkToken  string
-	Expires time.Time
+	LinkToken string
+	Expires   time.Time
 }
 
 func (p PlaidLinkToken) Token() string {
@@ -49,4 +49,3 @@ func (p PlaidLinkToken) Token() string {
 func (p PlaidLinkToken) Expiration() time.Time {
 	return p.Expires
 }
-

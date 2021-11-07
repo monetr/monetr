@@ -2,8 +2,8 @@ package controller_test
 
 import (
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/pkg/internal/mock_plaid"
 	"github.com/jarcoal/httpmock"
+	"github.com/monetr/monetr/pkg/internal/mock_plaid"
 	"net/http"
 	"testing"
 )

@@ -63,7 +63,7 @@ func (f *fsnotifyCertificateWatcher) backgroundWorker() {
 		}
 	}()
 
-	lastChange := time.Now().Add(- 1 * time.Minute)
+	lastChange := time.Now().Add(-1 * time.Minute)
 
 	for {
 		select {

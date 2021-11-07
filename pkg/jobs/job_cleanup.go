@@ -33,7 +33,7 @@ func (j *jobManagerBase) cleanupJobsTable(job *work.Job) (err error) {
 	log.Infof("getting ready to clean up the jobs table")
 
 	result, err := j.db.ModelContext(span.Context(), &models.Job{}).
-		Where(`"job"."enqueued_at" < ?`, time.Now().Add(-15 * 24 * time.Hour)).
+		Where(`"job"."enqueued_at" < ?`, time.Now().Add(-15*24*time.Hour)).
 		Delete()
 	if err != nil {
 		log.WithError(err).Errorf("failed to cleanup old jobs from the jobs table")

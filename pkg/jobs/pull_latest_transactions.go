@@ -98,7 +98,6 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
 	log := j.getLogForJob(job)
 	log.Infof("pulling account balances")
 
-
 	defer func() {
 		if err != nil {
 			hub.CaptureException(err)

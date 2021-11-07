@@ -1,4 +1,6 @@
-//+build !vault
+//go:build !vault
+// +build !vault
+
 // When we are not using vault we will be storing the access token on the plaid link record itself.
 
 package models

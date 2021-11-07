@@ -45,7 +45,7 @@ func ParseStripeForm(input url.Values) (StripeForm, error) {
 
 		part := data
 		for i, item := range path {
-			if i == len(path) - 1 {
+			if i == len(path)-1 {
 				part[item] = value
 				continue
 			}

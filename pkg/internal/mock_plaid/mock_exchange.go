@@ -30,12 +30,12 @@ func MockExchangePublicToken(t *testing.T) string {
 			requestId := gofakeit.UUID()
 			if exchangeRequest.PublicToken != publicToken {
 				return plaid.Error{
-					 RequestId:      &requestId,
-					 ErrorType:      "INVALID_REQUEST",
-					 ErrorCode:      "1234",
-					 ErrorMessage:   "public_token is not valid",
-					 DisplayMessage: *plaid.NewNullableString(myownsanity.StringP("public_token is not valid")),
-					 Status:         *plaid.NewNullableFloat32(myownsanity.Float32P(float32(http.StatusBadRequest))),
+					RequestId:      &requestId,
+					ErrorType:      "INVALID_REQUEST",
+					ErrorCode:      "1234",
+					ErrorMessage:   "public_token is not valid",
+					DisplayMessage: *plaid.NewNullableString(myownsanity.StringP("public_token is not valid")),
+					Status:         *plaid.NewNullableFloat32(myownsanity.Float32P(float32(http.StatusBadRequest))),
 				}, http.StatusBadRequest
 			}
 

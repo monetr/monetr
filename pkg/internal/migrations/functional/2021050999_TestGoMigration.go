@@ -13,7 +13,7 @@ func init() {
 			fmt.Println("TEST MIGRATION UP")
 			return nil
 		},
-		DownTx:  false,
+		DownTx: false,
 		Down: func(db migrations.DB) error {
 			fmt.Println("TEST MIGRATION DOWN")
 			return nil

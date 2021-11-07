@@ -1,4 +1,5 @@
-//+build !vault
+//go:build !vault
+// +build !vault
 
 package repository
 

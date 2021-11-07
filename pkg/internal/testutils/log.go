@@ -65,11 +65,11 @@ func GetLog(t *testing.T) *logrus.Entry {
 			keys = append(keys, "msg")
 			copy(input, keys)
 		},
-		DisableLevelTruncation:    false,
-		PadLevelText:              true,
-		QuoteEmptyFields:          false,
-		FieldMap:                  nil,
-		CallerPrettyfier:          nil,
+		DisableLevelTruncation: false,
+		PadLevelText:           true,
+		QuoteEmptyFields:       false,
+		FieldMap:               nil,
+		CallerPrettyfier:       nil,
 	}
 
 	t.Cleanup(func() {

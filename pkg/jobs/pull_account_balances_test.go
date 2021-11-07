@@ -46,9 +46,9 @@ func TestPullAccountBalances(t *testing.T) {
 		secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db)
 		plaidRepo := repository.NewPlaidRepository(db)
 		plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, config.Plaid{
-			ClientID:                      gofakeit.UUID(),
-			ClientSecret:                  gofakeit.UUID(),
-			Environment:                   plaid.Sandbox,
+			ClientID:     gofakeit.UUID(),
+			ClientSecret: gofakeit.UUID(),
+			Environment:  plaid.Sandbox,
 		})
 
 		plaidSecrets := mock_secrets.NewMockPlaidSecrets()

@@ -86,7 +86,7 @@ func TestJwtEmailVerificationTokenGenerator_ValidateToken(t *testing.T) {
 		assert.EqualError(t, err, "invalid token: token is expired by 1s", "should receive a token is expired error")
 		assert.Empty(t, emailResult, "email should not be returned if the token is expired")
 	})
-	
+
 	t.Run("invalid token", func(t *testing.T) {
 		email := gofakeit.Email()
 

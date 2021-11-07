@@ -33,7 +33,7 @@ func TestNewInMemoryWebhookVerification(t *testing.T) {
 			Environment:  plaid.Sandbox,
 		})
 
-		webhookVerification := NewInMemoryWebhookVerification(log, plaid, time.Second * 1)
+		webhookVerification := NewInMemoryWebhookVerification(log, plaid, time.Second*1)
 
 		verify, err := webhookVerification.GetVerificationKey(context.Background(), gofakeit.UUID())
 		assert.NoError(t, err, "must get verification")

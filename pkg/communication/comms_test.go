@@ -42,7 +42,7 @@ func TestUserCommunicationBase_SendVerificationEmail(t *testing.T) {
 		assert.Len(t, smtpMock.Sent, 1, "should have sent 1 email")
 		assert.Equal(t, "no-reply@monetr.mini", smtpMock.Sent[0].From, "from address should be a no-reply")
 	})
-	
+
 	t.Run("failure", func(t *testing.T) {
 		smtpMock := mock_mail.NewMockMail()
 		smtpMock.ShouldFail = true

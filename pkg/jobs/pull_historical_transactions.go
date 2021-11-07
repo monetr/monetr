@@ -118,7 +118,6 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) (err error) {
 
 		log.Debugf("retrieving transactions for %d bank account(s)", len(itemBankAccountIds))
 
-
 		platypus, err := j.plaidClient.NewClient(span.Context(), link, accessToken)
 		if err != nil {
 			log.WithError(err).Error("failed to create plaid client for link")

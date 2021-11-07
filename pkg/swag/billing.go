@@ -27,13 +27,13 @@ type AfterCheckoutResponse struct {
 	// subscription associated with that checkout session is not active.
 	//
 	// **NOTE:** This field is not included if the subscription is active and the after checkout is successful.
-	Message  string `json:"message,omitempty" example:"Subscription is not active" extensions:"x-nullable"`
+	Message string `json:"message,omitempty" example:"Subscription is not active" extensions:"x-nullable"`
 	// IsActive is used to indicate whether the user's subscription is not properly activated. On the UI this is
 	// propagated to the redux store to allow access to other application routes. If this is false then the subscription
 	// is not active and API calls to endpoints requiring payment will still fail.
-	IsActive bool   `json:"isActive"`
+	IsActive bool `json:"isActive"`
 	// NextURL is used to direct the user to a specific page after their checkout has been completed and verified. This
 	// should be followed by the web UI. Right now, successful checkouts will redirect to `/` which will prompt the user
 	// to either configure a Plaid link, or will present them with their budgeting data if there already is some.
-	NextURL  string `json:"nextUrl"`
+	NextURL string `json:"nextUrl"`
 }

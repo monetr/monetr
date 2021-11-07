@@ -142,7 +142,7 @@ func TestEmailRepositoryBase_GetLoginForEmail(t *testing.T) {
 		assert.NotNil(t, login, "login result should not be nil")
 		assert.Equal(t, originalLogin.LoginId, login.LoginId, "login Id should match expected")
 	})
-	
+
 	t.Run("email does not exist", func(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 

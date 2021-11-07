@@ -118,4 +118,3 @@ func mockStripeAttachPaymentMethodError(t *testing.T, stripeError StripeError, s
 		StripeHeaders,
 	)
 }
-

@@ -33,7 +33,6 @@ func (m *MockStripeHelper) AssertNSubscriptionsCreated(t *testing.T, n int) {
 	assert.Len(t, m.subscriptions, n, "should have X subscriptions created")
 }
 
-
 func StripeHeaders(t *testing.T, request *http.Request, response interface{}, status int) map[string][]string {
 	return map[string][]string{
 		"Request-Id": {

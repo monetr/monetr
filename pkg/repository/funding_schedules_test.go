@@ -31,13 +31,13 @@ func TestRepositoryBase_UpdateNextFundingScheduleDate(t *testing.T) {
 		originalOccurrence := time.Now().Add(-1 * time.Minute)
 
 		fundingSchedule := models.FundingSchedule{
-			AccountId:         bankAccount.AccountId,
-			BankAccountId:     bankAccount.BankAccountId,
-			Name:              "Test Funding Schedule For Update",
-			Description:       t.Name(),
-			Rule:              rule,
-			LastOccurrence:    nil,
-			NextOccurrence:    originalOccurrence,
+			AccountId:      bankAccount.AccountId,
+			BankAccountId:  bankAccount.BankAccountId,
+			Name:           "Test Funding Schedule For Update",
+			Description:    t.Name(),
+			Rule:           rule,
+			LastOccurrence: nil,
+			NextOccurrence: originalOccurrence,
 		}
 
 		err = repo.CreateFundingSchedule(context.Background(), &fundingSchedule)

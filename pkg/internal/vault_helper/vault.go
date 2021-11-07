@@ -329,7 +329,7 @@ func (v *vaultBase) authenticate() error {
 		nextExpiration = math.MaxInt64
 	} else {
 		// If the token does expire, store the expiration time (minus 1 minute) to have a safe buffer.
-		nextExpiration = time.Now().Add(time.Duration(auth.LeaseDuration) * time.Second - 1 * time.Minute).Unix()
+		nextExpiration = time.Now().Add(time.Duration(auth.LeaseDuration)*time.Second - 1*time.Minute).Unix()
 		log.Debugf("vault authentication will refresh by %s", time.Unix(nextExpiration, 0))
 	}
 

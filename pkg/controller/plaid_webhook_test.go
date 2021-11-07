@@ -26,7 +26,7 @@ func TestPlaidWebhook(t *testing.T) {
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().Equal("the requested path does not exist")
 	})
-	
+
 	t.Run("not authorized", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Plaid.WebhooksEnabled = true
@@ -44,7 +44,7 @@ func TestPlaidWebhook(t *testing.T) {
 		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().Equal("unauthorized")
 	})
-	
+
 	t.Run("bad authorization", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Plaid.WebhooksEnabled = true
