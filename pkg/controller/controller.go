@@ -320,6 +320,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 // @Produce json
 // @Router /health [get]
 // @Success 200 {object} swag.HealthResponse
+// @Failure 500 {object} swag.HealthResponse
 func (c *Controller) getHealth(ctx iris.Context) {
 	err := c.db.Ping(ctx.Request().Context())
 	if err != nil {
