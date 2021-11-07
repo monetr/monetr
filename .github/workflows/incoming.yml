@@ -9,7 +9,7 @@ jobs:
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
-    container: golang:1.17.2
+    container: golang:1.17.3
     steps:
       - uses: actions/checkout@v2
       - name: Dependencies
@@ -27,7 +27,7 @@ jobs:
   ui_dependencies:
     name: UI Dependencies
     runs-on: ubuntu-latest
-    container: node:16.11.0
+    container: node:17.0.1
     steps:
       - uses: actions/checkout@v2
       - name: Dependencies
@@ -45,7 +45,7 @@ jobs:
       - ui_dependencies
     name: Build UI
     runs-on: ubuntu-latest
-    container: node:16.11.0
+    container: node:17.0.1
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -69,7 +69,7 @@ jobs:
       - build_ui
     name: Build Binary
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.17.2
+    container: ghcr.io/monetr/build-containers/golang:1.17.3
     strategy:
       matrix:
         architecture:
@@ -106,7 +106,7 @@ jobs:
       - go_dependencies
     name: Test Go
     runs-on: ubuntu-latest
-    container: golang:1.17.2
+    container: golang:1.17.3
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
@@ -162,7 +162,7 @@ jobs:
       - ui_dependencies
     name: Test UI
     runs-on: ubuntu-latest
-    container: node:16.11.0
+    container: node:17.0.1
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
