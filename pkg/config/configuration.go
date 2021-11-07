@@ -205,6 +205,7 @@ type Stripe struct {
 	InitialPlan     *Plan
 	Plans           []Plan
 	BillingEnabled  bool
+	TaxesEnabled    bool
 }
 
 // IsBillingEnabled will return true if both Stripe and Billing are enabled. It will return false any other time.
@@ -343,6 +344,7 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.WebhooksDomain", "MONETR_STRIPE_WEBHOOKS_DOMAIN")
 	_ = v.BindEnv("Stripe.WebhookSecret", "MONETR_STRIPE_WEBHOOK_SECRET")
 	_ = v.BindEnv("Stripe.BillingEnabled", "MONETR_STRIPE_BILLING_ENABLED")
+	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
 	_ = v.BindEnv("Vault.Enabled", "MONETR_VAULT_ENABLED")
 	_ = v.BindEnv("Vault.Address", "MONETR_VAULT_ADDRESS")
 	_ = v.BindEnv("Vault.Auth", "MONETR_VAULT_AUTH")

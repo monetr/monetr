@@ -119,6 +119,7 @@ api:
     enabled: true
     webhooksEnabled: true # Still working on this for now.
     billingEnabled: true
+    taxesEnabled: true
     initialPlan:
       freeTrialDays: 1
       stripePriceId: price_1JGYV0I4uGGnwpgw3kkur7ze

@@ -2,12 +2,14 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"time"
+
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/stripe_helper"
-	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/build"
@@ -151,11 +153,30 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	}
 
 	crumbs.Debug(c.getContext(ctx), "Creating Stripe Checkout Session", map[string]interface{}{
-		"successUrl": successUrl,
-		"cancelUrl":  cancelUrl,
+		"successUrl":   successUrl,
+		"cancelUrl":    cancelUrl,
+		"collectTaxes": c.configuration.Stripe.TaxesEnabled,
 	})
 
+	var params stripe.Params
+
+	// If we are collecting taxes we require the user's billing address. We will not store this information in monetr
+	// but Stripe requires it for billing.
+	if c.configuration.Stripe.TaxesEnabled {
+		params.Extra = &stripe.ExtraValues{
+			Values: url.Values{
+				"customer_update[address]": []string{
+					"auto",
+				},
+			},
+		}
+	}
+
 	checkoutParams := &stripe.CheckoutSessionParams{
+		Params: params,
+		AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
+			Enabled: stripe.Bool(c.configuration.Stripe.TaxesEnabled),
+		},
 		AllowPromotionCodes: stripe.Bool(true),
 		SuccessURL:          &successUrl,
 		CancelURL:           &cancelUrl,

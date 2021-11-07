@@ -52,6 +52,7 @@ data:
   MONETR_STRIPE_WEBHOOKS_ENABLED: {{ quote .Values.api.stripe.webhooksEnabled }}
   MONETR_STRIPE_WEBHOOKS_DOMAIN: {{ quote .Values.api.stripe.webhooksDomain }}
   MONETR_STRIPE_BILLING_ENABLED: {{ quote .Values.api.stripe.billingEnabled }}
+  MONETR_STRIPE_TAXES_ENABLED: {{ quote .Values.api.stripe.taxesEnabled }}
   MONETR_VAULT_ENABLED: {{ quote .Values.api.vault.enabled }}
   {{ if .Values.api.vault.address }}MONETR_VAULT_ADDRESS: {{ quote .Values.api.vault.address }} {{ end }}
   {{ if .Values.api.vault.auth }}MONETR_VAULT_AUTH: {{ quote .Values.api.vault.auth }} {{ end }}

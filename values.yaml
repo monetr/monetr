@@ -173,6 +173,7 @@ api:
   stripe:
     enabled: false
     billingEnabled: false
+    taxesEnabled: false
     apiKey: ""
     publicKey: ""
     webhooksEnabled: false
