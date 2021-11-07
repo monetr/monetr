@@ -48,7 +48,7 @@ var (
 
 	ServeCommand = &cobra.Command{
 		Use:   "serve",
-		Short: "Run the REST API HTTP server",
+		Short: "Run the monetr HTTP server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return RunServer()
 		},
@@ -77,8 +77,8 @@ func RunServer() error {
 			Auth:            configuration.Vault.Auth,
 			Token:           configuration.Vault.Token,
 			TokenFile:       configuration.Vault.TokenFile,
-			Timeout:         30 * time.Second,
-			IdleConnTimeout: 9 * time.Minute,
+			Timeout:         configuration.Vault.Timeout,
+			IdleConnTimeout: configuration.Vault.IdleConnTimeout,
 			Username:        configuration.Vault.Username,
 			Password:        configuration.Vault.Password,
 		})
@@ -376,6 +376,7 @@ func RunServer() error {
 		defer cancel()
 		// close all hosts.
 		_ = app.Shutdown(ctx)
+		log.Info("http server shutdown complete")
 		close(idleConnsClosed)
 	})
 

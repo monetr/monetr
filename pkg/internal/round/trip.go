@@ -2,7 +2,11 @@ package round
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/getsentry/sentry-go"
 )
 
 var (
@@ -17,9 +21,17 @@ type ObservabilityRoundTripper struct {
 }
 
 func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+	span := sentry.StartSpan(request.Context(), fmt.Sprintf("%s %s", strings.ToUpper(request.Method), request.URL.Path))
+	defer span.Finish()
 	response, err := o.inner.RoundTrip(request)
 
 	o.handler(request.Context(), request, response, err)
+
+	if err != nil || response.StatusCode > http.StatusPermanentRedirect {
+		span.Status = sentry.SpanStatusInternalError
+	} else {
+		span.Status = sentry.SpanStatusOK
+	}
 
 	return response, err
 }
