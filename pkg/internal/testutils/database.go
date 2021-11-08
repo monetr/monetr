@@ -3,6 +3,7 @@ package testutils
 import (
 	"context"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -73,7 +74,29 @@ func GetPgDatabaseTxn(t *testing.T) *pg.Tx {
 	return txn
 }
 
+var testDatabases struct {
+	lock      sync.Mutex
+	databases map[string]*pg.DB
+}
+
+func init() {
+	testDatabases = struct {
+		lock          sync.Mutex
+		databases map[string]*pg.DB
+	}{
+		lock:          sync.Mutex{},
+		databases: map[string]*pg.DB{},
+	}
+}
+
 func GetPgDatabase(t *testing.T) *pg.DB {
+	testDatabases.lock.Lock()
+	defer testDatabases.lock.Unlock()
+
+	if db, ok := testDatabases.databases[t.Name()]; ok {
+		return db
+	}
+
 	options := &pg.Options{
 		Network:         "tcp",
 		Addr:            os.Getenv("POSTGRES_HOST") + ":5432",

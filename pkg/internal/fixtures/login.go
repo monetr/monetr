@@ -33,9 +33,13 @@ func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
 
 func GivenIHaveABasicAccount(t *testing.T) (_ models.User, password string) {
 	login, password := GivenIHaveLogin(t)
+	user := GivenIHaveAnAccount(t, login)
+	return user, password
+}
+
+func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
 	db := testutils.GetPgDatabase(t)
 	repo := repository.NewUnauthenticatedRepository(db)
-
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
 		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
@@ -58,5 +62,5 @@ func GivenIHaveABasicAccount(t *testing.T) (_ models.User, password string) {
 	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
 	require.NoError(t, err, "must be able to see user for basic account")
 
-	return user, password
+	return user
 }

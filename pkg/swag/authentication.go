@@ -26,6 +26,28 @@ type LoginResponse struct {
 	NextUrl string `json:"nextUrl" example:"/account/subscribe" extensions:"x-nullable"`
 }
 
+type LoginInvalidRequestResponse struct {
+	// The API performs a handful of validations on the request from the client. If any of these validations fail before
+	// the credentials are even processed then an invalid request response will be returned to the client. These things
+	// can be caused by not providing a valid email address (or not providing one at all), not providing a password that
+	// is long enough; or not providing a valid ReCAPTCHA when it is required by the config.
+	Error string `json:"error" example:"login is not valid: email address provided is not valid"`
+}
+
+type LoginInvalidCredentialsResponse struct {
+	// If the client provides an invalid email address and password pair. Then the API will reject the request with an
+	// error like the one here.
+	Error string `json:"error" example:"invalid email and password"`
+}
+
+type LoginEmailIsNotVerifiedResponse struct {
+	// When email verification is required by monetr, it is possible for the client to provide perfectly valid
+	// credentials in their request and still receive an error from the API. This particular error is to let the client
+	// know that a token cannot be issued until the user's email address is properly verified. In the UI the user is
+	// redirected to a screen to resend the verification email if this error is returned.
+	Error string `json:"error" example:"email address is not verified"`
+}
+
 type RegisterRequest struct {
 	// The email address you want to have associated with your login and user. This is only used for verification
 	// purposes like resetting a forgotten password. Or for billing. You are **never** added to any mailing list here.

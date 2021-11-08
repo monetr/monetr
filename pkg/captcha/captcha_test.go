@@ -17,7 +17,8 @@ func TestCaptchaBase_VerifyCaptcha(t *testing.T) {
 		defer httpmock.DeactivateAndReset()
 
 		mock_http_helper.NewHttpMockJsonResponder(t,
-			"POST", "https://www.google.com/recaptcha/api/siteverify", func(t *testing.T, request *http.Request) (interface{}, int) {
+			"POST", "https://www.google.com/recaptcha/api/siteverify",
+			func(t *testing.T, request *http.Request) (interface{}, int) {
 				return map[string]interface{}{
 					"success":      true,
 					"challenge_ts": time.Now(),
@@ -40,7 +41,8 @@ func TestCaptchaBase_VerifyCaptcha(t *testing.T) {
 		defer httpmock.DeactivateAndReset()
 
 		mock_http_helper.NewHttpMockJsonResponder(t,
-			"POST", "https://www.google.com/recaptcha/api/siteverify", func(t *testing.T, request *http.Request) (interface{}, int) {
+			"POST", "https://www.google.com/recaptcha/api/siteverify",
+			func(t *testing.T, request *http.Request) (interface{}, int) {
 				return map[string]interface{}{
 					"success":      true,
 					"challenge_ts": time.Now(),

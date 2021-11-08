@@ -9,7 +9,10 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/internal/fixtures"
+	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/mock_stripe"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/swag"
 	"github.com/monetr/monetr/pkg/verification"
@@ -32,6 +35,47 @@ func TestLogin(t *testing.T) {
 		response.JSON().Path("$.token").String().NotEmpty()
 	})
 
+	t.Run("no users", func(t *testing.T) {
+		e := NewTestApplication(t)
+		// Creating the login fixture directly prevents it from also creating a user and an account.
+		login, password := fixtures.GivenIHaveLogin(t)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(swag.LoginRequest{
+				Email:    login.Email,
+				Password: password,
+			}).
+			Expect()
+
+		response.Status(http.StatusForbidden)
+		response.JSON().Path("$.error").String().Equal("user has no accounts")
+		response.JSON().Object().NotContainsKey("token")
+	})
+
+	t.Run("multiple users", func(t *testing.T) {
+		e := NewTestApplication(t)
+		// Creating the login fixture directly prevents it from also creating a user and an account.
+		login, password := fixtures.GivenIHaveLogin(t)
+
+		user1 := fixtures.GivenIHaveAnAccount(t, login)
+		assert.Equal(t, login.LoginId, user1.LoginId, "user should have the given login")
+		user2 := fixtures.GivenIHaveAnAccount(t, login)
+		assert.Equal(t, login.LoginId, user2.LoginId, "user should have the given login")
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(swag.LoginRequest{
+				Email:    login.Email,
+				Password: password,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.token").String().NotEmpty()
+		response.JSON().Path("$.users").Array().Length().Equal(2) // Should have 2 accounts.
+		response.JSON().Path("$.users..accountId").Array().Contains(user1.AccountId)
+		response.JSON().Path("$.users..accountId").Array().Contains(user2.AccountId)
+	})
+
 	t.Run("invalid email", func(t *testing.T) {
 		e := NewTestApplication(t)
 
@@ -44,6 +88,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().Equal("login is not valid: email address provided is not valid")
+		response.JSON().Object().NotContainsKey("token")
 	})
 
 	t.Run("invalid email weird parser", func(t *testing.T) {
@@ -58,6 +103,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().Equal("login is not valid: email address provided is not valid")
+		response.JSON().Object().NotContainsKey("token")
 	})
 
 	t.Run("password to short", func(t *testing.T) {
@@ -72,6 +118,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().Equal("login is not valid: password must be at least 8 characters")
+		response.JSON().Object().NotContainsKey("token")
 	})
 
 	t.Run("inactive subscription", func(t *testing.T) {
@@ -115,6 +162,44 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusForbidden)
 		response.JSON().Path("$.error").Equal("invalid email and password")
+		response.JSON().Object().NotContainsKey("token")
+	})
+
+	t.Run("valid captcha", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		mock_http_helper.NewHttpMockJsonResponder(t,
+			"POST", "https://www.google.com/recaptcha/api/siteverify",
+			func(t *testing.T, request *http.Request) (interface{}, int) {
+				return map[string]interface{}{
+					"success":      true,
+					"challenge_ts": time.Now(),
+					"hostname":     "monetr.mini",
+					"score":        1.0,
+				}, http.StatusOK
+			},
+			nil,
+		)
+
+		config := NewTestApplicationConfig(t)
+		config.ReCAPTCHA.Enabled = true
+		config.ReCAPTCHA.VerifyLogin = true
+		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
+		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
+		e := NewTestApplicationWithConfig(t, config)
+		email, password := GivenIHaveLogin(t, e)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(swag.LoginRequest{
+				Email:    email,
+				Password: password,
+				Captcha:  myownsanity.StringP("Believe it or not, I am a valid captcha"),
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.token").String().NotEmpty()
 	})
 
 	t.Run("bad captcha", func(t *testing.T) {
@@ -136,6 +221,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").Equal("valid ReCAPTCHA is required: captcha is not valid")
+		response.JSON().Object().NotContainsKey("token")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -147,6 +233,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").Equal("malformed json: invalid character 'b' looking for beginning of object key string")
+		response.JSON().Object().NotContainsKey("token")
 	})
 
 	t.Run("with unverified email", func(t *testing.T) {
@@ -169,6 +256,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusPreconditionRequired)
 		response.JSON().Path("$.error").String().Equal("email address is not verified")
+		response.JSON().Object().NotContainsKey("token")
 	})
 }
 
@@ -197,6 +285,56 @@ func TestRegister(t *testing.T) {
 		response.JSON().Path("$.user").Object().NotEmpty()
 		response.JSON().Path("$.user.login").Object().NotEmpty()
 		response.JSON().Path("$.user.account").Object().NotEmpty()
+	})
+
+	t.Run("beta code not provided", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.Beta.EnableBetaCodes = true
+		e := NewTestApplicationWithConfig(t, config)
+
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("beta code required for registration")
+	})
+
+	t.Run("invalid beta code", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.Beta.EnableBetaCodes = true
+		e := NewTestApplicationWithConfig(t, config)
+
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+			BetaCode  string `json:"betaCode"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.BetaCode = "123456"
+
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().Equal("could not verify beta code: record does not exist")
 	})
 
 	t.Run("bad password", func(t *testing.T) {
@@ -241,6 +379,85 @@ func TestRegister(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").Equal("failed to parse timezone: unknown time zone going for broke")
+	})
+
+	t.Run("valid captcha", func(t *testing.T) {
+		httpmock.Activate()
+		defer httpmock.DeactivateAndReset()
+
+		mock_http_helper.NewHttpMockJsonResponder(t,
+			"POST", "https://www.google.com/recaptcha/api/siteverify",
+			func(t *testing.T, request *http.Request) (interface{}, int) {
+				return map[string]interface{}{
+					"success":      true,
+					"challenge_ts": time.Now(),
+					"hostname":     "monetr.mini",
+					"score":        1.0,
+				}, http.StatusOK
+			},
+			nil,
+		)
+
+		config := NewTestApplicationConfig(t)
+		config.ReCAPTCHA.Enabled = true
+		config.ReCAPTCHA.VerifyRegister = true
+		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
+		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
+		e := NewTestApplicationWithConfig(t, config)
+
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+			Captcha   string `json:"captcha"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Captcha = "I am a valid captcha"
+
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.token").String().NotEmpty()
+		response.JSON().Path("$.nextUrl").String().Equal("/setup")
+		response.JSON().Path("$.isActive").Boolean().True()
+		response.JSON().Path("$.user").Object().NotEmpty()
+		response.JSON().Path("$.user.login").Object().NotEmpty()
+		response.JSON().Path("$.user.account").Object().NotEmpty()
+	})
+
+	t.Run("invalid captcha", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.ReCAPTCHA.Enabled = true
+		config.ReCAPTCHA.VerifyRegister = true
+		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
+		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
+		e := NewTestApplicationWithConfig(t, config)
+
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+			Captcha   string `json:"captcha"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Captcha = "I am not a valid captcha"
+
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("valid ReCAPTCHA is required: remote error codes: [invalid-input-secret]")
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -360,6 +577,35 @@ func TestRegister(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.message").String().Equal("A verification email has been sent to your email address, please verify your email.")
+		response.JSON().Object().NotContainsKey("token")
+	})
+
+	t.Run("verification token lifespan is too short", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.Email.Enabled = true
+		config.Email.Verification.Enabled = true
+		config.Email.Verification.TokenLifetime = 1 * time.Millisecond
+		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
+		config.Email.Domain = "monetr.mini"
+		e := NewTestApplicationWithConfig(t, config)
+
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusInternalServerError)
+		response.JSON().Path("$.error").String().Equal("could not generate email verification token: lifetime must be greater than 1 second")
 		response.JSON().Object().NotContainsKey("token")
 	})
 }

@@ -48,9 +48,9 @@ func (c *Controller) handleAuthentication(p router.Party) {
 // @Param Login body swag.LoginRequest true "User Login Request"
 // @Router /authentication/login [post]
 // @Success 200 {object} swag.LoginResponse
-// @Failure 400 {object} ApiError Required data is missing.
-// @Failure 403 {object} ApiError Invalid credentials.
-// @Failure 428 {object} ApiError Email address is not verified.
+// @Failure 400 {object} swag.LoginInvalidRequestResponse Required data is missing.
+// @Failure 403 {object} swag.LoginInvalidCredentialsResponse Invalid credentials.
+// @Failure 428 {object} swag.LoginEmailIsNotVerifiedResponse Email address is not verified.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx iris.Context) {
 	var loginRequest struct {

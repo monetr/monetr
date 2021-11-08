@@ -25,7 +25,7 @@ func NewReCAPTCHAVerification(privateKey string) (Verification, error) {
 	captcha, err := recaptcha.NewReCAPTCHA(
 		privateKey,
 		recaptcha.V2,
-		15*time.Second,
+		10*time.Second,
 	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create ReCAPTCHA verification")
