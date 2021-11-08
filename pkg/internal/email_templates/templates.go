@@ -2,12 +2,14 @@ package email_templates
 
 import (
 	"embed"
-	"github.com/pkg/errors"
 	"html/template"
+
+	"github.com/pkg/errors"
 )
 
 const (
-	VerifyEmailTemplate = "templates/verify.html"
+	VerifyEmailTemplate    = "templates/verify.html"
+	ForgotPasswordTemplate = "templates/forgot.html"
 )
 
 //go:embed templates/*.html

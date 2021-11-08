@@ -11,6 +11,7 @@ type Login struct {
 	Email           string       `json:"email" pg:"email,notnull,unique"`
 	FirstName       string       `json:"firstName" pg:"first_name,notnull"`
 	LastName        string       `json:"lastName" pg:"last_name"`
+	PasswordResetAt *time.Time   `json:"passwordResetAt" pg:"password_reset_at"`
 	PhoneNumber     *PhoneNumber `json:"-" pg:"phone_number,type:'text'"`
 	IsEnabled       bool         `json:"-" pg:"is_enabled,notnull,use_zero"`
 	IsEmailVerified bool         `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`

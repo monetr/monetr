@@ -17,6 +17,8 @@ data:
   MONETR_EMAIL_DOMAIN: {{ quote .Values.api.email.domain }}
   MONETR_EMAIL_VERIFICATION_ENABLED: {{ quote .Values.api.email.verification.enabled }}
   MONETR_EMAIL_VERIFICATION_TOKEN_LIFETIME: {{ quote .Values.api.email.verification.tokenLifetime }}
+  MONETR_EMAIL_FORGOT_PASSWORD_ENABLED: {{ quote .Values.api.email.forgotPassword.enabled }}
+  MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_LIFETIME: {{ quote .Values.api.email.forgotPassword.tokenLifetime }}
   MONETR_EMAIL_SMTP_IDENTITY: {{ quote .Values.api.email.smtp.identity }}
   MONETR_EMAIL_SMTP_USERNAME: {{ quote .Values.api.email.smtp.username }}
   MONETR_EMAIL_SMTP_HOST: {{ quote .Values.api.email.smtp.host }}

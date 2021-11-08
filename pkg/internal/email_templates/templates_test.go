@@ -1,8 +1,9 @@
 package email_templates
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetEmailTemplate(t *testing.T) {
@@ -10,6 +11,12 @@ func TestGetEmailTemplate(t *testing.T) {
 		verifyEmailTemplate, err := GetEmailTemplate(VerifyEmailTemplate)
 		assert.NoError(t, err, "should succeed")
 		assert.NotNil(t, verifyEmailTemplate, "should return a valid template")
+	})
+
+	t.Run("forgot password", func(t *testing.T) {
+		forgotPasswordTemplate, err := GetEmailTemplate(ForgotPasswordTemplate)
+		assert.NoError(t, err, "should succeed")
+		assert.NotNil(t, forgotPasswordTemplate, "should return a valid template")
 	})
 
 	t.Run("missing template", func(t *testing.T) {

@@ -15,10 +15,17 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type VerifyEmailParams struct {
-	Login     models.Login
-	VerifyURL string
-}
+type (
+	VerifyEmailParams struct {
+		Login     models.Login
+		VerifyURL string
+	}
+
+	ForgotPasswordParams struct {
+		Login    models.Login
+		ResetURL string
+	}
+)
 
 var (
 	_ Configuration = config.Configuration{}
@@ -31,6 +38,7 @@ type Configuration interface {
 
 type UserCommunication interface {
 	SendVerificationEmail(ctx context.Context, params VerifyEmailParams) error
+	SendPasswordResetEmail(ctx context.Context, params ForgotPasswordParams) error
 }
 
 type userCommunicationBase struct {
@@ -51,12 +59,12 @@ func (u *userCommunicationBase) SendVerificationEmail(ctx context.Context, param
 	span := sentry.StartSpan(ctx, "SendVerificationEmail")
 	defer span.Finish()
 
-	emailContent, err := u.getVerificationEmailContent(span.Context(), params)
+	emailContent, err := u.getEmailContent(span.Context(), email_templates.VerifyEmailTemplate, params)
 	if err != nil {
 		return err
 	}
 
-	log := u.log.WithContext(ctx).WithFields(logrus.Fields{
+	log := u.log.WithContext(span.Context()).WithFields(logrus.Fields{
 		"loginId": params.Login.LoginId,
 	})
 
@@ -76,18 +84,45 @@ func (u *userCommunicationBase) SendVerificationEmail(ctx context.Context, param
 	return nil
 }
 
-func (u *userCommunicationBase) getVerificationEmailContent(ctx context.Context, params VerifyEmailParams) (string, error) {
-	span := sentry.StartSpan(ctx, "getVerificationEmailContent")
+func (u *userCommunicationBase) SendPasswordResetEmail(ctx context.Context, params ForgotPasswordParams) error {
+	span := sentry.StartSpan(ctx, "SendPasswordResetEmail")
 	defer span.Finish()
 
-	log := u.log.WithContext(ctx).WithFields(logrus.Fields{
+	emailContent, err := u.getEmailContent(span.Context(), email_templates.ForgotPasswordTemplate, params)
+	if err != nil {
+		return err
+	}
+
+	log := u.log.WithContext(span.Context()).WithFields(logrus.Fields{
 		"loginId": params.Login.LoginId,
 	})
 
-	verifyTemplate, err := email_templates.GetEmailTemplate(email_templates.VerifyEmailTemplate)
+	log.Debug("sending password reset email")
+
+	if err = u.mail.Send(span.Context(), mail.SendEmailRequest{
+		From:    fmt.Sprintf("no-reply@%s", u.options.GetEmail().Domain),
+		To:      params.Login.Email,
+		Subject: "Password Reset",
+		Content: emailContent,
+		IsHTML:  true,
+	}); err != nil {
+		log.WithError(err).Error("failed to send password reset email")
+		return errors.Wrap(err, "failed to send password reset email")
+	}
+
+	return nil
+}
+
+func (u *userCommunicationBase) getEmailContent(ctx context.Context, templateName string, params interface{}) (string, error) {
+	span := sentry.StartSpan(ctx, "getEmailContent")
+	defer span.Finish()
+
+	log := u.log.WithContext(span.Context()).WithField("emailTemplate", templateName)
+
+	verifyTemplate, err := email_templates.GetEmailTemplate(templateName)
 	if err != nil {
-		log.WithError(err).Error("failed to retrieve verification email template")
-		return "", errors.Wrap(err, "failed to retrieve verification email template")
+		log.WithError(err).Error("failed to retrieve email template")
+		return "", errors.Wrap(err, "failed to retrieve email template")
 	}
 
 	buffer := bytes.NewBuffer(nil)

@@ -173,11 +173,12 @@ release-asset:
 	$(GH) release upload $(RELEASE_VERSION) $(BINARY_TAR) --clobber
 endif
 
+TEST_FLAGS=-race -v
 test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr REST API)
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 	$(GOTESTSUM) --junitfile $(PWD)/rest-api-junit.xml --jsonfile $(PWD)/rest-api-tests.json --format testname -- \
-		-race -v \
+		$(TEST_FLAGS) \
 		-coverprofile=$(COVERAGE_TXT) \
 		-covermode=atomic $(GO_SRC_DIR)/...
 	$(GO) tool cover -func=$(COVERAGE_TXT)

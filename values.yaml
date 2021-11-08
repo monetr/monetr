@@ -131,8 +131,12 @@ api:
     domain: localhost
     verification:
       enabled: false
-      tokenLifetime: 1h
+      tokenLifetime: 10m
       tokenSecret: abc123
+    forgotPassword:
+      enabled: false
+      tokenLifetime: 10m
+      tokenSecret: qwe123
     smtp:
       identity: ""
       username: "no-reply"

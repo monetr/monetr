@@ -79,8 +79,9 @@ func (c Configuration) GetEmail() Email {
 type Email struct {
 	// Enabled controls whether the API can send emails at all. In order to support things like forgot password links or
 	// email verification this must be enabled.
-	Enabled      bool
-	Verification EmailVerification
+	Enabled        bool
+	Verification   EmailVerification
+	ForgotPassword ForgotPassword
 	// Domain specifies the actual domain name used to send emails. Emails will always be sent from `no-reply@{domain}`.
 	Domain string
 	// Email is sent via SMTP. If you want to send emails it is required to include an SMTP configuration.
@@ -98,6 +99,15 @@ type EmailVerification struct {
 	TokenSecret string
 }
 
+type ForgotPassword struct {
+	// If you want to allow people to reset their passwords then we need to be able to send them a password reset link.
+	Enabled bool
+	// Specify the amount of time that a password reset link will be valid.
+	TokenLifetime time.Duration
+	// Specify a secret used to generate the password reset links as well as validate them.
+	TokenSecret string
+}
+
 type SMTPClient struct {
 	Identity string
 	Username string
@@ -108,6 +118,10 @@ type SMTPClient struct {
 
 func (s Email) ShouldVerifyEmails() bool {
 	return s.Enabled && s.Verification.Enabled
+}
+
+func (s Email) AllowPasswordReset() bool {
+	return s.Enabled && s.ForgotPassword.Enabled
 }
 
 type ReCAPTCHA struct {
@@ -268,6 +282,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
+	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Level", "info")
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("PostgreSQL.Address", "localhost")
@@ -298,6 +313,9 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Email.Verification.Enabled", "MONETR_EMAIL_VERIFICATION_ENABLED")
 	_ = v.BindEnv("Email.Verification.TokenLifetime", "MONETR_EMAIL_VERIFICATION_TOKEN_LIFETIME")
 	_ = v.BindEnv("Email.Verification.TokenSecret", "MONETR_EMAIL_VERIFICATION_TOKEN_SECRET")
+	_ = v.BindEnv("Email.ForgotPassword.Enabled", "MONETR_EMAIL_FORGOT_PASSWORD_ENABLED")
+	_ = v.BindEnv("Email.ForgotPassword.TokenLifetime", "MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_LIFETIME")
+	_ = v.BindEnv("Email.ForgotPassword.TokenSecret", "MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_SECRET")
 	_ = v.BindEnv("Email.SMTP.Identity", "MONETR_EMAIL_SMTP_IDENTITY")
 	_ = v.BindEnv("Email.SMTP.Username", "MONETR_EMAIL_SMTP_USERNAME")
 	_ = v.BindEnv("Email.SMTP.Password", "MONETR_EMAIL_SMTP_PASSWORD")

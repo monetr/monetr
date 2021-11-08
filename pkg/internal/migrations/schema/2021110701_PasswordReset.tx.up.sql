@@ -1,0 +1,1 @@
+ALTER TABLE "logins" ADD COLUMN "password_reset_at" TIMESTAMPTZ NULL;
