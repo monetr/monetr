@@ -1,5 +1,19 @@
 # Changelog
 
+### [0.4.1](https://www.github.com/monetr/monetr/compare/v0.4.0...v0.4.1) (2021-11-08)
+
+
+### Bug Fixes
+
+* Added DST test to make sure I'm not going insane. ([bb40ab4](https://www.github.com/monetr/monetr/commit/bb40ab49adf74f9978393bd5fa1e4dac03b4f8c4))
+* Fixed race condition in pubsub test. ([59a5d78](https://www.github.com/monetr/monetr/commit/59a5d782afe8a37d9c5df79f0565451d93054e50)), closes [#272](https://www.github.com/monetr/monetr/issues/272)
+* Improve code coverage for testutils. ([b287949](https://www.github.com/monetr/monetr/commit/b287949b2991cd6f322cdc80a933b3fe671c2d14))
+* Increased notification delay, fixed React issue. ([637ca66](https://www.github.com/monetr/monetr/commit/637ca66da5e372187bb0cb3b1d1ee43a78ca6656))
+* Laying the groundwork for password resetting. ([06db23a](https://www.github.com/monetr/monetr/commit/06db23a1956f809768e8825454a2576702c77a7a))
+* Log `item_id` and `bank_account_id` for Plaid requests. ([d9acf8d](https://www.github.com/monetr/monetr/commit/d9acf8d2b36abe71e48f53f850852605412c7d54)), closes [#269](https://www.github.com/monetr/monetr/issues/269)
+* Minor improvements, testing pub sub. ([aa26bf7](https://www.github.com/monetr/monetr/commit/aa26bf75c3d8cc7ef1ae1cd4256ecaceb6d6035c))
+* Testing improvements and login documentation. ([a5d64e4](https://www.github.com/monetr/monetr/commit/a5d64e4d3a59df8fb6da0f52db1f43b33d16ace0))
+
 ## [0.4.0](https://www.github.com/monetr/monetr/compare/v0.3.9...v0.4.0) (2021-11-07)
 
 
