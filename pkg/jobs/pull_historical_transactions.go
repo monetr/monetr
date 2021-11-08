@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -62,12 +61,9 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) (err error) {
 
 	linkId := uint64(job.ArgInt64("linkId"))
 
+	crumbs.IncludeUserInScope(hub, accountId)
+
 	hub.ConfigureScope(func(scope *sentry.Scope) {
-		scope.SetUser(sentry.User{
-			ID:       strconv.FormatUint(accountId, 10),
-			Username: fmt.Sprintf("account:%d", accountId),
-		})
-		scope.SetTag("accountId", strconv.FormatUint(accountId, 10))
 		scope.SetTag("linkId", strconv.FormatUint(linkId, 10))
 		scope.SetTag("jobId", job.ID)
 	})
@@ -86,6 +82,8 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) (err error) {
 			log.WithError(err).Errorf("failed to pull transactions")
 			return err
 		}
+
+		crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
 
 		switch link.LinkStatus {
 		case models.LinkStatusSetup, models.LinkStatusPendingExpiration:

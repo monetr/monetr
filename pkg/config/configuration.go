@@ -278,7 +278,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("ListenPort", 4000)
 	v.SetDefault("StatsPort", 9000)
 	v.SetDefault("Environment", "development")
-	v.SetDefault("UIDomainName", "localhost:3000")
+	v.SetDefault("UIDomainName", "localhost:4000")
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
@@ -292,7 +292,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("ReCAPTCHA.Enabled", false)
 	v.SetDefault("Vault.Auth", "kubernetes")
 	v.SetDefault("Vault.IdleConnTimeout", 9*time.Minute)
-	v.SetDefault("Vault.Timeout", 30*time.Second)
+	v.SetDefault("Vault.Timeout", 10*time.Second)
 	v.SetDefault("Vault.TokenFile", "/var/run/secrets/kubernetes.io/serviceaccount/token")
 }
 

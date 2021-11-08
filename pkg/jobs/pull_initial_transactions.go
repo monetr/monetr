@@ -8,6 +8,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/gocraft/work"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
@@ -68,6 +69,8 @@ func (j *jobManagerBase) pullInitialTransactions(job *work.Job) (err error) {
 			log.Error("provided link does not have any plaid credentials")
 			return nil
 		}
+
+		crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
 
 		accessToken, err := j.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), accountId, link.PlaidLink.ItemId)
 		if err != nil {

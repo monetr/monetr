@@ -3,6 +3,8 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
@@ -12,7 +14,6 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"strconv"
 )
 
 const (
@@ -69,6 +70,10 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 			crumbs.Warn(span.Context(), "failed to retrieve link to be removed, this job will not be retried", "weirdness", nil)
 			log.WithError(err).Error("failed to retrieve link that to be removed, this job will not be retried")
 			return nil
+		}
+
+		if link.PlaidLink != nil {
+			crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
 		}
 
 		bankAccountIds := make([]uint64, 0)

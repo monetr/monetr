@@ -113,7 +113,7 @@ api:
     role: "monetr"
     insecureSkipVerify: false
     auth: "kubernetes"
-    timeout: "30s"
+    timeout: "10s"
     idleConnTimeout: "9m"
   stripe:
     enabled: true
@@ -121,7 +121,7 @@ api:
     billingEnabled: true
     taxesEnabled: true
     initialPlan:
-      freeTrialDays: 1
+      freeTrialDays: 30
       stripePriceId: price_1JGYV0I4uGGnwpgw3kkur7ze
       features:
         - ManualBudgeting

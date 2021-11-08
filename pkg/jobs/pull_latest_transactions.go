@@ -137,6 +137,8 @@ func (j *jobManagerBase) pullLatestTransactions(job *work.Job) (err error) {
 			return err
 		}
 
+		crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
+
 		switch link.LinkStatus {
 		case models.LinkStatusSetup, models.LinkStatusPendingExpiration:
 			break
