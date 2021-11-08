@@ -119,5 +119,7 @@ func GetPgDatabase(t *testing.T) *pg.DB {
 		require.NoError(t, db.Close(), "must close database connection")
 	})
 
+	testDatabases.databases[t.Name()] = db
+
 	return db
 }
