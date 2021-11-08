@@ -2053,6 +2053,9 @@ var doc = `{
                 },
                 "loginId": {
                     "type": "integer"
+                },
+                "passwordResetAt": {
+                    "type": "string"
                 }
             }
         },

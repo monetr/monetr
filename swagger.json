@@ -2038,6 +2038,9 @@
                 },
                 "loginId": {
                     "type": "integer"
+                },
+                "passwordResetAt": {
+                    "type": "string"
                 }
             }
         },
