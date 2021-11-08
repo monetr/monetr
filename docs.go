@@ -65,19 +65,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ApiError"
+                            "$ref": "#/definitions/swag.LoginInvalidRequestResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/controller.ApiError"
+                            "$ref": "#/definitions/swag.LoginInvalidCredentialsResponse"
                         }
                     },
                     "428": {
                         "description": "Precondition Required",
                         "schema": {
-                            "$ref": "#/definitions/controller.ApiError"
+                            "$ref": "#/definitions/swag.LoginEmailIsNotVerifiedResponse"
                         }
                     },
                     "500": {
@@ -2560,6 +2560,36 @@ var doc = `{
                     "type": "integer",
                     "x-nullable": true,
                     "example": 89547
+                }
+            }
+        },
+        "swag.LoginEmailIsNotVerifiedResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "When email verification is required by monetr, it is possible for the client to provide perfectly valid\ncredentials in their request and still receive an error from the API. This particular error is to let the client\nknow that a token cannot be issued until the user's email address is properly verified. In the UI the user is\nredirected to a screen to resend the verification email if this error is returned.",
+                    "type": "string",
+                    "example": "email address is not verified"
+                }
+            }
+        },
+        "swag.LoginInvalidCredentialsResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "If the client provides an invalid email address and password pair. Then the API will reject the request with an\nerror like the one here.",
+                    "type": "string",
+                    "example": "invalid email and password"
+                }
+            }
+        },
+        "swag.LoginInvalidRequestResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "The API performs a handful of validations on the request from the client. If any of these validations fail before\nthe credentials are even processed then an invalid request response will be returned to the client. These things\ncan be caused by not providing a valid email address (or not providing one at all), not providing a password that\nis long enough; or not providing a valid ReCAPTCHA when it is required by the config.",
+                    "type": "string",
+                    "example": "login is not valid: email address provided is not valid"
                 }
             }
         },
