@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.4.2](https://www.github.com/monetr/monetr/compare/v0.4.1...v0.4.2) (2021-11-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency eslint-plugin-jest to v25.2.4 ([b5ba346](https://www.github.com/monetr/monetr/commit/b5ba3466f967b67f318559bfd9ce5e291059c0f6))
+* **deps:** update dependency terser-webpack-plugin to v5.2.5 ([5772a2a](https://www.github.com/monetr/monetr/commit/5772a2a1ece9b1e85acdb436b46be2301737aa01))
+* **deps:** update material-ui monorepo ([0be2aa7](https://www.github.com/monetr/monetr/commit/0be2aa707cbe592aad152688234439c698b91b88))
+* **deps:** update typescript-eslint monorepo to v5.3.1 ([cb92603](https://www.github.com/monetr/monetr/commit/cb92603417659c22a3875aab806c7da0dbff942c))
+* Improvements for sentry, consistency. ([8576b15](https://www.github.com/monetr/monetr/commit/8576b159bc025784cb2909a7db449bdd9e1a8902))
+* Massive Typescript improvements. ([7919941](https://www.github.com/monetr/monetr/commit/7919941d3c441b24fc6268bc8aebe67f5da7091d))
+
 ### [0.4.1](https://www.github.com/monetr/monetr/compare/v0.4.0...v0.4.1) (2021-11-08)
 
 
