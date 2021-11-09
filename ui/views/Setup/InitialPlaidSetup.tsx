@@ -12,6 +12,7 @@ import { getBillingEnabled } from "shared/bootstrap/selectors";
 
 import { Button, Typography } from "@mui/material";
 import { List } from "immutable";
+import { AppState } from 'store';
 
 interface WithConnectionPropTypes {
   billingEnabled: boolean;
@@ -178,7 +179,7 @@ class InitialPlaidSetup extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  state => ({
+  (state: AppState) => ({
     billingEnabled: getBillingEnabled(state),
   }),
   {

@@ -8,12 +8,12 @@ import { connect } from 'react-redux';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
 import selectTransaction from 'shared/transactions/actions/selectTransaction';
 import { getTransactionById } from 'shared/transactions/selectors/getTransactionById';
-import { getTransactionIsSelected } from 'shared/transactions/selectors/getTransactionIsSelected';
 import SelectButton from 'components/SelectyBoi/SelectButton';
 import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
 import updateTransaction from 'shared/transactions/actions/updateTransaction';
 
 import './styles/TransactionItem.scss';
+import { AppState } from 'store';
 
 interface PropTypes {
   transactionId: number;
@@ -22,16 +22,12 @@ interface PropTypes {
 interface WithConnectionPropTypes extends PropTypes {
   transaction: Transaction;
   spending?: Spending;
-  isSelected: boolean;
-  selectTransaction: { (transactionId: number): void }
   updateTransaction: (transaction: Transaction) => Promise<void>;
 }
 
 interface State {
   spentFromAnchorEl: Element | null;
   spentFromWidth: number | null;
-  nameAnchorEl: Element | null;
-  nameWidth: number | null;
 }
 
 export class TransactionItem extends Component<WithConnectionPropTypes, State> {
@@ -39,8 +35,6 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
   state = {
     spentFromAnchorEl: null,
     spentFromWidth: 0,
-    nameAnchorEl: null,
-    nameWidth: 0,
   };
 
   getSpentFromString() {
@@ -71,16 +65,12 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
       this.setState({
         spentFromAnchorEl: event.currentTarget,
         spentFromWidth: event.currentTarget.clientWidth,
-        nameAnchorEl: null,
-        nameWidth: null,
       });
     };
 
     const closePopover = () => this.setState({
       spentFromAnchorEl: null,
       spentFromWidth: null,
-      nameAnchorEl: null,
-      nameWidth: null,
     });
 
     return (
@@ -126,12 +116,8 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
     )
   }
 
-  handleClick = () => {
-    return this.props.selectTransaction(this.props.transactionId);
-  }
-
   render() {
-    const { transaction, isSelected } = this.props;
+    const { transaction } = this.props;
 
     return (
       <Fragment>
@@ -167,13 +153,11 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  (state, props: PropTypes) => {
+  (state: AppState, props: PropTypes) => {
     const transaction = getTransactionById(props.transactionId)(state);
-    const isSelected = getTransactionIsSelected(props.transactionId)(state);
 
     return {
       transaction,
-      isSelected,
       spending: getSpendingById(transaction.spendingId)(state),
     }
   },

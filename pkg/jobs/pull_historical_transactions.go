@@ -9,7 +9,6 @@ import (
 	"github.com/gocraft/work"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -85,15 +84,9 @@ func (j *jobManagerBase) pullHistoricalTransactions(job *work.Job) (err error) {
 
 		crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
 
-		switch link.LinkStatus {
-		case models.LinkStatusSetup, models.LinkStatusPendingExpiration:
-			break
-		default:
-			crumbs.Warn(span.Context(), "Link is not in a state where data can be retrieved", "plaid", map[string]interface{}{
-				"status": link.LinkStatus,
-			})
-			return nil
-		}
+		crumbs.Warn(span.Context(), "Link is not setup, pulling historical transactions may fail", "plaid", map[string]interface{}{
+			"status": link.LinkStatus,
+		})
 
 		accessToken, err := j.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), accountId, link.PlaidLink.ItemId)
 		if err != nil {

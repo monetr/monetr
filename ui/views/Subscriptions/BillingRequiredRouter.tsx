@@ -5,7 +5,7 @@ import Logout from "views/Authentication/Logout";
 import AfterCheckout from "views/Subscriptions/AfterCheckout";
 import Subscribe from "views/Subscriptions/Subscribe";
 
-export default function BillingRequiredRouter(): React.ReactNode {
+export default function BillingRequiredRouter(): JSX.Element {
   return (
     <Switch>
       <Route path="/logout" exact component={ Logout }/>

@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-
 import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import request from 'shared/util/request';
 import User from 'models/User';
@@ -12,9 +11,6 @@ import {
   getShouldVerifyRegister,
   getStripePublicKey
 } from 'shared/bootstrap/selectors';
-
-import Logo from 'assets';
-
 import ReCAPTCHA from 'react-google-recaptcha';
 import classnames from 'classnames';
 import {
@@ -30,8 +26,11 @@ import {
   TextField
 } from '@mui/material';
 import { Formik, FormikHelpers } from 'formik';
+import { AppState } from 'store';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
+
+import Logo from 'assets';
 
 interface SignUpValues {
   agree: boolean;
@@ -459,7 +458,7 @@ class SignUpView extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  state => ({
+  (state: AppState) => ({
     ReCAPTCHAKey: getReCAPTCHAKey(state),
     initialPlan: getInitialPlan(state),
     requireBetaCode: getRequireBetaCode(state),

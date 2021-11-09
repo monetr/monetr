@@ -21,6 +21,7 @@ import {
   TextField
 } from '@mui/material';
 import { Formik, FormikHelpers, FormikValues } from 'formik';
+import { AppState } from 'store';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 
@@ -202,10 +203,9 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
   };
 
   render() {
-
     const initialValues: LoginValues = {
-      email: null,
-      password: null,
+      email: '',
+      password: '',
     }
 
     const disableForVerification = !this.props.verifyLogin || (this.props.ReCAPTCHAKey && this.state.verification);
@@ -311,7 +311,7 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  state => ({
+  (state: AppState) => ({
     ReCAPTCHAKey: getReCAPTCHAKey(state),
     allowSignUp: getSignUpAllowed(state),
     verifyLogin: getShouldVerifyLogin(state),

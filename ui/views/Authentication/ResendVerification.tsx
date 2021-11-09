@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Formik, FormikHelpers } from 'formik';
 import { Alert, AlertTitle, Button, CircularProgress, Snackbar, TextField } from '@mui/material';
 import classnames from 'classnames';
+import { AppState } from 'store';
 import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 import verifyEmailAddress from 'util/verifyEmailAddress';
@@ -195,7 +196,7 @@ class ResendVerification extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  state => ({
+  (state: AppState) => ({
     requireCaptcha: !!getReCAPTCHAKey(state),
   }),
   {},

@@ -5,6 +5,7 @@ import { RedirectToCheckoutOptions } from '@stripe/stripe-js/types/stripe-js/che
 import { connect } from 'react-redux';
 import { getInitialPlan, getStripePublicKey } from 'shared/bootstrap/selectors';
 import { RouteComponentProps } from 'react-router-dom';
+import { AppState } from 'store';
 
 interface State {
   loading: boolean;
@@ -53,7 +54,7 @@ class Subscribe extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  state => ({
+  (state: AppState) => ({
     initialPlan: getInitialPlan(state),
     stripePublicKey: getStripePublicKey(state),
   }),

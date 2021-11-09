@@ -1,8 +1,8 @@
-import { connect } from "react-redux";
-import { getReCAPTCHAKey } from "shared/bootstrap/selectors";
-import React, { Component } from "react";
-import { CircularProgress } from "@mui/material";
-import ReCAPTCHA from "react-google-recaptcha";
+import { useSelector } from 'react-redux';
+import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
+import React from 'react';
+import { CircularProgress } from '@mui/material';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 export interface PropTypes {
   show?: boolean;
@@ -10,36 +10,24 @@ export interface PropTypes {
   onVerify: (verification: string) => void;
 }
 
-interface WithConnectionPropTypes extends PropTypes {
-  ReCAPTCHAKey: string | null;
-}
+const CaptchaMaybe = (props: PropTypes): JSX.Element => {
+  const reCaptchaKey = useSelector(getReCAPTCHAKey);
 
-class CaptchaMaybe extends Component<WithConnectionPropTypes, any> {
+  const { show, loading, onVerify } = props;
 
-  render() {
-    const { show, ReCAPTCHAKey, loading } = this.props;
-
-    if (!show || !ReCAPTCHAKey) {
-      return null;
-    }
-
-    const { onVerify } = this.props;
-
-    return (
-      <div className="flex items-center justify-center w-full">
-        { !loading && <ReCAPTCHA
-          sitekey={ ReCAPTCHAKey }
-          onChange={ onVerify }
-        /> }
-        { loading && <CircularProgress/> }
-      </div>
-    );
+  if (!show || !reCaptchaKey) {
+    return null;
   }
+
+  return (
+    <div className="flex items-center justify-center w-full">
+      { !loading && <ReCAPTCHA
+        sitekey={ reCaptchaKey }
+        onChange={ onVerify }
+      /> }
+      { loading && <CircularProgress/> }
+    </div>
+  );
 }
 
-export default connect(
-  state => ({
-    ReCAPTCHAKey: getReCAPTCHAKey(state),
-  }),
-  {},
-)(CaptchaMaybe);
+export default CaptchaMaybe;
