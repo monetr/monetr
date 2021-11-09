@@ -1,5 +1,16 @@
 # Changelog
 
+### [0.4.4](https://www.github.com/monetr/monetr/compare/v0.4.3...v0.4.4) (2021-11-09)
+
+
+### Bug Fixes
+
+* Added `noreferrer` to github release link. ([c8f46ee](https://www.github.com/monetr/monetr/commit/c8f46ee834a5457061da92093f1443f9f1351add))
+* Converting more components to functional components. ([6b7dd54](https://www.github.com/monetr/monetr/commit/6b7dd54e829379c302ed545114a188961098def9))
+* **deps:** update dependency eslint-plugin-react-hooks to v4.3.0 ([410d9dc](https://www.github.com/monetr/monetr/commit/410d9dcc6f9e45c3bece2fb3780a9ec7ed2698f7))
+* Reduce memory requests in testing environment. ([6323808](https://www.github.com/monetr/monetr/commit/63238080940e439d2d542091cd8181885dd70346))
+* Removed old unused setup view. ([9f01501](https://www.github.com/monetr/monetr/commit/9f0150112c88f302c8943339ab0b7906016c01d7))
+
 ### [0.4.3](https://www.github.com/monetr/monetr/compare/v0.4.2...v0.4.3) (2021-11-09)
 
 
