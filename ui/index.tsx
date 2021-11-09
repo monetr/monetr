@@ -1,3 +1,4 @@
+import GlobalFooter from 'components/GlobalFooter';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux'
@@ -41,11 +42,7 @@ ReactDOM.render(
           <LocalizationProvider dateAdapter={ AdapterMoment }>
             <CssBaseline/>
             <Root/>
-            <Typography
-              className="absolute inline w-full text-center bottom-1 opacity-30"
-            >
-              © { new Date().getFullYear() } monetr LLC
-            </Typography>
+            <GlobalFooter/>
           </LocalizationProvider>
         </ThemeProvider>
       </Router>

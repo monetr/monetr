@@ -24,3 +24,7 @@ export const getStripePublicKey = (state: AppState): string | null => state.boot
 export const getInitialPlan = (state: AppState): Plan | null => state.bootstrap.initialPlan || null;
 
 export const getBillingEnabled = (state: AppState): boolean => state.bootstrap.billingEnabled;
+
+export const getRelease = (state: AppState): string => state.bootstrap.release;
+
+export const getRevision = (state: AppState): string => state.bootstrap.revision;
