@@ -13,6 +13,7 @@ const GlobalFooter = (): JSX.Element => {
         <span>- </span>
         <a
           target="_blank"
+          rel="noreferrer"
           href={ `https://github.com/monetr/monetr/releases/tag/${ release }` }
         >
           { release }
