@@ -32,7 +32,7 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),
       filename: filename,
-      sourceMapFilename: "[name].js.map"
+      sourceMapFilename: '[name].js.map'
     },
     module: {
       rules: [
@@ -153,8 +153,8 @@ module.exports = (env, argv) => {
     plugins: [
       new webpack.DefinePlugin({
         CONFIG: JSON.stringify({}),
-        RELEASE_REVISION: JSON.stringify(process.env.RELEASE_REVISION),
-        RELEASE_VERSION: JSON.stringify(process.env.RELEASE_VERSION),
+        REVISION: JSON.stringify(process.env.RELEASE_REVISION),
+        RELEASE: JSON.stringify(process.env.RELEASE_VERSION),
       }),
       new HtmlWebpackPlugin({
         inject: true,
