@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.3](https://www.github.com/monetr/monetr/compare/v0.4.2...v0.4.3) (2021-11-09)
+
+
+### Bug Fixes
+
+* Added release version to footer. ([58e1921](https://www.github.com/monetr/monetr/commit/58e1921c974d56cddfbdd87b89d37e558ea13625))
+
 ### [0.4.2](https://www.github.com/monetr/monetr/compare/v0.4.1...v0.4.2) (2021-11-09)
 
 
