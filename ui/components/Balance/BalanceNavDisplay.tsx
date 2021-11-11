@@ -3,7 +3,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { getBalance } from 'shared/balances/selectors/getBalance';
 
-const BalanceNavDisplay = (): JSX.Element => {
+const BalanceNavDisplay = React.memo((): JSX.Element => {
   const balance = useSelector(getBalance);
 
   if (!balance) {
@@ -26,6 +26,6 @@ const BalanceNavDisplay = (): JSX.Element => {
       </Typography>
     </div>
   )
-}
+});
 
 export default BalanceNavDisplay;

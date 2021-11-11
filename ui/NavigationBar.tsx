@@ -10,7 +10,7 @@ import logout from 'shared/authentication/actions/logout';
 import manageBilling from 'shared/billing/actions/manageBilling';
 import { getBillingEnabled } from 'shared/bootstrap/selectors';
 
-const NavigationBar = (): JSX.Element => {
+const NavigationBar = React.memo((): JSX.Element => {
   const billingEnabled = useSelector(getBillingEnabled);
 
   const dispatch = useDispatch();
@@ -72,6 +72,6 @@ const NavigationBar = (): JSX.Element => {
       </Toolbar>
     </AppBar>
   )
-};
+});
 
 export default NavigationBar;

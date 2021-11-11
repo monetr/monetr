@@ -124,12 +124,6 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
     }
 
     return this.renderSubRoutes();
-
-    return (
-      <Switch>
-        { this.renderSubRoutes() }
-      </Switch>
-    );
   }
 }
 
