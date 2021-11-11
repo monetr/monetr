@@ -170,6 +170,8 @@ api:
   logging:
     level: trace
     format: text
+    stackDriver:
+      enabled: false
   sentry:
     enabled: false
     sampleRate: 0.0

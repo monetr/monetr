@@ -197,9 +197,7 @@ type Logging struct {
 }
 
 type StackDriverLogging struct {
-	Enabled   bool
-	ProjectID string
-	LogName   string
+	Enabled bool
 }
 
 type Sentry struct {
@@ -285,6 +283,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Logging.Level", "info")
 	v.SetDefault("Logging.Format", "text")
+	v.SetDefault("Logging.StackDriver.Enabled", false)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)
@@ -325,6 +324,7 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("JWT.RegistrationJwtSecret", "MONETR_JWT_REGISTRATION_SECRET")
 	_ = v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	_ = v.BindEnv("Logging.Format", "MONETR_LOG_FORMAT")
+	_ = v.BindEnv("Logging.StackDriver.Enabled", "MONETR_LOG_STACKDRIVER_ENABLED")
 	_ = v.BindEnv("Plaid.ClientID", "MONETR_PLAID_CLIENT_ID")
 	_ = v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
 	_ = v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")

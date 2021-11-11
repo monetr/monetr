@@ -103,6 +103,8 @@ api:
   logging:
     level: trace
     format: json
+    stackDriver:
+      enabled: true
   sentry:
     enabled: true
     sampleRate: 1.0

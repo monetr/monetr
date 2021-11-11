@@ -29,13 +29,7 @@ func (c *contextFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// We cannot safely modify anything on the entry object being passed to this method. So if we want to add fields
 	// to the entry right before it actually gets logged we need to make a duplicate. The WithFields method is
 	// thread-safe and allows us to add the fields we want.
-	duplicate := entry.WithFields(ctxkeys.LogrusFieldsFromContext(entry.Context, entry.Data))
-	// Once we have made a basic duplicate though we need to copy over these other fields. These fields are not included
-	// in the WithFields copy.
-	duplicate.Message = entry.Message
-	duplicate.Buffer = entry.Buffer
-	duplicate.Level = entry.Level
-	duplicate.Caller = entry.Caller
+	duplicate := duplicateEntry(entry).WithFields(ctxkeys.LogrusFieldsFromContext(entry.Context, entry.Data))
 
 	// Now that we have our new entry with (potentially) some additional helpful fields from the context, we can send
 	// this off to the inner formatter.

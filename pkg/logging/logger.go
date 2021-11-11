@@ -66,8 +66,10 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 		}
 	}
 
+	logger.Formatter = NewContextFormatterWrapper(logger.Formatter)
+
 	if configuration.StackDriver.Enabled {
-		formatter, err := NewStackDriverFormatterWrapper(logger.Formatter, configuration.StackDriver)
+		formatter, err := NewStackDriverFormatterWrapper(logger.Formatter)
 		if err == nil {
 			logger.WithError(err).Errorf("failed to create stack driver wrapper")
 			return logrus.NewEntry(logger)
@@ -75,8 +77,6 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 
 		logger.Formatter = formatter
 	}
-
-	logger.Formatter = NewContextFormatterWrapper(logger.Formatter)
 
 	return logrus.NewEntry(logger)
 }

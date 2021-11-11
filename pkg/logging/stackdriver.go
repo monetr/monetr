@@ -1,13 +1,7 @@
 package logging
 
 import (
-	"cloud.google.com/go/logging"
-	"context"
-	"fmt"
-	"github.com/monetr/monetr/pkg/config"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	logpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
 var (
@@ -19,79 +13,56 @@ var (
 		"requestId",
 		"jobId",
 	}
+
+	// Stackdriver log levels documented here:
+	// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+	levelsToStackdriver = map[logrus.Level]string{
+		logrus.FatalLevel: "EMERGENCY",
+		logrus.ErrorLevel: "ERROR",
+		logrus.InfoLevel:  "NOTICE",
+		logrus.DebugLevel: "INFO",
+		logrus.TraceLevel: "DEBUG",
+	}
 )
 
 type stackDriverFormatterWrapper struct {
-	config config.StackDriverLogging
-	inner  logrus.Formatter
-	client *logging.Client
-	logger *logging.Logger
+	inner logrus.Formatter
 }
 
-func NewStackDriverFormatterWrapper(inner logrus.Formatter, config config.StackDriverLogging) (logrus.Formatter, error) {
-	ctx := context.Background()
-	client, err := logging.NewClient(ctx, config.ProjectID)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create stackdriver logging client")
-	}
-
+func NewStackDriverFormatterWrapper(inner logrus.Formatter) (logrus.Formatter, error) {
 	return &stackDriverFormatterWrapper{
-		config: config,
-		inner:  inner,
-		client: client,
-		logger: client.Logger(config.LogName),
+		inner: inner,
 	}, nil
 }
 
 func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error) {
-	googleEntry := logging.Entry{
-		Timestamp:      entry.Time,
-		Severity:       0,
-		Payload:        nil,
-		Labels:         nil,
-		SourceLocation: nil,
-	}
+	// This entire format wrapper moves some log entry data around for stackdriver.
+	// These behaviors are documented here:
+	// https://cloud.google.com/logging/docs/agent/logging/configuration#special-fields
+	duplicate := duplicateEntry(entry).WithFields(logrus.Fields{
+		"severity": levelsToStackdriver[entry.Level],
+		"message":  entry.Message,
+	})
 
-	switch entry.Level {
-	case logrus.FatalLevel:
-		googleEntry.Severity = logging.Alert
-	case logrus.ErrorLevel:
-		googleEntry.Severity = logging.Error
-	case logrus.InfoLevel:
-		googleEntry.Severity = logging.Info
-	case logrus.DebugLevel, logrus.TraceLevel:
-		googleEntry.Severity = logging.Debug
-	default:
-		// If for some reason we cannot translate the log level then just pass it to the inner.
-		return s.inner.Format(entry)
-	}
-
-	if entry.Caller != nil {
-		googleEntry.SourceLocation = &logpb.LogEntrySourceLocation{
-			File:     entry.Caller.File,
-			Line:     int64(entry.Caller.Line),
-			Function: entry.Caller.Function,
-		}
-	}
-
-	payload := map[string]interface{}{}
-	for key, value := range entry.Data {
-		payload[key] = value
-	}
-	labels := map[string]string{}
-	for _, key := range fieldToLabels {
-		value, ok := payload[key]
+	// Build our labels map.
+	labels := map[string]interface{}{}
+	for _, label := range fieldToLabels {
+		value, ok := duplicate.Data[label]
 		if !ok {
 			continue
 		}
 
-		labels[key] = fmt.Sprint(value)
-		delete(payload, key)
+		labels[label] = value
 	}
 
-	payload["msg"] = entry.Message
+	if len(labels) > 0 {
+		// Remove these fields from the data map since we are moving them to the labels map.
+		for label := range labels {
+			delete(duplicate.Data, label)
+		}
 
-	s.logger.Log(googleEntry)
+		duplicate = duplicate.WithField("logging.googleapis.com/labels", labels)
+	}
 
-	return s.inner.Format(entry)
+	return s.inner.Format(duplicate)
 }
