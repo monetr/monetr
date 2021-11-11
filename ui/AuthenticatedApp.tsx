@@ -1,19 +1,15 @@
+import NavigationBar from 'NavigationBar';
 import React, { Component, Fragment } from 'react';
-import { getBillingEnabled } from 'shared/bootstrap/selectors';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
-import logout from 'shared/authentication/actions/logout';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
 import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
 import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
 import fetchLinksIfNeeded from 'shared/links/actions/fetchLinksIfNeeded';
 import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import { Link as RouterLink, Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
+import { Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { AppBar, Backdrop, Button, CircularProgress, IconButton, Menu, MenuItem, Toolbar } from '@mui/material';
-import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
-import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Backdrop, CircularProgress } from '@mui/material';
 import { AppState } from 'store';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import ExpensesView from 'views/Expenses/ExpensesView';
@@ -22,11 +18,8 @@ import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import AllAccountsView from 'views/AccountView/AllAccountsView';
 import Logout from 'views/Authentication/Logout';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
-import request from 'shared/util/request';
-import { CreditCard, ExitToApp } from '@mui/icons-material';
 
 interface WithConnectionPropTypes {
-  logout: () => void;
   fetchBalances: () => Promise<any>;
   fetchBankAccounts: () => Promise<any>;
   fetchFundingSchedulesIfNeeded: () => Promise<any>;
@@ -34,19 +27,16 @@ interface WithConnectionPropTypes {
   fetchLinksIfNeeded: () => Promise<any>;
   fetchSpending: () => Promise<any>;
   hasAnyLinks: boolean;
-  billingEnabled: boolean;
 }
 
 interface State {
   loading: boolean;
-  menuAnchorEl: Element | null;
 }
 
 export class AuthenticatedApp extends Component<RouteComponentProps & WithConnectionPropTypes, State> {
 
   state = {
     loading: true,
-    menuAnchorEl: null,
   };
 
   componentDidMount() {
@@ -70,37 +60,6 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
     ])
       .finally(() => this.setState({ loading: false }));
   }
-
-  openMenu = (event: { currentTarget: Element }) => this.setState({
-    menuAnchorEl: event.currentTarget,
-  });
-
-  closeMenu = () => this.setState({
-    menuAnchorEl: null,
-  });
-
-  manageBilling = () => {
-    return request().get(`/billing/portal`)
-      .then(result => {
-        window.location.assign(result.data.url);
-      })
-      .catch(error => {
-        alert(error);
-      });
-  };
-
-  doLogout = () => {
-    this.props.logout();
-    this.props.history.push('/login');
-  };
-
-  gotoAccount = () => {
-    this.setState({
-      menuAnchorEl: null,
-    }, () => {
-      this.props.history.push('/account');
-    });
-  };
 
   renderSubRoutes = () => {
     if (this.props.hasAnyLinks) {
@@ -131,48 +90,7 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
   renderSetup = () => {
     return (
       <Fragment>
-        <AppBar position="static">
-          <Toolbar>
-            <BankAccountSelector/>
-            <Button to="/transactions" component={ RouterLink } color="inherit">Transactions</Button>
-            <Button to="/expenses" component={ RouterLink } color="inherit">Expenses</Button>
-            <Button to="/goals" component={ RouterLink } color="inherit">Goals</Button>
-            <BalanceNavDisplay/>
-            <div style={ { marginLeft: 'auto' } }/>
-            <IconButton onClick={ this.openMenu } edge="start" color="inherit" aria-label="menu">
-              <MenuIcon/>
-            </IconButton>
-            <Menu
-              id="user-menu"
-              anchorEl={ this.state.menuAnchorEl }
-              keepMounted
-              open={ Boolean(this.state.menuAnchorEl) }
-              onClose={ this.closeMenu }
-            >
-              { this.props.billingEnabled &&
-              <MenuItem
-                onClick={ this.manageBilling }
-              >
-                <CreditCard className="mr-2"/>
-                Billing
-              </MenuItem>
-              }
-
-              <MenuItem
-                onClick={ () => window.localStorage.setItem('darkMode', `${ window.localStorage.getItem('darkMode') !== 'true' }`) }
-              >
-                Toggle Dark Mode (Requires Reload)
-              </MenuItem>
-
-              <MenuItem
-                onClick={ this.doLogout }
-              >
-                <ExitToApp className="mr-2"/>
-                Logout
-              </MenuItem>
-            </Menu>
-          </Toolbar>
-        </AppBar>
+        <NavigationBar/>
         <Switch>
           <Route path="/register">
             <Redirect to="/"/>
@@ -205,6 +123,8 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
       );
     }
 
+    return this.renderSubRoutes();
+
     return (
       <Switch>
         { this.renderSubRoutes() }
@@ -216,10 +136,8 @@ export class AuthenticatedApp extends Component<RouteComponentProps & WithConnec
 export default connect(
   (state: AppState) => ({
     hasAnyLinks: getHasAnyLinks(state),
-    billingEnabled: getBillingEnabled(state),
   }),
   {
-    logout,
     fetchBalances,
     fetchBankAccounts,
     fetchFundingSchedulesIfNeeded,

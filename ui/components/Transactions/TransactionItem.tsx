@@ -162,7 +162,6 @@ export default connect(
     }
   },
   {
-    selectTransaction,
     updateTransaction,
   }
 )(TransactionItem)

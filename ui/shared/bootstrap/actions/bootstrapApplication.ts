@@ -1,15 +1,17 @@
 import { NewClient } from 'api/api';
+import { useDispatch } from 'react-redux';
 import { Bootstrap, BootstrapBegin } from 'shared/bootstrap/actions';
 import BootstrapState from 'shared/bootstrap/state';
 import request from 'shared/util/request';
-import { AppAction, AppDispatch } from 'store';
 
 const bootstrapBegin: BootstrapBegin = {
   type: Bootstrap.Begin,
 };
 
-export default function bootstrapApplication(): AppAction<Promise<void>> {
-  return (dispatch: AppDispatch): Promise<void> => {
+export default function useBootstrapApplication(): () => Promise<void> {
+  const dispatch = useDispatch();
+
+  return (): Promise<void> => {
     dispatch(bootstrapBegin);
 
     window.API = NewClient({

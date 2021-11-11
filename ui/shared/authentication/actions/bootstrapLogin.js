@@ -4,6 +4,12 @@ import { BOOTSTRAP_LOGIN } from 'shared/authentication/actions';
 import { getAPIUrl } from 'shared/bootstrap/selectors';
 import Cookies from 'js-cookie';
 import { NewClient } from 'api/api';
+import { useDispatch, useStore } from 'react-redux';
+
+export function useBootstrapLogin() {
+  const { dispatch, getState } = useStore();
+  return (token = null, user = null, subscriptionIsActive = true) => bootstrapLogin(token, user, subscriptionIsActive)(dispatch, getState);
+}
 
 export default function bootstrapLogin(token = null, user = null, subscriptionIsActive = true) {
   return (dispatch, getState) => {

@@ -22,10 +22,10 @@ export default class BootstrapState {
   readonly revision: string;
 
   constructor(data?: Partial<BootstrapState>) {
-    if (data) {
-      Object.assign(this, data);
-    }
-
-    this.isBootstrapping = data?.isBootstrapping || true;
+    Object.assign(this, {
+      isReady: false,
+      isBootstrapping: true,
+      ...data,
+    });
   }
 }

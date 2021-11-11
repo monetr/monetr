@@ -1,9 +1,9 @@
+import Application from 'Application';
 import GlobalFooter from 'components/GlobalFooter';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux'
 import reportWebVitals from './reportWebVitals';
-import Root from './root';
 import './styles/styles.css';
 import './styles/index.scss';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -41,7 +41,7 @@ ReactDOM.render(
         <ThemeProvider theme={ theme }>
           <LocalizationProvider dateAdapter={ AdapterMoment }>
             <CssBaseline/>
-            <Root/>
+            <Application/>
             <GlobalFooter/>
           </LocalizationProvider>
         </ThemeProvider>
