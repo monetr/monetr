@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.4.5](https://www.github.com/monetr/monetr/compare/v0.4.4...v0.4.5) (2021-11-11)
+
+
+### Bug Fixes
+
+* Bit of cleanup and memo of nav bar. ([2119c4e](https://www.github.com/monetr/monetr/commit/2119c4e8af0d722428e89e83b2ec1e3d1c54ed24))
+* Converting a lot more components to hooks/functional. ([3b7aeea](https://www.github.com/monetr/monetr/commit/3b7aeeaca854a8347972c214d6623e9e28d55c6a))
+* Declared variables for webpack define. ([d4f21eb](https://www.github.com/monetr/monetr/commit/d4f21ebe5b394315ba2a5c5ef0ca7c4284edcfce))
+* **deps:** update dependency eslint-plugin-import to v2.25.3 ([95c6b8f](https://www.github.com/monetr/monetr/commit/95c6b8fbefc159ed664b443e3f92057f22a08090))
+* **deps:** update dependency eslint-plugin-jsx-a11y to v6.5.1 ([0f50b05](https://www.github.com/monetr/monetr/commit/0f50b05b083cf4c6903db23c3b3a09190211fc5d))
+* **deps:** update dependency eslint-plugin-react to v7.27.0 ([f980114](https://www.github.com/monetr/monetr/commit/f980114c2806f03111d05e4f742c31954383f405))
+
 ### [0.4.4](https://www.github.com/monetr/monetr/compare/v0.4.3...v0.4.4) (2021-11-09)
 
 
