@@ -1,5 +1,16 @@
 # Changelog
 
+### [0.4.6](https://www.github.com/monetr/monetr/compare/v0.4.5...v0.4.6) (2021-11-11)
+
+
+### Bug Fixes
+
+* Added source maps and JobID logging. ([a96b900](https://www.github.com/monetr/monetr/commit/a96b900d306429599a2d69913a5c209896f91a17))
+* Adding better support for Stackdriver logging. ([694c86d](https://www.github.com/monetr/monetr/commit/694c86d96aeae47795008459bfbb0e9f03f03c79))
+* **deps:** update dependency eslint-webpack-plugin to v3.1.1 ([3289e65](https://www.github.com/monetr/monetr/commit/3289e65103fafa72d17b3301e14959d92f63a9cf))
+* **deps:** update sentry-javascript monorepo to v6.14.2 ([f52b5fc](https://www.github.com/monetr/monetr/commit/f52b5fc2dad1bf3b23ea3b0b55507d8ba1d3bbce))
+* **deps:** update sentry-javascript monorepo to v6.14.3 ([1c73ae8](https://www.github.com/monetr/monetr/commit/1c73ae865e6be520c0a8ed151971980c18eec2e6))
+
 ### [0.4.5](https://www.github.com/monetr/monetr/compare/v0.4.4...v0.4.5) (2021-11-11)
 
 
