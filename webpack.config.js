@@ -32,6 +32,8 @@ module.exports = (env, argv) => {
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),
       filename: filename,
+      // Source maps are automatically moved to $(PWD)/build/source_maps each time the UI is compiled. They will not be
+      // in the path above.
       sourceMapFilename: '[name].js.map'
     },
     module: {
@@ -132,7 +134,7 @@ module.exports = (env, argv) => {
       },
       modules: [path.resolve(__dirname, 'ui'), 'node_modules'],
     },
-    devtool: 'inline-source-map',
+    devtool: isDevelopment ? 'inline-source-map' : 'source-map',
     devServer: {
       allowedHosts: 'all',
       static: {

@@ -1,6 +1,7 @@
 PWD=$(shell git rev-parse --show-toplevel)
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
+BUILD_DIR = $(PWD)/build
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1`)
@@ -100,6 +101,10 @@ include $(PWD)/scripts/*.mk
 
 default: build
 
+SOURCE_MAP_DIR=$(BUILD_DIR)/source_maps
+$(SOURCE_MAP_DIR):
+	mkdir -p $(SOURCE_MAP_DIR)
+
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
 	yarn install
@@ -111,7 +116,7 @@ $(WEBPACK): $(NODE_MODULES)
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
 UI_CONFIG_FILES=$(PWD)/tsconfig.json $(PWD)/webpack.config.js
-$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(WEBPACK)
+$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(WEBPACK) $(SOURCE_MAP_DIR)
 	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
 	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(WEBPACK) --mode production
@@ -120,6 +125,7 @@ $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES
 	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png
 	cp $(PWD)/public/manifest.json $(STATIC_DIR)/manifest.json
 	cp $(PWD)/public/robots.txt $(STATIC_DIR)/robots.txt
+	mv $(STATIC_DIR)/*.js.map $(SOURCE_MAP_DIR)
 
 GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS)
@@ -194,6 +200,7 @@ clean:
 	-rm -rf $(COVERAGE_TXT)
 	-rm -rf $(NODE_MODULES)
 	-rm -rf $(LOCAL_TMP)
+	-rm -rf $(SOURCE_MAP_DIR)
 	-rm -rf $(PWD)/generated
 	-rm -rf $(PWD)/docs
 	-rm -rf $(PWD)/build

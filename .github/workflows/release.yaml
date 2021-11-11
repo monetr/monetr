@@ -45,7 +45,12 @@ jobs:
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
-          retention-days: 7
+          retention-days: 1
+      - uses: actions/upload-artifact@v2
+        with:
+          name: '${{ needs.release_please.outputs.version }}-source-maps'
+          path: '${{ github.workspace }}/build/source_maps'
+          retention-days: 1
 
   build_binary:
     if: ${{ needs.release_please.outputs.release_created }}
@@ -62,12 +67,10 @@ jobs:
         os:
           - linux
           - darwin
+          - windows
         architecture:
           - amd64
           - arm64
-        include:
-          - os: windows
-            architecture: amd64
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -131,6 +134,11 @@ jobs:
         with:
           name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
           path: '/tmp'
+      - uses: actions/download-artifact@v2
+        name: Download windows/arm64
+        with:
+          name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz'
+          path: '/tmp'
       - name: Upload Artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -140,6 +148,7 @@ jobs:
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz --clobber
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz --clobber
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
+          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz --clobber
 
   container:
     if: ${{ needs.release_please.outputs.release_created }}
@@ -204,6 +213,11 @@ jobs:
           environment: my.monetr.dog
           ref: "v${{ needs.release_please.outputs.version }}"
       - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        name: Download Compiled UI Artifacts
+        with:
+          name: '${{ needs.release_please.outputs.version }}-source-maps'
+          path: '${{ github.workspace }}/build/source_maps'
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
         env:
@@ -213,4 +227,4 @@ jobs:
         with:
           environment: 'my.monetr.dog'
           version: 'v${{ needs.release_please.outputs.version }}'
-          sourcemaps: './pkg ./ui'
+          sourcemaps: './build/source_maps'

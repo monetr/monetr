@@ -13,6 +13,7 @@ const (
 	UserID    MonetrContextKey = "userId"
 	AccountID MonetrContextKey = "accountId"
 	LoginID   MonetrContextKey = "loginId"
+	JobID     MonetrContextKey = "jobId"
 )
 
 var (
@@ -21,6 +22,7 @@ var (
 		UserID,
 		AccountID,
 		LoginID,
+		JobID,
 	}
 )
 
