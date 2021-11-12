@@ -9,19 +9,31 @@ import { Link as RouterLink } from 'react-router-dom';
 import logout from 'shared/authentication/actions/logout';
 import manageBilling from 'shared/billing/actions/manageBilling';
 import { getBillingEnabled } from 'shared/bootstrap/selectors';
+import * as Sentry from '@sentry/react';
 
 const NavigationBar = React.memo((): JSX.Element => {
   const billingEnabled = useSelector(getBillingEnabled);
 
   const dispatch = useDispatch();
-  const dispatchLogout = () => logout()(dispatch);
 
-  const toggleDarkMode = () => window.localStorage.setItem('darkMode', `${ window.localStorage.getItem('darkMode') !== 'true' }`);
+  function dispatchLogout() {
+    logout()(dispatch);
+  }
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
-  const handleCloseMenu = () => setAnchorEl(null);
+
+  function handleOpenMenu(event: React.MouseEvent<HTMLButtonElement>) {
+    setAnchorEl(event.currentTarget);
+  }
+
+  function handleCloseMenu() {
+    setAnchorEl(null);
+  }
+
+  function toggleDarkMode() {
+    window.localStorage.setItem('darkMode', `${ window.localStorage.getItem('darkMode') !== 'true' }`);
+  }
 
   return (
     <AppBar position="static">

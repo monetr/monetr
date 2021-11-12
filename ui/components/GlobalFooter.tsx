@@ -7,7 +7,7 @@ const GlobalFooter = (): JSX.Element => {
   const release = useSelector(getRelease);
 
   let versionLink: JSX.Element = null;
-  if (release) {
+  if (release && !release.startsWith('LOCAL')) {
     versionLink = (
       <Fragment>
         <span>- </span>
@@ -18,6 +18,12 @@ const GlobalFooter = (): JSX.Element => {
         >
           { release }
         </a>
+      </Fragment>
+    )
+  } else {
+    versionLink = (
+      <Fragment>
+        <span>- LOCAL DEVELOPMENT</span>
       </Fragment>
     )
   }

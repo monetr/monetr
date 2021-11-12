@@ -9,6 +9,7 @@ import fundingSchedules from 'shared/fundingSchedules/reducer';
 import links from 'shared/links/reducer';
 import spending from 'shared/spending/reducer';
 import transactions from 'shared/transactions/reducer';
+import * as Sentry from '@sentry/react';
 
 export const reducers = combineReducers({
   authentication,
@@ -29,10 +30,12 @@ export function configureStore() {
     traceLimit: 25,
   }) : compose;
 
+  const sentryReduxEnhancer = Sentry.createReduxEnhancer({});
+
   return createStore(
     reducers,
     {},
-    composeEnhancer(applyMiddleware(thunk)),
+    compose(applyMiddleware(thunk), sentryReduxEnhancer),
   );
 }
 

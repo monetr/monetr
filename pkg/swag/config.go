@@ -37,3 +37,8 @@ type ConfigResponse struct {
 	// must be generated before hand by an admin.
 	RequireBetaCode bool `json:"requireBetaCode"`
 }
+
+type SentryDSNResponse struct {
+	// Public Sentry DSN for monetr. This is to be used by the UI to provide some basic error reporting.
+	DSN string `json:"dsn"`
+}

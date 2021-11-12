@@ -42,7 +42,6 @@ export default function bootstrapLogin(token = null, user = null, subscriptionIs
         payload: {
           isAuthenticated: false,
           isActive: false,
-          token: null,
           user: null,
         }
       });
@@ -71,7 +70,6 @@ export default function bootstrapLogin(token = null, user = null, subscriptionIs
             type: BOOTSTRAP_LOGIN,
             payload: {
               isAuthenticated: true,
-              token: token,
               isActive: result.data.isActive,
               user: new User(result.data.user),
             }
@@ -93,7 +91,6 @@ export default function bootstrapLogin(token = null, user = null, subscriptionIs
       type: BOOTSTRAP_LOGIN,
       payload: {
         isAuthenticated: true,
-        token: token,
         isActive: subscriptionIsActive,
         user: new User(user),
       }

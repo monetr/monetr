@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import * as Sentry from '@sentry/react';
 
 declare global {
   interface Window {
@@ -20,10 +21,9 @@ export function NewClient(config: AxiosRequestConfig): AxiosInstance {
   client.interceptors.response.use(result => {
     return result;
   }, error => {
-    // Payment required.
-    // if (error.response.status === 402) {
-      // window.location.assign("/account/subscribe");
-    // }
+    if (error.response.status === 500) {
+      Sentry.captureException(error);
+    }
 
     return Promise.reject(error);
   });

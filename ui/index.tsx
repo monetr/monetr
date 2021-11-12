@@ -1,55 +1,50 @@
-import Application from 'Application';
-import GlobalFooter from 'components/GlobalFooter';
+import { Integrations } from '@sentry/tracing';
+import axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux'
+import Root from 'Root';
 import reportWebVitals from './reportWebVitals';
 import './styles/styles.css';
 import './styles/index.scss';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { createTheme, CssBaseline, ThemeProvider, Typography } from '@mui/material';
-import { store } from 'store';
-import AdapterMoment from '@mui/lab/AdapterMoment';
-import { LocalizationProvider } from '@mui/lab'
+import * as Sentry from '@sentry/react';
 
-const darkMode = window.localStorage.getItem('darkMode') === 'true';
-
-const theme = createTheme({
-  shape: {
-    borderRadius: 10,
-  },
-  palette: {
-    mode: darkMode ? 'dark' : 'light',
-    primary: {
-      main: darkMode ? '#712ddd' : '#4E1AA0',
-      contrastText: '#FFFFFF',
-    },
-    secondary: {
-      main: '#FF5798',
-      contrastText: '#FFFFFF',
-    },
-    background: {
-      default: darkMode ? '#2f2f2f' : '#FFFFFF',
+axios.get('/api/sentry')
+  .then(result => {
+    if (result.data.dsn) {
+      Sentry.init({
+        dsn: result.data.dsn,
+        integrations: [
+          new Integrations.BrowserTracing({
+            startTransactionOnPageLoad: false,
+            startTransactionOnLocationChange: false,
+            traceXHR: true,
+            tracingOrigins: [
+              window.location.hostname,
+            ]
+          })
+        ],
+        release: RELEASE,
+        // We recommend adjusting this value in production, or using tracesSampler
+        // for finer control
+        tracesSampleRate: 1.0,
+        environment: window.location.hostname,
+        normalizeDepth: 20,
+        beforeSend(event, hint) {
+          // Check if it is an exception, and if so, show the report dialog
+          if (event.exception) {
+            Sentry.showReportDialog({ eventId: event.event_id });
+          }
+          return event;
+        },
+      });
     }
-  }
-});
-
-ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={ store }>
-      <Router>
-        <ThemeProvider theme={ theme }>
-          <LocalizationProvider dateAdapter={ AdapterMoment }>
-            <CssBaseline/>
-            <Application/>
-            <GlobalFooter/>
-          </LocalizationProvider>
-        </ThemeProvider>
-      </Router>
-    </Provider>
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+  })
+  .finally(() => {
+    ReactDOM.render(
+      <Root/>,
+      document.getElementById('root')
+    );
+  });
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

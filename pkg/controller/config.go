@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/kataras/iris/v12/context"
+	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/build"
 )
 
@@ -13,7 +13,7 @@ import (
 // @Produce json
 // @Router /config [get]
 // @Success 200 {object} swag.ConfigResponse
-func (c *Controller) configEndpoint(ctx *context.Context) {
+func (c *Controller) configEndpoint(ctx iris.Context) {
 	type InitialPlan struct {
 		Price         int64 `json:"price"`
 		FreeTrialDays int32 `json:"freeTrialDays"`
@@ -89,4 +89,21 @@ func (c *Controller) configEndpoint(ctx *context.Context) {
 	configuration.LongPollPlaidSetup = true
 
 	ctx.JSON(configuration)
+}
+
+// Get Public Sentry DSN
+// @Summary Get Public Sentry DSN
+// @tags Config
+// @id get-ui-sentry-dsn
+// @description Is used to allow the Sentry DSN for the UI to be configurable at runtime. This endpoint is only
+// @description accessible when Sentry is enabled. The DSN it returns is the public DSN only. More information about how
+// @description the DSN works can be found here:
+// @description https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
+// @Produce json
+// @Router /sentry [get]
+// @Success 200 {object} swag.SentryDSNResponse
+func (c *Controller) getSentryUI(ctx iris.Context) {
+	ctx.JSON(map[string]interface{}{
+		"dsn": c.configuration.Sentry.DSN,
+	})
 }
