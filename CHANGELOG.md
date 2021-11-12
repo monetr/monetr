@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.10](https://www.github.com/monetr/monetr/compare/v0.4.9...v0.4.10) (2021-11-12)
+
+
+### Bug Fixes
+
+* Really really really really fixed logging this time. ([6e5667e](https://www.github.com/monetr/monetr/commit/6e5667e8ec31e1e69cdeef197c17624d5b816bcf))
+
 ### [0.4.9](https://www.github.com/monetr/monetr/compare/v0.4.9...v0.4.9) (2021-11-12)
 
 
