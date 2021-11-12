@@ -72,6 +72,8 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 				logrus.FieldKeyMsg: "message",
 			}
 		}
+
+		logger.Formatter = formatter
 	}
 
 	logger.Formatter = NewContextFormatterWrapper(logger.Formatter)
