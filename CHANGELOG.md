@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.9](https://www.github.com/monetr/monetr/compare/v0.4.9...v0.4.9) (2021-11-12)
+
+
+### Miscellaneous Chores
+
+* release 0.4.9 ([ba57c98](https://www.github.com/monetr/monetr/commit/ba57c9860ab6d7d5b200a2c2246fbae8433a31dd))
+
 ### [0.4.8](https://www.github.com/monetr/monetr/compare/v0.4.7...v0.4.8) (2021-11-12)
 
 
