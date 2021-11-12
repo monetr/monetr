@@ -39,7 +39,7 @@ func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error
 	// This entire format wrapper moves some log entry data around for stackdriver.
 	// These behaviors are documented here:
 	// https://cloud.google.com/logging/docs/agent/logging/configuration#special-fields
-	duplicate := duplicateEntry(entry).WithFields(logrus.Fields{
+	duplicate := duplicateEntry(entry, logrus.Fields{
 		"severity": levelsToStackdriver[entry.Level],
 		"message":  entry.Message,
 	})
@@ -60,8 +60,7 @@ func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error
 		for label := range labels {
 			delete(duplicate.Data, label)
 		}
-
-		duplicate = duplicate.WithField("logging.googleapis.com/labels", labels)
+		duplicate.Data["logging.googleapis.com/labels"] = labels
 	}
 
 	return s.inner.Format(duplicate)
