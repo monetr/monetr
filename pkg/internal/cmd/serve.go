@@ -71,6 +71,7 @@ func RunServer() error {
 
 	var vault vault_helper.VaultHelper
 	if configuration.Vault.Enabled {
+		log.Debug("vault is enabled for secret storage")
 		client, err := vault_helper.NewVaultHelper(log, vault_helper.Config{
 			Address:         configuration.Vault.Address,
 			Role:            configuration.Vault.Role,
@@ -302,7 +303,7 @@ func RunServer() error {
 	var stripe stripe_helper.Stripe
 	var basicPaywall billing.BasicPayWall
 	if configuration.Stripe.Enabled {
-		log.Trace("stripe is enabled, creating client")
+		log.Debug("stripe is enabled, creating client")
 		stripe = stripe_helper.NewStripeHelperWithCache(
 			log,
 			configuration.Stripe.APIKey,
