@@ -41,7 +41,6 @@ func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error
 	// https://cloud.google.com/logging/docs/agent/logging/configuration#special-fields
 	duplicate := duplicateEntry(entry, logrus.Fields{
 		"severity": levelsToStackdriver[entry.Level],
-		"message":  entry.Message,
 	})
 
 	// Build our labels map.

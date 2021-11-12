@@ -55,14 +55,22 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 			CallerPrettyfier:       nil,
 		}
 	case "json":
-		logger.Formatter = &logrus.JSONFormatter{
+		formatter := &logrus.JSONFormatter{
 			TimestampFormat:   time.RFC3339,
 			DisableTimestamp:  false,
 			DisableHTMLEscape: false,
 			DataKey:           "",
-			FieldMap:          nil,
+			FieldMap:          logrus.FieldMap{},
 			CallerPrettyfier:  nil,
 			PrettyPrint:       false,
+		}
+
+		// If we are using stackdriver, then use the `message` field name instead. Stackdriver will automatically detect
+		// this field in the json payload of a log entry.
+		if configuration.StackDriver.Enabled {
+			formatter.FieldMap = logrus.FieldMap{
+				logrus.FieldKeyMsg: "message",
+			}
 		}
 	}
 
@@ -70,7 +78,7 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 
 	if configuration.StackDriver.Enabled {
 		formatter, err := NewStackDriverFormatterWrapper(logger.Formatter)
-		if err == nil {
+		if err != nil {
 			logger.WithError(err).Errorf("failed to create stack driver wrapper")
 			return logrus.NewEntry(logger)
 		}
