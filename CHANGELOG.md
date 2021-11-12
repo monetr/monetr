@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.4.7](https://www.github.com/monetr/monetr/compare/v0.4.6...v0.4.7) (2021-11-12)
+
+
+### Bug Fixes
+
+* Added windows/arm64 to regular binary build. ([ade0365](https://www.github.com/monetr/monetr/commit/ade036579e005039cfab22d6f0af25bcfc5cf7d5))
+* Fixed logging issue due to bad duplication. ([484caa4](https://www.github.com/monetr/monetr/commit/484caa4dd54239813c6b047f02344dcc3cb85bde))
+
 ### [0.4.6](https://www.github.com/monetr/monetr/compare/v0.4.5...v0.4.6) (2021-11-11)
 
 
