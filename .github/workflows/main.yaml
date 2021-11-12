@@ -77,12 +77,10 @@ jobs:
         os:
           - linux
           - darwin
+          - windows
         architecture:
           - amd64
           - arm64
-        include:
-          - os: windows
-            architecture: amd64
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
