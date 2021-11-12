@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.4.8](https://www.github.com/monetr/monetr/compare/v0.4.7...v0.4.8) (2021-11-12)
+
+
+### Bug Fixes
+
+* Added better Sentry error reporting. ([aa7d312](https://www.github.com/monetr/monetr/commit/aa7d312b50f14c4ec529bc32301c686654b730b9))
+* Removed `docker` from Brewfile. ([b392127](https://www.github.com/monetr/monetr/commit/b39212720d3703f0e9c647c8a0cce0c5107f395f))
+
 ### [0.4.7](https://www.github.com/monetr/monetr/compare/v0.4.6...v0.4.7) (2021-11-12)
 
 
