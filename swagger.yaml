@@ -911,6 +911,13 @@ definitions:
           for a login that has not already validated their email.
         type: string
     type: object
+  swag.SentryDSNResponse:
+    properties:
+      dsn:
+        description: Public Sentry DSN for monetr. This is to be used by the UI to
+          provide some basic error reporting.
+        type: string
+    type: object
   swag.SpendingResponse:
     properties:
       bankAccountId:
@@ -2659,6 +2666,24 @@ paths:
       summary: Updated Token Callback
       tags:
       - Plaid
+  /sentry:
+    get:
+      description: |-
+        Is used to allow the Sentry DSN for the UI to be configurable at runtime. This endpoint is only
+        accessible when Sentry is enabled. The DSN it returns is the public DSN only. More information about how
+        the DSN works can be found here:
+        https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
+      operationId: get-ui-sentry-dsn
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/swag.SentryDSNResponse'
+      summary: Get Public Sentry DSN
+      tags:
+      - Config
 securityDefinitions:
   ApiKeyAuth:
     in: header

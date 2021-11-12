@@ -1888,6 +1888,27 @@
                     }
                 }
             }
+        },
+        "/sentry": {
+            "get": {
+                "description": "Is used to allow the Sentry DSN for the UI to be configurable at runtime. This endpoint is only\naccessible when Sentry is enabled. The DSN it returns is the public DSN only. More information about how\nthe DSN works can be found here:\nhttps://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config"
+                ],
+                "summary": "Get Public Sentry DSN",
+                "operationId": "get-ui-sentry-dsn",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/swag.SentryDSNResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2820,6 +2841,15 @@
                 },
                 "email": {
                     "description": "Specify the email address that you want to resend the verification link to. This must be a valid email address\nfor a login that has not already validated their email.",
+                    "type": "string"
+                }
+            }
+        },
+        "swag.SentryDSNResponse": {
+            "type": "object",
+            "properties": {
+                "dsn": {
+                    "description": "Public Sentry DSN for monetr. This is to be used by the UI to provide some basic error reporting.",
                     "type": "string"
                 }
             }
