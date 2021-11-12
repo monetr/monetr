@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.9](https://www.github.com/monetr/monetr/compare/v0.4.8...v0.4.9) (2021-11-12)
+
+
+### Bug Fixes
+
+* Fixed Stackdriver logging. ([af3ff31](https://www.github.com/monetr/monetr/commit/af3ff31f7d49199879c4425b3a93518b1fc26ac9))
+
 ### [0.4.8](https://www.github.com/monetr/monetr/compare/v0.4.7...v0.4.8) (2021-11-12)
 
 
