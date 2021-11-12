@@ -6,8 +6,8 @@ brew 'minikube'
 # Required to run minikube on macOS
 brew 'hyperkit'
 
-# Required to build images.
-cask 'docker'
+# We are no longer using the docker CLI for containers. Going forward we will use podman.
+brew 'podman'
 
 # Required for make local
 brew 'tmux'
