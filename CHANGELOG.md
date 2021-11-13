@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.12](https://www.github.com/monetr/monetr/compare/v0.4.11...v0.4.12) (2021-11-13)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/micahparks/keyfunc to v0.10.0 ([6b2ea09](https://www.github.com/monetr/monetr/commit/6b2ea0940f3fc6ff442f2695d0438bcff120e640))
+
 ### [0.4.11](https://www.github.com/monetr/monetr/compare/v0.4.10...v0.4.11) (2021-11-13)
 
 
