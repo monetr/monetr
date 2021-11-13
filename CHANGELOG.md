@@ -1,5 +1,14 @@
 # Changelog
 
+### [0.4.13](https://www.github.com/monetr/monetr/compare/v0.4.12...v0.4.13) (2021-11-13)
+
+
+### Bug Fixes
+
+* All Stackdriver label values must be strings. ([29fa381](https://www.github.com/monetr/monetr/commit/29fa381dad577b037e4f66a0c833ae4d9f267230))
+* Fixed test for stack driver formatter wrapper. ([bffb038](https://www.github.com/monetr/monetr/commit/bffb0387ece4e89a6d5d88060b0faa8b98ca8dea))
+* Fixing labels in Stackdriver. ([2b48517](https://www.github.com/monetr/monetr/commit/2b48517bdd87e5f5711ce97f1abac1ad69796929))
+
 ### [0.4.12](https://www.github.com/monetr/monetr/compare/v0.4.11...v0.4.12) (2021-11-13)
 
 
