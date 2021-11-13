@@ -1,6 +1,8 @@
 package logging
 
 import (
+	"fmt"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -51,7 +53,7 @@ func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error
 			continue
 		}
 
-		labels[label] = value
+		labels[label] = fmt.Sprint(value)
 	}
 
 	if len(labels) > 0 {
