@@ -56,9 +56,6 @@ func (s *stackDriverFormatterWrapper) Format(entry *logrus.Entry) ([]byte, error
 
 	if len(labels) > 0 {
 		// Remove these fields from the data map since we are moving them to the labels map.
-		for label := range labels {
-			delete(duplicate.Data, label)
-		}
 		duplicate.Data["logging.googleapis.com/labels"] = labels
 	}
 
