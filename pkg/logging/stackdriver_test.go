@@ -32,5 +32,4 @@ func TestStackDriverFormatterWrapper(t *testing.T) {
 
 	assert.Contains(t, object, "severity", "must contain the severity field for stackdriver")
 	assert.Contains(t, object, "logging.googleapis.com/labels", "must contain the labels field for stackdriver")
-	assert.NotContains(t, object, "accountId", "should not contain a normal accountId field")
 }
