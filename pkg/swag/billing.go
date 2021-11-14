@@ -9,9 +9,14 @@ type CreateCheckoutSessionRequest struct {
 }
 
 type CreateCheckoutSessionResponse struct {
+	// **DEPRECATED** after `v0.4.14`. The sessionId should not be used directly, instead the checkout session URL should be
+	// used.
 	// The value returned from stripe once a checkout session has been created. This is used on the frontend for the
 	// user to checkout and pay for their chosen plan.
-	SessionId string `json:"sessionId"`
+	SessionId string `json:"sessionId" extensions:"x-deprecated"`
+	// After `v0.4.14` the UI should rely on this field to redirect the user to the checkout session. This way we do not
+	// need to embed the Stripe library in our UI code when we really aren't doing anything with it.
+	URL string `json:"url"`
 }
 
 type CreatePortalSessionResponse struct {

@@ -15,7 +15,6 @@ export default class BootstrapState {
   readonly allowSignUp: boolean;
   readonly allowForgotPassword: boolean;
   readonly requireBetaCode: boolean;
-  readonly stripePublicKey: string | null;
   readonly initialPlan: Plan | null;
   readonly billingEnabled: boolean;
   readonly release: string;

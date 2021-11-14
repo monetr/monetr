@@ -214,6 +214,9 @@ $(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES)
 		--parseDepth 5 \
 		--parseInternal \
 		--output $(PWD)/docs
+	sed 's/x-deprecated:/deprecated:/g' $(SWAGGER_YAML) > $(SWAGGER_YAML).new
+	rm $(SWAGGER_YAML)
+	mv $(SWAGGER_YAML).new $(SWAGGER_YAML)
 	cp $(PWD)/public/favicon.ico $(PWD)/docs/favicon.ico
 	cp $(PWD)/public/logo192.png $(PWD)/docs/logo192.png
 	cp $(PWD)/public/logo512.png $(PWD)/docs/logo512.png

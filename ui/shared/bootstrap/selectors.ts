@@ -19,8 +19,6 @@ export const getRequirePhoneNumber = (state: AppState): boolean => state.bootstr
 
 export const getRequireBetaCode = (state: AppState): boolean => state.bootstrap.requireBetaCode;
 
-export const getStripePublicKey = (state: AppState): string | null => state.bootstrap.stripePublicKey;
-
 export const getInitialPlan = (state: AppState): Plan | null => state.bootstrap.initialPlan || null;
 
 export const getBillingEnabled = (state: AppState): boolean => state.bootstrap.billingEnabled;

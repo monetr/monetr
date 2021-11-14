@@ -1,9 +1,7 @@
 import request from 'shared/util/request';
 import React, { Component } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { RedirectToCheckoutOptions } from '@stripe/stripe-js/types/stripe-js/checkout';
 import { connect } from 'react-redux';
-import { getInitialPlan, getStripePublicKey } from 'shared/bootstrap/selectors';
+import { getInitialPlan } from 'shared/bootstrap/selectors';
 import { RouteComponentProps } from 'react-router-dom';
 import { AppState } from 'store';
 
@@ -13,7 +11,6 @@ interface State {
 
 interface WithConnectionPropTypes extends RouteComponentProps {
   initialPlan: { price: number, freeTrialDays: number } | null;
-  stripePublicKey: string | null;
 }
 
 class Subscribe extends Component<WithConnectionPropTypes, State> {
@@ -23,21 +20,13 @@ class Subscribe extends Component<WithConnectionPropTypes, State> {
   }
 
   setupStripe = () => {
-    const { initialPlan, stripePublicKey } = this.props;
+    const { initialPlan } = this.props;
     if (initialPlan) {
       return request().post(`/billing/create_checkout`, {
         priceId: '',
         cancelPath: '/logout',
       })
-        .then(result => {
-          return loadStripe(stripePublicKey).then(stripe => {
-            const options: RedirectToCheckoutOptions = {
-              sessionId: result.data.sessionId,
-            };
-
-            return stripe.redirectToCheckout(options);
-          });
-        })
+        .then(result => window.location.assign(result.data.url))
         .catch(error => alert(error));
     }
 
@@ -56,7 +45,6 @@ class Subscribe extends Component<WithConnectionPropTypes, State> {
 export default connect(
   (state: AppState) => ({
     initialPlan: getInitialPlan(state),
-    stripePublicKey: getStripePublicKey(state),
   }),
   {}
 )(Subscribe);

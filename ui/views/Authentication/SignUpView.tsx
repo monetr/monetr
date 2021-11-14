@@ -9,7 +9,6 @@ import {
   getReCAPTCHAKey,
   getRequireBetaCode,
   getShouldVerifyRegister,
-  getStripePublicKey
 } from 'shared/bootstrap/selectors';
 import ReCAPTCHA from 'react-google-recaptcha';
 import classnames from 'classnames';
@@ -55,7 +54,6 @@ interface WithConnectionPropTypes extends RouteComponentProps {
   bootstrapLogin: (token: string, user: User, subscriptionIsActive: boolean) => Promise<void>;
   initialPlan: { price: number, freeTrialDays: number } | null;
   requireBetaCode: boolean;
-  stripePublicKey: string | null;
   verifyRegister: boolean;
 }
 
@@ -462,7 +460,6 @@ export default connect(
     ReCAPTCHAKey: getReCAPTCHAKey(state),
     initialPlan: getInitialPlan(state),
     requireBetaCode: getRequireBetaCode(state),
-    stripePublicKey: getStripePublicKey(state),
     verifyRegister: getShouldVerifyRegister(state),
   }),
   {
