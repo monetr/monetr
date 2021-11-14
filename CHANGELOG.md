@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.15](https://www.github.com/monetr/monetr/compare/v0.4.14...v0.4.15) (2021-11-14)
+
+
+### Bug Fixes
+
+* Adding security headers and removing stripe-js. ([fc0fa6a](https://www.github.com/monetr/monetr/commit/fc0fa6a89177e59273d53fddc3024411d5a5e7e4)), closes [#304](https://www.github.com/monetr/monetr/issues/304)
+
 ### [0.4.14](https://www.github.com/monetr/monetr/compare/v0.4.13...v0.4.14) (2021-11-14)
 
 
