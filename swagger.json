@@ -2372,7 +2372,12 @@
             "type": "object",
             "properties": {
                 "sessionId": {
-                    "description": "The value returned from stripe once a checkout session has been created. This is used on the frontend for the\nuser to checkout and pay for their chosen plan.",
+                    "description": "**DEPRECATED** after `v0.4.14`. The sessionId should not be used directly, instead the checkout session URL should be\nused.\nThe value returned from stripe once a checkout session has been created. This is used on the frontend for the\nuser to checkout and pay for their chosen plan.",
+                    "type": "string",
+                    "x-deprecated": true
+                },
+                "url": {
+                    "description": "After `v0.4.14` the UI should rely on this field to redirect the user to the checkout session. This way we do not\nneed to embed the Stripe library in our UI code when we really aren't doing anything with it.",
                     "type": "string"
                 }
             }
