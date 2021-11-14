@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.14](https://www.github.com/monetr/monetr/compare/v0.4.13...v0.4.14) (2021-11-14)
+
+
+### Bug Fixes
+
+* **deps:** update emotion monorepo to v11.6.0 ([79d202d](https://www.github.com/monetr/monetr/commit/79d202dc4de150d3554a5cfdf70d73e4b883f32d))
+
 ### [0.4.13](https://www.github.com/monetr/monetr/compare/v0.4.12...v0.4.13) (2021-11-13)
 
 
