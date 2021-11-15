@@ -9,7 +9,7 @@ KUBECTL=$(MINIKUBE) kubectl --
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=redis mail work pgadmin pghero vault ngrok app
+SUBDOMAINS=relay redis mail work pgadmin pghero vault ngrok app
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -200,6 +200,11 @@ init-mini-values: $(YQ) $(HELM)
 	$(YQ) e '.api.email.smtp.host = "mail.default.svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.email.smtp.port = 1025' -i $(VALUES)
 	$(YQ) e '.api comments=""' -i $(VALUES)
+	$(YQ) e '.api.sentry.enabled = true' -i $(VALUES)
+	$(YQ) e '.api.sentry.dsn = "http://12345abcdef10111213141516171819@relay.default.svc.cluster.local:3000/123456"' -i $(VALUES)
+	$(YQ) e '.api.sentry.externalDsn = "https://12345abcdef10111213141516171819@relay.monetr.mini/123456"' -i $(VALUES)
+	$(YQ) e '.api.sentry.sampleRate = 1.0' -i $(VALUES)
+	$(YQ) e '.api.sentry.traceSampleRate = 1.0' -i $(VALUES)
 
 pg-tls-values: $(YQ)
 	$(YQ) e '.api.postgreSql.caCertificatePath = "/tls/ca.crt"' -i $(VALUES)
@@ -277,6 +282,11 @@ deploy-postgres:
 	$(KUBECTL) apply -f $(PWD)/minikube/postgres.yaml -n $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/postgres --namespace $(MINIKUBE_NAMESPACE) --timeout=120s
 
+deploy-relay:
+	$(call infoMsg,Deploying Sentry Relay (no-op) to the minikube cluster)
+	$(KUBECTL) apply -f $(PWD)/minikube/sentry.yaml -n $(MINIKUBE_NAMESPACE)
+	$(KUBECTL) rollout status deploy/relay --namespace $(MINIKUBE_NAMESPACE) --timeout=120s
+
 deploy-pgadmin:
 	$(call infoMsg,Deploying PGAdmin to the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/pgadmin.yaml -n $(MINIKUBE_NAMESPACE)
@@ -294,7 +304,7 @@ $(MINI_WORK_DOCKER_HASH):
 	$(KUBECTL) rollout status deploy/work --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	echo "$(HASH)" > $(MINI_WORK_DOCKER_HASH)
 
-deploy-services: deploy-certmanager update-coredns deploy-redis deploy-postgres mail-mini vault-mini deploy-pgadmin $(MINI_WORK_DOCKER_HASH)
+deploy-services: deploy-certmanager update-coredns deploy-redis deploy-postgres mail-mini vault-mini deploy-pgadmin $(MINI_WORK_DOCKER_HASH) deploy-relay
 	$(MAKE) deploy-certificate-authority
 
 SHELL_IMAGE=ghcr.io/elliotcourant/dotfiles/ubuntu:latest
