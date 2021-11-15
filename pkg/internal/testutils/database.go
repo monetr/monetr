@@ -2,7 +2,9 @@ package testutils
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strconv"
 	"sync"
 	"testing"
 
@@ -38,7 +40,7 @@ func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (cont
 		return ctx, nil
 	}
 
-	q.log.WithField("queryId", queryId).Trace(string(query))
+	q.log.WithContext(ctx).WithField("queryId", queryId).Trace(string(query))
 
 	return ctx, nil
 }
@@ -49,7 +51,7 @@ func (q *queryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error 
 	}
 
 	if event.Err != nil {
-		log := q.log
+		log := q.log.WithContext(ctx)
 		if event.Stash != nil {
 			if queryId, ok := event.Stash["queryId"].(string); ok {
 				log = log.WithField("queryId", queryId)
@@ -81,12 +83,35 @@ var testDatabases struct {
 
 func init() {
 	testDatabases = struct {
-		lock          sync.Mutex
+		lock      sync.Mutex
 		databases map[string]*pg.DB
 	}{
-		lock:          sync.Mutex{},
+		lock:      sync.Mutex{},
 		databases: map[string]*pg.DB{},
 	}
+}
+
+func GetPgOptions(t *testing.T) *pg.Options {
+	portString := os.Getenv("POSTGRES_PORT")
+	if portString == "" {
+		portString = "5432"
+	}
+
+	port, err := strconv.ParseInt(portString, 10, 64)
+	require.NoError(t, err, "must be able to parse the Postgres port as a number")
+
+	address := fmt.Sprintf("%s:%d", os.Getenv("POSTGRES_HOST"), port)
+
+	options := &pg.Options{
+		Network:         "tcp",
+		Addr:            address,
+		User:            os.Getenv("POSTGRES_USER"),
+		Password:        os.Getenv("POSTGRES_PASSWORD"),
+		Database:        os.Getenv("POSTGRES_DB"),
+		ApplicationName: "monetr - api - tests",
+	}
+
+	return options
 }
 
 func GetPgDatabase(t *testing.T) *pg.DB {
@@ -97,14 +122,7 @@ func GetPgDatabase(t *testing.T) *pg.DB {
 		return db
 	}
 
-	options := &pg.Options{
-		Network:         "tcp",
-		Addr:            os.Getenv("POSTGRES_HOST") + ":5432",
-		User:            os.Getenv("POSTGRES_USER"),
-		Password:        os.Getenv("POSTGRES_PASSWORD"),
-		Database:        os.Getenv("POSTGRES_DB"),
-		ApplicationName: "harder - api - tests",
-	}
+	options := GetPgOptions(t)
 	db := pg.Connect(options)
 
 	require.NoError(t, db.Ping(context.Background()), "must ping database")

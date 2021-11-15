@@ -1,14 +1,16 @@
 package controller_test
 
 import (
+	"context"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/gavv/httpexpect/v2"
 	"github.com/gomodule/redigo/redis"
-	"github.com/kataras/iris/v12/httptest"
 	"github.com/monetr/monetr/pkg/application"
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/cache"
@@ -62,7 +64,7 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	}
 }
 
-func NewTestApplication(t *testing.T) *httptest.Expect {
+func NewTestApplication(t *testing.T) *httpexpect.Expect {
 	configuration := NewTestApplicationConfig(t)
 	return NewTestApplicationWithConfig(t, configuration)
 }
@@ -71,7 +73,7 @@ type TestApp struct {
 	Mail *mock_mail.MockMailCommunication
 }
 
-func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httptest.Expect) {
+func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db)
@@ -117,24 +119,41 @@ func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configura
 		mockMail,
 	)
 	app := application.NewApp(configuration, c)
+
+	require.NoError(t, app.Build(), "must build app")
+
+	// run server using httptest
+	server := httptest.NewServer(app)
+	t.Cleanup(func() {
+		server.Close()
+	})
+
+	expect := httpexpect.WithConfig(httpexpect.Config{
+		Client:   server.Client(),
+		BaseURL:  server.URL,
+		Reporter: httpexpect.NewAssertReporter(t),
+		Printers: []httpexpect.Printer{},
+		Context:  context.WithValue(context.Background(), "test", t.Name()),
+	})
+
 	return &TestApp{
 		Mail: mockMail,
-	}, httptest.New(t, app)
+	}, expect
 }
 
-func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httptest.Expect {
+func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httpexpect.Expect {
 	_, e := NewTestApplicationExWithConfig(t, configuration)
 	return e
 }
 
-func GivenIHaveToken(t *testing.T, e *httptest.Expect) string {
+func GivenIHaveToken(t *testing.T, e *httpexpect.Expect) string {
 	_, _, result := register(t, e)
 	require.Contains(t, result, "token", "result must contain token")
 	require.IsType(t, string(""), result["token"], "token must be a string")
 	return result["token"].(string)
 }
 
-func register(t *testing.T, e *httptest.Expect) (email, password string, result map[string]interface{}) {
+func register(t *testing.T, e *httpexpect.Expect) (email, password string, result map[string]interface{}) {
 	var registerRequest struct {
 		Email     string `json:"email"`
 		Password  string `json:"password"`
@@ -154,14 +173,14 @@ func register(t *testing.T, e *httptest.Expect) (email, password string, result 
 	return registerRequest.Email, registerRequest.Password, response.JSON().Object().Raw()
 }
 
-func GivenIHaveLogin(t *testing.T, e *httptest.Expect) (email, password string) {
+func GivenIHaveLogin(t *testing.T, e *httpexpect.Expect) (email, password string) {
 	email, password, _ = register(t, e)
 	require.NotEmpty(t, email, "email cannot be empty")
 	require.NotEmpty(t, password, "password cannot be empty")
 	return
 }
 
-func GivenILogin(t *testing.T, e *httptest.Expect, email, password string) (token string) {
+func GivenILogin(t *testing.T, e *httpexpect.Expect, email, password string) (token string) {
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
