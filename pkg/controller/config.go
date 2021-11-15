@@ -104,6 +104,6 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 // @Success 200 {object} swag.SentryDSNResponse
 func (c *Controller) getSentryUI(ctx iris.Context) {
 	ctx.JSON(map[string]interface{}{
-		"dsn": c.configuration.Sentry.DSN,
+		"dsn": c.configuration.Sentry.ExternalDSN,
 	})
 }

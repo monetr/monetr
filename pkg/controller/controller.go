@@ -283,7 +283,9 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			}
 
 			repoParty.Get("/config", c.configEndpoint)
-			repoParty.Get("/sentry", c.getSentryUI)
+			if c.configuration.Sentry.ExternalSentryEnabled() {
+				repoParty.Get("/sentry", c.getSentryUI)
+			}
 
 			repoParty.PartyFunc("/authentication", c.handleAuthentication)
 

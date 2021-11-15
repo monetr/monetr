@@ -203,8 +203,13 @@ type StackDriverLogging struct {
 type Sentry struct {
 	Enabled         bool
 	DSN             string
+	ExternalDSN     string
 	SampleRate      float64
 	TraceSampleRate float64
+}
+
+func (s Sentry) ExternalSentryEnabled() bool {
+	return s.Enabled && s.ExternalDSN != ""
 }
 
 type Stripe struct {
@@ -353,6 +358,7 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Redis.Namespace", "MONETR_REDIS_NAMESPACE")
 	_ = v.BindEnv("Sentry.Enabled", "MONETR_SENTRY_ENABLED")
 	_ = v.BindEnv("Sentry.DSN", "MONETR_SENTRY_DSN")
+	_ = v.BindEnv("Sentry.External", "MONETR_SENTRY_EXTERNAL_DSN")
 	_ = v.BindEnv("Sentry.SampleRate", "MONETR_SENTRY_SAMPLE_RATE")
 	_ = v.BindEnv("Sentry.TraceSampleRate", "MONETR_SENTRY_TRACE_SAMPLE_RATE")
 	_ = v.BindEnv("Stripe.Enabled", "MONETR_STRIPE_ENABLED")
