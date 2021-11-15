@@ -21,7 +21,7 @@
     "babel-plugin-named-asset-import": "0.3.7",
     "babel-preset-react-app": "10.0.0",
     "bfj": "7.0.2",
-    "camelcase": "6.2.0",
+    "camelcase": "6.2.1",
     "classnames": "2.3.1",
     "css-what": "5.1.0",
     "dotenv": "10.0.0",
