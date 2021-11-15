@@ -1,15 +1,16 @@
 package metrics
 
 import (
-	"github.com/kataras/iris/v12/context"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/kataras/iris/v12"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const metricsNamespace = "monetr"
@@ -131,7 +132,7 @@ func (s *Stats) JobFinished(name string, accountId uint64, start time.Time) {
 	}).Inc()
 }
 
-func (s *Stats) FinishedRequest(ctx *context.Context, responseTime time.Duration) {
+func (s *Stats) FinishedRequest(ctx iris.Context, responseTime time.Duration) {
 	s.HTTPResponseTime.With(prometheus.Labels{
 		"path":   strings.TrimPrefix(ctx.RouteName(), ctx.Method()),
 		"method": ctx.Method(),

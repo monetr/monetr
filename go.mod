@@ -9,6 +9,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.9.0
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/fsnotify/fsnotify v1.5.1
+	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.10.6
@@ -86,7 +87,6 @@ require (
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/iris-contrib/httpexpect/v2 v2.0.5 // indirect
 	github.com/iris-contrib/jade v1.1.4 // indirect
 	github.com/iris-contrib/schema v0.0.6 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
@@ -130,6 +130,7 @@ require (
 	github.com/tkuchiki/go-timezone v0.2.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasthttp v1.27.0 // indirect
 	github.com/vmihailenco/bufpool v0.1.11 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
@@ -156,5 +157,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	mellium.im/sasl v0.2.1 // indirect
-	moul.io/http2curl v1.0.0 // indirect
+	moul.io/http2curl v1.0.1-0.20190925090545-5cd742060b0e // indirect
 )
