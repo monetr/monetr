@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.4.17](https://www.github.com/monetr/monetr/compare/v0.4.16...v0.4.17) (2021-11-15)
+
+
+### Bug Fixes
+
+* Changed HTTP testing to use httpexpect. ([26a6982](https://www.github.com/monetr/monetr/commit/26a69828ab1c1ae65d90f6078129f3e87a608d48))
+* Cleaning up dependencies. ([2d3456f](https://www.github.com/monetr/monetr/commit/2d3456f21d544baf84bcaed38bfe0c240b83a92a))
+* **deps:** update dependency camelcase to v6.2.1 ([e5b4f3f](https://www.github.com/monetr/monetr/commit/e5b4f3f974dd89be98126a59811cef1ab0d394df))
+* **deps:** update google.golang.org/genproto commit hash to 271947f ([39c84df](https://www.github.com/monetr/monetr/commit/39c84dfe3bf1ea57a3724e3ae46ce7558029e311))
+* **deps:** update typescript-eslint monorepo to v5.4.0 ([f15c12c](https://www.github.com/monetr/monetr/commit/f15c12ca1a8b47f191b482241c58f08acae78753))
+* Updated renovate config. ([882a853](https://www.github.com/monetr/monetr/commit/882a853060b77629233d025d345814dbfca3f215))
+
 ### [0.4.16](https://www.github.com/monetr/monetr/compare/v0.4.15...v0.4.16) (2021-11-15)
 
 
