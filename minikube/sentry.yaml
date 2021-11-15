@@ -27,6 +27,7 @@ data:
       max_connections: 1000
     logging:
       format: json
+      level: trace
       log_failed_payloads: true
 
 ---
