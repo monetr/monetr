@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.4.16](https://www.github.com/monetr/monetr/compare/v0.4.15...v0.4.16) (2021-11-15)
+
+
+### Bug Fixes
+
+* Allow separate Sentry DSN for UI. ([c01dac1](https://www.github.com/monetr/monetr/commit/c01dac163e8d68adc19f0f58aa051de9206558a9))
+* Sentry relay testing locally. Updated content policy. ([7efa38c](https://www.github.com/monetr/monetr/commit/7efa38cafc88b2cbf1ce46022666fe00680ddb0b))
+
 ### [0.4.15](https://www.github.com/monetr/monetr/compare/v0.4.14...v0.4.15) (2021-11-14)
 
 
