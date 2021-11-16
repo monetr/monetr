@@ -1,5 +1,5 @@
 import NavigationBar from 'NavigationBar';
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
 import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
@@ -7,10 +7,9 @@ import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/f
 import fetchSpending from 'shared/spending/actions/fetchSpending';
 import fetchLinksIfNeeded from 'shared/links/actions/fetchLinksIfNeeded';
 import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import { Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useSelector, useStore } from 'react-redux';
 import { Backdrop, CircularProgress } from '@mui/material';
-import { AppState } from 'store';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import ExpensesView from 'views/Expenses/ExpensesView';
 import GoalsView from 'views/Goals/GoalsView';
@@ -19,124 +18,60 @@ import AllAccountsView from 'views/AccountView/AllAccountsView';
 import Logout from 'views/Authentication/Logout';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 
-interface WithConnectionPropTypes {
-  fetchBalances: () => Promise<any>;
-  fetchBankAccounts: () => Promise<any>;
-  fetchFundingSchedulesIfNeeded: () => Promise<any>;
-  fetchInitialTransactionsIfNeeded: () => Promise<any>;
-  fetchLinksIfNeeded: () => Promise<any>;
-  fetchSpending: () => Promise<any>;
-  hasAnyLinks: boolean;
-}
+const AuthenticatedApp = (): JSX.Element => {
+  const [loading, setLoading] = useState(true);
+  const { dispatch, getState } = useStore();
 
-interface State {
-  loading: boolean;
-}
-
-export class AuthenticatedApp extends Component<RouteComponentProps & WithConnectionPropTypes, State> {
-
-  state = {
-    loading: true,
-  };
-
-  componentDidMount() {
-    const {
-      fetchBalances,
-      fetchBankAccounts,
-      fetchFundingSchedulesIfNeeded,
-      fetchSpending,
-      fetchLinksIfNeeded,
-      fetchInitialTransactionsIfNeeded,
-    } = this.props;
-
+  useEffect(() => {
     Promise.all([
-      fetchLinksIfNeeded(),
-      fetchBankAccounts().then(() => Promise.all([
-        fetchInitialTransactionsIfNeeded(),
-        fetchFundingSchedulesIfNeeded(),
-        fetchSpending(),
-        fetchBalances(),
+      fetchLinksIfNeeded()(dispatch, getState),
+      fetchBankAccounts()(dispatch).then(() => Promise.all([
+        fetchInitialTransactionsIfNeeded()(dispatch, getState),
+        fetchFundingSchedulesIfNeeded()(dispatch, getState),
+        fetchSpending()(dispatch, getState),
+        fetchBalances()(dispatch, getState),
       ])),
     ])
-      .finally(() => this.setState({ loading: false }));
-  }
+      .finally(() => setLoading(false));
+  }, []); // No dependencies makes sure that this will only ever be called the first time this component is mounted.
 
-  renderSubRoutes = () => {
-    if (this.props.hasAnyLinks) {
-      return this.renderSetup();
-    }
+  const hasAnyLinks = useSelector(getHasAnyLinks);
 
-    return this.renderNotSetup()
-  };
-
-  renderNotSetup = () => {
+  if (loading) {
     return (
-      <Switch>
-        <Route path="/logout" exact component={ Logout }/>
-        <Route path="/setup" exact component={ InitialPlaidSetup }/>
-        <Route path="/plaid/oauth-return">
-          <OAuthRedirect/>
-        </Route>
-        <Route path="/">
-          <Redirect to="/setup"/>
-        </Route>
-        <Route>
-          <Redirect to="/setup"/>
-        </Route>
-      </Switch>
-    )
-  };
-
-  renderSetup = () => {
-    return (
-      <Fragment>
-        <NavigationBar/>
-        <Switch>
-          <Route path="/register">
-            <Redirect to="/"/>
-          </Route>
-          <Route path="/login">
-            <Redirect to="/"/>
-          </Route>
-          <Route path="/logout" exact component={ Logout }/>
-          <Route path="/transactions" exact component={ TransactionsView }/>
-          <Route path="/expenses" exact component={ ExpensesView }/>
-          <Route path="/goals" exact component={ GoalsView }/>
-          <Route path="/accounts" exact component={ AllAccountsView }/>
-          <Route path="/">
-            <Redirect to="/transactions"/>
-          </Route>
-          <Route>
-            <h1>Not found</h1>
-          </Route>
-        </Switch>
-      </Fragment>
+      <Backdrop open={ true }>
+        <CircularProgress color="inherit"/>
+      </Backdrop>
     );
   }
 
-  render() {
-    if (this.state.loading) {
-      return (
-        <Backdrop open={ true }>
-          <CircularProgress color="inherit"/>
-        </Backdrop>
-      );
-    }
-
-    return this.renderSubRoutes();
+  // If the user has no links setup then we want to only give them a handful of routes to get things setup.
+  if (!hasAnyLinks) {
+    return (
+      <Routes>
+        <Route path="/logout" element={ <Logout/> }/>
+        <Route path="/setup" element={ <InitialPlaidSetup/> }/>
+        <Route path="/plaid/oauth-return" element={ <OAuthRedirect/> }/>
+        <Route path="*" element={ <Navigate replace to="/setup"/> }/>
+      </Routes>
+    );
   }
-}
 
-export default connect(
-  (state: AppState) => ({
-    hasAnyLinks: getHasAnyLinks(state),
-  }),
-  {
-    fetchBalances,
-    fetchBankAccounts,
-    fetchFundingSchedulesIfNeeded,
-    fetchSpending,
-    fetchLinksIfNeeded,
-    fetchInitialTransactionsIfNeeded,
-  }
-)(withRouter(AuthenticatedApp));
+  return (
+    <Fragment>
+      <NavigationBar/>
+      <Routes>
+        <Route path="/register" element={ <Navigate replace to="/"/> }/>
+        <Route path="/login" element={ <Navigate replace to="/"/> }/>
+        <Route path="/logout" element={ <Logout/> }/>
+        <Route path="/transactions" element={ <TransactionsView/> }/>
+        <Route path="/expenses" element={ <ExpensesView/> }/>
+        <Route path="/goals" element={ <GoalsView/> }/>
+        <Route path="/accounts" element={ <AllAccountsView/> }/>
+        <Route path="*" element={ <Navigate replace to="/transactions"/> }/>
+      </Routes>
+    </Fragment>
+  );
+};
+
+export default AuthenticatedApp;

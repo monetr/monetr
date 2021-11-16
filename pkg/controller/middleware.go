@@ -82,11 +82,11 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		defer func() {
 			var message string
 			if err == nil {
-				message = "M-Token is valid"
+				message = "Token is valid"
 				data["accountId"] = c.mustGetAccountId(ctx)
 				data["userId"] = c.mustGetUserId(ctx)
 			} else {
-				message = "Request did not have valid M-Token"
+				message = "Request did not have valid Token"
 			}
 
 			hub.AddBreadcrumb(&sentry.Breadcrumb{
@@ -100,10 +100,24 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		}()
 	}
 
-	if token = ctx.GetCookie(TokenName, iris.CookieSecure); token != "" {
-		data["source"] = "cookie"
-	} else if token = ctx.GetHeader(TokenName); token != "" {
-		data["source"] = "header"
+	{ // Read the token from the request.
+		// We can allocate a max capacity of 2 right away because we know (at least at the time of writing this) that we
+		// will have _at most_ 2 cookie options.
+		cookieOptions := make([]iris.CookieOption, 0, 2)
+		cookieOptions = append(cookieOptions, iris.CookieHTTPOnly(true))
+
+		// If the server is configured to use secure cookies then add that to the options.
+		if c.configuration.Server.Cookies.Secure {
+			cookieOptions = append(cookieOptions, iris.CookieSecure)
+		}
+
+		// Try to retrieve the cookie from the request with the options.
+		if token = ctx.GetCookie(
+			c.configuration.Server.Cookies.Name,
+			cookieOptions...,
+		); token != "" {
+			data["source"] = "cookie"
+		}
 	}
 
 	if token == "" {
@@ -157,6 +171,7 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 
 func (c *Controller) authenticationMiddleware(ctx iris.Context) {
 	if err := c.authenticateUser(ctx); err != nil {
+		c.updateAuthenticationCookie(ctx, ClearAuthentication)
 		ctx.SetErr(err)
 		ctx.StatusCode(http.StatusForbidden)
 		ctx.StopExecution()

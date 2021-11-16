@@ -32,7 +32,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.token").String().NotEmpty()
+		AssertSetTokenCookie(t, response)
 	})
 
 	t.Run("no users", func(t *testing.T) {
@@ -70,7 +70,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.token").String().NotEmpty()
+		AssertSetTokenCookie(t, response)
 		response.JSON().Path("$.users").Array().Length().Equal(2) // Should have 2 accounts.
 		response.JSON().Path("$.users..accountId").Array().Contains(user1.AccountId)
 		response.JSON().Path("$.users..accountId").Array().Contains(user2.AccountId)
@@ -144,7 +144,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.token").String().NotEmpty()
+		AssertSetTokenCookie(t, response)
 		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe")
 
 		stripeMock.AssertNCustomersCreated(t, 1)
@@ -199,7 +199,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.token").String().NotEmpty()
+		AssertSetTokenCookie(t, response)
 	})
 
 	t.Run("bad captcha", func(t *testing.T) {
@@ -260,6 +260,49 @@ func TestLogin(t *testing.T) {
 	})
 }
 
+func TestLogout(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		e := NewTestApplication(t)
+		email, password := GivenIHaveLogin(t, e)
+
+		var token string
+		{ // Login to monetr and retrieve our token cookie.
+			response := e.POST("/api/authentication/login").
+				WithJSON(swag.LoginRequest{
+					Email:    email,
+					Password: password,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			token = AssertSetTokenCookie(t, response)
+		}
+
+		{ // Then logout and make sure it removes the cookie.
+			response := e.GET("/api/authentication/logout").
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Headers().ContainsKey("Set-Cookie")
+			cookies := response.Raw().Cookies()
+			assert.Len(t, cookies, 1, "must contain only one cookie")
+			cookie := cookies[0]
+			assert.Empty(t, cookie.Value, "value should be blank to unset the cookie")
+		}
+	})
+
+	t.Run("no cookie", func(t *testing.T) {
+		e := NewTestApplication(t)
+
+		response := e.GET("/api/authentication/logout").
+			Expect()
+
+		response.Status(http.StatusForbidden)
+		response.JSON().Path("$.error").Equal("authentication required")
+	})
+}
+
 func TestRegister(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		e := NewTestApplication(t)
@@ -279,7 +322,8 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.token").String().NotEmpty()
+		AssertSetTokenCookie(t, response)
+
 		response.JSON().Path("$.nextUrl").String().Equal("/setup")
 		response.JSON().Path("$.isActive").Boolean().True()
 		response.JSON().Path("$.user").Object().NotEmpty()
@@ -423,7 +467,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.token").String().NotEmpty()
+		AssertSetTokenCookie(t, response)
 		response.JSON().Path("$.nextUrl").String().Equal("/setup")
 		response.JSON().Path("$.isActive").Boolean().True()
 		response.JSON().Path("$.user").Object().NotEmpty()
@@ -489,7 +533,7 @@ func TestRegister(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.token").String().NotEmpty()
+			AssertSetTokenCookie(t, response)
 			response.JSON().Path("$.user").Object().NotEmpty()
 			response.JSON().Path("$.user.login").Object().NotEmpty()
 			response.JSON().Path("$.user.account").Object().NotEmpty()
@@ -541,7 +585,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.token").String().NotEmpty()
+		AssertSetTokenCookie(t, response)
 		response.JSON().Path("$.isActive").Boolean().False()
 		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe")
 		response.JSON().Path("$.user").Object().NotEmpty()
@@ -689,7 +733,7 @@ func TestVerifyEmail(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.token").String().NotEmpty()
+			AssertSetTokenCookie(t, response)
 		}
 	})
 

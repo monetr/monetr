@@ -4,21 +4,15 @@ import { AppBar, Button, IconButton, Menu, MenuItem, Toolbar } from '@mui/materi
 import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
-import logout from 'shared/authentication/actions/logout';
+import useLogout from 'shared/authentication/actions/logout';
 import manageBilling from 'shared/billing/actions/manageBilling';
 import { getBillingEnabled } from 'shared/bootstrap/selectors';
-import * as Sentry from '@sentry/react';
 
 const NavigationBar = React.memo((): JSX.Element => {
   const billingEnabled = useSelector(getBillingEnabled);
-
-  const dispatch = useDispatch();
-
-  function dispatchLogout() {
-    logout()(dispatch);
-  }
+  const logout = useLogout();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -75,7 +69,7 @@ const NavigationBar = React.memo((): JSX.Element => {
           </MenuItem>
 
           <MenuItem
-            onClick={ dispatchLogout }
+            onClick={ logout }
           >
             <ExitToApp className="mr-2"/>
             Logout

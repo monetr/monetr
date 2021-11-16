@@ -1,7 +1,7 @@
 import Balance from 'models/Balance';
 import Spending from "models/Spending";
 import { Map } from 'immutable';
-import { Logout } from "shared/authentication/actions";
+import { LogoutActions } from 'shared/authentication/actions';
 import { ChangeBankAccount } from "shared/bankAccounts/actions";
 import { UpdateTransactionSuccess } from 'shared/transactions/actions';
 
@@ -110,5 +110,5 @@ export type SpendingActions =
   | Transfer
   | UpdateTransactionSuccess
   | UpdateSpendingSuccess
-  | Logout
+  | LogoutActions
   | ChangeBankAccount

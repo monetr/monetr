@@ -26,13 +26,17 @@ const (
 )
 
 type Configuration struct {
-	Name          string
-	ListenPort    int
+	// DEPRECATED: This is not used anymore. It serves no function at all.
+	Name string
+	// DEPRECATED: This is not used anymore. Use Server.ListenPort instead.
+	ListenPort int
+	// DEPRECATED: This is not used anymore. Use Server.StatsPort instead.
 	StatsPort     int
 	Environment   string
 	UIDomainName  string
 	APIDomainName string
 	AllowSignUp   bool
+	Server        Server
 	Beta          Beta
 	CORS          CORS
 	JWT           JWT
@@ -49,6 +53,33 @@ type Configuration struct {
 
 func (c Configuration) GetUIDomainName() string {
 	return c.UIDomainName
+}
+
+type Server struct {
+	// ListenPort defines the port that monetr will listen for HTTP requests on. This port should be forwarded such that
+	// it is accessible to the desired clients. Be that on a local network, or forwarded to the public internet.
+	ListenPort int
+	// StatsPort is the port that our prometheus metrics are served on. This port should not be publicly accessible and
+	// should only be accessible by the prometheus server scraping for metrics. It is not an endpoint that needs to be
+	// secured as no sensitive client information will be served by it; but it should not be accessible publicly.
+	StatsPort int
+	// Cookies defines the parameters used for issuing and processing cookies from clients. Cookies are used for
+	// authentication.
+	Cookies Cookies
+}
+
+type Cookies struct {
+	// SameSiteStrict allows the host of monetr to define whether the cookie used for authentication is limited to same
+	// site. This might impact use cases where the UI is on a different domain than the API. In general, it is
+	// recommended that this is enabled and that the UI and API are served from the same domain.
+	SameSiteStrict bool
+	// Secure specifies that the authentication cookie issued and required by API endpoints is a secure cookie. This
+	// defaults to true, but requires that the host of monetr use HTTPS. If you are not using HTTPS then this must be
+	// disabled for API calls to succeed.
+	Secure bool
+	// Name defines the name of the cookie to use for authentication. This defaults to `M-Token` but can be customized
+	// if the host wants to.
+	Name string
 }
 
 type Beta struct {
@@ -297,6 +328,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("PostgreSQL.Port", 5432)
 	v.SetDefault("PostgreSQL.Username", "postgres")
 	v.SetDefault("ReCAPTCHA.Enabled", false)
+	v.SetDefault("Server.Cookie.Name", "M-Token")
 	v.SetDefault("Vault.Auth", "kubernetes")
 	v.SetDefault("Vault.IdleConnTimeout", 9*time.Minute)
 	v.SetDefault("Vault.Timeout", 10*time.Second)

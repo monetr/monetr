@@ -1,14 +1,14 @@
 package controller_test
 
 import (
-	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/mock_stripe"
 	"github.com/monetr/monetr/pkg/swag"
-	"net/http"
-	"testing"
 )
 
 func TestGetAfterCheckout(t *testing.T) {
@@ -44,7 +44,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		var checkoutSessionId string
 		{ // Create a checkout session
 			result := e.POST("/api/billing/create_checkout").
-				WithHeader("M-Token", token).
+				WithCookie(TestCookieName, token).
 				WithJSON(swag.CreateCheckoutSessionRequest{
 					PriceId:    nil,
 					CancelPath: nil,
@@ -60,8 +60,9 @@ func TestGetAfterCheckout(t *testing.T) {
 		stripeMock.CompleteCheckoutSession(t, checkoutSessionId)
 
 		{ // Then do the callback from the frontend to complete the checkout session for our application.
-			result := e.GET(fmt.Sprintf("/api/billing/checkout/%s", checkoutSessionId)).
-				WithHeader("M-Token", token).
+			result := e.GET("/api/billing/checkout/{checkoutSessionId}").
+				WithPath("checkoutSessionId", checkoutSessionId).
+				WithCookie(TestCookieName, token).
 				Expect()
 
 			result.Status(http.StatusOK)

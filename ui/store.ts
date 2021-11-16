@@ -35,7 +35,7 @@ export function configureStore() {
   return createStore(
     reducers,
     {},
-    compose(applyMiddleware(thunk), sentryReduxEnhancer),
+    composeEnhancer(compose(applyMiddleware(thunk), sentryReduxEnhancer)),
   );
 }
 

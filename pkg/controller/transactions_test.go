@@ -1,7 +1,6 @@
 package controller_test
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -17,7 +16,7 @@ func TestPostTransactions(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		response := e.POST("/api/bank_accounts/1234/transactions").
-			WithHeader("M-Token", token).
+			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				BankAccountId: 1234,
 				SpendingId:    nil,
@@ -55,10 +54,10 @@ func TestPutTransactions(t *testing.T) {
 		transaction.Name = "A More Friendly Name"
 		assert.NotEqual(t, originalTransaction.Name, transaction.Name, "make sure the names dont somehow match")
 
-		response := e.PUT(fmt.Sprintf(`/api/bank_accounts/%d/transactions/%d`, bank.BankAccountId, transaction.TransactionId)).
-			WithHeaders(map[string]string{
-				"M-Token": token,
-			}).
+		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithCookie(TestCookieName, token).
 			WithJSON(transaction).
 			Expect()
 
@@ -74,10 +73,10 @@ func TestPutTransactions(t *testing.T) {
 		e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
-		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
-			WithHeaders(map[string]string{
-				"M-Token": token,
-			}).
+		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", 1234).
+			WithPath("transactionId", 1234).
+			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
 				Amount: 1243,
@@ -93,9 +92,7 @@ func TestPutTransactions(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/00000/transactions/1234`).
-			WithHeaders(map[string]string{
-				"M-Token": token,
-			}).
+			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
 				Amount: 1243,
@@ -111,9 +108,7 @@ func TestPutTransactions(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/0000`).
-			WithHeaders(map[string]string{
-				"M-Token": token,
-			}).
+			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
 				Amount: 1243,
@@ -129,9 +124,7 @@ func TestPutTransactions(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
-			WithHeaders(map[string]string{
-				"M-Token": token,
-			}).
+			WithCookie(TestCookieName, token).
 			WithBytes([]byte("I am not really json")).
 			Expect()
 
@@ -157,9 +150,7 @@ func TestPutTransactions(t *testing.T) {
 		e := NewTestApplication(t)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
-			WithHeaders(map[string]string{
-				"M-Token": gofakeit.Generate("????????"),
-			}).
+			WithCookie(TestCookieName, gofakeit.Generate("????????")).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
 				Amount: 1243,

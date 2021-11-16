@@ -1,10 +1,9 @@
-import React, { Component, Fragment } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
+import React, { Fragment, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { Formik, FormikHelpers } from 'formik';
 import { Alert, AlertTitle, Button, CircularProgress, Snackbar, TextField } from '@mui/material';
 import classnames from 'classnames';
-import { AppState } from 'store';
+import { useLocation } from 'react-router-dom';
 import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 import verifyEmailAddress from 'util/verifyEmailAddress';
@@ -16,46 +15,27 @@ interface ResendValues {
   email: string | null;
 }
 
-interface WithConnectionPropTypes extends RouteComponentProps {
-  requireCaptcha: boolean;
-}
+const ResendVerification = (): JSX.Element => {
+  const requireCaptcha = !!useSelector(getReCAPTCHAKey);
+  const { state: routeState } = useLocation();
+  const initialValues: ResendValues = {
+    email: (routeState && routeState['emailAddress']) || null,
+  }
 
-interface State {
-  loading: boolean;
-  error: string | null;
-  verification: string | null;
-  done: boolean;
-}
+  const [verification, setVerification] = useState<string | null>();
+  const [error, setError] = useState<string | null>();
+  const [done, setDone] = useState(false);
 
-class ResendVerification extends Component<WithConnectionPropTypes, State> {
-
-  state = {
-    loading: false,
-    error: null,
-    verification: null,
-    done: false,
-  };
-
-  resendVerification = (emailAddress: string): Promise<void> => {
-    this.setState({
-      loading: true,
-    });
-
+  function resendVerification(emailAddress: string): Promise<void> {
     return request().post('/authentication/verify/resend', {
-      'email': emailAddress,
-      'captcha': this.state.verification,
+      email: emailAddress,
+      captcha: verification,
     })
-      .then(() => this.setState({
-        done: true,
-      }))
-      .catch(error => {
-        this.setState({
-          error: error?.response?.data?.error || 'Failed to resend verification link',
-        })
-      })
-  };
+      .then(() => setDone(true))
+      .catch(error => setError(error?.response?.data?.error || 'Failed to resend verification link'));
+  }
 
-  validateInput = (values: ResendValues): Partial<ResendValues> | null => {
+  function validateInput(values: ResendValues): Partial<ResendValues> | null {
     let errors: Partial<ResendValues> = {};
 
     if (values.email) {
@@ -65,139 +45,126 @@ class ResendVerification extends Component<WithConnectionPropTypes, State> {
     }
 
     return errors;
-  };
+  }
 
-  submit = (values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> => {
+  function submit(values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> {
     helpers.setSubmitting(true);
-    return this.resendVerification(values.email)
+    return resendVerification(values.email)
       .finally(() => helpers.setSubmitting(false));
-  };
+  }
 
-  renderErrorMaybe = () => {
-    const { error } = this.state;
+  function hideError() {
+    setError(null);
+  }
+
+  function renderErrorMaybe(): JSX.Element | null {
     if (!error) {
       return null;
     }
 
     return (
-      <Snackbar open autoHideDuration={ 10000 }>
+      <Snackbar open={ !!error } autoHideDuration={ 10000 } onClose={ hideError }>
         <Alert variant="filled" severity="error">
           <AlertTitle>Error</AlertTitle>
-          { this.state.error }
+          { error }
         </Alert>
       </Snackbar>
-    );
-  };
+    )
+  }
 
-  render() {
-    const { done } = this.state;
+  if (done) {
+    return <AfterEmailVerificationSent/>;
+  }
 
-    if (done) {
-      return <AfterEmailVerificationSent/>;
-    }
+  return (
+    <Fragment>
+      { renderErrorMaybe() }
+      <Formik
+        initialValues={ initialValues }
+        validate={ validateInput }
+        onSubmit={ submit }
+      >
+        { ({
+             values,
+             errors,
+             touched,
+             handleChange,
+             handleBlur,
+             handleSubmit,
+             isSubmitting,
+             submitForm,
+           }) => (
+          <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
+            <div className="flex items-center justify-center w-full h-full max-h-full">
+              <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
+                <div className="flex justify-center w-full mb-5">
+                  <img src={ Logo } className="w-1/3"/>
+                </div>
+                <div className="w-full">
+                  <div className="w-full pb-2.5">
+                    { routeState &&
+                    <p className="text-center">
+                      It looks like your email address has not been verified. Do you want to resend the email
+                      verification link?
+                    </p>
+                    }
 
-    const { state: routeState } = this.props.location;
-    const initialValues: ResendValues = {
-      email: (routeState && routeState['emailAddress']) || null,
-    }
-
-    return (
-      <Fragment>
-        { this.renderErrorMaybe() }
-        <Formik
-          initialValues={ initialValues }
-          validate={ this.validateInput }
-          onSubmit={ this.submit }
-        >
-          { ({
-               values,
-               errors,
-               touched,
-               handleChange,
-               handleBlur,
-               handleSubmit,
-               isSubmitting,
-               submitForm,
-             }) => (
-            <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
-              <div className="flex items-center justify-center w-full h-full max-h-full">
-                <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                  <div className="flex justify-center w-full mb-5">
-                    <img src={ Logo } className="w-1/3"/>
+                    { !routeState &&
+                    <p className="text-center">
+                      If your email verification link has expired, or you never got one. You can enter your email
+                      address below and another verification link will be sent to you.
+                    </p>
+                    }
                   </div>
-                  <div className="w-full">
-                    <div className="w-full pb-2.5">
-                      { routeState &&
-                      <p className="text-center">
-                        It looks like your email address has not been verified. Do you want to resend the email
-                        verification link?
-                      </p>
-                      }
-
-                      { !routeState &&
-                      <p className="text-center">
-                        If your email verification link has expired, or you never got one. You can enter your email
-                        address below and another verification link will be sent to you.
-                      </p>
-                      }
-                    </div>
-                    <div className="w-full pb-2.5">
-                      <TextField
-                        autoComplete="username"
-                        autoFocus
-                        className="w-full"
-                        disabled={ isSubmitting }
-                        error={ touched.email && !!errors.email }
-                        helperText={ (touched.email && errors.email) ? errors.email : null }
-                        id="login-email"
-                        label="Email"
-                        name="email"
-                        onBlur={ handleBlur }
-                        onChange={ handleChange }
-                        value={ values.email }
-                        variant="outlined"
-                      />
-                    </div>
-                  </div>
-                  <CaptchaMaybe
-                    show
-                    loading={ isSubmitting }
-                    onVerify={ (value) => this.setState({
-                      verification: value,
-                    }) }
-                  />
-                  <div className="w-full pt-2.5 mb-10">
-                    <Button
+                  <div className="w-full pb-2.5">
+                    <TextField
+                      autoComplete="username"
+                      autoFocus
                       className="w-full"
-                      color="primary"
-                      disabled={ isSubmitting || !values.email || (this.props.requireCaptcha && !this.state.verification) }
-                      onClick={ submitForm }
-                      type="submit"
-                      variant="contained"
-                    >
-                      { isSubmitting && <CircularProgress
-                        className={ classnames('mr-2', {
-                          'opacity-50': isSubmitting,
-                        }) }
-                        size="1em"
-                        thickness={ 5 }
-                      /> }
-                      { isSubmitting ? 'Sending Verification Link...' : 'Resend Verification Link' }
-                    </Button>
+                      disabled={ isSubmitting }
+                      error={ touched.email && !!errors.email }
+                      helperText={ (touched.email && errors.email) ? errors.email : null }
+                      id="login-email"
+                      label="Email"
+                      name="email"
+                      onBlur={ handleBlur }
+                      onChange={ handleChange }
+                      value={ values.email }
+                      variant="outlined"
+                    />
                   </div>
                 </div>
+                <CaptchaMaybe
+                  show
+                  loading={ isSubmitting }
+                  onVerify={ setVerification }
+                />
+                <div className="w-full pt-2.5 mb-10">
+                  <Button
+                    className="w-full"
+                    color="primary"
+                    disabled={ isSubmitting || !values.email || (requireCaptcha && !verification) }
+                    onClick={ submitForm }
+                    type="submit"
+                    variant="contained"
+                  >
+                    { isSubmitting && <CircularProgress
+                      className={ classnames('mr-2', {
+                        'opacity-50': isSubmitting,
+                      }) }
+                      size="1em"
+                      thickness={ 5 }
+                    /> }
+                    { isSubmitting ? 'Sending Verification Link...' : 'Resend Verification Link' }
+                  </Button>
+                </div>
               </div>
-            </form>
-          ) }
-        </Formik>
-      </Fragment>
-    );
-  }
-}
+            </div>
+          </form>
+        ) }
+      </Formik>
+    </Fragment>
+  );
+};
 
-export default connect(
-  (state: AppState) => ({
-    requireCaptcha: !!getReCAPTCHAKey(state),
-  }),
-  {},
-)(withRouter(ResendVerification));
+export default ResendVerification;

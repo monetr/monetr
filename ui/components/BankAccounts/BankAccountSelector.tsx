@@ -1,9 +1,6 @@
 import { Button, Divider, Menu, MenuItem, Typography } from '@mui/material';
-import BankAccount from 'models/BankAccount';
-import Link from 'models/Link';
-import { Map } from 'immutable';
-import React, { Component, Fragment } from 'react';
-import { connect } from 'react-redux';
+import React, { Fragment, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
 import setSelectedBankAccountId from 'shared/bankAccounts/actions/setSelectedBankAccountId';
 import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
@@ -16,166 +13,131 @@ import fetchSpending from 'shared/spending/actions/fetchSpending';
 import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import { ArrowDropDown, CheckCircle } from '@mui/icons-material';
 import classnames from 'classnames';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { AppState } from 'store';
+import { useNavigate } from 'react-router-dom';
 
-interface PropTypes {
-  selectedBankAccountId: number;
-  setSelectedBankAccountId: {
-    (bankAccountId: number): void
-  };
-  bankAccounts: Map<number, BankAccount>;
-  bankAccountsLoading: boolean;
-  links: Map<number, Link>;
-  linksLoading: boolean;
-  fetchInitialTransactionsIfNeeded: {
-    (): Promise<void>;
-  };
-  fetchFundingSchedulesIfNeeded: { (): Promise<void> }
-  fetchSpending: { (): Promise<void> }
-  fetchBalances: { (): Promise<void> }
-}
+const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element => {
+  const dispatch = useDispatch();
 
-interface SelectEvent {
-  name: string;
-  value: number | string;
-}
+  const navigate = useNavigate();
+  const selectedBankAccountId = useSelector(getSelectedBankAccountId);
+  const bankAccounts = useSelector(getBankAccounts);
+  const links = useSelector(getLinks);
 
-interface ComponentState {
-  anchorEl: Element | null;
-}
+  function goToAllAccounts() {
+    navigate('/accounts');
+  }
 
-export class BankAccountSelector extends Component<RouteComponentProps & PropTypes, ComponentState> {
-
-  state = {
-    anchorEl: null,
-  };
-
-  changeBankAccount = (bankAccountId: number) => (): Promise<[void, void, void, void]> => {
-    this.props.setSelectedBankAccountId(bankAccountId);
-    this.closeMenu();
+  const changeBankAccount = (bankAccountId: number) => (): Promise<[void, void, void, void]> => {
+    dispatch(setSelectedBankAccountId(bankAccountId));
+    props.closeMenu();
     return Promise.all([
-      this.props.fetchInitialTransactionsIfNeeded(),
-      this.props.fetchFundingSchedulesIfNeeded(),
-      this.props.fetchSpending(),
-      this.props.fetchBalances(),
-    ])
+      void dispatch(fetchInitialTransactionsIfNeeded()),
+      void dispatch(fetchFundingSchedulesIfNeeded()),
+      void dispatch(fetchSpending()),
+      void dispatch(fetchBalances()),
+    ]);
   };
 
-  openMenu = event => this.setState({
-    anchorEl: event.currentTarget,
-  });
+  const bankAccountsViewButton = (
+    <MenuItem key="viewBankAccounts" onClick={ goToAllAccounts }>
+      <Typography>
+        View Bank Accounts
+      </Typography>
+    </MenuItem>
+  );
 
-  closeMenu = () => this.setState({
-    anchorEl: null,
-  });
-
-  goToAllAccounts = () => {
-    this.closeMenu();
-    this.props.history.push('/accounts');
+  if (bankAccounts.isEmpty()) {
+    return bankAccountsViewButton
   }
 
-  renderBankAccountMenu = (): JSX.Element | JSX.Element[] => {
-    const { selectedBankAccountId, bankAccounts } = this.props;
+  let items = bankAccounts
+    .sortBy(bankAccount => {
+      const link = links.get(bankAccount.linkId);
 
-    const bankAccountsViewButton = (
-      <MenuItem key="viewBankAccounts" onClick={ this.goToAllAccounts }>
-        <Typography>
-          View Bank Accounts
-        </Typography>
-      </MenuItem>
-    );
-
-    if (bankAccounts.isEmpty()) {
-      return [bankAccountsViewButton];
-    }
-
-    let items = bankAccounts
-      .sortBy(bankAccount => {
-        const link = this.props.links.get(bankAccount.linkId);
-
-        return `${ link.getName() } - ${ bankAccount.name }`;
-      })
-      .map(bankAccount => {
-        const link = this.props.links.get(bankAccount.linkId);
-        return (
-          <MenuItem
-            key={ bankAccount.bankAccountId }
-            onClick={ this.changeBankAccount(bankAccount.bankAccountId) }
-          >
-            <CheckCircle color="primary" className={ classnames('mr-1', {
-              'opacity-0': bankAccount.bankAccountId !== selectedBankAccountId,
-            }) }/>
-            { /* make it so its the link name - bank name */ }
-            { link.getName() } - { bankAccount.name }
-          </MenuItem>
-        )
-      })
-      .valueSeq()
-      .toArray();
-
-    items.push(<Divider key="divider" className="w-96"/>);
-    items.push(bankAccountsViewButton);
-
-    return items;
-  };
-
-  render() {
-    const { bankAccountsLoading, linksLoading, selectedBankAccountId, bankAccounts } = this.props;
-
-    if (bankAccountsLoading || linksLoading) {
-      return null;
-    }
-
-    let title = 'Select A Bank Account';
-    if (selectedBankAccountId) {
-      title = bankAccounts.get(selectedBankAccountId, null)?.name;
-    }
-
-    return (
-      <Fragment>
-        <Button
-          className="text-white"
-          onClick={ this.openMenu }
-          aria-label="menu"
+      return `${ link.getName() } - ${ bankAccount.name }`;
+    })
+    .map(bankAccount => {
+      const link = links.get(bankAccount.linkId);
+      return (
+        <MenuItem
+          key={ bankAccount.bankAccountId }
+          onClick={ changeBankAccount(bankAccount.bankAccountId) }
         >
-          <Typography
-            color="inherit"
-            className="mr-1"
-            variant="h6"
-          >
-            { title }
-          </Typography>
-          <ArrowDropDown scale={ 1.25 } color="inherit"/>
-        </Button>
-        <Menu
-          className="w-96 pt-0 pb-0"
-          id="bank-account-menu"
-          anchorEl={ this.state.anchorEl }
-          keepMounted
-          open={ !!this.state.anchorEl }
-          onClose={ this.closeMenu }
-        >
-          { this.renderBankAccountMenu() }
-        </Menu>
-      </Fragment>
-    );
-  }
+          <CheckCircle color="primary" className={ classnames('mr-1', {
+            'opacity-0': bankAccount.bankAccountId !== selectedBankAccountId,
+          }) }/>
+          { /* make it so its the link name - bank name */ }
+          { link.getName() } - { bankAccount.name }
+        </MenuItem>
+      )
+    })
+    .valueSeq()
+    .toArray();
+
+  items.push(<Divider key="divider" className="w-96"/>);
+  items.push(bankAccountsViewButton);
+
+  return ( // It won't let me just return the array as a valid JSX.Element, so wrapping it like this makes it valid.
+    <Fragment>
+      { items }
+    </Fragment>
+  );
 }
 
-export default connect(
-  (state: AppState) => ({
-    selectedBankAccountId: getSelectedBankAccountId(state),
-    bankAccounts: getBankAccounts(state),
-    bankAccountsLoading: getBankAccountsLoading(state),
-    links: getLinks(state),
-    linksLoading: getLinksLoading(state),
-  }),
-  {
-    setSelectedBankAccountId,
-    fetchInitialTransactionsIfNeeded,
-    fetchFundingSchedulesIfNeeded,
-    fetchSpending,
-    fetchBalances,
-  },
-)(withRouter(BankAccountSelector));
+const BankAccountSelector = (): JSX.Element => {
+  const selectedBankAccountId = useSelector(getSelectedBankAccountId);
+  const bankAccounts = useSelector(getBankAccounts);
+  const bankAccountsLoading = useSelector(getBankAccountsLoading);
+  const linksLoading = useSelector(getLinksLoading);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  function handleOpenMenu(event: React.MouseEvent<HTMLButtonElement>) {
+    setAnchorEl(event.currentTarget);
+  }
+
+  function handleCloseMenu() {
+    setAnchorEl(null);
+  }
+
+  if (bankAccountsLoading || linksLoading) {
+    return null;
+  }
+
+  let title = 'Select A Bank Account';
+  if (selectedBankAccountId) {
+    title = bankAccounts.get(selectedBankAccountId, null)?.name;
+  }
+
+  return (
+    <Fragment>
+      <Button
+        className="text-white"
+        onClick={ handleOpenMenu }
+        aria-label="menu"
+      >
+        <Typography
+          color="inherit"
+          className="mr-1"
+          variant="h6"
+        >
+          { title }
+        </Typography>
+        <ArrowDropDown scale={ 1.25 } color="inherit"/>
+      </Button>
+      <Menu
+        className="w-96 pt-0 pb-0"
+        id="bank-account-menu"
+        anchorEl={ anchorEl }
+        keepMounted
+        open={ open }
+        onClose={ handleCloseMenu }
+      >
+        <BankAccountSelectorMenu closeMenu={ handleCloseMenu }/>
+      </Menu>
+    </Fragment>
+  );
+};
+
+export default BankAccountSelector;

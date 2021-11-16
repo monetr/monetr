@@ -3,7 +3,7 @@ import AuthenticatedApp from 'AuthenticatedApp';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useBootstrapLogin } from 'shared/authentication/actions/bootstrapLogin';
+import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import { getIsAuthenticated, getSubscriptionIsActive } from 'shared/authentication/selectors';
 import useBootstrapApplication from 'shared/bootstrap/actions/bootstrapApplication';
 import { getIsBootstrapped } from 'shared/bootstrap/selectors';

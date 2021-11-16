@@ -35,10 +35,6 @@ import (
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
 )
 
-const (
-	TokenName = "M-Token"
-)
-
 type Controller struct {
 	db                       *pg.DB
 	configuration            config.Configuration

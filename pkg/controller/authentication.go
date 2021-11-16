@@ -31,8 +31,39 @@ type MonetrClaims struct {
 	jwt.StandardClaims
 }
 
+const ClearAuthentication = ""
+
+// updateAuthenticationCookie is used to maintain the authentication credentials that the client uses to communicate
+// with the API. When this is called with a token that token will be returned to the client in the response as a
+// Set-Cookie header. If a blank token is provided then the cookie is updated to expire immediately and the value of the
+// cookie is set to blank.
+func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) {
+	sameSite := http.SameSiteDefaultMode
+	if c.configuration.Server.Cookies.SameSiteStrict {
+		sameSite = http.SameSiteStrictMode
+	}
+
+	expiration := time.Now().Add(7 * 24 * time.Hour)
+	if token == "" {
+		expiration = time.Now().Add(-1 * time.Second)
+	}
+
+	ctx.SetCookie(&http.Cookie{
+		Name:     c.configuration.Server.Cookies.Name,
+		Value:    token,
+		Path:     "/",
+		Domain:   c.configuration.APIDomainName,
+		Expires:  expiration,
+		MaxAge:   0,
+		Secure:   c.configuration.Server.Cookies.Secure,
+		HttpOnly: true,
+		SameSite: sameSite,
+	})
+}
+
 func (c *Controller) handleAuthentication(p router.Party) {
 	p.Post("/login", c.loginEndpoint)
+	p.Get("/logout", c.logoutEndpoint)
 	p.Post("/register", c.registerEndpoint)
 	p.Post("/verify", c.verifyEndpoint)
 	p.Post("/verify/resend", c.resendVerification)
@@ -129,10 +160,11 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			return
 		}
 
+		c.updateAuthenticationCookie(ctx, token)
+
 		if !c.configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.
 			ctx.JSON(map[string]interface{}{
-				"token":    token,
 				"isActive": true,
 			})
 			return
@@ -145,12 +177,11 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		}
 
 		result := map[string]interface{}{
-			"token": token,
+			"isActive": subscriptionIsActive,
 		}
 
 		if !subscriptionIsActive {
 			result["nextUrl"] = "/account/subscribe"
-			result["isActive"] = false
 		}
 
 		ctx.JSON(result)
@@ -164,11 +195,31 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			return
 		}
 
+		c.updateAuthenticationCookie(ctx, token)
+
 		ctx.JSON(map[string]interface{}{
-			"token": token,
 			"users": login.Users,
 		})
 	}
+}
+
+// Logout
+// @Summary Logout
+// @id logout
+// @tags Authentication
+// @description Removes the `HttpOnly` authentication cookie for the user. This request does require the authentication
+// @description cookie is present. It will return a `403` if the cookie is not present.
+// @Router /authentication/logout [get]
+// @Security ApiKeyAuth
+// @Success 200
+// @Failure 403 {object} ApiError Cookie was not present.
+func (c *Controller) logoutEndpoint(ctx iris.Context) {
+	if cookie := ctx.GetCookie(c.configuration.Server.Cookies.Name); cookie == "" {
+		c.returnError(ctx, http.StatusForbidden, "authentication required")
+		return
+	}
+
+	c.updateAuthenticationCookie(ctx, ClearAuthentication)
 }
 
 // Register
@@ -398,10 +449,11 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	user.Login = login
 	user.Account = &account
 
+	c.updateAuthenticationCookie(ctx, token)
+
 	if !c.configuration.Stripe.IsBillingEnabled() {
 		ctx.JSON(map[string]interface{}{
 			"nextUrl":             "/setup",
-			"token":               token,
 			"user":                user,
 			"isActive":            true,
 			"requireVerification": false,
@@ -411,7 +463,6 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	ctx.JSON(map[string]interface{}{
 		"nextUrl":             "/account/subscribe",
-		"token":               token,
 		"user":                user,
 		"isActive":            false,
 		"requireVerification": false,

@@ -6,7 +6,6 @@ import Transaction from 'models/Transaction';
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
-import selectTransaction from 'shared/transactions/actions/selectTransaction';
 import { getTransactionById } from 'shared/transactions/selectors/getTransactionById';
 import SelectButton from 'components/SelectyBoi/SelectButton';
 import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
@@ -121,9 +120,7 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
 
     return (
       <Fragment>
-        <ListItem className={ classnames('transactions-item h-12', {
-          'selected': false,
-        }) } role="transaction-row">
+        <ListItem className="transactions-item h-12" role="transaction-row">
           <div className="flex flex-row w-full">
             <div className="flex-shrink w-2/5 pr-1 font-semibold transaction-item-name place-self-center">
               <TransactionNameEditor transactionId={ transaction.transactionId }/>

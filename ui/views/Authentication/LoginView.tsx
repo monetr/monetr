@@ -1,10 +1,8 @@
 import TextWithLine from 'components/TextWithLine';
-import React, { Component, Fragment } from 'react';
-import { connect } from 'react-redux';
-import { Link as RouterLink, RouteComponentProps, withRouter } from 'react-router-dom';
-import User from 'models/User';
-import bootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
-import request from 'shared/util/request';
+import React, { Fragment, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Link as RouterLink } from 'react-router-dom';
+import useLogin from 'shared/authentication/actions/login';
 import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
 import classnames from 'classnames';
 import {
@@ -12,16 +10,10 @@ import {
   AlertTitle,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Snackbar,
   TextField
 } from '@mui/material';
-import { Formik, FormikHelpers, FormikValues } from 'formik';
-import { AppState } from 'store';
+import { Formik, FormikHelpers } from 'formik';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 
@@ -32,46 +24,37 @@ interface LoginValues {
   password: string | null;
 }
 
-interface State {
-  error: string | null;
-  loading: boolean;
-  verification: string | null;
-  resendEmailAddress: string | null;
-}
+const LoginView = (): JSX.Element => {
+  const [error, setError] = useState<string | null>();
 
-interface WithConnectionPropTypes extends RouteComponentProps {
-  ReCAPTCHAKey: string | null;
-  bootstrapLogin: (token: string, user: User) => Promise<void>;
-  verifyLogin: boolean;
-  allowSignUp: boolean;
-}
+  function hideError() {
+    setError(null);
+  }
 
-class LoginView extends Component<WithConnectionPropTypes, State> {
-
-  state = {
-    error: null,
-    loading: false,
-    verification: null,
-    resendEmailAddress: null,
-  };
-
-  renderErrorMaybe = (): React.ReactNode | null => {
-    const { error } = this.state;
+  function renderErrorMaybe(): JSX.Element | null {
     if (!error) {
       return null;
     }
 
     return (
-      <Snackbar open={ !!error } autoHideDuration={ 10000 } onClose={ () => this.setState({ error: null }) }>
+      <Snackbar open={ !!error } autoHideDuration={ 10000 } onClose={ hideError }>
         <Alert variant="filled" severity="error">
           <AlertTitle>Error</AlertTitle>
-          { this.state.error }
+          { error }
         </Alert>
       </Snackbar>
-    );
-  };
+    )
+  }
 
-  validateInput = (values: LoginValues): Partial<LoginValues> => {
+  const ReCAPTCHAKey = useSelector(getReCAPTCHAKey);
+  const allowSignUp = useSelector(getSignUpAllowed);
+  const verifyLogin = useSelector(getShouldVerifyLogin);
+
+  const login = useLogin();
+
+  const [captcha, setCaptcha] = useState<string | null>(null);
+
+  function validateInput(values: LoginValues): Partial<LoginValues> {
     let errors: Partial<LoginValues> = {};
 
     if (values.email) {
@@ -87,96 +70,26 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
     }
 
     return errors;
-  };
+  }
 
-  submit = (values: LoginValues, helpers: FormikHelpers<LoginValues>): Promise<void> => {
+  function doLogin(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
     helpers.setSubmitting(true);
-    this.setState({
-      error: null,
-      loading: true,
-    });
 
-    return request()
-      .post('/authentication/login', {
-        captcha: this.state.verification,
-        email: values.email,
-        password: values.password,
-      })
-      .then(result => {
-        return this.props.bootstrapLogin(result.data.token, result.data.user)
-          .then(() => {
-            if (result.data.nextUrl) {
-              this.props.history.push(result.data.nextUrl);
-              return
-            }
-
-            this.props.history.push('/');
-          });
-      })
-      .catch(error => {
-        const errorMessage = error?.response?.data?.error || 'Failed to authenticate.'
-
-        switch (error?.response?.status) {
-          case 428: // Email not verified.
-            return this.props.history.push('/verify/email/resend', {
-              'emailAddress': values.email,
-            });
-          case 403: // Invalid login.
-            return this.setState({
-              error: errorMessage,
-              loading: false,
-            });
-        }
-
-        return this.setState({
-          error: errorMessage,
-          loading: false,
-        });
-      })
+    return login({
+      captcha: captcha,
+      email: values.email,
+      password: values.password
+    })
+      .catch(error => setError(error?.response?.data?.error || 'Failed to authenticate.'))
       .finally(() => helpers.setSubmitting(false));
-  };
+  }
 
-  renderResendVerificationDialogMaybe = (): React.ReactNode => {
-    const { resendEmailAddress } = this.state;
-
-    if (!resendEmailAddress) {
-      return null;
-    }
-
-    const closeDialog = () => this.setState({
-      resendEmailAddress: null,
-    });
-
-    return (
-      <Dialog
-        open
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Resend Email Verification Link</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            It looks like your email address has not been verified. Do you want to resend the email verification link?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={ closeDialog } color="secondary">
-            Cancel
-          </Button>
-          <Button onClick={ closeDialog } color="primary" autoFocus>
-            Resend
-          </Button>
-        </DialogActions>
-      </Dialog>
-    )
-  };
-
-  renderBottomButtons = (
+  function renderBottomButtons(
     isSubmitting: boolean,
     disableForVerification: boolean,
     values: LoginValues,
     submitForm: () => Promise<any>,
-  ): React.ReactNode => {
+  ): JSX.Element {
     return (
       <div>
         <div className="w-full pt-2.5 pb-2.5">
@@ -200,123 +113,109 @@ class LoginView extends Component<WithConnectionPropTypes, State> {
         </div>
       </div>
     )
-  };
+  }
 
-  render() {
-    const initialValues: LoginValues = {
-      email: '',
-      password: '',
-    }
+  const initialValues: LoginValues = {
+    email: '',
+    password: '',
+  }
 
-    const disableForVerification = !this.props.verifyLogin || (this.props.ReCAPTCHAKey && this.state.verification);
+  const disableForVerification = !verifyLogin || Boolean(ReCAPTCHAKey && captcha);
 
-    return (
-      <Fragment>
-        { this.renderResendVerificationDialogMaybe() }
-        { this.renderErrorMaybe() }
-        <Formik
-          initialValues={ initialValues }
-          validate={ this.validateInput }
-          onSubmit={ this.submit }
-        >
-          { ({
-               values,
-               errors,
-               touched,
-               handleChange,
-               handleBlur,
-               handleSubmit,
-               isSubmitting,
-               submitForm,
-             }) => (
-            <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
-              <div className="flex items-center justify-center w-full h-full max-h-full">
-                <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                  <div className="flex justify-center w-full mb-5">
-                    <img src={ Logo } className="w-1/3"/>
-                  </div>
-                  { this.props.allowSignUp && (
-                    <div>
-                      <div className="w-full pb-2.5">
-                        <Button
-                          className="w-full"
-                          color="secondary"
-                          component={ RouterLink }
-                          disabled={ isSubmitting }
-                          to="/register"
-                          variant="contained"
-                        >
-                          Sign Up For monetr
-                        </Button>
-                      </div>
-                      <div className="w-full opacity-50 pb-2.5">
-                        <TextWithLine>
-                          or sign in with your email
-                        </TextWithLine>
-                      </div>
-                    </div>
-                  ) }
-                  <div className="w-full">
-                    <div className="w-full pb-2.5">
-                      <TextField
-                        autoComplete="username"
-                        autoFocus
-                        className="w-full"
-                        disabled={ isSubmitting }
-                        error={ touched.email && !!errors.email }
-                        helperText={ (touched.email && errors.email) ? errors.email : null }
-                        id="login-email"
-                        label="Email"
-                        name="email"
-                        onBlur={ handleBlur }
-                        onChange={ handleChange }
-                        value={ values.email }
-                        variant="outlined"
-                      />
-                    </div>
-                    <div className="w-full pt-2.5 pb-2.5">
-                      <TextField
-                        autoComplete="current-password"
-                        className="w-full"
-                        disabled={ isSubmitting }
-                        error={ touched.password && !!errors.password }
-                        helperText={ (touched.password && errors.password) ? errors.password : null }
-                        id="login-password"
-                        label="Password"
-                        name="password"
-                        onBlur={ handleBlur }
-                        onChange={ handleChange }
-                        type="password"
-                        value={ values.password }
-                        variant="outlined"
-                      />
-                    </div>
-                  </div>
-                  <CaptchaMaybe
-                    loading={ isSubmitting }
-                    show={ this.props.verifyLogin }
-                    onVerify={ (value) => this.setState({
-                      verification: value,
-                    }) }
-                  />
-                  { this.renderBottomButtons(isSubmitting, disableForVerification, values, submitForm) }
+  return (
+    <Fragment>
+      { renderErrorMaybe() }
+      <Formik
+        initialValues={ initialValues }
+        validate={ validateInput }
+        onSubmit={ doLogin }
+      >
+        { ({
+             values,
+             errors,
+             touched,
+             handleChange,
+             handleBlur,
+             handleSubmit,
+             isSubmitting,
+             submitForm,
+           }) => (
+          <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
+            <div className="flex items-center justify-center w-full h-full max-h-full">
+              <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
+                <div className="flex justify-center w-full mb-5">
+                  <img src={ Logo } className="w-1/3"/>
                 </div>
+                { allowSignUp && (
+                  <div>
+                    <div className="w-full pb-2.5">
+                      <Button
+                        className="w-full"
+                        color="secondary"
+                        component={ RouterLink }
+                        disabled={ isSubmitting }
+                        to="/register"
+                        variant="contained"
+                      >
+                        Sign Up For monetr
+                      </Button>
+                    </div>
+                    <div className="w-full opacity-50 pb-2.5">
+                      <TextWithLine>
+                        or sign in with your email
+                      </TextWithLine>
+                    </div>
+                  </div>
+                ) }
+                <div className="w-full">
+                  <div className="w-full pb-2.5">
+                    <TextField
+                      autoComplete="username"
+                      autoFocus
+                      className="w-full"
+                      disabled={ isSubmitting }
+                      error={ touched.email && !!errors.email }
+                      helperText={ (touched.email && errors.email) ? errors.email : null }
+                      id="login-email"
+                      label="Email"
+                      name="email"
+                      onBlur={ handleBlur }
+                      onChange={ handleChange }
+                      value={ values.email }
+                      variant="outlined"
+                    />
+                  </div>
+                  <div className="w-full pt-2.5 pb-2.5">
+                    <TextField
+                      autoComplete="current-password"
+                      className="w-full"
+                      disabled={ isSubmitting }
+                      error={ touched.password && !!errors.password }
+                      helperText={ (touched.password && errors.password) ? errors.password : null }
+                      id="login-password"
+                      label="Password"
+                      name="password"
+                      onBlur={ handleBlur }
+                      onChange={ handleChange }
+                      type="password"
+                      value={ values.password }
+                      variant="outlined"
+                    />
+                  </div>
+                </div>
+                <CaptchaMaybe
+                  loading={ isSubmitting }
+                  show={ verifyLogin }
+                  onVerify={ setCaptcha }
+                />
+                { renderBottomButtons(isSubmitting, disableForVerification, values, submitForm) }
               </div>
-            </form>
-          ) }
-        </Formik>
-      </Fragment>
-    )
-  }
-}
+            </div>
+          </form>
+        ) }
+      </Formik>
+    </Fragment>
+  )
+};
 
-export default connect(
-  (state: AppState) => ({
-    ReCAPTCHAKey: getReCAPTCHAKey(state),
-    allowSignUp: getSignUpAllowed(state),
-    verifyLogin: getShouldVerifyLogin(state),
-  }),
-  {
-    bootstrapLogin,
-  }
-)(withRouter(LoginView));
+export default LoginView;
