@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.0](https://www.github.com/monetr/monetr/compare/v0.4.17...v0.5.0) (2021-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **sentry:** Created an axios based Sentry transport.
+
+### Bug Fixes
+
+* **deps:** update dependency workbox-webpack-plugin to v6.4.1 ([8a313e4](https://www.github.com/monetr/monetr/commit/8a313e4c1e401df764ee5e5d7cdb8b15f5026d59))
+* **sentry:** Created an axios based Sentry transport. ([c4217a4](https://www.github.com/monetr/monetr/commit/c4217a4cdd0625086925ae0a7734633183f3cd88))
+
+
+### Miscellaneous Chores
+
+* release 0.5.0 ([7fac0d1](https://www.github.com/monetr/monetr/commit/7fac0d1c988491fd7ff1cb2c5994b5ca038bdbc4))
+
 ### [0.4.17](https://www.github.com/monetr/monetr/compare/v0.4.16...v0.4.17) (2021-11-15)
 
 
