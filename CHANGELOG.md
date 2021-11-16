@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://www.github.com/monetr/monetr/compare/v0.4.17...v1.0.0) (2021-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **sentry:** Created an axios based Sentry transport.
+
+### Bug Fixes
+
+* **sentry:** Created an axios based Sentry transport. ([c4217a4](https://www.github.com/monetr/monetr/commit/c4217a4cdd0625086925ae0a7734633183f3cd88))
+
 ### [0.4.17](https://www.github.com/monetr/monetr/compare/v0.4.16...v0.4.17) (2021-11-15)
 
 
