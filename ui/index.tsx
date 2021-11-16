@@ -2,6 +2,7 @@ import { Integrations } from '@sentry/tracing';
 import axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import RelayTransport from 'relay/transport';
 import Root from 'Root';
 import reportWebVitals from './reportWebVitals';
 import './styles/styles.css';
@@ -13,6 +14,7 @@ axios.get('/api/sentry')
     if (result.data.dsn) {
       Sentry.init({
         dsn: result.data.dsn,
+        transport: RelayTransport,
         integrations: [
           new Integrations.BrowserTracing({
             startTransactionOnPageLoad: false,
