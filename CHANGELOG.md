@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.5.2](https://www.github.com/monetr/monetr/compare/v0.5.1...v0.5.2) (2021-11-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency mini-css-extract-plugin to v2.4.5 ([30521d0](https://www.github.com/monetr/monetr/commit/30521d06206b3ceb40ac1b010e6bca128c7a519d))
+* **deps:** update module github.com/stripe/stripe-go/v72 to v72.76.0 ([ca68675](https://www.github.com/monetr/monetr/commit/ca686755f2fc5826f577de39d9435b6db1b8c4a1))
+
 ### [0.5.1](https://www.github.com/monetr/monetr/compare/v0.5.0...v0.5.1) (2021-11-17)
 
 
