@@ -1,5 +1,15 @@
 # Changelog
 
+### [0.5.1](https://www.github.com/monetr/monetr/compare/v0.5.0...v0.5.1) (2021-11-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency postcss-preset-env to v7 ([ec533a8](https://www.github.com/monetr/monetr/commit/ec533a8d03568bf9f09d0208606350b8f25cb21c))
+* **deps:** update material-ui monorepo ([434033c](https://www.github.com/monetr/monetr/commit/434033c5aa15448be6ce150e3e8dbe89ba4a4f9f))
+* **deps:** update module github.com/stripe/stripe-go/v72 to v72.75.0 ([79bcb65](https://www.github.com/monetr/monetr/commit/79bcb6558c1a7b52f71ffa3cbe1af2ed6dfb6ae9))
+* **deps:** update sentry-javascript monorepo to v6.15.0 ([043b66a](https://www.github.com/monetr/monetr/commit/043b66aebbee25b8b6ab91c480752186d91ecd00))
+
 ## [0.5.0](https://www.github.com/monetr/monetr/compare/v0.4.17...v0.5.0) (2021-11-16)
 
 
