@@ -164,26 +164,19 @@ jobs:
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Login
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          buildah login -u ${{ github.repository_owner }} -p $GITHUB_TOKEN ghcr.io
+          buildah login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD docker.io
       - name: Build
         run: |
           sudo apt-get update && sudo apt-get -y install qemu-user-static
-          make container
-      - name: Push to ghcr.io
-        id: push-to-ghcr
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          tags: ghcr.io/monetr/monetr:latest ghcr.io/monetr/monetr:${{ needs.release_please.outputs.version }}
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push to docker.io
-        id: push-to-docker
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          tags: docker.io/monetr/monetr:latest docker.io/monetr/monetr:${{ needs.release_please.outputs.version }}
-          registry: docker.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          make container RELEASE_VERSION=${{ needs.release_please.outputs.version }}
+          make container-push RELEASE_VERSION=${{ needs.release_please.outputs.version }}
 
   deploy:
     if: ${{ needs.release_please.outputs.release_created }}

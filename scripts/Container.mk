@@ -37,12 +37,7 @@ endif
 DOCKERFILE=$(PWD)/Dockerfile
 DOCKER_IGNORE=$(PWD)/.dockerignore
 CONTAINER_REPOS=ghcr.io/monetr/monetr docker.io/monetr/monetr
-
-ifneq ($(GITHUB_REF_NAME),main)
-CONTAINER_VERSIONS=$(RELEASE_REVISION)
-endif
-CONTAINER_VERSIONS ?= latest $(RELEASE_VERSION)
-
+CONTAINER_VERSIONS=latest $(RELEASE_VERSION)
 CONTAINER_TAGS=$(foreach CONTAINER_REPO,$(CONTAINER_REPOS),$(foreach CONTAINER_VERSION,$(CONTAINER_VERSIONS),$(CONTAINER_REPO):$(CONTAINER_VERSION)))
 CONTAINER_TAG_ARGS=$(foreach TAG,$(CONTAINER_TAGS),-t $(TAG))
 CONTAINER_VARS = GOFLAGS="" REVISION="$(RELEASE_REVISION)" RELEASE="$(RELEASE_VERSION)"
@@ -52,15 +47,15 @@ CONTAINER_PLATFORMS=linux/amd64 linux/arm64
 else # Eventually we can add arm64 back for local builds
 CONTAINER_PLATFORMS=linux/amd64
 endif
+CONTAINER_PLATFORM_ARGS=$(foreach PLATFORM,$(CONTAINER_PLATFORMS),--platform $(PLATFORM))
 
+CONTAINER_MANIFEST=$(word 1,$(CONTAINER_REPOS)):$(RELEASE_REVISION)
 ifeq ($(word 1,$(CONTAINER_PLATFORMS)),$(CONTAINER_PLATFORMS)) # If platforms[0] == platforms then there is only one platform.
 CONTAINER_EXTRA_ARGS=$(CONTAINER_TAG_ARGS)
 else # When we are working with more than one platform, then we need to use manifest instead of tags.
-CONTAINER_EXTRA_ARGS=--manifest $(RELEASE_REVISION)
+CONTAINER_EXTRA_ARGS=--manifest $(CONTAINER_MANIFEST)
 endif
 
-CONTAINER_PLATFORM_ARGS=$(foreach PLATFORM,$(CONTAINER_PLATFORMS),--platform $(PLATFORM))
-CONTAINER_MANIFEST=monetr-$(RELEASE_REVISION)
 container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
 ifdef CI # When we are in CI we don't want to run the static dir targets, these files are provided via artifacts.
 container: BUILDAH=$(shell which buildah)
@@ -73,8 +68,7 @@ container:
 		$(CONTAINER_EXTRA_ARGS) \
 		-f $(DOCKERFILE) \
 		$(PWD) &&) exit 0;
-	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
-	$(foreach TAG,$(CONTAINER_TAGS),$(BUILDAH) tag $(RELEASE_REVISION) $(TAG) &&) exit 0;
+	$(BUILDAH) manifest inspect $(CONTAINER_MANIFEST)
 else
 container: $(PODMAN) $(STATIC_DIR)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
@@ -86,6 +80,13 @@ container: $(PODMAN) $(STATIC_DIR)
 		$(CONTAINER_EXTRA_ARGS) \
 		-f $(DOCKERFILE) \
 		$(PWD)
+endif
+
+ifdef CI
+container-push: BUILDAH=$(shell which buildah)
+container-push:
+	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
+	($(foreach TAG,$(CONTAINER_TAGS),$(BUILDAH) manifest push --all $(CONTAINER_MANIFEST) docker://$(TAG) &&) exit 0)
 endif
 
 docker: container
