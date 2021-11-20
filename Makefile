@@ -10,6 +10,7 @@ BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1`)
 CONTAINER_VERSION ?= $(subst v,,$(RELEASE_VERSION))
+BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
