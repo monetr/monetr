@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.1](https://www.github.com/monetr/monetr/compare/v0.6.0...v0.6.1) (2021-11-20)
+
+
+### Bug Fixes
+
+* Fixed buildah container pushing. ([ae9c8fa](https://www.github.com/monetr/monetr/commit/ae9c8fa8515c617228329b914f1431e67737bba4))
+
 ## [0.6.0](https://www.github.com/monetr/monetr/compare/v0.5.1...v0.6.0) (2021-11-20)
 
 
