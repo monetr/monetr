@@ -667,10 +667,6 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stripe/stripe-go/v72 v72.74.0 h1:loG7GXonQRMyfEBQXyEVccaTZW/X4r167nD2zxHzdDI=
-github.com/stripe/stripe-go/v72 v72.74.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
-github.com/stripe/stripe-go/v72 v72.75.0 h1:g0L4ZPl3HpTLVhNdJ7p7meemFmFGg3PJlwZHGoK1nz4=
-github.com/stripe/stripe-go/v72 v72.75.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/stripe/stripe-go/v72 v72.76.0 h1:Xk0oJCcTQmntpx9bHnU5FgQadI/fdMlvm0dUpT+gpIs=
 github.com/stripe/stripe-go/v72 v72.76.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/subosito/gotenv v1.2.0 h1:Slr1R9HxAlEKefgq5jn9U+DnETlIUa6HfgEzj0g5d7s=

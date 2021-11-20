@@ -31,10 +31,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            $GITHUB_WORKSPACE/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ github.workspace }}/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
             ${{ runner.os }}-ui-
       - name: Build
         run: |
@@ -78,9 +78,9 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
       - uses: actions/download-artifact@v2
         name: Download Compiled UI Artifacts
@@ -150,7 +150,7 @@ jobs:
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz --clobber
 
-  container:
+  buildah:
     if: ${{ needs.release_please.outputs.release_created }}
     needs:
       - "release_please"
@@ -159,41 +159,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: actions/download-artifact@v2
         name: Download Compiled UI Artifacts
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
-      - name: Build Image
-        id: docker_build
-        uses: docker/build-push-action@v2
+      - name: Build
+        run: |
+          sudo apt-get update && sudo apt-get -y install qemu-user-static
+          make container
+      - name: Push to ghcr.io
+        id: push-to-ghcr
+        uses: redhat-actions/push-to-registry@v2
         with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            RELEASE=v${{ needs.release_please.outputs.version }}
-            REVISION=${{ github.sha }}
-          tags: |
-            ghcr.io/monetr/monetr:latest
-            ghcr.io/monetr/monetr:${{ needs.release_please.outputs.version }}
-            monetr/monetr:latest
-            monetr/monetr:${{ needs.release_please.outputs.version }}
+          tags: ghcr.io/monetr/monetr:latest ghcr.io/monetr/monetr:${{ needs.release_please.outputs.version }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push to docker.io
+        id: push-to-docker
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          tags: docker.io/monetr/monetr:latest docker.io/monetr/monetr:${{ needs.release_please.outputs.version }}
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
   deploy:
     if: ${{ needs.release_please.outputs.release_created }}

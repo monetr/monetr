@@ -12,17 +12,17 @@ jobs:
     container: golang:1.17.3
     steps:
       - uses: actions/checkout@v2
-      - name: Dependencies
-        run: make go-dependencies
       - uses: actions/cache@v2
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
+      - name: Dependencies
+        run: make go-dependencies
 
   ui_dependencies:
     name: UI Dependencies
@@ -30,16 +30,16 @@ jobs:
     container: node:17.0.1
     steps:
       - uses: actions/checkout@v2
-      - name: Dependencies
-        run: make ui-dependencies
       - uses: actions/cache@v2
         with:
           path: |
-            $GITHUB_WORKSPACE/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ github.workspace }}/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
             ${{ runner.os }}-ui-
+      - name: Dependencies
+        run: make ui-dependencies
 
   build_ui:
     needs:
@@ -52,10 +52,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            $GITHUB_WORKSPACE/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ github.workspace }}/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
             ${{ runner.os }}-ui-
       - name: Build
         run: make build-ui
@@ -88,9 +88,9 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
       - uses: actions/download-artifact@v2
         name: Download Compiled UI Artifacts
@@ -138,9 +138,9 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
       - name: Test
         run: make test-go
@@ -175,10 +175,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: |
-            $GITHUB_WORKSPACE/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ github.workspace }}/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
             ${{ runner.os }}-ui-
       - name: Test
         run: make test-ui
@@ -243,66 +243,45 @@ jobs:
     container: ghcr.io/monetr/build-containers/ubuntu:20.04
     steps:
       - uses: actions/checkout@v2
-      - run: yarn install
       - uses: actions/cache@v2
         with:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('$GITHUB_WORKSPACE/go.sum') }}
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
       - uses: actions/cache@v2
         with:
           path: |
-            $GITHUB_WORKSPACE/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ github.workspace }}/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('$GITHUB_WORKSPACE/yarn.lock') }}
+            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
             ${{ runner.os }}-ui-
-      - run: make docs
       - name: Generate Documentation Static Site
-        run: $GITHUB_WORKSPACE/node_modules/.bin/redoc-cli bundle $GITHUB_WORKSPACE/docs/swagger.yaml -o $GITHUB_WORKSPACE/docs/index.html
-      - uses: actions/upload-artifact@v2
-        name: Upload Documentation As Artifact
-        with:
-          name: '${{ github.sha }}-docs'
-          path: '${{ github.workspace }}/docs'
-          retention-days: 7
+        run: make docs-static
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           branch: docs.monetr.dev
           folder: docs
 
-  container:
+  buildah:
     needs:
-      - "go_dependencies"
       - "ui_dependencies"
-      - "go_test"
-      - "ui_test"
       - "build_ui"
     name: Container
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
       - uses: actions/download-artifact@v2
         name: Download Compiled UI Artifacts
         with:
           name: '${{ github.sha }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
-      - name: Build Image
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: false
-          platforms: linux/amd64,linux/arm64
-          tags: 'ghcr.io/monetr/monetr:${{ github.sha }}'
-
-
+      - name: Build
+        run: |
+          sudo apt-get update && sudo apt-get -y install qemu-user-static
+          make container
