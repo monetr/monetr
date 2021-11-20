@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://www.github.com/monetr/monetr/compare/v0.5.1...v0.6.0) (2021-11-20)
+
+
+### Features
+
+* Switching to buildah for container builds. ([dbc370d](https://www.github.com/monetr/monetr/commit/dbc370d97cfacdc0d9419519ee6a6b4f8fb94ba2))
+
+
+### Bug Fixes
+
+* **deps:** update dependency mini-css-extract-plugin to v2.4.5 ([30521d0](https://www.github.com/monetr/monetr/commit/30521d06206b3ceb40ac1b010e6bca128c7a519d))
+* **deps:** update module github.com/stripe/stripe-go/v72 to v72.76.0 ([ca68675](https://www.github.com/monetr/monetr/commit/ca686755f2fc5826f577de39d9435b6db1b8c4a1))
+* Fixed release workflow mistake. ([e5f2db2](https://www.github.com/monetr/monetr/commit/e5f2db2802d902a15771b061180c7f8114de832f))
+
 ### [0.5.1](https://www.github.com/monetr/monetr/compare/v0.5.0...v0.5.1) (2021-11-17)
 
 
