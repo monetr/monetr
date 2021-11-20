@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.6.2](https://www.github.com/monetr/monetr/compare/v0.6.1...v0.6.2) (2021-11-20)
+
+
+### Bug Fixes
+
+* **deps:** update dependency eslint-plugin-react to v7.27.1 ([5ef5619](https://www.github.com/monetr/monetr/commit/5ef56190410043bf61cadb62008ecc68df1c345b))
+* Fixed version being passed incorrectly to build. ([6f0b40c](https://www.github.com/monetr/monetr/commit/6f0b40cbf18575187b5b31007987f4484f1427e0))
+
 ### [0.6.1](https://www.github.com/monetr/monetr/compare/v0.6.0...v0.6.1) (2021-11-20)
 
 
