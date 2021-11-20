@@ -1,3 +1,7 @@
+NOOP=
+SPACE = $(NOOP) $(NOOP)
+COMMA=,
+
 PWD=$(shell git rev-parse --show-toplevel)
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
@@ -5,7 +9,7 @@ BUILD_DIR = $(PWD)/build
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1`)
-CONTAINER_VERSION = $(subst v,,$(RELEASE_VERSION))
+CONTAINER_VERSION ?= $(subst v,,$(RELEASE_VERSION))
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
@@ -97,7 +101,10 @@ TEST_UI_FILES=$(shell find $(UI_SRC_DIR) -type f -name '*.spec.*')
 GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
 UI_DEPS=$(PWD)/package.json $(PWD)/yarn.lock
 
-include $(PWD)/scripts/*.mk
+include $(PWD)/scripts/Dependencies.mk
+include $(PWD)/scripts/Deployment.mk
+include $(PWD)/scripts/Lint.mk
+include $(PWD)/scripts/Container.mk
 
 default: build
 
@@ -233,19 +240,8 @@ $(REDOC_CLI): $(NODE_MODULES)
 docs-local: $(SWAGGER_YAML) $(REDOC_CLI)
 	$(REDOC_CLI) serve $(SWAGGER_YAML)
 
-DOCKERFILE=$(PWD)/Dockerfile
-DOCKER_DEPS=$(DOCKERFILE) $(PWD)/.dockerignore
-CONTAINER=$(BUILD_DIR)/monetr.container.tar
-$(CONTAINER): $(BUILD_DIR) $(DOCKER_DEPS) $(APP_GO_FILES) $(STATIC_DIR)
-	docker buildx $(DOCKER_OPTIONS) build $(DOCKER_CACHE) \
-		--build-arg REVISION=$(RELEASE_REVISION) \
-		--output type=tar,dest=$(CONTAINER) \
-		-t monetr -f $(PWD)/Dockerfile .
-
-docker: $(CONTAINER)
-
-docker-work-web-ui:
-	docker build -t workwebui -f Dockerfile.work .
+docs-static: $(SWAGGER_YAML) $(REDOC_CLI)
+	$(REDOC_CLI) bundle $(SWAGGER_YAML) -o $(PWD)/docs/index.html
 
 ifdef GITHUB_TOKEN
 license: $(LICENSE) $(BINARY)
