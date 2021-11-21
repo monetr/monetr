@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.4](https://www.github.com/monetr/monetr/compare/v0.6.3...v0.6.4) (2021-11-21)
+
+
+### Bug Fixes
+
+* Fixed container being tagd with a `v` prefix. ([d3e128e](https://www.github.com/monetr/monetr/commit/d3e128e2f611d45624661f7f8aab323b5d3db0cc))
+
 ### [0.6.3](https://www.github.com/monetr/monetr/compare/v0.6.2...v0.6.3) (2021-11-21)
 
 
