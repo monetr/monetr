@@ -123,7 +123,7 @@ $(WEBPACK): $(NODE_MODULES)
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
 PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
-UI_CONFIG_FILES=$(PWD)/tsconfig.json $(PWD)/webpack.config.js
+UI_CONFIG_FILES=$(PWD)/tsconfig.json $(PWD)/webpack.config.js $(PWD)/tailwind.config.js
 $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(WEBPACK) $(SOURCE_MAP_DIR)
 	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
