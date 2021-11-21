@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.3](https://www.github.com/monetr/monetr/compare/v0.6.2...v0.6.3) (2021-11-21)
+
+
+### Bug Fixes
+
+* Purge unused tailwind CSS styles. ([d47f544](https://www.github.com/monetr/monetr/commit/d47f5448fd127df542da4a27e29f88f5704c47b9))
+
 ### [0.6.2](https://www.github.com/monetr/monetr/compare/v0.6.1...v0.6.2) (2021-11-20)
 
 
