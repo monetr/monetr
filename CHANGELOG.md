@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.5](https://www.github.com/monetr/monetr/compare/v0.6.4...v0.6.5) (2021-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency eslint to v8.3.0 ([64641f2](https://www.github.com/monetr/monetr/commit/64641f2944b0e53380fa7ece77116030abec8f25))
+
 ### [0.6.4](https://www.github.com/monetr/monetr/compare/v0.6.3...v0.6.4) (2021-11-21)
 
 
