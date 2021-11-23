@@ -140,7 +140,10 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*models.User, error) {
 }
 
 func (r *repositoryBase) GetIsSetup(ctx context.Context) (bool, error) {
-	return r.txn.Model(&models.Link{}).
+	span := sentry.StartSpan(ctx, "GetIsSetup")
+	defer span.Finish()
+
+	return r.txn.ModelContext(span.Context(), &models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Exists()
 }
