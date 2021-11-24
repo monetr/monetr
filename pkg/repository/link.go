@@ -47,6 +47,21 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 	return result, nil
 }
 
+func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error) {
+	span := sentry.StartSpan(ctx, "GetLinks")
+	defer span.Finish()
+
+	count, err := r.txn.ModelContext(span.Context(), &models.Link{}).
+		Where(`"link"."account_id" = ?`, r.accountId).
+		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Count()
+	if err != nil {
+		return count, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
+	}
+
+	return count, nil
+}
+
 func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error) {
 	span := sentry.StartSpan(ctx, "GetLinkIsManual")
 	defer span.Finish()

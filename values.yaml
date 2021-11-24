@@ -158,6 +158,7 @@ api:
     webhooksEnabled: false
     webhooksDomain: ""
     oauthDomain: ""
+    maxNumberOfLinks: 0
   cors:
     allowedOrigins:
       - "*"

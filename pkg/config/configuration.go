@@ -169,6 +169,9 @@ type Plaid struct {
 	// protocol or a path. The protocol is auto inserted as `https` as it is the only protocol supported. The path is
 	// currently hard coded until a need for different paths arises?
 	OAuthDomain string
+	// MaxNumberOfLinks defines the max number of active Plaid links a single account can have. If this is set to 0 then
+	// there is no limit.
+	MaxNumberOfLinks int
 }
 
 func (p Plaid) GetWebhooksURL() string {

@@ -68,6 +68,7 @@ func (c *Controller) removeLinkTokenFromCache(ctx context.Context, log *logrus.E
 // @Router /plaid/token/new [get]
 // @Param use_cache query bool false "If true, the API will check and see if a plaid link token already exists for the current user. If one is present then it is returned instead of creating a new link token."
 // @Success 200 {object} swag.PlaidNewLinkTokenResponse
+// @Success 400 {object} swag.PlaidLinkLimitError
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) newPlaidToken(ctx iris.Context) {
 	// Retrieve the user's details. We need to pass some of these along to
@@ -76,6 +77,19 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
 		return
+	}
+
+	if maxLinks := c.configuration.Plaid.MaxNumberOfLinks; maxLinks > 0 {
+		numberOfLinks, err := c.mustGetAuthenticatedRepository(ctx).GetNumberOfPlaidLinks(c.getContext(ctx))
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine the number of existing plaid links")
+			return
+		}
+
+		if numberOfLinks >= maxLinks {
+			c.badRequest(ctx, "max number of Plaid links already reached")
+			return
+		}
 	}
 
 	userId := c.mustGetUserId(ctx)

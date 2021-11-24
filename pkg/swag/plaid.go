@@ -6,6 +6,11 @@ type PlaidNewLinkTokenResponse struct {
 	LinkToken string `json:"linkToken" example:"link-environment-6da2c37f-6aa0...."`
 }
 
+type PlaidLinkLimitError struct {
+	// Error will include a message about how the user has reached their limit for Plaid links.
+	Error string `json:"error" example:"max number of Plaid links already reached"`
+}
+
 type PlaidTokenCallbackResponse struct {
 	Success bool `json:"success"`
 	// LinkId will always be included in a successful response. It can be used when webhooks are enabled to wait for the
