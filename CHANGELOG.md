@@ -1,5 +1,15 @@
 # Changelog
 
+### [0.6.6](https://www.github.com/monetr/monetr/compare/v0.6.5...v0.6.6) (2021-11-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency eslint-plugin-jest to v25.3.0 ([9195d71](https://www.github.com/monetr/monetr/commit/9195d71cc2ad3b0f9791299532e8839cb3b5f862))
+* **deps:** update material-ui monorepo ([54dc2a5](https://www.github.com/monetr/monetr/commit/54dc2a59468ec34617f9e33b49a9bcb2a22bad7d))
+* Improve some errors and performance monitoring. ([2e683cb](https://www.github.com/monetr/monetr/commit/2e683cb276bac0a2806033d3f891deddfff34e47))
+* Improving embedded ui makefile. ([a559ec7](https://www.github.com/monetr/monetr/commit/a559ec776fba62b954001007f83f2d0e4212a822))
+
 ### [0.6.5](https://www.github.com/monetr/monetr/compare/v0.6.4...v0.6.5) (2021-11-22)
 
 
