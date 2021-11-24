@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.6.7](https://www.github.com/monetr/monetr/compare/v0.6.6...v0.6.7) (2021-11-24)
+
+
+### Bug Fixes
+
+* Added ability to limit the number of Plaid links. ([8eff39f](https://www.github.com/monetr/monetr/commit/8eff39f48088085c580c9f396d98e3e73e9cbfbd)), closes [#341](https://www.github.com/monetr/monetr/issues/341)
+* **deps:** update dependency is-svg to v4.3.2 ([042e585](https://www.github.com/monetr/monetr/commit/042e585f71740d62531af96a4ba5d202490dd347))
+
 ### [0.6.6](https://www.github.com/monetr/monetr/compare/v0.6.5...v0.6.6) (2021-11-24)
 
 
