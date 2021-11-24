@@ -796,6 +796,14 @@ definitions:
     - spendingType
     - targetAmount
     type: object
+  swag.PlaidLinkLimitError:
+    properties:
+      error:
+        description: Error will include a message about how the user has reached their
+          limit for Plaid links.
+        example: max number of Plaid links already reached
+        type: string
+    type: object
   swag.PlaidNewLinkTokenResponse:
     properties:
       linkToken:
@@ -2605,6 +2613,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/swag.PlaidNewLinkTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/swag.PlaidLinkLimitError'
         "500":
           description: Internal Server Error
           schema:

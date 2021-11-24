@@ -1808,6 +1808,12 @@ var doc = `{
                             "$ref": "#/definitions/swag.PlaidNewLinkTokenResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/swag.PlaidLinkLimitError"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -2747,6 +2753,16 @@ var doc = `{
                     "type": "integer",
                     "minimum": 1,
                     "example": 1395
+                }
+            }
+        },
+        "swag.PlaidLinkLimitError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "Error will include a message about how the user has reached their limit for Plaid links.",
+                    "type": "string",
+                    "example": "max number of Plaid links already reached"
                 }
             }
         },
