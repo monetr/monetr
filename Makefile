@@ -1,7 +1,8 @@
+USERNAME=$(shell whoami)
+HOME=$(shell echo ~$(USERNAME))
 NOOP=
 SPACE = $(NOOP) $(NOOP)
 COMMA=,
-
 PWD=$(shell git rev-parse --show-toplevel)
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
