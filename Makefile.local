@@ -9,7 +9,7 @@ KUBECTL=$(MINIKUBE) kubectl --
 # This is the domain that is used for local development. You can change it to anything you want here and run init-mini
 # and everything will be provisioned and setup on your development machine for that domain.
 LOCAL_DOMAIN=monetr.mini
-SUBDOMAINS=relay redis mail work pgadmin pghero vault ngrok app
+SUBDOMAINS=rabbitmq relay redis mail work pgadmin pghero vault ngrok app
 
 VALUES=$(PWD)/values.local.yaml
 LOGIN_JWT_SECRET=$(LOCAL_DIR)/login_jwt_secret.txt
@@ -291,6 +291,11 @@ deploy-pgadmin:
 	$(call infoMsg,Deploying PGAdmin to the minikube cluster)
 	$(KUBECTL) apply -f $(PWD)/minikube/pgadmin.yaml -n $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/pgadmin --namespace $(MINIKUBE_NAMESPACE) --timeout=120s
+
+deploy-rabbitmq: $(PWD)/minikube/rabbitmq.yaml
+	$(call infoMsg,Deploying RabbitMQ to the minikube cluster)
+	$(KUBECTL) apply -f $(PWD)/minikube/rabbitmq.yaml
+	$(KUBECTL) rollout status statefulset/rabbitmq -n rabbit --timeout=480s
 
 MINI_WORK_DOCKER_HASH=$(LOCAL_DIR)/work_docker_hash.txt
 $(MINI_WORK_DOCKER_HASH): $(PWD)/Dockerfile.work
