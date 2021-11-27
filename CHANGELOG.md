@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.9](https://www.github.com/monetr/monetr/compare/v0.6.8...v0.6.9) (2021-11-27)
+
+
+### Bug Fixes
+
+* Upgrading to react router v6 + more. ([5ab4cbd](https://www.github.com/monetr/monetr/commit/5ab4cbd7e7ee4a443cbf3218c159807d185ce20d))
+
 ### [0.6.8](https://www.github.com/monetr/monetr/compare/v0.6.7...v0.6.8) (2021-11-27)
 
 
