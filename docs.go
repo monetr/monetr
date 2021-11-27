@@ -89,6 +89,32 @@ var doc = `{
                 }
             }
         },
+        "/authentication/logout": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Removes the ` + "`" + `HttpOnly` + "`" + ` authentication cookie for the user. This request does require the authentication\ncookie is present. It will return a ` + "`" + `403` + "`" + ` if the cookie is not present.",
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Logout",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/authentication/register": {
             "post": {
                 "description": "Register creates a new login, user and account. Logins are used for authentication, users tie authentication to an account, and accounts hold budgeting data.",

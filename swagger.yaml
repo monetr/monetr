@@ -1452,6 +1452,24 @@ paths:
       summary: Login
       tags:
       - Authentication
+  /authentication/logout:
+    get:
+      description: |-
+        Removes the `HttpOnly` authentication cookie for the user. This request does require the authentication
+        cookie is present. It will return a `403` if the cookie is not present.
+      operationId: logout
+      responses:
+        "200":
+          description: ""
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      security:
+      - ApiKeyAuth: []
+      summary: Logout
+      tags:
+      - Authentication
   /authentication/register:
     post:
       consumes:
