@@ -66,7 +66,7 @@ func RunServer() error {
 	log := logging.NewLoggerWithConfig(configuration.Logging)
 
 	stats := metrics.NewStats()
-	stats.Listen(fmt.Sprintf(":%d", configuration.StatsPort))
+	stats.Listen(fmt.Sprintf(":%d", configuration.Server.StatsPort))
 	defer stats.Close()
 
 	var vault vault_helper.VaultHelper
@@ -396,7 +396,7 @@ func RunServer() error {
 
 		return app.Run(iris.Listener(listener))
 	} else {
-		listenAddress := fmt.Sprintf(":%d", configuration.ListenPort)
+		listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)
 		_ = app.Listen(listenAddress, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
 	}
 

@@ -1,10 +1,9 @@
-import { Button, Card, Divider, List, Typography } from "@mui/material";
+import { Button, Card, Divider, List, Typography } from '@mui/material';
 import ExpenseDetail from 'components/Expenses/ExpenseDetail';
 import ExpenseItem from 'components/Expenses/ExpenseItem';
-import NewExpenseDialog from "components/Expenses/NewExpenseDialog";
-import FundingScheduleList from "components/FundingSchedules/FundingScheduleList";
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
+import NewExpenseDialog from 'components/Expenses/NewExpenseDialog';
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
 import { getExpenseIds } from 'shared/spending/selectors/getExpenseIds';
 
 import './styles/ExpensesView.scss';
@@ -24,6 +23,10 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
     newExpenseDialogOpen: false,
     showFundingSchedules: false,
   };
+
+  componentDidMount() {
+    console.log('expenses');
+  }
 
   renderExpenseList = () => {
     const { expenseIds } = this.props;
@@ -105,7 +108,7 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
       return (
         <Fragment>
           { newExpenseDialogOpen &&
-          <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen />
+          <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen/>
           }
 
           <div className="minus-nav">
@@ -126,7 +129,7 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
     return (
       <Fragment>
         { newExpenseDialogOpen &&
-        <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen />
+        <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen/>
         }
 
         <div className="minus-nav">

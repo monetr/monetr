@@ -1,4 +1,4 @@
-import { LOGOUT } from "shared/authentication/actions";
+import { Logout } from 'shared/authentication/actions';
 import { CHANGE_BANK_ACCOUNT } from 'shared/bankAccounts/actions';
 import {
   CreateSpending,
@@ -11,8 +11,8 @@ import {
   SpendingActions,
   Transfer,
   UpdateSpending
-} from "shared/spending/actions";
-import SpendingState from "shared/spending/state";
+} from 'shared/spending/actions';
+import SpendingState from 'shared/spending/state';
 import { UpdateTransaction } from 'shared/transactions/actions';
 
 export default function reducer(state: SpendingState = new SpendingState(), action: SpendingActions): SpendingState {
@@ -94,7 +94,7 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         ...state,
         items: state.items.setIn([action.payload.bankAccountId, action.payload.spendingId], action.payload),
       };
-    case LOGOUT:
+    case Logout.Success:
       return new SpendingState();
     default:
       return state;

@@ -1,11 +1,12 @@
 package controller_test
 
 import (
+	"net/http"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/pkg/internal/mock_plaid"
-	"net/http"
-	"testing"
 )
 
 func TestPostTokenCallback(t *testing.T) {
@@ -20,7 +21,7 @@ func TestPostTokenCallback(t *testing.T) {
 		mock_plaid.MockGetAccounts(t, nil)
 
 		response := e.POST("/api/plaid/link/token/callback").
-			WithHeader("M-Token", token).
+			WithCookie(TestCookieName, token).
 			WithJSON(map[string]interface{}{
 				"publicToken":     publicToken,
 				"institutionId":   "123",

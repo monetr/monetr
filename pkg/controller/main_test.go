@@ -25,15 +25,30 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/plaid/plaid-go/plaid"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	TestEmailDomain   = "monetr.mini"
+	TestUIDomainName  = "app.monetr.mini"
+	TestAPIDomainName = "api.monetr.mini"
+	TestCookieName    = "M-Token"
 )
 
 func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	return config.Configuration{
 		Name:          t.Name(),
-		UIDomainName:  "ui.monetr.mini",
-		APIDomainName: "api.monetr.mini",
+		UIDomainName:  TestUIDomainName,
+		APIDomainName: TestAPIDomainName,
 		AllowSignUp:   true,
+		Server: config.Server{
+			Cookies: config.Cookies{
+				SameSiteStrict: true,
+				Secure:         true,
+				Name:           TestCookieName,
+			},
+		},
 		JWT: config.JWT{
 			LoginJwtSecret:        gofakeit.UUID(),
 			RegistrationJwtSecret: gofakeit.UUID(),
@@ -46,7 +61,7 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 				TokenLifetime: 10 * time.Second,
 				TokenSecret:   gofakeit.Generate("????????????????"),
 			},
-			Domain: "monetr.mini",
+			Domain: TestEmailDomain,
 			SMTP:   config.SMTPClient{},
 		},
 		ReCAPTCHA: config.ReCAPTCHA{},
@@ -147,13 +162,28 @@ func NewTestApplicationWithConfig(t *testing.T, configuration config.Configurati
 }
 
 func GivenIHaveToken(t *testing.T, e *httpexpect.Expect) string {
-	_, _, result := register(t, e)
-	require.Contains(t, result, "token", "result must contain token")
-	require.IsType(t, string(""), result["token"], "token must be a string")
-	return result["token"].(string)
+	email, password := register(t, e)
+	var loginRequest struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	loginRequest.Email = email
+	loginRequest.Password = password
+	var token string
+	{
+		response := e.POST("/api/authentication/login").
+			WithJSON(loginRequest).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.Cookie(TestCookieName).Value().NotEmpty()
+		token = response.Cookie(TestCookieName).Value().Raw()
+	}
+	require.NotEmpty(t, token, "token from login must not be empty")
+	return token
 }
 
-func register(t *testing.T, e *httpexpect.Expect) (email, password string, result map[string]interface{}) {
+func register(t *testing.T, e *httpexpect.Expect) (email, password string) {
 	var registerRequest struct {
 		Email     string `json:"email"`
 		Password  string `json:"password"`
@@ -170,11 +200,11 @@ func register(t *testing.T, e *httpexpect.Expect) (email, password string, resul
 		Expect()
 
 	response.Status(http.StatusOK)
-	return registerRequest.Email, registerRequest.Password, response.JSON().Object().Raw()
+	return registerRequest.Email, registerRequest.Password
 }
 
 func GivenIHaveLogin(t *testing.T, e *httpexpect.Expect) (email, password string) {
-	email, password, _ = register(t, e)
+	email, password = register(t, e)
 	require.NotEmpty(t, email, "email cannot be empty")
 	require.NotEmpty(t, password, "password cannot be empty")
 	return
@@ -193,6 +223,18 @@ func GivenILogin(t *testing.T, e *httpexpect.Expect, email, password string) (to
 		Expect()
 
 	response.Status(http.StatusOK)
-	response.JSON().Object().ContainsKey("token")
-	return response.JSON().Path("$.token").String().Raw()
+	AssertSetTokenCookie(t, response)
+	return response.Cookie(TestCookieName).Value().Raw()
+}
+
+func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
+	response.Cookie(TestCookieName).Path().Equal("/")
+	response.Cookie(TestCookieName).Domain().Equal(TestAPIDomainName)
+	assert.True(t, response.Cookie(TestCookieName).Raw().Secure, "cookie must be secure")
+	assert.True(t, response.Cookie(TestCookieName).Raw().HttpOnly, "cookie must be secure")
+
+	// This assertion is here to prevent a regression. We want to make sure that requests that would previously
+	// return a token in the body, do not anymore.
+	response.JSON().Object().NotContainsKey("token")
+	return response.Cookie(TestCookieName).Value().Raw()
 }

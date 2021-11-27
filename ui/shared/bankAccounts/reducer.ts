@@ -1,16 +1,16 @@
-import { LOGOUT } from "shared/authentication/actions";
+import { Logout } from 'shared/authentication/actions';
 import {
   BankAccountActions,
   CHANGE_BANK_ACCOUNT,
   FETCH_BANK_ACCOUNTS_FAILURE,
   FETCH_BANK_ACCOUNTS_REQUEST,
   FETCH_BANK_ACCOUNTS_SUCCESS
-} from "shared/bankAccounts/actions";
-import BankAccountsState from "shared/bankAccounts/state";
-import { RemoveLink } from "shared/links/actions";
-import BankAccount from "models/BankAccount";
+} from 'shared/bankAccounts/actions';
+import BankAccountsState from 'shared/bankAccounts/state';
+import { RemoveLink } from 'shared/links/actions';
+import BankAccount from 'models/BankAccount';
 
-export default function reducer(state: BankAccountsState = new BankAccountsState(), action: BankAccountActions) {
+export default function reducer(state: BankAccountsState = new BankAccountsState(), action: BankAccountActions): BankAccountsState {
   switch (action.type) {
     case CHANGE_BANK_ACCOUNT:
       return {
@@ -63,7 +63,7 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         selectedBankAccountId: !newBankAccountsSet.has(state.selectedBankAccountId) ? newBankAccountsSet.first()?.bankAccountId || null : state.selectedBankAccountId,
         items: newBankAccountsSet,
       }
-    case LOGOUT:
+    case Logout.Success:
       return new BankAccountsState();
     default:
       return state;

@@ -1,6 +1,6 @@
 import Spending from 'models/Spending';
 import Transaction from "models/Transaction";
-import { Logout } from "shared/authentication/actions";
+import { LogoutActions } from 'shared/authentication/actions';
 import { ChangeBankAccount } from "shared/bankAccounts/actions";
 
 export const FETCH_TRANSACTIONS_REQUEST = 'FETCH_TRANSACTIONS_REQUEST';
@@ -53,7 +53,7 @@ export type TransactionActions =
   FetchTransactionsSuccess
   | FetchTransactionsRequest
   | FetchTransactionsFailure
-  | Logout
+  | LogoutActions
   | ChangeBankAccount
   | ChangeSelectedTransaction
   | UpdateTransactionRequest

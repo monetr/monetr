@@ -10,13 +10,15 @@ import {
 import request from 'shared/util/request';
 import classnames from 'classnames';
 
-export interface PropTypes extends ButtonProps {
+interface BasePropTypes {
   useCache?: boolean;
   plaidOnSuccess: PlaidLinkOnSuccess;
   plaidOnExit?: PlaidLinkOnExit;
   plaidOnLoad?: PlaidLinkOnLoad;
   plaidOnEvent?: PlaidLinkOnEvent;
 }
+
+type PropTypes = BasePropTypes & ButtonProps;
 
 interface HookedPropTypes extends PropTypes {
   token: string;
@@ -41,8 +43,12 @@ const HookedPlaidButton = (props: HookedPropTypes) => {
     open();
   };
 
-  const newProps: HookedPropTypes = {
-    ...props,
+  // I want to extract only the button props, the easiest way to do that is to do a lift of the properties like this.
+  // This unfortunately leaves a ton of variables hanging though.
+  const { useCache, plaidOnSuccess, plaidOnExit, plaidOnLoad, plaidOnEvent, token, ...buttonProps } = props;
+
+  const newProps = {
+    ...buttonProps,
     onClick,
   };
 
@@ -88,8 +94,11 @@ export default class PlaidButton extends Component<PropTypes, State> {
 
   renderButton = (): React.ReactNode => {
     const disabled = this.state.loading || this.props.disabled || this.state.disabled;
+    // I want to extract only the button props, the easiest way to do that is to do a lift of the properties like this.
+    // This unfortunately leaves a ton of variables hanging though.
+    const { useCache, plaidOnSuccess, plaidOnExit, plaidOnLoad, plaidOnEvent, ...buttonProps } = this.props;
     const props: ButtonProps = {
-      ...this.props,
+      ...buttonProps,
       disabled: disabled,
       children: (
         <Fragment>

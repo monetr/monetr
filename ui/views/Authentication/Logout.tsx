@@ -1,29 +1,21 @@
-import { Component } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { Backdrop, CircularProgress } from '@mui/material';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useLogout from 'shared/authentication/actions/logout';
 
-import logout from 'shared/authentication/actions/logout';
+const Logout = (): JSX.Element => {
+  const logout = useLogout();
+  const navigate = useNavigate();
 
-interface PropTypes extends RouteComponentProps {
-  logout: () => void;
-}
+  useEffect(() => {
+    logout().finally(() => navigate('/login'));
+  })
 
-export class Logout extends Component<PropTypes, any> {
+  return (
+    <Backdrop open={ true }>
+      <CircularProgress color="inherit"/>
+    </Backdrop>
+  );
+};
 
-  componentDidMount() {
-    this.props.logout();
-    this.props.history.push('/login');
-  }
-
-  render() {
-    // This is just used to log the user out and redirect. It is not a real component.
-    return null;
-  }
-}
-
-export default connect(
-  _ => ({}),
-  {
-    logout,
-  }
-)(withRouter(Logout));
+export default Logout;

@@ -9,7 +9,12 @@ import './styles/styles.css';
 import './styles/index.scss';
 import * as Sentry from '@sentry/react';
 
-axios.get('/api/sentry')
+axios.get('/api/sentry', {
+  // When the UI initially loads, it tries to talk to the API to see if sentry should be setup. If it should then it
+  // tries to do that here. But if it cannot then nothing happens. We want to have a 1 second timeout for this request
+  // to not hurt user experience if things are running slowly.
+  timeout: 1000,
+})
   .then(result => {
     if (result.data.dsn) {
       Sentry.init({

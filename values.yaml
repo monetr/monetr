@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/monetr/monetr
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: 0.6.7
+  tag: latest
 
 imagePullSecrets: [ ]
 nameOverride: ""
@@ -104,13 +104,23 @@ customEnvFrom: [ ]
 api:
   customEnv: [ ]
   includeSecrets: false
+  # DEPRECATED. Use server.listenPort instead.
   listenPort: 4000
+  # DEPRECATED. Use server.statsPort instead.
   statsPort: 9000
   name: monetr
   uiDomainName: localhost:4000
   apiDomainName: localhost:4000
   allowSignUp: true
+  # DEPRECATED. This is no longer used.
   enableWebhooks: false
+  server:
+    listenPort: 4000
+    statsPort: 9000
+    cookies:
+      sameSiteStrict: true
+      secure: true
+      name: M-Token
   beta:
     enableBetaCodes: false
   jwt:

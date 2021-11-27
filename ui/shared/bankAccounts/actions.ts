@@ -1,6 +1,6 @@
 import BankAccount from "models/BankAccount";
 import { Map } from 'immutable';
-import { Logout } from "shared/authentication/actions";
+import { LogoutActions } from 'shared/authentication/actions';
 import { RemoveLinkSuccess } from "shared/links/actions";
 
 export const FETCH_BANK_ACCOUNTS_REQUEST = 'FETCH_BANK_ACCOUNTS_REQUEST';
@@ -33,4 +33,4 @@ export type BankAccountActions =
   | FetchBankAccountsRequest
   | FetchBankAccountsFailure
   | RemoveLinkSuccess
-  | Logout
+  | LogoutActions

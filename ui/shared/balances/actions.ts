@@ -1,7 +1,6 @@
 import Balance from 'models/Balance';
-import { Logout } from 'shared/authentication/actions';
+import { LogoutActions } from 'shared/authentication/actions';
 import { Transfer } from 'shared/spending/actions';
-
 
 export enum FetchBalances {
   Request = 'FetchBalancesRequest',
@@ -27,4 +26,4 @@ export type BalanceActions =
   | FetchBalancesFailure
   | FetchBalancesSuccess
   | Transfer
-  | Logout
+  | LogoutActions

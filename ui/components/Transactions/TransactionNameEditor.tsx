@@ -1,5 +1,5 @@
 import Transaction from 'models/Transaction';
-import React, { useState } from 'react';
+import React, { Component, useState } from 'react';
 import { useSelector, useStore } from 'react-redux';
 import { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
@@ -23,24 +23,24 @@ interface Option {
 
 const TransactionNameEditor = (props: PropTypes): JSX.Element => {
   const transaction = useSelector(getTransactionById(props.transactionId));
-  const store = useStore();
-  const [loading, setLoading] = useState<boolean>();
+  const { dispatch, getState } = useStore();
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const updateTransactionName = (input: string): Promise<void> => {
+  function updateTransactionName(input: string): Promise<void> {
     setLoading(true);
     const updated = new Transaction({
       ...transaction,
       name: input,
     });
 
-    return updateTransaction(updated)(store.dispatch, store.getState)
+    return updateTransaction(updated)(dispatch, getState)
       .catch(error => alert(error?.response?.data?.error || 'Could not save transaction name.'))
       .finally(() => setLoading(false));
-  };
+  }
 
-  const handleTransactionNameChange = (newValue: OnChangeValue<Option, false>, meta: ActionMeta<Option>) => {
+  function handleTransactionNameChange(newValue: OnChangeValue<Option, false>, meta: ActionMeta<Option>) {
     return updateTransactionName(newValue.label)
-  };
+  }
 
   const originalTransactionName: Option = {
     label: transaction.getOriginalName(),

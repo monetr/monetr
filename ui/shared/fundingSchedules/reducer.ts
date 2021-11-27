@@ -1,10 +1,10 @@
-import { LOGOUT } from "shared/authentication/actions";
-import { CreateFundingSchedule, FetchFundingSchedules, FundingScheduleActions } from "shared/fundingSchedules/actions";
-import FundingScheduleState from "shared/fundingSchedules/state";
-import { RemoveLink } from "shared/links/actions";
-import FundingSchedule from "models/FundingSchedule";
+import { Logout } from 'shared/authentication/actions';
+import { CreateFundingSchedule, FetchFundingSchedules, FundingScheduleActions } from 'shared/fundingSchedules/actions';
+import FundingScheduleState from 'shared/fundingSchedules/state';
+import { RemoveLink } from 'shared/links/actions';
+import FundingSchedule from 'models/FundingSchedule';
 import { Map } from 'immutable';
-import BankAccount from "models/BankAccount";
+import BankAccount from 'models/BankAccount';
 
 export default function reducer(state: FundingScheduleState = new FundingScheduleState(), action: FundingScheduleActions): FundingScheduleState {
   switch (action.type) {
@@ -48,7 +48,7 @@ export default function reducer(state: FundingScheduleState = new FundingSchedul
           return !action.payload.bankAccounts.find((bankAccount: BankAccount) => bankAccount.linkId === bankAccountId)
         }),
       }
-    case LOGOUT:
+    case Logout.Success:
       return new FundingScheduleState();
     default:
       return state;

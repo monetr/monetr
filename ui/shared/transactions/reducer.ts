@@ -1,7 +1,7 @@
-import Transaction from "models/Transaction";
-import { OrderedMap } from "immutable";
-import { LOGOUT } from "shared/authentication/actions";
-import { CHANGE_BANK_ACCOUNT } from "shared/bankAccounts/actions";
+import { OrderedMap } from 'immutable';
+import Transaction from 'models/Transaction';
+import { Logout } from 'shared/authentication/actions';
+import { CHANGE_BANK_ACCOUNT } from 'shared/bankAccounts/actions';
 import {
   CHANGE_SELECTED_TRANSACTION,
   FETCH_TRANSACTIONS_FAILURE,
@@ -9,8 +9,8 @@ import {
   FETCH_TRANSACTIONS_SUCCESS,
   TransactionActions,
   UpdateTransaction
-} from "shared/transactions/actions";
-import TransactionState from "shared/transactions/state";
+} from 'shared/transactions/actions';
+import TransactionState from 'shared/transactions/state';
 
 export default function reducer(state: TransactionState = new TransactionState(), action: TransactionActions): TransactionState {
   switch (action.type) {
@@ -63,7 +63,7 @@ export default function reducer(state: TransactionState = new TransactionState()
         ...state,
         selectedTransactionId: null,
       };
-    case LOGOUT:
+    case Logout.Success:
       return new TransactionState();
     default:
       return state;

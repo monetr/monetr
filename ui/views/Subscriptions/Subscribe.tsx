@@ -2,14 +2,13 @@ import request from 'shared/util/request';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getInitialPlan } from 'shared/bootstrap/selectors';
-import { RouteComponentProps } from 'react-router-dom';
 import { AppState } from 'store';
 
 interface State {
   loading: boolean;
 }
 
-interface WithConnectionPropTypes extends RouteComponentProps {
+interface WithConnectionPropTypes {
   initialPlan: { price: number, freeTrialDays: number } | null;
 }
 
