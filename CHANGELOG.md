@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.6.8](https://www.github.com/monetr/monetr/compare/v0.6.7...v0.6.8) (2021-11-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @emotion/react to v11.7.0 ([2178922](https://www.github.com/monetr/monetr/commit/2178922a025bd43b2dec1269c0f949b0fc4fae82))
+* **deps:** update dependency immer to v9.0.7 ([77dff34](https://www.github.com/monetr/monetr/commit/77dff34266766d77f31b59c2ecc8d4a2aadb96d1))
+* **deps:** update dependency redux-thunk to v2.4.1 ([0a90e9e](https://www.github.com/monetr/monetr/commit/0a90e9ee6cd905e853e5c53715aaf8525b314615))
+* **deps:** update dependency sass to v1.43.5 ([11898a8](https://www.github.com/monetr/monetr/commit/11898a85f592b19ba1660d499e0a6210c63c1dd8))
+* **deps:** update material-ui monorepo ([015721f](https://www.github.com/monetr/monetr/commit/015721f37df0fbd43069bab6e544586bb1098a6f))
+* Disable sentry locally, it is not useful without credentials. ([2f33469](https://www.github.com/monetr/monetr/commit/2f33469e201c494b577eeef79090643c69a0daab))
+
 ### [0.6.7](https://www.github.com/monetr/monetr/compare/v0.6.6...v0.6.7) (2021-11-24)
 
 
