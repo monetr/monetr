@@ -1,5 +1,14 @@
 # Changelog
 
+### [0.6.10](https://www.github.com/monetr/monetr/compare/v0.6.9...v0.6.10) (2021-11-28)
+
+
+### Bug Fixes
+
+* Fix (hopefully) rollout bug with v0.6.9 ([9e5e067](https://www.github.com/monetr/monetr/commit/9e5e067dd26bf5895329d0dd797175964332c12b))
+* Improving notificcations for other components. ([af482bc](https://www.github.com/monetr/monetr/commit/af482bc81261ba724ab4d58f5e0a2fed4c0ce4ce))
+* Improving snackbar notifications. ([51dab3d](https://www.github.com/monetr/monetr/commit/51dab3d9dc36a6e3c5f2eb5aceed509ef6f42744))
+
 ### [0.6.9](https://www.github.com/monetr/monetr/compare/v0.6.8...v0.6.9) (2021-11-27)
 
 
