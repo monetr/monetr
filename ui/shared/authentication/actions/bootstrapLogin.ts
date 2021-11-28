@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import User from 'models/User';
 import { useDispatch } from 'react-redux';
 import request from 'shared/util/request';
@@ -31,11 +32,17 @@ export default function useBootstrapLogin(): (user?: User | null, subscriptionIs
           isActive: result.data.isActive,
         },
       }))
-      .catch(error => {
+      .catch((error: AxiosError) => {
         dispatch({
           type: Login.Failure,
         });
 
+        // If we are not authenticated then don't through. This is going to be acceptable behavior.
+        if (error.response.status === 403) {
+          return;
+        }
+
+        // Any other scenarios should throw the exception though.
         throw error;
       });
   }
