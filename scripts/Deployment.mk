@@ -19,5 +19,5 @@ dry: $(KUBECTL) $(GENERATED_YAML)
 deploy: $(KUBECTL) $(GENERATED_YAML)
 	$(call infoMsg,Deploying monetr to $(DEPLOY_NAMESPACE))
 	$(KUBECTL) apply -f $(GENERATED_YAML) -n $(DEPLOY_NAMESPACE)
-	$(KUBECTL) rollout status deploy/monetr -n $(DEPLOY_NAMESPACE) --timeout=120s
+	$(KUBECTL) rollout status deploy/monetr -n $(DEPLOY_NAMESPACE) --timeout=240s
 endif

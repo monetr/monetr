@@ -8,8 +8,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const EnvironmentPrefix = "MONETR"
-
 type PlaidEnvironment string
 
 const (
@@ -283,27 +281,28 @@ type Vault struct {
 func LoadConfiguration(configFilePath *string) Configuration {
 	v := viper.GetViper()
 
-	v.SetEnvPrefix(EnvironmentPrefix)
-	v.AutomaticEnv()
+	return LoadConfigurationEx(v, configFilePath)
+}
 
+func LoadConfigurationEx(v *viper.Viper, configFilePath *string) Configuration {
 	setupDefaults(v)
 	setupEnv(v)
 
 	if configFilePath != nil {
-		viper.SetConfigName(*configFilePath)
+		v.SetConfigName(*configFilePath)
 	} else {
-		viper.SetConfigName("config")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath("/etc/monetr/")
-		viper.AddConfigPath(".")
+		v.SetConfigName("config")
+		v.SetConfigType("yaml")
+		v.AddConfigPath("/etc/monetr/")
+		v.AddConfigPath(".")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
+	if err := v.ReadInConfig(); err != nil {
 		fmt.Printf("failed to read in config from file: %+v\n", err)
 	}
 
 	var config Configuration
-	if err := viper.Unmarshal(&config); err != nil {
+	if err := v.Unmarshal(&config); err != nil {
 		panic(err)
 	}
 
@@ -311,17 +310,13 @@ func LoadConfiguration(configFilePath *string) Configuration {
 }
 
 func setupDefaults(v *viper.Viper) {
-	v.SetDefault("Name", "monetr")
-	v.SetDefault("ListenPort", 4000)
-	v.SetDefault("StatsPort", 9000)
-	v.SetDefault("Environment", "development")
-	v.SetDefault("UIDomainName", "localhost:4000")
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
-	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
-	v.SetDefault("Logging.Level", "info")
+	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
+	v.SetDefault("Environment", "development")
 	v.SetDefault("Logging.Format", "text")
+	v.SetDefault("Logging.Level", "info")
 	v.SetDefault("Logging.StackDriver.Enabled", false)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
@@ -329,6 +324,9 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("PostgreSQL.Username", "postgres")
 	v.SetDefault("ReCAPTCHA.Enabled", false)
 	v.SetDefault("Server.Cookie.Name", "M-Token")
+	v.SetDefault("Server.ListenPort", 4000)
+	v.SetDefault("Server.StatsPort", 9000)
+	v.SetDefault("UIDomainName", "localhost:4000")
 	v.SetDefault("Vault.Auth", "kubernetes")
 	v.SetDefault("Vault.IdleConnTimeout", 9*time.Minute)
 	v.SetDefault("Vault.Timeout", 10*time.Second)
@@ -336,9 +334,6 @@ func setupDefaults(v *viper.Viper) {
 }
 
 func setupEnv(v *viper.Viper) {
-	_ = v.BindEnv("Name", "MONETR_NAME")
-	_ = v.BindEnv("ListenPort", "MONETR_PORT")
-	_ = v.BindEnv("StatsPort", "MONETR_STATS_PORT")
 	_ = v.BindEnv("Environment", "MONETR_ENVIRONMENT")
 	_ = v.BindEnv("UIDomainName", "MONETR_UI_DOMAIN_NAME")
 	_ = v.BindEnv("APIDomainName", "MONETR_API_DOMAIN_NAME")
