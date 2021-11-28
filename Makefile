@@ -285,8 +285,6 @@ ifdef GITHUB_ACTION
 include $(PWD)/Makefile.github-actions
 endif
 
-include $(PWD)/Makefile.docker
-
 ifndef CI
 include $(PWD)/Makefile.tinker
 
