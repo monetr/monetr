@@ -22,7 +22,7 @@ ingress:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "Content-Security-Policy: default-src 'self'; script-src-elem 'self' https://www.gstatic.com https://www.google.com https://*.plaid.com https://relay.monetr.dog; font-src https://fonts.gstatic.com https://fonts.googleapis.com; style-src-elem 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://relay.monetr.dog; prefetch-src 'self' https://*.plaid.com; frame-src 'self' https://*.plaid.com https://www.google.com; img-src 'self' data:";
+      more_set_headers "Content-Security-Policy: default-src 'self'; script-src-elem 'self' https://www.gstatic.com https://www.google.com https://*.plaid.com https://relay.monetr.dog; font-src https://fonts.gstatic.com https://fonts.googleapis.com; style-src-elem 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://relay.monetr.dog https://sentry.io; prefetch-src 'self' https://*.plaid.com; frame-src 'self' https://*.plaid.com https://www.google.com; img-src 'self' data:";
       more_set_headers "X-Frame-Options: DENY";
       more_set_headers "X-Content-Type-Options: nosniff";
       more_set_headers "Referrer-Policy: same-origin";

@@ -211,3 +211,4 @@ jobs:
           environment: 'my.monetr.dog'
           version: 'v${{ needs.release_please.outputs.version }}'
           sourcemaps: './build/source_maps'
+          url_prefix: 'https://my.monetr.dog'
