@@ -1,5 +1,10 @@
 LOCAL_DIR=$(PWD)/local
 LOCAL_CERTS = $(LOCAL_DIR)/certs
+DEVELOPMENT_CONFIG=$(MONETR_DIR)/development.yaml
+
+$(DEVELOPMENT_CONFIG):
+	@if [ ! -f "$(DEVELOPMENT_SECRET)" ]; then echo "ERROR: You need to setup a development config for this." && exit 100; fi
+
 PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
 
 # Tools used to run the application locally
@@ -356,13 +361,10 @@ local-postgres-certs:
 	$(KUBECTL) get secret postgres-api-tls -o jsonpath='{.data.tls\.crt}' -n $(MINIKUBE_NAMESPACE) | base64 -d > $(LOCAL_DIR)/postgres/tls.crt
 	$(KUBECTL) get secret postgres-api-tls -o jsonpath='{.data.tls\.key}' -n $(MINIKUBE_NAMESPACE) | base64 -d > $(LOCAL_DIR)/postgres/tls.key
 
-
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
+webhooks-mini: $(YQ) $(DEVELOPMENT_CONFIG)
+webhooks-mini: NGROK_AUTH=$(shell cat $(DEVELOPMENT_CONFIG) | $(YQ) '.webhooks.ngrokToken')
 webhooks-mini:
-ifndef NGROK_AUTH
-	$(error Must specify NGROK_AUTH to setup webhooks)
-	exit 100
-endif
 	$(KUBECTL) create secret generic ngrok-auth-secret \
 		--from-literal=NGROK_AUTH=$(NGROK_AUTH) \
 		--dry-run=client -o yaml | $(KUBECTL) apply -f - \

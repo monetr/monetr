@@ -17,7 +17,7 @@ COVERAGE_TXT = $(PWD)/coverage.txt
 
 MONETR_DIR=$(HOME)/.monetr
 $(MONETR_DIR):
-	if [ ! -f "$(MONETR_DIR)" ]; then mkdir -p $(MONETR_DIR); fi
+	if [ ! -d "$(MONETR_DIR)" ]; then mkdir -p $(MONETR_DIR); fi
 
 KUBERNETES_VERSION=1.18.5
 

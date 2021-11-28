@@ -1,0 +1,6 @@
+# This file is an example development config, it should be copied to ~/.monetr/development.yaml and your own values
+# should be filled in. This is going to be built out a bit more as the project progresses. But will be the main way to
+# keep secrets out of the working directory of the project for local development.
+webhooks:
+  ngrokToken: 'abc123'
+
