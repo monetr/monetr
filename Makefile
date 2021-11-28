@@ -15,6 +15,10 @@ BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
+MONETR_DIR=$(HOME)/.monetr
+$(MONETR_DIR):
+	if [ ! -f "$(MONETR_DIR)" ]; then mkdir -p $(MONETR_DIR); fi
+
 KUBERNETES_VERSION=1.18.5
 
 ifeq ($(OS),Windows_NT)

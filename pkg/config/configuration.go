@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/plaid/plaid-go/plaid"
@@ -25,28 +26,28 @@ const (
 
 type Configuration struct {
 	// DEPRECATED: This is not used anymore. It serves no function at all.
-	Name string
+	Name string `yaml:"name"`
 	// DEPRECATED: This is not used anymore. Use Server.ListenPort instead.
-	ListenPort int
+	ListenPort int `yaml:"listenPort"`
 	// DEPRECATED: This is not used anymore. Use Server.StatsPort instead.
-	StatsPort     int
-	Environment   string
-	UIDomainName  string
-	APIDomainName string
-	AllowSignUp   bool
-	Server        Server
-	Beta          Beta
-	CORS          CORS
-	JWT           JWT
-	Logging       Logging
-	Plaid         Plaid
-	PostgreSQL    PostgreSQL
-	ReCAPTCHA     ReCAPTCHA
-	Redis         Redis
-	Email         Email
-	Sentry        Sentry
-	Stripe        Stripe
-	Vault         Vault
+	StatsPort     int        `yaml:"statsPort"`
+	Environment   string     `yaml:"environment"`
+	UIDomainName  string     `yaml:"uiDomainName"`
+	APIDomainName string     `yaml:"apiDomainName"`
+	AllowSignUp   bool       `yaml:"allowSignUp"`
+	Server        Server     `yaml:"server"`
+	Beta          Beta       `yaml:"beta"`
+	CORS          CORS       `yaml:"cors"`
+	JWT           JWT        `yaml:"jwt"`
+	Logging       Logging    `yaml:"logging"`
+	Plaid         Plaid      `yaml:"plaid"`
+	PostgreSQL    PostgreSQL `yaml:"postgreSql"`
+	ReCAPTCHA     ReCAPTCHA  `yaml:"reCAPTCHA"`
+	Redis         Redis      `yaml:"redis"`
+	Email         Email      `yaml:"email"`
+	Sentry        Sentry     `yaml:"sentry"`
+	Stripe        Stripe     `yaml:"stripe"`
+	Vault         Vault      `yaml:"vault"`
 }
 
 func (c Configuration) GetUIDomainName() string {
@@ -56,49 +57,49 @@ func (c Configuration) GetUIDomainName() string {
 type Server struct {
 	// ListenPort defines the port that monetr will listen for HTTP requests on. This port should be forwarded such that
 	// it is accessible to the desired clients. Be that on a local network, or forwarded to the public internet.
-	ListenPort int
+	ListenPort int `yaml:"listenPort"`
 	// StatsPort is the port that our prometheus metrics are served on. This port should not be publicly accessible and
 	// should only be accessible by the prometheus server scraping for metrics. It is not an endpoint that needs to be
 	// secured as no sensitive client information will be served by it; but it should not be accessible publicly.
-	StatsPort int
+	StatsPort int `yaml:"statsPort"`
 	// Cookies defines the parameters used for issuing and processing cookies from clients. Cookies are used for
 	// authentication.
-	Cookies Cookies
+	Cookies Cookies `yaml:"cookies"`
 }
 
 type Cookies struct {
 	// SameSiteStrict allows the host of monetr to define whether the cookie used for authentication is limited to same
 	// site. This might impact use cases where the UI is on a different domain than the API. In general, it is
 	// recommended that this is enabled and that the UI and API are served from the same domain.
-	SameSiteStrict bool
+	SameSiteStrict bool `yaml:"sameSiteStrict"`
 	// Secure specifies that the authentication cookie issued and required by API endpoints is a secure cookie. This
 	// defaults to true, but requires that the host of monetr use HTTPS. If you are not using HTTPS then this must be
 	// disabled for API calls to succeed.
-	Secure bool
+	Secure bool `yaml:"secure"`
 	// Name defines the name of the cookie to use for authentication. This defaults to `M-Token` but can be customized
 	// if the host wants to.
-	Name string
+	Name string `yaml:"name"`
 }
 
 type Beta struct {
-	EnableBetaCodes bool
+	EnableBetaCodes bool `yaml:"enableBetaCodes"`
 }
 
 type JWT struct {
-	LoginJwtSecret        string
-	RegistrationJwtSecret string
+	LoginJwtSecret        string `yaml:"loginJwtSecret"`
+	RegistrationJwtSecret string `yaml:"registrationJwtSecret"`
 }
 
 type PostgreSQL struct {
-	Address            string
-	Port               int
-	Username           string
-	Password           string
-	Database           string
-	InsecureSkipVerify bool
-	CACertificatePath  string
-	KeyPath            string
-	CertificatePath    string
+	Address            string `yaml:"address"`
+	Port               int    `yaml:"port"`
+	Username           string `yaml:"username"`
+	Password           string `yaml:"password"`
+	Database           string `yaml:"database"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify"`
+	CACertificatePath  string `yaml:"caCertificatePath"`
+	KeyPath            string `yaml:"keyPath"`
+	CertificatePath    string `yaml:"certificatePath"`
 }
 
 func (c Configuration) GetEmail() Email {
@@ -108,41 +109,41 @@ func (c Configuration) GetEmail() Email {
 type Email struct {
 	// Enabled controls whether the API can send emails at all. In order to support things like forgot password links or
 	// email verification this must be enabled.
-	Enabled        bool
-	Verification   EmailVerification
-	ForgotPassword ForgotPassword
+	Enabled        bool              `yaml:"enabled"`
+	Verification   EmailVerification `yaml:"verification"`
+	ForgotPassword ForgotPassword    `yaml:"forgotPassword"`
 	// Domain specifies the actual domain name used to send emails. Emails will always be sent from `no-reply@{domain}`.
-	Domain string
+	Domain string `yaml:"domain"`
 	// Email is sent via SMTP. If you want to send emails it is required to include an SMTP configuration.
-	SMTP SMTPClient
+	SMTP SMTPClient `yaml:"smtp"`
 }
 
 type EmailVerification struct {
 	// If you want to verify email addresses when a new user signs up then this should be enabled. This will require a
 	// user to verify that they own (or at least have proper access to) the email address that they used when they
 	// signed up.
-	Enabled bool
+	Enabled bool `yaml:"enabled"`
 	// Specify the amount of time that an email verification link is valid.
-	TokenLifetime time.Duration
+	TokenLifetime time.Duration `yaml:"tokenLifetime"`
 	// The secret used to generate verification tokens and validate them.
-	TokenSecret string
+	TokenSecret string `yaml:"tokenSecret"`
 }
 
 type ForgotPassword struct {
 	// If you want to allow people to reset their passwords then we need to be able to send them a password reset link.
-	Enabled bool
+	Enabled bool `yaml:"enabled"`
 	// Specify the amount of time that a password reset link will be valid.
-	TokenLifetime time.Duration
+	TokenLifetime time.Duration `yaml:"tokenLifetime"`
 	// Specify a secret used to generate the password reset links as well as validate them.
-	TokenSecret string
+	TokenSecret string `yaml:"tokenSecret"`
 }
 
 type SMTPClient struct {
-	Identity string
-	Username string
-	Password string
-	Host     string
-	Port     int
+	Identity string `yaml:"identity"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
 }
 
 func (s Email) ShouldVerifyEmails() bool {
@@ -154,13 +155,12 @@ func (s Email) AllowPasswordReset() bool {
 }
 
 type ReCAPTCHA struct {
-	Enabled    bool
-	PublicKey  string
-	PrivateKey string
-	Version    int // Currently only version 2 is supported by the UI.
-
-	VerifyLogin    bool
-	VerifyRegister bool
+	Enabled        bool   `yaml:"enabled"`
+	PublicKey      string `yaml:"publicKey"`
+	PrivateKey     string `yaml:"privateKey"`
+	Version        int    `yaml:"version"` // Currently only version 2 is supported by the UI.
+	VerifyLogin    bool   `yaml:"verifyLogin"`
+	VerifyRegister bool   `yaml:"loginRegister"`
 }
 
 func (r ReCAPTCHA) ShouldVerifyLogin() bool {
@@ -172,35 +172,35 @@ func (r ReCAPTCHA) ShouldVerifyRegistration() bool {
 }
 
 type Plaid struct {
-	ClientID     string
-	ClientSecret string
-	Environment  plaid.Environment
+	ClientID     string            `yaml:"clientId"`
+	ClientSecret string            `yaml:"clientSecret"`
+	Environment  plaid.Environment `yaml:"environment"`
 	// This does not seem to be a scope within the documentation. Per the
 	// documentation "balance is not a valid product" and is enabled
 	// automatically. It is not clear if that includes this beta feature though.
-	EnableBalanceTransfers bool
+	EnableBalanceTransfers bool `yaml:"enableBalanceTransfers"`
 
 	// EnableReturningUserExperience changes the required data for sign up. If
 	// this is enabled then the user must provide their full legal name as well
 	// as their phone number.
 	// If enabled; email address and phone number verification is REQUIRED.
-	EnableReturningUserExperience bool
+	EnableReturningUserExperience bool `yaml:"enableReturningUserExperience"`
 
 	// EnableBirthdatePrompt will allow users to provide their birthday during
 	// sign up or afterwards in their user settings. This is used by plaid for
 	// future products. At the time of writing this it does not do anything.
-	EnableBirthdatePrompt bool
+	EnableBirthdatePrompt bool `yaml:"enableBirthdatePrompt"`
 
-	WebhooksEnabled bool
-	WebhooksDomain  string
+	WebhooksEnabled bool   `yaml:"webhooksEnabled"`
+	WebhooksDomain  string `yaml:"webhooksDomain"`
 	// OAuthDomain is used to specify the domain name that the user will be brought to upon returning to monetr after
 	// authenticating to a bank that requires OAuth. This will typically be a UI domain name and should not include a
 	// protocol or a path. The protocol is auto inserted as `https` as it is the only protocol supported. The path is
 	// currently hard coded until a need for different paths arises?
-	OAuthDomain string
+	OAuthDomain string `yaml:"oauthDomain"`
 	// MaxNumberOfLinks defines the max number of active Plaid links a single account can have. If this is set to 0 then
 	// there is no limit.
-	MaxNumberOfLinks int
+	MaxNumberOfLinks int `yaml:"maxNumberOfLinks"`
 }
 
 func (p Plaid) GetWebhooksURL() string {
@@ -208,36 +208,36 @@ func (p Plaid) GetWebhooksURL() string {
 }
 
 type CORS struct {
-	AllowedOrigins []string
-	Debug          bool
+	AllowedOrigins []string `yaml:"allowedOrigins"`
+	Debug          bool     `yaml:"debug"`
 }
 
 // Redis defines the config used to connect to a redis for our worker pool. If these are left blank or default then we
 // will instead use a mock redis pool that is internal only. This is fine for single instance deployments, but anytime
 // more than one instance of the API is running a redis instance will be required.
 type Redis struct {
-	Enabled   bool
-	Address   string
-	Port      int
-	Namespace string
+	Enabled   bool   `yaml:"enabled"`
+	Address   string `yaml:"address"`
+	Port      int    `yaml:"port"`
+	Namespace string `yaml:"namespace"`
 }
 
 type Logging struct {
-	Level       string
-	Format      string
-	StackDriver StackDriverLogging
+	Level       string             `yaml:"level"`
+	Format      string             `yaml:"format"`
+	StackDriver StackDriverLogging `yaml:"stackDriver"`
 }
 
 type StackDriverLogging struct {
-	Enabled bool
+	Enabled bool `yaml:"enabled"`
 }
 
 type Sentry struct {
-	Enabled         bool
-	DSN             string
-	ExternalDSN     string
-	SampleRate      float64
-	TraceSampleRate float64
+	Enabled         bool    `yaml:"enabled"`
+	DSN             string  `yaml:"dsn"`
+	ExternalDSN     string  `yaml:"externalDSN"`
+	SampleRate      float64 `yaml:"sampleRate"`
+	TraceSampleRate float64 `yaml:"traceSampleRate"`
 }
 
 func (s Sentry) ExternalSentryEnabled() bool {
@@ -245,16 +245,17 @@ func (s Sentry) ExternalSentryEnabled() bool {
 }
 
 type Stripe struct {
-	Enabled         bool
-	APIKey          string
-	PublicKey       string
-	WebhooksEnabled bool
-	WebhooksDomain  string
-	WebhookSecret   string
-	InitialPlan     *Plan
-	Plans           []Plan
-	BillingEnabled  bool
-	TaxesEnabled    bool
+	Enabled         bool   `yaml:"enabled"`
+	APIKey          string `yaml:"apiKey"`
+	PublicKey       string `yaml:"publicKey"`
+	WebhooksEnabled bool   `yaml:"webhooksEnabled"`
+	// DEPRECATED: This does not matter to the application. This must be set inside Stripe.
+	WebhooksDomain string `yaml:"webhooksDomain"`
+	WebhookSecret  string `yaml:"webhookSecret"`
+	InitialPlan    *Plan  `yaml:"initialPlan"`
+	Plans          []Plan `yaml:"plans"`
+	BillingEnabled bool   `yaml:"billingEnabled"`
+	TaxesEnabled   bool   `yaml:"taxesEnabled"`
 }
 
 // IsBillingEnabled will return true if both Stripe and Billing are enabled. It will return false any other time.
@@ -263,40 +264,55 @@ func (s Stripe) IsBillingEnabled() bool {
 }
 
 type Vault struct {
-	Enabled            bool
-	Address            string
-	Auth               string
-	Token              string
-	TokenFile          string
-	Username, Password string
-	Role               string
-	CertificatePath    string
-	KeyPath            string
-	CACertificatePath  string
-	InsecureSkipVerify bool
-	Timeout            time.Duration
-	IdleConnTimeout    time.Duration
+	Enabled            bool          `yaml:"enabled"`
+	Address            string        `yaml:"address"`
+	Auth               string        `yaml:"auth"`
+	Token              string        `yaml:"token"`
+	TokenFile          string        `yaml:"tokenFile"`
+	Username           string        `yaml:"username"`
+	Password           string        `yaml:"password"`
+	Role               string        `yaml:"role"`
+	CertificatePath    string        `yaml:"certificatePath"`
+	KeyPath            string        `yaml:"keyPath"`
+	CACertificatePath  string        `yaml:"caCertificatePath"`
+	InsecureSkipVerify bool          `yaml:"insecureSkipVerify"`
+	Timeout            time.Duration `yaml:"timeout"`
+	IdleConnTimeout    time.Duration `yaml:"idleConnTimeout"`
 }
 
-func LoadConfiguration(configFilePath *string) Configuration {
+func getViper(configFilePath *string) *viper.Viper {
 	v := viper.GetViper()
-
-	return LoadConfigurationEx(v, configFilePath)
-}
-
-func LoadConfigurationEx(v *viper.Viper, configFilePath *string) Configuration {
-	setupDefaults(v)
-	setupEnv(v)
 
 	if configFilePath != nil {
 		v.SetConfigName(*configFilePath)
 	} else {
 		v.SetConfigName("config")
 		v.SetConfigType("yaml")
+
+		{ // If we can determine the user's home directory, then look there + /.sentry for the config
+			homeDir, err := os.UserHomeDir()
+			if err == nil {
+				v.AddConfigPath(homeDir + "/.monetr")
+			}
+		}
+
 		v.AddConfigPath("/etc/monetr/")
 		v.AddConfigPath(".")
 	}
 
+	setupDefaults(v)
+	setupEnv(v)
+
+	return v
+}
+
+func LoadConfiguration(configFilePath *string) Configuration {
+	v := getViper(configFilePath)
+
+	return LoadConfigurationEx(v)
+}
+
+func LoadConfigurationEx(v *viper.Viper) Configuration {
 	if err := v.ReadInConfig(); err != nil {
 		fmt.Printf("failed to read in config from file: %+v\n", err)
 	}
@@ -307,6 +323,18 @@ func LoadConfigurationEx(v *viper.Viper, configFilePath *string) Configuration {
 	}
 
 	return config
+}
+
+func GenerateConfigFile(configFilePath *string, outputFilePath string) error {
+	var v *viper.Viper
+	if configFilePath == nil {
+		v = viper.GetViper()
+		setupDefaults(v)
+	} else {
+		v = getViper(configFilePath)
+	}
+
+	return v.SafeWriteConfigAs(outputFilePath)
 }
 
 func setupDefaults(v *viper.Viper) {

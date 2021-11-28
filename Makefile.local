@@ -170,10 +170,10 @@ init-mini-values: REST_API_IMAGE_REPO = $(MINIKUBE_IP):5000/$(MONETR_IMAGE_NAME)
 init-mini-values: $(LOGIN_JWT_SECRET) $(REGISTER_JWT_SECRET)
 init-mini-values: LOGIN_JWT_SECRET_VALUE=$(shell cat $(LOGIN_JWT_SECRET))
 init-mini-values: REGISTER_JWT_SECRET_VALUE=$(shell cat $(REGISTER_JWT_SECRET))
-init-mini-values: $(YQ) $(HELM)
+init-mini-values: $(YQ) $(HELM) $(MONETR_DIR)
 	$(call infoMsg,Setting up a basic helm values file for running the API locally)
 	if [ ! -f "$(VALUES)" ]; then $(HELM) show values $(PWD) > $(VALUES); fi
-	if [ -f "$(PWD)/config.yaml" ]; then $(YQ) eval '{"api": . }' $(PWD)/config.yaml | $(YQ) eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' $(VALUES) - -i $(VALUES); fi
+	if [ -f "$(MONETR_DIR)/config.yaml" ]; then $(YQ) eval '{"api": . }' $(MONETR_DIR)/config.yaml | $(YQ) eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' $(VALUES) - -i $(VALUES); fi
 	$(YQ) e '.image.repository = "$(REST_API_IMAGE_REPO)"' -i $(VALUES)
 	$(YQ) e '.ingress.enabled = false' -i $(VALUES)
 	$(YQ) e '.uiService = true' -i $(VALUES)
