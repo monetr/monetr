@@ -24,7 +24,8 @@ type ConfigResponse struct {
 	ReCAPTCHAKey string `json:"ReCAPTCHAKey" extensions:"x-nullable"`
 
 	// The public key for Stripe, will be used for stripe elements on the frontend. Is omitted if stripe is not enabled.
-	StripePublicKey string `json:"stripePublicKey" extensions:"x-nullable"`
+	// **DEPRECATED** The UI no longer needs access to the Stripe public key.
+	StripePublicKey string `json:"stripePublicKey" extensions:"x-nullable,x-deprecated"`
 
 	// Tells the UI whether or not registration requests will be accepted by the UI.
 	AllowSignUp bool `json:"allowSignUp"`

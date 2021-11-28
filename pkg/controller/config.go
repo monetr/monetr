@@ -25,7 +25,6 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 		VerifyRegister      bool         `json:"verifyRegister"`
 		VerifyEmailAddress  bool         `json:"verifyEmailAddress"`
 		ReCAPTCHAKey        string       `json:"ReCAPTCHAKey,omitempty"`
-		StripePublicKey     string       `json:"stripePublicKey,omitempty"`
 		AllowSignUp         bool         `json:"allowSignUp"`
 		AllowForgotPassword bool         `json:"allowForgotPassword"`
 		LongPollPlaidSetup  bool         `json:"longPollPlaidSetup"`
@@ -63,8 +62,6 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 	}
 
 	if c.configuration.Stripe.Enabled {
-		configuration.StripePublicKey = c.configuration.Stripe.PublicKey
-
 		if c.configuration.Stripe.IsBillingEnabled() && c.configuration.Stripe.InitialPlan != nil {
 			price, err := c.stripe.GetPriceById(
 				c.getContext(ctx),
