@@ -2327,8 +2327,9 @@ var doc = `{
                     "type": "boolean"
                 },
                 "stripePublicKey": {
-                    "description": "The public key for Stripe, will be used for stripe elements on the frontend. Is omitted if stripe is not enabled.",
+                    "description": "The public key for Stripe, will be used for stripe elements on the frontend. Is omitted if stripe is not enabled.\n**DEPRECATED** The UI no longer needs access to the Stripe public key.",
                     "type": "string",
+                    "x-deprecated": true,
                     "x-nullable": true
                 },
                 "verifyEmailAddress": {
