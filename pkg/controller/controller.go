@@ -183,13 +183,21 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		p.Use(c.loggingMiddleware)
 		p.OnAnyErrorCode(func(ctx iris.Context) {
-			if err := ctx.GetErr(); err != nil {
-				c.reportError(ctx, err)
-
-				ctx.JSON(map[string]interface{}{
-					"error": err.Error(),
-				})
+			err := ctx.GetErr()
+			if err == nil {
+				return
 			}
+
+			switch ctx.GetStatusCode() {
+			case http.StatusForbidden:
+				// Don't report errors for forbidden status code.
+			default:
+				c.reportError(ctx, err)
+			}
+
+			ctx.JSON(map[string]interface{}{
+				"error": err.Error(),
+			})
 		})
 		p.OnErrorCode(http.StatusNotFound, func(ctx iris.Context) {
 			if err := ctx.GetErr(); err == nil {
