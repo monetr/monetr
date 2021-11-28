@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.6.11](https://www.github.com/monetr/monetr/compare/v0.6.10...v0.6.11) (2021-11-28)
+
+
+### Bug Fixes
+
+* Fixed how bootstrapLogin would throw exceptions. ([e6add7b](https://www.github.com/monetr/monetr/commit/e6add7bbd9c6dd46e9694e00d573d2b142a6ec27))
+* Fixed sentry submit feedback, fixed Sentry sourcemaps. ([aaf46a5](https://www.github.com/monetr/monetr/commit/aaf46a5f2bbc3a671fbb0568d279ae80cfa9a344))
+
 ### [0.6.10](https://www.github.com/monetr/monetr/compare/v0.6.9...v0.6.10) (2021-11-28)
 
 
