@@ -236,10 +236,17 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				defer func() {
 					switch span.Status {
 					case sentry.SpanStatusUndefined, sentry.SpanStatusUnknown:
-						if ctx.GetErr() != nil {
-							span.Status = sentry.SpanStatusInternalError
-						} else {
-							span.Status = sentry.SpanStatusOK
+						switch ctx.GetStatusCode() {
+						case http.StatusForbidden, http.StatusUnauthorized:
+							span.Status = sentry.SpanStatusUnauthenticated
+						case http.StatusBadRequest:
+							span.Status = sentry.SpanStatusInvalidArgument
+						default:
+							if ctx.GetErr() != nil {
+								span.Status = sentry.SpanStatusInternalError
+							} else {
+								span.Status = sentry.SpanStatusOK
+							}
 						}
 					}
 					span.Finish()
