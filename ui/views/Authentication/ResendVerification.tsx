@@ -1,3 +1,4 @@
+import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Formik, FormikHelpers } from 'formik';
@@ -16,6 +17,7 @@ interface ResendValues {
 }
 
 const ResendVerification = (): JSX.Element => {
+  const { enqueueSnackbar } = useSnackbar();
   const requireCaptcha = !!useSelector(getReCAPTCHAKey);
   const { state: routeState } = useLocation();
   const initialValues: ResendValues = {
@@ -23,7 +25,6 @@ const ResendVerification = (): JSX.Element => {
   }
 
   const [verification, setVerification] = useState<string | null>();
-  const [error, setError] = useState<string | null>();
   const [done, setDone] = useState(false);
 
   function resendVerification(emailAddress: string): Promise<void> {
@@ -32,7 +33,10 @@ const ResendVerification = (): JSX.Element => {
       captcha: verification,
     })
       .then(() => setDone(true))
-      .catch(error => setError(error?.response?.data?.error || 'Failed to resend verification link'));
+      .catch(error => void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }))
   }
 
   function validateInput(values: ResendValues): Partial<ResendValues> | null {
@@ -53,32 +57,12 @@ const ResendVerification = (): JSX.Element => {
       .finally(() => helpers.setSubmitting(false));
   }
 
-  function hideError() {
-    setError(null);
-  }
-
-  function renderErrorMaybe(): JSX.Element | null {
-    if (!error) {
-      return null;
-    }
-
-    return (
-      <Snackbar open={ !!error } autoHideDuration={ 10000 } onClose={ hideError }>
-        <Alert variant="filled" severity="error">
-          <AlertTitle>Error</AlertTitle>
-          { error }
-        </Alert>
-      </Snackbar>
-    )
-  }
-
   if (done) {
     return <AfterEmailVerificationSent/>;
   }
 
   return (
     <Fragment>
-      { renderErrorMaybe() }
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }

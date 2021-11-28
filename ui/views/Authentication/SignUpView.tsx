@@ -1,3 +1,4 @@
+import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -5,21 +6,17 @@ import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import useSignUp, { SignUpResponse } from 'shared/authentication/actions/signUp';
 import {
   getInitialPlan,
-  getReCAPTCHAKey,
   getRequireBetaCode,
   getShouldVerifyRegister,
 } from 'shared/bootstrap/selectors';
 import classnames from 'classnames';
 import {
-  Alert,
-  AlertTitle,
   Button,
   Checkbox,
   CircularProgress,
   FormControl,
   FormControlLabel,
   FormGroup,
-  Snackbar,
   TextField
 } from '@mui/material';
 import { Formik, FormikHelpers } from 'formik';
@@ -40,27 +37,7 @@ interface SignUpValues {
 }
 
 const SignUpView = (): JSX.Element => {
-  const [error, setError] = useState<string | null>(null);
-
-  function hideError() {
-    setError(null);
-  }
-
-  function renderErrorMaybe(): JSX.Element | null {
-    if (!error) {
-      return null;
-    }
-
-    return (
-      <Snackbar open={ !!error } autoHideDuration={ 10000 } onClose={ hideError }>
-        <Alert variant="filled" severity="error">
-          <AlertTitle>Error</AlertTitle>
-          { error }
-        </Alert>
-      </Snackbar>
-    )
-  }
-
+  const { enqueueSnackbar } = useSnackbar();
   const [successful, setSuccessful] = useState(false);
 
   const requireBetaCode = useSelector(getRequireBetaCode);
@@ -168,8 +145,11 @@ const SignUpView = (): JSX.Element => {
           });
       })
       .catch(error => {
-        setError(error?.response?.data?.error || 'Failed to sign up.');
-
+        const message = error?.response?.data?.error || 'Failed to sign up.';
+        enqueueSnackbar(message, {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
         throw error;
       })
       .finally(() => {
@@ -194,7 +174,6 @@ const SignUpView = (): JSX.Element => {
 
   return (
     <Fragment>
-      { renderErrorMaybe() }
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }

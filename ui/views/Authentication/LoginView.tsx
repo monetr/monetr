@@ -58,13 +58,10 @@ const LoginView = (): JSX.Element => {
       email: values.email,
       password: values.password
     })
-      .catch(error => {
-        const message = error?.response?.data?.error || 'Failed to authenticate.';
-        enqueueSnackbar(message, {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        });
-      })
+      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }))
       .finally(() => helpers.setSubmitting(false));
   }
 
