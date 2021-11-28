@@ -1,5 +1,14 @@
 # Changelog
 
+### [0.6.12](https://www.github.com/monetr/monetr/compare/v0.6.11...v0.6.12) (2021-11-28)
+
+
+### Bug Fixes
+
+* Added some basic Sentry transaction to bootstrap. ([51c7bcf](https://www.github.com/monetr/monetr/commit/51c7bcf41c172e965e935dda231516b296058ff1))
+* Don't report to sentry for unauthorization errors. ([df02e88](https://www.github.com/monetr/monetr/commit/df02e88cb299a846b1c443e444ae6a67688c7b51))
+* **stripe:** Deprecate Stripe public key from UI. ([7e1b38c](https://www.github.com/monetr/monetr/commit/7e1b38c7862739999400d86ee73aae52f2d79993))
+
 ### [0.6.11](https://www.github.com/monetr/monetr/compare/v0.6.10...v0.6.11) (2021-11-28)
 
 
