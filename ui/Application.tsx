@@ -9,6 +9,7 @@ import useBootstrapApplication from 'shared/bootstrap/actions/bootstrapApplicati
 import { getIsBootstrapped } from 'shared/bootstrap/selectors';
 import UnauthenticatedApplication from 'UnauthenticatedApplication';
 import BillingRequiredRouter from 'views/Subscriptions/BillingRequiredRouter';
+import * as Sentry from '@sentry/react';
 
 const Application = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
@@ -23,12 +24,16 @@ const Application = (): JSX.Element => {
   // we can kick that process off here at the highest level of the application.
   useEffect(() => {
     if (!isReady) {
+      const transaction = Sentry.startTransaction({ name: 'Bootstrapping Monetr' });
       bootstrapApplication()
         .then(() => bootstrapLogin())
         .catch(error => {
           throw error; // TODO Add something to handle this error.
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          setLoading(false);
+          transaction.finish();
+        });
     }
   }, [isReady]);
 
