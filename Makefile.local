@@ -5,6 +5,13 @@ DEVELOPMENT_CONFIG=$(MONETR_DIR)/development.yaml
 $(DEVELOPMENT_CONFIG):
 	@if [ ! -f "$(DEVELOPMENT_SECRET)" ]; then echo "ERROR: You need to setup a development config for this." && exit 100; fi
 
+# getDevelopmentSetting is a helper function to retrieve values from the developer's ~/.monetr/development.yaml. It
+# takes 2 arguments, the first argument should be a YQ compatible path to the value you want to read, and the second
+# value should be the default if the path is not in the file, or if the file does not exist.
+define getDevelopmentSetting
+$(word 1,$(shell (cat $(DEVELOPMENT_CONFIG) 2>/dev/null | $(YQ) e $(1) -) || true) $(2))
+endef
+
 PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first
 
 # Tools used to run the application locally
@@ -143,12 +150,14 @@ deploy-certificate: $(JQ) $(CERT_PATH)
 	-rm -rf $(LOCAL_TMP)/nginx-*.json
 
 MINIKUBE_NAMESPACE=default
-MINIKUBE_CPUS=4 # 4 CPU cores, could be reduced to 2.
-MINIKUBE_MEMORY=8192 # 8GB of memory. Reduce if this is too high for your computer. Could be reduced to 2GB
-MINIKUBE_DRIVER=hyperkit # I'm on macOS, so this will vary wildly.
-MINIKUBE_KUBERNETES_VERSION=v1.19.0
-start-minikube: $(MONETR_MINIKUBE_CERT)
-	$(info Starting minikube)
+start-minikube: $(MONETR_MINIKUBE_CERT) $(YQ)
+start-minikube: MINIKUBE_CPUS=$(call getDevelopmentSetting,'.minikube.cpus',4)
+start-minikube: MINIKUBE_MEMORY=$(call getDevelopmentSetting,'.minikube.memory',8192)
+start-minikube: MINIKUBE_DRIVER=$(call getDevelopmentSetting,'.minikube.driver',hyperkit)
+start-minikube: MINIKUBE_KUBERNETES_VERSION=$(call getDevelopmentSetting,'.minikube.kubernetesVersion',v1.19.0)
+start-minikube:
+	$(call infoMsg,Starting minikube)
+	$(call infoMsg,You can customize some minikube options in your $(DEVELOPMENT_CONFIG) file)
 	$(MINIKUBE) start \
 		--addons=ingress,ingress-dns,registry \
 		--cpus=$(MINIKUBE_CPUS) \
@@ -363,7 +372,7 @@ local-postgres-certs:
 
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
 webhooks-mini: $(YQ) $(DEVELOPMENT_CONFIG)
-webhooks-mini: NGROK_AUTH=$(shell cat $(DEVELOPMENT_CONFIG) | $(YQ) '.webhooks.ngrokToken')
+webhooks-mini: NGROK_AUTH=$(call getDevelopmentSetting,'.webhooks.ngrokToken','a custom token is required')
 webhooks-mini:
 	$(KUBECTL) create secret generic ngrok-auth-secret \
 		--from-literal=NGROK_AUTH=$(NGROK_AUTH) \

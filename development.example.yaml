@@ -3,4 +3,9 @@
 # keep secrets out of the working directory of the project for local development.
 webhooks:
   ngrokToken: 'abc123'
+minikube:
+  cpus: 4
+  memory: 8192
+  driver: hyperkit
+  kubernetesVersion: v1.19.0
 
