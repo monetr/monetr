@@ -13,7 +13,7 @@
     "@sentry/browser": "6.15.0",
     "@sentry/react": "6.15.0",
     "@sentry/tracing": "6.15.0",
-    "@svgr/webpack": "5.5.0",
+    "@svgr/webpack": "6.0.0",
     "@typescript-eslint/eslint-plugin": "5.4.0",
     "@typescript-eslint/parser": "5.4.0",
     "axios": "0.24.0",
