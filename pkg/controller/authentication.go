@@ -64,9 +64,22 @@ func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) 
 func (c *Controller) handleAuthentication(p router.Party) {
 	p.Post("/login", c.loginEndpoint)
 	p.Get("/logout", c.logoutEndpoint)
+
+	// These will be the primary endpoints for SRP
+	p.Post("/challenge")
+	p.Post("/authenticate")
 	p.Post("/register", c.registerEndpoint)
+
 	p.Post("/verify", c.verifyEndpoint)
 	p.Post("/verify/resend", c.resendVerification)
+}
+
+func (c *Controller) challengeEndpoint(ctx iris.Context) {
+
+}
+
+func (c *Controller) authenticateEndpoint(ctx iris.Context) {
+
 }
 
 // Login
