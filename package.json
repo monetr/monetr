@@ -143,7 +143,7 @@
     "prettier": "2.5.0",
     "react-refresh": "0.11.0",
     "react-refresh-typescript": "2.0.3",
-    "redoc-cli": "0.13.0",
+    "redoc-cli": "0.13.1",
     "redux-devtools-extension": "2.13.9",
     "sass-loader": "12.3.0",
     "style-loader": "3.3.1",
