@@ -8,6 +8,18 @@
 * added basic config generate, local dev config relocated. ([2d0cd8d](https://www.github.com/monetr/monetr/commit/2d0cd8d6b42d7963cb3e0696b7e2e2ea283fffdb))
 * Adding way to store secrets outside working dir. ([45b7dde](https://www.github.com/monetr/monetr/commit/45b7dde6d32d1846ba502568070f6dc656d99c74))
 * Cleaned up unused makefile stuff. ([aa4f596](https://www.github.com/monetr/monetr/commit/aa4f5967fd39b5e77dcf7f93d722a5977478d890))
+* **deps:** update dependency @svgr/webpack to v6 ([d6ee2cb](https://www.github.com/monetr/monetr/commit/d6ee2cb07e7aa2e25454dd8ddc549eb4a39210ef))
+* Improve sentry span status reporting. ([3dfcb14](https://www.github.com/monetr/monetr/commit/3dfcb149e9e4e08d826afb42b389069da092fc75))
+* Improved development.yaml support. ([66f2a9f](https://www.github.com/monetr/monetr/commit/66f2a9f39e05a4a6f66ae8a4c154e1c560e9a831))
+
+### [0.6.13](https://www.github.com/monetr/monetr/compare/v0.6.12...v0.6.13) (2021-11-29)
+
+
+### Bug Fixes
+
+* added basic config generate, local dev config relocated. ([2d0cd8d](https://www.github.com/monetr/monetr/commit/2d0cd8d6b42d7963cb3e0696b7e2e2ea283fffdb))
+* Adding way to store secrets outside working dir. ([45b7dde](https://www.github.com/monetr/monetr/commit/45b7dde6d32d1846ba502568070f6dc656d99c74))
+* Cleaned up unused makefile stuff. ([aa4f596](https://www.github.com/monetr/monetr/commit/aa4f5967fd39b5e77dcf7f93d722a5977478d890))
 * Improve sentry span status reporting. ([3dfcb14](https://www.github.com/monetr/monetr/commit/3dfcb149e9e4e08d826afb42b389069da092fc75))
 * Improved development.yaml support. ([66f2a9f](https://www.github.com/monetr/monetr/commit/66f2a9f39e05a4a6f66ae8a4c154e1c560e9a831))
 
