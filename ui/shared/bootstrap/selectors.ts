@@ -11,6 +11,8 @@ export const getShouldVerifyRegister = (state: AppState): boolean => state.boots
 
 export const getShouldVerifyLogin = (state: AppState): boolean => state.bootstrap.ReCAPTCHAKey && state.bootstrap.verifyLogin;
 
+export const getShouldVerifyForgotPassword = (state: AppState): boolean => state.bootstrap.ReCAPTCHAKey && state.bootstrap.verifyForgotPassword;
+
 export const getReCAPTCHAKey = (state: AppState): string | null => state.bootstrap.ReCAPTCHAKey;
 
 export const getRequireLegalName = (state: AppState): boolean => state.bootstrap.requireLegalName;
@@ -26,3 +28,5 @@ export const getBillingEnabled = (state: AppState): boolean => state.bootstrap.b
 export const getRelease = (state: AppState): string => state.bootstrap.release;
 
 export const getRevision = (state: AppState): string => state.bootstrap.revision;
+
+export const getAllowForgotPassword = (state: AppState) => state.bootstrap.allowForgotPassword;

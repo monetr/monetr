@@ -40,12 +40,12 @@ func NewEmailRepository(log *logrus.Entry, db pg.DBI) EmailRepository {
 	}
 }
 
-func (e *emailRepositoryBase) GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error) {
+func getLoginForEmail(ctx context.Context, db pg.DBI, emailAddress string) (*models.Login, error) {
 	span := sentry.StartSpan(ctx, "GetLoginForEmail")
 	defer span.Finish()
 
 	var login models.Login
-	err := e.db.ModelContext(span.Context(), &login).
+	err := db.ModelContext(span.Context(), &login).
 		Where(`"login"."email" = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
 		Limit(1).
 		Select(&login)
@@ -54,6 +54,10 @@ func (e *emailRepositoryBase) GetLoginForEmail(ctx context.Context, emailAddress
 	}
 
 	return &login, nil
+}
+
+func (e *emailRepositoryBase) GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error) {
+	return getLoginForEmail(ctx, e.db, emailAddress)
 }
 
 func (e *emailRepositoryBase) SetEmailVerified(ctx context.Context, emailAddress string) error {

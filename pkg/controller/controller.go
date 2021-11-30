@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/smtp"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -31,7 +31,6 @@ import (
 	"github.com/monetr/monetr/pkg/verification"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/xlzd/gotp"
 	"gopkg.in/ezzarghili/recaptcha-go.v4"
 )
 
@@ -43,8 +42,6 @@ type Controller struct {
 	plaidWebhookVerification platypus.WebhookVerification
 	plaidSecrets             secrets.PlaidSecretsProvider
 	plaidInstitutions        platypus.PlaidInstitutions
-	smtp                     *smtp.Client
-	mailVerifyCode           *gotp.HOTP
 	log                      *logrus.Entry
 	job                      jobs.JobManager
 	stats                    *metrics.Stats
@@ -57,6 +54,7 @@ type Controller struct {
 	stripeWebhooks           billing.StripeWebhookHandler
 	communication            communication.UserCommunication
 	emailVerification        verification.Verification
+	passwordResetTokens      verification.TokenGenerator
 }
 
 func NewController(
@@ -99,8 +97,13 @@ func NewController(
 			log,
 			configuration.Email.Verification.TokenLifetime,
 			repository.NewEmailRepository(log, db),
-			verification.NewJWTEmailVerification(configuration.Email.Verification.TokenSecret),
+			verification.NewTokenGenerator(configuration.Email.Verification.TokenSecret),
 		)
+	}
+
+	var passwordResetTokenGenerator verification.TokenGenerator
+	if configuration.Email.AllowPasswordReset() {
+		passwordResetTokenGenerator = verification.NewTokenGenerator(configuration.Email.ForgotPassword.TokenSecret)
 	}
 
 	var userCommunication communication.UserCommunication
@@ -132,6 +135,7 @@ func NewController(
 		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
 		communication:            userCommunication,
 		emailVerification:        emailVerification,
+		passwordResetTokens:      passwordResetTokenGenerator,
 	}
 }
 
@@ -248,6 +252,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				)
 				span.Description = strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
 				defer func() {
+					if panicErr := recover(); panicErr != nil {
+						hub.RecoverWithContext(span.Context(), panicErr)
+						c.getLog(ctx).Errorf("panic for request: %+v\n%s", panicErr, string(debug.Stack()))
+						ctx.StatusCode(http.StatusInternalServerError)
+						ctx.SetErr(errors.New("An internal error occurred."))
+					}
 					switch span.Status {
 					case sentry.SpanStatusUndefined, sentry.SpanStatusUnknown:
 						switch ctx.GetStatusCode() {

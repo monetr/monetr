@@ -9,6 +9,7 @@ export default class BootstrapState {
   readonly isBootstrapping: boolean;
   readonly verifyLogin: boolean;
   readonly verifyRegister: boolean;
+  readonly verifyForgotPassword: boolean;
   readonly requireLegalName: boolean;
   readonly requirePhoneNumber: boolean;
   readonly ReCAPTCHAKey: string | null;

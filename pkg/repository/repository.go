@@ -73,6 +73,8 @@ type UnauthenticatedRepository interface {
 	CreateLogin(ctx context.Context, email, hashedPassword string, firstName, lastName string) (*models.Login, error)
 	CreateAccountV2(ctx context.Context, account *models.Account) error
 	CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error
+	GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error)
+	ResetPassword(ctx context.Context, loginId uint64, hashedPassword string) error
 	GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error)
 	ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error)
 	UseBetaCode(ctx context.Context, betaId, usedBy uint64) error

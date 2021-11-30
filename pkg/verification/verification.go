@@ -35,10 +35,10 @@ type verificationBase struct {
 	log       *logrus.Entry
 	lifespan  time.Duration
 	emailRepo repository.EmailRepository
-	tokens    EmailVerificationTokenGenerator
+	tokens    TokenGenerator
 }
 
-func NewEmailVerification(log *logrus.Entry, lifespan time.Duration, emailRepo repository.EmailRepository, tokens EmailVerificationTokenGenerator) Verification {
+func NewEmailVerification(log *logrus.Entry, lifespan time.Duration, emailRepo repository.EmailRepository, tokens TokenGenerator) Verification {
 	return &verificationBase{
 		log:       log,
 		lifespan:  lifespan,

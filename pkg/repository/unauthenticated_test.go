@@ -1,19 +1,23 @@
-package repository
+package repository_test
 
 import (
 	"context"
+	"math"
 	"testing"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/pkg/hash"
+	"github.com/monetr/monetr/pkg/internal/fixtures"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/repository"
 	"github.com/stretchr/testify/assert"
 )
 
-func GetTestUnauthenticatedRepository(t *testing.T) UnauthenticatedRepository {
+func GetTestUnauthenticatedRepository(t *testing.T) repository.UnauthenticatedRepository {
 	txn := testutils.GetPgDatabaseTxn(t)
-	return NewUnauthenticatedRepository(txn)
+	return repository.NewUnauthenticatedRepository(txn)
 }
 
 func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
@@ -141,5 +145,22 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &userAgain)
 		assert.Error(t, err, "should not create duplicate login for account")
 		assert.Zero(t, userAgain.UserId, "should not have an id")
+	})
+}
+
+func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		repo := GetTestUnauthenticatedRepository(t)
+		login, _ := fixtures.GivenIHaveLogin(t)
+
+		err := repo.ResetPassword(context.Background(), login.LoginId, hash.HashPassword(login.Email, "new Password"))
+		assert.NoError(t, err, "must reset password without an error")
+	})
+
+	t.Run("bad login", func(t *testing.T) {
+		repo := GetTestUnauthenticatedRepository(t)
+
+		err := repo.ResetPassword(context.Background(), math.MaxUint64, hash.HashPassword(testutils.GetUniqueEmail(t), "new Password"))
+		assert.EqualError(t, err, "no logins were updated", "should return an error for invalid login")
 	})
 }

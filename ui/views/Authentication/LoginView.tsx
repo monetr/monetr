@@ -4,7 +4,12 @@ import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import useLogin from 'shared/authentication/actions/login';
-import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
+import {
+  getAllowForgotPassword,
+  getReCAPTCHAKey,
+  getShouldVerifyLogin,
+  getSignUpAllowed
+} from 'shared/bootstrap/selectors';
 import classnames from 'classnames';
 import {
   Button,
@@ -13,13 +18,26 @@ import {
 } from '@mui/material';
 import { Formik, FormikHelpers } from 'formik';
 import verifyEmailAddress from 'util/verifyEmailAddress';
+import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
-
-import Logo from 'assets';
 
 interface LoginValues {
   email: string | null;
   password: string | null;
+}
+
+function ForgotPasswordMaybe(): JSX.Element {
+  const allowForgotPassword = useSelector(getAllowForgotPassword);
+
+  if (!allowForgotPassword) {
+    return null;
+  }
+
+  return (
+    <div className="w-full flex justify-end mt-2.5 text-sm">
+      <RouterLink className="hover:underline opacity-50" to="/password/forgot">Forgot Password?</RouterLink>
+    </div>
+  );
 }
 
 const LoginView = (): JSX.Element => {
@@ -123,9 +141,7 @@ const LoginView = (): JSX.Element => {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <div className="flex justify-center w-full mb-5">
-                  <img src={ Logo } className="w-1/3"/>
-                </div>
+                <AuthenticationLogo />
                 { allowSignUp && (
                   <div>
                     <div className="w-full pb-2.5">
@@ -181,6 +197,7 @@ const LoginView = (): JSX.Element => {
                       value={ values.password }
                       variant="outlined"
                     />
+                    <ForgotPasswordMaybe/>
                   </div>
                 </div>
                 <CaptchaMaybe

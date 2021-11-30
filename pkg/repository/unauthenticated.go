@@ -94,6 +94,10 @@ func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId
 	return nil
 }
 
+func (u *unauthenticatedRepo) GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error) {
+	return getLoginForEmail(ctx, u.txn, emailAddress)
+}
+
 func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error) {
 	span := sentry.StartSpan(ctx, "GetLinksForItem")
 	defer span.Finish()
@@ -163,6 +167,30 @@ func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy ui
 	if result.RowsAffected() != 1 {
 		span.Status = sentry.SpanStatusInvalidArgument
 		return errors.Errorf("invalid number of beta codes used: %d", result.RowsAffected())
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return nil
+}
+
+func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64, hashedPassword string) error {
+	span := sentry.StartSpan(ctx, "ResetPassword")
+	defer span.Finish()
+
+	result, err := u.txn.ModelContext(span.Context(), &models.LoginWithHash{}).
+		Set(`"password_hash" = ?`, hashedPassword).
+		Set(`"password_reset_at" = ?`, time.Now()).
+		Where(`"login_with_hash"."login_id" = ?`, loginId).
+		Update()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to reset login password")
+	}
+
+	if result.RowsAffected() != 1 {
+		span.Status = sentry.SpanStatusNotFound
+		return errors.Errorf("no logins were updated")
 	}
 
 	span.Status = sentry.SpanStatusOK
