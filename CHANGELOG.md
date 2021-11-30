@@ -1,5 +1,14 @@
 # Changelog
 
+### [0.6.14](https://www.github.com/monetr/monetr/compare/v0.6.13...v0.6.14) (2021-11-29)
+
+
+### Bug Fixes
+
+* **deps:** update material-ui monorepo ([751d4f7](https://www.github.com/monetr/monetr/commit/751d4f7cb022b7a8b81db42dd9bed8051086a79f))
+* **deps:** update module github.com/brianvoe/gofakeit/v6 to v6.10.0 ([514e1bd](https://www.github.com/monetr/monetr/commit/514e1bdb361183e027f6fd381b2a486763b0816a))
+* **deps:** update typescript-eslint monorepo to v5.5.0 ([47f2ef3](https://www.github.com/monetr/monetr/commit/47f2ef38ab7d8e96383385b5c14b0582d36ce5d8))
+
 ### [0.6.13](https://www.github.com/monetr/monetr/compare/v0.6.12...v0.6.13) (2021-11-29)
 
 
