@@ -145,12 +145,26 @@ func NewController(
 // @license.url https://github.com/monetr/monetr/blob/main/LICENSE
 // @host your.monetr.app/api
 
+// @tag.name Authentication
+// @tag.description Authentication endpoints for end users.
+
+// @tag.name Bank Accounts
+// @tag.name Billing
+// @tag.name Config
+
 // @tag.name Funding Schedules
 // @tag.description Funding Schedules are created by the user to tell us when money should be taken from their account to fund their goals and expenses.
 
+// @tag.name Health
+// @tag.name Institutions
+// @tag.name Links
+// @tag.name Plaid
+// @tag.name Spending
+// @tag.name Transactions
+
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name M-Token
+// @name Cookies
 func (c *Controller) RegisterRoutes(app *iris.Application) {
 	if c.stats != nil {
 		app.UseGlobal(func(ctx iris.Context) {
