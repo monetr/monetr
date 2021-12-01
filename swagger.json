@@ -3292,14 +3292,45 @@
     "securityDefinitions": {
         "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "M-Token",
+            "name": "Cookies",
             "in": "header"
         }
     },
     "tags": [
         {
+            "description": "Authentication endpoints for end users.",
+            "name": "Authentication"
+        },
+        {
+            "name": "Bank Accounts"
+        },
+        {
+            "name": "Billing"
+        },
+        {
+            "name": "Config"
+        },
+        {
             "description": "Funding Schedules are created by the user to tell us when money should be taken from their account to fund their goals and expenses.",
             "name": "Funding Schedules"
+        },
+        {
+            "name": "Health"
+        },
+        {
+            "name": "Institutions"
+        },
+        {
+            "name": "Links"
+        },
+        {
+            "name": "Plaid"
+        },
+        {
+            "name": "Spending"
+        },
+        {
+            "name": "Transactions"
         }
     ]
 }
