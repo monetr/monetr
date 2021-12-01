@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.6.15](https://www.github.com/monetr/monetr/compare/v0.6.14...v0.6.15) (2021-11-30)
+
+
+### Bug Fixes
+
+* **deps:** update dependency sass to v1.44.0 ([c94be80](https://www.github.com/monetr/monetr/commit/c94be8068852b0e157fc88e20e988cdf05b74185))
+
 ### [0.6.14](https://www.github.com/monetr/monetr/compare/v0.6.13...v0.6.14) (2021-11-29)
 
 
