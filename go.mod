@@ -20,7 +20,7 @@ require (
 	github.com/hashicorp/vault/api v1.3.0
 	github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d
 	github.com/jarcoal/httpmock v1.0.8
-	github.com/kataras/iris/v12 v12.2.0-alpha4.0.20211031094939-485395190b77
+	github.com/kataras/iris/v12 v12.2.0-alpha5
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/nleeper/goment v1.4.2
 	github.com/nyaruka/phonenumbers v1.0.73
@@ -36,7 +36,7 @@ require (
 	github.com/teambition/rrule-go v1.7.2
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	google.golang.org/genproto v0.0.0-20211112145013-271947fe86fd // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
@@ -48,7 +48,7 @@ require (
 	github.com/Shopify/goreferrer v0.0.0-20210630161223-536fa16abd6f // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
-	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/armon/go-metrics v0.3.9 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -90,6 +90,7 @@ require (
 	github.com/iris-contrib/jade v1.1.4 // indirect
 	github.com/iris-contrib/schema v0.0.6 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kataras/blocks v0.0.4 // indirect
 	github.com/kataras/golog v0.1.7 // indirect
@@ -98,8 +99,8 @@ require (
 	github.com/kataras/tunnel v0.0.3 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
-	github.com/mattn/go-colorable v0.1.6 // indirect
-	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.16 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
@@ -143,16 +144,16 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/net v0.0.0-20211029224645-99673261e6eb // indirect
+	golang.org/x/net v0.0.0-20211201190559-0a0e4e1bb54c // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
-	golang.org/x/sys v0.0.0-20211031064116-611d5d643895 // indirect
+	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
+	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.41.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/ini.v1 v1.63.2 // indirect
+	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/square/go-jose.v2 v2.5.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
