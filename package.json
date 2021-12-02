@@ -81,7 +81,7 @@
     "ts-pnp": "1.2.0",
     "web-vitals": "2.1.2",
     "webpack-manifest-plugin": "4.0.2",
-    "workbox-webpack-plugin": "6.4.1"
+    "workbox-webpack-plugin": "6.4.2"
   },
   "scripts": {
     "build": "webpack",
