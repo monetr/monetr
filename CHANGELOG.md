@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.6.16](https://www.github.com/monetr/monetr/compare/v0.6.15...v0.6.16) (2021-12-03)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @svgr/webpack to v6.1.0 ([134c39c](https://www.github.com/monetr/monetr/commit/134c39cade4c2ffe1e02c48546b48a32e9d4ffe2))
+* **deps:** update dependency eslint-plugin-testing-library to v5.0.1 ([cbcc1c4](https://www.github.com/monetr/monetr/commit/cbcc1c4f532fbe93dc2d2ba761ab2cd2494327e8))
+* **deps:** update dependency workbox-webpack-plugin to v6.4.2 ([8a355ae](https://www.github.com/monetr/monetr/commit/8a355ae13ba7031ce60f36c0d67bd32907507399))
+* **deps:** update module github.com/gomodule/redigo to v1.8.6 ([298dc96](https://www.github.com/monetr/monetr/commit/298dc96bdf72270cd16a46c3c9ab2ada45f4b18e))
+* **deps:** update module github.com/kataras/iris/v12 to v12.2.0-alpha5 ([0d59b95](https://www.github.com/monetr/monetr/commit/0d59b9524e4eb0d5e258175fca6a830b5bc9cecf))
+* **deps:** update module github.com/plaid/plaid-go to v1.8.0 ([91a1119](https://www.github.com/monetr/monetr/commit/91a1119b8061c3199d28e45f8efc898b3c931547))
+* Improving documentation for API. ([ebf3f42](https://www.github.com/monetr/monetr/commit/ebf3f42e63b49c13bd5717af5ad8c35cd6c98f22))
+
 ### [0.6.15](https://www.github.com/monetr/monetr/compare/v0.6.14...v0.6.15) (2021-11-30)
 
 
