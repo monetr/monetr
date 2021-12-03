@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://www.github.com/monetr/monetr/compare/v0.6.16...v0.7.0) (2021-12-03)
+
+
+### Features
+
+* Adding `Forgot Password` to login page. ([48b0757](https://www.github.com/monetr/monetr/commit/48b075728fad9b877f3f7f0831ffef48653988d2)), closes [#92](https://www.github.com/monetr/monetr/issues/92)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/golang-jwt/jwt/v4 to v4.2.0 ([30ea8e6](https://www.github.com/monetr/monetr/commit/30ea8e6da49637a7d41ca9aff6518b13fcdc46be))
+
 ### [0.6.16](https://www.github.com/monetr/monetr/compare/v0.6.15...v0.6.16) (2021-12-03)
 
 
