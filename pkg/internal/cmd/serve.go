@@ -64,6 +64,9 @@ func RunServer() error {
 	configuration := config.LoadConfiguration(configPath)
 
 	log := logging.NewLoggerWithConfig(configuration.Logging)
+	if configFileName := configuration.GetConfigFileName(); configFileName != "" {
+		log.WithField("config", configFileName).Info("config file loaded")
+	}
 
 	stats := metrics.NewStats()
 	stats.Listen(fmt.Sprintf(":%d", configuration.Server.StatsPort))

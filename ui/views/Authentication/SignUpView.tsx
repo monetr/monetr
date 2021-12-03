@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios';
 import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -22,9 +23,9 @@ import {
 import { Formik, FormikHelpers } from 'formik';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
+import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
+import BackToLoginButton from 'views/Authentication/components/BackToLoginButton';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
-
-import Logo from 'assets';
 
 interface SignUpValues {
   agree: boolean;
@@ -144,7 +145,7 @@ const SignUpView = (): JSX.Element => {
             return navigate('/');
           });
       })
-      .catch(error => {
+      .catch((error: AxiosError) => {
         const message = error?.response?.data?.error || 'Failed to sign up.';
         enqueueSnackbar(message, {
           variant: 'error',
@@ -174,6 +175,7 @@ const SignUpView = (): JSX.Element => {
 
   return (
     <Fragment>
+      <BackToLoginButton />
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }
@@ -192,9 +194,7 @@ const SignUpView = (): JSX.Element => {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex justify-center w-full h-full max-h-full">
               <div className="w-full p-10 max-w-screen-sm sm:p-0">
-                <div className="flex justify-center w-full mt-5 mb-5">
-                  <img src={ Logo } className="w-1/4"/>
-                </div>
+                <AuthenticationLogo />
                 <div className="w-full">
                   <div className="w-full pb-1.5 pt-1.5">
                     <TextField

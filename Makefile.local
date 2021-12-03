@@ -9,7 +9,7 @@ $(DEVELOPMENT_CONFIG):
 # takes 2 arguments, the first argument should be a YQ compatible path to the value you want to read, and the second
 # value should be the default if the path is not in the file, or if the file does not exist.
 define getDevelopmentSetting
-$(word 1,$(shell (cat $(DEVELOPMENT_CONFIG) 2>/dev/null | $(YQ) e $(1) -) || true) $(2))
+$(word 1,$(shell (cat $(DEVELOPMENT_CONFIG) 2>/dev/null | $(YQ) e '$(subst ',,$(1)) // "$(2)"' -) || true) $(2))
 endef
 
 PATH:=$(LOCAL_BIN):$(PATH) # Use our local stuff first

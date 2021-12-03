@@ -35,6 +35,27 @@ func TestLogin(t *testing.T) {
 		AssertSetTokenCookie(t, response)
 	})
 
+	t.Run("bad cookie name", func(t *testing.T) {
+		conf := NewTestApplicationConfig(t)
+		conf.Server.Cookies.Name = ""
+		e := NewTestApplicationWithConfig(t, conf)
+
+		// We need to provision the login directly, because the token should fail otherwise.
+		login, password := fixtures.GivenIHaveLogin(t)
+		fixtures.GivenIHaveAnAccount(t, login)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(swag.LoginRequest{
+				Email:    login.Email,
+				Password: password,
+			}).
+			Expect()
+
+		response.Status(http.StatusInternalServerError)
+		response.JSON().Path("$.error").String().Equal("An internal error occurred.")
+		response.Cookies().Empty()
+	})
+
 	t.Run("no users", func(t *testing.T) {
 		e := NewTestApplication(t)
 		// Creating the login fixture directly prevents it from also creating a user and an account.
@@ -47,7 +68,7 @@ func TestLogin(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusInternalServerError)
 		response.JSON().Path("$.error").String().Equal("user has no accounts")
 		response.JSON().Object().NotContainsKey("token")
 	})
@@ -665,7 +686,7 @@ func TestVerifyEmail(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		app, e := NewTestApplicationExWithConfig(t, config)
 
-		tokenGenerator := verification.NewJWTEmailVerification(config.Email.Verification.TokenSecret)
+		tokenGenerator := verification.NewTokenGenerator(config.Email.Verification.TokenSecret)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -741,7 +762,7 @@ func TestVerifyEmail(t *testing.T) {
 		e := NewTestApplicationWithConfig(t, config)
 
 		// Create a token generator with a different secret so it will always generate invalid tokens.
-		tokenGenerator := verification.NewJWTEmailVerification(gofakeit.UUID())
+		tokenGenerator := verification.NewTokenGenerator(gofakeit.UUID())
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -795,7 +816,7 @@ func TestVerifyEmail(t *testing.T) {
 	t.Run("expired verification code", func(t *testing.T) {
 		e := NewTestApplicationWithConfig(t, config)
 
-		tokenGenerator := verification.NewJWTEmailVerification(config.Email.Verification.TokenSecret)
+		tokenGenerator := verification.NewTokenGenerator(config.Email.Verification.TokenSecret)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -957,5 +978,436 @@ func TestResendVerificationEmail(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().Equal("email must be provided to resend verification link")
+	})
+}
+
+func TestSendForgotPassword(t *testing.T) {
+	conf := NewTestApplicationConfig(t)
+	conf.Email.Enabled = true
+	conf.Email.ForgotPassword.Enabled = true
+	conf.Email.ForgotPassword.TokenLifetime = 5 * time.Second
+	conf.Email.ForgotPassword.TokenSecret = gofakeit.Generate("????????????????????????")
+	conf.Email.Domain = "monetr.mini"
+
+	t.Run("sends email for real login", func(t *testing.T) {
+		app, e := NewTestApplicationExWithConfig(t, conf)
+
+		email, _ := GivenIHaveLogin(t, e)
+
+		var resetPasswordRequest struct {
+			Email string `json:"email"`
+		}
+		resetPasswordRequest.Email = email
+
+		// Make sure we are starting with a clean slate.
+		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
+
+		{
+			response := e.POST(`/api/authentication/forgot`).
+				WithJSON(resetPasswordRequest).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().Empty()
+		}
+
+		assert.Len(t, app.Mail.Sent, 1, "should have sent a single email to reset password")
+	})
+
+	t.Run("success for non-existent email", func(t *testing.T) {
+		app, e := NewTestApplicationExWithConfig(t, conf)
+
+		var resetPasswordRequest struct {
+			Email string `json:"email"`
+		}
+		resetPasswordRequest.Email = testutils.GetUniqueEmail(t)
+
+		// Make sure we are starting with a clean slate.
+		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
+
+		{
+			response := e.POST(`/api/authentication/forgot`).
+				WithJSON(resetPasswordRequest).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().Empty()
+		}
+
+		// Make sure that even though the request succeeded, no emails were sent since the email address was not real.
+		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
+	})
+
+	t.Run("with unverified email", func(t *testing.T) {
+		verificationConf := conf
+		verificationConf.Email.Verification.Enabled = true
+		verificationConf.Email.Verification.TokenLifetime = time.Second * 10
+		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
+		app, e := NewTestApplicationExWithConfig(t, verificationConf)
+
+		email, _ := GivenIHaveLogin(t, e)
+
+		var resetPasswordRequest struct {
+			Email string `json:"email"`
+		}
+		resetPasswordRequest.Email = email
+
+		assert.Len(t, app.Mail.Sent, 1, "should contain the verification email")
+		assert.Equal(t, "Verify Your Email Address", app.Mail.Sent[0].Subject)
+
+		{
+			response := e.POST(`/api/authentication/forgot`).
+				WithJSON(resetPasswordRequest).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().Equal("You must verify your email before you can send forgot password requests.")
+		}
+
+		assert.Len(t, app.Mail.Sent, 1, "should not have sent another email")
+	})
+
+	t.Run("with verified email", func(t *testing.T) {
+		verificationConf := conf
+		verificationConf.Email.Verification.Enabled = true
+		verificationConf.Email.Verification.TokenLifetime = time.Second * 10
+		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
+		tokenGenerator := verification.NewTokenGenerator(verificationConf.Email.Verification.TokenSecret)
+		app, e := NewTestApplicationExWithConfig(t, verificationConf)
+
+		email, _ := GivenIHaveLogin(t, e)
+
+		var resetPasswordRequest struct {
+			Email string `json:"email"`
+		}
+		resetPasswordRequest.Email = email
+
+		assert.Len(t, app.Mail.Sent, 1, "should contain the verification email")
+		assert.Equal(t, "Verify Your Email Address", app.Mail.Sent[0].Subject)
+
+		{ // Then generate a verification token and try to use it.
+			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), email, 10*time.Second)
+			assert.NoError(t, err, "must generate verification token")
+			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
+
+			response := e.POST("/api/authentication/verify").
+				WithJSON(swag.VerifyRequest{
+					Token: verificationToken,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.nextUrl").String().Equal("/login")
+			response.JSON().Path("$.message").String().Equal("Your email is now verified. Please login.")
+		}
+
+		{
+			response := e.POST(`/api/authentication/forgot`).
+				WithJSON(resetPasswordRequest).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().Empty()
+		}
+
+		assert.Len(t, app.Mail.Sent, 2, "should now have sent 2 emails")
+	})
+
+	t.Run("with bad json body", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+
+		{ // Send a request with invalid json body.
+			response := e.POST(`/api/authentication/forgot`).
+				WithBytes([]byte("not json")).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().Equal("malformed JSON: invalid character 'o' in literal null (expecting 'u')")
+		}
+	})
+
+	t.Run("with blank email", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+
+		{ // Send a request with invalid json body.
+			response := e.POST(`/api/authentication/forgot`).
+				WithJSON(map[string]interface{}{
+					"email": "",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().Equal("Must provide an email address.")
+		}
+	})
+
+	t.Run("with blank captcha", func(t *testing.T) {
+		captchaConf := conf
+		captchaConf.ReCAPTCHA.Enabled = true
+		captchaConf.ReCAPTCHA.PublicKey = gofakeit.UUID()
+		captchaConf.ReCAPTCHA.PrivateKey = gofakeit.UUID()
+		captchaConf.ReCAPTCHA.VerifyPasswordReset = true
+		e := NewTestApplicationWithConfig(t, captchaConf)
+
+		{ // Send a request with invalid json body.
+			response := e.POST(`/api/authentication/forgot`).
+				WithJSON(map[string]interface{}{
+					"email":   testutils.GetUniqueEmail(t),
+					"captcha": "",
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().Equal("Must provide a valid ReCAPTCHA.")
+		}
+	})
+}
+
+func TestResetPassword(t *testing.T) {
+	conf := NewTestApplicationConfig(t)
+	conf.Email.Enabled = true
+	conf.Email.ForgotPassword.Enabled = true
+	conf.Email.ForgotPassword.TokenLifetime = 5 * time.Second
+	conf.Email.ForgotPassword.TokenSecret = gofakeit.Generate("????????????????????????")
+	conf.Email.Domain = "monetr.mini"
+
+	tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret)
+
+	t.Run("happy path", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+
+		{ // Make sure we can log in with the current password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			AssertSetTokenCookie(t, response)
+		}
+
+		// Generate a new password to reset to.
+		newPassword := gofakeit.Generate("????????")
+		assert.NotEqual(t, password, newPassword, "make sure the new password does not match the old one")
+
+		{ // Reset the password.
+			token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+			assert.NoError(t, err, "must be able to generate a password reset token")
+
+			response := e.POST(`/api/authentication/reset`).
+				WithJSON(map[string]interface{}{
+					"password": newPassword,
+					"token":    token,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().Empty()
+		}
+
+		{ // Try to log in with the old password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+				}).
+				Expect()
+
+			response.Status(http.StatusForbidden)
+			response.JSON().Path("$.error").String().Equal("invalid email and password")
+			response.Cookies().Empty()
+		}
+
+		{ // Try to log in with the new password.
+			response := e.POST(`/api/authentication/login`).
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": newPassword,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			AssertSetTokenCookie(t, response)
+		}
+	})
+
+	t.Run("invalidates multiple tokens after reset", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+		user, _ := fixtures.GivenIHaveABasicAccount(t)
+
+		firstToken, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		assert.NoError(t, err, "must be able to generate a password reset token")
+
+		secondToken, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		assert.NoError(t, err, "must be able to generate a password reset token")
+
+		// Make sure the issued_at on the tokens are definitely in the past.
+		time.Sleep(1 * time.Second)
+
+		// Generate a new password to reset to.
+		newPassword := gofakeit.Generate("????????")
+
+		{ // Reset the password using the first token.
+			response := e.POST(`/api/authentication/reset`).
+				WithJSON(map[string]interface{}{
+					"password": newPassword,
+					"token":    firstToken,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().Empty()
+		}
+
+		{ // Try to reset the password with the second token, it should fail.
+			response := e.POST(`/api/authentication/reset`).
+				WithJSON(map[string]interface{}{
+					"password": "aDifferentPassword",
+					"token":    secondToken,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().Equal("Password has already been reset, you must request another password reset link.")
+		}
+	})
+
+	t.Run("token cannot be used twice", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+		user, _ := fixtures.GivenIHaveABasicAccount(t)
+
+		token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		assert.NoError(t, err, "must be able to generate a password reset token")
+
+		// Generate a new password to reset to.
+		newPassword := gofakeit.Generate("????????")
+
+		{ // Reset the password using the first token.
+			response := e.POST(`/api/authentication/reset`).
+				WithJSON(map[string]interface{}{
+					"password": newPassword,
+					"token":    token,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.Body().Empty()
+		}
+
+		{ // Try to reset the password with the second token, it should fail.
+			response := e.POST(`/api/authentication/reset`).
+				WithJSON(map[string]interface{}{
+					"password": "aDifferentPassword",
+					"token":    token,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().Equal("Password has already been reset, you must request another password reset link.")
+		}
+	})
+
+	t.Run("token must not be expired", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+		user, _ := fixtures.GivenIHaveABasicAccount(t)
+
+		token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*1)
+		assert.NoError(t, err, "must be able to generate a password reset token")
+
+		// Wait for the token to expire.
+		time.Sleep(2 * time.Second)
+
+		// Generate a new password to reset to.
+		newPassword := gofakeit.Generate("????????")
+
+		{ // Try to reset the password using the expired token.
+			response := e.POST(`/api/authentication/reset`).
+				WithJSON(map[string]interface{}{
+					"password": newPassword,
+					"token":    token,
+				}).
+				Expect()
+
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.error").String().Contains("Failed to validate password reset token: invalid token: token is expired by")
+		}
+	})
+
+	t.Run("reset password login does not exist", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+
+		email := testutils.GetUniqueEmail(t)
+		token, err := tokenGenerator.GenerateToken(context.Background(), email, time.Second*5)
+		assert.NoError(t, err, "must be able to generate a password reset token")
+
+		response := e.POST(`/api/authentication/reset`).
+			WithJSON(map[string]interface{}{
+				"password": "doesn'tEvenMatter",
+				"token":    token,
+			}).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().Equal("Failed to verify login for email address: record does not exist")
+	})
+
+	t.Run("invalid json", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST(`/api/authentication/reset`).
+			WithBytes([]byte("I am not json")).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("malformed JSON: invalid character 'I' looking for beginning of value")
+	})
+
+	t.Run("token is empty", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST(`/api/authentication/reset`).
+			WithJSON(map[string]interface{}{
+				"password": "doesn'tEvenMatter",
+				"token":    "",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("Token must be provided to reset password.")
+	})
+
+	t.Run("password too short", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+
+		email := testutils.GetUniqueEmail(t)
+		token, err := tokenGenerator.GenerateToken(context.Background(), email, time.Second*5)
+		assert.NoError(t, err, "must be able to generate a password reset token")
+
+		response := e.POST(`/api/authentication/reset`).
+			WithJSON(map[string]interface{}{
+				"password": "short",
+				"token":    token,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("Password must be at least 8 characters long.")
+	})
+
+	t.Run("invalid token", func(t *testing.T) {
+		e := NewTestApplicationWithConfig(t, conf)
+
+		response := e.POST(`/api/authentication/reset`).
+			WithJSON(map[string]interface{}{
+				"password": "thisIsAPasswordForSure",
+				"token":    "notAToken",
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("Failed to validate password reset token: invalid token: token contains an invalid number of segments")
 	})
 }

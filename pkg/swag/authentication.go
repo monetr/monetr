@@ -117,3 +117,34 @@ type ResendVerificationRequest struct {
 	// this endpoint from easily being spammed.
 	Captcha *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
 }
+
+type ForgotPasswordRequest struct {
+	// The email address of the login that the client want's to reset the password for. This must be a valid email
+	// address.
+	Email string `json:"email" example:"i.am.a.user@example.com" validate:"required"`
+	// The ReCAPTCHA verification code if required by the API. This is only required if the /config endpoint indicates
+	// that it is for forgot passwords.
+	ReCAPTCHA *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
+}
+
+type ForgotPasswordBadRequest struct {
+	Error string `json:"error" example:"Must provide an email address."`
+}
+
+type ForgotPasswordEmailNotVerifiedError struct {
+	// This error is returned to the client if they attempt to request a password reset link before the email has been
+	// verified.
+	Error string `json:"error" example:"You must verify your email before you can send forgot password requests."`
+}
+
+type ResetPasswordRequest struct {
+	// The new password the client wants to use for logging in.
+	Password string `json:"password" example:"superSecureP@ssword"`
+	// The token that is provided to the client in an email sent by the forgot password endpoint. This is derived from
+	// the `token` URL parameter in the UI for the reset password page.
+	Token string `json:"token" example:"eyJhbGciOiJIUzI1NiIs..."`
+}
+
+type ResetPasswordBadRequest struct {
+	Error string `json:"error" example:"Token must be provided to reset password."`
+}

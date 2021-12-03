@@ -25,6 +25,10 @@ const (
 )
 
 type Configuration struct {
+	// configFile is not an actual configuration variable, but is used to let usages know what file was loaded for the
+	// configuration.
+	configFile string `yaml:"-"`
+
 	// DEPRECATED: This is not used anymore. It serves no function at all.
 	Name string `yaml:"name"`
 	// DEPRECATED: This is not used anymore. Use Server.ListenPort instead.
@@ -48,6 +52,10 @@ type Configuration struct {
 	Sentry        Sentry     `yaml:"sentry"`
 	Stripe        Stripe     `yaml:"stripe"`
 	Vault         Vault      `yaml:"vault"`
+}
+
+func (c Configuration) GetConfigFileName() string {
+	return c.configFile
 }
 
 func (c Configuration) GetUIDomainName() string {
@@ -161,6 +169,9 @@ type ReCAPTCHA struct {
 	Version        int    `yaml:"version"` // Currently only version 2 is supported by the UI.
 	VerifyLogin    bool   `yaml:"verifyLogin"`
 	VerifyRegister bool   `yaml:"loginRegister"`
+	// VerifyPasswordReset determines whether or not the user will be required to verify that they are not a robot
+	// overlord.
+	VerifyPasswordReset bool `yaml:"verifyPasswordReset"`
 }
 
 func (r ReCAPTCHA) ShouldVerifyLogin() bool {
@@ -169,6 +180,10 @@ func (r ReCAPTCHA) ShouldVerifyLogin() bool {
 
 func (r ReCAPTCHA) ShouldVerifyRegistration() bool {
 	return r.Enabled && r.VerifyRegister
+}
+
+func (r ReCAPTCHA) ShouldVerifyPasswordReset() bool {
+	return r.Enabled && r.VerifyPasswordReset
 }
 
 type Plaid struct {
@@ -322,6 +337,8 @@ func LoadConfigurationEx(v *viper.Viper) Configuration {
 		panic(err)
 	}
 
+	config.configFile = v.ConfigFileUsed()
+
 	return config
 }
 
@@ -351,7 +368,9 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("PostgreSQL.Port", 5432)
 	v.SetDefault("PostgreSQL.Username", "postgres")
 	v.SetDefault("ReCAPTCHA.Enabled", false)
-	v.SetDefault("Server.Cookie.Name", "M-Token")
+	v.SetDefault("Server.Cookies.Name", "M-Token")
+	v.SetDefault("Server.Cookies.Secure", true)
+	v.SetDefault("Server.Cookies.SameSiteStrict", true)
 	v.SetDefault("Server.ListenPort", 4000)
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("UIDomainName", "localhost:4000")

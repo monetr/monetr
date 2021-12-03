@@ -17,7 +17,7 @@ func TestVerificationBase_CreateEmailVerificationToken(t *testing.T) {
 		db := testutils.GetPgDatabase(t)
 
 		emailRepo := repository.NewEmailRepository(log, db)
-		tokens := NewJWTEmailVerification(gofakeit.Generate("????????"))
+		tokens := NewTokenGenerator(gofakeit.Generate("????????"))
 
 		verification := NewEmailVerification(log, time.Second, emailRepo, tokens)
 

@@ -29,8 +29,5 @@ export default function useSignUp(): (args: SignUpArguments) => Promise<SignUpRe
   return (args: SignUpArguments) => {
     return request().post('/authentication/register', args)
       .then(result => result.data as SignUpResponse)
-      .catch((error: AxiosError) => ({
-        error: error.response?.data?.error || 'Failed to sign up.',
-      }));
   }
 }

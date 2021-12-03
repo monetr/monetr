@@ -2,13 +2,14 @@ import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Formik, FormikHelpers } from 'formik';
-import { Alert, AlertTitle, Button, CircularProgress, Snackbar, TextField } from '@mui/material';
+import { Button, CircularProgress, TextField } from '@mui/material';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
+import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
+import BackToLoginButton from 'views/Authentication/components/BackToLoginButton';
 import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
 import verifyEmailAddress from 'util/verifyEmailAddress';
-import Logo from 'assets';
 import request from 'shared/util/request';
 import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
 
@@ -63,6 +64,7 @@ const ResendVerification = (): JSX.Element => {
 
   return (
     <Fragment>
+      <BackToLoginButton/>
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }
@@ -81,9 +83,7 @@ const ResendVerification = (): JSX.Element => {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <div className="flex justify-center w-full mb-5">
-                  <img src={ Logo } className="w-1/3"/>
-                </div>
+                <AuthenticationLogo/>
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     { routeState &&

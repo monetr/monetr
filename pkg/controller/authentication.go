@@ -17,6 +17,7 @@ import (
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/swag"
@@ -48,6 +49,10 @@ func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) 
 		expiration = time.Now().Add(-1 * time.Second)
 	}
 
+	if c.configuration.Server.Cookies.Name == "" {
+		panic("authentication cookie name is blank")
+	}
+
 	ctx.SetCookie(&http.Cookie{
 		Name:     c.configuration.Server.Cookies.Name,
 		Value:    token,
@@ -64,9 +69,16 @@ func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) 
 func (c *Controller) handleAuthentication(p router.Party) {
 	p.Post("/login", c.loginEndpoint)
 	p.Get("/logout", c.logoutEndpoint)
+
 	p.Post("/register", c.registerEndpoint)
+
 	p.Post("/verify", c.verifyEndpoint)
 	p.Post("/verify/resend", c.resendVerification)
+
+	if c.configuration.Email.AllowPasswordReset() {
+		p.Post("/forgot", c.sendForgotPassword)
+		p.Post("/reset", c.resetPassword)
+	}
 }
 
 // Login
@@ -113,14 +125,13 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 	hashedPassword := hash.HashPassword(loginRequest.Email, loginRequest.Password)
 	var login models.Login
-	if err := c.db.RunInTransaction(c.getContext(ctx), func(txn *pg.Tx) error {
-		return txn.ModelContext(c.getContext(ctx), &login).
-			Relation("Users").
-			Relation("Users.Account").
-			Where(`"login"."email" = ? AND "login"."password_hash" = ?`, loginRequest.Email, hashedPassword).
-			Limit(1).
-			Select(&login)
-	}); err != nil {
+	if err := c.mustGetDatabase(ctx).
+		ModelContext(c.getContext(ctx), &login).
+		Relation("Users").
+		Relation("Users.Account").
+		Where(`"login"."email" = ? AND "login"."password_hash" = ?`, loginRequest.Email, hashedPassword).
+		Limit(1).
+		Select(&login); err != nil {
 		if err == pg.ErrNoRows {
 			c.returnError(ctx, http.StatusForbidden, "invalid email and password")
 			return
@@ -140,7 +151,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	switch len(login.Users) {
 	case 0:
 		// TODO (elliotcourant) Should we allow them to create an account?
-		c.returnError(ctx, http.StatusForbidden, "user has no accounts")
+		c.returnError(ctx, http.StatusInternalServerError, "user has no accounts")
 		return
 	case 1:
 		user := login.Users[0]
@@ -572,6 +583,174 @@ func (c *Controller) resendVerification(ctx iris.Context) {
 	}
 
 	return
+}
+
+// Send Password Reset Link
+// @Summary Send Password Reset Link
+// @id send-password-reset-link
+// @tags Authentication
+// @description This endpoint should be used to send password reset links to clients who have forgotten their password.
+// @Produce json
+// @Accept json
+// @Param Token body swag.ForgotPasswordRequest true "Forgot Password Request"
+// @Router /authentication/forgot [post]
+// @Success 200
+// @Failure 400 {object} swag.ForgotPasswordBadRequest
+// @Failure 428 {object} swag.ForgotPasswordEmailNotVerifiedError Email verification required.
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) sendForgotPassword(ctx iris.Context) {
+	var sendForgotPasswordRequest struct {
+		Email     string `json:"email"`
+		ReCAPTCHA string `json:"captcha"`
+	}
+	if err := ctx.ReadJSON(&sendForgotPasswordRequest); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	// Clean up some of the input provided just in case.
+	sendForgotPasswordRequest.Email = strings.TrimSpace(strings.ToLower(sendForgotPasswordRequest.Email))
+	sendForgotPasswordRequest.ReCAPTCHA = strings.TrimSpace(sendForgotPasswordRequest.ReCAPTCHA)
+
+	if sendForgotPasswordRequest.Email == "" {
+		c.badRequest(ctx, "Must provide an email address.")
+		return
+	}
+
+	// If we require ReCAPTCHA then make sure they provide it.
+	if c.configuration.ReCAPTCHA.ShouldVerifyPasswordReset() {
+		if sendForgotPasswordRequest.ReCAPTCHA == "" {
+			c.badRequest(ctx, "Must provide a valid ReCAPTCHA.")
+			return
+		}
+
+		if err := c.validateCaptchaMaybe(c.getContext(ctx), ""); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
+			return
+		}
+	}
+
+	// We need to retrieve the login record for the email in order to verify that the login actually exists, as well as
+	// make sure the login email address has been verified.
+	login, err := c.mustGetUnauthenticatedRepository(ctx).GetLoginForEmail(
+		c.getContext(ctx),
+		sendForgotPasswordRequest.Email,
+	)
+	if err != nil {
+		crumbs.Debug(c.getContext(ctx), "No password reset email will be sent, login for email not found", map[string]interface{}{
+			"error": err.Error(),
+		})
+		// Don't return an error to the client, don't want them to know if it failed to send.
+		ctx.StatusCode(http.StatusOK)
+		return
+	}
+
+	// If the login's email is not verified then return an error to the client.
+	if c.configuration.Email.ShouldVerifyEmails() && !login.GetEmailIsVerified() {
+		c.returnError(ctx, http.StatusPreconditionRequired, "You must verify your email before you can send forgot password requests.")
+		return
+	}
+
+	// Generate the password reset token.
+	// TODO When we allow for email address to be changed, we will also need to verify that a token being used is for
+	//  the same login that it was generated for. Otherwise someone could generate a token for an email, then change the
+	//  email of the login -> change the email of another login to the first email; then reset the password for a
+	//  different login. I don't think this is a security risk as the actor would need to have access to both logins to
+	//  begin with. But it might cause some goofy issues and is definitely not desired behavior.
+	passwordResetToken, err := c.passwordResetTokens.GenerateToken(
+		c.getContext(ctx),
+		sendForgotPasswordRequest.Email,
+		c.configuration.Email.ForgotPassword.TokenLifetime,
+	)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
+		return
+	}
+
+	if err = c.communication.SendPasswordResetEmail(c.getContext(ctx), communication.ForgotPasswordParams{
+		Login: *login,
+		ResetURL: fmt.Sprintf("https://%s/password/reset?token=%s",
+			c.configuration.GetUIDomainName(),
+			url.QueryEscape(passwordResetToken),
+		),
+	}); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to send password reset email")
+		return
+	}
+
+	ctx.StatusCode(http.StatusOK)
+	return
+}
+
+// Reset Password
+// @Summary Reset Password
+// @id reset-password
+// @tags Authentication
+// @description This endpoint handles resetting passwords for users who have forgotten theirs. It requires a `token` be
+// @description provided that comes from the email the `/authentication/forgot` endpoint sends to the login's email
+// @description address.
+// @Produce json
+// @Accept json
+// @Param Token body swag.ResetPasswordRequest true "Reset Password Request"
+// @Router /authentication/reset [post]
+// @Success 200
+// @Failure 400 {object} swag.ResetPasswordBadRequest
+// @Failure 500 {object} ApiError Something went wrong on our end.
+func (c *Controller) resetPassword(ctx iris.Context) {
+	var resetPasswordRequest struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
+	}
+	if err := ctx.ReadJSON(&resetPasswordRequest); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		return
+	}
+
+	resetPasswordRequest.Token = strings.TrimSpace(resetPasswordRequest.Token)
+	resetPasswordRequest.Password = strings.TrimSpace(resetPasswordRequest.Password)
+
+	// The token is what verifies that the user is who they say they are even without a password. The token is emailed
+	// to their verified email address.
+	if resetPasswordRequest.Token == "" {
+		c.badRequest(ctx, "Token must be provided to reset password.")
+		return
+	}
+
+	if len(resetPasswordRequest.Password) < 8 {
+		c.badRequest(ctx, "Password must be at least 8 characters long.")
+		return
+	}
+
+	validation, err := c.passwordResetTokens.ValidateTokenEx(c.getContext(ctx), resetPasswordRequest.Token)
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Failed to validate password reset token")
+		return
+	}
+
+	unauthenticatedRepo := c.mustGetUnauthenticatedRepository(ctx)
+
+	// Retrieve the login for the email address in the token.
+	login, err := unauthenticatedRepo.GetLoginForEmail(c.getContext(ctx), validation.Email)
+	if err != nil {
+		c.wrapPgError(ctx, err, "Failed to verify login for email address")
+		return
+	}
+
+	// If the login's password has been changed since this token was issued, then this token is no longer valid. This
+	// will basically make sure that a token cannot be used twice.
+	if login.PasswordResetAt != nil && login.PasswordResetAt.After(validation.CreatedAt) {
+		c.badRequest(ctx, "Password has already been reset, you must request another password reset link.")
+		return
+	}
+
+	hashedPassword := hash.HashPassword(login.Email, resetPasswordRequest.Password)
+
+	if err = unauthenticatedRepo.ResetPassword(c.getContext(ctx), login.LoginId, hashedPassword); err != nil {
+		c.wrapPgError(ctx, err, "Failed to reset password")
+		return
+	}
+
+	ctx.StatusCode(http.StatusOK)
 }
 
 func (c *Controller) validateRegistration(email, password, firstName string) error {

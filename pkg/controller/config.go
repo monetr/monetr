@@ -48,7 +48,7 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 
 	// We can only allow forgot password if SMTP is enabled. Otherwise we have
 	// no way of sending an email to the user.
-	if c.configuration.Email.Enabled {
+	if c.configuration.Email.AllowPasswordReset() {
 		configuration.AllowForgotPassword = true
 	}
 
