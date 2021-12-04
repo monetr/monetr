@@ -30,6 +30,56 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/authentication/forgot": {
+            "post": {
+                "description": "This endpoint should be used to send password reset links to clients who have forgotten their password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Send Password Reset Link",
+                "operationId": "send-password-reset-link",
+                "parameters": [
+                    {
+                        "description": "Forgot Password Request",
+                        "name": "Token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/swag.ForgotPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/swag.ForgotPasswordBadRequest"
+                        }
+                    },
+                    "428": {
+                        "description": "Precondition Required",
+                        "schema": {
+                            "$ref": "#/definitions/swag.ForgotPasswordEmailNotVerifiedError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/authentication/login": {
             "post": {
                 "description": "Authenticate a user.",
@@ -157,6 +207,50 @@ var doc = `{
                         "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/controller.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/authentication/reset": {
+            "post": {
+                "description": "This endpoint handles resetting passwords for users who have forgotten theirs. It requires a ` + "`" + `token` + "`" + ` be\nprovided that comes from the email the ` + "`" + `/authentication/forgot` + "`" + ` endpoint sends to the login's email\naddress.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reset Password",
+                "operationId": "reset-password",
+                "parameters": [
+                    {
+                        "description": "Reset Password Request",
+                        "name": "Token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/swag.ResetPasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/swag.ResetPasswordBadRequest"
                         }
                     },
                     "500": {
@@ -2452,6 +2546,44 @@ var doc = `{
                 }
             }
         },
+        "swag.ForgotPasswordBadRequest": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Must provide an email address."
+                }
+            }
+        },
+        "swag.ForgotPasswordEmailNotVerifiedError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "This error is returned to the client if they attempt to request a password reset link before the email has been\nverified.",
+                    "type": "string",
+                    "example": "You must verify your email before you can send forgot password requests."
+                }
+            }
+        },
+        "swag.ForgotPasswordRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "captcha": {
+                    "description": "The ReCAPTCHA verification code if required by the API. This is only required if the /config endpoint indicates\nthat it is for forgot passwords.",
+                    "type": "string",
+                    "x-nullable": true,
+                    "example": "03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..."
+                },
+                "email": {
+                    "description": "The email address of the login that the client want's to reset the password for. This must be a valid email\naddress.",
+                    "type": "string",
+                    "example": "i.am.a.user@example.com"
+                }
+            }
+        },
         "swag.HealthResponse": {
             "type": "object",
             "properties": {
@@ -2905,6 +3037,30 @@ var doc = `{
                 "email": {
                     "description": "Specify the email address that you want to resend the verification link to. This must be a valid email address\nfor a login that has not already validated their email.",
                     "type": "string"
+                }
+            }
+        },
+        "swag.ResetPasswordBadRequest": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Token must be provided to reset password."
+                }
+            }
+        },
+        "swag.ResetPasswordRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "description": "The new password the client wants to use for logging in.",
+                    "type": "string",
+                    "example": "superSecureP@ssword"
+                },
+                "token": {
+                    "description": "The token that is provided to the client in an email sent by the forgot password endpoint. This is derived from\nthe ` + "`" + `token` + "`" + ` URL parameter in the UI for the reset password page.",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIs..."
                 }
             }
         },

@@ -455,6 +455,39 @@ definitions:
         description: The URL returned by Stripe for the customer's billing portal.
         type: string
     type: object
+  swag.ForgotPasswordBadRequest:
+    properties:
+      error:
+        example: Must provide an email address.
+        type: string
+    type: object
+  swag.ForgotPasswordEmailNotVerifiedError:
+    properties:
+      error:
+        description: |-
+          This error is returned to the client if they attempt to request a password reset link before the email has been
+          verified.
+        example: You must verify your email before you can send forgot password requests.
+        type: string
+    type: object
+  swag.ForgotPasswordRequest:
+    properties:
+      captcha:
+        description: |-
+          The ReCAPTCHA verification code if required by the API. This is only required if the /config endpoint indicates
+          that it is for forgot passwords.
+        example: 03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S...
+        type: string
+        x-nullable: true
+      email:
+        description: |-
+          The email address of the login that the client want's to reset the password for. This must be a valid email
+          address.
+        example: i.am.a.user@example.com
+        type: string
+    required:
+    - email
+    type: object
   swag.HealthResponse:
     properties:
       apiHealthy:
@@ -927,6 +960,25 @@ definitions:
         description: |-
           Specify the email address that you want to resend the verification link to. This must be a valid email address
           for a login that has not already validated their email.
+        type: string
+    type: object
+  swag.ResetPasswordBadRequest:
+    properties:
+      error:
+        example: Token must be provided to reset password.
+        type: string
+    type: object
+  swag.ResetPasswordRequest:
+    properties:
+      password:
+        description: The new password the client wants to use for logging in.
+        example: superSecureP@ssword
+        type: string
+      token:
+        description: |-
+          The token that is provided to the client in an email sent by the forgot password endpoint. This is derived from
+          the `token` URL parameter in the UI for the reset password page.
+        example: eyJhbGciOiJIUzI1NiIs...
         type: string
     type: object
   swag.SentryDSNResponse:
@@ -1415,6 +1467,40 @@ info:
   title: monetr's REST API
   version: "0.0"
 paths:
+  /authentication/forgot:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint should be used to send password reset links to clients
+        who have forgotten their password.
+      operationId: send-password-reset-link
+      parameters:
+      - description: Forgot Password Request
+        in: body
+        name: Token
+        required: true
+        schema:
+          $ref: '#/definitions/swag.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/swag.ForgotPasswordBadRequest'
+        "428":
+          description: Precondition Required
+          schema:
+            $ref: '#/definitions/swag.ForgotPasswordEmailNotVerifiedError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      summary: Send Password Reset Link
+      tags:
+      - Authentication
   /authentication/login:
     post:
       consumes:
@@ -1507,6 +1593,38 @@ paths:
           schema:
             $ref: '#/definitions/controller.ApiError'
       summary: Register
+      tags:
+      - Authentication
+  /authentication/reset:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        This endpoint handles resetting passwords for users who have forgotten theirs. It requires a `token` be
+        provided that comes from the email the `/authentication/forgot` endpoint sends to the login's email
+        address.
+      operationId: reset-password
+      parameters:
+      - description: Reset Password Request
+        in: body
+        name: Token
+        required: true
+        schema:
+          $ref: '#/definitions/swag.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/swag.ResetPasswordBadRequest'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      summary: Reset Password
       tags:
       - Authentication
   /authentication/verify:
