@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.7.2](https://www.github.com/monetr/monetr/compare/v0.7.1...v0.7.2) (2021-12-04)
+
+
+### Bug Fixes
+
+* Fixed verify forgot password in helm chart. ([5cc6ac2](https://www.github.com/monetr/monetr/commit/5cc6ac2883197f08644f8533b848ffdd9ce7de57))
+
 ### [0.7.1](https://www.github.com/monetr/monetr/compare/v0.7.0...v0.7.1) (2021-12-04)
 
 
