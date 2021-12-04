@@ -75,6 +75,9 @@ api:
   email:
     enabled: true
     domain: monetr.dev
+    forgotPassword:
+      enabled: true
+      tokenLifetime: 10m
     verification:
       enabled: true
       tokenLifetime: 30m
