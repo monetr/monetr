@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.7.1](https://www.github.com/monetr/monetr/compare/v0.7.0...v0.7.1) (2021-12-04)
+
+
+### Bug Fixes
+
+* Enabled forgot password in testing environment ([7bcdfdc](https://www.github.com/monetr/monetr/commit/7bcdfdc204799bdbb06faa43abbabdf127091ede))
+
 ## [0.7.0](https://www.github.com/monetr/monetr/compare/v0.6.16...v0.7.0) (2021-12-03)
 
 
