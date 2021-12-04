@@ -1146,7 +1146,7 @@ func TestSendForgotPassword(t *testing.T) {
 		captchaConf.ReCAPTCHA.Enabled = true
 		captchaConf.ReCAPTCHA.PublicKey = gofakeit.UUID()
 		captchaConf.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		captchaConf.ReCAPTCHA.VerifyPasswordReset = true
+		captchaConf.ReCAPTCHA.VerifyForgotPassword = true
 		e := NewTestApplicationWithConfig(t, captchaConf)
 
 		{ // Send a request with invalid json body.

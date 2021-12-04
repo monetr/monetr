@@ -74,6 +74,11 @@ metadata:
   {{- include "api.labels" . | nindent 4 }}
 data:
   config.yaml: |
+    reCaptcha:
+      enabled: {{ .Values.api.reCaptcha.enabled }}
+      verifyLogin: {{ .Values.api.reCaptcha.verifyLogin }}
+      verifyRegister: {{ .Values.api.reCaptcha.verifyRegister }}
+      verifyForgotPassword: {{ .Values.api.reCaptcha.verifyForgotPassword }}
     server:
     {{- toYaml .Values.api.server | nindent 6 }}
     {{- if .Values.api.stripe.initialPlan }}

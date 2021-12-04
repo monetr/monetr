@@ -618,7 +618,7 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 	}
 
 	// If we require ReCAPTCHA then make sure they provide it.
-	if c.configuration.ReCAPTCHA.ShouldVerifyPasswordReset() {
+	if c.configuration.ReCAPTCHA.ShouldVerifyForgotPassword() {
 		if sendForgotPasswordRequest.ReCAPTCHA == "" {
 			c.badRequest(ctx, "Must provide a valid ReCAPTCHA.")
 			return

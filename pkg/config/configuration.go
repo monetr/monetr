@@ -169,9 +169,9 @@ type ReCAPTCHA struct {
 	Version        int    `yaml:"version"` // Currently only version 2 is supported by the UI.
 	VerifyLogin    bool   `yaml:"verifyLogin"`
 	VerifyRegister bool   `yaml:"loginRegister"`
-	// VerifyPasswordReset determines whether or not the user will be required to verify that they are not a robot
+	// VerifyForgotPassword determines whether or not the user will be required to verify that they are not a robot
 	// overlord.
-	VerifyPasswordReset bool `yaml:"verifyPasswordReset"`
+	VerifyForgotPassword bool `yaml:"verifyPasswordReset"`
 }
 
 func (r ReCAPTCHA) ShouldVerifyLogin() bool {
@@ -182,8 +182,8 @@ func (r ReCAPTCHA) ShouldVerifyRegistration() bool {
 	return r.Enabled && r.VerifyRegister
 }
 
-func (r ReCAPTCHA) ShouldVerifyPasswordReset() bool {
-	return r.Enabled && r.VerifyPasswordReset
+func (r ReCAPTCHA) ShouldVerifyForgotPassword() bool {
+	return r.Enabled && r.VerifyForgotPassword
 }
 
 type Plaid struct {

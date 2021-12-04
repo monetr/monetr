@@ -95,6 +95,7 @@ api:
     enabled: true
     verifyLogin: true
     verifyRegister: true
+    verifyForgotPassword: true
   plaid:
     environment: "https://development.plaid.com"
     enableReturningUserExperience: true

@@ -19,20 +19,21 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 		FreeTrialDays int32 `json:"freeTrialDays"`
 	}
 	var configuration struct {
-		RequireLegalName    bool         `json:"requireLegalName"`
-		RequirePhoneNumber  bool         `json:"requirePhoneNumber"`
-		VerifyLogin         bool         `json:"verifyLogin"`
-		VerifyRegister      bool         `json:"verifyRegister"`
-		VerifyEmailAddress  bool         `json:"verifyEmailAddress"`
-		ReCAPTCHAKey        string       `json:"ReCAPTCHAKey,omitempty"`
-		AllowSignUp         bool         `json:"allowSignUp"`
-		AllowForgotPassword bool         `json:"allowForgotPassword"`
-		LongPollPlaidSetup  bool         `json:"longPollPlaidSetup"`
-		RequireBetaCode     bool         `json:"requireBetaCode"`
-		InitialPlan         *InitialPlan `json:"initialPlan"`
-		BillingEnabled      bool         `json:"billingEnabled"`
-		Release             string       `json:"release"`
-		Revision            string       `json:"revision"`
+		RequireLegalName     bool         `json:"requireLegalName"`
+		RequirePhoneNumber   bool         `json:"requirePhoneNumber"`
+		VerifyLogin          bool         `json:"verifyLogin"`
+		VerifyRegister       bool         `json:"verifyRegister"`
+		VerifyEmailAddress   bool         `json:"verifyEmailAddress"`
+		VerifyForgotPassword bool         `json:"verifyForgotPassword"`
+		ReCAPTCHAKey         string       `json:"ReCAPTCHAKey,omitempty"`
+		AllowSignUp          bool         `json:"allowSignUp"`
+		AllowForgotPassword  bool         `json:"allowForgotPassword"`
+		LongPollPlaidSetup   bool         `json:"longPollPlaidSetup"`
+		RequireBetaCode      bool         `json:"requireBetaCode"`
+		InitialPlan          *InitialPlan `json:"initialPlan"`
+		BillingEnabled       bool         `json:"billingEnabled"`
+		Release              string       `json:"release"`
+		Revision             string       `json:"revision"`
 	}
 
 	configuration.Release = build.Release
@@ -50,6 +51,7 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 	// no way of sending an email to the user.
 	if c.configuration.Email.AllowPasswordReset() {
 		configuration.AllowForgotPassword = true
+		configuration.VerifyForgotPassword = c.configuration.ReCAPTCHA.ShouldVerifyForgotPassword()
 	}
 
 	configuration.VerifyEmailAddress = c.configuration.Email.ShouldVerifyEmails()

@@ -159,6 +159,7 @@ api:
     publicKey: ""
     verifyLogin: false
     verifyRegister: false
+    verifyForgotPassword: false
   plaid:
     clientId: "abc123"
     clientSecret: "abc123"
