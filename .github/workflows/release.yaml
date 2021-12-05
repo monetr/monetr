@@ -71,7 +71,7 @@ jobs:
       - build_ui
     name: Build Binary
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.17.3
+    container: ghcr.io/monetr/build-containers/golang:1.17.4
     continue-on-error: true
     strategy:
       fail-fast: false
