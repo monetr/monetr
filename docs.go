@@ -2550,6 +2550,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "description": "Error string will be on of a few messages depending on the problem. Is used to indicate the input provided by the\nclient is not sufficient for sending a Forgot Password email.",
                     "type": "string",
                     "example": "Must provide an email address."
                 }
