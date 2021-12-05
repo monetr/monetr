@@ -136,7 +136,7 @@
     "html-webpack-plugin": "5.5.0",
     "http-status-codes": "2.1.4",
     "jest": "26.6.3",
-    "jest-mock-axios": "4.4.1",
+    "jest-mock-axios": "4.5.0",
     "js-yaml": "4.1.0",
     "postcss": "8.4.4",
     "postcss-loader": "6.2.1",
