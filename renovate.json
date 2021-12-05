@@ -12,7 +12,7 @@
         "go",
         "golang"
       ],
-      "semanticCommitScope": "Go"
+      "semanticCommitScope": "api"
     },
     {
       "matchLanguages": [
@@ -20,14 +20,14 @@
         "javascript",
         "typescript"
       ],
-      "semanticCommitScope": "JavaScript"
+      "semanticCommitScope": "ui"
     },
     {
       "matchLanguages": [
         "docker",
         "dockerfile"
       ],
-      "semanticCommitScope": "Containers"
+      "semanticCommitScope": "containers"
     }
   ]
 }
