@@ -128,6 +128,8 @@ type ForgotPasswordRequest struct {
 }
 
 type ForgotPasswordBadRequest struct {
+	// Error string will be on of a few messages depending on the problem. Is used to indicate the input provided by the
+	// client is not sufficient for sending a Forgot Password email.
 	Error string `json:"error" example:"Must provide an email address."`
 }
 
