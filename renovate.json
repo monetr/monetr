@@ -4,5 +4,22 @@
   ],
   "semanticCommits": "enabled",
   "semanticCommitType": "deps",
-  "semanticCommitScope": "renovate"
+  "semanticCommitTypeAll": "deps",
+  "semanticCommitScope": "Renovate",
+  "packageRules": [
+    {
+      "matchLanguages": ["go", "golang"],
+      "semanticCommits": "enabled",
+      "semanticCommitType": "deps",
+      "semanticCommitTypeAll": "deps",
+      "semanticCommitScope": "Go"
+    },
+    {
+      "matchLanguages": ["js", "javascript", "typescript"],
+      "semanticCommits": "enabled",
+      "semanticCommitType": "deps",
+      "semanticCommitTypeAll": "deps",
+      "semanticCommitScope": "JavaScript"
+    }
+  ]
 }
