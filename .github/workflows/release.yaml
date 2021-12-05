@@ -27,7 +27,7 @@ jobs:
               {"type":"docs","section":"Documentation","hidden":false},
               {"type":"ci","section":"Build Automation","hidden":false}
             ]
-          release-type: helm
+          release-type: simple
           package-name: monetr
           version-file: version.txt
 
