@@ -26,11 +26,11 @@ CMD ["serve"]
 LABEL org.opencontainers.image.url=https://github.com/monetr/monetr
 LABEL org.opencontainers.image.source=https://github.com/monetr/monetr
 LABEL org.opencontainers.image.authors=elliot.courant@monetr.app
-LABEL org.opencontainers.image.revision=$REVISION
 LABEL org.opencontainers.image.vendor="monetr"
 LABEL org.opencontainers.image.licenses="BSL-1.1"
 LABEL org.opencontainers.image.title="monetr"
 LABEL org.opencontainers.image.description="monetr's budgeting application"
 LABEL org.opencontainers.image.version=$RELEASE
+LABEL org.opencontainers.image.revision=$REVISION
 
 COPY --from=builder /bin/monetr /usr/bin/monetr
