@@ -1,5 +1,45 @@
 # Changelog
 
+### [0.7.3](https://www.github.com/monetr/monetr/compare/v0.7.2...v0.7.3) (2021-12-05)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @svgr/webpack to v6.1.1 ([d7115cf](https://www.github.com/monetr/monetr/commit/d7115cf3d32e9669c096f20338d6dbb43b0e1c4a))
+* **deps:** update dependency eslint to v8.4.0 ([ece4fa2](https://www.github.com/monetr/monetr/commit/ece4fa26f8a241751f289d354806177677292566))
+* Fixed forgot password endpoint failing with ReCAPTCHA. ([a6293d1](https://www.github.com/monetr/monetr/commit/a6293d129b1f25f460cd50df90fbbbb6494158f5))
+
+
+### Documentation
+
+* Adding some docs for forgot password. ([6fd272e](https://www.github.com/monetr/monetr/commit/6fd272e9b61aeba60b0f236e24e88fede7600e19))
+
+
+### Build Automation
+
+* Add commit types to release please action. ([5671cf6](https://www.github.com/monetr/monetr/commit/5671cf629c380f1941f6d290cf61189f227f9f0f))
+* Added multiple commit types for `feature`/`docs` ([4e4fe87](https://www.github.com/monetr/monetr/commit/4e4fe87377ef9accc1aa79785654f8d7db32dd59))
+* Try to group dependencies together in release notes. ([907fbf8](https://www.github.com/monetr/monetr/commit/907fbf8957f8f1cdfaa48adf906f7fdda42bcce3))
+
+
+### Dependencies
+
+* **ci:** Upgrade GitHub actions to golang:1.17.4 ([a6fd620](https://www.github.com/monetr/monetr/commit/a6fd620451b9f5d8c5b5f6ee583a63152f9c7cb7))
+* **containers:** update golang docker tag to v1.17.4 ([3fdb0e2](https://www.github.com/monetr/monetr/commit/3fdb0e226baefaa10f1f32d687016fae12572192))
+* **ui:** update dependency @date-io/moment to v2 ([4ef8c1d](https://www.github.com/monetr/monetr/commit/4ef8c1dbf3cf03a4551adaacb5e331fc6e76e173))
+* **ui:** update dependency jest-mock-axios to v4.5.0 ([70c9f93](https://www.github.com/monetr/monetr/commit/70c9f93e3ce352dbb5419f8aab92f25a0c1321f5))
+
+
+### Miscellaneous
+
+* Change release-please type to `helm` ([a1229d7](https://www.github.com/monetr/monetr/commit/a1229d7d1920db26fb384fa7c0d686d2cc1580ba))
+* **ci:** Cleaned up (removed) JUnit job steps. ([acd7160](https://www.github.com/monetr/monetr/commit/acd7160c967ef4e5182149c4b4bc4f31cb756b78))
+* **deps:** update dependency prettier to v2.5.1 ([b1a13ae](https://www.github.com/monetr/monetr/commit/b1a13ae0c158dbb2df33a2c768ed55c568d8abdd))
+* Finalize semantic config for renovate ([af71df6](https://www.github.com/monetr/monetr/commit/af71df6c9f8c3a857ccc96b736d7800ac967bdf8))
+* Fixing semantic commit types ([5bc057b](https://www.github.com/monetr/monetr/commit/5bc057b1fb1e12cd04141ee9fd9edc407c948d6c))
+* Trying to get semantic commits working. ([4b614d8](https://www.github.com/monetr/monetr/commit/4b614d873f98e0aa698f8278ccf4abdd7e0e014b))
+* Trying to improve renovate config. ([662b1e1](https://www.github.com/monetr/monetr/commit/662b1e1024d550e32577afcd40fc988f5ef95268))
+
 ### [0.7.2](https://www.github.com/monetr/monetr/compare/v0.7.1...v0.7.2) (2021-12-04)
 
 
