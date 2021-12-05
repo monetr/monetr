@@ -144,13 +144,6 @@ jobs:
             ${{ runner.os }}-go-
       - name: Test
         run: make test-go
-      - uses: actions/upload-artifact@v2
-        name: Upload Test JUnit Artifacts
-        if: always()
-        with:
-          name: '${{ github.sha }}-rest-api-junit'
-          path: '${{ github.workspace }}/rest-api-junit.xml'
-          retention-days: 7
       - name: Annotate tests
         if: always()
         uses: guyarb/golang-test-annotations@v0.5.0
@@ -214,25 +207,6 @@ jobs:
         with:
           files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
           name: monetr
-
-  junit:
-    needs:
-      - go_test
-    name: JUnit Report
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        name: Download Go JUnit Artifacts
-        with:
-          name: '${{ github.sha }}-rest-api-junit'
-          path: '${{ github.workspace }}/junit'
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v2
-        if: always() # always run even if the previous step fails
-        with:
-          report_paths: '${{ github.workspace }}/**/*-junit.xml'
-          check_name: 'Test Summary'
 
   docs-generate:
     needs:
