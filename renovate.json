@@ -2,5 +2,7 @@
   "extends": [
     "config:base"
   ],
-  "semanticCommitType": "fix"
+  "semanticCommits": "enabled",
+  "semanticCommitType": "deps",
+  "semanticCommitScope": "renovate"
 }

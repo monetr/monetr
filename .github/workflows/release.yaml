@@ -20,8 +20,7 @@ jobs:
             [
               {"type":"feat","section":"Features","hidden":false},
               {"type":"feature","section":"Features","hidden":false},
-              {"type":"chore(deps)","section":"Dependencies","hidden":false},
-              {"type":"fix(deps)","section":"Dependencies","hidden":false},
+              {"type":"deps","section":"Dependencies","hidden":false},
               {"type":"fix","section":"Bug Fixes","hidden":false},
               {"type":"chore","section":"Miscellaneous","hidden":false},
               {"type":"doc","section":"Documentation","hidden":false},
