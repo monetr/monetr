@@ -624,7 +624,7 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 			return
 		}
 
-		if err := c.validateCaptchaMaybe(c.getContext(ctx), ""); err != nil {
+		if err := c.validateCaptchaMaybe(c.getContext(ctx), sendForgotPasswordRequest.ReCAPTCHA); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
 			return
 		}
