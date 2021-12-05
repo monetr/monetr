@@ -8,18 +8,35 @@
   "semanticCommitScope": "Renovate",
   "packageRules": [
     {
-      "matchLanguages": ["go", "golang"],
+      "matchLanguages": [
+        "go",
+        "golang"
+      ],
       "semanticCommits": "enabled",
       "semanticCommitType": "deps",
       "semanticCommitTypeAll": "deps",
       "semanticCommitScope": "Go"
     },
     {
-      "matchLanguages": ["js", "javascript", "typescript"],
+      "matchLanguages": [
+        "js",
+        "javascript",
+        "typescript"
+      ],
       "semanticCommits": "enabled",
       "semanticCommitType": "deps",
       "semanticCommitTypeAll": "deps",
       "semanticCommitScope": "JavaScript"
+    },
+    {
+      "matchLanguages": [
+        "docker",
+        "dockerfile"
+      ],
+      "semanticCommits": "enabled",
+      "semanticCommitType": "deps",
+      "semanticCommitTypeAll": "deps",
+      "semanticCommitScope": "Containers"
     }
   ]
 }

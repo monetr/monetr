@@ -27,8 +27,9 @@ jobs:
               {"type":"docs","section":"Documentation","hidden":false},
               {"type":"ci","section":"Build Automation","hidden":false}
             ]
-          release-type: simple
+          release-type: helm
           package-name: monetr
+          version-file: version.txt
 
   build_ui:
     if: ${{ needs.release_please.outputs.release_created }}
