@@ -49,7 +49,7 @@ func NewWebhookVerificationKeyFromPlaid(input plaid.JWKPublicKey) (WebhookVerifi
 }
 
 type WebhookVerification interface {
-	GetVerificationKey(ctx context.Context, keyId string) (*keyfunc.JWKs, error)
+	GetVerificationKey(ctx context.Context, keyId string) (*keyfunc.JWKS, error)
 	Close() error
 }
 
@@ -74,7 +74,7 @@ func NewInMemoryWebhookVerification(log *logrus.Entry, plaid Platypus, cleanupIn
 
 type keyCacheItem struct {
 	expiration  time.Time
-	keyFunction *keyfunc.JWKs
+	keyFunction *keyfunc.JWKS
 }
 
 type memoryWebhookVerification struct {
@@ -87,7 +87,7 @@ type memoryWebhookVerification struct {
 	closer        chan chan error
 }
 
-func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyId string) (*keyfunc.JWKs, error) {
+func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyId string) (*keyfunc.JWKS, error) {
 	if atomic.LoadUint32(&m.closed) > 0 {
 		return nil, errors.New("webhook verification is closed")
 	}
