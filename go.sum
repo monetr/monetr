@@ -416,6 +416,8 @@ github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d h1:s9
 github.com/iris-contrib/middleware/cors v0.0.0-20210110101738-6d0a4d799b5d/go.mod h1:e2S1O+DNOz74yNNTyH4S2+EOx0eoiIw6N0SxPXiLLqA=
 github.com/iris-contrib/middleware/cors v0.0.0-20211206141049-cd414922a94e h1:ZxtQVwH4o0wKhEVzWf6l+v43v8gL0MGeqJD1qOzSHvk=
 github.com/iris-contrib/middleware/cors v0.0.0-20211206141049-cd414922a94e/go.mod h1:uM0rDwKclW+huaAvfdY20SGY/lK50PxS2oXHSzFAJZM=
+github.com/iris-contrib/middleware/cors v0.0.0-20211206172221-a2879657471e h1:x7EVsbjXuDv3qxrVeOhBZ1zCSgWfqkyIBZX5Z3e5sWc=
+github.com/iris-contrib/middleware/cors v0.0.0-20211206172221-a2879657471e/go.mod h1:uM0rDwKclW+huaAvfdY20SGY/lK50PxS2oXHSzFAJZM=
 github.com/iris-contrib/pongo2 v0.0.1/go.mod h1:Ssh+00+3GAZqSQb30AvBRNxBx7rf0GqwkjqxNd0u65g=
 github.com/iris-contrib/schema v0.0.1/go.mod h1:urYA3uvUNG1TIIjOSCzHr9/LmbQo8LrOcOqfqxa4hXw=
 github.com/iris-contrib/schema v0.0.6 h1:CPSBLyx2e91H2yJzPuhGuifVRnZBBJ3pCOMbOvPZaTw=
