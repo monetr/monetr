@@ -3,7 +3,7 @@ module github.com/monetr/monetr
 go 1.17
 
 require (
-	github.com/MicahParks/keyfunc v1.0.0
+	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/alicebob/miniredis/v2 v2.16.1
 	github.com/brianvoe/gofakeit/v6 v6.10.0

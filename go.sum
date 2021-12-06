@@ -62,6 +62,8 @@ github.com/MicahParks/keyfunc v0.10.0 h1:jWNhUVtMchsdYVl714lrZL8On+SKPEvPKC+CpIN
 github.com/MicahParks/keyfunc v0.10.0/go.mod h1:R8RZa27qn+5cHTfYLJ9/+7aSb5JIdz7cl0XFo0o4muo=
 github.com/MicahParks/keyfunc v1.0.0 h1:O9VAkG6q/LqX4eS+HuIsW9KfC/Luh2NBQr9v4NiwHU0=
 github.com/MicahParks/keyfunc v1.0.0/go.mod h1:R8RZa27qn+5cHTfYLJ9/+7aSb5JIdz7cl0XFo0o4muo=
+github.com/MicahParks/keyfunc v1.0.1 h1:BIKfiyELXV0A8SRCHQaByJW0s71xXpArhzfTS3uf26c=
+github.com/MicahParks/keyfunc v1.0.1/go.mod h1:R8RZa27qn+5cHTfYLJ9/+7aSb5JIdz7cl0XFo0o4muo=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/OneOfOne/xxhash v1.2.8 h1:31czK/TI9sNkxIKfaUfGlU47BAxQ0ztGgd9vPyqimf8=
 github.com/OneOfOne/xxhash v1.2.8/go.mod h1:eZbhyaAYD41SGSSsnmcpxVoRiQ/MPUTjUdIIOT9Um7Q=
