@@ -9,11 +9,13 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/cache"
@@ -169,7 +171,7 @@ func NewController(
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Cookies
-func (c *Controller) RegisterRoutes(app *iris.Application) {
+func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	if c.stats != nil {
 		app.UseGlobal(func(ctx iris.Context) {
 			start := time.Now()
@@ -195,6 +197,12 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 
 		ctx.Next()
 	})
+
+	app.GET(APIPath + "/health", c.getHealth)
+	apiGroup := app.Group(APIPath)
+	{
+		apiGroup.Use(c.loggingMiddleware)
+	}
 
 	app.PartyFunc(APIPath, func(p router.Party) {
 		p.Get("/health", c.getHealth)
@@ -359,7 +367,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 // @Router /health [get]
 // @Success 200 {object} swag.HealthResponse
 // @Failure 500 {object} swag.HealthResponse
-func (c *Controller) getHealth(ctx iris.Context) {
+func (c *Controller) getHealth(ctx echo.Context) error {
 	err := c.db.Ping(ctx.Request().Context())
 	if err != nil {
 		c.getLog(ctx).WithError(err).Warn("failed to ping database")
@@ -387,21 +395,21 @@ func (c *Controller) getHealth(ctx iris.Context) {
 	ctx.JSON(result)
 }
 
-func (c *Controller) getContext(ctx iris.Context) context.Context {
-	if requestContext, ok := ctx.Values().Get(spanContextKey).(context.Context); ok {
+func (c *Controller) getContext(ctx echo.Context) context.Context {
+	if requestContext, ok := ctx.Get(spanContextKey).(context.Context); ok {
 		return requestContext
 	}
 
 	return ctx.Request().Context()
 }
 
-func (c *Controller) getSpan(ctx iris.Context) *sentry.Span {
-	return ctx.Values().Get(spanKey).(*sentry.Span)
+func (c *Controller) getSpan(ctx echo.Context) *sentry.Span {
+	return ctx.Get(spanKey).(*sentry.Span)
 }
 
-func (c *Controller) getLog(ctx iris.Context) *logrus.Entry {
+func (c *Controller) getLog(ctx echo.Context) *logrus.Entry {
 	log := c.log.WithContext(c.getContext(ctx)).WithFields(logrus.Fields{
-		"requestId": ctx.GetHeader("X-Request-Id"),
+		"requestId": ctx.Request().Header.Get("X-Request-Id"),
 	})
 
 	if accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0); accountId > 0 {
@@ -420,25 +428,26 @@ func (c *Controller) getLog(ctx iris.Context) *logrus.Entry {
 }
 
 // reportWrappedError just includes an errors.Wrapf around reportError.
-func (c *Controller) reportWrappedError(ctx iris.Context, err error, message string, args ...interface{}) {
+func (c *Controller) reportWrappedError(ctx echo.Context, err error, message string, args ...interface{}) {
 	c.reportError(ctx, errors.Wrapf(err, message, args...))
 }
 
 // reportError is a simple wrapper to report errors to sentry.io. It is meant to be used to keep track of errors that
 // we encounter that we might not want to return to the end user. But might still need in order to diagnose issues.
-func (c *Controller) reportError(ctx iris.Context, err error) {
+func (c *Controller) reportError(ctx echo.Context, err error) {
 	if spanContext := c.getContext(ctx); spanContext != nil {
 		if hub := sentry.GetHubFromContext(spanContext); hub != nil {
 			_ = hub.CaptureException(err)
 			hub.Scope().SetLevel(sentry.LevelError)
-		} else if hub = sentryiris.GetHubFromContext(ctx); hub != nil {
+
+		} else if hub = sentryecho.GetHubFromContext(ctx); hub != nil {
 			_ = hub.CaptureException(err)
 			hub.Scope().SetLevel(sentry.LevelError)
 		} else {
 			sentry.CaptureException(err)
 		}
 	} else {
-		if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+		if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
 			_ = hub.CaptureException(err)
 			hub.Scope().SetLevel(sentry.LevelError)
 		} else {

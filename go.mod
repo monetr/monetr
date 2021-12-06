@@ -98,6 +98,8 @@ require (
 	github.com/kataras/sitemap v0.0.5 // indirect
 	github.com/kataras/tunnel v0.0.3 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/labstack/echo/v4 v4.6.1 // indirect
+	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -132,6 +134,7 @@ require (
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.27.0 // indirect
+	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/vmihailenco/bufpool v0.1.11 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect

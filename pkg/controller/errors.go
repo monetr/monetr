@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12/context"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/pkg/errors"
 )
@@ -45,7 +46,7 @@ func (c *Controller) sanitizePgError(err pg.Error) (error, int) {
 	}
 }
 
-func (c *Controller) wrapAndReturnError(ctx *context.Context, err error, status int, msg string, args ...interface{}) {
+func (c *Controller) wrapAndReturnError(ctx echo.Context, err error, status int, msg string, args ...interface{}) {
 	ctx.SetErr(errors.Wrapf(err, msg, args...))
 	ctx.StatusCode(status)
 	ctx.StopExecution()
@@ -55,7 +56,7 @@ func (c *Controller) wrapAndReturnError(ctx *context.Context, err error, status 
 	})
 }
 
-func (c *Controller) returnError(ctx *context.Context, status int, msg string, args ...interface{}) {
+func (c *Controller) returnError(ctx echo.Context, status int, msg string, args ...interface{}) {
 	ctx.SetErr(errors.Errorf(msg, args...))
 	ctx.StatusCode(status)
 	ctx.StopExecution()
@@ -65,6 +66,6 @@ func (c *Controller) returnError(ctx *context.Context, status int, msg string, a
 	})
 }
 
-func (c *Controller) badRequest(ctx *context.Context, msg string, args ...interface{}) {
+func (c *Controller) badRequest(ctx echo.Context, msg string, args ...interface{}) {
 	c.returnError(ctx, http.StatusBadRequest, msg, args...)
 }

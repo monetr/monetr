@@ -15,6 +15,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/crumbs"
@@ -38,7 +39,7 @@ const ClearAuthentication = ""
 // with the API. When this is called with a token that token will be returned to the client in the response as a
 // Set-Cookie header. If a blank token is provided then the cookie is updated to expire immediately and the value of the
 // cookie is set to blank.
-func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) {
+func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) {
 	sameSite := http.SameSiteDefaultMode
 	if c.configuration.Server.Cookies.SameSiteStrict {
 		sameSite = http.SameSiteStrictMode
@@ -95,13 +96,13 @@ func (c *Controller) handleAuthentication(p router.Party) {
 // @Failure 403 {object} swag.LoginInvalidCredentialsResponse Invalid credentials.
 // @Failure 428 {object} swag.LoginEmailIsNotVerifiedResponse Email address is not verified.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) loginEndpoint(ctx iris.Context) {
+func (c *Controller) loginEndpoint(ctx echo.Context) {
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
 	}
-	if err := ctx.ReadJSON(&loginRequest); err != nil {
+	if err := ctx.Bind(&loginRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
 		return
 	}
@@ -224,7 +225,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 // @Security ApiKeyAuth
 // @Success 200
 // @Failure 403 {object} ApiError Cookie was not present.
-func (c *Controller) logoutEndpoint(ctx iris.Context) {
+func (c *Controller) logoutEndpoint(ctx echo.Context) {
 	if cookie := ctx.GetCookie(c.configuration.Server.Cookies.Name); cookie == "" {
 		c.returnError(ctx, http.StatusForbidden, "authentication required")
 		return
@@ -246,7 +247,7 @@ func (c *Controller) logoutEndpoint(ctx iris.Context) {
 // @Failure 400 {object} ApiError Required data is missing.
 // @Failure 403 {object} ApiError Invalid credentials.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) registerEndpoint(ctx iris.Context) {
+func (c *Controller) registerEndpoint(ctx echo.Context) {
 	var registerRequest struct {
 		Email     string  `json:"email"`
 		Password  string  `json:"password"`
