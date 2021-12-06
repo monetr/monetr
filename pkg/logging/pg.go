@@ -108,7 +108,7 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 				}, nil)
 			}
 
-			span := sentry.StartSpan(ctx, queryType)
+			span := sentry.StartSpan(ctx, "db.sql.query")
 			span.StartTime = event.StartTime
 			span.Description = queryString
 			span.SetTag("query", queryType)
