@@ -60,7 +60,7 @@ func TestPlaidWebhook(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().Equal("unauthorized: token contains an invalid number of segments")
 	})
 }

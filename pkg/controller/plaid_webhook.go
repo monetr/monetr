@@ -114,12 +114,12 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 		return keyFunction.Keyfunc(token)
 	})
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "unauthorized")
+		c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
 	if !result.Valid {
-		c.returnError(ctx, http.StatusForbidden, "unauthorized")
+		c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 
