@@ -1,5 +1,30 @@
 # Changelog
 
+### [0.7.4](https://www.github.com/monetr/monetr/compare/v0.7.3...v0.7.4) (2021-12-06)
+
+
+### Bug Fixes
+
+* Fixed references to keyfunc with version update. ([143025e](https://www.github.com/monetr/monetr/commit/143025e506bd14192a795d8065e01a465a5560d5))
+* **sentry:** Improved span information for sentry. ([219dcd7](https://www.github.com/monetr/monetr/commit/219dcd76a2225efc1a862c3baa8c1a97b61d3d77))
+
+
+### Miscellaneous
+
+* **containers:** Improved order of labels in Dockerfile. ([3a3a18d](https://www.github.com/monetr/monetr/commit/3a3a18dd501be0164ab1756f0739d98200773d58))
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors commit hash to a287965 ([1b65b08](https://www.github.com/monetr/monetr/commit/1b65b082eecd6afb25ab2f15d39abb19e51d5bd9))
+* **api:** update github.com/iris-contrib/middleware/cors commit hash to cd41492 ([8fd5a74](https://www.github.com/monetr/monetr/commit/8fd5a744308d2b92ec6d21a6a23446e15167d280))
+* **api:** update module github.com/micahparks/keyfunc to v1 ([4a5ec0e](https://www.github.com/monetr/monetr/commit/4a5ec0e6f41400e662d310165123ecc9ccec3eda))
+* **api:** update module github.com/micahparks/keyfunc to v1.0.1 ([8103f44](https://www.github.com/monetr/monetr/commit/8103f44a05c3de981a23f9a41bdd47b590f93412))
+* **ui:** update dependency @testing-library/jest-dom to v5.16.1 ([9be130f](https://www.github.com/monetr/monetr/commit/9be130f9b077427fb16664ebedd50a4ed15fa791))
+* **ui:** update dependency webpack to v5.65.0 ([1761d22](https://www.github.com/monetr/monetr/commit/1761d22400f3c83c10ed395830473db788815c6c))
+* **ui:** update material-ui monorepo ([8c7c92d](https://www.github.com/monetr/monetr/commit/8c7c92d8a7b2bfaf943e3c10ae3604344cd1485e))
+* **ui:** update typescript-eslint monorepo to v5.6.0 ([1ad1584](https://www.github.com/monetr/monetr/commit/1ad1584adeb70a6102bab7148bcf5a04a77d593a))
+
 ### [0.7.3](https://www.github.com/monetr/monetr/compare/v0.7.2...v0.7.3) (2021-12-05)
 
 
