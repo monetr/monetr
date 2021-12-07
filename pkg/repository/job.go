@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"context"
+	"strings"
+
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
@@ -10,6 +13,7 @@ type JobRepository interface {
 	GetBankAccountsToSync() ([]models.BankAccount, error)
 	GetBankAccountsWithPendingTransactions() ([]CheckingPendingTransactionsItem, error)
 	GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error)
+	GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -23,14 +27,37 @@ type CheckingPendingTransactionsItem struct {
 	LinkId    uint64 `pg:"link_id"`
 }
 
-type jobRepository struct {
-	txn *pg.Tx
+type PlaidLinksForAccount struct {
+	tableName string `pg:"links"`
+
+	AccountId uint64   `pg:"account_id"`
+	LinkIds   []uint64 `pg:"link_ids,type:bigint[]"`
 }
 
-func NewJobRepository(txn *pg.Tx) JobRepository {
+type jobRepository struct {
+	txn pg.DBI
+}
+
+func NewJobRepository(db pg.DBI) JobRepository {
 	return &jobRepository{
-		txn: txn,
+		txn: db,
 	}
+}
+
+func (j *jobRepository) GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error) {
+	links := make([]PlaidLinksForAccount, 0)
+	err := j.txn.ModelContext(ctx, &links).
+		ColumnExpr(`"account_id"`).
+		ColumnExpr(`array_agg("link_id") "link_ids"`).
+		Where(`"link_type" = ?`, models.PlaidLinkType).
+		Where(`"plaid_link_id" IS NOT NULL`).
+		Group("account_id").
+		Select(&links)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query plaid links by account")
+	}
+
+	return links, nil
 }
 
 func (j *jobRepository) GetBankAccountsToSync() ([]models.BankAccount, error) {
@@ -45,7 +72,7 @@ func (j *jobRepository) GetBankAccountsToSync() ([]models.BankAccount, error) {
 
 func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error) {
 	var items []ProcessFundingSchedulesItem
-	_, err := j.txn.Query(&items, `
+	query := `
 		SELECT
 			"funding_schedules"."account_id",
 			"funding_schedules"."bank_account_id",
@@ -53,7 +80,15 @@ func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedule
 		FROM "funding_schedules"
 		WHERE "funding_schedules"."next_occurrence" < (now() AT TIME ZONE 'UTC')
 		GROUP BY "funding_schedules"."account_id", "funding_schedules"."bank_account_id"
-	`)
+	`
+
+	query = strings.NewReplacer(
+		"\n", "",
+		"\t", "",
+		"  ", " ",
+	).Replace(query)
+
+	_, err := j.txn.Query(&items, query)
 	if err != nil {
 		// TODO (elliotcourant) Can pg.NoRows return here? If it can this error is useless.
 		return nil, errors.Wrap(err, "failed to retrieve accounts and their funding schedules")

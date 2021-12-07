@@ -103,13 +103,14 @@ ALL_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*.go')
 TEST_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*_test.go')
 APP_GO_FILES=$(filter-out $(TEST_GO_FILES),$(ALL_GO_FILES))
 
+PUBLIC_DIR=$(PWD)/public
 UI_SRC_DIR=$(PWD)/ui
 ALL_UI_FILES=$(shell find $(UI_SRC_DIR) -type f)
 TEST_UI_FILES=$(shell find $(UI_SRC_DIR) -type f -name '*.spec.*')
 APP_UI_FILES=$(filter-out $(TEST_UI_FILES),$(ALL_UI_FILES))
-PUBLIC_FILES=$(wildcard $(PWD)/public/*)
+PUBLIC_FILES=$(wildcard $(PUBLIC_DIR)/*)
 # Of the public files, these are the files that should be copied to the static_dir before the go build.
-COPIED_PUBLIC_FILES=$(filter-out $(PWD)/public/index.html,$(PUBLIC_FILES))
+COPIED_PUBLIC_FILES=$(filter-out $(PUBLIC_DIR)/index.html,$(PUBLIC_FILES))
 UI_CONFIG_FILES=$(PWD)/tsconfig.json $(wildcard $(PWD)/*.config.js)
 
 GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
@@ -150,7 +151,7 @@ $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES
 
 GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS)
-	$(call infoMsg,Installing dependencies for monetrs rest-api)
+	$(call infoMsg,Installing dependencies for monetr)
 	$(GO) get -t $(GO_SRC_DIR)/...
 	touch -a -m $(GOMODULES)
 
@@ -182,9 +183,9 @@ $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
 $(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
 endif
-	$(GO) build -ldflags "-X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
-	$(call infoMsg,   Built monetr binary for: $(GOOS)/$(GOARCH))
-	$(call infoMsg,             Build Version: $(RELEASE_VERSION))
+	$(GO) build -ldflags "-s -w -X main.buildTime=$(BUILD_TIME) -X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
+	$(call infoMsg,Built monetr binary for: $(GOOS)/$(GOARCH))
+	$(call infoMsg,          Build Version: $(RELEASE_VERSION))
 
 build: $(BINARY)
 

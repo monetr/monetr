@@ -2,14 +2,15 @@ package mock_plaid
 
 import (
 	"encoding/json"
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func GenerateTransactions(t *testing.T, start, end time.Time, numberOfTransactions int, bankAccountIds []string) []plaid.Transaction {
@@ -42,6 +43,10 @@ func GenerateTransactions(t *testing.T, start, end time.Time, numberOfTransactio
 
 func MockGetRandomTransactions(t *testing.T, start, end time.Time, numberOfTransactions int, bankAccountIds []string) {
 	transactions := GenerateTransactions(t, start, end, numberOfTransactions, bankAccountIds)
+	MockGetTransactions(t, transactions)
+}
+
+func MockGetTransactions(t *testing.T, transactions []plaid.Transaction) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/transactions/get"),
@@ -59,9 +64,9 @@ func MockGetRandomTransactions(t *testing.T, start, end time.Time, numberOfTrans
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&getTransactionsRequest), "must decode request")
 
 			// Make sure our request dates are valid.
-			_, err := time.Parse("2006-01-02", getTransactionsRequest.StartDate)
+			filterStart, err := time.Parse("2006-01-02", getTransactionsRequest.StartDate)
 			require.NoError(t, err, "must provide a valid start date")
-			_, err = time.Parse("2006-01-02", getTransactionsRequest.EndDate)
+			filterEnd, err := time.Parse("2006-01-02", getTransactionsRequest.EndDate)
 			require.NoError(t, err, "must provide a valid end date")
 
 			if getTransactionsRequest.Options.Offset > len(transactions) {
@@ -70,13 +75,23 @@ func MockGetRandomTransactions(t *testing.T, start, end time.Time, numberOfTrans
 
 			offset := getTransactionsRequest.Options.Offset
 			count := getTransactionsRequest.Options.Count
-			endingOffset := myownsanity.Min(len(transactions), offset+count)
-			data := transactions[offset:endingOffset]
+
+			filteredTransactions := make([]plaid.Transaction, 0, len(transactions))
+			for _, transaction := range transactions {
+				transactionDate, err := time.Parse("2006-01-02", transaction.GetDate())
+				require.NoError(t, err, "must be able to parse transaction date")
+				if transactionDate.Before(filterEnd.Add(1*time.Second)) && transactionDate.After(filterStart.Add(-1*time.Second)) {
+					filteredTransactions = append(filteredTransactions, transaction)
+				}
+			}
+
+			endingOffset := myownsanity.Min(len(filteredTransactions), offset+count)
+			data := filteredTransactions[offset:endingOffset]
 
 			return plaid.TransactionsGetResponse{
 				Accounts:             nil, // Add some basic reporting here too
 				Transactions:         data,
-				TotalTransactions:    int32(len(transactions)),
+				TotalTransactions:    int32(len(filteredTransactions)),
 				Item:                 plaid.Item{},
 				RequestId:            gofakeit.UUID(),
 				AdditionalProperties: nil,

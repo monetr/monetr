@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/monetr/monetr/pkg/internal/vault_helper"
+	"github.com/monetr/monetr/pkg/vault_helper"
 	"github.com/sirupsen/logrus"
 
 	"github.com/getsentry/sentry-go"
@@ -64,7 +64,7 @@ func (v *vaultPlaidSecretsProvider) GetAccessTokenForPlaidLinkId(ctx context.Con
 		}
 	}
 
-	return "", errors.Errorf("access token could not be found")
+	return "", errors.WithStack(ErrNotFound)
 }
 
 func (v *vaultPlaidSecretsProvider) RemoveAccessTokenForPlaidLink(ctx context.Context, accountId uint64, plaidItemId string) error {

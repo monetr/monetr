@@ -2,36 +2,43 @@ package testutils
 
 import (
 	"bytes"
-	"github.com/monetr/monetr/pkg/logging"
-	"github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/require"
 	"os"
 	"sort"
 	"sync"
 	"testing"
+
+	"github.com/monetr/monetr/pkg/logging"
+	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/stretchr/testify/require"
 )
+
+type testLogEntry struct {
+	log  *logrus.Entry
+	hook *test.Hook
+}
 
 var testLogs struct {
 	lock sync.Mutex
-	logs map[string]*logrus.Entry
+	logs map[string]*testLogEntry
 }
 
 func init() {
 	testLogs = struct {
 		lock sync.Mutex
-		logs map[string]*logrus.Entry
+		logs map[string]*testLogEntry
 	}{
 		lock: sync.Mutex{},
-		logs: map[string]*logrus.Entry{},
+		logs: map[string]*testLogEntry{},
 	}
 }
 
-func GetLog(t *testing.T) *logrus.Entry {
+func GetTestLog(t *testing.T) (*logrus.Entry, *test.Hook) {
 	testLogs.lock.Lock()
 	defer testLogs.lock.Unlock()
 
 	if log, ok := testLogs.logs[t.Name()]; ok {
-		return log
+		return log.log, log.hook
 	}
 
 	logger := logging.NewLogger()
@@ -86,7 +93,16 @@ func GetLog(t *testing.T) *logrus.Entry {
 
 	logger = logger.WithField("test", t.Name())
 
-	testLogs.logs[t.Name()] = logger
+	testHook := test.NewLocal(logger.Logger)
+	testLogs.logs[t.Name()] = &testLogEntry{
+		log:  logger,
+		hook: testHook,
+	}
 
-	return logger
+	return logger, testHook
+}
+
+func GetLog(t *testing.T) *logrus.Entry {
+	log, _ := GetTestLog(t)
+	return log
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
+	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/swag"
@@ -298,15 +299,13 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 		}
 	}
 
-	jobId, err := c.job.TriggerRemoveLink(repo.AccountId(), repo.UserId(), link.LinkId)
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to queue link removal job")
+	if err = background.TriggerRemoveLink(c.getContext(ctx), c.jobRunner, background.RemoveLinkArguments{
+		AccountId: link.AccountId,
+		LinkId:    link.LinkId,
+	}); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to enqueue link removal job")
 		return
 	}
-
-	crumbs.Debug(c.getContext(ctx), "Link removal job has been queued", map[string]interface{}{
-		"jobId": jobId,
-	})
 }
 
 // Wait For Link Deletion

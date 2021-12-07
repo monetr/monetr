@@ -114,6 +114,10 @@ api:
   allowSignUp: true
   # DEPRECATED. This is no longer used.
   enableWebhooks: false
+  backgroundJobs:
+    engine: gocraft
+    scheduler: internal
+    jobSchedule: { }
   server:
     listenPort: 4000
     statsPort: 9000

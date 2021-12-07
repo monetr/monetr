@@ -2,6 +2,7 @@ package secrets
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
@@ -58,6 +59,7 @@ func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.C
 		Limit(1).
 		Select(&result)
 	if err != nil {
+		// TODO Add proper returning of the ErrNotFound here.
 		span.Status = sentry.SpanStatusInternalError
 		return accessToken, errors.Wrap(err, "failed to retrieve access token for plaid link")
 	}

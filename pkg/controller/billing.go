@@ -12,7 +12,7 @@ import (
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/monetr/monetr/pkg/internal/stripe_helper"
+	"github.com/monetr/monetr/pkg/stripe_helper"
 	"github.com/monetr/monetr/pkg/swag"
 	"github.com/stripe/stripe-go/v72"
 )

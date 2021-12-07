@@ -9,11 +9,12 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
+	"github.com/monetr/monetr/pkg/background"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
-	"github.com/monetr/monetr/pkg/internal/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/monetr/monetr/pkg/internal/platypus"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
@@ -311,7 +312,12 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
-	_, err = c.job.TriggerPullLatestTransactions(link.AccountId, link.LinkId, 0)
+	err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+		AccountId: link.AccountId,
+		LinkId:    link.LinkId,
+		Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
+		End:       time.Now(),
+	})
 	if err != nil {
 		log.WithError(err).Warn("failed to trigger pulling latest transactions after updating plaid link")
 	}
@@ -450,21 +456,22 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		return
 	}
 
-	var jobIdStr *string
 	if !c.configuration.Plaid.WebhooksEnabled {
-		jobId, err := c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
+		err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+			Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
+			End:       time.Now(),
+		})
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to pull initial transactions")
 			return
 		}
-
-		jobIdStr = &jobId
 	}
 
 	ctx.JSON(map[string]interface{}{
 		"success": true,
 		"linkId":  link.LinkId,
-		"jobId":   jobIdStr,
 	})
 }
 

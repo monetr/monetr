@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -34,24 +35,26 @@ type Configuration struct {
 	// DEPRECATED: This is not used anymore. Use Server.ListenPort instead.
 	ListenPort int `yaml:"listenPort"`
 	// DEPRECATED: This is not used anymore. Use Server.StatsPort instead.
-	StatsPort     int        `yaml:"statsPort"`
-	Environment   string     `yaml:"environment"`
-	UIDomainName  string     `yaml:"uiDomainName"`
-	APIDomainName string     `yaml:"apiDomainName"`
-	AllowSignUp   bool       `yaml:"allowSignUp"`
-	Server        Server     `yaml:"server"`
-	Beta          Beta       `yaml:"beta"`
-	CORS          CORS       `yaml:"cors"`
-	JWT           JWT        `yaml:"jwt"`
-	Logging       Logging    `yaml:"logging"`
-	Plaid         Plaid      `yaml:"plaid"`
-	PostgreSQL    PostgreSQL `yaml:"postgreSql"`
-	ReCAPTCHA     ReCAPTCHA  `yaml:"reCAPTCHA"`
-	Redis         Redis      `yaml:"redis"`
-	Email         Email      `yaml:"email"`
-	Sentry        Sentry     `yaml:"sentry"`
-	Stripe        Stripe     `yaml:"stripe"`
-	Vault         Vault      `yaml:"vault"`
+	StatsPort      int            `yaml:"statsPort"`
+	Environment    string         `yaml:"environment"`
+	UIDomainName   string         `yaml:"uiDomainName"`
+	APIDomainName  string         `yaml:"apiDomainName"`
+	AllowSignUp    bool           `yaml:"allowSignUp"`
+	BackgroundJobs BackgroundJobs `yaml:"backgroundJobs"`
+	Beta           Beta           `yaml:"beta"`
+	CORS           CORS           `yaml:"cors"`
+	Email          Email          `yaml:"email"`
+	JWT            JWT            `yaml:"jwt"`
+	Logging        Logging        `yaml:"logging"`
+	Plaid          Plaid          `yaml:"plaid"`
+	PostgreSQL     PostgreSQL     `yaml:"postgreSql"`
+	RabbitMQ       RabbitMQ       `yaml:"rabbitMQ"`
+	ReCAPTCHA      ReCAPTCHA      `yaml:"reCAPTCHA"`
+	Redis          Redis          `yaml:"redis"`
+	Sentry         Sentry         `yaml:"sentry"`
+	Server         Server         `yaml:"server"`
+	Stripe         Stripe         `yaml:"stripe"`
+	Vault          Vault          `yaml:"vault"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -295,10 +298,69 @@ type Vault struct {
 	IdleConnTimeout    time.Duration `yaml:"idleConnTimeout"`
 }
 
+type RabbitMQ struct {
+	Enabled  bool   `yaml:"enabled"`
+	Hostname string `yaml:"hostname"`
+	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
+type BackgroundJobEngine string
+
+const (
+	// BackgroundJobEngineInMemory is ideal for self-hosted or development deployments. It is not recommended at all for
+	// any type of deployment that demands reliability or high-availability. When using this option you **cannot**
+	// deploy more than a single replica of monetr. This is because jobs will not be shared between replicas, and you
+	// can end up with problems where scheduled jobs are performed multiple times by each replica. This option must be
+	// manually specified and is only the default configuration when Redis and RabbitMQ are disabled.
+	// **NOT YET IMPLEMENTED**
+	BackgroundJobEngineInMemory BackgroundJobEngine = "memory"
+	// BackgroundJobEngineGoCraftWork is an okay middle-ground between in-memory and RabbitMQ. GoCraft requires that a
+	// Redis instance is available and that all monetr instances are connected to that same Redis instance. Jobs and
+	// scheduling are coordinated through Redis and are reasonably fault-tolerant. This particular job engine may be
+	// deprecated in the future though as it seems the library supporting it is not really maintained anymore. If Redis
+	// is enabled but RabbitMQ is not, then this is the default job engine if none is specified.
+	BackgroundJobEngineGoCraftWork BackgroundJobEngine = "gocraft"
+	// BackgroundJobEngineRabbitMQ is ideal for high-availability deployments. It allows many instances of monetr to
+	// process background jobs while being reasonably tolerant to individual monetr failures or RabbitMQ failures. If
+	// RabbitMQ is enabled, then this engine is selected by default if no engine is specified. This engine **requires**
+	// an external job scheduler. Since there is no logic implemented for leader-election for RabbitMQ there is no
+	// internal way to schedule jobs automatically. If you are deploying monetr to Kubernetes, then the CronJob resource
+	// is the recommended way to schedule jobs. A CronJob should be created for each scheduled job type.
+	// **NOT YET IMPLEMENTED**
+	BackgroundJobEngineRabbitMQ BackgroundJobEngine = "rabbitmq"
+	// BackgroundJobEnginePostgreSQL might be another option for self-hosted deployments. It allows for multiple
+	// replicas of monetr to be deployed and scaled independently. Allowing for a somewhat high-availability deployment.
+	// This job engine will be built out in the future, but has some downsides as it will create a not-insignificant
+	// amount of churn in the PostgreSQL database. Things like vacuuming should be done far more frequently if this job
+	// engine is used.
+	// **NOT YET IMPLEMENTED**
+	BackgroundJobEnginePostgreSQL BackgroundJobEngine = "postgres"
+)
+
+type BackgroundJobScheduler string
+
+const (
+	// BackgroundJobSchedulerExternal requires that some process outside the monetr instance add scheduled jobs to the
+	// queue in order to be processed. This is required for deployments using the RabbitMQ background job engine.
+	BackgroundJobSchedulerExternal BackgroundJobScheduler = "external"
+	// BackgroundJobSchedulerInternal adds jobs to the queue within the monetr process and does not require any
+	// additional instances or external processes for jobs to be performed. This is only available for in-memory or
+	// gocraft/work job engine deployments. This also requires that the cron schedules for each queue be specified.
+	BackgroundJobSchedulerInternal BackgroundJobScheduler = "internal"
+)
+
+type BackgroundJobs struct {
+	Engine      BackgroundJobEngine    `yaml:"engine"`
+	Scheduler   BackgroundJobScheduler `yaml:"scheduler"`
+	JobSchedule map[string]string      `yaml:"jobSchedule"`
+}
+
 func getViper(configFilePath *string) *viper.Viper {
 	v := viper.GetViper()
 
-	if configFilePath != nil {
+	if configFilePath != nil && *configFilePath != "" {
 		v.SetConfigName(*configFilePath)
 	} else {
 		v.SetConfigName("config")
@@ -327,17 +389,42 @@ func LoadConfiguration(configFilePath *string) Configuration {
 	return LoadConfigurationEx(v)
 }
 
-func LoadConfigurationEx(v *viper.Viper) Configuration {
+func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 	if err := v.ReadInConfig(); err != nil {
 		fmt.Printf("failed to read in config from file: %+v\n", err)
 	}
 
-	var config Configuration
 	if err := v.Unmarshal(&config); err != nil {
 		panic(err)
 	}
 
 	config.configFile = v.ConfigFileUsed()
+
+	{ // Background job processing defaults.
+		if config.BackgroundJobs.JobSchedule == nil {
+			config.BackgroundJobs.JobSchedule = map[string]string{}
+		}
+
+		switch config.BackgroundJobs.Engine {
+		case BackgroundJobEngineInMemory:
+			log.Fatal("in-memory job scheduling is not yet implemented")
+		case BackgroundJobEngineGoCraftWork:
+			if config.BackgroundJobs.Scheduler == "" {
+				config.BackgroundJobs.Scheduler = BackgroundJobSchedulerInternal
+			}
+
+			// Make sure that the scheduler specified in the configuration is valid.
+			switch config.BackgroundJobs.Scheduler {
+			case BackgroundJobSchedulerInternal:
+			// The scheduler is configured correctly for the gocraft/work engine.
+			default:
+				log.Fatal("invalid scheduler provided to configuration for background jobs")
+				return
+			}
+		case BackgroundJobEngineRabbitMQ:
+			log.Fatal("RabbitMQ job scheduling is not yet implemented")
+		}
+	}
 
 	return config
 }
@@ -357,6 +444,8 @@ func GenerateConfigFile(configFilePath *string, outputFilePath string) error {
 func setupDefaults(v *viper.Viper) {
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
+	v.SetDefault("BackgroundJobs.Engine", BackgroundJobEngineGoCraftWork)
+	v.SetDefault("BackgroundJobs.Scheduler", BackgroundJobSchedulerInternal)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Environment", "development")

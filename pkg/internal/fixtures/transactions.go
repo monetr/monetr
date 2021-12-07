@@ -66,3 +66,20 @@ func GivenIHaveATransaction(t *testing.T, bankAccount models.BankAccount) models
 
 	return transaction
 }
+
+func AssertThatIHaveZeroTransactions(t *testing.T, accountId uint64) {
+	db := testutils.GetPgDatabase(t)
+	exists, err := db.Model(&models.Transaction{}).Where(`"transaction"."account_id" = ?`, accountId).Exists()
+	require.NoError(t, err, "must be able to query transactions successfully")
+	if exists {
+		panic("account has transactions")
+	}
+}
+
+func CountTransactions(t *testing.T, accountId uint64) int64 {
+	db := testutils.GetPgDatabase(t)
+	count, err := db.Model(&models.Transaction{}).Where(`"transaction"."account_id" = ?`, accountId).Count()
+	require.NoError(t, err, "must be able to query transactions successfully")
+
+	return int64(count)
+}

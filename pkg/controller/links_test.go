@@ -414,6 +414,7 @@ func TestDeleteLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
+			response.JSON().Object().NotEmpty()
 		}
 
 		{ // Try to delete it.
@@ -423,6 +424,7 @@ func TestDeleteLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
+			response.NoContent()
 		}
 
 		{ // Try to retrieve the link after it's been deleted.

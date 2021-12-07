@@ -12,18 +12,18 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/pkg/application"
+	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/controller"
 	"github.com/monetr/monetr/pkg/internal/mock_mail"
 	"github.com/monetr/monetr/pkg/internal/mock_secrets"
-	"github.com/monetr/monetr/pkg/internal/platypus"
-	"github.com/monetr/monetr/pkg/internal/stripe_helper"
 	"github.com/monetr/monetr/pkg/internal/testutils"
-	"github.com/monetr/monetr/pkg/jobs"
+	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
+	"github.com/monetr/monetr/pkg/stripe_helper"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -109,14 +109,7 @@ func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configura
 	})
 	plaidSecrets := mock_secrets.NewMockPlaidSecrets()
 
-	mockJobManager := jobs.NewNonDistributedJobManager(
-		log,
-		redisPool,
-		db,
-		plaidClient,
-		nil,
-		plaidSecrets,
-	)
+	jobRunner := background.NewSynchronousJobRunner(t, plaidClient, plaidSecrets)
 
 	mockMail := mock_mail.NewMockMail()
 
@@ -124,7 +117,7 @@ func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configura
 		log,
 		configuration,
 		db,
-		mockJobManager,
+		jobRunner,
 		plaidClient,
 		nil,
 		stripe_helper.NewStripeHelper(log, gofakeit.UUID()),

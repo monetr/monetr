@@ -14,20 +14,20 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
+	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/ctxkeys"
-	"github.com/monetr/monetr/pkg/internal/platypus"
-	"github.com/monetr/monetr/pkg/internal/stripe_helper"
-	"github.com/monetr/monetr/pkg/jobs"
 	"github.com/monetr/monetr/pkg/mail"
 	"github.com/monetr/monetr/pkg/metrics"
+	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
+	"github.com/monetr/monetr/pkg/stripe_helper"
 	"github.com/monetr/monetr/pkg/verification"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -43,7 +43,7 @@ type Controller struct {
 	plaidSecrets             secrets.PlaidSecretsProvider
 	plaidInstitutions        platypus.PlaidInstitutions
 	log                      *logrus.Entry
-	job                      jobs.JobManager
+	jobRunner                background.JobController
 	stats                    *metrics.Stats
 	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
@@ -61,7 +61,7 @@ func NewController(
 	log *logrus.Entry,
 	configuration config.Configuration,
 	db *pg.DB,
-	job jobs.JobManager,
+	jobRunner background.JobController,
 	plaidClient platypus.Platypus,
 	stats *metrics.Stats,
 	stripe stripe_helper.Stripe,
@@ -124,7 +124,7 @@ func NewController(
 		plaidSecrets:             plaidSecrets,
 		plaidInstitutions:        platypus.NewPlaidInstitutionWrapper(log, plaidClient, caching),
 		log:                      log,
-		job:                      job,
+		jobRunner:                jobRunner,
 		stats:                    stats,
 		stripe:                   stripe,
 		ps:                       pubSub,

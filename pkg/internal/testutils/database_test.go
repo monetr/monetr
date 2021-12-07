@@ -34,9 +34,14 @@ func TestGetPgDatabase(t *testing.T) {
 
 	secondDb := GetPgDatabase(t)
 	assert.Equal(t, originalDb, secondDb, "should return the same database if called again")
-	
+
 	t.Run("separate test", func(t *testing.T) {
 		separateDb := GetPgDatabase(t)
 		assert.NotEqual(t, originalDb, separateDb, "requesting a db in a separate test should be different")
+	})
+
+	t.Run("isolated db", func(t *testing.T) {
+		isolatedDb := GetPgDatabase(t, IsolatedDatabase)
+		assert.NotEqual(t, originalDb.Options().Database, isolatedDb.Options().Database, "database name should not be equal")
 	})
 }

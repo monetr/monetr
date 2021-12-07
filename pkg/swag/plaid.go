@@ -18,7 +18,8 @@ type PlaidTokenCallbackResponse struct {
 	LinkId uint64 `json:"linkId"`
 	// If webhooks are not enabled then a job Id is returned with the response. This job Id can also be used to check
 	// for initial transactions being retrieved.
-	JobId *string `json:"jobId" extensions:"x-nullable"`
+	// **DEPRECATED** This is no longer returned after moving to new background job processing system.
+	JobId *string `json:"jobId" extensions:"x-nullable,x-deprecated"`
 }
 
 type UpdatePlaidTokenCallbackRequest struct {
