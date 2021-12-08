@@ -145,7 +145,7 @@
     "react-refresh-typescript": "2.0.3",
     "redoc-cli": "0.13.1",
     "redux-devtools-extension": "2.13.9",
-    "sass-loader": "12.3.0",
+    "sass-loader": "12.4.0",
     "style-loader": "3.3.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat",
     "ts-loader": "9.2.6",
