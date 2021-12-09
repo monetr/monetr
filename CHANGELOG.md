@@ -1,5 +1,20 @@
 # Changelog
 
+### [0.7.5](https://www.github.com/monetr/monetr/compare/v0.7.4...v0.7.5) (2021-12-08)
+
+
+### Bug Fixes
+
+* **plaid:** Make sure webhook unauthorized errors are reported to sentry ([a698307](https://www.github.com/monetr/monetr/commit/a698307ccb3cb26c7ca2b099bde40ec8d34b62af))
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors commit hash to 081c558 ([3d577bf](https://www.github.com/monetr/monetr/commit/3d577bf254f49ff9528cc9c367b43db893029872))
+* **ui:** update dependency eslint to v8.4.1 ([a21ab8c](https://www.github.com/monetr/monetr/commit/a21ab8c185b41304470a1ebb24cfe90800a8d665))
+* **ui:** update dependency sass-loader to v12.4.0 ([fdd55ed](https://www.github.com/monetr/monetr/commit/fdd55ede7efdc21b7562bfb057e41a6e12d0a934))
+* **ui:** update sentry-javascript monorepo to v6.16.0 ([166a4ac](https://www.github.com/monetr/monetr/commit/166a4ac45f5af3d7ee870c22ec6af09f5df1d4fc))
+
 ### [0.7.4](https://www.github.com/monetr/monetr/compare/v0.7.3...v0.7.4) (2021-12-06)
 
 
