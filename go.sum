@@ -704,6 +704,8 @@ github.com/stripe/stripe-go/v72 v72.77.0 h1:5TIyKQ0su8GoM81aQ6ZjuOajgk30Twohpg8A
 github.com/stripe/stripe-go/v72 v72.77.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/stripe/stripe-go/v72 v72.78.0 h1:ZbdiDXb1j9Ea0k+TzQI0QgiQ+/nU91GJ32tzazkTpUI=
 github.com/stripe/stripe-go/v72 v72.78.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
+github.com/stripe/stripe-go/v72 v72.79.0 h1:J3ra3O7kubEyibVtIuQW8NV5ASmEvGHj7DYq4Ewz26A=
+github.com/stripe/stripe-go/v72 v72.79.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/subosito/gotenv v1.2.0 h1:Slr1R9HxAlEKefgq5jn9U+DnETlIUa6HfgEzj0g5d7s=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/tdewolff/minify/v2 v2.9.10/go.mod h1:U1Nc+/YBSB0FPEarqcgkYH3Ep4DNyyIbOyl5P4eWMuo=
