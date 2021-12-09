@@ -8593,7 +8593,7 @@ memfs@^3.2.2:
   dependencies:
     fs-monkey "1.0.3"
 
-memoize-one@^5.0.0, memoize-one@^5.2.1:
+memoize-one@^5.0.0:
   version "5.2.1"
   resolved "https://registry.npmjs.org/memoize-one/-/memoize-one-5.2.1.tgz"
   integrity sha512-zYiwtZUcYyXKo/np96AGZAckk+FWWsUdJ3cHGGmld7+AhvcWmQyGCYUh1hc4Q/pkOhb65dQR/pqCyK0cOaHz4Q==
@@ -10559,10 +10559,10 @@ redent@^3.0.0:
     indent-string "^4.0.0"
     strip-indent "^3.0.0"
 
-redoc-cli@0.13.1:
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.13.1.tgz#f69df5fb5202f5302c37ed7f04f0200e0de8c2ca"
-  integrity sha512-Ak2LZWRQ1PjsAOPkzirpwRJbYFLKLBpQqMGgmYIOoYje2lLoJQvcE6tknPPQGQV51PUJlmY94hWTNW6rpZi99w==
+redoc-cli@0.13.2:
+  version "0.13.2"
+  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.13.2.tgz#2ef5e1003d4fb797d3b98c87b2590f58e15686f2"
+  integrity sha512-eRGRmAKPvm8ozCb8TxaBlHF0BjeFOXYUKDTx7RD3ABkPKsDamle776GwMrrf1ojgl5i+RSSJfP62k1gTP7Owaw==
   dependencies:
     chokidar "^3.5.1"
     handlebars "^4.7.7"
@@ -10572,14 +10572,14 @@ redoc-cli@0.13.1:
     node-libs-browser "^2.2.1"
     react "^17.0.1"
     react-dom "^17.0.1"
-    redoc "2.0.0-rc.58"
+    redoc "2.0.0-rc.59"
     styled-components "^5.3.0"
     yargs "^17.0.1"
 
-redoc@2.0.0-rc.58:
-  version "2.0.0-rc.58"
-  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.58.tgz#ed0f37ae315ff9f4cd816f1afa545406da50ff6e"
-  integrity sha512-TWd+a2jv8UDaFOK4zST/lCBuJ7kpVLILW/3eoASZunjqRdcFyL/9aJC1zlFzKmEOUfaN6YWnZX/OM/YbE2BZlg==
+redoc@2.0.0-rc.59:
+  version "2.0.0-rc.59"
+  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.59.tgz#4a5075574e153eb8b8b6f657230ce47918ffb1bf"
+  integrity sha512-1Wkj/HSCv5CdtwF7FSZc5L0EeBgI0N7YpAIsatMtfiMHEon0WhuArAkc5rMQ6mQXUPRrqq5Fs6QPc4GpNp6DuA==
   dependencies:
     "@babel/runtime" "^7.14.0"
     "@redocly/openapi-core" "^1.0.0-beta.54"
@@ -10592,7 +10592,6 @@ redoc@2.0.0-rc.58:
     lunr "^2.3.9"
     mark.js "^8.11.1"
     marked "^0.7.0"
-    memoize-one "^5.2.1"
     mobx-react "^7.2.0"
     openapi-sampler "^1.0.1"
     path-browserify "^1.0.1"
