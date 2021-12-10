@@ -1,5 +1,15 @@
 # Changelog
 
+### [0.7.6](https://www.github.com/monetr/monetr/compare/v0.7.5...v0.7.6) (2021-12-10)
+
+
+### Dependencies
+
+* **api:** update module github.com/plaid/plaid-go to v1.9.0 ([3d448bd](https://www.github.com/monetr/monetr/commit/3d448bdd83f8a415fb6118b03bfa587150fba2f5))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.78.0 ([66c5b35](https://www.github.com/monetr/monetr/commit/66c5b35435755595389732355b7e94e32872a1d4))
+* **ui:** update dependency redoc-cli to v0.13.2 ([9306464](https://www.github.com/monetr/monetr/commit/93064641470086da9af992d956dbb4d93fc75390))
+* **ui:** update dependency typescript to v4.5.3 ([27ad9f9](https://www.github.com/monetr/monetr/commit/27ad9f9a524f3932f9842b24a42cfdd56c77ecc0))
+
 ### [0.7.5](https://www.github.com/monetr/monetr/compare/v0.7.4...v0.7.5) (2021-12-08)
 
 
