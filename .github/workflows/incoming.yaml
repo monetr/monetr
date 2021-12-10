@@ -165,7 +165,7 @@ jobs:
             dsn: ":memory:"
             options: >-
               -e BUSYBOX=true
-              --entrypoint tail -f /dev/null
+              --entrypoint "/bin/tail -f /dev/null"
     env:
       DATABASE: "${{ matrix.database.name }}"
       DSN: "${{ matrix.database.dsn }}"
