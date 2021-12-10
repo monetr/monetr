@@ -74,7 +74,7 @@
     "resolve": "1.20.0",
     "resolve-url-loader": "4.0.0",
     "rrule": "2.6.8",
-    "sass": "1.44.0",
+    "sass": "1.45.0",
     "selector-action": "1.2.0",
     "semver": "7.3.5",
     "terser-webpack-plugin": "5.2.5",
