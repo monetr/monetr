@@ -40,7 +40,7 @@ func NewEmailRepository(log *logrus.Entry, db bun.IDB) EmailRepository {
 	}
 }
 
-func getLoginForEmail(ctx context.Context, db pg.DBI, emailAddress string) (*models.Login, error) {
+func getLoginForEmail(ctx context.Context, db bun.IDB, emailAddress string) (*models.Login, error) {
 	span := sentry.StartSpan(ctx, "GetLoginForEmail")
 	defer span.Finish()
 

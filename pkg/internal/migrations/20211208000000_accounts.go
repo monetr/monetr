@@ -18,7 +18,7 @@ func init() {
 			ColumnDefinition{
 				Name:  "account_id",
 				Type:  BigInteger,
-				Flags: NotNull,
+				Flags: NotNull | AutoIncrement,
 			},
 			ColumnDefinition{
 				Name:         "timezone",

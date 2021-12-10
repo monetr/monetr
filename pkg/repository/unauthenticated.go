@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -52,10 +53,11 @@ func (u *unauthenticatedRepo) CreateLogin(
 		return nil, errors.Errorf("a login with the same email already exists")
 	}
 
-	_, err = u.db.NewInsert().Model(login).Exec(span.Context(), login)
+	result, err := u.db.NewInsert().Model(login).Returning("*").Exec(span.Context(), login)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 	}
+	fmt.Println(result)
 
 	return &login.Login, errors.Wrap(err, "failed to create login")
 }
@@ -97,7 +99,7 @@ func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId
 }
 
 func (u *unauthenticatedRepo) GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error) {
-	return getLoginForEmail(ctx, u.txn, emailAddress)
+	return getLoginForEmail(ctx, u.db, emailAddress)
 }
 
 func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error) {
@@ -189,17 +191,24 @@ func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64,
 	span := sentry.StartSpan(ctx, "ResetPassword")
 	defer span.Finish()
 
-	result, err := u.txn.ModelContext(span.Context(), &models.LoginWithHash{}).
-		Set(`"password_hash" = ?`, hashedPassword).
-		Set(`"password_reset_at" = ?`, time.Now()).
-		Where(`"login_with_hash"."login_id" = ?`, loginId).
-		Update()
+	result, err := u.db.NewUpdate().
+		Model(&models.LoginWithHash{}).
+		Set(`password_hash = ?`, hashedPassword).
+		Set(`password_reset_at = ?`, time.Now()).
+		Where(`login_with_hash.login_id = ?`, loginId).
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to reset login password")
 	}
 
-	if result.RowsAffected() != 1 {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		span.Status = sentry.SpanStatusDataLoss
+		return errors.Wrap(err, "failed to assert rows affected for password reset")
+	}
+
+	if affected != 1 {
 		span.Status = sentry.SpanStatusNotFound
 		return errors.Errorf("no logins were updated")
 	}

@@ -48,7 +48,7 @@ var (
 		dialect.SQLite: {
 			SmallInteger: "SMALLINT",
 			Integer:      "INTEGER",
-			BigInteger:   "BIGINTEGER",
+			BigInteger:   "INTEGER",
 			Boolean:      "BOOLEAN",
 			Blob:         "BLOB",
 			Date:         "DATE",

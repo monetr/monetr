@@ -3,18 +3,19 @@ package jobs
 import (
 	"context"
 	"fmt"
-	"github.com/go-pg/pg/v10"
+	"time"
+
 	"github.com/monetr/monetr/pkg/internal/platypus"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/sirupsen/logrus"
-	"time"
+	"github.com/uptrace/bun"
 )
 
 type nonDistributedJobManager struct {
 	log          *logrus.Entry
-	db           *pg.DB
+	db           *bun.DB
 	plaidClient  platypus.Platypus
 	plaidSecrets secrets.PlaidSecretsProvider
 	stats        *metrics.Stats

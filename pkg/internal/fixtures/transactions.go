@@ -58,7 +58,7 @@ func GivenIHaveATransaction(t *testing.T, bankAccount models.BankAccount) models
 		CreatedAt:                 time.Now(),
 	}
 
-	db := testutils.GetPgDatabase(t)
+	db := testutils.GetTestDatabase(t)
 	repo := repository.NewRepositoryFromSession(bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
 
 	err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)

@@ -18,7 +18,7 @@ import (
 
 func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
 	testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
-		repo := NewUnauthenticatedRepository(db)
+		repo := repository.NewUnauthenticatedRepository(db)
 		account := models.Account{
 			Timezone:                time.UTC.String(),
 			StripeCustomerId:        nil,
@@ -35,7 +35,7 @@ func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
 func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
-			repo := NewUnauthenticatedRepository(db)
+			repo := repository.NewUnauthenticatedRepository(db)
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 			hash := testutils.MustHashLogin(t, email, password)
 			login, err := repo.CreateLogin(ctx, email, hash, gofakeit.FirstName(), gofakeit.LastName())
@@ -47,7 +47,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 
 	t.Run("duplicate email", func(t *testing.T) {
 		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
-			repo := NewUnauthenticatedRepository(db)
+			repo := repository.NewUnauthenticatedRepository(db)
 			email := gofakeit.Email()
 
 			passwordOne := gofakeit.Password(true, true, true, true, false, 32)
@@ -74,7 +74,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
-			repo := NewUnauthenticatedRepository(db)
+			repo := repository.NewUnauthenticatedRepository(db)
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 			hash := testutils.MustHashLogin(t, email, password)
 
@@ -111,7 +111,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 
 	t.Run("unique login per account", func(t *testing.T) {
 		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
-			repo := NewUnauthenticatedRepository(db)
+			repo := repository.NewUnauthenticatedRepository(db)
 			email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 			hash := testutils.MustHashLogin(t, email, password)
 
@@ -156,17 +156,21 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 
 func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
-		login, _ := fixtures.GivenIHaveLogin(t)
+		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
+			repo := repository.NewUnauthenticatedRepository(db)
+			login, _ := fixtures.GivenIHaveLogin(t)
 
-		err := repo.ResetPassword(context.Background(), login.LoginId, hash.HashPassword(login.Email, "new Password"))
-		assert.NoError(t, err, "must reset password without an error")
+			err := repo.ResetPassword(ctx, login.LoginId, hash.HashPassword(login.Email, "new Password"))
+			assert.NoError(t, err, "must reset password without an error")
+		})
 	})
 
 	t.Run("bad login", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
+		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
+			repo := repository.NewUnauthenticatedRepository(db)
 
-		err := repo.ResetPassword(context.Background(), math.MaxUint64, hash.HashPassword(testutils.GetUniqueEmail(t), "new Password"))
-		assert.EqualError(t, err, "no logins were updated", "should return an error for invalid login")
+			err := repo.ResetPassword(ctx, math.MaxUint64, hash.HashPassword(testutils.GetUniqueEmail(t), "new Password"))
+			assert.EqualError(t, err, "no logins were updated", "should return an error for invalid login")
+		})
 	})
 }

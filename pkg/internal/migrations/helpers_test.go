@@ -19,17 +19,17 @@ func TestColumnGeneration(t *testing.T) {
 				Model(&TableModel{}).
 				ModelTableExpr(`?`, bun.Ident("logins"))
 
-			migrations.CreateColumnDefinition(
-				createTable,
-				"login_id",
-				migrations.BigInteger,
-				migrations.AutoIncrement|migrations.NotNull|migrations.PrimaryKey,
-			)
-			migrations.CreateColumnDefinition(
-				createTable,
-				"email",
-				migrations.TextOrVarChar(250),
-				migrations.NotNull,
+			migrations.CreateColumnDefinition(createTable,
+				migrations.ColumnDefinition{
+					Name:  "login_id",
+					Type:  migrations.BigInteger,
+					Flags: migrations.AutoIncrement | migrations.PrimaryKey | migrations.NotNull,
+				},
+				migrations.ColumnDefinition{
+					Name:  "email",
+					Type:  migrations.TextOrVarChar(250),
+					Flags: migrations.NotNull,
+				},
 			)
 
 			query, err := createTable.AppendQuery(db.Formatter(), nil)
@@ -55,18 +55,18 @@ func TestColumnGeneration(t *testing.T) {
 				Model(&TableModel{}).
 				ModelTableExpr(`?`, bun.Ident("logins"))
 
-			migrations.CreateColumnDefinition(
-				createTable,
-				"login_id",
-				migrations.BigInteger,
-				migrations.AutoIncrement|migrations.NotNull|migrations.PrimaryKey,
-			)
-			migrations.CreateColumnDefinition(
-				createTable,
-				"created_at",
-				migrations.Timestamp,
-				migrations.NotNull,
-				bun.Safe("CURRENT_TIMESTAMP"),
+			migrations.CreateColumnDefinition(createTable,
+				migrations.ColumnDefinition{
+					Name:  "login_id",
+					Type:  migrations.BigInteger,
+					Flags: migrations.AutoIncrement | migrations.PrimaryKey | migrations.NotNull,
+				},
+				migrations.ColumnDefinition{
+					Name:         "created_at",
+					Type:         migrations.Timestamp,
+					Flags:        migrations.NotNull,
+					DefaultValue: bun.Safe("CURRENT_TIMESTAMP"),
+				},
 			)
 
 			query, err := createTable.AppendQuery(db.Formatter(), nil)
@@ -82,32 +82,6 @@ func TestColumnGeneration(t *testing.T) {
 
 			_, err = createTable.Exec(ctx)
 			assert.NoError(t, err, "must be able to create table")
-		})
-	})
-
-	t.Run("panics for bad defaults", func(t *testing.T) {
-		testutils.ForEachDatabaseUnMigrated(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
-			type TableModel struct{}
-			createTable := db.NewCreateTable().
-				Model(&TableModel{}).
-				ModelTableExpr(`?`, bun.Ident("logins"))
-
-			migrations.CreateColumnDefinition(
-				createTable,
-				"login_id",
-				migrations.BigInteger,
-				migrations.AutoIncrement|migrations.NotNull|migrations.PrimaryKey,
-			)
-			assert.Panics(t, func() {
-				migrations.CreateColumnDefinition(
-					createTable,
-					"created_at",
-					migrations.Timestamp,
-					migrations.NotNull,
-					"First default value",
-					"Second default value", // I cause a panic
-				)
-			})
 		})
 	})
 }

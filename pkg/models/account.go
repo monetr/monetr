@@ -10,12 +10,12 @@ import (
 type Account struct {
 	tableName string `pg:"accounts"`
 
-	AccountId                    uint64     `json:"accountId" pg:"account_id,notnull,pk,type:'bigserial'"`
-	Timezone                     string     `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
-	StripeCustomerId             *string    `json:"-" pg:"stripe_customer_id"`
-	StripeSubscriptionId         *string    `json:"-" pg:"stripe_subscription_id"`
-	StripeWebhookLatestTimestamp *time.Time `json:"-" pg:"stripe_webhook_latest_timestamp"`
-	SubscriptionActiveUntil      *time.Time `json:"subscriptionActiveUntil" pg:"subscription_active_until"`
+	AccountId                    uint64     `json:"accountId" bun:"account_id,notnull,pk"`
+	Timezone                     string     `json:"timezone" bun:"timezone,notnull,default:'UTC'"`
+	StripeCustomerId             *string    `json:"-" bun:"stripe_customer_id"`
+	StripeSubscriptionId         *string    `json:"-" bun:"stripe_subscription_id"`
+	StripeWebhookLatestTimestamp *time.Time `json:"-" bun:"stripe_webhook_latest_timestamp"`
+	SubscriptionActiveUntil      *time.Time `json:"subscriptionActiveUntil" bun:"subscription_active_until"`
 }
 
 func (a *Account) GetTimezone() (*time.Location, error) {

@@ -41,7 +41,6 @@ require (
 	github.com/uptrace/bun/driver/pgdriver v1.0.19
 	github.com/uptrace/bun/driver/sqliteshim v1.0.19
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	google.golang.org/genproto v0.0.0-20211112145013-271947fe86fd // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
@@ -160,7 +159,7 @@ require (
 	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
+	golang.org/x/net v0.0.0-20211201190559-0a0e4e1bb54c // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
 	golang.org/x/text v0.3.7 // indirect

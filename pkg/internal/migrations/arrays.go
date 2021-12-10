@@ -28,6 +28,11 @@ func (t Array) DatabaseType(dbDialect dialect.Name) (string, error) {
 	case dialect.PG:
 		return fmt.Sprintf("%s[]", innerTypeString), nil
 	default:
-		panic("non text arrays are not implemented")
+		switch t.DataType.(type) {
+		case TextDataType:
+			return innerTypeString, nil
+		default:
+			panic("non text arrays are not implemented")
+		}
 	}
 }

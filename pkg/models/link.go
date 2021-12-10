@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/uptrace/bun"
+)
 
 type LinkStatus uint8
 
@@ -15,25 +19,25 @@ const (
 )
 
 type Link struct {
-	tableName string `pg:"links"`
+	bun.BaseModel `bun:"links"`
 
-	LinkId                uint64     `json:"linkId" pg:"link_id,notnull,pk,type:'bigserial'"`
-	AccountId             uint64     `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
-	Account               *Account   `json:"-" pg:"rel:has-one"`
-	LinkType              LinkType   `json:"linkType" pg:"link_type,notnull"`
-	PlaidLinkId           *uint64    `json:"-" pg:"plaid_link_id,on_delete:SET NULL"`
-	PlaidLink             *PlaidLink `json:"-" pg:"rel:has-one"`
-	PlaidInstitutionId    *string    `json:"plaidInstitutionId" pg:"plaid_institution_id"`
-	LinkStatus            LinkStatus `json:"linkStatus" pg:"link_status,notnull,default:0"`
-	ErrorCode             *string    `json:"errorCode,omitempty" pg:"error_code"`
-	ExpirationDate        *time.Time `json:"expirationDate" pg:"expiration_date"`
-	InstitutionName       string     `json:"institutionName" pg:"institution_name"`
-	CustomInstitutionName string     `json:"customInstitutionName,omitempty" pg:"custom_institution_name"`
-	CreatedAt             time.Time  `json:"createdAt" pg:"created_at,notnull"`
-	CreatedByUserId       uint64     `json:"createdByUserId" pg:"created_by_user_id,notnull,on_delete:CASCADE"`
-	CreatedByUser         *User      `json:"-,omitempty" pg:"rel:has-one,fk:created_by_user_id"`
-	UpdatedAt             time.Time  `json:"updatedAt" pg:"updated_at,notnull"`
-	LastSuccessfulUpdate  *time.Time `json:"lastSuccessfulUpdate" pg:"last_successful_update"`
+	LinkId                uint64     `json:"linkId" bun:"link_id,notnull,pk"`
+	AccountId             uint64     `json:"-" bun:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
+	Account               *Account   `json:"-" bun:"rel:has-one,join:account_id=account_id"`
+	LinkType              LinkType   `json:"linkType" bun:"link_type,notnull"`
+	PlaidLinkId           *uint64    `json:"-" bun:"plaid_link_id,on_delete:SET NULL"`
+	PlaidLink             *PlaidLink `json:"-" bun:"rel:has-one,join:plaid_link_id=plaid_link_id"`
+	PlaidInstitutionId    *string    `json:"plaidInstitutionId" bun:"plaid_institution_id"`
+	LinkStatus            LinkStatus `json:"linkStatus" bun:"link_status,notnull,default:0"`
+	ErrorCode             *string    `json:"errorCode,omitempty" bun:"error_code"`
+	ExpirationDate        *time.Time `json:"expirationDate" bun:"expiration_date"`
+	InstitutionName       string     `json:"institutionName" bun:"institution_name"`
+	CustomInstitutionName string     `json:"customInstitutionName,omitempty" bun:"custom_institution_name"`
+	CreatedAt             time.Time  `json:"createdAt" bun:"created_at,notnull"`
+	CreatedByUserId       uint64     `json:"createdByUserId" bun:"created_by_user_id,notnull,on_delete:CASCADE"`
+	CreatedByUser         *User      `json:"-,omitempty" bun:"rel:has-one,join:created_by_user_id=user_id"`
+	UpdatedAt             time.Time  `json:"updatedAt" bun:"updated_at,notnull"`
+	LastSuccessfulUpdate  *time.Time `json:"lastSuccessfulUpdate" bun:"last_successful_update"`
 
-	BankAccounts []BankAccount `json:"-" pg:"rel:has-many"`
+	BankAccounts []BankAccount `json:"-" bun:"rel:has-many,join:link_id=link_id"`
 }

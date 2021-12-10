@@ -16,7 +16,7 @@ import (
 )
 
 func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
-	db := testutils.GetPgDatabase(t)
+	db := testutils.GetTestDatabase(t)
 
 	repo := repository.NewUnauthenticatedRepository(db)
 
@@ -38,7 +38,7 @@ func GivenIHaveABasicAccount(t *testing.T) (_ models.User, password string) {
 }
 
 func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
-	db := testutils.GetPgDatabase(t)
+	db := testutils.GetTestDatabase(t)
 	repo := repository.NewUnauthenticatedRepository(db)
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),

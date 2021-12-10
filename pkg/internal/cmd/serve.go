@@ -336,7 +336,7 @@ func RunServer() error {
 		plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
 	} else {
 		log.Debugf("secrets will be stored in postgres")
-		plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db)
+		plaidSecrets = secrets.NewDatabasePlaidSecretsProvider(log, db)
 	}
 
 	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)

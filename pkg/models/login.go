@@ -15,12 +15,12 @@ type Login struct {
 	LastName        string       `json:"lastName" bun:"last_name"`
 	PasswordResetAt *time.Time   `json:"passwordResetAt" bun:"password_reset_at"`
 	PhoneNumber     *PhoneNumber `json:"-" bun:"phone_number,type:'text'"`
-	IsEnabled       bool         `json:"-" bun:"is_enabled,notnull,use_zero"`
+	IsEnabled       bool         `json:"-" bun:"is_enabled,notnull"`
 	IsEmailVerified bool         `json:"isEmailVerified" bun:"is_email_verified,notnull"`
 	EmailVerifiedAt *time.Time   `json:"emailVerifiedAt" bun:"email_verified_at"`
 	IsPhoneVerified bool         `json:"isPhoneVerified" bun:"is_phone_verified,notnull"`
 
-	Users []User `json:"-" pg:"rel:has-many"`
+	Users []User `json:"-" bun:"rel:has-many,join:login_id=login_id"`
 }
 
 type LoginWithHash struct {

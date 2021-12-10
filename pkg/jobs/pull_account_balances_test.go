@@ -43,7 +43,7 @@ func TestPullAccountBalances(t *testing.T) {
 			return nil
 		}), "must retrieve linkId")
 
-		secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		secretProvider := secrets.NewDatabasePlaidSecretsProvider(log, db)
 		plaidRepo := repository.NewPlaidRepository(db)
 		plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, config.Plaid{
 			ClientID:     gofakeit.UUID(),

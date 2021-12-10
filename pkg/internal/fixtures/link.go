@@ -16,7 +16,7 @@ import (
 )
 
 func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
-	db := testutils.GetPgDatabase(t)
+	db := testutils.GetTestDatabase(t)
 
 	repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
 

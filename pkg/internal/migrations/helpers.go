@@ -59,6 +59,8 @@ func CreateColumnDefinition(create *bun.CreateTableQuery, definitions ...ColumnD
 
 		if dbDialect == dialect.MySQL && definition.Flags&AutoIncrement != 0 {
 			builder.WriteString(`AUTO_INCREMENT `)
+		} else if dbDialect == dialect.SQLite && definition.Flags&AutoIncrement != 0 {
+			builder.WriteString(`DEFAULT IDENTITY (1,1) `)
 		}
 
 		params := []interface{}{

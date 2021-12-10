@@ -6,8 +6,6 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
 	"sync"
 	"testing"
 
@@ -27,6 +25,8 @@ import (
 	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/uptrace/bun/extra/bundebug"
 	"github.com/uptrace/bun/migrate"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -76,81 +76,19 @@ func (q *queryHook) AfterQuery(ctx context.Context, event *pg.QueryEvent) error 
 	return nil
 }
 
-func GetPgDatabaseTxn(t *testing.T) *pg.Tx {
-	db := GetPgDatabase(t)
-
-	txn, err := db.Begin()
-	require.NoError(t, err, "must begin transaction")
-
-	t.Cleanup(func() {
-		require.NoError(t, txn.Rollback(), "must rollback database transaction")
-	})
-
-	return txn
-}
-
 var testDatabases struct {
 	lock      sync.Mutex
-	databases map[string]*pg.DB
+	databases map[string]*bun.DB
 }
 
 func init() {
 	testDatabases = struct {
 		lock      sync.Mutex
-		databases map[string]*pg.DB
+		databases map[string]*bun.DB
 	}{
 		lock:      sync.Mutex{},
-		databases: map[string]*pg.DB{},
+		databases: map[string]*bun.DB{},
 	}
-}
-
-func GetPgOptions(t *testing.T) *pg.Options {
-	portString := os.Getenv("POSTGRES_PORT")
-	if portString == "" {
-		portString = "5432"
-	}
-
-	port, err := strconv.ParseInt(portString, 10, 64)
-	require.NoError(t, err, "must be able to parse the Postgres port as a number")
-
-	address := fmt.Sprintf("%s:%d", os.Getenv("POSTGRES_HOST"), port)
-
-	options := &pg.Options{
-		Network:         "tcp",
-		Addr:            address,
-		User:            os.Getenv("POSTGRES_USER"),
-		Password:        os.Getenv("POSTGRES_PASSWORD"),
-		Database:        os.Getenv("POSTGRES_DB"),
-		ApplicationName: "monetr - api - tests",
-	}
-
-	return options
-}
-
-func GetPgDatabase(t *testing.T) *pg.DB {
-	testDatabases.lock.Lock()
-	defer testDatabases.lock.Unlock()
-
-	if db, ok := testDatabases.databases[t.Name()]; ok {
-		return db
-	}
-
-	options := GetPgOptions(t)
-	db := pg.Connect(options)
-
-	require.NoError(t, db.Ping(context.Background()), "must ping database")
-
-	log := GetLog(t)
-
-	db.AddQueryHook(&pgQueryHook{
-		log: log,
-	})
-
-	t.Cleanup(func() {
-		require.NoError(t, db.Close(), "must close database connection")
-	})
-
-	return db
 }
 
 func getEnvDefault(envName, defaultValue string) string {
@@ -167,6 +105,13 @@ func getDatabaseName(t *testing.T) string {
 }
 
 func getTestingDatabase(t *testing.T, engine config.DatabaseEngine) *bun.DB {
+	testDatabases.lock.Lock()
+	defer testDatabases.lock.Unlock()
+
+	if db, ok := testDatabases.databases[t.Name()]; ok {
+		return db
+	}
+
 	dbname := getDatabaseName(t)
 	var db *bun.DB
 	switch engine {
@@ -236,20 +181,28 @@ func getTestingDatabase(t *testing.T, engine config.DatabaseEngine) *bun.DB {
 		bundebug.FromEnv(""),
 	))
 
+	testDatabases.databases[t.Name()] = db
+
+	t.Cleanup(func() {
+		testDatabases.lock.Lock()
+		defer testDatabases.lock.Unlock()
+		delete(testDatabases.databases, t.Name())
+	})
+
 	return db
 }
 
 func ForEachDatabase(t *testing.T, innerTest func(ctx context.Context, t *testing.T, db *bun.DB)) {
 	databases := []config.DatabaseEngine{
 		config.PostgreSQLDatabaseEngine,
-		config.MySQLDatabaseEngine,
+		// config.MySQLDatabaseEngine,
 		config.SQLiteDatabaseEngine,
 	}
 	for _, engine := range databases {
 		t.Run(engine.String(), func(innerT *testing.T) {
 			ctx := context.Background()
 
-			database := getTestingDatabase(t, engine)
+			database := getTestingDatabase(innerT, engine)
 			{
 				migrator := migrate.NewMigrator(database, monetrMigrations.Migrations)
 				require.NotNil(innerT, migrator, "database migrations must not be nil from bun")
@@ -280,59 +233,27 @@ func ForEachDatabase(t *testing.T, innerTest func(ctx context.Context, t *testin
 func ForEachDatabaseUnMigrated(t *testing.T, innerTest func(ctx context.Context, t *testing.T, db *bun.DB)) {
 	databases := []config.DatabaseEngine{
 		config.PostgreSQLDatabaseEngine,
-		config.MySQLDatabaseEngine,
+		// config.MySQLDatabaseEngine,
 		config.SQLiteDatabaseEngine,
 	}
 	for _, engine := range databases {
 		t.Run(engine.String(), func(innerT *testing.T) {
-			innerTest(context.Background(), innerT, getTestingDatabase(t, engine))
+			innerTest(context.Background(), innerT, getTestingDatabase(innerT, engine))
 		})
 	}
 }
 
 func GetDatabase(t *testing.T, engine config.DatabaseEngine) *bun.DB {
 	return getTestingDatabase(t, engine)
-	database := "sqlite"
-	dsn := "file::memory:?cache=shared"
-	// database := os.Getenv("DATABASE")
-	// dsn := os.Getenv("DSN")
+}
 
-	var sqldb *sql.DB
-	var err error
-	var db *bun.DB
+func GetTestDatabase(t *testing.T) *bun.DB {
+	testDatabases.lock.Lock()
+	defer testDatabases.lock.Unlock()
 
-	require.NotEmptyf(t, database, "database type must be specified")
-	require.NotEmptyf(t, dsn, "database connection string must be specified")
-
-	switch strings.ToLower(database) {
-	case "postgresql", "postgres", "pg":
-		sqldb = sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
-		db = bun.NewDB(sqldb, pgdialect.New())
-	case "mysql", "mariadb":
-		sqldb, err = sql.Open("mysql", dsn)
-		require.NoError(t, err, "must be able to open sql driver")
-		db = bun.NewDB(sqldb, mysqldialect.New())
-	case "sqlite":
-		sqldb, err = sql.Open(sqliteshim.ShimName, dsn)
-		require.NoError(t, err, "must be able to open sql driver")
-		db = bun.NewDB(sqldb, sqlitedialect.New())
-	default:
-		panic("invalid database type specified")
+	if db, ok := testDatabases.databases[t.Name()]; ok {
+		return db
 	}
 
-	require.NoError(t, db.PingContext(context.Background()), "must be able to ping database")
-
-	log := GetLog(t)
-
-	db.AddQueryHook(&bunQueryHook{
-		log: log,
-	})
-
-	t.Cleanup(func() {
-		require.NoError(t, db.Close(), "must close database connection")
-	})
-
-	// testDatabases.databases[t.Name()] = db
-
-	return db
+	panic("database must be initialized for test first!")
 }
