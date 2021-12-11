@@ -24,28 +24,14 @@
     "camelcase": "6.2.1",
     "classnames": "2.3.1",
     "css-what": "5.1.0",
-    "dotenv": "10.0.0",
-    "dotenv-expand": "5.1.0",
-    "eslint": "8.4.1",
-    "eslint-config-react-app": "6.0.0",
-    "eslint-plugin-flowtype": "8.0.3",
-    "eslint-plugin-import": "2.25.3",
-    "eslint-plugin-jest": "25.3.0",
-    "eslint-plugin-jsx-a11y": "6.5.1",
-    "eslint-plugin-react": "7.27.1",
-    "eslint-plugin-react-hooks": "4.3.0",
-    "eslint-plugin-testing-library": "5.0.1",
-    "eslint-webpack-plugin": "3.1.1",
     "formik": "2.2.9",
     "fs-extra": "10.0.0",
     "identity-obj-proxy": "3.0.0",
     "immer": "9.0.7",
     "immutable": "4.0.0",
-    "ini": "2.0.0",
     "is-svg": "4.3.2",
     "jest-circus": "26.6.3",
     "jest-resolve": "26.6.2",
-    "jest-watch-typeahead": "1.0.0",
     "mini-css-extract-plugin": "2.4.5",
     "moment": "2.29.1",
     "node-notifier": "10.0.0",
@@ -116,9 +102,9 @@
     "@babel/core": "7.16.0",
     "@babel/preset-env": "7.16.4",
     "@babel/preset-react": "7.16.0",
+    "@babel/preset-typescript": "7.16.0",
     "@hot-loader/react-dom": "17.0.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.3",
-    "@tailwindcss/postcss7-compat": "npm:@tailwindcss/postcss7-compat",
     "@testing-library/jest-dom": "5.16.1",
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "7.0.2",
@@ -128,14 +114,27 @@
     "@types/react-google-recaptcha": "2.1.2",
     "@types/react-redux": "7.1.20",
     "autoprefixer": "10.4.0",
-    "babel-jest": "26.6.3",
+    "babel-jest": "27.4.4",
     "babel-loader": "8.2.3",
     "case-sensitive-paths-webpack-plugin": "2.4.0",
     "css-loader": "6.5.1",
+    "dotenv": "10.0.0",
+    "dotenv-expand": "5.1.0",
+    "eslint": "8.4.1",
+    "eslint-config-react-app": "6.0.0",
+    "eslint-plugin-flowtype": "8.0.3",
+    "eslint-plugin-import": "2.25.3",
+    "eslint-plugin-jest": "25.3.0",
+    "eslint-plugin-jsx-a11y": "6.5.1",
+    "eslint-plugin-react": "7.27.1",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "eslint-plugin-testing-library": "5.0.1",
+    "eslint-webpack-plugin": "3.1.1",
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.5.0",
     "http-status-codes": "2.1.4",
-    "jest": "26.6.3",
+    "ini": "2.0.0",
+    "jest": "27.4.4",
     "jest-mock-axios": "4.5.0",
     "js-yaml": "4.1.0",
     "postcss": "8.4.4",
@@ -143,11 +142,12 @@
     "prettier": "2.5.1",
     "react-refresh": "0.11.0",
     "react-refresh-typescript": "2.0.3",
+    "react-test-renderer": "17.0.2",
     "redoc-cli": "0.13.2",
     "redux-devtools-extension": "2.13.9",
     "sass-loader": "12.4.0",
     "style-loader": "3.3.1",
-    "tailwindcss": "npm:@tailwindcss/postcss7-compat",
+    "tailwindcss": "3.0.0",
     "ts-loader": "9.2.6",
     "typescript": "4.5.3",
     "url-loader": "4.1.1",
@@ -157,77 +157,29 @@
     "webpack-dev-server": "4.6.0"
   },
   "jest": {
-    "roots": [
+    "modulePaths": [
       "<rootDir>/ui"
     ],
+    "resetMocks": true,
+    "timers": "fake",
     "collectCoverageFrom": [
       "ui/**/*.{js,jsx,ts,tsx}",
       "!ui/**/*.d.ts"
     ],
-    "setupFiles": [
-      "<rootDir>/testSetup.js",
-      "react-app-polyfill/jsdom"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/ui/setupTests.js"
-    ],
-    "testMatch": [
-      "<rootDir>/ui/**/__tests__/**/*.{js,jsx,ts,tsx}",
-      "<rootDir>/ui/**/*.{spec,test}.{js,jsx,ts,tsx}"
-    ],
-    "testEnvironment": "jsdom",
-    "transform": {
-      "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
-      "^.+\\.module\\.(css|sass|scss)$"
-    ],
-    "modulePaths": [
-      "<rootDir>/ui"
-    ],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web",
-      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
-    },
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "web.ts",
-      "ts",
-      "web.tsx",
-      "tsx",
-      "json",
-      "web.jsx",
-      "jsx",
-      "node"
-    ],
-    "watchPlugins": [
-      "jest-watch-typeahead/filename",
-      "jest-watch-typeahead/testname"
-    ],
-    "resetMocks": true
+    "notify": true
   },
   "babel": {
     "presets": [
       [
         "@babel/preset-env",
         {
-          "loose": true,
-          "modules": false
+          "targets": {
+            "node": "current"
+          }
         }
       ],
-      "@babel/preset-react"
-    ],
-    "plugins": [
-      [
-        "@babel/plugin-proposal-class-properties",
-        {
-          "loose": true
-        }
-      ]
+      "@babel/preset-react",
+      "@babel/preset-typescript"
     ]
   }
 }
