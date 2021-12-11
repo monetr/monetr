@@ -1,5 +1,15 @@
 # Changelog
 
+### [0.7.7](https://www.github.com/monetr/monetr/compare/v0.7.6...v0.7.7) (2021-12-11)
+
+
+### Dependencies
+
+* **ui:** update dependency react-router-dom to v6.1.0 ([2e6d116](https://www.github.com/monetr/monetr/commit/2e6d1167d0e5729d69a2ed4ab840a28abfbbc835))
+* **ui:** update dependency sass to v1.45.0 ([7397a1a](https://www.github.com/monetr/monetr/commit/7397a1a9ed0b79475604eaceb33529aad7a92fb8))
+* **ui:** update sentry-javascript monorepo to v6.16.1 ([57a2b2b](https://www.github.com/monetr/monetr/commit/57a2b2b2122fbcee58d9d0cd22527d04333deb8d))
+* **ui:** Upgraded jest to latest version and improved config. ([28094d4](https://www.github.com/monetr/monetr/commit/28094d4cba7baa40f885e9ccb4fbfc1b5f6209cd))
+
 ### [0.7.6](https://www.github.com/monetr/monetr/compare/v0.7.5...v0.7.6) (2021-12-10)
 
 
