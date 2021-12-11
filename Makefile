@@ -8,8 +8,15 @@ LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
 BUILD_DIR = $(PWD)/build
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+
 RELEASE_REVISION=$(shell git rev-parse HEAD)
-RELEASE_VERSION ?= $(shell git describe --tags `git rev-list --tags --max-count=1`)
+LAST_RELEASE_REVISION=$(shell git rev-list --tags --max-count=1)
+ifneq ($(RELEASE_REVISION),$(LAST_RELEASE_REVISION))
+RELEASE_VERSION ?= $(shell git describe --tags $(LAST_RELEASE_REVISION))-dev-$(shell git rev-parse --short $(RELEASE_REVISION))
+else
+RELEASE_VERSION ?= $(shell git describe --tags $(LAST_RELEASE_REVISION))
+endif
+
 CONTAINER_VERSION ?= $(subst v,,$(RELEASE_VERSION))
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
@@ -168,8 +175,9 @@ $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
 $(BINARY): $(STATIC_DIR) $(GOMODULES)
 endif
-	$(call infoMsg,Building monetr binary for: $(GOOS)/$(GOARCH))
 	$(GO) build -ldflags "-X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
+	$(call infoMsg,   Built monetr binary for: $(GOOS)/$(GOARCH))
+	$(call infoMsg,             Build Version: $(RELEASE_VERSION))
 
 BUILD_DIR=$(PWD)/build
 $(BUILD_DIR):

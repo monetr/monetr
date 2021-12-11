@@ -3,6 +3,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const ReactRefreshTypeScript = require('react-refresh-typescript');
+const WebpackBar = require('webpackbar');
 
 module.exports = (env, argv) => {
   const isDevelopment = !(process.env.NODE_ENV === 'production' || argv.mode === 'production');
@@ -141,6 +142,7 @@ module.exports = (env, argv) => {
       },
     },
     plugins: [
+      new WebpackBar(),
       new webpack.DefinePlugin({
         CONFIG: JSON.stringify({}),
         REVISION: JSON.stringify(process.env.RELEASE_REVISION),
