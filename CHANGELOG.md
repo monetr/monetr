@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.7.8](https://www.github.com/monetr/monetr/compare/v0.7.7...v0.7.8) (2021-12-11)
+
+
+### Miscellaneous
+
+* **build:** Improving development builds. ([e091005](https://www.github.com/monetr/monetr/commit/e091005c36d1f8ae7d38120675450813ee69b0c9))
+
+
+### Dependencies
+
+* **container:** Upgrading to the latest golang and node. ([e9d8718](https://www.github.com/monetr/monetr/commit/e9d87188b20dc3693f24f81d06cb99cdbf4ea3b8))
+* **ui:** update dependency tailwindcss to v3.0.1 ([2a3b32c](https://www.github.com/monetr/monetr/commit/2a3b32c471a69ffa4a0b06ad755b9e32da1fcb0f))
+
 ### [0.7.7](https://www.github.com/monetr/monetr/compare/v0.7.6...v0.7.7) (2021-12-11)
 
 
