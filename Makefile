@@ -17,7 +17,7 @@ else
 RELEASE_VERSION ?= $(shell git describe --tags $(LAST_RELEASE_REVISION))
 endif
 
-CONTAINER_VERSION ?= $(subst v,,$(RELEASE_VERSION))
+CONTAINER_VERSION ?= $(RELEASE_VERSION:v%=%)
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt

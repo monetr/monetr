@@ -14,30 +14,17 @@ $(PODMAN):
 $(PODMAN)-install:
 	$(error Podman is not installed; you must install podman to continue)
 
-ifdef CI
 $(PODMAN)-status:
 	@exit 0; # no op
-else
-$(PODMAN)-status:
-	($(PODMAN) machine list | grep $(PODMAN_MACHINE)) > /dev/null 2>&1 || $(MAKE) $(PODMAN)-machine
-	@$(PODMAN) info > /dev/null 2>&1 || $(MAKE) $(PODMAN)-machine
-
-$(PODMAN)-machine:
-	-$(PODMAN) machine stop $(PODMAN_MACHINE) > /dev/null 2>&1
-	-$(PODMAN) machine rm --force $(PODMAN_MACHINE) > /dev/null 2>&1
-	$(PODMAN) machine init \
- 		--cpus=$(PODMAN_CPUS) \
- 		--disk-size=$(PODMAN_DISK_SIZE) \
- 		--memory=$(PODMAN_MEMORY) \
- 		$(PODMAN_MACHINE)
-	$(call infoMsg,Starting monetr podman machine)
-	$(PODMAN) machine start $(PODMAN_MACHINE)
-endif
 
 DOCKERFILE=$(PWD)/Dockerfile
 DOCKER_IGNORE=$(PWD)/.dockerignore
 CONTAINER_REPOS=ghcr.io/monetr/monetr docker.io/monetr/monetr
+ifeq ($(RELEASE_REVISION),$(LAST_RELEASE_REVISION))
 CONTAINER_VERSIONS=latest $(CONTAINER_VERSION)
+else
+CONTAINER_VERSIONS=$(CONTAINER_VERSION)
+endif
 CONTAINER_TAGS=$(foreach CONTAINER_REPO,$(CONTAINER_REPOS),$(foreach C_VERSION,$(CONTAINER_VERSIONS),$(CONTAINER_REPO):$(C_VERSION)))
 CONTAINER_TAG_ARGS=$(foreach TAG,$(CONTAINER_TAGS),-t $(TAG))
 CONTAINER_VARS = GOFLAGS="" REVISION="$(RELEASE_REVISION)" RELEASE="$(RELEASE_VERSION)"
