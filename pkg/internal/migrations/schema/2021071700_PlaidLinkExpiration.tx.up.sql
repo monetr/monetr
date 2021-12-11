@@ -1,1 +1,0 @@
-ALTER TABLE "links" ADD COLUMN "expiration_date" TIMESTAMPTZ NULL;

@@ -24,12 +24,11 @@ func (r *repositoryBase) GetBalances(ctx context.Context, bankAccountId uint64) 
 	defer span.Finish()
 
 	var balance Balances
-	err := r.txn.ModelContext(span.Context(), &balance).
-		Where(`"balances"."account_id" = ?`, r.AccountId()).
-		Where(`"balances"."bank_account_id" = ?`, bankAccountId).
+	if err := r.db.NewSelect().Model(&balance).
+		Where(`balances.account_id = ?`, r.AccountId()).
+		Where(`balances.bank_account_id = ?`, bankAccountId).
 		Limit(1).
-		Select(&balance)
-	if err != nil {
+		Scan(ctx, &balance); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve balances")
 	}
@@ -51,10 +50,10 @@ type FundingStats struct {
 
 func (r *repositoryBase) GetFundingStats(ctx context.Context, bankAccountId uint64) ([]FundingStats, error) {
 	stats := make([]FundingStats, 0)
-	err := r.txn.ModelContext(ctx, &stats).
-		Where(`"funding_stats"."account_id" = ?`, r.AccountId()).
-		Where(`"funding_stats"."bank_account_id" = ?`, bankAccountId).
-		Select(&stats)
+	err := r.db.NewSelect().Model(&stats).
+		Where(`funding_stats.account_id = ?`, r.AccountId()).
+		Where(`funding_stats.bank_account_id = ?`, bankAccountId).
+		Scan(ctx, &stats)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve funding status")
 	}

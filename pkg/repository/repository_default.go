@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/uptrace/bun"
 )
 
 type repositoryBase struct {
 	userId, accountId uint64
-	txn               pg.DBI
+	db                bun.IDB
 	account           *models.Account
 }

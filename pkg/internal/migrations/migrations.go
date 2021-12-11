@@ -1,34 +1,33 @@
 package migrations
 
 import (
-	"net/http"
-
 	"github.com/go-pg/migrations/v8"
-	"github.com/monetr/monetr/pkg/internal/migrations/functional"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/uptrace/bun/migrate"
 )
 
 type MonetrMigrationsManager struct {
+	b          *migrate.Migrations
 	collection *migrations.Collection
 	log        *logrus.Entry
 	db         migrations.DB
 }
 
 func NewMigrationsManager(log *logrus.Entry, db migrations.DB) (*MonetrMigrationsManager, error) {
-	collection := migrations.NewCollection(functional.FunctionalMigrations...)
-	if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema"); err != nil {
-		return nil, errors.Wrap(err, "failed to discover embedded sql migrations")
-	}
-
-	if _, _, err := collection.Run(db, "init"); err != nil {
-		return nil, errors.Wrap(err, "failed to initialize schema migrations")
-	}
+	// collection := migrations.NewCollection(functional.FunctionalMigrations...)
+	// if err := collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema"); err != nil {
+	// 	return nil, errors.Wrap(err, "failed to discover embedded sql migrations")
+	// }
+	//
+	// if _, _, err := collection.Run(db, "init"); err != nil {
+	// 	return nil, errors.Wrap(err, "failed to initialize schema migrations")
+	// }
 
 	return &MonetrMigrationsManager{
-		collection: collection,
-		log:        log,
-		db:         db,
+		// collection: collection,
+		// log:        log,
+		// db:         db,
 	}, nil
 }
 
@@ -57,7 +56,6 @@ func (m *MonetrMigrationsManager) Up() (oldVersion, newVersion int64, err error)
 
 func RunMigrations(log *logrus.Entry, db migrations.DB) {
 	collection := migrations.NewCollection()
-	collection.DiscoverSQLMigrationsFromFilesystem(http.FS(things), "schema")
 
 	if _, _, err := collection.Run(db, "init"); err != nil {
 		log.Fatalf("failed to init schema migrations: %+v", err)

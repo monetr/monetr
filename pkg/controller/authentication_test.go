@@ -17,43 +17,48 @@ import (
 	"github.com/monetr/monetr/pkg/swag"
 	"github.com/monetr/monetr/pkg/verification"
 	"github.com/stretchr/testify/assert"
+	"github.com/uptrace/bun"
 )
 
 func TestLogin(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		e := NewTestApplication(t)
-		email, password := GivenIHaveLogin(t, e)
+		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
+			e := NewTestApplication(t)
+			email, password := GivenIHaveLogin(t, e)
 
-		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
-			}).
-			Expect()
+			response := e.POST("/api/authentication/login").
+				WithJSON(swag.LoginRequest{
+					Email:    email,
+					Password: password,
+				}).
+				Expect()
 
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
+			response.Status(http.StatusOK)
+			AssertSetTokenCookie(t, response)
+		})
 	})
 
 	t.Run("bad cookie name", func(t *testing.T) {
-		conf := NewTestApplicationConfig(t)
-		conf.Server.Cookies.Name = ""
-		e := NewTestApplicationWithConfig(t, conf)
+		testutils.ForEachDatabase(t, func(ctx context.Context, t *testing.T, db *bun.DB) {
+			conf := NewTestApplicationConfig(t)
+			conf.Server.Cookies.Name = ""
+			e := NewTestApplicationWithConfig(t, conf)
 
-		// We need to provision the login directly, because the token should fail otherwise.
-		login, password := fixtures.GivenIHaveLogin(t)
-		fixtures.GivenIHaveAnAccount(t, login)
+			// We need to provision the login directly, because the token should fail otherwise.
+			login, password := fixtures.GivenIHaveLogin(t)
+			fixtures.GivenIHaveAnAccount(t, login)
 
-		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    login.Email,
-				Password: password,
-			}).
-			Expect()
+			response := e.POST("/api/authentication/login").
+				WithJSON(swag.LoginRequest{
+					Email:    login.Email,
+					Password: password,
+				}).
+				Expect()
 
-		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().Equal("An internal error occurred.")
-		response.Cookies().Empty()
+			response.Status(http.StatusInternalServerError)
+			response.JSON().Path("$.error").String().Equal("An internal error occurred.")
+			response.Cookies().Empty()
+		})
 	})
 
 	t.Run("no users", func(t *testing.T) {

@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/internal/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
+	"github.com/uptrace/bun"
 )
 
 type SeedAccountOption uint8
@@ -23,7 +23,7 @@ const (
 	WithPlaidAccount  SeedAccountOption = 2
 )
 
-func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.User, *MockPlaidData) {
+func SeedAccount(t *testing.T, db *bun.DB, options SeedAccountOption) (*models.User, *MockPlaidData) {
 	require.NotNil(t, db, "db must not be nil")
 
 	plaidData := &MockPlaidData{
@@ -33,7 +33,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 	}
 
 	var user models.User
-	err := db.RunInTransaction(context.Background(), func(txn *pg.Tx) error {
+	err := db.RunInTx(context.Background(), nil, func(ctx context.Context, txn bun.Tx) error {
 		email := GetUniqueEmail(t)
 		login := models.LoginWithHash{
 			Login: models.Login{
@@ -47,14 +47,14 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 			PasswordHash: hash.HashPassword(email, gofakeit.Password(true, true, true, true, false, 16)),
 		}
 
-		_, err := txn.Model(&login).Insert(&login)
+		_, err := txn.NewInsert().Model(&login).Exec(ctx, &login)
 		require.NoError(t, err, "must insert new login")
 
 		account := models.Account{
 			Timezone: "UTC",
 		}
 
-		_, err = txn.Model(&account).Insert(&account)
+		_, err = txn.NewInsert().Model(&account).Exec(ctx, &account)
 		require.NoError(t, err, "failed to insert new account")
 
 		user = models.User{
@@ -64,7 +64,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 			LastName:  login.LastName,
 		}
 
-		_, err = txn.Model(&user).Insert(&user)
+		_, err = txn.NewInsert().Model(&user).Exec(ctx, &user)
 		require.NoError(t, err, "failed to insert new user")
 
 		user.Login = &login.Login
@@ -81,7 +81,8 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				UpdatedAt:       now,
 			}
 
-			_, err := txn.Model(&manualLink).Insert(&manualLink)
+
+			_, err = txn.NewInsert().Model(&manualLink).Exec(ctx, &manualLink)
 			require.NoError(t, err, "failed to create manual link")
 
 			checkingBalance := int64(gofakeit.Float32Range(0.00, 1000.00) * 100)
@@ -113,7 +114,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				},
 			}
 
-			_, err = txn.Model(&bankAccounts).Insert(&bankAccounts)
+			_, err = txn.NewInsert().Model(&bankAccounts).Exec(ctx, &bankAccounts)
 			require.NoError(t, err, "failed to create bank accounts")
 		}
 
@@ -126,7 +127,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				InstitutionName: "A Bank",
 			}
 
-			_, err = txn.Model(&plaidLink).Insert(&plaidLink)
+			_, err = txn.NewInsert().Model(&plaidLink).Exec(ctx, &plaidLink)
 			require.NoError(t, err, "failed to create plaid link")
 
 			plaidData.PlaidLinks[plaidLink.ItemId] = plaidLink
@@ -149,7 +150,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				UpdatedAt:       now,
 			}
 
-			_, err = txn.Model(&withPlaidLink).Insert(&withPlaidLink)
+			_, err = txn.NewInsert().Model(&withPlaidLink).Exec(ctx, &withPlaidLink)
 			require.NoError(t, err, "failed to create link")
 
 			checkingBalance := int64(gofakeit.Float32Range(0.00, 1000.00) * 100)
@@ -219,7 +220,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				},
 			}
 
-			_, err = txn.Model(&bankAccounts).Insert(&bankAccounts)
+			_, err = txn.NewInsert().Model(&bankAccounts).Exec(ctx, &bankAccounts)
 			require.NoError(t, err, "failed to create bank accounts")
 		}
 

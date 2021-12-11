@@ -14,6 +14,7 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/uptrace/bun"
 )
 
 const (
@@ -39,7 +40,7 @@ type RemoveLinkJob struct {
 	linkId    uint64
 	userId    uint64
 	log       *logrus.Entry
-	db        *pg.DB
+	db        *bun.DB
 	notify    pubsub.Publisher
 }
 
@@ -62,7 +63,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 
 	log := r.log
 
-	return r.db.RunInTransaction(span.Context(), func(txn *pg.Tx) error {
+	return r.db.RunInTx(span.Context(), nil, func(ctx context.Context, txn bun.Tx) error {
 		repo := repository.NewRepositoryFromSession(r.userId, r.accountId, txn)
 
 		link, err := repo.GetLink(span.Context(), r.linkId)

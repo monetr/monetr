@@ -2,10 +2,11 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
-	"time"
 )
 
 func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error) {
@@ -18,10 +19,11 @@ func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) 
 	}
 
 	var result []models.Spending
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"spending"."account_id" = ?`, r.AccountId()).
-		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`spending.account_id = ?`, r.AccountId()).
+		Where(`spending.bank_account_id = ?`, bankAccountId).
+		Scan(span.Context(), &result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve spending")
@@ -42,12 +44,13 @@ func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId, s
 		"spendingId":    spendingId,
 	}
 
-	ok, err := r.txn.ModelContext(span.Context(), &models.Spending{}).
-		Where(`"spending"."account_id" = ?`, r.AccountId()).
-		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Where(`"spending"."spending_id" = ?`, spendingId).
+	ok, err := r.db.NewSelect().
+		Model(&models.Spending{}).
+		Where(`spending.account_id = ?`, r.AccountId()).
+		Where(`spending.bank_account_id = ?`, bankAccountId).
+		Where(`spending.spending_id = ?`, spendingId).
 		Limit(1).
-		Exists()
+		Exists(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 	} else {
@@ -68,11 +71,12 @@ func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankA
 	}
 
 	result := make([]models.Spending, 0)
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"spending"."account_id" = ?`, r.AccountId()).
-		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Where(`"spending"."funding_schedule_id" = ?`, fundingScheduleId).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`spending.account_id = ?`, r.AccountId()).
+		Where(`spending.bank_account_id = ?`, bankAccountId).
+		Where(`spending.funding_schedule_id = ?`, fundingScheduleId).
+		Scan(span.Context(), &result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve expenses for funding schedule")
@@ -95,7 +99,7 @@ func (r *repositoryBase) CreateSpending(ctx context.Context, spending *models.Sp
 	spending.AccountId = r.AccountId()
 	spending.DateCreated = time.Now().UTC()
 
-	if _, err := r.txn.ModelContext(span.Context(), spending).Insert(spending); err != nil {
+	if _, err := r.db.NewInsert().Model(&spending).Exec(span.Context(), spending); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create spending")
 	}
@@ -125,8 +129,7 @@ func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId uint6
 		"spendingIds":   spendingIds,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &updates).
-		Update(&updates)
+	_, err := r.db.NewUpdate().Model(&updates).Exec(span.Context(), &updates)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update expenses")
@@ -148,12 +151,13 @@ func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId, spe
 	}
 
 	var result models.Spending
-	err := r.txn.ModelContext(span.Context(), &result).
+	err := r.db.NewSelect().
+		Model(&result).
 		Relation("FundingSchedule").
-		Where(`"spending"."account_id" = ?`, r.AccountId()).
-		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Where(`"spending"."spending_id" = ?`, spendingId).
-		Select(&result)
+		Where(`spending.account_id = ?`, r.AccountId()).
+		Where(`spending.bank_account_id = ?`, bankAccountId).
+		Where(`spending.spending_id = ?`, spendingId).
+		Scan(span.Context(), &result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve expense")
@@ -174,33 +178,39 @@ func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spen
 		"spendingId":    spendingId,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
-		Set(`"spending_id" = NULL`).
-		Set(`"spending_amount" = NULL`).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction"."spending_id" = ?`, spendingId).
-		Update()
+	_, err := r.db.NewUpdate().
+		Model(&models.Transaction{}).
+		Set(`spending_id = NULL`).
+		Set(`spending_amount = NULL`).
+		Where(`transaction.account_id = ?`, r.AccountId()).
+		Where(`transaction.bank_account_id = ?`, bankAccountId).
+		Where(`transaction.spending_id = ?`, spendingId).
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to remove spending from any transactions")
 	}
 
-	result, err := r.txn.ModelContext(span.Context(), &models.Spending{}).
-		Where(`"spending"."account_id" = ?`, r.AccountId()).
-		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Where(`"spending"."spending_id" = ?`, spendingId).
-		Delete()
+	result, err := r.db.NewDelete().
+		Model(&models.Spending{}).
+		Where(`spending.account_id = ?`, r.AccountId()).
+		Where(`spending.bank_account_id = ?`, bankAccountId).
+		Where(`spending.spending_id = ?`, spendingId).
+		Exec(span.Context())
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to delete spending")
 	}
 
-	span.Status = sentry.SpanStatusOK
-
-	if result.RowsAffected() != 1 {
+	affected, err := result.RowsAffected()
+	if err != nil {
 		span.Status = sentry.SpanStatusDataLoss
-		return errors.Errorf("invalid number of spending(s) deleted: %d", result.RowsAffected())
+		return errors.Wrap(err, "failed to determine rows affected")
+	}
+
+	if affected != 1 {
+		span.Status = sentry.SpanStatusDataLoss
+		return errors.Errorf("invalid number of spending(s) deleted: %d", affected)
 	}
 
 	span.Status = sentry.SpanStatusOK

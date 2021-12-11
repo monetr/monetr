@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
@@ -16,9 +17,9 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAcco
 	}
 
 	var result []models.BankAccount
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
-		Select(&result)
+	err := r.db.NewSelect().Model(&result).
+		Where(`bank_account.account_id = ?`, r.AccountId()).
+		Scan(span.Context(), &result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
 }
 
@@ -34,7 +35,7 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 		bankAccounts[i].BankAccountId = 0
 		bankAccounts[i].AccountId = r.AccountId()
 	}
-	if _, err := r.txn.ModelContext(span.Context(), &bankAccounts).Insert(&bankAccounts); err != nil {
+	if _, err := r.db.NewInsert().Model(&bankAccounts).Exec(span.Context(), &bankAccounts); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to insert bank accounts")
 	}
@@ -54,10 +55,11 @@ func (r *repositoryBase) GetBankAccountsByLinkId(ctx context.Context, linkId uin
 	}
 
 	var result []models.BankAccount
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
-		Where(`"bank_account"."link_id" = ? `, linkId).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`bank_account.account_id = ?`, r.AccountId()).
+		Where(`bank_account.link_id = ?`, linkId).
+		Scan(span.Context(), &result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve bank accounts by Id")
@@ -78,10 +80,11 @@ func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId uint6
 	}
 
 	var result models.BankAccount
-	err := r.txn.ModelContext(span.Context(), &result).
-		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
-		Where(`"bank_account"."bank_account_id" = ? `, bankAccountId).
-		Select(&result)
+	err := r.db.NewSelect().
+		Model(&result).
+		Where(`bank_account.account_id = ?`, r.AccountId()).
+		Where(`bank_account.bank_account_id = ?`, bankAccountId).
+		Scan(span.Context(), &result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to retrieve bank account")
@@ -112,9 +115,11 @@ func (r *repositoryBase) UpdateBankAccounts(ctx context.Context, accounts []mode
 		"bankAccountIds": bankAccountIds,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &accounts).
+	_, err := r.db.NewUpdate().
+		Model(&accounts).
 		WherePK().
-		UpdateNotZero(&accounts)
+		OmitZero().
+		Exec(span.Context(), &accounts)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to update bank accounts")

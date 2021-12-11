@@ -1,15 +1,15 @@
 package repository
 
 import (
+	"testing"
+
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
+	"github.com/uptrace/bun"
 )
 
-func GetTestAuthenticatedRepository(t *testing.T) Repository {
-	db := testutils.GetPgDatabase(t)
-
+func GetTestAuthenticatedRepository(t *testing.T, db *bun.DB) Repository {
 	user, _ := testutils.SeedAccount(t, db, testutils.WithPlaidAccount)
 
 	txn, err := db.Begin()
@@ -22,7 +22,6 @@ func GetTestAuthenticatedRepository(t *testing.T) Repository {
 	return &repositoryBase{
 		userId:    user.UserId,
 		accountId: user.AccountId,
-		txn:       txn,
-		account:   user.Account,
+		db:        txn,
 	}
 }

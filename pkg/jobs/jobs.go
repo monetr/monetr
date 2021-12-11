@@ -7,6 +7,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/internal/platypus"
+	"github.com/uptrace/bun"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/gocraft/work"
@@ -38,7 +39,7 @@ type jobManagerBase struct {
 	log          *logrus.Entry
 	work         *work.WorkerPool
 	queue        *work.Enqueuer
-	db           *pg.DB
+	db           *bun.DB
 	plaidClient  platypus.Platypus
 	plaidSecrets secrets.PlaidSecretsProvider
 	stats        *metrics.Stats
@@ -48,7 +49,7 @@ type jobManagerBase struct {
 func NewNonDistributedJobManager(
 	log *logrus.Entry,
 	pool *redis.Pool,
-	db *pg.DB,
+	db *bun.DB,
 	plaidClient platypus.Platypus,
 	stats *metrics.Stats,
 	plaidSecrets secrets.PlaidSecretsProvider,

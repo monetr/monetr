@@ -9,6 +9,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
+	"github.com/uptrace/bun"
 )
 
 type BaseRepository interface {
@@ -37,7 +38,6 @@ type BaseRepository interface {
 	GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error)
 	GetLinks(ctx context.Context) ([]models.Link, error)
 	GetNumberOfPlaidLinks(ctx context.Context) (int, error)
-	GetPendingTransactionsForBankAccount(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error)
 	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
 	GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)
 	GetSpendingById(ctx context.Context, bankAccountId, expenseId uint64) (*models.Spending, error)
@@ -80,17 +80,17 @@ type UnauthenticatedRepository interface {
 	UseBetaCode(ctx context.Context, betaId, usedBy uint64) error
 }
 
-func NewRepositoryFromSession(userId, accountId uint64, database pg.DBI) Repository {
+func NewRepositoryFromSession(userId, accountId uint64, database bun.IDB) Repository {
 	return &repositoryBase{
 		userId:    userId,
 		accountId: accountId,
-		txn:       database,
+		db:        database,
 	}
 }
 
-func NewUnauthenticatedRepository(txn pg.DBI) UnauthenticatedRepository {
+func NewUnauthenticatedRepository(db bun.IDB) UnauthenticatedRepository {
 	return &unauthenticatedRepo{
-		txn: txn,
+		db: db,
 	}
 }
 
@@ -120,12 +120,13 @@ func (r *repositoryBase) GetMe(ctx context.Context) (*models.User, error) {
 	}
 
 	var user models.User
-	err := r.txn.ModelContext(span.Context(), &user).
+	err := r.db.NewSelect().
+		Model(&user).
 		Relation("Login").
 		Relation("Account").
-		Where(`"user"."user_id" = ? AND "user"."account_id" = ?`, r.userId, r.accountId).
+		Where(`user.user_id = ? AND user.account_id = ?`, r.userId, r.accountId).
 		Limit(1).
-		Select(&user)
+		Scan(span.Context(), &user)
 	switch err {
 	case pg.ErrNoRows:
 		span.Status = sentry.SpanStatusNotFound
@@ -146,7 +147,8 @@ func (r *repositoryBase) GetIsSetup(ctx context.Context) (bool, error) {
 	span := sentry.StartSpan(ctx, "GetIsSetup")
 	defer span.Finish()
 
-	return r.txn.ModelContext(span.Context(), &models.Link{}).
-		Where(`"link"."account_id" = ?`, r.accountId).
-		Exists()
+	return r.db.NewSelect().
+		Model(&models.Link{}).
+		Where(`link.account_id = ?`, r.accountId).
+		Exists(span.Context())
 }

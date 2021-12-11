@@ -21,7 +21,7 @@ func GivenIHaveABankAccount(t *testing.T, link *models.Link, accountType models.
 		link.BankAccounts = make([]models.BankAccount, 0, 1)
 	}
 
-	db := testutils.GetPgDatabase(t)
+	db := testutils.GetTestDatabase(t)
 	repo := repository.NewRepositoryFromSession(link.CreatedByUserId, link.AccountId, db)
 
 	current := int64(gofakeit.Number(2000, 100000))
