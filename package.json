@@ -30,8 +30,6 @@
     "immer": "9.0.7",
     "immutable": "4.0.0",
     "is-svg": "4.3.2",
-    "jest-circus": "27.4.4",
-    "jest-resolve": "27.4.4",
     "mini-css-extract-plugin": "2.4.5",
     "moment": "2.29.1",
     "node-notifier": "10.0.0",
@@ -109,6 +107,7 @@
     "@testing-library/react": "12.1.2",
     "@testing-library/react-hooks": "7.0.2",
     "@testing-library/user-event": "13.5.0",
+    "@types/jest": "^27.0.3",
     "@types/react": "17.0.37",
     "@types/react-dom": "17.0.11",
     "@types/react-google-recaptcha": "2.1.2",
@@ -135,7 +134,10 @@
     "http-status-codes": "2.1.4",
     "ini": "2.0.0",
     "jest": "27.4.4",
+    "jest-circus": "27.4.4",
+    "jest-environment-jsdom": "^27.4.4",
     "jest-mock-axios": "4.5.0",
+    "jest-resolve": "27.4.4",
     "js-yaml": "4.1.0",
     "postcss": "8.4.4",
     "postcss-loader": "6.2.1",
@@ -167,7 +169,11 @@
       "ui/**/*.{js,jsx,ts,tsx}",
       "!ui/**/*.d.ts"
     ],
-    "notify": true
+    "notify": true,
+    "testEnvironment": "jest-environment-jsdom",
+    "setupFilesAfterEnv": [
+      "<rootDir>/ui/setupTests.js"
+    ]
   },
   "babel": {
     "presets": [

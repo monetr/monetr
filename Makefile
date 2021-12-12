@@ -159,6 +159,8 @@ ui-dependencies: $(NODE_MODULES)
 
 dependencies: $(GOMODULES) $(NODE_MODULES)
 
+deps: dependencies
+
 build-ui: $(STATIC_DIR)
 
 GOOS ?= $(OS)

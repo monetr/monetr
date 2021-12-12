@@ -13,29 +13,9 @@ import ErrorIcon from '@mui/icons-material/Error';
 import DoneIcon from '@mui/icons-material/Done';
 import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
+import theme from 'theme';
 
 export default function Root(): JSX.Element {
-  const darkMode = window.localStorage.getItem('darkMode') === 'true';
-  const theme = createTheme({
-    shape: {
-      borderRadius: 10,
-    },
-    palette: {
-      mode: darkMode ? 'dark' : 'light',
-      primary: {
-        main: darkMode ? '#712ddd' : '#4E1AA0',
-        contrastText: '#FFFFFF',
-      },
-      secondary: {
-        main: '#FF5798',
-        contrastText: '#FFFFFF',
-      },
-      background: {
-        default: darkMode ? '#2f2f2f' : '#FFFFFF',
-      }
-    }
-  });
-
   const snackbarIcons: Partial<IconVariant> = {
     error: <ErrorIcon className="mr-2.5"/>,
     success: <DoneIcon className="mr-2.5"/>,
