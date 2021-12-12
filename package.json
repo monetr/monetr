@@ -135,7 +135,7 @@
     "ini": "2.0.0",
     "jest": "27.4.4",
     "jest-circus": "27.4.4",
-    "jest-environment-jsdom": "^27.4.4",
+    "jest-environment-jsdom": "27.4.4",
     "jest-mock-axios": "4.5.0",
     "jest-resolve": "27.4.4",
     "js-yaml": "4.1.0",
