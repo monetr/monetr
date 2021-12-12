@@ -15,7 +15,7 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
     case CHANGE_BANK_ACCOUNT:
       return {
         ...state,
-        selectedBankAccountId: action.bankAccountId,
+        selectedBankAccountId: action.payload,
       }
     case FETCH_BANK_ACCOUNTS_REQUEST:
       return {

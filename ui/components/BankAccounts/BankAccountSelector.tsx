@@ -10,7 +10,7 @@ import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/f
 import { getLinks } from 'shared/links/selectors/getLinks';
 import { getLinksLoading } from 'shared/links/selectors/getLinksLoading';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
-import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import { ArrowDropDown, CheckCircle } from '@mui/icons-material';
 import classnames from 'classnames';
 import { useNavigate } from 'react-router-dom';
@@ -23,6 +23,8 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
   const bankAccounts = useSelector(getBankAccounts);
   const links = useSelector(getLinks);
 
+  const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
+
   function goToAllAccounts() {
     navigate('/accounts');
   }
@@ -31,7 +33,7 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
     dispatch(setSelectedBankAccountId(bankAccountId));
     props.closeMenu();
     return Promise.all([
-      void dispatch(fetchInitialTransactionsIfNeeded()),
+      void fetchInitialTransactionsIfNeeded(),
       void dispatch(fetchFundingSchedulesIfNeeded()),
       void dispatch(fetchSpending()),
       void dispatch(fetchBalances()),

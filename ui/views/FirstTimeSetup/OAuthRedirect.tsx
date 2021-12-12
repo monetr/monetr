@@ -12,7 +12,7 @@ import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
 import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
 import fetchLinks from 'shared/links/actions/fetchLinks';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
-import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import request from 'shared/util/request';
 
 interface State {
@@ -42,6 +42,8 @@ const OAuthRedirect = (): JSX.Element => {
   }, []);
 
   const navigate = useNavigate();
+
+  const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
 
   function longPollSetup() {
     setState(prevState => ({
@@ -107,7 +109,7 @@ const OAuthRedirect = (): JSX.Element => {
               fetchLinks()(dispatch),
               fetchBankAccounts()(dispatch).then(() => {
                 return Promise.all([
-                  fetchInitialTransactionsIfNeeded()(dispatch, getState),
+                  fetchInitialTransactionsIfNeeded(),
                   fetchFundingSchedulesIfNeeded()(dispatch, getState),
                   fetchSpending()(dispatch, getState),
                   fetchBalances()(dispatch, getState),

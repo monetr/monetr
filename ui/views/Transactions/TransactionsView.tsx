@@ -1,36 +1,25 @@
-import { Card, Divider, List, ListSubheader, Typography } from "@mui/material";
-import TransactionItem from "components/Transactions/TransactionItem";
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
-import fetchInitialTransactionsIfNeeded from "shared/transactions/actions/fetchInitialTransactionsIfNeeded";
-import Transaction from "models/Transaction";
-import { getTransactions } from "shared/transactions/selectors/getTransactions";
-import { Map } from 'immutable';
+import { Card, Divider, List, ListSubheader, Typography } from '@mui/material';
+import TransactionItem from 'components/Transactions/TransactionItem';
+import { useSnackbar } from 'notistack';
+import React, { Fragment, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import { getTransactions } from 'shared/transactions/selectors/getTransactions';
 
 import './styles/TransactionsView.scss';
+import useMountEffect from 'shared/util/useMountEffect';
 
-interface PropTypes {
-  transactions: Map<number, Transaction>;
-  fetchInitialTransactionsIfNeeded: {
-    (): Promise<void>;
-  }
-}
+function TransactionsView(): JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
+  const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
+  const transactions = useSelector(getTransactions);
 
-export class TransactionsView extends Component<PropTypes, any> {
+  useMountEffect(() => {
+    fetchInitialTransactionsIfNeeded()
+      .catch(() => enqueueSnackbar('Failed to retrieve transactions.', { variant: 'error' }))
+  });
 
-  componentDidMount() {
-    this.props.fetchInitialTransactionsIfNeeded()
-      .then(() => {
-        console.log('done');
-      })
-      .catch(error => {
-        console.error(error);
-      })
-  }
-
-  renderTransactions = () => {
-    const { transactions } = this.props;
-
+  function renderTransactions() {
     return transactions
       .groupBy(transaction => transaction.date.format('MMMM Do'))
       .map((transactions, group) => (
@@ -43,8 +32,9 @@ export class TransactionsView extends Component<PropTypes, any> {
               </ListSubheader>
             </Fragment>
             { transactions.map(transaction => (
-              <TransactionItem key={ transaction.transactionId }
-                               transactionId={ transaction.transactionId }
+              <TransactionItem
+                key={ transaction.transactionId }
+                transactionId={ transaction.transactionId }
               />)).valueSeq().toArray() }
           </ul>
         </li>
@@ -53,44 +43,21 @@ export class TransactionsView extends Component<PropTypes, any> {
       .toArray();
   }
 
-  renderTransaction = (transactionId: number) => {
-    return (
-      <TransactionItem
-        key={ transactionId }
-        transactionId={ transactionId }
-      />
-    );
-  };
-
-  render() {
-    return (
-      <div className="minus-nav">
-        <div className="flex flex-col h-full p-10 max-h-full">
-          <div className="grid grid-cols-3 gap-4 flex-grow">
-            <div className="col-span-3">
-              <Card elevation={ 4 } className="w-full transaction-list">
-                <List disablePadding className="w-full">
-                  { this.renderTransactions() }
-                </List>
-              </Card>
-            </div>
-            {/*<div className="">*/}
-            {/*  <Card elevation={ 4 } className="h-full w-full">*/}
-            {/*    <TransactionDetailView/>*/}
-            {/*  </Card>*/}
-            {/*</div>*/}
+  return (
+    <div className="minus-nav">
+      <div className="flex flex-col h-full p-10 max-h-full">
+        <div className="grid grid-cols-3 gap-4 flex-grow">
+          <div className="col-span-3">
+            <Card elevation={ 4 } className="w-full transaction-list">
+              <List disablePadding className="w-full">
+                { renderTransactions() }
+              </List>
+            </Card>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
-export default connect(
-  state => ({
-    transactions: getTransactions(state),
-  }),
-  {
-    fetchInitialTransactionsIfNeeded,
-  }
-)(TransactionsView)
+export default TransactionsView;

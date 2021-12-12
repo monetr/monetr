@@ -6,10 +6,11 @@ import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
 import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
 import fetchLinksIfNeeded from 'shared/links/actions/fetchLinksIfNeeded';
-import fetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useSelector, useStore } from 'react-redux';
 import { Backdrop, CircularProgress } from '@mui/material';
+import useMountEffect from 'shared/util/useMountEffect';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import ExpensesView from 'views/Expenses/ExpensesView';
 import GoalsView from 'views/Goals/GoalsView';
@@ -22,18 +23,20 @@ const AuthenticatedApp = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const { dispatch, getState } = useStore();
 
-  useEffect(() => {
+  const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
+
+  useMountEffect(() => {
     Promise.all([
       fetchLinksIfNeeded()(dispatch, getState),
       fetchBankAccounts()(dispatch).then(() => Promise.all([
-        fetchInitialTransactionsIfNeeded()(dispatch, getState),
+        fetchInitialTransactionsIfNeeded(),
         fetchFundingSchedulesIfNeeded()(dispatch, getState),
         fetchSpending()(dispatch, getState),
         fetchBalances()(dispatch, getState),
       ])),
     ])
       .finally(() => setLoading(false));
-  }, []); // No dependencies makes sure that this will only ever be called the first time this component is mounted.
+  });
 
   const hasAnyLinks = useSelector(getHasAnyLinks);
 

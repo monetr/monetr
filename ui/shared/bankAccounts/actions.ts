@@ -11,7 +11,7 @@ export const CHANGE_BANK_ACCOUNT = 'CHANGE_BANK_ACCOUNT';
 
 export interface ChangeBankAccount {
   type: typeof CHANGE_BANK_ACCOUNT;
-  bankAccountId: number;
+  payload: number;
 }
 
 export interface FetchBankAccountsSuccess {
