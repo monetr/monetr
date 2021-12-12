@@ -22,7 +22,9 @@ export const reducers = combineReducers({
   transactions,
 });
 
-export function configureStore() {
+export type AppState = ReturnType<typeof reducers>;
+
+export function configureStore(initialState?: Partial<AppState>) {
   const composeEnhancer = process.env.NODE_ENV !== 'production' ? composeWithDevTools({
     name: 'Primary',
     maxAge: 150,
@@ -34,7 +36,7 @@ export function configureStore() {
 
   return createStore(
     reducers,
-    {},
+    initialState || {},
     composeEnhancer(compose(applyMiddleware(thunk), sentryReduxEnhancer)),
   );
 }
@@ -44,8 +46,6 @@ export const store = configureStore();
 export type AppDispatch = typeof store.dispatch
 
 export type AppStore = typeof store;
-
-export type AppState = ReturnType<typeof store.getState>;
 
 export type GetAppState = () => AppState;
 
