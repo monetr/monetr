@@ -9,6 +9,7 @@ import PlaidIcon from 'components/Plaid/PlaidIcon';
 import { getBankAccountsByLinkId } from 'shared/bankAccounts/selectors/getBankAccountsByLinkId';
 import { connect } from 'react-redux';
 import { getBalances } from 'shared/balances/selectors/getBalances';
+import { AppState } from 'store';
 import RemoveLinkConfirmationDialog from 'views/AccountView/RemoveLinkConfirmationDialog';
 import { UpdatePlaidAccountDialog } from 'views/AccountView/UpdatePlaidAccountDialog';
 
@@ -213,7 +214,7 @@ class LinkItem extends Component<WithConnectionPropTypes, State> {
 }
 
 export default connect(
-  (state, props: PropTypes) => ({
+  (state: AppState, props: PropTypes) => ({
     bankAccounts: getBankAccountsByLinkId(props.link.linkId)(state),
     balances: getBalances(state),
   }),
