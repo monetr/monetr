@@ -372,7 +372,7 @@ local-postgres-certs:
 
 ###################### WORKING ON WEBHOOKS LOCALLY ##################################
 webhooks-mini: $(YQ) $(DEVELOPMENT_CONFIG)
-webhooks-mini: NGROK_AUTH=$(call getDevelopmentSetting,'.webhooks.ngrokToken','a custom token is required')
+webhooks-mini: NGROK_AUTH=$(call getDevelopmentSetting,'.webhooks.ngrokToken','CUSTOM_TOKEN_REQUIRED')
 webhooks-mini:
 	$(KUBECTL) create secret generic ngrok-auth-secret \
 		--from-literal=NGROK_AUTH=$(NGROK_AUTH) \
@@ -429,7 +429,6 @@ vault-mini:
 	$(KUBECTL) rollout status deploy/vault \
 		--namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	$(MAKE) vault-terraform
-	$(MAKE) vault-token
 	$(MAKE) $(VAULT_SERVICE_ACCOUNT)
 	$(MAKE) configure-vault
 
