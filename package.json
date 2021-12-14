@@ -18,7 +18,7 @@
     "@typescript-eslint/parser": "5.7.0",
     "axios": "0.24.0",
     "babel-eslint": "10.1.0",
-    "babel-plugin-named-asset-import": "0.3.7",
+    "babel-plugin-named-asset-import": "0.3.8",
     "babel-preset-react-app": "10.0.0",
     "bfj": "7.0.2",
     "camelcase": "6.2.1",
