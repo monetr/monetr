@@ -100,7 +100,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: '${{ github.sha }}-binary-${{ matrix.architecture }}'
-          path: '${{ github.workspace }}/bin/monetr'
+          path: '${{ github.workspace }}/build/monetr'
           retention-days: 7
 
   go_test:
