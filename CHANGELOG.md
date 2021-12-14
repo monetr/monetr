@@ -1,5 +1,39 @@
 # Changelog
 
+### [0.7.9](https://www.github.com/monetr/monetr/compare/v0.7.8...v0.7.9) (2021-12-14)
+
+
+### Bug Fixes
+
+* Re-impelemented basic testing for components. ([3504b4a](https://www.github.com/monetr/monetr/commit/3504b4aa9608c8ae1eb50a5eef3649102dee1221))
+* **ui:** Fixed failing build due to redux state type issue. ([357622f](https://www.github.com/monetr/monetr/commit/357622f21412faf6d69d26799b56b583ecad2ea7))
+* **ui:** Improving transactions, testing and hooks. ([6307ca1](https://www.github.com/monetr/monetr/commit/6307ca1af2293b6547fc4a18edb06cb0ff76c798))
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.17.0 ([104e0a3](https://www.github.com/monetr/monetr/commit/104e0a336bf6a426c2da2c75aeacb062ba8fc1f0))
+* **api:** update module github.com/spf13/viper to v1.10.0 ([6019ec5](https://www.github.com/monetr/monetr/commit/6019ec5fd562f0d40ea4273bfc7b76a4a7d77371))
+* **ui:** pin dependency @types/jest to 27.0.3 ([3f1634a](https://www.github.com/monetr/monetr/commit/3f1634a12e4fad92a63c8eae41d786eb51ecde1c))
+* **ui:** pin dependency jest-environment-jsdom to 27.4.4 ([f3faa76](https://www.github.com/monetr/monetr/commit/f3faa76036503814db351b888ffb556fed43f69e))
+* **ui:** update babel monorepo to v7.16.5 ([14f8e53](https://www.github.com/monetr/monetr/commit/14f8e535b91eaaca2916fa114df345432e986943))
+* **ui:** update dependency @emotion/react to v11.7.1 ([ee3ac2a](https://www.github.com/monetr/monetr/commit/ee3ac2a3a29f09ead48387414bf933fac1f3c6f6))
+* **ui:** update dependency @svgr/webpack to v6.1.2 ([0e1ff7b](https://www.github.com/monetr/monetr/commit/0e1ff7b9081d4d01671fd1cc0f698d6c518947bd))
+* **ui:** update dependency postcss to v8.4.5 ([b967173](https://www.github.com/monetr/monetr/commit/b9671732c0f25ff0d47cdae3fff037e1416205e0))
+* **ui:** update dependency react-router-dom to v6.1.1 ([0d61e82](https://www.github.com/monetr/monetr/commit/0d61e82491621c64097e3a8c99ff36884a5985ac))
+* **ui:** update dependency tailwindcss to v3.0.2 ([5f3e172](https://www.github.com/monetr/monetr/commit/5f3e172dd837e11e782f8d0c176aac980f20b3bc))
+* **ui:** update dependency typescript to v4.5.4 ([7232a3c](https://www.github.com/monetr/monetr/commit/7232a3c940e0c713dd3998112d3b052d5a93cc74))
+* **ui:** update jest monorepo to v27.4.5 ([3985386](https://www.github.com/monetr/monetr/commit/3985386ada6946d245f6d4b4ca9f312d7d7d89a2))
+* **ui:** update typescript-eslint monorepo to v5.7.0 ([f143969](https://www.github.com/monetr/monetr/commit/f1439694487ccc306aa010e456d671577be44f2e))
+
+
+### Miscellaneous
+
+* Add code of conduct ([ce2e804](https://www.github.com/monetr/monetr/commit/ce2e80464a5c02d826b1ad927f1f5671351b3f15))
+* Improvements to building container locally. ([61cb6df](https://www.github.com/monetr/monetr/commit/61cb6dfee25378df1c500a4ae2029eb63ca634a2))
+* Improving testing. ([4561d61](https://www.github.com/monetr/monetr/commit/4561d619135158cc319fc621f95c508d0dc8b7e5))
+* Local development cleanup ([641b7be](https://www.github.com/monetr/monetr/commit/641b7be9630812e557ea2e95a014c855dd6905b6))
+
 ### [0.7.8](https://www.github.com/monetr/monetr/compare/v0.7.7...v0.7.8) (2021-12-11)
 
 
