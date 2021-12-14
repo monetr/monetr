@@ -11,3 +11,5 @@ brew 'podman'
 
 # Required for make local
 brew 'tmux'
+
+brew 'go'

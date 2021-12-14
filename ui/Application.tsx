@@ -35,7 +35,7 @@ const Application = (): JSX.Element => {
           transaction.finish();
         });
     }
-  }, [isReady]);
+  }, [bootstrapApplication, bootstrapLogin, isReady]);
 
   // When the application is still getting ready we want to just show a loading state to the user.
   if (!isReady || loading) {

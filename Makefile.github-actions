@@ -1,5 +1,0 @@
-default:
-	$(info "This makefile is meant to be used in CI.")
-
-apply-schema-ci: $(GO) $(GOMODULES)
-	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)

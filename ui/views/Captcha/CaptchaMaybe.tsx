@@ -10,7 +10,7 @@ export interface PropTypes {
   onVerify: (verification: string) => void;
 }
 
-const CaptchaMaybe = (props: PropTypes): JSX.Element => {
+export default function CaptchaMaybe(props: PropTypes): JSX.Element {
   const reCaptchaKey = useSelector(getReCAPTCHAKey);
 
   const { show, loading, onVerify } = props;
@@ -29,5 +29,3 @@ const CaptchaMaybe = (props: PropTypes): JSX.Element => {
     </div>
   );
 }
-
-export default CaptchaMaybe;

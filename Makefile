@@ -1,24 +1,39 @@
+# These variables are set first as they are not folder or environment specific.
 USERNAME=$(shell whoami)
 HOME=$(shell echo ~$(USERNAME))
 NOOP=
 SPACE = $(NOOP) $(NOOP)
 COMMA=,
-PWD=$(shell git rev-parse --show-toplevel)
-LOCAL_TMP = $(PWD)/tmp
-LOCAL_BIN = $(PWD)/bin
-BUILD_DIR = $(PWD)/build
-BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+# This stuff is used for versioning monetr when doing a release or developing locally.
+BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 LAST_RELEASE_REVISION=$(shell git rev-list --tags --max-count=1)
+# If we are currently on the same commit as the last tag then that means we are working with a release revision of the
+# code base. When we are not we want to add a `-dev-${SHA}` suffix to the version for our builds.
 ifneq ($(RELEASE_REVISION),$(LAST_RELEASE_REVISION))
 RELEASE_VERSION ?= $(shell git describe --tags $(LAST_RELEASE_REVISION))-dev-$(shell git rev-parse --short $(RELEASE_REVISION))
 else
 RELEASE_VERSION ?= $(shell git describe --tags $(LAST_RELEASE_REVISION))
 endif
-
+# Containers should not have the `v` prefix. So we take the release version variable and trim the `v` at the beginning
+# if it is there.
 CONTAINER_VERSION ?= $(RELEASE_VERSION:v%=%)
-BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
+
+# We want ALL of our paths to be relative to the repository path on the computer we are on. Never relative to anything
+# else.
+PWD=$(shell git rev-parse --show-toplevel)
+
+
+# Then include the colors file to make a lot of the printing prettier.
+include $(PWD)/scripts/Colors.mk
+
+# These are some working directories we need for local development.
+LOCAL_TMP = $(PWD)/tmp
+LOCAL_BIN = $(PWD)/bin
+BUILD_DIR = $(PWD)/build
+
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
 
@@ -55,16 +70,6 @@ ENV_LOWER = $(shell echo $(ENVIRONMENT) | tr A-Z a-z)
 
 GENERATED_YAML=$(PWD)/generated/$(ENV_LOWER)
 
-ifeq ($(NO_CACHE),true)
-DOCKER_CACHE=--no-cache
-endif
-
-DOCKER_OPTIONS=
-
-ifeq ($(DEBUG),true)
-DOCKER_OPTIONS += --debug
-endif
-
 ifndef POSTGRES_DB
 POSTGRES_DB=postgres
 endif
@@ -77,19 +82,15 @@ ifndef POSTGRES_HOST
 POSTGRES_HOST=localhost
 endif
 
-GREEN=\033[0;32m
-YELLOW=\033[1;33m
-RESET=\033[0m
-
 # Just a shorthand to print some colored text, makes it easier to read and tell the developer what all the makefile is
 # doing since its doing a ton.
 ifndef BUILDKITE
 define infoMsg
-	@echo "$(GREEN)[$@] $(1)$(RESET)"
+	@echo "$(GREEN)[$@]$(WHITE) $(1)$(NC)"
 endef
 
 define warningMsg
-	@echo "$(YELLOW)[$@] $(1)$(RESET)"
+	@echo "$(YELLOW)[$@]$(WHITE) $(1)$(NC)"
 endef
 else
 define infoMsg
@@ -103,13 +104,17 @@ endif
 
 GO_SRC_DIR=$(PWD)/pkg
 ALL_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*.go')
-APP_GO_FILES=$(filter-out *_test.go, $(ALL_GO_FILES))
 TEST_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*_test.go')
+APP_GO_FILES=$(filter-out $(TEST_GO_FILES),$(ALL_GO_FILES))
 
 UI_SRC_DIR=$(PWD)/ui
 ALL_UI_FILES=$(shell find $(UI_SRC_DIR) -type f)
-APP_UI_FILES=$(filter-out *.spec.*, $(ALL_UI_FILES))
 TEST_UI_FILES=$(shell find $(UI_SRC_DIR) -type f -name '*.spec.*')
+APP_UI_FILES=$(filter-out $(TEST_UI_FILES),$(ALL_UI_FILES))
+PUBLIC_FILES=$(wildcard $(PWD)/public/*)
+# Of the public files, these are the files that should be copied to the static_dir before the go build.
+COPIED_PUBLIC_FILES=$(filter-out $(PWD)/public/index.html,$(PUBLIC_FILES))
+UI_CONFIG_FILES=$(PWD)/tsconfig.json $(wildcard $(PWD)/*.config.js)
 
 GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
 UI_DEPS=$(PWD)/package.json $(PWD)/yarn.lock
@@ -134,8 +139,6 @@ WEBPACK=$(word 1,$(wildcard $(YARN_BIN)/webpack) $(NODE_MODULES)/.bin/webpack)
 $(WEBPACK): $(NODE_MODULES)
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
-PUBLIC_FILES=$(PWD)/public/favicon.ico $(PWD)/public/logo192.png $(PWD)/public/logo512.png $(PWD)/public/manifest.json $(PWD)/public/robots.txt
-UI_CONFIG_FILES=$(PWD)/tsconfig.json $(PWD)/webpack.config.js $(PWD)/tailwind.config.js
 $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(WEBPACK) $(SOURCE_MAP_DIR)
 	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
@@ -172,26 +175,26 @@ else
 BINARY_FILE_NAME=monetr
 endif
 
-BINARY=$(LOCAL_BIN)/$(BINARY_FILE_NAME)
+BUILD_DIR=$(PWD)/build
+$(BUILD_DIR):
+	mkdir -p $(PWD)/build
+
+BINARY=$(BUILD_DIR)/$(BINARY_FILE_NAME)
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
-$(BINARY): $(STATIC_DIR) $(GOMODULES)
+$(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
 endif
 	$(GO) build -ldflags "-X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
 	$(call infoMsg,   Built monetr binary for: $(GOOS)/$(GOARCH))
 	$(call infoMsg,             Build Version: $(RELEASE_VERSION))
 
-BUILD_DIR=$(PWD)/build
-$(BUILD_DIR):
-	mkdir -p $(PWD)/build
-
 build: $(BINARY)
 
-BINARY_TAR=$(PWD)/bin/monetr-$(RELEASE_VERSION)-$(GOOS)-$(GOARCH).tar.gz
+BINARY_TAR=$(BUILD_DIR)/monetr-$(RELEASE_VERSION)-$(GOOS)-$(GOARCH).tar.gz
 $(BINARY_TAR): $(BINARY)
 $(BINARY_TAR): TAR=$(shell which tar)
 $(BINARY_TAR):
-	cd $(LOCAL_BIN) && $(TAR) -czf $(BINARY_TAR) $(BINARY_FILE_NAME)
+	cd $(BUILD_DIR) && $(TAR) -czf $(BINARY_TAR) $(BINARY_FILE_NAME)
 
 tar: $(BINARY_TAR)
 
@@ -272,8 +275,7 @@ endif
 CHART_FILE=$(PWD)/Chart.yaml
 VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml
 VALUES_FILES=$(PWD)/values.yaml $(VALUES_FILE)
-
-TEMPLATE_FILES=$(PWD)/templates/*
+TEMPLATE_FILES=$(wildcard $(PWD)/templates/*)
 
 $(GENERATED_YAML): $(CHART_FILE) $(VALUES_FILES) $(TEMPLATE_FILES)
 $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
@@ -291,17 +293,10 @@ $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 
 generate: $(GENERATED_YAML)
 
-ifdef GITHUB_ACTION
-include $(PWD)/Makefile.github-actions
-endif
-
 ifndef CI
-include $(PWD)/Makefile.tinker
-
 ifeq ($(ENV_LOWER),local)
 include $(PWD)/Makefile.local
 endif
-
 endif
 
 ifndef POSTGRES_PORT

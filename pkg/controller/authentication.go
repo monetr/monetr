@@ -70,10 +70,14 @@ func (c *Controller) handleAuthentication(p router.Party) {
 	p.Post("/login", c.loginEndpoint)
 	p.Get("/logout", c.logoutEndpoint)
 
-	p.Post("/register", c.registerEndpoint)
+	if c.configuration.AllowSignUp {
+		p.Post("/register", c.registerEndpoint)
+	}
 
-	p.Post("/verify", c.verifyEndpoint)
-	p.Post("/verify/resend", c.resendVerification)
+	if c.configuration.Email.ShouldVerifyEmails() {
+		p.Post("/verify", c.verifyEndpoint)
+		p.Post("/verify/resend", c.resendVerification)
+	}
 
 	if c.configuration.Email.AllowPasswordReset() {
 		p.Post("/forgot", c.sendForgotPassword)
