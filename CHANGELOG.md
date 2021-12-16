@@ -1,5 +1,34 @@
 # Changelog
 
+### [0.7.10](https://www.github.com/monetr/monetr/compare/v0.7.9...v0.7.10) (2021-12-16)
+
+
+### Bug Fixes
+
+* **ci:** Artifacts being uploaded for binaries for release. ([0a5fd0d](https://www.github.com/monetr/monetr/commit/0a5fd0d2be19110a8bb94013329cc0d1390fbe8b))
+* **ci:** Fixed other paths for built binaries. ([9085563](https://www.github.com/monetr/monetr/commit/908556395c8536eee051606df2426cb154f35b92))
+
+
+### Miscellaneous
+
+* Improving local development, cleanup. ([4147a2b](https://www.github.com/monetr/monetr/commit/4147a2b2b8fe2b06d117d7c36d6873cf53c17c37))
+
+
+### Dependencies
+
+* **api:** update module github.com/spf13/cobra to v1.3.0 ([8e3a0c9](https://www.github.com/monetr/monetr/commit/8e3a0c9f904e2518f1b888bf966f44c986527408))
+* **api:** update module github.com/spf13/viper to v1.10.1 ([37d48d8](https://www.github.com/monetr/monetr/commit/37d48d86208c8664c4382d277e5cff3cf2726c9c))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.80.0 ([fd174b3](https://www.github.com/monetr/monetr/commit/fd174b37840b412ea17bbe8e799b21dcff761b59))
+* **ui:** update dependency babel-plugin-named-asset-import to v0.3.8 ([93a94b8](https://www.github.com/monetr/monetr/commit/93a94b8696bb7ef353f3ea8a31fbe9db1294c857))
+* **ui:** update dependency babel-preset-react-app to v10.0.1 ([c826436](https://www.github.com/monetr/monetr/commit/c826436b09941cf18846c9e9d5d319156433cd7b))
+* **ui:** update dependency eslint-config-react-app to v7 ([4459987](https://www.github.com/monetr/monetr/commit/445998747c43636ccb44d211af7f6d39be3c5547))
+* **ui:** update dependency postcss-preset-env to v7.0.2 ([053ddc3](https://www.github.com/monetr/monetr/commit/053ddc39056fc498bbb8d3e60f2bf3213271a6ea))
+* **ui:** update dependency react-app-polyfill to v3 ([d74cd05](https://www.github.com/monetr/monetr/commit/d74cd05a5c85088562b41bc98494ebe141fb41d3))
+* **ui:** update dependency tailwindcss to v3.0.5 ([f162ad0](https://www.github.com/monetr/monetr/commit/f162ad0c4bc4dd21acbcaa28c3656cc9a9357038))
+* **ui:** update dependency tailwindcss to v3.0.6 ([2ff6b99](https://www.github.com/monetr/monetr/commit/2ff6b9952d56c6e19f4f5bc2d572d8d5ccdb0f0f))
+* **ui:** update dependency terser-webpack-plugin to v5.3.0 ([75a6157](https://www.github.com/monetr/monetr/commit/75a61573250905aa74364fea193dc7c1c8cf6f04))
+* **ui:** update material-ui monorepo ([31c577d](https://www.github.com/monetr/monetr/commit/31c577d6c0d52e49b4db0c80ba9850311bb4739f))
+
 ### [0.7.9](https://www.github.com/monetr/monetr/compare/v0.7.8...v0.7.9) (2021-12-14)
 
 
