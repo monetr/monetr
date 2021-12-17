@@ -140,12 +140,13 @@ deploy-certificate: $(JQ) $(CERT_PATH)
 	$(KUBECTL) -n $(NGINX_NAMESPACE) create secret tls $(TLS_SECRET_NAME) --key $(KEY_PATH) --cert $(CERT_PATH) \
 		--dry-run=client \
 		-o yaml | $(KUBECTL) apply -f -
-	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=90s
+	$(KUBECTL) -n $(NGINX_NAMESPACE) scale deploy/$(NGINX_DEPLOYMENT) --replicas=0 --timeout=120s
 	$(KUBECTL) get deploy/$(NGINX_DEPLOYMENT) \
 		--namespace=$(NGINX_NAMESPACE) -o json > $(LOCAL_TMP)/nginx-args.json
 	$(JQ) '.spec.template.spec.containers[0].args |= . + ["--default-ssl-certificate=$$(POD_NAMESPACE)/$(TLS_SECRET_NAME)"]' \
 		$(LOCAL_TMP)/nginx-args.json > $(LOCAL_TMP)/nginx-new.json
 	cat $(LOCAL_TMP)/nginx-new.json | $(KUBECTL) apply -f -
+	$(KUBECTL) -n $(NGINX_NAMESPACE) scale deploy/$(NGINX_DEPLOYMENT) --replicas=1 --timeout=120s
 	$(KUBECTL) rollout status deploy/$(NGINX_DEPLOYMENT) --namespace=$(NGINX_NAMESPACE) --timeout=90s
 	-rm -rf $(LOCAL_TMP)/nginx-*.json
 
