@@ -237,7 +237,7 @@ jobs:
       - name: Generate Documentation Static Site
         run: make docs-static
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.7
+        uses: JamesIves/github-pages-deploy-action@4.1.8
         with:
           branch: docs.monetr.dev
           folder: docs
