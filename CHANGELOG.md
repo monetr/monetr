@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.0](https://www.github.com/monetr/monetr/compare/v0.7.10...v0.8.0) (2021-12-18)
+
+
+### Features
+
+* **container:** Changed container to slim debian from ubuntu. ([5df2b34](https://www.github.com/monetr/monetr/commit/5df2b3482895fdc7f865fbe15e689318485251d2))
+
+
+### Miscellaneous
+
+* Add wakatime badge to readme. ([4feef04](https://www.github.com/monetr/monetr/commit/4feef040ad0c3c308a095f776a166ab7fc2aecee))
+
+
+### Dependencies
+
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.1.8 ([dc4df70](https://www.github.com/monetr/monetr/commit/dc4df70e3f7ea5d5af905198ad59cedc229394b4))
+* **ui:** update dependency eslint to v8.5.0 ([efe74f5](https://www.github.com/monetr/monetr/commit/efe74f501f8c7436a3293aafcb9bbd3b24afe177))
+* **ui:** update dependency react-router-dom to v6.2.0 ([f2d86ce](https://www.github.com/monetr/monetr/commit/f2d86ce31edcab863971bd3e3d9e05e8f7ffb87c))
+* **ui:** update dependency react-router-dom to v6.2.1 ([26c30ea](https://www.github.com/monetr/monetr/commit/26c30ea9601df472188a34063ff1dd968d1f62c7))
+* **ui:** update dependency tailwindcss to v3.0.7 ([59d8979](https://www.github.com/monetr/monetr/commit/59d8979398caaebd55a5cee612200956583df3ad))
+
 ### [0.7.10](https://www.github.com/monetr/monetr/compare/v0.7.9...v0.7.10) (2021-12-16)
 
 
