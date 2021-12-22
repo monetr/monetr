@@ -79,7 +79,6 @@ mini-info:
 	$(call infoMsg,Other services are run alongside monetr locally; you can access them at the following URLs:)
 	$(call infoMsg,    Email:                                    https://mail.$(LOCAL_DOMAIN))
 	$(call infoMsg,    Secrets:                                  https://vault.$(LOCAL_DOMAIN))
-	$(call infoMsg,    PGAdmin:                                  https://pgadmin.$(LOCAL_DOMAIN))
 	$(call infoMsg,    Redis:                                    https://redis.$(LOCAL_DOMAIN))
 	$(call infoMsg,    gocraft/work UI:                          https://work.$(LOCAL_DOMAIN))
 	$(call infoMsg,)
@@ -324,7 +323,7 @@ $(MINI_WORK_DOCKER_HASH):
 	$(KUBECTL) rollout status deploy/work --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	echo "$(HASH)" > $(MINI_WORK_DOCKER_HASH)
 
-deploy-services: deploy-certmanager update-coredns deploy-redis deploy-postgres mail-mini vault-mini deploy-pgadmin $(MINI_WORK_DOCKER_HASH) deploy-relay
+deploy-services: deploy-certmanager update-coredns deploy-redis deploy-postgres mail-mini vault-mini $(MINI_WORK_DOCKER_HASH) deploy-relay
 	$(MAKE) deploy-certificate-authority
 
 SHELL_IMAGE=ghcr.io/elliotcourant/dotfiles/ubuntu:latest
