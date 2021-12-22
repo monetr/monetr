@@ -19,7 +19,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/vault/api v1.3.0
 	github.com/iris-contrib/middleware/cors v0.0.0-20211207164801-081c558a02bb
-	github.com/jarcoal/httpmock v1.0.8
+	github.com/jarcoal/httpmock v1.1.0
 	github.com/kataras/iris/v12 v12.2.0-alpha5
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/nleeper/goment v1.4.2
