@@ -187,8 +187,8 @@ jobs:
       - name: Build
         run: |
           sudo apt-get update && sudo apt-get -y install qemu-user-static
-          make container RELEASE_VERSION=v${{ needs.release_please.outputs.version }}
-          make container-push RELEASE_VERSION=v${{ needs.release_please.outputs.version }}
+          make container RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
+          make container-push RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
 
   deploy:
     if: ${{ needs.release_please.outputs.release_created }}

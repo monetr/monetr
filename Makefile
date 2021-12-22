@@ -10,12 +10,19 @@ BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 LAST_RELEASE_REVISION=$(shell git rev-list --tags --max-count=1)
+LAST_RELEASE_VERSION=$(shell git describe --tags $(LAST_RELEASE_REVISION))
+# Development version represents a version string used for dirty working tree's, or for revisions that have not yet been
+# tagged. It should not be used directly. If you need to access the version being built, use RELEASE_VERSION.
+DEVELOPMENT_VERSION=$(LAST_RELEASE_VERSION)-dev-$(shell git rev-parse --short $(RELEASE_REVISION))
+# If we have a non-clean working tree, then use the development version string.
+ifneq ($(shell git diff --stat),)
+RELEASE_VERSION ?= $(DEVELOPMENT_VERSION)
 # If we are currently on the same commit as the last tag then that means we are working with a release revision of the
 # code base. When we are not we want to add a `-dev-${SHA}` suffix to the version for our builds.
-ifneq ($(RELEASE_REVISION),$(LAST_RELEASE_REVISION))
-RELEASE_VERSION ?= $(shell git describe --tags $(LAST_RELEASE_REVISION))-dev-$(shell git rev-parse --short $(RELEASE_REVISION))
+else ifneq ($(RELEASE_REVISION),$(LAST_RELEASE_REVISION))
+RELEASE_VERSION ?= $(DEVELOPMENT_VERSION)
 else
-RELEASE_VERSION ?= $(shell git describe --tags $(LAST_RELEASE_REVISION))
+RELEASE_VERSION ?= $(LAST_RELEASE_VERSION)
 endif
 # Containers should not have the `v` prefix. So we take the release version variable and trim the `v` at the beginning
 # if it is there.
@@ -130,9 +137,11 @@ SOURCE_MAP_DIR=$(BUILD_DIR)/source_maps
 $(SOURCE_MAP_DIR):
 	mkdir -p $(SOURCE_MAP_DIR)
 
+YARN=$(shell which yarn)
+
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
-	yarn install
+	$(YARN) install
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 WEBPACK=$(word 1,$(wildcard $(YARN_BIN)/webpack) $(NODE_MODULES)/.bin/webpack)

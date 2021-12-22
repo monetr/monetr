@@ -20,7 +20,10 @@ $(PODMAN)-status:
 DOCKERFILE=$(PWD)/Dockerfile
 DOCKER_IGNORE=$(PWD)/.dockerignore
 CONTAINER_REPOS=ghcr.io/monetr/monetr docker.io/monetr/monetr
-ifeq ($(RELEASE_REVISION),$(LAST_RELEASE_REVISION))
+LATEST_CONTAINER ?= false
+ifeq ($(LATEST_CONTAINER),true)
+CONTAINER_VERSIONS=latest $(CONTAINER_VERSION)
+else ifeq ($(RELEASE_REVISION),$(LAST_RELEASE_REVISION))
 CONTAINER_VERSIONS=latest $(CONTAINER_VERSION)
 else
 CONTAINER_VERSIONS=$(CONTAINER_VERSION)
@@ -54,7 +57,7 @@ container:
 		--platform="$(PLATFORM)" \
 		$(CONTAINER_EXTRA_ARGS) \
 		-f $(DOCKERFILE) \
-		$(PWD) &&) exit 0;
+		$(PWD) &&) true;
 	$(BUILDAH) manifest inspect $(CONTAINER_MANIFEST)
 else
 container: $(PODMAN) $(STATIC_DIR)
