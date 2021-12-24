@@ -1,5 +1,33 @@
 # Changelog
 
+### [0.8.1](https://www.github.com/monetr/monetr/compare/v0.8.0...v0.8.1) (2021-12-24)
+
+
+### Bug Fixes
+
+* **container:** Fixed container not being tagged with latest. ([11aa14e](https://www.github.com/monetr/monetr/commit/11aa14e7d470280a19e58b41177830725f438d5b)), closes [#501](https://www.github.com/monetr/monetr/issues/501)
+* **local:** Remove PGAdmin from local development for now. ([469dc8d](https://www.github.com/monetr/monetr/commit/469dc8d831264a66d73554149d62fdbc94c8c3b4))
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.12.0 ([4ae70df](https://www.github.com/monetr/monetr/commit/4ae70dfad0534e1ee4bf0471626ef3819b5fff93))
+* **api:** update module github.com/hashicorp/vault/api to v1.3.1 ([e02f22b](https://www.github.com/monetr/monetr/commit/e02f22b53fbbdd6d80bbef4c6000d82145956772))
+* **api:** update module github.com/jarcoal/httpmock to v1.1.0 ([6cb70d4](https://www.github.com/monetr/monetr/commit/6cb70d42c7c4285e6e33f51459c5b69d30890ed0))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.81.0 ([0ab0c4d](https://www.github.com/monetr/monetr/commit/0ab0c4d68e1f5ba804312ce42c3513b88c2ecaf4))
+* **renovate:** update terraform vault to v3.1.0 ([86ef22e](https://www.github.com/monetr/monetr/commit/86ef22e8cad11bedba93bae580e05e32e0e6462c))
+* **renovate:** update terraform vault to v3.1.1 ([a61371e](https://www.github.com/monetr/monetr/commit/a61371efaf8416cc6457097b3972aab8d7da4df4))
+* **ui:** update dependency @pmmmwh/react-refresh-webpack-plugin to v0.5.4 ([0108517](https://www.github.com/monetr/monetr/commit/01085172a56be15f17e3a635125f1dde2cdccb5f))
+* **ui:** update dependency @types/react to v17.0.38 ([021eb5b](https://www.github.com/monetr/monetr/commit/021eb5bb5399ddff8aef1299cc5e3074d8adbc17))
+* **ui:** update dependency @types/react-redux to v7.1.21 ([d350a4c](https://www.github.com/monetr/monetr/commit/d350a4c0828b1f1a419b89412c36059f813a6556))
+* **ui:** update dependency eslint-plugin-react to v7.28.0 ([aeebe37](https://www.github.com/monetr/monetr/commit/aeebe3743abaea67de4e4be38289c0377a22c45e))
+* **ui:** update dependency postcss-preset-env to v7.1.0 ([6ab599a](https://www.github.com/monetr/monetr/commit/6ab599a930a0504a25137b2971cb8ec716c0b70f))
+* **ui:** update dependency prop-types to v15.8.0 ([2036c9b](https://www.github.com/monetr/monetr/commit/2036c9b5ed64c2e674de1c46e573326c9452fad7))
+* **ui:** update dependency sass to v1.45.1 ([0c6126a](https://www.github.com/monetr/monetr/commit/0c6126a2b19a7442431810cd30fd2cbb23949cf6))
+* **ui:** update dependency webpack-dev-server to v4.7.1 ([e99ff63](https://www.github.com/monetr/monetr/commit/e99ff630366f765c6dc26efb29b10aab554886ac))
+* **ui:** update material-ui monorepo ([8616db5](https://www.github.com/monetr/monetr/commit/8616db50a9699b960b9fcf19c7ed34ab86b5c3d6))
+* **ui:** update typescript-eslint monorepo to v5.8.0 ([bcd85a2](https://www.github.com/monetr/monetr/commit/bcd85a24dcb6b1c405b081234dd773485be4a8c3))
+
 ## [0.8.0](https://www.github.com/monetr/monetr/compare/v0.7.10...v0.8.0) (2021-12-18)
 
 
