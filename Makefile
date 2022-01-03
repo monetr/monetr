@@ -1,3 +1,5 @@
+GIT_REPOSITORY=https://github.com/monetr/monetr.git
+
 # These variables are set first as they are not folder or environment specific.
 USERNAME=$(shell whoami)
 HOME=$(shell echo ~$(USERNAME))
@@ -11,6 +13,17 @@ BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 LAST_RELEASE_REVISION=$(shell git rev-list --tags --max-count=1)
 LAST_RELEASE_VERSION=$(shell git describe --tags $(LAST_RELEASE_REVISION))
+
+# If we were not able to retrieve the last tag from the git repo, then retrieve it from ls-remote.
+ifeq ($(LAST_RELEASE_REVISION),)
+# This will retrieve the latest revision and ref/tag for the monetr repo. This will allow us to determine whether or not
+# the current commit is equal to the commit with the tag. Or if it is a development version of monetr. This is done if
+# tags are not available in the current repository clone.
+LAST_RELEASE_LS=$(shell git ls-remote --tags $(GIT_REPOSITORY) | sort -t '/' -k 3 -V | tail -n 1)
+LAST_RELEASE_REVISION=$(firstword $(LAST_RELEASE_LS))
+LAST_RELEASE_VERSION=$(word 2,$(LAST_RELEASE_LS:refs/tags/%=%))
+endif
+
 # Development version represents a version string used for dirty working tree's, or for revisions that have not yet been
 # tagged. It should not be used directly. If you need to access the version being built, use RELEASE_VERSION.
 DEVELOPMENT_VERSION=$(LAST_RELEASE_VERSION)-dev-$(shell git rev-parse --short $(RELEASE_REVISION))
