@@ -33,17 +33,18 @@ CONTAINER_TAG_ARGS=$(foreach TAG,$(CONTAINER_TAGS),-t $(TAG))
 CONTAINER_VARS = GOFLAGS="" REVISION="$(RELEASE_REVISION)" RELEASE="$(RELEASE_VERSION)"
 CONTAINER_VAR_ARGS=$(foreach ARG,$(CONTAINER_VARS),--build-arg $(ARG))
 ifdef CI
-CONTAINER_PLATFORMS=linux/amd64 linux/arm64
+# Temporarily remove linux/arm64 from container builds. This was causing issues with libc, will re-add once fixed.
+CONTAINER_PLATFORMS=linux/amd64
 else # Eventually we can add arm64 back for local builds
 CONTAINER_PLATFORMS=linux/amd64
 endif
 CONTAINER_PLATFORM_ARGS=$(foreach PLATFORM,$(CONTAINER_PLATFORMS),--platform $(PLATFORM))
 
 CONTAINER_MANIFEST=$(word 1,$(CONTAINER_REPOS)):$(RELEASE_REVISION)
-ifeq ($(word 1,$(CONTAINER_PLATFORMS)),$(CONTAINER_PLATFORMS)) # If platforms[0] == platforms then there is only one platform.
-CONTAINER_EXTRA_ARGS=$(CONTAINER_TAG_ARGS)
-else # When we are working with more than one platform, then we need to use manifest instead of tags.
+ifdef CI
 CONTAINER_EXTRA_ARGS=--manifest $(CONTAINER_MANIFEST)
+else
+CONTAINER_EXTRA_ARGS=$(CONTAINER_TAG_ARGS)
 endif
 
 container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
@@ -51,6 +52,7 @@ ifdef CI # When we are in CI we don't want to run the static dir targets, these 
 container: BUILDAH=$(shell which buildah)
 container:
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
+	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	$(foreach PLATFORM,$(CONTAINER_PLATFORMS),$(BUILDAH) bud \
 		$(CONTAINER_VAR_ARGS) \
 		--ignorefile=$(DOCKER_IGNORE) \
@@ -75,7 +77,7 @@ endif
 ifdef CI
 container-push: BUILDAH=$(shell which buildah)
 container-push:
-	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
+	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	($(foreach TAG,$(CONTAINER_TAGS),$(BUILDAH) manifest push --all $(CONTAINER_MANIFEST) docker://$(TAG) &&) exit 0)
 endif
 
