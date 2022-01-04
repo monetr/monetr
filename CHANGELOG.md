@@ -1,5 +1,34 @@
 # Changelog
 
+### [0.8.2](https://www.github.com/monetr/monetr/compare/v0.8.1...v0.8.2) (2022-01-04)
+
+
+### Bug Fixes
+
+* **temp:** Removed `linux/arm64` containers from builds ([462a53f](https://www.github.com/monetr/monetr/commit/462a53f3619c1167879aa5ecad1ad227bc7a0883))
+
+
+### Miscellaneous
+
+* Updated License for 2022. ([f8cfc08](https://www.github.com/monetr/monetr/commit/f8cfc08c3c538f1a8bd965f8b13d8db3565c1f56))
+
+
+### Dependencies
+
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.11.1 ([f0947f5](https://www.github.com/monetr/monetr/commit/f0947f59b8118a8d91ed4e6d3cd272da04a8a173))
+* **api:** update module github.com/gomodule/redigo to v1.8.8 ([9cc8c69](https://www.github.com/monetr/monetr/commit/9cc8c6935c4389faeb0f6a10949ae7f0ab1bb776))
+* **api:** update module github.com/nyaruka/phonenumbers to v1.0.74 ([35b0258](https://www.github.com/monetr/monetr/commit/35b0258c6174c8957b750602e965aa373cd309e5))
+* **ui:** update babel monorepo to v7.16.7 ([917f248](https://www.github.com/monetr/monetr/commit/917f248cd6626c6ba5d09300ed500ee48be6193a))
+* **ui:** update dependency autoprefixer to v10.4.1 ([4fbece8](https://www.github.com/monetr/monetr/commit/4fbece8c72e5395bf0091ff0671533981b626f22))
+* **ui:** update dependency css-what to v6 ([de53a0f](https://www.github.com/monetr/monetr/commit/de53a0f0f30831d83d3e1aacdb78d816b77ba4b8))
+* **ui:** update dependency eslint-plugin-import to v2.25.4 ([4e63f9c](https://www.github.com/monetr/monetr/commit/4e63f9c986b032abebc9c512c362a15929011227))
+* **ui:** update dependency eslint-plugin-jest to v25.3.4 ([3f9f53d](https://www.github.com/monetr/monetr/commit/3f9f53d6b594d334151734f9afc3d8b31becf2ad))
+* **ui:** update dependency http-status-codes to v2.2.0 ([391abee](https://www.github.com/monetr/monetr/commit/391abee272733f7c10c5a0accd49108f90baded5))
+* **ui:** update dependency tailwindcss to v3.0.9 ([e0177e0](https://www.github.com/monetr/monetr/commit/e0177e03cf3ff031599e202fbc5b4a35c5adab5c))
+* **ui:** update dependency webpack-dev-server to v4.7.2 ([b01c457](https://www.github.com/monetr/monetr/commit/b01c45793ceb60271fda9280277e96d71fe178f2))
+* **ui:** update material-ui monorepo ([f55f20f](https://www.github.com/monetr/monetr/commit/f55f20f4d934cda945433119bc96fe991a215667))
+* **ui:** update typescript-eslint monorepo to v5.9.0 ([e2fe61d](https://www.github.com/monetr/monetr/commit/e2fe61d2c7573327e1f7e762830b0b567412c939))
+
 ### [0.8.1](https://www.github.com/monetr/monetr/compare/v0.8.0...v0.8.1) (2021-12-24)
 
 
