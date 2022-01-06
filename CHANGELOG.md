@@ -1,5 +1,26 @@
 # Changelog
 
+### [0.8.3](https://www.github.com/monetr/monetr/compare/v0.8.2...v0.8.3) (2022-01-06)
+
+
+### Dependencies
+
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.1.9 ([68cd345](https://www.github.com/monetr/monetr/commit/68cd3459fe2a6ec714bbb8c2f0cbc90ab414bbf3))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.2.0 ([269c08c](https://www.github.com/monetr/monetr/commit/269c08c7fbe38fc8b8f5a4a3cf4112a95a5a67a6))
+* **ui:** update dependency @types/jest to v27.4.0 ([c425e65](https://www.github.com/monetr/monetr/commit/c425e65b6da3ebb8c2a5a9735b5f3cd0cc79c50e))
+* **ui:** update dependency camelcase to v6.3.0 ([2863bde](https://www.github.com/monetr/monetr/commit/2863bdeb8b06ea266ee6e51430bee3e7b22869b6))
+* **ui:** update dependency eslint to v8.6.0 ([0b53cc5](https://www.github.com/monetr/monetr/commit/0b53cc5cd153c40990e1a5f08c65384a852ed2c2))
+* **ui:** update dependency jest to v27.4.7 ([cee903c](https://www.github.com/monetr/monetr/commit/cee903cbf3e7241f60aed4af6f177a2fdca2b0d8))
+* **ui:** update dependency mini-css-extract-plugin to v2.4.6 ([d2a0d12](https://www.github.com/monetr/monetr/commit/d2a0d122bf604123f9a81c1816cbe9fe137a6861))
+* **ui:** update dependency postcss-preset-env to v7.2.0 ([dcba2c9](https://www.github.com/monetr/monetr/commit/dcba2c9d60fcc03e5c0f25177c2377616999cd99))
+* **ui:** update dependency prop-types to v15.8.1 ([94e5412](https://www.github.com/monetr/monetr/commit/94e5412f8edaaba52db06022fdff48035c9aa6e2))
+* **ui:** update dependency resolve to v1.21.0 ([6c00059](https://www.github.com/monetr/monetr/commit/6c00059be54e527602693ac434a9605ed397e79e))
+* **ui:** update dependency sass to v1.45.2 ([2d96422](https://www.github.com/monetr/monetr/commit/2d9642254cc26ad411b9fd5c2b2137d326973e3f))
+* **ui:** update dependency sass to v1.46.0 ([672f149](https://www.github.com/monetr/monetr/commit/672f1496d11bf6e4be6d1fff6bf26c4171baf2cb))
+* **ui:** update dependency tailwindcss to v3.0.10 ([5a47a0d](https://www.github.com/monetr/monetr/commit/5a47a0d6f325e8045b54b792a4c121868ff15447))
+* **ui:** update dependency tailwindcss to v3.0.11 ([be11f1a](https://www.github.com/monetr/monetr/commit/be11f1a727bad45b6ee68e46cfdae0881545e493))
+* **ui:** update jest monorepo to v27.4.6 ([b2f89a0](https://www.github.com/monetr/monetr/commit/b2f89a087106155f2eead1d80b88f2e713b62ff0))
+
 ### [0.8.2](https://www.github.com/monetr/monetr/compare/v0.8.1...v0.8.2) (2022-01-04)
 
 
