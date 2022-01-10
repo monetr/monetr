@@ -1,5 +1,20 @@
 # Changelog
 
+### [0.8.4](https://www.github.com/monetr/monetr/compare/v0.8.3...v0.8.4) (2022-01-10)
+
+
+### Dependencies
+
+* **api:** update github.com/xlzd/gotp commit hash to 8b477b0 ([6810b12](https://www.github.com/monetr/monetr/commit/6810b1252a17795808f8a61c1644ebfb3a9ef6fd))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.12.0 ([4e39903](https://www.github.com/monetr/monetr/commit/4e3990304f45f479518f1d87e4d1e0c84a5282dd))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.2.1 ([6b6680b](https://www.github.com/monetr/monetr/commit/6b6680b92b444eedb361b31f3a269f11264e6a40))
+* **ui:** update dependency autoprefixer to v10.4.2 ([dd30b55](https://www.github.com/monetr/monetr/commit/dd30b558da5e594a2fd647aee9f003735d7c40cf))
+* **ui:** update dependency eslint-plugin-testing-library to v5.0.2 ([0a347ab](https://www.github.com/monetr/monetr/commit/0a347ab89d1d8802373be2f79420d4b82e194b81))
+* **ui:** update dependency eslint-plugin-testing-library to v5.0.3 ([e350376](https://www.github.com/monetr/monetr/commit/e350376ed6d6646459e3a9eb6bf310ba9874c612))
+* **ui:** update dependency sass to v1.47.0 ([3f0de34](https://www.github.com/monetr/monetr/commit/3f0de3492d22833859ad2b123d3def7073385b42))
+* **ui:** update dependency tailwindcss to v3.0.12 ([c5988b0](https://www.github.com/monetr/monetr/commit/c5988b03a9617ff21795f2b0c09bb50fdf575999))
+* **ui:** update dependency web-vitals to v2.1.3 ([df1bcb0](https://www.github.com/monetr/monetr/commit/df1bcb06fdb3dcf054fdba7bf20411a1b0d5bf87))
+
 ### [0.8.3](https://www.github.com/monetr/monetr/compare/v0.8.2...v0.8.3) (2022-01-06)
 
 
