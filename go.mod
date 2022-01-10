@@ -35,7 +35,7 @@ require (
 	github.com/stripe/stripe-go/v72 v72.81.0
 	github.com/teambition/rrule-go v1.7.2
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	github.com/xlzd/gotp v0.0.0-20220107120203-8b477b0b0578
+	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
