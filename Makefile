@@ -37,7 +37,7 @@ MONETR_DIR=$(HOME)/.monetr
 $(MONETR_DIR):
 	if [ ! -d "$(MONETR_DIR)" ]; then mkdir -p $(MONETR_DIR); fi
 
-KUBERNETES_VERSION=1.18.5
+KUBERNETES_VERSION=1.20.1
 
 ifeq ($(OS),Windows_NT)
 	OS=windows
