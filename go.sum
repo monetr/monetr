@@ -128,6 +128,8 @@ github.com/brianvoe/gofakeit/v6 v6.12.0 h1:JJV5csT+VHrIZa763GCZjRWgyezMBo+HlJAhh
 github.com/brianvoe/gofakeit/v6 v6.12.0/go.mod h1:Ow6qC71xtwm79anlwKRlWZW6zVq9D2XHE4QSSMP/rU8=
 github.com/brianvoe/gofakeit/v6 v6.12.1 h1:12JSuDkqX/eUiqnNcwetTrbHMdxdLIBx1pBEZNlCp98=
 github.com/brianvoe/gofakeit/v6 v6.12.1/go.mod h1:Ow6qC71xtwm79anlwKRlWZW6zVq9D2XHE4QSSMP/rU8=
+github.com/brianvoe/gofakeit/v6 v6.12.2 h1:5lMq+mM6rzy54Rij8PgycH6PCVzdEtTC3PpHzCOxteQ=
+github.com/brianvoe/gofakeit/v6 v6.12.2/go.mod h1:Ow6qC71xtwm79anlwKRlWZW6zVq9D2XHE4QSSMP/rU8=
 github.com/cenkalti/backoff/v3 v3.0.0 h1:ske+9nBpD9qZsTBoF41nW5L+AIuFBKMeze18XQ3eG1c=
 github.com/cenkalti/backoff/v3 v3.0.0/go.mod h1:cIeZDE3IrqwwJl6VUwCN6trj1oXrTS4rc0ij+ULvLYs=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
