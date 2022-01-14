@@ -6,7 +6,7 @@ require (
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/alicebob/miniredis/v2 v2.17.0
-	github.com/brianvoe/gofakeit/v6 v6.12.2
+	github.com/brianvoe/gofakeit/v6 v6.13.0
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/fsnotify/fsnotify v1.5.1
 	github.com/gavv/httpexpect/v2 v2.3.1
