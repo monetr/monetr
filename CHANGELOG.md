@@ -1,5 +1,38 @@
 # Changelog
 
+### [0.8.5](https://github.com/monetr/monetr/compare/v0.8.4...v0.8.5) (2022-01-14)
+
+
+### Bug Fixes
+
+* Significantly improve simplicity of versioning. ([f5abdef](https://github.com/monetr/monetr/commit/f5abdef84d53aec927d1de500003f78458bb182d))
+
+
+### Miscellaneous
+
+* **local:** Bumped local development kube version. ([54c6bba](https://github.com/monetr/monetr/commit/54c6bba544591c09dabe77d697d7cd8067ac908c))
+
+
+### Dependencies
+
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.12.1 ([4b16782](https://github.com/monetr/monetr/commit/4b1678223a071a084f3b6774ba8d7aec400d8665))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.12.2 ([282a7b1](https://github.com/monetr/monetr/commit/282a7b11174da338fe919c9d75c61c57e0c62e69))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.13.0 ([9d24220](https://github.com/monetr/monetr/commit/9d2422034a474193ff66be7969bed6c0e0f485d8))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.82.0 ([de45c1a](https://github.com/monetr/monetr/commit/de45c1a6e5faed6d056bab59dae8bced4bf49f52))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.83.0 ([c4617d3](https://github.com/monetr/monetr/commit/c4617d3d4aa0d2c37a1add5487a6853ec77f59c5))
+* **api:** update module github.com/teambition/rrule-go to v1.7.3 ([be96ec3](https://github.com/monetr/monetr/commit/be96ec380d0bb470cbd89c8f60cf326781575e32))
+* **ui:** update dependency @types/react-redux to v7.1.22 ([a4f1945](https://github.com/monetr/monetr/commit/a4f19457ee65a1874c5d635fa917f92fc6160121))
+* **ui:** update dependency dotenv to v11 ([99567c6](https://github.com/monetr/monetr/commit/99567c689bee4a9a0bc1d49314085cffb6e70563))
+* **ui:** update dependency immer to v9.0.12 ([0975b09](https://github.com/monetr/monetr/commit/0975b091fa7c79800eb9ca700f7a6acc58f95d0d))
+* **ui:** update dependency mini-css-extract-plugin to v2.4.7 ([8690f6c](https://github.com/monetr/monetr/commit/8690f6c4246f9b53a824e5af246cf00d1dbc2317))
+* **ui:** update dependency postcss-preset-env to v7.2.3 ([5dc27e5](https://github.com/monetr/monetr/commit/5dc27e5c123f981a468a959b9c7d2809d58859cc))
+* **ui:** update dependency react-select to v5.2.2 ([a0300b9](https://github.com/monetr/monetr/commit/a0300b9e1cccdc057e5bdc67882bfc5c6d97804a))
+* **ui:** update dependency sass to v1.48.0 ([35d4561](https://github.com/monetr/monetr/commit/35d4561e5b138b19538928afd07ca2871188f4a0))
+* **ui:** update dependency tailwindcss to v3.0.13 ([2eb7ea4](https://github.com/monetr/monetr/commit/2eb7ea4e4f6ec94b05027cb2b9932d90ceed6e3d))
+* **ui:** update dependency webpack to v5.66.0 ([40b2f8b](https://github.com/monetr/monetr/commit/40b2f8b8ecae367d09b93bc4dc721a1a26c8fb5d))
+* **ui:** update dependency webpack-dev-server to v4.7.3 ([dceb3ad](https://github.com/monetr/monetr/commit/dceb3ad114de7b91539477f28a99b5e1460fcb87))
+* **ui:** update dependency webpack-manifest-plugin to v4.1.1 ([83693d9](https://github.com/monetr/monetr/commit/83693d925bc7d81ca8f758e27c24e16e97f4373d))
+
 ### [0.8.4](https://github.com/monetr/monetr/compare/v0.8.3...v0.8.4) (2022-01-10)
 
 
