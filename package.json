@@ -30,7 +30,7 @@
     "immer": "9.0.12",
     "immutable": "4.0.0",
     "is-svg": "4.3.2",
-    "mini-css-extract-plugin": "2.4.6",
+    "mini-css-extract-plugin": "2.4.7",
     "moment": "2.29.1",
     "node-notifier": "10.0.0",
     "notistack": "2.0.3",
