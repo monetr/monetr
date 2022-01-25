@@ -1,5 +1,33 @@
 # Changelog
 
+### [0.8.6](https://github.com/monetr/monetr/compare/v0.8.5...v0.8.6) (2022-01-23)
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.18.0 ([fe6733d](https://github.com/monetr/monetr/commit/fe6733dd5903500509ced1c34c84d2e17f7c5ff7))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.13.2 ([2c5e041](https://github.com/monetr/monetr/commit/2c5e041b0388664efcdc5782d6147f2890f0c15d))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.14.0 ([8a12e23](https://github.com/monetr/monetr/commit/8a12e23c5dec2cd8e488f3ad0a606e1cb0189ce6))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.14.2 ([7d8595b](https://github.com/monetr/monetr/commit/7d8595b6a0ecb43c79dba25f1f8bd9859e02dc09))
+* **api:** update module github.com/prometheus/client_golang to v1.12.0 ([5b91a4a](https://github.com/monetr/monetr/commit/5b91a4a8d9725e7728b845ca2accee7e02faff5e))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.85.0 ([bf28cf9](https://github.com/monetr/monetr/commit/bf28cf93ba1c07bc6903048cc4bbaf203b1f1b86))
+* **ui:** update babel monorepo ([4f9438a](https://github.com/monetr/monetr/commit/4f9438a102f5af11015f52566d31f40443637490))
+* **ui:** update dependency @hot-loader/react-dom to v17.0.2 ([6390144](https://github.com/monetr/monetr/commit/639014478889beac3a64a04150eedef62bd79873))
+* **ui:** update dependency axios to v0.25.0 ([0da6d60](https://github.com/monetr/monetr/commit/0da6d60cb4430bd2246684d5ea151dd09bbafdae))
+* **ui:** update dependency dotenv to v12 ([7bb255d](https://github.com/monetr/monetr/commit/7bb255de757b29506506b39f4aae2ff600529a8b))
+* **ui:** update dependency dotenv to v12.0.4 ([d2e793d](https://github.com/monetr/monetr/commit/d2e793dd7e826d9caa7351b6858e471eac356f49))
+* **ui:** update dependency dotenv to v14 ([fa65ea4](https://github.com/monetr/monetr/commit/fa65ea48e1240db26caeef4dff6a34aee620621b))
+* **ui:** update dependency eslint to v8.7.0 ([ea408cb](https://github.com/monetr/monetr/commit/ea408cb83f186c42f598bd1451f33b324ab10f75))
+* **ui:** update dependency eslint-plugin-jest to v25.7.0 ([c7d8880](https://github.com/monetr/monetr/commit/c7d8880a5102611103ed4b568cb8ce5246426bdd))
+* **ui:** update dependency mini-css-extract-plugin to v2.5.0 ([39838d8](https://github.com/monetr/monetr/commit/39838d83326ecfebb61a2e850f4aee37813423c1))
+* **ui:** update dependency mini-css-extract-plugin to v2.5.2 ([44cf427](https://github.com/monetr/monetr/commit/44cf427747aecc6ac003ac61774e4f3d7371cf63))
+* **ui:** update dependency resolve-url-loader to v5 ([1021cda](https://github.com/monetr/monetr/commit/1021cda06f9f0dfec445b51763e30b2d57e9a18c))
+* **ui:** update dependency sass to v1.49.0 ([304dcfd](https://github.com/monetr/monetr/commit/304dcfd3680139d6318134c4eea9f3e3f359a73f))
+* **ui:** update dependency tailwindcss to v3.0.14 ([c4f0289](https://github.com/monetr/monetr/commit/c4f028904358b6b9eb64989dba3b3fb8cf99d61e))
+* **ui:** update dependency tailwindcss to v3.0.15 ([847e79e](https://github.com/monetr/monetr/commit/847e79e13fab14165e2c85d2fa242fce69dd3365))
+* **ui:** update material-ui monorepo ([a6483cc](https://github.com/monetr/monetr/commit/a6483cc95cfb51f73588cd029348df88fb37bfa8))
+* **ui:** update typescript-eslint monorepo to v5.10.0 ([203b64e](https://github.com/monetr/monetr/commit/203b64e7ca91e43ac0cc094beacf5c2affc8956c))
+
 ### [0.8.5](https://github.com/monetr/monetr/compare/v0.8.4...v0.8.5) (2022-01-14)
 
 
