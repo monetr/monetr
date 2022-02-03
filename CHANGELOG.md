@@ -1,5 +1,16 @@
 # Changelog
 
+### [0.8.7](https://github.com/monetr/monetr/compare/v0.8.6...v0.8.7) (2022-02-03)
+
+
+### Dependencies
+
+* **api:** update module github.com/nleeper/goment to v1.4.3 ([2e6c892](https://github.com/monetr/monetr/commit/2e6c892590581f3c3bb264c41f64bcd9993890af))
+* **api:** update module github.com/nleeper/goment to v1.4.4 ([53c9a5e](https://github.com/monetr/monetr/commit/53c9a5eea735f3f706a5267be089c001095194de))
+* **ui:** update dependency @babel/core to v7.16.12 ([3904afb](https://github.com/monetr/monetr/commit/3904afbb7be61627609b0fd3bde1171b5dc839c6))
+* **ui:** update dependency tailwindcss to v3.0.18 ([d2d8d0f](https://github.com/monetr/monetr/commit/d2d8d0fd736953c86148836dd2b360a873d26728))
+* **ui:** update dependency webpack-cli to v4.9.2 ([ffc1a66](https://github.com/monetr/monetr/commit/ffc1a668a07a3e6ee59e3c4fbf7268cc089b252c))
+
 ### [0.8.6](https://github.com/monetr/monetr/compare/v0.8.5...v0.8.6) (2022-01-23)
 
 
