@@ -551,8 +551,6 @@ definitions:
     type: object
   swag.InstitutionStatusResponse:
     properties:
-      balance:
-        type: boolean
       login:
         type: boolean
       plaidIncidents:

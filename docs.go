@@ -2651,9 +2651,6 @@ const docTemplate_swagger = `{
         "swag.InstitutionStatusResponse": {
             "type": "object",
             "properties": {
-                "balance": {
-                    "type": "boolean"
-                },
                 "login": {
                     "type": "boolean"
                 },
