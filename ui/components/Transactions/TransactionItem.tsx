@@ -122,12 +122,14 @@ export class TransactionItem extends Component<WithConnectionPropTypes, State> {
       <Fragment>
         <ListItem className="transactions-item h-12" role="transaction-row">
           <div className="flex flex-row w-full">
-            <div className="flex-shrink w-2/5 pr-1 font-semibold transaction-item-name place-self-center">
+            <div
+              className="flex-shrink w-2/5 pr-1 font-semibold transaction-item-name place-self-center"
+            >
               <TransactionNameEditor transactionId={ transaction.transactionId }/>
             </div>
 
             <p
-              className="flex-auto pr-1 overflow-hidden transaction-expense-name overflow-ellipsis flex-nowrap whitespace-nowrap"
+              className="flex-auto w-2/5 pr-1 overflow-hidden transaction-expense-name overflow-ellipsis flex-nowrap whitespace-nowrap"
             >
               { this.getSpentFromString() }
             </p>
