@@ -1,12 +1,13 @@
-import { Button, ButtonGroup, Divider, IconButton, List, ListItem, Typography } from "@mui/material";
+import { Button, ButtonGroup, Divider, IconButton, List, ListItem, Typography } from '@mui/material';
 import { ChevronRight } from '@mui/icons-material';
-import NewFundingScheduleDialog from "components/FundingSchedules/NewFundingScheduleDialog";
-import FundingSchedule from "models/FundingSchedule";
+import FundingScheduleListItem from 'components/FundingSchedules/FundingScheduleListItem';
+import NewFundingScheduleDialog from 'components/FundingSchedules/NewFundingScheduleDialog';
+import FundingSchedule from 'models/FundingSchedule';
 import { Map } from 'immutable';
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { getFundingSchedules } from "shared/fundingSchedules/selectors/getFundingSchedules";
-import NewExpenseDialog from "components/Expenses/NewExpenseDialog";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
+import NewExpenseDialog from 'components/Expenses/NewExpenseDialog';
 
 interface WithConnectionPropTypes {
   fundingSchedules: Map<number, FundingSchedule>;
@@ -75,28 +76,10 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
           </ButtonGroup>
         </div>
         <Divider/>
-        <List className="w-full">
+        <List className="w-full pt-0" dense>
           {
             fundingSchedules.map(schedule => (
-              <ListItem key={ schedule.fundingScheduleId } button>
-                <div className="grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full">
-                  <div className="col-span-2">
-                    <Typography>{ schedule.name }</Typography>
-                  </div>
-                  <div className="col-span-3 opacity-50">
-                    <Typography variant="body2">{ schedule.description }</Typography>
-                  </div>
-                  <div className="col-span-1 flex justify-end">
-                    <Typography variant="subtitle2"
-                                color="primary">{ schedule.nextOccurrence.format('MMM Do') }</Typography>
-                  </div>
-                  <div className="row-span-2 col-span-1 flex justify-end">
-                    <IconButton>
-                      <ChevronRight/>
-                    </IconButton>
-                  </div>
-                </div>
-              </ListItem>
+              <FundingScheduleListItem fundingScheduleId={ schedule.fundingScheduleId }/>
             )).valueSeq().toArray()
           }
         </List>

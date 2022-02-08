@@ -30,6 +30,7 @@ jobs:
           release-type: simple
           package-name: monetr
           version-file: version.txt
+          bump-patch-for-minor-pre-major: true
 
   build_ui:
     if: ${{ needs.release_please.outputs.release_created }}

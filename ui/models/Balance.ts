@@ -1,3 +1,5 @@
+import formatAmount from 'util/formatAmount';
+
 export default class Balance {
   bankAccountId: number;
   available: number;
@@ -13,18 +15,18 @@ export default class Balance {
   }
 
   getSafeToSpendString(): string {
-    return `$${ (this.safe / 100).toFixed(2) }`;
+    return formatAmount(this.safe);
   }
 
   getAvailableString(): string {
-    return `$${ (this.available / 100).toFixed(2) }`;
+    return formatAmount(this.available);
   }
 
   getExpensesString(): string {
-    return `$${ (this.expenses / 100).toFixed(2) }`;
+    return formatAmount(this.expenses);
   }
 
   getGoalsString(): string {
-    return `$${ (this.goals / 100).toFixed(2) }`;
+    return formatAmount(this.goals);
   }
 }
