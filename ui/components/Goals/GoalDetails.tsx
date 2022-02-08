@@ -10,10 +10,10 @@ import { connect } from 'react-redux';
 import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
 import selectGoal from 'shared/spending/actions/selectGoal';
 import { getSelectedGoal } from 'shared/spending/selectors/getSelectedGoal';
-import EditGoalView from "components/Goals/EditGoalView";
-import deleteSpending from "shared/spending/actions/deleteSpending";
-import fetchBalances from "shared/balances/actions/fetchBalances";
-import updateSpending from "shared/spending/actions/updateSpending";
+import EditGoalView from 'components/Goals/EditGoalView';
+import deleteSpending from 'shared/spending/actions/deleteSpending';
+import fetchBalances from 'shared/balances/actions/fetchBalances';
+import updateSpending from 'shared/spending/actions/updateSpending';
 
 interface WithConnectionPropTypes {
   selectGoal: { (goalId: number | null): void }
@@ -350,7 +350,121 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
   };
 
   renderComplete = () => {
-    return null;
+    const { goal, fundingSchedule } = this.props;
+
+    const created = goal.dateCreated;
+    const due = goal.nextRecurrence;
+
+    // If the goal is the same year then just do the month and the day, but if its a different year then do the month
+    // the day, and the year.
+    const dueDate = due.year() !== moment().year() ? due.format('MMMM Do, YYYY') : due.format('MMMM Do')
+    const createdDate = created.year() !== moment().year() ? created.format('MMMM Do, YYYY') : created.format('MMMM Do');
+
+    return (
+      <div className="w-full h-full">
+        <div className="w-full h-12">
+          <div className="grid grid-cols-6 grid-rows-1 grid-flow-col">
+            <div className="col-span-1">
+              <IconButton
+                onClick={ () => this.props.selectGoal(null) }
+              >
+                <ArrowBack/>
+              </IconButton>
+            </div>
+            <div className="col-span-4 flex justify-center items-center">
+              <Typography
+                variant="h6"
+              >
+                Completed Goal
+              </Typography>
+            </div>
+            <div className="col-span-1">
+              <IconButton onClick={ this.deleteGoal }>
+                <DeleteOutline/>
+              </IconButton>
+            </div>
+          </div>
+        </div>
+        <Divider/>
+
+        <div className="w-full pt-5">
+          <div className="w-full">
+            <Card elevation={ 3 } className="h-32 w-full flex justify-center items-center">
+              <Typography
+                className="opacity-50"
+              >
+                Image here or something (WIP)
+              </Typography>
+            </Card>
+          </div>
+          <div className="w-full pt-2.5">
+            <Typography
+              variant="h6"
+            >
+              { goal.name }
+            </Typography>
+          </div>
+        </div>
+        <Divider/>
+
+        <div className="w-full pt-5 pb-5">
+          <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-1">
+            <div className="col-span-1 row-span-1">
+              <Typography
+                variant="subtitle1"
+              >
+                Funding Schedule
+              </Typography>
+            </div>
+            <div className="col-span-1 row-span-1 flex items-end">
+              <Typography
+                variant="subtitle2"
+              >
+                { fundingSchedule.name }
+              </Typography>
+            </div>
+          </div>
+        </div>
+        <Divider/>
+
+        <div className="w-full pt-5 pb-5">
+          <Card elevation={ 3 }>
+            <List dense>
+              <ListItem key="totals" className="grid grid-cols-3 grid-flow-col">
+                <div className="col-span-2 flex justify-start items-center">
+                  <Typography>
+                    Total spent from Goal
+                  </Typography>
+                </div>
+                <div className="col-span-1 flex justify-end items-center">
+                  <Typography>
+                    { goal.getUsedAmountString() }
+                  </Typography>
+                </div>
+              </ListItem>
+              <Divider/>
+              <ListItem key="wip" className="flex justify-center items-center opacity-50">
+                <Typography>
+                  Transactions For Thing (WIP)
+                </Typography>
+              </ListItem>
+            </List>
+          </Card>
+        </div>
+        <Divider/>
+
+        <div className="w-full pt-5 pb-5 grid grid-cols-2 grid-flow-col gap-1">
+          <div className="col-span-2 flex justify-end items-center">
+            <Button
+              variant="outlined"
+              onClick={ this.openTransferDialog }
+            >
+              Transfer
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   renderContents = () => {
