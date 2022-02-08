@@ -26,7 +26,6 @@ type InstitutionResponse struct {
 type InstitutionStatusResponse struct {
 	Login          bool                       `json:"login"`
 	Transactions   bool                       `json:"transactions"`
-	Balance        bool                       `json:"balance"`
 	PlaidIncidents []InstitutionPlaidIncident `json:"plaidIncidents"`
 }
 
@@ -45,7 +44,6 @@ func NewInstitutionResponse(plaidInstitution *plaid.Institution) InstitutionResp
 		Status: InstitutionStatusResponse{
 			Login:          plaidInstitution.Status != nil && plaidInstitution.Status.ItemLogins.Status == "HEALTHY",
 			Transactions:   plaidInstitution.Status != nil && plaidInstitution.Status.TransactionsUpdates.Status == "HEALTHY",
-			Balance:        plaidInstitution.Status != nil && plaidInstitution.Status.Balance.Status == "HEALTHY",
 			PlaidIncidents: nil,
 		},
 	}
