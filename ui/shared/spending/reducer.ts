@@ -47,6 +47,10 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
         ...state,
         loading: false,
         items: state.items.removeIn([action.payload.bankAccountId, action.payload.spendingId]),
+        // If the currently selected goal is the one we are deleting then set the selected goal to null.
+        selectedGoalId: state.selectedGoalId === action.payload.spendingId ? null : state.selectedGoalId,
+        // Ditto for the currently selected expense.
+        selectedExpenseId: state.selectedExpenseId === action.payload.spendingId ? null : state.selectedExpenseId,
       };
     case CHANGE_BANK_ACCOUNT:
       return {

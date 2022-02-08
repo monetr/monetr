@@ -121,7 +121,10 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
   };
 
   render() {
-    const { isSelected } = this.props;
+    const { isSelected, goal } = this.props;
+    if (!goal) {
+      return null;
+    }
 
     return (
       <ListItem
