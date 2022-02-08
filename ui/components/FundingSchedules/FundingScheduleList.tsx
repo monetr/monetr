@@ -54,16 +54,16 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
     return (
       <div className="w-full funding-schedule-list">
         { this.state.newFundingScheduleDialogOpen &&
-        <NewFundingScheduleDialog
-          onClose={ this.closeFundingScheduleDialog }
-          isOpen={ this.state.newFundingScheduleDialogOpen }
-        />
+          <NewFundingScheduleDialog
+            onClose={ this.closeFundingScheduleDialog }
+            isOpen={ this.state.newFundingScheduleDialogOpen }
+          />
         }
         { this.state.newExpenseDialogOpen &&
-        <NewExpenseDialog
-          onClose={ this.closeNewExpenseDialog }
-          isOpen={ this.state.newExpenseDialogOpen }
-        />
+          <NewExpenseDialog
+            onClose={ this.closeNewExpenseDialog }
+            isOpen={ this.state.newExpenseDialogOpen }
+          />
         }
         <div className="w-full p-5">
           <ButtonGroup color="primary" className="w-full">
@@ -79,7 +79,10 @@ export class FundingScheduleList extends Component<WithConnectionPropTypes, Stat
         <List className="w-full pt-0" dense>
           {
             fundingSchedules.map(schedule => (
-              <FundingScheduleListItem fundingScheduleId={ schedule.fundingScheduleId }/>
+              <FundingScheduleListItem
+                key={ schedule.fundingScheduleId }
+                fundingScheduleId={ schedule.fundingScheduleId }
+              />
             )).valueSeq().toArray()
           }
         </List>
