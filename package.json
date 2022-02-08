@@ -32,7 +32,7 @@
     "is-svg": "4.3.2",
     "mini-css-extract-plugin": "2.5.3",
     "moment": "2.29.1",
-    "node-notifier": "10.0.0",
+    "node-notifier": "10.0.1",
     "notistack": "2.0.3",
     "optimize-css-assets-webpack-plugin": "6.0.1",
     "path-to-regexp": "6.2.0",
