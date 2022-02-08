@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.8.8](https://github.com/monetr/monetr/compare/v0.8.7...v0.8.8) (2022-02-08)
+
+
+### Bug Fixes
+
+* Resolved issue causing page crash when deleting a goal. ([bac640e](https://github.com/monetr/monetr/commit/bac640e2b1564567aaea60b047a68ac8fb7441f9)), closes [#640](https://github.com/monetr/monetr/issues/640)
+
+
+### Dependencies
+
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.2.3 ([b97e1da](https://github.com/monetr/monetr/commit/b97e1daf900dc643b3d6e2ffdca13cb9edc48320))
+
 ### [0.8.7](https://github.com/monetr/monetr/compare/v0.8.6...v0.8.7) (2022-02-03)
 
 
