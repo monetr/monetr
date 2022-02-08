@@ -1,5 +1,22 @@
 # Changelog
 
+### [0.8.10](https://github.com/monetr/monetr/compare/v0.8.9...v0.8.10) (2022-02-08)
+
+
+### Features
+
+* Include contribution amount on the funding schedule item. ([32b6bb2](https://github.com/monetr/monetr/commit/32b6bb239ed058240921e39720a2ad2bc7520aff))
+
+
+### Dependencies
+
+* **ui:** update dependency @mui/lab to v5.0.0-alpha.68 ([f0620c0](https://github.com/monetr/monetr/commit/f0620c0a412df81bea7a5962988d8dc4cdf74d48))
+* **ui:** update dependency @svgr/webpack to v6.2.1 ([2ddd02d](https://github.com/monetr/monetr/commit/2ddd02d1bdbfac1df106c91eae85d1741ec95e88))
+* **ui:** update dependency @testing-library/jest-dom to v5.16.2 ([a6af260](https://github.com/monetr/monetr/commit/a6af260d449052ef5c7a0c4613fffebaa6ce28e4))
+* **ui:** update dependency @types/react to v17.0.39 ([032bdfa](https://github.com/monetr/monetr/commit/032bdfa61cd7dbdfccf638d5e06177560085872f))
+* **ui:** update dependency eslint-plugin-testing-library to v5.0.5 ([b9dce45](https://github.com/monetr/monetr/commit/b9dce452dc92c7b7db93251cc20a3334a19d9cbc))
+* **ui:** update dependency node-notifier to v10.0.1 ([c9de21d](https://github.com/monetr/monetr/commit/c9de21d747f399b2a4cfc441e58c4b961b02a888))
+
 ### [0.8.9](https://github.com/monetr/monetr/compare/v0.8.8...v0.8.9) (2022-02-08)
 
 
