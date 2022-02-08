@@ -808,6 +808,8 @@ github.com/stripe/stripe-go/v72 v72.83.0 h1:yUQj9Qg008V/Eio3qa9WZrlXEigH7CNLw5CS
 github.com/stripe/stripe-go/v72 v72.83.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/stripe/stripe-go/v72 v72.85.0 h1:fpCITWZpSx1J4hvSnwUp8Zjyj3fSvw9CqO8FqM1n5/w=
 github.com/stripe/stripe-go/v72 v72.85.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
+github.com/stripe/stripe-go/v72 v72.86.0 h1:MkFhg7wwphqmDGI+KdOJKS3OKZR9O3qMWUpKt5fvslE=
+github.com/stripe/stripe-go/v72 v72.86.0/go.mod h1:QwqJQtduHubZht9mek5sds9CtQcKFdsykV9ZepRWwo0=
 github.com/subosito/gotenv v1.2.0 h1:Slr1R9HxAlEKefgq5jn9U+DnETlIUa6HfgEzj0g5d7s=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
 github.com/tdewolff/minify/v2 v2.9.10/go.mod h1:U1Nc+/YBSB0FPEarqcgkYH3Ep4DNyyIbOyl5P4eWMuo=
