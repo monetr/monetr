@@ -47,7 +47,7 @@
     "react-app-polyfill": "3.0.0",
     "react-dom": "17.0.2",
     "react-google-recaptcha": "2.1.0",
-    "react-plaid-link": "3.2.1",
+    "react-plaid-link": "3.3.0",
     "react-recaptcha": "2.3.10",
     "react-redux": "7.2.6",
     "react-router-dom": "6.2.1",
