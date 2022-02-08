@@ -283,6 +283,11 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		return
 	}
 
+	if transaction.IsAddition() && transaction.SpendingId != nil {
+		c.badRequest(ctx, "cannot specify a spent from on a deposit")
+		return
+	}
+
 	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId
 
 	if !isManual {

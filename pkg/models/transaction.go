@@ -33,3 +33,7 @@ type Transaction struct {
 	IsPending            bool       `json:"isPending" pg:"is_pending,notnull,use_zero"`
 	CreatedAt            time.Time  `json:"createdAt" pg:"created_at,notnull,default:now()"`
 }
+
+func (t Transaction) IsAddition() bool {
+	return t.Amount < 0 // Deposits will show as negative amounts.
+}
