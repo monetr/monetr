@@ -1,5 +1,14 @@
 # Changelog
 
+### [0.8.9](https://github.com/monetr/monetr/compare/v0.8.8...v0.8.9) (2022-02-08)
+
+
+### Bug Fixes
+
+* Adding in a basic completed goals view. ([e06af85](https://github.com/monetr/monetr/commit/e06af85fef765da4a6f319c4341dcd070c6d02da))
+* Fix additional Goal crash on delete. ([e332833](https://github.com/monetr/monetr/commit/e3328334ec5d2b398c03f624b15c57cfa9af8a73))
+* Fixed code coverage being random on mock. ([ad6244a](https://github.com/monetr/monetr/commit/ad6244af2c30ed7cc7dc326634b03e34291e6d33))
+
 ### [0.8.8](https://github.com/monetr/monetr/compare/v0.8.7...v0.8.8) (2022-02-08)
 
 
