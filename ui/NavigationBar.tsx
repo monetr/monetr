@@ -1,4 +1,4 @@
-import { CreditCard, ExitToApp } from '@mui/icons-material';
+import { CreditCard, ExitToApp, LightMode } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { AppBar, Button, IconButton, Menu, MenuItem, Toolbar } from '@mui/material';
 import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
@@ -65,6 +65,7 @@ const NavigationBar = React.memo((): JSX.Element => {
           <MenuItem
             onClick={ toggleDarkMode }
           >
+            <LightMode className="mr-2"/>
             Toggle Dark Mode (Requires Reload)
           </MenuItem>
 
