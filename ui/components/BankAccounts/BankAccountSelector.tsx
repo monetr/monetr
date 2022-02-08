@@ -26,6 +26,7 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
   const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
 
   function goToAllAccounts() {
+    props.closeMenu();
     navigate('/accounts');
   }
 
