@@ -3,11 +3,11 @@ import classnames from 'classnames';
 import Spending from 'models/Spending';
 import Transaction from 'models/Transaction';
 import React, { Fragment } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { FormatOptionLabelMeta } from 'react-select/base';
 import { getBalance } from 'shared/balances/selectors/getBalance';
 import { getSpending } from 'shared/spending/selectors/getSpending';
-import updateTransaction from 'shared/transactions/actions/updateTransaction';
+import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
 import { getTransactionById } from 'shared/transactions/selectors/getTransactionById';
 import Select, { components, OptionProps, ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { Map } from 'immutable';
@@ -44,7 +44,7 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
   const transaction = useSelector(getTransactionById(props.transactionId));
   const allSpending = useSelector(getSpending);
   const balances = useSelector(getBalance);
-  const dispatch = useDispatch();
+  const updateTransaction = useUpdateTransaction();
 
   if (transaction.getIsAddition()) {
     return null;
@@ -62,7 +62,7 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
       spendingId: spendingId,
     });
 
-    return dispatch(updateTransaction(updatedTransaction));
+    return updateTransaction(updatedTransaction);
   }
 
   function handleSpentFromChange(newValue: OnChangeValue<SpendingOption, false>, meta: ActionMeta<SpendingOption>) {

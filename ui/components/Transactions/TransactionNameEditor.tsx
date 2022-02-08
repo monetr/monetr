@@ -4,6 +4,7 @@ import { useSelector, useStore } from 'react-redux';
 import { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
 import CreatableSelect from 'react-select/creatable';
+import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
 import updateTransaction from 'shared/transactions/actions/updateTransaction';
 import { getTransactionById } from 'shared/transactions/selectors/getTransactionById';
 
@@ -23,8 +24,8 @@ interface Option {
 
 const TransactionNameEditor = (props: PropTypes): JSX.Element => {
   const transaction = useSelector(getTransactionById(props.transactionId));
-  const { dispatch, getState } = useStore();
   const [loading, setLoading] = useState<boolean>(false);
+  const updateTransaction = useUpdateTransaction();
 
   function updateTransactionName(input: string): Promise<void> {
     setLoading(true);
@@ -33,7 +34,7 @@ const TransactionNameEditor = (props: PropTypes): JSX.Element => {
       name: input,
     });
 
-    return updateTransaction(updated)(dispatch, getState)
+    return updateTransaction(updated)
       .catch(error => alert(error?.response?.data?.error || 'Could not save transaction name.'))
       .finally(() => setLoading(false));
   }

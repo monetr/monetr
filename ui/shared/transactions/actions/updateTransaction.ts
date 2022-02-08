@@ -1,14 +1,16 @@
 import Balance from 'models/Balance';
 import Spending from 'models/Spending';
 import Transaction from 'models/Transaction';
+import { useStore } from 'react-redux';
 import { FetchBalances } from 'shared/balances/actions';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { UpdateTransaction } from 'shared/transactions/actions';
 import request from 'shared/util/request';
-import { AppActionWithState, AppDispatch, AppState } from 'store';
 
-export default function updateTransaction(transaction: Transaction): AppActionWithState<Promise<void>> {
-  return (dispatch, getState) => {
+export default function useUpdateTransaction(): (transaction: Transaction) => Promise<void> {
+  const { dispatch, getState } = useStore();
+
+  return (transaction: Transaction): Promise<void> => {
     const selectedBankAccountId = getSelectedBankAccountId(getState());
     if (!selectedBankAccountId) {
       return Promise.resolve();
