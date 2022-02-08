@@ -38,7 +38,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
     const date = due.year() !== moment().year() ? due.format('MMMM Do, YYYY') : due.format('MMMM Do')
 
     return (
-      <div className="grid grid-cols-3 grid-rows-3 grid-flow-col w-full">
+      <div className="w-full grid grid-cols-3 grid-rows-3 grid-flow-col">
         <div className="col-span-3">
           <Typography
             variant="subtitle1"
@@ -46,7 +46,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
             { goal.name }
           </Typography>
         </div>
-        <div className="col-span-3 flex items-center">
+        <div className="flex items-center col-span-3">
           <LinearProgress
             classes={ {
               buffer: 'MuiLinearProgress-colorPrimary',
@@ -65,7 +65,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
             <b>{ goal.getCurrentAmountString() }</b>
           </Typography>
         </div>
-        <div className="col-span-1 flex justify-center">
+        <div className="flex justify-center col-span-1">
           <Typography
             variant="body2"
           >
@@ -77,7 +77,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
             }
           </Typography>
         </div>
-        <div className="col-span-1 flex justify-end">
+        <div className="flex justify-end col-span-1">
           <Typography
             variant="body2"
           >
@@ -92,7 +92,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
     const { goal } = this.props;
 
     return (
-      <div className="grid grid-cols-4 grid-rows-1 grid-flow-col gap-1 w-full h-full">
+      <div className="w-full h-full grid grid-cols-4 grid-rows-1 grid-flow-col gap-1">
         <div className="col-span-3">
           <Typography
             variant="subtitle1"
@@ -100,7 +100,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
             { goal.name }
           </Typography>
         </div>
-        <div className="col-span-1 flex justify-end">
+        <div className="flex justify-end col-span-1">
           <Chip
             label={ goal.getCurrentAmountString() }
             color="primary"
@@ -151,7 +151,7 @@ export default connect(
     const goal = getSpendingById(props.goalId)(state);
     return {
       goal,
-      fundingSchedule: getFundingScheduleById(goal.fundingScheduleId)(state),
+      fundingSchedule: goal && getFundingScheduleById(goal.fundingScheduleId)(state),
       isSelected: getGoalIsSelected(props.goalId)(state),
     }
   },

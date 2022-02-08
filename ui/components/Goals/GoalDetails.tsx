@@ -120,7 +120,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
                 <ArrowBack/>
               </IconButton>
             </div>
-            <div className="col-span-4 flex justify-center items-center">
+            <div className="flex items-center justify-center col-span-4">
               <Typography
                 variant="h6"
               >
@@ -138,7 +138,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
 
         <div className="w-full pt-5">
           <div className="w-full">
-            <Card elevation={ 3 } className="h-32 w-full flex justify-center items-center">
+            <Card elevation={ 3 } className="flex items-center justify-center w-full h-32">
               <Typography
                 className="opacity-50"
               >
@@ -158,14 +158,14 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
 
         <div className="w-full pt-5 pb-5">
           <div className="grid grid-cols-3 grid-rows-3">
-            <div className="h-5 col-span-2 row-span-1 flex justify-start">
+            <div className="flex justify-start h-5 col-span-2 row-span-1">
               <Typography
                 variant="caption"
               >
                 { createdDate }
               </Typography>
             </div>
-            <div className="col-span-1 row-span-1 flex justify-end">
+            <div className="flex justify-end col-span-1 row-span-1">
               <Typography
                 variant="caption"
               >
@@ -184,31 +184,31 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
                 value={ (goal.usedAmount / goal.targetAmount) * 100 }
               />
             </div>
-            <div className="col-span-1 row-span-1 flex flex-col justify-start">
+            <div className="flex flex-col justify-start col-span-1 row-span-1">
               <Typography
-                className="flex-1 flex justify-start"
+                className="flex justify-start flex-1"
                 variant="caption"
               >
                 <b>{ goal.getCurrentAmountString() }</b>
               </Typography>
               <Typography
-                className="relative flex-1 flex top-1 justify-start"
+                className="relative flex justify-start flex-1 top-1"
                 variant="caption"
               >
                 Saved
               </Typography>
             </div>
-            <div className="col-span-1 row-span-1 flex flex-col justify-center">
+            <div className="flex flex-col justify-center col-span-1 row-span-1">
               { !goal.isPaused &&
               <Fragment>
                 <Typography
-                  className="flex-1 flex justify-center"
+                  className="flex justify-center flex-1"
                   variant="caption"
                 >
                   <b>{ goal.getNextContributionAmountString() }</b>
                 </Typography>
                 <Typography
-                  className="relative flex-1 flex top-1 justify-center"
+                  className="relative flex justify-center flex-1 top-1"
                   variant="caption"
                 >
                   on { fundingSchedule.name }
@@ -218,22 +218,22 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
               { goal.isPaused &&
               <Fragment>
                 <Typography
-                  className="flex-1 flex justify-center"
+                  className="flex justify-center flex-1"
                   variant="body2"
                 >
                   Paused
                 </Typography>
               </Fragment> }
             </div>
-            <div className="col-span-1 row-span-1 flex flex-col justify-end">
+            <div className="flex flex-col justify-end col-span-1 row-span-1">
               <Typography
-                className="flex-1 flex justify-end"
+                className="flex justify-end flex-1"
                 variant="caption"
               >
                 <b>{ goal.getTargetAmountString() }</b>
               </Typography>
               <Typography
-                className="relative flex-1 flex top-1 justify-end"
+                className="relative flex justify-end flex-1 top-1"
                 variant="caption"
               >
                 Target
@@ -254,7 +254,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
         <Divider/>
 
         <div className="w-full pt-5 pb-5">
-          <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 opacity-50">
+          <div className="opacity-50 grid grid-cols-3 grid-rows-2 grid-flow-col gap-1">
             <div className="col-span-2 row-span-1">
               <Typography
                 variant="subtitle1"
@@ -262,14 +262,14 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
                 Auto-spend (WIP)
               </Typography>
             </div>
-            <div className="col-span-2 row-span-1 flex items-end">
+            <div className="flex items-end col-span-2 row-span-1">
               <Typography
                 variant="subtitle2"
               >
                 No categories selected
               </Typography>
             </div>
-            <div className="col-span-1 row-span-2 flex justify-end items-center">
+            <div className="flex items-center justify-end col-span-1 row-span-2">
               <Button
                 disabled
                 color="primary"
@@ -290,7 +290,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
                 Funding Schedule
               </Typography>
             </div>
-            <div className="col-span-1 row-span-1 flex items-end">
+            <div className="flex items-end col-span-1 row-span-1">
               <Typography
                 variant="subtitle2"
               >
@@ -305,19 +305,19 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
           <Card elevation={ 3 }>
             <List dense>
               <ListItem key="totals" className="grid grid-cols-3 grid-flow-col">
-                <div className="col-span-2 flex justify-start items-center">
+                <div className="flex items-center justify-start col-span-2">
                   <Typography>
                     Total spent from Goal
                   </Typography>
                 </div>
-                <div className="col-span-1 flex justify-end items-center">
+                <div className="flex items-center justify-end col-span-1">
                   <Typography>
                     { goal.getUsedAmountString() }
                   </Typography>
                 </div>
               </ListItem>
               <Divider/>
-              <ListItem key="wip" className="flex justify-center items-center opacity-50">
+              <ListItem key="wip" className="flex items-center justify-center opacity-50">
                 <Typography>
                   Transactions For Thing (WIP)
                 </Typography>
@@ -328,7 +328,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
         <Divider/>
 
         <div className="w-full pt-5 pb-5 grid grid-cols-2 grid-flow-col gap-1">
-          <div className="col-span-1 flex justify-start items-center">
+          <div className="flex items-center justify-start col-span-1">
             <Button
               variant="outlined"
               onClick={ this.openEditView }
@@ -336,7 +336,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
               More Edits
             </Button>
           </div>
-          <div className="col-span-1 flex justify-end items-center">
+          <div className="flex items-center justify-end col-span-1">
             <Button
               variant="outlined"
               onClick={ this.openTransferDialog }
@@ -381,7 +381,7 @@ export class GoalDetails extends Component<WithConnectionPropTypes, State> {
     return (
       <Fragment>
 
-        <div className="h-full flex justify-center items-center">
+        <div className="flex items-center justify-center h-full">
           <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
             <Typography
               className="opacity-50"
@@ -430,7 +430,7 @@ export default connect(
     const goal = getSelectedGoal(state);
     return {
       goal,
-      fundingSchedule: !!goal ? getFundingScheduleById(goal.fundingScheduleId)(state) : null,
+      fundingSchedule: goal && getFundingScheduleById(goal.fundingScheduleId)(state),
     };
   },
   {
