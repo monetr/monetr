@@ -37,10 +37,8 @@ export default function FundingScheduleListItem(props: PropTypes): JSX.Element {
             { schedule.nextOccurrence.format('MMM Do') }
           </Typography>
         </div>
-        <div className="row-span-3 col-span-1 flex justify-end">
-          <IconButton>
-            <ChevronRight/>
-          </IconButton>
+        <div className="row-span-3 col-span-1 flex justify-end items-center">
+          <ChevronRight/>
         </div>
       </div>
     </ListItem>
