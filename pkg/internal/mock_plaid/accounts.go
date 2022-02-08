@@ -26,30 +26,26 @@ func BankAccountFixture(t *testing.T) plaid.AccountBase {
 		string(plaid.ACCOUNTTYPE_LOAN),
 	})
 
-	var accountSubType plaid.AccountSubtype
-	switch plaid.AccountType(accountType) {
-	case plaid.ACCOUNTTYPE_DEPOSITORY:
-		accountSubType = plaid.AccountSubtype(gofakeit.RandomString([]string{
+	accountSubTypes := map[plaid.AccountType]plaid.AccountSubtype{
+		plaid.ACCOUNTTYPE_DEPOSITORY: plaid.AccountSubtype(gofakeit.RandomString([]string{
 			string(plaid.ACCOUNTSUBTYPE_CHECKING),
 			string(plaid.ACCOUNTSUBTYPE_SAVINGS),
 			string(plaid.ACCOUNTSUBTYPE_PAYPAL),
-		}))
-	case plaid.ACCOUNTTYPE_CREDIT:
-		accountSubType = plaid.AccountSubtype(gofakeit.RandomString([]string{
+		})),
+		plaid.ACCOUNTTYPE_CREDIT: plaid.AccountSubtype(gofakeit.RandomString([]string{
 			string(plaid.ACCOUNTSUBTYPE_CREDIT_CARD),
 			string(plaid.ACCOUNTSUBTYPE_PAYPAL),
-		}))
-	case plaid.ACCOUNTTYPE_INVESTMENT:
-		accountSubType = plaid.AccountSubtype(gofakeit.RandomString([]string{
+		})),
+		plaid.ACCOUNTTYPE_INVESTMENT: plaid.AccountSubtype(gofakeit.RandomString([]string{
 			string(plaid.ACCOUNTSUBTYPE_IRA),
 			string(plaid.ACCOUNTSUBTYPE_ROTH),
-		}))
-	case plaid.ACCOUNTTYPE_LOAN:
-		accountSubType = plaid.AccountSubtype(gofakeit.RandomString([]string{
+		})),
+		plaid.ACCOUNTTYPE_LOAN: plaid.AccountSubtype(gofakeit.RandomString([]string{
 			string(plaid.ACCOUNTSUBTYPE_AUTO),
 			string(plaid.ACCOUNTSUBTYPE_MORTGAGE),
-		}))
+		})),
 	}
+	accountSubType := accountSubTypes[plaid.AccountType(accountType)]
 
 	mask := accountNumber[len(accountNumber)-4:]
 
