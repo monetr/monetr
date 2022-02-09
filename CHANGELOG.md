@@ -1,5 +1,47 @@
 # Changelog
 
+### [0.8.11](https://github.com/monetr/monetr/compare/v0.8.10...v0.8.11) (2022-02-09)
+
+
+### Features
+
+* Improve spent from dropdown, converted to react-select. ([391b6f4](https://github.com/monetr/monetr/commit/391b6f4dc4d9ec61ddecf33c0fd04c5209218918))
+
+
+### Bug Fixes
+
+* Added icon for dark-mode menu. ([a058b14](https://github.com/monetr/monetr/commit/a058b14f5fdcebe14f71005c7cb81d87b83e41a1))
+* Close bank account menu after selecting "View All Accounts". ([5634930](https://github.com/monetr/monetr/commit/5634930a2916fa7e6393942ee3dc0b7c3a00e98f))
+* Convert `updateTransaction` to a react hook. ([780541b](https://github.com/monetr/monetr/commit/780541b48de74fd55e7dfdefae84dd78d5f681ff))
+* Fixed funding schedule arrow button appearance. ([a48e5a9](https://github.com/monetr/monetr/commit/a48e5a9456687de562140d83ba06bc3043d98937))
+* Fixed missing key on funding schedules list. ([3da4e9e](https://github.com/monetr/monetr/commit/3da4e9e1ee4e6089ad2a8ddc8794c15f73c59a52))
+* Improved spacing of transaction row columns. ([88371e2](https://github.com/monetr/monetr/commit/88371e2c84ec9023da50790d1f676f5db032c85d))
+* Prevent spending from being specified for deposits. ([79ad36a](https://github.com/monetr/monetr/commit/79ad36ab4c19529a0c8f3a4740e5355f852bd202))
+
+
+### Miscellaneous
+
+* Added test for `formatAmount`. ([72bb618](https://github.com/monetr/monetr/commit/72bb618b569c27a329f2c2b457073fb3d0fc8c39))
+
+
+### Dependencies
+
+* **api:** update module github.com/plaid/plaid-go to v1.10.0 ([8cabfac](https://github.com/monetr/monetr/commit/8cabfac43b44fa3ff1b28b31ea89ad059deb4742))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.86.0 ([56a7347](https://github.com/monetr/monetr/commit/56a734703dea8a522609610242ef40b5a236bbe8))
+* **ui:** update dependency @babel/core to v7.17.2 ([6e013df](https://github.com/monetr/monetr/commit/6e013df2aac8df65376f88936307ea7c6e8aa4e3))
+* **ui:** update dependency @date-io/moment to v2.13.1 ([e8fc6b9](https://github.com/monetr/monetr/commit/e8fc6b989606fcef2b3ace7db1989181d98047f5))
+* **ui:** update dependency @mui/icons-material to v5.4.1 ([791e733](https://github.com/monetr/monetr/commit/791e733f5f2d83d888033740ea0e86bbb84ab1ce))
+* **ui:** update dependency @mui/material to v5.4.1 ([701a14e](https://github.com/monetr/monetr/commit/701a14e612c528e7967997edfd60262030b489a4))
+* **ui:** update dependency @mui/styles to v5.4.1 ([68d5a15](https://github.com/monetr/monetr/commit/68d5a15ecdefc92bf084c351397315ac01870916))
+* **ui:** update dependency css-loader to v6.6.0 ([6721f10](https://github.com/monetr/monetr/commit/6721f1085a16bf34bab31f49240fb51b2ee26737))
+* **ui:** update dependency postcss to v8.4.6 ([dccff62](https://github.com/monetr/monetr/commit/dccff62159f493a9a049e3740801575b332377a7))
+* **ui:** update dependency react-plaid-link to v3.3.0 ([a82ac16](https://github.com/monetr/monetr/commit/a82ac16393a9a2ed93547e382e6a249dc753917b))
+* **ui:** update dependency sass to v1.49.7 ([6af25d8](https://github.com/monetr/monetr/commit/6af25d88b44b63e3216395e5a32bc7241fa95088))
+* **ui:** update dependency tailwindcss to v3.0.19 ([266af34](https://github.com/monetr/monetr/commit/266af348a6bd6e48ca55847ffa8a3f932630e4f4))
+* **ui:** update dependency terser-webpack-plugin to v5.3.1 ([447258a](https://github.com/monetr/monetr/commit/447258aa568a14224dab75a1aaf13cb870fe4dce))
+* **ui:** update dependency webpack-dev-server to v4.7.4 ([c794bf4](https://github.com/monetr/monetr/commit/c794bf479917489ea642abdddae99cf5b6febb80))
+* Upgrading to golang 1.17.6 ([b79f06a](https://github.com/monetr/monetr/commit/b79f06a9c284c3255f5b57336833cc44de7286e0))
+
 ### [0.8.10](https://github.com/monetr/monetr/compare/v0.8.9...v0.8.10) (2022-02-08)
 
 
