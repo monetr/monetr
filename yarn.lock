@@ -4045,16 +4045,16 @@
     "@emotion/cache" "^11.7.1"
     prop-types "^15.7.2"
 
-"@mui/styles@5.3.0":
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.3.0.tgz#9b4901b338259554ef38065d8d5b038e61c4ae56"
-  integrity sha512-TPfK8c8Zpydpynl4deNv43c0puriXSjf44eadyYle7veVQt5dnT3vgyIqXjP8Ypia653kEVe++GpXTvXnylU7A==
+"@mui/styles@5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@mui/styles/-/styles-5.4.1.tgz#994171da902267184fffa19896ee5bbb07d4d783"
+  integrity sha512-ekw2NBC06re0H9SvCA1XgtFcghB8AQdGPXD3mjIz5ik+X+LvR+f2TeoCpJpkKp7UQdcNn6uuYi6BO6irTiQhdw==
   dependencies:
-    "@babel/runtime" "^7.16.7"
+    "@babel/runtime" "^7.17.0"
     "@emotion/hash" "^0.8.0"
-    "@mui/private-theming" "^5.3.0"
-    "@mui/types" "^7.1.0"
-    "@mui/utils" "^5.3.0"
+    "@mui/private-theming" "^5.4.1"
+    "@mui/types" "^7.1.1"
+    "@mui/utils" "^5.4.1"
     clsx "^1.1.1"
     csstype "^3.0.10"
     hoist-non-react-statics "^3.3.2"
