@@ -13,10 +13,10 @@ RUN go mod download
 COPY ./ /build
 RUN go build -ldflags "-X main.buildRevision=$REVISION -X main.release=$RELEASE" -o /bin/monetr github.com/monetr/monetr/pkg/cmd
 
-FROM debian:bookworm-20211201-slim
+FROM docker.io/library/debian:bookworm-20211201-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
       tzdata=2021e-1  \
-      ca-certificates=20210119 \
+      ca-certificates=20211016 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
