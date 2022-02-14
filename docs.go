@@ -2930,8 +2930,9 @@ const docTemplate_swagger = `{
             "type": "object",
             "properties": {
                 "jobId": {
-                    "description": "If webhooks are not enabled then a job Id is returned with the response. This job Id can also be used to check\nfor initial transactions being retrieved.",
+                    "description": "If webhooks are not enabled then a job Id is returned with the response. This job Id can also be used to check\nfor initial transactions being retrieved.\n**DEPRECATED** This is no longer returned after moving to new background job processing system.",
                     "type": "string",
+                    "x-deprecated": true,
                     "x-nullable": true
                 },
                 "linkId": {
