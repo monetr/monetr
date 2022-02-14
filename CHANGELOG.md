@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.9.2](https://github.com/monetr/monetr/compare/v0.9.1...v0.9.2) (2022-02-14)
+
+
+### Miscellaneous
+
+* Add ability to build container using docker or podman. ([3924a66](https://github.com/monetr/monetr/commit/3924a669fd8b14fea8fbec6c1dc3ba39039550d8))
+
 ### [0.9.1](https://github.com/monetr/monetr/compare/v0.9.0...v0.9.1) (2022-02-14)
 
 
