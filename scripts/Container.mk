@@ -87,7 +87,7 @@ ifeq ($(ENGINE),docker)
 container-push: DOCKER=$(shell which docker)
 container-push: $(STATIC_DIR)
 	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
-	$(DOCKER) push $(CONTAINER_TAG_ARGS)
+	($(foreach TAG,$(CONTAINER_TAGS),$(DOCKER) push $(TAG) &&) true)
 else
 container-push:
 	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
