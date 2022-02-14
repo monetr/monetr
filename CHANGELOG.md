@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.9.1](https://github.com/monetr/monetr/compare/v0.9.0...v0.9.1) (2022-02-14)
+
+
+### Dependencies
+
+* **ui:** update dependency eslint to v8.9.0 ([00d3ea9](https://github.com/monetr/monetr/commit/00d3ea97662032810655927ac89cd837be85feec))
+
 ## [0.9.0](https://github.com/monetr/monetr/compare/v0.8.11...v0.9.0) (2022-02-14)
 
 
