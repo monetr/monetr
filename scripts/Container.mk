@@ -62,16 +62,19 @@ container:
 		$(PWD) &&) true;
 	$(BUILDAH) manifest inspect $(CONTAINER_MANIFEST)
 else
+ifeq ($(ENGINE),docker)
+container: DOCKER=$(shell which docker)
+container: $(STATIC_DIR)
+	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
+	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
+	$(DOCKER) build -f $(DOCKERFILE) $(CONTAINER_VAR_ARGS) $(CONTAINER_EXTRA_ARGS) $(PWD)
+else
 container: $(PODMAN) $(STATIC_DIR)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
-	$(PODMAN) build \
-		$(CONTAINER_VAR_ARGS) \
-		--ignorefile=$(DOCKER_IGNORE) \
-		$(CONTAINER_PLATFORM_ARGS) \
-		$(CONTAINER_EXTRA_ARGS) \
-		-f $(DOCKERFILE) \
-		$(PWD)
+	$(PODMAN) build $(CONTAINER_VAR_ARGS) --ignorefile=$(DOCKER_IGNORE) $(CONTAINER_PLATFORM_ARGS) \
+		$(CONTAINER_EXTRA_ARGS) -f $(DOCKERFILE) $(PWD)
+endif
 endif
 
 ifdef CI
@@ -79,6 +82,17 @@ container-push: BUILDAH=$(shell which buildah)
 container-push:
 	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	($(foreach TAG,$(CONTAINER_TAGS),$(BUILDAH) manifest push --all $(CONTAINER_MANIFEST) docker://$(TAG) &&) exit 0)
+else
+ifeq ($(ENGINE),docker)
+container-push: DOCKER=$(shell which docker)
+container-push: $(STATIC_DIR)
+	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
+	$(DOCKER) push $(CONTAINER_TAG_ARGS)
+else
+container-push:
+	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
+	$(error Cannot push with podman yet.)
+endif
 endif
 
 docker: container
