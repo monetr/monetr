@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.0](https://github.com/monetr/monetr/compare/v0.8.11...v0.9.0) (2022-02-14)
+
+
+### Features
+
+* **jobs:** Rewriting background job implementation. ([961ab0f](https://github.com/monetr/monetr/commit/961ab0fa8b105cd50ac3816615245ccc05ff5ac7))
+
+
+### Bug Fixes
+
+* **container:** Fixed ca-certificates version, upgraded bookworm. ([ebba23c](https://github.com/monetr/monetr/commit/ebba23ce1a8bae6cd50cb157b6246c57ca201c39))
+
+
+### Miscellaneous
+
+* release 0.9.0 ([0ea9ca8](https://github.com/monetr/monetr/commit/0ea9ca84f2184576d3b9aed37a21b799e4083365))
+
 ### [0.8.11](https://github.com/monetr/monetr/compare/v0.8.10...v0.8.11) (2022-02-09)
 
 
