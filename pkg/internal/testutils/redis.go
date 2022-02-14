@@ -1,10 +1,11 @@
 package testutils
 
 import (
+	"testing"
+
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func GetRedisPool(t *testing.T) *redis.Pool {

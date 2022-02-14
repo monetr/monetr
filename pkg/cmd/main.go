@@ -4,25 +4,24 @@ import (
 	"log"
 
 	"github.com/monetr/monetr/pkg/build"
-	"github.com/monetr/monetr/pkg/internal/cmd"
 )
 
 var (
 	buildRevision = ""
-	buildtime     = ""
+	buildTime     = ""
 	release       = ""
 )
 
 func main() {
 	build.Revision = buildRevision
-	build.BuildTime = buildtime
+	build.BuildTime = buildTime
 	if release == "" {
 		build.Release = buildRevision
 	} else {
 		build.Release = release
 	}
 	// This is going to be the final actual program that is distributed.
-	if err := cmd.RootCommand.Execute(); err != nil {
+	if err := rootCommand.Execute(); err != nil {
 		log.Fatalf("failed: %+v", err)
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/pkg/internal/consts"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
@@ -49,6 +49,32 @@ func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
 	}
 
 	err = repo.CreateLink(context.Background(), &link)
+	require.NoError(t, err, "must be able to seed link")
+
+	return link
+}
+
+func GivenIHaveAManualLink(t *testing.T, user models.User) models.Link {
+	db := testutils.GetPgDatabase(t)
+
+	repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
+
+	link := models.Link{
+		AccountId:             user.AccountId,
+		Account:               user.Account,
+		LinkType:              models.ManualLinkType,
+		LinkStatus:            models.LinkStatusSetup,
+		InstitutionName:       "Manual Link",
+		CustomInstitutionName: "",
+		CreatedAt:             time.Now(),
+		CreatedByUserId:       user.UserId,
+		CreatedByUser:         &user,
+		UpdatedAt:             time.Now(),
+		LastSuccessfulUpdate:  myownsanity.TimeP(time.Now()),
+		BankAccounts:          nil,
+	}
+
+	err := repo.CreateLink(context.Background(), &link)
 	require.NoError(t, err, "must be able to seed link")
 
 	return link

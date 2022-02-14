@@ -1,6 +1,14 @@
 package secrets
 
-import "context"
+import (
+	"context"
+
+	"github.com/pkg/errors"
+)
+
+var (
+	ErrNotFound = errors.New("access token not found")
+)
 
 type PlaidSecretsProvider interface {
 	UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId uint64, plaidItemId, accessToken string) error

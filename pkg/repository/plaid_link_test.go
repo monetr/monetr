@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/pkg/internal/consts"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

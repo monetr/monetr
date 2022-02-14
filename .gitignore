@@ -2,7 +2,6 @@
 bin
 coverage
 libexec
-config.yaml
 telepresence.log
 telepresence
 coverage.txt

@@ -73,9 +73,6 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 	default:
 		queryType = "UNKNOWN"
 	}
-	h.stats.Queries.With(prometheus.Labels{
-		"stmt": queryType,
-	}).Inc()
 
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		unformattedQuery, err := event.UnformattedQuery()
@@ -121,6 +118,12 @@ func (h *PostgresHooks) AfterQuery(ctx context.Context, event *pg.QueryEvent) er
 
 			defer span.Finish()
 		}
+	}
+
+	if h.stats != nil {
+		h.stats.Queries.With(prometheus.Labels{
+			"stmt": queryType,
+		}).Inc()
 	}
 
 	return nil

@@ -58,7 +58,7 @@ init-mini: info
 	$(call infoMsg,Setting stuff up)
 	($(MINIKUBE) status | grep "minikube start") && $(MAKE) start-minikube
 	$(MAKE) setup-hosts
-	$(MAKE) deploy-services
+	$(MAKE) deploy-services-concurrent
 	$(MAKE) deploy-mini-application
 	$(MAKE) mini-info
 
@@ -154,7 +154,7 @@ start-minikube: $(MONETR_MINIKUBE_CERT) $(YQ)
 start-minikube: MINIKUBE_CPUS=$(call getDevelopmentSetting,'.minikube.cpus',4)
 start-minikube: MINIKUBE_MEMORY=$(call getDevelopmentSetting,'.minikube.memory',8192)
 start-minikube: MINIKUBE_DRIVER=$(call getDevelopmentSetting,'.minikube.driver',hyperkit)
-start-minikube: MINIKUBE_KUBERNETES_VERSION=$(call getDevelopmentSetting,'.minikube.kubernetesVersion',v1.19.0)
+start-minikube: MINIKUBE_KUBERNETES_VERSION=$(call getDevelopmentSetting,'.minikube.kubernetesVersion',v1.20.0)
 start-minikube:
 	$(call infoMsg,Starting minikube)
 	$(call infoMsg,You can customize some minikube options in your $(DEVELOPMENT_CONFIG) file)
@@ -214,11 +214,7 @@ init-mini-values: $(YQ) $(HELM) $(MONETR_DIR)
 	$(YQ) e '.api.email.smtp.host = "mail.default.svc.cluster.local"' -i $(VALUES)
 	$(YQ) e '.api.email.smtp.port = 1025' -i $(VALUES)
 	$(YQ) e '.api comments=""' -i $(VALUES)
-	$(YQ) e '.api.sentry.enabled = false' -i $(VALUES)
-	$(YQ) e '.api.sentry.dsn = "http://12345abcdef10111213141516171819@relay.default.svc.cluster.local:3000/123456"' -i $(VALUES)
 	$(YQ) e '.api.sentry.externalDsn = "https://12345abcdef10111213141516171819@relay.monetr.mini/123456"' -i $(VALUES)
-	$(YQ) e '.api.sentry.sampleRate = 1.0' -i $(VALUES)
-	$(YQ) e '.api.sentry.traceSampleRate = 1.0' -i $(VALUES)
 
 pg-tls-values: $(YQ)
 	$(YQ) e '.api.postgreSql.caCertificatePath = "/tls/ca.crt"' -i $(VALUES)
@@ -316,12 +312,17 @@ $(MINI_WORK_DOCKER_HASH): $(PWD)/Dockerfile.work
 $(MINI_WORK_DOCKER_HASH): HASH=$(shell md5sum $(PWD)/Dockerfile.work | md5)
 $(MINI_WORK_DOCKER_HASH): MINIKUBE_IP=$(shell $(MINIKUBE) ip)
 $(MINI_WORK_DOCKER_HASH): BASE_IMAGE_NAME = $(MINIKUBE_IP):5000/work:$(HASH)
-$(MINI_WORK_DOCKER_HASH):
+$(MINI_WORK_DOCKER_HASH): $(PWD)/minikube/work.yaml
 	$(MINIKUBE) image build . -t $(BASE_IMAGE_NAME) -f Dockerfile.work
 	cat $(PWD)/minikube/work.yaml | sed 's/{{IMAGE_NAME}}/$(MINIKUBE_IP):5000\/work:$(HASH)/g' | \
  		$(KUBECTL) apply -f - --namespace $(MINIKUBE_NAMESPACE)
 	$(KUBECTL) rollout status deploy/work --namespace $(MINIKUBE_NAMESPACE) --timeout=60s
 	echo "$(HASH)" > $(MINI_WORK_DOCKER_HASH)
+
+work-mini: $(MINI_WORK_DOCKER_HASH)
+
+deploy-services-concurrent:
+	$(MAKE) deploy-services -j8
 
 deploy-services: deploy-certmanager update-coredns deploy-redis deploy-postgres mail-mini vault-mini $(MINI_WORK_DOCKER_HASH) deploy-relay
 	$(MAKE) deploy-certificate-authority

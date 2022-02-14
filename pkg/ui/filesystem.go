@@ -1,3 +1,5 @@
+//go:build !noui
+
 package ui
 
 import "net/http"

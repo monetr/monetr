@@ -7,8 +7,8 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/hash"
-	"github.com/monetr/monetr/pkg/internal/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/plaid/plaid-go/plaid"

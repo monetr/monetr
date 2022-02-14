@@ -2,6 +2,7 @@ package testutils
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,6 +12,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/metrics"
+	"github.com/monetr/monetr/pkg/migrations"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -114,7 +116,13 @@ func GetPgOptions(t *testing.T) *pg.Options {
 	return options
 }
 
-func GetPgDatabase(t *testing.T) *pg.DB {
+type DatabaseOption uint8
+
+const (
+	IsolatedDatabase DatabaseOption = 1
+)
+
+func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 	testDatabases.lock.Lock()
 	defer testDatabases.lock.Unlock()
 
@@ -133,11 +141,45 @@ func GetPgDatabase(t *testing.T) *pg.DB {
 		log: log,
 	})
 
-	t.Cleanup(func() {
-		require.NoError(t, db.Close(), "must close database connection")
-	})
+	var databaseToReturn *pg.DB
+	databaseToReturn = db
+	if len(databaseOptions) > 0 {
+		for _, option := range databaseOptions {
+			switch option {
+			case IsolatedDatabase:
+				log.Debug("creating isolated database for test")
+				databaseName := fmt.Sprintf("%x", md5.Sum([]byte(t.Name())))
 
-	testDatabases.databases[t.Name()] = db
+				_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s";`, databaseName))
+				require.NoError(t, err, "must be able to drop an isolated database if it exists")
 
-	return db
+				_, err = db.Exec(fmt.Sprintf(`CREATE DATABASE "%s";`, databaseName))
+				require.NoError(t, err, "must be able to create the isolated database")
+
+				isolatedOptions := *options
+				isolatedOptions.Database = databaseName
+				databaseToReturn = pg.Connect(&isolatedOptions)
+				databaseToReturn.AddQueryHook(&queryHook{
+					log: log,
+				})
+
+				migrations.RunMigrations(log, databaseToReturn)
+
+				t.Cleanup(func() {
+					require.NoError(t, databaseToReturn.Close(), "must close the isolated database once we are done")
+					_, err := db.Exec(fmt.Sprintf(`DROP DATABASE IF EXISTS "%s";`, databaseName))
+					require.NoError(t, err, "must be able to drop an isolated database if it exists")
+					require.NoError(t, db.Close(), "must close database connection")
+				})
+			}
+		}
+	} else {
+		t.Cleanup(func() {
+			require.NoError(t, db.Close(), "must close database connection")
+		})
+	}
+
+	testDatabases.databases[t.Name()] = databaseToReturn
+
+	return databaseToReturn
 }

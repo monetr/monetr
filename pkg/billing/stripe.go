@@ -3,16 +3,17 @@ package billing
 import (
 	"context"
 	"encoding/json"
+	"strconv"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/monetr/monetr/pkg/internal/stripe_helper"
 	"github.com/monetr/monetr/pkg/pubsub"
+	"github.com/monetr/monetr/pkg/stripe_helper"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stripe/stripe-go/v72"
-	"strconv"
-	"time"
 )
 
 type StripeWebhookHandler interface {

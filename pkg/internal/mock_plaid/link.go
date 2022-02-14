@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/pkg/internal/consts"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/plaid/plaid-go/plaid"

@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
+	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
@@ -214,13 +215,32 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 	case "TRANSACTIONS":
 		switch hook.WebhookCode {
 		case "INITIAL_UPDATE":
-			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
+			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+				Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
+				End:       time.Now(),
+			})
 		case "HISTORICAL_UPDATE":
-			_, err = c.job.TriggerPullHistoricalTransactions(link.AccountId, link.LinkId)
+			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+				Start:     time.Now().Add(-2 * 365 * 24 * time.Hour), // Last 2 years.
+				End:       time.Now(),
+			})
 		case "DEFAULT_UPDATE":
-			_, err = c.job.TriggerPullLatestTransactions(link.AccountId, link.LinkId, hook.NewTransactions)
+			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+				Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
+				End:       time.Now(),
+			})
 		case "TRANSACTIONS_REMOVED":
-			_, err = c.job.TriggerRemoveTransactions(link.AccountId, link.LinkId, hook.RemovedTransactions)
+			err = background.TriggerRemoveTransactions(c.getContext(ctx), c.jobRunner, background.RemoveTransactionsArguments{
+				AccountId:           link.AccountId,
+				LinkId:              link.LinkId,
+				PlaidTransactionIds: hook.RemovedTransactions,
+			})
 		default:
 			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}
@@ -243,7 +263,12 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 			link.ErrorCode = myownsanity.StringP(code.(string))
 			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
 		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
-			_, err = c.job.TriggerPullInitialTransactions(link.AccountId, link.CreatedByUserId, link.LinkId)
+			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+				Start:     time.Now().Add(-7 * 24 * time.Hour),
+				End:       time.Now(),
+			})
 		default:
 			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}
