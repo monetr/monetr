@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.9.3](https://github.com/monetr/monetr/compare/v0.9.2...v0.9.3) (2022-02-14)
+
+
+### Bug Fixes
+
+* Fixed container-push make task ([6d65b44](https://github.com/monetr/monetr/commit/6d65b4433de1fbafb056fec73a042b46798a6b08))
+
 ### [0.9.2](https://github.com/monetr/monetr/compare/v0.9.1...v0.9.2) (2022-02-14)
 
 
