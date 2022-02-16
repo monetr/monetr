@@ -259,3 +259,23 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get -y install qemu-user-static
           make container
+
+  docker:
+    needs:
+      - "ui_dependencies"
+      - "build_ui"
+    name: Container (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        name: Download Compiled UI Artifacts
+        with:
+          name: '${{ github.sha }}-ui'
+          path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build
+        run: make container ENGINE=docker

@@ -49,6 +49,13 @@ endif
 
 container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
 ifdef CI # When we are in CI we don't want to run the static dir targets, these files are provided via artifacts.
+ifeq ($(ENGINE),docker)
+container: DOCKER=$(shell which docker)
+container:
+	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
+	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
+	$(DOCKER) build -f $(DOCKERFILE) $(CONTAINER_VAR_ARGS) $(CONTAINER_TAG_ARGS) $(PWD)
+else
 container: BUILDAH=$(shell which buildah)
 container:
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
@@ -61,6 +68,7 @@ container:
 		-f $(DOCKERFILE) \
 		$(PWD) &&) true;
 	$(BUILDAH) manifest inspect $(CONTAINER_MANIFEST)
+endif
 else
 ifeq ($(ENGINE),docker)
 container: DOCKER=$(shell which docker)
@@ -78,10 +86,17 @@ endif
 endif
 
 ifdef CI
+ifeq ($(ENGINE),docker)
+container-push: DOCKER=$(shell which docker)
+container-push:
+	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
+	($(foreach TAG,$(CONTAINER_TAGS),$(DOCKER) push $(TAG) &&) true)
+else
 container-push: BUILDAH=$(shell which buildah)
 container-push:
 	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	($(foreach TAG,$(CONTAINER_TAGS),$(BUILDAH) manifest push --all $(CONTAINER_MANIFEST) docker://$(TAG) &&) exit 0)
+endif
 else
 ifeq ($(ENGINE),docker)
 container-push: DOCKER=$(shell which docker)
