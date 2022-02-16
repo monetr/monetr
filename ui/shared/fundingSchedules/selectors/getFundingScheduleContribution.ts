@@ -6,6 +6,7 @@ import { Map } from 'immutable';
 export const getFundingScheduleContribution = (fundingScheduleId: number) => createSelector<any, any, number>(
   [getSpending],
   (spending: Map<number, Spending>) => spending.reduce((total: number, item: Spending) => {
-    return total + (item.fundingScheduleId === fundingScheduleId ? item.nextContributionAmount : 0);
+    // Build a total of all the spending objects contributions who are not paused and are for this funding schedule.
+    return total + (item.fundingScheduleId === fundingScheduleId && !item.isPaused ? item.nextContributionAmount : 0);
   }, 0),
 );

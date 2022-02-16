@@ -34,7 +34,7 @@ describe('getFundingScheduleContribution', () => {
       })
     });
 
-    // Then include a single spending object that will not be included.
+    // Then include a spending object that will not be included because of its funding schedule.
     store.dispatch({
       type: CreateSpending.Success,
       payload: new Spending({
@@ -42,6 +42,18 @@ describe('getFundingScheduleContribution', () => {
         fundingScheduleId: 101,
         bankAccountId: 10,
         nextContributionAmount: 1254, // $12.54
+      })
+    });
+
+    // Then include a spending object that will not be included because it is paused.
+    store.dispatch({
+      type: CreateSpending.Success,
+      payload: new Spending({
+        spendingId: 1003,
+        fundingScheduleId: 100,
+        bankAccountId: 10,
+        nextContributionAmount: 375, // $3.75
+        isPaused: true, // Will cause this to be excluded.
       })
     });
 
