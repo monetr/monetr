@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.9.5](https://github.com/monetr/monetr/compare/v0.9.4...v0.9.5) (2022-02-16)
+
+
+### Bug Fixes
+
+* Fixed build revision and version not being embedded in container. ([88620a0](https://github.com/monetr/monetr/commit/88620a0023a69866fb9b622ad3f8479de5548688)), closes [#683](https://github.com/monetr/monetr/issues/683)
+
 ### [0.9.4](https://github.com/monetr/monetr/compare/v0.9.3...v0.9.4) (2022-02-16)
 
 
