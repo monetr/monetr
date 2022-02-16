@@ -75,7 +75,7 @@ container: DOCKER=$(shell which docker)
 container: $(STATIC_DIR)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
-	$(DOCKER) build -f $(DOCKERFILE) $(CONTAINER_VAR_ARGS) $(CONTAINER_EXTRA_ARGS) $(PWD)
+	$(DOCKER) build -f $(DOCKERFILE) $(CONTAINER_VAR_ARGS) $(CONTAINER_TAG_ARGS) $(PWD)
 else
 container: $(PODMAN) $(STATIC_DIR)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
