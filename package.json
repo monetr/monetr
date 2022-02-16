@@ -9,7 +9,7 @@
     "@mui/icons-material": "5.4.2",
     "@mui/lab": "5.0.0-alpha.69",
     "@mui/material": "5.4.2",
-    "@mui/styles": "5.4.1",
+    "@mui/styles": "5.4.2",
     "@sentry/browser": "6.16.1",
     "@sentry/react": "6.16.1",
     "@sentry/tracing": "6.16.1",
