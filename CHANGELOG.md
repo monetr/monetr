@@ -1,5 +1,40 @@
 # Changelog
 
+### [0.9.6](https://github.com/monetr/monetr/compare/v0.9.5...v0.9.6) (2022-02-16)
+
+
+### Features
+
+* Improving UI appearance. ([fae66b9](https://github.com/monetr/monetr/commit/fae66b94f5a2216cabbd399640e080232332e09a))
+* Laying ground-work for manual syncing. ([90a2f3e](https://github.com/monetr/monetr/commit/90a2f3e6bf85b90a4d1372373e87eb02e9f54c34))
+
+
+### Bug Fixes
+
+* Exclude paused spending from contribution totals. ([315d9c8](https://github.com/monetr/monetr/commit/315d9c865c9a01f62a9fb93eb97470fcaba2b97f))
+
+
+### Miscellaneous
+
+* **containers:** Bumping golang to 1.17.7 and node to 17.5.0. ([027722b](https://github.com/monetr/monetr/commit/027722baf4bcdba722dabf1488795061325ae7ed))
+* Improved local development for UI. ([5dde8c0](https://github.com/monetr/monetr/commit/5dde8c01cb2d2c021f2e9f290f336afa4b2d38bf))
+
+
+### Dependencies
+
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.2.5 ([c3e187b](https://github.com/monetr/monetr/commit/c3e187bb2f306d520a86bd29b81e8308bdaa3d32))
+* **ui:** update dependency @babel/core to v7.17.4 ([5c7b94a](https://github.com/monetr/monetr/commit/5c7b94a50d10753f4deb10b35845e4f3c4079232))
+* **ui:** update dependency @mui/icons-material to v5.4.2 ([8410a7b](https://github.com/monetr/monetr/commit/8410a7b557673072abbf63bf2120748445582b88))
+* **ui:** update dependency @mui/lab to v5.0.0-alpha.69 ([4f3bd30](https://github.com/monetr/monetr/commit/4f3bd308f9ee613dac862216a23f57b62387148d))
+* **ui:** update dependency @mui/material to v5.4.2 ([b519ac8](https://github.com/monetr/monetr/commit/b519ac8ff88be815e274c48564523cf7b3f62ebb))
+* **ui:** update dependency @mui/styles to v5.4.2 ([f8c8e46](https://github.com/monetr/monetr/commit/f8c8e467d7692a8323eeea0d27479aad121ae627))
+* **ui:** update dependency @types/react-google-recaptcha to v2.1.4 ([39bba1e](https://github.com/monetr/monetr/commit/39bba1ea8a7cd2ab4301cb8ff4c4cd2fd6ee401d))
+* **ui:** update dependency dotenv to v16 ([a493072](https://github.com/monetr/monetr/commit/a49307263d6ad57955dd404c48ac78d57a738d58))
+* **ui:** update dependency dotenv-expand to v8 ([c69941f](https://github.com/monetr/monetr/commit/c69941fbed4ec5c99a27b5192715982fd6bed0e5))
+* **ui:** update dependency postcss-preset-env to v7.4.0 ([fdd7547](https://github.com/monetr/monetr/commit/fdd7547e3585720e874db29183cb642da718c70a))
+* **ui:** update jest monorepo to v27.5.1 ([29a6645](https://github.com/monetr/monetr/commit/29a66451e3bedc2414f8b46e7f347d7cf0c97e15))
+* **ui:** update typescript-eslint monorepo to v5.12.0 ([c5ce714](https://github.com/monetr/monetr/commit/c5ce714164be595888bc3ee3398526f5cfcb4e08))
+
 ### [0.9.5](https://github.com/monetr/monetr/compare/v0.9.4...v0.9.5) (2022-02-16)
 
 
