@@ -45,16 +45,10 @@ function TransactionsView(): JSX.Element {
 
   return (
     <div className="minus-nav">
-      <div className="flex flex-col h-full p-10 max-h-full">
-        <div className="grid grid-cols-3 gap-4 flex-grow">
-          <div className="col-span-3">
-            <Card elevation={ 4 } className="w-full transaction-list">
-              <List disablePadding className="w-full">
-                { renderTransactions() }
-              </List>
-            </Card>
-          </div>
-        </div>
+      <div className="w-full transaction-list">
+        <List disablePadding className="w-full">
+          { renderTransactions() }
+        </List>
       </div>
     </div>
   );

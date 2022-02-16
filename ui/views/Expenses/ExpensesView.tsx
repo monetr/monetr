@@ -108,16 +108,16 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
       return (
         <Fragment>
           { newExpenseDialogOpen &&
-          <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen/>
+            <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen/>
           }
 
           <div className="minus-nav">
-            <div className="flex flex-col h-full p-10 max-h-full">
-              <div className="grid grid-cols-3 gap-4 flex-grow">
+            <div className="flex flex-col h-full max-h-full">
+              <div className="grid grid-cols-3 flex-grow">
                 <div className="col-span-3">
-                  <Card elevation={ 4 } className="w-full expenses-list">
+                  <div className="w-full expenses-list">
                     { this.renderExpenseList() }
-                  </Card>
+                  </div>
                 </div>
               </div>
             </div>
@@ -129,21 +129,21 @@ export class ExpensesView extends Component<WithConnectionPropTypes, State> {
     return (
       <Fragment>
         { newExpenseDialogOpen &&
-        <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen/>
+          <NewExpenseDialog onClose={ this.closeNewExpenseDialog } isOpen/>
         }
 
         <div className="minus-nav">
-          <div className="flex flex-col h-full p-10 max-h-full">
-            <div className="grid grid-cols-3 gap-4 flex-grow">
+          <div className="flex flex-col h-full max-h-full">
+            <div className="grid grid-cols-3 flex-grow">
               <div className="col-span-2">
-                <Card elevation={ 4 } className="w-full expenses-list">
+                <div className="w-full expenses-list">
                   { this.renderExpenseList() }
-                </Card>
+                </div>
               </div>
-              <div className="">
-                <Card elevation={ 4 } className="w-full expenses-list">
+              <div className="border-l">
+                <div className="w-full expenses-list">
                   { this.renderSideBar() }
-                </Card>
+                </div>
               </div>
             </div>
           </div>

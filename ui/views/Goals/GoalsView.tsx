@@ -22,7 +22,7 @@ export default function GoalsView(): JSX.Element {
 
   function GoalList(): JSX.Element {
     return (
-      <Card elevation={ 4 } className="w-full goals-list">
+      <div className="w-full goals-list">
         <List disablePadding className="w-full">
           {
             goalIds.map(item => (
@@ -33,7 +33,7 @@ export default function GoalsView(): JSX.Element {
             ))
           }
         </List>
-      </Card>
+      </div>
     );
   }
 
@@ -42,10 +42,10 @@ export default function GoalsView(): JSX.Element {
       <Fragment>
         { newGoalDialogOpen && <NewGoalDialog onClose={ closeNewGoalDialog } isOpen={ newGoalDialogOpen }/> }
         <div className="minus-nav">
-          <div className="flex flex-col h-full p-10 max-h-full">
-            <div className="grid grid-cols-3 gap-4 flex-grow">
+          <div className="flex flex-col h-full max-h-full">
+            <div className="grid grid-cols-3 flex-grow">
               <div className="col-span-3">
-                <Card elevation={ 4 } className="w-full goals-list ">
+                <div className="w-full goals-list ">
                   <div className="h-full flex justify-center items-center">
                     <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
                       <Typography
@@ -66,7 +66,7 @@ export default function GoalsView(): JSX.Element {
                       </Button>
                     </div>
                   </div>
-                </Card>
+                </div>
               </div>
             </div>
           </div>
@@ -77,15 +77,13 @@ export default function GoalsView(): JSX.Element {
 
   return (
     <div className="minus-nav">
-      <div className="flex flex-col h-full p-10 max-h-full">
-        <div className="grid grid-cols-3 gap-4 flex-grow">
+      <div className="flex flex-col h-full max-h-full">
+        <div className="grid grid-cols-3 flex-grow">
           <div className="col-span-2">
             <GoalList/>
           </div>
-          <div>
-            <Card elevation={ 4 } className="w-full goals-list">
-              <GoalDetails/>
-            </Card>
+          <div className="border-l w-full goals-list">
+            <GoalDetails/>
           </div>
         </div>
       </div>

@@ -54,12 +54,12 @@ const NavigationBar = React.memo((): JSX.Element => {
           onClose={ handleCloseMenu }
         >
           { billingEnabled &&
-          <MenuItem
-            onClick={ manageBilling }
-          >
-            <CreditCard className="mr-2"/>
-            Billing
-          </MenuItem>
+            <MenuItem
+              onClick={ manageBilling }
+            >
+              <CreditCard className="mr-2"/>
+              Billing
+            </MenuItem>
           }
 
           <MenuItem
