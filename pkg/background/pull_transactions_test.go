@@ -22,6 +22,7 @@ import (
 )
 
 func TestPullTransactionsJob_Run(t *testing.T) {
+	t.Skipf("skipping for now")
 	t.Run("invalid link", func(t *testing.T) {
 		log, hook := testutils.GetTestLog(t)
 		db := testutils.GetPgDatabase(t)

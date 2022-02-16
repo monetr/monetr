@@ -186,10 +186,12 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 	}
 
 	plaidIdsToBankIds := map[string]uint64{}
+	plaidBankToLocalBank := map[string]models.BankAccount{}
 	bankAccountIds := make([]string, len(link.BankAccounts))
 	for i, bankAccount := range link.BankAccounts {
 		bankAccountIds[i] = bankAccount.PlaidAccountId
 		plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
+		plaidBankToLocalBank[bankAccount.PlaidAccountId] = bankAccount
 	}
 
 	now := time.Now().UTC()
@@ -330,6 +332,71 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		if err = p.repo.InsertTransactions(span.Context(), transactionsToInsert); err != nil {
 			log.WithError(err).Error("failed to insert new transactions")
 			return err
+		}
+	}
+
+	if len(transactionsToInsert)+len(transactionsToUpdate) > 0 {
+		result, err := plaidClient.GetAccounts(
+			span.Context(),
+			bankAccountIds...,
+		)
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve bank accounts from plaid")
+			return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
+		}
+
+		updatedBankAccounts := make([]models.BankAccount, 0, len(result))
+		for _, item := range result {
+			bankAccount, ok := plaidBankToLocalBank[item.GetAccountId()]
+			if !ok {
+				log.WithField("plaidBankAccountId", item.GetAccountId()).Warn("bank was not found in map")
+				continue
+			}
+
+			bankLog := log.WithFields(logrus.Fields{
+				"bankAccountId": bankAccount.BankAccountId,
+				"linkId":        bankAccount.LinkId,
+			})
+			shouldUpdate := false
+			available := item.GetBalances().GetAvailable()
+			current := item.GetBalances().GetCurrent()
+
+			if bankAccount.CurrentBalance != current {
+				bankLog = bankLog.WithField("currentBalanceChanged", true)
+				shouldUpdate = true
+			} else {
+				bankLog = bankLog.WithField("currentBalanceChanged", false)
+			}
+
+			if bankAccount.AvailableBalance != available {
+				bankLog = bankLog.WithField("availableBalanceChanged", true)
+				shouldUpdate = true
+			} else {
+				bankLog = bankLog.WithField("availableBalanceChanged", false)
+			}
+
+			bankLog = bankLog.WithField("willUpdate", shouldUpdate)
+
+			if shouldUpdate {
+				bankLog.Info("updating bank account balances")
+			} else {
+				bankLog.Trace("balances do not need to be updated")
+			}
+
+			if shouldUpdate {
+				updatedBankAccounts = append(updatedBankAccounts, models.BankAccount{
+					BankAccountId:    bankAccount.BankAccountId,
+					AccountId:        p.args.AccountId,
+					AvailableBalance: available,
+					CurrentBalance:   current,
+					LastUpdated:      now.UTC(),
+				})
+			}
+		}
+
+		if err = p.repo.UpdateBankAccounts(span.Context(), updatedBankAccounts); err != nil {
+			log.WithError(err).Error("failed to update bank account balances")
+			crumbs.ReportError(span.Context(), err, "Failed to update bank account balances", "job", nil)
 		}
 	}
 

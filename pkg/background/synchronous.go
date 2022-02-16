@@ -50,7 +50,6 @@ func NewSynchronousJobRunner(
 
 	jobs := []JobHandler{
 		NewProcessFundingScheduleHandler(log, db),
-		NewPullBalancesHandler(log, db, plaidSecrets, plaidPlatypus),
 		NewPullTransactionsHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
 		NewRemoveLinkHandler(log, db, publisher),
 		NewRemoveTransactionsHandler(log, db),

@@ -2,10 +2,11 @@ package crumbs
 
 import (
 	"context"
-	"github.com/getsentry/sentry-go"
-	"github.com/pkg/errors"
 	"net/http"
 	"time"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/pkg/errors"
 )
 
 func WrapError(ctx context.Context, err error, message string) error {
@@ -15,6 +16,20 @@ func WrapError(ctx context.Context, err error, message string) error {
 
 func Error(ctx context.Context, message, category string, data map[string]interface{}) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		hub.AddBreadcrumb(&sentry.Breadcrumb{
+			Type:      "error",
+			Category:  category,
+			Message:   message,
+			Data:      data,
+			Level:     sentry.LevelError,
+			Timestamp: time.Now(),
+		}, nil)
+	}
+}
+
+func ReportError(ctx context.Context, err error, message, category string, data map[string]interface{}) {
+	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		hub.CaptureException(err)
 		hub.AddBreadcrumb(&sentry.Breadcrumb{
 			Type:      "error",
 			Category:  category,
