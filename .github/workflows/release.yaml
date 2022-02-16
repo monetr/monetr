@@ -38,7 +38,7 @@ jobs:
       - release_please
     name: Build UI
     runs-on: ubuntu-latest
-    container: node:17.2.0
+    container: node:17.5.0
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -72,7 +72,7 @@ jobs:
       - build_ui
     name: Build Binary
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.17.6
+    container: ghcr.io/monetr/build-containers/golang:1.17.7
     continue-on-error: true
     strategy:
       fail-fast: false
