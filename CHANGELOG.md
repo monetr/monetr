@@ -1,5 +1,15 @@
 # Changelog
 
+### [0.9.4](https://github.com/monetr/monetr/compare/v0.9.3...v0.9.4) (2022-02-16)
+
+
+### Bug Fixes
+
+* Fixed deploy dependencies. ([75e845b](https://github.com/monetr/monetr/commit/75e845be950e453423c84db7294bddf3e9c6888c))
+* Fixed release pipeline. ([f787c6c](https://github.com/monetr/monetr/commit/f787c6c9f1daaf588c46cb9fd7b121e8659bfe4a))
+* Move back to docker for container builds. ([29be5fd](https://github.com/monetr/monetr/commit/29be5fd683b5e46aeb76649b35cf02e8247de5e3))
+* Refresh balances when transactions change. ([c9cf04a](https://github.com/monetr/monetr/commit/c9cf04a5050263852057cfaffaafc84ee374eff3)), closes [#680](https://github.com/monetr/monetr/issues/680)
+
 ### [0.9.3](https://github.com/monetr/monetr/compare/v0.9.2...v0.9.3) (2022-02-14)
 
 
