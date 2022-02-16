@@ -229,7 +229,7 @@ jobs:
     if: ${{ needs.release_please.outputs.release_created }}
     needs:
       - "release_please"
-      - "container"
+      - "docker"
     name: Deploy my.monetr.dog
     runs-on: ubuntu-latest
     steps:
