@@ -531,3 +531,16 @@ else
 	tmux new -d -s monetr-local 'yarn start' \; switch -t monetr-local \; \
 		split-window '$(MINIKUBE) tunnel --cleanup=true' \;
 endif
+
+
+local-ui: LOCAL_IP=$(shell ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $$2 }' | cut -f2 -d: | head -n1)
+local-ui: $(YQ)
+	$(YQ) e '.subsets[0].addresses[0].ip = "$(LOCAL_IP)"' $(PWD)/minikube/ui-endpoint.yaml | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(MONETR_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e 'del(.spec.selector)' - | $(KUBECTL) apply -f -
+	$(KUBECTL) get svc/$(MONETR_IMAGE_NAME)-ui -n $(MINIKUBE_NAMESPACE) -o yaml | $(YQ) e '.spec.ports[0].targetPort = 30000' - | $(KUBECTL) apply -f -
+	-bash -c "trap '$(MAKE) local-down' EXIT; $(MAKE) _local_ui_"
+
+
+_local_ui_:
+	@echo "Hit CTRL-C to exit this and to remove local provisions."
+	$(YARN) start
