@@ -163,12 +163,39 @@ jobs:
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz --clobber
 
-  container:
-    if: ${{ needs.release_please.outputs.release_created }}
+  #  container:
+  #    if: ${{ needs.release_please.outputs.release_created }}
+  #    needs:
+  #      - "release_please"
+  #      - "build_ui"
+  #    name: Container
+  #    runs-on: ubuntu-latest
+  #    steps:
+  #      - uses: actions/checkout@v2
+  #      - uses: actions/download-artifact@v2
+  #        name: Download Compiled UI Artifacts
+  #        with:
+  #          name: '${{ needs.release_please.outputs.version }}-ui'
+  #          path: '${{ github.workspace }}/pkg/ui/static/'
+  #      - name: Login
+  #        env:
+  #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  #        run: |
+  #          buildah login -u ${{ github.repository_owner }} -p $GITHUB_TOKEN ghcr.io
+  #          buildah login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD docker.io
+  #      - name: Build
+  #        run: |
+  #          sudo apt-get update && sudo apt-get -y install qemu-user-static
+  #          make container RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
+  #          make container-push RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
+
+  docker:
     needs:
-      - "release_please"
+      - "ui_dependencies"
       - "build_ui"
-    name: Container
+    name: Container (Docker)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -177,19 +204,25 @@ jobs:
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
-      - name: Login
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: |
-          buildah login -u ${{ github.repository_owner }} -p $GITHUB_TOKEN ghcr.io
-          buildah login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD docker.io
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: |
-          sudo apt-get update && sudo apt-get -y install qemu-user-static
-          make container RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
-          make container-push RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
+          make container ENGINE=docker RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
+          make container-push ENGINE=docker RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
 
   deploy:
     if: ${{ needs.release_please.outputs.release_created }}
