@@ -11,6 +11,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewReCAPTCHAVerification(t *testing.T) {
+	t.Run("failure", func(t *testing.T) {
+		verification, err := NewReCAPTCHAVerification("")
+		assert.Error(t, err, "should fail to create a verifier without a private key")
+		assert.Nil(t, verification, "verification should not be returned if there was a problem")
+	})
+}
+
 func TestCaptchaBase_VerifyCaptcha(t *testing.T) {
 	t.Run("mock success", func(t *testing.T) {
 		httpmock.Activate()
@@ -44,7 +52,7 @@ func TestCaptchaBase_VerifyCaptcha(t *testing.T) {
 			"POST", "https://www.google.com/recaptcha/api/siteverify",
 			func(t *testing.T, request *http.Request) (interface{}, int) {
 				return map[string]interface{}{
-					"success":      true,
+					"success":      false,
 					"challenge_ts": time.Now(),
 					"hostname":     "monetr.mini",
 					"score":        0,
@@ -57,6 +65,6 @@ func TestCaptchaBase_VerifyCaptcha(t *testing.T) {
 		assert.NoError(t, err, "must be able to create captcha verification")
 
 		err = verification.VerifyCaptcha(context.Background(), "abc123")
-		assert.NoError(t, err, "must verify captcha")
+		assert.EqualError(t, err, "invalid ReCAPTCHA: invalid challenge solution")
 	})
 }
