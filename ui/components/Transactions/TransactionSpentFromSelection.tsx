@@ -26,13 +26,15 @@ interface SpendingOption {
 }
 
 function SpendingSelectOption({ children, ...props }: OptionProps<SpendingOption>): JSX.Element {
+  // If the current amount is specified then format the amount, if it is not then use N/A.
+  const amount = !props.data.spending?.currentAmount ? 'N/A' : formatAmount(props.data.spending?.currentAmount);
   return (
     <components.Option { ...props }>
       <div className="w-full flex items-center">
         <span className="font-semibold">{ props.label }</span>
         <Chip
           className="ml-auto font-semibold"
-          label={ formatAmount(props.data.spending?.currentAmount) }
+          label={ amount }
           color="secondary"
         />
       </div>
@@ -73,7 +75,10 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
     label: 'Safe-To-Spend',
     value: null,
     spending: {
-      currentAmount: balances.safe,
+      // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
+      // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
+      // until the balance is loaded.
+      currentAmount: balances?.safe,
     },
   }
   const items: Map<number, SpendingOption> = allSpending
