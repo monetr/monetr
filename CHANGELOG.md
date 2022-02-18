@@ -1,5 +1,31 @@
 # Changelog
 
+### [0.9.7](https://github.com/monetr/monetr/compare/v0.9.6...v0.9.7) (2022-02-18)
+
+
+### Bug Fixes
+
+* Fix page crash on changing bank account. ([b349db2](https://github.com/monetr/monetr/commit/b349db252c68ed9271ea5fbaab8fd1db22eff71e)), closes [#700](https://github.com/monetr/monetr/issues/700)
+
+
+### Miscellaneous
+
+* Improve testing of captcha interface. ([12d1143](https://github.com/monetr/monetr/commit/12d11439c3aca2bd6b204aeb3338d5c008028be3))
+
+
+### Dependencies
+
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.87.0 ([7522d2f](https://github.com/monetr/monetr/commit/7522d2f80931d137879d9c33c56a9c61a464729f))
+* **ui:** update dependency @babel/core to v7.17.5 ([3c444cd](https://github.com/monetr/monetr/commit/3c444cd8df6473868921c671ea9933a39c776692))
+* **ui:** update dependency @testing-library/react to v12.1.3 ([5ed74fc](https://github.com/monetr/monetr/commit/5ed74fc57fb386e44b83a509ad651853918ac895))
+* **ui:** update dependency axios to v0.26.0 ([380a8b4](https://github.com/monetr/monetr/commit/380a8b4d43272b419827180acaa4abb74d642ec5))
+* **ui:** update dependency eslint-plugin-jest to v26 ([2d2e36a](https://github.com/monetr/monetr/commit/2d2e36a35cd896149c4f84ea5b3dc754d71661c2))
+* **ui:** update dependency postcss-preset-env to v7.4.1 ([e36e3d7](https://github.com/monetr/monetr/commit/e36e3d7cd0683425ea8ca1ffb8d591e5d6d79a59))
+* **ui:** update dependency sass to v1.49.8 ([653546b](https://github.com/monetr/monetr/commit/653546b223310e004f825f153082c481a5302c9b))
+* **ui:** update dependency sass-loader to v12.6.0 ([e4458a0](https://github.com/monetr/monetr/commit/e4458a0993c180385960222b24940bef876092f8))
+* **ui:** update dependency tailwindcss to v3.0.23 ([77c5c3e](https://github.com/monetr/monetr/commit/77c5c3ea4027d5abffa98d53c1bb3876d33e6fcb))
+* **ui:** update dependency webpack to v5.69.1 ([81a5a8d](https://github.com/monetr/monetr/commit/81a5a8da012e2a3ae260be51bda27008ec24d00a))
+
 ### [0.9.6](https://github.com/monetr/monetr/compare/v0.9.5...v0.9.6) (2022-02-16)
 
 
