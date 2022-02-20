@@ -18,7 +18,7 @@ require (
 	github.com/gomodule/redigo v1.8.8
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/vault/api v1.3.1
-	github.com/iris-contrib/middleware/cors v0.0.0-20211206172221-a2879657471e
+	github.com/iris-contrib/middleware/cors v0.0.0-20220218204641-8e282f24acb7
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/kataras/iris/v12 v12.2.0-alpha6
 	github.com/mailru/easyjson v0.7.7 // indirect

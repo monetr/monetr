@@ -403,6 +403,8 @@ github.com/iris-contrib/jade v1.1.4 h1:WoYdfyJFfZIUgqNAeOyRfTNQZOksSlZ6+FnXR3AEp
 github.com/iris-contrib/jade v1.1.4/go.mod h1:EDqR+ur9piDl6DUgs6qRrlfzmlx/D5UybogqrXvJTBE=
 github.com/iris-contrib/middleware/cors v0.0.0-20211206172221-a2879657471e h1:x7EVsbjXuDv3qxrVeOhBZ1zCSgWfqkyIBZX5Z3e5sWc=
 github.com/iris-contrib/middleware/cors v0.0.0-20211206172221-a2879657471e/go.mod h1:uM0rDwKclW+huaAvfdY20SGY/lK50PxS2oXHSzFAJZM=
+github.com/iris-contrib/middleware/cors v0.0.0-20220218204641-8e282f24acb7 h1:c479tWJAyw2UZ6WCFb4qOPjN/yfgMz/i4ZVK3P6LkP8=
+github.com/iris-contrib/middleware/cors v0.0.0-20220218204641-8e282f24acb7/go.mod h1:ZeC6WYS2vTfa0NxptlH70lPNTcQuKIP97zCn+uqnRMA=
 github.com/iris-contrib/pongo2 v0.0.1/go.mod h1:Ssh+00+3GAZqSQb30AvBRNxBx7rf0GqwkjqxNd0u65g=
 github.com/iris-contrib/schema v0.0.1/go.mod h1:urYA3uvUNG1TIIjOSCzHr9/LmbQo8LrOcOqfqxa4hXw=
 github.com/iris-contrib/schema v0.0.6 h1:CPSBLyx2e91H2yJzPuhGuifVRnZBBJ3pCOMbOvPZaTw=
