@@ -31,12 +31,10 @@ require (
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.0
-	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.87.0
 	github.com/teambition/rrule-go v1.7.3
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
@@ -64,7 +62,6 @@ require (
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/go-pg/zerochecker v0.2.0 // indirect
 	github.com/goccy/go-json v0.9.4 // indirect
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -148,14 +145,11 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
-	golang.org/x/tools v0.1.5 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.43.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

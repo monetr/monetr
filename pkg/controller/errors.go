@@ -68,3 +68,7 @@ func (c *Controller) returnError(ctx *context.Context, status int, msg string, a
 func (c *Controller) badRequest(ctx *context.Context, msg string, args ...interface{}) {
 	c.returnError(ctx, http.StatusBadRequest, msg, args...)
 }
+
+func (c *Controller) notFound(ctx *context.Context, msg string, args ...interface{}) {
+	c.returnError(ctx, http.StatusNotFound, msg, args...)
+}

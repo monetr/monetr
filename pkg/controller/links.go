@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/swag"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -182,10 +184,10 @@ func (c *Controller) putLink(ctx iris.Context) {
 // @Security ApiKeyAuth
 // @Router /links/convert/{linkId} [put]
 // @Param linkId path int true "Link ID"
-// @Param newLink body swag.CreateLinkRequest true "New Manual Link"
 // @Success 200 {object} swag.LinkResponse "New link object after being converted to a manual link."
 // @Failure 400 {object} ApiError "The link specified is already a manual link."
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 404 {object} LinkNotFoundError A not found status code and an error is returned if the provided link ID does not exist.
 // @Failure 500 {object} ApiError "Something went wrong on our end."
 func (c *Controller) convertLink(ctx iris.Context) {
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
@@ -198,6 +200,11 @@ func (c *Controller) convertLink(ctx iris.Context) {
 
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
+		if errors.Is(errors.Cause(err), pg.ErrNoRows) {
+			c.notFound(ctx, "the specified link ID does not exist")
+			return
+		}
+
 		c.wrapPgError(ctx, err, "could not retrieve link to convert")
 		return
 	}
@@ -218,9 +225,9 @@ func (c *Controller) convertLink(ctx iris.Context) {
 	ctx.JSON(link)
 }
 
-// Delete Manual Link
-// @Summary Delete Manual Link
-// @id delete-manual-link
+// Delete Link
+// @Summary Delete Link
+// @id delete-link
 // @tags Links
 // @description Remove a link from your account. This will remove
 // @description - All bank accounts associated with this link.
@@ -237,6 +244,7 @@ func (c *Controller) convertLink(ctx iris.Context) {
 // @Success 200
 // @Failure 400 {object} ApiError A bad request can be returned if the link you specified is not valid.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
+// @Failure 404 {object} LinkNotFoundError A not found status code and an error is returned if the provided link ID does not exist.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) deleteLink(ctx iris.Context) {
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
@@ -248,6 +256,11 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
+		if errors.Is(errors.Cause(err), pg.ErrNoRows) {
+			c.notFound(ctx, "the specified link ID does not exist")
+			return
+		}
+
 		c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 		return
 	}
