@@ -1597,15 +1597,6 @@ const docTemplate = `{
                         "name": "linkId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "description": "New Manual Link",
-                        "name": "newLink",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/swag.CreateLinkRequest"
-                        }
                     }
                 ],
                 "responses": {
@@ -1625,6 +1616,12 @@ const docTemplate = `{
                         "description": "Payment Required",
                         "schema": {
                             "$ref": "#/definitions/controller.SubscriptionNotActiveError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.LinkNotFoundError"
                         }
                     },
                     "500": {
@@ -1776,8 +1773,8 @@ const docTemplate = `{
                 "tags": [
                     "Links"
                 ],
-                "summary": "Delete Manual Link",
-                "operationId": "delete-manual-link",
+                "summary": "Delete Link",
+                "operationId": "delete-link",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1801,6 +1798,12 @@ const docTemplate = `{
                         "description": "Payment Required",
                         "schema": {
                             "$ref": "#/definitions/controller.SubscriptionNotActiveError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.LinkNotFoundError"
                         }
                     },
                     "500": {

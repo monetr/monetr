@@ -2529,7 +2529,7 @@ paths:
         If the link specified is a Plaid link, then the access_token associated with that link will also be
         revoked. Link data is deleted in the background, so if you need to "wait" for all of the link's data to
         be properly deleted. Then you should poll the `/link/wait` endpoint.
-      operationId: delete-manual-link
+      operationId: delete-link
       parameters:
       - description: 'Link ID for the plaid link that is being setup. NOTE: Not Plaid''s
           ID, this is a numeric ID we assign to the object that is returned from the
@@ -2551,13 +2551,17 @@ paths:
           description: Payment Required
           schema:
             $ref: '#/definitions/controller.SubscriptionNotActiveError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.LinkNotFoundError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controller.ApiError'
       security:
       - ApiKeyAuth: []
-      summary: Delete Manual Link
+      summary: Delete Link
       tags:
       - Links
     get:
@@ -2652,12 +2656,6 @@ paths:
         name: linkId
         required: true
         type: integer
-      - description: New Manual Link
-        in: body
-        name: newLink
-        required: true
-        schema:
-          $ref: '#/definitions/swag.CreateLinkRequest'
       produces:
       - application/json
       responses:
@@ -2673,6 +2671,10 @@ paths:
           description: Payment Required
           schema:
             $ref: '#/definitions/controller.SubscriptionNotActiveError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.LinkNotFoundError'
         "500":
           description: Something went wrong on our end.
           schema:
