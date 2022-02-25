@@ -32,7 +32,7 @@ require (
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.0
 	github.com/stretchr/testify v1.7.0
-	github.com/stripe/stripe-go/v72 v72.87.0
+	github.com/stripe/stripe-go/v72 v72.88.0
 	github.com/teambition/rrule-go v1.7.3
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
