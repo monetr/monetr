@@ -1,5 +1,25 @@
 # Changelog
 
+### [0.9.8](https://github.com/monetr/monetr/compare/v0.9.7...v0.9.8) (2022-02-26)
+
+
+### Bug Fixes
+
+* Prevent multiple subscriptions from being made. ([802e888](https://github.com/monetr/monetr/commit/802e88848d674ebbd96b45060b4d38bf372479aa)), closes [#717](https://github.com/monetr/monetr/issues/717)
+
+
+### Miscellaneous
+
+* Improving documentation and link errors. ([c7a28e5](https://github.com/monetr/monetr/commit/c7a28e560dcbdb18d23b0810790611ccb9847737))
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors commit hash to 8e282f2 ([80185c0](https://github.com/monetr/monetr/commit/80185c031a30eb3ba51c11f9a7fec7f9b332d8dd))
+* **api:** update module github.com/kataras/iris/v12 to v12.2.0-alpha6 ([b2c6733](https://github.com/monetr/monetr/commit/b2c673316985871b75b43bc27764722a3011c5c5))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.88.0 ([3a7174f](https://github.com/monetr/monetr/commit/3a7174ff6ceab1512bb37ea89e1eb8a42eacd658))
+* **ui:** update material-ui monorepo ([0eb073b](https://github.com/monetr/monetr/commit/0eb073b090a227041d425b2b9af26f22b9b0445e))
+
 ### [0.9.7](https://github.com/monetr/monetr/compare/v0.9.6...v0.9.7) (2022-02-18)
 
 
