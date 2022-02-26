@@ -5,5 +5,6 @@ export default class AuthenticationState {
   // isActive indicates whether or not the user's subscription is activated. This is determined by the authentication
   // API call, or by the /users/me request.
   isActive: boolean;
+  hasSubscription: boolean;
   user: User | null;
 }

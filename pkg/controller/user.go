@@ -32,32 +32,31 @@ func (c *Controller) getMe(ctx *context.Context) {
 
 	if !c.configuration.Stripe.IsBillingEnabled() {
 		ctx.JSON(map[string]interface{}{
-			"user":     user,
-			"isSetup":  isSetup,
-			"isActive": true,
+			"user":            user,
+			"isSetup":         isSetup,
+			"isActive":        true,
+			"hasSubscription": true,
 		})
 		return
 	}
 
-	subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not verify subscription is active")
-		return
-	}
+	subscriptionIsActive := user.Account.IsSubscriptionActive()
 
 	if !subscriptionIsActive {
 		ctx.JSON(map[string]interface{}{
-			"user":     user,
-			"isSetup":  isSetup,
-			"isActive": subscriptionIsActive,
-			"nextUrl":  "/account/subscribe",
+			"user":            user,
+			"isSetup":         isSetup,
+			"isActive":        subscriptionIsActive,
+			"hasSubscription": user.Account.HasSubscription(),
+			"nextUrl":         "/account/subscribe",
 		})
 		return
 	}
 
 	ctx.JSON(map[string]interface{}{
-		"user":     user,
-		"isSetup":  isSetup,
-		"isActive": subscriptionIsActive,
+		"user":            user,
+		"isSetup":         isSetup,
+		"isActive":        subscriptionIsActive,
+		"hasSubscription": user.Account.HasSubscription(),
 	})
 }

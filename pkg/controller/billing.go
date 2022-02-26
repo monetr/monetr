@@ -27,14 +27,16 @@ func (c *Controller) handleBilling(p iris.Party) {
 // @Summary Create Checkout Session
 // @id create-checkout-session
 // @tags Billing
-// @description Create a checkout session for Stripe. This is used to manage new subscriptions to monetr and offload the complexity of managing subscriptions. **Note:** You cannot create a checkout session if you have an active subscrption.
+// @description Create a checkout session for Stripe. This is used to manage new subscriptions to monetr and offload the
+// @description complexity of managing subscriptions. **Note:** You cannot create a checkout session if you already have
+// @description a subscription that is not canceled associated with the account.
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
 // @Param createCheckoutSession body swag.CreateCheckoutSessionRequest true "New Checkout Session"
 // @Router /billing/create_checkout [post]
 // @Success 200 {object} swag.CreateCheckoutSessionResponse
-// @Failure 400 {object} ApiError Invalid request.
+// @Failure 400 {object} ApiError A bad request can be returned if the account already has an active subscription, or an incomplete subscription already created.
 // @Failure 500 {object} ApiError Something went wrong on our end or when communicating with Stripe.
 func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	isActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), c.mustGetAccountId(ctx))
@@ -49,6 +51,17 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	// there instead.
 	if isActive {
 		c.badRequest(ctx, "there is already an active subscription for your account")
+		return
+	}
+
+	hasSubscription, err := c.paywall.GetHasSubscription(c.getContext(ctx), c.mustGetAccountId(ctx))
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify that a subscription does not already exist")
+		return
+	}
+
+	if hasSubscription {
+		c.badRequest(ctx, "there is already a subscription associated with your account")
 		return
 	}
 
@@ -281,18 +294,13 @@ func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
 		return
 	}
 
-	// This is implemented here and in the stripe webhook handler. Eventually this should be moved so that this logic
-	// is only implemented in a single place, but I don't think right now is the time to do that.
-	var validUntil *time.Time
-	if stripe_helper.SubscriptionIsActive(*subscription) {
-		validUntil = myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
-	}
+	validUntil := myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
 
 	if err = c.billing.UpdateCustomerSubscription(
 		c.getContext(ctx),
 		account,
-		subscription.Customer.ID,
-		subscription.ID,
+		subscription.Customer.ID, subscription.ID,
+		subscription.Status,
 		validUntil,
 		time.Now(),
 	); err != nil {
@@ -324,7 +332,7 @@ func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
 // @Produce json
 // @Router /billing/portal [get]
 // @Success 200 {array} swag.CreatePortalSessionResponse
-// @Failure 402 {object} SubscriptionNotActiveError Returned if the user does not have an active subscription, this endpoint can only be used to update or cancel active subscriptions.
+// @Failure 400 {object} ApiError Returned if the customer does not have a subscription, even if that subscription is expired.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
@@ -333,8 +341,8 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 		return
 	}
 
-	if !account.IsSubscriptionActive() {
-		c.returnError(ctx, http.StatusPaymentRequired, "subscription is not active")
+	if !account.HasSubscription() {
+		c.badRequest(ctx, "account does not have a subscription")
 		return
 	}
 
@@ -373,6 +381,7 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 		}
 	}
 
+	// TODO Allow a custom return URL to be set.
 	returnUrl := ctx.GetReferrer().Raw
 	if returnUrl == "" {
 		returnUrl = fmt.Sprintf("https://%s", c.configuration.UIDomainName)

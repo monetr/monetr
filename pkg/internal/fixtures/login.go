@@ -13,6 +13,7 @@ import (
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/stretchr/testify/require"
+	"github.com/stripe/stripe-go/v72"
 )
 
 func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
@@ -40,12 +41,14 @@ func GivenIHaveABasicAccount(t *testing.T) (_ models.User, password string) {
 func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
 	db := testutils.GetPgDatabase(t)
 	repo := repository.NewUnauthenticatedRepository(db)
+	subStatus := stripe.SubscriptionStatusActive
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
 		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
 		StripeSubscriptionId:         myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t)),
 		StripeWebhookLatestTimestamp: myownsanity.TimeP(time.Now().Add(-4 * time.Minute)),
 		SubscriptionActiveUntil:      myownsanity.TimeP(time.Now().Add(10 * time.Minute)),
+		SubscriptionStatus:           &subStatus,
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")
