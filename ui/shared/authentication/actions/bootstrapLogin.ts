@@ -30,6 +30,7 @@ export default function useBootstrapLogin(): (user?: User | null, subscriptionIs
         payload: {
           user: new User(result.data.user),
           isActive: result.data.isActive,
+          hasSubscription: result.data.hasSubscription,
         },
       }))
       .catch((error: AxiosError) => {

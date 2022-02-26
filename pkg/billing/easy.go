@@ -3,17 +3,18 @@ package billing
 import (
 	"context"
 	"fmt"
-	"github.com/monetr/monetr/pkg/crumbs"
 	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/cache"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/stripe/stripe-go/v72"
 )
 
 func buildAccountCacheKey(accountId uint64) string {
@@ -25,12 +26,6 @@ type AccountRepository interface {
 	GetAccount(ctx context.Context, accountId uint64) (*models.Account, error)
 	GetAccountByCustomerId(ctx context.Context, stripeCustomerId string) (*models.Account, error)
 	UpdateAccount(ctx context.Context, account *models.Account) error
-}
-
-// BasicPayWall is used by the API middleware and other operations to restrict access to some features or functionality
-// that requires an active subscription.
-type BasicPayWall interface {
-	GetSubscriptionIsActive(ctx context.Context, accountId uint64) (bool, error)
 }
 
 // BasicBilling is used by the Stripe webhooks to maintain a subscription's status within our application. As the status
@@ -45,11 +40,24 @@ type BasicBilling interface {
 	// webhook for a subscription being created (which would have an incomplete status) can be delivered after a update
 	// webhook for the same subscription (which would indicate an active status) causing the subscription to incorrectly
 	// show as inactive.
-	UpdateSubscription(ctx context.Context, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error
+	UpdateSubscription(
+		ctx context.Context,
+		customerId, subscriptionId string,
+		status stripe.SubscriptionStatus,
+		activeUntil *time.Time,
+		timestamp time.Time,
+	) error
 	// UpdateCustomerSubscription does the same thing that UpdateSubscription does, but does not require that the
 	// stripe customerId match any customerId stored. Instead, it will take the provided account and update the customer
 	// ID and store it on the account with the new subscription data.
-	UpdateCustomerSubscription(ctx context.Context, account *models.Account, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error
+	UpdateCustomerSubscription(
+		ctx context.Context,
+		account *models.Account,
+		customerId, subscriptionId string,
+		status stripe.SubscriptionStatus,
+		activeUntil *time.Time,
+		timestamp time.Time,
+	) error
 }
 
 var (
@@ -150,73 +158,6 @@ func (p *postgresAccountRepository) UpdateAccount(ctx context.Context, account *
 }
 
 var (
-	_ BasicPayWall = &baseBasicPaywall{}
-)
-
-type baseBasicPaywall struct {
-	log      *logrus.Entry
-	accounts AccountRepository
-}
-
-func NewBasicPaywall(log *logrus.Entry, repo AccountRepository) BasicPayWall {
-	return &baseBasicPaywall{
-		log:      log,
-		accounts: repo,
-	}
-}
-
-// GetSubscriptionIsActive will retrieve the account data from the AccountRepository interface. This means it is
-// possible for it to return a stale response within a few seconds. But in general it should be acceptable. When an
-// account is updated -> its cache is invalidated. There is likely a very small window where an invalid state could be
-// evaluated, but it should be fine.
-func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountId uint64) (active bool, err error) {
-	span := sentry.StartSpan(ctx, "Billing - GetSubscriptionIsActive")
-	defer span.Finish()
-
-	defer func() {
-		if hub := sentry.GetHubFromContext(ctx); hub != nil {
-			level := sentry.LevelDebug
-			crumbType := "debug"
-			if err != nil {
-				crumbType = "error"
-				level = sentry.LevelError
-			}
-
-			var message string
-			if active {
-				message = "Subscription is active."
-			} else if err == nil {
-				message = "Subscription is not active, the current endpoint may require an active subscription."
-			} else {
-				message = "There was a problem verifying whether or not the subscription was active"
-			}
-
-			hub.AddBreadcrumb(&sentry.Breadcrumb{
-				Type:      crumbType,
-				Category:  "subscription",
-				Message:   message,
-				Level:     level,
-				Timestamp: time.Now(),
-			}, nil)
-		}
-	}()
-
-	log := b.log.WithContext(span.Context()).WithField("accountId", accountId)
-
-	log.Trace("checking if account subscription is active")
-
-	account, err := b.accounts.GetAccount(span.Context(), accountId)
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return false, errors.Wrap(err, "cannot determine if account subscription is active")
-	}
-
-	span.Status = sentry.SpanStatusOK
-
-	return account.IsSubscriptionActive(), nil
-}
-
-var (
 	_ BasicBilling = &baseBasicBilling{}
 )
 
@@ -234,7 +175,13 @@ func NewBasicBilling(log *logrus.Entry, repo AccountRepository, notifications pu
 	}
 }
 
-func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error {
+func (b *baseBasicBilling) UpdateSubscription(
+	ctx context.Context,
+	customerId, subscriptionId string,
+	status stripe.SubscriptionStatus,
+	activeUntil *time.Time,
+	timestamp time.Time,
+) error {
 	span := sentry.StartSpan(ctx, "Billing - UpdateSubscription")
 	defer span.Finish()
 
@@ -251,10 +198,24 @@ func (b *baseBasicBilling) UpdateSubscription(ctx context.Context, customerId, s
 		return errors.Wrap(err, "failed to retrieve account by stripe customer Id")
 	}
 
-	return b.UpdateCustomerSubscription(span.Context(), account, customerId, subscriptionId, activeUntil, timestamp)
+	return b.UpdateCustomerSubscription(
+		span.Context(),
+		account,
+		customerId, subscriptionId,
+		status,
+		activeUntil,
+		timestamp,
+	)
 }
 
-func (b *baseBasicBilling) UpdateCustomerSubscription(ctx context.Context, account *models.Account, customerId, subscriptionId string, activeUntil *time.Time, timestamp time.Time) error {
+func (b *baseBasicBilling) UpdateCustomerSubscription(
+	ctx context.Context,
+	account *models.Account,
+	customerId, subscriptionId string,
+	status stripe.SubscriptionStatus,
+	activeUntil *time.Time,
+	timestamp time.Time,
+) error {
 	span := sentry.StartSpan(ctx, "Billing - UpdateCustomerSubscription")
 	defer span.Finish()
 
@@ -316,6 +277,7 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(ctx context.Context, accou
 	account.StripeSubscriptionId = &subscriptionId
 	account.SubscriptionActiveUntil = activeUntil
 	account.StripeWebhookLatestTimestamp = &timestamp
+	account.SubscriptionStatus = &status
 
 	if err := b.repo.UpdateAccount(span.Context(), account); err != nil {
 		log.WithError(err).Errorf("failed to update account subscription status")
@@ -323,6 +285,7 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(ctx context.Context, accou
 	}
 
 	// Check to see if the subscription status of the account has changed with this update to be.
+	// TODO This might not be the best representation of "active" at this point since past due can technically be active?
 	if account.IsSubscriptionActive() != currentlyActive {
 		// If it has check to see if it was previously active.
 		updatedChannelName := fmt.Sprintf("account:%d:subscription:updated", account.AccountId)

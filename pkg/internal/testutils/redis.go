@@ -5,6 +5,7 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
+	"github.com/monetr/monetr/pkg/cache"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,4 +28,10 @@ func GetRedisPool(t *testing.T) *redis.Pool {
 	})
 
 	return pool
+}
+
+func GetCache(t *testing.T) cache.Cache {
+	log := GetLog(t)
+	redisPool := GetRedisPool(t)
+	return cache.NewCache(log, redisPool)
 }

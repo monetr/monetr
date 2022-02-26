@@ -20,6 +20,7 @@ export interface LoginSuccess extends Action<typeof Login.Success> {
   payload: {
     user: User;
     isActive: boolean;
+    hasSubscription: boolean;
   };
 }
 
