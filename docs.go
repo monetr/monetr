@@ -1255,7 +1255,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Create a checkout session for Stripe. This is used to manage new subscriptions to monetr and offload the complexity of managing subscriptions. **Note:** You cannot create a checkout session if you have an active subscrption.",
+                "description": "Create a checkout session for Stripe. This is used to manage new subscriptions to monetr and offload the\ncomplexity of managing subscriptions. **Note:** You cannot create a checkout session if you already have\na subscription that is not canceled associated with the account.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1326,10 +1326,10 @@ const docTemplate = `{
                             }
                         }
                     },
-                    "402": {
-                        "description": "Payment Required",
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.SubscriptionNotActiveError"
+                            "$ref": "#/definitions/controller.ApiError"
                         }
                     },
                     "500": {
@@ -2139,6 +2139,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "subscriptionActiveUntil": {
+                    "type": "string"
+                },
+                "subscriptionStatus": {
                     "type": "string"
                 },
                 "timezone": {

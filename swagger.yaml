@@ -69,6 +69,8 @@ definitions:
         type: integer
       subscriptionActiveUntil:
         type: string
+      subscriptionStatus:
+        type: string
       timezone:
         type: string
     type: object
@@ -2302,9 +2304,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a checkout session for Stripe. This is used to manage new
-        subscriptions to monetr and offload the complexity of managing subscriptions.
-        **Note:** You cannot create a checkout session if you have an active subscrption.
+      description: |-
+        Create a checkout session for Stripe. This is used to manage new subscriptions to monetr and offload the
+        complexity of managing subscriptions. **Note:** You cannot create a checkout session if you already have
+        a subscription that is not canceled associated with the account.
       operationId: create-checkout-session
       parameters:
       - description: New Checkout Session
@@ -2348,10 +2351,10 @@ paths:
             items:
               $ref: '#/definitions/swag.CreatePortalSessionResponse'
             type: array
-        "402":
-          description: Payment Required
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/controller.SubscriptionNotActiveError'
+            $ref: '#/definitions/controller.ApiError'
         "500":
           description: Internal Server Error
           schema:
