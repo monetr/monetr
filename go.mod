@@ -18,9 +18,9 @@ require (
 	github.com/gomodule/redigo v1.8.8
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/vault/api v1.3.1
-	github.com/iris-contrib/middleware/cors v0.0.0-20220218204641-8e282f24acb7
+	github.com/iris-contrib/middleware/cors v0.0.0-20220301201128-27fa0f6a7d7e
 	github.com/jarcoal/httpmock v1.1.0
-	github.com/kataras/iris/v12 v12.2.0-alpha6
+	github.com/kataras/iris/v12 v12.2.0-alpha9
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.0.74
@@ -66,7 +66,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.0.0 // indirect
@@ -92,12 +92,12 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kataras/blocks v0.0.4 // indirect
+	github.com/kataras/blocks v0.0.5 // indirect
 	github.com/kataras/golog v0.1.7 // indirect
 	github.com/kataras/pio v0.0.10 // indirect
 	github.com/kataras/sitemap v0.0.5 // indirect
 	github.com/kataras/tunnel v0.0.3 // indirect
-	github.com/klauspost/compress v1.14.3 // indirect
+	github.com/klauspost/compress v1.14.4 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -145,11 +145,11 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
+	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
+	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/grpc v1.43.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
