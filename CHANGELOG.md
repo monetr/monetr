@@ -1,5 +1,23 @@
 # Changelog
 
+### [0.9.9](https://github.com/monetr/monetr/compare/v0.9.8...v0.9.9) (2022-03-09)
+
+
+### Bug Fixes
+
+* Fixed N/A string for empty expenses/goals. ([f5a4a3b](https://github.com/monetr/monetr/commit/f5a4a3bdf6ba5325f95c4c1446ffc336b347fc92))
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors commit hash to 27fa0f6 ([bf06340](https://github.com/monetr/monetr/commit/bf063407f453c6f4fe9ee2a9210fe8b6f26dda83))
+* **ui:** update dependency @types/react-dom to v17.0.13 ([d4cd55e](https://github.com/monetr/monetr/commit/d4cd55ee7bbf11cddcf3effd0a48a7f346775350))
+* **ui:** update dependency eslint to v8.10.0 ([4a890c9](https://github.com/monetr/monetr/commit/4a890c9f296d372b6eb1a39f12fb467bc1667257))
+* **ui:** update dependency react-router-dom to v6.2.2 ([325b5f3](https://github.com/monetr/monetr/commit/325b5f37e637bc3a1ce33e2177ef4e03dbfe6ff1))
+* **ui:** update dependency sass to v1.49.9 ([fb6c872](https://github.com/monetr/monetr/commit/fb6c8721d51ce0e27826024b34f60320efd5f817))
+* **ui:** update dependency typescript to v4.6.2 ([589c67a](https://github.com/monetr/monetr/commit/589c67a6162fe63c7deee2a7ad64137b1b79ab4f))
+* **ui:** update material-ui monorepo ([927c5b9](https://github.com/monetr/monetr/commit/927c5b9f4c3fb1e5b06ebc8cc38f10a5c4f4e476))
+
 ### [0.9.8](https://github.com/monetr/monetr/compare/v0.9.7...v0.9.8) (2022-02-26)
 
 
