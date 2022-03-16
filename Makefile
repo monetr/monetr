@@ -101,7 +101,9 @@ endif
 GO_SRC_DIR=$(PWD)/pkg
 ALL_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*.go')
 TEST_GO_FILES=$(shell find $(GO_SRC_DIR) -type f -name '*_test.go')
-APP_GO_FILES=$(filter-out $(TEST_GO_FILES),$(ALL_GO_FILES))
+ALL_SQL_FILES=$(shell find $(GO_SRC_DIR)/migrations/schema -type f -name '*.sql')
+# Include the SQL files in this variable, this way when new migrations are added then the app will trigger a rebuild.
+APP_GO_FILES=$(filter-out $(TEST_GO_FILES),$(ALL_GO_FILES)) $(ALL_SQL_FILES)
 
 PUBLIC_DIR=$(PWD)/public
 UI_SRC_DIR=$(PWD)/ui
