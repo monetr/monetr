@@ -72,16 +72,18 @@ func (c *Controller) removeLinkTokenFromCache(ctx context.Context, log *logrus.E
 // @Success 400 {object} swag.PlaidLinkLimitError
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) newPlaidToken(ctx iris.Context) {
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
 	// Retrieve the user's details. We need to pass some of these along to
 	// plaid as part of the linking process.
-	me, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
+	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
 		return
 	}
 
 	if maxLinks := c.configuration.Plaid.MaxNumberOfLinks; maxLinks > 0 {
-		numberOfLinks, err := c.mustGetAuthenticatedRepository(ctx).GetNumberOfPlaidLinks(c.getContext(ctx))
+		numberOfLinks, err := repo.GetNumberOfPlaidLinks(c.getContext(ctx))
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine the number of existing plaid links")
 			return
