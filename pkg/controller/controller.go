@@ -18,6 +18,7 @@ import (
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/cache"
+	"github.com/monetr/monetr/pkg/captcha"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/ctxkeys"
@@ -31,13 +32,12 @@ import (
 	"github.com/monetr/monetr/pkg/verification"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/ezzarghili/recaptcha-go.v4"
 )
 
 type Controller struct {
 	db                       *pg.DB
 	configuration            config.Configuration
-	captcha                  *recaptcha.ReCAPTCHA
+	captcha                  captcha.Verification
 	plaid                    platypus.Platypus
 	plaidWebhookVerification platypus.WebhookVerification
 	plaidSecrets             secrets.PlaidSecretsProvider
@@ -70,13 +70,11 @@ func NewController(
 	basicPaywall billing.BasicPayWall,
 	smtpCommunication mail.Communication,
 ) *Controller {
-	var captcha recaptcha.ReCAPTCHA
+	var recaptcha captcha.Verification
 	var err error
 	if configuration.ReCAPTCHA.Enabled {
-		captcha, err = recaptcha.NewReCAPTCHA(
+		recaptcha, err = captcha.NewReCAPTCHAVerification(
 			configuration.ReCAPTCHA.PrivateKey,
-			recaptcha.V2,
-			30*time.Second,
 		)
 		if err != nil {
 			panic(err)
@@ -116,7 +114,7 @@ func NewController(
 	}
 
 	return &Controller{
-		captcha:                  &captcha,
+		captcha:                  recaptcha,
 		configuration:            configuration,
 		db:                       db,
 		plaid:                    plaidClient,

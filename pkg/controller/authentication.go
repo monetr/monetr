@@ -799,7 +799,7 @@ func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) e
 	span := sentry.StartSpan(ctx, "ReCAPTCHA")
 	defer span.Finish()
 
-	return c.captcha.Verify(captcha)
+	return c.captcha.VerifyCaptcha(ctx, captcha)
 }
 
 func (c *Controller) validateLogin(email, password string) error {

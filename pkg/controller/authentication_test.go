@@ -522,7 +522,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("valid ReCAPTCHA is required: remote error codes: [invalid-input-secret]")
+		response.JSON().Path("$.error").String().Equal("valid ReCAPTCHA is required: invalid ReCAPTCHA: remote error codes: [invalid-input-secret]")
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
