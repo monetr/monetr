@@ -5,5 +5,6 @@ allow = [
   "MIT",
   "MPL-2.0",
   "Unlicense",
+  "ISC",
 ]
 deny = []
