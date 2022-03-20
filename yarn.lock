@@ -4812,10 +4812,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-google-recaptcha@2.1.4":
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/@types/react-google-recaptcha/-/react-google-recaptcha-2.1.4.tgz#29ad60ef07dd0209cf69c9b65e3408d1c603a1fc"
-  integrity sha512-ZtL13ZpdIADXhZNaGppD5ueSMon19eemuhwGjnmPtK4+OH98v2jkFWuiSVQRvAl8KN5oZdxnTk6sJX6oXBlRvw==
+"@types/react-google-recaptcha@2.1.5":
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/@types/react-google-recaptcha/-/react-google-recaptcha-2.1.5.tgz#af157dc2e4bde3355f9b815a64f90e85cfa9df8b"
+  integrity sha512-iWTjmVttlNgp0teyh7eBXqNOQzVq2RWNiFROWjraOptRnb1OcHJehQnji0sjqIRAk9K0z8stjyhU+OLpPb0N6w==
   dependencies:
     "@types/react" "*"
 
