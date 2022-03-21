@@ -1,6 +1,6 @@
 module github.com/monetr/monetr
 
-go 1.17
+go 1.18
 
 require (
 	github.com/MicahParks/keyfunc v1.0.1

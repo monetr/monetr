@@ -9,6 +9,7 @@ COMMA=,
 
 # This stuff is used for versioning monetr when doing a release or developing locally.
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+BUILD_HOST=$(shell hostname)
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 RELEASE_REVISION=$(shell git rev-parse HEAD)
 RELEASE_VERSION ?= $(shell git describe --tags --dirty)
@@ -185,7 +186,7 @@ $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
 $(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
 endif
-	$(GO) build -ldflags "-s -w -X main.buildTime=$(BUILD_TIME) -X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
+	$(GO) build -ldflags "-s -w -X main.buildHost=$(BUILD_HOST) -X main.buildTime=$(BUILD_TIME) -X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
 	$(call infoMsg,Built monetr binary for: $(GOOS)/$(GOARCH))
 	$(call infoMsg,          Build Version: $(RELEASE_VERSION))
 
