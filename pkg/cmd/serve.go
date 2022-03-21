@@ -222,6 +222,11 @@ func RunServer() error {
 		log.WithError(err).Fatalf("failed to start background job worker")
 		return err
 	}
+	defer func() {
+		if err := backgroundJobs.Close(); err != nil {
+			log.WithError(err).Error("failed to close background jobs processor gracefully")
+		}
+	}()
 
 	app := application.NewApp(configuration, getControllers(
 		log,
