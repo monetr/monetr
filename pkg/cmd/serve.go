@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net"
 	"os"
 	"time"
 
@@ -242,8 +241,6 @@ func RunServer() error {
 		smtpClient,
 	)...)
 
-	unixSocket := false
-
 	idleConnsClosed := make(chan struct{})
 	iris.RegisterOnInterrupt(func() {
 		log.Info("shutting down")
@@ -256,24 +253,8 @@ func RunServer() error {
 		close(idleConnsClosed)
 	})
 
-	if unixSocket {
-		workingDirectory, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
-		listener, err := net.ListenUnix("unix", &net.UnixAddr{
-			Name: workingDirectory + "/api.sock",
-			Net:  "unix",
-		})
-		if err != nil {
-			panic(err)
-		}
-
-		return app.Run(iris.Listener(listener))
-	} else {
-		listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)
-		_ = app.Listen(listenAddress, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
-	}
+	listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)
+	_ = app.Listen(listenAddress, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
 
 	<-idleConnsClosed
 
