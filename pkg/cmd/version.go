@@ -28,20 +28,24 @@ func newVersionCommand(parent *cobra.Command) {
 				"Version:      %s\n" +
 				"Revision:     %s\n" +
 				"Build time:   %s\n" +
+				"Build host:   %s\n" +
 				"Embedded UI:  %t\n" +
 				"Architecture: %s\n" +
 				"OS:           %s\n" +
-				"Compiler:     %s\n"
+				"Compiler:     %s\n" +
+				"Go Version:   %s\n"
 
 			fmt.Printf(
 				detailedString,
 				build.Release,
 				build.Revision,
 				build.BuildTime,
+				build.BuildHost,
 				ui.EmbeddedUI,
 				runtime.GOARCH,
 				runtime.GOOS,
 				runtime.Compiler,
+				runtime.Version(),
 			)
 
 			return nil

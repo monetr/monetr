@@ -9,12 +9,14 @@ import (
 var (
 	buildRevision = ""
 	buildTime     = ""
+	buildHost     = ""
 	release       = ""
 )
 
 func main() {
 	build.Revision = buildRevision
 	build.BuildTime = buildTime
+	build.BuildHost = buildHost
 	if release == "" {
 		build.Release = buildRevision
 	} else {
