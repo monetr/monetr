@@ -27,3 +27,4 @@ rest-api-junit.xml
 rest-api-tests.json
 
 Brewfile.lock.json
+.vscode
