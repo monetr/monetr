@@ -1,5 +1,44 @@
 # Changelog
 
+### [0.9.10](https://github.com/monetr/monetr/compare/v0.9.9...v0.9.10) (2022-03-21)
+
+
+### Features
+
+* Laying the groundwork for TOTP. ([46f712e](https://github.com/monetr/monetr/commit/46f712e287e7a6a0f151f28c33a4a85ff4a87ed1))
+
+
+### Bug Fixes
+
+* Adding theme color to manifest.json. ([e30de2d](https://github.com/monetr/monetr/commit/e30de2d81c885d305bbdf772276632ba651b825c))
+* Close background job processor on shutdown. ([89e1084](https://github.com/monetr/monetr/commit/89e10845a2120ea3914c4b87275aa11457405e4e)), closes [#744](https://github.com/monetr/monetr/issues/744)
+* Fixing timezone for "last sync" date. ([a1682da](https://github.com/monetr/monetr/commit/a1682dabc1cf6059d433e44555facecf6b3ce720))
+
+
+### Miscellaneous
+
+* Add ISC license to allow list. ([13dc6f1](https://github.com/monetr/monetr/commit/13dc6f15fa26683d84b0104c74f135eaadaf02cc))
+* Add vscode to git ignore. ([a0dca61](https://github.com/monetr/monetr/commit/a0dca612cf7fc6e6f628e954720eac41fc040658))
+* Minor code cleanup ([38ae436](https://github.com/monetr/monetr/commit/38ae436b2d32d667a425b69a784c8b4f5c03733e))
+* Minor makefile improvements. ([8bdb59d](https://github.com/monetr/monetr/commit/8bdb59da0ee6101336c29b4b2f34db2ede64aab1))
+* Remove unused unix socket code. ([5ff0304](https://github.com/monetr/monetr/commit/5ff030466bdb84ac8aa8072edb0524ee73de8823))
+* Start using the proper Captcha interface. ([2143afc](https://github.com/monetr/monetr/commit/2143afc0135af4e5d65c4efcfe29f495467462a3))
+
+
+### Dependencies
+
+* **api:** update module github.com/stretchr/testify to v1.7.1 ([6e53b6f](https://github.com/monetr/monetr/commit/6e53b6f90f76e02219bed1ece335e12e16234169))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.94.0 ([f48da3d](https://github.com/monetr/monetr/commit/f48da3d0f47742e81038b73212044c53d895af9f))
+* **ui:** update dependency @babel/core to v7.17.8 ([3b5571c](https://github.com/monetr/monetr/commit/3b5571c9947719a458e91667160dbad8eb3e26bf))
+* **ui:** update dependency @emotion/react to v11.8.2 ([f7dd0eb](https://github.com/monetr/monetr/commit/f7dd0ebe904d8940ba293afd2d01cd1cf44f4774))
+* **ui:** update dependency @testing-library/react to v12.1.4 ([f0ee3e6](https://github.com/monetr/monetr/commit/f0ee3e66350a964a0f607679d1cb5f6837173972))
+* **ui:** update dependency @types/react to v17.0.41 ([40d514a](https://github.com/monetr/monetr/commit/40d514a9ad8448b857f368dd06252e89ddace033))
+* **ui:** update dependency @types/react-dom to v17.0.14 ([66fccc3](https://github.com/monetr/monetr/commit/66fccc351ef6e962d9262f4251fa09dde52dcd89))
+* **ui:** update dependency @types/react-google-recaptcha to v2.1.5 ([00366ea](https://github.com/monetr/monetr/commit/00366ea92c3627ee7148c3c906b22fb8185d98cd))
+* **ui:** update dependency @types/react-redux to v7.1.23 ([494195d](https://github.com/monetr/monetr/commit/494195d1d0950a63dc4b8e683ae032d6abc16f5b))
+* **ui:** update dependency eslint-plugin-react to v7.29.4 ([208410a](https://github.com/monetr/monetr/commit/208410aeea79d48e3010a501010ac0f12bdfd973))
+* **ui:** update dependency redoc-cli to v0.13.9 ([43d369e](https://github.com/monetr/monetr/commit/43d369ea286346de2fe048b2a1f6e09ecf159421))
+
 ### [0.9.9](https://github.com/monetr/monetr/compare/v0.9.8...v0.9.9) (2022-03-09)
 
 
