@@ -36,7 +36,7 @@ GO_BINARY=$(shell which go)
 # Check to see if the user has golang installed. If they don't then install it locally just for this project.
 ifeq ("$(strip $(GO_BINARY))","")
 GOROOT=$(LOCAL_BIN)/go
-GOVERSION=go1.17.5
+GOVERSION=go1.18.0
 GO_BINARY=$(GOROOT)/bin/go
 
 GO=$(GO_BINARY)
