@@ -11,7 +11,7 @@ import { getLinks } from 'shared/links/selectors/getLinks';
 import { getLinksLoading } from 'shared/links/selectors/getLinksLoading';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
 import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import { ArrowDropDown, CheckCircle } from '@mui/icons-material';
+import { AccountBalanceWallet, ArrowDropDown, CheckCircle } from '@mui/icons-material';
 import classnames from 'classnames';
 import { useNavigate } from 'react-router-dom';
 
@@ -116,18 +116,14 @@ const BankAccountSelector = (): JSX.Element => {
   return (
     <Fragment>
       <Button
-        className="text-white"
+        color="inherit"
+        className="text-lg w-full"
         onClick={ handleOpenMenu }
         aria-label="menu"
       >
-        <Typography
-          color="inherit"
-          className="mr-1"
-          variant="h6"
-        >
-          { title }
-        </Typography>
-        <ArrowDropDown scale={ 1.25 } color="inherit"/>
+        <AccountBalanceWallet className="mr-2.5"/>
+        { title }
+        <ArrowDropDown scale={ 1.25 } color="inherit" className="ml-auto"/>
       </Button>
       <Menu
         className="w-96 pt-0 pb-0"

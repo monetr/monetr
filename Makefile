@@ -236,6 +236,27 @@ clean:
 	-rm -rf $(PWD)/Notes.md
 	-git clean -f -X $(STATIC_DIR)
 
+DOCKER=$(shell which docker)
+DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env
+COMPOSE_FILE=$(PWD)/docker-compose.yaml
+ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")
+    COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(COMPOSE_FILE)
+else
+	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
+endif
+develop: $(NODE_MODULES)
+	$(COMPOSE) up -d
+
+logs:
+	$(COMPOSE) logs -f
+
+webhooks:
+	$(COMPOSE) up ngrok -d
+	$(COMPOSE) restart monetr
+
+shutdown:
+	$(COMPOSE) down --remove-orphans -v
+
 SWAGGER_YAML=$(PWD)/docs/swagger.yaml
 $(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES)
 	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \

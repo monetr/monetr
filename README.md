@@ -33,6 +33,14 @@ In order to run monetr locally you will need sandbox credentials for Plaid, you 
 [Plaid Sign Up](https://dashboard.plaid.com/signup). Once you have a Client ID and a Client Secret you can run the
 following command in the monetr project directory to start a local environment.
 
+If you run into any missing commands you can run
+
+```shell
+brew bundle
+```
+
+To install all of the tools needed to develop monetr.
+
 You'll want to install node dependencies before starting the containers, as yarn install is extremely slow inside
 docker.
 
@@ -53,6 +61,53 @@ development easier.
 
 The API is run inside Docker using [delve](https://github.com/go-delve/delve), so if you want to or prefer step
 debugging for development you can connect your editor to `localhost:2345` for remote debugging.
+
+It may take a few moments for the API and the UI to get running. But once they are you can access the application by
+navigating to `http://localhost` in a browser.
+
+---
+
+If you want to/need to develop using webhooks from Plaid then you can run the following command to enable ngrok.
+
+```shell
+docker compose up ngrok -d
+PLAID_CLIENT_ID="Your Client ID" PLAID_CLIENT_SECRET="Your Secret" docker compose restart monetr
+```
+
+This will restart the `monetr` API container as well as bring up the ngrok container. If you have ngrok API credentials
+you can specify them using the `NGROK_AUTH` environment variable. If you do not have credentials you will be given a
+temporary URL where webhooks will be directed. The hot-reload container for the API will also grab this URL
+automatically when it is restarted as well as enable Plaid webhooks. Note: Right now it is required to specify the Plaid
+credentials again, otherwise they would be overwritten when the monetr container is restarted.
+
+Once ngrok is running you can access it by going to `http://localhost:4040`.
+
+---
+
+Once you have finished any work and you want to tear down the local development environment you can run:
+
+```shell
+docker compose down --remove-orphans -v
+```
+
+Note: If you have created any Plaid links, especially ones with webhooks enabled; it is recommended to remove them
+before tearing everything down. This way Plaid isn't left with useless stuff in their sandbox and doesn't continue to
+send webhooks to an ngrok instance that isn't being used anymore.
+
+Once everything is down you can also run:
+
+```shell
+make clean
+```
+
+To clean up any extra things like node modules or temp files that may have been created in the project directory.
+
+---
+
+Most of these can be run directly through `make` but I cannot guarantee that it will support Windows at the moment. To
+get started you can run `make develop` to start the development environment. `make logs` will tail all the logs for
+everything running. `make webhooks` will provision and setup containers for developing webhooks, and `make shutdown`
+will take down the development environment.
 
 Contributions are more than welcome!
 

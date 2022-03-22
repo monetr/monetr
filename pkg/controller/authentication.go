@@ -97,13 +97,14 @@ func (c *Controller) handleAuthentication(p router.Party) {
 // @Success 200 {object} swag.LoginResponse
 // @Failure 400 {object} swag.LoginInvalidRequestResponse Required data is missing.
 // @Failure 403 {object} swag.LoginInvalidCredentialsResponse Invalid credentials.
-// @Failure 428 {object} swag.LoginEmailIsNotVerifiedResponse Email address is not verified.
+// @Failure 428 {object} swag.LoginPreconditionRequiredResponse Login requirements are missing.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx iris.Context) {
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
+		TOTP     string `json:"totp"`
 	}
 	if err := ctx.ReadJSON(&loginRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
@@ -121,6 +122,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
 	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
+	loginRequest.TOTP = strings.TrimSpace(loginRequest.TOTP)
 
 	if err := c.validateLogin(loginRequest.Email, loginRequest.Password); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "login is not valid")
@@ -144,12 +146,35 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to authenticate")
 		return
 	}
+	log := c.getLog(ctx).WithField("loginId", login.LoginId)
 
 	// If we want to verify emails and the login does not have a verified email address, then return an error to the
 	// user.
 	if c.configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
-		c.returnError(ctx, http.StatusPreconditionRequired, "email address is not verified")
+		log.Debug("login email address is not verified, please verify before continuing")
+		c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
 		return
+	}
+
+	// Check if the login requires MFA in order to authenticate.
+	if login.TOTP != "" && loginRequest.TOTP == "" {
+		log.Debug("login requires TOTP MFA, but none was provided")
+		c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
+		return
+	} else if login.TOTP != "" && loginRequest.TOTP != "" {
+		// If the login does require TOTP and a code was provided in the request, then validate that the provided code is
+		// correct.
+		log.Trace("login requires TOTP MFA, and a code was provided; it will be verified")
+
+		if err := login.VerifyTOTP(loginRequest.TOTP); err != nil {
+			log.Trace("provided TOTP MFA code is not valid")
+			c.returnError(ctx, http.StatusForbidden, "invalid TOTP code")
+			return
+		}
+
+		log.Trace("provided TOTP MFA code is valid")
+	} else if login.TOTP == "" && loginRequest.TOTP != "" {
+		log.Warn("login does not require TOTP MFA, but a code was provided anyway")
 	}
 
 	switch len(login.Users) {

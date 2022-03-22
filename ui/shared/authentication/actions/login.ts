@@ -1,4 +1,3 @@
-import User from 'models/User';
 import { useNavigate } from 'react-router-dom';
 import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import request from 'shared/util/request';
@@ -22,20 +21,29 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         return bootstrapLogin().then(() => navigate(result?.data?.nextUrl || '/'));
       })
       .catch(error => {
-        // If there was an error logging in, then establish the reason why from the error message. But if that message
-        // is not present in the response then just use a default "failed to authenticate" message.
-        const errorMessage = error?.response?.data?.error || 'Failed to authenticate.';
-
         // More important than the message though is the status of the response. If the status code was 428 then that
         // means the credentials are valid, but the user has not verified their email yet. If this is the case we want
         // to redirect them to the resend email verification page and autofill that user's email address.
         switch (error?.response?.status) {
           case 428: // Email not verified.
-            return navigate('/verify/email/resend', {
-              state: {
-                'emailAddress': loginArgs.email,
-              }
-            });
+            switch (error?.response?.data?.code) {
+              case 'MFA_REQUIRED':
+                return navigate('/login/mfa', {
+                  state: {
+                    'emailAddress': loginArgs.email,
+                    'password': loginArgs.password,
+                    // TODO ReCAPTCHA?
+                  }
+                });
+              case 'EMAIL_NOT_VERIFIED':
+                return navigate('/verify/email/resend', {
+                  state: {
+                    'emailAddress': loginArgs.email,
+                  }
+                });
+              default:
+                throw error;
+            }
           case 403: // Invalid login.
             throw error;
         }

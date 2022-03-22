@@ -16,18 +16,15 @@ require (
 	github.com/gocraft/work v0.5.1
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/gomodule/redigo v1.8.8
-	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/vault/api v1.3.1
 	github.com/iris-contrib/middleware/cors v0.0.0-20220301201128-27fa0f6a7d7e
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/kataras/iris/v12 v12.2.0-alpha9
-	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.0.74
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	github.com/plaid/plaid-go v1.10.0
 	github.com/prometheus/client_golang v1.12.1
-	github.com/robfig/cron v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
 	github.com/spf13/viper v1.10.0
@@ -35,8 +32,7 @@ require (
 	github.com/stripe/stripe-go/v72 v72.94.0
 	github.com/teambition/rrule-go v1.7.3
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
-	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
@@ -64,6 +60,7 @@ require (
 	github.com/goccy/go-json v0.9.4 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -99,6 +96,7 @@ require (
 	github.com/kataras/tunnel v0.0.3 // indirect
 	github.com/klauspost/compress v1.14.4 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
@@ -117,6 +115,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.32.1 // indirect
 	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/robfig/cron v1.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
@@ -145,12 +144,14 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
+	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
 	google.golang.org/grpc v1.43.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
