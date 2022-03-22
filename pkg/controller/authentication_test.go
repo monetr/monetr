@@ -35,6 +35,59 @@ func TestLogin(t *testing.T) {
 		AssertSetTokenCookie(t, response)
 	})
 
+	t.Run("cannot login without TOTP when enabled", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		// Then configure the login fixture with TOTP.
+		fixtures.GivenIHaveTOTPForLogin(t, user.Login)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(swag.LoginRequest{
+				Email:    user.Login.Email,
+				Password: password,
+			}).
+			Expect()
+
+		response.Status(http.StatusPreconditionRequired)
+		response.JSON().Path("$.error").String().Equal("login requires MFA")
+		response.JSON().Path("$.code").String().Equal("MFA_REQUIRED")
+		response.Cookies().Empty()
+	})
+
+	t.Run("can login when TOTP is provided", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		// Then configure the login fixture with TOTP.
+		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, user.Login)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(swag.LoginRequest{
+				Email:    user.Login.Email,
+				Password: password,
+				TOTP:     loginTotp.Now(),
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		AssertSetTokenCookie(t, response)
+	})
+
+	t.Run("can provide TOTP when it is not enabled", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+
+		response := e.POST("/api/authentication/login").
+			WithJSON(swag.LoginRequest{
+				Email:    user.Login.Email,
+				Password: password,
+				TOTP:     "123456",
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		AssertSetTokenCookie(t, response)
+	})
+
 	t.Run("bad cookie name", func(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
 		conf.Server.Cookies.Name = ""
@@ -277,6 +330,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusPreconditionRequired)
 		response.JSON().Path("$.error").String().Equal("email address is not verified")
+		response.JSON().Path("$.code").String().Equal("EMAIL_NOT_VERIFIED")
 		response.JSON().Object().NotContainsKey("token")
 	})
 }

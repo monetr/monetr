@@ -1,5 +1,7 @@
+import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import NavigationBar from 'NavigationBar';
-import React, { Fragment, useEffect, useState } from 'react';
+import Settings from 'pages/settings';
+import React, { Fragment, useState } from 'react';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
 import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
@@ -62,17 +64,23 @@ const AuthenticatedApp = (): JSX.Element => {
 
   return (
     <Fragment>
-      <NavigationBar/>
-      <Routes>
-        <Route path="/register" element={ <Navigate replace to="/"/> }/>
-        <Route path="/login" element={ <Navigate replace to="/"/> }/>
-        <Route path="/logout" element={ <Logout/> }/>
-        <Route path="/transactions" element={ <TransactionsView/> }/>
-        <Route path="/expenses" element={ <ExpensesView/> }/>
-        <Route path="/goals" element={ <GoalsView/> }/>
-        <Route path="/accounts" element={ <AllAccountsView/> }/>
-        <Route path="*" element={ <Navigate replace to="/transactions"/> }/>
-      </Routes>
+      <div className="flex h-full min-w-0 min-h-full">
+        <Sidebar/>
+        <div className="relative flex flex-col flex-1 w-0 min-w-0 mb-8 lg:ml-64">
+          <NavigationBar/>
+          <Routes>
+            <Route path="/register" element={ <Navigate replace to="/"/> }/>
+            <Route path="/login" element={ <Navigate replace to="/"/> }/>
+            <Route path="/logout" element={ <Logout/> }/>
+            <Route path="/transactions" element={ <TransactionsView/> }/>
+            <Route path="/expenses" element={ <ExpensesView/> }/>
+            <Route path="/goals" element={ <GoalsView/> }/>
+            <Route path="/accounts" element={ <AllAccountsView/> }/>
+            <Route path="/settings" element={ <Settings/> }/>
+            <Route path="*" element={ <Navigate replace to="/transactions"/> }/>
+          </Routes>
+        </div>
+      </div>
     </Fragment>
   );
 };

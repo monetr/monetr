@@ -64,6 +64,10 @@ func RunServer() error {
 		log.WithField("config", configFileName).Info("config file loaded")
 	}
 
+	if configuration.Plaid.WebhooksEnabled {
+		log.WithField("domain", configuration.Plaid.WebhooksDomain).Trace("plaid webhooks are enabled")
+	}
+
 	stats := metrics.NewStats()
 	stats.Listen(fmt.Sprintf(":%d", configuration.Server.StatsPort))
 	defer stats.Close()

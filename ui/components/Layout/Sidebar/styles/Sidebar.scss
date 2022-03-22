@@ -1,0 +1,11 @@
+div.sidebar {
+  background: linear-gradient(to bottom,
+          #4E1AA0 24px,
+          #4E1AA0, darken(#4E1AA0, 7));
+  scroll-behavior: auto;
+  overflow-y: auto;
+
+  button.MuiButton-root, a.MuiButton-root {
+    text-transform: unset;
+  }
+}

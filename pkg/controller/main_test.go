@@ -9,6 +9,7 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/form3tech-oss/jwt-go"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/pkg/application"
@@ -230,4 +231,30 @@ func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
 	// return a token in the body, do not anymore.
 	response.JSON().Object().NotContainsKey("token")
 	return response.Cookie(TestCookieName).Value().Raw()
+}
+
+func GenerateToken(t *testing.T, conf config.Configuration, loginId, userId, accountId uint64) string {
+	now := time.Now()
+	claims := &controller.MonetrClaims{
+		LoginId:   loginId,
+		UserId:    userId,
+		AccountId: accountId,
+		StandardClaims: jwt.StandardClaims{
+			Audience: []string{
+				conf.APIDomainName,
+			},
+			ExpiresAt: now.Add(10 * time.Second).Unix(),
+			Id:        "",
+			IssuedAt:  now.Unix(),
+			Issuer:    conf.APIDomainName,
+			NotBefore: now.Unix(),
+			Subject:   "monetr",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte(conf.JWT.LoginJwtSecret))
+	require.NoError(t, err, "must be able to sign generated token")
+
+	return signedToken
 }

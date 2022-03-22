@@ -9,7 +9,7 @@ cmd = "go build -tags=mini -o /usr/bin/monetr github.com/monetr/monetr/pkg/cmd"
 # The resulting binary that we are working with.
 bin = "/usr/bin/monetr"
 # Run monetr inside of dlv, this allows us to connect debuggers to it very easily.
-full_bin = "/go/bin/dlv exec --continue --accept-multiclient --listen=:2345 --headless=true --api-version=2 /usr/bin/monetr -- serve --migrate=true"
+full_bin = "/build/compose/api-wrapper.sh"
 include_ext = ["go", "tpl", "tmpl", "html", "sql", "yaml"]
 exclude_dir = ["scripts", "templates", "public", "ui", "minikube", "node_modules"]
 include_dir = ["pkg", "compose"]

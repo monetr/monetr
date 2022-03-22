@@ -2,6 +2,13 @@ package models
 
 import (
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/xlzd/gotp"
+)
+
+var (
+	ErrTOTPNotValid = errors.New("provided TOTP code is not valid")
 )
 
 type Login struct {
@@ -17,8 +24,28 @@ type Login struct {
 	IsEmailVerified bool         `json:"isEmailVerified" pg:"is_email_verified,notnull,use_zero"`
 	EmailVerifiedAt *time.Time   `json:"emailVerifiedAt" pg:"email_verified_at"`
 	IsPhoneVerified bool         `json:"isPhoneVerified" pg:"is_phone_verified,notnull,use_zero"`
+	TOTP            string       `json:"-" pg:"totp"`
+	TOTPEnabledAt   *time.Time   `json:"totpEnabledAt" pg:"totp_enabled_at"`
 
 	Users []User `json:"-" pg:"rel:has-many"`
+}
+
+// VerifyTOTP will validate that the provided TOTP string is correct for this login. It will return ErrTOTPNotValid if
+// the provided input is not valid, or if TOTP is not configured for the login.
+func (l Login) VerifyTOTP(input string) error {
+	// If the login does not have TOTP configured, do not return a special error. To the client it should appear as if
+	// the TOTP provided is not valid. I don't know if this really makes a difference at all, but it seems like the
+	// intuitive thing to do.
+	if l.TOTP == "" {
+		return errors.WithStack(ErrTOTPNotValid)
+	}
+
+	loginTotp := gotp.NewDefaultTOTP(l.TOTP)
+	if loginTotp.Verify(input, int(time.Now().Unix())) {
+		return nil
+	}
+
+	return errors.WithStack(ErrTOTPNotValid)
 }
 
 type LoginWithHash struct {

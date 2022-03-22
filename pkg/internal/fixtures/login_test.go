@@ -28,3 +28,15 @@ func TestGivenIHaveABasicAccount(t *testing.T) {
 
 	assert.True(t, user.Account.IsSubscriptionActive(), "account subscription must be active")
 }
+
+func TestGivenIHaveTOTPForLogin(t *testing.T) {
+	login, _ := GivenIHaveLogin(t)
+	assert.NotZero(t, login.LoginId, "login must have been created")
+	assert.Empty(t, login.TOTP, "should not have a TOTP initially")
+	assert.Nil(t, login.TOTPEnabledAt, "TOTP enabled at should be nil")
+
+	loginTotp := GivenIHaveTOTPForLogin(t, &login)
+	assert.NotNil(t, loginTotp, "should return a TOTP object")
+	assert.NotEmpty(t, login.TOTP, "should now have a TOTP secret for the login")
+	assert.NotNil(t, login.TOTPEnabledAt, "TOTP enabled at should no longer be nil")
+}

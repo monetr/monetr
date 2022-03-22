@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"net"
 	"os"
 	"strconv"
 	"sync"
@@ -13,6 +14,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/monetr/monetr/pkg/migrations"
+	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
@@ -121,6 +123,19 @@ type DatabaseOption uint8
 const (
 	IsolatedDatabase DatabaseOption = 1
 )
+
+func GetBadPgDatabase(t *testing.T) *pg.DB {
+	options := GetPgOptions(t)
+	options.Dialer = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		return nil, errors.New("forcing a bad connection")
+	}
+	db := pg.Connect(options)
+	t.Cleanup(func() {
+		db.Close()
+	})
+
+	return db
+}
 
 func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 	testDatabases.lock.Lock()

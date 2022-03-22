@@ -50,7 +50,7 @@ endif
 container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
 ifdef CI # When we are in CI we don't want to run the static dir targets, these files are provided via artifacts.
 ifeq ($(ENGINE),docker)
-container: DOCKER=$(shell which docker)
+container:
 container:
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))

@@ -55,6 +55,16 @@ func (c *Controller) wrapAndReturnError(ctx iris.Context, err error, status int,
 	})
 }
 
+func (c *Controller) failure(ctx iris.Context, status int, error GenericAPIError) {
+	ctx.SetErr(error)
+	ctx.StatusCode(status)
+	ctx.StopExecution()
+
+	crumbs.Error(c.getContext(ctx), error.FriendlyMessage(), c.configuration.APIDomainName, map[string]interface{}{
+		"error": error,
+	})
+}
+
 func (c *Controller) returnError(ctx iris.Context, status int, msg string, args ...interface{}) {
 	ctx.SetErr(errors.Errorf(msg, args...))
 	ctx.StatusCode(status)
