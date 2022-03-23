@@ -1,0 +1,48 @@
+services:
+  monetr:
+    image: cosmtrek/air
+    restart: always
+    working_dir: /build
+    environment:
+      air_wd: /build
+      MONETR_PLAID_CLIENT_ID: $PLAID_CLIENT_ID
+      MONETR_PLAID_CLIENT_SECRET: $PLAID_CLIENT_SECRET
+    command:
+      - -c
+      - /build/air.toml
+    links:
+      - redis
+      - postgres
+    volumes:
+      - ./:/build
+      - ./compose/monetr.yaml:/etc/monetr/config.yaml
+  ui:
+    image: node:17.5.0
+    working_dir: /build
+    environment:
+      INSECURE_WS: "true"
+      NODE_OPTIONS: --openssl-legacy-provider
+    volumes:
+      - ./:/build
+    command:
+      - yarn
+      - start
+  mail:
+    image: mailhog/mailhog
+    environment:
+      MH_CORES_ORIGIN: localhost
+      MH_HOSTNAME: localhost
+  redis:
+    image: redis:6.2.2-alpine
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: ""
+      POSTGRES_HOST_AUTH_METHOD: trust
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./compose/nginx.conf:/etc/nginx/nginx.conf

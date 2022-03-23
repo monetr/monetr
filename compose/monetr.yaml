@@ -1,0 +1,33 @@
+allowsignup: true
+apidomainname: localhost:4000
+plaid:
+  environment: https://sandbox.plaid.com
+backgroundjobs:
+  engine: gocraft
+  scheduler: internal
+email:
+  forgotpassword:
+    tokenlifetime: 10m0s
+  verification:
+    tokenlifetime: 10m0s
+environment: development
+logging:
+  format: text
+  level: trace
+  stackdriver:
+    enabled: false
+postgresql:
+  address: postgres
+  database: postgres
+  port: 5432
+  username: postgres
+recaptcha:
+  enabled: false
+server:
+  cookies:
+    name: M-Token
+    samesitestrict: true
+    secure: true
+  listenport: 4000
+  statsport: 9000
+uidomainname: localhost:4000

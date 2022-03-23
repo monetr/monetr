@@ -93,7 +93,7 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 			return errors.Wrap(err, errorMessage)
 		}
 
-		return errors.Wrap(errors.Errorf("plaid API call failed with %s - %s", plaidError.ErrorType, plaidError.ErrorCode), errorMessage)
+		return errors.Wrap(errors.Errorf("plaid API call failed with [%s - %s] %s", plaidError.ErrorType, plaidError.ErrorCode, plaidError.ErrorMessage), errorMessage)
 	default:
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, errorMessage)
@@ -142,7 +142,10 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 
 	log := p.log
 
-	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain)
+	var redirectUri *string
+	if p.config.OAuthDomain != "" {
+		redirectUri = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
+	}
 
 	var webhooksUrl *string
 	if p.config.WebhooksEnabled {
@@ -173,7 +176,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 			Webhook:               webhooksUrl,
 			AccessToken:           nil,
 			LinkCustomizationName: nil,
-			RedirectUri:           &redirectUri,
+			RedirectUri:           redirectUri,
 			AndroidPackageName:    nil,
 			AccountFilters:        nil,
 			EuConfig:              nil,

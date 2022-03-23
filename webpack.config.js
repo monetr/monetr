@@ -17,6 +17,8 @@ module.exports = (env, argv) => {
     filename = `[name].js`;
   }
 
+  let insecureWebsocket = process.env.INSECURE_WS === 'true';
+
   const config = {
     mode: isDevelopment ? 'development' : 'production',
     target: 'web',
@@ -137,7 +139,7 @@ module.exports = (env, argv) => {
       liveReload: true,
       client: {
         webSocketTransport: 'ws',
-        webSocketURL: 'wss://app.monetr.mini/ws',
+        webSocketURL: insecureWebsocket ? 'ws://localhost/ws' : 'wss://app.monetr.mini/ws',
         progress: true,
       },
     },
