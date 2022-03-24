@@ -29,9 +29,22 @@ This documentation is auto-generated from comments in the API code.
 
 ## Contributing
 
-Contributions are more than welcome, however local development for monetr might be a bit wonky. I will in the future
-provide a concise way to run everything needed to develop monetr locally. But right now beware that some things might
-just not work right now.
+In order to run monetr locally you will need sandbox credentials for Plaid, you can obtain your own credentials here:
+[Plaid Sign Up](https://dashboard.plaid.com/signup). Once you have a Client ID and a Client Secret you can run the
+following command in the monetr project directory to start a local environment.
+
+```shell
+$ PLAID_CLIENT_ID="Your Client ID" PLAID_CLIENT_SECRET="Your Secret" docker compose up
+```
+
+This will start all of the services needed to do basic development on monetr. Some services are not currently included
+in this workflow though, like vault. I am still working on an easier way to develop locally that will not require
+providing secrets each time, but will also allow for config customizations.
+
+The UI and API will "hot reload" while running in docker compose, any changes made to them will be auto built to make
+development easier.
+
+Contributions are more than welcome!
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr?ref=badge_large)

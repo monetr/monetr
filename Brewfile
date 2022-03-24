@@ -1,15 +1,10 @@
 # 'brew tap'
 tap "homebrew/cask"
 
-# Required to run the monetr stack locally.
-brew 'minikube'
-# Required to run minikube on macOS
-brew 'hyperkit'
-
-# We are no longer using the docker CLI for containers. Going forward we will use podman.
-brew 'podman'
-
-# Required for make local
-brew 'tmux'
+# We are moving back to docker for ease of local development. Until podman has more support for macOS
+brew 'docker'
 
 brew 'go'
+
+# For macOS the included version of make is :trash:. Install a real one.
+brew 'make'
