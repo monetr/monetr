@@ -94,14 +94,14 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 		}
 
 		// Only include the plaid error message if it is provided.
-		message := ""
+		plaidMessage := ""
 		if plaidError.ErrorMessage != "" {
-			message += " " + plaidError.ErrorMessage
+			plaidMessage += " " + plaidError.ErrorMessage
 		}
 
 		return errors.Wrap(errors.Errorf(
 			"plaid API call failed with [%s - %s]%s",
-			plaidError.ErrorType, plaidError.ErrorCode, message,
+			plaidError.ErrorType, plaidError.ErrorCode, plaidMessage,
 		), errorMessage)
 	default:
 		span.Status = sentry.SpanStatusInternalError
@@ -149,7 +149,7 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 	span := sentry.StartSpan(ctx, "Plaid - CreateLinkToken")
 	defer span.Finish()
 
-	log := p.log
+	log := p.log.WithContext(span.Context())
 
 	var redirectUri *string
 	if p.config.OAuthDomain != "" {
@@ -218,7 +218,7 @@ func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*I
 	span := sentry.StartSpan(ctx, "Plaid - ExchangePublicToken")
 	defer span.Finish()
 
-	log := p.log
+	log := p.log.WithContext(span.Context())
 
 	request := p.client.PlaidApi.
 		ItemPublicTokenExchange(span.Context()).
@@ -250,7 +250,7 @@ func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*W
 	span := sentry.StartSpan(ctx, "Plaid - GetWebhookVerificationKey")
 	defer span.Finish()
 
-	log := p.log
+	log := p.log.WithContext(span.Context())
 
 	request := p.client.PlaidApi.
 		WebhookVerificationKeyGet(span.Context()).
@@ -282,7 +282,7 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 	span := sentry.StartSpan(ctx, "Plaid - GetInstitution")
 	defer span.Finish()
 
-	log := p.log
+	log := p.log.WithContext(span.Context())
 
 	request := p.client.PlaidApi.
 		InstitutionsGetById(span.Context()).

@@ -97,7 +97,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 
 	userId := c.mustGetUserId(ctx)
 
-	log := c.log.WithFields(logrus.Fields{
+	log := c.getLog(ctx).WithFields(logrus.Fields{
 		"accountId": me.AccountId,
 		"userId":    me.UserId,
 		"loginId":   me.LoginId,
@@ -155,6 +155,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		phoneNumber = myownsanity.StringP(me.Login.PhoneNumber.E164())
 	}
 
+	log.Trace("creating Plaid link token")
 	token, err := c.plaid.CreateLinkToken(c.getContext(ctx), platypus.LinkTokenOptions{
 		ClientUserID:             strconv.FormatUint(userId, 10),
 		LegalName:                legalName,
