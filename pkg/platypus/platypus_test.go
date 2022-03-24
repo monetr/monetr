@@ -99,7 +99,7 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 			EmailAddressVerifiedTime: nil,
 			UpdateMode:               false,
 		})
-		assert.EqualError(t, err, "failed to create link token: plaid API call failed with API_ERROR - INTERNAL_SERVER_ERROR")
+		assert.EqualError(t, err, "failed to create link token: plaid API call failed with [API_ERROR - INTERNAL_SERVER_ERROR]")
 		assert.Nil(t, linkToken, "link token should be nil in the event of an error")
 		assert.Equal(t, map[string]int{
 			"POST https://sandbox.plaid.com/link/token/create": 1,

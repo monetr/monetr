@@ -33,8 +33,12 @@ In order to run monetr locally you will need sandbox credentials for Plaid, you 
 [Plaid Sign Up](https://dashboard.plaid.com/signup). Once you have a Client ID and a Client Secret you can run the
 following command in the monetr project directory to start a local environment.
 
+You'll want to install node dependencies before starting the containers, as yarn install is extremely slow inside
+docker.
+
 ```shell
-$ PLAID_CLIENT_ID="Your Client ID" PLAID_CLIENT_SECRET="Your Secret" docker compose up
+yarn install
+PLAID_CLIENT_ID="Your Client ID" PLAID_CLIENT_SECRET="Your Secret" docker compose up
 ```
 
 You can certainly develop monetr without Plaid credentials, but at the moment most functionality will not work without
