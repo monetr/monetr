@@ -35,26 +35,29 @@ type Configuration struct {
 	// DEPRECATED: This is not used anymore. Use Server.ListenPort instead.
 	ListenPort int `yaml:"listenPort"`
 	// DEPRECATED: This is not used anymore. Use Server.StatsPort instead.
-	StatsPort      int            `yaml:"statsPort"`
-	Environment    string         `yaml:"environment"`
-	UIDomainName   string         `yaml:"uiDomainName"`
-	APIDomainName  string         `yaml:"apiDomainName"`
-	AllowSignUp    bool           `yaml:"allowSignUp"`
-	BackgroundJobs BackgroundJobs `yaml:"backgroundJobs"`
-	Beta           Beta           `yaml:"beta"`
-	CORS           CORS           `yaml:"cors"`
-	Email          Email          `yaml:"email"`
-	JWT            JWT            `yaml:"jwt"`
-	Logging        Logging        `yaml:"logging"`
-	Plaid          Plaid          `yaml:"plaid"`
-	PostgreSQL     PostgreSQL     `yaml:"postgreSql"`
-	RabbitMQ       RabbitMQ       `yaml:"rabbitMQ"`
-	ReCAPTCHA      ReCAPTCHA      `yaml:"reCAPTCHA"`
-	Redis          Redis          `yaml:"redis"`
-	Sentry         Sentry         `yaml:"sentry"`
-	Server         Server         `yaml:"server"`
-	Stripe         Stripe         `yaml:"stripe"`
-	Vault          Vault          `yaml:"vault"`
+	StatsPort   int    `yaml:"statsPort"`
+	Environment string `yaml:"environment"`
+	// ExternalURLProtocol is used to determine what protocol should be used in things like email templates. It defaults
+	// to https.
+	ExternalURLProtocol string         `yaml:"externalUrlProtocol"`
+	UIDomainName        string         `yaml:"uiDomainName"`
+	APIDomainName       string         `yaml:"apiDomainName"`
+	AllowSignUp         bool           `yaml:"allowSignUp"`
+	BackgroundJobs      BackgroundJobs `yaml:"backgroundJobs"`
+	Beta                Beta           `yaml:"beta"`
+	CORS                CORS           `yaml:"cors"`
+	Email               Email          `yaml:"email"`
+	JWT                 JWT            `yaml:"jwt"`
+	Logging             Logging        `yaml:"logging"`
+	Plaid               Plaid          `yaml:"plaid"`
+	PostgreSQL          PostgreSQL     `yaml:"postgreSql"`
+	RabbitMQ            RabbitMQ       `yaml:"rabbitMQ"`
+	ReCAPTCHA           ReCAPTCHA      `yaml:"reCAPTCHA"`
+	Redis               Redis          `yaml:"redis"`
+	Sentry              Sentry         `yaml:"sentry"`
+	Server              Server         `yaml:"server"`
+	Stripe              Stripe         `yaml:"stripe"`
+	Vault               Vault          `yaml:"vault"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -63,6 +66,10 @@ func (c Configuration) GetConfigFileName() string {
 
 func (c Configuration) GetUIDomainName() string {
 	return c.UIDomainName
+}
+
+func (c Configuration) GetUIURL() string {
+	return fmt.Sprintf("%s://%s", c.ExternalURLProtocol, c.UIDomainName)
 }
 
 type Server struct {
@@ -444,6 +451,7 @@ func GenerateConfigFile(configFilePath *string, outputFilePath string) error {
 func setupDefaults(v *viper.Viper) {
 	v.SetDefault("APIDomainName", "localhost:4000")
 	v.SetDefault("AllowSignUp", true)
+	v.SetDefault("ExternalURLProtocol", "https")
 	v.SetDefault("BackgroundJobs.Engine", BackgroundJobEngineGoCraftWork)
 	v.SetDefault("BackgroundJobs.Scheduler", BackgroundJobSchedulerInternal)
 	v.SetDefault("Email.ForgotPassword.TokenLifetime", 10*time.Minute)
@@ -456,6 +464,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)
 	v.SetDefault("PostgreSQL.Username", "postgres")
+	v.SetDefault("Redis.Port", 6379)
 	v.SetDefault("ReCAPTCHA.Enabled", false)
 	v.SetDefault("Server.Cookies.Name", "M-Token")
 	v.SetDefault("Server.Cookies.Secure", true)

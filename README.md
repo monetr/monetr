@@ -37,6 +37,9 @@ following command in the monetr project directory to start a local environment.
 $ PLAID_CLIENT_ID="Your Client ID" PLAID_CLIENT_SECRET="Your Secret" docker compose up
 ```
 
+You can certainly develop monetr without Plaid credentials, but at the moment most functionality will not work without
+them.
+
 This will start all of the services needed to do basic development on monetr. Some services are not currently included
 in this workflow though, like vault. I am still working on an easier way to develop locally that will not require
 providing secrets each time, but will also allow for config customizations.
@@ -44,7 +47,11 @@ providing secrets each time, but will also allow for config customizations.
 The UI and API will "hot reload" while running in docker compose, any changes made to them will be auto built to make
 development easier.
 
+The API is run inside Docker using [delve](https://github.com/go-delve/delve), so if you want to or prefer step
+debugging for development you can connect your editor to `localhost:2345` for remote debugging.
+
 Contributions are more than welcome!
 
 ## License
+
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr?ref=badge_large)

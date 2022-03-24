@@ -435,8 +435,8 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 		if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
 			Login: *login,
-			VerifyURL: fmt.Sprintf("https://%s/verify/email?token=%s",
-				c.configuration.GetUIDomainName(),
+			VerifyURL: fmt.Sprintf("%s/verify/email?token=%s",
+				c.configuration.GetUIURL(),
 				url.QueryEscape(verificationToken),
 			),
 		}); err != nil {
@@ -578,8 +578,8 @@ func (c *Controller) resendVerification(ctx iris.Context) {
 
 	if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
 		Login: *login,
-		VerifyURL: fmt.Sprintf("https://%s/verify/email?token=%s",
-			c.configuration.GetUIDomainName(),
+		VerifyURL: fmt.Sprintf("%s/verify/email?token=%s",
+			c.configuration.GetUIURL(),
 			url.QueryEscape(verificationToken),
 		),
 	}); err != nil {
@@ -673,8 +673,8 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 
 	if err = c.communication.SendPasswordResetEmail(c.getContext(ctx), communication.ForgotPasswordParams{
 		Login: *login,
-		ResetURL: fmt.Sprintf("https://%s/password/reset?token=%s",
-			c.configuration.GetUIDomainName(),
+		ResetURL: fmt.Sprintf("%s/password/reset?token=%s",
+			c.configuration.GetUIURL(),
 			url.QueryEscape(passwordResetToken),
 		),
 	}); err != nil {

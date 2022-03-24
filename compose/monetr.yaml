@@ -1,15 +1,28 @@
 allowsignup: true
-apidomainname: localhost:4000
+apidomainname: localhost
+externalUrlProtocol: http
 plaid:
   environment: https://sandbox.plaid.com
 backgroundjobs:
   engine: gocraft
   scheduler: internal
+redis:
+  enabled: true
+  address: redis
 email:
-  forgotpassword:
+  enabled: true
+  domain: monetr.mini
+  smtp:
+    username: restapi
+    password: mailpassword
+    host: mail
+    port: 1025
+  forgotPassword:
+    enabled: true
     tokenlifetime: 10m0s
   verification:
-    tokenlifetime: 10m0s
+    enabled: true
+    tokenLifetime: 10m0s
 environment: development
 logging:
   format: text
@@ -30,4 +43,4 @@ server:
     secure: true
   listenport: 4000
   statsport: 9000
-uidomainname: localhost:4000
+uiDomainName: localhost

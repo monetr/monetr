@@ -1,53 +1,36 @@
 # Config file for [Air](https://github.com/cosmtrek/air) in TOML format
 
-# Working directory
-# . or absolute path, please note that the directories following must be under root.
 root = "/build"
 tmp_dir = "/tmp"
 
 [build]
-# Just plain old shell command. You could use `make` as well.
-cmd = "go build -o /usr/bin/monetr github.com/monetr/monetr/pkg/cmd"
-# Binary file yields from `cmd`.
+# Build monetr with the mini tag, this will allow insecure SMTP communication for working with emails locally.
+cmd = "go build -tags=mini -o /usr/bin/monetr github.com/monetr/monetr/pkg/cmd"
+# The resulting binary that we are working with.
 bin = "/usr/bin/monetr"
-# Customize binary, can setup environment variables when run your app.
-full_bin = "/usr/bin/monetr serve --migrate=true"
-# Watch these filename extensions.
-include_ext = ["go", "tpl", "tmpl", "html", "sql"]
-# Ignore these filename extensions or directories.
+# Run monetr inside of dlv, this allows us to connect debuggers to it very easily.
+full_bin = "/go/bin/dlv exec --continue --accept-multiclient --listen=:2345 --headless=true --api-version=2 /usr/bin/monetr -- serve --migrate=true"
+include_ext = ["go", "tpl", "tmpl", "html", "sql", "yaml"]
 exclude_dir = ["scripts", "templates", "public", "ui", "minikube", "node_modules"]
-# Watch these directories if you specified.
-include_dir = ["pkg"]
-# Exclude files.
+include_dir = ["pkg", "compose"]
 exclude_file = []
-# Exclude specific regular expressions.
 exclude_regex = ["_test.go"]
-# Exclude unchanged files.
 exclude_unchanged = true
-# Follow symlink for directories
 follow_symlink = true
-# This log file places in your tmp_dir.
 log = "air.log"
-# It's not necessary to trigger build each time file changes if it's too frequent.
 delay = 1000 # ms
-# Stop running old binary when build errors occur.
 stop_on_error = true
-# Send Interrupt signal before killing process (windows does not support this feature)
-send_interrupt = false
-# Delay after sending Interrupt signal
+send_interrupt = true
 kill_delay = 500 # ms
 
 [log]
-# Show log time
 time = false
 
 [color]
-# Customize each part's color. If no color found, use the raw app log.
 main = "magenta"
 watcher = "cyan"
 build = "yellow"
 runner = "green"
 
 [misc]
-# Delete tmp directory on exit
 clean_on_exit = true

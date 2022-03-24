@@ -144,7 +144,7 @@ module.exports = (env, argv) => {
       },
     },
     plugins: [
-      new WebpackBar(),
+      process.env.IS_COMPOSE !== 'true' && new WebpackBar(),
       new webpack.DefinePlugin({
         CONFIG: JSON.stringify({}),
         REVISION: JSON.stringify(process.env.RELEASE_REVISION),
