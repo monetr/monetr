@@ -1,4 +1,7 @@
 services:
+  # The golang hot-reload container we are using does not have dlv installed (to my knowledge) at runtime. So in order
+  # to support step-debugging for the API we need to side-load it in. This container runs before the monetr container
+  # starts and simply installs the latest dlv debugger CLI to a tmpfs volume that is shared.
   delve_install:
     image: golang:1.18
     working_dir: /build
@@ -9,12 +12,14 @@ services:
     volumes:
       - delveBinary:/go/bin
   monetr:
-    tty: true
-    image: cosmtrek/air
-    restart: always
+    tty: true # Makes color output work nicely.
+    image: cosmtrek/air # Container that lets us hot-reload our go code.
+    restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     environment:
       air_wd: /build
+      # If you want to do development against Plaid you will need to provide your own secrets. Please do not modify this
+      # file, instead define these as environment variables in your own shell when you execute the compose.
       MONETR_PLAID_CLIENT_ID: $PLAID_CLIENT_ID
       MONETR_PLAID_CLIENT_SECRET: $PLAID_CLIENT_SECRET
       MONETR_EMAIL_VERIFICATION_TOKEN_SECRET: "abc123"
@@ -27,6 +32,7 @@ services:
       - redis
       - postgres
     ports:
+      # This port is used for editors to connect to dlv remotely to do step debugging.
       - 2345:2345
     volumes:
       - ./:/build
@@ -39,22 +45,27 @@ services:
         condition: service_started
       postgres:
         condition: service_started
+      # Wait for the delve install to finish before trying to start this container.
       delve_install:
         condition: service_completed_successfully
   ui:
-    tty: true
+    # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
+    # do `yarn install` before doing docker compose up.
+    tty: true # Color output.
     image: node:17.5.0
     working_dir: /build
     environment:
-      INSECURE_WS: "true"
-      NODE_OPTIONS: --openssl-legacy-provider
-      IS_COMPOSE: "true"
+      INSECURE_WS: "true" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
+      NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
+      IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
     volumes:
       - ./:/build
     command:
       - yarn
       - start
   mail:
+    # Mailhog is used for testing email sending from the application. This is for things like forgot password or email
+    # verification. It can be accessed by navigating to `http://localhost/mail`
     image: mailhog/mailhog
     environment:
       MH_CORES_ORIGIN: localhost
@@ -64,6 +75,7 @@ services:
   postgres:
     image: postgres:13
     environment:
+      # Make it so that monetr doesn't need any credentials to connect to PostgreSQL.
       POSTGRES_PASSWORD: ""
       POSTGRES_HOST_AUTH_METHOD: trust
   nginx:
