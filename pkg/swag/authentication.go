@@ -9,6 +9,9 @@ type LoginRequest struct {
 	Password string `json:"password" example:"tHEBeSTPaSsWOrdYoUCaNCOmeUpWiTH"`
 	// ReCAPTCHA value from validation. Required if `verifyLogin` is enabled on the server.
 	Captcha *string `json:"captcha" example:"03AGdBq266UHyZ62gfKGJozRNQz17oIhSlj9S9S..." extensions:"x-nullable"`
+	// TOTP is used to provide an MFA code for the login process. It is not required to provide this code. If a login has
+	// TOTP enabled then the request will fail and should be resubmitted with the TOTP code provided.
+	TOTP string `json:"totp" example:"123456" extensions:"x-nullable"`
 }
 
 type LoginResponse struct {
@@ -40,12 +43,17 @@ type LoginInvalidCredentialsResponse struct {
 	Error string `json:"error" example:"invalid email and password"`
 }
 
-type LoginEmailIsNotVerifiedResponse struct {
-	// When email verification is required by monetr, it is possible for the client to provide perfectly valid
-	// credentials in their request and still receive an error from the API. This particular error is to let the client
-	// know that a token cannot be issued until the user's email address is properly verified. In the UI the user is
-	// redirected to a screen to resend the verification email if this error is returned.
+// LoginPreconditionRequiredResponse is returned to the client during authentication even if the credentials provided
+// are valid. This is returned because something more is required in order to authenticate this login.
+type LoginPreconditionRequiredResponse struct {
+	// Error will contain a generic message about the problem.
 	Error string `json:"error" example:"email address is not verified"`
+	// Code indicates the type of precondition that is required by this endpoint.
+	// * `MFA_REQUIRED` - MFA is required for this login to authenticate. The request can be remade with the MFA included
+	//   in the subsequent request.
+	// * `EMAIL_NOT_VERIFIED` - The email address for the provided login is not verified yet. The user must click the
+	//   verify link in the email they received in order to verify that they own the email address.
+	Code string `json:"code" enums:"MFA_REQUIRED,EMAIL_NOT_VERIFIED" example:"EMAIL_NOT_VERIFIED"`
 }
 
 type RegisterRequest struct {

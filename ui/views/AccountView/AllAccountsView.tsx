@@ -104,7 +104,7 @@ class AllAccountsView extends Component<WithConnectionPropTypes, ComponentState>
         <Fab
           color="primary"
           aria-label="add"
-          className="absolute z-50 bottom-16 right-16"
+          className="absolute z-50 bottom-0 right-5"
           onClick={ this.openDialog(DialogOpen.CreateBankAccount) }
         >
           <Add/>
@@ -135,10 +135,8 @@ class AllAccountsView extends Component<WithConnectionPropTypes, ComponentState>
       <Fragment>
         { this.renderDialogs() }
         <div className="minus-nav">
-          <div className="flex flex-col h-full max-h-full md:p-10 sm:p-1">
-            <Card elevation={ 4 } className="w-full h-full overflow-y-auto">
-              { this.renderContents() }
-            </Card>
+          <div className="flex flex-col h-full max-h-full">
+            { this.renderContents() }
           </div>
         </div>
       </Fragment>

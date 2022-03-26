@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	VerifyEmailTemplate    = "templates/verify.html"
-	ForgotPasswordTemplate = "templates/forgot.html"
+	VerifyEmailTemplate     = "templates/verify.html"
+	ForgotPasswordTemplate  = "templates/forgot.html"
+	PasswordChangedTemplate = "templates/password_changed.html"
 )
 
 //go:embed templates/*.html

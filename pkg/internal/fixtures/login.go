@@ -2,6 +2,7 @@ package fixtures
 
 import (
 	"context"
+	"encoding/base32"
 	"testing"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/stretchr/testify/require"
 	"github.com/stripe/stripe-go/v72"
+	"github.com/xlzd/gotp"
 )
 
 func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
@@ -30,6 +32,20 @@ func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
 	require.NoError(t, err, "must be able to seed login")
 
 	return *login, password
+}
+
+func GivenIHaveTOTPForLogin(t *testing.T, login *models.Login) *gotp.TOTP {
+	db := testutils.GetPgDatabase(t)
+
+	secret := base32.StdEncoding.EncodeToString([]byte(gofakeit.UUID()))
+	loginTotp := gotp.NewDefaultTOTP(secret)
+	login.TOTP = secret
+	login.TOTPEnabledAt = myownsanity.TimeP(time.Now())
+	result, err := db.Model(login).WherePK().Update(login)
+	require.NoError(t, err, "must be able to update login with TOTP")
+	require.Equal(t, 1, result.RowsAffected(), "must have only updated a single row")
+
+	return loginTotp
 }
 
 func GivenIHaveABasicAccount(t *testing.T) (_ models.User, password string) {

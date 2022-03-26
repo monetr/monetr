@@ -19,6 +19,12 @@ func TestGetEmailTemplate(t *testing.T) {
 		assert.NotNil(t, forgotPasswordTemplate, "should return a valid template")
 	})
 
+	t.Run("password changed", func(t *testing.T) {
+		passwordChangedTemplate, err := GetEmailTemplate(PasswordChangedTemplate)
+		assert.NoError(t, err, "should succeed")
+		assert.NotNil(t, passwordChangedTemplate, "should return a valid template")
+	})
+
 	t.Run("missing template", func(t *testing.T) {
 		verifyEmailTemplate, err := GetEmailTemplate("templates/i_dont_exist.html")
 		assert.EqualError(t, err, "failed to open email template (templates/i_dont_exist.html): open templates/i_dont_exist.html: file does not exist")

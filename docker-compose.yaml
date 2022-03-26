@@ -16,12 +16,22 @@ services:
     image: cosmtrek/air # Container that lets us hot-reload our go code.
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4000/api/health" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
     environment:
       air_wd: /build
       # If you want to do development against Plaid you will need to provide your own secrets. Please do not modify this
       # file, instead define these as environment variables in your own shell when you execute the compose.
       MONETR_PLAID_CLIENT_ID: $PLAID_CLIENT_ID
       MONETR_PLAID_CLIENT_SECRET: $PLAID_CLIENT_SECRET
+      MONETR_STRIPE_API_KEY: $MONETR_STRIPE_API_KEY
+      MONETR_STRIPE_WEBHOOK_SECRET: $MONETR_STRIPE_WEBHOOK_SECRET
+      MONETR_CAPTCHA_PUBLIC_KEY: $MONETR_CAPTCHA_PUBLIC_KEY
+      MONETR_CAPTCHA_PRIVATE_KEY: $MONETR_CAPTCHA_PRIVATE_KEY
       MONETR_EMAIL_VERIFICATION_TOKEN_SECRET: "abc123"
       MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_SECRET: "123abc"
       MONETR_JWT_LOGIN_SECRET: "qwertyuiop1234567890"
@@ -54,6 +64,13 @@ services:
     tty: true # Color output.
     image: node:17.5.0
     working_dir: /build
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:30000" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
     environment:
       INSECURE_WS: "true" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
@@ -67,12 +84,47 @@ services:
     # Mailhog is used for testing email sending from the application. This is for things like forgot password or email
     # verification. It can be accessed by navigating to `http://localhost/mail`
     image: mailhog/mailhog
+    healthcheck:
+      test: [ "CMD", "wget", "http://localhost:8025", "-q", "-O", "-" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
     environment:
       MH_CORES_ORIGIN: localhost
       MH_HOSTNAME: localhost
   redis:
     image: redis:6.2.2-alpine
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  ngrok:
+    image: wernight/ngrok
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4040" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    ports:
+      - 4040:4040
+    environment:
+      NGROK_PORT: monetr:4000
+      NGROK_DEBUG: "true"
+      NGROK_AUTH: $NGROK_AUTH
+      NGROK_HOSTNAME: $NGROK_HOSTNAME
+    profiles:
+      - donotstart
   postgres:
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     image: postgres:13
     environment:
       # Make it so that monetr doesn't need any credentials to connect to PostgreSQL.
@@ -80,6 +132,12 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
   nginx:
     tty: true
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
     image: nginx:latest
     restart: unless-stopped
     ports:

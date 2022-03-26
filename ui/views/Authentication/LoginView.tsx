@@ -35,7 +35,7 @@ function ForgotPasswordMaybe(): JSX.Element {
 
   return (
     <div className="w-full flex justify-end mt-2.5 text-sm">
-      <RouterLink className="hover:underline opacity-50" to="/password/forgot">Forgot Password?</RouterLink>
+      <RouterLink className="opacity-50 hover:underline" to="/password/forgot">Forgot Password?</RouterLink>
     </div>
   );
 }
@@ -53,16 +53,15 @@ const LoginView = (): JSX.Element => {
   function validateInput(values: LoginValues): Partial<LoginValues> {
     let errors: Partial<LoginValues> = {};
 
-    if (values.email) {
-      if (!verifyEmailAddress(values.email)) {
-        errors['email'] = 'Please provide a valid email address.';
-      }
+    // If the email address has been input, but it is not valid, then tell the user that they need to enter one that is
+    // valid.
+    if (values.email && !verifyEmailAddress(values.email)) {
+      errors['email'] = 'Please provide a valid email address.';
     }
 
-    if (values.password) {
-      if (values.password.length < 8) {
-        errors['password'] = 'Password must be at least 8 characters long.'
-      }
+    // Same for the password, but right now we just do a length assertion.
+    if (values.password?.length < 8) {
+      errors['password'] = 'Password must be at least 8 characters long.'
     }
 
     return errors;

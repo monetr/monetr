@@ -70,6 +70,10 @@ func (c *Controller) setupRepositoryMiddleware(ctx iris.Context) {
 	ctx.Next()
 }
 
+func (c *Controller) removeCookieIfPresent(ctx iris.Context) {
+	ctx.RemoveCookie(c.configuration.Server.Cookies.Name)
+}
+
 func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 	now := time.Now()
 	var token string
@@ -134,10 +138,12 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		return []byte(c.configuration.JWT.LoginJwtSecret), nil
 	})
 	if err != nil {
+		c.removeCookieIfPresent(ctx)
 		return errors.Wrap(err, "failed to validate token")
 	}
 
 	if !result.Valid {
+		c.removeCookieIfPresent(ctx)
 		return errors.Errorf("token is not valid")
 	}
 
@@ -214,6 +220,18 @@ func (c *Controller) mustGetDatabase(ctx iris.Context) pg.DBI {
 	}
 
 	return txn
+}
+
+// mustGetSecurityRepository is used to retrieve/create a repository interface that can interact with more security
+// sensitive parts of the data layer. This interface is not specific to a single tenant. If the interface cannot be
+// created due then this method will panic.
+func (c *Controller) mustGetSecurityRepository(ctx iris.Context) repository.SecurityRepository {
+	db, ok := ctx.Values().Get(databaseContextKey).(pg.DBI)
+	if !ok {
+		panic("failed to retrieve database object from controller context")
+	}
+
+	return repository.NewSecurityRepository(db)
 }
 
 func (c *Controller) getUnauthenticatedRepository(ctx iris.Context) (repository.UnauthenticatedRepository, error) {
