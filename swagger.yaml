@@ -110,6 +110,8 @@ definitions:
         type: integer
       passwordResetAt:
         type: string
+      totpEnabledAt:
+        type: string
     type: object
   models.User:
     properties:
@@ -289,6 +291,24 @@ definitions:
     - accountType
     - bankAccountId
     - linkId
+    type: object
+  swag.ChangePasswordRequest:
+    properties:
+      currentPassword:
+        description: The current password for the authenticated user. This must be
+          provided or the new password will not be accepted.
+        example: I@mY0ur0ldP@ssw0rd
+        minLength: 8
+        type: string
+      newPassword:
+        description: The new password desired for the authenticated user. This must
+          meet all the requirements
+        example: I@mY0urN#wP@ssw0rd
+        minLength: 8
+        type: string
+    required:
+    - currentPassword
+    - newPassword
     type: object
   swag.ConfigResponse:
     properties:
@@ -662,17 +682,6 @@ definitions:
         type: integer
         x-nullable: true
     type: object
-  swag.LoginEmailIsNotVerifiedResponse:
-    properties:
-      error:
-        description: |-
-          When email verification is required by monetr, it is possible for the client to provide perfectly valid
-          credentials in their request and still receive an error from the API. This particular error is to let the client
-          know that a token cannot be issued until the user's email address is properly verified. In the UI the user is
-          redirected to a screen to resend the verification email if this error is returned.
-        example: email address is not verified
-        type: string
-    type: object
   swag.LoginInvalidCredentialsResponse:
     properties:
       error:
@@ -693,6 +702,25 @@ definitions:
         example: 'login is not valid: email address provided is not valid'
         type: string
     type: object
+  swag.LoginPreconditionRequiredResponse:
+    properties:
+      code:
+        description: |-
+          Code indicates the type of precondition that is required by this endpoint.
+          * `MFA_REQUIRED` - MFA is required for this login to authenticate. The request can be remade with the MFA included
+            in the subsequent request.
+          * `EMAIL_NOT_VERIFIED` - The email address for the provided login is not verified yet. The user must click the
+            verify link in the email they received in order to verify that they own the email address.
+        enum:
+        - MFA_REQUIRED
+        - EMAIL_NOT_VERIFIED
+        example: EMAIL_NOT_VERIFIED
+        type: string
+      error:
+        description: Error will contain a generic message about the problem.
+        example: email address is not verified
+        type: string
+    type: object
   swag.LoginRequest:
     properties:
       captcha:
@@ -709,6 +737,13 @@ definitions:
         description: Your login password.
         example: tHEBeSTPaSsWOrdYoUCaNCOmeUpWiTH
         type: string
+      totp:
+        description: |-
+          TOTP is used to provide an MFA code for the login process. It is not required to provide this code. If a login has
+          TOTP enabled then the request will fail and should be resubmitted with the TOTP code provided.
+        example: "123456"
+        type: string
+        x-nullable: true
     type: object
   swag.LoginResponse:
     properties:
@@ -735,6 +770,38 @@ definitions:
           user.
         example: eyJhbGciOiJI...
         type: string
+    type: object
+  swag.MeResponse:
+    properties:
+      hasSubscription:
+        description: |-
+          HasSubscription is another billing indicator, this field is only present on the response when the server does
+          have billing enabled. It indicates whether or not the user does have a subscription, but not whether that
+          subscription is active. This can be true even if the subscription has expired.
+        type: boolean
+        x-nullable: true
+      isActive:
+        description: |-
+          IsActive is an indicator of whether or not a user's subscription is active. This field is always present and is
+          true if billing is not configured on the instance at all. It is only ever false if the server has billing
+          configured _and_ the user's subscription has expired or has never been set up.
+        type: boolean
+      isSetup:
+        description: |-
+          IsSetup indicates whether or not the user has any links configured at all. If this is false then the user should
+          be prompted to set up a new link.
+        type: boolean
+      nextUrl:
+        description: |-
+          NextURL is only present when the user needs to be directed somewhere by the backend. Currently, it is leveraged
+          for billing purposes. But in the future it can be used to direct the user through an on-boarding flow or
+          something similar.
+        type: string
+        x-nullable: true
+      user:
+        $ref: '#/definitions/models.User'
+        description: User has all of the details about the currently authenticated
+          user.
     type: object
   swag.NewPlaidTokenCallbackRequest:
     properties:
@@ -1537,7 +1604,7 @@ paths:
         "428":
           description: Precondition Required
           schema:
-            $ref: '#/definitions/swag.LoginEmailIsNotVerifiedResponse'
+            $ref: '#/definitions/swag.LoginPreconditionRequiredResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -2850,6 +2917,72 @@ paths:
       summary: Get Public Sentry DSN
       tags:
       - Config
+  /users/me:
+    get:
+      description: |-
+        Retrieve details about the currently authenticated user. If the user is not authenticated then an error
+        will be returned to the client. This is used by the UI to determine if the user is actually
+        authenticated. This is because cookies are stored as HTTP only, and are not visible by the JS code in
+        the UI.
+      operationId: get-current-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/swag.MeResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      security:
+      - ApiKeyAuth: []
+      summary: Get Current User
+      tags:
+      - User
+  /users/security/password:
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Change the currently authenticated user's password. This requires that the current password be provided
+        by the client to make sure that some actor other than the current user is not performing the action. If
+        the request succeeds and the password is changed, no JSON will be returned; just a 200 status code.
+      operationId: change-password
+      parameters:
+      - description: Forgot Password Request
+        in: body
+        name: Token
+        required: true
+        schema:
+          $ref: '#/definitions/swag.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ApiError'
+      security:
+      - ApiKeyAuth: []
+      summary: Change Password
+      tags:
+      - User
 securityDefinitions:
   ApiKeyAuth:
     in: header

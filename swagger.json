@@ -112,7 +112,7 @@
                     "428": {
                         "description": "Precondition Required",
                         "schema": {
-                            "$ref": "#/definitions/swag.LoginEmailIsNotVerifiedResponse"
+                            "$ref": "#/definitions/swag.LoginPreconditionRequiredResponse"
                         }
                     },
                     "500": {
@@ -2038,6 +2038,99 @@
                     }
                 }
             }
+        },
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve details about the currently authenticated user. If the user is not authenticated then an error\nwill be returned to the client. This is used by the UI to determine if the user is actually\nauthenticated. This is because cookies are stored as HTTP only, and are not visible by the JS code in\nthe UI.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get Current User",
+                "operationId": "get-current-user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/swag.MeResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/security/password": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Change the currently authenticated user's password. This requires that the current password be provided\nby the client to make sure that some actor other than the current user is not performing the action. If\nthe request succeeds and the password is changed, no JSON will be returned; just a 200 status code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Change Password",
+                "operationId": "change-password",
+                "parameters": [
+                    {
+                        "description": "Forgot Password Request",
+                        "name": "Token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/swag.ChangePasswordRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ApiError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2193,6 +2286,9 @@
                     "type": "integer"
                 },
                 "passwordResetAt": {
+                    "type": "string"
+                },
+                "totpEnabledAt": {
                     "type": "string"
                 }
             }
@@ -2380,6 +2476,27 @@
                     "description": "The original name of the bank account from when it was created. This name cannot be changed after the bank\naccount is created. This is primarily due to bank account's coming from a 3rd party provider like Plaid. But to\nreduce the amount of logic in the application the same rule applies for manual links as well.",
                     "type": "string",
                     "example": "Checking Account #1"
+                }
+            }
+        },
+        "swag.ChangePasswordRequest": {
+            "type": "object",
+            "required": [
+                "currentPassword",
+                "newPassword"
+            ],
+            "properties": {
+                "currentPassword": {
+                    "description": "The current password for the authenticated user. This must be provided or the new password will not be accepted.",
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "I@mY0ur0ldP@ssw0rd"
+                },
+                "newPassword": {
+                    "description": "The new password desired for the authenticated user. This must meet all the requirements",
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "I@mY0urN#wP@ssw0rd"
                 }
             }
         },
@@ -2743,16 +2860,6 @@
                 }
             }
         },
-        "swag.LoginEmailIsNotVerifiedResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "description": "When email verification is required by monetr, it is possible for the client to provide perfectly valid\ncredentials in their request and still receive an error from the API. This particular error is to let the client\nknow that a token cannot be issued until the user's email address is properly verified. In the UI the user is\nredirected to a screen to resend the verification email if this error is returned.",
-                    "type": "string",
-                    "example": "email address is not verified"
-                }
-            }
-        },
         "swag.LoginInvalidCredentialsResponse": {
             "type": "object",
             "properties": {
@@ -2770,6 +2877,25 @@
                     "description": "The API performs a handful of validations on the request from the client. If any of these validations fail before\nthe credentials are even processed then an invalid request response will be returned to the client. These things\ncan be caused by not providing a valid email address (or not providing one at all), not providing a password that\nis long enough; or not providing a valid ReCAPTCHA when it is required by the config.",
                     "type": "string",
                     "example": "login is not valid: email address provided is not valid"
+                }
+            }
+        },
+        "swag.LoginPreconditionRequiredResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "Code indicates the type of precondition that is required by this endpoint.\n* `MFA_REQUIRED` - MFA is required for this login to authenticate. The request can be remade with the MFA included\n  in the subsequent request.\n* `EMAIL_NOT_VERIFIED` - The email address for the provided login is not verified yet. The user must click the\n  verify link in the email they received in order to verify that they own the email address.",
+                    "type": "string",
+                    "enum": [
+                        "MFA_REQUIRED",
+                        "EMAIL_NOT_VERIFIED"
+                    ],
+                    "example": "EMAIL_NOT_VERIFIED"
+                },
+                "error": {
+                    "description": "Error will contain a generic message about the problem.",
+                    "type": "string",
+                    "example": "email address is not verified"
                 }
             }
         },
@@ -2791,6 +2917,12 @@
                     "description": "Your login password.",
                     "type": "string",
                     "example": "tHEBeSTPaSsWOrdYoUCaNCOmeUpWiTH"
+                },
+                "totp": {
+                    "description": "TOTP is used to provide an MFA code for the login process. It is not required to provide this code. If a login has\nTOTP enabled then the request will fail and should be resubmitted with the TOTP code provided.",
+                    "type": "string",
+                    "x-nullable": true,
+                    "example": "123456"
                 }
             }
         },
@@ -2813,6 +2945,33 @@
                     "description": "A JWT that can be used to make authenticated requests for the user.",
                     "type": "string",
                     "example": "eyJhbGciOiJI..."
+                }
+            }
+        },
+        "swag.MeResponse": {
+            "type": "object",
+            "properties": {
+                "hasSubscription": {
+                    "description": "HasSubscription is another billing indicator, this field is only present on the response when the server does\nhave billing enabled. It indicates whether or not the user does have a subscription, but not whether that\nsubscription is active. This can be true even if the subscription has expired.",
+                    "type": "boolean",
+                    "x-nullable": true
+                },
+                "isActive": {
+                    "description": "IsActive is an indicator of whether or not a user's subscription is active. This field is always present and is\ntrue if billing is not configured on the instance at all. It is only ever false if the server has billing\nconfigured _and_ the user's subscription has expired or has never been set up.",
+                    "type": "boolean"
+                },
+                "isSetup": {
+                    "description": "IsSetup indicates whether or not the user has any links configured at all. If this is false then the user should\nbe prompted to set up a new link.",
+                    "type": "boolean"
+                },
+                "nextUrl": {
+                    "description": "NextURL is only present when the user needs to be directed somewhere by the backend. Currently, it is leveraged\nfor billing purposes. But in the future it can be used to direct the user through an on-boarding flow or\nsomething similar.",
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "user": {
+                    "description": "User has all of the details about the currently authenticated user.",
+                    "$ref": "#/definitions/models.User"
                 }
             }
         },
