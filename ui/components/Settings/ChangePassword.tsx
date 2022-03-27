@@ -80,12 +80,18 @@ export default function ChangePassword(): JSX.Element {
             </span>
             <div className="grid lg:grid-cols-2 gap-2.5 mt-2.5">
               <div className="grid gap-2.5">
+                { /*
+                  This is here to suppress a Chrome warning about "you should have a username field
+                  even if its hidden" thing.
+                */ }
+                <input id="username" name="username" autoComplete="username" className="hidden" />
                 <TextField
                   id="current-password"
                   label="Current Password"
                   variant="outlined"
                   className="w-full"
                   type="password"
+                  autoComplete="current-password"
                   disabled={ isSubmitting }
                   name="currentPassword"
                   error={ touched.currentPassword && !!errors.currentPassword }
@@ -101,6 +107,7 @@ export default function ChangePassword(): JSX.Element {
                   variant="outlined"
                   className="w-full"
                   type="password"
+                  autoComplete="new-password"
                   disabled={ isSubmitting }
                   name="newPassword"
                   error={ touched.newPassword && !!errors.newPassword }
@@ -115,6 +122,7 @@ export default function ChangePassword(): JSX.Element {
                   variant="outlined"
                   className="w-full"
                   type="password"
+                  autoComplete="new-password"
                   disabled={ isSubmitting }
                   name="repeatPassword"
                   error={ touched.repeatPassword && !!errors.repeatPassword }
