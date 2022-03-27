@@ -19,7 +19,7 @@ ARG BUILD_HOST
 
 ARG GOFLAGS
 ENV GOFLAGS=$GOFLAGS
-RUN go build -ldflags "-s -w -X main.buildHost=${BUILD_HOST:-`hostname`} -X main.buildTime=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -X main.buildRevision=${REVISION} -X main.release=${RELEASE}" -o /usr/bin/monetr /build/pkg/cmd
+RUN go build -ldflags "-s -w -X main.buildType=container -X main.buildHost=${BUILD_HOST:-`hostname`} -X main.buildTime=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -X main.buildRevision=${REVISION} -X main.release=${RELEASE}" -o /usr/bin/monetr /build/pkg/cmd
 
 FROM docker.io/library/debian:bookworm-20211201-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \

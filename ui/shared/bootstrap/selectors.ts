@@ -1,3 +1,4 @@
+import { Moment } from 'moment';
 import { Plan } from 'shared/bootstrap/state';
 import { AppState } from 'store';
 
@@ -28,5 +29,9 @@ export const getBillingEnabled = (state: AppState): boolean => state.bootstrap.b
 export const getRelease = (state: AppState): string => state.bootstrap.release;
 
 export const getRevision = (state: AppState): string => state.bootstrap.revision;
+
+export const getBuildType = (state: AppState): string => state.bootstrap.buildType;
+
+export const getBuildTime = (state: AppState): Moment | null => state.bootstrap.buildTime;
 
 export const getAllowForgotPassword = (state: AppState) => state.bootstrap.allowForgotPassword;

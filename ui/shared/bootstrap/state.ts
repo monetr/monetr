@@ -1,3 +1,6 @@
+import { Moment } from 'moment';
+import { parseToMomentMaybe } from 'util/parseToMoment';
+
 export class Plan {
   price: number;
   freeTrialDays: number;
@@ -20,12 +23,15 @@ export default class BootstrapState {
   readonly billingEnabled: boolean;
   readonly release: string;
   readonly revision: string;
+  readonly buildType: string;
+  readonly buildTime: Moment | null;
 
   constructor(data?: Partial<BootstrapState>) {
     Object.assign(this, {
       isReady: false,
       isBootstrapping: true,
       ...data,
+      buildTime: parseToMomentMaybe(data?.buildTime),
     });
   }
 }

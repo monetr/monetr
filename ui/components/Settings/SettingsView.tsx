@@ -2,6 +2,7 @@ import { Info, Lock, Password, Payment, Security, Settings } from '@mui/icons-ma
 import { Box, Button, TextField, Typography } from '@mui/material';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import AboutView from 'components/About/AboutView/AboutView';
 import ChangePassword from 'components/Settings/ChangePassword';
 import TOTPSettings from 'components/Settings/TOTPSettings';
 import React, { Fragment, useState } from 'react';
@@ -65,7 +66,7 @@ export default function SettingsView(): JSX.Element {
         </div>
       </TabPanel>
       <TabPanel value={ value } index={ 2 }>
-        <h1>About</h1>
+        <AboutView/>
       </TabPanel>
     </div>
   )

@@ -34,10 +34,14 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 		BillingEnabled       bool         `json:"billingEnabled"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
+		BuildType            string       `json:"buildType"`
+		BuildTime            string       `json:"buildTime"`
 	}
 
 	configuration.Release = build.Release
 	configuration.Revision = build.Revision
+	configuration.BuildType = build.BuildType
+	configuration.BuildTime = build.BuildTime
 
 	// If ReCAPTCHA is enabled then we want to provide the UI our public key as
 	// well as whether or not we want it to verify logins and registrations.
