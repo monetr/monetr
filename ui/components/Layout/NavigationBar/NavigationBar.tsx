@@ -2,7 +2,9 @@ import { AppBar, Toolbar } from '@mui/material';
 import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
 import React from 'react';
 
-const NavigationBar = React.memo((): JSX.Element => {
+import 'components/Layout/NavigationBar/styles/NavigationBar.scss';
+
+export default function NavigationBar(): JSX.Element {
   return (
     <AppBar position="static">
       <Toolbar>
@@ -10,6 +12,4 @@ const NavigationBar = React.memo((): JSX.Element => {
       </Toolbar>
     </AppBar>
   )
-});
-
-export default NavigationBar;
+}

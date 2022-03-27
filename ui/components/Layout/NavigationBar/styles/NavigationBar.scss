@@ -1,0 +1,11 @@
+@import 'ui/styles/variables';
+
+header.MuiPaper-root.MuiAppBar-root {
+  height: $nav-bar-height !important;
+  z-index: $sidebar-z-index - 1;
+
+  div.MuiToolbar-root {
+    min-height: $nav-bar-height !important;
+    height: $nav-bar-height !important;
+  }
+}

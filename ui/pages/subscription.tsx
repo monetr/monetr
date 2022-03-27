@@ -6,7 +6,9 @@ import request from 'shared/util/request';
 import useMountEffect from 'shared/util/useMountEffect';
 import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
 
-export default function Subscription(): JSX.Element {
+// SubscriptionPage is just used to redirect the user to the stripe billing portal. Upon mounting, it will make an API
+// call to start a billing portal session, and once it gets a response it will redirect the user there.
+export default function SubscriptionPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 

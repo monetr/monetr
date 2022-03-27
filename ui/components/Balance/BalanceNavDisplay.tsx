@@ -11,7 +11,7 @@ const BalanceNavDisplay = React.memo((): JSX.Element => {
   }
 
   return (
-    <div className="flex-1 flex justify-center gap-2">
+    <div className="flex-1 flex justify-center gap-2 items-center">
       <Typography data-testid="safe-to-spend">
         <b>Safe-To-Spend:</b> { balance.getSafeToSpendString() }
       </Typography>

@@ -1,7 +1,10 @@
+@import 'ui/styles/_variables.scss';
+
 div.sidebar {
+  z-index: $sidebar-z-index;
   background: linear-gradient(to bottom,
-          #4E1AA0 24px,
-          #4E1AA0, darken(#4E1AA0, 7));
+          $primary-color $nav-bar-height, // Start the gradient below the bottom of the navbar.
+          $primary-color, darken($primary-color, 7));
   scroll-behavior: auto;
   overflow-y: auto;
 

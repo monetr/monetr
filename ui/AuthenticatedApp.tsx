@@ -1,7 +1,8 @@
 import Sidebar from 'components/Layout/Sidebar/Sidebar';
-import NavigationBar from 'NavigationBar';
-import Settings from 'pages/settings';
-import Subscription from 'pages/subscription';
+import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
+import ExpensesPage from 'pages/expenses';
+import SettingsPage from 'pages/settings';
+import SubscriptionPage from 'pages/subscription';
 import React, { Fragment, useState } from 'react';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
@@ -15,7 +16,6 @@ import { useSelector, useStore } from 'react-redux';
 import { Backdrop, CircularProgress } from '@mui/material';
 import useMountEffect from 'shared/util/useMountEffect';
 import TransactionsView from 'views/Transactions/TransactionsView';
-import ExpensesView from 'views/Expenses/ExpensesView';
 import GoalsView from 'views/Goals/GoalsView';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import AllAccountsView from 'views/AccountView/AllAccountsView';
@@ -74,11 +74,11 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/login" element={ <Navigate replace to="/"/> }/>
             <Route path="/logout" element={ <Logout/> }/>
             <Route path="/transactions" element={ <TransactionsView/> }/>
-            <Route path="/expenses" element={ <ExpensesView/> }/>
+            <Route path="/expenses" element={ <ExpensesPage/> }/>
             <Route path="/goals" element={ <GoalsView/> }/>
             <Route path="/accounts" element={ <AllAccountsView/> }/>
-            <Route path="/settings" element={ <Settings/> }/>
-            <Route path="/subscription" element={ <Subscription/> }/>
+            <Route path="/settings" element={ <SettingsPage/> }/>
+            <Route path="/subscription" element={ <SubscriptionPage/> }/>
             <Route path="*" element={ <Navigate replace to="/transactions"/> }/>
           </Routes>
         </div>

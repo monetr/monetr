@@ -15,7 +15,6 @@ import (
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
-	"github.com/monetr/monetr/pkg/util"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -414,7 +413,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		link.LinkStatus = models.LinkStatusSetup
 		linkWasSetup = true
 	}
-	link.LastSuccessfulUpdate = myownsanity.TimeP(util.InLocal(time.Now(), timezone))
+	link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
 	if err = p.repo.UpdateLink(span.Context(), link); err != nil {
 		log.WithError(err).Error("failed to update link after transaction sync")
 		return err

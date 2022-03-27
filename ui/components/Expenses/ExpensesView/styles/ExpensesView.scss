@@ -1,8 +1,10 @@
+@import 'ui/styles/variables';
+
 // This makes it so that the transaction list will always fit inside the view. It is the height of the screen minus the
 // height of the nav bar (64px) minus the 2.5em of padding (5em).
 .expenses-list {
-  height: calc(100vh - 64px - 5em);
-  max-height: calc(100vh - 64px - 5em);
+  height: calc(100vh - #{$nav-bar-height});
+  max-height: calc(100vh - #{$nav-bar-height});
   overflow-y: auto !important;
   overflow-x: unset !important;
 }

@@ -20,7 +20,7 @@ export default function Sidebar(): JSX.Element {
   const billingEnabled = useSelector(getBillingEnabled);
 
   return (
-    <div className="sidebar fixed top-0 bottom-0 left-0 z-30 hidden lg:flex lg:flex-shrink-0 lg:w-64">
+    <div className="sidebar fixed top-0 bottom-0 left-0 hidden lg:flex lg:flex-shrink-0 lg:w-64">
       <div className="w-full h-full flex flex-col text-white">
         <div className="flex justify-start p-2.5 flex-shrink-0">
           <BankAccountSelector/>
