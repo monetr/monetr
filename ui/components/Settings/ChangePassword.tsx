@@ -85,6 +85,7 @@ export default function ChangePassword(): JSX.Element {
                   label="Current Password"
                   variant="outlined"
                   className="w-full"
+                  type="password"
                   disabled={ isSubmitting }
                   name="currentPassword"
                   error={ touched.currentPassword && !!errors.currentPassword }
@@ -99,6 +100,7 @@ export default function ChangePassword(): JSX.Element {
                   label="New Password"
                   variant="outlined"
                   className="w-full"
+                  type="password"
                   disabled={ isSubmitting }
                   name="newPassword"
                   error={ touched.newPassword && !!errors.newPassword }
@@ -112,6 +114,7 @@ export default function ChangePassword(): JSX.Element {
                   label="Repeat New Password"
                   variant="outlined"
                   className="w-full"
+                  type="password"
                   disabled={ isSubmitting }
                   name="repeatPassword"
                   error={ touched.repeatPassword && !!errors.repeatPassword }
@@ -130,8 +133,8 @@ export default function ChangePassword(): JSX.Element {
                   Update Password
                 </Button>
               </div>
-              <div className="h-full flex items-center">
-                <p className="opacity-70 h-full">
+              <div className="flex items-center h-full">
+                <p className="h-full opacity-70">
                   We strongly recommend you store your passwords in a <b>secure</b> password manager like 1Password.
                 </p>
               </div>
