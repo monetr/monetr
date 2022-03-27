@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.10.0](https://github.com/monetr/monetr/compare/v0.9.10...v0.10.0) (2022-03-27)
+
+
+### Features
+
+* Adding docker compose for local development. ([b20620b](https://github.com/monetr/monetr/commit/b20620b2e0218c2b66311f43d9ca6fa17432c8e3))
+* **authentication:** Adding support for changing passwords. ([83417c3](https://github.com/monetr/monetr/commit/83417c35d6545ffe70426d5502fc8f5dbcff6403)), closes [#565](https://github.com/monetr/monetr/issues/565)
+* **go:** Upgrading to Go 1.18. ([6648000](https://github.com/monetr/monetr/commit/664800017dfe409442e399c01392265c676db7c9))
+
+
+### Bug Fixes
+
+* Fixed failing test, imroved dev documentation. ([05f8c9a](https://github.com/monetr/monetr/commit/05f8c9af9acf8580b8577dcdf8d2c217876761f0))
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.19.0 ([c6c8455](https://github.com/monetr/monetr/commit/c6c8455d47954525553fe28b3a6721cb443c8df5))
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.20.0 ([d4e505e](https://github.com/monetr/monetr/commit/d4e505e25f694e07a92972f9e9b151f5ffa07b46))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.15.0 ([ac0bf07](https://github.com/monetr/monetr/commit/ac0bf07115281f80571824fb3025037109876005))
+* **api:** update module github.com/getsentry/sentry-go to v0.13.0 ([4c8716c](https://github.com/monetr/monetr/commit/4c8716ce37a327f6c67a3ca9e14b5960f3781760))
+* **api:** update module github.com/spf13/cobra to v1.4.0 ([53b9c80](https://github.com/monetr/monetr/commit/53b9c80a05104add4febf10591628784998aa859))
+* **containers:** update dependency golang to v1.18 ([792fbb1](https://github.com/monetr/monetr/commit/792fbb177604c87a2c7ef68b7a528c988fb0de85))
+* **ui:** update dependency @types/react to v17.0.42 ([b183059](https://github.com/monetr/monetr/commit/b18305971281ed56a24f52f8388c6260f4f7b55e))
+* **ui:** update dependency autoprefixer to v10.4.4 ([c2041b5](https://github.com/monetr/monetr/commit/c2041b583d1a65cfeb5ec9d43a863b7045432e8d))
+* **ui:** update dependency axios to v0.26.1 ([58a7d76](https://github.com/monetr/monetr/commit/58a7d764ef4db2abc14e91c1d77834f1c5aa816f))
+* **ui:** update dependency babel-loader to v8.2.4 ([fe6a319](https://github.com/monetr/monetr/commit/fe6a319bf58f94e46f0651f7d1a0baf7de07481f))
+* **ui:** update dependency css-loader to v6.7.1 ([0462c09](https://github.com/monetr/monetr/commit/0462c09d52fc8432e1e4e66185cd0d101ab70b90))
+* **ui:** update dependency dotenv-expand to v8.0.3 ([1f80e23](https://github.com/monetr/monetr/commit/1f80e23024b4c854a9c75c77277d08dc47577909))
+* **ui:** update dependency eslint to v8.11.0 ([a2a1101](https://github.com/monetr/monetr/commit/a2a1101842d121c4546b8efe2c6ab0db4d6b6447))
+* **ui:** update dependency eslint-plugin-jest to v26.1.2 ([b78bf8d](https://github.com/monetr/monetr/commit/b78bf8dd5d75011ba5bc805d7fe573d37cf037bf))
+* **ui:** update dependency eslint-plugin-testing-library to v5.1.0 ([52793c7](https://github.com/monetr/monetr/commit/52793c76aa40e23abad637c91c2c229f24e10cdb))
+* **ui:** update dependency mini-css-extract-plugin to v2.6.0 ([6fbf18b](https://github.com/monetr/monetr/commit/6fbf18b942bd4042276d58c516f5794ec87d9827))
+* **ui:** update dependency postcss to v8.4.12 ([97b747f](https://github.com/monetr/monetr/commit/97b747f7052ddbc1406b925e87842d3267189840))
+* **ui:** update dependency postcss-preset-env to v7.4.3 ([b96a8d9](https://github.com/monetr/monetr/commit/b96a8d904c35511214a6c052bf0bcbeb7b48b04a))
+* **ui:** update dependency ts-loader to v9.2.8 ([a22128a](https://github.com/monetr/monetr/commit/a22128a58b1682709d0a218e9228e6920f03959a))
+* **ui:** update dependency workbox-webpack-plugin to v6.5.1 ([b2e81bf](https://github.com/monetr/monetr/commit/b2e81bf97c328df4c0bb892576b335390c38002a))
+
+
+### Miscellaneous
+
+* **ci:** Upgrading CI pipelines to Go 1.18 ([284c887](https://github.com/monetr/monetr/commit/284c887ad00a7121ffbf02d17b27104aeea64df8))
+* **development:** Adding comments to the docker compose file. ([fafb808](https://github.com/monetr/monetr/commit/fafb80884d77f495f9ac107a053e3fbc53bd61f1))
+* **development:** Huge improvements to local development. ([211c412](https://github.com/monetr/monetr/commit/211c41201965bddf739b15041901cbe819e642ed))
+* **docs:** Add information on how to develop. ([8827855](https://github.com/monetr/monetr/commit/8827855eab09cd59a610c729ff12195bb8f6f66a))
+* **make:** Fix golang version in dependencies scripts. ([9a46a4c](https://github.com/monetr/monetr/commit/9a46a4c0f73713f0ecada43ca98b656942b28ccd))
+* Minor cleanup and logging fix. ([68d2785](https://github.com/monetr/monetr/commit/68d2785d300fb63bcb4736de2750cb46f9335371))
+* release 0.10.0 ([1fabf31](https://github.com/monetr/monetr/commit/1fabf312117bf5641ba2352abe226d1fceb73c36))
+
 ### [0.9.10](https://github.com/monetr/monetr/compare/v0.9.9...v0.9.10) (2022-03-21)
 
 
