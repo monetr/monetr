@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.10.1](https://github.com/monetr/monetr/compare/v0.10.0...v0.10.1) (2022-03-27)
+
+
+### Features
+
+* **billing:** Added new billing navigation. ([39c18dd](https://github.com/monetr/monetr/commit/39c18dddc7702cdea8a12ca3deffa8a3b8566eef))
+
+
+### Bug Fixes
+
+* **ui:** Fixed change password fields type. ([9963344](https://github.com/monetr/monetr/commit/996334441e22c1e709ebbbd2013cfc780c9a560f))
+
 ## [0.10.0](https://github.com/monetr/monetr/compare/v0.9.10...v0.10.0) (2022-03-27)
 
 
