@@ -4,7 +4,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import ChangePassword from 'components/Settings/ChangePassword';
 import TOTPSettings from 'components/Settings/TOTPSettings';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -25,9 +25,9 @@ function TabPanel(props: TabPanelProps) {
       { ...other }
     >
       { value === index && (
-        <Box sx={ { p: 3 } }>
-          <Typography>{ children }</Typography>
-        </Box>
+        <div className="p-2.5">
+          { children }
+        </div>
       ) }
     </div>
   );
