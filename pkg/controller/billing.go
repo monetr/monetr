@@ -381,12 +381,9 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 		}
 	}
 
-	// TODO Allow a custom return URL to be set.
-	returnUrl := ctx.GetReferrer().Raw
-	if returnUrl == "" {
-		returnUrl = fmt.Sprintf("%s://%s", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
-	}
-
+	// Return the user to the UI home page when they return the monetr. If they are authenticated this will show them
+	// the transactions view, or will prompt them for credentials if they are no longer authenticated.
+	returnUrl := fmt.Sprintf("%s://%s", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
 	params := &stripe.BillingPortalSessionParams{
 		Configuration: nil,
 		Customer:      account.StripeCustomerId,
