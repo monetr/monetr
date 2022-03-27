@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.10.2](https://github.com/monetr/monetr/compare/v0.10.1...v0.10.2) (2022-03-27)
+
+
+### Bug Fixes
+
+* **billing:** Fixed return URL for billing portal. ([dde7232](https://github.com/monetr/monetr/commit/dde72324b2dbc80d7a1901cb6d7826fe093be1db))
+
 ### [0.10.1](https://github.com/monetr/monetr/compare/v0.10.0...v0.10.1) (2022-03-27)
 
 
