@@ -257,6 +257,9 @@ webhooks:
 shutdown:
 	$(COMPOSE) down --remove-orphans -v
 
+restart-monetr:
+	$(COMPOSE) restart monetr
+
 SWAGGER_YAML=$(PWD)/docs/swagger.yaml
 $(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES)
 	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \

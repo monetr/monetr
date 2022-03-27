@@ -158,10 +158,10 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		log.Info("successfully created stripe customer for account")
 	}
 
-	successUrl := fmt.Sprintf("https://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}", c.configuration.UIDomainName)
-	cancelUrl := fmt.Sprintf("https://%s/account/subscribe", c.configuration.UIDomainName)
+	successUrl := fmt.Sprintf("%s://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
+	cancelUrl := fmt.Sprintf("%s://%s/account/subscribe", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
 	if request.CancelPath != nil {
-		cancelUrl = fmt.Sprintf("https://%s%s", c.configuration.UIDomainName, *request.CancelPath)
+		cancelUrl = fmt.Sprintf("%s://%s%s", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName, *request.CancelPath)
 	}
 
 	crumbs.Debug(c.getContext(ctx), "Creating Stripe Checkout Session", map[string]interface{}{
@@ -384,7 +384,7 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 	// TODO Allow a custom return URL to be set.
 	returnUrl := ctx.GetReferrer().Raw
 	if returnUrl == "" {
-		returnUrl = fmt.Sprintf("https://%s", c.configuration.UIDomainName)
+		returnUrl = fmt.Sprintf("%s://%s", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
 	}
 
 	params := &stripe.BillingPortalSessionParams{

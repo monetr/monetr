@@ -1,6 +1,7 @@
 import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import NavigationBar from 'NavigationBar';
 import Settings from 'pages/settings';
+import Subscription from 'pages/subscription';
 import React, { Fragment, useState } from 'react';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
@@ -77,6 +78,7 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/goals" element={ <GoalsView/> }/>
             <Route path="/accounts" element={ <AllAccountsView/> }/>
             <Route path="/settings" element={ <Settings/> }/>
+            <Route path="/subscription" element={ <Subscription/> }/>
             <Route path="*" element={ <Navigate replace to="/transactions"/> }/>
           </Routes>
         </div>

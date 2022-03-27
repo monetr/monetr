@@ -51,7 +51,6 @@ export default function SettingsView(): JSX.Element {
         >
           <Tab className="h-12 min-h-0" label="General" iconPosition="start" icon={ <Settings/> }/>
           <Tab className="h-12 min-h-0" label="Security" iconPosition="start" icon={ <Security/> }/>
-          <Tab className="h-12 min-h-0" label="Subscription" iconPosition="start" icon={ <Payment/> }/>
           <Tab className="h-12 min-h-0" label="About" iconPosition="start" icon={ <Info/> }/>
         </Tabs>
       </div>
@@ -66,9 +65,6 @@ export default function SettingsView(): JSX.Element {
         </div>
       </TabPanel>
       <TabPanel value={ value } index={ 2 }>
-        <h1>Subscription</h1>
-      </TabPanel>
-      <TabPanel value={ value } index={ 3 }>
         <h1>About</h1>
       </TabPanel>
     </div>
