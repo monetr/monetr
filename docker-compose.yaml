@@ -96,7 +96,7 @@ services:
       MH_CORES_ORIGIN: localhost
       MH_HOSTNAME: localhost
   redis:
-    image: redis:6.2.2-alpine
+    image: redis:6.2.6-alpine
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 30s
