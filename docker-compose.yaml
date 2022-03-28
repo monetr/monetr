@@ -64,7 +64,7 @@ services:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `yarn install` before doing docker compose up.
     tty: true # Color output.
-    image: node:17.5.0
+    image: node:17.8.0
     working_dir: /build
     restart: always
     healthcheck:
