@@ -1,7 +1,7 @@
 services:
   monetr:
     tty: true # Makes color output work nicely.
-    image: cosmtrek/air # Container that lets us hot-reload our go code.
+    image: golang:1.18
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     healthcheck:
@@ -26,8 +26,9 @@ services:
       MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_SECRET: "123abc"
       MONETR_JWT_LOGIN_SECRET: "qwertyuiop1234567890"
     command:
+      - bash
       - -c
-      - /build/air.toml
+      - /build/compose/api-entrypoint.sh
     links:
       - redis
       - postgres
