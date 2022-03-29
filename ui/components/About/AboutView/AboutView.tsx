@@ -105,24 +105,6 @@ export default function AboutView(): JSX.Element {
     )
   }
 
-  function NodeVersion(): JSX.Element {
-    return (
-      <Fragment>
-        <div className="grid grid-cols-2">
-          <div className="flex items-center">
-            <span className="text-lg">Node Version</span>
-          </div>
-          <div className="flex items-center">
-            <CodeBasic>
-              { NODE_VERSION }
-            </CodeBasic>
-          </div>
-        </div>
-        <hr/>
-      </Fragment>
-    )
-  }
-
   return (
     <div className="grid gap-5 w-full lg:w-2/3">
       <div>
@@ -134,7 +116,6 @@ export default function AboutView(): JSX.Element {
           <Revision/>
           <BuildType/>
           <BuildTime/>
-          <NodeVersion/>
         </div>
       </div>
       <div>
