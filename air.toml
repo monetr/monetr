@@ -5,7 +5,7 @@ tmp_dir = "/tmp"
 
 [build]
 # Build monetr with the mini tag, this will allow insecure SMTP communication for working with emails locally.
-cmd = 'go build -ldflags "-X main.buildType=development -X main.buildHost=${BUILD_HOST:-`hostname`} -X main.buildTime=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -X main.buildRevision=`git rev-parse HEAD`" -tags=mini -o /usr/bin/monetr github.com/monetr/monetr/pkg/cmd'
+cmd = '/build/compose/api-builder.sh'
 # The resulting binary that we are working with.
 bin = "/usr/bin/monetr"
 # Run monetr inside of dlv, this allows us to connect debuggers to it very easily.

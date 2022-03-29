@@ -1,16 +1,4 @@
 services:
-  # The golang hot-reload container we are using does not have dlv installed (to my knowledge) at runtime. So in order
-  # to support step-debugging for the API we need to side-load it in. This container runs before the monetr container
-  # starts and simply installs the latest dlv debugger CLI to a tmpfs volume that is shared.
-  delve_install:
-    image: golang:1.18
-    working_dir: /build
-    command:
-      - go
-      - install
-      - github.com/go-delve/delve/cmd/dlv@latest
-    volumes:
-      - delveBinary:/go/bin
   monetr:
     tty: true # Makes color output work nicely.
     image: cosmtrek/air # Container that lets us hot-reload our go code.
@@ -49,7 +37,6 @@ services:
     volumes:
       - ./:/build
       - ./compose/monetr.yaml:/etc/monetr/config.yaml
-      - delveBinary:/go/bin
     depends_on:
       mail:
         condition: service_started
@@ -57,9 +44,6 @@ services:
         condition: service_started
       postgres:
         condition: service_started
-      # Wait for the delve install to finish before trying to start this container.
-      delve_install:
-        condition: service_completed_successfully
   ui:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
     # do `yarn install` before doing docker compose up.
@@ -150,6 +134,3 @@ services:
       - monetr
       - ui
       - mail
-
-volumes:
-  delveBinary:

@@ -245,7 +245,33 @@ else
 	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
 endif
 develop: $(NODE_MODULES)
-	$(COMPOSE) up -d
+	$(COMPOSE) up --wait
+	$(MAKE) development-info
+
+development-info:
+	$(call infoMsg,=====================================================================================================)
+	$(call infoMsg,Local environment is setup.)
+	$(call infoMsg,You should be able to access monetr at:       http://localhost)
+	$(call infoMsg,)
+	$(call infoMsg,Other services are run alongside monetr locally; you can access them at the following URLs:)
+	$(call infoMsg,    Email:                                    http://localhost/mail)
+	$(call infoMsg,)
+	$(call infoMsg,If you want you can see the logs for all the containers using:)
+	$(call infoMsg,  $$ make logs)
+	$(call infoMsg,)
+	$(call infoMsg,If you are working on features related to webhooks you can setup webhook development using:)
+	$(call infoMsg,  $$ make webhooks)
+	$(call infoMsg,This will setup an ngrok container forwarding to your API instance you dont need to have an API key.)
+	$(call infoMsg,However if you dont have one then the webhooks endpoint will only work for a few hours.)
+	$(call infoMsg,)
+	$(call infoMsg,If you run into problems or need a clean development environment; run the following command:)
+	$(call infoMsg,  $$ make shutdown)
+	$(call infoMsg,This command will take down the local dev environment but wont remove any node_modules or clean anything.)
+	$(call infoMsg,)
+	$(call infoMsg,You can see all of these details at any time by running the following command:)
+	$(call infoMsg,  $$ make development-info)
+	$(call infoMsg,)
+	$(call infoMsg,=====================================================================================================)
 
 logs:
 	$(COMPOSE) logs -f
