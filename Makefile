@@ -224,7 +224,7 @@ test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
 
 test: test-go test-ui
 
-clean:
+clean: shutdown
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
 	-rm -rf $(NODE_MODULES)
@@ -281,7 +281,7 @@ webhooks:
 	$(COMPOSE) restart monetr
 
 shutdown:
-	$(COMPOSE) down --remove-orphans -v
+	-$(COMPOSE) down --remove-orphans -v
 
 restart-monetr:
 	$(COMPOSE) restart monetr
