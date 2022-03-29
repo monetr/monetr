@@ -149,6 +149,7 @@ module.exports = (env, argv) => {
         CONFIG: JSON.stringify({}),
         REVISION: JSON.stringify(process.env.RELEASE_REVISION),
         RELEASE: JSON.stringify(process.env.RELEASE_VERSION),
+        NODE_VERSION: process.version,
       }),
       new HtmlWebpackPlugin({
         inject: true,
