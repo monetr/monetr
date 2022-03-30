@@ -70,7 +70,9 @@ services:
   mail:
     # Mailhog is used for testing email sending from the application. This is for things like forgot password or email
     # verification. It can be accessed by navigating to `http://localhost/mail`
-    image: mailhog/mailhog
+    build:
+      dockerfile: Dockerfile.mailhog
+      context: .
     healthcheck:
       test: [ "CMD", "wget", "http://localhost:8025", "-q", "-O", "-" ]
       interval: 10s
