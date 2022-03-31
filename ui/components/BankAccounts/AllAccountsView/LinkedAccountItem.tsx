@@ -6,7 +6,6 @@ import { Map } from 'immutable';
 import BankAccount from 'models/BankAccount';
 import Link, { LinkStatus } from 'models/Link';
 import React, { Fragment, useState } from 'react';
-import AddBankAccountDialog from 'components/BankAccounts/AllAccountsView/AddBankAccountDialog';
 import RemoveLinkConfirmationDialog from 'components/BankAccounts/AllAccountsView/RemoveLinkConfirmationDialog';
 import { UpdatePlaidAccountDialog } from 'components/BankAccounts/AllAccountsView/UpdatePlaidAccountDialog';
 
