@@ -13,9 +13,9 @@ import request from 'shared/util/request';
 import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
 import fetchLinks from 'shared/links/actions/fetchLinks';
 import { AppState } from 'store';
-import AddManualBankAccountDialog from 'views/AccountView/AddManualBankAccountDialog';
+import AddManualBankAccountDialog from 'components/BankAccounts/AllAccountsView/AddManualBankAccountDialog';
 import { Map } from 'immutable';
-import DuplicateInstitutionDialog from 'views/AccountView/DuplicateInstitutionDialog';
+import DuplicateInstitutionDialog from 'components/BankAccounts/AllAccountsView/DuplicateInstitutionDialog';
 
 export interface PropTypes {
   open: boolean;

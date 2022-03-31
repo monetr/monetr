@@ -1,5 +1,6 @@
 import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
+import AccountsPage from 'pages/accounts';
 import ExpensesPage from 'pages/expenses';
 import SettingsPage from 'pages/settings';
 import SubscriptionPage from 'pages/subscription';
@@ -18,7 +19,6 @@ import useMountEffect from 'shared/util/useMountEffect';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import GoalsView from 'views/Goals/GoalsView';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
-import AllAccountsView from 'views/AccountView/AllAccountsView';
 import Logout from 'views/Authentication/Logout';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 
@@ -76,7 +76,7 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/transactions" element={ <TransactionsView/> }/>
             <Route path="/expenses" element={ <ExpensesPage/> }/>
             <Route path="/goals" element={ <GoalsView/> }/>
-            <Route path="/accounts" element={ <AllAccountsView/> }/>
+            <Route path="/accounts" element={ <AccountsPage/> }/>
             <Route path="/settings" element={ <SettingsPage/> }/>
             <Route path="/subscription" element={ <SubscriptionPage/> }/>
             <Route path="*" element={ <Navigate replace to="/transactions"/> }/>
