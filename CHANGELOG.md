@@ -1,5 +1,46 @@
 # Changelog
 
+### [0.10.3](https://github.com/monetr/monetr/compare/v0.10.2...v0.10.3) (2022-03-31)
+
+
+### Features
+
+* **development:** Custom MailHog container to support arm64. ([47e9143](https://github.com/monetr/monetr/commit/47e914347129342237b49c91de58136d17b1545f))
+* **development:** Significantly improved local development. ([7033ecf](https://github.com/monetr/monetr/commit/7033ecf20bb5723961b62633a5c134db85970402))
+* **ui/about:** Include Node version in about screen. ([36cdb99](https://github.com/monetr/monetr/commit/36cdb99d9dfb2ba5823a3bc114e5a540f7c513db))
+* **ui:** All accounts view improvements. ([708000b](https://github.com/monetr/monetr/commit/708000bab6966d12ea9fcadd76ec902145f1a724))
+* **ui:** Building out basic About screen. ([aa3b94d](https://github.com/monetr/monetr/commit/aa3b94d5d53dad9d2dbed655af92b4164a45b3aa))
+
+
+### Bug Fixes
+
+* **development:** Allow for development on arm64. ([85b1a58](https://github.com/monetr/monetr/commit/85b1a5812d8f625e40d1afb68fc5d71b5b4997ff))
+* **ui:** Fixed bad practive with UI settings component. ([8713793](https://github.com/monetr/monetr/commit/87137934eb0b34b787ef71729392581f98eb89f6))
+* **ui:** Resolve Chrome warning about password forms. ([98335ff](https://github.com/monetr/monetr/commit/98335ff85d2d2bef6f262ad345ae2000a170b62b))
+
+
+### Dependencies
+
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.96.0 ([303ccf9](https://github.com/monetr/monetr/commit/303ccf9e73a62122d66152df66d0730203eb43c2))
+* **containers:** update dependency redis to v6.2.6 ([c151895](https://github.com/monetr/monetr/commit/c151895aa633f467d299a8ad9f832f10b137486c))
+* **containers:** update node.js to v17.8.0 ([ebade0e](https://github.com/monetr/monetr/commit/ebade0e13813642a2e2c38b706438e765e059425))
+* **ui:** update dependency @testing-library/jest-dom to v5.16.3 ([ff876d6](https://github.com/monetr/monetr/commit/ff876d631296cbd39297bd4cf6266abb5788aee0))
+* **ui:** update dependency @types/react to v17.0.43 ([3bf8c86](https://github.com/monetr/monetr/commit/3bf8c863cdbd33a64c521e54c5297f70f084740e))
+* **ui:** update dependency eslint-plugin-jest to v26.1.3 ([69a6c57](https://github.com/monetr/monetr/commit/69a6c57f23a15a8821e87650e5e1e5aca3104be3))
+* **ui:** update dependency prettier to v2.6.1 ([a7d42d9](https://github.com/monetr/monetr/commit/a7d42d9447c12aeaa17881f80918c61f015e6c2d))
+* **ui:** update dependency typescript to v4.6.3 ([37fc321](https://github.com/monetr/monetr/commit/37fc3218f0174f4cb4fe98f499fb6169cd252c0e))
+* **ui:** update dependency webpack to v5.70.0 ([f91ea5c](https://github.com/monetr/monetr/commit/f91ea5c0d7c551d8f9486b1ca32349d0b49fe1a0))
+* **ui:** update dependency workbox-webpack-plugin to v6.5.2 ([aad7968](https://github.com/monetr/monetr/commit/aad7968a2a1387b30a6eb9a7b92e2aaf506db202))
+* **ui:** update material-ui monorepo ([07de381](https://github.com/monetr/monetr/commit/07de3818d45d8d3b8551fe43251a6438f7804b34))
+* **ui:** update material-ui monorepo ([409fed5](https://github.com/monetr/monetr/commit/409fed56427afd1d67619b256d54055d6c70826f))
+
+
+### Miscellaneous
+
+* Added monetr screenshot. ([5f99330](https://github.com/monetr/monetr/commit/5f99330d8fc6d6e931b65513a0373b31cbe03f5d))
+* **development:** Shutdown compose if its running on clean. ([8fa5f11](https://github.com/monetr/monetr/commit/8fa5f11cb720bc3ef07adedf2e4b6d5620cbc616))
+* **ui:** General codebase improvements. ([3426e89](https://github.com/monetr/monetr/commit/3426e89e076023e47ff738030a1656dd076b9626))
+
 ### [0.10.2](https://github.com/monetr/monetr/compare/v0.10.1...v0.10.2) (2022-03-27)
 
 
