@@ -9,6 +9,7 @@ import {
 } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
+import SidebarButton from 'components/Layout/Sidebar/SidebarButton';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
@@ -25,43 +26,23 @@ export default function Sidebar(): JSX.Element {
         <div className="flex justify-start p-2.5 flex-shrink-0">
           <BankAccountSelector/>
         </div>
-        <div className="flex-1 flex flex-col gap-2.5 p-2.5">
-          <Button
-            className="justify-start text-lg"
-            to="/transactions"
-            component={ RouterLink }
-            color="inherit"
-          >
+        <div className="flex-1 flex flex-col pl-2.5 pt-2.5">
+          <SidebarButton to="/transactions">
             <ShoppingCart className="mr-2.5"/>
             Transactions
-          </Button>
-          <Button
-            className="justify-start text-lg"
-            to="/expenses"
-            component={ RouterLink }
-            color="inherit"
-          >
+          </SidebarButton>
+          <SidebarButton to="/expenses">
             <PriceCheck className="mr-2.5"/>
             Expenses
-          </Button>
-          <Button
-            className="justify-start text-lg"
-            to="/goals"
-            component={ RouterLink }
-            color="inherit"
-          >
+          </SidebarButton>
+          <SidebarButton to="/goals">
             <Savings className="mr-2.5"/>
             Goals
-          </Button>
-          <Button
-            className="justify-start text-lg"
-            to="/accounts"
-            component={ RouterLink }
-            color="inherit"
-          >
+          </SidebarButton>
+          <SidebarButton to="/accounts">
             <AccountBalance className="mr-2.5"/>
             Accounts
-          </Button>
+          </SidebarButton>
         </div>
         <div className="flex justify-start p-2.5 flex-col gap-2.5">
           { billingEnabled &&
