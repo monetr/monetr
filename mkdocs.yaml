@@ -1,4 +1,5 @@
 site_name: monetr
+site_url: http://localhost/documentation/
 repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
 copyright: © monetr 2022
@@ -15,3 +16,20 @@ extra_css:
   - stylesheets/extra.css
 nav:
   - Home: README.md
+  - API:
+      - REST API: api/API.md
+  - Developer:
+      - Local: developer/Local.md
+
+plugins:
+  - search
+  - render_swagger
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences

@@ -284,6 +284,12 @@ webhooks:
 	$(COMPOSE) up ngrok -d
 	$(COMPOSE) restart monetr
 
+stop:
+	$(COMPOSE) stop
+
+start:
+	$(COMPOSE) start
+
 restart:
 	$(COMPOSE) restart
 
@@ -310,8 +316,17 @@ $(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES) $(BUILD_DIR)
 	cp $(PWD)/public/logo192.png $(DOCS_DIR)/logo192.png
 	cp $(PWD)/public/logo512.png $(DOCS_DIR)/logo512.png
 	cp $(PWD)/public/manifest.json $(DOCS_DIR)/manifest.json
+	cp $(DOCS_DIR)/swagger.json $(PWD)/docs/api/swagger.json
 
 docs: $(SWAGGER_YAML)
+
+MKDOCS_YAML=$(PWD)/mkdocs.yaml
+DOCS_FILES=$(shell find $(PWD)/docs -type f)
+DOCS_SITE=$(PWD)/build/site/index.html
+$(DOCS_SITE): $(MKDOCS_YAML) $(DOCS_FILES)
+	$(DOCKER) run -v $(PWD):/work -w /work --rm --entrypoint sh squidfunk/mkdocs-material:8.2.8 /work/scripts/docs-build.sh
+
+mkdocs: $(DOCS_SITE)
 
 # redoc-cli is either installed globally and accessible via yarn, or is installed in the node_modules bin dir. This
 # variable will check if the file exists via yarn, and if it does not it will default to the node_modules dir. If the
@@ -367,8 +382,26 @@ ifndef POSTGRES_PORT
 POSTGRES_PORT=5432
 endif
 
+MIGRATE_FLAGS=$(NOOP)
+ifdef POSTGRES_DB
+MIGRATE_FLAGS += -d $(POSTGRES_DB)
+endif
+ifdef POSTGRES_USER
+MIGRATE_FLAGS += -U $(POSTGRES_USER)
+endif
+ifdef POSTGRES_HOST
+MIGRATE_FLAGS += -H $(POSTGRES_HOST)
+endif
+ifdef POSTGRES_PORT
+MIGRATE_FLAGS += -P $(POSTGRES_PORT)
+endif
+ifdef POSTGRES_PASSWORD
+MIGRATE_FLAGS += -W $(POSTGRES_PASSWORD)
+endif
+
+
 migrate: $(GO)
-	@$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
+	@$(GO) run $(MONETR_CLI_PACKAGE) database migrate $(MIGRATE_FLAGS)
 
 beta-code: $(GO)
 	@$(GO) run $(MONETR_CLI_PACKAGE) beta new-code -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)

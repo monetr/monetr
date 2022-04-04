@@ -3,11 +3,9 @@ services:
     image: squidfunk/mkdocs-material:8.2.8
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
+    entrypoint: sh
     command:
-      - mkdocs
-      - serve
-      - -w
-      - docs
+      - /build/compose/docs-entrypoint.sh
     volumes:
       - ./:/build
   monetr:
