@@ -273,12 +273,19 @@ development-info:
 	$(call infoMsg,)
 	$(call infoMsg,=====================================================================================================)
 
-logs:
+logs: # Tail logs for the current development environment. Provide NAME to limit to a single process.
+ifdef NAME
+	$(COMPOSE) logs -f $(NAME)
+else
 	$(COMPOSE) logs -f
+endif
 
 webhooks:
 	$(COMPOSE) up ngrok -d
 	$(COMPOSE) restart monetr
+
+restart:
+	$(COMPOSE) restart
 
 shutdown:
 	-$(COMPOSE) down --remove-orphans -v

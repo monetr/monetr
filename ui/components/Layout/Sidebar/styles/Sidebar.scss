@@ -76,7 +76,7 @@ div.sidebar {
       button.MuiButton-root, a.MuiButton-root {
         border-top-right-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
-        color: black;
+        color: $primary-color;
         background: linear-gradient(to right,
                 lighten($primary-color, 50) 50px, // Start the gradient below the bottom of the navbar.
                 white);
