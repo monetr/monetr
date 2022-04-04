@@ -5,7 +5,6 @@ libexec
 telepresence.log
 telepresence
 coverage.txt
-docs
 node_modules
 generated
 values.mayview.yaml
