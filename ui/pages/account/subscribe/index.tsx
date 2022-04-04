@@ -32,7 +32,7 @@ export default function SubscribePage(): JSX.Element {
     <div className="flex items-center justify-center w-full h-full max-h-full">
       <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
         <div className="flex justify-center w-full mb-5">
-          {/*<img src={ Logo } className="w-1/3"/>*/ }
+          <img src={ Logo } className="w-1/3"/>
         </div>
         <div className="w-full pt-2.5 pb-2.5">
           <Typography
