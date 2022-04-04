@@ -31,7 +31,7 @@
     "immutable": "4.0.0",
     "is-svg": "4.3.2",
     "mini-css-extract-plugin": "2.6.0",
-    "moment": "2.29.1",
+    "moment": "2.29.2",
     "node-notifier": "10.0.1",
     "notistack": "2.0.3",
     "optimize-css-assets-webpack-plugin": "6.0.1",
