@@ -1,5 +1,35 @@
 # Changelog
 
+### [0.10.4](https://github.com/monetr/monetr/compare/v0.10.3...v0.10.4) (2022-04-04)
+
+
+### Features
+
+* **ui/layout:** Show which area is currently active in sidebar. ([de8ae13](https://github.com/monetr/monetr/commit/de8ae137c3532115724b50c85fbb24d2ccc7df06))
+* **ui:** Greatly improving UI structure in code. ([d99ed48](https://github.com/monetr/monetr/commit/d99ed48173efffad2501a79ccf5bd2a897497a17))
+
+
+### Bug Fixes
+
+* **ui:** Added logo back to subscribe page. ([4f0dca8](https://github.com/monetr/monetr/commit/4f0dca837245e052bed026f6ba78e691a6b706ee))
+
+
+### Dependencies
+
+* **ui:** Removing unused dependencies. ([bd8c993](https://github.com/monetr/monetr/commit/bd8c9934bdd63187029ecf9482d39edc819287a5))
+* **ui:** update dependency moment to v2.29.2 ([f44681f](https://github.com/monetr/monetr/commit/f44681f3d577004a8733a80ca9ca1089834618c4))
+
+
+### Miscellaneous
+
+* Adding screenshots to docs folder. ([261e555](https://github.com/monetr/monetr/commit/261e555368ea812ca5a22eac96fe24d3e63f9599))
+* Don't remove docs dir on clean. ([13c48ec](https://github.com/monetr/monetr/commit/13c48ec8e1707e7c6b21851dfa28b5ccc6464c60))
+* Improved local dev, improved documentation folder structure. ([0714b38](https://github.com/monetr/monetr/commit/0714b38ef059e6e8368d8e6757760e86c3b3525f))
+* Minor improvements. ([17ced87](https://github.com/monetr/monetr/commit/17ced87490b946e6b1460d4b8bdfb4f6909a01af))
+* Remove docs folder from git ignore. ([6f9278f](https://github.com/monetr/monetr/commit/6f9278f1067c854cfc07be7e76ba51dd907d68a1))
+* Remove unused import in LinkedAccountItem. ([c5fe7d8](https://github.com/monetr/monetr/commit/c5fe7d8cf9cee8d5a933ddbb8338fbc6fb73d3b3))
+* **ui:** Minor sidebar improvement. ([1878415](https://github.com/monetr/monetr/commit/1878415bbf668f465011089ab386181ffd86cb1e))
+
 ### [0.10.3](https://github.com/monetr/monetr/compare/v0.10.2...v0.10.3) (2022-03-31)
 
 
