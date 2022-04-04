@@ -288,25 +288,28 @@ restart:
 	$(COMPOSE) restart
 
 shutdown:
+	-$(COMPOSE) exec monetr monetr development clean:plaid
 	-$(COMPOSE) down --remove-orphans -v
 
 restart-monetr:
 	$(COMPOSE) restart monetr
 
-SWAGGER_YAML=$(PWD)/docs/swagger.yaml
-$(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES)
+DOCS_DIR=$(BUILD_DIR)/docs
+SWAGGER_YAML=$(DOCS_DIR)/swagger.yaml
+$(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES) $(BUILD_DIR)
+	$(call infoMsg,Generating Swagger yaml from API comments)
 	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \
 		--parseDependency \
 		--parseDepth 5 \
 		--parseInternal \
-		--output $(PWD)/docs
+		--output $(DOCS_DIR)
 	sed 's/x-deprecated:/deprecated:/g' $(SWAGGER_YAML) > $(SWAGGER_YAML).new
 	rm $(SWAGGER_YAML)
 	mv $(SWAGGER_YAML).new $(SWAGGER_YAML)
-	cp $(PWD)/public/favicon.ico $(PWD)/docs/favicon.ico
-	cp $(PWD)/public/logo192.png $(PWD)/docs/logo192.png
-	cp $(PWD)/public/logo512.png $(PWD)/docs/logo512.png
-	cp $(PWD)/public/manifest.json $(PWD)/docs/manifest.json
+	cp $(PWD)/public/favicon.ico $(DOCS_DIR)/favicon.ico
+	cp $(PWD)/public/logo192.png $(DOCS_DIR)/logo192.png
+	cp $(PWD)/public/logo512.png $(DOCS_DIR)/logo512.png
+	cp $(PWD)/public/manifest.json $(DOCS_DIR)/manifest.json
 
 docs: $(SWAGGER_YAML)
 
@@ -320,7 +323,8 @@ docs-local: $(SWAGGER_YAML) $(REDOC_CLI)
 	$(REDOC_CLI) serve $(SWAGGER_YAML)
 
 docs-static: $(SWAGGER_YAML) $(REDOC_CLI)
-	$(REDOC_CLI) bundle $(SWAGGER_YAML) -o $(PWD)/docs/index.html
+	$(call infoMsg,Building static API documentation site)
+	$(REDOC_CLI) bundle $(SWAGGER_YAML) -o $(DOCS_DIR)/index.html
 
 ifdef GITHUB_TOKEN
 license: $(LICENSE) $(BINARY)
