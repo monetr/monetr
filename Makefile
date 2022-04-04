@@ -231,7 +231,6 @@ clean: shutdown
 	-rm -rf $(LOCAL_TMP)
 	-rm -rf $(SOURCE_MAP_DIR)
 	-rm -rf $(PWD)/generated
-	-rm -rf $(PWD)/docs
 	-rm -rf $(PWD)/build
 	-rm -rf $(PWD)/Notes.md
 	-git clean -f -X $(STATIC_DIR)
