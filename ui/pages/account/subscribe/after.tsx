@@ -7,7 +7,7 @@ import activateSubscription from 'shared/authentication/actions/activateSubscrip
 
 import Logo from 'assets';
 
-const AfterCheckout = (): JSX.Element => {
+export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -50,5 +50,3 @@ const AfterCheckout = (): JSX.Element => {
     </div>
   );
 };
-
-export default AfterCheckout;

@@ -2,15 +2,16 @@ import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
 import AccountsPage from 'pages/accounts';
 import ExpensesPage from 'pages/expenses';
+import LogoutPage from 'pages/logout';
 import SettingsPage from 'pages/settings';
 import SubscriptionPage from 'pages/subscription';
 import React, { Fragment, useState } from 'react';
+import useFetchLinksIfNeeded from 'shared/links/hooks/useFetchLinksIfNeeded';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
 import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
 import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
-import fetchLinksIfNeeded from 'shared/links/actions/fetchLinksIfNeeded';
 import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useSelector, useStore } from 'react-redux';
@@ -19,7 +20,6 @@ import useMountEffect from 'shared/util/useMountEffect';
 import TransactionsView from 'views/Transactions/TransactionsView';
 import GoalsView from 'views/Goals/GoalsView';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
-import Logout from 'views/Authentication/Logout';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 
 const AuthenticatedApp = (): JSX.Element => {
@@ -27,10 +27,11 @@ const AuthenticatedApp = (): JSX.Element => {
   const { dispatch, getState } = useStore();
 
   const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
+  const fetchLinksIfNeeded = useFetchLinksIfNeeded();
 
   useMountEffect(() => {
     Promise.all([
-      fetchLinksIfNeeded()(dispatch, getState),
+      fetchLinksIfNeeded(),
       fetchBankAccounts()(dispatch).then(() => Promise.all([
         fetchInitialTransactionsIfNeeded(),
         fetchFundingSchedulesIfNeeded()(dispatch, getState),
@@ -55,7 +56,7 @@ const AuthenticatedApp = (): JSX.Element => {
   if (!hasAnyLinks) {
     return (
       <Routes>
-        <Route path="/logout" element={ <Logout/> }/>
+        <Route path="/logout" element={ <LogoutPage/> }/>
         <Route path="/setup" element={ <InitialPlaidSetup/> }/>
         <Route path="/plaid/oauth-return" element={ <OAuthRedirect/> }/>
         <Route path="*" element={ <Navigate replace to="/setup"/> }/>
@@ -72,7 +73,7 @@ const AuthenticatedApp = (): JSX.Element => {
           <Routes>
             <Route path="/register" element={ <Navigate replace to="/"/> }/>
             <Route path="/login" element={ <Navigate replace to="/"/> }/>
-            <Route path="/logout" element={ <Logout/> }/>
+            <Route path="/logout" element={ <LogoutPage/> }/>
             <Route path="/transactions" element={ <TransactionsView/> }/>
             <Route path="/expenses" element={ <ExpensesPage/> }/>
             <Route path="/goals" element={ <GoalsView/> }/>

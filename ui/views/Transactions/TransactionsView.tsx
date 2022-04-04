@@ -45,7 +45,7 @@ function TransactionsView(): JSX.Element {
 
   return (
     <div className="minus-nav">
-      <div className="w-full transaction-list">
+      <div className="w-full transaction-list bg-white">
         <List disablePadding className="w-full">
           { renderTransactions() }
         </List>

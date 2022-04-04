@@ -42,7 +42,7 @@ export default function GoalsView(): JSX.Element {
       <Fragment>
         { newGoalDialogOpen && <NewGoalDialog onClose={ closeNewGoalDialog } isOpen={ newGoalDialogOpen }/> }
         <div className="minus-nav">
-          <div className="flex flex-col h-full max-h-full">
+          <div className="flex flex-col h-full max-h-full bg-white">
             <div className="grid grid-cols-3 flex-grow">
               <div className="col-span-3">
                 <div className="w-full goals-list ">

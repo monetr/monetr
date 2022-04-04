@@ -1,14 +1,14 @@
 import { Button, CircularProgress, TextField } from '@mui/material';
 import classnames from 'classnames';
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import useSendForgotPassword from 'shared/authentication/actions/sendForgotPassword';
 import { getShouldVerifyForgotPassword } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
-import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
-import BackToLoginButton from 'views/Authentication/components/BackToLoginButton';
-import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
+import BackToLoginButton from 'components/Authentication/BackToLoginButton';
+import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 
 interface ForgotPasswordValues {
   email: string;
@@ -18,7 +18,7 @@ const initialValues: ForgotPasswordValues = {
   email: '',
 };
 
-export default function ForgotPasswordView(): JSX.Element {
+export default function ForgotPasswordPage(): JSX.Element {
   const verifyForgotPassword = useSelector(getShouldVerifyForgotPassword);
   const [verification, setVerification] = useState<string | null>(null);
   const sendForgotPassword = useSendForgotPassword();
@@ -65,7 +65,7 @@ export default function ForgotPasswordView(): JSX.Element {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto pb-20">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <AuthenticationLogo/>
+                <CenteredLogo/>
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     <p className="text-center">

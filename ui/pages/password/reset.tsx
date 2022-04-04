@@ -1,12 +1,12 @@
 import { Button, CircularProgress, TextField } from '@mui/material';
 import classnames from 'classnames';
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import React, { Fragment, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useResetPassword from 'shared/authentication/actions/resetPassword';
-import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
-import BackToLoginButton from 'views/Authentication/components/BackToLoginButton';
+import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 
 interface ResetPasswordValues {
   password: string;
@@ -18,7 +18,7 @@ const initialValues: ResetPasswordValues = {
   verifyPassword: '',
 };
 
-export default function ResetPasswordView(): JSX.Element {
+export default function ResetPasswordPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ export default function ResetPasswordView(): JSX.Element {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto pb-20">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <AuthenticationLogo/>
+                <CenteredLogo/>
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     <p className="text-center">

@@ -8,7 +8,7 @@ import { getIsAuthenticated, getSubscriptionIsActive } from 'shared/authenticati
 import useBootstrapApplication from 'shared/bootstrap/actions/bootstrapApplication';
 import { getIsBootstrapped } from 'shared/bootstrap/selectors';
 import UnauthenticatedApplication from 'UnauthenticatedApplication';
-import BillingRequiredRouter from 'views/Subscriptions/BillingRequiredRouter';
+import BillingRequiredRouter from 'BillingRequiredRouter';
 import * as Sentry from '@sentry/react';
 
 const Application = (): JSX.Element => {

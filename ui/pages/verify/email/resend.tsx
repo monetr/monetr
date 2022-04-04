@@ -1,3 +1,4 @@
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -5,10 +6,9 @@ import { Formik, FormikHelpers } from 'formik';
 import { Button, CircularProgress, TextField } from '@mui/material';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
-import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
-import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
-import BackToLoginButton from 'views/Authentication/components/BackToLoginButton';
-import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
+import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
+import BackToLoginButton from 'components/Authentication/BackToLoginButton';
+import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import request from 'shared/util/request';
 import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
@@ -17,7 +17,7 @@ interface ResendValues {
   email: string | null;
 }
 
-const ResendVerification = (): JSX.Element => {
+export default function ResendVerificationPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const requireCaptcha = !!useSelector(getReCAPTCHAKey);
   const { state: routeState } = useLocation();
@@ -83,21 +83,21 @@ const ResendVerification = (): JSX.Element => {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <AuthenticationLogo/>
+                <CenteredLogo/>
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     { routeState &&
-                    <p className="text-center">
-                      It looks like your email address has not been verified. Do you want to resend the email
-                      verification link?
-                    </p>
+                      <p className="text-center">
+                        It looks like your email address has not been verified. Do you want to resend the email
+                        verification link?
+                      </p>
                     }
 
                     { !routeState &&
-                    <p className="text-center">
-                      If your email verification link has expired, or you never got one. You can enter your email
-                      address below and another verification link will be sent to you.
-                    </p>
+                      <p className="text-center">
+                        If your email verification link has expired, or you never got one. You can enter your email
+                        address below and another verification link will be sent to you.
+                      </p>
                     }
                   </div>
                   <div className="w-full pb-2.5">
@@ -150,5 +150,3 @@ const ResendVerification = (): JSX.Element => {
     </Fragment>
   );
 };
-
-export default ResendVerification;

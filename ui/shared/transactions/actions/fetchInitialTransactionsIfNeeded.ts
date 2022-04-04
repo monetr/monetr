@@ -1,5 +1,5 @@
 import Transaction from 'models/Transaction';
-import { useDispatch, useSelector, useStore } from 'react-redux';
+import { useStore } from 'react-redux';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import {
   FETCH_TRANSACTIONS_FAILURE,

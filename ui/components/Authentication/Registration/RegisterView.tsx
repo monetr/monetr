@@ -1,31 +1,19 @@
+import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import { AxiosError } from 'axios';
+import classnames from 'classnames';
+import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
+import CenteredLogo from 'components/Logo/CenteredLogo';
+import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import useSignUp, { SignUpResponse } from 'shared/authentication/actions/signUp';
-import {
-  getInitialPlan,
-  getRequireBetaCode,
-  getShouldVerifyRegister,
-} from 'shared/bootstrap/selectors';
-import classnames from 'classnames';
-import {
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
-  TextField
-} from '@mui/material';
-import { Formik, FormikHelpers } from 'formik';
+import { getInitialPlan, getRequireBetaCode, getShouldVerifyRegister } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
-import AfterEmailVerificationSent from 'views/Authentication/AfterEmailVerificationSent';
-import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
-import BackToLoginButton from 'views/Authentication/components/BackToLoginButton';
-import CaptchaMaybe from 'views/Captcha/CaptchaMaybe';
+import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
+import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 
 interface SignUpValues {
   agree: boolean;
@@ -37,7 +25,7 @@ interface SignUpValues {
   verifyPassword: string;
 }
 
-const SignUpView = (): JSX.Element => {
+export default function RegisterView(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [successful, setSuccessful] = useState(false);
 
@@ -175,7 +163,7 @@ const SignUpView = (): JSX.Element => {
 
   return (
     <Fragment>
-      <BackToLoginButton />
+      <BackToLoginButton/>
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }
@@ -194,7 +182,7 @@ const SignUpView = (): JSX.Element => {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex justify-center w-full h-full max-h-full">
               <div className="w-full p-10 max-w-screen-sm sm:p-0">
-                <AuthenticationLogo />
+                <CenteredLogo/>
                 <div className="w-full">
                   <div className="w-full pb-1.5 pt-1.5">
                     <TextField
@@ -274,22 +262,22 @@ const SignUpView = (): JSX.Element => {
                     />
                   </div>
                   { requireBetaCode &&
-                  <div className="w-full pt-1.5 pb-1.5">
-                    <TextField
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.betaCode && !!errors.betaCode }
-                      helperText={ (touched.betaCode && errors.betaCode) ? errors.betaCode : null }
-                      id="login-betaCode"
-                      label="Beta Code"
-                      name="betaCode"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      type="betaCode"
-                      value={ values.betaCode }
-                      variant="outlined"
-                    />
-                  </div>
+                    <div className="w-full pt-1.5 pb-1.5">
+                      <TextField
+                        className="w-full"
+                        disabled={ isSubmitting }
+                        error={ touched.betaCode && !!errors.betaCode }
+                        helperText={ (touched.betaCode && errors.betaCode) ? errors.betaCode : null }
+                        id="login-betaCode"
+                        label="Beta Code"
+                        name="betaCode"
+                        onBlur={ handleBlur }
+                        onChange={ handleChange }
+                        type="betaCode"
+                        value={ values.betaCode }
+                        variant="outlined"
+                      />
+                    </div>
                   }
                 </div>
                 <CaptchaMaybe onVerify={ setVerification } show={ verifyRegister }/>
@@ -347,5 +335,3 @@ const SignUpView = (): JSX.Element => {
     </Fragment>
   )
 };
-
-export default SignUpView;

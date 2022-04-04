@@ -1,10 +1,10 @@
 import { CircularProgress, Typography } from '@mui/material';
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import { useSnackbar } from 'notistack';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import request from 'shared/util/request';
 import useMountEffect from 'shared/util/useMountEffect';
-import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
 
 // SubscriptionPage is just used to redirect the user to the stripe billing portal. Upon mounting, it will make an API
 // call to start a billing portal session, and once it gets a response it will redirect the user there.
@@ -27,7 +27,7 @@ export default function SubscriptionPage(): JSX.Element {
   return (
     <div className="flex items-center justify-center w-full h-full max-h-full">
       <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-        <AuthenticationLogo/>
+        <CenteredLogo/>
         <div className="w-full pt-2.5 pb-2.5">
           <Typography
             variant="h5"

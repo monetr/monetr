@@ -1,13 +1,13 @@
 import { Backdrop, CircularProgress } from '@mui/material';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useLogout from 'shared/authentication/actions/logout';
+import useMountEffect from 'shared/util/useMountEffect';
 
-const Logout = (): JSX.Element => {
+export default function LogoutPage(): JSX.Element {
   const logout = useLogout();
   const navigate = useNavigate();
-
-  useEffect(() => {
+  useMountEffect(() => {
     logout().finally(() => navigate('/login'));
   })
 
@@ -16,6 +16,4 @@ const Logout = (): JSX.Element => {
       <CircularProgress color="inherit"/>
     </Backdrop>
   );
-};
-
-export default Logout;
+}

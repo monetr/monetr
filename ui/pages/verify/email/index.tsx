@@ -1,10 +1,10 @@
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography } from '@mui/material';
 import request from 'shared/util/request';
-import AuthenticationLogo from 'views/Authentication/components/AuthenticationLogo';
 
-const VerifyEmail = (): JSX.Element => {
+export default function VerifyEmailPage(): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -39,7 +39,7 @@ const VerifyEmail = (): JSX.Element => {
   return (
     <div className="flex items-center justify-center w-full h-full max-h-full">
       <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-        <AuthenticationLogo/>
+        <CenteredLogo/>
         <div className="w-full pt-2.5 pb-2.5">
           <Typography
             variant="h5"
@@ -55,5 +55,3 @@ const VerifyEmail = (): JSX.Element => {
     </div>
   );
 };
-
-export default VerifyEmail;
