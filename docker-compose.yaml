@@ -1,4 +1,15 @@
 services:
+  documentation:
+    image: squidfunk/mkdocs-material:8.2.8
+    restart: always # If something goes wrong just restart the container, this is for development only.
+    working_dir: /build
+    command:
+      - mkdocs
+      - serve
+      - -w
+      - docs
+    volumes:
+      - ./:/build
   monetr:
     tty: true # Makes color output work nicely.
     image: golang:1.18

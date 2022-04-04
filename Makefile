@@ -254,6 +254,7 @@ development-info:
 	$(call infoMsg,)
 	$(call infoMsg,Other services are run alongside monetr locally; you can access them at the following URLs:)
 	$(call infoMsg,    Email:                                    http://localhost/mail)
+	$(call infoMsg,    Documentation:                            http://localhost/documentation)
 	$(call infoMsg,)
 	$(call infoMsg,If you want you can see the logs for all the containers using:)
 	$(call infoMsg,  $$ make logs)

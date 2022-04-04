@@ -1,0 +1,17 @@
+site_name: monetr
+repo_url: https://github.com/monetr/monetr
+repo_name: GitHub
+copyright: © monetr 2022
+site_dir: build/site
+watch:
+  - docs
+theme:
+  name: material
+  logo: img/logo192.png
+  favicon: img/favicon.ico
+extra:
+  homepage: https://monetr.app
+extra_css:
+  - stylesheets/extra.css
+nav:
+  - Home: README.md
