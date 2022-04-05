@@ -142,7 +142,7 @@ func TestPutTransactions(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().Equal("token must be provided")
 	})
 
@@ -157,7 +157,7 @@ func TestPutTransactions(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().Equal("failed to validate token: token contains an invalid number of segments")
 	})
 }

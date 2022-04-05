@@ -234,7 +234,7 @@ func TestLogin(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").Equal("invalid email and password")
 		response.JSON().Object().NotContainsKey("token")
 	})
@@ -373,7 +373,7 @@ func TestLogout(t *testing.T) {
 		response := e.GET("/api/authentication/logout").
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").Equal("authentication required")
 	})
 }
@@ -1270,7 +1270,7 @@ func TestResetPassword(t *testing.T) {
 				}).
 				Expect()
 
-			response.Status(http.StatusForbidden)
+			response.Status(http.StatusUnauthorized)
 			response.JSON().Path("$.error").String().Equal("invalid email and password")
 			response.Cookies().Empty()
 		}

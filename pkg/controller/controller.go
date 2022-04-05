@@ -243,8 +243,10 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 					switch span.Status {
 					case sentry.SpanStatusUndefined, sentry.SpanStatusUnknown:
 						switch ctx.GetStatusCode() {
-						case http.StatusForbidden, http.StatusUnauthorized:
+						case http.StatusUnauthorized:
 							span.Status = sentry.SpanStatusUnauthenticated
+						case http.StatusForbidden:
+							span.Status = sentry.SpanStatusPermissionDenied
 						case http.StatusBadRequest:
 							span.Status = sentry.SpanStatusInvalidArgument
 						default:

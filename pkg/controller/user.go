@@ -28,12 +28,12 @@ func (c *Controller) handleUsers(p router.Party) {
 // @Produce json
 // @Router /users/me [get]
 // @Success 200 {object} swag.MeResponse
-// @Failure 403 {object} ApiError There is no authenticated user.
+// @Failure 401 {object} ApiError There is no authenticated user.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getMe(ctx iris.Context) {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusForbidden, "cannot retrieve user details")
+		c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "cannot retrieve user details")
 		return
 	}
 
@@ -97,7 +97,7 @@ func (c *Controller) getMe(ctx iris.Context) {
 // @Router /users/security/password [put]
 // @Success 200
 // @Failure 400 {object} ApiError
-// @Failure 403 {object} ApiError
+// @Failure 401 {object} ApiError
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) changePassword(ctx iris.Context) {
 	var changePasswordRequest struct {
@@ -135,7 +135,7 @@ func (c *Controller) changePassword(ctx iris.Context) {
 	err = secureRepo.ChangePassword(c.getContext(ctx), user.LoginId, oldHashedPassword, newHashedPassword)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
-		c.returnError(ctx, http.StatusForbidden, "current password provided is not correct")
+		c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
 	case nil:
 		ctx.StatusCode(http.StatusOK)
 	default:

@@ -179,7 +179,7 @@ func (c *Controller) authenticationMiddleware(ctx iris.Context) {
 	if err := c.authenticateUser(ctx); err != nil {
 		c.updateAuthenticationCookie(ctx, ClearAuthentication)
 		ctx.SetErr(err)
-		ctx.StatusCode(http.StatusForbidden)
+		ctx.StatusCode(http.StatusUnauthorized)
 		ctx.StopExecution()
 		return
 	}

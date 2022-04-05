@@ -50,7 +50,7 @@ func TestPostLink(t *testing.T) {
 			WithJSON(link).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().Equal("token must be provided")
 	})
 }
@@ -131,7 +131,7 @@ func TestGetLink(t *testing.T) {
 		response := e.GET("/api/links").
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 		response.JSON().Path("$.error").String().Equal("token must be provided")
 	})
 
@@ -300,7 +300,7 @@ func TestPutLink(t *testing.T) {
 			WithJSON(link).
 			Expect()
 
-		updated.Status(http.StatusForbidden)
+		updated.Status(http.StatusUnauthorized)
 		updated.JSON().Path("$.error").String().Equal("token must be provided")
 	})
 
