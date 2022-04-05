@@ -251,10 +251,8 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 // @Router /authentication/logout [get]
 // @Security ApiKeyAuth
 // @Success 200
-// @Failure 401 {object} ApiError Cookie was not present.
 func (c *Controller) logoutEndpoint(ctx iris.Context) {
 	if cookie := ctx.GetCookie(c.configuration.Server.Cookies.Name); cookie == "" {
-		c.returnError(ctx, http.StatusUnauthorized, "authentication required")
 		return
 	}
 

@@ -373,8 +373,8 @@ func TestLogout(t *testing.T) {
 		response := e.GET("/api/authentication/logout").
 			Expect()
 
-		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").Equal("authentication required")
+		response.Status(http.StatusOK)
+		response.Body().Empty()
 	})
 }
 
