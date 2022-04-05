@@ -3,15 +3,15 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
-import mockAxios from "jest-mock-axios";
+import mockAxios from 'jest-mock-axios';
 
 module.export = global.CONFIG = {
   BOOTSTRAP_CONFIG_JSON: false,
   USE_LOCAL_STORAGE: false,
   COOKIE_DOMAIN: 'app.monetr.mini',
-  ENVIRONMENT: "Testing",
-  API_URL: "https://app.monetr.mini",
-  API_DOMAIN: "app.monetr.mini",
+  ENVIRONMENT: 'Testing',
+  API_URL: 'https://app.monetr.mini',
+  API_DOMAIN: 'app.monetr.mini',
   SENTRY_DSN: null,
 };
 

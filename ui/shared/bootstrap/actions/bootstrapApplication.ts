@@ -16,7 +16,6 @@ export default function useBootstrapApplication(): () => Promise<void> {
 
     window.API = NewClient({
       baseURL: '/api',
-      withCredentials: true,
     });
 
     return request()

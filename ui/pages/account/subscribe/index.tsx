@@ -1,4 +1,6 @@
 import { CircularProgress, Typography } from '@mui/material';
+import axios from 'axios';
+import { useSnackbar } from 'notistack';
 import React from 'react';
 import { getHasSubscription } from 'shared/authentication/selectors';
 import request from 'shared/util/request';
@@ -8,6 +10,7 @@ import useMountEffect from 'shared/util/useMountEffect';
 import Logo from 'assets';
 
 export default function SubscribePage(): JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
   const initialPlan = useSelector(getInitialPlan);
   const hasSubscription = useSelector(getHasSubscription);
 
@@ -18,13 +21,19 @@ export default function SubscribePage(): JSX.Element {
         cancelPath: '/logout',
       })
         .then(result => window.location.assign(result.data.url))
-        .catch(error => alert(error));
+        .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to create checkout session.', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        }));
     } else if (hasSubscription) {
       // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
       // subscription for a card that has failed payment or something similar.
       request().get('/billing/portal')
         .then(result => window.location.assign(result.data.url))
-        .catch(error => alert(error));
+        .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to load billing portal.', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        }));
     }
   });
 

@@ -1,5 +1,6 @@
-import { AxiosInstance } from 'axios';
+import axios from 'axios';
+import { AxiosInterface } from 'api/api';
 
-export default function request(): AxiosInstance {
-  return window.API;
+export default function request(): AxiosInterface {
+  return axios;
 }
