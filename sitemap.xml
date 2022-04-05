@@ -61,6 +61,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>http://localhost/documentation/developing/CODE_OF_CONDUCT/</loc>
+         <lastmod>2022-04-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/documentation/</loc>
+         <lastmod>2022-04-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>http://localhost/documentation/help/</loc>
          <lastmod>2022-04-05</lastmod>
          <changefreq>daily</changefreq>
