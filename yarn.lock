@@ -12051,10 +12051,10 @@ rollup@^2.43.1:
   optionalDependencies:
     fsevents "~2.3.2"
 
-rrule@2.6.8:
-  version "2.6.8"
-  resolved "https://registry.npmjs.org/rrule/-/rrule-2.6.8.tgz"
-  integrity sha512-cUaXuUPrz9d1wdyzHsBfT1hptKlGgABeCINFXFvulEPqh9Np9BnF3C3lrv9uO54IIr8VDb58tsSF3LhsW+4VRw==
+rrule@2.6.9:
+  version "2.6.9"
+  resolved "https://registry.yarnpkg.com/rrule/-/rrule-2.6.9.tgz#8ee4ee261451e84852741f92ded769245580744a"
+  integrity sha512-PE4ErZDMfAcRnc1B35bZgPGS9mbn7Z9bKDgk6+XgrIwvBjeWk7JVEYsqKwHYTrDGzsHPtZTpaon8IyeKzAhj5w==
   dependencies:
     tslib "^1.10.0"
   optionalDependencies:
