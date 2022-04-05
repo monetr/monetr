@@ -111,8 +111,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/swag.LoginInvalidRequestResponse"
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/swag.LoginInvalidCredentialsResponse"
                         }
@@ -148,12 +148,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": ""
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ApiError"
-                        }
                     }
                 }
             }
@@ -196,8 +190,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/controller.ApiError"
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/controller.ApiError"
                         }
@@ -2070,8 +2064,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/swag.MeResponse"
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/controller.ApiError"
                         }
@@ -2125,8 +2119,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/controller.ApiError"
                         }
                     },
-                    "403": {
-                        "description": "Forbidden",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/controller.ApiError"
                         }

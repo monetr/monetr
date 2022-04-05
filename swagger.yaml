@@ -1597,8 +1597,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/swag.LoginInvalidRequestResponse'
-        "403":
-          description: Forbidden
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/swag.LoginInvalidCredentialsResponse'
         "428":
@@ -1621,10 +1621,6 @@ paths:
       responses:
         "200":
           description: ""
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/controller.ApiError'
       security:
       - ApiKeyAuth: []
       summary: Logout
@@ -1656,8 +1652,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.ApiError'
-        "403":
-          description: Forbidden
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/controller.ApiError'
         "500":
@@ -2932,8 +2928,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/swag.MeResponse'
-        "403":
-          description: Forbidden
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/controller.ApiError'
         "500":
@@ -2970,8 +2966,8 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.ApiError'
-        "403":
-          description: Forbidden
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/controller.ApiError'
         "500":
