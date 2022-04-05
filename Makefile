@@ -38,6 +38,12 @@ MONETR_DIR=$(HOME)/.monetr
 $(MONETR_DIR):
 	if [ ! -d "$(MONETR_DIR)" ]; then mkdir -p $(MONETR_DIR); fi
 
+# If the developer has a development.env file, then include that in the makefile variables.
+MONETR_ENV=$(MONETR_DIR)/development.env
+ifneq (,$(wildcard $(MONETR_ENV)))
+include $(MONETR_ENV)
+endif
+
 KUBERNETES_VERSION=1.20.1
 
 ifeq ($(OS),Windows_NT)
@@ -320,11 +326,12 @@ $(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES) $(BUILD_DIR)
 
 docs: $(SWAGGER_YAML)
 
+MKDOCS_IMAGE ?= squidfunk/mkdocs-material:8.2.8
 MKDOCS_YAML=$(PWD)/mkdocs.yaml
 DOCS_FILES=$(shell find $(PWD)/docs -type f)
 DOCS_SITE=$(PWD)/build/site/index.html
 $(DOCS_SITE): $(MKDOCS_YAML) $(DOCS_FILES)
-	$(DOCKER) run -v $(PWD):/work -w /work --rm --entrypoint sh squidfunk/mkdocs-material:8.2.8 /work/scripts/docs-build.sh
+	$(DOCKER) run -v $(PWD):/work -w /work --rm --entrypoint sh $(MKDOCS_IMAGE) /work/scripts/docs-build.sh
 
 mkdocs: $(DOCS_SITE)
 

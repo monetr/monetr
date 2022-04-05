@@ -1,4 +1,5 @@
 site_name: monetr
+site_description: Building an open source financial planning application.
 site_url: http://localhost/documentation/
 repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
@@ -52,8 +53,10 @@ nav:
   - Home: README.md
   - Help:
       - help/index.md
-  - Develop:
+  - Contributing:
       - developing/index.md
+      - Code Of Conduct: developing/CODE_OF_CONDUCT.md
+      - Documentation: developing/documentation.md
       - API:
           - REST API: api/API.md
           - Resources:
@@ -83,6 +86,9 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
