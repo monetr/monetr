@@ -2,6 +2,7 @@ site_name: monetr
 site_url: http://localhost/documentation/
 repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
+edit_uri: edit/main/docs/
 copyright: © monetr 2022
 site_dir: build/site
 watch:
@@ -10,6 +11,25 @@ theme:
   name: material
   logo: img/logo192.png
   favicon: img/favicon.ico
+  custom_dir: docs/custom/overrides
+  features:
+    - announce.dismiss
+    - content.code.annotate
+    # - content.tabs.link
+    # - header.autohide
+    - navigation.expand
+    - navigation.indexes
+    - navigation.instant
+    - navigation.sections
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    # - toc.integrate
   icon:
     admonition:
       note: octicons/tag-16
@@ -30,18 +50,27 @@ extra_css:
   - stylesheets/extra.css
 nav:
   - Home: README.md
-  - API:
-      - REST API: api/API.md
-      - Resources:
-          - api/resources/index.md
-          - Authentication: api/resources/authentication.md
-          - User: api/resources/user.md
-  - Developer:
-      - Local: developer/Local.md
+  - Help:
+      - help/index.md
+  - Develop:
+      - developing/index.md
+      - API:
+          - REST API: api/API.md
+          - Resources:
+              - api/resources/index.md
+              - Authentication: api/resources/authentication.md
+              - Bank Accounts: api/resources/bank_accounts.md
+              - Funding Schedules: api/resources/funding_schedules.md
+              - Links: api/resources/links.md
+              - Spending: api/resources/spending.md
+              - Transactions: api/resources/transactions.md
+              - User: api/resources/user.md
+      - Developer:
+          - Local: developer/Local.md
 
 plugins:
   - search
-  - section-index
+  #  - section-index
   - render_swagger
 
 markdown_extensions:

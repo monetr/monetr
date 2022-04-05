@@ -237,7 +237,25 @@ jobs:
         name: Upload Documentation As Artifact
         with:
           name: '${{ github.sha }}-docs'
-          path: '${{ github.workspace }}/docs'
+          path: '${{ github.workspace }}/build/docs'
+          retention-days: 7
+
+  mkdocs:
+    name: MkDocs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build
+        run: make mkdocs
+      - uses: actions/upload-artifact@v2
+        name: Upload Documentation As Artifact
+        with:
+          name: '${{ github.sha }}-mkdocs'
+          path: '${{ github.workspace }}/build/site'
           retention-days: 7
 
   buildah:

@@ -2,7 +2,12 @@
 
 Available resources for the monetr REST API.
 
-| Resource                            | Available endpoints                                                                      |
-|:------------------------------------|:-----------------------------------------------------------------------------------------|
-| [Authentication](authentication.md) | `/api/authenication/login`, `/api/authentication/logout`, `/api/authentication/register` |
-| [User](user.md)                     | `/api/users/me`                                                                          |
+| Resource                                  | Available endpoints                                                                      |
+|:------------------------------------------|:-----------------------------------------------------------------------------------------|
+| [Authentication](authentication.md)       | `/api/authenication/login`, `/api/authentication/logout`, `/api/authentication/register` |
+| [Bank Accounts](bank_accounts.md)         | `/api/bank_accounts`                                                                     |
+| [Funding Schedules](funding_schedules.md) | `/api/bank_accounts/:bankAccountId/funding_schedules`                                    |
+| [Links](links.md)                         | `/api/links`                                                                             |
+| [Spending](spending.md)                   | `/api/bank_accounts/:bankAccountId/spending`                                             |
+| [Transactions](transactions.md)           | `/api/bank_accounts/:bankAccountId/transactions`                                         |
+| [User](user.md)                           | `/api/users/me`                                                                          |
