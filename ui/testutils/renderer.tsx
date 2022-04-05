@@ -6,18 +6,19 @@ import { LocalizationProvider } from '@mui/lab';
 import AdapterMoment from '@mui/lab/AdapterMoment';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { queries, Queries, render, RenderOptions, RenderResult } from '@testing-library/react';
-import Application from 'Application';
-import GlobalFooter from 'components/GlobalFooter';
 import { IconVariant, SnackbarProvider } from 'notistack';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { AppStore, configureStore, store } from 'store';
+import { AppStore, configureStore } from 'store';
 import theme from 'theme';
+import { createMemoryHistory, MemoryHistory } from 'history'
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
 
 export interface Options<Q extends Queries = typeof queries,
   Container extends Element | DocumentFragment = HTMLElement,
   > extends RenderOptions<Q, Container> {
   store?: AppStore;
+  history?: MemoryHistory;
 }
 
 function testRenderer<Q extends Queries = typeof queries,
@@ -32,6 +33,7 @@ function testRenderer<Q extends Queries = typeof queries,
   };
   const Wrapper = (props: React.PropsWithChildren<any>) => {
     const store = options?.store || configureStore();
+    const history = options?.history || createMemoryHistory();
 
     const snackbarIcons: Partial<IconVariant> = {
       error: <ErrorIcon className="mr-2.5"/>,
@@ -42,19 +44,21 @@ function testRenderer<Q extends Queries = typeof queries,
 
     return (
       <Provider store={ store }>
-        <ThemeProvider theme={ theme }>
-          <LocalizationProvider dateAdapter={ AdapterMoment }>
-            <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-              <CssBaseline/>
-              { props.children }
-            </SnackbarProvider>
-          </LocalizationProvider>
-        </ThemeProvider>
+        <HistoryRouter history={ history }>
+          <ThemeProvider theme={ theme }>
+            <LocalizationProvider dateAdapter={ AdapterMoment }>
+              <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+                <CssBaseline/>
+                { props.children }
+              </SnackbarProvider>
+            </LocalizationProvider>
+          </ThemeProvider>
+        </HistoryRouter>
       </Provider>
     );
   }
 
-  return render<Q, Container>(ui, { wrapper: Wrapper, ...testLibraryOptions })
+  return render<Q, Container>(ui, { wrapper: Wrapper, ...testLibraryOptions });
 }
 
 export default testRenderer;

@@ -2,6 +2,7 @@ import { CircularProgress, Typography } from '@mui/material';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getHasSubscription } from 'shared/authentication/selectors';
 import request from 'shared/util/request';
 import { useSelector } from 'react-redux';
@@ -11,6 +12,7 @@ import Logo from 'assets';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
   const initialPlan = useSelector(getInitialPlan);
   const hasSubscription = useSelector(getHasSubscription);
 
@@ -34,6 +36,12 @@ export default function SubscribePage(): JSX.Element {
           variant: 'error',
           disableWindowBlurListener: true,
         }));
+    } else {
+      // If for whatever reason this page renders and billing is required, but they don't need to update their
+      // subscription. Then just do nothing, and navigate to the index. This might cause a redirect loop somewhere if
+      // we have some code automatically bringing them to this page though. So this page should only be navigated to on
+      // authentication.
+      navigate('/');
     }
   });
 

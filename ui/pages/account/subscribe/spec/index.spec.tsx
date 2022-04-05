@@ -1,3 +1,4 @@
+import { createMemoryHistory } from 'history';
 import SubscribePage from 'pages/account/subscribe/index';
 import React from 'react';
 import { Bootstrap } from 'shared/bootstrap/actions';
@@ -12,8 +13,12 @@ describe('/accounts/subscribe', () => {
   beforeEach(() => setupWindowLocationMock());
   afterEach(() => cleanupWindowLocationMock());
 
-  it('will render', () => {
-    testRenderer(<SubscribePage/>);
+  it('will redirect to index', () => {
+    const history = createMemoryHistory();
+    history.push = jest.fn();
+    testRenderer(<SubscribePage/>, {
+      history,
+    });
     expect(screen.getByText('Getting Stripe ready...')).not.toBeEmptyDOMElement();
 
     // When we have nothing in state, no requests should be made because we don't know what the plan is or whether or
@@ -21,6 +26,7 @@ describe('/accounts/subscribe', () => {
     expect(mockAxios.post).not.toHaveBeenCalled();
     expect(mockAxios.get).not.toHaveBeenCalled();
     expect(window.location.assign).not.toHaveBeenCalled();
+    expect(history.push).toHaveBeenCalledWith({ hash: '', pathname: '/', search: '' }, undefined);
   });
 
   it('will request checkout session', () => {
