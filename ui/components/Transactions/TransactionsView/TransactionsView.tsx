@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import { getTransactions } from 'shared/transactions/selectors/getTransactions';
 
-import './styles/TransactionsView.scss';
+import 'components/Transactions/TransactionsView/styles/TransactionsView.scss';
 import useMountEffect from 'shared/util/useMountEffect';
 
 function TransactionsView(): JSX.Element {

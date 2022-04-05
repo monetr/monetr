@@ -6,6 +6,7 @@ import GoalsPage from 'pages/goals';
 import LogoutPage from 'pages/logout';
 import SettingsPage from 'pages/settings';
 import SubscriptionPage from 'pages/subscription';
+import TransactionsPage from 'pages/transactions';
 import React, { Fragment, useState } from 'react';
 import useFetchLinksIfNeeded from 'shared/links/hooks/useFetchLinksIfNeeded';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
@@ -18,8 +19,6 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useSelector, useStore } from 'react-redux';
 import { Backdrop, CircularProgress } from '@mui/material';
 import useMountEffect from 'shared/util/useMountEffect';
-import TransactionsView from 'views/Transactions/TransactionsView';
-import GoalsView from 'components/Goals/GoalsView/GoalsView';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 
@@ -75,7 +74,7 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/register" element={ <Navigate replace to="/"/> }/>
             <Route path="/login" element={ <Navigate replace to="/"/> }/>
             <Route path="/logout" element={ <LogoutPage/> }/>
-            <Route path="/transactions" element={ <TransactionsView/> }/>
+            <Route path="/transactions" element={ <TransactionsPage/> }/>
             <Route path="/expenses" element={ <ExpensesPage/> }/>
             <Route path="/goals" element={ <GoalsPage/> }/>
             <Route path="/accounts" element={ <AccountsPage/> }/>
