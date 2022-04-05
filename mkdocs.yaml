@@ -18,11 +18,16 @@ nav:
   - Home: README.md
   - API:
       - REST API: api/API.md
+      - Resources:
+          - api/resources/index.md
+          - Authentication: api/resources/authentication.md
+          - User: api/resources/user.md
   - Developer:
       - Local: developer/Local.md
 
 plugins:
   - search
+  - section-index
   - render_swagger
 
 markdown_extensions:
