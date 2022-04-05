@@ -1,5 +1,36 @@
 # Changelog
 
+### [0.10.5](https://github.com/monetr/monetr/compare/v0.10.4...v0.10.5) (2022-04-05)
+
+
+### Features
+
+* Adding new documentation site groundwork. ([5b33df8](https://github.com/monetr/monetr/commit/5b33df864d1726884a458f790e87f7f6240e5033))
+* **docs:** Adding more documentation for API. ([02fb643](https://github.com/monetr/monetr/commit/02fb643b8280cc03c1c430e433f17acda415ec92))
+* **docs:** Building out completely new docs site. ([862fd30](https://github.com/monetr/monetr/commit/862fd30e763c301d962a997114303de1007164c8))
+
+
+### Bug Fixes
+
+* Fixing axios in tests, I hate you jest. ([fcd8087](https://github.com/monetr/monetr/commit/fcd808771bbe8d87492f16d9a0f1a8beb3172d7f))
+* **ui:** Fixed background colors on other routes. ([61330f3](https://github.com/monetr/monetr/commit/61330f30193efe00f05fe4c7f1d528a7d6f9ab55))
+* **ui:** Fixed not using the global axios instance. ([916e059](https://github.com/monetr/monetr/commit/916e059e04c55c671e9c82eda1cc537421e6d9ff))
+
+
+### Dependencies
+
+* **api:** update module github.com/teambition/rrule-go to v1.8.0 ([486a47c](https://github.com/monetr/monetr/commit/486a47c17c0b6c28e14924a90aa5ef3d4e587d7f))
+* **ui:** update dependency prettier to v2.6.2 ([755e88c](https://github.com/monetr/monetr/commit/755e88cd54231b8f55c6e74d9ff2e2be51846be6))
+* **ui:** update dependency rrule to v2.6.9 ([80217c2](https://github.com/monetr/monetr/commit/80217c28a6e1262db81c3ac9d9c468ef09d16600))
+
+
+### Miscellaneous
+
+* Adding more tests because I can. ([63d5941](https://github.com/monetr/monetr/commit/63d5941d5e4f29ba4c518370ed5dccdcea3a1bbb))
+* **development:** Improved Go hot-reload watchlist. ([ff553fb](https://github.com/monetr/monetr/commit/ff553fbe1f1427aac66bf9d341b3a636806a8dcd))
+* Improving tests. ([af74440](https://github.com/monetr/monetr/commit/af74440da4681007368efa1db72563f03cceb0c6))
+* **ui:** Move transactions view to component tree. ([57b1fa7](https://github.com/monetr/monetr/commit/57b1fa72113540b4d4ac1da1ac38c53eb0993a3e))
+
 ### [0.10.4](https://github.com/monetr/monetr/compare/v0.10.3...v0.10.4) (2022-04-04)
 
 
