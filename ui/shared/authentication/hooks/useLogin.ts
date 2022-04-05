@@ -5,7 +5,7 @@ import request from 'shared/util/request';
 export interface LoginArguments {
   email: string;
   password: string;
-  captcha: string | null;
+  captcha?: string;
 }
 
 export default function useLogin(): (loginArgs: LoginArguments) => Promise<void> {

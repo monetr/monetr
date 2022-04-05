@@ -2,7 +2,10 @@ import { ACTIVATE_SUBSCRIPTION, AuthenticationActions, Login, Logout } from 'sha
 import AuthenticationState from 'shared/authentication/state';
 import * as Sentry from '@sentry/browser';
 
-export default function reducer(state = new AuthenticationState(), action: AuthenticationActions): AuthenticationState {
+export default function reducer(
+  state = new AuthenticationState(),
+  action: AuthenticationActions,
+): AuthenticationState {
   switch (action.type) {
     case Login.Pending:
     case Login.Failure:
@@ -29,6 +32,7 @@ export default function reducer(state = new AuthenticationState(), action: Authe
       return {
         ...state,
         isActive: true,
+        hasSubscription: true,
       };
     case Logout.Pending:
     case Logout.Failure:

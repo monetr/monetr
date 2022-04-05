@@ -9,7 +9,7 @@ import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
-import useLogin from 'shared/authentication/actions/login';
+import useLogin from 'shared/authentication/hooks/useLogin';
 import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
