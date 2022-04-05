@@ -11,7 +11,7 @@ bin = "/usr/bin/monetr"
 # Run monetr inside of dlv, this allows us to connect debuggers to it very easily.
 full_bin = "/build/compose/api-wrapper.sh"
 include_ext = ["sh", "go", "tpl", "tmpl", "html", "sql", "yaml"]
-exclude_dir = ["scripts", "templates", "public", "ui", "minikube", "node_modules"]
+exclude_dir = ["scripts", "templates", "public", "ui", "minikube", "node_modules", "pkg/ui/static"]
 include_dir = ["pkg", "compose"]
 exclude_file = []
 exclude_regex = ["_test.go"]
