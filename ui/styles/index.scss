@@ -1,3 +1,5 @@
+@import "ui/styles/variables";
+
 html {
   //background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   //height: 100vh;
@@ -43,5 +45,18 @@ body > #root {
   .MuiLinearProgress-bar2Buffer {
     // Make the secondary bar (the one that indicates progress, not the amount used) a bit darker so you can see it.
     background-color: rgb(89, 97, 146) !important;
+  }
+}
+
+// This is what creates the small inverted circle in the main application view in the top left hand corner. bg-primary
+// should be applied to the higher div, and the view-inner to the immediate child div. This will result in the small
+// inverted circle corner next to the side bar.
+// TODO This is probably busted on small screens.
+.bg-primary {
+  background-color: $primary-color;
+
+  > .view-inner {
+    border-top-left-radius: 10px;
+    background-color: white;
   }
 }

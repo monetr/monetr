@@ -2,6 +2,7 @@ import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
 import AccountsPage from 'pages/accounts';
 import ExpensesPage from 'pages/expenses';
+import GoalsPage from 'pages/goals';
 import LogoutPage from 'pages/logout';
 import SettingsPage from 'pages/settings';
 import SubscriptionPage from 'pages/subscription';
@@ -18,7 +19,7 @@ import { useSelector, useStore } from 'react-redux';
 import { Backdrop, CircularProgress } from '@mui/material';
 import useMountEffect from 'shared/util/useMountEffect';
 import TransactionsView from 'views/Transactions/TransactionsView';
-import GoalsView from 'views/Goals/GoalsView';
+import GoalsView from 'components/Goals/GoalsView/GoalsView';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 
@@ -76,7 +77,7 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/logout" element={ <LogoutPage/> }/>
             <Route path="/transactions" element={ <TransactionsView/> }/>
             <Route path="/expenses" element={ <ExpensesPage/> }/>
-            <Route path="/goals" element={ <GoalsView/> }/>
+            <Route path="/goals" element={ <GoalsPage/> }/>
             <Route path="/accounts" element={ <AccountsPage/> }/>
             <Route path="/settings" element={ <SettingsPage/> }/>
             <Route path="/subscription" element={ <SubscriptionPage/> }/>

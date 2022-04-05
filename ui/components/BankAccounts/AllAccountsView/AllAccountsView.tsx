@@ -35,7 +35,7 @@ export default function AllAccountsView(): JSX.Element {
 
   function Empty(): JSX.Element {
     return (
-      <div className="flex items-center justify-center h-full bg-white">
+      <div className="flex items-center justify-center h-full">
         <div className="grid grid-cols-1 grid-rows-3 grid-flow-col gap-2">
           <AccountBalance className="self-center w-full h-32 opacity-40"/>
           <div className="flex items-center">
@@ -91,8 +91,10 @@ export default function AllAccountsView(): JSX.Element {
   return (
     <Fragment>
       <Dialogs/>
-      <div className="minus-nav bg-white">
-        <Content/>
+      <div className="minus-nav bg-primary">
+        <div className="w-full h-full view-inner">
+          <Content/>
+        </div>
         <Fab
           color="primary"
           aria-label="add"

@@ -22,24 +22,26 @@ export default function ExpensesView(): JSX.Element {
 
   function EmptyState(): JSX.Element {
     return (
-      <div className="h-full flex justify-center items-center">
-        <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
-          <Typography
-            className="opacity-50"
-            variant="h3"
-          >
-            You don't have any expenses yet...
-          </Typography>
-          <Button
-            onClick={ openNewExpenseDialog }
-            color="primary"
-          >
+      <div className="h-full w-full bg-primary">
+        <div className="view-inner h-full flex justify-center items-center">
+          <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
             <Typography
-              variant="h6"
+              className="opacity-50"
+              variant="h3"
             >
-              Create An Expense
+              You don't have any expenses yet...
             </Typography>
-          </Button>
+            <Button
+              onClick={ openNewExpenseDialog }
+              color="primary"
+            >
+              <Typography
+                variant="h6"
+              >
+                Create An Expense
+              </Typography>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -51,8 +53,8 @@ export default function ExpensesView(): JSX.Element {
     }
 
     return (
-      <div className="minus-nav">
-        <div className="flex flex-col h-full max-h-full">
+      <div className="minus-nav bg-primary">
+        <div className="flex flex-col h-full max-h-full view-inner">
           <div className="grid grid-cols-3 flex-grow">
             <div className="col-span-2">
               <div className="w-full expenses-list">

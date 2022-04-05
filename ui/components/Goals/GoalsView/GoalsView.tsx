@@ -6,7 +6,7 @@ import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getGoalIds } from 'shared/spending/selectors/getGoalIds';
 
-import './styles/GoalsView.scss';
+import 'components/Goals/GoalsView/styles/GoalsView.scss';
 
 export default function GoalsView(): JSX.Element {
   const [newGoalDialogOpen, setNewGoalDialogOpen] = useState(false);
@@ -41,8 +41,8 @@ export default function GoalsView(): JSX.Element {
     return (
       <Fragment>
         { newGoalDialogOpen && <NewGoalDialog onClose={ closeNewGoalDialog } isOpen={ newGoalDialogOpen }/> }
-        <div className="minus-nav">
-          <div className="flex flex-col h-full max-h-full bg-white">
+        <div className="minus-nav bg-primary">
+          <div className="flex flex-col h-full max-h-full bg-white view-inner">
             <div className="grid grid-cols-3 flex-grow">
               <div className="col-span-3">
                 <div className="w-full goals-list ">
@@ -76,8 +76,8 @@ export default function GoalsView(): JSX.Element {
   }
 
   return (
-    <div className="minus-nav">
-      <div className="flex flex-col h-full max-h-full">
+    <div className="minus-nav bg-primary">
+      <div className="flex flex-col h-full max-h-full view-inner">
         <div className="grid grid-cols-3 flex-grow">
           <div className="col-span-2">
             <GoalList/>

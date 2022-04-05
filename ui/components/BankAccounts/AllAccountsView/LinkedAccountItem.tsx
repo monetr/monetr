@@ -94,65 +94,63 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
 
   return (
     <Fragment>
-      <div className="bg-white">
-        <Dialogs/>
-        <li>
-          <ul>
-            <ListSubheader className="pt-2 pl-0 pr-2">
-              <div className="flex pb-2">
-                <div className="items-center self-center flex-auto">
-                  <Typography className="h-full ml-6 text-xl font-semibold">
-                    { props.link.getName() }
-                  </Typography>
-                </div>
-                <PlaidInfoMaybe/>
-                <IconButton onClick={ openMenu }>
-                  <MoreVert/>
-                </IconButton>
-                <Menu
-                  id={ `${ props.link.linkId }-link-menu` }
-                  anchorEl={ menuAnchor }
-                  keepMounted
-                  open={ Boolean(menuAnchor) }
-                  onClose={ closeMenu }
-                >
-                  { props.link.getIsPlaid() && props.link.linkStatus === LinkStatus.Error &&
-                    <MenuItem
-                      onClick={ openDialog(DialogOpen.UpdateLinkDialog) }
-                      className="text-yellow-600"
-                    >
-                      <Autorenew className="mr-2"/>
-                      Reauthenticate
-                    </MenuItem>
-                  }
-                  { props.link.getIsPlaid() &&
-                    <MenuItem>
-                      <CloudOff className="mr-2"/>
-                      Convert To Manual Link
-                    </MenuItem>
-                  }
-                  <MenuItem>
-                    <Edit className="mr-2"/>
-                    Rename
-                  </MenuItem>
-                  <MenuItem className="text-red-500" onClick={ openDialog(DialogOpen.RemoveLinkDialog) }>
-                    <Remove className="mr-2"/>
-                    Remove
-                  </MenuItem>
-                </Menu>
+      <Dialogs/>
+      <li>
+        <ul>
+          <ListSubheader className="pt-2 pl-0 pr-2 bg-transparent">
+            <div className="flex pb-2">
+              <div className="items-center self-center flex-auto">
+                <Typography className="h-full ml-6 text-xl font-semibold">
+                  { props.link.getName() }
+                </Typography>
               </div>
-              <Divider/>
-            </ListSubheader>
-            {
-              props.bankAccounts
-                .sortBy((item: BankAccount) => item.name)
-                .map((item: BankAccount) => <LinkedBankAccountItem bankAccount={ item }/>)
-                .valueSeq()
-                .toArray()
-            }
-          </ul>
-        </li>
-      </div>
+              <PlaidInfoMaybe/>
+              <IconButton onClick={ openMenu }>
+                <MoreVert/>
+              </IconButton>
+              <Menu
+                id={ `${ props.link.linkId }-link-menu` }
+                anchorEl={ menuAnchor }
+                keepMounted
+                open={ Boolean(menuAnchor) }
+                onClose={ closeMenu }
+              >
+                { props.link.getIsPlaid() && props.link.linkStatus === LinkStatus.Error &&
+                  <MenuItem
+                    onClick={ openDialog(DialogOpen.UpdateLinkDialog) }
+                    className="text-yellow-600"
+                  >
+                    <Autorenew className="mr-2"/>
+                    Reauthenticate
+                  </MenuItem>
+                }
+                { props.link.getIsPlaid() &&
+                  <MenuItem>
+                    <CloudOff className="mr-2"/>
+                    Convert To Manual Link
+                  </MenuItem>
+                }
+                <MenuItem>
+                  <Edit className="mr-2"/>
+                  Rename
+                </MenuItem>
+                <MenuItem className="text-red-500" onClick={ openDialog(DialogOpen.RemoveLinkDialog) }>
+                  <Remove className="mr-2"/>
+                  Remove
+                </MenuItem>
+              </Menu>
+            </div>
+            <Divider/>
+          </ListSubheader>
+          {
+            props.bankAccounts
+              .sortBy((item: BankAccount) => item.name)
+              .map((item: BankAccount) => <LinkedBankAccountItem bankAccount={ item }/>)
+              .valueSeq()
+              .toArray()
+          }
+        </ul>
+      </li>
     </Fragment>
   );
 
