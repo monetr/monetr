@@ -208,6 +208,23 @@ jobs:
           files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
           name: monetr
 
+  mkdocs:
+    name: MkDocs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build
+        run: make mkdocs
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: monetr.app
+          folder: build/site
+
   docs-generate:
     needs:
       - go_dependencies
