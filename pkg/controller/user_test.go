@@ -50,7 +50,7 @@ func TestMe(t *testing.T) {
 			WithCookie(TestCookieName, gofakeit.UUID()).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 	})
 
 	t.Run("no token", func(t *testing.T) {
@@ -59,7 +59,7 @@ func TestMe(t *testing.T) {
 		response := e.GET(`/api/users/me`).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 	})
 }
 
@@ -115,7 +115,7 @@ func TestChangePassword(t *testing.T) {
 				}).
 				Expect()
 
-			response.Status(http.StatusForbidden)
+			response.Status(http.StatusUnauthorized)
 		}
 
 		{ // Login to the user with their new password.
@@ -161,7 +161,7 @@ func TestChangePassword(t *testing.T) {
 				}).
 				Expect()
 
-			response.Status(http.StatusForbidden)
+			response.Status(http.StatusUnauthorized)
 			response.JSON().Path("$.error").String().Equal("current password provided is not correct")
 		}
 
@@ -186,7 +186,7 @@ func TestChangePassword(t *testing.T) {
 				}).
 				Expect()
 
-			response.Status(http.StatusForbidden)
+			response.Status(http.StatusUnauthorized)
 		}
 	})
 
@@ -317,7 +317,7 @@ func TestChangePassword(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 	})
 
 	t.Run("no token", func(t *testing.T) {
@@ -330,6 +330,6 @@ func TestChangePassword(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusForbidden)
+		response.Status(http.StatusUnauthorized)
 	})
 }

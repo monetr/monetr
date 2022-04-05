@@ -1,4 +1,4 @@
-# monetr
-
-Welcome to the groundwork for monetr's documentation.
-
+---
+template: home.html
+title: Material for MkDocs
+---

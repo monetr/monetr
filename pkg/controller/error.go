@@ -25,7 +25,7 @@ func (c *Controller) onAnyErrorCode(ctx iris.Context) {
 	}
 
 	switch ctx.GetStatusCode() {
-	case http.StatusForbidden:
+	case http.StatusUnauthorized:
 		// Don't report errors for forbidden status code.
 	default:
 		// TODO Add something to exclude some custom errors like MFA required from being reported.

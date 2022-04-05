@@ -96,7 +96,7 @@ func (c *Controller) handleAuthentication(p router.Party) {
 // @Router /authentication/login [post]
 // @Success 200 {object} swag.LoginResponse
 // @Failure 400 {object} swag.LoginInvalidRequestResponse Required data is missing.
-// @Failure 403 {object} swag.LoginInvalidCredentialsResponse Invalid credentials.
+// @Failure 401 {object} swag.LoginInvalidCredentialsResponse Invalid credentials.
 // @Failure 428 {object} swag.LoginPreconditionRequiredResponse Login requirements are missing.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) loginEndpoint(ctx iris.Context) {
@@ -135,7 +135,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	login, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, hashedPassword)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
-		c.returnError(ctx, http.StatusForbidden, "invalid email and password")
+		c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
 		return
 	case nil:
 		// If no error was returned then do nothing.
@@ -167,7 +167,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 		if err := login.VerifyTOTP(loginRequest.TOTP); err != nil {
 			log.Trace("provided TOTP MFA code is not valid")
-			c.returnError(ctx, http.StatusForbidden, "invalid TOTP code")
+			c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
 			return
 		}
 
@@ -251,10 +251,8 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 // @Router /authentication/logout [get]
 // @Security ApiKeyAuth
 // @Success 200
-// @Failure 403 {object} ApiError Cookie was not present.
 func (c *Controller) logoutEndpoint(ctx iris.Context) {
 	if cookie := ctx.GetCookie(c.configuration.Server.Cookies.Name); cookie == "" {
-		c.returnError(ctx, http.StatusForbidden, "authentication required")
 		return
 	}
 
@@ -272,7 +270,7 @@ func (c *Controller) logoutEndpoint(ctx iris.Context) {
 // @Router /authentication/register [post]
 // @Success 200 {object} swag.RegisterResponse
 // @Failure 400 {object} ApiError Required data is missing.
-// @Failure 403 {object} ApiError Invalid credentials.
+// @Failure 401 {object} ApiError Invalid credentials.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) registerEndpoint(ctx iris.Context) {
 	var registerRequest struct {
