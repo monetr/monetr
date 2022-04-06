@@ -9,7 +9,7 @@ options.
 
 ![monetr Account's Menu](assets/monetr_account_menu.png)
 
-Simply click `- Remove` to remove the bank account.
+Simply click `- Remove` to continue.
 
 ??? danger
 
@@ -17,6 +17,10 @@ Simply click `- Remove` to remove the bank account.
     able to see information about that account through Plaid. It will also remove all data from our application for that
     bank account shortly after confirming its deletion. This includes any transactions, expenses, or goals created for
     any of the accounts for that bank. **This data cannot be recovered**.
+
+We will ask you to confirm that you want to remove your bank account. This action cannot be undone.
+
+![monetr Account Removal Confirm](assets/monetr_remove_confirm.png)
 
 Bank accounts and their information are removed in the background. It will immediately be removed from the UI, but if
 you refresh your page shortly after removing it; you may still see it. However, it will disappear shortly thereafter.
