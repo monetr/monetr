@@ -89,7 +89,7 @@ but it is very easy to make your changes and then hit _debug_ and let your break
 Delve is available via port `2345` on `localhost`. I'm not sure what the configuration will be for every editor to
 connect to it; but this is a screenshot of IntellJ IDEA's configuration for remote debugging.
 
-![IntellJ IDEA Configuration](docs/developing/assets/IntellJ_IDEA_Go_Debugging.png)
+![IntellJ IDEA Configuration](assets/IntellJ_IDEA_Go_Debugging.png)
 
 ### Running Tests
 
