@@ -8,7 +8,7 @@ import request from 'shared/util/request';
 import { useSelector } from 'react-redux';
 import { getInitialPlan } from 'shared/bootstrap/selectors';
 import useMountEffect from 'shared/util/useMountEffect';
-import Logo from 'assets';
+import { Logo } from 'assets';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();

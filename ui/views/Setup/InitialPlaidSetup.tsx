@@ -13,7 +13,7 @@ import { getBillingEnabled } from 'shared/bootstrap/selectors';
 import { Button, Typography } from '@mui/material';
 import { List } from 'immutable';
 
-import Logo from 'assets';
+import { Logo } from 'assets';
 
 interface State {
   linkId: number | null;

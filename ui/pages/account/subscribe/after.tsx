@@ -5,7 +5,7 @@ import request from 'shared/util/request';
 import { CircularProgress, Typography } from '@mui/material';
 import activateSubscription from 'shared/authentication/actions/activateSubscription';
 
-import Logo from 'assets';
+import { Logo } from 'assets';
 
 export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();
