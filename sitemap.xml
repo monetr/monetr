@@ -61,6 +61,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>http://localhost/documentation/developing/credentials/</loc>
+         <lastmod>2022-04-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>http://localhost/documentation/developing/documentation/</loc>
          <lastmod>2022-04-06</lastmod>
          <changefreq>daily</changefreq>
