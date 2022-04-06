@@ -58,6 +58,8 @@ nav:
       - developing/index.md
       - Code Of Conduct: developing/CODE_OF_CONDUCT.md
       - Documentation: developing/documentation.md
+      - Developer:
+          - Local: developing/local.md
       - API:
           - REST API: api/API.md
           - Resources:
@@ -69,8 +71,6 @@ nav:
               - Spending: api/resources/spending.md
               - Transactions: api/resources/transactions.md
               - User: api/resources/user.md
-      - Developer:
-          - Local: developing/Local.md
 
 plugins:
   - search
