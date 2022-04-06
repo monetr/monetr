@@ -60,6 +60,14 @@ represents. Adjacent code blocks without a paragraph of text between them should
 Screenshots, if at all possible, should be no larger than `1280x720`. This is not a strict requirement, but if a
 screenshot can reasonably capture all the necessary details in that resolution or less; that is greatly preferred.
 
+### Links
+
+Links to external sites should be opened in a new tab. This can be done by appending the following snippet after a link.
+
+```text title="Open In New Tab"
+{:target="_blank"}
+```
+
 ### Inclusivity
 
 Language that has been identified as hurtful or insensitive should be avoided.

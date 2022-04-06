@@ -60,8 +60,9 @@ nav:
       - developing/index.md
       - Code Of Conduct: developing/CODE_OF_CONDUCT.md
       - Documentation: developing/documentation.md
-      - Developer:
-          - Local: developing/local.md
+      - Developing:
+          - Local Development: developing/local.md
+          - Credentials: developing/credentials.md
       - API:
           - REST API: api/API.md
           - Resources:

@@ -3,6 +3,11 @@
 This guide walks you through setting up a local development environment for monetr on macOS or Linux. If you are using
 Windows, it is still possible to run the development environment locally. However, it is not documented at this time.
 
+## Prerequisites
+
+At the time of writing this, monetr requires Plaid credentials for development. Among other credentials, documentation
+on how to retrieve them can be found here: [Developing > Credentials](credentials.md)
+
 ## Clone the repository
 
 To get started, clone the monetr repository from [GitHub](https://github.com/monetr/monetr) or from your fork.
