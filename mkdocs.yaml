@@ -54,6 +54,8 @@ nav:
   - Help:
       - help/index.md
       - Onboarding: help/onboarding.md
+      - Bank Accounts:
+          - Removing: help/bank_accounts/removing.md
   - Contributing:
       - developing/index.md
       - Code Of Conduct: developing/CODE_OF_CONDUCT.md
