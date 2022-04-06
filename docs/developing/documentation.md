@@ -18,7 +18,7 @@ in our GitHub Actions workflows.
 ??? note
 
     To properly work on documentation locally, it is recommended that you run the local development stack. Documentation
-    for that can be found in [Developer / Local](../developer/Local.md)
+    for that can be found in [Developer / Local](local.md)
 
 You can build our documentation site locally using the following command, but it does require a Docker runtime to be
 available.
@@ -54,6 +54,11 @@ neutral if possible. Attempt to use "they" as a pronoun for the reader.
 
 Code blocks should always be accompanied by a preceding text to give context as to what that code block is, or
 represents. Adjacent code blocks without a paragraph of text between them should be avoided.
+
+### Screenshots
+
+Screenshots, if at all possible, should be no larger than `1280x720`. This is not a strict requirement, but if a
+screenshot can reasonably capture all the necessary details in that resolution or less; that is greatly preferred.
 
 ### Inclusivity
 

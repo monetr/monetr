@@ -89,7 +89,7 @@ but it is very easy to make your changes and then hit _debug_ and let your break
 Delve is available via port `2345` on `localhost`. I'm not sure what the configuration will be for every editor to
 connect to it; but this is a screenshot of IntellJ IDEA's configuration for remote debugging.
 
-![IntellJ IDEA Configuration](assets/IntellJ_IDEA_Go_Debugging.png)
+![IntellJ IDEA Configuration](docs/developing/assets/IntellJ_IDEA_Go_Debugging.png)
 
 ### Running Tests
 
@@ -155,4 +155,4 @@ This removes the Plaid links that are active, takes down the Docker compose cont
 removes all temporary directories and generated code in the project directory. It might miss a few things, but this
 should essentially return the project directory to a state akin to having freshly cloned it.
 
-1. **This will delete all of your local development data, including any Plaid links, expenses, goals, etc...***
+1. **This will delete all of your local development data, including any Plaid links, expenses, goals, etc...**

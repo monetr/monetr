@@ -53,6 +53,7 @@ nav:
   - Home: README.md
   - Help:
       - help/index.md
+      - Onboarding: help/onboarding.md
   - Contributing:
       - developing/index.md
       - Code Of Conduct: developing/CODE_OF_CONDUCT.md
@@ -69,7 +70,7 @@ nav:
               - Transactions: api/resources/transactions.md
               - User: api/resources/user.md
       - Developer:
-          - Local: developer/Local.md
+          - Local: developing/Local.md
 
 plugins:
   - search
