@@ -250,7 +250,7 @@ else
 	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
 endif
 develop: $(NODE_MODULES)
-	$(COMPOSE) up --wait
+	$(COMPOSE) up --wait --remove-orphans
 	$(MAKE) development-info
 
 development-info:
