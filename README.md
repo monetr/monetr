@@ -15,21 +15,13 @@ completely free to self-host (documentation to come), but requires a Plaid accou
 
 monetr is currently still in heavy development; but is being alpha-tested with the latest release version constantly.
 
-
 ![image](https://user-images.githubusercontent.com/37967690/160265126-8c71c1dd-28aa-4176-b849-de4266b84157.png)
-
 
 ## Status
 
 | Environment   | Uptime                                                                                                        | Status Page                                                       |
-| ------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+|---------------|---------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | Alpha Testing | ![Uptime Robot ratio (30 days)](https://img.shields.io/uptimerobot/ratio/m789641931-ce8fe24a641913b47027297d) | [Status Page](https://stats.uptimerobot.com/zAjyOcGm7E/789641931) |
-
----
-
-Basic API documentation is currently available at https://docs.monetr.dev
-
-This documentation is auto-generated from comments in the API code.
 
 ## Contributing
 
