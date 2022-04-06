@@ -228,7 +228,7 @@ jobs:
       - name: Build
         run: make mkdocs
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
         with:
           branch: monetr.app
           folder: build/site
@@ -262,7 +262,7 @@ jobs:
       - name: Generate Documentation Static Site
         run: make docs-static
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
         with:
           branch: docs.monetr.dev
           folder: build/docs
