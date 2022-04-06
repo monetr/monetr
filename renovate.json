@@ -6,6 +6,7 @@
   "semanticCommits": "enabled",
   "semanticCommitType": "deps",
   "semanticCommitScope": "Renovate",
+  "prConcurrentLimit": 20,
   "packageRules": [
     {
       "matchLanguages": [
