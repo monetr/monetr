@@ -10,6 +10,80 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestGetTransactions(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t)
+			link := fixtures.GivenIHaveAPlaidLink(t, user)
+			bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, bank, 10)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Array().Length().Equal(10)
+	})
+
+	t.Run("pagination", func(t *testing.T) {
+		e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+
+		{ // Seed the data for the test.
+			user, password := fixtures.GivenIHaveABasicAccount(t)
+			link := fixtures.GivenIHaveAPlaidLink(t, user)
+			bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, bank, 70)
+
+			token = GivenILogin(t, e, user.Login.Email, password)
+		}
+
+		{ // First page
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().Equal(25)
+		}
+
+		{ // Second page
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithQuery("offset", 25).
+				WithQuery("limit", 25).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().Equal(25)
+		}
+
+		{ // Third page
+			response := e.GET("/api/bank_accounts/{bankAccountId}/transactions").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithQuery("offset", 50).
+				WithQuery("limit", 25).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Array().Length().Equal(20)
+		}
+	})
+}
+
 func TestPostTransactions(t *testing.T) {
 	t.Run("bad request", func(t *testing.T) {
 		e := NewTestApplication(t)
