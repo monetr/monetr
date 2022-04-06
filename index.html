@@ -358,7 +358,19 @@ a.md-button {
     .md-sidebar--primary {
         display: none
     }
-}</style>
+}
+
+body::before {
+    z-index: -1;
+    position: absolute;
+    content: " ";
+    width: 100vw;
+    height: 100vh;
+    background-image: url("img/backdrop-1.svg");
+    background-size: cover;
+    opacity: 50%;
+}
+</style>
 <section class="mdx-container home-container">
   <div class="md-grid md-typeset">
     <div class="mdx-hero">
