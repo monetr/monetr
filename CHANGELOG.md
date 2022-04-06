@@ -1,5 +1,48 @@
 # Changelog
 
+### [0.10.6](https://github.com/monetr/monetr/compare/v0.10.5...v0.10.6) (2022-04-06)
+
+
+### Features
+
+* **docs:** Added backdrop to documentation site. ([a80a1b5](https://github.com/monetr/monetr/commit/a80a1b5ea8c97c1226c4b0ba7ae7ddcb1d7f097d))
+* **docs:** Adding basic onboarding documentation. ([416fc9d](https://github.com/monetr/monetr/commit/416fc9d674d6834a67e97f8a1d5967ce5d37773a))
+* **docs:** Adding documentation on development credentials. ([5d69a58](https://github.com/monetr/monetr/commit/5d69a581a79bb97e9a394f2d2b81ecab3e4cf516))
+* **docs:** Adding information on removing a bank account. ([31468e1](https://github.com/monetr/monetr/commit/31468e1bb62688affdd88e4c05b91827fb566c3f))
+* **docs:** Adding mkdocs-material-insider. ([0654329](https://github.com/monetr/monetr/commit/065432904b9bb1e967e94ef38269c2e3cf688dff))
+* **docs:** Building out more documentation structure. ([1be8c5f](https://github.com/monetr/monetr/commit/1be8c5f13c1e404a1c923ba8818edc8b52f656e0))
+
+
+### Bug Fixes
+
+* **api:** Fixing status codes for authorization. ([62dcf78](https://github.com/monetr/monetr/commit/62dcf78cfccb5284cc22edf1f72f0e99dee90f64))
+* **docs:** Fixed `Developer > Local` link, reordered sidebar. ([a21e2ce](https://github.com/monetr/monetr/commit/a21e2ce8bbbd5108655bce085d2cec3e30fccb1b))
+* **docs:** Fixed debugger screenshot for local dev. ([ae7e97e](https://github.com/monetr/monetr/commit/ae7e97e41615ce6470b07fa9424a372581018342))
+* **test:** Fixed flaky JWT test. ([fe40835](https://github.com/monetr/monetr/commit/fe408354c311a120bc7c4a9b4b4927cfc61a2e54))
+
+
+### Miscellaneous
+
+* **build:** Increase PR limit for renovate. ([70f3ce6](https://github.com/monetr/monetr/commit/70f3ce6d4c1e5ba09abc7ac3445e02b992fa3116))
+* **ci:** Adding stuff for new static site. ([8aedbea](https://github.com/monetr/monetr/commit/8aedbeaaafa115e5f01c9aaf9fab5e17bc52aa7b))
+* **docs:** Add confirm screenshot to remove account doc. ([ed31510](https://github.com/monetr/monetr/commit/ed31510e7408d968594eafd5c2af8e2ec2e8247c))
+* **docs:** Adding endpoint to list in index. ([ecbfd4d](https://github.com/monetr/monetr/commit/ecbfd4df8e905eb4d4c95e42e5f09817534c280d))
+* **docs:** Adding more documentation around authentication. ([326fe9d](https://github.com/monetr/monetr/commit/326fe9d9d925dcfca4ceec43aaa879f2ec3d7a4a))
+* **docs:** Fix sign up link. ([bc072e5](https://github.com/monetr/monetr/commit/bc072e5b589a68635aaf595f38a506b1f30ff3fb))
+* **docs:** Reference github issues for missing documentation. ([2bc7753](https://github.com/monetr/monetr/commit/2bc7753a2facf22b1ffd74239bc78ba609e7d73d))
+* Experimenting with background. ([a212ac6](https://github.com/monetr/monetr/commit/a212ac655373e938cb955b24f32836f41f1c89b4))
+* Fixed readme referencing outdated url. ([a878d39](https://github.com/monetr/monetr/commit/a878d39cb0746bed2f755c5e7faabc2581bae5cd))
+* Reduce background intensity. ([7c16dfd](https://github.com/monetr/monetr/commit/7c16dfdbe69c875cd51528f0907bb5c62dbfcb59))
+* **tests:** Adding test for retrieving transactions. ([2178392](https://github.com/monetr/monetr/commit/217839223bd3a8fed5ea4503efefb468317ece1e))
+
+
+### Dependencies
+
+* **ui:** update dependency @babel/core to v7.17.9 ([60bbe49](https://github.com/monetr/monetr/commit/60bbe49772c571501fec20eda91de5c655929eab))
+* **ui:** update dependency @testing-library/jest-dom to v5.16.4 ([39ae2b4](https://github.com/monetr/monetr/commit/39ae2b407e35b529cab183e7b74e083f116fdd90))
+* **ui:** update dependency react-refresh-typescript to v2.0.4 ([160693f](https://github.com/monetr/monetr/commit/160693f30d450701cf5a9b8127ef58c96c9fdd8f))
+* **ui:** update dependency redoc-cli to v0.13.10 ([411fcc7](https://github.com/monetr/monetr/commit/411fcc74f64646a47d7b09cf8778a220d0e7e892))
+
 ### [0.10.5](https://github.com/monetr/monetr/compare/v0.10.4...v0.10.5) (2022-04-05)
 
 
