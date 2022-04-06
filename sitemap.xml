@@ -80,4 +80,9 @@
          <lastmod>2022-04-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
+    <url>
+         <loc>http://localhost/documentation/help/bank_accounts/removing/</loc>
+         <lastmod>2022-04-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
 </urlset>
