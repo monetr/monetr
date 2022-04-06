@@ -68,6 +68,19 @@ Links to external sites should be opened in a new tab. This can be done by appen
 {:target="_blank"}
 ```
 
+### Issue Tracking
+
+If documentation is missing and is planned to be added later. Please add a placeholder badge for that documentation
+using [shields.io](https://shields.io/category/issue-tracking), with the `GitHub issue/pull request detail` shield.
+
+The "override label" should use the following format.
+
+```text title="Label Format"
+#{GitHub Issue Number} - {GitHub Issue Title}
+```
+
+Please make the badge link back to the original issue as well.
+
 ### Inclusivity
 
 Language that has been identified as hurtful or insensitive should be avoided.

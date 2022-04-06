@@ -1,6 +1,6 @@
 # 3rd Party API credentials for development
 
-To work on all of the features monetr provides locally, you will need access to 3 sets of API credentials. These
+To work on all of the features monetr provides locally, you will need access to four sets of API credentials. These
 credentials are outlines here in order of significance. monetr or people representing monetr **will not** provide any of
 these credentials to you. You are responsible for gaining access to these credentials on your own. None of the
 credentials require that you pay for them for development purposes.
@@ -24,6 +24,8 @@ For monetr you will need your `client_id` as well as your `sandbox` secret.
 ### OAuth
 
 **TODO**
+
+[![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/806?label=%23806%20-%20docs%3A%20Document%20Plaid%20OAuth%20setup%20for%20local%20development.&logo=github)](https://github.com/monetr/monetr/issues/806){:target="_blank"}
 
 ## ngrok
 
@@ -82,3 +84,9 @@ Once the webhook endpoint has been created click `Reveal` under Signing Secret t
 endpoint.
 
 ![Stripe Created Webhook](assets/stripe_created_webhook.png)
+
+## ReCAPTCHA
+
+**TODO**
+
+[![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/805?label=%23805%20-%20docs%3A%20Document%20ReCAPTCHA%20credentials.&logo=github)](https://github.com/monetr/monetr/issues/805){:target="_blank"}
