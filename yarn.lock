@@ -11613,13 +11613,13 @@ react-is@^16.13.1, react-is@^16.7.0, react-is@^16.8.1:
   resolved "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-react-plaid-link@3.3.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/react-plaid-link/-/react-plaid-link-3.3.0.tgz#543bc6bdf754ec5e92f80d7bc872969ff4e61683"
-  integrity sha512-OZni8dTn0OBvZLpHgNmvTXCMOZj47QuRRXyhc67lEqqtEVNujC4/J9s6XcoWkG3kdq3oT3P1coAbN8Q0Q/8xuA==
+react-plaid-link@3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/react-plaid-link/-/react-plaid-link-3.3.1.tgz#adf89b074519e0e0ed468ca25478e81ae160ecc4"
+  integrity sha512-whBphCaK8fMVk6zqn+t0ROceD6z9ewVv3Z/fd49c3Er7XW8ewrxiF/O6mB8NuR4zHppCm9jM2zO8iQMzECoX3g==
   dependencies:
     prop-types "^15.7.2"
-    react-script-hook "1.5.0"
+    react-script-hook "^1.6.0"
 
 react-recaptcha@2.3.10:
   version "2.3.10"
@@ -11663,10 +11663,10 @@ react-router@6.2.2:
   dependencies:
     history "^5.2.0"
 
-react-script-hook@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/react-script-hook/-/react-script-hook-1.5.0.tgz#7d7eb189c92e01cf0a8d1796113947ef8e08eed5"
-  integrity sha512-LzWXi5rxT4xz+zLwCt7nTmMuFyFs04c5m6lHCs8Ps9U8J8zHQNp+E9IcLFSFzkn4WZMiNPt2DQUVeBHLy2Ix0w==
+react-script-hook@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/react-script-hook/-/react-script-hook-1.6.0.tgz#6a44ff5e65113cb29252eadad1b8306f5fe0c626"
+  integrity sha512-aJm72XGWV+wJTKiqHmAaTNC/JQZV/Drv6A1kd1VQlzhzAXLqtBRBeTt3iTESImGe5TaBDHUOUeaGNw4v+7bqDw==
 
 react-select@5.2.2:
   version "5.2.2"
