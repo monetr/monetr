@@ -90,7 +90,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         name: Download Compiled UI Artifacts
         with:
           name: '${{ github.sha }}-ui'
@@ -187,12 +187,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         name: Download Go Coverage Artifacts
         with:
           name: '${{ github.sha }}-go-coverage'
           path: '${{ github.workspace }}/coverage'
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         name: Download UI Coverage Artifacts
         with:
           name: '${{ github.sha }}-ui-coverage'
@@ -274,7 +274,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         name: Download Compiled UI Artifacts
         with:
           name: '${{ github.sha }}-ui'
@@ -292,7 +292,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
         name: Download Compiled UI Artifacts
         with:
           name: '${{ github.sha }}-ui'
