@@ -60,7 +60,7 @@ jobs:
             ${{ runner.os }}-ui-
       - name: Build
         run: make build-ui
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: '${{ github.sha }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
@@ -97,7 +97,7 @@ jobs:
           path: '${{ github.workspace }}/pkg/ui/static/'
       - name: Build
         run: GOARCH=${{ matrix.architecture }} make build
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: '${{ github.sha }}-binary-${{ matrix.architecture }}'
           path: '${{ github.workspace }}/build/monetr'
@@ -145,7 +145,7 @@ jobs:
         uses: guyarb/golang-test-annotations@v0.5.0
         with:
           test-results: '${{ github.workspace }}/rest-api-tests.json'
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         name: Upload Go Test Coverage Artifacts
         if: always()
         with:
@@ -171,7 +171,7 @@ jobs:
             ${{ runner.os }}-ui-
       - name: Test
         run: make test-ui
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         name: Upload UI Test Coverage Artifacts
         if: always()
         with:
@@ -233,7 +233,7 @@ jobs:
             ${{ runner.os }}-ui-
       - run: |
           make docs-static
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         name: Upload Documentation As Artifact
         with:
           name: '${{ github.sha }}-docs'
@@ -259,7 +259,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }} # Read only token.
       - name: Build
         run: make mkdocs
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         name: Upload Documentation As Artifact
         with:
           name: '${{ github.sha }}-mkdocs'
