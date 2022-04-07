@@ -39,7 +39,7 @@ export default function useBootstrapLogin(): (user?: User | null, subscriptionIs
         });
 
         // If we are not authenticated then don't through. This is going to be acceptable behavior.
-        if (error.response.status === 403) {
+        if (error.response.status === 401) {
           return;
         }
 
