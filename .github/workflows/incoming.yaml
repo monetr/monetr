@@ -12,7 +12,7 @@ jobs:
     container: golang:1.18.0
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
@@ -31,7 +31,7 @@ jobs:
     container: node:17.5.0
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/node_modules
@@ -50,7 +50,7 @@ jobs:
     container: node:17.5.0
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/node_modules
@@ -80,7 +80,7 @@ jobs:
           - arm64
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
@@ -128,7 +128,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
@@ -161,7 +161,7 @@ jobs:
     container: node:17.5.0
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/node_modules
@@ -213,7 +213,7 @@ jobs:
     container: ghcr.io/monetr/build-containers/ubuntu:20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ~/.cache/go-build
@@ -223,7 +223,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         with:
           path: |
             ${{ github.workspace }}/node_modules
