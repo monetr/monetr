@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.18.0
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:17.5.0
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:17.5.0
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -79,7 +79,7 @@ jobs:
           - amd64
           - arm64
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -127,7 +127,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     container: node:17.5.0
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -186,7 +186,7 @@ jobs:
       - ui_test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/download-artifact@v2
         name: Download Go Coverage Artifacts
         with:
@@ -212,7 +212,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/monetr/build-containers/ubuntu:20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v3
         with:
           path: |
@@ -246,7 +246,7 @@ jobs:
     env:
       MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:04052022
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -273,7 +273,7 @@ jobs:
     name: Container (Buildah)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/download-artifact@v2
         name: Download Compiled UI Artifacts
         with:
@@ -291,7 +291,7 @@ jobs:
     name: Container (Docker)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/download-artifact@v2
         name: Download Compiled UI Artifacts
         with:
