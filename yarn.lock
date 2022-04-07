@@ -6925,10 +6925,10 @@ css-vendor@^2.0.8:
     "@babel/runtime" "^7.8.3"
     is-in-browser "^1.0.2"
 
-css-what@6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/css-what/-/css-what-6.0.1.tgz#3be33be55b9f302f710ba3a9c3abc1e2a63fc7eb"
-  integrity sha512-z93ZGFLNc6yaoXAmVhqoSIb+BduplteCt1fepvwhBUQK6MNE4g6fgjpuZKJKp0esUe+vXWlIkwZZjNWoOKw0ZA==
+css-what@6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/css-what/-/css-what-6.1.0.tgz#fb5effcf76f1ddea2c81bdfaa4de44e79bac70f4"
+  integrity sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==
 
 css-what@^5.0.0:
   version "5.1.0"
