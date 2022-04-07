@@ -54,12 +54,12 @@ jobs:
           echo "${{ needs.release_please.outputs.version }}"
           make ui-dependencies
           RELEASE_VERSION=v${{ needs.release_please.outputs.version }} make build-ui
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
           retention-days: 1
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: '${{ needs.release_please.outputs.version }}-source-maps'
           path: '${{ github.workspace }}/build/source_maps'
@@ -107,7 +107,7 @@ jobs:
           max_attempts: 3
           command: |
             RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make tar
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: 'monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
           path: '${{ github.workspace }}/build/monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
