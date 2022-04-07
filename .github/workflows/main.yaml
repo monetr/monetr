@@ -203,7 +203,7 @@ jobs:
           path: '${{ github.workspace }}/coverage'
       - name: CodeCov
         if: always()
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
           name: monetr
