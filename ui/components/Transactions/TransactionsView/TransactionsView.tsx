@@ -1,5 +1,5 @@
 import { Divider, List, ListSubheader, Typography } from '@mui/material';
-import TransactionItem from 'components/Transactions/TransactionItem';
+import TransactionItem from 'components/Transactions/TransactionsView/TransactionItem';
 import { Moment } from 'moment';
 import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
@@ -77,7 +77,7 @@ function TransactionsView(): JSX.Element {
           <ul>
             <Fragment>
               <ListSubheader className="bg-white pl-0 pr-0 pt-1 bg-gray-50">
-                <Typography className="ml-6 font-semibold opacity-75 text-base">
+                <Typography className="ml-4 md:ml-6 font-semibold opacity-75 text-base">
                   { formatDateHeader(group) }
                 </Typography>
                 <Divider/>
@@ -86,7 +86,7 @@ function TransactionsView(): JSX.Element {
             { transactions.map(transaction => (
               <TransactionItem
                 key={ transaction.transactionId }
-                transactionId={ transaction.transactionId }
+                transaction={ transaction }
               />)).valueSeq().toArray() }
           </ul>
         </li>

@@ -15,13 +15,13 @@ const BalanceNavDisplay = React.memo((): JSX.Element => {
       <Typography data-testid="safe-to-spend">
         <b>Safe-To-Spend:</b> { balance.getSafeToSpendString() }
       </Typography>
-      <Typography variant="body2">
+      <Typography variant="body2" className="hidden lg:block">
         <b>Expenses:</b> { balance.getExpensesString() }
       </Typography>
-      <Typography variant="body2">
+      <Typography variant="body2" className="hidden lg:block">
         <b>Goals:</b> { balance.getGoalsString() }
       </Typography>
-      <Typography variant="body2">
+      <Typography variant="body2" className="hidden lg:block">
         <b>Available:</b> { balance.getAvailableString() }
       </Typography>
     </div>

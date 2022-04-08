@@ -1,15 +1,12 @@
 import Transaction from 'models/Transaction';
-import React, { Component, useState } from 'react';
-import { useSelector, useStore } from 'react-redux';
+import React, { useState } from 'react';
 import { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
 import CreatableSelect from 'react-select/creatable';
 import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
-import updateTransaction from 'shared/transactions/actions/updateTransaction';
-import { getTransactionById } from 'shared/transactions/selectors/getTransactionById';
 
 interface PropTypes {
-  transactionId: number;
+  transaction: Transaction;
 }
 
 enum TransactionName {
@@ -23,7 +20,7 @@ interface Option {
 }
 
 const TransactionNameEditor = (props: PropTypes): JSX.Element => {
-  const transaction = useSelector(getTransactionById(props.transactionId));
+  const { transaction } = props;
   const [loading, setLoading] = useState<boolean>(false);
   const updateTransaction = useUpdateTransaction();
 
@@ -92,7 +89,8 @@ const TransactionNameEditor = (props: PropTypes): JSX.Element => {
           primary: '#4E1AA0',
         },
       }) }
-      classNamePrefix="transaction-name-select"
+      classNamePrefix="transaction-select"
+      className="w-full md:basis-1/2 pl-0 pr-0 md:pl-2.5 md:pt-0 md:pb-0 transaction-item-name"
       createOptionPosition="first"
       formatCreateLabel={ createLabelFormat }
       formatOptionLabel={ formatOptionsLabel }

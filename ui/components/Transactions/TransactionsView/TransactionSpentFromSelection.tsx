@@ -8,24 +8,28 @@ import { FormatOptionLabelMeta } from 'react-select/base';
 import { getBalance } from 'shared/balances/selectors/getBalance';
 import { getSpending } from 'shared/spending/selectors/getSpending';
 import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
-import { getTransactionById } from 'shared/transactions/selectors/getTransactionById';
 import Select, { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { Map } from 'immutable';
 
-import './styles/TransactionSpentFromSelection.scss';
-
 interface Props {
-  transactionId: number;
+  transaction: Transaction;
 }
 
 export default function TransactionSpentFromSelection(props: Props): JSX.Element {
-  const transaction = useSelector(getTransactionById(props.transactionId));
+  const { transaction } = props;
   const allSpending = useSelector(getSpending);
   const balances = useSelector(getBalance);
   const updateTransaction = useUpdateTransaction();
 
   if (transaction.getIsAddition()) {
-    return null;
+    return (
+      <span
+        className="flex items-center w-full md:basis-1/2 pl-3 pr-0 mt-2.5 md:pl-5 md:mt-0 md:mb-0 opacity-50"
+        style={ { height: '38px' } }
+      >
+        Deposit
+      </span>
+    )
   }
 
   function updateSpentFrom(selection: Spending | null) {
@@ -98,7 +102,8 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
       components={ {
         Option: SpendingSelectOption,
       } }
-      classNamePrefix="transaction-spending-select"
+      classNamePrefix="transaction-select"
+      className="w-full md:basis-1/2 pl-0 pr-0 pt-2.5 md:pl-2.5 md:pt-0 md:pb-0"
       isClearable={ false }
       isDisabled={ false }
       isLoading={ false }

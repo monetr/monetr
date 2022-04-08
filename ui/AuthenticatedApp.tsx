@@ -26,6 +26,8 @@ const AuthenticatedApp = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
   const { dispatch, getState } = useStore();
 
+  const [sidebarClosed, setSidebarClosed] = useState(true);
+
   const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
   const fetchLinksIfNeeded = useFetchLinksIfNeeded();
 
@@ -64,12 +66,20 @@ const AuthenticatedApp = (): JSX.Element => {
     );
   }
 
+  function toggleSidebar() {
+    setSidebarClosed(!sidebarClosed);
+  }
+
   return (
     <Fragment>
       <div className="flex h-full min-w-0 min-h-full">
-        <Sidebar/>
+        <Sidebar
+          closed={ sidebarClosed }
+          onToggleSidebar={ toggleSidebar }
+          closeSidebar={ () => setSidebarClosed(true) }
+        />
         <div className="relative flex flex-col flex-1 w-0 min-w-0 mb-8 lg:ml-64">
-          <NavigationBar/>
+          <NavigationBar onToggleSidebar={ toggleSidebar }/>
           <Routes>
             <Route path="/register" element={ <Navigate replace to="/"/> }/>
             <Route path="/login" element={ <Navigate replace to="/"/> }/>

@@ -181,7 +181,7 @@ export default function RegisterView(): JSX.Element {
            }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex justify-center w-full h-full max-h-full">
-              <div className="w-full p-10 max-w-screen-sm sm:p-0">
+              <div className="w-full p-2.5 md:p-10 max-w-screen-sm sm:p-0 mt-5">
                 <CenteredLogo/>
                 <div className="w-full">
                   <div className="w-full pb-1.5 pt-1.5">
@@ -301,16 +301,7 @@ export default function RegisterView(): JSX.Element {
                 </div>
                 <div className="w-full pt-1.5 flex justify-center pb-10">
                   <Button
-                    className="w-1/2 mr-1 min-w-max"
-                    color="secondary"
-                    disabled={ isSubmitting }
-                    onClick={ () => navigate('/login') }
-                    variant="outlined"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    className="w-1/2 ml-1 min-w-max"
+                    className="w-full"
                     color="primary"
                     disabled={ isSubmitting || cannotSubmit(values) }
                     onClick={ submitForm }

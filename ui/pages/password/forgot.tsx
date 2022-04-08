@@ -64,7 +64,7 @@ export default function ForgotPasswordPage(): JSX.Element {
            }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto pb-20">
             <div className="flex items-center justify-center w-full h-full max-h-full">
-              <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
+              <div className="w-full p-2.5 md:p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
                 <CenteredLogo/>
                 <div className="w-full">
                   <div className="w-full pb-2.5">

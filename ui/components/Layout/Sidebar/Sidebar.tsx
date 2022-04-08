@@ -1,13 +1,14 @@
 import {
   AccountBalance,
   CreditCard,
-  ExitToApp,
+  ExitToApp, Menu,
   PriceCheck,
   Savings,
   Settings,
   ShoppingCart
 } from '@mui/icons-material';
-import { Button } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
+import classnames from 'classnames';
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
 import SidebarButton from 'components/Layout/Sidebar/SidebarButton';
 import React from 'react';
@@ -17,29 +18,45 @@ import { getBillingEnabled } from 'shared/bootstrap/selectors';
 
 import 'components/Layout/Sidebar/styles/Sidebar.scss'
 
-export default function Sidebar(): JSX.Element {
+interface SidebarProps {
+  closed?: boolean;
+  onToggleSidebar?: () => void;
+  closeSidebar?: () => void;
+}
+
+export default function Sidebar(props: SidebarProps): JSX.Element {
   const billingEnabled = useSelector(getBillingEnabled);
 
   return (
-    <div className="sidebar fixed top-0 bottom-0 left-0 hidden lg:flex lg:flex-shrink-0 lg:w-64">
+    <div className={ classnames('sidebar fixed top-0 bottom-0 left-0 lg:flex lg:flex-shrink-0 lg:w-64 w-full z-50', {
+      'block': !!!props.closed,
+      'hidden': !!props.closed,
+    }) }>
       <div className="w-full h-full flex flex-col text-white">
-        <div className="flex justify-start p-2.5 flex-shrink-0">
-          <BankAccountSelector/>
+        <div className="flex">
+          <div className="basis-1/5 block lg:hidden flex justify-start items-center pl-2.5">
+            <IconButton onClick={ props.onToggleSidebar } aria-label="menu" className="text-white">
+              <Menu/>
+            </IconButton>
+          </div>
+          <div className="basis-4/5 lg:basis-full flex justify-start p-2.5 flex-shrink-0">
+            <BankAccountSelector/>
+          </div>
         </div>
-        <div className="flex-1 flex flex-col pl-2.5 pt-2.5">
-          <SidebarButton to="/transactions">
+        <div className="flex-1 flex flex-col pl-2.5 pt-2.5 pr-2.5 lg:pr-0">
+          <SidebarButton onClick={ props.closeSidebar } to="/transactions">
             <ShoppingCart className="mr-2.5"/>
             Transactions
           </SidebarButton>
-          <SidebarButton to="/expenses">
+          <SidebarButton onClick={ props.closeSidebar } to="/expenses">
             <PriceCheck className="mr-2.5"/>
             Expenses
           </SidebarButton>
-          <SidebarButton to="/goals">
+          <SidebarButton onClick={ props.closeSidebar } to="/goals">
             <Savings className="mr-2.5"/>
             Goals
           </SidebarButton>
-          <SidebarButton to="/accounts">
+          <SidebarButton onClick={ props.closeSidebar } to="/accounts">
             <AccountBalance className="mr-2.5"/>
             Accounts
           </SidebarButton>
@@ -47,6 +64,7 @@ export default function Sidebar(): JSX.Element {
         <div className="flex justify-start p-2.5 flex-col gap-2.5">
           { billingEnabled &&
             <Button
+              onClick={ props.closeSidebar }
               className="justify-start"
               to="/subscription"
               component={ RouterLink }
@@ -57,6 +75,7 @@ export default function Sidebar(): JSX.Element {
             </Button>
           }
           <Button
+            onClick={ props.closeSidebar }
             className="justify-start"
             to="/settings"
             component={ RouterLink }
@@ -66,7 +85,7 @@ export default function Sidebar(): JSX.Element {
             Settings
           </Button>
           <Button
-
+            onClick={ props.closeSidebar }
             className="justify-start"
             to="/logout"
             component={ RouterLink }

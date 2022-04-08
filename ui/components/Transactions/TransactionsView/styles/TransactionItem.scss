@@ -1,0 +1,24 @@
+.transactions-item {
+  // This is for the react-select components for changing the transaction name.
+  .transaction-select__control:not(:hover) {
+    &:not(:focus-within) {
+      border-color: transparent;
+
+      .transaction-select__indicators {
+        opacity: 0;
+      }
+    }
+  }
+
+  .transaction-select__menu {
+    z-index: 2;
+  }
+
+  .amount {
+    color: red;
+
+    &.addition {
+      color: green;
+    }
+  }
+}
