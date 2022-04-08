@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"strings"
+	"time"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
@@ -14,6 +16,7 @@ type JobRepository interface {
 	GetBankAccountsWithPendingTransactions() ([]CheckingPendingTransactionsItem, error)
 	GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error)
 	GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error)
+	GetLinksForExpiredAccounts(ctx context.Context) ([]models.Link, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -126,4 +129,26 @@ func (r *repositoryBase) GetJob(jobId string) (models.Job, error) {
 		Select(&result)
 
 	return result, errors.Wrap(err, "failed to retrieve job")
+}
+
+func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]models.Link, error) {
+	span := sentry.StartSpan(ctx, "GetLinksForExpiredAccounts")
+	defer span.Finish()
+
+	// Links should be seen as expired if the account subscription is not active for 90 days.
+	expirationCutoff := time.Now().UTC().Add(-90 * 24 * time.Hour)
+
+	var result []models.Link
+	err := j.txn.ModelContext(span.Context(), &result).
+		Join(`INNER JOIN "accounts" AS "account"`).
+		JoinOn(`"account"."account_id" = "link"."account_id"`).
+		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Where(`"account"."subscription_active_until" IS NOT NULL`).
+		Where(`"account"."subscription_active_until" < ?`, expirationCutoff).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve Plaid links for expired accounts")
+	}
+
+	return result, nil
 }

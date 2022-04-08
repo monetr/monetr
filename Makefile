@@ -290,6 +290,9 @@ webhooks:
 	$(COMPOSE) up ngrok -d
 	$(COMPOSE) restart monetr
 
+sql-shell:
+	$(COMPOSE) exec postgres psql -U postgres
+
 stop:
 	$(COMPOSE) stop
 

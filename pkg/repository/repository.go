@@ -21,6 +21,10 @@ type BaseRepository interface {
 	CreatePlaidLink(ctx context.Context, link *models.PlaidLink) error
 	CreateSpending(ctx context.Context, expense *models.Spending) error
 	CreateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error
+	// DeleteAccount removes all of the records from the database related to the current account. This action cannot be
+	// undone. Any Plaid links should be removed BEFORE calling this function.
+	DeleteAccount(ctx context.Context) error
+	DeletePlaidLink(ctx context.Context, plaidLinkId uint64) error
 	DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error
 	DeleteTransaction(ctx context.Context, bankAccountId, transactionId uint64) error
 	GetAccount(ctx context.Context) (*models.Account, error)

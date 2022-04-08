@@ -5,6 +5,7 @@ package repository
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
@@ -26,6 +27,27 @@ func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *models.Plaid
 	span.SetTag("accountId", r.AccountIdStr())
 	_, err := r.txn.ModelContext(span.Context(), link).WherePK().Update(link)
 	return errors.Wrap(err, "failed to update Plaid link")
+}
+
+func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64) error {
+	span := sentry.StartSpan(ctx, "DeletePlaidLink")
+	defer span.Finish()
+
+	_, err := r.txn.ModelContext(span.Context(), &models.Link{}).
+		Set(`"plaid_link_id" = NULL`).
+		Set(`"link_type" = ?`, models.ManualLinkType).
+		Where(`"link"."account_id" = ?`, r.AccountId()).
+		Where(`"link"."plaid_link_id" = ?`, plaidLinkId).
+		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Update()
+	if err != nil {
+		return errors.Wrap(err, "failed to clean Plaid link prior to removal")
+	}
+
+	_, err = r.txn.ModelContext(span.Context(), &models.PlaidLink{}).
+		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
+		ForceDelete()
+	return errors.Wrap(err, "failed to delete Plaid link")
 }
 
 type PlaidRepository interface {
