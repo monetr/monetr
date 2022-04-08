@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.10.9](https://github.com/monetr/monetr/compare/v0.10.8...v0.10.9) (2022-04-08)
+
+
+### Features
+
+* **security:** Improving how CSP works with deployment. ([6403fdc](https://github.com/monetr/monetr/commit/6403fdc52d569253beefc00ec59f7e8eac27a0a5))
+
+
+### Dependencies
+
+* **ui:** pin dependency @fontsource/roboto to 4.5.5 ([6f3a215](https://github.com/monetr/monetr/commit/6f3a215d1a67ed42001bf1c0125452c4ce5c0564))
+
 ### [0.10.8](https://github.com/monetr/monetr/compare/v0.10.7...v0.10.8) (2022-04-08)
 
 
