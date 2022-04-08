@@ -1,5 +1,13 @@
 # Changelog
 
+### [0.10.10](https://github.com/monetr/monetr/compare/v0.10.9...v0.10.10) (2022-04-08)
+
+
+### Bug Fixes
+
+* **security:** Fixed CSP middleware. ([f60d163](https://github.com/monetr/monetr/commit/f60d16346550c5ebc304576f2ff147d303e00ed2))
+* **ui/transactions:** Fixed request spam on transactions page. ([20fc4f1](https://github.com/monetr/monetr/commit/20fc4f1fe5086c6ec44bf78733f2a92636e54755)), closes [#852](https://github.com/monetr/monetr/issues/852)
+
 ### [0.10.9](https://github.com/monetr/monetr/compare/v0.10.8...v0.10.9) (2022-04-08)
 
 
