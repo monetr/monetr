@@ -99,4 +99,6 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 	if len(policies) > 0 {
 		ctx.Header("Content-Security-Policy", encodePolicies())
 	}
+
+	ctx.Next()
 }
