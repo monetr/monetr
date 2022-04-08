@@ -1,5 +1,17 @@
 # Changelog
 
+### [0.10.8](https://github.com/monetr/monetr/compare/v0.10.7...v0.10.8) (2022-04-08)
+
+
+### Features
+
+* **ui:** Significant improvements for mobile. ([684ec36](https://github.com/monetr/monetr/commit/684ec369da3b00a14b60917c41411c791176fece))
+
+
+### Dependencies
+
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.101.0 ([0643a48](https://github.com/monetr/monetr/commit/0643a484969956e97ce51b5b934ae2652e6a511d))
+
 ### [0.10.7](https://github.com/monetr/monetr/compare/v0.10.6...v0.10.7) (2022-04-08)
 
 
