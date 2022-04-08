@@ -101,7 +101,6 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(ctx context.Context, data []by
 }
 
 func (d DeactivateLinksHandler) DefaultSchedule() string {
-	return "0 0 * * * *"
 	// Will run once a day.
 	return "0 0 0 * * *"
 }
