@@ -16,6 +16,8 @@ const (
 
 func (c *UIController) RegisterRoutes(app *iris.Application) {
 	app.PartyFunc("/", func(p router.Party) {
+		p.Use(c.ContentSecurityPolicyMiddleware)
+
 		p.Any("/api/*", func(ctx iris.Context) {
 			ctx.Next()
 			ctx.StatusCode(http.StatusNotFound)

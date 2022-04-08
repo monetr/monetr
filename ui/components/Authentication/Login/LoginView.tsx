@@ -76,7 +76,6 @@ export default function LoginView(): JSX.Element {
             color="primary"
             disabled={ isSubmitting || (!values.password || !values.email || !disableForVerification) }
             onClick={ submitForm }
-            type="submit"
             variant="contained"
           >
             { isSubmitting && <CircularProgress

@@ -44,6 +44,6 @@ func getControllers(
 			basicPaywall,
 			smtpCommunication,
 		),
-		ui.NewUIController(),
+		ui.NewUIController(configuration),
 	}
 }

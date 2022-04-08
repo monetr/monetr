@@ -5,6 +5,12 @@ import ReactDOM from 'react-dom';
 import RelayTransport from 'relay/transport';
 import Root from 'Root';
 import reportWebVitals from './reportWebVitals';
+
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
 import './styles/styles.css';
 import './styles/index.scss';
 import * as Sentry from '@sentry/react';
