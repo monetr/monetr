@@ -133,7 +133,7 @@
     "file-loader": "6.2.0",
     "html-webpack-plugin": "5.5.0",
     "http-status-codes": "2.2.0",
-    "ini": "2.0.0",
+    "ini": "3.0.0",
     "jest": "27.5.1",
     "jest-circus": "27.5.1",
     "jest-environment-jsdom": "27.5.1",
