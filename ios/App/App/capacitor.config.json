@@ -1,0 +1,9 @@
+{
+	"appId": "com.monetr.app",
+	"appName": "monetr",
+	"webDir": "pkg/ui/static",
+	"bundledWebRuntime": false,
+	"server": {
+		"url": "http://localhost"
+	}
+}

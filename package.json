@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@capacitor/android": "^3.4.3",
+    "@capacitor/core": "3.4.3",
+    "@capacitor/ios": "3.4.3",
     "@date-io/moment": "2.13.1",
     "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
@@ -102,6 +105,7 @@
     "@babel/preset-env": "7.16.11",
     "@babel/preset-react": "7.16.7",
     "@babel/preset-typescript": "7.16.7",
+    "@capacitor/cli": "3.4.3",
     "@hot-loader/react-dom": "17.0.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.5",
     "@testing-library/jest-dom": "5.16.4",

@@ -181,7 +181,7 @@ export default function RegisterView(): JSX.Element {
            }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex justify-center w-full h-full max-h-full">
-              <div className="w-full p-10 max-w-screen-sm sm:p-0">
+              <div className="w-full p-2.5 md:p-10 max-w-screen-sm sm:p-0">
                 <CenteredLogo/>
                 <div className="w-full">
                   <div className="w-full pb-1.5 pt-1.5">
