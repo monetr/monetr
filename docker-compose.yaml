@@ -1,6 +1,6 @@
 services:
   documentation:
-    image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.2.8}
+    image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.2.9}
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     entrypoint: sh
