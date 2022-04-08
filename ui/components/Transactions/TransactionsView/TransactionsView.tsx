@@ -28,7 +28,7 @@ function TransactionsView(): JSX.Element {
   // TODO This is a temp approach, since we don't know how many transactions we have for a given bank account, we can
   //  just request transactions until we get a page that is not full. But this is not a good way to do it. If they have
   //  a total number of transactions divisible by 25 then we could continue to try to request more.
-  const hasNextPage = transactions.count() % 25 === 0;
+  const hasNextPage = transactions.count() % 25 === 0 && transactions.count() !== 0;
 
   function retrieveMoreTransactions() {
     setLoading(true);
