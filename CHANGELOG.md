@@ -1,5 +1,51 @@
 # Changelog
 
+### [0.10.7](https://github.com/monetr/monetr/compare/v0.10.6...v0.10.7) (2022-04-08)
+
+
+### Features
+
+* **jobs:** Added job to deactivate plaid links for expired accounts. ([baba144](https://github.com/monetr/monetr/commit/baba144c268d20840ade1a21281d32438cfc144c))
+* **ui:** Added infinite scrolling to transactions. ([cf1e72f](https://github.com/monetr/monetr/commit/cf1e72f116411a6cbd561c57dcfa0efd9d7c93ad)), closes [#89](https://github.com/monetr/monetr/issues/89)
+
+
+### Bug Fixes
+
+* **jobs:** Fixed cron job schedule for link deactivation. ([85d1cc0](https://github.com/monetr/monetr/commit/85d1cc0475f4fe2c32d4821e82aa6c981f7be237))
+* **ui:** Fixed Sentry crash report showing when not logged in. ([3e2fcd8](https://github.com/monetr/monetr/commit/3e2fcd8fc5bd55849d857b9d4c18907d1d64778b))
+
+
+### Miscellaneous
+
+* Tweaking makefile and renovate. ([3c34d2b](https://github.com/monetr/monetr/commit/3c34d2bf512ead9073362eb368e80d71130f0947))
+
+
+### Dependencies
+
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.100.0 ([bd70c37](https://github.com/monetr/monetr/commit/bd70c3737710c3b99d4c49cdb015fc1b6f22573e))
+* **renovate:** update actions/cache action to v3 ([fe890dc](https://github.com/monetr/monetr/commit/fe890dcbf94ebb8e724a21927e80b18faa234c3d))
+* **renovate:** update actions/checkout action to v3 ([741ec72](https://github.com/monetr/monetr/commit/741ec72e3a18827c89ec40c8e1231269b093e05a))
+* **renovate:** update actions/download-artifact action to v3 ([5070dfa](https://github.com/monetr/monetr/commit/5070dfa412cf4191cb30798f136eef3733863e81))
+* **renovate:** update actions/upload-artifact action to v3 ([ab0ab63](https://github.com/monetr/monetr/commit/ab0ab631807b7692edd71aa82682c64bb76df3cd))
+* **renovate:** update codecov/codecov-action action to v3 ([ca38bcc](https://github.com/monetr/monetr/commit/ca38bccf4f2439f7e060273cbc5121dc7f716195))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.3.0 ([2d28738](https://github.com/monetr/monetr/commit/2d28738231ca44061f01463b87b3f46b33586426))
+* **ui:** update dependency @emotion/react to v11.9.0 ([64c3aed](https://github.com/monetr/monetr/commit/64c3aed7f21943441956f39ecfa6e3b36d703f4c))
+* **ui:** update dependency @types/react to v17.0.44 ([8c0f983](https://github.com/monetr/monetr/commit/8c0f983e387313b4d4a5abb499e471c61c3e6067))
+* **ui:** update dependency @types/react-dom to v17.0.15 ([05257a6](https://github.com/monetr/monetr/commit/05257a6c8523068b810707fa989ed0129189e4bc))
+* **ui:** update dependency css-what to v6.1.0 ([73c2733](https://github.com/monetr/monetr/commit/73c273319231a85d5e7302f17c7cb668923f8552))
+* **ui:** update dependency eslint-plugin-import to v2.26.0 ([85835b0](https://github.com/monetr/monetr/commit/85835b0657e7077741505de98d2998d11cbbef3e))
+* **ui:** update dependency eslint-plugin-testing-library to v5.2.1 ([e3aeeaf](https://github.com/monetr/monetr/commit/e3aeeaf8144ebead3558bc5fd56b6fbfb62271be))
+* **ui:** update dependency react-router-dom to v6.3.0 ([7656aa9](https://github.com/monetr/monetr/commit/7656aa98977ea13958f76094fef10beda4017ab7))
+* **ui:** update dependency sass to v1.49.11 ([da412d5](https://github.com/monetr/monetr/commit/da412d5f32b8845ad10c36844857aaeb9deb1de7))
+* **ui:** update dependency sass to v1.50.0 ([6783e12](https://github.com/monetr/monetr/commit/6783e12dc465afbae2cf494ad50ec6c8a8d34dec))
+* **ui:** update dependency semver to v7.3.6 ([69973c4](https://github.com/monetr/monetr/commit/69973c4c402705a27039ea52f3acb472db5ca84a))
+* **ui:** update dependency webpack to v5.71.0 ([80c8522](https://github.com/monetr/monetr/commit/80c8522efc884cdb4742fe9c382fd26eb8d911cc))
+* **ui:** update dependency webpack to v5.72.0 ([f7e3067](https://github.com/monetr/monetr/commit/f7e3067bd1db870a62067a7ddb53d8f95126e74e))
+* **ui:** update dependency webpack-dev-server to v4.8.1 ([b43c6c9](https://github.com/monetr/monetr/commit/b43c6c93840b70b0b2c6f5ad8f37b3a67474a432))
+* **ui:** update material-ui monorepo ([84b193a](https://github.com/monetr/monetr/commit/84b193acffccbce7ba7b80c10cd548ef5858137e))
+* **ui:** update react monorepo ([2c84936](https://github.com/monetr/monetr/commit/2c84936d91ea8526da30bb1875edbadd45996409))
+* **ui:** update typescript-eslint monorepo to v5.18.0 ([03d9b26](https://github.com/monetr/monetr/commit/03d9b2625fb8e11065666648d446a7321a0a335c))
+
 ### [0.10.6](https://github.com/monetr/monetr/compare/v0.10.5...v0.10.6) (2022-04-06)
 
 
