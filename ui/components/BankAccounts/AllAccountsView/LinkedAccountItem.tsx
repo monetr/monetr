@@ -5,9 +5,10 @@ import PlaidIcon from 'components/Plaid/PlaidIcon';
 import { Map } from 'immutable';
 import BankAccount from 'models/BankAccount';
 import Link, { LinkStatus } from 'models/Link';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import RemoveLinkConfirmationDialog from 'components/BankAccounts/AllAccountsView/RemoveLinkConfirmationDialog';
 import { UpdatePlaidAccountDialog } from 'components/BankAccounts/AllAccountsView/UpdatePlaidAccountDialog';
+import request from 'shared/util/request';
 
 interface LinkedAccountItemProps {
   link: Link;
@@ -20,6 +21,19 @@ enum DialogOpen {
 }
 
 export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.Element {
+  const [logoB64, setLogo] = useState<string>(null);
+
+  useEffect(() => {
+    if (props.link.plaidInstitutionId && !logoB64) {
+      request().get(`/institutions/${ props.link.plaidInstitutionId }`)
+        .then(result => {
+          if (result.data.logo) {
+            setLogo(result.data.logo);
+          }
+        });
+    }
+  }, [logoB64, props.link.plaidInstitutionId])
+
   const [menuAnchor, setMenuAnchor] = useState<Element | null>();
   const [dialog, setDialog] = useState<DialogOpen | null>();
 
@@ -99,10 +113,11 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
         <ul>
           <ListSubheader className="pt-2 pl-0 pr-2 bg-transparent">
             <div className="flex pb-2">
-              <div className="items-center self-center flex-auto">
-                <Typography className="h-full ml-6 text-xl font-semibold">
-                  { props.link.getName() }
-                </Typography>
+              <div className="flex flex-row self-center flex-auto h-full items-center pl-2.5">
+                { logoB64 && <img className="max-h-8 col-span-4" src={ `data:image/png;base64,${ logoB64 }` }/> }
+                <span className="h-full ml-2.5 text-xl font-semibold align-middle">
+                    { props.link.getName() }
+                  </span>
               </div>
               <PlaidInfoMaybe/>
               <IconButton onClick={ openMenu }>
@@ -153,5 +168,4 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
       </li>
     </Fragment>
   );
-
 }

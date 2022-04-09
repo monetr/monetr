@@ -66,7 +66,6 @@ export default function LoginView(): JSX.Element {
     isSubmitting: boolean,
     disableForVerification: boolean,
     values: LoginValues,
-    submitForm: () => Promise<any>,
   ): JSX.Element {
     return (
       <div>
@@ -75,7 +74,7 @@ export default function LoginView(): JSX.Element {
             className="w-full"
             color="primary"
             disabled={ isSubmitting || (!values.password || !values.email || !disableForVerification) }
-            onClick={ submitForm }
+            type="submit"
             variant="contained"
           >
             { isSubmitting && <CircularProgress
@@ -183,7 +182,7 @@ export default function LoginView(): JSX.Element {
                   show={ verifyLogin }
                   onVerify={ setCaptcha }
                 />
-                { renderBottomButtons(isSubmitting, disableForVerification, values, submitForm) }
+                { renderBottomButtons(isSubmitting, disableForVerification, values) }
               </div>
             </div>
           </form>

@@ -43,7 +43,7 @@ func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionI
 
 	{ // Check to see if the institution is in the cache.
 		var institution plaid.Institution
-		if err := p.caching.GetEz(span.Context(), p.cacheKey(institutionId), institution); err == nil && institution.InstitutionId != "" {
+		if err := p.caching.GetEz(span.Context(), p.cacheKey(institutionId), &institution); err == nil && institution.InstitutionId != "" {
 			return &institution, nil
 		}
 	}

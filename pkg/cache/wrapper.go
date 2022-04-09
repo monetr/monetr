@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Cache interface {
@@ -108,7 +108,7 @@ func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) 
 
 	span.Description = key
 
-	data, err := msgpack.Marshal(object)
+	data, err := json.Marshal(object)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal item to be cached")
 	}
@@ -122,7 +122,7 @@ func (r *redisCache) SetEzTTL(ctx context.Context, key string, object interface{
 
 	span.Description = key
 
-	data, err := msgpack.Marshal(object)
+	data, err := json.Marshal(object)
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal item to be cached")
 	}
@@ -184,7 +184,7 @@ func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) 
 		return nil
 	}
 
-	if err = msgpack.Unmarshal(data, output); err != nil {
+	if err = json.Unmarshal(data, output); err != nil {
 		span.Status = sentry.SpanStatusDataLoss
 		return errors.Wrap(err, "failed to unmarshal from cache")
 	}
