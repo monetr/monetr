@@ -31,6 +31,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>http://localhost/documentation/api/resources/institutions/</loc>
+         <lastmod>2022-04-09</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>http://localhost/documentation/api/resources/links/</loc>
          <lastmod>2022-04-09</lastmod>
          <changefreq>daily</changefreq>
