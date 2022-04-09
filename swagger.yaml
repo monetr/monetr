@@ -549,39 +549,6 @@ definitions:
         example: "2021-11-07T12:11:10Z"
         type: string
     type: object
-  swag.InstitutionPlaidIncident:
-    properties:
-      end:
-        type: string
-      start:
-        type: string
-      title:
-        type: string
-    type: object
-  swag.InstitutionResponse:
-    properties:
-      logo:
-        type: string
-      name:
-        type: string
-      primaryColor:
-        type: string
-      status:
-        $ref: '#/definitions/swag.InstitutionStatusResponse'
-      url:
-        type: string
-    type: object
-  swag.InstitutionStatusResponse:
-    properties:
-      login:
-        type: boolean
-      plaidIncidents:
-        items:
-          $ref: '#/definitions/swag.InstitutionPlaidIncident'
-        type: array
-      transactions:
-        type: boolean
-    type: object
   swag.LinkResponse:
     properties:
       createdAt:
@@ -2473,10 +2440,6 @@ paths:
         required: true
         type: string
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/swag.InstitutionResponse'
         "402":
           description: Payment Required
           schema:

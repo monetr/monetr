@@ -1406,12 +1406,6 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/swag.InstitutionResponse"
-                        }
-                    },
                     "402": {
                         "description": "Payment Required",
                         "schema": {
@@ -2728,57 +2722,6 @@ const docTemplate = `{
                     "description": "The current time on the server that handled the request. This is always in UTC.",
                     "type": "string",
                     "example": "2021-11-07T12:11:10Z"
-                }
-            }
-        },
-        "swag.InstitutionPlaidIncident": {
-            "type": "object",
-            "properties": {
-                "end": {
-                    "type": "string"
-                },
-                "start": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "swag.InstitutionResponse": {
-            "type": "object",
-            "properties": {
-                "logo": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "primaryColor": {
-                    "type": "string"
-                },
-                "status": {
-                    "$ref": "#/definitions/swag.InstitutionStatusResponse"
-                },
-                "url": {
-                    "type": "string"
-                }
-            }
-        },
-        "swag.InstitutionStatusResponse": {
-            "type": "object",
-            "properties": {
-                "login": {
-                    "type": "boolean"
-                },
-                "plaidIncidents": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/swag.InstitutionPlaidIncident"
-                    }
-                },
-                "transactions": {
-                    "type": "boolean"
                 }
             }
         },
