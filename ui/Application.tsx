@@ -24,7 +24,6 @@ const Application = (): JSX.Element => {
   // we can kick that process off here at the highest level of the application.
   useEffect(() => {
     if (!isReady) {
-      const transaction = Sentry.startTransaction({ name: 'Bootstrapping Monetr' });
       bootstrapApplication()
         .then(() => bootstrapLogin())
         .catch(error => {
@@ -32,7 +31,6 @@ const Application = (): JSX.Element => {
         })
         .finally(() => {
           setLoading(false);
-          transaction.finish();
         });
     }
   }, [bootstrapApplication, bootstrapLogin, isReady]);

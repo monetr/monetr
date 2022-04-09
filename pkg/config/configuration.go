@@ -469,6 +469,8 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("ReCAPTCHA.VerifyLogin", true)
 	v.SetDefault("ReCAPTCHA.VerifyRegister", true)
 	v.SetDefault("ReCAPTCHA.VerifyForgotPassword", true)
+	v.SetDefault("Sentry.SampleRate", 1.0)
+	v.SetDefault("Sentry.TraceSampleRate", 1.0)
 	v.SetDefault("Server.Cookies.Name", "M-Token")
 	v.SetDefault("Server.Cookies.Secure", true)
 	v.SetDefault("Server.Cookies.SameSiteStrict", true)

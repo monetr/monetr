@@ -1,17 +1,22 @@
 import { BaseTransport } from '@sentry/browser/dist/transports';
-import { API, eventToSentryRequest, sessionToSentryRequest } from '@sentry/core';
+import { APIDetails, eventToSentryRequest, sessionToSentryRequest } from '@sentry/core';
 import {
   Event,
-  Outcome,
   Response as SentryResponse,
   SentryRequest,
   SentryRequestType,
   Session,
   SessionAggregates,
   TransportOptions,
-  Status,
 } from '@sentry/types';
-import { SyncPromise, logger, SentryError } from '@sentry/utils';
+import {
+  SyncPromise,
+  logger,
+  SentryError,
+  eventStatusFromHttpCode,
+  updateRateLimits,
+  isRateLimited
+} from '@sentry/utils';
 import axios, { AxiosResponse } from 'axios';
 
 interface SentryRequestExtended extends SentryRequest {
@@ -32,11 +37,11 @@ export default class RelayTransport extends BaseTransport {
     return this._sendRequest(this._sessionToSentryRequest(session, this._api), session);
   }
 
-  private _sessionToSentryRequest(session: Session | SessionAggregates, api: API): SentryRequestExtended {
+  private _sessionToSentryRequest(session: Session | SessionAggregates, api: APIDetails): SentryRequestExtended {
     return this._extendSentryRequest(sessionToSentryRequest(session, api));
   }
 
-  private _eventToSentryRequest(event: Event, api: API): SentryRequestExtended {
+  private _eventToSentryRequest(event: Event, api: APIDetails): SentryRequestExtended {
     return this._extendSentryRequest(eventToSentryRequest(event, api));
   }
 
@@ -57,11 +62,11 @@ export default class RelayTransport extends BaseTransport {
     }
   }
 
-  private _sendRequest(sentryRequest: SentryRequestExtended, originalPayload: Event | Session | SessionAggregates): PromiseLike<SentryResponse> {
+  _sendRequest(sentryRequest: SentryRequestExtended, originalPayload: Event | Session | SessionAggregates): PromiseLike<SentryResponse> {
     // Check if the current request type is being rate limited.
-    if (this._isRateLimited(sentryRequest.type)) {
+    if (isRateLimited(this._rateLimits, sentryRequest.type)) {
       // If it is then we want to record a lost event with the rate limit backoff outcome for this request type.
-      this.recordLostEvent(Outcome.RateLimitBackoff, sentryRequest.type);
+      this.recordLostEvent('ratelimit_backoff', sentryRequest.type);
 
       // Then return a rejected promise to the caller indicating that this request will not be sent.
       return Promise.reject({
@@ -97,9 +102,9 @@ export default class RelayTransport extends BaseTransport {
       .then(undefined, reason => {
         // It's either buffer rejection or any other xhr/fetch error, which are treated as NetworkError.
         if (reason instanceof SentryError) {
-          this.recordLostEvent(Outcome.QueueOverflow, sentryRequest.type);
+          this.recordLostEvent('queue_overflow', sentryRequest.type);
         } else {
-          this.recordLostEvent(Outcome.NetworkError, sentryRequest.type);
+          this.recordLostEvent('network_error', sentryRequest.type);
         }
         throw reason;
       });
@@ -112,17 +117,17 @@ export default class RelayTransport extends BaseTransport {
     resolve: (value?: SentryResponse | PromiseLike<SentryResponse> | null | undefined) => void,
     reject: (reason?: unknown) => void,
   ): void {
-    const status = Status.fromHttpCode(response.status);
+    const status = eventStatusFromHttpCode(response.status);
 
     /**
      * "The name is case-insensitive."
      * https://developer.mozilla.org/en-US/docs/Web/API/Headers/get
      */
-    const limited = this._handleRateLimit(headers);
-    if (limited)
+    this._rateLimits = updateRateLimits(this._rateLimits, headers);
+    if (isRateLimited(this._rateLimits, requestType))
       logger.warn(`Too many ${ requestType } requests, backing off until: ${ this._disabledUntil(requestType) }`);
 
-    if (status === Status.Success) {
+    if (status === 'success') {
       resolve({ status });
       return;
     }

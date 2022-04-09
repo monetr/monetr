@@ -33,5 +33,14 @@ if [[ ! -z "${MONETR_CAPTCHA_PUBLIC_KEY}" ]] && [[ ! -z "${MONETR_CAPTCHA_PRIVAT
   export MONETR_CAPTCHA_ENABLED="true";
 fi
 
+if [[ ! -z "${MONETR_SENTRY_DSN}" ]]; then
+  echo "[wrapper] Sentry DSN detected, enabling...";
+  export MONETR_SENTRY_ENABLED="true";
+fi
+
+# Sometimes the old process does not get killed properly. This should do it.
+pkill monetr;
+pkill dlv;
+
 # Execute the command with the new environment variables.
 /go/bin/dlv exec --continue --accept-multiclient --listen=:2345 --headless=true --api-version=2 /usr/bin/monetr -- serve --migrate=true;
