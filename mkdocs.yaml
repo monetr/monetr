@@ -71,6 +71,7 @@ nav:
               - Bank Accounts: api/resources/bank_accounts.md
               - Funding Schedules: api/resources/funding_schedules.md
               - Links: api/resources/links.md
+              - Institutions: api/resources/institutions.md
               - Spending: api/resources/spending.md
               - Transactions: api/resources/transactions.md
               - User: api/resources/user.md

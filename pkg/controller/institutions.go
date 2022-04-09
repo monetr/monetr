@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/kataras/iris/v12"
-	"github.com/monetr/monetr/pkg/swag"
 )
 
 func (c *Controller) institutionsController(p iris.Party) {
@@ -19,7 +18,6 @@ func (c *Controller) institutionsController(p iris.Party) {
 // @Security ApiKeyAuth
 // @Param institutionId path string true "Institution ID"
 // @Router /institutions/{institutionId} [get]
-// @Success 200 {object} swag.InstitutionResponse
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getInstitutionDetails(ctx iris.Context) {
@@ -35,6 +33,5 @@ func (c *Controller) getInstitutionDetails(ctx iris.Context) {
 		return
 	}
 
-	response := swag.NewInstitutionResponse(plaidInstitution)
-	ctx.JSON(response)
+	ctx.JSON(plaidInstitution)
 }

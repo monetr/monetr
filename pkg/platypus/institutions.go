@@ -12,12 +12,36 @@ import (
 )
 
 type PlaidInstitutions interface {
-	GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error)
+	GetInstitution(ctx context.Context, institutionId string) (PlaidInstitution, error)
 }
 
 var (
 	_ PlaidInstitutions = &plaidInstitutionsBase{}
 )
+
+type PlaidInstitution struct {
+	InstitutionId string                  `json:"institutionId"`
+	Name          string                  `json:"name"`
+	Products      []plaid.Products        `json:"products"`
+	CountryCodes  []plaid.CountryCode     `json:"countryCodes"`
+	URL           string                  `json:"url,omitempty"`
+	PrimaryColor  string                  `json:"primaryColor,omitempty"`
+	Logo          string                  `json:"logo,omitempty"`
+	Status        plaid.InstitutionStatus `json:"status"`
+}
+
+func NewPlaidInstitution(input plaid.Institution) PlaidInstitution {
+	return PlaidInstitution{
+		InstitutionId: input.GetInstitutionId(),
+		Name:          input.GetName(),
+		Products:      input.GetProducts(),
+		CountryCodes:  input.GetCountryCodes(),
+		URL:           input.GetUrl(),
+		PrimaryColor:  input.GetPrimaryColor(),
+		Logo:          input.GetLogo(),
+		Status:        input.GetStatus(),
+	}
+}
 
 type plaidInstitutionsBase struct {
 	log      *logrus.Entry
@@ -33,7 +57,7 @@ func NewPlaidInstitutionWrapper(log *logrus.Entry, platypus Platypus, caching ca
 	}
 }
 
-func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error) {
+func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionId string) (PlaidInstitution, error) {
 	span := sentry.StartSpan(ctx, "GetInstitution")
 	defer span.Finish()
 
@@ -41,23 +65,25 @@ func (p *plaidInstitutionsBase) GetInstitution(ctx context.Context, institutionI
 		"institutionId": institutionId,
 	}
 
+	var institution PlaidInstitution
 	{ // Check to see if the institution is in the cache.
-		var institution plaid.Institution
 		if err := p.caching.GetEz(span.Context(), p.cacheKey(institutionId), &institution); err == nil && institution.InstitutionId != "" {
-			return &institution, nil
+			return institution, nil
 		}
 	}
 
 	result, err := p.platypus.GetInstitution(span.Context(), institutionId)
 	if err != nil {
-		return nil, err
+		return institution, err
 	}
 
-	if err = p.caching.SetEzTTL(span.Context(), p.cacheKey(institutionId), result, 30*time.Minute); err != nil {
+	institution = NewPlaidInstitution(*result)
+
+	if err = p.caching.SetEzTTL(span.Context(), p.cacheKey(institutionId), institution, 30*time.Minute); err != nil {
 		p.log.WithField("institutionId", institutionId).WithError(err).Warn("failed to cache institution details")
 	}
 
-	return result, nil
+	return institution, nil
 }
 
 func (p *plaidInstitutionsBase) cacheKey(institutionId string) string {
