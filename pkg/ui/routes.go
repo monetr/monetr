@@ -16,8 +16,6 @@ const (
 
 func (c *UIController) RegisterRoutes(app *iris.Application) {
 	app.PartyFunc("/", func(p router.Party) {
-		p.Use(c.ContentSecurityPolicyMiddleware)
-
 		p.Any("/api/*", func(ctx iris.Context) {
 			ctx.Next()
 			ctx.StatusCode(http.StatusNotFound)
@@ -41,6 +39,7 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 		app.Get("/*", func(ctx iris.Context) {
 			ctx.Header("Expires", time.Now().Add(24*time.Hour).Truncate(time.Hour).Format(http.TimeFormat))
 			fileHandler(ctx)
+			c.ContentSecurityPolicyMiddleware(ctx)
 		})
 	})
 }
