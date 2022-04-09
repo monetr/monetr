@@ -1,5 +1,18 @@
 # Changelog
 
+### [0.10.11](https://github.com/monetr/monetr/compare/v0.10.10...v0.10.11) (2022-04-09)
+
+
+### Features
+
+* **ui:** Added bank logos to all accounts view. ([47c298b](https://github.com/monetr/monetr/commit/47c298b9f056bffcbfcc163219e3d53b3441bdc0))
+
+
+### Bug Fixes
+
+* **institutions:** Fixed issue introduced by institution change. ([f90872f](https://github.com/monetr/monetr/commit/f90872fc45782bf50f1f49cf9599fdf1aa45da70))
+* **security:** Trying to get CSP headers working properly. ([af2f5bc](https://github.com/monetr/monetr/commit/af2f5bc772fa0ac09e94bda27cce0e8f8c659f75))
+
 ### [0.10.10](https://github.com/monetr/monetr/compare/v0.10.9...v0.10.10) (2022-04-08)
 
 
