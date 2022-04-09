@@ -28,5 +28,10 @@ if [[ ! -z "${MONETR_STRIPE_API_KEY}" ]] && \
   export MONETR_STRIPE_WEBHOOKS_DOMAIN=${WEBHOOKS_DOMAIN};
 fi
 
+if [[ ! -z "${MONETR_CAPTCHA_PUBLIC_KEY}" ]] && [[ ! -z "${MONETR_CAPTCHA_PRIVATE_KEY}" ]]; then
+  echo "[wrapper] ReCAPTCHA credentials detected, requiring verification...";
+  export MONETR_CAPTCHA_ENABLED="true";
+fi
+
 # Execute the command with the new environment variables.
 /go/bin/dlv exec --continue --accept-multiclient --listen=:2345 --headless=true --api-version=2 /usr/bin/monetr -- serve --migrate=true;
