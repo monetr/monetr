@@ -3,8 +3,10 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"strings"
+	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/go-pg/pg/v10/types"
 	"github.com/nleeper/goment"
@@ -84,4 +86,8 @@ func (r *Rule) ScanValue(rd types.Reader, n int) error {
 	r.RRule = *rule
 
 	return nil
+}
+
+func (r *Rule) String() string {
+	return fmt.Sprintf("%s <%s>", r.RRule.After(time.Now(), false), r.RRule.String())
 }

@@ -1,13 +1,14 @@
 package controller
 
 import (
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/monetr/monetr/pkg/models"
-	"net/http"
-	"strings"
-	"time"
 )
 
 // @tag.name Spending
@@ -158,6 +159,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		account.Timezone,
 		fundingSchedule.NextOccurrence,
 		fundingSchedule.Rule,
+		time.Now(),
 	); err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
@@ -265,6 +267,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 			account.Timezone,
 			fundingSchedule.NextOccurrence,
 			fundingSchedule.Rule,
+			time.Now(),
 		); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 			return
@@ -299,6 +302,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 			account.Timezone,
 			fundingSchedule.NextOccurrence,
 			fundingSchedule.Rule,
+			time.Now(),
 		); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 			return
@@ -435,6 +439,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 			account.Timezone,
 			fundingSchedule.NextOccurrence,
 			fundingSchedule.Rule,
+			time.Now(),
 		); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
 			return

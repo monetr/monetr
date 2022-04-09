@@ -251,6 +251,9 @@ else
 endif
 develop: $(NODE_MODULES)
 	$(COMPOSE) up --wait --remove-orphans
+ifdef NGROK_AUTH # If the developer has an NGROK_AUTH token specified, then bring up webhooks right away too.
+	$(MAKE) webhooks
+endif
 	$(MAKE) development-info
 
 development-info:

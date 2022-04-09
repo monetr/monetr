@@ -43,6 +43,14 @@ type Spending struct {
 	DateCreated            time.Time        `json:"dateCreated" pg:"date_created,notnull"`
 }
 
+func (e Spending) GetIsStale(now time.Time) bool {
+	return e.NextRecurrence.Before(now)
+}
+
+func (e Spending) GetIsPaused() bool {
+	return e.IsPaused
+}
+
 func (e Spending) GetProgressAmount() int64 {
 	switch e.SpendingType {
 	case SpendingTypeGoal:
@@ -54,11 +62,16 @@ func (e Spending) GetProgressAmount() int64 {
 	}
 }
 
+// CalculateNextContribution will take the provided details about the next contribution's date and frequency and
+// determine how much will need to be allocated on that day to this spending object. This is to the best of my knowledge
+// a "pure" function, it should produce the same results given the same inputs every single time. As such it must be
+// provided things like "now".
 func (e *Spending) CalculateNextContribution(
 	ctx context.Context,
 	accountTimezone string,
 	nextContributionDate time.Time,
 	nextContributionRule *Rule,
+	now time.Time,
 ) error {
 	span := sentry.StartSpan(ctx, "CalculateNextContribution")
 	defer span.Finish()
@@ -87,38 +100,83 @@ func (e *Spending) CalculateNextContribution(
 		e.NextContributionAmount = 0
 	}
 
+	// Always cast to the timezone, this way if the timezone changes (like crossing DST) we make sure we have the
+	// correct midnight value.
 	nextDueDate := util.MidnightInLocal(e.NextRecurrence, timezone)
-	if time.Now().After(nextDueDate) && e.RecurrenceRule != nil {
-		e.LastRecurrence = &nextDueDate
-		e.NextRecurrence = util.MidnightInLocal(e.RecurrenceRule.After(nextDueDate, false), timezone)
-		nextDueDate = util.MidnightInLocal(e.NextRecurrence, timezone)
+
+	if e.RecurrenceRule != nil {
+		// This will trick RRule into calculating the "after" based on the current next due date, so the next one will
+		// be relative to the current one.
+		e.RecurrenceRule.DTStart(nextDueDate)
 	}
 
-	needed := int64(math.Max(float64(e.TargetAmount-progressAmount), 0))
+	if now.After(nextDueDate) && e.RecurrenceRule != nil {
+		// Bump the last time this spending object recurred to the "nextDueDate" which should now be in the past.
+		e.LastRecurrence = &nextDueDate
+		// Calculate the next time this spending object will need to have a full balance.
+		e.NextRecurrence = util.MidnightInLocal(
+			e.RecurrenceRule.After(nextDueDate, false),
+			timezone, // Make sure we calculate this in the account's timezone.
+		)
+		nextDueDate = e.NextRecurrence
+	}
 
-	// If the next time we would contribute to this expense is after the next time the expense is due, then the expense
-	// has fallen behind. Mark it as behind and set the contribution to be the difference.
+	// This is just to make absolutely sure that we are working in the user's timezone and not something else.
+	nowInTimezone := now.In(timezone)
+
+	// Keep track of how much we need for a single recurrence of the expense.
+	targetAmount := e.TargetAmount
+
+	// Make sure we calculate our next contribution relative to the next contribution date. This will make sure that the
+	// RRule library does not do anything with the hours, minutes or seconds that can throw of calculations.
+	nextContributionRule.DTStart(nextContributionDate)
+
+	// If we are a recurring expense then check to see if it recurs more frequently than we get funding for it.
+	if e.RecurrenceRule != nil {
+		// Start with the next contribution date.
+		subsequentContributionDate := nextContributionDate
+
+		// If the next time we need this expense ready is not before the next contribution date (could be equal to the
+		// next contribution date) then look ahead one more contribution.
+		if !e.NextRecurrence.Before(nextContributionDate) {
+			subsequentContributionDate = nextContributionRule.After(nextContributionDate, false)
+		}
+		//subsequentContributionDate := nextContributionRule.After(nextContributionDate, false)
+		// Then see how many times this expense is due between now and then.
+		numberOfTimesNeededBeforeNextContribution := len(e.RecurrenceRule.Between(nowInTimezone, subsequentContributionDate, false))
+		// If it is due at least once then that means we need to modify our target amount for the next contribution, so
+		// we can over-allocate.
+		if numberOfTimesNeededBeforeNextContribution > 0 {
+			targetAmount *= int64(numberOfTimesNeededBeforeNextContribution)
+		}
+	}
+
+	// This is just how much we need to meet our target.
+	needed := int64(math.Max(float64(targetAmount-progressAmount), 0))
+
 	if nextContributionDate.After(nextDueDate) {
+		// If the next time we would contribute to this expense is after the next time the expense is due, then the
+		// expense has fallen behind. Mark it as behind and set the contribution to be the difference.
+		// This might over allocate towards the expense in some scenarios where it believes it is behind when it is not.
 		e.NextContributionAmount = needed
-		e.IsBehind = progressAmount < e.TargetAmount
+		e.IsBehind = progressAmount < targetAmount
 		return nil
 	} else if nextContributionDate.Equal(nextDueDate) {
 		// If the next time we would contribute is the same day it's due, this is okay. The user could change the due
-		// date if they want a bit of a buffer and we would plan it differently. But we don't want to consider this
+		// date if they want a bit of a buffer, and we would plan it differently. But we don't want to consider this
 		// "behind".
 		e.IsBehind = false
 		e.NextContributionAmount = needed
 		return nil
-	} else if progressAmount >= e.TargetAmount {
+	} else if progressAmount >= targetAmount {
 		e.IsBehind = false
 	} else {
 		// Fix weird edge case where this isn't being unset.
 		e.IsBehind = false
 	}
 
-	// TODO Handle expenses that recur more frequently than they are funded.
-	nowInTimezone := time.Now().In(timezone)
-	nextContributionRule.DTStart(nextContributionDate)
+	// Count the number of times the contribution rule will happen before the next time we are due. We can then divide
+	// the amount needed by the number of times we will have a chance to contribute.
 	numberOfContributions := len(nextContributionRule.Between(nowInTimezone, nextDueDate, false))
 
 	if numberOfContributions == 0 {

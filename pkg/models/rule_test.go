@@ -16,3 +16,12 @@ func TestNewRule(t *testing.T) {
 		assert.Equal(t, time.Date(2022, 4, 15, 0, 0, 0, 0, time.UTC), nextRecurrence, "next recurrence should be equal")
 	})
 }
+
+func TestRuleString(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		input := "FREQ=MONTHLY;BYMONTHDAY=15,-1"
+		rule, err := NewRule(input)
+		assert.NoError(t, err, "must be able to parse semi-monthly rule")
+		assert.NotEmpty(t, rule.String(), "should produce a string")
+	})
+}

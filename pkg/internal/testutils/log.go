@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"sort"
+	"strings"
 	"sync"
 	"testing"
 
@@ -105,4 +106,14 @@ func GetTestLog(t *testing.T) (*logrus.Entry, *test.Hook) {
 func GetLog(t *testing.T) *logrus.Entry {
 	log, _ := GetTestLog(t)
 	return log
+}
+
+func MustHaveLogMessage(t *testing.T, hook *test.Hook, message string) {
+	for _, entry := range hook.AllEntries() {
+		if strings.EqualFold(entry.Message, message) {
+			return
+		}
+	}
+
+	t.Fatalf("log message was not sent during test: %s", message)
 }

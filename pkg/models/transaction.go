@@ -1,7 +1,11 @@
 package models
 
 import (
+	"context"
 	"time"
+
+	"github.com/getsentry/sentry-go"
+	"github.com/pkg/errors"
 )
 
 type Transaction struct {
@@ -36,4 +40,48 @@ type Transaction struct {
 
 func (t Transaction) IsAddition() bool {
 	return t.Amount < 0 // Deposits will show as negative amounts.
+}
+
+// AddSpendingToTransaction will take the provided spending object and deduct as much as possible from this transaction
+// from that spending object. It does not change the spendingId on the transaction, it simply performs the deductions.
+func (t *Transaction) AddSpendingToTransaction(ctx context.Context, spending *Spending, account *Account) error {
+	span := sentry.StartSpan(ctx, "AddSpendingToTransaction")
+	defer span.Finish()
+
+	var allocationAmount int64
+	// If the amount allocated to the spending we are adding to the transaction is less than the amount of the
+	// transaction then we can only do a partial allocation.
+	if spending.CurrentAmount < t.Amount {
+		allocationAmount = spending.CurrentAmount
+	} else {
+		// Otherwise, we will allocate the entire transaction amount from the spending.
+		allocationAmount = t.Amount
+	}
+
+	// Subtract the amount we are taking from the spending from it's current amount.
+	spending.CurrentAmount -= allocationAmount
+
+	switch spending.SpendingType {
+	case SpendingTypeExpense:
+	// We don't need to do anything special if it's an expense, at least not right now.
+	case SpendingTypeGoal:
+		// Goals also keep track of how much has been spent, so increment the used amount.
+		spending.UsedAmount += allocationAmount
+	}
+
+	// Keep track of how much we took from the spending in case things change later.
+	t.SpendingAmount = &allocationAmount
+
+	// Now that we have deducted the amount we need from the spending we need to recalculate it's next contribution.
+	if err := spending.CalculateNextContribution(
+		span.Context(),
+		account.Timezone,
+		spending.FundingSchedule.NextOccurrence,
+		spending.FundingSchedule.Rule,
+		time.Now(),
+	); err != nil {
+		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
+	}
+
+	return nil
 }

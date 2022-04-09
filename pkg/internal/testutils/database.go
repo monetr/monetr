@@ -198,3 +198,25 @@ func GetPgDatabase(t *testing.T, databaseOptions ...DatabaseOption) *pg.DB {
 
 	return databaseToReturn
 }
+
+func MustInsert[T any](t *testing.T, model T) T {
+	db := GetPgDatabase(t)
+	result, err := db.Model(&model).Insert(&model)
+	require.NoError(t, err, "must insert data")
+	require.GreaterOrEqual(t, 1, result.RowsAffected(), "must insert at least one row")
+	return model
+}
+
+func MustRetrieve[T any](t *testing.T, model T) T {
+	var result T
+	db := GetPgDatabase(t)
+	err := db.Model(&model).WherePK().Select(&result)
+	require.NoError(t, err, "must retrieve data")
+	return result
+}
+
+func Must[T any, A any](t *testing.T, generalFunction func(arg A) (T, error), arg A) T {
+	result, err := generalFunction(arg)
+	require.NoError(t, err, "function must succeed without an error")
+	return result
+}

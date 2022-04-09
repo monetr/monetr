@@ -17,6 +17,7 @@ type JobRepository interface {
 	GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error)
 	GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error)
 	GetLinksForExpiredAccounts(ctx context.Context) ([]models.Link, error)
+	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -35,6 +36,11 @@ type PlaidLinksForAccount struct {
 
 	AccountId uint64   `pg:"account_id"`
 	LinkIds   []uint64 `pg:"link_ids,type:bigint[]"`
+}
+
+type BankAccountWithStaleSpendingItem struct {
+	AccountId     uint64 `pg:"account_id"`
+	BankAccountId uint64 `pg:"bank_account_id"`
 }
 
 type jobRepository struct {
@@ -151,4 +157,29 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]model
 	}
 
 	return result, nil
+}
+
+// GetBankAccountsWithStaleSpending will return all of the bank accounts globally that have a non-paused spending object
+// with a next recurrence that is in the past. This is used to find spending objects that need to be updated as they
+// have not been spent from for at least once cycle.
+func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error) {
+	span := sentry.StartSpan(ctx, "GetBankAccountsWithStaleSpending")
+	defer span.Finish()
+
+	var result []BankAccountWithStaleSpendingItem
+	err := j.txn.ModelContext(span.Context(), &models.BankAccount{}).
+		ColumnExpr(`"bank_account"."account_id"`).
+		ColumnExpr(`"bank_account"."bank_account_id"`).
+		Join(`INNER JOIN "spending" AS "spending"`).
+		JoinOn(`"spending"."account_id" = "bank_account"."account_id" AND "spending"."bank_account_id" = "bank_account"."bank_account_id"`).
+		Where(`"spending"."next_recurrence" < ?`, time.Now()).
+		Where(`"spending"."is_paused" = ?`, false).
+		GroupExpr(`"bank_account"."account_id"`).
+		GroupExpr(`"bank_account"."bank_account_id"`).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve bank accounts with stale spending objects")
+	}
+
+	return result, err
 }

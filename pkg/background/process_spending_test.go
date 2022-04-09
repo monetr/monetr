@@ -1,4 +1,4 @@
-package repository_test
+package background
 
 import (
 	"context"
@@ -8,32 +8,14 @@ import (
 	"github.com/monetr/monetr/pkg/internal/fixtures"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
-	"github.com/monetr/monetr/pkg/repository"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJobRepository_GetPlaidLinksByAccount(t *testing.T) {
-	t.Run("simple", func(t *testing.T) {
+func TestProcessSpendingJob_Run(t *testing.T) {
+	t.Run("fix stale spending", func(t *testing.T) {
+		log, hook := testutils.GetTestLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
-		jobRepo := repository.NewJobRepository(db)
-
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		_ = fixtures.GivenIHaveAPlaidLink(t, user)
-		_ = fixtures.GivenIHaveAPlaidLink(t, user)
-
-		plaidLinks, err := jobRepo.GetPlaidLinksByAccount(context.Background())
-		assert.NoError(t, err, "should be able to retrieve the two links")
-		assert.Len(t, plaidLinks, 1, "should retrieve the one account")
-		assert.Len(t, plaidLinks[0].LinkIds, 2, "should have two links for the one account")
-	})
-}
-
-func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
-	t.Run("simple", func(t *testing.T) {
-		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
-
-		jobRepo := repository.NewJobRepository(db)
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		link := fixtures.GivenIHaveAPlaidLink(t, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
@@ -64,9 +46,20 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			DateCreated:       time.Now(),
 		})
 
-		result, err := jobRepo.GetBankAccountsWithStaleSpending(context.Background())
-		assert.NoError(t, err, "must not return an error")
-		assert.NotEmpty(t, result, "should return at least one expense")
-		assert.Equal(t, spending.BankAccountId, result[0].BankAccountId)
+		handler := NewProcessSpendingHandler(log, db)
+
+		args := ProcessSpendingArguments{
+			AccountId:     spending.AccountId,
+			BankAccountId: spending.BankAccountId,
+		}
+		argsEncoded, err := DefaultJobMarshaller(args)
+		assert.NoError(t, err, "must be able to marshal arguments")
+
+		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
+		assert.NoError(t, err, "should run job successfully")
+		testutils.MustHaveLogMessage(t, hook, "updating stale spending objects")
+
+		updatedSpending := testutils.MustRetrieve(t, spending)
+		assert.Greater(t, updatedSpending.NextRecurrence, spending.NextRecurrence, "make sure the next recurrence field was updated")
 	})
 }

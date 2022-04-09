@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
@@ -241,6 +242,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 					account.Timezone,
 					fundingSchedule.NextOccurrence,
 					fundingSchedule.Rule,
+					time.Now(),
 				); err != nil {
 					crumbs.Error(span.Context(), "Failed to calculate next contribution for spending", "spending", map[string]interface{}{
 						"fundingScheduleId": fundingScheduleId,

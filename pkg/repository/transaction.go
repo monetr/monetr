@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
@@ -362,6 +364,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 			account.Timezone,
 			currentExpense.FundingSchedule.NextOccurrence,
 			currentExpense.FundingSchedule.Rule,
+			time.Now(),
 		); err != nil {
 			return nil, errors.Wrap(err, "failed to calculate next contribution for current transaction expense")
 		}
@@ -378,7 +381,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		// expense.
 		fallthrough
 	case AddExpense:
-		if err = r.AddExpenseToTransaction(span.Context(), input, newExpense); err != nil {
+		if err = input.AddSpendingToTransaction(span.Context(), newExpense, account); err != nil {
 			return nil, err
 		}
 
@@ -428,6 +431,7 @@ func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transactio
 		account.Timezone,
 		spending.FundingSchedule.NextOccurrence,
 		spending.FundingSchedule.Rule,
+		time.Now(),
 	); err != nil {
 		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
 	}

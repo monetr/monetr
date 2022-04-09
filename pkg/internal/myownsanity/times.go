@@ -22,3 +22,11 @@ func TimesPEqual(a, b *time.Time) bool {
 
 	return a.Equal(*b)
 }
+
+func MaxTime(a, b time.Time) time.Time {
+	if a.After(b) {
+		return a
+	} else {
+		return b
+	}
+}
