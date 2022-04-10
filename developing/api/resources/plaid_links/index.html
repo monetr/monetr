@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="http://localhost/documentation/developing/api/resources/transactions/">
+        <link rel="canonical" href="http://localhost/documentation/developing/api/resources/plaid_links/">
       
       
         
@@ -20,7 +20,7 @@
     
     
       
-        <title>Transactions - monetr</title>
+        <title>Plaid Links - monetr</title>
       
     
     
@@ -151,7 +151,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#transactions" class="md-skip">
+        <a href="#plaid-links" class="md-skip">
           Skip to content
         </a>
       
@@ -183,7 +183,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Transactions
+              Plaid Links
             
           </span>
         </div>
@@ -927,9 +927,28 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../plaid_links/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Plaid Links
+  </span>
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -937,6 +956,181 @@
   </span>
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#new-plaid-link-token" class="md-nav__link">
+    New Plaid Link Token
+  </a>
+  
+    <nav class="md-nav" aria-label="New Plaid Link Token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-query-parameters" class="md-nav__link">
+    Request Query Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-link-token-examples" class="md-nav__link">
+    New Link Token Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="New Link Token Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful" class="md-nav__link">
+    Successful
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-link-errors" class="md-nav__link">
+    New Link Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="New Link Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-limit-reached" class="md-nav__link">
+    Link Limit Reached
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-api-failure-or-other-failure" class="md-nav__link">
+    Plaid API failure or other failure
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plaid-token-callback" class="md-nav__link">
+    Plaid Token Callback
+  </a>
+  
+    <nav class="md-nav" aria-label="Plaid Token Callback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body_1" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-token-callback-examples" class="md-nav__link">
+    Plaid Token Callback Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Plaid Token Callback Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful_1" class="md-nav__link">
+    Successful
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-token-callback-errors" class="md-nav__link">
+    Plaid Token Callback Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="Plaid Token Callback Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-public-token-provided" class="md-nav__link">
+    No public token provided
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-accounts-provided" class="md-nav__link">
+    No accounts provided
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-api-failure-or-other-failure_1" class="md-nav__link">
+    Plaid API failure or other failure
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -965,18 +1159,9 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../transactions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -984,7 +1169,6 @@
   </span>
 
       </a>
-      
     </li>
   
 
@@ -1049,6 +1233,169 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#new-plaid-link-token" class="md-nav__link">
+    New Plaid Link Token
+  </a>
+  
+    <nav class="md-nav" aria-label="New Plaid Link Token">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-query-parameters" class="md-nav__link">
+    Request Query Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-link-token-examples" class="md-nav__link">
+    New Link Token Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="New Link Token Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful" class="md-nav__link">
+    Successful
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-link-errors" class="md-nav__link">
+    New Link Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="New Link Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#link-limit-reached" class="md-nav__link">
+    Link Limit Reached
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-api-failure-or-other-failure" class="md-nav__link">
+    Plaid API failure or other failure
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plaid-token-callback" class="md-nav__link">
+    Plaid Token Callback
+  </a>
+  
+    <nav class="md-nav" aria-label="Plaid Token Callback">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-body" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body_1" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-token-callback-examples" class="md-nav__link">
+    Plaid Token Callback Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Plaid Token Callback Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful_1" class="md-nav__link">
+    Successful
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-token-callback-errors" class="md-nav__link">
+    Plaid Token Callback Errors
+  </a>
+  
+    <nav class="md-nav" aria-label="Plaid Token Callback Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-public-token-provided" class="md-nav__link">
+    No public token provided
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#no-accounts-provided" class="md-nav__link">
+    No accounts provided
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plaid-api-failure-or-other-failure_1" class="md-nav__link">
+    Plaid API failure or other failure
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1059,13 +1406,217 @@
             <article class="md-content__inner md-typeset">
               
                 
-<a href="https://github.com/monetr/monetr/edit/main/docs/developing/api/resources/transactions.md" title="Edit this page" class="md-content__button md-icon">
+<a href="https://github.com/monetr/monetr/edit/main/docs/developing/api/resources/plaid_links.md" title="Edit this page" class="md-content__button md-icon">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
 </a>
 
 
 
-<h1 id="transactions">Transactions</h1>
+<h1 id="plaid-links">Plaid Links</h1>
+<p>Plaid Links are supporting resources behind the normal <a href="../links/">Link</a> resource. They provide a way to retrieve real
+transaction and balance data from a person's bank account using Plaid's API. These endpoints expose some basic
+functionality for interacting with Plaid Links through monetr's API rather than with Plaid directly.</p>
+<h2 id="new-plaid-link-token">New Plaid Link Token</h2>
+<p>In order to connect a user's account with Plaid and thus their bank account, you need to create a link token. This token
+is then used by the Plaid SDK in the UI in order to provide an authentication flow for that user and their bank.</p>
+<p>Under the hood, monetr is making a call
+to <a href="https://plaid.com/docs/api/tokens/#linktokencreate" target="_blank">Create Link Token</a>.</p>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">GET /api/plaid/token/new</span>
+</code></pre></div>
+<h3 id="request-query-parameters">Request Query Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>use_cache</code></td>
+<td>bool</td>
+<td>false</td>
+<td>If true then the endpoint will not try to create another link token if one has already been created for the current user and has not been completed. This is used to reduce the number of API calls made to Plaid. It is recommended to use <code>true</code> for this. The endpoint will never return a Link token that has already been used.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="response-body">Response Body</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>linkToken</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The link token created from Plaid, this can be used with the Plaid SDK to authenticate a user's bank account.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-link-token-examples">New Link Token Examples</h3>
+<div class="highlight"><span class="filename">Example New Link Token Request</span><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>curl --request GET <span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  --url <span class="s2">&quot;https://my.monetr.app/api/plaid/token/new&quot;</span>
+</code></pre></div>
+<h4 id="successful">Successful</h4>
+<p>If the user has not reached their limit for links <sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> then they will receive a link token in the response and nothing
+else.</p>
+<div class="highlight"><span class="filename">200 Ok</span><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&quot;linkToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;link-sandbox-af1a0311-da53-4636-b754-dd15cc058176&quot;</span><span class="w"></span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h3 id="new-link-errors">New Link Errors</h3>
+<h4 id="link-limit-reached">Link Limit Reached</h4>
+<div class="highlight"><span class="filename">400 Bad Request</span><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;max number of Plaid links already reached&quot;</span><span class="w"></span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h4 id="plaid-api-failure-or-other-failure">Plaid API failure or other failure</h4>
+<div class="highlight"><span class="filename">500 Internal Server Error</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;failed to create link token&quot;</span><span class="w"></span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h2 id="plaid-token-callback">Plaid Token Callback</h2>
+<p>Once the user has completed authenticating their bank account using the Plaid SDK, you will be given a <code>public_token</code>.
+This new token must be exchanged with Plaid's API in order to allow monetr to access the bank data. The bank account
+should not be considered linked until this token is successfully exchanged<sup id="fnref:2"><a class="footnote-ref" href="#fn:2">2</a></sup>.</p>
+<details class="note">
+<summary>Note</summary>
+<p><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M480 288H32c-17.62 0-32 14.38-32 32v128c0 17.62 14.38 32 32 32h448c17.62 0 32-14.38 32-32V320c0-17.6-14.4-32-32-32zM352 408c-13.25 0-24-10.75-24-24s10.75-24 24-24 24 10.75 24 24-10.7 24-24 24zm64 0c-13.25 0-24-10.75-24-24s10.75-24 24-24 24 10.75 24 24-10.7 24-24 24zm64-376H32C14.38 32 0 46.38 0 64v128c0 17.62 14.38 32 32 32h448c17.62 0 32-14.38 32-32V64c0-17.62-14.4-32-32-32zM352 152c-13.25 0-24-10.75-24-24s10.8-24 24-24 24 10.8 24 24-10.7 24-24 24zm64 0c-13.25 0-24-10.75-24-24s10.8-24 24-24 24 10.8 24 24-10.7 24-24 24z"/></svg></span> Self-Hosted</p>
+<p>If webhooks are not enabled on the monetr server, then a job to retrieve transactions from Plaid will immediately be
+kicked off once the token has successfully been exchanged. This job will only attempt to retrieve the last 7 days of
+transactions from Plaid.</p>
+</details>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="err">POST /api/plaid/token/callback</span>
+</code></pre></div>
+<h3 id="request-body">Request Body</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>publicToken</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The <code>public_token</code> you received from the Plaid Link flow via the SDK.</td>
+</tr>
+<tr>
+<td><code>institutionId</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The Plaid <code>institution_id</code>, the API will not return an error if this is not provided (TODO). But it is required in order for the API to function properly.</td>
+</tr>
+<tr>
+<td><code>institutionName</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The name of the institution as provided by the Plaid SDK. This is used as the initial name for the link until the user decides to rename it.</td>
+</tr>
+<tr>
+<td><code>accountIds</code></td>
+<td>[]string</td>
+<td>yes</td>
+<td>An array of Plaid bank account IDs, this should be the list of IDs that the user selected when they were going through the link process.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="response-body_1">Response Body</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>linkId</code></td>
+<td>integer</td>
+<td>yes</td>
+<td>The ID of the newly created link for the Plaid connection.</td>
+</tr>
+</tbody>
+</table>
+<details class="attention">
+<summary>Attention</summary>
+<p>There is an additional field in the response body called <code>success</code>. This field is not present if the request fails
+and is only present if it succeeds. The status of the request is already indicated properly using the status code of
+the response. This field should not be used, it will be removed in the future.
+<a href="https://github.com/monetr/monetr/issues/858" target="_blank"><img alt="GitHub issue/pull request detail" src="https://img.shields.io/github/issues/detail/state/monetr/monetr/858?label=%23858%20-%20chore%3A%20Remove%20success%20field%20and%20any%20references%20from%20the%20%2Fapi%2Fplaid%2Ftoken%2Fcallback%20response.&amp;logo=github" /></a></p>
+</details>
+<h3 id="plaid-token-callback-examples">Plaid Token Callback Examples</h3>
+<div class="highlight"><span class="filename">Example Plaid Token Callback Request</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>curl --request POST <span class="se">\</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  --url <span class="s2">&quot;https://my.monetr.app/api/plaid/token/callback&quot;</span> <span class="se">\</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  --header <span class="s2">&quot;content-type: application/json&quot;</span> <span class="se">\</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  --data <span class="s1">&#39;{</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="s1">    &quot;publicToken&quot;: &quot;public-sandbox-5c224a01-8314-4491-a06f-39e193d5cddc&quot;,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="s1">    &quot;institutionId&quot;: &quot;ins_1&quot;,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="s1">    &quot;institutionName&quot;: &quot;A Banks Name&quot;,</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="s1">    &quot;accountIds&quot;: [</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="s1">      &quot;BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp&quot;,</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="s1">      &quot;lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje&quot;</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="s1">    ]</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="s1">}&#39;</span>
+</code></pre></div>
+<h4 id="successful_1">Successful</h4>
+<p class="annotate">If monetr is able to exchange the public token successfully, then you will receive a successful response with the newly
+created Link ID (1). <!--- This makes sure the annotation is not on this line, otherwise it does not work.--></p>
+<ol>
+<li>The Link ID is not a unique identifier for Plaid, it is monetr's internal unique identifier.</li>
+</ol>
+<div class="highlight"><span class="filename">200 Ok</span><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">&quot;linkId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="w"></span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h3 id="plaid-token-callback-errors">Plaid Token Callback Errors</h3>
+<h4 id="no-public-token-provided">No public token provided</h4>
+<p>You <strong>must</strong> provide a public token to create a Plaid link, there is no other way to authenticate a bank account through
+Plaid.</p>
+<div class="highlight"><span class="filename">400 Bad Request</span><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;must provide a public token&quot;</span><span class="w"></span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h4 id="no-accounts-provided">No accounts provided</h4>
+<p>If you do not provide any Plaid bank account IDs then the API will not attempt to exchange the provided public token.</p>
+<div class="highlight"><span class="filename">400 Bad Request</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;must select at least one account&quot;</span><span class="w"></span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h4 id="plaid-api-failure-or-other-failure_1">Plaid API failure or other failure</h4>
+<div class="highlight"><span class="filename">500 Internal Server Error</span><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;failed to exchange token&quot;</span><span class="w"></span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>monetr can be configured to limit the number of links an account can have. This is for those using development
+credentials. If you intend to self-host monetr and let friends and/or family use it, it is recommended that you
+limit how many links someone can have to prevent someone from adding many links to their account and using up your
+limited number of development links.&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:2">
+<p>If you fully authenticate a bank account, but you never exchange the <code>public_token</code> for that authenticated bank
+account. It <em>should not</em> affect the number of accounts linked for development credentials.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
@@ -1088,7 +1639,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../spending/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Spending" rel="prev">
+        <a href="../links/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Links" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -1097,20 +1648,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Spending
+              Links
             </div>
           </div>
         </a>
       
       
         
-        <a href="../user/" class="md-footer__link md-footer__link--next" aria-label="Next: User" rel="next">
+        <a href="../spending/" class="md-footer__link md-footer__link--next" aria-label="Next: Spending" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              User
+              Spending
             </div>
           </div>
           <div class="md-footer__button md-icon">

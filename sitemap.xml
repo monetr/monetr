@@ -61,6 +61,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>http://localhost/documentation/developing/api/resources/plaid_links/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>http://localhost/documentation/developing/api/resources/spending/</loc>
          <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
