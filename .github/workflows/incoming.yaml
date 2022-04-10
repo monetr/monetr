@@ -204,42 +204,6 @@ jobs:
           files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
           name: monetr
 
-  docs-generate:
-    needs:
-      - go_dependencies
-      - ui_dependencies
-    name: Generate Documentation
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/ubuntu:20.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            ${{ github.workspace }}/vendor
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-ui-
-      - run: |
-          make docs-static
-      - uses: actions/upload-artifact@v3
-        name: Upload Documentation As Artifact
-        with:
-          name: '${{ github.sha }}-docs'
-          path: '${{ github.workspace }}/build/docs'
-          retention-days: 7
-
   mkdocs:
     name: MkDocs
     runs-on: ubuntu-latest

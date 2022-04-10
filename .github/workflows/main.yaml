@@ -233,40 +233,6 @@ jobs:
           branch: monetr.app
           folder: build/site
 
-  docs-generate:
-    needs:
-      - go_dependencies
-      - ui_dependencies
-    name: Generate Documentation
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/ubuntu:20.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-ui-
-      - name: Generate Documentation Static Site
-        run: make docs-static
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.3.0
-        with:
-          branch: docs.monetr.dev
-          folder: build/docs
-
   buildah:
     needs:
       - "ui_dependencies"
