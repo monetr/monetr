@@ -2,97 +2,97 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>http://localhost/documentation/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/API/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/authentication/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/bank_accounts/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/funding_schedules/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/institutions/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/links/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/spending/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/transactions/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/api/resources/user/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/CODE_OF_CONDUCT/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/credentials/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/documentation/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/local/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/onboarding/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/bank_accounts/removing/</loc>
-         <lastmod>2022-04-09</lastmod>
+         <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
