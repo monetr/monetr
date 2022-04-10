@@ -1,5 +1,33 @@
 # Changelog
 
+### [0.10.12](https://github.com/monetr/monetr/compare/v0.10.11...v0.10.12) (2022-04-10)
+
+
+### Features
+
+* **spending:** Completely rewrote spending calculation code. ([50af9fa](https://github.com/monetr/monetr/commit/50af9fa1ba6db290055f9e4a3b591133a8976cbe))
+* **spending:** Support more frequent spending than funding. ([f230702](https://github.com/monetr/monetr/commit/f2307027353ab7d7d6ee3a6cd547ae95d465da59)), closes [#141](https://github.com/monetr/monetr/issues/141)
+
+
+### Bug Fixes
+
+* **docs:** Removed references to the swagger file from documentation. ([9cb2e4b](https://github.com/monetr/monetr/commit/9cb2e4beaa52105b1ab577603dc66986701c2140))
+* **sentry:** Fixed sentry transport for new version of SDK. ([6caa36d](https://github.com/monetr/monetr/commit/6caa36dcd6a86d289751dab9cc0e72f70f7efe4a))
+
+
+### Dependencies
+
+* **ui:** update sentry-javascript monorepo to v6.19.6 ([cb24ace](https://github.com/monetr/monetr/commit/cb24acefcd2cc146416a9444be41ccb68b0583f7))
+
+
+### Miscellaneous
+
+* **ci:** Remove swagger docs generation in pipeline. ([71697e8](https://github.com/monetr/monetr/commit/71697e8ab5b59e8e65d19c89b574b134531f5190))
+* **development:** Adding support for ReCAPTCHA for local development. ([89f6831](https://github.com/monetr/monetr/commit/89f683112565ce6f5bd085ffc08d5eaf10114a48))
+* **docs:** Added plaid links to resource index. ([2bf31d3](https://github.com/monetr/monetr/commit/2bf31d337f91372b4f890ffb3207068ea44e574a))
+* **docs:** Adding documentation around Plaid Links. ([e80295c](https://github.com/monetr/monetr/commit/e80295c957ec18edba8acb2c7b925bf8b8cd54f3))
+* Updated go.mod ([66c52b7](https://github.com/monetr/monetr/commit/66c52b7d1b0b39429f2b1329931a5cbe9b228161))
+
 ### [0.10.11](https://github.com/monetr/monetr/compare/v0.10.10...v0.10.11) (2022-04-09)
 
 
