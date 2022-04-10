@@ -1,6 +1,6 @@
 # 3rd Party API credentials for development
 
-To work on all of the features monetr provides locally, you will need access to four sets of API credentials. These
+To work on all of the features monetr provides locally, you will need access to several sets of API credentials. These
 credentials are outlines here in order of significance. monetr or people representing monetr **will not** provide any of
 these credentials to you. You are responsible for gaining access to these credentials on your own. None of the
 credentials require that you pay for them for development purposes.
@@ -90,3 +90,15 @@ endpoint.
 **TODO**
 
 [![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/805?label=%23805%20-%20docs%3A%20Document%20ReCAPTCHA%20credentials.&logo=github)](https://github.com/monetr/monetr/issues/805){:target="_blank"}
+
+## Sentry
+
+**TODO**
+
+[![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/856?label=%23856%20-%20docs%3A%20Document%20Sentry%20credentials.&logo=github)](https://github.com/monetr/monetr/issues/856){:target="_blank"}
+
+## SMTP
+
+**TODO**
+
+[![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/857?label=%23857%20-%20docs%3A%20Document%20SMTP%20credentials.&logo=github)](https://github.com/monetr/monetr/issues/857){:target="_blank"}

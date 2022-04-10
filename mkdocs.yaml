@@ -69,8 +69,9 @@ nav:
               - Authentication: developing/api/resources/authentication.md
               - Bank Accounts: developing/api/resources/bank_accounts.md
               - Funding Schedules: developing/api/resources/funding_schedules.md
-              - Links: developing/api/resources/links.md
               - Institutions: developing/api/resources/institutions.md
+              - Links: developing/api/resources/links.md
+              - Plaid Links: developing/api/resources/plaid_links.md
               - Spending: developing/api/resources/spending.md
               - Transactions: developing/api/resources/transactions.md
               - User: developing/api/resources/user.md

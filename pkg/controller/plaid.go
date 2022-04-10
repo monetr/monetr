@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -360,6 +361,12 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 
 	if len(callbackRequest.AccountIds) == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must select at least one account")
+		return
+	}
+
+	callbackRequest.PublicToken = strings.TrimSpace(callbackRequest.PublicToken)
+	if callbackRequest.PublicToken == "" {
+		c.badRequest(ctx, "must provide a public token")
 		return
 	}
 

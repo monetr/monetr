@@ -269,6 +269,8 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 				Start:     time.Now().Add(-7 * 24 * time.Hour),
 				End:       time.Now(),
 			})
+		case "NEW_ACCOUNTS_AVAILABLE":
+			// no-op for now.
 		default:
 			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}
