@@ -296,6 +296,9 @@ webhooks:
 sql-shell:
 	$(COMPOSE) exec postgres psql -U postgres
 
+redis-shell:
+	$(COMPOSE) exec redis redis-cli
+
 stop:
 	$(COMPOSE) stop
 

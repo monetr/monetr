@@ -205,7 +205,9 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				"fundingScheduleId": fundingScheduleId,
 			})
 		default:
-			for _, spending := range expenses {
+			for i := range expenses {
+				// :shakes-fist: arrays
+				spending := expenses[i]
 				spendingLog := fundingLog.WithFields(logrus.Fields{
 					"spendingId":   spending.SpendingId,
 					"spendingName": spending.Name,

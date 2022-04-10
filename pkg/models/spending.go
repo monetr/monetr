@@ -62,11 +62,123 @@ func (e Spending) GetProgressAmount() int64 {
 	}
 }
 
-// CalculateNextContribution will take the provided details about the next contribution's date and frequency and
+func (e *Spending) CalculateNextContribution(
+	ctx context.Context,
+	accountTimezone string,
+	nextContributionDate time.Time,
+	nextContributionRule *Rule,
+	now time.Time,
+) error {
+	span := sentry.StartSpan(ctx, "CalculateNextContribution")
+	defer span.Finish()
+
+	span.SetTag("spendingId", strconv.FormatUint(e.SpendingId, 10))
+
+	timezone, err := time.LoadLocation(accountTimezone)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse account's timezone")
+	}
+
+	// Make sure we are working in midnight in the user's timezone.
+	nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
+
+	// Force the start of the rule to be the next contribution date. This fixes a bug where the rule would increment
+	// properly, but would include the current timestamp in that increment causing incorrect comparisons below. This
+	// makes sure that the rule will increment in the user's timezone as intended.
+	nextContributionRule.DTStart(nextContributionDate)
+
+	// If the next contribution date is in the past relative to now, then bump it forward.
+	if nextContributionDate.Before(now) {
+		nextContributionDate = nextContributionRule.After(now, false)
+	}
+
+	nextRecurrence := e.NextRecurrence
+	if e.RecurrenceRule != nil {
+		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
+		// rather than the current timestamp (which is what RRule defaults to).
+		e.RecurrenceRule.DTStart(e.NextRecurrence)
+
+		// If the next recurrence of the spending is in the past, then bump it as well.
+		if nextRecurrence.Before(now) {
+			nextRecurrence = e.RecurrenceRule.After(now, false)
+		}
+	}
+
+	targetAmount := e.TargetAmount
+	currentAmount := e.GetProgressAmount()
+	var nextContribution int64
+	var isBehind bool
+	switch {
+	case nextContributionDate.After(nextRecurrence) && e.SpendingType == SpendingTypeExpense:
+		// If the next contribution date happens after the next time the expense recurs, then we need to see if the
+		// expense recurs at all again before that contribution. Then make sure that we set the contribution amount to
+		// represent the total needed for every recurrence.
+		numberOfRecurrences := int64(len(e.RecurrenceRule.Between(now, nextContributionDate, false)))
+		// Multiple how much we need by how many times this expense will be needed before we will get funding again.
+		targetAmount *= numberOfRecurrences
+		// Calculate how much we need to contribute next time based on that need.
+		nextContribution = targetAmount - currentAmount
+		// We are behind if there is anything left to contribute that we cannot contribute before the next recurrence.
+		isBehind = targetAmount-currentAmount > 0
+	case nextContributionDate.After(nextRecurrence) && e.SpendingType == SpendingTypeGoal:
+		// If we won't receive another contribution before the goal is due then just set the next contribution amount to
+		// be the amount we need.
+		nextContribution = int64(math.Max(float64(targetAmount-currentAmount), 0))
+		// We are behind if there is anything left to contribute that we cannot contribute before the next recurrence.
+		isBehind = targetAmount-currentAmount > 0
+	case nextRecurrence.After(nextContributionDate) && e.SpendingType == SpendingTypeExpense:
+		// Check to see how many times this expense will be needed between the next contribution date and the
+		// contribution date succeeding it. If the expense is needed multiple times then we need to allocate more to the
+		// expense with each contribution.
+		frequent := e.RecurrenceRule.Between(nextContributionDate, nextContributionRule.After(nextContributionDate, false), false)
+		if len(frequent) > 1 {
+			// If the expense is needed more than one time, then multiply the target amount so we can allocate enough
+			// with the next contribution to cover us.
+			targetAmount *= int64(len(frequent))
+		}
+		fallthrough
+	case nextRecurrence.After(nextContributionDate):
+		// If the next recurrence happens after a contribution, then calculate how many contributions will occur before
+		// that recurrence and set that to be the next contribution amount.
+		// Technically this works a bit oddly with expenses that recur more frequently than they can be funded, but
+		// because we have adjusted the target amount above (if this is the case) then the calculation will still be
+		// correct.
+		numberOfContributions := int64(len(nextContributionRule.Between(now, nextRecurrence, false)))
+		nextContribution = (targetAmount - currentAmount) / numberOfContributions
+	case nextRecurrence.Equal(nextContributionDate) && e.SpendingType == SpendingTypeExpense:
+		// Check to see how many times this expense will recur between the next contribution date and the one that
+		// succeeds it. But this time make it an inclusive search (the true at the end). Because the next contribution
+		// date is also the next recurrence we need to allocate an additional targetAmount towards the expense with the
+		// next contribution to cover everything.
+		frequent := e.RecurrenceRule.Between(nextContributionDate, nextContributionRule.After(nextContributionDate, false), true)
+		if len(frequent) > 1 {
+			targetAmount *= int64(len(frequent))
+		}
+		fallthrough
+	case nextRecurrence.Equal(nextContributionDate):
+		// Super simple, we know how much we need (targetAmount) and we know how much we have (currentAmount), and the
+		// next time this expense will be needed is on the same day that the expense will receive funding. So just
+		// subtract our current from what we need to determine how much we want to allocate.
+		nextContribution = int64(math.Max(float64(targetAmount-currentAmount), 0))
+	}
+
+	e.NextContributionAmount = nextContribution
+	e.IsBehind = isBehind
+
+	// If the current nextRecurrence on the object is in the past, then bump it to our new next recurrence.
+	if e.NextRecurrence.Before(now) {
+		e.LastRecurrence = &e.NextRecurrence
+		e.NextRecurrence = nextRecurrence
+	}
+
+	return nil
+}
+
+// CalculateNextContributionOld will take the provided details about the next contribution's date and frequency and
 // determine how much will need to be allocated on that day to this spending object. This is to the best of my knowledge
 // a "pure" function, it should produce the same results given the same inputs every single time. As such it must be
 // provided things like "now".
-func (e *Spending) CalculateNextContribution(
+func (e *Spending) CalculateNextContributionOld(
 	ctx context.Context,
 	accountTimezone string,
 	nextContributionDate time.Time,

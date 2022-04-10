@@ -7,6 +7,7 @@ import (
 
 	"github.com/monetr/monetr/pkg/util"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSpending_GetProgressAmount(t *testing.T) {
@@ -52,16 +53,15 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		today := util.MidnightInLocal(time.Now(), time.UTC)
 		tomorrow := util.MidnightInLocal(time.Now().Add(25*time.Hour), time.UTC)
 		assert.True(t, tomorrow.After(today), "tomorrow timestamp must come after today's")
+		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
+		assert.NoError(t, err, "must be able to parse the rrule")
 
 		spending := Spending{
-			SpendingType:   SpendingTypeExpense,
+			SpendingType:   SpendingTypeGoal,
 			TargetAmount:   100,
 			CurrentAmount:  0,
 			NextRecurrence: tomorrow,
 		}
-
-		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
-		assert.NoError(t, err, "must be able to parse the rrule")
 
 		err = spending.CalculateNextContribution(
 			context.Background(),
@@ -198,7 +198,6 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: nextDueDate,
 			RecurrenceRule: spendingRule,
 		}
-
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
@@ -278,5 +277,146 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.EqualValues(t, 5000, spending.NextContributionAmount, "we will need another $50 to meet the instances before the next contribution because the previous one was missed")
 		expectedNextRecurrence := time.Date(2022, 4, 18, 0, 0, 0, 0, time.UTC)
 		assert.Equal(t, expectedNextRecurrence, spending.NextRecurrence, "should then be needed next on the 18th")
+	})
+
+	t.Run("generic monthly expense - central time", func(t *testing.T) {
+		location, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		// Now is before the pay day, so there should be two contributions.
+		now := time.Date(2022, 4, 9, 12, 0, 0, 0, location)
+		nextDueDate := time.Date(2022, 5, 2, 0, 0, 0, 0, location)
+
+		// We want to spend this next on the 2nd of next month.
+		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		// But we can only contribute to the expense twice a month.
+		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   5000,
+			CurrentAmount:  0,
+			NextRecurrence: nextDueDate,
+			RecurrenceRule: spendingRule,
+		}
+
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			time.UTC.String(),
+			contributionRule.After(now, false),
+			contributionRule,
+			now,
+		)
+		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
+		assert.False(t, spending.IsBehind, "should not be behind")
+		assert.EqualValues(t, 2500, spending.NextContributionAmount, "give that there will be 2 contributions, half of the target amount should be allocated on the next contribution")
+	})
+
+	t.Run("generic monthly expense stale", func(t *testing.T) {
+		location, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		// Now is before the pay day, so there should be two contributions.
+		now := time.Date(2022, 4, 9, 12, 0, 0, 0, location)
+		nextDueDate := time.Date(2022, 4, 2, 0, 0, 0, 0, location)
+
+		// We want to spend this next on the 2nd of next month.
+		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		// But we can only contribute to the expense twice a month.
+		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   5000,
+			CurrentAmount:  100, // We have enough to cover the 11th, but not subsequent ones.
+			NextRecurrence: nextDueDate,
+			RecurrenceRule: spendingRule,
+		}
+
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			time.UTC.String(),
+			contributionRule.After(now, false),
+			contributionRule,
+			now,
+		)
+		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
+		assert.False(t, spending.IsBehind, "should not be behind")
+		assert.EqualValues(t, 2450, spending.NextContributionAmount, "little bit less than half per contribution")
+	})
+
+	t.Run("yearly generic", func(t *testing.T) {
+		location, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		// Now is before the pay day, so there should be two contributions.
+		now := time.Date(2022, 4, 9, 12, 0, 0, 0, location)
+		nextDueDate := time.Date(2023, 1, 1, 0, 0, 0, 0, location)
+
+		// We want to spend this next on the 2nd of next month.
+		spendingRule, err := NewRule("FREQ=YEARLY;INTERVAL=1;BYMONTH=2;BYMONTHDAY=1")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		// But we can only contribute to the expense twice a month.
+		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   20000,
+			CurrentAmount:  1454,
+			NextRecurrence: nextDueDate,
+			RecurrenceRule: spendingRule,
+		}
+
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			time.UTC.String(),
+			contributionRule.After(now, false),
+			contributionRule,
+			now,
+		)
+		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
+		assert.False(t, spending.IsBehind, "should not be behind")
+		assert.EqualValues(t, 1030, spending.NextContributionAmount, "little bit less than half per contribution")
+	})
+
+	t.Run("contribution rule is today", func(t *testing.T) {
+		location, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		// 3 minutes after the funding schedule is set to contribute.
+		now := time.Date(2022, 4, 1, 0, 3, 0, 0, location)
+		fundingDate := time.Date(2022, 4, 1, 0, 0, 0, 0, location)
+		nextDueDate := time.Date(2023, 1, 1, 0, 0, 0, 0, location)
+
+		// We want to spend this next on the 2nd of next month.
+		spendingRule, err := NewRule("FREQ=YEARLY;INTERVAL=1;BYMONTH=2;BYMONTHDAY=1")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		// But we can only contribute to the expense twice a month.
+		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   20000,
+			CurrentAmount:  1454,
+			NextRecurrence: nextDueDate,
+			RecurrenceRule: spendingRule,
+		}
+
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			time.UTC.String(),
+			fundingDate,
+			contributionRule,
+			now,
+		)
+		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
+		assert.False(t, spending.IsBehind, "should not be behind")
+		assert.EqualValues(t, 1030, spending.NextContributionAmount, "little bit less than half per contribution")
 	})
 }

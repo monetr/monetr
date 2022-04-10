@@ -176,7 +176,10 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 	fundingSchedules := map[uint64]*models.FundingSchedule{}
 
 	spendingToUpdate := make([]models.Spending, 0, len(allSpending))
-	for _, spending := range allSpending {
+	for i := range allSpending {
+		// Avoid funky pointer issues with arrays and for loops.
+		spending := allSpending[i]
+
 		// Skip spending objects that are not stale, or ones that are paused.
 		if !spending.GetIsStale(now) || spending.GetIsPaused() {
 			continue
