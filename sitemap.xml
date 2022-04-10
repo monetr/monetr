@@ -6,56 +6,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>http://localhost/documentation/api/API/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/authentication/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/bank_accounts/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/funding_schedules/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/institutions/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/links/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/spending/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/transactions/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>http://localhost/documentation/api/resources/user/</loc>
-         <lastmod>2022-04-10</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>http://localhost/documentation/developing/</loc>
          <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
@@ -77,6 +27,51 @@
     </url>
     <url>
          <loc>http://localhost/documentation/developing/local/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/authentication/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/bank_accounts/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/funding_schedules/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/institutions/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/links/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/spending/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/transactions/</loc>
+         <lastmod>2022-04-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>http://localhost/documentation/developing/api/resources/user/</loc>
          <lastmod>2022-04-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
