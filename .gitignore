@@ -27,4 +27,4 @@ rest-api-tests.json
 
 Brewfile.lock.json
 .vscode
-docs/api/swagger.*
+docs/developing/api/swagger.*

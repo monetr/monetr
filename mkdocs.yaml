@@ -64,17 +64,16 @@ nav:
           - Local Development: developing/local.md
           - Credentials: developing/credentials.md
       - API:
-          - REST API: api/API.md
           - Resources:
-              - api/resources/index.md
-              - Authentication: api/resources/authentication.md
-              - Bank Accounts: api/resources/bank_accounts.md
-              - Funding Schedules: api/resources/funding_schedules.md
-              - Links: api/resources/links.md
-              - Institutions: api/resources/institutions.md
-              - Spending: api/resources/spending.md
-              - Transactions: api/resources/transactions.md
-              - User: api/resources/user.md
+              - developing/api/resources/index.md
+              - Authentication: developing/api/resources/authentication.md
+              - Bank Accounts: developing/api/resources/bank_accounts.md
+              - Funding Schedules: developing/api/resources/funding_schedules.md
+              - Links: developing/api/resources/links.md
+              - Institutions: developing/api/resources/institutions.md
+              - Spending: developing/api/resources/spending.md
+              - Transactions: developing/api/resources/transactions.md
+              - User: developing/api/resources/user.md
 
 plugins:
   - search
