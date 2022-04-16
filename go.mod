@@ -3,6 +3,7 @@ module github.com/monetr/monetr
 go 1.18
 
 require (
+	github.com/1Password/srp v0.1.2-0.20211221194831-4a3d1796f1f2
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/alicebob/miniredis/v2 v2.20.0
@@ -165,3 +166,6 @@ require (
 	mellium.im/sasl v0.2.1 // indirect
 	moul.io/http2curl v1.0.1-0.20190925090545-5cd742060b0e // indirect
 )
+
+// Until the changes to marshal and unmarshal the SRP object are merged, this is what we'll do.
+replace github.com/1Password/srp v0.1.2-0.20211221194831-4a3d1796f1f2 => github.com/elliotcourant/srp v0.1.2-0.20220415223601-c87f3049191a

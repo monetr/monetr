@@ -21,6 +21,35 @@ type unauthenticatedRepo struct {
 	txn pg.DBI
 }
 
+func (u *unauthenticatedRepo) CreateSecureLogin(ctx context.Context, newLogin *models.LoginWithVerifier) error {
+	span := sentry.StartSpan(ctx, "CreateSecureLogin")
+	defer span.Finish()
+
+	// Just to make sure, clean up these fields.
+	newLogin.Email = strings.ToLower(newLogin.Email)
+	newLogin.LoginId = 0
+
+	count, err := u.txn.ModelContext(span.Context(), newLogin).
+		Where(`"email" = ?`, newLogin.Email).
+		Count()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to verify if email is unique")
+	}
+
+	if count != 0 {
+		span.Status = sentry.SpanStatusInvalidArgument
+		return errors.Errorf("a login with the same email already exists")
+	}
+
+	_, err = u.txn.ModelContext(span.Context(), newLogin).Insert(newLogin)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+	}
+
+	return errors.Wrap(err, "failed to create new login")
+}
+
 func (u *unauthenticatedRepo) CreateLogin(
 	ctx context.Context,
 	email, hashedPassword string, firstName, lastName string,

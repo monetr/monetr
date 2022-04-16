@@ -36,6 +36,8 @@ cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RX
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3fOKtUw0Xmo=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
+github.com/1Password/srp v0.1.2-0.20211221194831-4a3d1796f1f2 h1:HxfYLqwDGsp3G1WX5H+m4KF4kWBlueHUlXA0dOlnuyE=
+github.com/1Password/srp v0.1.2-0.20211221194831-4a3d1796f1f2/go.mod h1:LIGqQ7eEA0UJT98j7sXk60QWVpHJ3g00BX6LOm9kYTc=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.0.0 h1:dtDWrepsVPfW9H/4y7dDgFc2MBUSeJhlaDtK13CxFlU=
 github.com/BurntSushi/toml v1.0.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
@@ -120,6 +122,10 @@ github.com/djherbis/atime v1.1.0/go.mod h1:28OF6Y8s3NQWwacXc5eZTsEsiMzp7LF8MbXE+
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 h1:clC1lXBpe2kTj2VHdaIu9ajZQe4kcEY9j0NsnDDBZ3o=
 github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385/go.mod h1:0vRUJqYpeSZifjYj7uP3BG/gKcuzL9xWVV/Y+cK33KM=
+github.com/elliotcourant/srp v0.1.1 h1:ulNfy9+AQApluoePiVlGilyFK/AOACY0LWfiAzlnxdE=
+github.com/elliotcourant/srp v0.1.1/go.mod h1:LIGqQ7eEA0UJT98j7sXk60QWVpHJ3g00BX6LOm9kYTc=
+github.com/elliotcourant/srp v0.1.2-0.20220415223601-c87f3049191a h1:+37BVI2NPzLuAECOJeLghdH5QZmCzkcInbLa4oUiInI=
+github.com/elliotcourant/srp v0.1.2-0.20220415223601-c87f3049191a/go.mod h1:2J630Cm2CmiKCf/7vClekxVX3nSIDKzmyQd1jSIxhTY=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=

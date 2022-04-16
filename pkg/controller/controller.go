@@ -307,6 +307,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 			}
 
 			repoParty.PartyFunc("/authentication", c.handleAuthentication)
+			repoParty.PartyFunc("/authentication/secure", c.handleSecureAuthentication)
 
 			repoParty.Use(c.authenticationMiddleware)
 

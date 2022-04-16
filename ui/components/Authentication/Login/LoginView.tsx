@@ -1,9 +1,7 @@
 import { Button, CircularProgress, TextField } from '@mui/material';
-import { Backdrop1 } from 'assets';
 import classnames from 'classnames';
 import ForgotPasswordMaybe from 'components/Authentication/Login/ForgotPasswordMaybe';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
-import Backdrop from 'components/Layout/Backdrop/Backdrop';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
 import { Formik, FormikHelpers } from 'formik';

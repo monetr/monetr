@@ -48,6 +48,10 @@ func (l Login) VerifyTOTP(input string) error {
 	return errors.WithStack(ErrTOTPNotValid)
 }
 
+func (l Login) GetEmailIsVerified() bool {
+	return l.IsEmailVerified && l.EmailVerifiedAt != nil
+}
+
 type LoginWithHash struct {
 	tableName string `pg:"logins"`
 
@@ -55,6 +59,12 @@ type LoginWithHash struct {
 	PasswordHash string `json:"-" pg:"password_hash,notnull"`
 }
 
-func (l Login) GetEmailIsVerified() bool {
-	return l.IsEmailVerified && l.EmailVerifiedAt != nil
+// LoginWithVerifier gives us access to the fields needed for secure remote password authentication. The notnull tags
+// are meant to enforce the ORM and are not representative of the database constraints.
+type LoginWithVerifier struct {
+	tableName string `pg:"logins"`
+
+	Login
+	Verifier []byte `json:"-" pg:"verifier,notnull"`
+	Salt     []byte `json:"-" pg:"salt,notnull"`
 }

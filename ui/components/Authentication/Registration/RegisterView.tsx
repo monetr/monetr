@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import useSignUp, { SignUpResponse } from 'shared/authentication/actions/signUp';
+import useRegister from 'shared/authentication/hooks/useRegister';
 import { getInitialPlan, getRequireBetaCode, getShouldVerifyRegister } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
@@ -102,12 +103,13 @@ export default function RegisterView(): JSX.Element {
   }
 
   const signUp = useSignUp();
+  const register = useRegister();
   const bootstrapLogin = useBootstrapLogin();
   const navigate = useNavigate();
 
   function submit(values: SignUpValues, { setSubmitting }: FormikHelpers<SignUpValues>): Promise<void> {
     setSubmitting(true);
-    return signUp({
+    return register({
       agree: values.agree,
       betaCode: values.betaCode,
       captcha: verification,
@@ -117,7 +119,7 @@ export default function RegisterView(): JSX.Element {
       password: values.password,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     })
-      .then((result: SignUpResponse) => {
+      .then(result => {
         // After sending the sign up request, if the user needs to verify their email then the requires verification
         // field will be true. We can stop here and just show the user a successful screen.
         if (result.requireVerification) {
