@@ -17,6 +17,10 @@ var (
 	_ UnauthenticatedRepository = &unauthenticatedRepo{}
 )
 
+var (
+	ErrEmailAlreadyExists = errors.New("a login with this email already exists")
+)
+
 type unauthenticatedRepo struct {
 	txn pg.DBI
 }
@@ -39,7 +43,7 @@ func (u *unauthenticatedRepo) CreateSecureLogin(ctx context.Context, newLogin *m
 
 	if count != 0 {
 		span.Status = sentry.SpanStatusInvalidArgument
-		return errors.Errorf("a login with the same email already exists")
+		return errors.WithStack(ErrEmailAlreadyExists)
 	}
 
 	_, err = u.txn.ModelContext(span.Context(), newLogin).Insert(newLogin)
@@ -77,7 +81,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 
 	if count != 0 {
 		span.Status = sentry.SpanStatusInvalidArgument
-		return nil, errors.Errorf("a login with the same email already exists")
+		return nil, errors.WithStack(ErrEmailAlreadyExists)
 	}
 
 	_, err = u.txn.ModelContext(span.Context(), login).Insert(login)

@@ -102,7 +102,6 @@ export default function RegisterView(): JSX.Element {
     return 'Sign Up';
   }
 
-  const signUp = useSignUp();
   const register = useRegister();
   const bootstrapLogin = useBootstrapLogin();
   const navigate = useNavigate();
@@ -141,7 +140,6 @@ export default function RegisterView(): JSX.Element {
           variant: 'error',
           disableWindowBlurListener: true,
         });
-        throw error;
       })
       .finally(() => {
         setVerification(null);

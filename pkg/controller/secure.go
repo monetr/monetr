@@ -19,6 +19,7 @@ import (
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
 )
@@ -149,6 +150,11 @@ func (c *Controller) secureRegister(ctx iris.Context) {
 	}
 
 	if err = repo.CreateSecureLogin(c.getContext(ctx), &login); err != nil {
+		if errors.Is(errors.Cause(err), repository.ErrEmailAlreadyExists) {
+			c.badRequest(ctx, "a login with this email already exists")
+			return
+		}
+
 		c.wrapPgError(ctx, err, "failed to register")
 		return
 	}
