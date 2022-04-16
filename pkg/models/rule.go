@@ -29,6 +29,9 @@ func NewRule(input string) (*Rule, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse rule")
 	}
+	// This will make sure that we can work with times that are in the past. I started working on monetr in february
+	// 2021 I think. So really there shouldn't be anything before that time.
+	rule.DTStart(time.Date(2021, 2, 14, 0, 0, 0, 0, time.UTC))
 
 	return &Rule{
 		RRule: *rule,
