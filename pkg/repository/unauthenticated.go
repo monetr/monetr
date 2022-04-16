@@ -25,6 +25,23 @@ type unauthenticatedRepo struct {
 	txn pg.DBI
 }
 
+func (u *unauthenticatedRepo) GetLoginForChallenge(ctx context.Context, email string) (*models.LoginWithVerifier, error) {
+	span := sentry.StartSpan(ctx, "GetLoginForChallenge")
+	defer span.Finish()
+
+	email = strings.ToLower(email)
+	var login models.LoginWithVerifier
+	err := u.txn.ModelContext(span.Context(), &login).
+		Where(`"email" = ?`, email).
+		Limit(1).
+		Select(&login)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve login details")
+	}
+
+	return &login, nil
+}
+
 func (u *unauthenticatedRepo) CreateSecureLogin(ctx context.Context, newLogin *models.LoginWithVerifier) error {
 	span := sentry.StartSpan(ctx, "CreateSecureLogin")
 	defer span.Finish()

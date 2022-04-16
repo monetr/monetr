@@ -75,6 +75,7 @@ type Repository interface {
 
 type UnauthenticatedRepository interface {
 	CreateSecureLogin(ctx context.Context, newLogin *models.LoginWithVerifier) error
+	GetLoginForChallenge(ctx context.Context, email string) (*models.LoginWithVerifier, error)
 	CreateLogin(ctx context.Context, email, hashedPassword string, firstName, lastName string) (*models.Login, error)
 	CreateAccountV2(ctx context.Context, account *models.Account) error
 	CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error

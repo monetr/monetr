@@ -39,7 +39,105 @@ func hexToBigInt(input string) (*big.Int, error) {
 }
 
 func (c *Controller) handleSecureAuthentication(p router.Party) {
+	p.Post("/challenge", c.secureChallenge)
+	p.Post("/authenticate", c.secureAuthenticate)
 	p.Post("/register", c.secureRegister)
+}
+
+func (c *Controller) secureChallenge(ctx iris.Context) {
+	var challengeRequest struct {
+		Email     string `json:"email"`
+		SessionId string `json:"sessionId"`
+		// TODO ReCAPTCHA
+	}
+	if err := ctx.ReadJSON(&challengeRequest); err != nil {
+		c.badRequest(ctx, "invalid challenge request provided")
+		return
+	}
+	if challengeRequest.SessionId == "" {
+		c.badRequest(ctx, "sessionId must be provided")
+		return
+	}
+
+	sessionCacheKey := fmt.Sprintf("authentication:%x", challengeRequest.SessionId)
+
+	{ // Check to make sure that the session is not already in the cache.
+		result, err := c.memory.Get(c.getContext(ctx), sessionCacheKey)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to setup authentication session")
+			return
+		}
+
+		if result != nil {
+			c.badRequest(ctx, "invalid sessionId provided")
+			return
+		}
+	}
+
+	repo := c.mustGetUnauthenticatedRepository(ctx)
+
+	login, err := repo.GetLoginForChallenge(c.getContext(ctx), challengeRequest.Email)
+	if err != nil {
+		// If we could not verify the email address exists, force the client to fall back to legacy authentication. This
+		// will make them fail normally if the credentials truely are bad.
+		ctx.JSON(map[string]interface{}{
+			"secure": false,
+		})
+		return
+	}
+
+	// If the stuff needed for SRP is missing then the login is still using legacy authentication. Let the client know.
+	if login.Verifier == nil && login.Salt == nil {
+		ctx.JSON(map[string]interface{}{
+			"secure": false,
+		})
+		return
+	}
+
+	server := srp.NewSRPServer(srp.KnownGroups[srp.RFC5054Group8192], login.GetVerifier(), nil)
+	B := server.EphemeralPublic()
+
+	encodedServer, err := server.MarshalBinary()
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store authentication session")
+		return
+	}
+
+	// TODO cache the salt as well, we will need it for the authenticate stage.
+	if err = c.memory.SetTTL(c.getContext(ctx), sessionCacheKey, encodedServer, 5*time.Minute); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store authentication session")
+		return
+	}
+
+	ctx.JSON(map[string]interface{}{
+		"secure": true,
+		"public": hex.EncodeToString(B.Bytes()),
+		"salt":   hex.EncodeToString(login.Salt),
+	})
+}
+
+func (c *Controller) secureAuthenticate(ctx iris.Context) {
+	var authenticateRequest struct {
+		Proof     string `json:"proof"`
+		Public    string `json:"public"`
+		SessionId string `json:"sessionId"`
+		// TODO ReCAPTCHA
+	}
+	if err := ctx.ReadJSON(&authenticateRequest); err != nil {
+		c.badRequest(ctx, "invalid challenge request provided")
+		return
+	}
+	if authenticateRequest.SessionId == "" {
+		c.badRequest(ctx, "sessionId must be provided")
+		return
+	}
+
+	sessionCacheKey := fmt.Sprintf("authentication:%x", authenticateRequest.SessionId)
+
+	var srp *srp.SRP
+	{ // Retrieve the SRP instance from our cache.
+
+	}
 }
 
 func (c *Controller) secureRegister(ctx iris.Context) {

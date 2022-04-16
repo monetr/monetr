@@ -1,6 +1,7 @@
 package models
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/pkg/errors"
@@ -67,4 +68,12 @@ type LoginWithVerifier struct {
 	Login
 	Verifier []byte `json:"-" pg:"verifier,notnull"`
 	Salt     []byte `json:"-" pg:"salt,notnull"`
+}
+
+func (l *LoginWithVerifier) GetVerifier() *big.Int {
+	if l.Verifier == nil {
+		return nil
+	}
+
+	return (&big.Int{}).SetBytes(l.Verifier)
 }
