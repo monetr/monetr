@@ -18,7 +18,7 @@ var (
 )
 
 var (
-	ErrEmailAlreadyExists = errors.New("a login with this email already exists")
+	ErrEmailAlreadyExists = errors.New("a login with the same email already exists")
 )
 
 type unauthenticatedRepo struct {
