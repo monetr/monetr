@@ -1,5 +1,33 @@
 # Changelog
 
+### [0.10.13](https://github.com/monetr/monetr/compare/v0.10.12...v0.10.13) (2022-04-18)
+
+
+### Bug Fixes
+
+* **rrule:** Fixed failing tests due to DTSTART. ([033550a](https://github.com/monetr/monetr/commit/033550afc874103faa9b2a6225c224b98cc27b9a))
+
+
+### Dependencies
+
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.16.0 ([00ed758](https://github.com/monetr/monetr/commit/00ed75846bc9d42d878bd3b7074885e6620f6ee5))
+* **api:** update module github.com/kataras/iris/v12 to v12.2.0-beta1 ([3625d66](https://github.com/monetr/monetr/commit/3625d6667aa8650ab177b3b0afcb3749c37a7120))
+* **api:** update module github.com/spf13/viper to v1.11.0 ([1bf6059](https://github.com/monetr/monetr/commit/1bf60599b7236b0029c9c342b00534475bc4689d))
+* **renovate:** update guyarb/golang-test-annotations action to v0.5.1 ([42527d5](https://github.com/monetr/monetr/commit/42527d56d3425855a943d187255f80ffe2a67161))
+* **ui:** update dependency @testing-library/react to v12.1.5 ([86273c2](https://github.com/monetr/monetr/commit/86273c2395664683415c9f5a4c94a598194a59a3))
+* **ui:** update dependency @types/react-redux to v7.1.24 ([d83b7c5](https://github.com/monetr/monetr/commit/d83b7c5dfc7046c021b2646ec703a5408a546111))
+* **ui:** update dependency eslint-config-react-app to v7.0.1 ([7502cbf](https://github.com/monetr/monetr/commit/7502cbf93413951d8f3fa87addc796ccf6faf7b7))
+* **ui:** update dependency eslint-plugin-testing-library to v5.3.1 ([ef6f73b](https://github.com/monetr/monetr/commit/ef6f73b60c5d98ff732076e1f2594c77adf8f656))
+* **ui:** update dependency fs-extra to v10.1.0 ([71c7f5b](https://github.com/monetr/monetr/commit/71c7f5b500a1e43d969fe91f73466d0085a43d43))
+* **ui:** update dependency moment to v2.29.3 ([5ba62d3](https://github.com/monetr/monetr/commit/5ba62d3fa369c19982995f6ddce9a3b37f329cd0))
+* **ui:** update dependency notistack to v2.0.4 ([afb1561](https://github.com/monetr/monetr/commit/afb15610d6e15f7a51b3ddc03d45c4c1603a1fc8))
+* **ui:** update dependency react-select to v5.3.0 ([28cf3a1](https://github.com/monetr/monetr/commit/28cf3a177879350df0722b619a105bf3ac4f08f9))
+* **ui:** update dependency semver to v7.3.7 ([481b9bd](https://github.com/monetr/monetr/commit/481b9bd39ffc6ee76eff88d85b2f5b75c852bbc2))
+* **ui:** update dependency tailwindcss to v3.0.24 ([ee5f3ca](https://github.com/monetr/monetr/commit/ee5f3ca98d3091d282cb0eb4ff9396973e33861e))
+* **ui:** update dependency workbox-webpack-plugin to v6.5.3 ([5ae784e](https://github.com/monetr/monetr/commit/5ae784e2894a4a92e7e72a8238bbb586111c94ef))
+* **ui:** update material-ui monorepo ([123c042](https://github.com/monetr/monetr/commit/123c042b517b5d3c4f84106a7f2ef3147149f0df))
+* **ui:** update typescript-eslint monorepo to v5.19.0 ([10f794b](https://github.com/monetr/monetr/commit/10f794b37279aae808818c3901746f3e4481ced8))
+
 ### [0.10.12](https://github.com/monetr/monetr/compare/v0.10.11...v0.10.12) (2022-04-10)
 
 
