@@ -1,9 +1,11 @@
 package cache
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/base32"
+	"encoding/gob"
 	"time"
 
 	"github.com/1Password/srp"
@@ -12,14 +14,49 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type AuthenticationSession struct {
+	LoginId uint64
+	SRP     *srp.SRP
+}
+
+func (a *AuthenticationSession) MarshalBinary() ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+
+	if err := enc.Encode(a.LoginId); err != nil {
+		return nil, errors.Wrap(err, "failed to encode authentication session login Id")
+	}
+	if err := enc.Encode(a.SRP); err != nil {
+		return nil, errors.Wrap(err, "failed to encode authentication session")
+	}
+
+	return buf.Bytes(), nil
+}
+
+func (a *AuthenticationSession) UnmarshalBinary(src []byte) error {
+	dec := gob.NewDecoder(bytes.NewBuffer(src))
+	a.SRP = new(srp.SRP)
+	values := []interface{}{
+		&a.LoginId,
+		&a.SRP,
+	}
+	for _, value := range values {
+		if err := dec.Decode(value); err != nil {
+			return errors.Wrap(err, "failed to unmarshal authentication session")
+		}
+	}
+
+	return nil
+}
+
 type SRPCache interface {
 	// CacheAuthenticationSession takes the SRP object for the current authentication session and stores it somewhere.
 	// If it is able to store it successfully then a sessionId will be returned that can be used to retrieve the
 	// session from the cache.
-	CacheAuthenticationSession(ctx context.Context, session *srp.SRP) (sessionId string, _ error)
+	CacheAuthenticationSession(ctx context.Context, session *AuthenticationSession) (sessionId string, _ error)
 	// LookupAuthenticationSession attempts to retrieve an SRP object from the cache for the provided sessionId, if the
 	// provided sessionId is not valid; or if the session has expired, then an error will be returned.
-	LookupAuthenticationSession(ctx context.Context, sessionId string) (*srp.SRP, error)
+	LookupAuthenticationSession(ctx context.Context, sessionId string) (*AuthenticationSession, error)
 }
 
 type srpCache struct {
@@ -37,7 +74,7 @@ func NewSRPCache(log *logrus.Entry, cache Cache) SRPCache {
 // CacheAuthenticationSession takes the SRP object for the current authentication session and stores it somewhere.
 // If it is able to store it successfully then a sessionId will be returned that can be used to retrieve the
 // session from the cache.
-func (s *srpCache) CacheAuthenticationSession(ctx context.Context, session *srp.SRP) (sessionId string, err error) {
+func (s *srpCache) CacheAuthenticationSession(ctx context.Context, session *AuthenticationSession) (sessionId string, err error) {
 	span := sentry.StartSpan(ctx, "CacheAuthenticationSession")
 	defer span.Finish()
 
@@ -63,7 +100,7 @@ func (s *srpCache) CacheAuthenticationSession(ctx context.Context, session *srp.
 	)
 }
 
-func (s *srpCache) LookupAuthenticationSession(ctx context.Context, sessionId string) (*srp.SRP, error) {
+func (s *srpCache) LookupAuthenticationSession(ctx context.Context, sessionId string) (*AuthenticationSession, error) {
 	span := sentry.StartSpan(ctx, "LookupAuthenticationSession")
 	defer span.Finish()
 
@@ -74,7 +111,7 @@ func (s *srpCache) LookupAuthenticationSession(ctx context.Context, sessionId st
 	}
 
 	// If we didn't get an error then try to decode our byte array into the SRP object.
-	session := new(srp.SRP)
+	session := new(AuthenticationSession)
 	if err = session.UnmarshalBinary(encodedData); err != nil {
 		return nil, errors.Wrap(err, "failed to read encoded authentication session")
 	}

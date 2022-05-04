@@ -17,6 +17,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetr/monetr/pkg/build"
+	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
@@ -97,7 +98,10 @@ func (c *Controller) secureChallenge(ctx iris.Context) {
 	server := srp.NewSRPServer(srp.KnownGroups[srp.RFC5054Group8192], login.GetVerifier(), nil)
 	B := server.EphemeralPublic()
 
-	sessionId, err := c.authenticationSessions.CacheAuthenticationSession(c.getContext(ctx), server)
+	sessionId, err := c.authenticationSessions.CacheAuthenticationSession(c.getContext(ctx), &cache.AuthenticationSession{
+		LoginId: login.LoginId,
+		SRP:     server,
+	})
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store authentication session")
 		return
@@ -147,7 +151,7 @@ func (c *Controller) secureAuthenticate(ctx iris.Context) {
 		return
 	}
 
-	server, err := c.authenticationSessions.LookupAuthenticationSession(
+	session, err := c.authenticationSessions.LookupAuthenticationSession(
 		c.getContext(ctx),
 		sessionId,
 	)
@@ -156,6 +160,7 @@ func (c *Controller) secureAuthenticate(ctx iris.Context) {
 		return
 	}
 
+	server := session.SRP
 	if err = server.SetOthersPublic(public); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid client public key")
 		return

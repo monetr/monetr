@@ -17,7 +17,10 @@ func TestSRPCache_CacheAuthenticationSession(t *testing.T) {
 		log := testutils.GetLog(t)
 		srpCache := cache.NewSRPCache(log, cacheBasic)
 
-		session := srp.NewSRPServer(srp.KnownGroups[srp.RFC5054Group8192], big.NewInt(1234), nil)
+		session := &cache.AuthenticationSession{
+			LoginId: 12345,
+			SRP:     srp.NewSRPServer(srp.KnownGroups[srp.RFC5054Group8192], big.NewInt(1234), nil),
+		}
 		sessionId, err := srpCache.CacheAuthenticationSession(context.Background(), session)
 		assert.NoError(t, err, "must cache the session")
 		assert.NotEmpty(t, sessionId, "must return a valid sessionId")
