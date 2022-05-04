@@ -22,7 +22,7 @@ require (
 	github.com/kataras/iris/v12 v12.2.0-beta1
 	github.com/mileusna/useragent v1.0.2
 	github.com/nleeper/goment v1.4.4
-	github.com/nyaruka/phonenumbers v1.0.74
+	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
 	github.com/plaid/plaid-go v1.10.0
 	github.com/prometheus/client_golang v1.12.1
