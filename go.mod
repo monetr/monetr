@@ -8,7 +8,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.20.0
 	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
-	github.com/fsnotify/fsnotify v1.5.1
+	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/getsentry/sentry-go v0.13.0
 	github.com/go-pg/migrations/v8 v8.1.0
