@@ -97,6 +97,9 @@ type Cookies struct {
 	// Name defines the name of the cookie to use for authentication. This defaults to `M-Token` but can be customized
 	// if the host wants to.
 	Name string `yaml:"name"`
+	// AuthenticationSessionName defines the name of the cookie that will be used during secure-remote-password
+	// authentication. This defaults to `M-Authentication-Session`.
+	AuthenticationSessionName string `json:"authenticationSessionName"`
 }
 
 type Beta struct {
@@ -472,6 +475,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Sentry.SampleRate", 1.0)
 	v.SetDefault("Sentry.TraceSampleRate", 1.0)
 	v.SetDefault("Server.Cookies.Name", "M-Token")
+	v.SetDefault("Server.Cookies.AuthenticationSessionName", "M-Authentication-Session")
 	v.SetDefault("Server.Cookies.Secure", true)
 	v.SetDefault("Server.Cookies.SameSiteStrict", true)
 	v.SetDefault("Server.ListenPort", 4000)

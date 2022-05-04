@@ -49,6 +49,7 @@ type Controller struct {
 	ps                       pubsub.PublishSubscribe
 	cache                    *redis.Pool
 	memory                   cache.Cache
+	authenticationSessions   cache.SRPCache
 	accounts                 billing.AccountRepository
 	paywall                  billing.BasicPayWall
 	billing                  billing.BasicBilling
@@ -114,6 +115,7 @@ func NewController(
 		)
 	}
 
+	memory := cache.NewCache(log, cachePool)
 	return &Controller{
 		captcha:                  recaptcha,
 		configuration:            configuration,
@@ -128,7 +130,8 @@ func NewController(
 		stripe:                   stripe,
 		ps:                       pubSub,
 		cache:                    cachePool,
-		memory:                   cache.NewCache(log, cachePool),
+		memory:                   memory,
+		authenticationSessions:   cache.NewSRPCache(log, memory),
 		accounts:                 accountsRepo,
 		paywall:                  basicPaywall,
 		billing:                  basicBilling,

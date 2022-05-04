@@ -97,18 +97,21 @@ func (c *Controller) secureChallenge(ctx iris.Context) {
 	server := srp.NewSRPServer(srp.KnownGroups[srp.RFC5054Group8192], login.GetVerifier(), nil)
 	B := server.EphemeralPublic()
 
-	encodedServer, err := server.MarshalBinary()
+	sessionId, err := c.authenticationSessions.CacheAuthenticationSession(c.getContext(ctx), server)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store authentication session")
 		return
 	}
 
-	// TODO cache the salt as well, we will need it for the authenticate stage.
-	if err = c.memory.SetTTL(c.getContext(ctx), sessionCacheKey, encodedServer, 5*time.Minute); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store authentication session")
-		return
-	}
-
+	ctx.SetCookie(&http.Cookie{
+		Name:     c.configuration.Server.Cookies.AuthenticationSessionName,
+		Value:    sessionId,
+		Domain:   c.configuration.APIDomainName,
+		Expires:  time.Now().Add(5 * time.Minute),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+	})
 	ctx.JSON(map[string]interface{}{
 		"secure": true,
 		"public": hex.EncodeToString(B.Bytes()),
@@ -117,27 +120,57 @@ func (c *Controller) secureChallenge(ctx iris.Context) {
 }
 
 func (c *Controller) secureAuthenticate(ctx iris.Context) {
+	sessionId := ctx.GetCookie(c.configuration.Server.Cookies.AuthenticationSessionName)
+	if sessionId == "" {
+		c.returnError(ctx, http.StatusExpectationFailed, "invalid authentication session")
+		return
+	}
+
 	var authenticateRequest struct {
-		Proof     string `json:"proof"`
-		Public    string `json:"public"`
-		SessionId string `json:"sessionId"`
-		// TODO ReCAPTCHA
+		Proof  string `json:"proof"`
+		Public string `json:"public"`
 	}
 	if err := ctx.ReadJSON(&authenticateRequest); err != nil {
 		c.badRequest(ctx, "invalid challenge request provided")
 		return
 	}
-	if authenticateRequest.SessionId == "" {
-		c.badRequest(ctx, "sessionId must be provided")
+
+	public, ok := new(big.Int).SetString(authenticateRequest.Public, 16)
+	if !ok {
+		c.badRequest(ctx, "invalid client public key provided")
 		return
 	}
 
-	sessionCacheKey := fmt.Sprintf("authentication:%x", authenticateRequest.SessionId)
-
-	var srp *srp.SRP
-	{ // Retrieve the SRP instance from our cache.
-
+	proof, err := hex.DecodeString(authenticateRequest.Proof)
+	if err != nil {
+		c.badRequest(ctx, "invalid client proof provided")
+		return
 	}
+
+	server, err := c.authenticationSessions.LookupAuthenticationSession(
+		c.getContext(ctx),
+		sessionId,
+	)
+	if err != nil {
+		c.badRequest(ctx, "invalid authentication session")
+		return
+	}
+
+	if err = server.SetOthersPublic(public); err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid client public key")
+		return
+	}
+
+	if ok = server.GoodClientProof(proof); !ok {
+		c.badRequest(ctx, "invalid client proof")
+		return
+	}
+
+	// At this point the authentication has succeeded. Remove the session cookie, and return a successful status.
+	ctx.RemoveCookie(c.configuration.Server.Cookies.AuthenticationSessionName)
+
+	// TODO We need to associate the authentication session with a specific login based on the provided email. Here is
+	//  where we then need to gather all those details and return necessary information to the client.
 }
 
 func (c *Controller) secureRegister(ctx iris.Context) {

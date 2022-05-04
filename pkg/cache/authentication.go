@@ -42,12 +42,12 @@ func (s *srpCache) CacheAuthenticationSession(ctx context.Context, session *srp.
 	defer span.Finish()
 
 	{ // Generate a sessionId that we can use to store the authentication data.
-		sessionIdBytes := make([]byte, 16)
+		sessionIdBytes := make([]byte, 30)
 		if _, err = rand.Read(sessionIdBytes); err != nil {
 			return "", errors.Wrap(err, "failed to generate authentication session identifier")
 		}
 		// Then take the bytes and turn it into a more friendly identifier.
-		sessionId = base32.StdEncoding.EncodeToString(sessionIdBytes)
+		sessionId = base32.HexEncoding.EncodeToString(sessionIdBytes)
 	}
 
 	// Encode the SRP data into a binary format.
