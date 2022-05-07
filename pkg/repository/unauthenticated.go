@@ -42,6 +42,10 @@ func (u *unauthenticatedRepo) GetLoginForChallenge(ctx context.Context, email st
 	return &login, nil
 }
 
+func (u *unauthenticatedRepo) GetLoginById(ctx context.Context, loginId uint64) (*models.Login, error) {
+	return nil, nil
+}
+
 func (u *unauthenticatedRepo) CreateSecureLogin(ctx context.Context, newLogin *models.LoginWithVerifier) error {
 	span := sentry.StartSpan(ctx, "CreateSecureLogin")
 	defer span.Finish()

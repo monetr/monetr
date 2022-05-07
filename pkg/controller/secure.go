@@ -46,37 +46,19 @@ func (c *Controller) handleSecureAuthentication(p router.Party) {
 }
 
 func (c *Controller) secureChallenge(ctx iris.Context) {
+	// The client only needs to provide two fields initially. The email address of the login they are trying to
+	// authenticate to, and a ReCAPTCHA result (if the configuration requires ReCAPTCHA).
 	var challengeRequest struct {
 		Email     string `json:"email"`
-		SessionId string `json:"sessionId"`
-		// TODO ReCAPTCHA
+		ReCAPTCHA string `json:"captcha"`
 	}
 	if err := ctx.ReadJSON(&challengeRequest); err != nil {
 		c.badRequest(ctx, "invalid challenge request provided")
 		return
 	}
-	if challengeRequest.SessionId == "" {
-		c.badRequest(ctx, "sessionId must be provided")
-		return
-	}
 
-	sessionCacheKey := fmt.Sprintf("authentication:%x", challengeRequest.SessionId)
-
-	{ // Check to make sure that the session is not already in the cache.
-		result, err := c.memory.Get(c.getContext(ctx), sessionCacheKey)
-		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to setup authentication session")
-			return
-		}
-
-		if result != nil {
-			c.badRequest(ctx, "invalid sessionId provided")
-			return
-		}
-	}
-
+	// Try to look up the login for the provided email address.
 	repo := c.mustGetUnauthenticatedRepository(ctx)
-
 	login, err := repo.GetLoginForChallenge(c.getContext(ctx), challengeRequest.Email)
 	if err != nil {
 		// If we could not verify the email address exists, force the client to fall back to legacy authentication. This
@@ -95,6 +77,8 @@ func (c *Controller) secureChallenge(ctx iris.Context) {
 		return
 	}
 
+	// Create the SRP server side. Right now we are using RFC5054Group8192 but this might change in the future. If it
+	// does, then we need to add a column to the database to indicate what group was used for each verifier.
 	server := srp.NewSRPServer(srp.KnownGroups[srp.RFC5054Group8192], login.GetVerifier(), nil)
 	B := server.EphemeralPublic()
 
@@ -174,8 +158,88 @@ func (c *Controller) secureAuthenticate(ctx iris.Context) {
 	// At this point the authentication has succeeded. Remove the session cookie, and return a successful status.
 	ctx.RemoveCookie(c.configuration.Server.Cookies.AuthenticationSessionName)
 
-	// TODO We need to associate the authentication session with a specific login based on the provided email. Here is
-	//  where we then need to gather all those details and return necessary information to the client.
+	repo := c.mustGetUnauthenticatedRepository(ctx)
+	login, err := repo.GetLoginById(c.getContext(ctx), session.LoginId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve login details for authentication session")
+		return
+	}
+
+	log := c.getLog(ctx).WithField("loginId", login.LoginId)
+
+	if c.configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
+		log.Debug("login email address is not verified, please verify before continuing")
+		c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerified)
+		return
+	}
+
+	if login.TOTP != "" {
+		panic("TOTP for secure authentication not yet implemented")
+	}
+
+	switch len(login.Users) {
+	case 0:
+		c.returnError(ctx, http.StatusInternalServerError, "user has no accounts")
+		return
+	case 1:
+		user := login.Users[0]
+
+		if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
+			hub.ConfigureScope(func(scope *sentry.Scope) {
+				scope.SetUser(sentry.User{
+					ID:       strconv.FormatUint(user.AccountId, 10),
+					Username: fmt.Sprintf("account:%d", user.AccountId),
+				})
+			})
+		}
+
+		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
+			return
+		}
+
+		c.updateAuthenticationCookie(ctx, token)
+
+		if !c.configuration.Stripe.IsBillingEnabled() {
+			// Return their account token.
+			ctx.JSON(map[string]interface{}{
+				"isActive": true,
+			})
+			return
+		}
+
+		subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
+			return
+		}
+
+		result := map[string]interface{}{
+			"isActive": subscriptionIsActive,
+		}
+
+		if !subscriptionIsActive {
+			result["nextUrl"] = "/account/subscribe"
+		}
+
+		ctx.JSON(result)
+	default:
+		// If the login has more than one user then we want to generate a temp
+		// JWT that will only grant them access to API endpoints not specific to
+		// an account.
+		token, err := c.generateToken(login.LoginId, 0, 0)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
+			return
+		}
+
+		c.updateAuthenticationCookie(ctx, token)
+
+		ctx.JSON(map[string]interface{}{
+			"users": login.Users,
+		})
+	}
 }
 
 func (c *Controller) secureRegister(ctx iris.Context) {
