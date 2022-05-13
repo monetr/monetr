@@ -8,6 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	EmailNotVerified = EmailNotVerifiedError{}
+)
+
 type GenericAPIError interface {
 	Cause() error
 	Error() string

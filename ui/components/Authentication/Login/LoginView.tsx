@@ -1,9 +1,7 @@
 import { Button, CircularProgress, TextField } from '@mui/material';
-import { Backdrop1 } from 'assets';
 import classnames from 'classnames';
 import ForgotPasswordMaybe from 'components/Authentication/Login/ForgotPasswordMaybe';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
-import Backdrop from 'components/Layout/Backdrop/Backdrop';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
 import { Formik, FormikHelpers } from 'formik';
@@ -11,7 +9,7 @@ import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
-import useLogin from 'shared/authentication/hooks/useLogin';
+import useSecureLogin from 'shared/authentication/hooks/useSecureLogin';
 import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
@@ -26,7 +24,8 @@ export default function LoginView(): JSX.Element {
   const allowSignUp = useSelector(getSignUpAllowed);
   const verifyLogin = useSelector(getShouldVerifyLogin);
 
-  const login = useLogin();
+  // const login = useLogin();
+  const login = useSecureLogin();
 
   const [captcha, setCaptcha] = useState<string | null>(null);
 

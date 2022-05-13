@@ -21,11 +21,7 @@ export interface SignUpResponse {
   user: User | null;
 }
 
-export interface SignUpError {
-  error: string;
-}
-
-export default function useSignUp(): (args: SignUpArguments) => Promise<SignUpResponse | SignUpError> {
+export default function useSignUp(): (args: SignUpArguments) => Promise<SignUpResponse> {
   return (args: SignUpArguments) => {
     return request().post('/authentication/register', args)
       .then(result => result.data as SignUpResponse)

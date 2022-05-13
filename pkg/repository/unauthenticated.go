@@ -17,8 +17,62 @@ var (
 	_ UnauthenticatedRepository = &unauthenticatedRepo{}
 )
 
+var (
+	ErrEmailAlreadyExists = errors.New("a login with the same email already exists")
+)
+
 type unauthenticatedRepo struct {
 	txn pg.DBI
+}
+
+func (u *unauthenticatedRepo) GetLoginForChallenge(ctx context.Context, email string) (*models.LoginWithVerifier, error) {
+	span := sentry.StartSpan(ctx, "GetLoginForChallenge")
+	defer span.Finish()
+
+	email = strings.ToLower(email)
+	var login models.LoginWithVerifier
+	err := u.txn.ModelContext(span.Context(), &login).
+		Where(`"email" = ?`, email).
+		Limit(1).
+		Select(&login)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve login details")
+	}
+
+	return &login, nil
+}
+
+func (u *unauthenticatedRepo) GetLoginById(ctx context.Context, loginId uint64) (*models.Login, error) {
+	return nil, nil
+}
+
+func (u *unauthenticatedRepo) CreateSecureLogin(ctx context.Context, newLogin *models.LoginWithVerifier) error {
+	span := sentry.StartSpan(ctx, "CreateSecureLogin")
+	defer span.Finish()
+
+	// Just to make sure, clean up these fields.
+	newLogin.Email = strings.ToLower(newLogin.Email)
+	newLogin.LoginId = 0
+
+	count, err := u.txn.ModelContext(span.Context(), newLogin).
+		Where(`"email" = ?`, newLogin.Email).
+		Count()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to verify if email is unique")
+	}
+
+	if count != 0 {
+		span.Status = sentry.SpanStatusInvalidArgument
+		return errors.WithStack(ErrEmailAlreadyExists)
+	}
+
+	_, err = u.txn.ModelContext(span.Context(), newLogin).Insert(newLogin)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+	}
+
+	return errors.Wrap(err, "failed to create new login")
 }
 
 func (u *unauthenticatedRepo) CreateLogin(
@@ -48,7 +102,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 
 	if count != 0 {
 		span.Status = sentry.SpanStatusInvalidArgument
-		return nil, errors.Errorf("a login with the same email already exists")
+		return nil, errors.WithStack(ErrEmailAlreadyExists)
 	}
 
 	_, err = u.txn.ModelContext(span.Context(), login).Insert(login)
