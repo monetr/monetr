@@ -103,7 +103,7 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
         Option: SpendingSelectOption,
       } }
       classNamePrefix="transaction-select"
-      className="w-full md:basis-1/2 pl-0 pr-0 pt-2.5 md:pl-2.5 md:pt-0 md:pb-0"
+      className="w-full md:basis-1/2 pl-0 pr-1 pt-2.5 md:pl-2.5 md:pt-0 md:pb-0"
       isClearable={ false }
       isDisabled={ false }
       isLoading={ false }

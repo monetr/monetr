@@ -1,3 +1,4 @@
+import { AccessTime } from '@mui/icons-material';
 import { Chip, Divider, ListItem } from '@mui/material';
 import classnames from 'classnames';
 import TransactionNameEditor from 'components/Transactions/TransactionsView/TransactionNameEditor';
@@ -19,8 +20,8 @@ export default function TransactionItem(props: Props): JSX.Element {
           <TransactionNameEditor transaction={ props.transaction }/>
           <TransactionSpentFromSelection transaction={ props.transaction }/>
         </div>
-        { props.transaction.isPending && <Chip label="Pending" className="self-center align-middle"/> }
         <div className="basis-3/12 md:basis-2/12 flex justify-end w-full items-center">
+          { props.transaction.isPending && <Chip icon={<AccessTime />} label="Pending" className="mr-auto"/> }
           <span className={ classnames('h-full amount align-middle self-center place-self-center', {
             'addition': props.transaction.getIsAddition(),
           }) }>
