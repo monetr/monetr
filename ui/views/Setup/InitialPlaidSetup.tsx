@@ -70,6 +70,7 @@ const InitialPlaidSetup = (): JSX.Element => {
 
   function longPollSetup(linkId: number) {
     setState(prevState => ({
+      loading: true,
       longPollAttempts: prevState.longPollAttempts + 1,
     }));
 
@@ -125,7 +126,10 @@ const InitialPlaidSetup = (): JSX.Element => {
     })
       .then(result => {
         const linkId: number = result.data.linkId;
-        setState({ linkId });
+        setState({
+          linkId: linkId,
+          loading: true,
+        });
 
         return longPollSetup(linkId)
           .then(() => {
