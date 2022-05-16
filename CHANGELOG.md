@@ -1,5 +1,20 @@
 # Changelog
 
+### [0.10.15](https://github.com/monetr/monetr/compare/v0.10.14...v0.10.15) (2022-05-16)
+
+
+### Bug Fixes
+
+* **docs:** Fixed "Getting Started" link for development docs. ([7a3347a](https://github.com/monetr/monetr/commit/7a3347aa69b9fe87ab51a6910050718af3994821))
+
+
+### Dependencies
+
+* **containers:** update dependency redis to v6.2.7 ([151f0d0](https://github.com/monetr/monetr/commit/151f0d07f49b6b74b9b85cb7bf0831612a55f2ac))
+* **containers:** update dependency squidfunk/mkdocs-material to v8.2.15 ([8153709](https://github.com/monetr/monetr/commit/815370944cca5ed4df5886f4e4af63202fd3c8da))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.3.3 ([7afdc4d](https://github.com/monetr/monetr/commit/7afdc4d3c993a68b67c198d5c921fe49a11722dd))
+* **ui:** update babel monorepo ([b3b9e07](https://github.com/monetr/monetr/commit/b3b9e07d4949debc14a4d917c6ec36bc6a0f279b))
+
 ### [0.10.14](https://github.com/monetr/monetr/compare/v0.10.13...v0.10.14) (2022-05-16)
 
 
