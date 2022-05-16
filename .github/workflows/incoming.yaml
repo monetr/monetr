@@ -214,6 +214,8 @@ jobs:
         password: ${{ secrets.GHCR_TOKEN }} # Read only token.
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Build
         run: |
           # God you suck GitHub Actions
