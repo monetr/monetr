@@ -213,9 +213,11 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GHCR_TOKEN }} # Read only token.
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build
         run: |
+          # God you suck GitHub Actions
+          git config --global --add safe.directory /__w/monetr/monetr
           apk update && apk add make
           make mkdocs
       - uses: actions/upload-artifact@v3
