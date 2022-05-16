@@ -213,13 +213,14 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GHCR_TOKEN }} # Read only token.
     steps:
+      - name: God you suck github actions
+        run: |
+          git config --global --add safe.directory /__w/monetr/monetr
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Build
         run: |
-          # God you suck GitHub Actions
-          git config --global --add safe.directory /__w/monetr/monetr
           apk update && apk add make
           make mkdocs
       - uses: actions/upload-artifact@v3
