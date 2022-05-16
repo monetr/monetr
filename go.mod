@@ -17,7 +17,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.2.0
 	github.com/gomodule/redigo v1.8.8
 	github.com/hashicorp/vault/api v1.3.1
-	github.com/iris-contrib/middleware/cors v0.0.0-20220301201128-27fa0f6a7d7e
+	github.com/iris-contrib/middleware/cors v0.0.0-20220417122231-60b1fdb1e02b
 	github.com/jarcoal/httpmock v1.1.0
 	github.com/kataras/iris/v12 v12.2.0-beta2
 	github.com/mileusna/useragent v1.0.2
