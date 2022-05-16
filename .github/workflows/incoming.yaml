@@ -213,7 +213,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GHCR_TOKEN }} # Read only token.
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - name: Build
         run: |
           apk update && apk add make
