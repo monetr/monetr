@@ -19,7 +19,7 @@ require (
 	github.com/hashicorp/vault/api v1.3.1
 	github.com/iris-contrib/middleware/cors v0.0.0-20220301201128-27fa0f6a7d7e
 	github.com/jarcoal/httpmock v1.1.0
-	github.com/kataras/iris/v12 v12.2.0-beta1
+	github.com/kataras/iris/v12 v12.2.0-beta2
 	github.com/mileusna/useragent v1.0.2
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.0.75
@@ -58,7 +58,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/go-pg/zerochecker v0.2.0 // indirect
-	github.com/goccy/go-json v0.9.7-0.20220412154129-171d97575378 // indirect
+	github.com/goccy/go-json v0.9.8-0.20220506185958-23bd66f4c0d5 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -95,7 +95,7 @@ require (
 	github.com/kataras/pio v0.0.10 // indirect
 	github.com/kataras/sitemap v0.0.5 // indirect
 	github.com/kataras/tunnel v0.0.3 // indirect
-	github.com/klauspost/compress v1.15.1 // indirect
+	github.com/klauspost/compress v1.15.3 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mailgun/raymond/v2 v2.0.46 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -129,8 +129,8 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
-	github.com/tdewolff/minify/v2 v2.11.1 // indirect
-	github.com/tdewolff/parse/v2 v2.5.28 // indirect
+	github.com/tdewolff/minify/v2 v2.11.2 // indirect
+	github.com/tdewolff/parse/v2 v2.5.29 // indirect
 	github.com/tkuchiki/go-timezone v0.2.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
@@ -147,10 +147,10 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
-	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
+	golang.org/x/crypto v0.0.0-20220507011949-2cf3adece122 // indirect
+	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
+	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
