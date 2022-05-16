@@ -47,6 +47,8 @@ theme:
       quote: octicons/quote-16
 extra:
   homepage: https://monetr.app
+  version:
+    provider: mike
 extra_css:
   - stylesheets/extra.css
 nav:
@@ -79,8 +81,13 @@ nav:
 plugins:
   - search
   #  - section-index
-  - render_swagger
-
+  - mike:
+      # these fields are all optional; the defaults are as below...
+      version_selector: true   # set to false to leave out the version selector
+      css_dir: css             # the directory to put the version selector's CSS
+      javascript_dir: js       # the directory to put the version selector's JS
+      canonical_version: null  # the version for <link rel="canonical">; `null`
+                               # uses the version specified via `mike deploy`
 markdown_extensions:
   - footnotes
   - admonition

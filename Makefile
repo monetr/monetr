@@ -339,8 +339,18 @@ MKDOCS_IMAGE ?= squidfunk/mkdocs-material:8.2.8
 MKDOCS_YAML=$(PWD)/mkdocs.yaml
 DOCS_FILES=$(shell find $(PWD)/docs -type f)
 DOCS_SITE=$(PWD)/build/site/index.html
+ifndef CI
+$(DOCS_SITE): GIT_USER=$(shell git config user.name)
+$(DOCS_SITE): GIT_EMAIL=$(shell git config user.email)
 $(DOCS_SITE): $(MKDOCS_YAML) $(DOCS_FILES)
-	$(DOCKER) run -v $(PWD):/work -w /work --rm --entrypoint sh $(MKDOCS_IMAGE) /work/scripts/docs-build.sh
+	$(DOCKER) run -v $(PWD):/work \
+		-e GIT_USER="$(GIT_USER)" \
+		-e GIT_EMAIL="$(GIT_EMAIL)" \
+		-w /work --rm --entrypoint sh $(MKDOCS_IMAGE) /work/scripts/docs-build.sh $(RELEASE_VERSION)
+else
+$(DOCS_SITE): $(MKDOCS_YAML) $(DOCS_FILES)
+	$(PWD)/scripts/docs-build.sh $(RELEASE_VERSION)
+endif
 
 mkdocs: $(DOCS_SITE)
 
