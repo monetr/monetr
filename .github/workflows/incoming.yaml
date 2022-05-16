@@ -207,7 +207,11 @@ jobs:
   mkdocs:
     name: MkDocs
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/mkdocs-material-insiders:04052022
+    container:
+      image: ghcr.io/monetr/mkdocs-material-insiders:04262022
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GHCR_TOKEN }} # Read only token.
     steps:
       - uses: actions/checkout@v3
       - name: Build
