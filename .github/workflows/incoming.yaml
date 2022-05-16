@@ -215,7 +215,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build
-        run: make mkdocs
+        run: |
+          apk update && apk add make
+          make mkdocs
       - uses: actions/upload-artifact@v3
         name: Upload Documentation As Artifact
         with:
