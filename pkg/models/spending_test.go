@@ -47,6 +47,16 @@ func TestSpending_GetProgressAmount(t *testing.T) {
 	})
 }
 
+func GiveMeAFundingSchedule(nextContributionDate time.Time, rule *Rule) *FundingSchedule {
+	return &FundingSchedule{
+		FundingScheduleId: 12345,
+		Name:              "Bogus Funding Schedule",
+		Description:       "Bogus",
+		Rule:              rule,
+		NextOccurrence:    nextContributionDate,
+	}
+}
+
 func TestSpending_CalculateNextContribution(t *testing.T) {
 	// This might eventually become obsolete, but it covers a bug scenario I discovered while working on institutions.
 	t.Run("next funding in the past", func(t *testing.T) {
@@ -66,8 +76,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			today,
-			rule,
+			GiveMeAFundingSchedule(today, rule),
 			time.Now(),
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -102,8 +111,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -137,8 +145,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -170,8 +177,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -201,8 +207,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -216,8 +221,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -252,8 +256,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -266,8 +269,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -305,8 +307,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -340,8 +341,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -375,8 +375,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			contributionRule.After(now, false),
-			contributionRule,
+			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -411,8 +410,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			fundingDate,
-			contributionRule,
+			GiveMeAFundingSchedule(fundingDate, contributionRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")

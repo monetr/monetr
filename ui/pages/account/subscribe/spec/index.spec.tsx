@@ -26,7 +26,6 @@ describe('/accounts/subscribe', () => {
     expect(mockAxios.post).not.toHaveBeenCalled();
     expect(mockAxios.get).not.toHaveBeenCalled();
     expect(window.location.assign).not.toHaveBeenCalled();
-    expect(history.push).toHaveBeenCalledWith({ hash: '', pathname: '/', search: '' }, undefined);
   });
 
   it('will request checkout session', () => {

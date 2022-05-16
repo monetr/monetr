@@ -242,8 +242,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				if err = (&spending).CalculateNextContribution(
 					span.Context(),
 					account.Timezone,
-					fundingSchedule.NextOccurrence,
-					fundingSchedule.Rule,
+					fundingSchedule,
 					time.Now(),
 				); err != nil {
 					crumbs.Error(span.Context(), "Failed to calculate next contribution for spending", "spending", map[string]interface{}{

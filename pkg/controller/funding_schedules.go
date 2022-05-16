@@ -132,11 +132,7 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 	// happen via the UI. But it is currently possible for someone to select the current day in the UI. Which then gets
 	// adjusted for midnight that day, which will always be in the past for the user.
 	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) || time.Now().After(fundingSchedule.NextOccurrence) {
-		fundingSchedule.NextOccurrence, err = c.midnightInLocal(ctx, fundingSchedule.Rule.After(time.Now(), false))
-		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine next occurrence")
-			return
-		}
+		fundingSchedule.CalculateNextOccurrence(c.getContext(ctx), c.mustGetTimezone(ctx))
 	}
 
 	// It has never occurred so this needs to be nil.

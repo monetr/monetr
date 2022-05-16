@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/monetr/monetr/pkg/util"
 	"github.com/pkg/errors"
 )
 
@@ -65,8 +64,7 @@ func (e Spending) GetProgressAmount() int64 {
 func (e *Spending) CalculateNextContribution(
 	ctx context.Context,
 	accountTimezone string,
-	nextContributionDate time.Time,
-	nextContributionRule *Rule,
+	fundingSchedule *FundingSchedule,
 	now time.Time,
 ) error {
 	span := sentry.StartSpan(ctx, "CalculateNextContribution")
@@ -79,18 +77,7 @@ func (e *Spending) CalculateNextContribution(
 		return errors.Wrap(err, "failed to parse account's timezone")
 	}
 
-	// Make sure we are working in midnight in the user's timezone.
-	nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
-
-	// Force the start of the rule to be the next contribution date. This fixes a bug where the rule would increment
-	// properly, but would include the current timestamp in that increment causing incorrect comparisons below. This
-	// makes sure that the rule will increment in the user's timezone as intended.
-	nextContributionRule.DTStart(nextContributionDate)
-
-	// If the next contribution date is in the past relative to now, then bump it forward.
-	if nextContributionDate.Before(now) {
-		nextContributionDate = nextContributionRule.After(now, false)
-	}
+	nextContributionDate := fundingSchedule.GetNextContributionDateAfter(now, timezone)
 
 	nextRecurrence := e.NextRecurrence
 	if e.RecurrenceRule != nil {
@@ -130,7 +117,11 @@ func (e *Spending) CalculateNextContribution(
 		// Check to see how many times this expense will be needed between the next contribution date and the
 		// contribution date succeeding it. If the expense is needed multiple times then we need to allocate more to the
 		// expense with each contribution.
-		frequent := e.RecurrenceRule.Between(nextContributionDate, nextContributionRule.After(nextContributionDate, false), false)
+		frequent := e.RecurrenceRule.Between(
+			nextContributionDate,
+			fundingSchedule.GetNextContributionDateAfter(nextContributionDate, timezone),
+			false,
+		)
 		if len(frequent) > 1 {
 			// If the expense is needed more than one time, then multiply the target amount so we can allocate enough
 			// with the next contribution to cover us.
@@ -143,14 +134,18 @@ func (e *Spending) CalculateNextContribution(
 		// Technically this works a bit oddly with expenses that recur more frequently than they can be funded, but
 		// because we have adjusted the target amount above (if this is the case) then the calculation will still be
 		// correct.
-		numberOfContributions := int64(len(nextContributionRule.Between(now, nextRecurrence, false)))
+		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(now, nextRecurrence)
 		nextContribution = (targetAmount - currentAmount) / numberOfContributions
 	case nextRecurrence.Equal(nextContributionDate) && e.SpendingType == SpendingTypeExpense:
 		// Check to see how many times this expense will recur between the next contribution date and the one that
 		// succeeds it. But this time make it an inclusive search (the true at the end). Because the next contribution
 		// date is also the next recurrence we need to allocate an additional targetAmount towards the expense with the
 		// next contribution to cover everything.
-		frequent := e.RecurrenceRule.Between(nextContributionDate, nextContributionRule.After(nextContributionDate, false), true)
+		frequent := e.RecurrenceRule.Between(
+			nextContributionDate,
+			fundingSchedule.GetNextContributionDateAfter(nextContributionDate, timezone),
+			true,
+		)
 		if len(frequent) > 1 {
 			targetAmount *= int64(len(frequent))
 		}

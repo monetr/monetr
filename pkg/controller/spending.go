@@ -157,8 +157,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	if err = spending.CalculateNextContribution(
 		c.getContext(ctx),
 		account.Timezone,
-		fundingSchedule.NextOccurrence,
-		fundingSchedule.Rule,
+		fundingSchedule,
 		time.Now(),
 	); err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
@@ -265,8 +264,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		if err = fromExpense.CalculateNextContribution(
 			c.getContext(ctx),
 			account.Timezone,
-			fundingSchedule.NextOccurrence,
-			fundingSchedule.Rule,
+			fundingSchedule,
 			time.Now(),
 		); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
@@ -300,8 +298,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		if err = toExpense.CalculateNextContribution(
 			c.getContext(ctx),
 			account.Timezone,
-			fundingSchedule.NextOccurrence,
-			fundingSchedule.Rule,
+			fundingSchedule,
 			time.Now(),
 		); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
@@ -437,8 +434,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 		if err = updatedSpending.CalculateNextContribution(
 			c.getContext(ctx),
 			account.Timezone,
-			fundingSchedule.NextOccurrence,
-			fundingSchedule.Rule,
+			fundingSchedule,
 			time.Now(),
 		); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")

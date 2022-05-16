@@ -199,8 +199,7 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 		if err = spending.CalculateNextContribution(
 			span.Context(),
 			account.Timezone,
-			fundingSchedule.NextOccurrence,
-			fundingSchedule.Rule,
+			fundingSchedule,
 			now,
 		); err != nil {
 			log.WithError(err).Warn("failed to calculate next contribution for spending object")

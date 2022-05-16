@@ -76,8 +76,7 @@ func (t *Transaction) AddSpendingToTransaction(ctx context.Context, spending *Sp
 	if err := spending.CalculateNextContribution(
 		span.Context(),
 		account.Timezone,
-		spending.FundingSchedule.NextOccurrence,
-		spending.FundingSchedule.Rule,
+		spending.FundingSchedule,
 		time.Now(),
 	); err != nil {
 		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")

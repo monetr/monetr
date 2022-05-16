@@ -362,8 +362,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		if err = currentExpense.CalculateNextContribution(
 			span.Context(),
 			account.Timezone,
-			currentExpense.FundingSchedule.NextOccurrence,
-			currentExpense.FundingSchedule.Rule,
+			currentExpense.FundingSchedule,
 			time.Now(),
 		); err != nil {
 			return nil, errors.Wrap(err, "failed to calculate next contribution for current transaction expense")
@@ -429,8 +428,7 @@ func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transactio
 	if err = spending.CalculateNextContribution(
 		span.Context(),
 		account.Timezone,
-		spending.FundingSchedule.NextOccurrence,
-		spending.FundingSchedule.Rule,
+		spending.FundingSchedule,
 		time.Now(),
 	); err != nil {
 		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
