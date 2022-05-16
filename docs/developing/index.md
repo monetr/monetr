@@ -12,7 +12,7 @@ problems within monetr.
 
     Fixing bugs, adding features, reviewing code.
 
-    [:octicons-arrow-right-24: Getting started](#)
+    [:octicons-arrow-right-24: Getting started](local.md)
 
 -   :fontawesome-solid-book:{ .lg .middle } __Documentation__
 
