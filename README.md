@@ -15,7 +15,7 @@ completely free to self-host (documentation to come), but requires a Plaid accou
 
 monetr is currently still in heavy development; but is being alpha-tested with the latest release version constantly.
 
-![image](https://user-images.githubusercontent.com/37967690/160265126-8c71c1dd-28aa-4176-b849-de4266b84157.png)
+![image](https://user-images.githubusercontent.com/37967690/168505075-5f5f11d4-0546-4594-a0b3-4ee860a9938e.png)
 
 ## Status
 
