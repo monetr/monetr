@@ -1,5 +1,32 @@
 # Changelog
 
+### [0.10.14](https://github.com/monetr/monetr/compare/v0.10.13...v0.10.14) (2022-05-16)
+
+
+### Features
+
+* **funding:** Allow funding schedules to exclude weekends. ([ede6ecb](https://github.com/monetr/monetr/commit/ede6ecb8dd8ce710cbd1f04adf8f5ee88d3dade6))
+
+
+### Bug Fixes
+
+* **ui/transactions:** Fixed padding issue for pending transactions. ([a033ea9](https://github.com/monetr/monetr/commit/a033ea960d34535e0b60ed3d541c28c8ec199251))
+* **ui:** Fixed loading state on initial Plaid setup. ([ad74acf](https://github.com/monetr/monetr/commit/ad74acfdadea5e55ca55328effca9249b9a8b981))
+* **ui:** Removed some buggy ui code for subscriptions. ([0637009](https://github.com/monetr/monetr/commit/06370098d3b50de45dda42b7e70277457ddc9168))
+
+
+### Dependencies
+
+* **api:** update module github.com/fsnotify/fsnotify to v1.5.4 ([5a2228c](https://github.com/monetr/monetr/commit/5a2228ce59c9f34feb51f577b40c1685bbf46453))
+* **api:** update module github.com/kataras/iris/v12 to v12.2.0-beta2 ([1b12002](https://github.com/monetr/monetr/commit/1b12002510808ec4aa0db44b24fd89706fdfb8c2))
+* **api:** update module github.com/nyaruka/phonenumbers to v1.0.75 ([612db24](https://github.com/monetr/monetr/commit/612db24cdb3a667d335dac99056cf68dc2934c32))
+
+
+### Miscellaneous
+
+* **docs:** Adding basic docs for funding schedules. ([0d5a549](https://github.com/monetr/monetr/commit/0d5a549f2b1fbe719f2680513b357dc93d08059e))
+* Updated screenshot. ([01cedb6](https://github.com/monetr/monetr/commit/01cedb6e73cd202760aaa93017d365e2249a7fcf))
+
 ### [0.10.13](https://github.com/monetr/monetr/compare/v0.10.12...v0.10.13) (2022-04-18)
 
 
