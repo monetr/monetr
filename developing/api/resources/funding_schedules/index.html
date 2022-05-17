@@ -969,6 +969,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#delete-funding-schedule" class="md-nav__link">
+    Delete Funding Schedule
+  </a>
+  
+    <nav class="md-nav" aria-label="Delete Funding Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path_1" class="md-nav__link">
+    Request Path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-funding-schedule-example" class="md-nav__link">
+    Delete Funding Schedule Example
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1192,6 +1219,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#delete-funding-schedule" class="md-nav__link">
+    Delete Funding Schedule
+  </a>
+  
+    <nav class="md-nav" aria-label="Delete Funding Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path_1" class="md-nav__link">
+    Request Path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-funding-schedule-example" class="md-nav__link">
+    Delete Funding Schedule Example
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1359,6 +1413,41 @@ how frequently it occurs.</p>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="nt">&quot;excludeWeekends&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">&quot;nextOccurrence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-05-31T00:00:00-06:00&quot;</span><span class="w"></span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h2 id="delete-funding-schedule">Delete Funding Schedule</h2>
+<p>Delete a funding schedule for a given bank account. This can only be done if there are no spending objects associated
+with the funding schedule you want to remove. This will simply return a <code>200 Ok</code> status code if it succeeds, there is
+no response body.</p>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="err">DELETE /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}</span>
+</code></pre></div>
+<h3 id="request-path_1">Request Path</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bankAccountId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The ID of the bank account the funding schedule belongs to.</td>
+</tr>
+<tr>
+<td><code>fundingScheduleId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The ID of the funding schedule you want to remove.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="delete-funding-schedule-example">Delete Funding Schedule Example</h3>
+<div class="highlight"><span class="filename">Example Delete Funding Schedule Request</span><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>curl --request DELETE <span class="se">\</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  --url <span class="s2">&quot;https://my.monetr.app/api/bank_accounts/123/funding_schedules/123&quot;</span>
 </code></pre></div>
 
 
