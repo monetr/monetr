@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
 	"github.com/monetr/monetr/pkg/models"
 )
 
@@ -31,7 +30,7 @@ func (c *Controller) handleFundingSchedules(p iris.Party) {
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getFundingSchedules(ctx *context.Context) {
+func (c *Controller) getFundingSchedules(ctx iris.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
@@ -66,7 +65,7 @@ func (c *Controller) getFundingSchedules(ctx *context.Context) {
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getFundingScheduleStats(ctx *context.Context) {
+func (c *Controller) getFundingScheduleStats(ctx iris.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
@@ -98,7 +97,7 @@ func (c *Controller) getFundingScheduleStats(ctx *context.Context) {
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
-func (c *Controller) postFundingSchedules(ctx *context.Context) {
+func (c *Controller) postFundingSchedules(ctx iris.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
@@ -146,7 +145,7 @@ func (c *Controller) postFundingSchedules(ctx *context.Context) {
 	ctx.JSON(fundingSchedule)
 }
 
-func (c *Controller) putFundingSchedules(ctx *context.Context) {
+func (c *Controller) putFundingSchedules(ctx iris.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
@@ -155,11 +154,22 @@ func (c *Controller) putFundingSchedules(ctx *context.Context) {
 
 }
 
-func (c *Controller) deleteFundingSchedules(ctx *context.Context) {
+func (c *Controller) deleteFundingSchedules(ctx iris.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		c.badRequest(ctx, "must specify a valid bank account Id")
 		return
 	}
 
+	fundingScheduleId := ctx.Params().GetUint64Default("fundingScheduleId", 0)
+	if fundingScheduleId == 0 {
+		c.badRequest(ctx, "must specify a valid funding schedule Id")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	if err := repo.DeleteFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId); err != nil {
+		c.wrapPgError(ctx, err, "failed to remove funding schedule")
+		return
+	}
 }

@@ -24,6 +24,7 @@ type BaseRepository interface {
 	// DeleteAccount removes all of the records from the database related to the current account. This action cannot be
 	// undone. Any Plaid links should be removed BEFORE calling this function.
 	DeleteAccount(ctx context.Context) error
+	DeleteFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) error
 	DeletePlaidLink(ctx context.Context, plaidLinkId uint64) error
 	DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error
 	DeleteTransaction(ctx context.Context, bankAccountId, transactionId uint64) error

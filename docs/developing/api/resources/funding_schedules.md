@@ -71,3 +71,28 @@ If the funding schedule was created successfully, then you'll receive the create
   "nextOccurrence": "2022-05-31T00:00:00-06:00"
 }
 ```
+
+## Delete Funding Schedule
+
+Delete a funding schedule for a given bank account. This can only be done if there are no spending objects associated
+with the funding schedule you want to remove. This will simply return a `200 Ok` status code if it succeeds, there is
+no response body.
+
+```http title="HTTP"
+DELETE /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}
+```
+
+### Request Path
+
+| Attribute           | Type     | Required   | Description                                                              |
+| -----------------   | -------- | ---------- | ------------------------------------------------------------------------ |
+| `bankAccountId`     | number   | yes        | The ID of the bank account the funding schedule belongs to.              |
+| `fundingScheduleId` | number   | yes        | The ID of the funding schedule you want to remove.                       |
+
+
+### Delete Funding Schedule Example
+
+```shell title="Example Delete Funding Schedule Request"
+curl --request DELETE \
+  --url "https://my.monetr.app/api/bank_accounts/123/funding_schedules/123"
+```

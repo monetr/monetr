@@ -43,4 +43,4 @@ pkill monetr;
 pkill dlv;
 
 # Execute the command with the new environment variables.
-/go/bin/dlv exec --continue --accept-multiclient --listen=:2345 --headless=true --api-version=2 /usr/bin/monetr -- serve --migrate=true;
+/go/bin/dlv exec --continue --api-version 2 --accept-multiclient --listen=:2345 --headless=true --api-version=2 /usr/bin/monetr -- serve --migrate=true;

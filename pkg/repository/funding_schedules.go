@@ -2,10 +2,11 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
-	"time"
 )
 
 func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error) {
@@ -101,5 +102,23 @@ func (r *repositoryBase) UpdateNextFundingScheduleDate(ctx context.Context, fund
 
 	span.Status = sentry.SpanStatusOK
 
+	return nil
+}
+
+func (r *repositoryBase) DeleteFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) error {
+	span := sentry.StartSpan(ctx, "DeleteFundingSchedule")
+	defer span.Finish()
+
+	_, err := r.txn.ModelContext(span.Context(), &models.FundingSchedule{}).
+		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
+		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
+		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
+		Delete()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to remove funding schedule")
+	}
+
+	span.Status = sentry.SpanStatusOK
 	return nil
 }
