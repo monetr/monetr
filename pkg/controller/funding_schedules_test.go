@@ -1,6 +1,7 @@
 package controller_test
 
 import (
+	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -183,5 +184,42 @@ func TestPostFundingSchedules(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").Equal("malformed JSON: invalid character 'o' in literal null (expecting 'u')")
+	})
+}
+
+func TestDeleteFundingSchedules(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAManualLink(t, user)
+		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", fundingSchedule.BankAccountId).
+			WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.Body().Empty()
+	})
+
+	t.Run("funding schedule does not exist", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAManualLink(t, user)
+		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("fundingScheduleId", math.MaxInt64).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().Equal("cannot remove funding schedule, it does not exist")
 	})
 }

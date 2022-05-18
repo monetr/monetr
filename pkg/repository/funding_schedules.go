@@ -9,6 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	ErrFundingScheduleNotFound = errors.New("funding schedule does not exist")
+)
+
 func (r *repositoryBase) GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error) {
 	span := sentry.StartSpan(ctx, "GetFundingSchedules")
 	defer span.Finish()
@@ -109,7 +113,7 @@ func (r *repositoryBase) DeleteFundingSchedule(ctx context.Context, bankAccountI
 	span := sentry.StartSpan(ctx, "DeleteFundingSchedule")
 	defer span.Finish()
 
-	_, err := r.txn.ModelContext(span.Context(), &models.FundingSchedule{}).
+	result, err := r.txn.ModelContext(span.Context(), &models.FundingSchedule{}).
 		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_schedule"."bank_account_id" = ?`, bankAccountId).
 		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
@@ -117,6 +121,9 @@ func (r *repositoryBase) DeleteFundingSchedule(ctx context.Context, bankAccountI
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to remove funding schedule")
+	} else if result.RowsAffected() == 0 {
+		span.Status = sentry.SpanStatusNotFound
+		return errors.WithStack(ErrFundingScheduleNotFound)
 	}
 
 	span.Status = sentry.SpanStatusOK

@@ -7,6 +7,8 @@ import (
 
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/repository"
+	"github.com/pkg/errors"
 )
 
 func (c *Controller) handleFundingSchedules(p iris.Party) {
@@ -169,6 +171,11 @@ func (c *Controller) deleteFundingSchedules(ctx iris.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	if err := repo.DeleteFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId); err != nil {
+		if errors.Is(errors.Cause(err), repository.ErrFundingScheduleNotFound) {
+			c.notFound(ctx, "cannot remove funding schedule, it does not exist")
+			return
+		}
+
 		c.wrapPgError(ctx, err, "failed to remove funding schedule")
 		return
 	}
