@@ -146,3 +146,13 @@ DELETE /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}
 curl --request DELETE \
   --url "https://my.monetr.app/api/bank_accounts/123/funding_schedules/123"
 ```
+
+#### Funding Schedule Does Not Exist
+
+If you try to delete a funding schedule that does not exist, then you will receive the following error.
+
+```json title="404 Not Found"
+{
+  "error": "cannot remove funding schedule, it does not exist"
+}
+```
