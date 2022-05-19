@@ -11725,10 +11725,10 @@ react-is@^16.13.1, react-is@^16.7.0, react-is@^16.8.1:
   resolved "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
-react-plaid-link@3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/react-plaid-link/-/react-plaid-link-3.3.1.tgz#adf89b074519e0e0ed468ca25478e81ae160ecc4"
-  integrity sha512-whBphCaK8fMVk6zqn+t0ROceD6z9ewVv3Z/fd49c3Er7XW8ewrxiF/O6mB8NuR4zHppCm9jM2zO8iQMzECoX3g==
+react-plaid-link@3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/react-plaid-link/-/react-plaid-link-3.3.2.tgz#58799baf7dc35a68cc84b62f721aa51f12df927b"
+  integrity sha512-W2L9C4RCE/KFFia2SUFFTi8SYRQ1UMUXh4iLE/oo4EQ8UYAT6msKzWvauj8bJirlrkzeiUtY6wgkmWil/okaNg==
   dependencies:
     prop-types "^15.7.2"
     react-script-hook "^1.6.0"
