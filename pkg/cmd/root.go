@@ -12,8 +12,11 @@ var (
 			return cmd.Help()
 		},
 	}
+
+	logLevelFlag string
 )
 
 func init() {
+	rootCommand.PersistentFlags().StringVarP(&logLevelFlag, "log-level", "L", "info", "Specify the log level to use, allowed values: trace, debug, info, warn, error, fatal")
 	newVersionCommand(rootCommand)
 }

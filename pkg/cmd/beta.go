@@ -31,7 +31,7 @@ var (
 		Use:   "beta",
 		Short: "Manage beta things",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLogger()
+			log := logging.NewLoggerWithLevel(logLevelFlag)
 
 			options := getDatabaseCommandConfiguration()
 

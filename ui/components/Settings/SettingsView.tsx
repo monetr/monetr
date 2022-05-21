@@ -1,11 +1,9 @@
-import { Info, Lock, Password, Payment, Security, Settings } from '@mui/icons-material';
-import { Box, Button, TextField, Typography } from '@mui/material';
+import { Info, Security, Settings } from '@mui/icons-material';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import AboutView from 'components/About/AboutView/AboutView';
 import ChangePassword from 'components/Settings/ChangePassword';
-import TOTPSettings from 'components/Settings/TOTPSettings';
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 
 interface TabPanelProps {
   children?: React.ReactNode;

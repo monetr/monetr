@@ -38,7 +38,7 @@ var (
 		Short: "Run database migrations against your PostgreSQL.",
 		Long:  "Updates your PostgreSQL database to the latest schema version for monetr.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLoggerWithLevel("info")
+			log := logging.NewLoggerWithLevel(logLevelFlag)
 
 			options := getDatabaseCommandConfiguration()
 
@@ -70,7 +70,7 @@ var (
 		Use:   "version",
 		Short: "Prints version information about your database.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLogger()
+			log := logging.NewLoggerWithLevel(logLevelFlag)
 
 			options := getDatabaseCommandConfiguration()
 

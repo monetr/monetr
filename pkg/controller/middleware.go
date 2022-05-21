@@ -12,6 +12,7 @@ import (
 	sentryiris "github.com/getsentry/sentry-go/iris"
 	"github.com/go-pg/pg/v10"
 	"github.com/kataras/iris/v12"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/ctxkeys"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
@@ -125,7 +126,7 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 	}
 
 	if token == "" {
-		return errors.Errorf("token must be provided")
+		return errors.New("token must be provided")
 	}
 
 	var claims MonetrClaims
@@ -139,12 +140,16 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 	})
 	if err != nil {
 		c.removeCookieIfPresent(ctx)
-		return errors.Wrap(err, "failed to validate token")
+		// Don't return the JWT error to the client, but throw it in Sentry so it can still be used for debugging.
+		crumbs.Error(c.getContext(ctx), "failed to validate token", "authentication", map[string]interface{}{
+			"error": err,
+		})
+		return errors.New("token is not valid")
 	}
 
 	if !result.Valid {
 		c.removeCookieIfPresent(ctx)
-		return errors.Errorf("token is not valid")
+		return errors.New("token is not valid")
 	}
 
 	// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that

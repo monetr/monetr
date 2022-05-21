@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -11,6 +12,7 @@ import (
 
 func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 	logger := logrus.New()
+	logger.Out = os.Stderr
 
 	level, err := logrus.ParseLevel(configuration.Level)
 	if err != nil {
