@@ -4321,10 +4321,10 @@
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-"@redocly/openapi-core@^1.0.0-beta.88":
-  version "1.0.0-beta.93"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.0.0-beta.93.tgz#882db8684598217f621adc7349288229253a0038"
-  integrity sha512-xQj7UnjPj3mKtkyRrm+bjzEoyo0CVNjGP4pV6BzQ0vgKf0Jqq7apFC703psyBH+JscYr7NKK1hPQU76ylhFDdg==
+"@redocly/openapi-core@^1.0.0-beta.97":
+  version "1.0.0-beta.98"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.0.0-beta.98.tgz#3dfdd9b84e16b4c2c686914dd1ec53ef9135b1bd"
+  integrity sha512-lrWCpyaxMYaw0x4F6zP2FosGJGAogrFBz3VNDD3OsaSlC3iQZYIOBI2UNBqVtdnDZSzfTLIdiQtEoXfKzlD2qw==
   dependencies:
     "@redocly/ajv" "^8.6.4"
     "@types/node" "^14.11.8"
@@ -4332,15 +4332,10 @@
     js-levenshtein "^1.1.6"
     js-yaml "^4.1.0"
     lodash.isequal "^4.5.0"
-    minimatch "^3.0.4"
+    minimatch "^5.0.1"
     node-fetch "^2.6.1"
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
-
-"@redocly/react-dropdown-aria@^2.0.11":
-  version "2.0.12"
-  resolved "https://registry.npmjs.org/@redocly/react-dropdown-aria/-/react-dropdown-aria-2.0.12.tgz"
-  integrity sha512-feQEZlyBvQsbT/fvpJ4jJ5OLGaUPpnskHYDsY8DGpPymN+HUeDQrqkBEbbKRwMKidFTI2cxk2kJNNTnvdS9jyw==
 
 "@rollup/plugin-babel@^5.2.0":
   version "5.3.0"
@@ -10014,10 +10009,10 @@ mark.js@^8.11.1:
   resolved "https://registry.npmjs.org/mark.js/-/mark.js-8.11.1.tgz"
   integrity sha1-GA8fnr74sOY45BZq1S24eb6y/8U=
 
-marked@^4.0.10:
-  version "4.0.12"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.12.tgz#2262a4e6fd1afd2f13557726238b69a48b982f7d"
-  integrity sha512-hgibXWrEDNBWgGiK18j/4lkS6ihTe9sxtV4Q1OQppb/0zzyPSzoFANBa5MfsG/zgsWklmNnhm0XACZOH/0HBiQ==
+marked@^4.0.15:
+  version "4.0.16"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-4.0.16.tgz#9ec18fc1a723032eb28666100344d9428cf7a264"
+  integrity sha512-wahonIQ5Jnyatt2fn8KqF/nIqZM8mh3oRu2+l5EANGMhu6RFjiSG52QNE2eWzFMI94HqYSgN184NurgNG6CztA==
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -10556,10 +10551,10 @@ open@^8.0.9:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openapi-sampler@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/openapi-sampler/-/openapi-sampler-1.2.1.tgz#2ca9eea527f8f2ddb32c3ae1dda31afd8bf0833f"
-  integrity sha512-mHrYmyvcLD0qrfqPkPRBAL2z16hGT2rW0d0B7nklfoTcc3pmkJLkSZlKSeFgerUM41E5c7jlxf0Y19xrM7mWQQ==
+openapi-sampler@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/openapi-sampler/-/openapi-sampler-1.2.3.tgz#753b69c4f45b54682469f2343399a10bc60ec993"
+  integrity sha512-dH2QYXqakorV5dxkP/f1BV3Ku4yNn21YmBsqJunnyrHLw7mnCNZZldftgrEpv/66b1m5oaUAmiJoJN+FqBEkJg==
   dependencies:
     "@types/json-schema" "^7.0.7"
     json-pointer "0.6.2"
@@ -11876,10 +11871,10 @@ redent@^3.0.0:
     indent-string "^4.0.0"
     strip-indent "^3.0.0"
 
-redoc-cli@0.13.10:
-  version "0.13.10"
-  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.13.10.tgz#188a9b0f3b43a80bc0ad62ee0b12bb6352179aa0"
-  integrity sha512-txYchKO6rpXJapD6Kg/Vd6mEg3ZJDz+TLCev8dvj8cGQxiSZDJ/V/x3uRfg03EH5FrC71kHC4ETI97MUlye9NQ==
+redoc-cli@0.13.14:
+  version "0.13.14"
+  resolved "https://registry.yarnpkg.com/redoc-cli/-/redoc-cli-0.13.14.tgz#5d580ae5782cca4271ff5d5134328688dfcae530"
+  integrity sha512-QPiVRdz0+CvLmjPzaIAz1RttpYUOSeUbep/WxLXaalu1Z9jeSjsI0yI2+HC3sh/tEuLzaHQ2bvE7mvGq0aTbWA==
   dependencies:
     chokidar "^3.5.1"
     handlebars "^4.7.7"
@@ -11889,17 +11884,16 @@ redoc-cli@0.13.10:
     node-libs-browser "^2.2.1"
     react "^17.0.1"
     react-dom "^17.0.1"
-    redoc "2.0.0-rc.66"
+    redoc "2.0.0-rc.70"
     styled-components "^5.3.0"
     yargs "^17.3.1"
 
-redoc@2.0.0-rc.66:
-  version "2.0.0-rc.66"
-  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.66.tgz#f38495c408ab1b9d1f9bd5db2cdae09a21047018"
-  integrity sha512-ZjmZhYkg46QAkza4SYCouY3TEuqnkjf50uyJBiz6Dyaz55RLClofAKokPoy5uEBo0RkPjxebKf9HTGyrxNqJ8A==
+redoc@2.0.0-rc.70:
+  version "2.0.0-rc.70"
+  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.0.0-rc.70.tgz#24a64f1fa012c104479bc85445bc01662a4d92b4"
+  integrity sha512-sdmZ8FX4JjF50hTSjHJ64Ccu9Ewa2O8+Fo8pCLg8GHFrbaFJ2E+KBDK9pGuAqNi61fm3Z5c91Ur7zqpITkUpNg==
   dependencies:
-    "@redocly/openapi-core" "^1.0.0-beta.88"
-    "@redocly/react-dropdown-aria" "^2.0.11"
+    "@redocly/openapi-core" "^1.0.0-beta.97"
     classnames "^2.3.1"
     decko "^1.2.0"
     dompurify "^2.2.8"
@@ -11907,9 +11901,9 @@ redoc@2.0.0-rc.66:
     json-pointer "^0.6.2"
     lunr "^2.3.9"
     mark.js "^8.11.1"
-    marked "^4.0.10"
+    marked "^4.0.15"
     mobx-react "^7.2.0"
-    openapi-sampler "^1.2.1"
+    openapi-sampler "^1.2.3"
     path-browserify "^1.0.1"
     perfect-scrollbar "^1.5.1"
     polished "^4.1.3"
