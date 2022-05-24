@@ -41,6 +41,42 @@ jobs:
       - name: Dependencies
         run: make ui-dependencies
 
+  local_dev:
+    name: Local Development
+    needs:
+      - go_dependencies
+      - ui_dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            ${{ github.workspace }}/vendor
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-go-
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ${{ github.workspace }}/node_modules
+          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
+            ${{ runner.os }}-ui-
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Setup local development environment
+        run: |
+          make develop
+          curl http://localhost
+          make shutdown
+
   build_ui:
     needs:
       - ui_dependencies
