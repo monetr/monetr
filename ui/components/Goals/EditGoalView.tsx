@@ -161,7 +161,7 @@ export class EditGoalView extends Component<WithConnectionPropTypes, any> {
             onChange={ formik.handleChange }
             disabled={ formik.isSubmitting }
           >
-            { fundingSchedules.map(item => (
+            { fundingSchedules.valueSeq().map(item => (
               <MenuItem
                 key={ item.fundingScheduleId }
                 value={ item.fundingScheduleId }
