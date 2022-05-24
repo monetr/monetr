@@ -232,6 +232,6 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("failed to validate token: token contains an invalid number of segments")
+		response.JSON().Path("$.error").String().Equal("token is not valid")
 	})
 }
