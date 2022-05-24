@@ -1,5 +1,53 @@
 # Changelog
 
+### [0.10.15](https://github.com/monetr/monetr/compare/v0.10.14...v0.10.15) (2022-05-24)
+
+
+### Features
+
+* **api:** Adding support for removing funding schedules. ([8f194f4](https://github.com/monetr/monetr/commit/8f194f431611c05642c654781f8bdef67f1e4e9a))
+* **ci:** Test the local development environment inside CI. ([697ac46](https://github.com/monetr/monetr/commit/697ac4622e368d6b2c9e5f465c070e7837525d66))
+* **cli:** Adding tool to export your data to JSON. ([aac02d6](https://github.com/monetr/monetr/commit/aac02d658e46c9cd776f1dc7f4f9ff13b66e42c1))
+
+
+### Bug Fixes
+
+* **docs:** Fixed "Getting Started" link for development docs. ([7a3347a](https://github.com/monetr/monetr/commit/7a3347aa69b9fe87ab51a6910050718af3994821))
+* **test:** Fixing failing test from auth error changes. ([2f24ace](https://github.com/monetr/monetr/commit/2f24ace78835979fb70801ee5b2c234611013ed6))
+* **ui:** Fixed crash when trying to edit a goal. ([a067dc3](https://github.com/monetr/monetr/commit/a067dc33ffa404632dc7a8cac57926c9407ece5d))
+
+
+### Dependencies
+
+* **containers:** update dependency redis to v6.2.7 ([151f0d0](https://github.com/monetr/monetr/commit/151f0d07f49b6b74b9b85cb7bf0831612a55f2ac))
+* **containers:** update dependency squidfunk/mkdocs-material to v8.2.15 ([8153709](https://github.com/monetr/monetr/commit/815370944cca5ed4df5886f4e4af63202fd3c8da))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.3.3 ([7afdc4d](https://github.com/monetr/monetr/commit/7afdc4d3c993a68b67c198d5c921fe49a11722dd))
+* **ui:** update babel monorepo ([b3b9e07](https://github.com/monetr/monetr/commit/b3b9e07d4949debc14a4d917c6ec36bc6a0f279b))
+* **ui:** update babel monorepo to v7.17.12 ([8dee34a](https://github.com/monetr/monetr/commit/8dee34a9174a25194be30d518880cdedb4b5a6fa))
+* **ui:** update dependency @fontsource/roboto to v4.5.7 ([b33ec2e](https://github.com/monetr/monetr/commit/b33ec2e3907810b7129e861be84d9fd42a2c2e0e))
+* **ui:** update dependency @pmmmwh/react-refresh-webpack-plugin to v0.5.6 ([cd05ad3](https://github.com/monetr/monetr/commit/cd05ad3a45e5b34fa448375b7a90566a96ad01f8))
+* **ui:** update dependency @types/react to v17.0.45 ([2fab942](https://github.com/monetr/monetr/commit/2fab94227e6dd9d60c2984bae5588466329df723))
+* **ui:** update dependency @types/react-dom to v17.0.17 ([639fbd8](https://github.com/monetr/monetr/commit/639fbd81e5d70fb88fea1fbb63db397f36a2b006))
+* **ui:** update dependency autoprefixer to v10.4.7 ([2e4d27e](https://github.com/monetr/monetr/commit/2e4d27e37aadee5e82d8f12965f3ecbc2431661e))
+* **ui:** update dependency dotenv to v16.0.1 ([3ef493a](https://github.com/monetr/monetr/commit/3ef493a227faa09dadc7e1cfe3733f783013d8e6))
+* **ui:** update dependency immer to v9.0.14 ([1c6310f](https://github.com/monetr/monetr/commit/1c6310f4e1c22043c2942f202e85a9df18e91221))
+* **ui:** update dependency notistack to v2.0.5 ([e64bbfd](https://github.com/monetr/monetr/commit/e64bbfd7568ad689d566b727a5a1217aaabb1d6c))
+* **ui:** update dependency path-to-regexp to v6.2.1 ([616d2d4](https://github.com/monetr/monetr/commit/616d2d4d964a3ba20a82141f339b97df686d6cd4))
+* **ui:** update dependency postcss to v8.4.14 ([ded5383](https://github.com/monetr/monetr/commit/ded5383303624e4f650792c1e60360f9c4a6169f))
+* **ui:** update dependency react-plaid-link to v3.3.2 ([543513b](https://github.com/monetr/monetr/commit/543513b2a9e3427a0b15b31ed9cefceb930854cc))
+* **ui:** update dependency react-select to v5.3.2 ([6279feb](https://github.com/monetr/monetr/commit/6279febc232143b3d8217cbae78c9716065a3882))
+
+
+### Miscellaneous
+
+* Adding tests for edit goals view. ([63f37d5](https://github.com/monetr/monetr/commit/63f37d5ce676c200d276a3746b78692809386e05))
+* **deps:** Bump async from 2.6.3 to 2.6.4 ([093cde9](https://github.com/monetr/monetr/commit/093cde99c0d02f5c094dc3120779484eade7fb75))
+* **deps:** Bump ejs from 3.1.6 to 3.1.8 ([b6ee2f0](https://github.com/monetr/monetr/commit/b6ee2f01c37752d0dede0f247e6f623a9bfa1f51))
+* **docs:** Adding a not found error to docs for funding schedules. ([7b6e454](https://github.com/monetr/monetr/commit/7b6e454b635b38de7ad28b232e4301fdb04a744b))
+* **docs:** Adding documentation on reading funding schedules. ([83c3ff7](https://github.com/monetr/monetr/commit/83c3ff7dc0a8e71283a78a03e1ddf90f8bfc9c35))
+* **docs:** Adding github actions docs page. ([96e0983](https://github.com/monetr/monetr/commit/96e0983fdabcb725a6bb170d0ff0973a2beb1d4c))
+* **tests:** Adding tests for deleting funding schedules. ([98a9818](https://github.com/monetr/monetr/commit/98a98183089e55052652073eb443deaa47017337))
+
 ### [0.10.14](https://github.com/monetr/monetr/compare/v0.10.13...v0.10.14) (2022-05-16)
 
 
