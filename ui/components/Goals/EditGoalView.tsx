@@ -1,9 +1,9 @@
 import { DatePicker } from '@mui/lab';
-import { connect } from "react-redux";
-import React, { Component, Fragment } from "react";
-import Spending from "models/Spending";
-import { Formik, FormikErrors, FormikHelpers, FormikProps } from "formik";
-import { getSelectedGoal } from "shared/spending/selectors/getSelectedGoal";
+import { connect } from 'react-redux';
+import React, { Component, Fragment } from 'react';
+import Spending from 'models/Spending';
+import { Formik, FormikErrors, FormikHelpers, FormikProps } from 'formik';
+import { getSelectedGoal } from 'shared/spending/selectors/getSelectedGoal';
 import {
   Button,
   Divider,
@@ -16,12 +16,12 @@ import {
   Select, TextField,
   Typography
 } from '@mui/material';
-import { ArrowBack, DeleteOutline } from "@mui/icons-material";
-import moment from "moment";
-import updateSpending from "shared/spending/actions/updateSpending";
-import MomentUtils from "@date-io/moment";
-import { getFundingSchedules } from "shared/fundingSchedules/selectors/getFundingSchedules";
-import FundingSchedule from "models/FundingSchedule";
+import { ArrowBack, DeleteOutline } from '@mui/icons-material';
+import moment from 'moment';
+import updateSpending from 'shared/spending/actions/updateSpending';
+import MomentUtils from '@date-io/moment';
+import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
+import FundingSchedule from 'models/FundingSchedule';
 import { Map } from 'immutable';
 
 export interface PropTypes {
@@ -154,6 +154,7 @@ export class EditGoalView extends Component<WithConnectionPropTypes, any> {
         <FormControl fullWidth className="mt-5">
           <InputLabel id="edit-funding-schedule-label">Funding Schedule</InputLabel>
           <Select
+            data-testid={ `funding-schedule-selector` }
             labelId="edit-funding-schedule-label"
             id="edit-funding-schedule"
             name="fundingScheduleId"

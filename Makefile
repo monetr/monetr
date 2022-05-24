@@ -315,6 +315,9 @@ shutdown:
 restart-monetr:
 	$(COMPOSE) restart monetr
 
+restart-ui:
+	$(COMPOSE) restart ui
+
 DOCS_DIR=$(BUILD_DIR)/docs
 SWAGGER_YAML=$(DOCS_DIR)/swagger.yaml
 $(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES) $(BUILD_DIR)
