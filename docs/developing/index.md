@@ -20,6 +20,6 @@ problems within monetr.
 
     Contribute to documentation to help others.    
 
-    [:octicons-arrow-right-24: Getting started](#)
+    [:octicons-arrow-right-24: Getting started](documentation.md)
 
 </div>

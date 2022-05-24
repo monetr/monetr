@@ -70,6 +70,7 @@ nav:
       - Developing:
           - Local Development: developing/local.md
           - Credentials: developing/credentials.md
+          - GitHub Actions: developing/github_actions.md
       - API:
           - Resources:
               - developing/api/resources/index.md
