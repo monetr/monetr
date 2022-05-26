@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
-	github.com/alicebob/miniredis/v2 v2.20.0
+	github.com/alicebob/miniredis/v2 v2.21.0
 	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/fsnotify/fsnotify v1.5.4
