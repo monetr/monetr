@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/pkg/errors"
 )
 
@@ -15,6 +16,7 @@ type SpendingType uint8
 const (
 	SpendingTypeExpense SpendingType = iota
 	SpendingTypeGoal
+	SpendingTypeOverflow
 )
 
 type Spending struct {
@@ -71,6 +73,11 @@ func (e *Spending) CalculateNextContribution(
 	defer span.Finish()
 
 	span.SetTag("spendingId", strconv.FormatUint(e.SpendingId, 10))
+
+	if e.SpendingType == SpendingTypeOverflow {
+		crumbs.Debug(ctx, "No need to calculate contribution for overflow spending", nil)
+		return nil
+	}
 
 	timezone, err := time.LoadLocation(accountTimezone)
 	if err != nil {

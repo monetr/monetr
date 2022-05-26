@@ -183,16 +183,8 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 	}
 
 	// Set the user for this webhook for sentry.
-	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
-		hub.ConfigureScope(func(scope *sentry.Scope) {
-			scope.SetUser(sentry.User{
-				ID:       strconv.FormatUint(link.AccountId, 10),
-				Username: fmt.Sprintf("account:%d", link.AccountId),
-			})
-			scope.SetTag("accountId", strconv.FormatUint(link.AccountId, 10))
-			scope.SetTag("linkId", strconv.FormatUint(link.LinkId, 10))
-		})
-	}
+	crumbs.IncludeUserInScope(c.getContext(ctx), link.AccountId)
+	crumbs.AddTag(c.getContext(ctx), "linkId", strconv.FormatUint(link.LinkId, 10))
 
 	log = c.log.WithFields(logrus.Fields{
 		"accountId": link.AccountId,

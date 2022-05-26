@@ -2,8 +2,6 @@ package background
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -64,14 +62,7 @@ func (p *ProcessFundingScheduleHandler) HandleConsumeJob(ctx context.Context, da
 		return err
 	}
 
-	if hub := sentry.GetHubFromContext(ctx); hub != nil {
-		hub.ConfigureScope(func(scope *sentry.Scope) {
-			scope.SetUser(sentry.User{
-				ID:       strconv.FormatUint(job.args.AccountId, 10),
-				Username: fmt.Sprintf("account:%d", job.args.AccountId),
-			})
-		})
-	}
+	crumbs.IncludeUserInScope(ctx, job.args.AccountId)
 
 	return p.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
@@ -167,6 +158,11 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 	}
 
 	expensesToUpdate := make([]models.Spending, 0)
+
+	initialBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)
+	if err != nil {
+		log.WithError(err).Warn("failed to retrieve initial balances")
+	}
 
 	for _, fundingScheduleId := range p.args.FundingScheduleIds {
 		fundingLog := log.WithFields(logrus.Fields{
@@ -274,6 +270,23 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 	if err = p.repo.UpdateSpending(span.Context(), p.args.BankAccountId, expensesToUpdate); err != nil {
 		log.WithError(err).Error("failed to update spending")
 		return err
+	}
+
+	updatedBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)
+	if err != nil {
+		log.WithError(err).Warn("failed to retrieve updated balances")
+	}
+
+	// Trying to determine how often balances go negative.
+	crumbs.Debug(ctx, "Funding result balances", map[string]interface{}{
+		"before": initialBalances,
+		"after":  updatedBalances,
+	})
+	if initialBalances.Safe > 0 && updatedBalances.Safe < 0 {
+		crumbs.Warn(ctx, "Safe to spend has gone negative!", "balance", nil)
+		crumbs.AddTag(ctx, "safe-to-spend", "negative")
+	} else if updatedBalances.Safe > 0 {
+		crumbs.AddTag(ctx, "safe-to-spend", "positive")
 	}
 
 	return nil

@@ -93,3 +93,9 @@ func HTTP(ctx context.Context, message, category, url, method string, statusCode
 		}, nil)
 	}
 }
+
+func AddTag(ctx context.Context, name, value string) {
+	sentry.GetHubFromContext(ctx).ConfigureScope(func(scope *sentry.Scope) {
+		scope.SetTag(name, value)
+	})
+}

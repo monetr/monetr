@@ -1,5 +1,4 @@
 import BalanceNavDisplay from 'components/Balance/BalanceNavDisplay';
-import { Map } from 'immutable';
 import Balance from 'models/Balance';
 import React from 'react';
 import BalancesState from 'shared/balances/state';

@@ -2,8 +2,6 @@ package background
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -72,14 +70,7 @@ func (r *RemoveTransactionsHandler) HandleConsumeJob(ctx context.Context, data [
 		return err
 	}
 
-	if hub := sentry.GetHubFromContext(ctx); hub != nil {
-		hub.ConfigureScope(func(scope *sentry.Scope) {
-			scope.SetUser(sentry.User{
-				ID:       strconv.FormatUint(args.AccountId, 10),
-				Username: fmt.Sprintf("account:%d", args.AccountId),
-			})
-		})
-	}
+	crumbs.IncludeUserInScope(ctx, args.AccountId)
 
 	return r.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
