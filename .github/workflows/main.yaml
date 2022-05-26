@@ -74,7 +74,7 @@ jobs:
       - name: Setup local development environment
         run: |
           make develop
-          curl http://localhost
+          curl http://monetr.local
           make shutdown
 
   build_ui:

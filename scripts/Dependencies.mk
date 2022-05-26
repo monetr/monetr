@@ -35,6 +35,7 @@ GO_BINARY=$(shell which go)
 
 # Check to see if the user has golang installed. If they don't then install it locally just for this project.
 ifeq ("$(strip $(GO_BINARY))","")
+ifndef CI
 GOROOT=$(LOCAL_BIN)/go
 GOVERSION=go1.18.0
 GO_BINARY=$(GOROOT)/bin/go
@@ -55,6 +56,10 @@ install-$(GO): $(LOCAL_BIN) $(LOCAL_TMP) $(CURL)
 
 GO111MODULE=on
 GOROOT=$(LOCAL_BIN)/go
+else
+$(GO):
+	$(error You must have golang installed to perform this task)
+endif
 endif
 
 GO=$(GO_BINARY)
@@ -122,27 +127,17 @@ HOSTESS=$(LOCAL_BIN)/hostess
 $(HOSTESS):
 	@if [ ! -f "$(HOSTESS)" ]; then $(MAKE) install-$(HOSTESS); fi
 
-install-$(HOSTESS): HOSTESS_REPO = "https://github.com/cbednarski/hostess.git"
-install-$(HOSTESS): HOSTESS_DIR=$(LOCAL_TMP)/hostess
-install-$(HOSTESS): $(LOCAL_BIN) $(LOCAL_TMP) $(GO)
+install-$(HOSTESS): $(LOCAL_BIN) $(GO)
 	$(call infoMsg,Installing hostess to $(HOSTESS))
-	-rm -rf $(HOSTESS_DIR)
-	git clone $(HOSTESS_REPO) $(HOSTESS_DIR)
-	cd $(HOSTESS_DIR) && $(GO) build -o $(HOSTESS) .
-	rm -rf $(HOSTESS_DIR)
+	GOBIN=$(LOCAL_BIN) $(GO) install github.com/cbednarski/hostess@latest
 
 MKCERT=$(LOCAL_BIN)/mkcert
 $(MKCERT):
 	@if [ ! -f "$(MKCERT)" ]; then $(MAKE) install-$(MKCERT); fi
 
-install-$(MKCERT): MKCERT_REPO = "https://github.com/FiloSottile/mkcert.git"
-install-$(MKCERT): MKCERT_DIR=$(LOCAL_TMP)/mkcert
-install-$(MKCERT): $(LOCAL_BIN) $(LOCAL_TMP) $(GO)
+install-$(MKCERT): $(LOCAL_BIN) $(GO)
 	$(call infoMsg,Installing mkcert to $(MKCERT))
-	-rm -rf $(MKCERT_DIR)
-	git clone $(MKCERT_REPO) $(MKCERT_DIR)
-	cd $(MKCERT_DIR) && $(GO) build -o $(MKCERT) .
-	rm -rf $(MKCERT_DIR)
+	GOBIN=$(LOCAL_BIN) $(GO) install filippo.io/mkcert@latest
 
 KUBEVAL=$(LOCAL_BIN)/kubeval
 $(KUBEVAL):

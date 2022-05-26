@@ -230,7 +230,10 @@ test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
 
 test: test-go test-ui
 
-clean: shutdown
+
+LOCAL_DOMAIN ?= monetr.local
+
+clean: shutdown $(HOSTESS)
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
 	-rm -rf $(NODE_MODULES)
@@ -245,11 +248,18 @@ DOCKER=$(shell which docker)
 DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env
 COMPOSE_FILE=$(PWD)/docker-compose.yaml
 ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")
-    COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(COMPOSE_FILE)
+	COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(COMPOSE_FILE)
 else
 	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
 endif
-develop: $(NODE_MODULES)
+develop: $(NODE_MODULES) $(HOSTESS)
+ifneq ($(LOCAL_DOMAIN),localhost)
+	$(call infoMsg,Setting up $(LOCAL_DOMAIN) domain with your /etc/hosts file)
+	$(call infoMsg,If you would prefer to not use this; add)
+	$(call infoMsg,	LOCAL_DOMAIN=localhost)
+	$(call infoMsg,to your $(DEVELOPMENT_ENV_FILE) file)
+	sudo $(HOSTESS) add $(LOCAL_DOMAIN) 127.0.0.1
+endif
 	$(COMPOSE) up --wait --remove-orphans
 ifdef NGROK_AUTH # If the developer has an NGROK_AUTH token specified, then bring up webhooks right away too.
 	$(MAKE) webhooks
@@ -259,11 +269,11 @@ endif
 development-info:
 	$(call infoMsg,=====================================================================================================)
 	$(call infoMsg,Local environment is setup.)
-	$(call infoMsg,You should be able to access monetr at:       http://localhost)
+	$(call infoMsg,You should be able to access monetr at:       http://$(LOCAL_DOMAIN))
 	$(call infoMsg,)
 	$(call infoMsg,Other services are run alongside monetr locally; you can access them at the following URLs:)
-	$(call infoMsg,    Email:                                    http://localhost/mail)
-	$(call infoMsg,    Documentation:                            http://localhost/documentation)
+	$(call infoMsg,    Email:                                    http://$(LOCAL_DOMAIN)/mail)
+	$(call infoMsg,    Documentation:                            http://$(LOCAL_DOMAIN)/documentation)
 	$(call infoMsg,)
 	$(call infoMsg,If you want you can see the logs for all the containers using:)
 	$(call infoMsg,  $$ make logs)
@@ -390,12 +400,6 @@ $(GENERATED_YAML): $(HELM) $(SPLIT_YAML)
 		--values=values.$(ENV_LOWER).yaml | $(SPLIT_YAML) --outdir $(GENERATED_YAML) -
 
 generate: $(GENERATED_YAML)
-
-ifndef CI
-ifeq ($(ENV_LOWER),local)
-include $(PWD)/Makefile.local
-endif
-endif
 
 ifndef POSTGRES_PORT
 POSTGRES_PORT=5432

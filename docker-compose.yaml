@@ -21,6 +21,8 @@ services:
       start_period: 60s
     environment:
       air_wd: /build
+      MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
+      MONETR_API_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
       # If you want to do development against Plaid you will need to provide your own secrets. Please do not modify this
       # file, instead define these as environment variables in your own shell when you execute the compose.
       MONETR_PLAID_CLIENT_ID: $PLAID_CLIENT_ID
@@ -91,8 +93,8 @@ services:
       retries: 12
       start_period: 60s
     environment:
-      MH_CORES_ORIGIN: localhost
-      MH_HOSTNAME: localhost
+      MH_CORES_ORIGIN: ${LOCAL_DOMAIN:-monetr.local}
+      MH_HOSTNAME: ${LOCAL_DOMAIN:-monetr.local}
   redis:
     image: redis:6.2.7-alpine
     healthcheck:

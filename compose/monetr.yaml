@@ -1,5 +1,4 @@
 allowsignup: true
-apidomainname: localhost
 externalUrlProtocol: http
 plaid:
   environment: https://sandbox.plaid.com
@@ -11,7 +10,7 @@ redis:
   address: redis
 email:
   enabled: true
-  domain: monetr.mini
+  domain: monetr.local
   smtp:
     username: restapi
     password: mailpassword
@@ -43,4 +42,3 @@ server:
     secure: true
   listenport: 4000
   statsport: 9000
-uiDomainName: localhost
