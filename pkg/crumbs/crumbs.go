@@ -95,7 +95,9 @@ func HTTP(ctx context.Context, message, category, url, method string, statusCode
 }
 
 func AddTag(ctx context.Context, name, value string) {
-	sentry.GetHubFromContext(ctx).ConfigureScope(func(scope *sentry.Scope) {
-		scope.SetTag(name, value)
-	})
+	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		hub.ConfigureScope(func(scope *sentry.Scope) {
+			scope.SetTag(name, value)
+		})
+	}
 }

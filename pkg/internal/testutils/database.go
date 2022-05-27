@@ -226,3 +226,25 @@ func Must[T any, A any](t *testing.T, generalFunction func(arg A) (T, error), ar
 	require.NoError(t, err, "function must succeed without an error")
 	return result
 }
+
+func MustDBUpdate[T any](t *testing.T, model *T) {
+	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
+	result, err := db.Model(model).WherePK().Update(model)
+	require.NoError(t, err, "must be able to update record")
+	require.EqualValues(t, 1, result.RowsAffected(), "must have updated one record")
+}
+
+func MustDBInsert[T any](t *testing.T, model *T) {
+	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
+	result, err := db.Model(model).Insert(model)
+	require.NoError(t, err, "must be able to create record")
+	require.EqualValues(t, 1, result.RowsAffected(), "must have created one record")
+}
+
+func MustDBRead[T any](t *testing.T, model T) T {
+	db := GetPgDatabase(t) // Don't need options, DB should already be in cache
+	var result T
+	err := db.Model(&model).WherePK().Select(&result)
+	require.NoError(t, err, "must be able to read updated record")
+	return result
+}

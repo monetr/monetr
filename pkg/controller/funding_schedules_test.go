@@ -69,8 +69,10 @@ func TestPostFundingSchedules(t *testing.T) {
 		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
-		nextFriday := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;BYDAY=FR").After(time.Now(), false)
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		rule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;BYDAY=FR")
+		rule.DTStart(time.Now().In(timezone).Add(-30 * 24 * time.Hour)) // Force the Rule to be in the correct TZ.
+		nextFriday := rule.After(time.Now(), false)
 		nextFriday = util.MidnightInLocal(nextFriday, timezone)
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 			WithPath("bankAccountId", bank.BankAccountId).

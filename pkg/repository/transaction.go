@@ -271,6 +271,24 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context
 	return result, nil
 }
 
+func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error) {
+	span := sentry.StartSpan(ctx, "GetRecentDepositTransactions")
+	defer span.Finish()
+
+	result := make([]models.Transaction, 0)
+	err := r.txn.ModelContext(span.Context(), &result).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."amount" < 0`). // Negative transactions are deposits.
+		Where(`"transaction"."date" >= ?`, time.Now().Add(-24*time.Hour)).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve recent deposit transactions")
+	}
+
+	return result, nil
+}
+
 func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error) {
 	span := sentry.StartSpan(ctx, "ProcessTransactionSpentFrom")
 	defer span.Finish()

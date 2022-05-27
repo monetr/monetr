@@ -49,6 +49,9 @@ type BaseRepository interface {
 	GetSpendingExists(ctx context.Context, bankAccountId, spendingId uint64) (bool, error)
 	GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error)
 	GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
+	// GetRecentDepositTransactions will return all deposit transactions for the specified bank account within the past
+	// 24 hours.
+	GetRecentDepositTransactions(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
 	GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error)

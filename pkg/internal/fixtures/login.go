@@ -83,3 +83,13 @@ func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
 
 	return user
 }
+
+func GivenAccountIsInTimezone(t *testing.T, account *models.Account, location *time.Location) {
+	db := testutils.GetPgDatabase(t)
+	result, err := db.Model(account).
+		WherePK().
+		Set(`"timezone" = ?`, location.String()).
+		UpdateNotZero(account)
+	require.NoError(t, err, "must be able to set timezone")
+	require.EqualValues(t, 1, result.RowsAffected(), "must have updated a single row")
+}

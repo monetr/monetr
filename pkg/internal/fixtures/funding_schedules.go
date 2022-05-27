@@ -21,6 +21,8 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 	db := testutils.GetPgDatabase(t)
 	repo := repository.NewRepositoryFromSession(bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
 	rule := testutils.Must(t, models.NewRule, ruleString)
+	tz := testutils.MustEz(t, bankAccount.Account.GetTimezone)
+	rule.DTStart(time.Now().In(tz).Add(-30 * 24 * time.Hour))
 
 	fundingSchedule := models.FundingSchedule{
 		AccountId:         bankAccount.AccountId,

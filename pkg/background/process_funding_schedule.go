@@ -175,10 +175,35 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 			return err
 		}
 
+		// If this funding schedule requires waiting for a deposit to process then check to see if there are any.
+		// TODO This approach is not going to scale well, if people were to create funding schedules with wait for
+		//  deposit enabled. But then they never receive a deposit, or maybe the plaid link isn't active anymore, or
+		//  some other scenario. We would continue to try and process these over and over again.
+		if fundingSchedule.WaitForDeposit {
+			log.Info("funding schedule requires a deposit to be present before processing")
+			// TODO Eventually this should be moved out of the for loop.
+			// TODO Maybe this could just be a count? Idk what I'd like to use these transactions for in the future.
+			deposits, err := p.repo.GetRecentDepositTransactions(span.Context(), p.args.BankAccountId)
+			if err != nil {
+				fundingLog.WithError(err).Error("failed to retrieve recent deposits to process funding schedule")
+				return err
+			}
+
+			// If there were any deposits then process the funding schedule, if there were not any deposits then do
+			// nothing.
+			if count := len(deposits); count > 0 {
+				fundingLog.WithField("count", count).Info("found deposits in the last 24 hours")
+			} else {
+				fundingLog.Info("did not find any deposits in the past 24 hours, funding schedule will not be processed")
+				continue
+			}
+		}
+
 		if !fundingSchedule.CalculateNextOccurrence(span.Context(), timezone) {
 			crumbs.Error(span.Context(), "bug: funding schedule for processing occurs in the future", "bug", map[string]interface{}{
 				"nextOccurrence": fundingSchedule.NextOccurrence,
 			})
+			crumbs.AddTag(span.Context(), "bug", "true")
 			span.Status = sentry.SpanStatusInvalidArgument
 			fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
 			continue
@@ -252,7 +277,6 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				expensesToUpdate = append(expensesToUpdate, spending)
 			}
 		}
-
 	}
 
 	if len(expensesToUpdate) == 0 {
