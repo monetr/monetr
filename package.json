@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@date-io/moment": "2.13.1",
+    "@date-io/moment": "2.14.0",
     "@emotion/react": "11.9.0",
     "@emotion/styled": "11.8.1",
     "@fontsource/roboto": "4.5.7",
