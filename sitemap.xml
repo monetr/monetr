@@ -2,127 +2,127 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>http://localhost/documentation/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/CODE_OF_CONDUCT/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/credentials/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/documentation/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/github_actions/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/local/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/authentication/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/bank_accounts/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/funding_schedules/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/institutions/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/links/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/plaid_links/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/spending/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/transactions/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/developing/api/resources/user/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/onboarding/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/bank_accounts/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/bank_accounts/removing/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/funding_schedules/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/funding_schedules/adding/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/self_hosting/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/documentation/help/self_hosting/command_line/</loc>
-         <lastmod>2022-05-27</lastmod>
+         <lastmod>2022-06-01</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
