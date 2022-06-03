@@ -109,6 +109,33 @@ func (r *repositoryBase) UpdateNextFundingScheduleDate(ctx context.Context, fund
 	return nil
 }
 
+func (r *repositoryBase) UpdateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error {
+	span := sentry.StartSpan(ctx, "UpdateFundingSchedule")
+	defer span.Finish()
+
+	fundingSchedule.AccountId = r.AccountId()
+
+	span.Data = map[string]interface{}{
+		"accountId":         r.AccountId(),
+		"fundingScheduleId": fundingSchedule.FundingScheduleId,
+	}
+
+	result, err := r.txn.ModelContext(span.Context(), fundingSchedule).
+		WherePK().
+		UpdateNotZero(&fundingSchedule)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to update funding schedule")
+	} else if result.RowsAffected() != 1 {
+		span.Status = sentry.SpanStatusNotFound
+		return errors.New("no rows updated")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return nil
+}
+
 func (r *repositoryBase) DeleteFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) error {
 	span := sentry.StartSpan(ctx, "DeleteFundingSchedule")
 	defer span.Finish()

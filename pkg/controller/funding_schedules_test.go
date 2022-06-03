@@ -189,6 +189,29 @@ func TestPostFundingSchedules(t *testing.T) {
 	})
 }
 
+func TestPutFundingSchedules(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAManualLink(t, user)
+		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		fundingSchedule.Name = "This is an updated name"
+
+		response := e.PUT("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", fundingSchedule.BankAccountId).
+			WithPath("fundingScheduleId", fundingSchedule.FundingScheduleId).
+			WithJSON(fundingSchedule).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.name").Equal(fundingSchedule.Name)
+	})
+}
+
 func TestDeleteFundingSchedules(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		e := NewTestApplication(t)

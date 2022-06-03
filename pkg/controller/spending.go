@@ -17,7 +17,7 @@ func (c *Controller) handleSpending(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/spending", c.getSpending)
 	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)
 	p.Post("/{bankAccountId:uint64}/spending/transfer", c.postSpendingTransfer)
-	p.Put("/{bankAccountId:uint64}/spending/{expenseId:uint64}", c.putSpending)
+	p.Put("/{bankAccountId:uint64}/spending/{spendingId:uint64}", c.putSpending)
 	p.Delete("/{bankAccountId:uint64}/spending/{spendingId:uint64}", c.deleteSpending)
 }
 
@@ -348,16 +348,19 @@ func (c *Controller) putSpending(ctx *context.Context) {
 		return
 	}
 
+	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
+	if spendingId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid spending Id")
+		return
+	}
+
 	updatedSpending := &models.Spending{}
 	if err := ctx.ReadJSON(updatedSpending); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
-
-	if updatedSpending.SpendingId == 0 {
-		c.badRequest(ctx, "spending Id must be valid")
-		return
-	}
+	updatedSpending.SpendingId = spendingId
+	updatedSpending.BankAccountId = bankAccountId
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 

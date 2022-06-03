@@ -61,6 +61,7 @@ type BaseRepository interface {
 	UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error
 	UpdateLink(ctx context.Context, link *models.Link) error
 	UpdateNextFundingScheduleDate(ctx context.Context, fundingScheduleId uint64, nextOccurrence time.Time) error
+	UpdateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error
 	UpdatePlaidLink(ctx context.Context, plaidLink *models.PlaidLink) error
 	UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error
 

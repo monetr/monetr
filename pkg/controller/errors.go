@@ -79,6 +79,10 @@ func (c *Controller) badRequest(ctx iris.Context, msg string, args ...interface{
 	c.returnError(ctx, http.StatusBadRequest, msg, args...)
 }
 
+func (c *Controller) invalidJson(ctx iris.Context) {
+	c.returnError(ctx, http.StatusBadRequest, "invalid JSON body")
+}
+
 func (c *Controller) notFound(ctx iris.Context, msg string, args ...interface{}) {
 	c.returnError(ctx, http.StatusNotFound, msg, args...)
 }

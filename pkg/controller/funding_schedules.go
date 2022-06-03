@@ -153,7 +153,55 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
 		return
 	}
+	fundingScheduleId := ctx.Params().GetUint64Default("fundingScheduleId", 0)
+	if bankAccountId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid funding schedule Id")
+		return
+	}
+	var request models.FundingSchedule
+	if err := ctx.ReadJSON(&request); err != nil {
+		c.invalidJson(ctx)
+		return
+	}
 
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
+	existingFundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
+		return
+	}
+
+	request.FundingScheduleId = fundingScheduleId
+	request.BankAccountId = bankAccountId
+	request.Name = strings.TrimSpace(request.Name)
+	request.Description = strings.TrimSpace(request.Description)
+	request.AccountId = existingFundingSchedule.AccountId
+	request.LastOccurrence = existingFundingSchedule.LastOccurrence
+
+	if request.Name == "" {
+		c.badRequest(ctx, "funding schedule must have a name")
+		return
+	}
+
+	if request.Rule == nil {
+		c.badRequest(ctx, "funding schedule must include a rule")
+		return
+	}
+
+	// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
+	// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
+	// next occurrence.
+	if !request.NextOccurrence.Equal(existingFundingSchedule.NextOccurrence) && request.NextOccurrence.Before(time.Now()) {
+		request.NextOccurrence = existingFundingSchedule.NextOccurrence
+	}
+
+	if err = repo.UpdateFundingSchedule(c.getContext(ctx), &request); err != nil {
+		c.wrapPgError(ctx, err, "failed to update funding schedule")
+		return
+	}
+
+	ctx.JSON(request)
 }
 
 func (c *Controller) deleteFundingSchedules(ctx iris.Context) {
