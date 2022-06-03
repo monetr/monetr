@@ -1222,6 +1222,60 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#update-funding-schedule" class="md-nav__link">
+    Update Funding Schedule
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Funding Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path_2" class="md-nav__link">
+    Request Path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-body_1" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body_2" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-funding-schedule-examples" class="md-nav__link">
+    Update Funding Schedule Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Funding Schedule Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful_2" class="md-nav__link">
+    Successful
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#delete-funding-schedule" class="md-nav__link">
     Delete Funding Schedule
   </a>
@@ -1230,7 +1284,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#request-path_2" class="md-nav__link">
+  <a href="#request-path_3" class="md-nav__link">
     Request Path
   </a>
   
@@ -1532,6 +1586,60 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#update-funding-schedule" class="md-nav__link">
+    Update Funding Schedule
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Funding Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path_2" class="md-nav__link">
+    Request Path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-body_1" class="md-nav__link">
+    Request Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body_2" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-funding-schedule-examples" class="md-nav__link">
+    Update Funding Schedule Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Funding Schedule Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful_2" class="md-nav__link">
+    Successful
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#delete-funding-schedule" class="md-nav__link">
     Delete Funding Schedule
   </a>
@@ -1540,7 +1648,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#request-path_2" class="md-nav__link">
+  <a href="#request-path_3" class="md-nav__link">
     Request Path
   </a>
   
@@ -1835,13 +1943,169 @@ how frequently it occurs.</p>
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="w">  </span><span class="nt">&quot;nextOccurrence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-05-31T00:00:00-06:00&quot;</span><span class="w"></span>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
+<h2 id="update-funding-schedule">Update Funding Schedule</h2>
+<p>A funding schedule can be updated after it has been created, this will allow people to change when they get paid or when
+they want to allocate funds to budgets. When updating a funding schedule it is recommended that you provide the entire
+funding schedule object. Some fields can be omitted but may result in those fields being unset. To avoid this it is best
+to retrieve the entire funding schedule via an API call, and then update the fields needed and send the updated object
+back using this API endpoint.</p>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">PUT /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}</span>
+</code></pre></div>
+<h3 id="request-path_2">Request Path</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bankAccountId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The ID of the bank account this funding schedule you are updating belongs to.</td>
+</tr>
+<tr>
+<td><code>fundingScheduleId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The ID of the funding schedule that you are updating.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="request-body_1">Request Body</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The name of the new funding schedule. For a given <code>bankAccountId</code> this value must be unique.</td>
+</tr>
+<tr>
+<td><code>rule</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The RRule representing how the funding schedule should occur. See <a href="https://datatracker.ietf.org/doc/html/rfc5545">RFC5545</a>.<br> <strong>Examples</strong>: <br> - The 15th and last day of every month: <code>FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1</code> <br> - Every other friday: <code>FREQ=WEEKLY;INTERVAL=2;BYDAY=FR</code> <br> - Every friday: <code>FREQ=WEEKLY;INTERVAL=1;BYDAY=FR</code></td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The description of the funding schedule, this can be anything you want; but in the UI this is auto filled to be a string of the RRule. For example; <code>The 15th and Last day of every month</code></td>
+</tr>
+<tr>
+<td><code>excludeWeekends</code></td>
+<td>bool</td>
+<td>yes</td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M437.2 403.5 319.1 215V64h7.1c13.25 0 23.1-10.75 23.1-24V24c0-13.25-10.75-24-23.1-24H120c-13.2 0-23.99 10.75-23.99 24v16c0 13.25 10.75 24 23.1 24h7.1L128 215 10.8 403.5C-18.48 450.6 15.27 512 70.89 512h306.2c55.61 0 89.41-61.5 60.11-108.5zM137.1 320l48.15-77.63c4.55-5.07 6.65-11.57 6.65-18.37l.065-160h63.99l-.06 160c0 6.875 2.25 13.25 5.875 18.38L309.9 320H137.1z"/></svg></span> Exclude weekends will adjust the occurrence dates if they were to fall on a weekend. It will set the date to be the closest previous business day. This will not impact the frequency of the funding schedule.</td>
+</tr>
+<tr>
+<td><code>nextOccurrence</code></td>
+<td>datetime</td>
+<td>yes</td>
+<td>You can override the next time this funding schedule will be processed, if you do then the funding schedule will recur relative to this date going forward. This can be useful for adjusting a bi-weekly funding schedule to recur based on an alternate day of each week.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="response-body_2">Response Body</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fundingScheduleId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The unique identifier for the funding schedule you updated. This is globally unique within monetr.</td>
+</tr>
+<tr>
+<td><code>bankAccountId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>This will be the value of the <code>bankAccountId</code> parameter you provided in the API path, and is included on <code>GET</code> requests as well.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The name of the funding schedule provided by you, if there were leading or trailing spaces they will have been trimmed.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>no</td>
+<td>If a description was provided then it will be present here.</td>
+</tr>
+<tr>
+<td><code>rule</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The RRule used to calculate recurrences.</td>
+</tr>
+<tr>
+<td><code>excludeWeekends</code></td>
+<td>bool</td>
+<td>yes</td>
+<td>Whether or not this funding schedule will exclude weekends from its recurrence.</td>
+</tr>
+<tr>
+<td><code>nextOccurrence</code></td>
+<td>datetime</td>
+<td>yes</td>
+<td>The next time this funding schedule will be processed.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="update-funding-schedule-examples">Update Funding Schedule Examples</h3>
+<div class="highlight"><span class="filename">Example Update Funding Schedule Request</span><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>curl --request PUT <span class="se">\</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  --url <span class="s2">&quot;https://my.monetr.app/api/bank_accounts/123/funding_schedules/456&quot;</span> <span class="se">\</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  --header <span class="s2">&quot;content-type: application/json&quot;</span> <span class="se">\</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  --data <span class="s1">&#39;{</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="s1">    &quot;name&quot;: &quot;Payday (Old)&quot;,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="s1">    &quot;description&quot;: &quot;The 15th and Last day of every month&quot;,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="s1">    &quot;rule&quot;: &quot;FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1&quot;,</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="s1">    &quot;excludeWeekends&quot;: false,</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="s1">    &quot;nextOccurrence&quot;: &quot;2022-05-31T00:00:00-06:00&quot;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="s1">}&#39;</span>
+</code></pre></div>
+<h4 id="successful_2">Successful</h4>
+<p>If the funding schedule was updated successfully, then you'll receive the updated object back. Even if you only provided
+a few fields in the request you will receive the entire object in the response.</p>
+<div class="highlight"><span class="filename">200 Ok</span><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;fundingScheduleId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">456</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">&quot;bankAccountId&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Payday (Old)&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The 15th and the Last day of every month&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">&quot;excludeWeekends&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nt">&quot;nextOccurrence&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-05-31T00:00:00-06:00&quot;</span><span class="w"></span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="delete-funding-schedule">Delete Funding Schedule</h2>
 <p>Delete a funding schedule for a given bank account. This can only be done if there are no spending objects associated
 with the funding schedule you want to remove. This will simply return a <code>200 Ok</code> status code if it succeeds, there is
 no response body.</p>
-<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="err">DELETE /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}</span>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="err">DELETE /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}</span>
 </code></pre></div>
-<h3 id="request-path_2">Request Path</h3>
+<h3 id="request-path_3">Request Path</h3>
 <table>
 <thead>
 <tr>
@@ -1867,14 +2131,14 @@ no response body.</p>
 </tbody>
 </table>
 <h3 id="delete-funding-schedule-example">Delete Funding Schedule Example</h3>
-<div class="highlight"><span class="filename">Example Delete Funding Schedule Request</span><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>curl --request DELETE <span class="se">\</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  --url <span class="s2">&quot;https://my.monetr.app/api/bank_accounts/123/funding_schedules/123&quot;</span>
+<div class="highlight"><span class="filename">Example Delete Funding Schedule Request</span><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>curl --request DELETE <span class="se">\</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  --url <span class="s2">&quot;https://my.monetr.app/api/bank_accounts/123/funding_schedules/123&quot;</span>
 </code></pre></div>
 <h4 id="funding-schedule-does-not-exist">Funding Schedule Does Not Exist</h4>
 <p>If you try to delete a funding schedule that does not exist, then you will receive the following error.</p>
-<div class="highlight"><span class="filename">404 Not Found</span><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span><span class="w"></span>
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cannot remove funding schedule, it does not exist&quot;</span><span class="w"></span>
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">}</span><span class="w"></span>
+<div class="highlight"><span class="filename">404 Not Found</span><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cannot remove funding schedule, it does not exist&quot;</span><span class="w"></span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 
 
