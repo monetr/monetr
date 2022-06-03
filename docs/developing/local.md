@@ -77,9 +77,9 @@ is starting up you can use the `make logs` command in another terminal inside th
 ## Working
 
 Congratulations, you should now have monetr running locally on your computer. The `develop` task will print out some
-basic information for you. But if you missed it, you can access the development version of monetr at `http://localhost`.
+basic information for you. But if you missed it, you can access the development version of monetr at `http://monetr.local`.
 
-If you are working on documentation then that can be accessed at `http://localhost/documentation`.
+If you are working on documentation then that can be accessed at `http://monetr.local/documentation`.
 
 Almost all of monetr's code is setup to hot-reload as you make changes. The documentation, Go code and React UI will all
 automatically reload as changes are made. Changes to the Go code will not invoke a browser refresh of any sort though,
