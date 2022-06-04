@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.10.16](https://github.com/monetr/monetr/compare/v0.10.15...v0.10.16) (2022-06-04)
+
+
+### Features
+
+* Adding new settings table, adding metrics to improve safe to spend ([c89be4d](https://github.com/monetr/monetr/commit/c89be4d318b5abe94cbf246c1f4b6a26d24dbc75))
+* **api:** Added support for updating funding schedules ([63ce246](https://github.com/monetr/monetr/commit/63ce246b6ee2718c5e429346314581bce8ac2686))
+* **funding:** Adding basic support for waiting for deposits. ([0ea5d1a](https://github.com/monetr/monetr/commit/0ea5d1a0517263aca60528cd10c9036c68f6ae81))
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.21.0 ([5ea2e5d](https://github.com/monetr/monetr/commit/5ea2e5dd9c4802f8704e3e9415e8a0ea5d58916b))
+* **api:** update module github.com/jarcoal/httpmock to v1.2.0 ([bb12fbf](https://github.com/monetr/monetr/commit/bb12fbf8eb7e3c03f7dfcc59ed6e72a2db414556))
+* **api:** update module github.com/spf13/viper to v1.12.0 ([d064ea0](https://github.com/monetr/monetr/commit/d064ea0bdec7b8f1edd331550f47805670303888))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.111.0 ([f6ec576](https://github.com/monetr/monetr/commit/f6ec57659fe4f9496c70db78fd4fc6dc1c2ab569))
+* **containers:** update dependency squidfunk/mkdocs-material to v8.2.16 ([4df6fb3](https://github.com/monetr/monetr/commit/4df6fb34716da08e3e3ef2aa4769295bf59904ec))
+* **ui:** update dependency @date-io/moment to v2.14.0 ([ab7c6c4](https://github.com/monetr/monetr/commit/ab7c6c4f136abaec0a4411756ad8b70d0b3ce443))
+* **ui:** update dependency webpack to v5.72.1 ([dfe5e92](https://github.com/monetr/monetr/commit/dfe5e9234eb6cfc3ba660eb698f9acf76f90727c))
+* **ui:** update sentry-javascript monorepo to v6.19.7 ([466df41](https://github.com/monetr/monetr/commit/466df41aed50f37b75aa0df9b9a3d83ec2f6415e))
+
+
+### Miscellaneous
+
+* **api:** Improving Links API + docs. ([ae972ba](https://github.com/monetr/monetr/commit/ae972ba0ce8bc5320c9c51eeba0e5504ae382329))
+* **dev:** Removing minikube local development. ([2771138](https://github.com/monetr/monetr/commit/2771138d85c7713dfdba95bd7d2005ed62001c92))
+* **docs:** Updated local development hostname. ([e1a8724](https://github.com/monetr/monetr/commit/e1a87243fd05574b276c7b26482b519190243be5))
+
 ### [0.10.15](https://github.com/monetr/monetr/compare/v0.10.14...v0.10.15) (2022-05-24)
 
 
