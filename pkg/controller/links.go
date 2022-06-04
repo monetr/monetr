@@ -83,31 +83,32 @@ func (c *Controller) getLink(ctx iris.Context) {
 	ctx.JSON(links)
 }
 
-// Create A Link
-// @Summary Create A Link
-// @id create-link
-// @tags Links
-// @description Create a manual link.
-// @Produce json
-// @Accept json
-// @Security ApiKeyAuth
-// @Router /links [post]
-// @Param newLink body swag.CreateLinkRequest true "New Manual Link"
-// @Success 200 {object} swag.LinkResponse "Newly created manual link"
-// @Failure 400 {object} MalformedJSONError "Malformed JSON."
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError "Something went wrong on our end."
 func (c *Controller) postLinks(ctx iris.Context) {
-	var link models.Link
-	if err := ctx.ReadJSON(&link); err != nil {
+	var request struct {
+		InstitutionName       string `json:"institutionName"`
+		CustomInstitutionName string `json:"customInstitutionName"`
+	}
+	if err := ctx.ReadJSON(&request); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
 
-	link.LinkId = 0 // Make sure the link Id is unset.
-	link.InstitutionName = strings.TrimSpace(link.InstitutionName)
-	link.LinkType = models.ManualLinkType
-	link.LinkStatus = models.LinkStatusSetup
+	request.InstitutionName = strings.TrimSpace(request.InstitutionName)
+	request.CustomInstitutionName = strings.TrimSpace(request.CustomInstitutionName)
+	if request.InstitutionName == "" {
+		c.badRequest(ctx, "link must have an institution name")
+		return
+	}
+
+	link := models.Link{
+		InstitutionName:       request.InstitutionName,
+		CustomInstitutionName: request.CustomInstitutionName,
+		LinkType:              models.ManualLinkType,
+		LinkStatus:            models.LinkStatusSetup,
+	}
+	if request.CustomInstitutionName == "" {
+		link.CustomInstitutionName = request.InstitutionName
+	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {

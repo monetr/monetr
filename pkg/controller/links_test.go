@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/pkg/internal/fixtures"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 )
 
@@ -19,6 +20,7 @@ func TestPostLink(t *testing.T) {
 			LinkType:              models.PlaidLinkType, // This should be changed to manual in the response.
 			InstitutionName:       "U.S. Bank",
 			CustomInstitutionName: "US Bank",
+			PlaidInstitutionId:    myownsanity.StringP("ins_123"),
 			CreatedAt:             time.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
 			UpdatedAt:             time.Now().Add(1 * time.Hour),
 		}
@@ -33,6 +35,7 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.linkId").Number().Gt(0)
 		response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
+		response.JSON().Path("$.plaidInstitutionId").Null()
 	})
 
 	t.Run("unauthenticated", func(t *testing.T) {
