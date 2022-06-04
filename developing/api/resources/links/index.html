@@ -1124,6 +1124,16 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Links
+  </span>
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1132,6 +1142,45 @@
   </span>
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#list-links" class="md-nav__link">
+    List Links
+  </a>
+  
+    <nav class="md-nav" aria-label="List Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1254,6 +1303,34 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#list-links" class="md-nav__link">
+    List Links
+  </a>
+  
+    <nav class="md-nav" aria-label="List Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1271,6 +1348,106 @@
 
 
 <h1 id="links">Links</h1>
+<p>Links are used to represent a connection between monetr and Plaid (or potentially some other source of data for bank
+transactions and balances). But links can also be used to represent a manual budgeting "area". Links are either created
+automatically by following the Plaid workflow; or can be created manually using these API endpoints to do manual
+budgeting.</p>
+<h2 id="list-links">List Links</h2>
+<p>This endpoint does not support any pagination, it simply returns all of the links associated with the currently
+authenticated account.</p>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">GET /api/links</span>
+</code></pre></div>
+<h3 id="response-body">Response Body</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>linkId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The unique identifier for a given link within monetr. This is unique.</td>
+</tr>
+<tr>
+<td><code>linkType</code></td>
+<td>enum</td>
+<td>yes</td>
+<td>What type of link this is. <br>- <code>0</code> Unknown (likely an error state) <br>- <code>1</code> Plaid Link (<strong>managed</strong>) <br>- <code>2</code> Manual Link</td>
+</tr>
+<tr>
+<td><code>plaidInstitutionId</code></td>
+<td>string</td>
+<td>no</td>
+<td>If the link is a Plaid link, then this will include Plaid's unique identifier for the institution it is assocaited with. This is used to retrieve basic institution information. It is <code>null</code> for manual links</td>
+</tr>
+<tr>
+<td><code>linkStatus</code></td>
+<td>enum</td>
+<td>yes</td>
+<td>The status of the link, for manual links this will always be <code>2</code>. <br>- <code>0</code> Unknown (likely an error state) <br>- <code>1</code> Pending (the link is currently being setup by the user, or waiting on Plaid data) <br>- <code>2</code> Setup (the link is healthy and functioning normally) <br>- <code>3</code> Error (something is wrong with the link that might require user interaction to resolve) <br>- <code>4</code> Pending Expiration (the credentials for the link are going to expire and it needs to be reauthenticated) <br> - <code>5</code> Revoked (the user has revoked access to the bank via Plaid)</td>
+</tr>
+<tr>
+<td><code>errorCode</code></td>
+<td>string</td>
+<td>no</td>
+<td>If the link is an error state this will have an error code from Plaid, this is used to help decide what action needs to be taken to fix the link.</td>
+</tr>
+<tr>
+<td><code>expirationDate</code></td>
+<td>datetime</td>
+<td>no</td>
+<td>If the Plaid link can expire, then its expiration date will be stored here. After this date the link will need to be reauthenticated.</td>
+</tr>
+<tr>
+<td><code>institutionName</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The name of the instituion or link. If this is a Plaid link then this will be the name of the bank assocaited with the link in Plaid. If this is a manual link then this will be the name given to the link at creation.</td>
+</tr>
+<tr>
+<td><code>customInstitutionName</code></td>
+<td>string</td>
+<td>no</td>
+<td>Plaid links cannot have their <code>institutionName</code> updated, but if the user wants a custom name for a Plaid link then this field will be used.</td>
+</tr>
+<tr>
+<td><code>createdAt</code></td>
+<td>datetime</td>
+<td>yes</td>
+<td>When this link was created. This will be in UTC.</td>
+</tr>
+<tr>
+<td><code>createdByUserId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The ID of the user who created the link. Links are "owned" by the user who creates them. Even if multiple people have access to the same account, a link is "owned" by the one who creates it.</td>
+</tr>
+<tr>
+<td><code>updatedAt</code></td>
+<td>datetime</td>
+<td>yes</td>
+<td>When this link was last updated. <strong>Note</strong>: This field might not be well maintained and should not be relied on, it may be deprecated in the future.</td>
+</tr>
+<tr>
+<td><code>lastManualSync</code></td>
+<td>datetime</td>
+<td>no</td>
+<td>The last time this link was "manually" triggered to sync.</td>
+</tr>
+<tr>
+<td><code>lastSuccessfulUpdate</code></td>
+<td>datetime</td>
+<td>no</td>
+<td>The last time this link successfully received new data from Plaid.</td>
+</tr>
+</tbody>
+</table>
 
 
 
