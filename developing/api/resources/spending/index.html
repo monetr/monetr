@@ -1162,6 +1162,16 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Spending
+  </span>
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -1170,6 +1180,52 @@
   </span>
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#list-spending" class="md-nav__link">
+    List Spending
+  </a>
+  
+    <nav class="md-nav" aria-label="List Spending">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path" class="md-nav__link">
+    Request Path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1254,6 +1310,41 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#list-spending" class="md-nav__link">
+    List Spending
+  </a>
+  
+    <nav class="md-nav" aria-label="List Spending">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path" class="md-nav__link">
+    Request Path
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-body" class="md-nav__link">
+    Response Body
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1271,6 +1362,144 @@
 
 
 <h1 id="spending">Spending</h1>
+<p>Spending objects are used to represent how the user wants to spend their money and how frequently they want to or need
+to spend it. Spending objects create an <a href="https://www.merriam-webster.com/dictionary/earmark">"earmark"</a> against the
+available balance of the bank account they are associated with. This is then used to allow monetr to calculate an amount
+that is safe for the user to spend at any given time; while making sure they still have funds for their defined
+financial obligations.</p>
+<h2 id="list-spending">List Spending</h2>
+<p>This endpoint does not support any pagination, it simply returns all of the spending objects for the provided bank
+account ID.</p>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="err">GET /api/bank_accounts/{bankAccountId}/spending</span>
+</code></pre></div>
+<h3 id="request-path">Request Path</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bankAccountId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The ID of the bank account the spending objects belong to.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="response-body">Response Body</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>spendingId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The unique identifier for a spending object within monetr.</td>
+</tr>
+<tr>
+<td><code>bankAccountId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The bank account that the spending object belongs to. This will match the path parameter for this API endpoint.</td>
+</tr>
+<tr>
+<td><code>fundingScheduleId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The ID of the funding schedule that is used to calculate contributions to the spending object.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>yes</td>
+<td>The name or title of the spending object, this must be unique within a bank account and <code>spendingType</code>.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>no</td>
+<td>The description for the spending object.</td>
+</tr>
+<tr>
+<td><code>spendingType</code></td>
+<td>enum</td>
+<td>yes</td>
+<td>The type of spending object this is. <br> - <code>0</code> Expense <br> - <code>1</code> Goal</td>
+</tr>
+<tr>
+<td><code>targetAmount</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The amount of money (in cents) that this spending object needs at or before it's <code>nextRecurrence</code> date.</td>
+</tr>
+<tr>
+<td><code>currentAmount</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The amount of money (in cents) that is allocated to this spending object.</td>
+</tr>
+<tr>
+<td><code>usedAmount</code></td>
+<td>number</td>
+<td>no</td>
+<td>This field is only used for Goals, it is used to keep track of how much has been spent from the goal. When a transaction is spent from a Goal it increments the <code>usedAmount</code> equal the the amount of the transaction or the <code>currentAmount</code> of the spending object, whichever is lesser.</td>
+</tr>
+<tr>
+<td><code>recurrenceRule</code></td>
+<td>string</td>
+<td>no</td>
+<td>The RRule used to calculate the due dates for a spending object, this is only present for Expenses.</td>
+</tr>
+<tr>
+<td><code>lastRecurrence</code></td>
+<td>datetime</td>
+<td>no</td>
+<td>The timestamp of the last time this spending object was due. This is not a reflection of the last time the spending object was used.</td>
+</tr>
+<tr>
+<td><code>nextRecurrence</code></td>
+<td>datetime</td>
+<td>yes</td>
+<td>The timestamp of the next time this spending object is due, for a Goal this is just the day you want to complete the Goal. For an expense this is the next time it will recur before it is recalculated.</td>
+</tr>
+<tr>
+<td><code>nextContributionAmount</code></td>
+<td>number</td>
+<td>yes</td>
+<td>The amount of money (in cents) that will be allocated to the <code>currentAmount</code> the next time the funding schedule is processed.</td>
+</tr>
+<tr>
+<td><code>isBehind</code></td>
+<td>boolean</td>
+<td>yes</td>
+<td>Spending objects can fall behind if there will not be a funding event before the <code>nextRecurrence</code> and the <code>currentAmount</code> is less than the <code>targetAmount</code>.</td>
+</tr>
+<tr>
+<td><code>isPaused</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>Spending objects can be paused, when they are paused they will not be funded or updated automatically.</td>
+</tr>
+<tr>
+<td><code>dateCreated</code></td>
+<td>datetime</td>
+<td>yes</td>
+<td>The timestamp of when this spending object was created.</td>
+</tr>
+</tbody>
+</table>
 
 
 
