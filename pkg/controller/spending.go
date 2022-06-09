@@ -199,13 +199,13 @@ type SpendingTransfer struct {
 func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
 	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		c.badRequest(ctx, "must specify a valid bank account Id")
 		return
 	}
 
 	transfer := &SpendingTransfer{}
 	if err := ctx.ReadJSON(transfer); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		c.invalidJson(ctx)
 		return
 	}
 

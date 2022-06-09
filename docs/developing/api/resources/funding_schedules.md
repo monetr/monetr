@@ -15,9 +15,9 @@ GET /api/bank_accounts/{bankAccountId}/funding_schedules
 
 ### Request Path
 
-| Attribute       | Type   | Required | Description                                                            |
-|-----------------|--------|----------|------------------------------------------------------------------------|
-| `bankAccountId` | number | yes      | The ID of the bank account this new funding schedule should belong to. |
+| Attribute         | Type     | Required   | Description                                                              |
+| ----------------- | -------- | ---------- | ------------------------------------------------------------------------ |
+| `bankAccountId`   | number   | yes        | The ID of the bank account the funding schedules belong to.              |
 
 ### Response Body
 

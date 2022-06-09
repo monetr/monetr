@@ -164,6 +164,12 @@ func (e *Spending) CalculateNextContribution(
 		nextContribution = int64(math.Max(float64(targetAmount-currentAmount), 0))
 	}
 
+	// If the next contribution would be less than zero (likely because the user manually transferred extra funds to this)
+	// spending object. Then make sure we don't actually attempt to allocate negative funds.
+	if nextContribution < 0 {
+		nextContribution = 0
+	}
+
 	e.NextContributionAmount = nextContribution
 	e.IsBehind = isBehind
 
