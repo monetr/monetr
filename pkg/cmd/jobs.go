@@ -21,8 +21,6 @@ import (
 func init() {
 	rootCommand.AddCommand(JobCommand)
 
-	JobCommand.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use; if omitted ./config.yaml, ~/.monetr/config.yaml or /etc/monetr/config.yaml will be used.")
-
 	JobCommand.AddCommand(RunJobCommand)
 	newCleanupJobsCommand(RunJobCommand)
 	RunJobCommand.AddCommand(RunPullTransactionsCommand)
@@ -59,12 +57,7 @@ var (
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 
-			var configPath *string
-			if len(configFilePath) > 0 {
-				configPath = &configFilePath
-			}
-
-			configuration := config.LoadConfiguration(configPath)
+			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
 			db, err := getDatabase(log, configuration, nil)
@@ -135,12 +128,7 @@ var (
 				return errors.New("--link must be specified if you are running against a single account")
 			}
 
-			var configPath *string
-			if len(configFilePath) > 0 {
-				configPath = &configFilePath
-			}
-
-			configuration := config.LoadConfiguration(configPath)
+			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if AccountIDFlag != 0 && AllFlag {
 				log.Warn("--account flag does nothing when --all is specified")

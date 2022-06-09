@@ -28,14 +28,12 @@ import (
 
 func init() {
 	ServeCommand.PersistentFlags().BoolVarP(&MigrateDatabaseFlag, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
-	ServeCommand.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use, if omitted ./config.yaml or /etc/monetr/config.yaml will be used.")
 	ServeCommand.PersistentFlags().IntVarP(&PortFlag, "port", "p", 0, "Specify a port to serve HTTP traffic on for monetr.")
 	rootCommand.AddCommand(ServeCommand)
 }
 
 var (
 	PortFlag            int
-	configFilePath      = ""
 	MigrateDatabaseFlag = false
 
 	ServeCommand = &cobra.Command{
@@ -48,12 +46,7 @@ var (
 )
 
 func RunServer() error {
-	var configPath *string
-	if len(configFilePath) > 0 {
-		configPath = &configFilePath
-	}
-
-	configuration := config.LoadConfiguration(configPath)
+	configuration := config.LoadConfiguration()
 
 	if PortFlag > 0 {
 		configuration.Server.ListenPort = PortFlag

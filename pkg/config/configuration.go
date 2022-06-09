@@ -10,6 +10,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	// FilePath is set via a flag in pkg/cmd.
+	FilePath string
+	// LogLevel is set via a flag in pkg/cmd.
+	LogLevel string
+)
+
 type PlaidEnvironment string
 
 const (
@@ -390,7 +397,11 @@ func getViper(configFilePath *string) *viper.Viper {
 	return v
 }
 
-func LoadConfiguration(configFilePath *string) Configuration {
+func LoadConfiguration() Configuration {
+	return LoadConfigurationFromFile(&FilePath)
+}
+
+func LoadConfigurationFromFile(configFilePath *string) Configuration {
 	v := getViper(configFilePath)
 
 	return LoadConfigurationEx(v)
@@ -438,7 +449,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 
 func GenerateConfigFile(configFilePath *string, outputFilePath string) error {
 	var v *viper.Viper
-	if configFilePath == nil {
+	if configFilePath == nil || *configFilePath == "" {
 		v = viper.GetViper()
 		setupDefaults(v)
 	} else {
@@ -458,7 +469,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Email.Verification.TokenLifetime", 10*time.Minute)
 	v.SetDefault("Environment", "development")
 	v.SetDefault("Logging.Format", "text")
-	v.SetDefault("Logging.Level", "info")
+	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")

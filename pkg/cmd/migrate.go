@@ -21,7 +21,6 @@ func init() {
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "", "PostgreSQL user.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "", "PostgreSQL database.")
-	DatabaseCommand.PersistentFlags().StringVarP(&configFilePath, "config", "c", "", "Specify a config file to use, if omitted ./config.yaml or /etc/monetr/config.yaml will be used.")
 }
 
 var (
@@ -38,7 +37,7 @@ var (
 		Short: "Run database migrations against your PostgreSQL.",
 		Long:  "Updates your PostgreSQL database to the latest schema version for monetr.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLoggerWithLevel(logLevelFlag)
+			log := logging.NewLoggerWithLevel(config.LogLevel)
 
 			options := getDatabaseCommandConfiguration()
 
@@ -70,7 +69,7 @@ var (
 		Use:   "version",
 		Short: "Prints version information about your database.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLoggerWithLevel(logLevelFlag)
+			log := logging.NewLoggerWithLevel(config.LogLevel)
 
 			options := getDatabaseCommandConfiguration()
 
@@ -113,12 +112,7 @@ var (
 )
 
 func getDatabaseCommandConfiguration() *pg.Options {
-	var configPath *string
-	if len(configFilePath) > 0 {
-		configPath = &configFilePath
-	}
-
-	configuration := config.LoadConfiguration(configPath)
+	configuration := config.LoadConfiguration()
 
 	address := myownsanity.CoalesceStrings(postgresAddress, configuration.PostgreSQL.Address, "localhost")
 	port := myownsanity.CoalesceInts(postgresPort, configuration.PostgreSQL.Port, 5432)

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/logging"
 	"github.com/monetr/monetr/pkg/models"
@@ -31,7 +32,7 @@ var (
 		Use:   "beta",
 		Short: "Manage beta things",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLoggerWithLevel(logLevelFlag)
+			log := logging.NewLoggerWithLevel(config.LogLevel)
 
 			options := getDatabaseCommandConfiguration()
 

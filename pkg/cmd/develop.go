@@ -36,12 +36,7 @@ func newDevelopCommand(parent *cobra.Command) {
 		Use:   "clean:plaid",
 		Short: "Remove all Plaid links currently configured in the development environment.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var configPath *string
-			if len(configFilePath) > 0 {
-				configPath = &configFilePath
-			}
-
-			configuration := config.LoadConfiguration(configPath)
+			configuration := config.LoadConfiguration()
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 			if configFileName := configuration.GetConfigFileName(); configFileName != "" {

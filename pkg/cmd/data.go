@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/pkg/client"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/logging"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
@@ -39,7 +40,7 @@ func newExportDataCommand(parent *cobra.Command) {
 		Use:   "export",
 		Short: "Export data from your monetr account",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLoggerWithLevel(logLevelFlag)
+			log := logging.NewLoggerWithLevel(config.LogLevel)
 
 			monetrClient := client.NewMonetrHTTPClient(log, hostname, token)
 
@@ -153,7 +154,6 @@ func newExportDataCommand(parent *cobra.Command) {
 }
 
 func newImportDataCommand(parent *cobra.Command) {
-	var config string
 	var input string
 	var dryRun bool
 
@@ -166,6 +166,5 @@ func newImportDataCommand(parent *cobra.Command) {
 	}
 	command.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Dry run the data import, this will print any changes or any failures that would occur during the data import without changing anything.")
 	command.PersistentFlags().StringVarP(&input, "input", "i", "monetr_export.json", "Specify the input file, this file must be in the same format as the output of the export command.")
-	command.PersistentFlags().StringVarP(&config, "config", "c", "config.yaml", "Specify a monetr config yaml file, this file is used to connect to the monetr database and provision the data provided.")
 	parent.AddCommand(command)
 }

@@ -16,12 +16,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 		Use:   "cleanup-jobs",
 		Short: "Cleanup old job records in the job table.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var configPath *string
-			if len(configFilePath) > 0 {
-				configPath = &configFilePath
-			}
-
-			configuration := config.LoadConfiguration(configPath)
+			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
 			db, err := getDatabase(log, configuration, nil)
