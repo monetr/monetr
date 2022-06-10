@@ -3,6 +3,7 @@ module github.com/monetr/monetr
 go 1.18
 
 require (
+	cloud.google.com/go/kms v1.4.0
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/alicebob/miniredis/v2 v2.21.0
@@ -34,10 +35,14 @@ require (
 	github.com/teambition/rrule-go v1.8.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
+	google.golang.org/api v0.81.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
 require (
+	cloud.google.com/go v0.100.2 // indirect
+	cloud.google.com/go/compute v1.6.1 // indirect
+	cloud.google.com/go/iam v0.1.0 // indirect
 	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/CloudyKit/jet/v6 v6.1.0 // indirect
@@ -48,7 +53,6 @@ require (
 	github.com/armon/go-metrics v0.3.10 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v3 v3.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
@@ -59,10 +63,13 @@ require (
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/go-pg/zerochecker v0.2.0 // indirect
 	github.com/goccy/go-json v0.9.8-0.20220506185958-23bd66f4c0d5 // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -146,6 +153,7 @@ require (
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9 // indirect
+	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/crypto v0.0.0-20220507011949-2cf3adece122 // indirect
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
