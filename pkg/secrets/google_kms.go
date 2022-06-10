@@ -7,6 +7,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/option"
+	kmspb "google.golang.org/genproto/googleapis/cloud/kms/v1"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type GoogleKMSConfig struct {
@@ -50,12 +52,25 @@ func NewGoogleKMS(ctx context.Context, config GoogleKMSConfig) (KeyManagement, e
 }
 
 func (g *GoogleKMS) Encrypt(input []byte) (keyID, version string, result []byte, _ error) {
-	//TODO implement me
-	panic("implement me")
+	request := &kmspb.EncryptRequest{
+		Name:                        g.config.KeyName,
+		Plaintext:                   input,
+		AdditionalAuthenticatedData: nil,
+		PlaintextCrc32C: &wrapperspb.Int64Value{
+			Value: 0, // TODO Add a CRC32 hash of the input.
+		},
+		AdditionalAuthenticatedDataCrc32C: nil,
+	}
+
+	response, err := g.client.Encrypt(context.Background(), request)
+	if err != nil {
+		return "", "", nil, errors.Wrap(err, "failed to encrypt data using Google KMS")
+	}
+
+	return response.Name, "", response.Ciphertext, nil
 }
 
 func (g *GoogleKMS) Decrypt(keyID, version string, input []byte) (result []byte, _ error) {
 	//TODO implement me
 	panic("implement me")
 }
-
