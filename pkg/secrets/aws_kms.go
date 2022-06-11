@@ -25,7 +25,7 @@ func NewAWSKMS(ctx context.Context, config AWSKMSConfig) (KeyManagement, error) 
 	return nil, nil
 }
 
-func (a *AWSKMS) Encrypt(input []byte) (keyID string, version string, result []byte, _ error) {
+func (a *AWSKMS) Encrypt(ctx context.Context, input []byte) (keyID string, version string, result []byte, _ error) {
 	request := &kms.EncryptInput{
 		EncryptionAlgorithm: aws.String("SYMMETRIC_DEFAULT"),
 		EncryptionContext:   nil,
@@ -42,7 +42,7 @@ func (a *AWSKMS) Encrypt(input []byte) (keyID string, version string, result []b
 	return *response.KeyId, "", response.CiphertextBlob, nil
 }
 
-func (a *AWSKMS) Decrypt(keyID string, version string, input []byte) (result []byte, _ error) {
+func (a *AWSKMS) Decrypt(ctx context.Context, keyID string, version string, input []byte) (result []byte, _ error) {
 	request := &kms.DecryptInput{
 		CiphertextBlob:      input,
 		EncryptionAlgorithm: aws.String("SYMMETRIC_DEFAULT"), // TODO Maybe make this a config thing?

@@ -102,3 +102,12 @@ endpoint.
 **TODO**
 
 [![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/857?label=%23857%20-%20docs%3A%20Document%20SMTP%20credentials.&logo=github)](https://github.com/monetr/monetr/issues/857){:target="_blank"}
+
+## Google Cloud KMS
+
+Google Cloud KMS support is currently being added to improve the security of storing encrypted secrets in monetr. 
+Documentation to follow.
+
+**TODO**
+
+[![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/936?label=%23936%20-%20docs%3A%20Document%20Google%20Cloud%20KMS%20credentials&logo=github)](https://github.com/monetr/monetr/issues/857){:target="_blank"}
