@@ -2,6 +2,9 @@ package secrets
 
 import (
 	"context"
+	"fmt"
+	"hash/crc32"
+	"strings"
 
 	kms "cloud.google.com/go/kms/apiv1"
 	"github.com/getsentry/sentry-go"
@@ -73,30 +76,58 @@ func (g *GoogleKMS) Encrypt(ctx context.Context, input []byte) (keyID, version s
 	defer span.Finish()
 	span.SetTag("kms", "google")
 
+	inputCRC32C := crc32.Checksum(input, crc32.MakeTable(crc32.Castagnoli))
+
 	span.Data = map[string]interface{}{
 		"resource": g.config.KeyName,
+		"checksum": inputCRC32C,
 	}
 
 	request := &kmspb.EncryptRequest{
-		Name:                        g.config.KeyName,
-		Plaintext:                   input,
-		AdditionalAuthenticatedData: nil,
+		Name:      g.config.KeyName,
+		Plaintext: input,
 		PlaintextCrc32C: &wrapperspb.Int64Value{
-			Value: 0, // TODO Add a CRC32 hash of the input.
+			Value: int64(inputCRC32C),
 		},
-		AdditionalAuthenticatedDataCrc32C: nil,
 	}
 
-	response, err := g.client.Encrypt(context.Background(), request)
+	response, err := g.client.Encrypt(span.Context(), request)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return "", "", nil, errors.Wrap(err, "failed to encrypt data using Google KMS")
 	}
 
-	return response.Name, "", response.Ciphertext, nil
+	versionPrefix := fmt.Sprintf("%s/cryptoKeyVersions/", g.config.KeyName)
+
+	return g.config.KeyName, strings.TrimPrefix(response.Name, versionPrefix), response.Ciphertext, nil
 }
 
 func (g *GoogleKMS) Decrypt(ctx context.Context, keyID, version string, input []byte) (result []byte, _ error) {
-	//TODO implement me
-	panic("implement me")
+	span := sentry.StartSpan(ctx, "Decrypt KMS")
+	defer span.Finish()
+	span.SetTag("kms", "google")
+
+	inputCRC32C := crc32.Checksum(input, crc32.MakeTable(crc32.Castagnoli))
+
+	span.Data = map[string]interface{}{
+		"resource": keyID,
+		"version":  version,
+		"checksum": inputCRC32C,
+	}
+
+	request := &kmspb.DecryptRequest{
+		Name:       keyID, // The server knows the appropriate version.
+		Ciphertext: input,
+		CiphertextCrc32C: &wrapperspb.Int64Value{
+			Value: int64(inputCRC32C),
+		},
+	}
+
+	response, err := g.client.Decrypt(span.Context(), request)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to decrypt data using Google KMS")
+	}
+
+	return response.Plaintext, nil
 }
