@@ -21,6 +21,7 @@ services:
       start_period: 60s
     environment:
       air_wd: /build
+      DISABLE_GO_RELOAD: ${DISABLE_GO_RELOAD:-false}
       MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
       MONETR_API_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
       # If you want to do development against Plaid you will need to provide your own secrets. Please do not modify this

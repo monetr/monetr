@@ -85,6 +85,11 @@ Almost all of monetr's code is setup to hot-reload as you make changes. The docu
 automatically reload as changes are made. Changes to the Go code will not invoke a browser refresh of any sort though,
 so to observe a new behavior in the API you will need to refresh or make the API call again.
 
+??? note
+
+    If you want to disable hot reloading of the Go code, you can include `DISABLE_GO_RELOAD=true` in your env variables
+    when you run `make develop`.
+
 ### Debugging
 
 The monetr container running the API has [delve](https://github.com/go-delve/delve) included. If you prefer to work
@@ -150,7 +155,10 @@ make start
 
 ### Completely Clean up
 
-If you want to completely shut everything down { .annotate } then you can run the following command:
+If you want to completely shut everything down (1) then you can run the following command:
+{ .annotate }
+
+1. **This will delete all of your local development data, including any Plaid links, expenses, goals, etc...**
 
 ```shell title="Shell"
 make clean
@@ -159,5 +167,3 @@ make clean
 This removes the Plaid links that are active, takes down the Docker compose containers, removes their volumes, and
 removes all temporary directories and generated code in the project directory. It might miss a few things, but this
 should essentially return the project directory to a state akin to having freshly cloned it.
-
-1. **This will delete all of your local development data, including any Plaid links, expenses, goals, etc...**

@@ -260,6 +260,9 @@ ifneq ($(LOCAL_DOMAIN),localhost)
 	$(call infoMsg,to your $(DEVELOPMENT_ENV_FILE) file)
 	sudo $(HOSTESS) add $(LOCAL_DOMAIN) 127.0.0.1
 endif
+ifdef MKDOCS_IMAGE
+	$(call infoMsg,Using custom MKDocs container image; $(MKDOCS_IMAGE))
+endif
 	$(COMPOSE) up --wait --remove-orphans
 ifdef NGROK_AUTH # If the developer has an NGROK_AUTH token specified, then bring up webhooks right away too.
 	$(MAKE) webhooks
