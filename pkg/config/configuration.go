@@ -56,6 +56,7 @@ type Configuration struct {
 	Email               Email          `yaml:"email"`
 	JWT                 JWT            `yaml:"jwt"`
 	Logging             Logging        `yaml:"logging"`
+	KeyManagement       KeyManagement  `yaml:"keyManagement"`
 	Plaid               Plaid          `yaml:"plaid"`
 	PostgreSQL          PostgreSQL     `yaml:"postgreSql"`
 	RabbitMQ            RabbitMQ       `yaml:"rabbitMQ"`
@@ -77,6 +78,32 @@ func (c Configuration) GetUIDomainName() string {
 
 func (c Configuration) GetUIURL() string {
 	return fmt.Sprintf("%s://%s", c.ExternalURLProtocol, c.UIDomainName)
+}
+
+// KeyManagement specifies the properties required to securely encrypt and decrypt stored secrets. If enabled only one
+// of the providers can be enabled at a time. It is not recommended to change providers.
+type KeyManagement struct {
+	// Enabled determines whether or not key management is being used. If it is enabled and there is a key ID and
+	// version present on a given token; then the KMS will be used. Otherwise it will be read as plaintext if vault is
+	// disabled (deprecated), or will be read from vault.
+	Enabled bool `yaml:"enabled"`
+	// AWS provides configuration for using AWS's KMS for encrypting and decrypting secrets.
+	AWS *AWSKMS `yaml:"aws"`
+	// Google provides configuration for using Google's KMS for encrypting and decrypting secrets.
+	Google *GoogleKMS `yaml:"google"`
+}
+
+type AWSKMS struct {
+	Region    string  `yaml:"region"`
+	AccessKey string  `yaml:"accessKey"`
+	SecretKey string  `yaml:"secretKey"`
+	KeyID     string  `yaml:"keyID"`
+	Endpoint  *string `yaml:"endpoint"`
+}
+
+type GoogleKMS struct {
+	CredentialsJSON *string `yaml:"credentialsJSON"`
+	ResourceName    string  `yaml:"resourceName"`
 }
 
 type Server struct {
@@ -522,6 +549,8 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	_ = v.BindEnv("Logging.Format", "MONETR_LOG_FORMAT")
 	_ = v.BindEnv("Logging.StackDriver.Enabled", "MONETR_LOG_STACKDRIVER_ENABLED")
+	_ = v.BindEnv("KeyManagement.AWS.AccessKey", "AWS_ACCESS_KEY_ID")
+	_ = v.BindEnv("KeyManagement.AWS.SecretKey", "AWS_ACCESS_KEY")
 	_ = v.BindEnv("Plaid.ClientID", "MONETR_PLAID_CLIENT_ID")
 	_ = v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
 	_ = v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")

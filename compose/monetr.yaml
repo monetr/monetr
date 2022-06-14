@@ -39,6 +39,22 @@ server:
   cookies:
     name: M-Token
     samesitestrict: true
-    secure: true
+    secure: false # Cant use secure over http.
   listenport: 4000
   statsport: 9000
+keyManagement:
+  enabled: true
+  aws:
+    region: us-east-1
+    accessKey: foo
+    secretKey: bar
+    keyId: bc436485-5092-42b8-92a3-0aa8b93536dc
+    endpoint: http://kms:8080
+
+vault:
+  enabled: true
+  address: http://vault:8200
+  auth: token
+  token: "s.5MVFPCkGufY5mZsvZFyWQBeh"
+  role: root
+  timeout: 5s

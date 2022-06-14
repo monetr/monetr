@@ -259,6 +259,7 @@ ifneq ($(LOCAL_DOMAIN),localhost)
 	$(call infoMsg,	LOCAL_DOMAIN=localhost)
 	$(call infoMsg,to your $(DEVELOPMENT_ENV_FILE) file)
 	sudo $(HOSTESS) add $(LOCAL_DOMAIN) 127.0.0.1
+	sudo $(HOSTESS) add vault.local 127.0.0.1
 endif
 ifdef MKDOCS_IMAGE
 	$(call infoMsg,Using custom MKDocs container image; $(MKDOCS_IMAGE))
@@ -295,6 +296,13 @@ development-info:
 	$(call infoMsg,)
 	$(call infoMsg,=====================================================================================================)
 
+up:
+ifndef CONTAINER
+	$(error Must provide a CONTAINER to up)
+else
+	$(COMPOSE) up $(CONTAINER) -d
+endif
+
 logs: # Tail logs for the current development environment. Provide NAME to limit to a single process.
 ifdef NAME
 	$(COMPOSE) logs -f $(NAME)
@@ -315,6 +323,13 @@ redis-shell:
 docs-shell:
 	$(COMPOSE) exec documentation /bin/sh
 
+shell:
+ifdef CONTAINER
+	$(COMPOSE) exec $(CONTAINER) /bin/sh
+else
+	$(error Must specify a CONTAINER to shell into)
+endif
+
 stop:
 	$(COMPOSE) stop
 
@@ -322,7 +337,11 @@ start:
 	$(COMPOSE) start
 
 restart:
+ifndef CONTAINER
 	$(COMPOSE) restart
+else
+	$(COMPOSE) restart $(CONTAINER)
+endif
 
 shutdown:
 	-$(COMPOSE) exec monetr monetr development clean:plaid

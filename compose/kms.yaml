@@ -1,0 +1,11 @@
+Keys:
+  Symmetric:
+    Aes:
+      - Metadata:
+          KeyId: bc436485-5092-42b8-92a3-0aa8b93536dc
+        BackingKeys:
+          - 5cdaead27fe7da2de47945d73cd6d79e36494e73802f3cd3869f1d2cb0b5d7a9
+
+Aliases:
+  - AliasName: vault-key
+    TargetKeyId: bc436485-5092-42b8-92a3-0aa8b93536dc
