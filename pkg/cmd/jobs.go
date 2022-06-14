@@ -184,13 +184,20 @@ var (
 				}
 
 				repo := repository.NewRepositoryFromSession(0, AccountIDFlag, txn)
+
+				kms, err := getKMS(log, configuration)
+				if err != nil {
+					log.WithError(err).Fatal("failed to initialize KMS")
+					return err
+				}
+
 				var plaidSecrets secrets.PlaidSecretsProvider
 				if configuration.Vault.Enabled {
 					log.Debugf("secrets will be stored in vault")
 					plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
 				} else {
 					log.Debugf("secrets will be stored in postgres")
-					plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+					plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
 				}
 
 				job, err := background.NewPullTransactionsJob(

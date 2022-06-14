@@ -183,13 +183,19 @@ func RunServer() error {
 		log.Debugf("stripe webhooks are enabled and will be sent to: %s", configuration.Stripe.WebhooksDomain)
 	}
 
+	kms, err := getKMS(log, configuration)
+	if err != nil {
+		log.WithError(err).Fatal("failed to initialize KMS")
+		return err
+	}
+
 	var plaidSecrets secrets.PlaidSecretsProvider
 	if configuration.Vault.Enabled {
 		log.Debugf("secrets will be stored in vault")
 		plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
 	} else {
 		log.Debugf("secrets will be stored in postgres")
-		plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+		plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
 	}
 
 	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)

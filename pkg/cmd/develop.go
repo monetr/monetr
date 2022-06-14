@@ -71,13 +71,19 @@ func newDevelopCommand(parent *cobra.Command) {
 				return err
 			}
 
+			kms, err := getKMS(log, configuration)
+			if err != nil {
+				log.WithError(err).Fatal("failed to initialize KMS")
+				return err
+			}
+
 			var plaidSecrets secrets.PlaidSecretsProvider
 			if configuration.Vault.Enabled {
 				log.Debugf("secrets will be stored in vault")
 				plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
 			} else {
 				log.Debugf("secrets will be stored in postgres")
-				plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+				plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
 			}
 
 			log.Info("retrieving Plaid links from the database")

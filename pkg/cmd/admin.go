@@ -204,22 +204,10 @@ func newSecretMigrationCommand(parent *cobra.Command) {
 				return errors.Wrap(err, "failed to initialize database")
 			}
 
-			var kms secrets.KeyManagement
-			if configuration.KeyManagement.Enabled {
-				if kmsConfig := configuration.KeyManagement.AWS; kmsConfig != nil {
-					kms, err = secrets.NewAWSKMS(cmd.Context(), secrets.AWSKMSConfig{
-						Log:       log,
-						KeyID:     kmsConfig.KeyID,
-						Region:    kmsConfig.Region,
-						AccessKey: kmsConfig.AccessKey,
-						SecretKey: kmsConfig.SecretKey,
-						Endpoint:  kmsConfig.Endpoint,
-					})
-					if err != nil {
-						log.WithError(err).Fatalf("failed to init AWS KMS client")
-						return err
-					}
-				}
+			kms, err := getKMS(log, configuration)
+			if err != nil {
+				log.WithError(err).Fatal("failed to setup KMS")
+				return err
 			}
 
 			var vault vault_helper.VaultHelper
