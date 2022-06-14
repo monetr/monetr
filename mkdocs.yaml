@@ -90,7 +90,6 @@ plugins:
   - search
   #  - section-index
   - render_swagger
-  - mike
 
 markdown_extensions:
   - footnotes
