@@ -2,9 +2,11 @@ package secrets
 
 import (
 	"context"
+	"encoding/hex"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -17,12 +19,14 @@ var (
 type postgresPlaidSecretProvider struct {
 	log *logrus.Entry
 	db  pg.DBI
+	kms KeyManagement
 }
 
-func NewPostgresPlaidSecretsProvider(log *logrus.Entry, db pg.DBI) PlaidSecretsProvider {
+func NewPostgresPlaidSecretsProvider(log *logrus.Entry, db pg.DBI, kms KeyManagement) PlaidSecretsProvider {
 	return &postgresPlaidSecretProvider{
 		log: log,
 		db:  db,
+		kms: kms,
 	}
 }
 
@@ -35,6 +39,28 @@ func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx contex
 		AccountId:   accountId,
 		AccessToken: accessToken,
 	}
+
+	if p.kms != nil {
+		span.Data = map[string]interface{}{
+			"kms": true,
+		}
+		keyId, version, encrypted, err := p.kms.Encrypt(span.Context(), []byte(accessToken))
+		if err != nil {
+			span.Status = sentry.SpanStatusInternalError
+			return errors.Wrap(err, "failed to encrypt access token")
+		}
+
+		token.KeyID = &keyId
+		if version != "" {
+			token.Version = &version
+		}
+		token.AccessToken = hex.EncodeToString(encrypted)
+	} else {
+		span.Data = map[string]interface{}{
+			"kms": false,
+		}
+	}
+
 	_, err := p.db.ModelContext(span.Context(), &token).
 		OnConflict(`(item_id, account_id) DO UPDATE`).
 		Insert(&token)
@@ -62,6 +88,39 @@ func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.C
 		// TODO Add proper returning of the ErrNotFound here.
 		span.Status = sentry.SpanStatusInternalError
 		return accessToken, errors.Wrap(err, "failed to retrieve access token for plaid link")
+	}
+
+	if p.kms != nil && result.KeyID != nil {
+		span.Data = map[string]interface{}{
+			"kms": true,
+		}
+		version := ""
+		if result.Version != nil {
+			version = *result.Version
+		}
+		decoded, err := hex.DecodeString(result.AccessToken)
+		if err != nil {
+			span.Status = sentry.SpanStatusDataLoss
+			return accessToken, errors.Wrap(err, "failed to hex decode encrypted access token")
+		}
+		decrypted, err := p.kms.Decrypt(span.Context(), *result.KeyID, version, decoded)
+		if err != nil {
+			span.Status = sentry.SpanStatusInternalError
+			return accessToken, errors.Wrap(err, "failed to encrypt access token")
+		}
+
+		span.Status = sentry.SpanStatusOK
+
+		return string(decrypted), nil
+	} else if p.kms != nil {
+		crumbs.Debug(span.Context(), "Not decrypting using KMS because access token was not encrypted", nil)
+		span.Data = map[string]interface{}{
+			"kms": false,
+		}
+	} else {
+		span.Data = map[string]interface{}{
+			"kms": false,
+		}
 	}
 
 	span.Status = sentry.SpanStatusOK

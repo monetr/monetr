@@ -27,7 +27,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		log, hook := testutils.GetTestLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 
@@ -57,7 +57,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		link := fixtures.GivenIHaveAManualLink(t, user)
@@ -92,7 +92,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
@@ -122,7 +122,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
@@ -154,7 +154,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
@@ -229,7 +229,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
@@ -310,7 +310,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)

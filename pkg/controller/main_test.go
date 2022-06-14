@@ -92,7 +92,7 @@ type TestApp struct {
 func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db)
+	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 	plaidRepo := repository.NewPlaidRepository(db)
 	plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, configuration.Plaid)
 

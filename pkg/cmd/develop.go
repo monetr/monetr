@@ -77,7 +77,7 @@ func newDevelopCommand(parent *cobra.Command) {
 				plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
 			} else {
 				log.Debugf("secrets will be stored in postgres")
-				plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db)
+				plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 			}
 
 			log.Info("retrieving Plaid links from the database")
