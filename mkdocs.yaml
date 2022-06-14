@@ -1,6 +1,6 @@
 site_name: monetr
 site_description: Building an open source financial planning application.
-site_url: http://localhost/documentation/
+site_url: http://monetr.local/documentation/
 repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
 edit_uri: edit/main/docs/
@@ -47,6 +47,8 @@ theme:
       quote: octicons/quote-16
 extra:
   homepage: https://monetr.app
+  version:
+    provider: mike
 extra_css:
   - stylesheets/extra.css
 nav:
@@ -88,6 +90,7 @@ plugins:
   - search
   #  - section-index
   - render_swagger
+  - mike
 
 markdown_extensions:
   - footnotes

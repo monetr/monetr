@@ -312,6 +312,9 @@ sql-shell:
 redis-shell:
 	$(COMPOSE) exec redis redis-cli
 
+docs-shell:
+	$(COMPOSE) exec documentation /bin/sh
+
 stop:
 	$(COMPOSE) stop
 
@@ -330,6 +333,9 @@ restart-monetr:
 
 restart-ui:
 	$(COMPOSE) restart ui
+
+restart-docs:
+	$(COMPOSE) restart documentation
 
 DOCS_DIR=$(BUILD_DIR)/docs
 SWAGGER_YAML=$(DOCS_DIR)/swagger.yaml
