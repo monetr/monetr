@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.19](https://github.com/monetr/monetr/compare/v0.10.18...v0.10.19) (2022-06-15)
+
+
+### Bug Fixes
+
+* **spending:** Fixed divide by zero bug in calculation. ([c39fe7a](https://github.com/monetr/monetr/commit/c39fe7a10710e0dbb2377ec7c525be10e43e15d2)), closes [#940](https://github.com/monetr/monetr/issues/940)
+
 ## [0.10.18](https://github.com/monetr/monetr/compare/v0.10.17...v0.10.18) (2022-06-15)
 
 
