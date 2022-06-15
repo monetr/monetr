@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/fixtures"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,12 +22,19 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bankAccount, "FREQ=DAILY;INTERVAL=1", false)
-		fundingSchedule.NextOccurrence = fundingSchedule.NextOccurrence.Add(-24 * time.Hour)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bankAccount, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", false)
+		fundingSchedule.NextOccurrence = util.MidnightInLocal(fundingSchedule.NextOccurrence.Add(-24 * time.Hour), timezone)
 		testutils.MustDBUpdate(t, fundingSchedule)
 
+
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
-		spendingRule.DTStart(time.Now().In(testutils.MustEz(t, user.Account.GetTimezone)).Add(-24 * time.Hour))
+		spendingRule.DTStart(time.Now().Add(7 * 24 * time.Hour))
+		nextDue := spendingRule.After(time.Now(), false)
+
+		contributions := fundingSchedule.GetNumberOfContributionsBetween(time.Now(), nextDue)
+		assert.NotZero(t, contributions, "must have at least one contribution, if this fails then this test is written wrong")
 
 		spending := models.Spending{
 			AccountId:              user.AccountId,
@@ -43,7 +51,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 			UsedAmount:             0,
 			RecurrenceRule:         spendingRule,
 			LastRecurrence:         nil,
-			NextRecurrence:         spendingRule.After(time.Now(), false),
+			NextRecurrence:         nextDue,
 			NextContributionAmount: 100,
 			IsBehind:               false,
 			IsPaused:               false,
