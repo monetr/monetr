@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.18](https://github.com/monetr/monetr/compare/v0.10.17...v0.10.18) (2022-06-15)
+
+
+### Bug Fixes
+
+* **spending:** Fixed contribution count being off. ([082f29b](https://github.com/monetr/monetr/commit/082f29ba93a47d753ff9a54befd2a3ee4dbada89)), closes [#937](https://github.com/monetr/monetr/issues/937)
+
 ## [0.10.17](https://github.com/monetr/monetr/compare/v0.10.16...v0.10.17) (2022-06-15)
 
 
