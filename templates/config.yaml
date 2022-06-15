@@ -105,3 +105,8 @@ data:
 
     plaid:
       maxNumberOfLinks: {{ .Values.api.plaid.maxNumberOfLinks }}
+
+    {{- if .Values.api.keyManagement }}
+    keyManagement:
+    {{- toYaml .Values.api.keyManagement | nindent 6 }}
+    {{- end }}

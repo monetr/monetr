@@ -100,14 +100,9 @@ SPLIT_YAML=$(LOCAL_BIN)/kubernetes-split-yaml
 $(SPLIT_YAML):
 	@if [ ! -f "$(SPLIT_YAML)" ]; then $(MAKE) install-$(SPLIT_YAML); fi
 
-install-$(SPLIT_YAML): SPLIT_YAML_REPO = "https://github.com/mogensen/kubernetes-split-yaml.git"
-install-$(SPLIT_YAML): SPLIT_YAML_DIR=$(LOCAL_TMP)/kubernetes-split-yaml
-install-$(SPLIT_YAML): $(LOCAL_TMP) $(LOCAL_BIN) $(GO)
-	$(call infoMsg,Installing kubernetes-split-yaml from $(SPLIT_YAML_REPO) at $(SPLIT_YAML))
-	-rm -rf $(SPLIT_YAML_DIR)
-	git clone $(SPLIT_YAML_REPO) $(SPLIT_YAML_DIR)
-	cd $(SPLIT_YAML_DIR) && go build -o $(SPLIT_YAML) ./...
-	rm -rfd $(SPLIT_YAML_DIR)
+install-$(SPLIT_YAML): $(LOCAL_BIN) $(GO)
+	$(call infoMsg,Installing kubernetes-split-yaml to $(SPLIT_YAML))
+	GOBIN=$(LOCAL_BIN) $(GO) install github.com/elliotcourant/kubernetes-split-yaml@3c77b924132b7ac914dc156eeea2e1db47541bb0
 
 SWAG=$(LOCAL_BIN)/swag
 $(SWAG):

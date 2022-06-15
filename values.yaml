@@ -203,6 +203,17 @@ api:
     webhooksEnabled: false
     webhooksDomain: ""
     webhookSecret: ""
+  keyManagement:
+    enabled: false
+    provider: google # Google or AWS
+    google:
+      resourceName: ""
+    aws:
+      region: us-east-1
+      accessKey: null
+      secretKey: null
+      keyId: ""
+      endpoint: null
   vault:
     enabled: false
     address: ""
