@@ -142,7 +142,13 @@ func (e *Spending) CalculateNextContribution(
 		// because we have adjusted the target amount above (if this is the case) then the calculation will still be
 		// correct.
 		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(now, nextRecurrence)
-		nextContribution = (targetAmount - currentAmount) / numberOfContributions
+
+		// If for some reason there are no contributions to be made, then prevent us from trying to divide by zero.
+		if numberOfContributions == 0 {
+			nextContribution = 0
+		} else {
+			nextContribution = (targetAmount - currentAmount) / numberOfContributions
+		}
 	case nextRecurrence.Equal(nextContributionDate) && e.SpendingType == SpendingTypeExpense:
 		// Check to see how many times this expense will recur between the next contribution date and the one that
 		// succeeds it. But this time make it an inclusive search (the true at the end). Because the next contribution
