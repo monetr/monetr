@@ -44,6 +44,7 @@ server:
   statsport: 9000
 keyManagement:
   enabled: true
+  provider: aws
   aws:
     region: us-east-1
     accessKey: foo
@@ -52,9 +53,9 @@ keyManagement:
     endpoint: http://kms:8080
 
 vault:
-  enabled: true
+  enabled: false
   address: http://vault:8200
   auth: token
-  token: "s.5MVFPCkGufY5mZsvZFyWQBeh"
+  token: "abc123"
   role: root
   timeout: 5s

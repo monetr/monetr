@@ -18,12 +18,11 @@ services:
       - donotstart
   kms:
     image: nsmithuk/local-kms
+    restart: always # If something goes wrong just restart the container, this is for development only.
     volumes:
       - ./compose/kms.yaml:/init/seed.yaml
     ports:
       - 8080:8080
-    profiles:
-      - donotstart
   documentation:
     image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.2.16}
     restart: always # If something goes wrong just restart the container, this is for development only.
@@ -83,6 +82,8 @@ services:
       redis:
         condition: service_started
       postgres:
+        condition: service_started
+      kms:
         condition: service_started
   ui:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you

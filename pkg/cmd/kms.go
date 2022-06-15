@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strings"
 
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/secrets"
@@ -17,30 +18,15 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 
 	log.Trace("setting up key management interface")
 
-	{ // Assert that the configuration only has a single provider setup.
-		count := 0
-		for _, provider := range []interface{}{
-			configuration.KeyManagement.AWS,
-			configuration.KeyManagement.Google,
-		} {
-			if provider != nil {
-				count++
-			}
-		}
-
-		switch count {
-		case 0:
-			return nil, errors.New("key management is enabled by not provider is configured")
-		case 1:
-			break
-		default:
-			return nil, errors.New("you can only have one key management provider configured at a time")
-		}
+	if configuration.KeyManagement.Provider == "" {
+		return nil, errors.New("key management is enabled by not provider is configured")
 	}
 
 	var kms secrets.KeyManagement
 	var err error
-	if kmsConfig := configuration.KeyManagement.AWS; kmsConfig != nil {
+	switch strings.ToLower(configuration.KeyManagement.Provider) {
+	case "aws":
+		kmsConfig := configuration.KeyManagement.AWS
 		log.Trace("using AWS KMS")
 		kms, err = secrets.NewAWSKMS(context.Background(), secrets.AWSKMSConfig{
 			Log:       log,
@@ -50,7 +36,8 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 			SecretKey: kmsConfig.SecretKey,
 			Endpoint:  kmsConfig.Endpoint,
 		})
-	} else if kmsConfig := configuration.KeyManagement.Google; kmsConfig != nil {
+	case "google":
+		kmsConfig := configuration.KeyManagement.Google
 		log.Trace("using Google KMS")
 		kms, err = secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
@@ -59,6 +46,8 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 			APIKey:          nil,
 			CredentialsFile: kmsConfig.CredentialsJSON,
 		})
+	default:
+		return nil, errors.Errorf("invalid kms provider: %s", configuration.KeyManagement.Provider)
 	}
 
 	if err != nil {

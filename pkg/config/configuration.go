@@ -86,7 +86,8 @@ type KeyManagement struct {
 	// Enabled determines whether or not key management is being used. If it is enabled and there is a key ID and
 	// version present on a given token; then the KMS will be used. Otherwise it will be read as plaintext if vault is
 	// disabled (deprecated), or will be read from vault.
-	Enabled bool `yaml:"enabled"`
+	Enabled  bool   `yaml:"enabled"`
+	Provider string `yaml:"provider"`
 	// AWS provides configuration for using AWS's KMS for encrypting and decrypting secrets.
 	AWS *AWSKMS `yaml:"aws"`
 	// Google provides configuration for using Google's KMS for encrypting and decrypting secrets.
@@ -498,6 +499,8 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
+	v.SetDefault("KeyManagement.AWS", nil)
+	v.SetDefault("KeyManagement.Google", nil)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)
