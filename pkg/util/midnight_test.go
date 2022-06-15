@@ -27,3 +27,14 @@ func TestInLocal(t *testing.T) {
 		assert.False(t, finallyDST.IsDST(), "November 8th 2021 at midnight CST should not be considered DST")
 	})
 }
+
+func TestMidnightInLocal(t *testing.T) {
+	t.Run("late in the day", func(t *testing.T) {
+		central, err := time.LoadLocation("America/Chicago")
+		assert.NoError(t, err, "must be able to load the central time location")
+		start := time.Date(2022, 06, 15, 2, 24, 38, 0, time.UTC)
+
+		midnight := MidnightInLocal(start, central)
+		assert.Equal(t, time.Date(2022, 06, 14, 0, 0, 0, 0, central), midnight, "midnight in a different timezone is a different day")
+	})
+}
