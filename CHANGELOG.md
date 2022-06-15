@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.10.17](https://github.com/monetr/monetr/compare/v0.10.16...v0.10.17) (2022-06-15)
+
+
+### Features
+
+* Added global `--config` flag. ([d5aa091](https://github.com/monetr/monetr/commit/d5aa091829b19b0d2a3190a9a38dc1cf2f35be4f)), closes [#933](https://github.com/monetr/monetr/issues/933)
+* **cli:** Adding command to help debug secrets. ([cd2e584](https://github.com/monetr/monetr/commit/cd2e58418ed34db794d8febb14c208270d556626))
+* **kms:** Adding command to migrate secrets from vault. ([156bce2](https://github.com/monetr/monetr/commit/156bce2a17530144a4b3122e4e321a2101d13b72))
+* **kms:** Adding support for decrypting using Google KMS. ([b2dc807](https://github.com/monetr/monetr/commit/b2dc8078a2fd42bf0ec27af55a2cd3e0fc0c5afd))
+* **kms:** Check permissions when initializing Google KMS. ([b1133e6](https://github.com/monetr/monetr/commit/b1133e60f6cc7c0b6fcdf8749ff73894862555b4))
+* **kms:** Laying groundwork for key-management-system. ([b94d5c9](https://github.com/monetr/monetr/commit/b94d5c9ca4e731411bc4bbdada9a1dbc71e2cdcb))
+* **kms:** Laying groundwork for managing secrets via CLI. ([70ab0f3](https://github.com/monetr/monetr/commit/70ab0f316a95aa21fef080bf35ae73dbfd05bbda))
+* **kms:** Use KMS provider from configuration. ([e88d2c6](https://github.com/monetr/monetr/commit/e88d2c64f075f60d0ff32c29094a916487103ab2))
+* **local:** Allow Golang hot reload to be disabled. ([567fceb](https://github.com/monetr/monetr/commit/567fcebe231649bfc77ebc55938fdf7d9ddde23c))
+
+
+### Bug Fixes
+
+* **bug:** Spending objects will no longer have negative contributions. ([4d487ad](https://github.com/monetr/monetr/commit/4d487ad7fd80ebd0e6b40a988221828884e5e7e8)), closes [#930](https://github.com/monetr/monetr/issues/930)
+* **docs:** Fixed build failing because of missing plugin. ([6aae759](https://github.com/monetr/monetr/commit/6aae759d907c5071a72a015b022830ecfe00b73a))
+* **spending:** Fixed spending contribution miscalculation. ([4433ac3](https://github.com/monetr/monetr/commit/4433ac392eaf00a0b90f4b9504f6da45936d56b8)), closes [#937](https://github.com/monetr/monetr/issues/937)
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors digest to e50b808 ([10e3c5c](https://github.com/monetr/monetr/commit/10e3c5cfaeb6f595c27955366534c33261c60ec6))
+* **docs:** Bumped mkdocs material to its latest version. ([b7d6bbb](https://github.com/monetr/monetr/commit/b7d6bbb13c8ee08f09472135d4ea6fc4083f7db7))
+
+
+### Miscellaneous
+
+* **docs:** Laying groundwork for versioning. ([5d4679f](https://github.com/monetr/monetr/commit/5d4679f3e185120fd8509718dc3a4a1eb1d5bd86))
+* General cleanup of unused tools. ([eb2fb5d](https://github.com/monetr/monetr/commit/eb2fb5de764be18b0d0004010dd1ecda80bd3c32))
+* **kms:** Progress on AWS and Google KMS implementations. ([ccb0418](https://github.com/monetr/monetr/commit/ccb0418bce10543ffce006b0bb45f63d0845c990))
+* Starting to integrate the KMS into the PG secrets provider. ([f58f044](https://github.com/monetr/monetr/commit/f58f044e39da674881ad492aafb9203b78605716))
+* Tweaking local dev + kms init. ([a4e80c3](https://github.com/monetr/monetr/commit/a4e80c3c994b610f2aeccd5df9d0aeb2b02749eb))
+
 ## [0.10.16](https://github.com/monetr/monetr/compare/v0.10.15...v0.10.16) (2022-06-04)
 
 
