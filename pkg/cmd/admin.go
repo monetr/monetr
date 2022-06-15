@@ -49,6 +49,7 @@ func newSecretsCommand(parent *cobra.Command) {
 
 	newSecretInformationCommand(command)
 	newSecretMigrationCommand(command)
+	newViewSecretCommand(command)
 
 	parent.AddCommand(command)
 }
@@ -177,6 +178,91 @@ func newSecretInformationCommand(parent *cobra.Command) {
 			return nil
 		},
 	}
+
+	parent.AddCommand(command)
+}
+
+func newViewSecretCommand(parent *cobra.Command) {
+	var itemId string
+
+	command := &cobra.Command{
+		Use:   "get",
+		Short: "Retrieve a secret's value from the data store, meant for debugging purposes only!",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			configuration := config.LoadConfiguration()
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+
+			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to initialze database")
+				return errors.Wrap(err, "failed to initialize database")
+			}
+
+			kms, err := getKMS(log, configuration)
+			if err != nil {
+				log.WithError(err).Fatal("failed to setup KMS")
+				return err
+			}
+
+			var vault vault_helper.VaultHelper
+			if configuration.Vault.Enabled {
+				vault, err = vault_helper.NewVaultHelper(log, vault_helper.Config{
+					Address:         configuration.Vault.Address,
+					Role:            configuration.Vault.Role,
+					Auth:            configuration.Vault.Auth,
+					Token:           configuration.Vault.Token,
+					TokenFile:       configuration.Vault.TokenFile,
+					Timeout:         configuration.Vault.Timeout,
+					IdleConnTimeout: configuration.Vault.IdleConnTimeout,
+					Username:        configuration.Vault.Username,
+					Password:        configuration.Vault.Password,
+				})
+				if err != nil {
+					log.WithError(err).Fatalf("failed to initialize vault client")
+					return errors.Wrap(err, "failed to initialize vault client")
+				}
+				defer vault.Close()
+
+				log.Fatalf("cannot read secrets from vault at this time")
+				return nil
+			}
+
+			var token models.PlaidToken
+			err = db.Model(&token).
+				Where(`"item_id" = ?`, itemId).
+				Limit(1).
+				Select(&token)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to retrieve secret")
+				return errors.Wrap(err, "failed to retrieve secret")
+			}
+
+			if token.KeyID == nil {
+				fmt.Println(token.AccessToken)
+				return nil
+			}
+
+			version := ""
+			if token.Version != nil && *token.Version != "" {
+				version = *token.Version
+			}
+			decoded, err := hex.DecodeString(token.AccessToken)
+			if err != nil {
+				log.WithError(err).Fatal("failed to decode secret")
+				return err
+			}
+			decrypted, err := kms.Decrypt(cmd.Context(), *token.KeyID, version, decoded)
+			if err != nil {
+				log.WithError(err).Fatal("failed to decrypt secret")
+				return err
+			}
+
+
+			fmt.Println(string(decrypted))
+			return nil
+		},
+	}
+	command.PersistentFlags().StringVar(&itemId, "item-id", "", "The Plaid Item ID to retrieve the secret for.")
 
 	parent.AddCommand(command)
 }
