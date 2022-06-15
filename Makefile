@@ -320,9 +320,6 @@ sql-shell:
 redis-shell:
 	$(COMPOSE) exec redis redis-cli
 
-docs-shell:
-	$(COMPOSE) exec documentation /bin/sh
-
 shell:
 ifdef CONTAINER
 	$(COMPOSE) exec $(CONTAINER) /bin/sh
@@ -347,35 +344,6 @@ shutdown:
 	-$(COMPOSE) exec monetr monetr development clean:plaid
 	-$(COMPOSE) down --remove-orphans -v
 
-restart-monetr:
-	$(COMPOSE) restart monetr
-
-restart-ui:
-	$(COMPOSE) restart ui
-
-restart-docs:
-	$(COMPOSE) restart documentation
-
-DOCS_DIR=$(BUILD_DIR)/docs
-SWAGGER_YAML=$(DOCS_DIR)/swagger.yaml
-$(SWAGGER_YAML): $(SWAG) $(APP_GO_FILES) $(BUILD_DIR)
-	$(call infoMsg,Generating Swagger yaml from API comments)
-	$(SWAG) init -d $(GO_SRC_DIR)/controller -g controller.go \
-		--parseDependency \
-		--parseDepth 5 \
-		--parseInternal \
-		--output $(DOCS_DIR)
-	sed 's/x-deprecated:/deprecated:/g' $(SWAGGER_YAML) > $(SWAGGER_YAML).new
-	rm $(SWAGGER_YAML)
-	mv $(SWAGGER_YAML).new $(SWAGGER_YAML)
-	cp $(PWD)/public/favicon.ico $(DOCS_DIR)/favicon.ico
-	cp $(PWD)/public/logo192.png $(DOCS_DIR)/logo192.png
-	cp $(PWD)/public/logo512.png $(DOCS_DIR)/logo512.png
-	cp $(PWD)/public/manifest.json $(DOCS_DIR)/manifest.json
-	cp $(DOCS_DIR)/swagger.json $(PWD)/docs/api/swagger.json
-
-docs: $(SWAGGER_YAML)
-
 MKDOCS_IMAGE ?= squidfunk/mkdocs-material:8.2.8
 MKDOCS_YAML=$(PWD)/mkdocs.yaml
 DOCS_FILES=$(shell find $(PWD)/docs -type f)
@@ -385,18 +353,7 @@ $(DOCS_SITE): $(MKDOCS_YAML) $(DOCS_FILES)
 
 mkdocs: $(DOCS_SITE)
 
-# redoc-cli is either installed globally and accessible via yarn, or is installed in the node_modules bin dir. This
-# variable will check if the file exists via yarn, and if it does not it will default to the node_modules dir. If the
-# resulting file path does not exist, then the $(NODE_MODULES) target will be run, which will install the redoc-cli.
-REDOC_CLI=$(word 1,$(wildcard $(shell yarn bin)/redoc-cli) $(NODE_MODULES)/.bin/redoc-cli)
-$(REDOC_CLI): $(NODE_MODULES)
-
-docs-local: $(SWAGGER_YAML) $(REDOC_CLI)
-	$(REDOC_CLI) serve $(SWAGGER_YAML)
-
-docs-static: $(SWAGGER_YAML) $(REDOC_CLI)
-	$(call infoMsg,Building static API documentation site)
-	$(REDOC_CLI) bundle $(SWAGGER_YAML) -o $(DOCS_DIR)/index.html
+docs: mkdocs
 
 ifdef GITHUB_TOKEN
 license: $(LICENSE) $(BINARY)
