@@ -27,7 +27,10 @@ type FundingSchedule struct {
 }
 
 func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time) int64 {
-	return int64(len(f.Rule.Between(start, end, false)))
+	rule := f.Rule.RRule
+	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
+	rule.DTStart(start.Add(-365 * 24 * time.Hour))
+	return int64(len(rule.Between(start, end, false)))
 }
 
 func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) time.Time {

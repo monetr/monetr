@@ -83,6 +83,41 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		assert.EqualValues(t, spending.TargetAmount, spending.NextContributionAmount, "next contribution should be the entire amount")
 	})
 
+	t.Run("timezone near midnight", func(t *testing.T) {
+		// This test is here to prove a fix for https://github.com/monetr/monetr/issues/937
+		// Basically, we want to make sure that if the user is close to their funding schedule such that the server is
+		// already on the next day; that we still calculate everything correctly. This was not happening, this test
+		// accompanies a fix to remedy that situation.
+		central, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must be able to load timezone")
+		now := time.Date(2022, 06, 14, 22, 37, 43, 0, central)
+		nextFunding := time.Date(2022, 06, 15, 0, 0, 0, 0, central)
+		nextRecurrence := time.Date(2022, 7, 8, 0, 0, 0, 0, central)
+
+		fundingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1") // Every other friday
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeExpense,
+			TargetAmount:   25000,
+			CurrentAmount:  6960,
+			RecurrenceRule: spendingRule,
+			NextRecurrence: nextRecurrence.UTC(),
+		}
+
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			central.String(),
+			GiveMeAFundingSchedule(nextFunding.UTC(), fundingRule),
+			now,
+		)
+		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
+		assert.EqualValues(t, 9020, spending.NextContributionAmount, "next contribution amount should be half of the total needed to reach the target")
+	})
+
 	t.Run("spend from a day early falls behind", func(t *testing.T) {
 		// This test is a placeholder for now. Recurring expenses are not always consistent about the day they come in.
 		// If we try to process an expense early then it can sometimes misrepresent that expense for the next cycle. In
