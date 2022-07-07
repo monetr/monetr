@@ -10,6 +10,15 @@
   "prConcurrentLimit": 20,
   "packageRules": [
     {
+      "matchPackageNames": [
+        "github.com/aws/aws-sdk-go",
+        "google.golang.org/genproto"
+      ],
+      "extends": [
+        "schedule:monthly"
+      ]
+    },
+    {
       "matchLanguages": [
         "go",
         "golang"
