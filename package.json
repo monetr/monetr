@@ -138,7 +138,7 @@
     "jest": "27.5.1",
     "jest-circus": "27.5.1",
     "jest-environment-jsdom": "27.5.1",
-    "jest-mock-axios": "4.5.0",
+    "jest-mock-axios": "4.6.1",
     "jest-resolve": "27.5.1",
     "js-yaml": "4.1.0",
     "postcss": "8.4.14",
