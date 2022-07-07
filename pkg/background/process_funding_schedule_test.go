@@ -25,7 +25,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bankAccount, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", false)
-		fundingSchedule.NextOccurrence = util.MidnightInLocal(fundingSchedule.NextOccurrence.Add(-24 * time.Hour), timezone)
+		fundingSchedule.NextOccurrence = util.MidnightInLocal(fundingSchedule.NextOccurrence.Add(-48 * time.Hour), timezone)
 		testutils.MustDBUpdate(t, fundingSchedule)
 
 
