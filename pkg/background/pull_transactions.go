@@ -75,6 +75,10 @@ func NewPullTransactionsHandler(
 	}
 }
 
+func (p *PullTransactionsHandler) SetUnmarshaller(unmarshaller JobUnmarshaller) {
+	p.unmarshaller = unmarshaller
+}
+
 func (p PullTransactionsHandler) QueueName() string {
 	return PullTransactions
 }

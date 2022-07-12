@@ -25,6 +25,7 @@ type CleanupJobsHandler struct {
 	db  *pg.DB
 }
 
+
 func TriggerCleanupJobs(ctx context.Context, backgroundJobs JobController) error {
 	return backgroundJobs.triggerJob(ctx, CleanupJobs, nil)
 }
@@ -34,6 +35,10 @@ func NewCleanupJobsHandler(log *logrus.Entry, db *pg.DB) *CleanupJobsHandler {
 		log: log,
 		db:  db,
 	}
+}
+
+func (c CleanupJobsHandler) SetUnmarshaller(unmarshaller JobUnmarshaller) {
+	// no-op, cleanup jobs has no args.
 }
 
 func (c CleanupJobsHandler) DefaultSchedule() string {

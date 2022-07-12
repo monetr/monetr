@@ -44,6 +44,11 @@ func NewProcessFundingScheduleHandler(
 	}
 }
 
+func (p *ProcessFundingScheduleHandler) SetUnmarshaller(unmarshaller JobUnmarshaller) {
+	p.unmarshaller = unmarshaller
+}
+
+
 func (p ProcessFundingScheduleHandler) QueueName() string {
 	return ProcessFundingSchedules
 }

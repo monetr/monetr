@@ -17,6 +17,10 @@ const (
 	ProcessSpending = "ProcessSpending"
 )
 
+var (
+	_ JobHandler = &ProcessSpendingHandler{}
+)
+
 type (
 	ProcessSpendingHandler struct {
 		log          *logrus.Entry
@@ -47,6 +51,10 @@ func NewProcessSpendingHandler(
 		repo:         repository.NewJobRepository(db),
 		unmarshaller: DefaultJobUnmarshaller,
 	}
+}
+
+func (p *ProcessSpendingHandler) SetUnmarshaller(unmarshaller JobUnmarshaller) {
+	p.unmarshaller = unmarshaller
 }
 
 func (p ProcessSpendingHandler) QueueName() string {

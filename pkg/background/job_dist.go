@@ -17,6 +17,7 @@ var (
 type JobHandler interface {
 	QueueName() string
 	HandleConsumeJob(ctx context.Context, data []byte) error
+	SetUnmarshaller(unmarshaller JobUnmarshaller)
 }
 
 type ScheduledJobHandler interface {

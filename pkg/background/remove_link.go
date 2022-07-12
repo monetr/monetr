@@ -64,6 +64,10 @@ func NewRemoveLinkHandler(
 	}
 }
 
+func (r *RemoveLinkHandler) SetUnmarshaller(unmarshaller JobUnmarshaller) {
+	r.unmarshaller = unmarshaller
+}
+
 func (r RemoveLinkHandler) QueueName() string {
 	return RemoveLink
 }

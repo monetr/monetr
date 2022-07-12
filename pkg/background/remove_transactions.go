@@ -57,6 +57,10 @@ func NewRemoveTransactionsHandler(
 	}
 }
 
+func (r *RemoveTransactionsHandler) SetUnmarshaller(unmarshaller JobUnmarshaller) {
+	r.unmarshaller = unmarshaller
+}
+
 func (r RemoveTransactionsHandler) QueueName() string {
 	return RemoveTransactions
 }

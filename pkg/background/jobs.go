@@ -7,6 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/platypus"
+	"github.com/monetr/monetr/pkg/postgresque"
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/pkg/errors"
@@ -63,6 +64,8 @@ func NewBackgroundJobs(
 	case config.BackgroundJobEngineRabbitMQ:
 		panic("RabbitMQ job engine not implemented")
 	case config.BackgroundJobEnginePostgreSQL:
+		queue := postgresque.NewPostgresQueue(log, db)
+		enqueuer = NewPostgresJobEnqueuer(log, queue)
 		panic("PostgreSQL job engine not implemented")
 	default:
 		return nil, errors.New("invalid background job engine specified")

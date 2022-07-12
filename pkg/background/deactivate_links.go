@@ -57,6 +57,10 @@ func NewDeactivateLinksHandler(
 	}
 }
 
+func (d *DeactivateLinksHandler) SetUnmarshaller(unmarshaller JobUnmarshaller) {
+	d.unmarshaller = unmarshaller
+}
+
 func (d DeactivateLinksHandler) QueueName() string {
 	return DeactivateLinks
 }
