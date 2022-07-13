@@ -18,4 +18,6 @@ LDFLAGS="${LDFLAGS} -X main.buildTime=${NOW}"
 LDFLAGS="${LDFLAGS} -X main.buildRevision=${REVISION}"
 
 echo "[builder] building monetr now..."
-go build -ldflags "${LDFLAGS}" -tags=development,mini,noui -o /usr/bin/monetr github.com/monetr/monetr/pkg/cmd
+TAGS="development,mini,noui,icons"
+[ -d "pkg/icons/sources/simple-icons" ] && TAGS="${TAGS},simple-icons"
+go build -ldflags "${LDFLAGS}" -tags=${TAGS} -o /usr/bin/monetr github.com/monetr/monetr/pkg/cmd

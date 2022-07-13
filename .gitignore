@@ -11,6 +11,8 @@ values.mayview.yaml
 redoc-static.html
 pkg/ui/static/*
 !pkg/ui/static/README.md
+pkg/icons/sources/*
+!pkg/icons/sources/README.md
 tmp
 local
 values.local.yaml

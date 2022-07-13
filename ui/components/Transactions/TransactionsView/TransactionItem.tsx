@@ -1,6 +1,7 @@
 import { AccessTime } from '@mui/icons-material';
-import { Chip, Divider, ListItem } from '@mui/material';
+import { Avatar, Chip, Divider, ListItem } from '@mui/material';
 import classnames from 'classnames';
+import TransactionIcon from 'components/Transactions/components/TransactionIcon';
 import TransactionNameEditor from 'components/Transactions/TransactionsView/TransactionNameEditor';
 import TransactionSpentFromSelection from 'components/Transactions/TransactionsView/TransactionSpentFromSelection';
 import Transaction from 'models/Transaction';
@@ -15,8 +16,9 @@ interface Props {
 export default function TransactionItem(props: Props): JSX.Element {
   return (
     <Fragment>
-      <ListItem className="flex flex-row transactions-item pl-1 pr-1 md:pr-2.5">
+      <ListItem className="flex flex-row transactions-item pl-3 pr-1 md:pr-2.5">
         <div className="flex flex-col md:flex-row basis-9/12 md:basis-10/12">
+          <TransactionIcon transaction={ props.transaction }/>
           <TransactionNameEditor transaction={ props.transaction }/>
           <TransactionSpentFromSelection transaction={ props.transaction }/>
         </div>

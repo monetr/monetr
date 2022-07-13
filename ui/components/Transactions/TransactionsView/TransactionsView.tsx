@@ -77,7 +77,7 @@ function TransactionsView(): JSX.Element {
           <ul>
             <Fragment>
               <ListSubheader className="bg-white pl-0 pr-0 pt-1 bg-gray-50">
-                <Typography className="ml-4 md:ml-6 font-semibold opacity-75 text-base">
+                <Typography className="ml-3 md:ml-3 font-semibold opacity-75 text-base">
                   { formatDateHeader(group) }
                 </Typography>
                 <Divider/>

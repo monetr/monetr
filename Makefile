@@ -174,6 +174,10 @@ deps: dependencies
 
 build-ui: $(STATIC_DIR)
 
+SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons
+$(SIMPLE_ICONS):
+	git clone https://github.com/simple-icons/simple-icons.git $(SIMPLE_ICONS)
+
 GOOS ?= $(OS)
 GOARCH ?= amd64
 
@@ -188,11 +192,20 @@ $(BUILD_DIR):
 	mkdir -p $(PWD)/build
 
 BINARY=$(BUILD_DIR)/$(BINARY_FILE_NAME)
+TAGS ?= icons,simple_icons
+ifdef TAGS
+	TAGS_FLAG=-tags "$(TAGS)"
+else
+	TAGS_FLAG=-tags ""
+endif
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
 $(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
 endif
-	$(GO) build -ldflags "-s -w -X main.buildHost=$(BUILD_HOST) -X main.buildTime=$(BUILD_TIME) -X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
+ifneq (,$(findstring simple_icons,$(TAGS))) # If our icon packs include simple_icons then make sure the dir exists.
+$(BINARY): $(SIMPLE_ICONS)
+endif
+	$(GO) build $(TAGS_FLAG) -ldflags "-s -w -X main.buildHost=$(BUILD_HOST) -X main.buildTime=$(BUILD_TIME) -X main.buildRevision=$(RELEASE_REVISION) -X main.release=$(RELEASE_VERSION)" -o $(BINARY) $(MONETR_CLI_PACKAGE)
 	$(call infoMsg,Built monetr binary for: $(GOOS)/$(GOARCH))
 	$(call infoMsg,          Build Version: $(RELEASE_VERSION))
 
@@ -243,6 +256,7 @@ clean: shutdown $(HOSTESS)
 	-rm -rf $(PWD)/build
 	-rm -rf $(PWD)/Notes.md
 	-git clean -f -X $(STATIC_DIR)
+	-rm -rf $(SIMPLE_ICONS)
 
 DOCKER=$(shell which docker)
 DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env

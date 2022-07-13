@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"strings"
 
 	"github.com/monetr/monetr/pkg/build"
+	"github.com/monetr/monetr/pkg/icons"
 	"github.com/monetr/monetr/pkg/ui"
 	"github.com/spf13/cobra"
 )
@@ -25,15 +27,28 @@ func newVersionCommand(parent *cobra.Command) {
 			}
 
 			detailedString := "" +
-				"Version:      %s\n" +
-				"Revision:     %s\n" +
-				"Build time:   %s\n" +
-				"Build host:   %s\n" +
-				"Embedded UI:  %t\n" +
-				"Architecture: %s\n" +
-				"OS:           %s\n" +
-				"Compiler:     %s\n" +
-				"Go Version:   %s\n"
+				"Version:         %s\n" +
+				"Revision:        %s\n" +
+				"Build time:      %s\n" +
+				"Build host:      %s\n" +
+				"Embedded UI:     %t\n" +
+				"Embedded Icons:  %t\n" +
+				"  Icon Packs:    %s\n" +
+				"Architecture:    %s\n" +
+				"OS:              %s\n" +
+				"Compiler:        %s\n" +
+				"Go Version:      %s\n"
+
+			iconsEnabled := icons.GetIconsEnabled()
+			iconPacks := "<not enabled>"
+			if iconsEnabled {
+				indexes := icons.GetIconIndexes()
+				if len(indexes) == 0 {
+					iconPacks = "<none enabled>"
+				} else {
+					iconPacks = strings.Join(indexes, ", ")
+				}
+			}
 
 			fmt.Printf(
 				detailedString,
@@ -42,6 +57,8 @@ func newVersionCommand(parent *cobra.Command) {
 				build.BuildTime,
 				build.BuildHost,
 				ui.EmbeddedUI,
+				iconsEnabled,
+				iconPacks,
 				runtime.GOARCH,
 				runtime.GOOS,
 				runtime.Compiler,

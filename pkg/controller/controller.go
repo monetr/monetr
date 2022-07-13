@@ -320,6 +320,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				}
 			}
 
+			repoParty.PartyFunc("/icons", c.iconsController)
 			repoParty.PartyFunc("/account", c.handleAccounts)
 			repoParty.PartyFunc("/links", c.linksController)
 			repoParty.PartyFunc("/institutions", c.institutionsController)
