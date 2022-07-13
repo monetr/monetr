@@ -76,6 +76,7 @@ nav:
       - API:
           - Resources:
               - developing/api/resources/index.md
+              - Account Settings: developing/api/resources/account_settings.md
               - Authentication: developing/api/resources/authentication.md
               - Bank Accounts: developing/api/resources/bank_accounts.md
               - Funding Schedules: developing/api/resources/funding_schedules.md
