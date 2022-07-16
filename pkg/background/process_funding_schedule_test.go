@@ -9,7 +9,6 @@ import (
 	"github.com/monetr/monetr/pkg/internal/fixtures"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
-	"github.com/monetr/monetr/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,15 +21,12 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
-		timezone := testutils.MustEz(t, user.Account.GetTimezone)
-
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bankAccount, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", false)
-		fundingSchedule.NextOccurrence = util.MidnightInLocal(fundingSchedule.NextOccurrence.Add(-48 * time.Hour), timezone)
 		testutils.MustDBUpdate(t, fundingSchedule)
-
+		assert.Greater(t, time.Now(), fundingSchedule.NextOccurrence, "next occurrence must be in the past")
 
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
-		spendingRule.DTStart(time.Now().Add(7 * 24 * time.Hour))
+		spendingRule.DTStart(time.Now().Add(14 * 24 * time.Hour))
 		nextDue := spendingRule.After(time.Now(), false)
 
 		contributions := fundingSchedule.GetNumberOfContributionsBetween(time.Now(), nextDue)
@@ -109,7 +105,10 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bankAccount, "FREQ=DAILY;INTERVAL=1", false)
+		fundingSchedule.NextOccurrence = time.Now().Add(1 * time.Hour).In(timezone)
+		testutils.MustDBUpdate(t, fundingSchedule)
 
 		handler := NewProcessFundingScheduleHandler(log, db)
 		args := ProcessFundingScheduleArguments{
