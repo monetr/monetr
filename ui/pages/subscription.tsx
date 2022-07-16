@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography } from '@mui/material';
+import { useSnackbar } from 'notistack';
 
 import CenteredLogo from 'components/Logo/CenteredLogo';
-import { useSnackbar } from 'notistack';
-import request from 'shared/util/request';
 import useMountEffect from 'hooks/useMountEffect';
+import request from 'util/request';
 
 // SubscriptionPage is just used to redirect the user to the stripe billing portal. Upon mounting, it will make an API
 // call to start a billing portal session, and once it gets a response it will redirect the user there.

@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios';
 import { useSnackbar, VariantType } from 'notistack';
-import request from 'shared/util/request';
+
+import request from 'util/request';
 
 export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();

@@ -7,10 +7,10 @@ import {
   usePlaidLink } from 'react-plaid-link';
 import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import * as Sentry from '@sentry/react';
-
 import classnames from 'classnames';
 import { useSnackbar } from 'notistack';
-import request from 'shared/util/request';
+
+import request from 'util/request';
 
 interface BasePropTypes {
   useCache?: boolean;
@@ -126,6 +126,7 @@ const HookedPlaidButton = (props: HookedPropTypes) => {
 
   // I want to extract only the button props, the easiest way to do that is to do a lift of the properties like this.
   // This unfortunately leaves a ton of variables hanging though.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { useCache, plaidOnSuccess, plaidOnExit, plaidOnLoad, plaidOnEvent, token, ...buttonProps } = props;
 
   const newProps = {

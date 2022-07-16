@@ -1,7 +1,7 @@
 import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 
-import request from 'shared/util/request';
+import request from 'util/request';
 
 export interface LoginArguments {
   email: string;
@@ -19,7 +19,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         // Then bootstrap the authentication, once it's bootstrapped we want to consider the `nextUrl` field from the
         // login response above. If the nextUrl is present, then we want to navigate the user to that path. If it is not
         // present then we can direct the user to the root path.
-        return queryClient.invalidateQueries('/api/users/me')
+        return queryClient.invalidateQueries('/users/me')
           .then(() => navigate(result?.data?.nextUrl || '/'));
       })
       .catch(error => {

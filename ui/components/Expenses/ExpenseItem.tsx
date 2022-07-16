@@ -1,23 +1,25 @@
-import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
-import selectExpense from 'shared/spending/actions/selectExpense';
-import { getExpenseIsSelected } from 'shared/spending/selectors/getExpenseIsSelected';
-import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
+import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
 
-export interface PropTypes {
-  expenseId: number;
+import { useFundingSchedule } from 'hooks/fundingSchedules';
+import useStore from 'hooks/store';
+import Spending from 'models/Spending';
+
+export interface Props {
+  expense: Spending;
 }
 
-const ExpenseItem = (props: PropTypes): JSX.Element => {
-  const expense = useSelector(getSpendingById(props.expenseId));
-  const isSelected = useSelector(getExpenseIsSelected(props.expenseId));
-  const fundingSchedule = useSelector(getFundingScheduleById(expense.fundingScheduleId));
+export default function ExpenseItem(props: Props): JSX.Element {
+  const { expense } = props;
 
-  const dispatch = useDispatch();
+  const {
+    selectedExpenseId,
+    setCurrentExpense,
+  } = useStore();
 
-  const onClick = () => dispatch(selectExpense(expense.spendingId));
+  const isSelected = expense.spendingId === selectedExpenseId;
+  const fundingSchedule = useFundingSchedule(expense.fundingScheduleId);
+  const onClick = () => setCurrentExpense(isSelected ? null : expense.spendingId);
 
   return (
     <ListItem button onClick={ onClick }>
@@ -40,7 +42,7 @@ const ExpenseItem = (props: PropTypes): JSX.Element => {
             variant="body1"
           >
             { expense.getCurrentAmountString() } <span
-            className="opacity-80">of</span> { expense.getTargetAmountString() }
+              className="opacity-80">of</span> { expense.getTargetAmountString() }
           </Typography>
         </div>
         <div className="col-span-4">
@@ -55,16 +57,16 @@ const ExpenseItem = (props: PropTypes): JSX.Element => {
           <Typography
             variant="body1"
           >
-            { expense.getNextContributionAmountString() }/{ fundingSchedule.name }
+            { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
           </Typography>
         </div>
         <div className="flex justify-end p-5 align-middle col-span-1 row-span-4">
           { expense.isBehind &&
-          <Chip
-            className="self-center"
-            label="Behind"
-            color="secondary"
-          />
+            <Chip
+              className="self-center"
+              label="Behind"
+              color="secondary"
+            />
           }
         </div>
         <div className="flex justify-end align-middle col-span-1 row-span-4">
@@ -77,7 +79,5 @@ const ExpenseItem = (props: PropTypes): JSX.Element => {
         </div>
       </div>
     </ListItem>
-  )
-}
-
-export default ExpenseItem;
+  );
+};

@@ -9,9 +9,7 @@ export default class Balance {
   goals: number;
 
   constructor(data?: Partial<Balance>) {
-    if (data) {
-      Object.assign(this, data);
-    }
+    if (data) Object.assign(this, data);
   }
 
   getSafeToSpendString(): string {

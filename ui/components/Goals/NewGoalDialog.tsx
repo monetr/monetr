@@ -1,5 +1,5 @@
-import MomentUtils from '@date-io/moment';
-import { DatePicker, DesktopDatePicker, StaticDatePicker } from '@mui/lab';
+import React, { Fragment, useState } from 'react';
+import { DatePicker } from '@mui/lab';
 import {
   Alert,
   Button,
@@ -17,38 +17,21 @@ import {
   StepContent,
   StepLabel,
   Stepper,
-  TextField
+  TextField,
 } from '@mui/material';
-import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
-import Spending, { SpendingType } from 'models/Spending';
 import { Formik, FormikHelpers } from 'formik';
 import moment from 'moment';
-import React, { Component, Fragment } from 'react';
-import { connect } from 'react-redux';
-import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
-import createSpending from 'shared/spending/actions/createSpending';
-import { AppState } from 'store';
 
-export interface PropTypes {
-  onClose: { (): void };
-  isOpen: boolean;
-}
+import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
+import { useSelectedBankAccountId } from 'hooks/bankAccounts';
+import { useCreateSpending } from 'hooks/spending';
+import Spending, { SpendingType } from 'models/Spending';
 
-interface WithConnectionPropTypes extends PropTypes {
-  bankAccountId: number;
-  createSpending: { (spending: Spending): Promise<any> }
-}
-
-enum NewGoalStep {
+enum DialogStep {
   Name,
   Amount,
   Date,
   Funding,
-}
-
-interface ComponentState {
-  step: NewGoalStep;
-  error?: string;
 }
 
 interface NewGoalForm {
@@ -63,17 +46,21 @@ const initialValues: NewGoalForm = {
   amount: 0.00,
   byDate: moment().add(1, 'day'),
   fundingScheduleId: 0,
+};
+
+interface Props {
+  onClose: { (): void };
+  isOpen: boolean;
 }
 
-export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentState> {
+export default function NewGoalDialog(props: Props): JSX.Element {
+  const [step, setStep] = useState<DialogStep>(DialogStep.Name);
+  const [error, setError]  = useState<string|null>(null);
+  const bankAccountId = useSelectedBankAccountId();
+  const createSpending = useCreateSpending();
 
-  state = {
-    step: NewGoalStep.Name,
-    error: null,
-  };
-
-  submit = (values: NewGoalForm, { setSubmitting }: FormikHelpers<NewGoalForm>) => {
-    const { bankAccountId, createSpending, onClose } = this.props;
+  async function submit(values: NewGoalForm, { setSubmitting }: FormikHelpers<NewGoalForm>): Promise<void> {
+    const { onClose } = props;
 
     const newSpending = new Spending({
       bankAccountId: bankAccountId,
@@ -86,32 +73,23 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentS
       recurrenceRule: null,
     });
 
+
     return createSpending(newSpending)
-      .then(() => onClose())
-      .catch(error => {
-        setSubmitting(false);
+      .then(onClose)
+      .catch(error => setError(error?.response?.data?.error))
+      .finally(() => setSubmitting(false));
+  }
 
-        this.setState({
-          error: error.response.data.error,
-        });
-      });
-  };
+  function nextStep() {
+    setStep(Math.min(DialogStep.Funding, step + 1));
+  }
 
-  nextStep = () => {
-    return this.setState(prevState => ({
-      step: Math.min(NewGoalStep.Funding, prevState.step + 1),
-    }));
-  };
+  function previousStep() {
+    setStep(Math.max(DialogStep.Name, step - 1));
+  }
 
-  previousStep = () => {
-    return this.setState(prevState => ({
-      step: Math.max(NewGoalStep.Name, prevState.step - 1),
-    }));
-  };
-
-  renderActions = (isSubmitting: boolean, submitForm: { (): Promise<any> }) => {
-    const { onClose } = this.props;
-    const { step } = this.state;
+  function renderActions(isSubmitting: boolean, submitForm: () => Promise<unknown>) {
+    const { onClose } = props;
 
     const cancelButton = (
       <Button color="secondary" onClick={ onClose }>
@@ -123,7 +101,7 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentS
       <Button
         disabled={ isSubmitting }
         color="secondary"
-        onClick={ this.previousStep }
+        onClick={ previousStep }
       >
         Previous
       </Button>
@@ -132,7 +110,7 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentS
     const nextButton = (
       <Button
         color="primary"
-        onClick={ this.nextStep }
+        onClick={ nextStep }
       >
         Next
       </Button>
@@ -150,14 +128,14 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentS
     );
 
     switch (step) {
-      case NewGoalStep.Name:
+      case DialogStep.Name:
         return (
           <Fragment>
             { cancelButton }
             { nextButton }
           </Fragment>
         );
-      case NewGoalStep.Funding:
+      case DialogStep.Funding:
         return (
           <Fragment>
             { previousButton }
@@ -172,16 +150,14 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentS
           </Fragment>
         );
     }
-  };
+  }
 
-  renderErrorMaybe = () => {
-    const { error } = this.state;
-
+  function ErrorMaybe(): JSX.Element {
     if (!error) {
       return null;
     }
 
-    const onClose = () => this.setState({ error: null });
+    const onClose = () => setError(null);
 
     return (
       <Snackbar open autoHideDuration={ 6000 } onClose={ onClose }>
@@ -189,122 +165,111 @@ export class NewGoalDialog extends Component<WithConnectionPropTypes, ComponentS
           { error }
         </Alert>
       </Snackbar>
-    )
-  };
-
-  render() {
-    const { isOpen } = this.props;
-    const { step } = this.state;
-
-    return (
-      <Formik
-        initialValues={ initialValues }
-        validate={ () => {
-        } }
-        onSubmit={ this.submit }
-      >
-        { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             setFieldValue,
-             isSubmitting,
-             submitForm,
-           }) => (
-          <form onSubmit={ handleSubmit }>
-            <Dialog open={ isOpen } maxWidth="sm">
-              <DialogTitle>
-                Create a new goal
-              </DialogTitle>
-              <DialogContent>
-                { this.renderErrorMaybe() }
-                <DialogContentText>
-                  Goals let you save up to something specific over a longer period of time. They do not repeat but
-                  make it easy to put money aside for something you know you'll need or want later.
-                </DialogContentText>
-                <div>
-                  <Stepper activeStep={ step } orientation="vertical">
-                    <Step key="What are you saving for?">
-                      <StepLabel>
-                        What are you saving for?
-                      </StepLabel>
-                      <StepContent>
-                        <TextField
-                          error={ touched.name && !!errors.name }
-                          helperText={ (touched.name && errors.name) ? errors.name : null }
-                          autoFocus
-                          id="new-goal-name"
-                          name="name"
-                          className="w-full"
-                          label="Name"
-                          onChange={ handleChange }
-                          onBlur={ handleBlur }
-                          value={ values.name }
-                          disabled={ isSubmitting }
-                        />
-                      </StepContent>
-                    </Step>
-                    <Step key="How much do you need?">
-                      <StepLabel>How much do you need?</StepLabel>
-                      <StepContent>
-                        <FormControl fullWidth>
-                          <InputLabel htmlFor="new-goal-amount">Amount</InputLabel>
-                          <Input
-                            id="new-goal-amount"
-                            name="amount"
-                            value={ values.amount }
-                            onBlur={ handleBlur }
-                            onChange={ handleChange }
-                            disabled={ isSubmitting }
-                            startAdornment={ <InputAdornment position="start">$</InputAdornment> }
-                          />
-                        </FormControl>
-                      </StepContent>
-                    </Step>
-                    <Step key="When do you need it by?">
-                      <StepLabel>When do you need it by</StepLabel>
-                      <StepContent>
-                        <DatePicker
-                          minDate={ moment().startOf('day').add(1, 'day') }
-                          onChange={ (value) => setFieldValue('byDate', value.startOf('day')) }
-                          inputFormat="MM/DD/yyyy"
-                          value={ values.byDate }
-                          renderInput={ (params) => <TextField fullWidth { ...params } /> }
-                        />
-                      </StepContent>
-                    </Step>
-                    <Step key="How do you want to fund it?">
-                      <StepLabel>How do you want to fund it?</StepLabel>
-                      <StepContent>
-                        <div className="mt-5"/>
-                        <FundingScheduleSelectionList
-                          disabled={ isSubmitting }
-                          onChange={ (value) => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
-                        />
-                      </StepContent>
-                    </Step>
-                  </Stepper>
-                </div>
-              </DialogContent>
-              <DialogActions>
-                { this.renderActions(isSubmitting, submitForm) }
-              </DialogActions>
-            </Dialog>
-          </form>
-        ) }
-      </Formik>
     );
   }
+
+  const { isOpen } = props;
+
+  return (
+    <Formik
+      initialValues={ initialValues }
+      validate={ () => {
+      } }
+      onSubmit={ submit }
+    >
+      { ({
+        values,
+        errors,
+        touched,
+        handleChange,
+        handleBlur,
+        handleSubmit,
+        setFieldValue,
+        isSubmitting,
+        submitForm,
+      }) => (
+        <form onSubmit={ handleSubmit }>
+          <Dialog open={ isOpen } maxWidth="sm">
+            <DialogTitle>
+              Create a new goal
+            </DialogTitle>
+            <DialogContent>
+              <ErrorMaybe />
+              <DialogContentText>
+                Goals let you save up to something specific over a longer period of time. They do not repeat but
+                make it easy to put money aside for something you know you'll need or want later.
+              </DialogContentText>
+              <div>
+                <Stepper activeStep={ step } orientation="vertical">
+                  <Step key="What are you saving for?">
+                    <StepLabel>
+                      What are you saving for?
+                    </StepLabel>
+                    <StepContent>
+                      <TextField
+                        error={ touched.name && !!errors.name }
+                        helperText={ (touched.name && errors.name) ? errors.name : null }
+                        autoFocus
+                        id="new-goal-name"
+                        name="name"
+                        className="w-full"
+                        label="Name"
+                        onChange={ handleChange }
+                        onBlur={ handleBlur }
+                        value={ values.name }
+                        disabled={ isSubmitting }
+                      />
+                    </StepContent>
+                  </Step>
+                  <Step key="How much do you need?">
+                    <StepLabel>How much do you need?</StepLabel>
+                    <StepContent>
+                      <FormControl fullWidth>
+                        <InputLabel htmlFor="new-goal-amount">Amount</InputLabel>
+                        <Input
+                          id="new-goal-amount"
+                          name="amount"
+                          value={ values.amount }
+                          onBlur={ handleBlur }
+                          onChange={ handleChange }
+                          disabled={ isSubmitting }
+                          startAdornment={ <InputAdornment position="start">$</InputAdornment> }
+                        />
+                      </FormControl>
+                    </StepContent>
+                  </Step>
+                  <Step key="When do you need it by?">
+                    <StepLabel>When do you need it by</StepLabel>
+                    <StepContent>
+                      <DatePicker
+                        minDate={ moment().startOf('day').add(1, 'day') }
+                        onChange={ value => setFieldValue('byDate', value.startOf('day')) }
+                        inputFormat="MM/DD/yyyy"
+                        value={ values.byDate }
+                        renderInput={ params => <TextField fullWidth { ...params } /> }
+                      />
+                    </StepContent>
+                  </Step>
+                  <Step key="How do you want to fund it?">
+                    <StepLabel>How do you want to fund it?</StepLabel>
+                    <StepContent>
+                      <div className="mt-5" />
+                      <FundingScheduleSelectionList
+                        disabled={ isSubmitting }
+                        onChange={ value => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
+                      />
+                    </StepContent>
+                  </Step>
+                </Stepper>
+              </div>
+            </DialogContent>
+            <DialogActions>
+              { renderActions(isSubmitting, submitForm) }
+            </DialogActions>
+          </Dialog>
+        </form>
+      ) }
+    </Formik>
+  );
 }
 
-export default connect(
-  (state: AppState) => ({
-    bankAccountId: getSelectedBankAccountId(state),
-  }),
-  {
-    createSpending,
-  }
-)(NewGoalDialog)

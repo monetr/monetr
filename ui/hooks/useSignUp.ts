@@ -1,5 +1,5 @@
 import User from 'models/User';
-import request from 'shared/util/request';
+import request from 'util/request';
 
 export interface SignUpArguments {
   agree: boolean;

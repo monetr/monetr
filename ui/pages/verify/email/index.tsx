@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography } from '@mui/material';
 
 import CenteredLogo from 'components/Logo/CenteredLogo';
-import request from 'shared/util/request';
+import request from 'util/request';
 
 export default function VerifyEmailPage(): JSX.Element {
   const location = useLocation();

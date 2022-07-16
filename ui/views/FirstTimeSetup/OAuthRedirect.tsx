@@ -1,19 +1,13 @@
+import React, { useEffect, useState } from 'react';
+import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
+import { useQueryClient } from 'react-query';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { Severity } from '@sentry/react';
+
 import { OAuthRedirectPlaidLink } from 'components/Plaid/OAuthRedirectPlaidLink';
-import { List } from 'immutable';
-import React, { useEffect, useState } from 'react';
-import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
-import { useStore } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import fetchBalances from 'shared/balances/actions/fetchBalances';
-import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
-import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
-import fetchLinks from 'shared/links/actions/fetchLinks';
-import fetchSpending from 'shared/spending/actions/fetchSpending';
-import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import request from 'shared/util/request';
+import request from 'util/request';
 
 interface State {
   loading: boolean;
@@ -23,7 +17,8 @@ interface State {
   longPollAttempts: number;
 }
 
-const OAuthRedirect = (): JSX.Element => {
+export default function OAuthRedirect(): JSX.Element {
+  const queryClient = useQueryClient();
   const [state, setState] = useState<Partial<State>>({
     loading: true,
   });
@@ -43,9 +38,7 @@ const OAuthRedirect = (): JSX.Element => {
 
   const navigate = useNavigate();
 
-  const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
-
-  function longPollSetup() {
+  async function longPollSetup(): Promise<void> {
     setState(prevState => ({
       longPollAttempts: prevState.longPollAttempts + 1,
     }));
@@ -56,11 +49,13 @@ const OAuthRedirect = (): JSX.Element => {
     }
 
     return request().get(`/plaid/link/setup/wait/${ linkId }`)
-      .then(result => Promise.resolve())
+      .then(() => Promise.resolve())
       .catch(error => {
         if (error.response.status === 408) {
-          return this.longPollSetup();
+          return longPollSetup();
         }
+
+        throw error;
       });
   }
 
@@ -79,24 +74,22 @@ const OAuthRedirect = (): JSX.Element => {
             level: Severity.Info,
             message: 'Error from Plaid link',
             data: error,
-          }
-        ]
+          },
+        ],
       });
     }
 
     return navigate('/');
   }
 
-  const { dispatch, getState } = useStore();
-
-  function plaidLinkSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata) {
+  async function plaidLinkSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> {
     setState({ loading: true });
 
-    return request().post('/plaid/link/token/callback', {
+    return void request().post('/plaid/link/token/callback', {
       publicToken: public_token,
       institutionId: metadata.institution.institution_id,
       institutionName: metadata.institution.name,
-      accountIds: List(metadata.accounts).map((account: { id: string }) => account.id).toArray()
+      accountIds: metadata.accounts.map((account: { id: string}) => account.id),
     })
       .then(result => {
         setState({
@@ -104,19 +97,10 @@ const OAuthRedirect = (): JSX.Element => {
         });
 
         return longPollSetup()
-          .then(() => {
-            return Promise.all([
-              fetchLinks()(dispatch),
-              fetchBankAccounts()(dispatch).then(() => {
-                return Promise.all([
-                  fetchInitialTransactionsIfNeeded(),
-                  fetchFundingSchedulesIfNeeded()(dispatch, getState),
-                  fetchSpending()(dispatch, getState),
-                  fetchBalances()(dispatch, getState),
-                ]);
-              }),
-            ]);
-          });
+          .then(() => Promise.all([
+            queryClient.invalidateQueries('/links'),
+            queryClient.invalidateQueries('/bank_accounts'),
+          ]));
       });
   }
 
@@ -128,7 +112,7 @@ const OAuthRedirect = (): JSX.Element => {
             One moment...
           </Typography>
           <div className="flex justify-center items-center p-5 m-5">
-            <CircularProgress/>
+            <CircularProgress />
           </div>
         </div>
       );
@@ -142,7 +126,7 @@ const OAuthRedirect = (): JSX.Element => {
           plaidOnExit={ plaidLinkExit }
         />
       </div>
-    )
+    );
   }
 
   return (
@@ -158,4 +142,3 @@ const OAuthRedirect = (): JSX.Element => {
   );
 };
 
-export default OAuthRedirect;

@@ -3,10 +3,10 @@ import { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
 import CreatableSelect from 'react-select/creatable';
 
+import { useUpdateTransaction } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
-import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
 
-interface PropTypes {
+interface Props {
   transaction: Transaction;
 }
 
@@ -20,12 +20,12 @@ interface Option {
   readonly value: TransactionName;
 }
 
-const TransactionNameEditor = (props: PropTypes): JSX.Element => {
+const TransactionNameEditor = (props: Props): JSX.Element => {
   const { transaction } = props;
   const [loading, setLoading] = useState<boolean>(false);
   const updateTransaction = useUpdateTransaction();
 
-  function updateTransactionName(input: string): Promise<void> {
+  async function updateTransactionName(input: string): Promise<void> {
     setLoading(true);
     const updated = new Transaction({
       ...transaction,
@@ -37,7 +37,7 @@ const TransactionNameEditor = (props: PropTypes): JSX.Element => {
       .finally(() => setLoading(false));
   }
 
-  function handleTransactionNameChange(newValue: OnChangeValue<Option, false>, meta: ActionMeta<Option>) {
+  function handleTransactionNameChange(newValue: OnChangeValue<Option, false>, _: ActionMeta<Option>) {
     return updateTransactionName(newValue.label);
   }
 

@@ -3,7 +3,6 @@ import { CircularProgress as MaterialCircularProgress } from '@mui/material';
 import {
   CircularProgressProps as MaterialCircularProgressProps,
 } from '@mui/material/CircularProgress/CircularProgress';
-
 import classNames from 'classnames';
 
 interface CircularProgressExtendedProps {

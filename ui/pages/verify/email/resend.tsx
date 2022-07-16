@@ -1,16 +1,16 @@
 import React, { Fragment, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
-
 import classnames from 'classnames';
+import { Formik, FormikHelpers } from 'formik';
+import { useSnackbar } from 'notistack';
+
 import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
 import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
-import { Formik, FormikHelpers } from 'formik';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { useSnackbar } from 'notistack';
-import request from 'shared/util/request';
+import request from 'util/request';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface ResendValues {

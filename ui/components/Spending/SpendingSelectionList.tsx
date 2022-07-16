@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React from 'react';
 import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
+import * as R from 'ramda';
 
-import { Map } from 'immutable';
+import { useSpendingSink } from 'hooks/spending';
 import Spending from 'models/Spending';
-import { getSpending } from 'shared/spending/selectors/getSpending';
 
-export interface PropTypes {
+interface Props {
   value: number | null;
   onChange: { (spending: Spending | null): void };
   disabled?: boolean;
@@ -14,31 +13,56 @@ export interface PropTypes {
   excludeSafeToSpend?: boolean;
 }
 
-interface WithConnectionPropTypes extends PropTypes {
-  spending: Map<number, Spending>;
-}
+export default function SpendingSelectionList(props: Props): JSX.Element {
+  const { result: spending } = useSpendingSink();
 
-export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}> {
-
-  selectItem = (spendingId: number | null) => () => {
-    const { onChange, spending, value } = this.props;
+  const selectItem = (spendingId: number | null) => () => {
+    const { onChange, value } = props;
     if (spendingId === value) {
       return;
     }
 
-    return onChange(spending.get(spendingId, null));
+    return onChange(spending.get(spendingId));
   };
 
-  render() {
-    const { spending, value, disabled, excludeIds, excludeSafeToSpend } = this.props;
+  const { value, disabled, excludeIds, excludeSafeToSpend } = props;
+  const items = R.pipe(
+    R.filter((item: Spending) => !excludeIds?.includes(item.spendingId)),
+    R.sortBy(item => item.name.toLowerCase()),
+    R.map(item => (
+      <ListItem
+        key={ `${ item.spendingId }` }
+        onClick={ selectItem(item.spendingId) }
+        button
+      >
+        <ListItemIcon>
+          <Checkbox
+            edge="start"
+            checked={ value === item.spendingId }
+            tabIndex={ -1 }
+            color="primary"
+            disabled={ !!disabled }
+          />
+        </ListItemIcon>
+        <div className="w-full grid grid-cols-3 grid-rows-1 grid-flow-col gap-1">
+          <div className="col-span-2">
+            <Typography>{ item.name }</Typography>
+          </div>
+          <div className="flex justify-end col-span-1">
+            <Typography>{ item.getCurrentAmountString() }</Typography>
+          </div>
+        </div>
+      </ListItem>
+    )),
+  )(Array.from(spending.values()));
 
-    return (
-      <div className="w-full spending-selection-list">
-        <List className="p-0">
-          { !excludeSafeToSpend &&
+  return (
+    <div className="w-full spending-selection-list">
+      <List className="p-0">
+        { !excludeSafeToSpend &&
           <ListItem
             key="safe"
-            onClick={ this.selectItem(null) }
+            onClick={ selectItem(null) }
             button
           >
             <ListItemIcon>
@@ -56,49 +80,10 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
               </div>
             </div>
           </ListItem>
-          }
-
-          {
-            spending
-              .filter(item => !excludeIds?.includes(item.spendingId))
-              .sortBy(item => item.name.toLowerCase()) // Sort without case sensitivity.
-              .map(item => (
-                <ListItem
-                  key={ `${ item.spendingId }` }
-                  onClick={ this.selectItem(item.spendingId) }
-                  button
-                >
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      checked={ value === item.spendingId }
-                      tabIndex={ -1 }
-                      color="primary"
-                      disabled={ !!disabled }
-                    />
-                  </ListItemIcon>
-                  <div className="w-full grid grid-cols-3 grid-rows-1 grid-flow-col gap-1">
-                    <div className="col-span-2">
-                      <Typography>{ item.name }</Typography>
-                    </div>
-                    <div className="flex justify-end col-span-1">
-                      <Typography>{ item.getCurrentAmountString() }</Typography>
-                    </div>
-                  </div>
-                </ListItem>
-              ))
-              .valueSeq()
-              .toArray()
-          }
-        </List>
-      </div>
-    );
-  }
+        }
+        { items }
+      </List>
+    </div>
+  );
 }
 
-export default connect(
-  state => ({
-    spending: getSpending(state),
-  }),
-  {}
-)(SpendingSelectionList);

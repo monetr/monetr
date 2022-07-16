@@ -1,33 +1,36 @@
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography } from '@mui/material';
 
 import { Logo } from 'assets';
-import activateSubscription from 'shared/authentication/actions/activateSubscription';
-import request from 'shared/util/request';
+import { useAfterCheckout } from 'hooks/useAuthentication';
+import useMountEffect from 'hooks/useMountEffect';
 
 export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  function setupFromCheckout(): Promise<void> {
+  const afterCheckout = useAfterCheckout();
+
+  async function setupFromCheckout(): Promise<void> {
     const params = new URLSearchParams(search);
     const checkoutSessionId = params.get('session');
-    return request().get(`/billing/checkout/${ checkoutSessionId }`)
-      .then(({ data }) => {
-        if (data?.isActive) {
-          dispatch(activateSubscription());
+    return afterCheckout(checkoutSessionId)
+      .then(result => {
+        // If the user's subscription is now active then redirect them to the main view of the authenticated
+        // application.
+        if (result.isActive) {
           return navigate('/');
         }
 
-        alert('subscription is not active');
-      });
+        // Otherwise, dispaly the message from the result of the afterCheckout call.
+        alert(result?.message || 'Subscription is not active');
+      })
+      .catch(() => alert('Unable to determine your subscription state, please contact support@monetr.app'));
   }
 
   // As soon as the component mounts, call setup from checkout to get the subscription sorted out.
-  useEffect(() => void setupFromCheckout(), []);
+  useMountEffect(() => void setupFromCheckout());
 
   return (
     <div className="flex items-center justify-center w-full h-full max-h-full">

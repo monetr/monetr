@@ -1,60 +1,35 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { useSelector } from 'react-redux';
 import { Divider, List, ListSubheader, Typography } from '@mui/material';
+import moment, { Moment } from 'moment';
+import * as R from 'ramda';
 
 import TransactionItem from 'components/Transactions/TransactionsView/TransactionItem';
-import { Moment } from 'moment';
-import { useSnackbar } from 'notistack';
-import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import useFetchTransactions from 'shared/transactions/hooks/useFetchTransactions';
-import { getTransactions } from 'shared/transactions/selectors/getTransactions';
-import useMountEffect from 'hooks/useMountEffect';
+import { useTransactionsSink } from 'hooks/transactions';
+import Transaction from 'models/Transaction';
 
 import 'components/Transactions/TransactionsView/styles/TransactionsView.scss';
 
 function TransactionsView(): JSX.Element {
-  const { enqueueSnackbar } = useSnackbar();
-  const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
-  const fetchTransactions = useFetchTransactions();
-  const transactions = useSelector(getTransactions);
+  const { isLoading, isFetching, fetchNextPage, error, result: transactions } = useTransactionsSink();
 
-  useMountEffect(() => {
-    fetchInitialTransactionsIfNeeded()
-      .catch(() => enqueueSnackbar('Failed to retrieve transactions.', { variant: 'error' }));
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   // TODO This is a temp approach, since we don't know how many transactions we have for a given bank account, we can
   //  just request transactions until we get a page that is not full. But this is not a good way to do it. If they have
   //  a total number of transactions divisible by 25 then we could continue to try to request more.
-  const hasNextPage = transactions.count() % 25 === 0 && transactions.count() !== 0;
-
-  function retrieveMoreTransactions() {
-    setLoading(true);
-    return fetchTransactions(transactions.count())
-      .catch(error => {
-        enqueueSnackbar('Failed to retrieve more transactions.', {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        });
-        setError(error);
-      })
-      .finally(() => setLoading(false));
-  }
+  const hasNextPage = transactions.size % 25 === 0 && transactions.size !== 0;
+  const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({
     loading,
     hasNextPage,
-    onLoadMore: retrieveMoreTransactions,
+    onLoadMore: fetchNextPage,
     // When there is an error, we stop infinite loading.
     // It can be reactivated by setting "error" state as undefined.
     disabled: !!error,
     // `rootMargin` is passed to `IntersectionObserver`.
     // We can use it to trigger 'onLoadMore' when the sentry comes near to become
     // visible, instead of becoming fully visible on the screen.
-    rootMargin: '0px 0px 400px 0px',
+    rootMargin: '0px 0px 0px 0px',
   });
 
   // formatDateHeader will just take the moment for a given transaction group and format it based on whether that day is
@@ -69,11 +44,18 @@ function TransactionsView(): JSX.Element {
   }
 
   function renderTransactions() {
-    return transactions
-      // TODO Right now transactions don't have a "time", only a date. So is this a good group by key? Could we ever
-      //  have two transactions for the same day that are not the same date object?
-      .groupBy(transaction => transaction.date)
-      .map((transactions, group) => (
+    interface TransactionGroup {
+      transactions: Array<Transaction>;
+      group: moment.Moment;
+    }
+    return R.pipe(
+      R.groupBy((item: Transaction) => item.date.toString()),
+      R.mapObjIndexed((transactions, date) => ({
+        transactions: transactions,
+        group: moment(date),
+      })),
+      R.values,
+      R.map(({ transactions, group }: TransactionGroup): JSX.Element => (
         <li key={ group.unix() }>
           <ul>
             <Fragment>
@@ -88,12 +70,11 @@ function TransactionsView(): JSX.Element {
               <TransactionItem
                 key={ transaction.transactionId }
                 transaction={ transaction }
-              />)).valueSeq().toArray() }
+              />)) }
           </ul>
         </li>
-      ))
-      .valueSeq()
-      .toArray();
+      )),
+    )(Array.from(transactions.values()));
   }
 
   function TransactionListFooter(): JSX.Element {

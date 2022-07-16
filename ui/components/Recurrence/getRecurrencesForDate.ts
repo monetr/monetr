@@ -1,9 +1,9 @@
-import Recurrence from 'components/Recurrence/Recurrence';
-import { List } from 'immutable';
 import moment from 'moment';
+
+import Recurrence from 'components/Recurrence/Recurrence';
 import RRule, { Weekday } from 'rrule';
 
-export default function getRecurrencesForDate(date: moment.Moment): List<Recurrence> {
+export default function getRecurrencesForDate(date: moment.Moment): Array<Recurrence> {
   const input = date.clone().startOf('day');
   const endOfMonth = input.clone().endOf('month').startOf('day');
   const startOfMonth = input.clone().startOf('month').startOf('day');
@@ -98,7 +98,7 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
     }));
   }
 
-  return List<Recurrence>(rules);
+  return rules;
 }
 
 function getRuleDayOfWeek(date: moment.Moment): Weekday {

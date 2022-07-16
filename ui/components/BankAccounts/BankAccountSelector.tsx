@@ -1,45 +1,34 @@
 import React, { Fragment, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AccountBalanceWallet, ArrowDropDown, CheckCircle } from '@mui/icons-material';
 import { Button, Divider, Menu, MenuItem, Typography } from '@mui/material';
-
 import classnames from 'classnames';
-import fetchBalances from 'shared/balances/actions/fetchBalances';
-import setSelectedBankAccountId from 'shared/bankAccounts/actions/setSelectedBankAccountId';
-import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
-import { getBankAccountsLoading } from 'shared/bankAccounts/selectors/getBankAccountsLoading';
-import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
-import { fetchFundingSchedulesIfNeeded } from 'shared/fundingSchedules/actions/fetchFundingSchedulesIfNeeded';
-import { getLinks } from 'shared/links/selectors/getLinks';
-import { getLinksLoading } from 'shared/links/selectors/getLinksLoading';
-import fetchSpending from 'shared/spending/actions/fetchSpending';
-import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
+import * as R from 'ramda';
+import shallow from 'zustand/shallow';
+
+import { useBankAccounts, useBankAccountsSink, useSelectedBankAccountId } from 'hooks/bankAccounts';
+import { useLinks, useLinksSink } from 'hooks/links';
+import useStore from 'hooks/store';
+import BankAccount from 'models/BankAccount';
 
 const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element => {
-  const dispatch = useDispatch();
-
   const navigate = useNavigate();
-  const selectedBankAccountId = useSelector(getSelectedBankAccountId);
-  const bankAccounts = useSelector(getBankAccounts);
-  const links = useSelector(getLinks);
-
-  const fetchInitialTransactionsIfNeeded = useFetchInitialTransactionsIfNeeded();
+  const { selectedBankAccountId, setCurrentBankAccount } = useStore(state => ({
+    selectedBankAccountId: state.selectedBankAccountId,
+    setCurrentBankAccount: state.setCurrentBankAccount,
+  }), shallow);
+  const bankAccounts = useBankAccounts();
+  const links = useLinks();
 
   function goToAllAccounts() {
     props.closeMenu();
     navigate('/accounts');
   }
 
-  const changeBankAccount = (bankAccountId: number) => (): Promise<[void, void, void, void]> => {
-    dispatch(setSelectedBankAccountId(bankAccountId));
+  const changeBankAccount = (bankAccountId: number) => (): Promise<void> => {
+    setCurrentBankAccount(bankAccountId);
     props.closeMenu();
-    return Promise.all([
-      void fetchInitialTransactionsIfNeeded(),
-      void dispatch(fetchFundingSchedulesIfNeeded()),
-      void dispatch(fetchSpending()),
-      void dispatch(fetchBalances()),
-    ]);
+    return Promise.resolve();
   };
 
   const bankAccountsViewButton = (
@@ -50,17 +39,17 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
     </MenuItem>
   );
 
-  if (bankAccounts.isEmpty()) {
+  if (bankAccounts.size === 0) {
     return bankAccountsViewButton;
   }
 
-  const items = bankAccounts
-    .sortBy(bankAccount => {
+  const items = R.pipe(
+    R.sortBy((bankAccount: BankAccount) => {
       const link = links.get(bankAccount.linkId);
 
       return `${ link.getName() } - ${ bankAccount.name }`;
-    })
-    .map(bankAccount => {
+    }),
+    R.map((bankAccount: BankAccount) => {
       const link = links.get(bankAccount.linkId);
       return (
         <MenuItem
@@ -74,9 +63,8 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
           { link.getName() } - { bankAccount.name }
         </MenuItem>
       );
-    })
-    .valueSeq()
-    .toArray();
+    }),
+  )(Array.from(bankAccounts.values()));
 
   items.push(<Divider key="divider" className="w-96" />);
   items.push(bankAccountsViewButton);
@@ -89,10 +77,13 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
 };
 
 const BankAccountSelector = (): JSX.Element => {
-  const selectedBankAccountId = useSelector(getSelectedBankAccountId);
-  const bankAccounts = useSelector(getBankAccounts);
-  const bankAccountsLoading = useSelector(getBankAccountsLoading);
-  const linksLoading = useSelector(getLinksLoading);
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const {
+    isLoading: bankAccountsLoading,
+    result: bankAccounts,
+  } = useBankAccountsSink();
+
+  const { isLoading: linksLoading } = useLinksSink();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -111,7 +102,7 @@ const BankAccountSelector = (): JSX.Element => {
 
   let title = 'Select A Bank Account';
   if (selectedBankAccountId) {
-    title = bankAccounts.get(selectedBankAccountId, null)?.name;
+    title = bankAccounts.get(selectedBankAccountId)?.name;
   }
 
   return (

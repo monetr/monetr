@@ -1,10 +1,10 @@
 import React from 'react';
 import { Password } from '@mui/icons-material';
 import { Button, TextField } from '@mui/material';
-
 import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
-import request from 'shared/util/request';
+
+import request from 'util/request';
 
 interface ChangePasswordValues {
   currentPassword: string;

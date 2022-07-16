@@ -1,76 +1,48 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { Checkbox, List as ListUI, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import moment from 'moment';
 
 import getRecurrencesForDate from 'components/Recurrence/getRecurrencesForDate';
 import Recurrence from 'components/Recurrence/Recurrence';
-import { List } from 'immutable';
-import moment from 'moment';
 
-export interface PropTypes {
+export interface Props {
   // TODO Add a way to pass a current value to the RecurrenceList component.
   date: moment.Moment;
-  onChange: { (value: Recurrence): void }
+  onChange: { (value: Recurrence): void };
   disabled?: boolean;
-}
-
-interface State {
-  rules: List<Recurrence>;
-  selectedIndex?: number;
 }
 
 // RecurrenceList generates a list of possible recurrence rules based on the provided date. When a recurrence is
 // selected the onChange function will be called with a string value representing an RRule.
-export class RecurrenceList extends Component<PropTypes, State> {
+export default function RecurrenceList(props: Props): JSX.Element {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const rules = getRecurrencesForDate(props.date);
 
-  state = {
-    selectedIndex: null,
-    rules: List<Recurrence>(),
+  const selectItem = (index: number) => () => {
+    const { onChange } = props;
+    setSelectedIndex(index);
+    onChange(rules[index]);
   };
 
-  componentDidMount() {
-    const { date } = this.props;
-    this.setState({
-      rules: getRecurrencesForDate(date),
-    });
-  }
-
-  selectItem = (index: number) => () => {
-    const { onChange } = this.props;
-    const { rules } = this.state;
-
-    return this.setState({
-      selectedIndex: index,
-    }, () => onChange(rules.get(index)));
-  };
-
-  renderItems = () => {
-    const { disabled } = this.props;
-    const { rules, selectedIndex } = this.state;
-
-    return rules.map((rule, index) => (
-      <ListItem key={ rule.name } dense button onClick={ this.selectItem(index) }>
-        <ListItemIcon>
-          <Checkbox
-            edge="start"
-            checked={ selectedIndex === index }
-            tabIndex={ -1 }
-            color="primary"
-            disabled={ !!disabled }
-          />
-        </ListItemIcon>
-        <ListItemText>
-          { rule.name }
-        </ListItemText>
-      </ListItem>
-    ));
-  };
-
-  render() {
-
-    return (
-      <ListUI dense>
-        { this.renderItems() }
-      </ListUI>
-    );
-  }
+  return (
+    <ListUI dense>
+      { rules
+        .map((rule, index) => (
+          <ListItem key={ rule.name } dense button onClick={ selectItem(index) }>
+            <ListItemIcon>
+              <Checkbox
+                edge="start"
+                checked={ selectedIndex === index }
+                tabIndex={ -1 }
+                color="primary"
+                disabled={ !!props.disabled }
+              />
+            </ListItemIcon>
+            <ListItemText>
+              { rule.name }
+            </ListItemText>
+          </ListItem>
+        )) }
+    </ListUI>
+  );
 }

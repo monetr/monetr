@@ -1,6 +1,4 @@
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   AccountBalance,
@@ -12,10 +10,11 @@ import {
   ShoppingCart,
 } from '@mui/icons-material';
 import { Button, IconButton } from '@mui/material';
-
 import classnames from 'classnames';
+
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
 import SidebarButton from 'components/Layout/Sidebar/SidebarButton';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 import 'components/Layout/Sidebar/styles/Sidebar.scss';
 

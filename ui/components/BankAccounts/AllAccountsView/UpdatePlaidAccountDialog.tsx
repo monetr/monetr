@@ -1,4 +1,5 @@
-import React, { Component } from "react";
+import React, { useState } from 'react';
+import { PlaidLinkOnEventMetadata, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
 import {
   Button,
   CircularProgress,
@@ -6,10 +7,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Typography
-} from "@mui/material";
-import request from "shared/util/request";
-import { PlaidConnectButton } from "views/FirstTimeSetup/PlaidConnectButton";
+  Typography,
+} from '@mui/material';
+
+import useMountEffect from 'hooks/useMountEffect';
+import request from 'util/request';
+import { PlaidConnectButton } from 'views/FirstTimeSetup/PlaidConnectButton';
 
 interface PropTypes {
   open: boolean;
@@ -23,86 +26,76 @@ interface State {
   error: string | null;
 }
 
-export class UpdatePlaidAccountDialog extends Component<PropTypes, State> {
+export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element {
+  const [state, setState] = useState<Partial<State>>({});
 
-  state = {
-    loading: false,
-    linkToken: null,
-    error: null,
-  };
-
-  componentDidMount() {
+  useMountEffect(() => {
     request()
-      .put(`/plaid/link/update/${ this.props.linkId }`)
-      .then(result => {
-        this.setState({
-          loading: false,
-          linkToken: result.data.linkToken,
-        });
-      })
+      .put(`/plaid/link/update/${ props.linkId }`)
+      .then(result => setState({
+        loading: false,
+        linkToken: result.data.linkToken,
+      }))
       .catch(error => {
-        this.setState({
+        setState({
           loading: false,
           error: error,
         });
-      });
-  }
 
-  plaidOnSuccess = (token: string, metadata: { institution: { institution_id: string, name: string }, accounts: object[] }) => {
-    this.setState({
+        // TODO Add a notification that it failed.
+        throw error;
+      });
+  });
+
+
+  async function plaidOnSuccess(token: string, metadata: PlaidLinkOnSuccessMetadata) {
+    setState({
       loading: true,
     });
 
     request().post('/plaid/link/update/callback', {
-      linkId: this.props.linkId,
+      linkId: props.linkId,
       publicToken: token,
     })
-      .then(result => {
-        this.props.onClose();
-      })
+      .then(() => props.onClose())
       .catch(error => {
         console.error(error);
-      })
-  };
+      });
+  }
 
-  plaidOnEvent = (event: string | object) => {
+  function plaidOnEvent(event: PlaidLinkOnEventMetadata) {
 
-  };
+  }
 
-  plaidOnExit = (event) => {
-    console.log(event);
+  function plaidOnExit(event: PlaidLinkOnExitMetadata) {
     if (!event) {
       return;
     }
 
-    if (event.error_code === 'item-no-error') {
-      this.props.onClose();
-    }
-  };
-
-  render() {
-    return (
-      <Dialog disableEnforceFocus={ true } open={ this.props.open } onClose={ this.props.onClose }>
-        <DialogTitle>
-          Update your plaid link.
-        </DialogTitle>
-        <DialogContent>
-          <Typography>
-            test
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={ this.props.onClose } color="secondary">Cancel</Button>
-          { this.state.loading && <CircularProgress/> }
-          { (!this.state.loading && this.state.linkToken) && <PlaidConnectButton
-            token={ this.state.linkToken }
-            onSuccess={ this.plaidOnSuccess }
-            onExit={ this.plaidOnExit }
-            onLoad={ this.plaidOnEvent }
-            onEvent={ this.plaidOnEvent }
-          /> }
-        </DialogActions>
-      </Dialog>
-    );
+    props.onClose();
   }
+
+  return (
+    <Dialog disableEnforceFocus={ true } open={ props.open } onClose={ props.onClose }>
+      <DialogTitle>
+        Update your plaid link.
+      </DialogTitle>
+      <DialogContent>
+        <Typography>
+          test
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={ props.onClose } color="secondary">Cancel</Button>
+        { state.loading && <CircularProgress /> }
+        { (!state.loading && state.linkToken) && <PlaidConnectButton
+          token={ state.linkToken }
+          onSuccess={ plaidOnSuccess }
+          onExit={ plaidOnExit }
+          onLoad={ plaidOnEvent }
+          onEvent={ plaidOnEvent }
+        /> }
+      </DialogActions>
+    </Dialog>
+  );
 }

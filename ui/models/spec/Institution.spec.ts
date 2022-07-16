@@ -1,6 +1,7 @@
-import Institution, { InstitutionPlaidIncident, InstitutionStatus } from 'models/Institution';
-import moment from 'moment';
 import { instanceOf } from 'prop-types';
+import moment from 'moment';
+
+import Institution, { InstitutionPlaidIncident, InstitutionStatus } from 'models/Institution';
 
 describe('InstitutionPlaidIncident', () => {
   it('will construct with no end', () => {

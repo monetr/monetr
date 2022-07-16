@@ -65,15 +65,7 @@
         }
       }
     ],
-    "no-unused-vars": [
-      2,
-      {
-        "vars": "all",
-        "args": "after-used",
-        "argsIgnorePattern": "^(state|_+|_.+|_)$",
-        "varsIgnorePattern": "^(React|_+|_.+|_)$"
-      }
-    ],
+    "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
       2,
       {
@@ -232,7 +224,15 @@
                 "^prop-types",
                 "^react",
                 "^redux$",
-                "^@.+"
+                "^@.+",
+                "^axios",
+                "^classnames",
+                "^formik",
+                "^moment",
+                "^notistack",
+                "^ramda",
+                "^zustand",
+                "^history"
               ],
               // Internal packages
               [
