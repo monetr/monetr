@@ -44,6 +44,7 @@ export default function Root(): JSX.Element {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
+        staleTime: 5 * 60 * 1000, // 5 minute default stale time,
         queryFn: defaultQueryFn,
       },
     },
