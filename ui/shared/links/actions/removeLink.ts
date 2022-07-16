@@ -1,8 +1,8 @@
-import { Dispatch } from "redux";
-import { RemoveLink } from "shared/links/actions";
-import request from "shared/util/request";
-import Link from "models/Link";
-import { getBankAccountsByLinkId } from "shared/bankAccounts/selectors/getBankAccountsByLinkId";
+import Link from 'models/Link';
+import { Dispatch } from 'redux';
+import { getBankAccountsByLinkId } from 'shared/bankAccounts/selectors/getBankAccountsByLinkId';
+import { RemoveLink } from 'shared/links/actions';
+import request from 'shared/util/request';
 
 interface ActionWithState {
   (dispatch: Dispatch, getState: () => any): Promise<void>
@@ -30,7 +30,7 @@ export default function removeLink(link: Link): ActionWithState {
           payload: {
             link,
             bankAccounts: bankAccounts,
-          }
+          },
         });
       })
       .catch(error => {

@@ -1,5 +1,5 @@
 export enum BillingInterval {
-  Monthly = "month"
+  Monthly = 'month'
 }
 
 export default class BillingPlan {

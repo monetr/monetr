@@ -23,7 +23,7 @@ export default function useUpdateTransaction(): (transaction: Transaction) => Pr
     transaction.bankAccountId = selectedBankAccountId;
 
     dispatch({
-      type: UpdateTransaction.Request
+      type: UpdateTransaction.Request,
     });
 
     return request().put(`/bank_accounts/${ selectedBankAccountId }/transactions/${ transaction.transactionId }`, transaction)
@@ -34,7 +34,7 @@ export default function useUpdateTransaction(): (transaction: Transaction) => Pr
           payload: {
             transaction: new Transaction(result.data.transaction),
             spending: result.data.spending?.map(item => new Spending(item)),
-          }
+          },
         });
 
         if (result.data.balance) {
@@ -46,10 +46,10 @@ export default function useUpdateTransaction(): (transaction: Transaction) => Pr
       })
       .catch(error => {
         dispatch({
-          type: UpdateTransaction.Failure
+          type: UpdateTransaction.Failure,
         });
 
         throw error;
-      })
+      });
   };
 }

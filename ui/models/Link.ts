@@ -1,5 +1,5 @@
-import { Moment } from "moment";
-import { parseToMomentMaybe } from "util/parseToMoment";
+import { Moment } from 'moment';
+import { parseToMomentMaybe } from 'util/parseToMoment';
 
 export enum LinkType {
   Unknown = 0,
@@ -15,7 +15,7 @@ export enum LinkStatus {
 }
 
 export const errorMessages = {
-  'ITEM_LOGIN_REQUIRED': `This link's authentication has expired and needs to be re-authenticated.`
+  'ITEM_LOGIN_REQUIRED': 'This link\'s authentication has expired and needs to be re-authenticated.',
 };
 
 /**

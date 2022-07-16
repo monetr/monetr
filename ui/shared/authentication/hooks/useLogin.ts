@@ -33,13 +33,13 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
                     'emailAddress': loginArgs.email,
                     'password': loginArgs.password,
                     // TODO ReCAPTCHA?
-                  }
+                  },
                 });
               case 'EMAIL_NOT_VERIFIED':
                 return navigate('/verify/email/resend', {
                   state: {
                     'emailAddress': loginArgs.email,
-                  }
+                  },
                 });
               default:
                 throw error;
@@ -50,5 +50,5 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
 
         throw error;
       });
-  }
+  };
 }

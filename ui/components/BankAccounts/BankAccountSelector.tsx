@@ -1,6 +1,10 @@
-import { Button, Divider, Menu, MenuItem, Typography } from '@mui/material';
 import React, { Fragment, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { AccountBalanceWallet, ArrowDropDown, CheckCircle } from '@mui/icons-material';
+import { Button, Divider, Menu, MenuItem, Typography } from '@mui/material';
+
+import classnames from 'classnames';
 import fetchBalances from 'shared/balances/actions/fetchBalances';
 import setSelectedBankAccountId from 'shared/bankAccounts/actions/setSelectedBankAccountId';
 import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
@@ -11,9 +15,6 @@ import { getLinks } from 'shared/links/selectors/getLinks';
 import { getLinksLoading } from 'shared/links/selectors/getLinksLoading';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
 import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import { AccountBalanceWallet, ArrowDropDown, CheckCircle } from '@mui/icons-material';
-import classnames from 'classnames';
-import { useNavigate } from 'react-router-dom';
 
 const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element => {
   const dispatch = useDispatch();
@@ -50,10 +51,10 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
   );
 
   if (bankAccounts.isEmpty()) {
-    return bankAccountsViewButton
+    return bankAccountsViewButton;
   }
 
-  let items = bankAccounts
+  const items = bankAccounts
     .sortBy(bankAccount => {
       const link = links.get(bankAccount.linkId);
 
@@ -68,16 +69,16 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
         >
           <CheckCircle color="primary" className={ classnames('mr-1', {
             'opacity-0': bankAccount.bankAccountId !== selectedBankAccountId,
-          }) }/>
+          }) } />
           { /* make it so its the link name - bank name */ }
           { link.getName() } - { bankAccount.name }
         </MenuItem>
-      )
+      );
     })
     .valueSeq()
     .toArray();
 
-  items.push(<Divider key="divider" className="w-96"/>);
+  items.push(<Divider key="divider" className="w-96" />);
   items.push(bankAccountsViewButton);
 
   return ( // It won't let me just return the array as a valid JSX.Element, so wrapping it like this makes it valid.
@@ -85,7 +86,7 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
       { items }
     </Fragment>
   );
-}
+};
 
 const BankAccountSelector = (): JSX.Element => {
   const selectedBankAccountId = useSelector(getSelectedBankAccountId);
@@ -121,9 +122,9 @@ const BankAccountSelector = (): JSX.Element => {
         onClick={ handleOpenMenu }
         aria-label="menu"
       >
-        <AccountBalanceWallet className="mr-2.5"/>
+        <AccountBalanceWallet className="mr-2.5" />
         { title }
-        <ArrowDropDown scale={ 1.25 } color="inherit" className="ml-auto"/>
+        <ArrowDropDown scale={ 1.25 } color="inherit" className="ml-auto" />
       </Button>
       <Menu
         className="w-96 pt-0 pb-0"
@@ -133,7 +134,7 @@ const BankAccountSelector = (): JSX.Element => {
         open={ open }
         onClose={ handleCloseMenu }
       >
-        <BankAccountSelectorMenu closeMenu={ handleCloseMenu }/>
+        <BankAccountSelectorMenu closeMenu={ handleCloseMenu } />
       </Menu>
     </Fragment>
   );

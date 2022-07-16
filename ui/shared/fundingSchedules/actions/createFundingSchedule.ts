@@ -1,13 +1,13 @@
-import FundingSchedule from "models/FundingSchedule";
-import { Dispatch } from "redux";
-import { CreateFundingSchedule } from "shared/fundingSchedules/actions";
-import request from "shared/util/request";
+import FundingSchedule from 'models/FundingSchedule';
+import { Dispatch } from 'redux';
+import { CreateFundingSchedule } from 'shared/fundingSchedules/actions';
+import request from 'shared/util/request';
 
 
 export default function createFundingSchedule(fundingSchedule: FundingSchedule) {
   return (dispatch: Dispatch) => {
     if (fundingSchedule.bankAccountId <= 0) {
-      throw "funding schedule must have a bank account Id";
+      throw 'funding schedule must have a bank account Id';
     }
 
     dispatch({
@@ -31,6 +31,6 @@ export default function createFundingSchedule(fundingSchedule: FundingSchedule) 
         });
 
         throw error;
-      })
-  }
+      });
+  };
 }

@@ -17,8 +17,8 @@ const theme = createTheme({
     },
     background: {
       default: darkMode ? '#2f2f2f' : '#FFFFFF',
-    }
-  }
+    },
+  },
 });
 
 export default theme;

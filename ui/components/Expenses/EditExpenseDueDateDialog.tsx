@@ -1,6 +1,6 @@
-import { DatePicker } from '@mui/lab';
 import React, { Component, Fragment } from 'react';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { connect } from 'react-redux';
+import { DatePicker } from '@mui/lab';
 import {
   Alert,
   Button,
@@ -13,20 +13,18 @@ import {
   Step,
   StepContent,
   StepLabel,
-  Stepper, TextField
+  Stepper,
+  TextField,
 } from '@mui/material';
-import { connect } from 'react-redux';
-import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
-import Spending from 'models/Spending';
-import updateSpending from 'shared/spending/actions/updateSpending';
-import moment from 'moment';
-import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
-import Recurrence from 'components/Recurrence/Recurrence';
 
-enum EditSpendingDueDateStep {
-  NextRecurrence,
-  Frequency,
-}
+import { EditSpendingDueDateStep } from 'components/Expenses/EditSpendingDueDateStep';
+import Recurrence from 'components/Recurrence/Recurrence';
+import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
+import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import Spending from 'models/Spending';
+import moment from 'moment';
+import updateSpending from 'shared/spending/actions/updateSpending';
+import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
 
 export interface PropTypes {
   onClose: { (): void };
@@ -35,7 +33,7 @@ export interface PropTypes {
 
 interface WithConnectionPropTypes extends PropTypes {
   spending: Spending;
-  updateSpending: { (spending: Spending): Promise<any> }
+  updateSpending: { (_: Spending): Promise<any> }
 }
 
 interface State {
@@ -55,7 +53,7 @@ export class EditExpenseDueDateDialog extends Component<WithConnectionPropTypes,
     step: EditSpendingDueDateStep.NextRecurrence,
   };
 
-  validateInput = (values: editSpendingDueDateForm): FormikErrors<any> => {
+  validateInput = (_: editSpendingDueDateForm): FormikErrors<any> => {
     return null;
   };
 
@@ -97,7 +95,7 @@ export class EditExpenseDueDateDialog extends Component<WithConnectionPropTypes,
           { error }
         </Alert>
       </Snackbar>
-    )
+    );
   };
 
   nextStep = () => {
@@ -196,16 +194,12 @@ export class EditExpenseDueDateDialog extends Component<WithConnectionPropTypes,
           onSubmit={ this.submit }
         >
           { ({
-               values,
-               errors,
-               touched,
-               handleChange,
-               handleBlur,
-               handleSubmit,
-               setFieldValue,
-               isSubmitting,
-               submitForm,
-             }) => (
+            values,
+            handleSubmit,
+            setFieldValue,
+            isSubmitting,
+            submitForm,
+          }) => (
             <form onSubmit={ handleSubmit }>
               <Dialog open={ isOpen } maxWidth="sm">
                 <DialogTitle>
@@ -223,10 +217,10 @@ export class EditExpenseDueDateDialog extends Component<WithConnectionPropTypes,
                         <StepContent>
                           <DatePicker
                             minDate={ moment().startOf('day').add(1, 'day') }
-                            onChange={ (value) => setFieldValue('dueDate', value.startOf('day')) }
+                            onChange={ value => setFieldValue('dueDate', value.startOf('day')) }
                             inputFormat="MM/DD/yyyy"
                             value={ values.dueDate }
-                            renderInput={ (params) => <TextField fullWidth { ...params } /> }
+                            renderInput={ params => <TextField fullWidth { ...params } /> }
                           />
                         </StepContent>
                       </Step>
@@ -237,7 +231,7 @@ export class EditExpenseDueDateDialog extends Component<WithConnectionPropTypes,
                           <RecurrenceList
                             disabled={ isSubmitting }
                             date={ values.dueDate }
-                            onChange={ (value) => setFieldValue('recurrenceRule', value) }
+                            onChange={ value => setFieldValue('recurrenceRule', value) }
                           />
                           }
                         </StepContent>

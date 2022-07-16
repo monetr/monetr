@@ -19,7 +19,7 @@ describe('getBalances', () => {
         type: FetchBalances.Success,
         payload: new Balance({
           bankAccountId: 1,
-        })
+        }),
       });
     }
 

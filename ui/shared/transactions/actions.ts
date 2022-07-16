@@ -1,7 +1,7 @@
 import Spending from 'models/Spending';
-import Transaction from "models/Transaction";
+import Transaction from 'models/Transaction';
 import { LogoutActions } from 'shared/authentication/actions';
-import { ChangeBankAccount } from "shared/bankAccounts/actions";
+import { ChangeBankAccount } from 'shared/bankAccounts/actions';
 
 export const FETCH_TRANSACTIONS_REQUEST = 'FETCH_TRANSACTIONS_REQUEST';
 export const FETCH_TRANSACTIONS_FAILURE = 'FETCH_TRANSACTIONS_FAILURE';

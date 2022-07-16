@@ -1,5 +1,5 @@
-import Spending from 'models/Spending';
 import { Map } from 'immutable';
+import Spending from 'models/Spending';
 import { createSelector } from 'reselect';
 import { getGoals } from 'shared/spending/selectors/getGoals';
 
@@ -14,4 +14,4 @@ export const getSelectedGoal = createSelector<any, any, Spending | null>(
 
     return goals.get(selectedGoalId, null);
   }
-)
+);

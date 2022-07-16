@@ -1,7 +1,7 @@
-import Recurrence from "components/Recurrence/Recurrence";
+import Recurrence from 'components/Recurrence/Recurrence';
 import { List } from 'immutable';
-import moment from "moment";
-import RRule, { Weekday } from "rrule";
+import moment from 'moment';
+import RRule, { Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(date: moment.Moment): List<Recurrence> {
   const input = date.clone().startOf('day');
@@ -16,7 +16,7 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
 
   const dayStr = isEndOfMonth ? ' last day of the month' : ordinalSuffixOf(input.date());
 
-  let rules = [
+  const rules = [
     new Recurrence({
       name: `Every ${ weekdayString }`,
       rule: new RRule({
@@ -78,23 +78,23 @@ export default function getRecurrencesForDate(date: moment.Moment): List<Recurre
 
   if (isStartOfMonth || input.date() === 15) {
     rules.push(new Recurrence({
-      name: `1st and 15th of every month`,
+      name: '1st and 15th of every month',
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
         bymonthday: [1, 15],
-      })
+      }),
     }));
   }
 
   if (isEndOfMonth || input.date() === 15) {
     rules.push(new Recurrence({
-      name: `15th and last day of every month`,
+      name: '15th and last day of every month',
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
         bymonthday: [15, -1],
-      })
+      }),
     }));
   }
 
@@ -123,15 +123,15 @@ function getRuleDayOfWeek(date: moment.Moment): Weekday {
 }
 
 function ordinalSuffixOf(i) {
-  let j = i % 10, k = i % 100;
+  const j = i % 10, k = i % 100;
   if (j === 1 && k !== 11) {
-    return i + "st";
+    return `${i  }st`;
   }
   if (j === 2 && k !== 12) {
-    return i + "nd";
+    return `${i  }nd`;
   }
   if (j === 3 && k !== 13) {
-    return i + "rd";
+    return `${i  }rd`;
   }
-  return i + "th";
+  return `${i  }th`;
 }

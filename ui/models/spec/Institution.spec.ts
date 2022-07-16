@@ -8,7 +8,7 @@ describe('InstitutionPlaidIncident', () => {
     const incident = new InstitutionPlaidIncident({
       start: start,
       end: null,
-      title: 'This institution is currently experiencing problems.'
+      title: 'This institution is currently experiencing problems.',
     });
 
     expect(incident.start.toISOString()).toBe(start.toISOString());
@@ -22,7 +22,7 @@ describe('InstitutionPlaidIncident', () => {
     const incident = new InstitutionPlaidIncident({
       start: start,
       end: end,
-      title: 'This institution was experiencing problems.'
+      title: 'This institution was experiencing problems.',
     });
 
     expect(incident.start.toISOString()).toBe(start.toISOString());
@@ -48,7 +48,7 @@ describe('InstitutionPlaidIncident', () => {
 
   it('what happens with no start', () => {
     expect(() => new InstitutionPlaidIncident({
-      title: 'This institution was experiencing problems.'
+      title: 'This institution was experiencing problems.',
     })).toThrow('input to mustParseToMoment was not a valid date time');
   });
 });
@@ -83,7 +83,7 @@ describe('InstitutionStatus', () => {
           start: moment().startOf('day'),
           end: null,
           title: 'There is an ongoing problem.',
-        }
+        },
       ],
     });
 
@@ -96,7 +96,7 @@ describe('InstitutionStatus', () => {
   });
 });
 
-describe('Institutions', function () {
+describe('Institutions', () => {
   it('create', () => {
     const item = new Institution({
       name: 'U.S. Bank',

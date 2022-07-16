@@ -1,5 +1,5 @@
-import Spending from 'models/Spending';
 import { Map } from 'immutable';
+import Spending from 'models/Spending';
 import { createSelector } from 'reselect';
 import { getExpenses } from 'shared/spending/selectors/getExpenses';
 

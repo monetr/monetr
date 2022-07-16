@@ -1,5 +1,5 @@
-import moment from "moment";
-import { mustParseToMoment, parseToMomentMaybe } from "util/parseToMoment";
+import moment from 'moment';
+import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export default class Transaction {
   transactionId: number;
@@ -31,10 +31,10 @@ export default class Transaction {
 
   getAmountString(): string {
     if (this.amount < 0) {
-      return `+ $${ (-this.amount / 100).toFixed(2) }`
+      return `+ $${ (-this.amount / 100).toFixed(2) }`;
     }
 
-    return `$${ (this.amount / 100).toFixed(2) }`
+    return `$${ (this.amount / 100).toFixed(2) }`;
   }
 
   getIsAddition(): boolean {
@@ -53,7 +53,7 @@ export default class Transaction {
   // friendly title first, but fallback on other data if a friendly title is not available.
   getTitle(): string {
     if (this.name) {
-      return this.name
+      return this.name;
     } else if (this.merchantName) {
       return this.merchantName;
     } else if (this.originalMerchantName) {
@@ -91,6 +91,6 @@ export default class Transaction {
       return this.originalCategories[0];
     }
 
-    return "Other";
+    return 'Other';
   }
 }

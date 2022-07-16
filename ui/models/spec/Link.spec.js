@@ -1,11 +1,11 @@
-import Link, { LinkType } from "models/Link";
+import Link, { LinkType } from 'models/Link';
 
 
 describe('links', () => {
   it('will detect manual', () => {
     const link = new Link({
       linkType: LinkType.Manual,
-    })
+    });
     expect(link.getIsManual()).toBeTruthy();
 
     link.linkType = LinkType.Plaid;
@@ -14,7 +14,7 @@ describe('links', () => {
 
   it('will handle custom names', () => {
     const link = new Link({
-      institutionName: 'Original'
+      institutionName: 'Original',
     });
 
     expect(link.getName()).toBe('Original');

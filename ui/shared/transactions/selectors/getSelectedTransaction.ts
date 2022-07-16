@@ -1,7 +1,7 @@
-import Transaction from "models/Transaction";
-import { OrderedMap } from "immutable";
-import { createSelector } from "reselect";
-import { getTransactions } from "shared/transactions/selectors/getTransactions";
+import { OrderedMap } from 'immutable';
+import Transaction from 'models/Transaction';
+import { createSelector } from 'reselect';
+import { getTransactions } from 'shared/transactions/selectors/getTransactions';
 
 const getSelectedTransactionId = state => state.transactions.selectedTransactionId;
 
@@ -14,4 +14,4 @@ export const getSelectedTransaction = createSelector<any, any, Transaction|null>
 
     return transactions.get(selectedTransactionId, null);
   },
-)
+);

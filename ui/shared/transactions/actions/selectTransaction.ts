@@ -1,5 +1,5 @@
-import { Dispatch } from "redux";
-import { CHANGE_SELECTED_TRANSACTION } from "shared/transactions/actions";
+import { Dispatch } from 'redux';
+import { CHANGE_SELECTED_TRANSACTION } from 'shared/transactions/actions';
 
 export default function selectTransaction(transactionId: number) {
   return (dispatch: Dispatch) => {

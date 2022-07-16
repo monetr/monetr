@@ -4,4 +4,4 @@ export const getSentryUser = (state: object) => {
     // @ts-ignore
     id: state.authentication.user.userId,
   };
-}
+};

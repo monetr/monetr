@@ -10,7 +10,7 @@ export default class Balance {
 
   constructor(data?: Partial<Balance>) {
     if (data) {
-      Object.assign(this, data)
+      Object.assign(this, data);
     }
   }
 

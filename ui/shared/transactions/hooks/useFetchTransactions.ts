@@ -4,12 +4,12 @@ import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelec
 import {
   FETCH_TRANSACTIONS_FAILURE,
   FETCH_TRANSACTIONS_REQUEST,
-  FETCH_TRANSACTIONS_SUCCESS
+  FETCH_TRANSACTIONS_SUCCESS,
 } from 'shared/transactions/actions';
 import request from 'shared/util/request';
 
 export default function useFetchTransactions(): (offset?: number) => Promise<void> {
-  const { dispatch, getState} = useStore();
+  const { dispatch, getState } = useStore();
 
   return function (offset?: number): Promise<void> {
     const selectedBankAccountId = getSelectedBankAccountId(getState());
@@ -24,7 +24,7 @@ export default function useFetchTransactions(): (offset?: number) => Promise<voi
     return request()
       .get(`/bank_accounts/${ selectedBankAccountId }/transactions`, {
         params: offset && {
-          offset: offset!
+          offset: offset!,
         },
       })
       .then(result => void dispatch({
@@ -38,5 +38,5 @@ export default function useFetchTransactions(): (offset?: number) => Promise<voi
         });
         throw error;
       });
-  }
+  };
 }

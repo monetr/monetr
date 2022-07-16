@@ -10,7 +10,7 @@ import {
   SelectGoal,
   SpendingActions,
   Transfer,
-  UpdateSpending
+  UpdateSpending,
 } from 'shared/spending/actions';
 import SpendingState from 'shared/spending/state';
 import { UpdateTransaction } from 'shared/transactions/actions';
@@ -27,7 +27,7 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
     case FETCH_SPENDING_FAILURE:
       return {
         ...state,
-        loading: false
+        loading: false,
       };
     case FETCH_SPENDING_SUCCESS:
       return {
@@ -81,7 +81,7 @@ export default function reducer(state: SpendingState = new SpendingState(), acti
       return {
         ...state,
         items,
-      }
+      };
     }
     case Transfer: {
       let items = state.items;

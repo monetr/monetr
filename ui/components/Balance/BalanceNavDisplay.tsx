@@ -1,6 +1,7 @@
-import { Typography } from '@mui/material';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { Typography } from '@mui/material';
+
 import { getBalance } from 'shared/balances/selectors/getBalance';
 
 const BalanceNavDisplay = React.memo((): JSX.Element => {
@@ -25,7 +26,7 @@ const BalanceNavDisplay = React.memo((): JSX.Element => {
         <b>Available:</b> { balance.getAvailableString() }
       </Typography>
     </div>
-  )
+  );
 });
 
 export default BalanceNavDisplay;

@@ -12,7 +12,7 @@ interface ActionWithState {
 export default function transfer(from: number | null, to: number | null, amount: number): ActionWithState {
   return (dispatch, getState) => {
     if (!from && !to) {
-      throw "must specify a from or a to";
+      throw 'must specify a from or a to';
     }
 
     const selectedBankAccountId = getSelectedBankAccountId(getState());
@@ -32,11 +32,11 @@ export default function transfer(from: number | null, to: number | null, amount:
           payload: {
             balance: new Balance(result.data.balance),
             spending: result.data.spending.map(item => new Spending(item)),
-          }
+          },
         });
       })
       .catch(error => {
         throw error;
       });
-  }
+  };
 }

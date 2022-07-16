@@ -4,7 +4,7 @@ import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelec
 import {
   FETCH_TRANSACTIONS_FAILURE,
   FETCH_TRANSACTIONS_REQUEST,
-  FETCH_TRANSACTIONS_SUCCESS
+  FETCH_TRANSACTIONS_SUCCESS,
 } from 'shared/transactions/actions';
 import { getHasAnyTransactions } from 'shared/transactions/selectors/getHasAnyTransactions';
 import request from 'shared/util/request';
@@ -44,7 +44,7 @@ function useFetchInitialTransactionsIfNeeded(): () => Promise<void> {
         });
         throw error;
       });
-  }
+  };
 }
 
 export default useFetchInitialTransactionsIfNeeded;

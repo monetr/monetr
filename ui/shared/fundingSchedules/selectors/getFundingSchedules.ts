@@ -1,7 +1,7 @@
-import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
-import { createSelector } from "reselect";
-import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
+import FundingSchedule from 'models/FundingSchedule';
+import { createSelector } from 'reselect';
+import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 
 const fundingSchedulesByBankAccount = state => state.fundingSchedules.items;
 

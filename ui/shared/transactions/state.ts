@@ -1,4 +1,4 @@
-import { Map, OrderedMap } from "immutable";
+import { Map, OrderedMap } from 'immutable';
 import Transaction from 'models/Transaction';
 
 export default class TransactionState {

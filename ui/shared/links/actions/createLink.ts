@@ -1,7 +1,7 @@
-import { Dispatch } from "redux";
-import Link from "models/Link";
-import request from "shared/util/request";
-import { CreateLinks } from "shared/links/actions";
+import Link from 'models/Link';
+import { Dispatch } from 'redux';
+import { CreateLinks } from 'shared/links/actions';
+import request from 'shared/util/request';
 
 
 interface ActionWithState {
@@ -11,11 +11,11 @@ interface ActionWithState {
 export default function createLink(link: Link): ActionWithState {
   return (dispatch: Dispatch) => {
     dispatch({
-      type: CreateLinks.Request
+      type: CreateLinks.Request,
     });
 
     return request()
-      .post(`/links`, link)
+      .post('/links', link)
       .then(result => {
         const link = new Link(result.data);
         dispatch({
@@ -27,10 +27,10 @@ export default function createLink(link: Link): ActionWithState {
       })
       .catch(error => {
         dispatch({
-          type: CreateLinks.Failure
+          type: CreateLinks.Failure,
         });
 
         throw error;
       });
-  }
+  };
 }

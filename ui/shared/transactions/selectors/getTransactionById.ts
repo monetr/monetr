@@ -1,6 +1,6 @@
-import { createSelector } from "reselect";
-import { getTransactions } from "shared/transactions/selectors/getTransactions";
-import Transaction from "models/Transaction";
+import Transaction from 'models/Transaction';
+import { createSelector } from 'reselect';
+import { getTransactions } from 'shared/transactions/selectors/getTransactions';
 
 
 export const getTransactionById = (transactionId: number) => createSelector<any, any, Transaction|null>(

@@ -12,7 +12,7 @@ export default class BankAccount {
 
   constructor(data?: Partial<BankAccount>) {
     if (data) {
-      Object.assign(this, data)
+      Object.assign(this, data);
     }
   }
 

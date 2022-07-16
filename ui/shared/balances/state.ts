@@ -1,5 +1,5 @@
-import Balance from 'models/Balance';
 import { Map } from 'immutable';
+import Balance from 'models/Balance';
 
 export default class BalancesState {
   items: Map<number, Balance>;

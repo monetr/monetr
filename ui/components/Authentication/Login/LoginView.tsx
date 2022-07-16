@@ -1,16 +1,15 @@
+import React, { Fragment, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Link as RouterLink } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
-import { Backdrop1 } from 'assets';
+
 import classnames from 'classnames';
 import ForgotPasswordMaybe from 'components/Authentication/Login/ForgotPasswordMaybe';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
-import Backdrop from 'components/Layout/Backdrop/Backdrop';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
 import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
-import React, { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Link as RouterLink } from 'react-router-dom';
 import useLogin from 'shared/authentication/hooks/useLogin';
 import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
@@ -31,7 +30,7 @@ export default function LoginView(): JSX.Element {
   const [captcha, setCaptcha] = useState<string | null>(null);
 
   function validateInput(values: LoginValues): Partial<LoginValues> {
-    let errors: Partial<LoginValues> = {};
+    const errors: Partial<LoginValues> = {};
 
     // If the email address has been input, but it is not valid, then tell the user that they need to enter one that is
     // valid.
@@ -41,7 +40,7 @@ export default function LoginView(): JSX.Element {
 
     // Same for the password, but right now we just do a length assertion.
     if (values.password?.length < 8) {
-      errors['password'] = 'Password must be at least 8 characters long.'
+      errors['password'] = 'Password must be at least 8 characters long.';
     }
 
     return errors;
@@ -53,7 +52,7 @@ export default function LoginView(): JSX.Element {
     return login({
       captcha: captcha,
       email: values.email,
-      password: values.password
+      password: values.password,
     })
       .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
         variant: 'error',
@@ -88,13 +87,13 @@ export default function LoginView(): JSX.Element {
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   const initialValues: LoginValues = {
     email: '',
     password: '',
-  }
+  };
 
   const disableForVerification = !verifyLogin || Boolean(ReCAPTCHAKey && captcha);
 
@@ -106,19 +105,18 @@ export default function LoginView(): JSX.Element {
         onSubmit={ doLogin }
       >
         { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             isSubmitting,
-             submitForm,
-           }) => (
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+        }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-2.5 md:p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo/>
+                <CenteredLogo />
                 { allowSignUp && (
                   <div>
                     <div className="w-full pb-2.5">
@@ -174,7 +172,7 @@ export default function LoginView(): JSX.Element {
                       value={ values.password }
                       variant="outlined"
                     />
-                    <ForgotPasswordMaybe/>
+                    <ForgotPasswordMaybe />
                   </div>
                 </div>
                 <CaptchaMaybe
@@ -189,5 +187,5 @@ export default function LoginView(): JSX.Element {
         ) }
       </Formik>
     </Fragment>
-  )
+  );
 };

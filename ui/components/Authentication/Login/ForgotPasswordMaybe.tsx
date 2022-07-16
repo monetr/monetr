@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
+
 import { getAllowForgotPassword } from 'shared/bootstrap/selectors';
 
 export default function ForgotPasswordMaybe(): JSX.Element {

@@ -22,7 +22,7 @@ describe('getFundingScheduleContribution', () => {
         fundingScheduleId: 100,
         bankAccountId: 10,
         nextContributionAmount: 1525, // $15.25
-      })
+      }),
     });
     store.dispatch({
       type: CreateSpending.Success,
@@ -31,7 +31,7 @@ describe('getFundingScheduleContribution', () => {
         fundingScheduleId: 100,
         bankAccountId: 10,
         nextContributionAmount: 375, // $3.75
-      })
+      }),
     });
 
     // Then include a spending object that will not be included because of its funding schedule.
@@ -42,7 +42,7 @@ describe('getFundingScheduleContribution', () => {
         fundingScheduleId: 101,
         bankAccountId: 10,
         nextContributionAmount: 1254, // $12.54
-      })
+      }),
     });
 
     // Then include a spending object that will not be included because it is paused.
@@ -54,10 +54,10 @@ describe('getFundingScheduleContribution', () => {
         bankAccountId: 10,
         nextContributionAmount: 375, // $3.75
         isPaused: true, // Will cause this to be excluded.
-      })
+      }),
     });
 
     const total = getFundingScheduleContribution(100)(store.getState());
     expect(total).toBe(1900);
   });
-})
+});

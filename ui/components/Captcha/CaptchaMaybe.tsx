@@ -1,8 +1,9 @@
-import { useSelector } from 'react-redux';
-import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
 import React from 'react';
-import { CircularProgress } from '@mui/material';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useSelector } from 'react-redux';
+import { CircularProgress } from '@mui/material';
+
+import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
 
 export interface PropTypes {
   show?: boolean;
@@ -25,7 +26,7 @@ export default function CaptchaMaybe(props: PropTypes): JSX.Element {
         sitekey={ reCaptchaKey }
         onChange={ onVerify }
       /> }
-      { loading && <CircularProgress/> }
+      { loading && <CircularProgress /> }
     </div>
   );
 }

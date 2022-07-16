@@ -3,7 +3,7 @@ import { mustParseToMoment } from 'util/parseToMoment';
 
 describe('parse to moment', () => {
   function isMoment(input: any | Moment): input is Moment {
-    return (<Moment>input).isValid()
+    return (<Moment>input).isValid();
   }
 
   it('will parse api date to moment', () => {

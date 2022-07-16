@@ -1,13 +1,13 @@
-import Spending from "models/Spending";
-import { Dispatch } from "redux";
-import { DeleteSpending } from "shared/spending/actions";
-import request from "shared/util/request";
+import Spending from 'models/Spending';
+import { Dispatch } from 'redux';
+import { DeleteSpending } from 'shared/spending/actions';
+import request from 'shared/util/request';
 
 
 export default function deleteSpending(spending: Spending) {
   return (dispatch: Dispatch) => {
     if (spending.bankAccountId <= 0) {
-      throw "spending must have a bank account Id";
+      throw 'spending must have a bank account Id';
     }
 
     dispatch({

@@ -1,14 +1,14 @@
+import BankAccount from 'models/BankAccount';
 import { Logout } from 'shared/authentication/actions';
 import {
   BankAccountActions,
   CHANGE_BANK_ACCOUNT,
   FETCH_BANK_ACCOUNTS_FAILURE,
   FETCH_BANK_ACCOUNTS_REQUEST,
-  FETCH_BANK_ACCOUNTS_SUCCESS
+  FETCH_BANK_ACCOUNTS_SUCCESS,
 } from 'shared/bankAccounts/actions';
 import BankAccountsState from 'shared/bankAccounts/state';
 import { RemoveLink } from 'shared/links/actions';
-import BankAccount from 'models/BankAccount';
 
 export default function reducer(state: BankAccountsState = new BankAccountsState(), action: BankAccountActions): BankAccountsState {
   switch (action.type) {
@@ -16,7 +16,7 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
       return {
         ...state,
         selectedBankAccountId: action.payload,
-      }
+      };
     case FETCH_BANK_ACCOUNTS_REQUEST:
       return {
         ...state,
@@ -33,7 +33,7 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         // If there is not, check and see if there is one in local storage that is valid.
         || +window.localStorage.getItem('selectedBankAccountId');
 
-      const allBankAccounts = state.items.merge(action.payload)
+      const allBankAccounts = state.items.merge(action.payload);
 
       // If there is a bankAccountId selected, but its not in our list of bank accounts -> then default to the first
       // bank account we have.
@@ -48,8 +48,8 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         loaded: true,
         loading: false,
         selectedBankAccountId: selectedBankAccountId,
-        items: state.items.merge(action.payload)
-      }
+        items: state.items.merge(action.payload),
+      };
     case RemoveLink.Success:
       // This is a bit goofy. Basically when we remove a link we are returned the link itself, and all of the bank
       // accounts associated with that link. We are basically doing a reverse intersection here (read exclusion) to
@@ -62,7 +62,7 @@ export default function reducer(state: BankAccountsState = new BankAccountsState
         loading: false,
         selectedBankAccountId: !newBankAccountsSet.has(state.selectedBankAccountId) ? newBankAccountsSet.first()?.bankAccountId || null : state.selectedBankAccountId,
         items: newBankAccountsSet,
-      }
+      };
     case Logout.Success:
       return new BankAccountsState();
     default:

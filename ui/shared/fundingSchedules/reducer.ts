@@ -1,10 +1,10 @@
+import { Map } from 'immutable';
+import BankAccount from 'models/BankAccount';
+import FundingSchedule from 'models/FundingSchedule';
 import { Logout } from 'shared/authentication/actions';
 import { CreateFundingSchedule, FetchFundingSchedules, FundingScheduleActions } from 'shared/fundingSchedules/actions';
 import FundingScheduleState from 'shared/fundingSchedules/state';
 import { RemoveLink } from 'shared/links/actions';
-import FundingSchedule from 'models/FundingSchedule';
-import { Map } from 'immutable';
-import BankAccount from 'models/BankAccount';
 
 export default function reducer(state: FundingScheduleState = new FundingScheduleState(), action: FundingScheduleActions): FundingScheduleState {
   switch (action.type) {
@@ -45,9 +45,9 @@ export default function reducer(state: FundingScheduleState = new FundingSchedul
         // accounts associated with that link. We then look at all of our funding schedules, but only return those that
         // do not belong to bank accounts that are in that payload. The ones in the payload are being removed.
         items: state.items.filter((fundingSchedule: Map<number, FundingSchedule>, bankAccountId: number): boolean => {
-          return !action.payload.bankAccounts.find((bankAccount: BankAccount) => bankAccount.linkId === bankAccountId)
+          return !action.payload.bankAccounts.find((bankAccount: BankAccount) => bankAccount.linkId === bankAccountId);
         }),
-      }
+      };
     case Logout.Success:
       return new FundingScheduleState();
     default:

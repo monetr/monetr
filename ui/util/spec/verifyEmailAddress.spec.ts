@@ -1,4 +1,4 @@
-import verifyEmailAddress from "util/verifyEmailAddress";
+import verifyEmailAddress from 'util/verifyEmailAddress';
 
 describe('verify email address', () => {
   it('will accept a valid email', () => {

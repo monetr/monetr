@@ -1,12 +1,12 @@
-import { Moment } from "moment";
+import { Moment } from 'moment';
 
 export enum Feature {
-  ManualBudgeting = "ManualBudgeting",
-  LinkedBudgeting = "LinkedBudgeting",
+  ManualBudgeting = 'ManualBudgeting',
+  LinkedBudgeting = 'LinkedBudgeting',
 }
 
 export enum SubscriptionStatus {
-  Active = "active",
+  Active = 'active',
 }
 
 export default class Subscription {

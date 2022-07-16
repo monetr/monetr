@@ -1,7 +1,7 @@
+import { Map } from 'immutable';
 import Spending from 'models/Spending';
 import { createSelector } from 'reselect';
 import { getSpending } from 'shared/spending/selectors/getSpending';
-import { Map } from 'immutable';
 
 export const getFundingScheduleContribution = (fundingScheduleId: number) => createSelector<any, any, number>(
   [getSpending],

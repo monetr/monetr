@@ -1,10 +1,11 @@
-import React, { Component, Fragment } from "react";
-import { connect } from "react-redux";
-import Spending from "models/Spending";
-import { Alert, Dialog, DialogContent, DialogContentText, DialogTitle, Snackbar } from "@mui/material";
-import { Formik, FormikErrors } from "formik";
-import FundingScheduleSelectionList from "components/FundingSchedules/FundingScheduleSelectionList";
-import { getSelectedExpense } from "shared/spending/selectors/getSelectedExpense";
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
+import { Alert, Dialog, DialogContent, DialogContentText, DialogTitle, Snackbar } from '@mui/material';
+
+import FundingScheduleSelectionList from 'components/FundingSchedules/FundingScheduleSelectionList';
+import { Formik, FormikErrors } from 'formik';
+import Spending from 'models/Spending';
+import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
 
 export interface Props {
   onClose: () => void;
@@ -29,7 +30,7 @@ export class EditExpenseFundingScheduleDialog extends Component<WithConnectionPr
 
   };
 
-  validateInput = (values: {}): FormikErrors<any> => {
+  validateInput = (_: {}): FormikErrors<any> => {
     return null;
   };
 
@@ -48,7 +49,7 @@ export class EditExpenseFundingScheduleDialog extends Component<WithConnectionPr
           { error }
         </Alert>
       </Snackbar>
-    )
+    );
   };
 
   render() {
@@ -61,16 +62,10 @@ export class EditExpenseFundingScheduleDialog extends Component<WithConnectionPr
           onSubmit={ this.submit }
         >
           { ({
-               values,
-               errors,
-               touched,
-               handleChange,
-               handleBlur,
-               handleSubmit,
-               setFieldValue,
-               isSubmitting,
-               submitForm,
-             }) => (
+            handleSubmit,
+            setFieldValue,
+            isSubmitting,
+          }) => (
             <form onSubmit={ handleSubmit }>
               <Dialog open={ true } maxWidth='xs'>
                 <DialogTitle>
@@ -83,7 +78,7 @@ export class EditExpenseFundingScheduleDialog extends Component<WithConnectionPr
                   </DialogContentText>
                   <FundingScheduleSelectionList
                     disabled={ isSubmitting }
-                    onChange={ (value) => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
+                    onChange={ value => setFieldValue('fundingScheduleId', value.fundingScheduleId) }
                   />
                 </DialogContent>
               </Dialog>
@@ -91,12 +86,12 @@ export class EditExpenseFundingScheduleDialog extends Component<WithConnectionPr
           ) }
         </Formik>
       </Fragment>
-    )
+    );
   }
 }
 
 export default connect(
-  (state, props: Props) => ({
+  (state, _: Props) => ({
     expense: getSelectedExpense(state),
   }),
   {}

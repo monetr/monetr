@@ -1,7 +1,7 @@
+import { Map } from 'immutable';
 import Link from 'models/Link';
 import { createSelector } from 'reselect';
 import { getLinks } from 'shared/links/selectors/getLinks';
-import { Map } from 'immutable';
 
 export const getLinksByInstitutionId = createSelector<any, any, Map<string, Link[]>>(
   [getLinks],
@@ -18,5 +18,5 @@ export const getLinksByInstitutionId = createSelector<any, any, Map<string, Link
           link,
         ]);
       }
-    })
+    });
   }));

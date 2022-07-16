@@ -10,13 +10,12 @@ import {
   TransportOptions,
 } from '@sentry/types';
 import {
-  SyncPromise,
+  eventStatusFromHttpCode,
+  isRateLimited,
   logger,
   SentryError,
-  eventStatusFromHttpCode,
-  updateRateLimits,
-  isRateLimited
-} from '@sentry/utils';
+  SyncPromise,
+  updateRateLimits } from '@sentry/utils';
 import axios, { AxiosResponse } from 'axios';
 
 interface SentryRequestExtended extends SentryRequest {
@@ -47,19 +46,19 @@ export default class RelayTransport extends BaseTransport {
 
   private _extendSentryRequest(request: SentryRequest): SentryRequestExtended {
     const parsedUrl = new URL(request.url);
-    const newUrl = `${ parsedUrl.protocol }//${ parsedUrl.host }${ parsedUrl.pathname }`
+    const newUrl = `${ parsedUrl.protocol }//${ parsedUrl.host }${ parsedUrl.pathname }`;
 
-    let authParts: string[] = [];
+    const authParts: string[] = [];
     parsedUrl.searchParams.forEach((value, key) => authParts.push(`${ key }=${ value }`));
 
     return {
       body: request.body,
       headers: {
-        'X-Sentry-Auth': `Sentry ${ authParts.join(', ') }`
+        'X-Sentry-Auth': `Sentry ${ authParts.join(', ') }`,
       },
       type: request.type,
-      url: newUrl
-    }
+      url: newUrl,
+    };
   }
 
   _sendRequest(sentryRequest: SentryRequestExtended, originalPayload: Event | Session | SessionAggregates): PromiseLike<SentryResponse> {

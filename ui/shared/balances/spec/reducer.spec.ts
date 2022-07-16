@@ -16,7 +16,7 @@ describe('balance reducer', () => {
       type: FetchBalances.Success,
       payload: new Balance({
         current: 100,
-      })
+      }),
     });
 
     expect(getBalances(store.getState()).toArray()).toHaveLength(1);

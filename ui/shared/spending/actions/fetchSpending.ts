@@ -1,9 +1,9 @@
-import Spending from "models/Spending";
 import { Map } from 'immutable';
-import { Dispatch } from "redux";
-import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
-import { FETCH_SPENDING_FAILURE, FETCH_SPENDING_REQUEST, FETCH_SPENDING_SUCCESS } from "shared/spending/actions";
-import request from "shared/util/request";
+import Spending from 'models/Spending';
+import { Dispatch } from 'redux';
+import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
+import { FETCH_SPENDING_FAILURE, FETCH_SPENDING_REQUEST, FETCH_SPENDING_SUCCESS } from 'shared/spending/actions';
+import request from 'shared/util/request';
 
 export const fetchSpendingRequest = {
   type: FETCH_SPENDING_REQUEST,
@@ -30,13 +30,13 @@ export default function fetchSpending() {
             (result.data || []).forEach(item => {
               const spending = new Spending(item);
               map.setIn([spending.bankAccountId, spending.spendingId], spending);
-            })
+            });
           }),
         });
       })
       .catch(error => {
         dispatch(fetchSpendingFailure);
         throw error;
-      })
-  }
+      });
+  };
 }

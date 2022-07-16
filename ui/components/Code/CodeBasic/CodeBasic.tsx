@@ -11,7 +11,7 @@ interface CodeBasicProps {
 export default function CodeBasic(props: CodeBasicProps): JSX.Element {
   let className = 'code-basic';
   if (props.className) {
-    className += ' ' + props.className;
+    className += ` ${props.className}`;
   }
 
   return (
@@ -20,5 +20,5 @@ export default function CodeBasic(props: CodeBasicProps): JSX.Element {
         { props.children }
       </code>
     </Fragment>
-  )
+  );
 }

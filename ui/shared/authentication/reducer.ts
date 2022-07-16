@@ -1,6 +1,6 @@
+import * as Sentry from '@sentry/browser';
 import { ACTIVATE_SUBSCRIPTION, AuthenticationActions, Login, Logout } from 'shared/authentication/actions';
 import AuthenticationState from 'shared/authentication/state';
-import * as Sentry from '@sentry/browser';
 
 export default function reducer(
   state = new AuthenticationState(),
@@ -20,7 +20,7 @@ export default function reducer(
         const accountId = action.payload.user.accountId.toString(10);
         Sentry.setUser({
           id: accountId,
-          username: `account:${ accountId }`
+          username: `account:${ accountId }`,
         });
       }
 

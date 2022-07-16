@@ -1,6 +1,6 @@
 import { useStore } from 'react-redux';
-import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 import fetchLinks from 'shared/links/actions/fetchLinks';
+import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 
 export default function useFetchLinksIfNeeded(): () => Promise<void> {
   const { dispatch, getState } = useStore();
@@ -12,5 +12,5 @@ export default function useFetchLinksIfNeeded(): () => Promise<void> {
     }
 
     return fetchLinks()(dispatch);
-  }
+  };
 }

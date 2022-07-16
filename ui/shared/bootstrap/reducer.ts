@@ -1,5 +1,5 @@
-import BootstrapState from 'shared/bootstrap/state';
 import { Bootstrap, BootstrapActions } from 'shared/bootstrap/actions';
+import BootstrapState from 'shared/bootstrap/state';
 
 export default function reducer(state = new BootstrapState(), action: BootstrapActions): BootstrapState {
   switch (action.type) {
@@ -21,7 +21,7 @@ export default function reducer(state = new BootstrapState(), action: BootstrapA
         ...action.payload,
         isReady: true,
         isBootstrapping: false,
-      }
+      };
     default:
       return state;
   }

@@ -1,4 +1,4 @@
-import { createSelector } from "reselect";
+import { createSelector } from 'reselect';
 
 const getSelectedTransactionId = state => state.transactions.selectedTransactionId;
 

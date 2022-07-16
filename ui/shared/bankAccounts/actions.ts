@@ -1,7 +1,7 @@
-import BankAccount from "models/BankAccount";
 import { Map } from 'immutable';
+import BankAccount from 'models/BankAccount';
 import { LogoutActions } from 'shared/authentication/actions';
-import { RemoveLinkSuccess } from "shared/links/actions";
+import { RemoveLinkSuccess } from 'shared/links/actions';
 
 export const FETCH_BANK_ACCOUNTS_REQUEST = 'FETCH_BANK_ACCOUNTS_REQUEST';
 export const FETCH_BANK_ACCOUNTS_FAILURE = 'FETCH_BANK_ACCOUNT_FAILURE';

@@ -5,7 +5,7 @@ import {
   FETCH_LINKS_REQUEST,
   FETCH_LINKS_SUCCESS,
   LinkActions,
-  RemoveLink
+  RemoveLink,
 } from 'shared/links/actions';
 import LinksState from 'shared/links/state';
 
@@ -33,7 +33,7 @@ export default function reducer(state: LinksState = new LinksState(), action: Li
         ...state,
         loaded: true,
         loading: false,
-        items: state.items.set(action.payload.linkId, action.payload)
+        items: state.items.set(action.payload.linkId, action.payload),
       };
     case RemoveLink.Request:
       return {

@@ -1,8 +1,7 @@
-import { FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS } from "shared/links/actions";
-import request from "shared/util/request";
-
 import { Map } from 'immutable';
-import Link from "models/Link";
+import Link from 'models/Link';
+import { FETCH_LINKS_FAILURE, FETCH_LINKS_REQUEST, FETCH_LINKS_SUCCESS } from 'shared/links/actions';
+import request from 'shared/util/request';
 
 
 export const fetchLinksRequest = {
@@ -31,5 +30,5 @@ export default function fetchLinks() {
         dispatch(fetchLinksFailure);
         throw error;
       });
-  }
+  };
 }

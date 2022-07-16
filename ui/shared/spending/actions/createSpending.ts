@@ -6,7 +6,7 @@ import request from 'shared/util/request';
 export default function createSpending(spending: Spending) {
   return (dispatch: Dispatch) => {
     if (spending.bankAccountId <= 0) {
-      throw "spending must have a bank account Id";
+      throw 'spending must have a bank account Id';
     }
 
     dispatch({

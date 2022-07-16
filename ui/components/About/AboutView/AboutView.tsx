@@ -1,8 +1,9 @@
-import { GitHub } from '@mui/icons-material';
-import { Button } from '@mui/material';
-import CodeBasic from 'components/Code/CodeBasic/CodeBasic';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
+import { GitHub } from '@mui/icons-material';
+import { Button } from '@mui/material';
+
+import CodeBasic from 'components/Code/CodeBasic/CodeBasic';
 import { getBuildTime, getBuildType, getRelease, getRevision } from 'shared/bootstrap/selectors';
 
 export default function AboutView(): JSX.Element {
@@ -31,14 +32,14 @@ export default function AboutView(): JSX.Element {
               color="inherit"
               className="ml-auto"
             >
-              <GitHub className="mr-2.5"/>
+              <GitHub className="mr-2.5" />
               Release Notes
             </Button>
           </div>
         </div>
-        <hr/>
+        <hr />
       </Fragment>
-    )
+    );
   }
 
   function Revision(): JSX.Element {
@@ -57,14 +58,14 @@ export default function AboutView(): JSX.Element {
               color="inherit"
               className="ml-auto"
             >
-              <GitHub className="mr-2.5"/>
+              <GitHub className="mr-2.5" />
               Browse
             </Button>
           </div>
         </div>
-        <hr/>
+        <hr />
       </Fragment>
-    )
+    );
   }
 
   function BuildType(): JSX.Element {
@@ -78,9 +79,9 @@ export default function AboutView(): JSX.Element {
             <CodeBasic>{ buildType }</CodeBasic>
           </div>
         </div>
-        <hr/>
+        <hr />
       </Fragment>
-    )
+    );
   }
 
   function BuildTime(): JSX.Element {
@@ -100,9 +101,9 @@ export default function AboutView(): JSX.Element {
             </CodeBasic>
           </div>
         </div>
-        <hr/>
+        <hr />
       </Fragment>
-    )
+    );
   }
 
   return (
@@ -112,10 +113,10 @@ export default function AboutView(): JSX.Element {
           About monetr
         </span>
         <div className="grid mt-2.5 gap-2.5">
-          <Version/>
-          <Revision/>
-          <BuildType/>
-          <BuildTime/>
+          <Version />
+          <Revision />
+          <BuildType />
+          <BuildTime />
         </div>
       </div>
       <div>
@@ -136,7 +137,7 @@ export default function AboutView(): JSX.Element {
               </a>
             </div>
           </div>
-          <hr/>
+          <hr />
           <div className="grid grid-cols-2">
             <div className="flex items-center">
               <span className="text-lg">GitHub Discussions</span>
@@ -150,9 +151,9 @@ export default function AboutView(): JSX.Element {
               </a>
             </div>
           </div>
-          <hr/>
+          <hr />
         </div>
       </div>
     </div>
-  )
+  );
 }

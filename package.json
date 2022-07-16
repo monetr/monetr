@@ -15,8 +15,6 @@
     "@sentry/react": "6.19.7",
     "@sentry/tracing": "6.19.7",
     "@svgr/webpack": "6.2.1",
-    "@typescript-eslint/eslint-plugin": "5.19.0",
-    "@typescript-eslint/parser": "5.19.0",
     "axios": "0.26.1",
     "babel-eslint": "10.1.0",
     "babel-plugin-named-asset-import": "0.3.8",
@@ -114,6 +112,8 @@
     "@types/react-dom": "17.0.17",
     "@types/react-google-recaptcha": "2.1.5",
     "@types/react-redux": "7.1.24",
+    "@typescript-eslint/eslint-plugin": "5.30.5",
+    "@typescript-eslint/parser": "5.30.5",
     "autoprefixer": "10.4.7",
     "babel-jest": "27.5.1",
     "babel-loader": "8.2.5",
@@ -124,11 +124,13 @@
     "eslint": "8.13.0",
     "eslint-config-react-app": "7.0.1",
     "eslint-plugin-flowtype": "8.0.3",
+    "eslint-plugin-hooks": "0.4.3",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-jest": "26.1.4",
     "eslint-plugin-jsx-a11y": "6.5.1",
-    "eslint-plugin-react": "7.29.4",
-    "eslint-plugin-react-hooks": "4.4.0",
+    "eslint-plugin-react": "7.30.1",
+    "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-simple-import-sort": "7.0.0",
     "eslint-plugin-testing-library": "5.3.1",
     "eslint-webpack-plugin": "3.1.1",
     "file-loader": "6.2.0",
@@ -161,6 +163,9 @@
     "webpackbar": "5.0.2"
   },
   "jest": {
+    "testPathIgnorePatterns": [
+      ".+\/pkg\/.+"
+    ],
     "modulePaths": [
       "<rootDir>/ui"
     ],

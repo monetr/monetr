@@ -1,19 +1,20 @@
-import { Integrations } from '@sentry/tracing';
-import axios from 'axios';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import * as Sentry from '@sentry/react';
+import { Integrations } from '@sentry/tracing';
+
+import reportWebVitals from './reportWebVitals';
+
+import axios from 'axios';
 import RelayTransport from 'relay/transport';
 import Root from 'Root';
-import reportWebVitals from './reportWebVitals';
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-
 import './styles/styles.css';
 import './styles/index.scss';
-import * as Sentry from '@sentry/react';
 
 axios.get('/api/sentry', {
   // When the UI initially loads, it tries to talk to the API to see if sentry should be setup. If it should then it
@@ -33,8 +34,8 @@ axios.get('/api/sentry', {
             traceXHR: true,
             tracingOrigins: [
               window.location.hostname,
-            ]
-          })
+            ],
+          }),
         ],
         release: RELEASE,
         // We recommend adjusting this value in production, or using tracesSampler
@@ -42,7 +43,7 @@ axios.get('/api/sentry', {
         tracesSampleRate: 1.0,
         environment: window.location.hostname,
         normalizeDepth: 20,
-        beforeSend(event, hint) {
+        beforeSend(event, _) {
           // Check if it is an exception, and if so, show the report dialog
           if (event.exception) {
             Sentry.showReportDialog({ eventId: event.event_id });
@@ -54,7 +55,7 @@ axios.get('/api/sentry', {
   })
   .finally(() => {
     ReactDOM.render(
-      <Root/>,
+      <Root />,
       document.getElementById('root')
     );
   });

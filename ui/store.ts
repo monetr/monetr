@@ -1,4 +1,6 @@
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
+import * as Sentry from '@sentry/react';
+
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from 'redux-thunk';
 import authentication from 'shared/authentication/reducer';
@@ -9,7 +11,6 @@ import fundingSchedules from 'shared/fundingSchedules/reducer';
 import links from 'shared/links/reducer';
 import spending from 'shared/spending/reducer';
 import transactions from 'shared/transactions/reducer';
-import * as Sentry from '@sentry/react';
 
 export const reducers = combineReducers({
   authentication,

@@ -1,7 +1,7 @@
 import Balance from 'models/Balance';
 import { createSelector } from 'reselect';
+import { getBalances } from 'shared/balances/selectors/getBalances';
 import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
-import { getBalances } from "shared/balances/selectors/getBalances";
 
 export const getBalance = createSelector<any, any, Balance|null>(
   [getSelectedBankAccountId, getBalances],

@@ -8,7 +8,7 @@ import {
   FETCH_TRANSACTIONS_REQUEST,
   FETCH_TRANSACTIONS_SUCCESS,
   TransactionActions,
-  UpdateTransaction
+  UpdateTransaction,
 } from 'shared/transactions/actions';
 import TransactionState from 'shared/transactions/state';
 
@@ -33,7 +33,7 @@ export default function reducer(state: TransactionState = new TransactionState()
           // our new item to the end of the map. Preserving the order we want.
           action.payload.forEach(item => {
             map = map.set(item.transactionId, item);
-          })
+          });
         })
       );
       return {

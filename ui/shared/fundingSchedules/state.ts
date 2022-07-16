@@ -1,5 +1,5 @@
-import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
+import FundingSchedule from 'models/FundingSchedule';
 
 
 export default class FundingScheduleState {

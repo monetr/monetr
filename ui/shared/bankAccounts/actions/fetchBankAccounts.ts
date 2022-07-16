@@ -1,11 +1,11 @@
+import { Map } from 'immutable';
+import BankAccount from 'models/BankAccount';
 import {
   FETCH_BANK_ACCOUNTS_FAILURE,
   FETCH_BANK_ACCOUNTS_REQUEST,
-  FETCH_BANK_ACCOUNTS_SUCCESS
-} from "shared/bankAccounts/actions";
-import request from "shared/util/request";
-import BankAccount from "models/BankAccount";
-import { Map } from 'immutable';
+  FETCH_BANK_ACCOUNTS_SUCCESS,
+} from 'shared/bankAccounts/actions';
+import request from 'shared/util/request';
 
 export const fetchBankAccountsRequest = {
   type: FETCH_BANK_ACCOUNTS_REQUEST,
@@ -26,7 +26,7 @@ export default function fetchBankAccounts() {
           payload: Map<number, BankAccount>().withMutations(map => {
             (result.data || []).forEach((bankAccount: BankAccount) => {
               map.set(bankAccount.bankAccountId, new BankAccount(bankAccount));
-            })
+            });
           }),
         });
       })
@@ -34,5 +34,5 @@ export default function fetchBankAccounts() {
         dispatch(fetchBankAccountsFailure);
         throw error;
       });
-  }
+  };
 }

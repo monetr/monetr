@@ -1,8 +1,8 @@
-import FundingSchedule from "models/FundingSchedule";
 import { Map } from 'immutable';
-import { getSelectedBankAccountId } from "shared/bankAccounts/selectors/getSelectedBankAccountId";
-import { FetchFundingSchedules } from "shared/fundingSchedules/actions";
-import request from "shared/util/request";
+import FundingSchedule from 'models/FundingSchedule';
+import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
+import { FetchFundingSchedules } from 'shared/fundingSchedules/actions';
+import request from 'shared/util/request';
 import { AppDispatch, AppState } from 'store';
 
 interface ActionWithState {

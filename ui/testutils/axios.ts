@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 export function mockAxiosGetOnce(result: any) {
   // @ts-ignore
@@ -8,6 +8,6 @@ export function mockAxiosGetOnce(result: any) {
 
 export function mockAxios() {
   Object.defineProperty(window, 'API', {
-    value: axios
-  })
+    value: axios,
+  });
 }

@@ -1,5 +1,5 @@
-import React, { Component, Fragment } from "react";
-import { Formik, FormikErrors, FormikHelpers } from "formik";
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
 import {
   Alert,
   Button,
@@ -12,12 +12,13 @@ import {
   Input,
   InputAdornment,
   InputLabel,
-  Snackbar
-} from "@mui/material";
-import { connect } from "react-redux";
-import { getSelectedExpense } from "shared/spending/selectors/getSelectedExpense";
-import Spending from "models/Spending";
-import updateSpending from "shared/spending/actions/updateSpending";
+  Snackbar,
+} from '@mui/material';
+
+import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import Spending from 'models/Spending';
+import updateSpending from 'shared/spending/actions/updateSpending';
+import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
 
 
 export interface PropTypes {
@@ -27,7 +28,7 @@ export interface PropTypes {
 
 interface WithConnectionPropTypes extends PropTypes {
   spending: Spending;
-  updateSpending: { (spending: Spending): Promise<any> }
+  updateSpending: { (_: Spending): Promise<any> }
 }
 
 interface State {
@@ -48,7 +49,7 @@ export class EditExpenseAmountDialog extends Component<WithConnectionPropTypes, 
     },
   };
 
-  validateInput = (values: editSpendingAmountForm): FormikErrors<any> => {
+  validateInput = (_: editSpendingAmountForm): FormikErrors<any> => {
     return null;
   };
 
@@ -88,7 +89,7 @@ export class EditExpenseAmountDialog extends Component<WithConnectionPropTypes, 
           { error }
         </Alert>
       </Snackbar>
-    )
+    );
   };
 
   render() {
@@ -107,16 +108,13 @@ export class EditExpenseAmountDialog extends Component<WithConnectionPropTypes, 
           onSubmit={ this.submit }
         >
           { ({
-               values,
-               errors,
-               touched,
-               handleChange,
-               handleBlur,
-               handleSubmit,
-               setFieldValue,
-               isSubmitting,
-               submitForm,
-             }) => (
+            values,
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            isSubmitting,
+            submitForm,
+          }) => (
             <form onSubmit={ handleSubmit }>
               <Dialog open={ isOpen } maxWidth='xs'>
                 <DialogTitle>

@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import * as Sentry from '@sentry/react';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 declare global {
   interface Window {
@@ -28,7 +28,7 @@ export interface AxiosInterface {
 export default axios;
 
 export function NewClient(config: AxiosRequestConfig): AxiosInstance {
-  let client = axios.create(config);
+  const client = axios.create(config);
 
   client.interceptors.request.use(result => {
     return result;

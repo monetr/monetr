@@ -1,8 +1,8 @@
 import { AxiosError } from 'axios';
 import User from 'models/User';
 import { useDispatch } from 'react-redux';
-import request from 'shared/util/request';
 import { Login } from 'shared/authentication/actions';
+import request from 'shared/util/request';
 
 export default function useBootstrapLogin(): (user?: User | null, subscriptionIsActive?: boolean) => Promise<void> {
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ export default function useBootstrapLogin(): (user?: User | null, subscriptionIs
         payload: {
           user: user,
           isActive: subscriptionIsActive,
-        }
+        },
       });
       return Promise.resolve();
     }
@@ -46,5 +46,5 @@ export default function useBootstrapLogin(): (user?: User | null, subscriptionIs
         // Any other scenarios should throw the exception though.
         throw error;
       });
-  }
+  };
 }

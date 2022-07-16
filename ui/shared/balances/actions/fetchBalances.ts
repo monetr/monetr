@@ -1,5 +1,5 @@
-import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import fetchBalancesForBankAccount from 'shared/balances/actions/fetchBalancesForBankAccount';
+import { getSelectedBankAccountId } from 'shared/bankAccounts/selectors/getSelectedBankAccountId';
 import { AppActionWithState, AppDispatch, AppState, GetAppState } from 'store';
 
 export default function fetchBalances(): AppActionWithState<Promise<void>> {

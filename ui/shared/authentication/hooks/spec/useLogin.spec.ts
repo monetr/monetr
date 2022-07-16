@@ -27,12 +27,12 @@ describe('useLogin', () => {
         status: 500,
         data: {
           error: 'Something has gone the not right way...',
-        }
-      }
+        },
+      },
     });
     await expect(result).rejects.toStrictEqual({
       isAxiosError: true,
-      response: { data: { error: 'Something has gone the not right way...' }, status: 500 }
+      response: { data: { error: 'Something has gone the not right way...' }, status: 500 },
     });
     expect(history.push).not.toHaveBeenCalled();
   });
@@ -54,12 +54,12 @@ describe('useLogin', () => {
         status: 403,
         data: {
           error: 'Invalid email or password.',
-        }
-      }
+        },
+      },
     });
     await expect(result).rejects.toStrictEqual({
       isAxiosError: true,
-      response: { data: { error: 'Invalid email or password.' }, status: 403 }
+      response: { data: { error: 'Invalid email or password.' }, status: 403 },
     });
     expect(history.push).not.toHaveBeenCalled();
   });
@@ -82,14 +82,14 @@ describe('useLogin', () => {
         data: {
           code: 'EMAIL_NOT_VERIFIED',
           error: 'Email address is not verified.',
-        }
-      }
+        },
+      },
     });
     await expect(result).resolves.toBe(undefined);
     expect(history.push).toHaveBeenCalledWith({
       hash: '',
       pathname: '/verify/email/resend',
-      search: ''
+      search: '',
     }, { emailAddress: 'email@test.com' });
   });
 });

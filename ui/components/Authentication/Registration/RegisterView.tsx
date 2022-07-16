@@ -1,19 +1,20 @@
+import React, { Fragment, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
+
 import { AxiosError } from 'axios';
 import classnames from 'classnames';
+import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
+import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
-import React, { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import useSignUp, { SignUpResponse } from 'shared/authentication/actions/signUp';
 import { getInitialPlan, getRequireBetaCode, getShouldVerifyRegister } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
-import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
-import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 
 interface SignUpValues {
   agree: boolean;
@@ -32,7 +33,7 @@ export default function RegisterView(): JSX.Element {
   const requireBetaCode = useSelector(getRequireBetaCode);
 
   function validateInput(values: SignUpValues): Partial<SignUpValues> {
-    let errors: Partial<SignUpValues> = {};
+    const errors: Partial<SignUpValues> = {};
 
     if (values.email) {
       if (!verifyEmailAddress(values.email)) {
@@ -158,31 +159,31 @@ export default function RegisterView(): JSX.Element {
   };
 
   if (successful) {
-    return <AfterEmailVerificationSent/>
+    return <AfterEmailVerificationSent />;
   }
 
   return (
     <Fragment>
-      <BackToLoginButton/>
+      <BackToLoginButton />
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }
         onSubmit={ submit }
       >
         { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             isSubmitting,
-             submitForm,
-           }) => (
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+          submitForm,
+        }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex justify-center w-full h-full max-h-full">
               <div className="w-full p-2.5 md:p-10 max-w-screen-sm sm:p-0 mt-5">
-                <CenteredLogo/>
+                <CenteredLogo />
                 <div className="w-full">
                   <div className="w-full pb-1.5 pt-1.5">
                     <TextField
@@ -280,7 +281,7 @@ export default function RegisterView(): JSX.Element {
                     </div>
                   }
                 </div>
-                <CaptchaMaybe onVerify={ setVerification } show={ verifyRegister }/>
+                <CaptchaMaybe onVerify={ setVerification } show={ verifyRegister } />
                 <div className="w-full flex justify-center items-center pt-1.5 pb-1">
                   <FormControl component="fieldset">
                     <FormGroup aria-label="position" row>
@@ -324,5 +325,5 @@ export default function RegisterView(): JSX.Element {
         ) }
       </Formik>
     </Fragment>
-  )
+  );
 };

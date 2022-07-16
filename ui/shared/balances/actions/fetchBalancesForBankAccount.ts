@@ -23,12 +23,12 @@ export default function fetchBalancesForBankAccount(bankAccountId: number | null
       .then(result => {
         dispatch({
           type: FetchBalances.Success,
-          payload: new Balance(result.data)
+          payload: new Balance(result.data),
         });
       })
       .catch(error => {
         dispatch(fetchBalancesFailure);
         throw error;
-      })
+      });
   };
 }

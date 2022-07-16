@@ -1,7 +1,7 @@
-import fetchBalancesForBankAccount from 'shared/balances/actions/fetchBalancesForBankAccount';
-import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
-import { getBalances } from 'shared/balances/selectors/getBalances';
 import BankAccount from 'models/BankAccount';
+import fetchBalancesForBankAccount from 'shared/balances/actions/fetchBalancesForBankAccount';
+import { getBalances } from 'shared/balances/selectors/getBalances';
+import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
 import { AppActionWithState, AppDispatch, GetAppState } from 'store';
 
 export default function fetchMissingBankAccountBalances(): AppActionWithState<Promise<void[]>> {
@@ -16,8 +16,8 @@ export default function fetchMissingBankAccountBalances(): AppActionWithState<Pr
       }
 
       missingPromises.push(fetchBalancesForBankAccount(item.bankAccountId)(dispatch, getState));
-    })
+    });
 
     return Promise.all(missingPromises);
-  }
+  };
 }

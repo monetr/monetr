@@ -1,7 +1,7 @@
-import { ArrowBack } from '@mui/icons-material';
-import { Button } from '@mui/material';
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
+import { Button } from '@mui/material';
 
 export default function BackToLoginButton(): JSX.Element {
   return (
@@ -11,9 +11,9 @@ export default function BackToLoginButton(): JSX.Element {
         component={ RouterLink }
         to="/login"
       >
-        <ArrowBack className="mr-1"/>
+        <ArrowBack className="mr-1" />
         Back To Login
       </Button>
     </div>
-  )
+  );
 }
