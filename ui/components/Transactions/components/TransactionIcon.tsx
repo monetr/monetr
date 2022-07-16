@@ -8,10 +8,15 @@ interface Props {
   transaction: Transaction;
 }
 
+interface IconResponse {
+  svg: string;
+  colors: Array<string>;
+}
+
 export default function TransactionIcon(props: Props): JSX.Element {
   const letter = props.transaction.name.toUpperCase().charAt(0);
 
-  const { data } = useQuery(`/api/icons/search?name=${ props.transaction.name }`);
+  const { data } = useQuery<IconResponse>(`/api/icons/search?name=${ props.transaction.name }`);
 
   if (data?.svg) {
     const styles = {
