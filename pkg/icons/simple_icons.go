@@ -78,15 +78,6 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 
 		dereferenceTitle := title
 
-		metadata := func(name string) *Metadata {
-			for _, item := range metadata.Icons {
-				if strings.EqualFold(item.Title, name) {
-					return &item
-				}
-			}
-
-			return nil
-		}(title)
 
 		data := Icon{
 			Title:   &dereferenceTitle,
@@ -95,9 +86,18 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 			SVG:     base64.StdEncoding.EncodeToString(iconFile),
 			Colors:  nil,
 		}
-		if metadata != nil {
+		iconMetadata := func(name string) *Metadata {
+			for _, item := range metadata.Icons {
+				if strings.EqualFold(item.Title, name) {
+					return &item
+				}
+			}
+
+			return nil
+		}(title)
+		if iconMetadata != nil {
 			data.Colors = []string{
-				metadata.Hex,
+				iconMetadata.Hex,
 			}
 		}
 

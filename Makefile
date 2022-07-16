@@ -175,8 +175,10 @@ deps: dependencies
 build-ui: $(STATIC_DIR)
 
 SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons
+SIMPLE_ICONS_VERSION=7.4.0
+SIMPLE_ICONS_REPO=https://github.com/simple-icons/simple-icons.git
 $(SIMPLE_ICONS):
-	git clone https://github.com/simple-icons/simple-icons.git $(SIMPLE_ICONS)
+	git clone --depth 1 -b $(SIMPLE_ICONS_VERSION) $(SIMPLE_ICONS_REPO) $(SIMPLE_ICONS)
 
 GOOS ?= $(OS)
 GOARCH ?= amd64
