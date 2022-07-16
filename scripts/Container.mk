@@ -30,8 +30,8 @@ CONTAINER_VERSIONS=$(CONTAINER_VERSION)
 endif
 CONTAINER_TAGS=$(foreach CONTAINER_REPO,$(CONTAINER_REPOS),$(foreach C_VERSION,$(CONTAINER_VERSIONS),$(CONTAINER_REPO):$(C_VERSION)))
 CONTAINER_TAG_ARGS=$(foreach TAG,$(CONTAINER_TAGS),-t $(TAG))
-CONTAINER_VARS = GOFLAGS="" REVISION="$(RELEASE_REVISION)" RELEASE="$(RELEASE_VERSION)" BUILD_HOST="$(BUILD_HOST)"
-CONTAINER_VAR_ARGS=$(foreach ARG,$(CONTAINER_VARS),--build-arg $(ARG))
+CONTAINER_VARS = REVISION="$(RELEASE_REVISION)" RELEASE="$(RELEASE_VERSION)" BUILD_HOST="$(BUILD_HOST)"
+CONTAINER_VAR_ARGS=$(foreach ARG,$(CONTAINER_VARS),--build-arg $(ARG)) --build-arg GOFLAGS='$(TAGS_FLAG)'
 ifdef CI
 # Temporarily remove linux/arm64 from container builds. This was causing issues with libc, will re-add once fixed.
 CONTAINER_PLATFORMS=linux/amd64
@@ -48,6 +48,9 @@ CONTAINER_EXTRA_ARGS=$(CONTAINER_TAG_ARGS)
 endif
 
 container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
+ifneq (,$(findstring simple_icons,$(TAGS))) # If our icon packs include simple_icons then make sure the dir exists.
+container: $(SIMPLE_ICONS)
+endif
 ifdef CI # When we are in CI we don't want to run the static dir targets, these files are provided via artifacts.
 ifeq ($(ENGINE),docker)
 container:

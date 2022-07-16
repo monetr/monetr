@@ -128,7 +128,6 @@ UI_DEPS=$(PWD)/package.json $(PWD)/yarn.lock
 include $(PWD)/scripts/Dependencies.mk
 include $(PWD)/scripts/Deployment.mk
 include $(PWD)/scripts/Lint.mk
-include $(PWD)/scripts/Container.mk
 
 default: build
 
@@ -196,9 +195,9 @@ $(BUILD_DIR):
 BINARY=$(BUILD_DIR)/$(BINARY_FILE_NAME)
 TAGS ?= icons,simple_icons
 ifdef TAGS
-	TAGS_FLAG=-tags "$(TAGS)"
+	TAGS_FLAG=-tags=$(TAGS)
 else
-	TAGS_FLAG=-tags ""
+	TAGS_FLAG=-tags=
 endif
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
@@ -431,3 +430,5 @@ beta-code: $(GO)
 	@$(GO) run $(MONETR_CLI_PACKAGE) beta new-code -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST) -P $(POSTGRES_PORT) -W $(POSTGRES_PASSWORD)
 
 all: build test generate lint
+
+include $(PWD)/scripts/Container.mk
