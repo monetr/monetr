@@ -1,5 +1,4 @@
 import React, { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
 
@@ -10,10 +9,10 @@ import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikHelpers } from 'formik';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import { useSnackbar } from 'notistack';
 import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import useSignUp, { SignUpResponse } from 'shared/authentication/actions/signUp';
-import { getInitialPlan, getRequireBetaCode, getShouldVerifyRegister } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface SignUpValues {
@@ -30,7 +29,11 @@ export default function RegisterView(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
   const [successful, setSuccessful] = useState(false);
 
-  const requireBetaCode = useSelector(getRequireBetaCode);
+  const {
+    requireBetaCode,
+    initialPlan,
+    verifyRegister,
+  } = useAppConfiguration();
 
   function validateInput(values: SignUpValues): Partial<SignUpValues> {
     const errors: Partial<SignUpValues> = {};
@@ -65,9 +68,6 @@ export default function RegisterView(): JSX.Element {
 
     return errors;
   }
-
-  const initialPlan = useSelector(getInitialPlan);
-  const verifyRegister = useSelector(getShouldVerifyRegister);
 
   const [verification, setVerification] = useState<string | null>(null);
 

@@ -1,16 +1,16 @@
-import { useSnackbar } from 'notistack';
 import React, { Fragment, useEffect, useState } from 'react';
-import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import {
-  usePlaidLink,
-  PlaidLinkOptionsWithLinkToken,
   PlaidLinkOnEvent,
-  PlaidLinkOnLoad,
-  PlaidLinkOnExit, PlaidLinkOnSuccess
-} from 'react-plaid-link';
-import request from 'shared/util/request';
-import classnames from 'classnames';
+  PlaidLinkOnExit,   PlaidLinkOnLoad,
+  PlaidLinkOnSuccess,
+  PlaidLinkOptionsWithLinkToken,
+  usePlaidLink } from 'react-plaid-link';
+import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import * as Sentry from '@sentry/react';
+
+import classnames from 'classnames';
+import { useSnackbar } from 'notistack';
+import request from 'shared/util/request';
 
 interface BasePropTypes {
   useCache?: boolean;
@@ -38,7 +38,7 @@ const PlaidButton = (props: PropTypes): JSX.Element => {
   const [state, setState] = useState<Partial<State>>({});
 
   useEffect(() => {
-    const url = `/plaid/link/token/new${ props.useCache ? '?use_cache=true' : '' }`
+    const url = `/plaid/link/token/new${ props.useCache ? '?use_cache=true' : '' }`;
     request().get(url)
       .then(result => setState({
         loading: false,
@@ -61,6 +61,7 @@ const PlaidButton = (props: PropTypes): JSX.Element => {
     const disabled = state.loading || props.disabled || state.disabled;
     // I want to extract only the button props, the easiest way to do that is to do a lift of the properties like this.
     // This unfortunately leaves a ton of variables hanging though.
+    // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
     const { useCache, plaidOnSuccess, plaidOnExit, plaidOnLoad, plaidOnEvent, ...buttonProps } = props;
     const newProps: ButtonProps = {
       ...buttonProps,
@@ -69,11 +70,11 @@ const PlaidButton = (props: PropTypes): JSX.Element => {
         <Fragment>
           { state.loading && <CircularProgress size="1em" thickness={ 5 } className={ classnames('mr-2', {
             'opacity-50': disabled,
-          }) }/> }
+          }) } /> }
           { props.children }
         </Fragment>
       ),
-    }
+    };
 
     return (
       <Button { ...newProps } />
@@ -89,7 +90,7 @@ const PlaidButton = (props: PropTypes): JSX.Element => {
       plaidOnLoad={ props.plaidOnLoad }
       { ...props }
     />
-  )
+  );
 
 };
 
@@ -115,7 +116,7 @@ const HookedPlaidButton = (props: HookedPropTypes) => {
     }
   }, [error]);
 
-  const onClick = (event) => {
+  const onClick = event => {
     if (props.onClick) {
       props.onClick(event);
     }

@@ -1,17 +1,17 @@
-import CenteredLogo from 'components/Logo/CenteredLogo';
-import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Formik, FormikHelpers } from 'formik';
-import { Button, CircularProgress, TextField } from '@mui/material';
-import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
+import { Button, CircularProgress, TextField } from '@mui/material';
+
+import classnames from 'classnames';
 import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
 import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
-import verifyEmailAddress from 'util/verifyEmailAddress';
+import CenteredLogo from 'components/Logo/CenteredLogo';
+import { Formik, FormikHelpers } from 'formik';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import { useSnackbar } from 'notistack';
 import request from 'shared/util/request';
-import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
+import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface ResendValues {
   email: string | null;
@@ -19,11 +19,12 @@ interface ResendValues {
 
 export default function ResendVerificationPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const requireCaptcha = !!useSelector(getReCAPTCHAKey);
+  const { ReCAPTCHAKey } = useAppConfiguration();
+  const requireCaptcha = !!ReCAPTCHAKey;
   const { state: routeState } = useLocation();
   const initialValues: ResendValues = {
     email: (routeState && routeState['emailAddress']) || null,
-  }
+  };
 
   const [verification, setVerification] = useState<string | null>();
   const [done, setDone] = useState(false);
@@ -37,11 +38,11 @@ export default function ResendVerificationPage(): JSX.Element {
       .catch(error => void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
         variant: 'error',
         disableWindowBlurListener: true,
-      }))
+      }));
   }
 
   function validateInput(values: ResendValues): Partial<ResendValues> | null {
-    let errors: Partial<ResendValues> = {};
+    const errors: Partial<ResendValues> = {};
 
     if (values.email) {
       if (!verifyEmailAddress(values.email)) {
@@ -59,31 +60,31 @@ export default function ResendVerificationPage(): JSX.Element {
   }
 
   if (done) {
-    return <AfterEmailVerificationSent/>;
+    return <AfterEmailVerificationSent />;
   }
 
   return (
     <Fragment>
-      <BackToLoginButton/>
+      <BackToLoginButton />
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }
         onSubmit={ submit }
       >
         { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             isSubmitting,
-             submitForm,
-           }) => (
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+          submitForm,
+        }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo/>
+                <CenteredLogo />
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     { routeState &&

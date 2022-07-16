@@ -1,14 +1,14 @@
-import { Button, CircularProgress, TextField } from '@mui/material';
-import classnames from 'classnames';
-import CenteredLogo from 'components/Logo/CenteredLogo';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import React, { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
-import useSendForgotPassword from 'shared/authentication/actions/sendForgotPassword';
-import { getShouldVerifyForgotPassword } from 'shared/bootstrap/selectors';
-import verifyEmailAddress from 'util/verifyEmailAddress';
+import { Button, CircularProgress, TextField } from '@mui/material';
+
+import classnames from 'classnames';
 import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
+import CenteredLogo from 'components/Logo/CenteredLogo';
+import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import useSendForgotPassword from 'shared/authentication/actions/sendForgotPassword';
+import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface ForgotPasswordValues {
   email: string;
@@ -19,12 +19,14 @@ const initialValues: ForgotPasswordValues = {
 };
 
 export default function ForgotPasswordPage(): JSX.Element {
-  const verifyForgotPassword = useSelector(getShouldVerifyForgotPassword);
+  const {
+    verifyForgotPassword,
+  } = useAppConfiguration();
   const [verification, setVerification] = useState<string | null>(null);
   const sendForgotPassword = useSendForgotPassword();
 
   function validateInput(values: ForgotPasswordValues): FormikErrors<ForgotPasswordValues> {
-    let errors: FormikErrors<ForgotPasswordValues> = {};
+    const errors: FormikErrors<ForgotPasswordValues> = {};
 
     if (values.email) {
       if (!verifyEmailAddress(values.email)) {
@@ -46,26 +48,26 @@ export default function ForgotPasswordPage(): JSX.Element {
 
   return (
     <Fragment>
-      <BackToLoginButton/>
+      <BackToLoginButton />
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }
         onSubmit={ submitForgotPassword }
       >
         { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             isSubmitting,
-             submitForm,
-           }) => (
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+          submitForm,
+        }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto pb-20">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-2.5 md:p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo/>
+                <CenteredLogo />
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     <p className="text-center">

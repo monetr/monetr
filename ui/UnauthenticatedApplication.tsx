@@ -1,19 +1,20 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import LoginPage from 'pages/login';
 import ForgotPasswordPage from 'pages/password/forgot';
 import ResetPasswordPage from 'pages/password/reset';
 import RegisterPage from 'pages/register';
 import VerifyEmailPage from 'pages/verify/email';
 import ResendVerificationPage from 'pages/verify/email/resend';
-import { getAllowForgotPassword, getSignUpAllowed } from 'shared/bootstrap/selectors';
 import TOTPView from 'views/Authentication/TOTPView';
 
-const UnauthenticatedApplication = (): JSX.Element => {
-  const allowSignUp = useSelector(getSignUpAllowed);
-  const allowForgotPassword = useSelector(getAllowForgotPassword);
+export default function UnauthenticatedApplication(): JSX.Element {
+  const {
+    allowSignUp,
+    allowForgotPassword,
+  } = useAppConfiguration();
 
   return (
     <Routes>
@@ -27,6 +28,4 @@ const UnauthenticatedApplication = (): JSX.Element => {
       <Route path="*" element={ <Navigate replace to="/login" /> } />
     </Routes>
   );
-};
-
-export default UnauthenticatedApplication;
+}

@@ -1,5 +1,4 @@
 import React, { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
 
@@ -9,9 +8,9 @@ import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
 import { Formik, FormikHelpers } from 'formik';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import { useSnackbar } from 'notistack';
 import useLogin from 'shared/authentication/hooks/useLogin';
-import { getReCAPTCHAKey, getShouldVerifyLogin, getSignUpAllowed } from 'shared/bootstrap/selectors';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface LoginValues {
@@ -21,9 +20,11 @@ interface LoginValues {
 
 export default function LoginView(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const ReCAPTCHAKey = useSelector(getReCAPTCHAKey);
-  const allowSignUp = useSelector(getSignUpAllowed);
-  const verifyLogin = useSelector(getShouldVerifyLogin);
+  const {
+    ReCAPTCHAKey,
+    allowSignUp,
+    verifyLogin,
+  } = useAppConfiguration();
 
   const login = useLogin();
 

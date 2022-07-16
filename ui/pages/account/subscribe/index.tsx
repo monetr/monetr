@@ -1,22 +1,24 @@
-import { CircularProgress, Typography } from '@mui/material';
-import { useSnackbar } from 'notistack';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { CircularProgress, Typography } from '@mui/material';
+
+import { Logo } from 'assets';
+import { useSnackbar } from 'notistack';
 import { getHasSubscription } from 'shared/authentication/selectors';
 import request from 'shared/util/request';
-import { useSelector } from 'react-redux';
-import { getInitialPlan } from 'shared/bootstrap/selectors';
-import useMountEffect from 'shared/util/useMountEffect';
-import { Logo } from 'assets';
+import useMountEffect from 'hooks/useMountEffect';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const initialPlan = useSelector(getInitialPlan);
+  const {
+    initialPlan,
+  } = useAppConfiguration();
   const hasSubscription = useSelector(getHasSubscription);
 
   useMountEffect(() => {
     if (initialPlan && !hasSubscription) {
-      request().post(`/billing/create_checkout`, {
+      request().post('/billing/create_checkout', {
         priceId: '',
         cancelPath: '/logout',
       })
@@ -41,7 +43,7 @@ export default function SubscribePage(): JSX.Element {
     <div className="flex items-center justify-center w-full h-full max-h-full">
       <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
         <div className="flex justify-center w-full mb-5">
-          <img src={ Logo } className="w-1/3"/>
+          <img src={ Logo } className="w-1/3" />
         </div>
         <div className="w-full pt-2.5 pb-2.5">
           <Typography
@@ -52,7 +54,7 @@ export default function SubscribePage(): JSX.Element {
           </Typography>
         </div>
         <div className="w-full pt-2.5 pb-2.5 flex justify-center">
-          <CircularProgress/>
+          <CircularProgress />
         </div>
       </div>
     </div>

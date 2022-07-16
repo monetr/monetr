@@ -1,16 +1,17 @@
 import React, { Fragment } from 'react';
-import { useSelector } from 'react-redux';
 import { GitHub } from '@mui/icons-material';
 import { Button } from '@mui/material';
 
 import CodeBasic from 'components/Code/CodeBasic/CodeBasic';
-import { getBuildTime, getBuildType, getRelease, getRevision } from 'shared/bootstrap/selectors';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 export default function AboutView(): JSX.Element {
-  const release = useSelector(getRelease);
-  const revision = useSelector(getRevision);
-  const buildType = useSelector(getBuildType);
-  const buildTime = useSelector(getBuildTime);
+  const {
+    release,
+    revision,
+    buildType,
+    buildTime,
+  } = useAppConfiguration();
 
   function Version(): JSX.Element {
     if (!release) {

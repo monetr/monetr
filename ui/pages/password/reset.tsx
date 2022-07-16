@@ -1,12 +1,13 @@
+import React, { Fragment, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
+
 import classnames from 'classnames';
+import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
-import React, { Fragment, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import useResetPassword from 'shared/authentication/actions/resetPassword';
-import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 
 interface ResetPasswordValues {
   password: string;
@@ -43,7 +44,7 @@ export default function ResetPasswordPage(): JSX.Element {
   }, [token, enqueueSnackbar, navigate, location.pathname]);
 
   function validateInput(values: ResetPasswordValues): FormikErrors<ResetPasswordValues> {
-    let errors: FormikErrors<ResetPasswordValues> = {};
+    const errors: FormikErrors<ResetPasswordValues> = {};
 
     if (values.password) {
       if (values.password.trim().length < 8) {
@@ -70,26 +71,26 @@ export default function ResetPasswordPage(): JSX.Element {
 
   return (
     <Fragment>
-      <BackToLoginButton/>
+      <BackToLoginButton />
       <Formik
         initialValues={ initialValues }
         validate={ validateInput }
         onSubmit={ submitResetPassword }
       >
         { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             isSubmitting,
-             submitForm,
-           }) => (
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+          submitForm,
+        }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto pb-20">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo/>
+                <CenteredLogo />
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     <p className="text-center">
@@ -157,5 +158,5 @@ export default function ResetPasswordPage(): JSX.Element {
         ) }
       </Formik>
     </Fragment>
-  )
+  );
 }

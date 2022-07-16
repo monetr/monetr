@@ -16,5 +16,5 @@ export default function GeneralSettings(): JSX.Element {
         </span>
       </div>
     </div>
-  )
+  );
 }

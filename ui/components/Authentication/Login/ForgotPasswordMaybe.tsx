@@ -1,11 +1,12 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Link as RouterLink } from 'react-router-dom';
 
-import { getAllowForgotPassword } from 'shared/bootstrap/selectors';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 export default function ForgotPasswordMaybe(): JSX.Element {
-  const allowForgotPassword = useSelector(getAllowForgotPassword);
+  const {
+    allowForgotPassword,
+  } = useAppConfiguration();
 
   if (!allowForgotPassword) {
     return null;

@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import request from 'shared/util/request';
 import { CircularProgress, Typography } from '@mui/material';
-import activateSubscription from 'shared/authentication/actions/activateSubscription';
 
 import { Logo } from 'assets';
+import activateSubscription from 'shared/authentication/actions/activateSubscription';
+import request from 'shared/util/request';
 
 export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();
@@ -33,7 +33,7 @@ export default function AfterCheckoutPage(): JSX.Element {
     <div className="flex items-center justify-center w-full h-full max-h-full">
       <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
         <div className="flex justify-center w-full mb-5">
-          <img src={ Logo } className="w-1/3"/>
+          <img src={ Logo } className="w-1/3" />
         </div>
         <div className="w-full pt-2.5 pb-2.5">
           <Typography
@@ -44,7 +44,7 @@ export default function AfterCheckoutPage(): JSX.Element {
           </Typography>
         </div>
         <div className="w-full pt-2.5 pb-2.5 flex justify-center">
-          <CircularProgress/>
+          <CircularProgress />
         </div>
       </div>
     </div>

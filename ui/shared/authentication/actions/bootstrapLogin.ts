@@ -1,6 +1,7 @@
+import { useDispatch } from 'react-redux';
+
 import { AxiosError } from 'axios';
 import User from 'models/User';
-import { useDispatch } from 'react-redux';
 import { Login } from 'shared/authentication/actions';
 import request from 'shared/util/request';
 

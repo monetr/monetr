@@ -1,7 +1,8 @@
-import CenteredLogo from 'components/Logo/CenteredLogo';
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography } from '@mui/material';
+
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import request from 'shared/util/request';
 
 export default function VerifyEmailPage(): JSX.Element {
@@ -20,7 +21,7 @@ export default function VerifyEmailPage(): JSX.Element {
   useEffect(() => {
     if (!token) {
       errorRedirect('Email verification link is not valid.');
-      return
+      return;
     }
 
     request().post('/authentication/verify', {
@@ -39,7 +40,7 @@ export default function VerifyEmailPage(): JSX.Element {
   return (
     <div className="flex items-center justify-center w-full h-full max-h-full">
       <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-        <CenteredLogo/>
+        <CenteredLogo />
         <div className="w-full pt-2.5 pb-2.5">
           <Typography
             variant="h5"
@@ -49,7 +50,7 @@ export default function VerifyEmailPage(): JSX.Element {
           </Typography>
         </div>
         <div className="w-full pt-2.5 pb-2.5 flex justify-center">
-          <CircularProgress/>
+          <CircularProgress />
         </div>
       </div>
     </div>

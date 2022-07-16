@@ -1,15 +1,16 @@
-import classnames from 'classnames';
-import { SpendingOption, SpendingSelectOption } from 'components/Transactions/components/SpendingSelectOption';
-import Spending from 'models/Spending';
-import Transaction from 'models/Transaction';
 import React, { Fragment } from 'react';
 import { useSelector } from 'react-redux';
+import Select, { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
+
+import classnames from 'classnames';
+import { SpendingOption, SpendingSelectOption } from 'components/Transactions/components/SpendingSelectOption';
+import { Map } from 'immutable';
+import Spending from 'models/Spending';
+import Transaction from 'models/Transaction';
 import { getBalance } from 'shared/balances/selectors/getBalance';
 import { getSpending } from 'shared/spending/selectors/getSpending';
 import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
-import Select, { ActionMeta, OnChangeValue, Theme } from 'react-select';
-import { Map } from 'immutable';
 
 interface Props {
   transaction: Transaction;
@@ -29,7 +30,7 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
       >
         Deposit
       </span>
-    )
+    );
   }
 
   function updateSpentFrom(selection: Spending | null) {
@@ -60,7 +61,7 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
       // until the balance is loaded.
       currentAmount: balances?.safe,
     },
-  }
+  };
   const items: Map<number, SpendingOption> = allSpending
     .sortBy(item => item.name.toLowerCase()) // Sort without case sensitivity.
     .map(item => ({
@@ -84,7 +85,7 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
             { option.label }
           </span>
         </Fragment>
-      )
+      );
     }
 
     return option.label;

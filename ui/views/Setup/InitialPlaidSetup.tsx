@@ -1,19 +1,19 @@
-import { Severity } from '@sentry/react';
-import * as Sentry from '@sentry/react';
 import React, { Fragment, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { Button, Typography } from '@mui/material';
+import { Severity } from '@sentry/react';
+import * as Sentry from '@sentry/react';
+
+import { Logo } from 'assets';
 import PlaidButton from 'components/Plaid/PlaidButton';
 import PlaidIcon from 'components/Plaid/PlaidIcon';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import { List } from 'immutable';
 import useLogout from 'shared/authentication/actions/logout';
 import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
 import fetchLinks from 'shared/links/actions/fetchLinks';
 import request from 'shared/util/request';
-import { getBillingEnabled } from 'shared/bootstrap/selectors';
-import { Button, Typography } from '@mui/material';
-import { List } from 'immutable';
-
-import { Logo } from 'assets';
 
 interface State {
   linkId: number | null;
@@ -22,10 +22,12 @@ interface State {
 }
 
 const InitialSetupBilling = (): JSX.Element => {
-  const billingEnabled = useSelector(getBillingEnabled);
+  const {
+    billingEnabled,
+  } = useAppConfiguration();
 
   function manageSubscription() {
-    return request().get(`/billing/portal`)
+    return request().get('/billing/portal')
       .then(result => {
         window.location.assign(result.data.url);
         return Promise.resolve();
@@ -42,11 +44,11 @@ const InitialSetupBilling = (): JSX.Element => {
   return (
     <Fragment>
       <div className="w-full opacity-50 pt-2.5 pb-2.5">
-        <div className="relative w-full border-t border-gray-400 top-5"/>
+        <div className="relative w-full border-t border-gray-400 top-5" />
         <div className="relative flex justify-center inline w-full">
-            <span className="relative bg-white p-1.5">
+          <span className="relative bg-white p-1.5">
               or
-            </span>
+          </span>
         </div>
       </div>
       <div className="w-full pt-2.5 pb-2.5">
@@ -60,7 +62,7 @@ const InitialSetupBilling = (): JSX.Element => {
       </div>
     </Fragment>
   );
-}
+};
 
 const InitialPlaidSetup = (): JSX.Element => {
   const [state, setState] = useState<Partial<State>>({
@@ -107,8 +109,8 @@ const InitialPlaidSetup = (): JSX.Element => {
             level: Severity.Info,
             message: 'Error from Plaid link',
             data: error,
-          }
-        ]
+          },
+        ],
       });
     }
   }
@@ -122,7 +124,7 @@ const InitialPlaidSetup = (): JSX.Element => {
       publicToken: public_token,
       institutionId: metadata.institution.institution_id,
       institutionName: metadata.institution.name,
-      accountIds: List(metadata.accounts).map((account: { id: string }) => account.id).toArray()
+      accountIds: List(metadata.accounts).map((account: { id: string }) => account.id).toArray(),
     })
       .then(result => {
         const linkId: number = result.data.linkId;
@@ -143,7 +145,7 @@ const InitialPlaidSetup = (): JSX.Element => {
         console.error(error);
         setState({
           loading: false,
-        })
+        });
       });
   }
 
@@ -155,7 +157,7 @@ const InitialPlaidSetup = (): JSX.Element => {
         <div className="flex items-center justify-center flex-grow">
           <div>
             <div className="flex justify-center w-full mb-5">
-              <img src={ Logo } className="w-1/3"/>
+              <img src={ Logo } className="w-1/3" />
             </div>
             <div className="w-full pt-2.5 pb-2.5">
               <Typography
@@ -174,10 +176,10 @@ const InitialPlaidSetup = (): JSX.Element => {
                 variant="outlined"
               >
                 Get Started with
-                <PlaidIcon className="flex-none w-16 ml-2"/>
+                <PlaidIcon className="flex-none w-16 ml-2" />
               </PlaidButton>
             </div>
-            <InitialSetupBilling/>
+            <InitialSetupBilling />
           </div>
         </div>
         <div className="flex-initial w-full pt-2.5 pb-2.5">
@@ -190,7 +192,7 @@ const InitialPlaidSetup = (): JSX.Element => {
         </div>
       </div>
     </div>
-  )
+  );
 };
 
 export default InitialPlaidSetup;

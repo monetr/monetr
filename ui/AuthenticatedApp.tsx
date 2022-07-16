@@ -19,7 +19,7 @@ import useFetchLinksIfNeeded from 'shared/links/hooks/useFetchLinksIfNeeded';
 import { getHasAnyLinks } from 'shared/links/selectors/getHasAnyLinks';
 import fetchSpending from 'shared/spending/actions/fetchSpending';
 import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
-import useMountEffect from 'shared/util/useMountEffect';
+import useMountEffect from 'hooks/useMountEffect';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 

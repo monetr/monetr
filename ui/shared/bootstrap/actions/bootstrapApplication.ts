@@ -1,5 +1,6 @@
-import { NewClient } from 'api/api';
 import { useDispatch } from 'react-redux';
+
+import { NewClient } from 'api/api';
 import { Bootstrap, BootstrapBegin } from 'shared/bootstrap/actions';
 import BootstrapState from 'shared/bootstrap/state';
 import request from 'shared/util/request';

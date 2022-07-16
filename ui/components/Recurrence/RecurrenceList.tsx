@@ -1,10 +1,10 @@
-import { Checkbox, List as ListUI, ListItem, ListItemIcon, ListItemText } from "@mui/material";
-import getRecurrencesForDate from "components/Recurrence/getRecurrencesForDate";
-import Recurrence from "components/Recurrence/Recurrence";
+import React, { Component } from 'react';
+import { Checkbox, List as ListUI, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 
+import getRecurrencesForDate from 'components/Recurrence/getRecurrencesForDate';
+import Recurrence from 'components/Recurrence/Recurrence';
 import { List } from 'immutable';
-import moment from "moment";
-import React, { Component } from "react";
+import moment from 'moment';
 
 export interface PropTypes {
   // TODO Add a way to pass a current value to the RecurrenceList component.
@@ -30,7 +30,7 @@ export class RecurrenceList extends Component<PropTypes, State> {
   componentDidMount() {
     const { date } = this.props;
     this.setState({
-      rules: getRecurrencesForDate(date)
+      rules: getRecurrencesForDate(date),
     });
   }
 

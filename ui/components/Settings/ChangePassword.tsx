@@ -1,8 +1,9 @@
+import React from 'react';
 import { Password } from '@mui/icons-material';
 import { Button, TextField } from '@mui/material';
+
 import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
-import React from 'react';
 import request from 'shared/util/request';
 
 interface ChangePasswordValues {
@@ -15,7 +16,7 @@ export default function ChangePassword(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
 
   function validateInput(values: ChangePasswordValues): Partial<ChangePasswordValues> {
-    let errors: Partial<ChangePasswordValues> = {};
+    const errors: Partial<ChangePasswordValues> = {};
 
     if (!values.currentPassword) {
       errors['currentPassword'] = 'Your current password must be provided in order to change your password.';
@@ -23,11 +24,11 @@ export default function ChangePassword(): JSX.Element {
     }
 
     if (values.newPassword.length < 8) {
-      errors['newPassword'] = 'New Password must be at least 8 characters long.'
+      errors['newPassword'] = 'New Password must be at least 8 characters long.';
     }
 
     if (values.repeatPassword !== values.newPassword) {
-      errors['repeatPassword'] = 'New Passwords must match.'
+      errors['repeatPassword'] = 'New Passwords must match.';
     }
 
     return errors;
@@ -65,15 +66,15 @@ export default function ChangePassword(): JSX.Element {
         onSubmit={ updatePassword }
       >
         { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             isSubmitting,
-             submitForm,
-           }) => (
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+          submitForm,
+        }) => (
           <form onSubmit={ handleSubmit }>
             <span className="text-2xl">
               Password
@@ -100,7 +101,7 @@ export default function ChangePassword(): JSX.Element {
                   onChange={ handleChange }
                   value={ values.currentPassword }
                 />
-                <hr/>
+                <hr />
                 <TextField
                   id="new-password"
                   label="New Password"
@@ -137,7 +138,7 @@ export default function ChangePassword(): JSX.Element {
                   variant="contained"
                   className="mt-2.5"
                 >
-                  <Password className="mr-2.5"/>
+                  <Password className="mr-2.5" />
                   Update Password
                 </Button>
               </div>
@@ -151,5 +152,5 @@ export default function ChangePassword(): JSX.Element {
         ) }
       </Formik>
     </div>
-  )
+  );
 }

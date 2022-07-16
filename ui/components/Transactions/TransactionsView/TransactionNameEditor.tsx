@@ -1,8 +1,9 @@
-import Transaction from 'models/Transaction';
 import React, { useState } from 'react';
 import { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
 import CreatableSelect from 'react-select/creatable';
+
+import Transaction from 'models/Transaction';
 import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
 
 interface PropTypes {
@@ -37,7 +38,7 @@ const TransactionNameEditor = (props: PropTypes): JSX.Element => {
   }
 
   function handleTransactionNameChange(newValue: OnChangeValue<Option, false>, meta: ActionMeta<Option>) {
-    return updateTransactionName(newValue.label)
+    return updateTransactionName(newValue.label);
   }
 
   const originalTransactionName: Option = {
@@ -61,7 +62,7 @@ const TransactionNameEditor = (props: PropTypes): JSX.Element => {
 
   const createLabelFormat = (inputValue: string): string => {
     return `Rename To: ${ inputValue }`;
-  }
+  };
 
   const formatOptionsLabel = (option: Option, meta: FormatOptionLabelMeta<Option>): React.ReactNode => {
     if (meta.context === 'value') {
@@ -76,7 +77,7 @@ const TransactionNameEditor = (props: PropTypes): JSX.Element => {
       default:
         return option.label;
     }
-  }
+  };
 
   const value = customTransactionName || originalTransactionName;
 
@@ -103,6 +104,6 @@ const TransactionNameEditor = (props: PropTypes): JSX.Element => {
       value={ value }
     />
   );
-}
+};
 
 export default TransactionNameEditor;

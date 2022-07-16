@@ -1,7 +1,8 @@
-import { Chip } from '@mui/material';
-import Spending from 'models/Spending';
 import React from 'react';
 import { components, OptionProps } from 'react-select';
+import { Chip } from '@mui/material';
+
+import Spending from 'models/Spending';
 import formatAmount from 'util/formatAmount';
 
 export interface SpendingOption {
@@ -25,5 +26,5 @@ export function SpendingSelectOption({ children, ...props }: OptionProps<Spendin
         />
       </div>
     </components.Option>
-  )
+  );
 }

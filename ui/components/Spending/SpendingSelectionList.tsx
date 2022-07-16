@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-
-import Spending from 'models/Spending';
 import { Checkbox, List, ListItem, ListItemIcon, Typography } from '@mui/material';
+
 import { Map } from 'immutable';
+import Spending from 'models/Spending';
 import { getSpending } from 'shared/spending/selectors/getSpending';
 
 export interface PropTypes {
@@ -37,7 +37,7 @@ export class SpendingSelectionList extends Component<WithConnectionPropTypes, {}
         <List className="p-0">
           { !excludeSafeToSpend &&
           <ListItem
-            key={ 'safe' }
+            key="safe"
             onClick={ this.selectItem(null) }
             button
           >

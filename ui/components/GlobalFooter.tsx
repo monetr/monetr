@@ -1,7 +1,5 @@
+import React from 'react';
 import { Typography } from '@mui/material';
-import React, { Fragment } from 'react';
-import { useSelector } from 'react-redux';
-import { getRelease } from 'shared/bootstrap/selectors';
 
 const GlobalFooter = (): JSX.Element => {
   return (

@@ -1,15 +1,14 @@
-import { Backdrop, CircularProgress } from '@mui/material';
-import AuthenticatedApp from 'AuthenticatedApp';
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { Backdrop, CircularProgress } from '@mui/material';
+
+import AuthenticatedApp from 'AuthenticatedApp';
+import BillingRequiredRouter from 'BillingRequiredRouter';
 import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
 import { getIsAuthenticated, getSubscriptionIsActive } from 'shared/authentication/selectors';
 import useBootstrapApplication from 'shared/bootstrap/actions/bootstrapApplication';
 import { getIsBootstrapped } from 'shared/bootstrap/selectors';
 import UnauthenticatedApplication from 'UnauthenticatedApplication';
-import BillingRequiredRouter from 'BillingRequiredRouter';
-import * as Sentry from '@sentry/react';
 
 const Application = (): JSX.Element => {
   const [loading, setLoading] = useState(true);
@@ -39,22 +38,22 @@ const Application = (): JSX.Element => {
   if (!isReady || loading) {
     return (
       <Backdrop open={ true }>
-        <CircularProgress color="inherit"/>
+        <CircularProgress color="inherit" />
       </Backdrop>
     );
   }
 
   if (!isAuthenticated) {
-    return <UnauthenticatedApplication/>
+    return <UnauthenticatedApplication />;
   }
 
   if (!isSubscriptionActive) {
-    return <BillingRequiredRouter/>;
+    return <BillingRequiredRouter />;
   }
 
   return (
-    <AuthenticatedApp/>
-  )
+    <AuthenticatedApp />
+  );
 };
 
 export default Application;

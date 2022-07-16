@@ -1,7 +1,8 @@
-import { Button } from '@mui/material';
-import classnames from 'classnames';
 import React from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Button } from '@mui/material';
+
+import classnames from 'classnames';
 
 interface SidebarButtonProps {
   onClick?: () => void;
@@ -11,13 +12,13 @@ interface SidebarButtonProps {
 
 export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
   const location = useLocation();
-  let className = 'justify-start text-lg w-full';
+  const className = 'justify-start text-lg w-full';
 
   return (
     <div className={ classnames(className, 'sidebar-button-wrapper', {
       'sidebar-button-wrapper-active': location.pathname === props.to,
     }) }>
-      <div className="navigation-before"/>
+      <div className="navigation-before" />
       <Button
         onClick={ props.onClick }
         to={ props.to }
@@ -26,8 +27,8 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
         children={ props.children }
         color="inherit"
       />
-      <div className="navigation-after"/>
+      <div className="navigation-after" />
     </div>
-  )
+  );
 
 }

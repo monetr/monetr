@@ -1,9 +1,8 @@
 import React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
-import { useSelector } from 'react-redux';
 import { CircularProgress } from '@mui/material';
 
-import { getReCAPTCHAKey } from 'shared/bootstrap/selectors';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 export interface PropTypes {
   show?: boolean;
@@ -12,18 +11,20 @@ export interface PropTypes {
 }
 
 export default function CaptchaMaybe(props: PropTypes): JSX.Element {
-  const reCaptchaKey = useSelector(getReCAPTCHAKey);
+  const {
+    ReCAPTCHAKey,
+  } = useAppConfiguration();
 
   const { show, loading, onVerify } = props;
 
-  if (!show || !reCaptchaKey) {
+  if (!show || !ReCAPTCHAKey) {
     return null;
   }
 
   return (
     <div className="flex items-center justify-center w-full">
       { !loading && <ReCAPTCHA
-        sitekey={ reCaptchaKey }
+        sitekey={ ReCAPTCHAKey }
         onChange={ onVerify }
       /> }
       { loading && <CircularProgress /> }

@@ -37,7 +37,6 @@ export default function Root(): JSX.Element {
     return data;
   };
 
-
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

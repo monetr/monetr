@@ -1,9 +1,10 @@
+import React from 'react';
 import { CircularProgress as MaterialCircularProgress } from '@mui/material';
 import {
-  CircularProgressProps as MaterialCircularProgressProps
+  CircularProgressProps as MaterialCircularProgressProps,
 } from '@mui/material/CircularProgress/CircularProgress';
+
 import classNames from 'classnames';
-import React from 'react';
 
 interface CircularProgressExtendedProps {
   visible?: boolean;
@@ -25,5 +26,5 @@ export default function CircularProgress(props: CircularProgressProps): JSX.Elem
     <MaterialCircularProgress
       { ...materialProps }
     />
-  )
+  );
 }

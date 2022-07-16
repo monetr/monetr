@@ -1,3 +1,6 @@
+import React, { Component, Fragment } from 'react';
+import { connect } from 'react-redux';
+import { SwapVert } from '@mui/icons-material';
 import {
   Accordion,
   AccordionDetails,
@@ -12,20 +15,18 @@ import {
   Input,
   InputAdornment,
   InputLabel,
-  Typography
-} from "@mui/material";
+  Typography,
+} from '@mui/material';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import { SwapVert } from '@mui/icons-material';
+
 import classNames from 'classnames';
 import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
+import { Formik, FormikErrors, FormikHandlers, FormikHelpers } from 'formik';
 import Balance from 'models/Balance';
 import Spending from 'models/Spending';
-import React, { Component, Fragment } from "react";
-import { connect } from 'react-redux';
 import { getBalance } from 'shared/balances/selectors/getBalance';
 import transfer from 'shared/spending/actions/transfer';
 import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
-import { Formik, FormikErrors, FormikHandlers, FormikHelpers } from "formik";
 
 import './styles/TransferDialog.scss';
 
@@ -55,7 +56,7 @@ enum Target {
   From,
 }
 
-let SafeToSpend = new Spending({
+const SafeToSpend = new Spending({
   spendingId: null, // Indicates that this is safe to spend.
   name: 'Safe-To-Spend',
 });
@@ -82,9 +83,9 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
     SafeToSpend.currentAmount = balance.safe;
 
     if (!to && from !== SafeToSpend) {
-      to = SafeToSpend
+      to = SafeToSpend;
     } else if (!from && to !== SafeToSpend) {
-      from = SafeToSpend
+      from = SafeToSpend;
     }
 
     this.setState({
@@ -139,7 +140,7 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
             Choose Goal or Expense
           </Typography>
         </div>
-      )
+      );
     }
 
     return (
@@ -166,7 +167,7 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
     return this.setState(prevState => ({
       selectionDialog: prevState.selectionDialog === target ? null : target,
     }));
-  }
+  };
 
   handleFromOnChange = (spending: Spending | null) => {
     return this.setState({
@@ -218,11 +219,11 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
                     'opacity-100': this.state.selectionDialog === null,
                   }) }
                 >
-                  <SwapVert/>
+                  <SwapVert />
                 </IconButton>
                 <div>
                   <Accordion expanded={ this.state.selectionDialog === Target.From } className="transfer-item"
-                             onChange={ this.toggleExpanded(Target.From) }>
+                    onChange={ this.toggleExpanded(Target.From) }>
                     <AccordionSummary>
                       <div className='grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full'>
                         <div className="col-span-1 row-span-2">
@@ -246,7 +247,7 @@ class TransferDialog extends Component<WithConnectionPropTypes, State> {
                     </AccordionDetails>
                   </Accordion>
                   <Accordion expanded={ this.state.selectionDialog === Target.To }
-                             onChange={ this.toggleExpanded(Target.To) }>
+                    onChange={ this.toggleExpanded(Target.To) }>
                     <AccordionSummary>
                       <div className='grid grid-cols-4 grid-rows-2 grid-flow-col gap-1 w-full'>
                         <div className="col-span-1 row-span-2">

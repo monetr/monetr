@@ -1,14 +1,15 @@
-import { Divider, List, ListSubheader, Typography } from '@mui/material';
-import TransactionItem from 'components/Transactions/TransactionsView/TransactionItem';
-import { Moment } from 'moment';
-import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useSelector } from 'react-redux';
+import { Divider, List, ListSubheader, Typography } from '@mui/material';
+
+import TransactionItem from 'components/Transactions/TransactionsView/TransactionItem';
+import { Moment } from 'moment';
+import { useSnackbar } from 'notistack';
 import useFetchInitialTransactionsIfNeeded from 'shared/transactions/actions/fetchInitialTransactionsIfNeeded';
 import useFetchTransactions from 'shared/transactions/hooks/useFetchTransactions';
 import { getTransactions } from 'shared/transactions/selectors/getTransactions';
-import useMountEffect from 'shared/util/useMountEffect';
+import useMountEffect from 'hooks/useMountEffect';
 
 import 'components/Transactions/TransactionsView/styles/TransactionsView.scss';
 
@@ -20,7 +21,7 @@ function TransactionsView(): JSX.Element {
 
   useMountEffect(() => {
     fetchInitialTransactionsIfNeeded()
-      .catch(() => enqueueSnackbar('Failed to retrieve transactions.', { variant: 'error' }))
+      .catch(() => enqueueSnackbar('Failed to retrieve transactions.', { variant: 'error' }));
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,9 +39,9 @@ function TransactionsView(): JSX.Element {
           variant: 'error',
           disableWindowBlurListener: true,
         });
-        setError(error)
+        setError(error);
       })
-      .finally(() => setLoading(false))
+      .finally(() => setLoading(false));
   }
 
   const [sentryRef] = useInfiniteScroll({
@@ -61,10 +62,10 @@ function TransactionsView(): JSX.Element {
   // different it will include the year.
   function formatDateHeader(moment: Moment): string {
     if (moment.year() !== new Date().getFullYear()) {
-      return moment.format('MMMM Do, YYYY')
+      return moment.format('MMMM Do, YYYY');
     }
 
-    return moment.format('MMMM Do')
+    return moment.format('MMMM Do');
   }
 
   function renderTransactions() {
@@ -80,7 +81,7 @@ function TransactionsView(): JSX.Element {
                 <Typography className="ml-3 md:ml-3 font-semibold opacity-75 text-base">
                   { formatDateHeader(group) }
                 </Typography>
-                <Divider/>
+                <Divider />
               </ListSubheader>
             </Fragment>
             { transactions.map(transaction => (
@@ -96,7 +97,7 @@ function TransactionsView(): JSX.Element {
   }
 
   function TransactionListFooter(): JSX.Element {
-    let message = 'No more transactions...'
+    let message = 'No more transactions...';
     if (loading) {
       message = 'Loading...';
     } else if (hasNextPage) {
@@ -117,12 +118,12 @@ function TransactionsView(): JSX.Element {
           { renderTransactions() }
           { (loading || hasNextPage) && (
             <li ref={ sentryRef }>
-              <TransactionListFooter/>
+              <TransactionListFooter />
             </li>
           ) }
           { (!hasNextPage && !loading) && (
             <li>
-              <TransactionListFooter/>
+              <TransactionListFooter />
             </li>
           ) }
         </List>

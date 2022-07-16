@@ -1,6 +1,6 @@
+import React from 'react';
 import { Lock } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import React from 'react';
 
 export default function TOTPSettings(): JSX.Element {
   return (
@@ -12,7 +12,7 @@ export default function TOTPSettings(): JSX.Element {
         <div className="flex items-center">
           <div className="w-full">
             <Button variant="contained" className="w-full">
-              <Lock className="mr-2.5"/>
+              <Lock className="mr-2.5" />
               Setup TOTP
             </Button>
           </div>
