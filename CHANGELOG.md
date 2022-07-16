@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.10.20](https://github.com/monetr/monetr/compare/v0.10.19...v0.10.20) (2022-07-16)
+
+
+### Features
+
+* **helm:** Getting ready to rollout KMS. ([6070c48](https://github.com/monetr/monetr/commit/6070c4844e18c4984037eddc78bd9c20afeda074))
+* **icons:** Adding basic icon support. ([bb4b105](https://github.com/monetr/monetr/commit/bb4b105c6de258f8e1f355a117eb700b0556a10c))
+* **icons:** Show icons on transaction rows. ([3b4d961](https://github.com/monetr/monetr/commit/3b4d9611b533af5f93e8ab4f821f43a8a2786f9d))
+* **settings:** Added settings read endpoint, tests, docs. ([6ca91c1](https://github.com/monetr/monetr/commit/6ca91c1a3b5294b94d2b2df30441c39a1db2ba03))
+
+
+### Bug Fixes
+
+* **test:** Fixed flaky funding schedule test. ([9d004fa](https://github.com/monetr/monetr/commit/9d004fa3ea8a5084e8944819fc906c5a9967f1d0))
+* **test:** Fixed tests around funding schedules. ([65bdf76](https://github.com/monetr/monetr/commit/65bdf761182c256c211f3ab1754b231daf7954f2))
+* **ui:** Fixed types for retrieving icons. ([093e3c4](https://github.com/monetr/monetr/commit/093e3c45ad6067e2c92756cd0c3127398f41123e))
+
+
+### Miscellaneous
+
+* Fix failing test, updating container image to latest debian. ([d06d0dc](https://github.com/monetr/monetr/commit/d06d0dcf84fc647cf2601fbe34ce12073f6bee42))
+* Fixing renovate ([31ce92c](https://github.com/monetr/monetr/commit/31ce92cb0a6fc1cb368b0ffd48a6c1cdd9b4eb11))
+* **icons:** Pin simple icons version. ([7d8b6c8](https://github.com/monetr/monetr/commit/7d8b6c813ea66fb06ae423672e51414060239d36)), closes [#947](https://github.com/monetr/monetr/issues/947)
+* **lint:** Fixing the ESLint config and fixing many files. ([78f0d1a](https://github.com/monetr/monetr/commit/78f0d1a5ea30919c3fc3f7b985cadf3104c87dbd))
+
+
+### Dependencies
+
+* **api:** update module github.com/aws/aws-sdk-go to v1.44.56 ([940308f](https://github.com/monetr/monetr/commit/940308f4249c8eafb8e04228e63a5a51c5265bd9))
+* **api:** update module github.com/gomodule/redigo to v1.8.9 ([aa527e0](https://github.com/monetr/monetr/commit/aa527e035579b628a565b8451066082991fa8772))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.3.4 ([64c5fdc](https://github.com/monetr/monetr/commit/64c5fdc2b056e101d9b7c980a9f8f6984dfb3501))
+* **ui:** pin dependency react-query to 3.39.2 ([1020d03](https://github.com/monetr/monetr/commit/1020d030423d282e4f7525054e4d77b97e5c1c33))
+* **ui:** update babel monorepo to v7.18.6 ([6946af0](https://github.com/monetr/monetr/commit/6946af0a75d2310a466e76ccf81efb4ec407b13b))
+* **ui:** update dependency @types/react to v17.0.47 ([42d3f07](https://github.com/monetr/monetr/commit/42d3f0758c6063df1900e634d192438be4521368))
+* **ui:** update dependency jest-mock-axios to v4.6.1 ([e7c927a](https://github.com/monetr/monetr/commit/e7c927a841f2a9229e0945bd6db12816639cace0))
+* **ui:** update dependency moment to v2.29.4 [security] ([383b61c](https://github.com/monetr/monetr/commit/383b61c1e4f85ce839c8d360e0fff2a1c64ec7e7))
+* **ui:** update dependency react-refresh-typescript to v2.0.7 ([662b3d5](https://github.com/monetr/monetr/commit/662b3d55842bf2ffa1e24183d742f2ac5cf98fb6))
+
 ## [0.10.19](https://github.com/monetr/monetr/compare/v0.10.18...v0.10.19) (2022-06-15)
 
 
