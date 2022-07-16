@@ -1,5 +1,6 @@
-import User from 'models/User';
 import { Action } from 'redux';
+
+import User from 'models/User';
 
 export enum Login {
   Pending = 'LoginPending',

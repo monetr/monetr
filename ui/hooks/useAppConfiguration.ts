@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from 'react-query';
-
 import moment from 'moment';
+
 import { parseToMomentMaybe } from 'util/parseToMoment';
 
 export class AppConfiguration {

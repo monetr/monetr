@@ -232,7 +232,13 @@
                 "^prop-types",
                 "^react",
                 "^redux$",
-                "^@.+"
+                "^@.+",
+                "^zustand",
+                "^moment",
+                "^notistack",
+                "^axios",
+                "^formik",
+                "^classnames"
               ],
               // Internal packages
               [

@@ -7,7 +7,15 @@ export interface Store {
 
 const useStore = create<Store>((set): Store => ({
   selectedBankAccountId: null,
-  setCurrentBankAccount: (bankAccountId: number) => set(() => ({ selectedBankAccountId: bankAccountId })),
+  setCurrentBankAccount: (bankAccountId: number) => set(() => {
+    window.localStorage.setItem('selectedBankAccountId', bankAccountId.toString(10));
+    return { selectedBankAccountId: bankAccountId };
+  }),
 }));
+
+const bankAccountId = +window.localStorage.getItem('selectedBankAccountId');
+if (bankAccountId) {
+  useStore.setState({ selectedBankAccountId: bankAccountId });
+}
 
 export default useStore;

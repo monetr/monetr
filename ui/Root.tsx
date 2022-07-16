@@ -13,11 +13,11 @@ import { LocalizationProvider } from '@mui/lab';
 import AdapterMoment from '@mui/lab/AdapterMoment';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import * as Sentry from '@sentry/react';
+import { IconVariant, SnackbarProvider } from 'notistack';
+import axios from 'axios';
 
 import Application from 'Application';
-import axios from 'axios';
 import GlobalFooter from 'components/GlobalFooter';
-import { IconVariant, SnackbarProvider } from 'notistack';
 import { store } from 'store';
 import theme from 'theme';
 

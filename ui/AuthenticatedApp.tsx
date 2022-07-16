@@ -1,12 +1,9 @@
 import React, { Fragment, useState } from 'react';
-import { useStore } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { Backdrop, CircularProgress } from '@mui/material';
 
 import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
 import Sidebar from 'components/Layout/Sidebar/Sidebar';
-import { useLinks, useLinksSink } from 'hooks/links';
-import useMountEffect from 'hooks/useMountEffect';
+import { useLinksSink } from 'hooks/links';
 import AccountsPage from 'pages/accounts';
 import ExpensesPage from 'pages/expenses';
 import GoalsPage from 'pages/goals';

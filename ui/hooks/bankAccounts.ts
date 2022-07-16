@@ -1,9 +1,9 @@
-import { useLinks } from 'hooks/links';
 import { useQuery, UseQueryResult } from 'react-query';
+import shallow from 'zustand/shallow';
 
+import { useLinks } from 'hooks/links';
 import useStore from 'hooks/store';
 import BankAccount from 'models/BankAccount';
-import shallow from 'zustand/shallow';
 
 export type BankAccountsResult =
   {

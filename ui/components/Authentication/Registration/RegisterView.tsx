@@ -2,16 +2,16 @@ import React, { Fragment, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
-
+import { useSnackbar } from 'notistack';
 import { AxiosError } from 'axios';
+import { Formik, FormikHelpers } from 'formik';
 import classnames from 'classnames';
+
 import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
 import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
-import { Formik, FormikHelpers } from 'formik';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { useSnackbar } from 'notistack';
 import useSignUp, { SignUpResponse } from 'hooks/useSignUp';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
