@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.21](https://github.com/monetr/monetr/compare/v0.10.20...v0.10.21) (2022-07-16)
+
+
+### Bug Fixes
+
+* **container:** Make sure icons make their way into the container. ([7ae7166](https://github.com/monetr/monetr/commit/7ae7166bdd2174e86f11dbb98090451cf369a7b7))
+* **icons:** Don't request icons if they are not embedded. ([16cd6bd](https://github.com/monetr/monetr/commit/16cd6bd94e3d674275ad15f0b46a2ae24625922e))
+
 ## [0.10.20](https://github.com/monetr/monetr/compare/v0.10.19...v0.10.20) (2022-07-16)
 
 
