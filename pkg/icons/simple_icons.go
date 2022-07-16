@@ -23,6 +23,7 @@ var (
 type simpleIconsIndex struct {
 	slugs    map[string]Icon
 	searches map[string]string
+	version  string
 }
 
 func (s *simpleIconsIndex) Search(input string) *Icon {
@@ -42,6 +43,10 @@ func (s *simpleIconsIndex) Search(input string) *Icon {
 }
 
 func (s simpleIconsIndex) Name() string {
+	if s.version != "" {
+		return fmt.Sprintf("simple-icons@%s", s.version)
+	}
+
 	return "simple-icons"
 }
 
@@ -58,7 +63,7 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 
 	type Metadata struct {
 		Title string `json:"title"`
-		Hex string `json:"hex"`
+		Hex   string `json:"hex"`
 	}
 
 	var metadata struct {
@@ -77,8 +82,6 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 		}
 
 		dereferenceTitle := title
-
-
 		data := Icon{
 			Title:   &dereferenceTitle,
 			Slug:    slug,
@@ -104,9 +107,19 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 		icons[slug] = data
 	}
 
+	var packageInfo struct {
+		Version string `json:"version"`
+	}
+	packageJsonBytes, _ := simpleIconsFiles.ReadFile("sources/simple-icons/package.json")
+	if err == nil {
+		_ = json.Unmarshal(packageJsonBytes, &packageInfo)
+	}
+
+
 	return &simpleIconsIndex{
 		slugs:    icons,
 		searches: nameToSlug,
+		version: packageInfo.Version,
 	}
 }
 
