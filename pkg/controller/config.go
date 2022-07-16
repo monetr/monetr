@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/build"
+	"github.com/monetr/monetr/pkg/icons"
 )
 
 // Application Configuration
@@ -32,6 +33,7 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 		RequireBetaCode      bool         `json:"requireBetaCode"`
 		InitialPlan          *InitialPlan `json:"initialPlan"`
 		BillingEnabled       bool         `json:"billingEnabled"`
+		IconsEnabled         bool         `json:"iconsEnabled"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
 		BuildType            string       `json:"buildType"`
@@ -90,6 +92,8 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 
 	// Just make this true for now, this might change in the future as I do websockets.
 	configuration.LongPollPlaidSetup = true
+
+	configuration.IconsEnabled = icons.GetIconsEnabled()
 
 	ctx.JSON(configuration)
 }

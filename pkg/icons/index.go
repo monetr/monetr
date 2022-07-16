@@ -11,7 +11,7 @@ var (
 )
 
 func GetIconsEnabled() bool {
-	return enabled
+	return enabled && len(indexes) > 0
 }
 
 func GetIconIndexes() []string {
