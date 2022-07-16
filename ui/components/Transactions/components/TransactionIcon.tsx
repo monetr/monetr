@@ -1,7 +1,7 @@
-import { useIconSearch } from 'hooks/useIconSearch';
 import React from 'react';
 import { Avatar } from '@mui/material';
 
+import { useIconSearch } from 'hooks/useIconSearch';
 import Transaction from 'models/Transaction';
 
 interface Props {
@@ -15,15 +15,15 @@ export default function TransactionIcon(props: Props): JSX.Element {
 
   if (icon?.svg) {
     const styles = {
-      webkitMaskImage: `url(data:image/svg+xml;base64,${ icon.svg })`,
-      webkitMaskRepeat: 'no-repeat',
+      WebkitMaskImage: `url(data:image/svg+xml;base64,${ icon.svg })`,
+      WebkitMaskRepeat: 'no-repeat',
       height: '40px',
       width: '40px',
       ...(icon.colors.length > 0 && { backgroundColor: `#${ icon.colors[0] }` }),
     };
 
     return (
-      <div style={ styles }/>
+      <div style={ styles } />
     );
   }
 

@@ -1,4 +1,4 @@
-import { useQuery } from 'react-query';
+import { useQuery, UseQueryResult } from 'react-query';
 
 import moment from 'moment';
 import { parseToMomentMaybe } from 'util/parseToMoment';
@@ -34,7 +34,26 @@ export class AppConfiguration {
   }
 }
 
+export interface AppConfigurationWrapper {
+  result: AppConfiguration;
+}
+
+export type AppConfigurationResult = AppConfigurationWrapper & UseQueryResult<Partial<AppConfiguration>, unknown>;
+
+export function useAppConfigurationSink(): AppConfigurationResult {
+  const result = useQuery<Partial<AppConfiguration>>('/api/config', {
+    staleTime: 60 * 1000, // One minute in milliseconds.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+  });
+  return {
+    result: new AppConfiguration(result.data),
+    ...result,
+  };
+}
+
 export function useAppConfiguration(): AppConfiguration {
-  const { data } = useQuery<Partial<AppConfiguration>>('/api/config');
-  return new AppConfiguration(data);
+  const { result } = useAppConfigurationSink();
+  return result;
 }

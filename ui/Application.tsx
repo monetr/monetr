@@ -1,41 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { Backdrop, CircularProgress } from '@mui/material';
 
 import AuthenticatedApp from 'AuthenticatedApp';
 import BillingRequiredRouter from 'BillingRequiredRouter';
-import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
-import { getIsAuthenticated, getSubscriptionIsActive } from 'shared/authentication/selectors';
-import useBootstrapApplication from 'shared/bootstrap/actions/bootstrapApplication';
-import { getIsBootstrapped } from 'shared/bootstrap/selectors';
+import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
+import { useAuthenticationSink } from 'hooks/useAuthentication';
 import UnauthenticatedApplication from 'UnauthenticatedApplication';
 
 const Application = (): JSX.Element => {
-  const [loading, setLoading] = useState(true);
-  const isReady = useSelector(getIsBootstrapped);
-  const isAuthenticated = useSelector(getIsAuthenticated);
-  const isSubscriptionActive = useSelector(getSubscriptionIsActive);
-  const bootstrapApplication = useBootstrapApplication();
-  const bootstrapLogin = useBootstrapLogin();
-
-  // I really only want this to run one time, isReady will only be false when the application is initially loading in
-  // a user's web browser. So we can use this effect to see if we have already bootstrapped things. If we have not then
-  // we can kick that process off here at the highest level of the application.
-  useEffect(() => {
-    if (!isReady) {
-      bootstrapApplication()
-        .then(() => bootstrapLogin())
-        .catch(error => {
-          throw error; // TODO Add something to handle this error.
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [bootstrapApplication, bootstrapLogin, isReady]);
+  const { isLoading, isError } = useAppConfigurationSink();
+  const { result: { user, isActive } } = useAuthenticationSink();
+  const isReady = !isLoading && !isError;
+  const isAuthenticated = !!user;
 
   // When the application is still getting ready we want to just show a loading state to the user.
-  if (!isReady || loading) {
+  if (!isReady) {
     return (
       <Backdrop open={ true }>
         <CircularProgress color="inherit" />
@@ -47,7 +26,7 @@ const Application = (): JSX.Element => {
     return <UnauthenticatedApplication />;
   }
 
-  if (!isSubscriptionActive) {
+  if (!isActive) {
     return <BillingRequiredRouter />;
   }
 

@@ -10,7 +10,7 @@ import TextWithLine from 'components/TextWithLine';
 import { Formik, FormikHelpers } from 'formik';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import { useSnackbar } from 'notistack';
-import useLogin from 'shared/authentication/hooks/useLogin';
+import useLogin from 'hooks/useLogin';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface LoginValues {

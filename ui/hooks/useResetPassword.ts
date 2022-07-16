@@ -1,6 +1,7 @@
+import { useNavigate } from 'react-router-dom';
+
 import { AxiosError } from 'axios';
 import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
 import request from 'shared/util/request';
 
 export default function useResetPassword(): (newPassword: string, token: string) => Promise<void> {

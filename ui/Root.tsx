@@ -1,5 +1,8 @@
-import axios from 'axios';
 import React from 'react';
+import {
+  QueryClient,
+  QueryClientProvider,
+} from 'react-query';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
 import DoneIcon from '@mui/icons-material/Done';
@@ -10,15 +13,9 @@ import { LocalizationProvider } from '@mui/lab';
 import AdapterMoment from '@mui/lab/AdapterMoment';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import * as Sentry from '@sentry/react';
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from 'react-query';
 
 import Application from 'Application';
+import axios from 'axios';
 import GlobalFooter from 'components/GlobalFooter';
 import { IconVariant, SnackbarProvider } from 'notistack';
 import { store } from 'store';
@@ -33,7 +30,14 @@ export default function Root(): JSX.Element {
   };
 
   const defaultQueryFn = async ({ queryKey }) => {
-    const { data } = await axios.get(`${queryKey[0]}`);
+    const { data } = await axios.get(`${queryKey[0]}`).catch(result => {
+      switch (result.response.status) {
+        case 500:
+          throw result;
+        default:
+          return result.response;
+      }
+    });
     return data;
   };
 

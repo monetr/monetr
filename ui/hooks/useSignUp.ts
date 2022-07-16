@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import User from 'models/User';
 import request from 'shared/util/request';
 

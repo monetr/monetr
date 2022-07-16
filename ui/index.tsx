@@ -5,6 +5,7 @@ import { Integrations } from '@sentry/tracing';
 
 import reportWebVitals from './reportWebVitals';
 
+import { NewClient } from 'api/api';
 import axios from 'axios';
 import RelayTransport from 'relay/transport';
 import Root from 'Root';
@@ -54,6 +55,10 @@ axios.get('/api/sentry', {
     }
   })
   .finally(() => {
+    window.API = NewClient({
+      baseURL: '/api',
+    });
+
     ReactDOM.render(
       <Root />,
       document.getElementById('root')

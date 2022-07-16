@@ -7,7 +7,7 @@ import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
-import useResetPassword from 'shared/authentication/actions/resetPassword';
+import useResetPassword from 'hooks/useResetPassword';
 
 interface ResetPasswordValues {
   password: string;

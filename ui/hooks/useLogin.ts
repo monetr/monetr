@@ -1,5 +1,6 @@
+import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
+
 import request from 'shared/util/request';
 
 export interface LoginArguments {
@@ -10,7 +11,7 @@ export interface LoginArguments {
 
 export default function useLogin(): (loginArgs: LoginArguments) => Promise<void> {
   const navigate = useNavigate();
-  const bootstrapLogin = useBootstrapLogin();
+  const queryClient = useQueryClient();
 
   return (loginArgs: LoginArguments): Promise<void> => {
     return request().post('/authentication/login', loginArgs)
@@ -18,7 +19,8 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         // Then bootstrap the authentication, once it's bootstrapped we want to consider the `nextUrl` field from the
         // login response above. If the nextUrl is present, then we want to navigate the user to that path. If it is not
         // present then we can direct the user to the root path.
-        return bootstrapLogin().then(() => navigate(result?.data?.nextUrl || '/'));
+        return queryClient.invalidateQueries('/api/users/me')
+          .then(() => navigate(result?.data?.nextUrl || '/'));
       })
       .catch(error => {
         // More important than the message though is the status of the response. If the status code was 428 then that

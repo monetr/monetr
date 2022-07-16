@@ -1,4 +1,3 @@
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import React, { Fragment, useState } from 'react';
 import { Button, CircularProgress, TextField } from '@mui/material';
 
@@ -7,7 +6,8 @@ import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
-import useSendForgotPassword from 'shared/authentication/actions/sendForgotPassword';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import useSendForgotPassword from 'hooks/useSendForgotPassword';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface ForgotPasswordValues {

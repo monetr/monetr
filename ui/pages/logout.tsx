@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Backdrop, CircularProgress } from '@mui/material';
 
-import useLogout from 'shared/authentication/actions/logout';
+import useLogout from 'hooks/useLogout';
 import useMountEffect from 'hooks/useMountEffect';
 
 export default function LogoutPage(): JSX.Element {

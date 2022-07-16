@@ -10,7 +10,7 @@ import PlaidButton from 'components/Plaid/PlaidButton';
 import PlaidIcon from 'components/Plaid/PlaidIcon';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import { List } from 'immutable';
-import useLogout from 'shared/authentication/actions/logout';
+import useLogout from 'hooks/useLogout';
 import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
 import fetchLinks from 'shared/links/actions/fetchLinks';
 import request from 'shared/util/request';

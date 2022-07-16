@@ -1,8 +1,9 @@
-import { Button } from '@mui/material';
-import * as Sentry from '@sentry/react';
 import React from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import { useSelector } from 'react-redux';
+import { Button } from '@mui/material';
+import * as Sentry from '@sentry/react';
+
 import { getSentryUser } from 'shared/authentication/selectors/getSentryUser';
 
 export const PlaidConnectButton = props => {

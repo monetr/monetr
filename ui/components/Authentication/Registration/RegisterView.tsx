@@ -1,4 +1,5 @@
 import React, { Fragment, useState } from 'react';
+import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
 
@@ -11,8 +12,7 @@ import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikHelpers } from 'formik';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import { useSnackbar } from 'notistack';
-import useBootstrapLogin from 'shared/authentication/actions/bootstrapLogin';
-import useSignUp, { SignUpResponse } from 'shared/authentication/actions/signUp';
+import useSignUp, { SignUpResponse } from 'hooks/useSignUp';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface SignUpValues {
@@ -103,8 +103,8 @@ export default function RegisterView(): JSX.Element {
   }
 
   const signUp = useSignUp();
-  const bootstrapLogin = useBootstrapLogin();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   function submit(values: SignUpValues, { setSubmitting }: FormikHelpers<SignUpValues>): Promise<void> {
     setSubmitting(true);
@@ -125,7 +125,8 @@ export default function RegisterView(): JSX.Element {
           return setSuccessful(true);
         }
 
-        return bootstrapLogin(result.user, result.isActive)
+
+        return queryClient.invalidateQueries('/api/users/me')
           .then(() => {
             if (result.nextUrl) {
               return navigate(result.nextUrl);
