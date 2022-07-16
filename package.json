@@ -48,6 +48,7 @@
     "react-google-recaptcha": "2.1.0",
     "react-infinite-scroll-hook": "4.0.3",
     "react-plaid-link": "3.3.2",
+    "react-query": "^3.39.2",
     "react-recaptcha": "2.3.10",
     "react-redux": "7.2.8",
     "react-router-dom": "6.3.0",
@@ -164,7 +165,7 @@
   },
   "jest": {
     "testPathIgnorePatterns": [
-      ".+\/pkg\/.+"
+      ".+/pkg/.+"
     ],
     "modulePaths": [
       "<rootDir>/ui"

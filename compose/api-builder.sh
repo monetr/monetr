@@ -17,7 +17,8 @@ LDFLAGS="${LDFLAGS} -X main.buildHost=${BUILD_HOST:-`hostname`}"
 LDFLAGS="${LDFLAGS} -X main.buildTime=${NOW}"
 LDFLAGS="${LDFLAGS} -X main.buildRevision=${REVISION}"
 
-echo "[builder] building monetr now..."
 TAGS="development,mini,noui,icons"
-[ -d "pkg/icons/sources/simple-icons" ] && TAGS="${TAGS},simple-icons"
+[ -d "pkg/icons/sources/simple-icons" ] && TAGS="${TAGS},simple_icons"
+
+echo "[builder] building monetr now with tags (${TAGS})..."
 go build -ldflags "${LDFLAGS}" -tags=${TAGS} -o /usr/bin/monetr github.com/monetr/monetr/pkg/cmd

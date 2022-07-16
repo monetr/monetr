@@ -5,6 +5,7 @@ package icons
 import (
 	"embed"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -55,6 +56,19 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 		return nil
 	}
 
+	type Metadata struct {
+		Title string `json:"title"`
+		Hex string `json:"hex"`
+	}
+
+	var metadata struct {
+		Icons []Metadata `json:"icons"`
+	}
+	metadataBytes, _ := simpleIconsFiles.ReadFile("sources/simple-icons/_data/simple-icons.json")
+	if err == nil {
+		_ = json.Unmarshal(metadataBytes, &metadata)
+	}
+
 	icons := map[string]Icon{}
 	for title, slug := range nameToSlug {
 		iconFile, err := simpleIconsFiles.ReadFile(fmt.Sprintf("sources/simple-icons/icons/%s.svg", slug))
@@ -64,13 +78,30 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 
 		dereferenceTitle := title
 
-		icons[slug] = Icon{
+		metadata := func(name string) *Metadata {
+			for _, item := range metadata.Icons {
+				if strings.EqualFold(item.Title, name) {
+					return &item
+				}
+			}
+
+			return nil
+		}(title)
+
+		data := Icon{
 			Title:   &dereferenceTitle,
 			Slug:    slug,
 			Library: "simple-icons",
 			SVG:     base64.StdEncoding.EncodeToString(iconFile),
 			Colors:  nil,
 		}
+		if metadata != nil {
+			data.Colors = []string{
+				metadata.Hex,
+			}
+		}
+
+		icons[slug] = data
 	}
 
 	return &simpleIconsIndex{

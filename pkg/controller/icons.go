@@ -21,7 +21,7 @@ func (c *Controller) searchIcon(ctx iris.Context) {
 	}
 
 	icon, err := icons.SearchIcon(name)
-	if err != nil {
+	if err != nil || icon == nil {
 		ctx.StatusCode(http.StatusNoContent)
 		return
 	}
