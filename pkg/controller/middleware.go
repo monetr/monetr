@@ -72,7 +72,7 @@ func (c *Controller) setupRepositoryMiddleware(ctx iris.Context) {
 }
 
 func (c *Controller) removeCookieIfPresent(ctx iris.Context) {
-	ctx.RemoveCookie(c.configuration.Server.Cookies.Name)
+	c.updateAuthenticationCookie(ctx, "")
 }
 
 func (c *Controller) authenticateUser(ctx iris.Context) (err error) {

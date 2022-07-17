@@ -9,8 +9,8 @@ import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
 import { Formik, FormikHelpers } from 'formik';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { useSnackbar } from 'notistack';
 import useLogin from 'hooks/useLogin';
+import { useSnackbar } from 'notistack';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface LoginValues {
