@@ -9,10 +9,9 @@ interface Props {
 }
 
 export default function TransactionIcon(props: Props): JSX.Element {
-  const letter = props.transaction.name.toUpperCase().charAt(0);
-
+  // Try to retrieve the icon. If the icon cannot be retrieved or icons are not currently enabled in the application
+  // config then this will simply return null.
   const icon = useIconSearch(props.transaction.name);
-
   if (icon?.svg) {
     const styles = {
       WebkitMaskImage: `url(data:image/svg+xml;base64,${ icon.svg })`,
@@ -27,6 +26,8 @@ export default function TransactionIcon(props: Props): JSX.Element {
     );
   }
 
+  // If we have no icon to work with then create an avatar with the first character of the transaction name.
+  const letter = props.transaction.name.toUpperCase().charAt(0);
   return (
     <Avatar>
       { letter }
