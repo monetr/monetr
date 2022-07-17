@@ -2,22 +2,22 @@ import React, { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AccountBalanceWallet, ArrowDropDown, CheckCircle } from '@mui/icons-material';
 import { Button, Divider, Menu, MenuItem, Typography } from '@mui/material';
-
+import shallow from 'zustand/shallow';
 import classnames from 'classnames';
-import { useBankAccountsSink } from 'hooks/bankAccounts';
+
+import { useBankAccounts, useBankAccountsSink, useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useLinks, useLinksSink } from 'hooks/links';
+import useStore from 'hooks/store';
 import BankAccount from 'models/BankAccount';
 import * as R from 'ramda';
 
 const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element => {
   const navigate = useNavigate();
-  const {
-    result: {
-      selectedBankAccountId,
-      setCurrentBankAccount,
-      bankAccounts,
-    },
-  } = useBankAccountsSink();
+  const { selectedBankAccountId, setCurrentBankAccount } = useStore(state => ({
+    selectedBankAccountId: state.selectedBankAccountId,
+    setCurrentBankAccount: state.setCurrentBankAccount,
+  }), shallow);
+  const bankAccounts = useBankAccounts();
   const links = useLinks();
 
   function goToAllAccounts() {
@@ -77,12 +77,10 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
 };
 
 const BankAccountSelector = (): JSX.Element => {
+  const selectedBankAccountId = useSelectedBankAccountId();
   const {
     isLoading: bankAccountsLoading,
-    result: {
-      selectedBankAccountId,
-      bankAccounts,
-    },
+    result: bankAccounts,
   } = useBankAccountsSink();
 
   const { isLoading: linksLoading } = useLinksSink();

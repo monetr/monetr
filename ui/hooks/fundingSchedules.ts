@@ -10,7 +10,7 @@ export type FundingSchedulesResult =
 export function useFundingSchedulesSink(): FundingSchedulesResult {
   const { result: { selectedBankAccountId } } = useBankAccountsSink();
   const result = useQuery<Array<Partial<FundingSchedule>>>(
-    `/api/bank_accounts/${ selectedBankAccountId }/funding_schedules`,
+    `/bank_accounts/${ selectedBankAccountId }/funding_schedules`,
     {
       enabled: !!selectedBankAccountId,
     },

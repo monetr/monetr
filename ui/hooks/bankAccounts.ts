@@ -6,39 +6,48 @@ import useStore from 'hooks/store';
 import BankAccount from 'models/BankAccount';
 
 export type BankAccountsResult =
-  {
-    result: {
-      setCurrentBankAccount: (_bankAccountId: number) => void;
-      selectedBankAccountId: number | null;
-      bankAccounts: Map<number, BankAccount>;
-    }
-  }
+  { result: Map<number, BankAccount> }
   & UseQueryResult<Array<Partial<BankAccount>>>;
 
 export function useBankAccountsSink(): BankAccountsResult {
   const links = useLinks();
-  const result = useQuery<Array<Partial<BankAccount>>>('/api/bank_accounts', {
+  const result = useQuery<Array<Partial<BankAccount>>>('/bank_accounts', {
     enabled: links.size > 0,
   });
-  const { selectedBankAccountId, setCurrentBankAccount } = useStore(state => ({
-    selectedBankAccountId: state.selectedBankAccountId,
-    setCurrentBankAccount: state.setCurrentBankAccount,
-  }), shallow);
   return {
     ...result,
-    result: {
-      setCurrentBankAccount,
-      selectedBankAccountId,
-      bankAccounts: new Map(result?.data?.map(item => {
-        const bankAccount = new BankAccount(item);
-        return [bankAccount.bankAccountId, bankAccount];
-      })),
-    },
+    result: new Map(result?.data?.map(item => {
+      const bankAccount = new BankAccount(item);
+      return [bankAccount.bankAccountId, bankAccount];
+    })),
   };
 }
 
 export function useBankAccounts(): Map<number, BankAccount> {
-  const { result: { bankAccounts } } = useBankAccountsSink();
+  const { result: bankAccounts } = useBankAccountsSink();
   return bankAccounts;
 }
 
+export function useSelectedBankAccountId(): number | null {
+  const { selectedBankAccountId, setCurrentBankAccount } = useStore(state => ({
+    selectedBankAccountId: state.selectedBankAccountId,
+    setCurrentBankAccount: state.setCurrentBankAccount,
+  }), shallow);
+  const { isLoading, result: bankAccounts } = useBankAccountsSink();
+
+  if (isLoading) {
+    return selectedBankAccountId;
+  }
+
+  if (!isLoading && !bankAccounts.has(selectedBankAccountId)) {
+    if (bankAccounts.size === 0) {
+      return null;
+    }
+
+    const id = Array.from(bankAccounts.keys())[0];
+    setCurrentBankAccount(id);
+    return id;
+  }
+
+  return selectedBankAccountId;
+}

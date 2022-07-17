@@ -14,7 +14,7 @@ export type AuthenticationResult =
   & UseQueryResult<Partial<AuthenticationWrapper>, unknown>;
 
 export function useAuthenticationSink(): AuthenticationResult {
-  const result = useQuery<Partial<AuthenticationWrapper>>('/api/users/me');
+  const result = useQuery<Partial<AuthenticationWrapper>>('/users/me');
   return {
     ...result,
     result: {

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   QueryClient,
-  QueryClientProvider,
+  QueryClientProvider, QueryFunctionContext, QueryKey,
 } from 'react-query';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -29,23 +29,26 @@ export default function Root(): JSX.Element {
     info: <InfoIcon className="mr-2.5" />,
   };
 
-  const defaultQueryFn = async ({ queryKey }) => {
-    const { data } = await axios.get(`${queryKey[0]}`).catch(result => {
-      switch (result.response.status) {
-        case 500:
-          throw result;
-        default:
-          return result.response;
-      }
-    });
+  async function queryFn<T = unknown, TQueryKey extends QueryKey = QueryKey>(
+    context: QueryFunctionContext<TQueryKey>,
+  ): Promise<T> {
+    const { data } = await axios.get<T>(`/api${ context.queryKey[0] }`)
+      .catch(result => {
+        switch (result.response.status) {
+          case 500:
+            throw result;
+          default:
+            return result.response;
+        }
+      });
     return data;
-  };
+  }
 
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 5 * 60 * 1000, // 5 minute default stale time,
-        queryFn: defaultQueryFn,
+        queryFn: queryFn,
       },
     },
   });

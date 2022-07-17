@@ -5,7 +5,7 @@ import { Divider, IconButton, ListSubheader, Menu, MenuItem, Tooltip, Typography
 
 import LinkedBankAccountItem from 'components/BankAccounts/AllAccountsView/LinkedBankAccountItem';
 import RemoveLinkConfirmationDialog from 'components/BankAccounts/AllAccountsView/RemoveLinkConfirmationDialog';
-import { UpdatePlaidAccountDialog } from 'components/BankAccounts/AllAccountsView/UpdatePlaidAccountDialog';
+import UpdatePlaidAccountDialog from 'components/BankAccounts/AllAccountsView/UpdatePlaidAccountDialog';
 import PlaidIcon from 'components/Plaid/PlaidIcon';
 import BankAccount from 'models/BankAccount';
 import Link, { LinkStatus } from 'models/Link';

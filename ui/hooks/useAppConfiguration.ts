@@ -41,7 +41,7 @@ export interface AppConfigurationWrapper {
 export type AppConfigurationResult = AppConfigurationWrapper & UseQueryResult<Partial<AppConfiguration>, unknown>;
 
 export function useAppConfigurationSink(): AppConfigurationResult {
-  const result = useQuery<Partial<AppConfiguration>>('/api/config', {
+  const result = useQuery<Partial<AppConfiguration>>('/config', {
     staleTime: 60 * 1000, // One minute in milliseconds.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

@@ -11,9 +11,9 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
-
 import { AxiosError } from 'axios';
 import classnames from 'classnames';
+
 import { useLink, useRemoveLink } from 'hooks/links';
 
 interface Props {

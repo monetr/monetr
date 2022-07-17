@@ -10,7 +10,7 @@ export type LinksResult =
   & UseQueryResult<Array<Partial<Link>>>;
 
 export function useLinksSink(): LinksResult {
-  const result = useQuery<Array<Partial<Link>>>('/api/links');
+  const result = useQuery<Array<Partial<Link>>>('/links');
   return {
     ...result,
     result: new Map(result?.data?.map(item => {
@@ -36,8 +36,8 @@ export function useRemoveLink(): (_linkId: number) => Promise<void> {
     return request()
       .delete(`/links/${ linkId }`)
       .then(() => void Promise.all([
-        queryClient.invalidateQueries('/api/links'),
-        queryClient.invalidateQueries('/api/bank_accounts'),
+        queryClient.invalidateQueries('/links'),
+        queryClient.invalidateQueries('/bank_accounts'),
         // TODO Invalidate other endpoints for the removed bank accounts?
       ]));
   };

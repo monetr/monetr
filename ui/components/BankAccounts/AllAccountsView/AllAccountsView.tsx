@@ -10,11 +10,11 @@ import BankAccount from 'models/BankAccount';
 import Link from 'models/Link';
 import * as R from 'ramda';
 
-enum DialogOpen {
-  CreateBankAccount,
-}
-
 export default function AllAccountsView(): JSX.Element {
+  enum DialogOpen {
+    CreateBankAccount,
+  }
+
   const bankAccounts = useBankAccounts();
   const links = useLinks();
   const [dialog, setDialog] = useState<DialogOpen | null>();

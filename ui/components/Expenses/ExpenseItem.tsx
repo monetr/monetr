@@ -1,19 +1,20 @@
-import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
+import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
+
+import { useFundingSchedule } from 'hooks/fundingSchedules';
+import Spending from 'models/Spending';
 import selectExpense from 'shared/spending/actions/selectExpense';
 import { getExpenseIsSelected } from 'shared/spending/selectors/getExpenseIsSelected';
-import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
 
-export interface PropTypes {
-  expenseId: number;
+export interface Props {
+  expense: Spending;
 }
 
-const ExpenseItem = (props: PropTypes): JSX.Element => {
-  const expense = useSelector(getSpendingById(props.expenseId));
-  const isSelected = useSelector(getExpenseIsSelected(props.expenseId));
-  const fundingSchedule = useSelector(getFundingScheduleById(expense.fundingScheduleId));
+export default function ExpenseItem(props: Props): JSX.Element {
+  const { expense } = props;
+  const isSelected = useSelector(getExpenseIsSelected(expense.spendingId));
+  const fundingSchedule = useFundingSchedule(expense.fundingScheduleId);
 
   const dispatch = useDispatch();
 
@@ -60,11 +61,11 @@ const ExpenseItem = (props: PropTypes): JSX.Element => {
         </div>
         <div className="flex justify-end p-5 align-middle col-span-1 row-span-4">
           { expense.isBehind &&
-          <Chip
-            className="self-center"
-            label="Behind"
-            color="secondary"
-          />
+            <Chip
+              className="self-center"
+              label="Behind"
+              color="secondary"
+            />
           }
         </div>
         <div className="flex justify-end align-middle col-span-1 row-span-4">
@@ -77,7 +78,5 @@ const ExpenseItem = (props: PropTypes): JSX.Element => {
         </div>
       </div>
     </ListItem>
-  )
-}
-
-export default ExpenseItem;
+  );
+};
