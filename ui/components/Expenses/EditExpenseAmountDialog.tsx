@@ -40,7 +40,11 @@ interface editSpendingAmountForm {
   amount: number;
 }
 
-export class EditExpenseAmountDialog extends Component<WithConnectionPropTypes, State> {
+export default function EditExpenseAmountDialog(): JSX.Element {
+  return null;
+}
+
+export class Old extends Component<WithConnectionPropTypes, State> {
 
   state = {
     error: null,
@@ -172,4 +176,4 @@ export default connect(
   {
     updateSpending,
   }
-)(EditExpenseAmountDialog);
+)(Old);
