@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	cloud.google.com/go/kms v1.4.0
-	github.com/MicahParks/keyfunc v1.0.1
+	github.com/MicahParks/keyfunc v1.2.0
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/alicebob/miniredis/v2 v2.21.0
 	github.com/aws/aws-sdk-go v1.44.56
@@ -16,7 +16,7 @@ require (
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.10.6
 	github.com/gocraft/work v0.5.1
-	github.com/golang-jwt/jwt/v4 v4.2.0
+	github.com/golang-jwt/jwt/v4 v4.4.1
 	github.com/gomodule/redigo v1.8.9
 	github.com/hashicorp/vault/api v1.3.1
 	github.com/iris-contrib/middleware/cors v0.0.0-20220605200020-e50b808c7502
