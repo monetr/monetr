@@ -11,7 +11,6 @@ import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useLogin from 'hooks/useLogin';
-import { useSnackbar } from 'notistack';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface LoginValues {

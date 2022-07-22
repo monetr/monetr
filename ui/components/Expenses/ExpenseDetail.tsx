@@ -50,7 +50,7 @@ export default function ExpenseDetail(props: Props): JSX.Element {
       case Dialog.TransferDialog:
         return <TransferDialog isOpen onClose={ closeDialog } initialToSpendingId={ expense.spendingId } />;
       case Dialog.EditAmountDialog:
-        return <EditSpendingAmountDialog isOpen onClose={ closeDialog } />;
+        return <EditSpendingAmountDialog spendingId={ expense.spendingId } isOpen onClose={ closeDialog } />;
       case Dialog.EditDueDateDialog:
         return <EditExpenseDueDateDialog isOpen onClose={ closeDialog } />;
       case Dialog.EditFundingScheduleDialog:

@@ -16,13 +16,13 @@ import {
   Stepper,
   TextField,
 } from '@mui/material';
+import moment from 'moment';
+import { Formik, FormikErrors, FormikHelpers } from 'formik';
 
 import { EditSpendingDueDateStep } from 'components/Expenses/EditSpendingDueDateStep';
 import Recurrence from 'components/Recurrence/Recurrence';
 import { RecurrenceList } from 'components/Recurrence/RecurrenceList';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import Spending from 'models/Spending';
-import moment from 'moment';
 import updateSpending from 'shared/spending/actions/updateSpending';
 import { getSelectedExpense } from 'shared/spending/selectors/getSelectedExpense';
 
