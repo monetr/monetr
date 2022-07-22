@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from 'react-query';
 
-import { useBankAccountsSink } from 'hooks/bankAccounts';
+import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import FundingSchedule from 'models/FundingSchedule';
 
 export type FundingSchedulesResult =
@@ -8,7 +8,7 @@ export type FundingSchedulesResult =
   & UseQueryResult<Array<Partial<FundingSchedule>>>;
 
 export function useFundingSchedulesSink(): FundingSchedulesResult {
-  const { result: { selectedBankAccountId } } = useBankAccountsSink();
+  const selectedBankAccountId = useSelectedBankAccountId();
   const result = useQuery<Array<Partial<FundingSchedule>>>(
     `/bank_accounts/${ selectedBankAccountId }/funding_schedules`,
     {
@@ -22,6 +22,11 @@ export function useFundingSchedulesSink(): FundingSchedulesResult {
       return [fundingSchedule.fundingScheduleId, fundingSchedule];
     })),
   };
+}
+
+export function useFundingSchedules(): Map<number, FundingSchedule> {
+  const { result } = useFundingSchedulesSink();
+  return result;
 }
 
 export function useFundingSchedule(fundingScheduleId: number): FundingSchedule | null {

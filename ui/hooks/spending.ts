@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import shallow from 'zustand/shallow';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
+import useStore from 'hooks/store';
 import Spending, { SpendingType } from 'models/Spending';
 import request from 'shared/util/request';
 
@@ -42,6 +44,14 @@ export function useSpendingFiltered(kind: SpendingType): SpendingResult {
   };
 }
 
+export function useSelectedExpense(): Spending | null {
+  const selectedExpenseId: number | null = useStore(state => state.selectedBankAccountId, shallow);
+  const { isLoading, result } = useSpendingFiltered(SpendingType.Expense);
+  if (isLoading) return null;
+
+  return result[selectedExpenseId] || null;
+}
+
 export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
   const queryClient = useQueryClient();
   const selectedBankAccountId = useSelectedBankAccountId();
@@ -72,11 +82,10 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
 
 export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
   const queryClient = useQueryClient();
-  const selectedBankAccountId = useSelectedBankAccountId();
 
   async function updateSpending(spending: Spending): Promise<Spending> {
     return request()
-      .put<Partial<Spending>>(`/bank_accounts/${ selectedBankAccountId }/spending/${ spending.spendingId }`, spending)
+      .put<Partial<Spending>>(`/bank_accounts/${ spending.bankAccountId }/spending/${ spending.spendingId }`, spending)
       .then(result => new Spending(result?.data));
   }
 
@@ -85,11 +94,38 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
     {
       onSuccess: (updatedSpending: Spending) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/spending`,
+          `/bank_accounts/${ updatedSpending.bankAccountId }/spending`,
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => item.spendingId === updatedSpending.spendingId ? updatedSpending : item),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ selectedBankAccountId }/balances`),
+        queryClient.invalidateQueries(`/bank_accounts/${ updatedSpending.bankAccountId }/balances`),
+      ]),
+    },
+  );
+
+  return async (spending: Spending): Promise<void> => {
+    return mutate(spending);
+  };
+}
+
+export function useCreateSpending(): (_spending: Spending) => Promise<void> {
+  const queryClient = useQueryClient();
+
+  async function createSpending(spending: Spending): Promise<Spending> {
+    return request()
+      .post<Partial<Spending>>(`/bank_accounts/${ spending.bankAccountId }/spending`, spending)
+      .then(result => new Spending(result?.data));
+  }
+
+  const { mutate } = useMutation(
+    createSpending,
+    {
+      onSuccess: (createdSpending: Spending) => Promise.all([
+        queryClient.setQueriesData(
+          `/bank_accounts/${ createdSpending.bankAccountId }/spending`,
+          (previous: Array<Partial<Spending>>) => previous.concat(createdSpending),
+        ),
+        queryClient.invalidateQueries(`/bank_accounts/${ createdSpending.bankAccountId }/balances`),
       ]),
     },
   );

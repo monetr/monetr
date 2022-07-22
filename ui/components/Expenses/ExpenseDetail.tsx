@@ -17,25 +17,25 @@ import EditExpenseFundingScheduleDialog from 'components/Expenses/EditExpenseFun
 import FundingScheduleList from 'components/FundingSchedules/FundingScheduleList';
 import TransferDialog from 'components/Spending/TransferDialog';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
-import { useRemoveSpending } from 'hooks/spending';
-import Spending from 'models/Spending';
+import { useRemoveSpending, useSelectedExpense } from 'hooks/spending';
 
-interface Props {
-  expense: Spending | null;
-}
-
-export default function ExpenseDetail(props: Props): JSX.Element {
-  const { expense } = props;
-  const fundingSchedule = useFundingSchedule(expense.fundingScheduleId);
+export default function ExpenseDetail(): JSX.Element {
+  const removeSpending = useRemoveSpending();
+  const expense = useSelectedExpense();
+  const fundingSchedule = useFundingSchedule(expense?.fundingScheduleId);
 
   enum Dialog {
     TransferDialog,
     EditAmountDialog,
     EditDueDateDialog,
     EditFundingScheduleDialog,
-  };
+  }
+
   const [dialogOpen, setDialogOpen] = useState<Dialog | null>(null);
-  const removeSpending = useRemoveSpending();
+
+  if (!expense) {
+    return null;
+  }
 
   function openDialog(dialog: Dialog) {
     setDialogOpen(dialog);
