@@ -38,13 +38,11 @@ export default class Link {
   createdByUserId: number;
   lastSuccessfulUpdate: Moment | null;
 
-  constructor(data: Partial<Link>) {
-    if (data) {
-      Object.assign(this, {
-        ...data,
-        lastSuccessfulUpdate: parseToMomentMaybe(data.lastSuccessfulUpdate),
-      });
-    }
+  constructor(data?: Partial<Link>) {
+    if (data) Object.assign(this, {
+      ...data,
+      lastSuccessfulUpdate: parseToMomentMaybe(data.lastSuccessfulUpdate),
+    });
   }
 
   getName(): string {

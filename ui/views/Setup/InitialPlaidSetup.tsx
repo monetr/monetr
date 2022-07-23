@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
-import { useDispatch } from 'react-redux';
+import { useQueryClient } from 'react-query';
 import { Button, Typography } from '@mui/material';
 import { Severity } from '@sentry/react';
 import * as Sentry from '@sentry/react';
@@ -9,10 +9,8 @@ import { Logo } from 'assets';
 import PlaidButton from 'components/Plaid/PlaidButton';
 import PlaidIcon from 'components/Plaid/PlaidIcon';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { List } from 'immutable';
 import useLogout from 'hooks/useLogout';
-import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
-import fetchLinks from 'shared/links/actions/fetchLinks';
+import { List } from 'immutable';
 import request from 'shared/util/request';
 
 interface State {
@@ -64,13 +62,13 @@ const InitialSetupBilling = (): JSX.Element => {
   );
 };
 
-const InitialPlaidSetup = (): JSX.Element => {
+export default function InitialPlaidSetup(): JSX.Element {
   const [state, setState] = useState<Partial<State>>({
     loading: false,
   });
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  function longPollSetup(linkId: number) {
+  async function longPollSetup(linkId: number): Promise<void> {
     setState(prevState => ({
       loading: true,
       longPollAttempts: prevState.longPollAttempts + 1,
@@ -81,11 +79,13 @@ const InitialPlaidSetup = (): JSX.Element => {
       return Promise.resolve();
     }
 
-    return request().get(`/plaid/link/setup/wait/${ linkId }`)
+    return void request().get(`/plaid/link/setup/wait/${ linkId }`)
       .catch(error => {
         if (error.response.status === 408) {
           return longPollSetup(linkId);
         }
+
+        throw error;
       });
   }
 
@@ -134,18 +134,17 @@ const InitialPlaidSetup = (): JSX.Element => {
         });
 
         return longPollSetup(linkId)
-          .then(() => {
-            return Promise.all([
-              fetchLinks()(dispatch),
-              fetchBankAccounts()(dispatch),
-            ]);
-          });
+          .then(() => Promise.all([
+            queryClient.invalidateQueries('/api/links'),
+            queryClient.invalidateQueries('/api/bank_accounts'),
+          ]));
       })
       .catch(error => {
-        console.error(error);
         setState({
           loading: false,
         });
+
+        throw error;
       });
   }
 
@@ -194,5 +193,3 @@ const InitialPlaidSetup = (): JSX.Element => {
     </div>
   );
 };
-
-export default InitialPlaidSetup;

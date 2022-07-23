@@ -1,6 +1,6 @@
+import React, { Component } from 'react';
 import { Close } from '@mui/icons-material';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
-import React, { Component } from 'react';
 
 interface PropTypes {
   open: boolean;
@@ -17,11 +17,11 @@ export default class DuplicateInstitutionDialog extends Component<PropTypes> {
       <Dialog open={ open } disableEnforceFocus={ true } maxWidth="xs">
         <DialogTitle>
           <div className="flex items-center">
-              <span className="text-2xl flex-auto">
+            <span className="text-2xl flex-auto">
                 There is already a link for this bank account
-              </span>
+            </span>
             <IconButton className="flex-none" onClick={ onCancel }>
-              <Close/>
+              <Close />
             </IconButton>
           </div>
         </DialogTitle>
@@ -44,6 +44,6 @@ export default class DuplicateInstitutionDialog extends Component<PropTypes> {
           </Button>
         </DialogActions>
       </Dialog>
-    )
+    );
   }
 }

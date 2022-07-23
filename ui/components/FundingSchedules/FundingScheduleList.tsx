@@ -1,99 +1,66 @@
-import { Button, ButtonGroup, Divider, IconButton, List, ListItem, Typography } from '@mui/material';
-import { ChevronRight } from '@mui/icons-material';
+import React, { useState } from 'react';
+import { Button, ButtonGroup, Divider,  List } from '@mui/material';
+
+import NewExpenseDialog from 'components/Expenses/NewExpenseDialog';
 import FundingScheduleListItem from 'components/FundingSchedules/FundingScheduleListItem';
 import NewFundingScheduleDialog from 'components/FundingSchedules/NewFundingScheduleDialog';
-import FundingSchedule from 'models/FundingSchedule';
-import { Map } from 'immutable';
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
-import NewExpenseDialog from 'components/Expenses/NewExpenseDialog';
+import { useFundingSchedules } from 'hooks/fundingSchedules';
 
-interface WithConnectionPropTypes {
-  fundingSchedules: Map<number, FundingSchedule>;
-}
+export default function FundingScheduleList(): JSX.Element {
+  enum DialogOpen {
+    NewFundingSchedule,
+    NewExpense,
+  }
 
-interface State {
-  newFundingScheduleDialogOpen: boolean;
-  newExpenseDialogOpen: boolean;
-}
+  const [currentDialog, setOpenDialog] = useState<DialogOpen | null>(null);
+  const fundingSchedules = useFundingSchedules();
 
-export class FundingScheduleList extends Component<WithConnectionPropTypes, State> {
+  function openDialog(dialog: DialogOpen) {
+    setOpenDialog(dialog);
+  }
 
-  state = {
-    newFundingScheduleDialogOpen: false,
-    newExpenseDialogOpen: false,
-  };
+  function Dialog(): JSX.Element {
+    function closeDialog() {
+      setOpenDialog(null);
+    }
 
-  openNewExpenseDialog = () => {
-    return this.setState({
-      newExpenseDialogOpen: true
-    });
-  };
+    switch (currentDialog) {
+      case DialogOpen.NewFundingSchedule:
+        return <NewFundingScheduleDialog onClose={ closeDialog } isOpen />;
+      case DialogOpen.NewExpense:
+        return <NewExpenseDialog onClose={ closeDialog } isOpen />;
+      default:
+        return null;
+    }
+  }
 
-  closeNewExpenseDialog = () => {
-    return this.setState({
-      newExpenseDialogOpen: false
-    });
-  };
-
-  openNewFundingScheduleDialog = () => {
-    return this.setState({
-      newFundingScheduleDialogOpen: true,
-    });
-  };
-
-  closeFundingScheduleDialog = () => {
-    return this.setState({
-      newFundingScheduleDialogOpen: false,
-    });
-  };
-
-  render() {
-    const { fundingSchedules } = this.props;
-    return (
-      <div className="w-full funding-schedule-list">
-        { this.state.newFundingScheduleDialogOpen &&
-          <NewFundingScheduleDialog
-            onClose={ this.closeFundingScheduleDialog }
-            isOpen={ this.state.newFundingScheduleDialogOpen }
-          />
-        }
-        { this.state.newExpenseDialogOpen &&
-          <NewExpenseDialog
-            onClose={ this.closeNewExpenseDialog }
-            isOpen={ this.state.newExpenseDialogOpen }
-          />
-        }
-        <div className="w-full p-5">
-          <ButtonGroup color="primary" className="w-full">
-            <Button variant="outlined" className="w-full" color="primary" onClick={ this.openNewFundingScheduleDialog }>
-              New Funding Schedule
-            </Button>
-            <Button variant="outlined" className="w-full" color="primary" onClick={ this.openNewExpenseDialog }>
-              New Expense
-            </Button>
-          </ButtonGroup>
-        </div>
-        <Divider/>
-        <List className="w-full pt-0" dense>
-          {
-            fundingSchedules.map(schedule => (
+  return (
+    <div className="w-full funding-schedule-list">
+      <Dialog />
+      <div className="w-full p-5">
+        <ButtonGroup color="primary" className="w-full">
+          <Button variant="outlined" className="w-full" color="primary"
+            onClick={ () => openDialog(DialogOpen.NewFundingSchedule) }>
+            New Funding Schedule
+          </Button>
+          <Button variant="outlined" className="w-full" color="primary"
+            onClick={ () => openDialog(DialogOpen.NewExpense) }>
+            New Expense
+          </Button>
+        </ButtonGroup>
+      </div>
+      <Divider />
+      <List className="w-full pt-0" dense>
+        {
+          Array.from(fundingSchedules.values())
+            .map(schedule => (
               <FundingScheduleListItem
                 key={ schedule.fundingScheduleId }
                 fundingScheduleId={ schedule.fundingScheduleId }
               />
-            )).valueSeq().toArray()
-          }
-        </List>
-      </div>
-    )
-  }
+            ))
+        }
+      </List>
+    </div>
+  );
 }
-
-export default connect(
-  state => ({
-    fundingSchedules: getFundingSchedules(state),
-  }),
-  {}
-)(FundingScheduleList);

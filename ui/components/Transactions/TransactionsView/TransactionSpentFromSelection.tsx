@@ -5,10 +5,10 @@ import { FormatOptionLabelMeta } from 'react-select/base';
 
 import classnames from 'classnames';
 import { SpendingOption, SpendingSelectOption } from 'components/Transactions/components/SpendingSelectOption';
+import { useCurrentBalance } from 'hooks/balances';
 import { Map } from 'immutable';
 import Spending from 'models/Spending';
 import Transaction from 'models/Transaction';
-import { getBalance } from 'shared/balances/selectors/getBalance';
 import { getSpending } from 'shared/spending/selectors/getSpending';
 import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
 
@@ -19,7 +19,7 @@ interface Props {
 export default function TransactionSpentFromSelection(props: Props): JSX.Element {
   const { transaction } = props;
   const allSpending = useSelector(getSpending);
-  const balances = useSelector(getBalance);
+  const balances = useCurrentBalance();
   const updateTransaction = useUpdateTransaction();
 
   if (transaction.getIsAddition()) {

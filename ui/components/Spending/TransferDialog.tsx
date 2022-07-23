@@ -18,10 +18,10 @@ import {
   Typography,
 } from '@mui/material';
 import AccordionSummary from '@mui/material/AccordionSummary';
-
-import classNames from 'classnames';
-import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
 import { Formik, FormikErrors, FormikHandlers, FormikHelpers } from 'formik';
+import classNames from 'classnames';
+
+import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
 import Balance from 'models/Balance';
 import Spending from 'models/Spending';
 import { getBalance } from 'shared/balances/selectors/getBalance';
