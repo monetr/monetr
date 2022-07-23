@@ -18,6 +18,10 @@ module.exports = (env, argv) => {
   }
 
   let insecureWebsocket = process.env.INSECURE_WS === 'true';
+  let websocketUrl = insecureWebsocket ? 'ws://localhost/ws' : 'wss://app.monetr.mini/ws';
+  if (process.env.GITPOD_WORKSPACE_ID && process.env.MONETR_UI_DOMAIN_NAME) {
+    websocketUrl = `wss://${process.env.MONETR_UI_DOMAIN_NAME}/ws`;
+  }
 
   const config = {
     mode: isDevelopment ? 'development' : 'production',
@@ -139,7 +143,7 @@ module.exports = (env, argv) => {
       liveReload: true,
       client: {
         webSocketTransport: 'ws',
-        webSocketURL: insecureWebsocket ? 'ws://localhost/ws' : 'wss://app.monetr.mini/ws',
+        webSocketURL: websocketUrl,
         progress: true,
       },
     },

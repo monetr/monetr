@@ -2,18 +2,27 @@
 
 # Try to hit the ngrok API inside docker compose, if this succeeds then that means webhooks are enabled for plaid for
 # local development.
-WEBHOOKS_DOMAIN=$(curl http://ngrok:4040/api/tunnels -s -m 0.1 | perl -pe '/\"public_url\":\"https:\/\/(\S*?)\",/g; print $1;' | cut -d "{" -f1);
 
-if [[ ! -z "${WEBHOOKS_DOMAIN}" ]]; then
-  echo "[wrapper] ngrok detected, webhooks should target: ${WEBHOOKS_DOMAIN}";
+if [[ ! -z ${GITPOD_WORKSPACE_ID} ]]; then
+  echo "[wrapper] gitpod detected, will use gitpod URL for webhooks instead";
 
-  # If the domain name has been derived then enable webhooks for plaid.
-  echo "[wrapper] Plaid webhooks have been enabled...";
-  export MONETR_PLAID_WEBHOOKS_DOMAIN=${WEBHOOKS_DOMAIN};
+  export MONETR_PLAID_WEBHOOKS_DOMAIN="https://${MONETR_API_DOMAIN_NAME}";
   export MONETR_PLAID_WEBHOOKS_ENABLED="true";
 else
-  echo "[wrapper] ngrok not detected, webhooks will not be available..."
+  WEBHOOKS_DOMAIN=$(curl http://ngrok:4040/api/tunnels -s -m 0.1 | perl -pe '/\"public_url\":\"https:\/\/(\S*?)\",/g; print $1;' | cut -d "{" -f1);
+
+  if [[ ! -z "${WEBHOOKS_DOMAIN}" ]]; then
+    echo "[wrapper] ngrok detected, webhooks should target: ${WEBHOOKS_DOMAIN}";
+
+    # If the domain name has been derived then enable webhooks for plaid.
+    echo "[wrapper] Plaid webhooks have been enabled...";
+    export MONETR_PLAID_WEBHOOKS_DOMAIN=${WEBHOOKS_DOMAIN};
+    export MONETR_PLAID_WEBHOOKS_ENABLED="true";
+  else
+    echo "[wrapper] ngrok not detected, webhooks will not be available..."
+  fi
 fi
+
 
 # If the stripe API key, webhook secret and price ID are provided then enable billing for local development.
 # Stripe does require webhooks, as we rely on them in order to know when a subscription becomes active.

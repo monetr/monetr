@@ -246,10 +246,10 @@ test: test-go test-ui
 
 ifndef GITPOD_WORKSPACE_ID
 LOCAL_DOMAIN ?= monetr.local
-LOCAL_PROTOCOL = http
+LOCAL_PROTOCOL=http
 else
-LOCAL_DOMAIN = 80-$(GITPOD_WORKSPACE_ID).$(GITPOD_WORKSPACE_CLUSTER_HOST)
-LOCAL_PROTOCOL = https
+LOCAL_DOMAIN:=80-$(GITPOD_WORKSPACE_ID).$(GITPOD_WORKSPACE_CLUSTER_HOST)
+LOCAL_PROTOCOL:=https
 endif
 
 clean: shutdown $(HOSTESS)
@@ -272,6 +272,7 @@ ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")
 else
 	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
 endif
+.EXPORT_ALL_VARIABLES: develop
 develop: $(NODE_MODULES) $(HOSTESS)
 ifndef GITPOD_WORKSPACE_ID
 ifneq ($(LOCAL_DOMAIN),localhost)

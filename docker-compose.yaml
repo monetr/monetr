@@ -46,6 +46,7 @@ services:
     environment:
       air_wd: /build
       DISABLE_GO_RELOAD: ${DISABLE_GO_RELOAD:-false}
+      GITPOD_WORKSPACE_ID: ${GITPOD_WORKSPACE_ID}
       MONETR_EXTERNAL_PROTOCOL: ${LOCAL_PROTOCOL:-http}
       MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
       MONETR_API_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
@@ -103,6 +104,8 @@ services:
       INSECURE_WS: "true" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
       IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
+      MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
+      GITPOD_WORKSPACE_ID: ${GITPOD_WORKSPACE_ID}
     volumes:
       - ./:/build
     command:
