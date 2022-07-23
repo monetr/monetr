@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 
-import { useSpending, useUpdateSpending } from 'hooks/spending';
+import { useUpdateSpending } from 'hooks/spending';
 import Spending from 'models/Spending';
 
 interface editSpendingAmountForm {
@@ -23,7 +23,7 @@ interface editSpendingAmountForm {
 }
 
 export interface Props {
-  spendingId: number;
+  spending: Spending;
   onClose: { (): void };
   isOpen: boolean;
 }
@@ -31,10 +31,9 @@ export interface Props {
 export default function EditExpenseAmountDialog(props: Props): JSX.Element {
   const [error, setError] = useState<string|null>(null);
   const updateSpending = useUpdateSpending();
-  const spending = useSpending(props.spendingId);
 
   const initialValues: editSpendingAmountForm = {
-    amount: spending.getTargetAmountDollars(),
+    amount: props.spending.getTargetAmountDollars(),
   };
 
   function validateInput(_: editSpendingAmountForm): FormikErrors<editSpendingAmountForm> {
@@ -47,7 +46,7 @@ export default function EditExpenseAmountDialog(props: Props): JSX.Element {
   ): Promise<void> {
     setSubmitting(true);
     const updatedSpending = new Spending({
-      ...spending,
+      ...props.spending,
       targetAmount: values.amount * 100,
     });
 

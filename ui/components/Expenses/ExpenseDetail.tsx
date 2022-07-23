@@ -13,7 +13,6 @@ import { Button, Divider, LinearProgress, List, ListItem, ListItemIcon, Typograp
 
 import EditSpendingAmountDialog from 'components/Expenses/EditExpenseAmountDialog';
 import EditExpenseDueDateDialog from 'components/Expenses/EditExpenseDueDateDialog';
-import EditExpenseFundingScheduleDialog from 'components/Expenses/EditExpenseFundingScheduleDialog';
 import FundingScheduleList from 'components/FundingSchedules/FundingScheduleList';
 import TransferDialog from 'components/Spending/TransferDialog';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
@@ -50,11 +49,12 @@ export default function ExpenseDetail(): JSX.Element {
       case Dialog.TransferDialog:
         return <TransferDialog isOpen onClose={ closeDialog } initialToSpendingId={ expense.spendingId } />;
       case Dialog.EditAmountDialog:
-        return <EditSpendingAmountDialog spendingId={ expense.spendingId } isOpen onClose={ closeDialog } />;
+        return <EditSpendingAmountDialog spending={ expense } isOpen onClose={ closeDialog } />;
       case Dialog.EditDueDateDialog:
-        return <EditExpenseDueDateDialog isOpen onClose={ closeDialog } />;
+        return <EditExpenseDueDateDialog spending={ expense } isOpen onClose={ closeDialog } />;
       case Dialog.EditFundingScheduleDialog:
-        return <EditExpenseFundingScheduleDialog isOpen onClose={ closeDialog } />;
+        // TODO Implement.
+        return null;
       default:
         return null;
     }
