@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.10.22](https://github.com/monetr/monetr/compare/v0.10.21...v0.10.22) (2022-07-23)
+
+
+### Features
+
+* **dev:** Adding some stuff for gitpod development. ([8fbe3c6](https://github.com/monetr/monetr/commit/8fbe3c687b10c3f97cf2c3dc9df3f2b0404b8788))
+* **github:** Adding support for GitHub Codespaces ([35266f3](https://github.com/monetr/monetr/commit/35266f30ae45ed95c3e605bf67a64cda2695eed9))
+* **gitpod:** Adding named ports for gitpod. ([f157554](https://github.com/monetr/monetr/commit/f157554d87d5f07d4193b69cb08613e7f796b123))
+* **gitpod:** Further improving support for GitPod. ([a1249d8](https://github.com/monetr/monetr/commit/a1249d8c191e0b48399e3fd33fe5b3cc25937d09))
+* **ui:** Moving more things to react-query, general cleanup. ([1c72463](https://github.com/monetr/monetr/commit/1c72463a5085d9d1720045f1cc6230920410784d))
+
+
+### Bug Fixes
+
+* **dev:** Fixed GitPod/CodeSpaces development URLs ([ebc6b59](https://github.com/monetr/monetr/commit/ebc6b59851e357addf00378e5c87634c12e79b67))
+* **icons:** Fixing icon search query. ([ea49963](https://github.com/monetr/monetr/commit/ea499635f9b529f7f88f8076cbe2d3ac61f76a73)), closes [#961](https://github.com/monetr/monetr/issues/961)
+* **login:** Fixing cookie not being cleared after server error. ([d4455c0](https://github.com/monetr/monetr/commit/d4455c0b2d9ff7f4c1c2fad5179ce10ae40c91de))
+
+
+### Dependencies
+
+* **ui:** update dependency terser-webpack-plugin to v5.3.3 ([a07505e](https://github.com/monetr/monetr/commit/a07505e8e4c61cc0cd2a08f745e4b22de14304f3))
+
+
+### Miscellaneous
+
+* **deps:** Bump terser from 5.9.0 to 5.14.2 ([776891c](https://github.com/monetr/monetr/commit/776891c4c4410781640057c09e0b49f79b9d06b1))
+* **docs:** Updated screenshot in README ([b8bb345](https://github.com/monetr/monetr/commit/b8bb3456c8f19a74ac6d877113ed7d03a3f5d35f))
+* Include version information for icons, hook improvement. ([b8698d6](https://github.com/monetr/monetr/commit/b8698d6276f69edf32eddbfca3794e33cbd99214))
+* **lint:** Linting fixes + react-query buy-in ([bd389bd](https://github.com/monetr/monetr/commit/bd389bddf28e12b1d820693aff9f4acdd91934c4))
+* Update readme with new dev instructions ([d164a30](https://github.com/monetr/monetr/commit/d164a301bda17af494ac5e6bb86879d9e8bb0c39))
+
 ## [0.10.21](https://github.com/monetr/monetr/compare/v0.10.20...v0.10.21) (2022-07-16)
 
 
