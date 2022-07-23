@@ -6,4 +6,10 @@ tasks:
   - init: make dependencies
     command: echo "Ready!"
 
+ports:
+  - name: monetr
+    description: monetr development application
+    onOpen: open-browser
+    port: 80
+    visibility: public
 

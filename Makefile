@@ -273,9 +273,10 @@ else
 	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
 endif
 .EXPORT_ALL_VARIABLES: develop
-develop: $(NODE_MODULES) $(HOSTESS)
+develop: $(NODE_MODULES)
 ifndef GITPOD_WORKSPACE_ID
 ifneq ($(LOCAL_DOMAIN),localhost)
+develop: $(HOSTESS)
 	$(call infoMsg,Setting up $(LOCAL_DOMAIN) domain with your /etc/hosts file)
 	$(call infoMsg,If you would prefer to not use this; add)
 	$(call infoMsg,	LOCAL_DOMAIN=localhost)
