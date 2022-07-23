@@ -244,8 +244,13 @@ test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
 
 test: test-go test-ui
 
-
+ifndef GITPOD_WORKSPACE_ID
 LOCAL_DOMAIN ?= monetr.local
+LOCAL_PROTOCOL = http
+else
+LOCAL_DOMAIN = 80-$(GITPOD_WORKSPACE_ID).$(GITPOD_WORKSPACE_CLUSTER_HOST)
+LOCAL_PROTOCOL = https
+endif
 
 clean: shutdown $(HOSTESS)
 	-rm -rf $(LOCAL_BIN)
@@ -268,6 +273,7 @@ else
 	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
 endif
 develop: $(NODE_MODULES) $(HOSTESS)
+ifndef GITPOD_WORKSPACE_ID
 ifneq ($(LOCAL_DOMAIN),localhost)
 	$(call infoMsg,Setting up $(LOCAL_DOMAIN) domain with your /etc/hosts file)
 	$(call infoMsg,If you would prefer to not use this; add)
@@ -275,6 +281,7 @@ ifneq ($(LOCAL_DOMAIN),localhost)
 	$(call infoMsg,to your $(DEVELOPMENT_ENV_FILE) file)
 	sudo $(HOSTESS) add $(LOCAL_DOMAIN) 127.0.0.1
 	sudo $(HOSTESS) add vault.local 127.0.0.1
+endif
 endif
 ifdef MKDOCS_IMAGE
 	$(call infoMsg,Using custom MKDocs container image; $(MKDOCS_IMAGE))
@@ -288,11 +295,11 @@ endif
 development-info:
 	$(call infoMsg,=====================================================================================================)
 	$(call infoMsg,Local environment is setup.)
-	$(call infoMsg,You should be able to access monetr at:       http://$(LOCAL_DOMAIN))
+	$(call infoMsg,You should be able to access monetr at:       $(LOCAL_PROTOCOL)://$(LOCAL_DOMAIN))
 	$(call infoMsg,)
 	$(call infoMsg,Other services are run alongside monetr locally; you can access them at the following URLs:)
-	$(call infoMsg,    Email:                                    http://$(LOCAL_DOMAIN)/mail)
-	$(call infoMsg,    Documentation:                            http://$(LOCAL_DOMAIN)/documentation)
+	$(call infoMsg,    Email:                                    $(LOCAL_PROTOCOL)://$(LOCAL_DOMAIN)/mail)
+	$(call infoMsg,    Documentation:                            $(LOCAL_PROTOCOL)://$(LOCAL_DOMAIN)/documentation)
 	$(call infoMsg,)
 	$(call infoMsg,If you want you can see the logs for all the containers using:)
 	$(call infoMsg,  $$ make logs)

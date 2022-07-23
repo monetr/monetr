@@ -1,5 +1,4 @@
 allowsignup: true
-externalUrlProtocol: http
 plaid:
   environment: https://sandbox.plaid.com
 backgroundjobs:

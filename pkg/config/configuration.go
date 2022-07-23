@@ -530,6 +530,7 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("UIDomainName", "MONETR_UI_DOMAIN_NAME")
 	_ = v.BindEnv("APIDomainName", "MONETR_API_DOMAIN_NAME")
 	_ = v.BindEnv("AllowSignUp", "MONETR_ALLOW_SIGN_UP")
+	_ = v.BindEnv("ExternalURLProtocol", "MONETR_EXTERNAL_PROTOCOL")
 	_ = v.BindEnv("EnableWebhooks", "MONETR_ENABLE_WEBHOOKS")
 	_ = v.BindEnv("Beta.EnableBetaCodes", "MONETR_ENABLE_BETA_CODES")
 	_ = v.BindEnv("Cors.AllowedOrigins", "MONETR_CORS_ALLOWED_ORIGINS")
