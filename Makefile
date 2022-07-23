@@ -245,19 +245,19 @@ test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
 test: test-go test-ui
 
 ifdef GITPOD_WORKSPACE_ID
-	LOCAL_DOMAIN:=80-$(GITPOD_WORKSPACE_ID).$(GITPOD_WORKSPACE_CLUSTER_HOST)
-	LOCAL_PROTOCOL:=https
-	CLOUD_MAGIC:=magic
+LOCAL_DOMAIN:=80-$(GITPOD_WORKSPACE_ID).$(GITPOD_WORKSPACE_CLUSTER_HOST)
+LOCAL_PROTOCOL:=https
+CLOUD_MAGIC:=magic
 else
-	ifdef CODESPACE_NAME
-		LOCAL_DOMAIN:=$(CODESPACE_NAME)-80.githubpreview.dev
-		LOCAL_PROTOCOL:=https
-		CLOUD_MAGIC:=magic
-	else
-		LOCAL_DOMAIN ?= monetr.local
-		LOCAL_PROTOCOL=http
-		CLOUD_MAGIC=false
-	endif
+ifdef CODESPACE_NAME
+LOCAL_DOMAIN:=$(CODESPACE_NAME)-80.githubpreview.dev
+LOCAL_PROTOCOL:=https
+CLOUD_MAGIC:=magic
+else
+LOCAL_DOMAIN ?= monetr.local
+LOCAL_PROTOCOL=http
+CLOUD_MAGIC=false
+endif
 endif
 
 clean: shutdown $(HOSTESS)
