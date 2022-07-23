@@ -49,7 +49,7 @@ export function useSelectedExpense(): Spending | null {
   const { isLoading, result } = useSpendingFiltered(SpendingType.Expense);
   if (isLoading) return null;
 
-  return result[selectedExpenseId] || null;
+  return result.get(selectedExpenseId) || null;
 }
 
 export function useRemoveSpending(): (_spendingId: number) => Promise<void> {

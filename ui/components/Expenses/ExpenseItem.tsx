@@ -1,11 +1,11 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
 
 import { useFundingSchedule } from 'hooks/fundingSchedules';
+import { useSelectedExpense } from 'hooks/spending';
 import Spending from 'models/Spending';
 import selectExpense from 'shared/spending/actions/selectExpense';
-import { getExpenseIsSelected } from 'shared/spending/selectors/getExpenseIsSelected';
 
 export interface Props {
   expense: Spending;
@@ -13,7 +13,8 @@ export interface Props {
 
 export default function ExpenseItem(props: Props): JSX.Element {
   const { expense } = props;
-  const isSelected = useSelector(getExpenseIsSelected(expense.spendingId));
+  const { spendingId } = useSelectedExpense();
+  const isSelected = expense.spendingId === spendingId;
   const fundingSchedule = useFundingSchedule(expense.fundingScheduleId);
 
   const dispatch = useDispatch();
@@ -41,7 +42,7 @@ export default function ExpenseItem(props: Props): JSX.Element {
             variant="body1"
           >
             { expense.getCurrentAmountString() } <span
-            className="opacity-80">of</span> { expense.getTargetAmountString() }
+              className="opacity-80">of</span> { expense.getTargetAmountString() }
           </Typography>
         </div>
         <div className="col-span-4">
