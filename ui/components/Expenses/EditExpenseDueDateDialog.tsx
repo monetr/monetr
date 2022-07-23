@@ -46,7 +46,16 @@ interface editSpendingDueDateForm {
   recurrenceRule: Recurrence;
 }
 
-export class EditExpenseDueDateDialog extends Component<WithConnectionPropTypes, State> {
+interface Props {
+  onClose: { (): void };
+  isOpen: boolean;
+}
+
+export default function EditExpenseDueDateDialog(props: Props): JSX.Element {
+
+}
+
+export class Old extends Component<WithConnectionPropTypes, State> {
 
   state = {
     error: null,
@@ -250,12 +259,3 @@ export class EditExpenseDueDateDialog extends Component<WithConnectionPropTypes,
     );
   }
 }
-
-export default connect(
-  state => ({
-    spending: getSelectedExpense(state),
-  }),
-  {
-    updateSpending,
-  }
-)(EditExpenseDueDateDialog);
