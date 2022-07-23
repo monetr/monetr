@@ -46,7 +46,7 @@ services:
     environment:
       air_wd: /build
       DISABLE_GO_RELOAD: ${DISABLE_GO_RELOAD:-false}
-      GITPOD_WORKSPACE_ID: ${GITPOD_WORKSPACE_ID}
+      CLOUD_MAGIC: ${CLOUD_MAGIC:-false}
       MONETR_EXTERNAL_PROTOCOL: ${LOCAL_PROTOCOL:-http}
       MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
       MONETR_API_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
@@ -105,7 +105,7 @@ services:
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
       IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
       MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
-      GITPOD_WORKSPACE_ID: ${GITPOD_WORKSPACE_ID}
+      CLOUD_MAGIC: ${CLOUD_MAGIC:-false}
     volumes:
       - ./:/build
     command:

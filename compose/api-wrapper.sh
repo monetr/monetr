@@ -3,8 +3,8 @@
 # Try to hit the ngrok API inside docker compose, if this succeeds then that means webhooks are enabled for plaid for
 # local development.
 
-if [[ ! -z ${GITPOD_WORKSPACE_ID} ]]; then
-  echo "[wrapper] gitpod detected, will use gitpod URL for webhooks instead";
+if [[ ${CLOUD_MAGIC} == "magic" ]]; then
+  echo "[wrapper] Cloud magic detected, will use GitPod/CodeSpaces URL for webhooks instead."
 
   export MONETR_PLAID_WEBHOOKS_DOMAIN="https://${MONETR_API_DOMAIN_NAME}";
   export MONETR_PLAID_WEBHOOKS_ENABLED="true";

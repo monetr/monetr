@@ -244,12 +244,20 @@ test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
 
 test: test-go test-ui
 
-ifndef GITPOD_WORKSPACE_ID
-LOCAL_DOMAIN ?= monetr.local
-LOCAL_PROTOCOL=http
+ifdef GITPOD_WORKSPACE_ID
+	LOCAL_DOMAIN:=80-$(GITPOD_WORKSPACE_ID).$(GITPOD_WORKSPACE_CLUSTER_HOST)
+	LOCAL_PROTOCOL:=https
+	CLOUD_MAGIC:=magic
 else
-LOCAL_DOMAIN:=80-$(GITPOD_WORKSPACE_ID).$(GITPOD_WORKSPACE_CLUSTER_HOST)
-LOCAL_PROTOCOL:=https
+	ifdef CODESPACE_NAME
+		LOCAL_DOMAIN:=$(CODESPACE_NAME)-80.githubpreview.dev
+		LOCAL_PROTOCOL:=https
+		CLOUD_MAGIC:=magic
+	else
+		LOCAL_DOMAIN ?= monetr.local
+		LOCAL_PROTOCOL=http
+		CLOUD_MAGIC=false
+	endif
 endif
 
 clean: shutdown $(HOSTESS)
@@ -275,6 +283,7 @@ endif
 .EXPORT_ALL_VARIABLES: develop
 develop: $(NODE_MODULES)
 ifndef GITPOD_WORKSPACE_ID
+ifndef CODESPACE_NAME
 ifneq ($(LOCAL_DOMAIN),localhost)
 develop: $(HOSTESS)
 	$(call infoMsg,Setting up $(LOCAL_DOMAIN) domain with your /etc/hosts file)
@@ -283,6 +292,7 @@ develop: $(HOSTESS)
 	$(call infoMsg,to your $(DEVELOPMENT_ENV_FILE) file)
 	sudo $(HOSTESS) add $(LOCAL_DOMAIN) 127.0.0.1
 	sudo $(HOSTESS) add vault.local 127.0.0.1
+endif
 endif
 endif
 ifdef MKDOCS_IMAGE
