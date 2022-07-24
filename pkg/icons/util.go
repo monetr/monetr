@@ -23,9 +23,14 @@ func parseSimpleIconsSlugMarkdown(data []byte) (map[string]string, error) {
 		}
 
 		parts := bytes.SplitN(line, middle, 2)
-		first := bytes.TrimPrefix(parts[0], prefix)
+		first := bytes.ToLower(bytes.TrimPrefix(parts[0], prefix))
+		firstNoSpaces := bytes.ReplaceAll(first, []byte(" "), []byte{})
 		last := bytes.TrimSuffix(parts[1], suffix)
 		result[string(first)] = string(last)
+
+		if !bytes.Equal(first, firstNoSpaces) {
+			result[string(firstNoSpaces)] = string(last)
+		}
 	}
 
 	return result, nil
