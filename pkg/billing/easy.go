@@ -10,6 +10,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/pkg/errors"
@@ -275,7 +276,11 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(
 
 	account.StripeCustomerId = &customerId
 	account.StripeSubscriptionId = &subscriptionId
-	account.SubscriptionActiveUntil = activeUntil
+	// Add 24 hours to the subscription window. This way Stripe has time to process the subscription payment and update
+	// the status for us even if things are running a bit slow. This resolves an issue where the active until date can
+	// pass before Stripe has processed the renewal. Causing (usually) around an hour or more of time where monetr
+	// believed the subscription to not be active anymore.
+	account.SubscriptionActiveUntil = myownsanity.TimeP(activeUntil.Add(24 * time.Hour))
 	account.StripeWebhookLatestTimestamp = &timestamp
 	account.SubscriptionStatus = &status
 
