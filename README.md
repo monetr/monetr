@@ -47,6 +47,8 @@ make develop
 This will set pretty much everything up that you need to work on monetr. This also works out of the box inside GitPod or
 GitHub Codespaces.
 
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer)
+
 ---
 
 Contributions are more than welcome!
