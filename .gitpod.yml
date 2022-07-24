@@ -4,7 +4,7 @@
 
 tasks:
   - init: make dependencies
-    command: echo "Ready!"
+    command: make develop
 
 ports:
   - name: monetr
