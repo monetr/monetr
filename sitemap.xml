@@ -2,132 +2,132 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>http://monetr.local/documentation/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/CODE_OF_CONDUCT/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/credentials/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/documentation/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/github_actions/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/local/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/account_settings/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/authentication/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/bank_accounts/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/funding_schedules/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/institutions/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/links/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/plaid_links/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/spending/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/transactions/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/developing/api/resources/user/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/onboarding/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/bank_accounts/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/bank_accounts/removing/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/funding_schedules/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/funding_schedules/adding/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/self_hosting/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://monetr.local/documentation/help/self_hosting/command_line/</loc>
-         <lastmod>2022-07-24</lastmod>
+         <lastmod>2022-08-08</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
