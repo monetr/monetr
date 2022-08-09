@@ -71,6 +71,10 @@ func (r *RemoveTransactionsHandler) HandleConsumeJob(ctx context.Context, data [
 	}
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
+	crumbs.Debug(ctx, "Removing transactions", map[string]interface{}{
+		"linkId":              args.LinkId,
+		"plaidTransactionIds": args.PlaidTransactionIds,
+	})
 
 	return r.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
@@ -132,6 +136,11 @@ func (r *RemoveTransactionsJob) Run(ctx context.Context) error {
 
 	if len(transactions) != len(r.args.PlaidTransactionIds) {
 		log.Warnf("number of transactions retrieved does not match expected number of transactions, expected: %d found: %d", len(r.args.PlaidTransactionIds), len(transactions))
+		crumbs.IndicateBug(span.Context(), "The number of transactions retrieved does not match the expected number of transactions", map[string]interface{}{
+			"expected":            len(r.args.PlaidTransactionIds),
+			"found":               len(transactions),
+			"plaidTransactionIds": r.args.PlaidTransactionIds,
+		})
 	}
 
 	for _, existingTransaction := range transactions {

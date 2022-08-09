@@ -101,3 +101,22 @@ func AddTag(ctx context.Context, name, value string) {
 		})
 	}
 }
+
+// IndicateBug is used to tag a trace with the bug tag. This will be used to trigger notifications via sentry for when
+// something that does not necessarily result in an "error" happens that technically should not happen, or should be
+// cause for concern.
+func IndicateBug(ctx context.Context, message string, details map[string]interface{}) {
+	if hub := sentry.GetHubFromContext(ctx); hub != nil {
+		hub.ConfigureScope(func(scope *sentry.Scope) {
+			scope.SetTag("bug", "true")
+		})
+		hub.AddBreadcrumb(&sentry.Breadcrumb{
+			Type:      "default",
+			Category:  "bug",
+			Message:   message,
+			Data:      details,
+			Level:     sentry.LevelWarning,
+			Timestamp: time.Now(),
+		}, nil)
+	}
+}
