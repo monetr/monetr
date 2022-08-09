@@ -78,8 +78,9 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 		logger.Formatter = formatter
 	}
 
-	logger.Formatter = NewContextFormatterWrapper(logger.Formatter)
-
+	// If stack driver is enabled then we need to perform some mutations around the formatter before the object is
+	// printed. This wrapper must come ahead of the context wrapper because of how the chain of wrappers is built.
+	// This makes sure that the context fields are properly placed on the stackdriver formatted log message.
 	if configuration.StackDriver.Enabled {
 		formatter, err := NewStackDriverFormatterWrapper(logger.Formatter)
 		if err != nil {
@@ -89,6 +90,8 @@ func NewLoggerWithConfig(configuration config.Logging) *logrus.Entry {
 
 		logger.Formatter = formatter
 	}
+
+	logger.Formatter = NewContextFormatterWrapper(logger.Formatter)
 
 	return logrus.NewEntry(logger)
 }
