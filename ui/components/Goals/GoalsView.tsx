@@ -27,6 +27,7 @@ export default function GoalsView(): JSX.Element {
         <List disablePadding className="w-full">
           {
             Array.from(goals.values())
+              .sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
               .map(item => (
                 <Fragment key={ item.spendingId }>
                   <GoalRow goal={ item } />

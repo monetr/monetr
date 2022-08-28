@@ -62,6 +62,7 @@ export default function ExpensesView(): JSX.Element {
                 <List disablePadding className="w-full">
                   {
                     Array.from(expenses.values())
+                      .sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
                       .map(expense => (
                         <Fragment key={ expense.spendingId }>
                           <ExpenseItem expense={ expense } />
