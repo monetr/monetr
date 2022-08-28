@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/monetr/monetr/compare/v0.11.0...v0.11.1) (2022-08-28)
+
+
+### Bug Fixes
+
+* **icons:** Fixed page crash for icon without color. ([f7f3ab7](https://github.com/monetr/monetr/commit/f7f3ab7d4c5bbea5270cf2bf823645c80938c11d)), closes [#976](https://github.com/monetr/monetr/issues/976)
+
 ## [0.11.0](https://github.com/monetr/monetr/compare/v0.10.21...v0.11.0) (2022-08-28)
 
 
