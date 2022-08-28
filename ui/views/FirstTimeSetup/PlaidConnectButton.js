@@ -1,10 +1,7 @@
 import React from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import { useSelector } from 'react-redux';
 import { Button } from '@mui/material';
 import * as Sentry from '@sentry/react';
-
-import { getSentryUser } from 'shared/authentication/selectors/getSentryUser';
 
 export const PlaidConnectButton = props => {
   const config = {
@@ -15,16 +12,13 @@ export const PlaidConnectButton = props => {
     onEvent: props.onEvent,
   };
 
-  const sentryUser = useSelector(getSentryUser);
 
   const { error, open } = usePlaidLink(config);
   if (error) {
     console.warn({
       error,
     });
-    Sentry.captureException(error, {
-      user: sentryUser,
-    });
+    Sentry.captureException(error);
   }
 
   const onClick = () => {

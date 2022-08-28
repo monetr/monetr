@@ -1,12 +1,12 @@
 import React, { Fragment, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
-
 import classnames from 'classnames';
-import BackToLoginButton from 'components/Authentication/BackToLoginButton';
-import CenteredLogo from 'components/Logo/CenteredLogo';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
+
+import BackToLoginButton from 'components/Authentication/BackToLoginButton';
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import useResetPassword from 'hooks/useResetPassword';
 
 interface ResetPasswordValues {

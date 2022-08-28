@@ -1,33 +1,15 @@
-import Link from 'models/Link';
-import React, { Component, Fragment } from 'react';
-import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
-import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
-import { connect } from 'react-redux';
+import React, { Fragment, useState } from 'react';
+import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
+import { useQueryClient } from 'react-query';
 import { Close } from '@mui/icons-material';
-import PlaidButton from 'components/Plaid/PlaidButton';
-import { List } from 'immutable';
-import detectDuplicateLink from 'shared/links/actions/detectDuplicateLink';
-import plaidLinkTokenCallback from 'shared/links/actions/plaidLinkTokenCallback';
-import { getLinksByInstitutionId } from 'shared/links/selectors/getLinksByInstitutionId';
-import request from 'shared/util/request';
-import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
-import fetchLinks from 'shared/links/actions/fetchLinks';
-import { AppState } from 'store';
+import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
+
 import AddManualBankAccountDialog from 'components/BankAccounts/AllAccountsView/AddManualBankAccountDialog';
-import { Map } from 'immutable';
 import DuplicateInstitutionDialog from 'components/BankAccounts/AllAccountsView/DuplicateInstitutionDialog';
-
-export interface PropTypes {
-  open: boolean;
-  onClose: () => void;
-}
-
-interface WithConnectionPropTypes extends PropTypes {
-  fetchLinks: () => Promise<void>;
-  fetchBankAccounts: () => Promise<void>;
-  detectDuplicateLink: (metadata: PlaidLinkOnSuccessMetadata) => boolean;
-  linksByInstitutionId: Map<string, Link[]>;
-}
+import PlaidButton from 'components/Plaid/PlaidButton';
+import { useDetectDuplicateLink } from 'hooks/links';
+import plaidLinkTokenCallback from 'util/plaidLinkTokenCallback';
+import request from 'util/request';
 
 interface State {
   loading: boolean;
@@ -41,20 +23,66 @@ interface State {
   } | null;
 }
 
-class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
+interface Props {
+  open: boolean;
+  onClose: () => void;
+}
 
-  state = {
-    loading: false,
-    linkId: null,
-    longPollAttempts: 0,
-    manualDialogOpen: false,
-    duplicateDialogOpen: false,
-    callback: null,
+export default function AddBankAccountDialog(props: Props): JSX.Element {
+  const queryClient = useQueryClient();
+  const detectDuplicateLink = useDetectDuplicateLink();
+
+  const [state, setState] = useState<Partial<State>>({});
+
+  async function longPollSetup(linkId: number, attempts: number = 0): Promise<void> {
+    if (attempts > 6) {
+      return Promise.resolve();
+    }
+
+    return void request().get(`/plaid/link/setup/wait/${ linkId }`)
+      .catch(error => {
+        if (error.response.status === 408) {
+          return longPollSetup(linkId, attempts + 1);
+        }
+
+        throw error;
+      });
   };
 
-  onPlaidSuccess = (token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> => {
-    const { detectDuplicateLink } = this.props;
-    this.setState({
+  async function afterPlaidLink(token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> {
+    setState({
+      ...state,
+      duplicateDialogOpen: false,
+    });
+    return void plaidLinkTokenCallback(
+      token,
+      metadata.institution.institution_id,
+      metadata.institution.name,
+      metadata.accounts.map((account: { id: string }) => account.id),
+    )
+      .then(async result => {
+        return longPollSetup(result.linkId)
+          .then(() => Promise.all([
+            queryClient.invalidateQueries('/links'),
+            queryClient.invalidateQueries('/bank_accounts'),
+          ]));
+      })
+      .catch(error => {
+        setState({
+          ...state,
+          loading: false,
+        });
+
+        throw error;
+      })
+      .finally(() => {
+        props.onClose();
+      });
+  }
+
+  async function onPlaidSuccess(token: string, metadata: PlaidLinkOnSuccessMetadata): Promise<void> {
+    setState({
+      ...state,
       loading: true,
       callback: {
         token,
@@ -63,148 +91,81 @@ class AddBankAccountDialog extends Component<WithConnectionPropTypes, State> {
     });
 
     if (detectDuplicateLink(metadata)) {
-      this.setState({
+      setState({
+        ...state,
         duplicateDialogOpen: true,
       });
       return Promise.resolve();
     }
 
-    return this.afterPlaidLink();
+    return afterPlaidLink(token, metadata);
   }
 
-  afterPlaidLink = () => {
-    this.setState({
-      duplicateDialogOpen: false,
-    })
-    const { callback: { token, metadata } } = this.state;
-    return plaidLinkTokenCallback(
-      token,
-      metadata.institution.institution_id,
-      metadata.institution.name,
-      List(metadata.accounts).map((account: { id: string }) => account.id).toArray(),
-    )
-      .then(result => {
-        this.setState({
-          linkId: result.linkId,
-        });
-
-        return this.longPollSetup()
-          .then(() => {
-            return this.props.fetchLinks().then(() => this.props.fetchBankAccounts());
-          });
-      })
-      .catch(error => {
-        this.setState({
-          loading: false,
-        })
-      })
-      .finally(() => {
-        this.props.onClose();
-      });
-  };
-
-  longPollSetup = () => {
-    this.setState(prevState => ({
-      longPollAttempts: prevState.longPollAttempts + 1,
-    }));
-
-    const { longPollAttempts, linkId } = this.state;
-    if (longPollAttempts > 6) {
-      return Promise.resolve();
-    }
-
-    return request().get(`/plaid/link/setup/wait/${ linkId }`)
-      .then(result => {
-        return Promise.resolve();
-      })
-      .catch(error => {
-        if (error.response.status === 408) {
-          return this.longPollSetup();
-        }
-      });
-  };
-
-  openManualDialog = () => this.setState({
+  const openManualDialog = () => setState({
     manualDialogOpen: true,
   });
 
-  closeManualDialog = () => this.setState({
+  const closeManualDialog = () => setState({
     manualDialogOpen: false,
   });
 
-  renderDialogs = () => {
-    const { manualDialogOpen, duplicateDialogOpen } = this.state;
+  function Dialogs(): JSX.Element {
+    const { manualDialogOpen, duplicateDialogOpen } = state;
 
     if (manualDialogOpen) {
-      return <AddManualBankAccountDialog open={ true } onClose={ this.closeManualDialog }/>
+      return <AddManualBankAccountDialog open={ true } onClose={ closeManualDialog } />;
     }
 
     if (duplicateDialogOpen) {
       return <DuplicateInstitutionDialog
         open={ true }
-        onCancel={ this.props.onClose }
-        onConfirm={ this.afterPlaidLink }
-      />
+        onCancel={ props.onClose }
+        onConfirm={ () => alert('TODO') }
+      />;
     }
 
     return null;
   }
 
-  render() {
-    const { open, onClose } = this.props;
-
-    return (
-      <Fragment>
-
-        { this.renderDialogs() }
-
-        <Dialog open={ open } disableEnforceFocus={ true } maxWidth="xs">
-          <DialogTitle>
-            <div className="flex items-center">
-              <span className="text-2xl flex-auto">
+  const { open, onClose } = props;
+  return (
+    <Fragment>
+      <Dialogs />
+      <Dialog open={ open } disableEnforceFocus={ true } maxWidth="xs">
+        <DialogTitle>
+          <div className="flex items-center">
+            <span className="text-2xl flex-auto">
                 Add a bank account
-              </span>
-              <IconButton className="flex-none" onClick={ onClose }>
-                <Close/>
-              </IconButton>
-            </div>
-          </DialogTitle>
-          <DialogContent className="mb-5">
-            <Typography>
-              You can link your bank account to automatically sync transactions and balances. Or you can create a
-              manual bank account to manage your transactions and balances yourself.
-            </Typography>
-            <div className="grid grid-flow-col grid-rows-2 grid-cols-1 gap-2 mt-5">
-              <PlaidButton
-                disabled={ this.state.loading }
-                useCache={ true }
-                plaidOnSuccess={ this.onPlaidSuccess }
-                variant="outlined"
-                color="primary"
-              >
-                Connect My Bank Account
-              </PlaidButton>
-              <Button
-                variant="outlined"
-                onClick={ this.openManualDialog }
-              >
-                Create Manual Bank Account
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </Fragment>
-    );
-  }
+            </span>
+            <IconButton className="flex-none" onClick={ onClose }>
+              <Close />
+            </IconButton>
+          </div>
+        </DialogTitle>
+        <DialogContent className="mb-5">
+          <Typography>
+            You can link your bank account to automatically sync transactions and balances. Or you can create a
+            manual bank account to manage your transactions and balances yourself.
+          </Typography>
+          <div className="grid grid-flow-col grid-rows-2 grid-cols-1 gap-2 mt-5">
+            <PlaidButton
+              disabled={ state.loading }
+              useCache={ true }
+              plaidOnSuccess={ onPlaidSuccess }
+              variant="outlined"
+              color="primary"
+            >
+              Connect My Bank Account
+            </PlaidButton>
+            <Button
+              variant="outlined"
+              onClick={ openManualDialog }
+            >
+              Create Manual Bank Account
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </Fragment>
+  );
 }
-
-export default connect(
-  (state: AppState) => ({
-    linksByInstitutionId: getLinksByInstitutionId(state),
-  }),
-  {
-    fetchLinks,
-    fetchBankAccounts,
-    detectDuplicateLink,
-  }
-)(AddBankAccountDialog);

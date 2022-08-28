@@ -1,3 +1,5 @@
+default: build
+
 GIT_REPOSITORY=https://github.com/monetr/monetr.git
 
 # These variables are set first as they are not folder or environment specific.
@@ -129,7 +131,6 @@ include $(PWD)/scripts/Dependencies.mk
 include $(PWD)/scripts/Deployment.mk
 include $(PWD)/scripts/Lint.mk
 
-default: build
 
 SOURCE_MAP_DIR=$(BUILD_DIR)/source_maps
 $(SOURCE_MAP_DIR):

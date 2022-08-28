@@ -1,21 +1,22 @@
+import React, { Fragment, useState } from 'react';
 import { AccountBalance, Add } from '@mui/icons-material';
 import { Button, Fab, List, Typography } from '@mui/material';
-import LinkedAccountItem from 'components/BankAccounts/AllAccountsView/LinkedAccountItem';
-import BankAccount from 'models/BankAccount';
-import React from 'react';
-import { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { getBankAccounts } from 'shared/bankAccounts/selectors/getBankAccounts';
-import { getLinks } from 'shared/links/selectors/getLinks';
-import AddBankAccountDialog from 'components/BankAccounts/AllAccountsView/AddBankAccountDialog';
+import * as R from 'ramda';
 
-enum DialogOpen {
-  CreateBankAccount,
-}
+import AddBankAccountDialog from 'components/BankAccounts/AllAccountsView/AddBankAccountDialog';
+import LinkedAccountItem from 'components/BankAccounts/AllAccountsView/LinkedAccountItem';
+import { useBankAccounts } from 'hooks/bankAccounts';
+import { useLinks } from 'hooks/links';
+import BankAccount from 'models/BankAccount';
+import Link from 'models/Link';
 
 export default function AllAccountsView(): JSX.Element {
-  const bankAccounts = useSelector(getBankAccounts);
-  const links = useSelector(getLinks);
+  enum DialogOpen {
+    CreateBankAccount,
+  }
+
+  const bankAccounts = useBankAccounts();
+  const links = useLinks();
   const [dialog, setDialog] = useState<DialogOpen | null>();
 
   const openDialog = (dialog: DialogOpen) => () => setDialog(dialog);
@@ -27,7 +28,7 @@ export default function AllAccountsView(): JSX.Element {
   function Dialogs(): JSX.Element {
     switch (dialog) {
       case DialogOpen.CreateBankAccount:
-        return <AddBankAccountDialog open={ true } onClose={ closeDialog }/>;
+        return <AddBankAccountDialog open={ true } onClose={ closeDialog } />;
       default:
         return null;
     }
@@ -37,7 +38,7 @@ export default function AllAccountsView(): JSX.Element {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="grid grid-cols-1 grid-rows-3 grid-flow-col gap-2">
-          <AccountBalance className="self-center w-full h-32 opacity-40"/>
+          <AccountBalance className="self-center w-full h-32 opacity-40" />
           <div className="flex items-center">
             <Typography
               className="text-center opacity-50"
@@ -61,39 +62,48 @@ export default function AllAccountsView(): JSX.Element {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   function Content(): JSX.Element {
-    if (bankAccounts.isEmpty()) {
-      return <Empty/>
+    if (bankAccounts.size === 0) {
+      return <Empty />;
     }
+
+    interface TransformItem {
+      bankAccounts: Array<BankAccount>;
+      link: Link;
+    }
+
+    const items = R.pipe(
+      R.groupBy((item: BankAccount) => item.linkId.toString(10)),
+      R.mapObjIndexed((bankAccounts, linkId) => ({
+        bankAccounts: bankAccounts,
+        link: links.get(parseInt(linkId)),
+      })),
+      R.values,
+      R.sortBy((item: TransformItem) => item.link.getName()),
+      R.map((item: TransformItem) => (
+        <LinkedAccountItem
+          key={ item.link.linkId }
+          link={ item.link }
+          bankAccounts={ item.bankAccounts } />
+      )),
+    )(Array.from(bankAccounts.values()));
 
     return (
       <List disablePadding>
-        { bankAccounts
-          .groupBy((item: BankAccount) => item.linkId)
-          .map((bankAccounts, linkId) => ({
-            bankAccounts: bankAccounts.toMap(),
-            link: links.get(linkId),
-          }))
-          .sortBy(item => item.link.getName())
-          .map(item => (
-            <LinkedAccountItem key={ item.link.linkId } link={ item.link } bankAccounts={ item.bankAccounts }/>
-          ))
-          .valueSeq()
-          .toArray()
-        }
+        { items }
       </List>
-    )
+    );
   }
 
   return (
     <Fragment>
-      <Dialogs/>
+      <Dialogs />
       <div className="minus-nav bg-primary">
         <div className="w-full h-full view-inner">
-          <Content/>
+          <Content />
         </div>
         <Fab
           color="primary"
@@ -101,9 +111,9 @@ export default function AllAccountsView(): JSX.Element {
           className="absolute z-50 bottom-0 right-5"
           onClick={ openDialog(DialogOpen.CreateBankAccount) }
         >
-          <Add/>
+          <Add />
         </Fab>
       </div>
     </Fragment>
-  )
+  );
 }

@@ -1,5 +1,6 @@
-import { Backdrop1 } from 'assets';
 import React from 'react';
+
+import { Backdrop1 } from 'assets';
 
 interface BackdropProps {
   className?: string;
@@ -13,5 +14,5 @@ export default function Backdrop(props: BackdropProps): JSX.Element {
     } }>
       { props.children }
     </div>
-  )
+  );
 }

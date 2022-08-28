@@ -1,38 +1,14 @@
-import { DatePicker } from '@mui/lab';
-import { connect } from 'react-redux';
-import React, { Component, Fragment } from 'react';
-import Spending from 'models/Spending';
-import { Formik, FormikErrors, FormikHelpers, FormikProps } from 'formik';
-import { getSelectedGoal } from 'shared/spending/selectors/getSelectedGoal';
+import React, { Fragment } from 'react';
 import {
   Button,
-  Divider,
-  FormControl,
-  IconButton,
-  Input,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select, TextField,
-  Typography
 } from '@mui/material';
-import { ArrowBack, DeleteOutline } from '@mui/icons-material';
+import { Formik, FormikErrors, FormikHelpers, FormikProps } from 'formik';
 import moment from 'moment';
-import updateSpending from 'shared/spending/actions/updateSpending';
-import MomentUtils from '@date-io/moment';
-import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
-import FundingSchedule from 'models/FundingSchedule';
-import { Map } from 'immutable';
+import { useSnackbar } from 'notistack';
 
-export interface PropTypes {
-  hideView: { (): void }
-}
-
-interface WithConnectionPropTypes extends PropTypes {
-  goal: Spending;
-  fundingSchedules: Map<number, FundingSchedule>;
-  updateSpending: { (spending: Spending): Promise<void> }
-}
+import EditInProgressGoal from 'components/Goals/EditInProgressGoal';
+import { useUpdateSpending } from 'hooks/spending';
+import Spending from 'models/Spending';
 
 interface editGoalForm {
   name: string;
@@ -41,17 +17,24 @@ interface editGoalForm {
   fundingScheduleId: number;
 }
 
-export class EditGoalView extends Component<WithConnectionPropTypes, any> {
+interface Props {
+  goal: Spending;
+  hideView: () => void;
+}
 
-  validateInput = (values: editGoalForm): FormikErrors<any> => {
+export default function EditGoalView(props: Props): JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const updateSpending = useUpdateSpending();
+
+  function validateInput(_: editGoalForm): FormikErrors<editGoalForm> {
     return null;
-  };
+  }
 
-  submit = (values: editGoalForm, { setSubmitting }: FormikHelpers<editGoalForm>) => {
-    const { goal, updateSpending } = this.props;
-
+  async function submit(values: editGoalForm, { setSubmitting }: FormikHelpers<editGoalForm>): Promise<void> {
+    setSubmitting(true);
     const updatedSpending = new Spending({
-      ...goal,
+      ...props.goal,
       name: values.name,
       targetAmount: values.amount * 100,
       nextRecurrence: values.dueDate.startOf('day'),
@@ -59,171 +42,55 @@ export class EditGoalView extends Component<WithConnectionPropTypes, any> {
     });
 
     return updateSpending(updatedSpending)
-      .then(() => {
-        setSubmitting(false);
-      })
-      .catch(error => {
-        setSubmitting(false);
+      .catch(error => void enqueueSnackbar(error?.response?.data?.error || 'Failed to update goal.', {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }))
+      .finally(() => setSubmitting(false));
+  }
 
-        this.setState({
-          error: error.response.data.error,
-        });
-      });
-  };
+  const { goal, hideView } = props;
 
-  renderContents = (formik: FormikProps<editGoalForm>) => {
-    const { goal } = this.props;
-
+  function Contents({ formik }: { formik: FormikProps<editGoalForm> }): JSX.Element {
     if (goal.getGoalIsInProgress()) {
-      return this.renderInProgress(formik);
+      return <EditInProgressGoal formik={ formik } hideView={ hideView } />;
     }
 
-    return this.renderComplete();
-  };
-
-  renderTopBar = () => {
-    return (
-      <Fragment>
-        <div className="w-full h-12">
-          <div className="grid grid-cols-6 grid-rows-1 grid-flow-col">
-            <div className="col-span-1">
-              <IconButton
-                onClick={ () => this.props.hideView() }
-              >
-                <ArrowBack/>
-              </IconButton>
-            </div>
-            <div className="col-span-4 flex justify-center items-center">
-              <Typography
-                variant="h6"
-              >
-                Edit Goal
-              </Typography>
-            </div>
-            <div className="col-span-1">
-              <IconButton disabled>
-                <DeleteOutline/>
-              </IconButton>
-            </div>
-          </div>
-        </div>
-        <Divider/>
-      </Fragment>
-    )
-  };
-
-  renderInProgress = (formik: FormikProps<editGoalForm>) => {
-    const { fundingSchedules } = this.props;
-
-    return (
-      <div className="w-full h-full flex-grow">
-        { this.renderTopBar() }
-
-        <FormControl fullWidth className="mt-5">
-          <InputLabel htmlFor="edit-goal-name">Goal Name</InputLabel>
-          <Input
-            autoFocus={ true }
-            id="edit-goal-name"
-            name="name"
-            value={ formik.values.name }
-            onBlur={ formik.handleBlur }
-            onChange={ formik.handleChange }
-            disabled={ formik.isSubmitting }
-          />
-        </FormControl>
-        <FormControl fullWidth className="mt-5">
-          <InputLabel htmlFor="edit-goal-amount">Target Amount</InputLabel>
-          <Input
-            id="edit-goal-amount"
-            name="amount"
-            value={ formik.values.amount }
-            onBlur={ formik.handleBlur }
-            onChange={ formik.handleChange }
-            disabled={ formik.isSubmitting }
-            startAdornment={ <InputAdornment position="start">$</InputAdornment> }
-          />
-        </FormControl>
-        <DatePicker
-          className="mt-5"
-          minDate={ moment().startOf('day').add(1, 'day') }
-          onChange={ (value) => formik.setFieldValue('dueDate', value.startOf('day')) }
-          inputFormat="MM/DD/yyyy"
-          value={ formik.values.dueDate }
-          renderInput={ (params) => <TextField fullWidth { ...params } /> }
-        />
-        <FormControl fullWidth className="mt-5">
-          <InputLabel id="edit-funding-schedule-label">Funding Schedule</InputLabel>
-          <Select
-            data-testid={ `funding-schedule-selector` }
-            labelId="edit-funding-schedule-label"
-            id="edit-funding-schedule"
-            name="fundingScheduleId"
-            value={ formik.values.fundingScheduleId }
-            onChange={ formik.handleChange }
-            disabled={ formik.isSubmitting }
-          >
-            { fundingSchedules.valueSeq().map(item => (
-              <MenuItem
-                key={ item.fundingScheduleId }
-                value={ item.fundingScheduleId }
-              >
-                { item.name }
-              </MenuItem>
-            )).toArray() }
-          </Select>
-        </FormControl>
-      </div>
-    )
-  };
-
-  renderComplete = () => {
+    // TODO Implement completed goals editing.
     return null;
+  }
+
+  const initial: editGoalForm = {
+    name: goal.name,
+    amount: goal.getTargetAmountDollars(),
+    dueDate: goal.nextRecurrence,
+    fundingScheduleId: goal.fundingScheduleId,
   };
 
-  render() {
-    const { goal } = this.props;
-    const initial: editGoalForm = {
-      name: goal.name,
-      amount: goal.getTargetAmountDollars(),
-      dueDate: goal.nextRecurrence,
-      fundingScheduleId: goal.fundingScheduleId,
-    };
-
-    return (
-      <Fragment>
-        <Formik
-          initialValues={ initial }
-          validate={ this.validateInput }
-          onSubmit={ this.submit }
-        >
-          { (formik: FormikProps<editGoalForm>) => (
-            <form onSubmit={ formik.handleSubmit } className="h-full flex flex-col justify-between">
-              { this.renderContents(formik) }
-              <div>
-                <Button
-                  className="w-full"
-                  variant="outlined"
-                  color="primary"
-                  disabled={ formik.isSubmitting }
-                  onClick={ formik.submitForm }
-                >
-                  Update Goal
-                </Button>
-              </div>
-            </form>
-          ) }
-        </Formik>
-      </Fragment>
-    )
-  }
+  return (
+    <Fragment>
+      <Formik
+        initialValues={ initial }
+        validate={ validateInput }
+        onSubmit={ submit }
+      >
+        { (formik: FormikProps<editGoalForm>) => (
+          <form onSubmit={ formik.handleSubmit } className="h-full flex flex-col justify-between">
+            <Contents formik={ formik } />
+            <div>
+              <Button
+                className="w-full"
+                variant="outlined"
+                color="primary"
+                disabled={ formik.isSubmitting }
+                onClick={ formik.submitForm }
+              >
+                Update Goal
+              </Button>
+            </div>
+          </form>
+        ) }
+      </Formik>
+    </Fragment>
+  );
 }
-
-export default connect(
-  (state) => ({
-    goal: getSelectedGoal(state),
-    fundingSchedules: getFundingSchedules(state),
-  }),
-  {
-    updateSpending,
-  }
-)(EditGoalView);

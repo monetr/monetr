@@ -1,84 +1,55 @@
+import React, { useState } from 'react';
 import { Button, Checkbox, Divider, List, ListItem, ListItemIcon, Typography } from '@mui/material';
+
 import NewFundingScheduleDialog from 'components/FundingSchedules/NewFundingScheduleDialog';
+import { useFundingSchedules } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
-import { Map } from 'immutable';
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { getFundingSchedules } from 'shared/fundingSchedules/selectors/getFundingSchedules';
 
-
-export interface PropTypes {
-  onChange: { (fundingSchedule: FundingSchedule): void }
+interface Props {
+  onChange: (_fundingSchedule: FundingSchedule) => void;
   disabled?: boolean;
 }
 
-interface WithConnectionPropTypes extends PropTypes {
-  fundingSchedules: Map<number, FundingSchedule>;
-}
+export default function FundingScheduleSelectionList(props: Props): JSX.Element {
+  const [newFundingScheduleDialogOpen, setNewFundingScheduleDialogOpen] = useState<boolean>(false);
+  const [selectedFundingSchedule, setSelectedFundingSchedule] = useState<FundingSchedule | null>(null);
 
-interface State {
-  newFundingScheduleDialogOpen: boolean;
-  selectedFundingSchedule?: number;
-}
+  const fundingSchedules = useFundingSchedules();
 
-export class FundingScheduleSelectionList extends Component<WithConnectionPropTypes, State> {
+  function selectItem(fundingScheduleId: number) {
+    const fundingSchedule = fundingSchedules.get(fundingScheduleId);
+    setSelectedFundingSchedule(fundingSchedule);
+    props.onChange(fundingSchedule);
+  }
 
-  state = {
-    newFundingScheduleDialogOpen: false,
-    selectedFundingSchedule: null,
-  };
-
-  openNewFundingScheduleDialog = () => {
-    return this.setState({
-      newFundingScheduleDialogOpen: true,
-    });
-  };
-
-  closeFundingScheduleDialog = () => {
-    return this.setState({
-      newFundingScheduleDialogOpen: false,
-    });
-  };
-
-  selectItem = (fundingScheduleId: number) => () => {
-    const { onChange, fundingSchedules } = this.props;
-
-    return this.setState({
-      selectedFundingSchedule: fundingScheduleId,
-    }, () => onChange(fundingSchedules.get(fundingScheduleId)));
-  };
-
-  render() {
-    const { fundingSchedules, disabled } = this.props;
-    const { selectedFundingSchedule } = this.state;
-
-    return (
-      <div className="w-full funding-schedule-selection-list">
-        <NewFundingScheduleDialog
-          onClose={ this.closeFundingScheduleDialog }
-          isOpen={ this.state.newFundingScheduleDialogOpen }
-        />
-        <Button
-          className="w-full mb-2.5"
-          variant="outlined"
-          color="primary"
-          onClick={ this.openNewFundingScheduleDialog }
-        >
-          New Funding Schedule
-        </Button>
-        <Divider/>
-        <List>
-          {
-            fundingSchedules.map(schedule => (
+  return (
+    <div className="w-full funding-schedule-selection-list">
+      <NewFundingScheduleDialog
+        onClose={ () => setNewFundingScheduleDialogOpen(false) }
+        isOpen={ newFundingScheduleDialogOpen }
+      />
+      <Button
+        className="w-full mb-2.5"
+        variant="outlined"
+        color="primary"
+        onClick={ () => setNewFundingScheduleDialogOpen(true) }
+      >
+        New Funding Schedule
+      </Button>
+      <Divider />
+      <List>
+        {
+          Array.from(fundingSchedules.values())
+            .map(schedule => (
               <ListItem key={ schedule.fundingScheduleId } button
-                        onClick={ this.selectItem(schedule.fundingScheduleId) }>
+                onClick={ () => selectItem(schedule.fundingScheduleId) }>
                 <ListItemIcon>
                   <Checkbox
                     edge="start"
-                    checked={ selectedFundingSchedule === schedule.fundingScheduleId }
+                    checked={ selectedFundingSchedule?.fundingScheduleId === schedule.fundingScheduleId }
                     tabIndex={ -1 }
                     color="primary"
-                    disabled={ !!disabled }
+                    disabled={ !!props.disabled }
                   />
                 </ListItemIcon>
                 <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
@@ -90,22 +61,13 @@ export class FundingScheduleSelectionList extends Component<WithConnectionPropTy
                   </div>
                   <div className="col-span-1 flex justify-end">
                     <Typography variant="subtitle2"
-                                color="primary">{ schedule.nextOccurrence.format('MMM Do') }</Typography>
+                      color="primary">{ schedule.nextOccurrence.format('MMM Do') }</Typography>
                   </div>
                 </div>
               </ListItem>
-            )).valueSeq().toArray()
-          }
-        </List>
-      </div>
-    )
-  }
+            ))
+        }
+      </List>
+    </div>
+  );
 }
-
-export default connect(
-  state => ({
-    fundingSchedules: getFundingSchedules(state),
-  }),
-  {}
-)(FundingScheduleSelectionList);
-

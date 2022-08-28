@@ -1,16 +1,16 @@
 import React, { Fragment, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
-
 import classnames from 'classnames';
+import { Formik, FormikHelpers } from 'formik';
+import { useSnackbar } from 'notistack';
+
 import ForgotPasswordMaybe from 'components/Authentication/Login/ForgotPasswordMaybe';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
-import { Formik, FormikHelpers } from 'formik';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useLogin from 'hooks/useLogin';
-import { useSnackbar } from 'notistack';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface LoginValues {

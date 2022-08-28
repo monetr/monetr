@@ -67,7 +67,7 @@ On the [Stripe Webhooks](https://dashboard.stripe.com/test/webhooks) page click 
 
 ![New Stripe Webhook](assets/stripe_new_webhook.png)
 
-Enter your ngrok base URL here with the suffix: `/stripe/webhook`
+Enter your ngrok base URL here with the suffix: `/api/stripe/webhook`
 
 Then you can add events that you need to work with. At a minimum the following events should be added as monetr requires
 them.
@@ -105,7 +105,7 @@ endpoint.
 
 ## Google Cloud KMS
 
-Google Cloud KMS support is currently being added to improve the security of storing encrypted secrets in monetr. 
+Google Cloud KMS support is currently being added to improve the security of storing encrypted secrets in monetr.
 Documentation to follow.
 
 **TODO**

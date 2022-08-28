@@ -1,41 +1,33 @@
+import React, { Fragment } from 'react';
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
-import FundingSchedule from 'models/FundingSchedule';
-import Spending from 'models/Spending';
 import moment from 'moment';
-import React, { Fragment, Component } from 'react';
-import { connect } from 'react-redux';
-import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
-import selectGoal from 'shared/spending/actions/selectGoal';
-import { getGoalIsSelected } from 'shared/spending/selectors/getGoalIsSelected';
-import { getSpendingById } from 'shared/spending/selectors/getSpendingById';
+import shallow from 'zustand/shallow';
+
+import { useFundingSchedule } from 'hooks/fundingSchedules';
+import useStore from 'hooks/store';
+import Spending from 'models/Spending';
 
 import './styles/GoalRow.scss';
 
-export interface PropTypes {
-  goalId: number;
-}
-
-interface WithConnectionPropTypes extends PropTypes {
-  isSelected: boolean;
+interface Props {
   goal: Spending;
-  fundingSchedule: FundingSchedule;
-  selectGoal: { (goalId: number): void }
 }
 
-export class GoalRow extends Component<WithConnectionPropTypes, any> {
+export default function GoalRow(props: Props): JSX.Element  {
+  const { selectedGoalId, setCurrentGoal } = useStore(state => ({
+    selectedGoalId: state.selectedGoalId,
+    setCurrentGoal: state.setCurrentGoal,
+  }), shallow);
+  const isSelected = props.goal.spendingId === selectedGoalId;
+  const fundingSchedule = useFundingSchedule(props.goal.fundingScheduleId);
 
-  onClick = () => {
-    return this.props.selectGoal(this.props.goalId);
-  };
-
-  renderInProgress = () => {
-    const { goal, fundingSchedule } = this.props;
-
+  function InProgress(): JSX.Element {
+    const { goal } = props;
     const due = goal.nextRecurrence;
 
     // If the goal is the same year then just do the month and the day, but if its a different year then do the month
     // the day, and the year.
-    const date = due.year() !== moment().year() ? due.format('MMMM Do, YYYY') : due.format('MMMM Do')
+    const date = due.year() !== moment().year() ? due.format('MMMM Do, YYYY') : due.format('MMMM Do');
 
     return (
       <div className="w-full grid grid-cols-3 grid-rows-3 grid-flow-col">
@@ -43,7 +35,7 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
           <Typography
             variant="subtitle1"
           >
-            { goal.name }
+            { props.goal.name }
           </Typography>
         </div>
         <div className="flex items-center col-span-3">
@@ -71,9 +63,9 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
           >
             { goal.isPaused && 'Paused' }
             { !goal.isPaused &&
-            <Fragment>
-              <b>{ goal.getNextContributionAmountString() }</b> on { fundingSchedule.name }
-            </Fragment>
+              <Fragment>
+                <b>{ goal.getNextContributionAmountString() }</b> on { fundingSchedule?.name }
+              </Fragment>
             }
           </Typography>
         </div>
@@ -85,11 +77,11 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
           </Typography>
         </div>
       </div>
-    )
-  };
+    );
+  }
 
-  renderComplete = () => {
-    const { goal } = this.props;
+  function Complete(): JSX.Element {
+    const { goal } = props;
 
     return (
       <div className="w-full h-full grid grid-cols-4 grid-rows-1 grid-flow-col gap-1">
@@ -107,55 +99,43 @@ export class GoalRow extends Component<WithConnectionPropTypes, any> {
           />
         </div>
       </div>
-    )
-  };
-
-  renderContents = () => {
-    const { goal } = this.props;
-
-    if (goal.getGoalIsInProgress()) {
-      return this.renderInProgress();
-    }
-
-    return this.renderComplete();
-  };
-
-  render() {
-    const { isSelected, goal } = this.props;
-    if (!goal) {
-      return null;
-    }
-
-    return (
-      <ListItem
-        button
-        className="goal-row"
-        onClick={ this.onClick }
-      >
-        <ListItemIcon>
-          <Checkbox
-            edge="start"
-            checked={ isSelected }
-            tabIndex={ -1 }
-            color="primary"
-          />
-        </ListItemIcon>
-        { this.renderContents() }
-      </ListItem>
     );
   }
-}
 
-export default connect(
-  (state, props: PropTypes) => {
-    const goal = getSpendingById(props.goalId)(state);
-    return {
-      goal,
-      fundingSchedule: goal && getFundingScheduleById(goal.fundingScheduleId)(state),
-      isSelected: getGoalIsSelected(props.goalId)(state),
+  function Contents(): JSX.Element {
+    const { goal } = props;
+
+    if (goal.getGoalIsInProgress()) {
+      return <InProgress />;
     }
-  },
-  {
-    selectGoal,
+
+    return <Complete />;
   }
-)(GoalRow);
+
+  function onClick() {
+    setCurrentGoal(selectedGoalId === goal.spendingId ? null : goal.spendingId);
+  }
+
+  const { goal } = props;
+  if (!goal) {
+    return null;
+  }
+
+  return (
+    <ListItem
+      button
+      className="goal-row"
+      onClick={ onClick }
+    >
+      <ListItemIcon>
+        <Checkbox
+          edge="start"
+          checked={ isSelected }
+          tabIndex={ -1 }
+          color="primary"
+        />
+      </ListItemIcon>
+      <Contents />
+    </ListItem>
+  );
+}

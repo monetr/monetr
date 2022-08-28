@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
-import { useDispatch } from 'react-redux';
+import { useQueryClient } from 'react-query';
 import { Button, Typography } from '@mui/material';
 import { Severity } from '@sentry/react';
 import * as Sentry from '@sentry/react';
@@ -9,11 +9,8 @@ import { Logo } from 'assets';
 import PlaidButton from 'components/Plaid/PlaidButton';
 import PlaidIcon from 'components/Plaid/PlaidIcon';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { List } from 'immutable';
 import useLogout from 'hooks/useLogout';
-import fetchBankAccounts from 'shared/bankAccounts/actions/fetchBankAccounts';
-import fetchLinks from 'shared/links/actions/fetchLinks';
-import request from 'shared/util/request';
+import request from 'util/request';
 
 interface State {
   linkId: number | null;
@@ -26,7 +23,7 @@ const InitialSetupBilling = (): JSX.Element => {
     billingEnabled,
   } = useAppConfiguration();
 
-  function manageSubscription() {
+  async function manageSubscription() {
     return request().get('/billing/portal')
       .then(result => {
         window.location.assign(result.data.url);
@@ -64,28 +61,30 @@ const InitialSetupBilling = (): JSX.Element => {
   );
 };
 
-const InitialPlaidSetup = (): JSX.Element => {
+export default function InitialPlaidSetup(): JSX.Element {
   const [state, setState] = useState<Partial<State>>({
     loading: false,
   });
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-  function longPollSetup(linkId: number) {
-    setState(prevState => ({
+  async function longPollSetup(linkId: number): Promise<void> {
+    setState({
       loading: true,
-      longPollAttempts: prevState.longPollAttempts + 1,
-    }));
+      longPollAttempts: state.longPollAttempts + 1,
+    });
 
     const { longPollAttempts } = state;
     if (longPollAttempts > 6) {
       return Promise.resolve();
     }
 
-    return request().get(`/plaid/link/setup/wait/${ linkId }`)
+    return void request().get(`/plaid/link/setup/wait/${ linkId }`)
       .catch(error => {
         if (error.response.status === 408) {
           return longPollSetup(linkId);
         }
+
+        throw error;
       });
   }
 
@@ -115,7 +114,7 @@ const InitialPlaidSetup = (): JSX.Element => {
     }
   }
 
-  function onPlaidSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata) {
+  async function onPlaidSuccess(public_token: string, metadata: PlaidLinkOnSuccessMetadata) {
     setState({
       loading: true,
     });
@@ -124,7 +123,7 @@ const InitialPlaidSetup = (): JSX.Element => {
       publicToken: public_token,
       institutionId: metadata.institution.institution_id,
       institutionName: metadata.institution.name,
-      accountIds: List(metadata.accounts).map((account: { id: string }) => account.id).toArray(),
+      accountIds: metadata.accounts.map((account: { id: string }) => account.id),
     })
       .then(result => {
         const linkId: number = result.data.linkId;
@@ -134,22 +133,22 @@ const InitialPlaidSetup = (): JSX.Element => {
         });
 
         return longPollSetup(linkId)
-          .then(() => {
-            return Promise.all([
-              fetchLinks()(dispatch),
-              fetchBankAccounts()(dispatch),
-            ]);
-          });
+          .then(() => Promise.all([
+            queryClient.invalidateQueries('/links'),
+            queryClient.invalidateQueries('/bank_accounts'),
+          ]));
       })
       .catch(error => {
-        console.error(error);
         setState({
           loading: false,
         });
+
+        throw error;
       });
   }
 
   const logout = useLogout();
+  console.log('testing things');
 
   return (
     <div className="flex justify-center w-full h-full max-h-full pb-5">
@@ -194,5 +193,3 @@ const InitialPlaidSetup = (): JSX.Element => {
     </div>
   );
 };
-
-export default InitialPlaidSetup;

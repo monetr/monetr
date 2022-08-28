@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react';
 import { AccessTime } from '@mui/icons-material';
 import { Chip, Divider, ListItem } from '@mui/material';
-
 import classnames from 'classnames';
+
 import TransactionIcon from 'components/Transactions/components/TransactionIcon';
 import TransactionNameEditor from 'components/Transactions/TransactionsView/TransactionNameEditor';
 import TransactionSpentFromSelection from 'components/Transactions/TransactionsView/TransactionSpentFromSelection';
@@ -14,7 +14,7 @@ interface Props {
   transaction: Transaction;
 }
 
-export default function TransactionItem(props: Props): JSX.Element {
+function TransactionItem(props: Props): JSX.Element {
   return (
     <Fragment>
       <ListItem className="flex flex-row transactions-item pl-3 pr-1 md:pr-2.5">
@@ -36,3 +36,5 @@ export default function TransactionItem(props: Props): JSX.Element {
     </Fragment>
   );
 }
+
+export default React.memo(TransactionItem);

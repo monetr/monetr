@@ -1,4 +1,6 @@
-import React, { Component, Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
+import { useQueryClient } from 'react-query';
+import { Close } from '@mui/icons-material';
 import {
   Alert,
   Button,
@@ -8,65 +10,44 @@ import {
   DialogTitle,
   IconButton,
   Snackbar,
-  Typography
+  Typography,
 } from '@mui/material';
-import Link from 'models/Link';
-import { getLink } from 'shared/links/selectors/getLink';
-import { connect } from 'react-redux';
-import { Close } from '@mui/icons-material';
-import removeLink from 'shared/links/actions/removeLink';
+import { AxiosError } from 'axios';
 import classnames from 'classnames';
-import { AppState } from 'store';
 
-interface PropTypes {
+import { useLink, useRemoveLink } from 'hooks/links';
+
+interface Props {
   open: boolean;
   onClose: () => void;
   linkId: number;
 }
 
-interface WithConnectionPropTypes extends PropTypes {
-  link: Link;
-  removeLink: (link: Link) => Promise<void>;
-}
+export default function RemoveLinkConfirmationDialog(props: Props): JSX.Element {
+  const queryClient = useQueryClient();
+  const link = useLink(props.linkId);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>(null);
+  const removeLink = useRemoveLink();
 
-interface State {
-  loading: boolean;
-  error: string | null;
-}
+  async function doRemoveLink(): Promise<void> {
+    setLoading(true);
+    return removeLink(props.linkId)
+      .then(() => props.onClose())
+      .then(() => void Promise.all([
+        queryClient.invalidateQueries('/links'),
+        queryClient.invalidateQueries('/bank_accounts'),
+      ]))
+      .catch((error: AxiosError<{ error: string; }>) => setError(error?.response?.data?.error))
+      .finally(() => setLoading(false));
+  }
 
-class RemoveLinkConfirmationDialog extends Component<WithConnectionPropTypes, State> {
-
-  state = {
-    loading: false,
-    error: null,
-  };
-
-  doRemoveLink = (): Promise<void> => {
-    this.setState({
-      loading: true,
-    });
-
-    return this.props.removeLink(this.props.link)
-      // If we successfully remove the link then close this dialog.
-      .then(() => this.props.onClose())
-      // If it fails then show an error.
-      .catch(error => this.setState({
-        error: error.response.data.error,
-      }))
-      // If the request failed then we will hit this, this will remove the loading state but will not close the dialog.
-      .finally(() => this.setState({
-        loading: false,
-      }));
-  };
-
-  renderErrorMaybe = () => {
-    const { error } = this.state;
-
+  function ErrorMaybe(): JSX.Element {
     if (!error) {
       return null;
     }
 
-    const onClose = () => this.setState({ error: null });
+    const onClose = () => setError(null);
 
     return (
       <Snackbar open autoHideDuration={ 6000 } onClose={ onClose }>
@@ -74,66 +55,53 @@ class RemoveLinkConfirmationDialog extends Component<WithConnectionPropTypes, St
           { error }
         </Alert>
       </Snackbar>
-    )
-  };
+    );
+  }
 
-  render() {
-    const { open, onClose, link } = this.props;
-    const { loading } = this.state;
+  const { open, onClose } = props;
 
-    return (
-      <Fragment>
-        { this.renderErrorMaybe() }
-
-        <Dialog open={ open } onClose={ onClose }>
-          <DialogTitle>
-            <div className="flex items-center">
-              <span className="text-2xl flex-auto">
+  return (
+    <Fragment>
+      <ErrorMaybe />
+      <Dialog open={ open } onClose={ onClose }>
+        <DialogTitle>
+          <div className="flex items-center">
+            <span className="text-2xl flex-auto">
                 Remove { link.getName() }
-              </span>
-              <IconButton
-                disabled={ loading }
-                className="flex-none"
-                onClick={ onClose }
-              >
-                <Close/>
-              </IconButton>
-            </div>
-          </DialogTitle>
-          <DialogContent>
-            <Typography>
-              Are you sure you want to remove the <b>{ link.getName() }</b> link? This cannot be undone.
-            </Typography>
-            { link.getIsPlaid() && <Typography>You can also convert this link to be manual instead.</Typography> }
-          </DialogContent>
-          <DialogActions>
-            <Button
+            </span>
+            <IconButton
               disabled={ loading }
+              className="flex-none"
               onClick={ onClose }
             >
-              Cancel
-            </Button>
-            <Button
-              disabled={ loading }
-              onClick={ this.doRemoveLink }
-              className={ classnames({
-                'text-red-500': !loading,
-              }) }
-            >
-              Remove
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Fragment>
-    )
-  }
+              <Close />
+            </IconButton>
+          </div>
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to remove the <b>{ link.getName() }</b> link? This cannot be undone.
+          </Typography>
+          { link.getIsPlaid() && <Typography>You can also convert this link to be manual instead.</Typography> }
+        </DialogContent>
+        <DialogActions>
+          <Button
+            disabled={ loading }
+            onClick={ onClose }
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={ loading }
+            onClick={ doRemoveLink }
+            className={ classnames({
+              'text-red-500': !loading,
+            }) }
+          >
+            Remove
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Fragment>
+  );
 }
-
-export default connect(
-  (state: AppState, props: PropTypes) => ({
-    link: getLink(props.linkId)(state),
-  }),
-  {
-    removeLink,
-  },
-)(RemoveLinkConfirmationDialog);

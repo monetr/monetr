@@ -1,5 +1,6 @@
 import moment, { Moment } from 'moment';
-import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
+
+import { parseToMomentMaybe } from 'util/parseToMoment';
 
 export enum SpendingType {
   Expense = 0,

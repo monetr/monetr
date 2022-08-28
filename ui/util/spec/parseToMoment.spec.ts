@@ -1,4 +1,5 @@
 import moment, { Moment } from 'moment';
+
 import { mustParseToMoment } from 'util/parseToMoment';
 
 describe('parse to moment', () => {

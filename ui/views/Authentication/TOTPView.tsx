@@ -1,12 +1,13 @@
-import { Button, TextField } from '@mui/material';
-import CircularProgress from 'components/CircularProgress';
-import CenteredLogo from 'components/Logo/CenteredLogo';
-import { Formik, FormikHelpers } from 'formik';
-import { useSnackbar } from 'notistack';
 import React, { Fragment, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Button, TextField } from '@mui/material';
+import { Formik, FormikHelpers } from 'formik';
+import { useSnackbar } from 'notistack';
+
 import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
+import CircularProgress from 'components/CircularProgress';
+import CenteredLogo from 'components/Logo/CenteredLogo';
 
 interface TOTPViewParameters {
   emailAddress: string;
@@ -48,25 +49,25 @@ export default function TOTPView(): JSX.Element {
 
   return (
     <Fragment>
-      <BackToLoginButton/>
+      <BackToLoginButton />
       <Formik
         initialValues={ initialValues }
         onSubmit={ submit }
       >
         { ({
-             values,
-             errors,
-             touched,
-             handleChange,
-             handleBlur,
-             handleSubmit,
-             isSubmitting,
-             submitForm,
-           }) => (
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          handleSubmit,
+          isSubmitting,
+          submitForm,
+        }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo/>
+                <CenteredLogo />
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     <p className="text-center">

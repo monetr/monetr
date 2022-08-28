@@ -5,8 +5,6 @@ export default class Login {
   lastName: string;
 
   constructor(data?: Partial<Login>) {
-    if (data) {
-      Object.assign(this, data);
-    }
+    if (data) Object.assign(this, data);
   }
 };

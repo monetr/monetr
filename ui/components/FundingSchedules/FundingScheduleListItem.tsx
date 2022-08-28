@@ -1,18 +1,20 @@
-import { ChevronRight } from '@mui/icons-material';
-import { IconButton, ListItem, Typography } from '@mui/material';
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { getFundingScheduleById } from 'shared/fundingSchedules/selectors/getFundingScheduleById';
-import { getFundingScheduleContribution } from 'shared/fundingSchedules/selectors/getFundingScheduleContribution';
-import formatAmount from 'util/formatAmount';
+import { ChevronRight } from '@mui/icons-material';
+import { ListItem, Typography } from '@mui/material';
 
-interface PropTypes {
+import { useFundingSchedule } from 'hooks/fundingSchedules';
+import { useSpendingSink } from 'hooks/spending';
+import formatAmount from 'util/formatAmount';
+import getFundingScheduleContribution from 'util/getFundingScheduleContribution';
+
+interface Props {
   fundingScheduleId: number;
 }
 
-export default function FundingScheduleListItem(props: PropTypes): JSX.Element {
-  const schedule = useSelector(getFundingScheduleById(props.fundingScheduleId));
-  const contribution = useSelector(getFundingScheduleContribution(props.fundingScheduleId));
+export default function FundingScheduleListItem(props: Props): JSX.Element {
+  const schedule = useFundingSchedule(props.fundingScheduleId);
+  const { result: spending } = useSpendingSink();
+  const contribution = getFundingScheduleContribution(props.fundingScheduleId, spending);
 
   return (
     <ListItem key={ schedule.fundingScheduleId } button>
@@ -38,7 +40,7 @@ export default function FundingScheduleListItem(props: PropTypes): JSX.Element {
           </Typography>
         </div>
         <div className="row-span-3 col-span-1 flex justify-end items-center">
-          <ChevronRight/>
+          <ChevronRight />
         </div>
       </div>
     </ListItem>

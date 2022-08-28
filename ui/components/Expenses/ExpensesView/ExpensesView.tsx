@@ -1,15 +1,16 @@
+import React, { Fragment, useState } from 'react';
 import { Button, Divider, List, Typography } from '@mui/material';
+
 import ExpenseDetail from 'components/Expenses/ExpenseDetail';
 import ExpenseItem from 'components/Expenses/ExpenseItem';
 import NewExpenseDialog from 'components/Expenses/NewExpenseDialog';
-import React, { Fragment, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { getExpenseIds } from 'shared/spending/selectors/getExpenseIds';
+import { useSpendingFiltered } from 'hooks/spending';
+import { SpendingType } from 'models/Spending';
 
 import 'components/Expenses/ExpensesView/styles/ExpensesView.scss';
 
 export default function ExpensesView(): JSX.Element {
-  const expenseIds = useSelector(getExpenseIds);
+  const { result: expenses } = useSpendingFiltered(SpendingType.Expense);
   const [newExpenseDialogOpen, setNewExpenseDialogOpen] = useState(false);
 
   function openNewExpenseDialog() {
@@ -48,8 +49,8 @@ export default function ExpensesView(): JSX.Element {
   }
 
   function ViewContents(): JSX.Element {
-    if (expenseIds.length === 0) {
-      return <EmptyState/>
+    if (expenses.size === 0) {
+      return <EmptyState />;
     }
 
     return (
@@ -60,32 +61,33 @@ export default function ExpensesView(): JSX.Element {
               <div className="w-full expenses-list">
                 <List disablePadding className="w-full">
                   {
-                    expenseIds.map(expense => (
-                      <Fragment key={ expense }>
-                        <ExpenseItem expenseId={ expense }/>
-                        <Divider/>
-                      </Fragment>
-                    ))
+                    Array.from(expenses.values())
+                      .map(expense => (
+                        <Fragment key={ expense.spendingId }>
+                          <ExpenseItem expense={ expense } />
+                          <Divider />
+                        </Fragment>
+                      ))
                   }
                 </List>
               </div>
             </div>
             <div className="border-l">
               <div className="w-full expenses-list">
-                <ExpenseDetail/>
+                <ExpenseDetail />
               </div>
             </div>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <Fragment>
-      { newExpenseDialogOpen && <NewExpenseDialog onClose={ closeNewExpenseDialog } isOpen/> }
-      <ViewContents/>
+      { newExpenseDialogOpen && <NewExpenseDialog onClose={ closeNewExpenseDialog } isOpen /> }
+      <ViewContents />
     </Fragment>
-  )
+  );
 }
 

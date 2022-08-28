@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import * as Sentry from '@sentry/react';
 import { Integrations } from '@sentry/tracing';
+import axios from 'axios';
 
 import reportWebVitals from './reportWebVitals';
 
 import { NewClient } from 'api/api';
-import axios from 'axios';
 import RelayTransport from 'relay/transport';
 import Root from 'Root';
 

@@ -1,4 +1,5 @@
 import moment, { Moment } from 'moment';
+
 import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export default class Institution {

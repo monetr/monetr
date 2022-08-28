@@ -1,25 +1,23 @@
 import React, { Fragment } from 'react';
-import { useSelector } from 'react-redux';
 import Select, { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
-
 import classnames from 'classnames';
+
 import { SpendingOption, SpendingSelectOption } from 'components/Transactions/components/SpendingSelectOption';
-import { Map } from 'immutable';
+import { useCurrentBalance } from 'hooks/balances';
+import { useSpendingSink } from 'hooks/spending';
+import { useUpdateTransaction } from 'hooks/transactions';
 import Spending from 'models/Spending';
 import Transaction from 'models/Transaction';
-import { getBalance } from 'shared/balances/selectors/getBalance';
-import { getSpending } from 'shared/spending/selectors/getSpending';
-import useUpdateTransaction from 'shared/transactions/actions/updateTransaction';
 
 interface Props {
   transaction: Transaction;
 }
 
-export default function TransactionSpentFromSelection(props: Props): JSX.Element {
+function TransactionSpentFromSelection(props: Props): JSX.Element {
   const { transaction } = props;
-  const allSpending = useSelector(getSpending);
-  const balances = useSelector(getBalance);
+  const { result: allSpending } = useSpendingSink();
+  const balances = useCurrentBalance();
   const updateTransaction = useUpdateTransaction();
 
   if (transaction.getIsAddition()) {
@@ -48,7 +46,7 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
     return updateTransaction(updatedTransaction);
   }
 
-  function handleSpentFromChange(newValue: OnChangeValue<SpendingOption, false>, meta: ActionMeta<SpendingOption>) {
+  function handleSpentFromChange(newValue: OnChangeValue<SpendingOption, false>, _: ActionMeta<SpendingOption>) {
     return updateSpentFrom(newValue.spending);
   }
 
@@ -62,17 +60,17 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
       currentAmount: balances?.safe,
     },
   };
-  const items: Map<number, SpendingOption> = allSpending
-    .sortBy(item => item.name.toLowerCase()) // Sort without case sensitivity.
-    .map(item => ({
+  const items: Map<number, SpendingOption> = new Map(Array.from(allSpending.values())
+    .map(item => [item.spendingId, ({
       label: item.name,
       value: item.spendingId,
       spending: item,
-    }));
+    })]));
 
   const options = [
     safeToSpend,
-    ...items.valueSeq().toArray(),
+    // Labels will be unique. So we only need 1 | -1
+    ...(Array.from(items.values()).sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
   ];
 
   const selectedItem = !transaction.spendingId ? safeToSpend : items.get(transaction.spendingId);
@@ -115,3 +113,5 @@ export default function TransactionSpentFromSelection(props: Props): JSX.Element
     />
   );
 }
+
+export default React.memo(TransactionSpentFromSelection);

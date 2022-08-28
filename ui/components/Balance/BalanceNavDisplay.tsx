@@ -1,11 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import { Typography } from '@mui/material';
 
-import { getBalance } from 'shared/balances/selectors/getBalance';
+import { useCurrentBalance } from 'hooks/balances';
 
-const BalanceNavDisplay = React.memo((): JSX.Element => {
-  const balance = useSelector(getBalance);
+export default function BalanceNavDisplay(): JSX.Element {
+  const balance = useCurrentBalance();
 
   if (!balance) {
     return null;
@@ -27,6 +26,4 @@ const BalanceNavDisplay = React.memo((): JSX.Element => {
       </Typography>
     </div>
   );
-});
-
-export default BalanceNavDisplay;
+}
