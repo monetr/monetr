@@ -39,7 +39,7 @@ require (
 	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
 	google.golang.org/api v0.81.0
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd
-	google.golang.org/protobuf v1.28.0
+	google.golang.org/protobuf v1.28.1
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
