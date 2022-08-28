@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.11.2](https://github.com/monetr/monetr/compare/v0.11.1...v0.11.2) (2022-08-28)
+
+
+### Bug Fixes
+
+* **icons:** Further improve icon searching. ([e8d2fe0](https://github.com/monetr/monetr/commit/e8d2fe0e71597816b770a72787aa2bc72809b22e))
+* **icons:** Slightly improve icon search. ([4c35527](https://github.com/monetr/monetr/commit/4c35527586a427a34a4daf277b61dbd587efd2cc))
+* **ui:** Fixed goals and expenses not being sorted alphabetically. ([2f8b2e2](https://github.com/monetr/monetr/commit/2f8b2e24ba782983032137f659715eeab21bf856)), closes [#978](https://github.com/monetr/monetr/issues/978)
+
+
+### Miscellaneous
+
+* Updated bluemonday because of retraction. ([9d66f35](https://github.com/monetr/monetr/commit/9d66f3570b4216b1c32e308a4f3a9d400f81f413))
+
+
+### Dependencies
+
+* **api:** update google.golang.org/genproto digest to 9e6da59 ([#980](https://github.com/monetr/monetr/issues/980)) ([65ce471](https://github.com/monetr/monetr/commit/65ce4718736922b411770d530c63b85c8d1cc54f))
+* **api:** update module github.com/aws/aws-sdk-go to v1.44.86 ([#981](https://github.com/monetr/monetr/issues/981)) ([9f980fc](https://github.com/monetr/monetr/commit/9f980fc8fd569350b5899680141f0213758c8a1b))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.4.0 ([#994](https://github.com/monetr/monetr/issues/994)) ([eb8b1b7](https://github.com/monetr/monetr/commit/eb8b1b73fcfb2619bab7046fddaf506dbedbf741))
+* **ui:** update dependency @fontsource/roboto to v4.5.8 ([#984](https://github.com/monetr/monetr/issues/984)) ([43cd670](https://github.com/monetr/monetr/commit/43cd670305f8dc208b8df7dfe9d998b91f2abd25))
+* **ui:** update dependency @types/react to v17.0.48 ([#985](https://github.com/monetr/monetr/issues/985)) ([49f19f0](https://github.com/monetr/monetr/commit/49f19f095d4f156ffda8b45566e528906c84a7ed))
+* **ui:** update dependency postcss-loader to v7 ([#1014](https://github.com/monetr/monetr/issues/1014)) ([9144fd5](https://github.com/monetr/monetr/commit/9144fd5d8d314e085fef15a6814070952b9eae16))
+* **ui:** update dependency sass to v1.54.5 ([#1005](https://github.com/monetr/monetr/issues/1005)) ([9f880d6](https://github.com/monetr/monetr/commit/9f880d6861f299ba541d07f77bb9bb2942775f47))
+* **ui:** update dependency sass-loader to v13 ([#1015](https://github.com/monetr/monetr/issues/1015)) ([7d79b7c](https://github.com/monetr/monetr/commit/7d79b7ca62f33d2243721fb233d5ce8b40b2b831))
+* **ui:** update dependency typescript to v4.8.2 ([#1007](https://github.com/monetr/monetr/issues/1007)) ([60c81c8](https://github.com/monetr/monetr/commit/60c81c87a3ff54f4389b0e6bd17af7cb9a824319))
+* **ui:** update dependency webpack-dev-server to v4.10.0 ([#1009](https://github.com/monetr/monetr/issues/1009)) ([136d731](https://github.com/monetr/monetr/commit/136d731ea3fbe7b9fb7486d755e6a4f6723f7d53))
+* **ui:** update dependency zustand to v4.1.1 ([#1010](https://github.com/monetr/monetr/issues/1010)) ([f390a19](https://github.com/monetr/monetr/commit/f390a1902a4cd9078246c0a5165ec57605f30137))
+* **ui:** update emotion monorepo to v11.10.0 ([#1011](https://github.com/monetr/monetr/issues/1011)) ([6650b50](https://github.com/monetr/monetr/commit/6650b50f764b421f88cebb274d65d70fe7cda096))
+
 ## [0.11.1](https://github.com/monetr/monetr/compare/v0.11.0...v0.11.1) (2022-08-28)
 
 
