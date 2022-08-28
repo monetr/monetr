@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.11.0](https://github.com/monetr/monetr/compare/v0.10.21...v0.11.0) (2022-08-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ui:** Migration to react-query from redux.
+
+### Features
+
+* **dev:** Adding some stuff for gitpod development. ([8fbe3c6](https://github.com/monetr/monetr/commit/8fbe3c687b10c3f97cf2c3dc9df3f2b0404b8788))
+* **github:** Adding support for GitHub Codespaces ([35266f3](https://github.com/monetr/monetr/commit/35266f30ae45ed95c3e605bf67a64cda2695eed9))
+* **gitpod:** Adding named ports for gitpod. ([f157554](https://github.com/monetr/monetr/commit/f157554d87d5f07d4193b69cb08613e7f796b123))
+* **gitpod:** Further improving support for GitPod. ([a1249d8](https://github.com/monetr/monetr/commit/a1249d8c191e0b48399e3fd33fe5b3cc25937d09))
+* **icons:** Improve icon matching, case insensitivity + whitespace. ([eb51ce8](https://github.com/monetr/monetr/commit/eb51ce803f5265e104369a68f4d82ea83cd95136))
+* **ui:** Migration to react-query from redux. ([9552ff5](https://github.com/monetr/monetr/commit/9552ff5ec1792486f5907e93767f087d0bff71f8))
+* **ui:** Moving more things to react-query, general cleanup. ([1c72463](https://github.com/monetr/monetr/commit/1c72463a5085d9d1720045f1cc6230920410784d))
+
+
+### Bug Fixes
+
+* **billing:** Resolved Stripe subscription delay issue. ([796d13c](https://github.com/monetr/monetr/commit/796d13ce382d601ca416d805c3aa6579bed80d0d)), closes [#966](https://github.com/monetr/monetr/issues/966)
+* **dev:** Fixed GitPod/CodeSpaces development URLs ([ebc6b59](https://github.com/monetr/monetr/commit/ebc6b59851e357addf00378e5c87634c12e79b67))
+* **icons:** Fixing icon search query. ([ea49963](https://github.com/monetr/monetr/commit/ea499635f9b529f7f88f8076cbe2d3ac61f76a73)), closes [#961](https://github.com/monetr/monetr/issues/961)
+* **job:** Improving debugging around removing transactions. ([31efb5c](https://github.com/monetr/monetr/commit/31efb5c6b8f3ffbcb7a0384720ab4007e82b2f69))
+* **login:** Fixing cookie not being cleared after server error. ([d4455c0](https://github.com/monetr/monetr/commit/d4455c0b2d9ff7f4c1c2fad5179ce10ae40c91de))
+* **logs:** Fixed stackdriver logs not being formatted correctly. ([9f31299](https://github.com/monetr/monetr/commit/9f3129958e49e2ef94497e1daa7a3595b6d3f89d))
+
+
+### Dependencies
+
+* **icons:** Bump simple-icons to 7.7.0 ([b9c0304](https://github.com/monetr/monetr/commit/b9c030497374816674c094da389641f5fe3e4d0d))
+* **ui:** update dependency tailwindcss to v3.1.8 ([a155cf1](https://github.com/monetr/monetr/commit/a155cf17224dd05355606ca167a839eae6523fb7))
+* **ui:** update dependency terser-webpack-plugin to v5.3.3 ([a07505e](https://github.com/monetr/monetr/commit/a07505e8e4c61cc0cd2a08f745e4b22de14304f3))
+* **ui:** update dependency webpack to v5.74.0 ([14cae1a](https://github.com/monetr/monetr/commit/14cae1a7080f035eb17510dba1eb9f21e966def3))
+* **ui:** update dependency webpack-cli to v4.10.0 ([8210afa](https://github.com/monetr/monetr/commit/8210afaf95daf01fa2c30698c4c0dd60f879ec6d))
+* **ui:** update dependency webpack-dev-server to v4.9.3 ([efb5254](https://github.com/monetr/monetr/commit/efb5254681070219d0b971d3670c99670cd093b9))
+* **ui:** update emotion monorepo to v11.9.3 ([d060463](https://github.com/monetr/monetr/commit/d060463b16f1aa2f14c8977e725f1ad6ac2392b5))
+
+
+### Miscellaneous
+
+* Add Open in GitPod button. ([b0733cd](https://github.com/monetr/monetr/commit/b0733cded49d4d283eb36c3a577b6c4bd6058225))
+* **deps:** Bump terser from 5.9.0 to 5.14.2 ([776891c](https://github.com/monetr/monetr/commit/776891c4c4410781640057c09e0b49f79b9d06b1))
+* **deps:** Removed unused dependencies. ([7110064](https://github.com/monetr/monetr/commit/711006421feb78fc7d3bad91e8d451ab0ecd8be9))
+* **deps:** Removing `reselect` dependency. ([566b484](https://github.com/monetr/monetr/commit/566b48466489774862ec5770d51196ce8f73ea81))
+* **docs:** Updated screenshot in README ([b8bb345](https://github.com/monetr/monetr/commit/b8bb3456c8f19a74ac6d877113ed7d03a3f5d35f))
+* Include version information for icons, hook improvement. ([b8698d6](https://github.com/monetr/monetr/commit/b8698d6276f69edf32eddbfca3794e33cbd99214))
+* **lint:** Linting fixes + react-query buy-in ([bd389bd](https://github.com/monetr/monetr/commit/bd389bddf28e12b1d820693aff9f4acdd91934c4))
+* release 0.11.0 ([8948829](https://github.com/monetr/monetr/commit/8948829b302cd79b7391ec08e1a73f0b9123f610))
+* Start in GitPod immediately ([9a18cc1](https://github.com/monetr/monetr/commit/9a18cc1b894c903a9bad984a96a6989b36d3553f))
+* Update readme with new dev instructions ([d164a30](https://github.com/monetr/monetr/commit/d164a301bda17af494ac5e6bb86879d9e8bb0c39))
+
 ## [0.10.21](https://github.com/monetr/monetr/compare/v0.10.20...v0.10.21) (2022-07-16)
 
 
