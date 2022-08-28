@@ -75,7 +75,7 @@ export default function ExpenseDetail(): JSX.Element {
   return (
     <Fragment>
       <Dialogs />
-      <div className="w-full pl-5 pr-5 pt-5 expense-detail">
+      <div className="flex-auto w-full pl-5 pr-5 pt-5 expense-detail">
         <div className="grid grid-cols-3 grid-rows-4 grid-flow-col gap-1 w-auto">
           <div className="col-span-2">
             <Typography

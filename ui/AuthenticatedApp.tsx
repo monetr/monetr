@@ -1,3 +1,4 @@
+import FundingPage from 'pages/funding';
 import React, { Fragment, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Backdrop, CircularProgress } from '@mui/material';
@@ -65,6 +66,7 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/transactions" element={ <TransactionsPage /> } />
             <Route path="/expenses" element={ <ExpensesPage /> } />
             <Route path="/goals" element={ <GoalsPage /> } />
+            <Route path="/funding" element={ <FundingPage /> } />
             <Route path="/accounts" element={ <AccountsPage /> } />
             <Route path="/settings" element={ <SettingsPage /> } />
             <Route path="/subscription" element={ <SubscriptionPage /> } />
