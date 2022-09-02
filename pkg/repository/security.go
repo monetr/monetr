@@ -6,6 +6,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/models"
@@ -170,7 +171,7 @@ func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId uin
 		return errors.Errorf("failed to verify credentials")
 	}
 
-	newPasswordHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	newPasswordHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), consts.BcryptCost)
 	if err != nil {
 		return crumbs.WrapError(span.Context(), err, "failed to encrypt new password for change")
 	}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/hash"
 	"golang.org/x/crypto/bcrypt"
@@ -30,7 +31,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 	span := sentry.StartSpan(ctx, "CreateLogin")
 	defer span.Finish()
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), consts.BcryptCost)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to bcrypt provided password")
 	}
@@ -185,7 +186,7 @@ func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64,
 	span := sentry.StartSpan(ctx, "ResetPassword")
 	defer span.Finish()
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), consts.BcryptCost)
 	if err != nil {
 		return crumbs.WrapError(span.Context(), err, "failed to encrypt provided password for reset")
 	}

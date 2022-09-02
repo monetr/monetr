@@ -29,10 +29,11 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
         switch (error?.response?.status) {
           case 428: // The user needs to take some action before they can be fully authenticated.
             switch (error?.response?.data?.code) {
-              case 'REQUIRE_CHANGE_PASSWORD':
+              case 'PASSWORD_CHANGE_REQUIRED':
                 return navigate('/password/reset', {
                   state: {
-                    'token': error?.response?.data?.token,
+                    'message': 'You are required to change your password before authenticating.',
+                    'token': error?.response?.data?.resetToken,
                   },
                 });
               case 'MFA_REQUIRED':

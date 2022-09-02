@@ -37,7 +37,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 		email := GetUniqueEmail(t)
 		hashedPassword, err := bcrypt.GenerateFromPassword(
 			[]byte(gofakeit.Password(true, true, true, true, false, 16)),
-			bcrypt.DefaultCost,
+			consts.BcryptCost,
 		)
 		require.NoError(t, err, "must not have an error when generating the password")
 		login := models.LoginWithHash{

@@ -44,8 +44,8 @@ export default function ResetPasswordPage(): JSX.Element {
 
     // Clear the URL so that the token is not shown. But also so that the user cannot accidentally navigate back to the
     // password reset page with the token still in place.
-    window.history.replaceState({}, document.title, location.pathname);
-  }, [token, enqueueSnackbar, navigate, location.pathname]);
+    window.history.replaceState({}, document.title, !token ? '/login' : location.pathname);
+  }, [routeState, token, enqueueSnackbar, navigate, location.pathname]);
 
   function validateInput(values: ResetPasswordValues): FormikErrors<ResetPasswordValues> {
     const errors: FormikErrors<ResetPasswordValues> = {};
@@ -73,6 +73,8 @@ export default function ResetPasswordPage(): JSX.Element {
       .catch(() => helpers.setSubmitting(false));
   }
 
+  const message = (routeState && routeState['message']) || 'Enter the new password you would like to use.';
+
   return (
     <Fragment>
       <BackToLoginButton />
@@ -98,7 +100,7 @@ export default function ResetPasswordPage(): JSX.Element {
                 <div className="w-full">
                   <div className="w-full pb-2.5">
                     <p className="text-center">
-                      Enter the new password you would like to use.
+                      { message }
                     </p>
                   </div>
                   <div className="w-full pb-2.5">
