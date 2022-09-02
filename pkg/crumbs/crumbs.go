@@ -10,6 +10,10 @@ import (
 )
 
 func WrapError(ctx context.Context, err error, message string) error {
+	if err == nil {
+		return nil
+	}
+
 	Error(ctx, message, "error", nil)
 	return errors.Wrap(err, message)
 }

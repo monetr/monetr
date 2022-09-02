@@ -17,7 +17,6 @@ import (
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/crumbs"
-	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/swag"
@@ -129,10 +128,8 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		return
 	}
 
-	hashedPassword := hash.HashPassword(loginRequest.Email, loginRequest.Password)
-
 	secureRepo := c.mustGetSecurityRepository(ctx)
-	login, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, hashedPassword)
+	login, requiresPasswordChange, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, loginRequest.Password)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
 		c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
@@ -145,6 +142,9 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		return
 	}
 
+	// I want to track how many of these types of things we get.
+	crumbs.AddTag(c.getContext(ctx), "requiresPasswordChange", fmt.Sprint(requiresPasswordChange))
+
 	log := c.getLog(ctx).WithField("loginId", login.LoginId)
 
 	// If we want to verify emails and the login does not have a verified email address, then return an error to the
@@ -152,6 +152,30 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	if c.configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
 		log.Debug("login email address is not verified, please verify before continuing")
 		c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
+		return
+	}
+
+	if requiresPasswordChange {
+		// If the server is not configured to allow password resets return an error.
+		if !c.configuration.Email.AllowPasswordReset() {
+			c.returnError(ctx, http.StatusNotAcceptable, "login requires password reset, but password reset is not allowed")
+			return
+		}
+
+		passwordResetToken, err := c.passwordResetTokens.GenerateToken(
+			c.getContext(ctx),
+			loginRequest.Email,
+			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
+		)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
+			return
+		}
+
+		log.Info("login requires a password change")
+		c.failure(ctx, http.StatusPreconditionRequired, PasswordResetRequiredError{
+			ResetToken: passwordResetToken,
+		})
 		return
 	}
 
@@ -346,17 +370,12 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		}
 	}
 
-	// Hash the user's password so that we can store it securely.
-	hashedPassword := hash.HashPassword(
-		registerRequest.Email, registerRequest.Password,
-	)
-
 	// Create the user's login record in the database, this will return the login
 	// record including the new login's loginId which we will need below.
 	login, err := repository.CreateLogin(
 		c.getContext(ctx),
 		registerRequest.Email,
-		hashedPassword,
+		registerRequest.Password,
 		registerRequest.FirstName,
 		registerRequest.LastName,
 	)
@@ -769,9 +788,11 @@ func (c *Controller) resetPassword(ctx iris.Context) {
 		return
 	}
 
-	hashedPassword := hash.HashPassword(login.Email, resetPasswordRequest.Password)
-
-	if err = unauthenticatedRepo.ResetPassword(c.getContext(ctx), login.LoginId, hashedPassword); err != nil {
+	if err = unauthenticatedRepo.ResetPassword(
+		c.getContext(ctx),
+		login.LoginId,
+		resetPasswordRequest.Password,
+	); err != nil {
 		c.wrapPgError(ctx, err, "Failed to reset password")
 		return
 	}

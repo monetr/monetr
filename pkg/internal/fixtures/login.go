@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/internal/mock_stripe"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
@@ -28,7 +27,7 @@ func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
 	firstName := gofakeit.FirstName()
 	lastName := gofakeit.LastName()
 
-	login, err := repo.CreateLogin(context.Background(), email, hash.HashPassword(email, password), firstName, lastName)
+	login, err := repo.CreateLogin(context.Background(), email, password, firstName, lastName)
 	require.NoError(t, err, "must be able to seed login")
 
 	return *login, password

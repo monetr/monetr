@@ -47,7 +47,7 @@ export default function LoginView(): JSX.Element {
     return errors;
   }
 
-  function doLogin(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
+  async function doLogin(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
     helpers.setSubmitting(true);
 
     return login({

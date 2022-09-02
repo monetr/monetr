@@ -80,7 +80,7 @@ type Repository interface {
 }
 
 type UnauthenticatedRepository interface {
-	CreateLogin(ctx context.Context, email, hashedPassword string, firstName, lastName string) (*models.Login, error)
+	CreateLogin(ctx context.Context, email, password string, firstName, lastName string) (*models.Login, error)
 	CreateAccountV2(ctx context.Context, account *models.Account) error
 	CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error
 	GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error)

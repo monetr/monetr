@@ -38,8 +38,7 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-		hash := testutils.MustHashLogin(t, email, password)
-		login, err := repo.CreateLogin(context.Background(), email, hash, gofakeit.FirstName(), gofakeit.LastName())
+		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
 		assert.Greater(t, login.LoginId, uint64(0), "loginId should be greater than 0")
@@ -50,19 +49,17 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 		email := gofakeit.Email()
 
 		passwordOne := gofakeit.Password(true, true, true, true, false, 32)
-		hashOne := testutils.MustHashLogin(t, email, passwordOne)
 
 		// Creating the first login should succeed.
-		loginOne, err := repo.CreateLogin(context.Background(), email, hashOne, gofakeit.FirstName(), gofakeit.LastName())
+		loginOne, err := repo.CreateLogin(context.Background(), email, passwordOne, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, loginOne, "new login should not be empty")
 		assert.Greater(t, loginOne.LoginId, uint64(0), "loginId should be greater than 0")
 
 		passwordTwo := gofakeit.Password(true, true, true, true, false, 32)
-		hashTwo := testutils.MustHashLogin(t, email, passwordTwo)
 
 		// Creating the first login should succeed.
-		loginTwo, err := repo.CreateLogin(context.Background(), email, hashTwo, gofakeit.FirstName(), gofakeit.LastName())
+		loginTwo, err := repo.CreateLogin(context.Background(), email, passwordTwo, gofakeit.FirstName(), gofakeit.LastName())
 		assert.Error(t, err, "should fail to create another login with the same email")
 		assert.EqualError(t, err, "a login with the same email already exists")
 		assert.Nil(t, loginTwo, "should return nil for login")
@@ -73,9 +70,8 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-		hash := testutils.MustHashLogin(t, email, password)
 
-		login, err := repo.CreateLogin(context.Background(), email, hash, gofakeit.FirstName(), gofakeit.LastName())
+		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
 		assert.Greater(t, login.LoginId, uint64(0), "loginId should be greater than 0")
@@ -108,9 +104,8 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 	t.Run("unique login per account", func(t *testing.T) {
 		repo := GetTestUnauthenticatedRepository(t)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
-		hash := testutils.MustHashLogin(t, email, password)
 
-		login, err := repo.CreateLogin(context.Background(), email, hash, gofakeit.FirstName(), gofakeit.LastName())
+		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
 		assert.NotEmpty(t, login, "new login should not be empty")
 		assert.Greater(t, login.LoginId, uint64(0), "loginId should be greater than 0")
