@@ -52,7 +52,8 @@ type LoginWithHash struct {
 	tableName string `pg:"logins"`
 
 	Login
-	PasswordHash string `json:"-" pg:"password_hash,notnull"`
+	PasswordHash *string `json:"-" pg:"password_hash"`
+	Crypt        []byte  `json:"-" pg:"crypt"`
 }
 
 func (l Login) GetEmailIsVerified() bool {

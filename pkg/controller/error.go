@@ -54,8 +54,9 @@ func (c *Controller) onAnyErrorCode(ctx iris.Context) {
 }
 
 var (
-	ErrMFARequired      = errors.New("login requires MFA")
-	ErrEmailNotVerified = errors.New("email address is not verified")
+	ErrMFARequired            = errors.New("login requires MFA")
+	ErrEmailNotVerified       = errors.New("email address is not verified")
+	ErrPasswordChangeRequired = errors.New("password must be changed")
 )
 
 var (
@@ -108,6 +109,33 @@ func (e EmailNotVerifiedError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
 		"error": e.FriendlyMessage(),
 		"code":  "EMAIL_NOT_VERIFIED",
+	})
+}
+
+// PasswordResetRequiredError is returned to the client when they attempt to login to an account that must have its
+// password updated for any reason. A short lived token is returned to the client that can be used to call the reset
+// password endpoint with an updated password.
+type PasswordResetRequiredError struct {
+	ResetToken string `json:"resetToken"`
+}
+
+func (e PasswordResetRequiredError) Cause() error {
+	return ErrPasswordChangeRequired
+}
+
+func (e PasswordResetRequiredError) Error() string {
+	return e.FriendlyMessage()
+}
+
+func (e PasswordResetRequiredError) FriendlyMessage() string {
+	return e.Cause().Error()
+}
+
+func (e PasswordResetRequiredError) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+		"resetToken": e.ResetToken,
+		"error":      e.FriendlyMessage(),
+		"code":       "PASSWORD_CHANGE_REQUIRED",
 	})
 }
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/hash"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
@@ -23,10 +24,15 @@ type unauthenticatedRepo struct {
 
 func (u *unauthenticatedRepo) CreateLogin(
 	ctx context.Context,
-	email, hashedPassword string, firstName, lastName string,
+	email, password string, firstName, lastName string,
 ) (*models.Login, error) {
 	span := sentry.StartSpan(ctx, "CreateLogin")
 	defer span.Finish()
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to bcrypt provided password")
+	}
 
 	login := &models.LoginWithHash{
 		Login: models.Login{
@@ -36,7 +42,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 			IsEnabled:       true,
 			IsEmailVerified: EmailNotVerified, // Always insert false.
 		},
-		PasswordHash: hashedPassword,
+		Crypt: hashedPassword,
 	}
 	count, err := u.txn.ModelContext(span.Context(), login).
 		Where(`"email" = ?`, email).

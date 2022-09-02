@@ -7,8 +7,10 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -22,12 +24,15 @@ var (
 )
 
 type SecurityRepository interface {
-	// Login receives the user's provided email address, as well as a hashed version of their password. It will then
+	// LoginOld receives the user's provided email address, as well as a hashed version of their password. It will then
 	// verify that a login with that email and password does exist and return that login. This method can return the
 	// error ErrRequirePasswordChange. This method can also return ErrInvalidCredentials. If the login is not nil then
 	// this function call should not be treated as a failure. The caller should check for one of the two aforementioned
 	// errors where this function is called and handle them appropriately.
-	Login(ctx context.Context, email, hashedPassword string) (*models.Login, error)
+	// DEPRECATED! Use Login instead.
+	LoginOld(ctx context.Context, email, hashedPassword string) (*models.Login, error)
+
+	Login(ctx context.Context, email, password string) (_ *models.Login, requiresPasswordChange bool, err error)
 
 	// ChangePassword accepts a login ID and the old hashed password and the new hashed password. The two passwords
 	// should be hashed from the user's input. Specifically, you should not retrieve the "oldHashedPassword" from the
@@ -52,8 +57,8 @@ func NewSecurityRepository(db pg.DBI) SecurityRepository {
 	}
 }
 
-func (b *baseSecurityRepository) Login(ctx context.Context, email, hashedPassword string) (*models.Login, error) {
-	span := sentry.StartSpan(ctx, "Login")
+func (b *baseSecurityRepository) LoginOld(ctx context.Context, email, hashedPassword string) (*models.Login, error) {
+	span := sentry.StartSpan(ctx, "LoginOld")
 	defer span.Finish()
 
 	// This shouldn't be necessary, but better safe than sorry.
@@ -78,6 +83,57 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, hashedPasswor
 		span.Status = sentry.SpanStatusInternalError
 		return nil, crumbs.WrapError(span.Context(), err, "failed to verify credentials")
 	}
+}
+
+func (b *baseSecurityRepository) Login(ctx context.Context, email, password string) (*models.Login, bool, error) {
+	span := sentry.StartSpan(ctx, "Login")
+	defer span.Finish()
+
+	requiresPasswordChange := false
+
+	// Used for backwards compatability.
+	hashedPassword := hash.HashPassword(email, password)
+
+	var login models.LoginWithHash
+	err := b.db.ModelContext(span.Context(), &login).
+		Relation("Users").
+		Relation("Users.Account").
+		Where(`"login_with_hash"."email" = ?`, strings.ToLower(email)).
+		Limit(1).
+		Select(&login)
+	switch err {
+	case nil:
+	case pg.ErrNoRows:
+		span.Status = sentry.SpanStatusNotFound
+		return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
+	default:
+		span.Status = sentry.SpanStatusInternalError
+		return nil, requiresPasswordChange, crumbs.WrapError(span.Context(), err, "failed to verify credentials")
+	}
+
+	switch {
+	case login.Crypt != nil:
+		if err = bcrypt.CompareHashAndPassword(login.Crypt, []byte(password)); err != nil {
+			return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
+		}
+	case login.PasswordHash != nil:
+		if *login.PasswordHash != hashedPassword {
+			return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
+		}
+		requiresPasswordChange = true
+	default:
+		span.Status = sentry.SpanStatusDataLoss
+		crumbs.IndicateBug(
+			span.Context(),
+			"Login is missing bcrypt and legacy password hash, cannot authenticate",
+			map[string]interface{}{
+				"loginId": login.LoginId,
+			})
+		return nil, requiresPasswordChange, errors.Errorf("failed to verify credentials")
+	}
+
+	span.Status = sentry.SpanStatusOK
+	return &login.Login, requiresPasswordChange, nil
 }
 
 func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId uint64, oldHashedPassword, newHashedPassword string) error {
