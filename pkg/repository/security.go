@@ -136,21 +136,51 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, password stri
 	return &login.Login, requiresPasswordChange, nil
 }
 
-func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId uint64, oldHashedPassword, newHashedPassword string) error {
+func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId uint64, oldPassword, newPassword string) error {
 	span := sentry.StartSpan(ctx, "ChangePassword")
 	defer span.Finish()
 
-	var login models.Login
-	result, err := b.db.ModelContext(span.Context(), &login).
-		Set(`"password_hash" = ?`, newHashedPassword).
-		Where(`"login"."login_id" = ?`, loginId).
-		Where(`"login"."password_hash" = ?`, oldHashedPassword).
+	var login models.LoginWithHash
+	err := b.db.ModelContext(span.Context(), &login).
+		Where(`"login_id" = ?`, loginId).
+		Limit(1).
+		Select(&login)
+	if err != nil {
+		return crumbs.WrapError(span.Context(), err, "failed to find login record to change password")
+	}
+
+	switch {
+	case login.Crypt != nil:
+		if err = bcrypt.CompareHashAndPassword(login.Crypt, []byte(oldPassword)); err != nil {
+			return errors.WithStack(ErrInvalidCredentials)
+		}
+	case login.PasswordHash != nil:
+		hashedPassword := hash.HashPassword(login.Email, newPassword)
+		if *login.PasswordHash != hashedPassword {
+			return errors.WithStack(ErrInvalidCredentials)
+		}
+	default:
+		span.Status = sentry.SpanStatusDataLoss
+		crumbs.IndicateBug(
+			span.Context(),
+			"Login is missing bcrypt and legacy password hash, cannot authenticate",
+			map[string]interface{}{
+				"loginId": login.LoginId,
+			})
+		return errors.Errorf("failed to verify credentials")
+	}
+
+	newPasswordHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return crumbs.WrapError(span.Context(), err, "failed to encrypt new password for change")
+	}
+
+	_, err = b.db.ModelContext(span.Context(), &login).
+		Set(`"crypt" = ?`, newPasswordHash).
+		Where(`"login_id" = ?`, loginId).
 		Update(&login)
 	if err != nil {
 		return crumbs.WrapError(span.Context(), err, "failed to update password")
-	}
-	if result.RowsAffected() == 0 {
-		return errors.WithStack(ErrInvalidCredentials)
 	}
 
 	return nil

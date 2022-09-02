@@ -17,7 +17,6 @@ import (
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/crumbs"
-	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/swag"
@@ -789,9 +788,11 @@ func (c *Controller) resetPassword(ctx iris.Context) {
 		return
 	}
 
-	hashedPassword := hash.HashPassword(login.Email, resetPasswordRequest.Password)
-
-	if err = unauthenticatedRepo.ResetPassword(c.getContext(ctx), login.LoginId, hashedPassword); err != nil {
+	if err = unauthenticatedRepo.ResetPassword(
+		c.getContext(ctx),
+		login.LoginId,
+		resetPasswordRequest.Password,
+	); err != nil {
 		c.wrapPgError(ctx, err, "Failed to reset password")
 		return
 	}

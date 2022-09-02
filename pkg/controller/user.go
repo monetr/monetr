@@ -6,7 +6,6 @@ import (
 
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/core/router"
-	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 )
@@ -128,11 +127,13 @@ func (c *Controller) changePassword(ctx iris.Context) {
 		return
 	}
 
-	oldHashedPassword := hash.HashPassword(user.Login.Email, changePasswordRequest.CurrentPassword)
-	newHashedPassword := hash.HashPassword(user.Login.Email, changePasswordRequest.NewPassword)
-
 	secureRepo := c.mustGetSecurityRepository(ctx)
-	err = secureRepo.ChangePassword(c.getContext(ctx), user.LoginId, oldHashedPassword, newHashedPassword)
+	err = secureRepo.ChangePassword(
+		c.getContext(ctx),
+		user.LoginId,
+		changePasswordRequest.CurrentPassword,
+		changePasswordRequest.NewPassword,
+	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
 		c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
