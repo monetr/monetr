@@ -1,3 +1,3 @@
 package consts
 
-const BcryptCost = 16
+const BcryptCost = 10
