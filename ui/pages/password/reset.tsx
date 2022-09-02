@@ -25,9 +25,13 @@ export default function ResetPasswordPage(): JSX.Element {
   const navigate = useNavigate();
   const resetPassword = useResetPassword();
 
+  const { state: routeState } = useLocation();
+
   const search = location.search;
   const query = new URLSearchParams(search);
-  const token = query.get('token');
+  // The token is loaded from the route state (which is provided when a password reset is being forced) or from the
+  // URL query parameter (which is provided when the user is brought here from a link in their email).
+  const token = query.get('token') || (routeState && routeState['token']);
 
   useEffect(() => {
     if (!token) {
@@ -59,7 +63,7 @@ export default function ResetPasswordPage(): JSX.Element {
     return errors;
   }
 
-  function submitResetPassword(values: ResetPasswordValues, helpers: FormikHelpers<ResetPasswordValues>): Promise<void> {
+  async function submitResetPassword(values: ResetPasswordValues, helpers: FormikHelpers<ResetPasswordValues>): Promise<void> {
     helpers.setSubmitting(true);
 
     return resetPassword(values.password, token)
