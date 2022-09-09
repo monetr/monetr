@@ -3,6 +3,7 @@
 package ui
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -37,7 +38,10 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 		)
 
 		app.Get("/*", func(ctx iris.Context) {
-			ctx.Header("Expires", time.Now().Add(24*time.Hour).Truncate(time.Hour).Format(http.TimeFormat))
+			cacheExpiration := time.Now().Add(24*time.Hour).Truncate(time.Hour)
+			seconds := int(cacheExpiration.Sub(time.Now()).Seconds())
+			ctx.Header("Expires", cacheExpiration.Format(http.TimeFormat))
+			ctx.Header("Cache-Control", fmt.Sprintf("max-age=%d", seconds))
 			fileHandler(ctx)
 			c.ContentSecurityPolicyMiddleware(ctx)
 		})
