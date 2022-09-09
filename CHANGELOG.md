@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.11.3](https://github.com/monetr/monetr/compare/v0.11.2...v0.11.3) (2022-09-09)
+
+
+### Features
+
+* **bcrypt:** Use bcrypt for passwords going forward. ([#1017](https://github.com/monetr/monetr/issues/1017)) ([3db5e40](https://github.com/monetr/monetr/commit/3db5e4015d1368d8cfc56132d9091e0771b84e5c))
+
+
+### Bug Fixes
+
+* **docs:** Fixed table rendering in documentation. ([#1018](https://github.com/monetr/monetr/issues/1018)) ([cac54e5](https://github.com/monetr/monetr/commit/cac54e50b215bf02a4f4683795731097bc20a36b)), closes [#974](https://github.com/monetr/monetr/issues/974)
+* **ui:** Improved `Cache-Control` of UI content files. ([81e86e4](https://github.com/monetr/monetr/commit/81e86e47ad6f85db3ebaf3e2b77cd36fa303d546))
+
+
+### Dependencies
+
+* **ui:** update dependency react-refresh to v0.14.0 ([#1002](https://github.com/monetr/monetr/issues/1002)) ([a11f8cf](https://github.com/monetr/monetr/commit/a11f8cf10dcb224d9ec8f7468fc6038e64fb88b9))
+* **ui:** update dependency ts-loader to v9.3.1 ([#1006](https://github.com/monetr/monetr/issues/1006)) ([43f938d](https://github.com/monetr/monetr/commit/43f938d098c623e166b19ff94359bb7eda34f1ab))
+
 ## [0.11.2](https://github.com/monetr/monetr/compare/v0.11.1...v0.11.2) (2022-08-28)
 
 
