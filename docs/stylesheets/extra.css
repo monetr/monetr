@@ -11,3 +11,7 @@
 .home-container {
     padding: 5em;
 }
+
+tr td:first-child code {
+    white-space: nowrap;
+}
