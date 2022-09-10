@@ -48,7 +48,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
   });
 
 
-  async function plaidOnSuccess(token: string, metadata: PlaidLinkOnSuccessMetadata) {
+  async function plaidOnSuccess(token: string, _metadata: PlaidLinkOnSuccessMetadata) {
     setState({
       loading: true,
     });
@@ -63,8 +63,8 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       });
   }
 
-  function plaidOnEvent(event: PlaidLinkOnEventMetadata) {
-
+  function plaidOnEvent(_event: PlaidLinkOnEventMetadata) {
+    return;
   }
 
   function plaidOnExit(event: PlaidLinkOnExitMetadata) {

@@ -7,7 +7,7 @@ import Transaction from 'models/Transaction';
 import request from 'util/request';
 
 export type TransactionsResult =
-  { result: Map<number, Transaction> }
+  { result: Array<Transaction> }
   & UseInfiniteQueryResult<Array<Partial<Transaction>>>;
 
 export function useTransactionsSink(): TransactionsResult {
@@ -22,11 +22,8 @@ export function useTransactionsSink(): TransactionsResult {
   );
   return {
     ...result,
-    // Take all the items from all the pages and build a map with the results, keyed by the transaction ID.
-    result: new Map(result?.data?.pages.flatMap(x => x).map(item => {
-      const transaction = new Transaction(item);
-      return [transaction.transactionId, transaction];
-    })),
+    // Take all the pages and build an array.
+    result: result?.data?.pages.flatMap(x => x).map(item => new Transaction(item)),
   };
 }
 

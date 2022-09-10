@@ -125,7 +125,7 @@ export default function TransferDialog(props: Props): JSX.Element {
     });
   }
 
-  function doTransfer(values: transferForm, { setSubmitting, setFieldError }: FormikHelpers<transferForm>) {
+  async function doTransfer(values: transferForm, { setSubmitting, setFieldError }: FormikHelpers<transferForm>) {
     const { to, from } = state;
 
     if (values.amount <= 0) {
