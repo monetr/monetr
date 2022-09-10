@@ -15,9 +15,10 @@ import (
 )
 
 var (
-	// ErrRequirePasswordChange is an error that is returned when a user's password must be updated. This is more or
-	// less future planning, as I'd like to implement a new method of storing passwords and need to make sure a path to
-	// make user's update their passwords is in place. This error should not be considered a "failure" state.
+	// Deprecated: use requiresPasswordChange instead ErrRequirePasswordChange is an error that is returned when a user's
+	// password must be updated. This is more or less future planning, as I'd like to implement a new method of storing
+	// passwords and need to make sure a path to make user's update their passwords is in place. This error should not be
+	// considered a "failure" state.
 	ErrRequirePasswordChange = errors.New("password must be updated")
 	// ErrInvalidCredentials is returned when the provided email and/or password does not match the current password for
 	// an existing login.
@@ -25,14 +26,12 @@ var (
 )
 
 type SecurityRepository interface {
-	// LoginOld receives the user's provided email address, as well as a hashed version of their password. It will then
-	// verify that a login with that email and password does exist and return that login. This method can return the
-	// error ErrRequirePasswordChange. This method can also return ErrInvalidCredentials. If the login is not nil then
-	// this function call should not be treated as a failure. The caller should check for one of the two aforementioned
-	// errors where this function is called and handle them appropriately.
-	// DEPRECATED! Use Login instead.
-	LoginOld(ctx context.Context, email, hashedPassword string) (*models.Login, error)
-
+	// Login recieves the user's provided email address as well as password. This password is then hashed using bcrypt and
+	// is then compared to the stored hash for that login. If the provided password is equivalent to the stored hash then
+	// this function will return the login model for the credentials provided. As well as a boolean indicating whether or
+	// not the user must change their password at this time. A user MUST NOT be given credentials if their password
+	// requires changing. If the provided credentials are invalid then ErrInvalidCredentials is returned.
+	// NOTE: ErrRequirePasswordChange is no longer returned.
 	Login(ctx context.Context, email, password string) (_ *models.Login, requiresPasswordChange bool, err error)
 
 	// ChangePassword accepts a login ID and the old hashed password and the new hashed password. The two passwords
@@ -55,34 +54,6 @@ type baseSecurityRepository struct {
 func NewSecurityRepository(db pg.DBI) SecurityRepository {
 	return &baseSecurityRepository{
 		db: db,
-	}
-}
-
-func (b *baseSecurityRepository) LoginOld(ctx context.Context, email, hashedPassword string) (*models.Login, error) {
-	span := sentry.StartSpan(ctx, "LoginOld")
-	defer span.Finish()
-
-	// This shouldn't be necessary, but better safe than sorry.
-	email = strings.TrimSpace(strings.ToLower(email))
-
-	var login models.Login
-	err := b.db.ModelContext(span.Context(), &login).
-		Relation("Users").
-		Relation("Users.Account").
-		Where(`"login"."email" = ?`, email).
-		Where(`"login"."password_hash" = ?`, hashedPassword).
-		Limit(1).
-		Select(&login)
-	switch err {
-	case pg.ErrNoRows:
-		span.Status = sentry.SpanStatusNotFound
-		return nil, errors.WithStack(ErrInvalidCredentials)
-	case nil:
-		span.Status = sentry.SpanStatusOK
-		return &login, nil
-	default:
-		span.Status = sentry.SpanStatusInternalError
-		return nil, crumbs.WrapError(span.Context(), err, "failed to verify credentials")
 	}
 }
 
