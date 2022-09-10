@@ -83,6 +83,16 @@ func newSecretInformationCommand(parent *cobra.Command) {
 						log.WithError(err).Fatalf("failed to init AWS KMS client")
 						return err
 					}
+				} else if kmsConfig := configuration.KeyManagement.Google; kmsConfig != nil {
+					kms, err = secrets.NewGoogleKMS(cmd.Context(), secrets.GoogleKMSConfig{
+						Log:             log,
+						KeyName:         kmsConfig.ResourceName,
+						CredentialsFile: kmsConfig.CredentialsJSON,
+					})
+					if err != nil {
+						log.WithError(err).Fatalf("failed to init Google KMS client")
+						return err
+					}
 				}
 			}
 
@@ -256,7 +266,6 @@ func newViewSecretCommand(parent *cobra.Command) {
 				log.WithError(err).Fatal("failed to decrypt secret")
 				return err
 			}
-
 
 			fmt.Println(string(decrypted))
 			return nil
