@@ -20,7 +20,10 @@ type (
 	Client interface {
 		GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error)
 		GetAllTransactions(ctx context.Context, start, end time.Time, accountIds []string) ([]Transaction, error)
-		UpdateItem(ctx context.Context) (LinkToken, error)
+		// UpdateItem will create a LinkToken that is used to allow the client to update this particular link. This can be
+		// used to resolve issues with the link and its authentication. Or can be used to add/remove accounts that monetr
+		// has access to via Plaid's API.
+		UpdateItem(ctx context.Context, updateAccountSelection bool) (LinkToken, error)
 		RemoveItem(ctx context.Context) error
 	}
 )
@@ -169,7 +172,6 @@ func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time,
 				IncludeOriginalDescription: plaid.NullableBool{},
 			},
 			AccessToken: p.accessToken,
-			Secret:      nil,
 			StartDate:   start.Format("2006-01-02"),
 			EndDate:     end.Format("2006-01-02"),
 		})
@@ -199,7 +201,7 @@ func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time,
 	return transactions, nil
 }
 
-func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
+func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection bool) (LinkToken, error) {
 	span := sentry.StartSpan(ctx, "Plaid - UpdateItem")
 	defer span.Finish()
 
@@ -209,6 +211,8 @@ func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
 
 	log.Trace("creating link token for update")
 
+	// Normally we would substitute the configured protocol, but Plaid _requires_ that we use HTTPS for oauth callbacks.
+	// So if the monetr server is not configured for TLS that sucks because this won't work.
 	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain)
 
 	var webhooksUrl *string
@@ -233,6 +237,9 @@ func (p *PlaidClient) UpdateItem(ctx context.Context) (LinkToken, error) {
 			AccessToken:           &p.accessToken,
 			LinkCustomizationName: nil,
 			RedirectUri:           &redirectUri,
+			Update: &plaid.LinkTokenCreateRequestUpdate{
+				AccountSelectionEnabled: myownsanity.BoolP(updateAccountSelection),
+			},
 		})
 
 	result, response, err := request.Execute()
