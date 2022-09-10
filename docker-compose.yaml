@@ -39,10 +39,10 @@ services:
     working_dir: /build
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4000/api/health" ]
-      interval: 10s
+      interval: 5s
       timeout: 10s
-      retries: 12
-      start_period: 60s
+      retries: 24
+      start_period: 30s
     environment:
       air_wd: /build
       DISABLE_GO_RELOAD: ${DISABLE_GO_RELOAD:-false}
@@ -50,6 +50,11 @@ services:
       MONETR_EXTERNAL_PROTOCOL: ${LOCAL_PROTOCOL:-http}
       MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
       MONETR_API_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
+      # By default we want to use the AWS KMS provider as that is what we have built into the local env. But iuf the
+      # developer specifies a different KMS provider we want to use that instead.
+      MONETR_KMS_PROVIDER: ${MONETR_KMS_PROVIDER:-aws}
+      # If they are developing using Google's KMS then they'll need to provide a resource name.
+      MONETR_KMS_RESOURCE_NAME: ${MONETR_KMS_RESOURCE_NAME:-}
       # If you want to do development against Plaid you will need to provide your own secrets. Please do not modify this
       # file, instead define these as environment variables in your own shell when you execute the compose.
       MONETR_PLAID_CLIENT_ID: $PLAID_CLIENT_ID
@@ -62,6 +67,7 @@ services:
       MONETR_CAPTCHA_PRIVATE_KEY: $MONETR_CAPTCHA_PRIVATE_KEY
       MONETR_SENTRY_DSN: $MONETR_SENTRY_DSN
       MONETR_SENTRY_EXTERNAL_DSN: ${MONETR_SENTRY_EXTERNAL_DSN:-${MONETR_SENTRY_DSN}}
+      MONETR_EMAIL_VERIFICATION_ENABLED: ${MONETR_EMAIL_VERIFICATION_ENABLED:-true}
       MONETR_EMAIL_VERIFICATION_TOKEN_SECRET: "abc123"
       MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_SECRET: "123abc"
       MONETR_JWT_LOGIN_SECRET: "qwertyuiop1234567890"
@@ -76,6 +82,8 @@ services:
       # This port is used for editors to connect to dlv remotely to do step debugging.
       - 2345:2345
     volumes:
+      - goData:/go/pkg/mod
+      - tmpData:/etc/monetr
       - ./:/build
       - ./compose/monetr.yaml:/etc/monetr/config.yaml
     depends_on:
@@ -185,3 +193,5 @@ services:
 volumes:
   vaultData:
   kmsData:
+  tmpData:
+  goData:

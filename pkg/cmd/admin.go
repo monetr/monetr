@@ -68,32 +68,9 @@ func newSecretInformationCommand(parent *cobra.Command) {
 				return errors.Wrap(err, "failed to initialize database")
 			}
 
-			var kms secrets.KeyManagement
-			if configuration.KeyManagement.Enabled {
-				if kmsConfig := configuration.KeyManagement.AWS; kmsConfig != nil {
-					kms, err = secrets.NewAWSKMS(cmd.Context(), secrets.AWSKMSConfig{
-						Log:       log,
-						KeyID:     kmsConfig.KeyID,
-						Region:    kmsConfig.Region,
-						AccessKey: kmsConfig.AccessKey,
-						SecretKey: kmsConfig.SecretKey,
-						Endpoint:  kmsConfig.Endpoint,
-					})
-					if err != nil {
-						log.WithError(err).Fatalf("failed to init AWS KMS client")
-						return err
-					}
-				} else if kmsConfig := configuration.KeyManagement.Google; kmsConfig != nil {
-					kms, err = secrets.NewGoogleKMS(cmd.Context(), secrets.GoogleKMSConfig{
-						Log:             log,
-						KeyName:         kmsConfig.ResourceName,
-						CredentialsFile: kmsConfig.CredentialsJSON,
-					})
-					if err != nil {
-						log.WithError(err).Fatalf("failed to init Google KMS client")
-						return err
-					}
-				}
+			kms, err := getKMS(log, configuration)
+			if err != nil {
+				log.WithError(err).Fatal("failed to configur KMS")
 			}
 
 			var vault vault_helper.VaultHelper
@@ -121,7 +98,6 @@ func newSecretInformationCommand(parent *cobra.Command) {
 				Relation("PlaidLink").
 				Join(`LEFT JOIN "plaid_tokens" AS "plaid_token"`).
 				JoinOn(`"plaid_link"."item_id" = "plaid_token"."item_id"`).
-				Where(`"plaid_token"."access_token" IS NULL`).
 				Where(`"plaid_link"."item_id" IS NOT NULL`).
 				Select(&links)
 			if err != nil {
@@ -161,7 +137,7 @@ func newSecretInformationCommand(parent *cobra.Command) {
 
 				reEncryptionStatus := "not re-encrypted"
 				if accessToken == "" {
-					reEncryptionStatus = "no secret to re-encrypt"
+					reEncryptionStatus = "no secret to re-encrypt or secret already migrated"
 				} else if kms != nil {
 					keyId, _, _, err := kms.Encrypt(cmd.Context(), []byte(accessToken))
 					if err != nil {
@@ -194,12 +170,17 @@ func newSecretInformationCommand(parent *cobra.Command) {
 
 func newViewSecretCommand(parent *cobra.Command) {
 	var itemId string
+	var kmsProvider string
 
 	command := &cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a secret's value from the data store, meant for debugging purposes only!",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configuration := config.LoadConfiguration()
+			if kmsProvider != "" {
+				configuration.KeyManagement.Provider = kmsProvider
+			}
+
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
 			db, err := getDatabase(log, configuration, nil)
@@ -272,6 +253,7 @@ func newViewSecretCommand(parent *cobra.Command) {
 		},
 	}
 	command.PersistentFlags().StringVar(&itemId, "item-id", "", "The Plaid Item ID to retrieve the secret for.")
+	command.PersistentFlags().StringVar(&kmsProvider, "kms-provider", "", "Override the KMS provider setting in the config.")
 
 	parent.AddCommand(command)
 }

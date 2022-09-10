@@ -83,7 +83,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       </DialogTitle>
       <DialogContent>
         <Typography>
-          test
+          One moment...
         </Typography>
       </DialogContent>
       <DialogActions>
