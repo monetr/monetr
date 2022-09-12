@@ -1404,6 +1404,87 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#update-plaid-link" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Plaid Link
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Plaid Link">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request Path Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-query-parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request Query Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-link-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Link Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Link Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Successful
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-link-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Link Errors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Link Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-link-update-requested" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Link Update Requested
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1708,6 +1789,87 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#update-plaid-link" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Plaid Link
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Plaid Link">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#request-path-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request Path Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#request-query-parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Request Query Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-link-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Link Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Link Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#successful_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Successful
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-link-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Link Errors
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Update Link Errors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#manual-link-update-requested" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Link Update Requested
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1916,6 +2078,69 @@ Plaid.</p>
 <a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;failed to exchange token&quot;</span><span class="w"></span>
 <a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
+<h2 id="update-plaid-link">Update Plaid Link</h2>
+<p>Plaid links can be updated after they have been established. This can be used as a method of re-authenticating a link if
+it ends up in an error state (though sometimes a link can end up in an error state without indicating <sup id="fnref:3"><a class="footnote-ref" href="#fn:3">3</a></sup>). This can
+also be used as a way to add additional accounts to a link if those accounts were not originally granted access when the
+link was created.</p>
+<div class="highlight"><span class="filename">HTTP</span><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="err">PUT /api/plaid/link/update/{linkId}</span>
+</code></pre></div>
+<h3 id="request-path-parameters">Request Path Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>linkId</code></td>
+<td>number</td>
+<td>yes</td>
+<td>A link ID must be provided in order to put that link into update mode. The link must also be a Plaid link, a manual link will result in a bad request.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="request-query-parameters_1">Request Query Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>update_account_selection</code></td>
+<td>boolean</td>
+<td>no</td>
+<td>This parameter is used to specify whether you want to put this link into an update mode that will allow you to add/remove accounts that are visible to monetr. This will change the Plaid Link dialog behavior slightly when it is presented to the client.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="update-link-examples">Update Link Examples</h3>
+<div class="highlight"><span class="filename">Example Update Link Request</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>curl --request PUT <span class="se">\</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  --url <span class="s2">&quot;https://my.monetr.app/api/plaid/link/update/123?update_account_selection=true&quot;</span>
+</code></pre></div>
+<h4 id="successful_2">Successful</h4>
+<p>If the link is able to be put into update mode, then a Link Token is returned to the client. This can then be used with
+the Plaid Link library to allow the user to update their account selection or re-authenticate their link with their
+bank.</p>
+<div class="highlight"><span class="filename">200 Ok</span><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;linkToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;link-sandbox-af1a0311-da53-4636-b754-dd15cc058176&quot;</span><span class="w"></span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h3 id="update-link-errors">Update Link Errors</h3>
+<h4 id="manual-link-update-requested">Manual Link Update Requested</h4>
+<div class="highlight"><span class="filename">400 Bad Request</span><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cannot update a non-Plaid link&quot;</span><span class="w"></span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <div class="footnote">
 <hr />
 <ol>
@@ -1928,6 +2153,11 @@ limited number of development links.&#160;<a class="footnote-backref" href="#fnr
 <li id="fn:2">
 <p>If you fully authenticate a bank account, but you never exchange the <code>public_token</code> for that authenticated bank
 account. It <em>should not</em> affect the number of accounts linked for development credentials.&#160;<a class="footnote-backref" href="#fnref:2" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:3">
+<p>While working on monetr I had a link fail to receive any updates from Plaid/the bank. It still showed that it was in
+a healthy state though. It didn't require re-authentication but at the time putting the link through "link update"
+was ultimately what resolved it.&#160;<a class="footnote-backref" href="#fnref:3" title="Jump back to footnote 3 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>
