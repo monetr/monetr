@@ -66,4 +66,8 @@ body::before {
 </section>
 {% endblock %}
 {% block content %}{% endblock %}
-{% block footer %}{% endblock %}
+{% block footer %}
+<footer class="md-footer">
+  {% include "partials/footer-details.html" %}
+</footer>
+{% endblock %}
