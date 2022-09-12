@@ -37,4 +37,22 @@ func TestMidnightInLocal(t *testing.T) {
 		midnight := MidnightInLocal(start, central)
 		assert.Equal(t, time.Date(2022, 06, 14, 0, 0, 0, 0, central), midnight, "midnight in a different timezone is a different day")
 	})
+
+	t.Run("weird timezone", func(t *testing.T) {
+		sanLuis, err := time.LoadLocation("America/Argentina/San_Luis")
+		assert.NoError(t, err, "must be able to load the sanLuis time location")
+		start := time.Date(2022, 06, 15, 2, 24, 38, 0, time.UTC)
+
+		midnight := MidnightInLocal(start, sanLuis)
+		assert.Equal(t, time.Date(2022, 06, 14, 0, 0, 0, 0, sanLuis), midnight, "midnight in a different timezone is a different day")
+	})
+
+	t.Run("panics for an empty time", func(t *testing.T) {
+		sanLuis, err := time.LoadLocation("America/Argentina/San_Luis")
+		assert.NoError(t, err, "must be able to load the sanLuis time location")
+
+		assert.Panics(t, func() {
+			_ = MidnightInLocal(time.Time{}, sanLuis)
+		})
+	})
 }

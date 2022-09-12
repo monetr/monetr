@@ -6,10 +6,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-// MidnightInLocal will take the provided timestamp and return the midnight of that timestamp in the provided timezome.
+// MidnightInLocal will take the provided timestamp and return the midnight of that timestamp in the provided timezone.
 // This can sometimes result in returning the day prior when the function is evaluated at such a time that the current
 // input time is far enough ahead that the timezone is still the previous day.
 func MidnightInLocal(input time.Time, timezone *time.Location) time.Time {
+	if input.IsZero() {
+		panic("cannot calculate the midnight in local of an empty time")
+	}
 	clone := time.Date(
 		input.Year(),
 		input.Month(),

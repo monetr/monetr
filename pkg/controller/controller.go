@@ -137,6 +137,15 @@ func NewController(
 	}
 }
 
+func (c *Controller) Close() error {
+	if err := c.plaidWebhookVerification.Close(); err != nil {
+		c.log.WithError(err).Error("failed to dispose of plaid webhook verification gracefully")
+		return err
+	}
+
+	return nil
+}
+
 // @title monetr's REST API
 // @version 0.0
 // @description This is the REST API for our budgeting application.

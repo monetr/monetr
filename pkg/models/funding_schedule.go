@@ -43,7 +43,16 @@ func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezo
 }
 
 func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) time.Time {
-	nextContributionDate := util.MidnightInLocal(f.NextOccurrence, timezone)
+	// Make debugging easier.
+	now = now.In(timezone)
+	var nextContributionDate time.Time
+	if !f.NextOccurrence.IsZero() {
+		nextContributionDate = util.MidnightInLocal(f.NextOccurrence, timezone)
+	} else {
+		// Hack to determine the previous contribution date before we figure out the next one.
+		f.Rule.RRule.DTStart(now.AddDate(-1, 0, 0))
+		nextContributionDate = util.MidnightInLocal(f.Rule.Before(now, false), timezone)
+	}
 	if now.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.
 		// This might be goofy if we want to test stuff in the distant past?
