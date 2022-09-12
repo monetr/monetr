@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { useQuery } from 'react-query';
-import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, Remove } from '@mui/icons-material';
+import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, PriceChange, Remove } from '@mui/icons-material';
 import { Divider, IconButton, ListSubheader, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
 import * as R from 'ramda';
 
@@ -19,6 +19,7 @@ interface LinkedAccountItemProps {
 enum DialogOpen {
   RemoveLinkDialog,
   UpdateLinkDialog,
+  UpdateAccountsDialog,
 }
 
 export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.Element {
@@ -92,6 +93,8 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
     switch (dialog) {
       case DialogOpen.UpdateLinkDialog:
         return <UpdatePlaidAccountDialog open={ true } onClose={ closeDialog } linkId={ props.link.linkId } />;
+      case DialogOpen.UpdateAccountsDialog:
+        return <UpdatePlaidAccountDialog open={ true } onClose={ closeDialog } linkId={ props.link.linkId } updateAccountSelection={ true } />;
       case DialogOpen.RemoveLinkDialog:
         return <RemoveLinkConfirmationDialog open={ true } onClose={ closeDialog } linkId={ props.link.linkId } />;
       default:
@@ -141,6 +144,12 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
                   <MenuItem>
                     <CloudOff className="mr-2" />
                     Convert To Manual Link
+                  </MenuItem>
+                }
+                { props.link.getCanUpdateAccountSelection() &&
+                  <MenuItem onClick={ openDialog(DialogOpen.UpdateAccountsDialog) }>
+                    <PriceChange className="mr-2" />
+                    Update Account Selection
                   </MenuItem>
                 }
                 <MenuItem>

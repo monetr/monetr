@@ -34,6 +34,7 @@ export default class Link {
   linkStatus: LinkStatus;
   errorCode: string | null;
   plaidInstitutionId: string | null;
+  plaidNewAccountsAvailable: boolean | null;
   institutionName: string;
   customInstitutionName?: string;
   createdByUserId: number;
@@ -56,6 +57,10 @@ export default class Link {
 
   getIsPlaid(): boolean {
     return this.linkType === LinkType.Plaid;
+  }
+
+  getCanUpdateAccountSelection(): boolean {
+    return this.getIsPlaid() && this.plaidNewAccountsAvailable === true;
   }
 
   getIsError(): boolean {

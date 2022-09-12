@@ -124,7 +124,7 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 		assert.NoError(t, err, "should create client")
 		assert.NotNil(t, client, "should not be nil")
 
-		linkToken, err := client.UpdateItem(context.Background())
+		linkToken, err := client.UpdateItem(context.Background(), false)
 		assert.NoError(t, err, "should not return an error creating an update link token")
 		assert.NotEmpty(t, linkToken.Token(), "must not be empty")
 	})
