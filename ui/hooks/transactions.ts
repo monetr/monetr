@@ -22,8 +22,8 @@ export function useTransactionsSink(): TransactionsResult {
   );
   return {
     ...result,
-    // Take all the pages and build an array.
-    result: result?.data?.pages.flatMap(x => x).map(item => new Transaction(item)),
+    // Take all the pages and build an array. Make sure we actually return an array here even if it's empty.
+    result: result?.data?.pages.flatMap(x => x).map(item => new Transaction(item)) || [],
   };
 }
 
