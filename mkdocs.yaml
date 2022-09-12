@@ -4,7 +4,7 @@ site_url: http://monetr.local/documentation/
 repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
 edit_uri: edit/main/docs/
-copyright: © monetr 2022
+copyright: © monetr LLC 2022
 site_dir: build/site
 watch:
   - docs
@@ -49,6 +49,11 @@ extra:
   homepage: https://monetr.app
   version:
     provider: mike
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/monetr
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/monetr
 extra_css:
   - stylesheets/extra.css
 nav:
