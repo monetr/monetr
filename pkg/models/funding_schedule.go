@@ -33,6 +33,15 @@ func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time) 
 	return int64(len(rule.Between(start, end, false)))
 }
 
+// GetNextTwoContributionDatesAfter returns the next two contribution dates relative to the timestamp provided. This is
+// used to better calculate contributions to funds that recur more frequently than they can be funded.
+func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
+	nextOne := f.GetNextContributionDateAfter(now, timezone)
+	subsequent := f.GetNextContributionDateAfter(nextOne, timezone)
+
+	return nextOne, subsequent
+}
+
 func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) time.Time {
 	nextContributionDate := util.MidnightInLocal(f.NextOccurrence, timezone)
 	if now.Before(nextContributionDate) {
@@ -46,7 +55,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	// Force the start of the rule to be the next contribution date. This fixes a bug where the rule would increment
 	// properly, but would include the current timestamp in that increment causing incorrect comparisons below. This
 	// makes sure that the rule will increment in the user's timezone as intended.
-	nextContributionRule.DTStart(f.NextOccurrence)
+	nextContributionRule.DTStart(nextContributionDate)
 
 	// Keep track of an un-adjusted next contribution date. Because we might subtract days to account for early
 	// funding, we need to make sure we are still incrementing relative to the _real_ contribution dates. Not the
