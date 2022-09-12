@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.11.4](https://github.com/monetr/monetr/compare/v0.11.3...v0.11.4) (2022-09-12)
+
+
+### Features
+
+* **dev:** Allow Google Cloud KMS for local development. ([#1023](https://github.com/monetr/monetr/issues/1023)) ([636e71b](https://github.com/monetr/monetr/commit/636e71b724b3267e7b1cd15d977f933b405ba9ae))
+* **legal:** Adding references to Terms of Use and Privacy Policy. ([#1029](https://github.com/monetr/monetr/issues/1029)) ([124279e](https://github.com/monetr/monetr/commit/124279e9b990e2a025c230b1a22e0055f9da484c))
+* **plaid:** Implemented Plaid Account Select V2. ([#1022](https://github.com/monetr/monetr/issues/1022)) ([b9ab47c](https://github.com/monetr/monetr/commit/b9ab47cc199e690db15d4042966fe4126140e51e)), closes [#780](https://github.com/monetr/monetr/issues/780)
+
+
+### Dependencies
+
+* **ui:** update dependency eslint to v8.23.0 ([#996](https://github.com/monetr/monetr/issues/996)) ([d9c2a46](https://github.com/monetr/monetr/commit/d9c2a463ad8fb50d96b98dff2b439cde7b6cbf40))
+* **ui:** update dependency react-select to v5.4.0 ([#1003](https://github.com/monetr/monetr/issues/1003)) ([a6d879a](https://github.com/monetr/monetr/commit/a6d879a5424bc2d329c730bdf736b69066a53712))
+
+
+### Miscellaneous
+
+* **api:** Deprecate old login function. ([#1021](https://github.com/monetr/monetr/issues/1021)) ([88111bd](https://github.com/monetr/monetr/commit/88111bd4109aa2986c3361992e4cbf56d80f3867))
+* **icons:** Include simple icons `LICENSE.md` file in embed. ([a0f045f](https://github.com/monetr/monetr/commit/a0f045fe4756dcbc6d69b70e53dd434fca5752de))
+* **kms:** Add Google KMS to admin commands. ([e879584](https://github.com/monetr/monetr/commit/e879584933b1a1d7ef20ea242d3d72665f8f5268))
+* **ui:** General code cleanup. ([0ad45de](https://github.com/monetr/monetr/commit/0ad45de96020ae4bddce05a699de739a251cdf76))
+
 ## [0.11.3](https://github.com/monetr/monetr/compare/v0.11.2...v0.11.3) (2022-09-09)
 
 
