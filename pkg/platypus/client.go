@@ -209,11 +209,13 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 
 	log := p.getLog(span)
 
-	log.Trace("creating link token for update")
-
-	// Normally we would substitute the configured protocol, but Plaid _requires_ that we use HTTPS for oauth callbacks.
+	var redirectUri *string
+	if p.config.OAuthDomain != "" {
+		// Normally we would substitute the configured protocol, but Plaid _requires_ that we use HTTPS for oauth callbacks.
 	// So if the monetr server is not configured for TLS that sucks because this won't work.
-	redirectUri := fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain)
+	redirectUri = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
+		log = log.WithField("redirectUri", *redirectUri)
+	}
 
 	var webhooksUrl *string
 	if p.config.WebhooksEnabled {
@@ -221,8 +223,11 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 			crumbs.Warn(span.Context(), "BUG: Plaid webhook domain is not present but webhooks are enabled.", "bug", nil)
 		} else {
 			webhooksUrl = myownsanity.StringP(p.config.GetWebhooksURL())
+			log = log.WithField("webhooksUrl", *webhooksUrl)
 		}
 	}
+
+	log.Trace("creating link token for update")
 
 	request := p.client.PlaidApi.
 		LinkTokenCreate(span.Context()).
@@ -232,11 +237,12 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 			CountryCodes: consts.PlaidCountries,
 			User: plaid.LinkTokenCreateRequestUser{
 				ClientUserId: strconv.FormatUint(p.accountId, 10),
+				EmailAddress: nil,
 			},
 			Webhook:               webhooksUrl,
 			AccessToken:           &p.accessToken,
 			LinkCustomizationName: nil,
-			RedirectUri:           &redirectUri,
+			RedirectUri:           redirectUri,
 			Update: &plaid.LinkTokenCreateRequestUpdate{
 				AccountSelectionEnabled: myownsanity.BoolP(updateAccountSelection),
 			},

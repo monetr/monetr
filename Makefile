@@ -286,7 +286,7 @@ develop: $(NODE_MODULES)
 ifndef GITPOD_WORKSPACE_ID
 ifndef CODESPACE_NAME
 ifneq ($(LOCAL_DOMAIN),localhost)
-develop: $(HOSTESS)
+develop: $(HOSTESS) $(GOOGLE_KMS_AUTH)
 	$(call infoMsg,Setting up $(LOCAL_DOMAIN) domain with your /etc/hosts file)
 	$(call infoMsg,If you would prefer to not use this; add)
 	$(call infoMsg,	LOCAL_DOMAIN=localhost)
@@ -302,6 +302,18 @@ endif
 	$(COMPOSE) up --wait --remove-orphans
 ifdef NGROK_AUTH # If the developer has an NGROK_AUTH token specified, then bring up webhooks right away too.
 	$(MAKE) webhooks
+endif
+ifdef GOOGLE_KMS_AUTH
+	$(call infoMsg,Google credentials have been provided by (GOOGLE_KMS_AUTH) they will be copied to your development environment.)
+	$(COMPOSE) cp $(GOOGLE_KMS_AUTH) monetr:/etc/monetr/google-service-account.json
+	$(COMPOSE) restart monetr
+else
+	$(call infoMsg,No Google credentials were found. Instead monetr will use a KMS service within its development environment.)
+	$(call infoMsg,  If you want to develop using Google Cloud KMS then specify a path to a service account JSON file)
+	$(call infoMsg,  using the environment variable GOOGLE_KMS_AUTH. The file specified at this path will be loaded)
+	$(call infoMsg,  into the development environment at startup.)
+	$(call infoMsg,Note: This is not at all required. There is an AWS compliant KMS built into the development)
+	$(call infoMsg,  environment by default.)
 endif
 	$(MAKE) development-info
 
@@ -339,8 +351,8 @@ else
 endif
 
 logs: # Tail logs for the current development environment. Provide NAME to limit to a single process.
-ifdef NAME
-	$(COMPOSE) logs -f $(NAME)
+ifdef CONTAINER
+	$(COMPOSE) logs -f $(CONTAINER)
 else
 	$(COMPOSE) logs -f
 endif
