@@ -73,7 +73,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
       - name: Setup local development environment
         run: |
-          make develop
+          make develop || (make logs && exit 1)
           curl http://monetr.local
           make shutdown
 
