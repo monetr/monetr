@@ -2,12 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useSnackbar } from 'notistack';
 
-import request from 'util/request';
+import request, { APIError } from 'util/request';
 
 export default function useResetPassword(): (newPassword: string, token: string) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  return (newPassword: string, token: string) => {
+  return async (newPassword: string, token: string) => {
     return request().post('/authentication/reset', {
       token,
       password: newPassword,
@@ -19,8 +19,8 @@ export default function useResetPassword(): (newPassword: string, token: string)
         });
         navigate('/login');
       })
-      .catch((error: AxiosError) => {
-        const message = error?.response?.data?.error || 'Failed to reset password.';
+      .catch((error: AxiosError<APIError>) => {
+        const message = error.response.data.error || 'Failed to reset password.';
         enqueueSnackbar(message, {
           variant: 'error',
           disableWindowBlurListener: true,

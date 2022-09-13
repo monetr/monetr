@@ -1,11 +1,11 @@
 import { AxiosError } from 'axios';
 import { useSnackbar, VariantType } from 'notistack';
 
-import request from 'util/request';
+import request, { APIError } from 'util/request';
 
 export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
-  return (email: string, ReCAPTCHA: string | null) => {
+  return async (email: string, ReCAPTCHA: string | null) => {
     return request().post('/authentication/forgot', {
       email,
       captcha: ReCAPTCHA,
@@ -14,8 +14,8 @@ export default function useSendForgotPassword(): (email: string, ReCAPTCHA: stri
         variant: 'success',
         disableWindowBlurListener: true,
       }))
-      .catch((error: AxiosError) => {
-        const message = error?.response?.data?.error || 'Failed to send password reset email.';
+      .catch((error: AxiosError<APIError>) => {
+        const message = error.response.data.error || 'Failed to send password reset email.';
         let variant: VariantType = 'error';
 
         // Check to see if the status code is precondition required. If it is that means that the email address is valid

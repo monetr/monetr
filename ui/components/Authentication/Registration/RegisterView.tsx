@@ -14,6 +14,7 @@ import CenteredLogo from 'components/Logo/CenteredLogo';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useSignUp, { SignUpResponse } from 'hooks/useSignUp';
 import verifyEmailAddress from 'util/verifyEmailAddress';
+import { APIError } from 'util/request';
 
 interface SignUpValues {
   agree: boolean;
@@ -135,8 +136,8 @@ export default function RegisterView(): JSX.Element {
             return navigate('/');
           });
       })
-      .catch((error: AxiosError) => {
-        const message = error?.response?.data?.error || 'Failed to sign up.';
+      .catch((error: AxiosError<APIError>) => {
+        const message = error.response.data.error || 'Failed to sign up.';
         enqueueSnackbar(message, {
           variant: 'error',
           disableWindowBlurListener: true,
