@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.5](https://github.com/monetr/monetr/compare/v0.11.4...v0.11.5) (2022-09-13)
+
+
+### Features
+
+* **spending:** Significantly improve spending calculations. ([#1031](https://github.com/monetr/monetr/issues/1031)) ([0b8b597](https://github.com/monetr/monetr/commit/0b8b5972d2b78a8e0e4a77a65ebd440b2895f80e))
+
+
+### Bug Fixes
+
+* **ui:** Fix transactions page crash. ([#1033](https://github.com/monetr/monetr/issues/1033)) ([7942082](https://github.com/monetr/monetr/commit/7942082cf361931cac5cde6aa99c75b9479517c0)), closes [#1032](https://github.com/monetr/monetr/issues/1032)
+
 ## [0.11.4](https://github.com/monetr/monetr/compare/v0.11.3...v0.11.4) (2022-09-12)
 
 
