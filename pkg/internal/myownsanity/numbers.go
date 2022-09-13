@@ -8,7 +8,11 @@ func Int32P(value int32) *int32 {
 	return &value
 }
 
-func Max(a, b int) int {
+type Number interface {
+	int | int32 | int64
+}
+
+func Max[T Number](a, b T) T {
 	if a > b {
 		return a
 	}
@@ -16,7 +20,7 @@ func Max(a, b int) int {
 	return b
 }
 
-func Min(a, b int) int {
+func Min[T Number](a, b T) T {
 	if a < b {
 		return a
 	}

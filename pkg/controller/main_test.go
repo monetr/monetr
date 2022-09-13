@@ -134,6 +134,7 @@ func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configura
 	// run server using httptest
 	server := httptest.NewServer(app)
 	t.Cleanup(func() {
+		require.NoError(t, c.Close(), "must be able to shutdown the monetr http controller")
 		server.Close()
 	})
 
