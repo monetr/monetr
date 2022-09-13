@@ -1,6 +1,6 @@
 module github.com/monetr/monetr
 
-go 1.18
+go 1.19
 
 require (
 	cloud.google.com/go/kms v1.4.0
@@ -37,6 +37,7 @@ require (
 	github.com/teambition/rrule-go v1.8.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
+	golang.org/x/crypto v0.0.0-20220507011949-2cf3adece122
 	google.golang.org/api v0.81.0
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc
 	google.golang.org/protobuf v1.28.1
@@ -161,7 +162,6 @@ require (
 	github.com/yuin/gopher-lua v0.0.0-20210529063254-f4c35e4016d9 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.0.0-20220507011949-2cf3adece122 // indirect
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
