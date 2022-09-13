@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+//go:embed sources/simple-icons/LICENSE.md
 //go:embed sources/simple-icons/package.json
 //go:embed sources/simple-icons/slugs.md
 //go:embed sources/simple-icons/_data/simple-icons.json

@@ -6,7 +6,10 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/consts"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/hash"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
@@ -23,10 +26,15 @@ type unauthenticatedRepo struct {
 
 func (u *unauthenticatedRepo) CreateLogin(
 	ctx context.Context,
-	email, hashedPassword string, firstName, lastName string,
+	email, password string, firstName, lastName string,
 ) (*models.Login, error) {
 	span := sentry.StartSpan(ctx, "CreateLogin")
 	defer span.Finish()
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), consts.BcryptCost)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to bcrypt provided password")
+	}
 
 	login := &models.LoginWithHash{
 		Login: models.Login{
@@ -36,7 +44,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 			IsEnabled:       true,
 			IsEmailVerified: EmailNotVerified, // Always insert false.
 		},
-		PasswordHash: hashedPassword,
+		Crypt: hashedPassword,
 	}
 	count, err := u.txn.ModelContext(span.Context(), login).
 		Where(`"email" = ?`, email).
@@ -174,12 +182,17 @@ func (u *unauthenticatedRepo) UseBetaCode(ctx context.Context, betaId, usedBy ui
 	return nil
 }
 
-func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64, hashedPassword string) error {
+func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64, password string) error {
 	span := sentry.StartSpan(ctx, "ResetPassword")
 	defer span.Finish()
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), consts.BcryptCost)
+	if err != nil {
+		return crumbs.WrapError(span.Context(), err, "failed to encrypt provided password for reset")
+	}
+
 	result, err := u.txn.ModelContext(span.Context(), &models.LoginWithHash{}).
-		Set(`"password_hash" = ?`, hashedPassword).
+		Set(`"crypt" = ?`, hashedPassword).
 		Set(`"password_reset_at" = ?`, time.Now()).
 		Where(`"login_with_hash"."login_id" = ?`, loginId).
 		Update()

@@ -38,7 +38,9 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 		})
 	case "google":
 		kmsConfig := configuration.KeyManagement.Google
-		log.Trace("using Google KMS")
+		log.WithFields(logrus.Fields{
+			"keyName": kmsConfig.ResourceName,
+		}).Trace("using Google KMS")
 		kms, err = secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         kmsConfig.ResourceName,

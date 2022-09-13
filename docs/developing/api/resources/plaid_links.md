@@ -166,6 +166,59 @@ If you do not provide any Plaid bank account IDs then the API will not attempt t
 }
 ```
 
+## Update Plaid Link
+
+Plaid links can be updated after they have been established. This can be used as a method of re-authenticating a link if
+it ends up in an error state (though sometimes a link can end up in an error state without indicating [^3]). This can
+also be used as a way to add additional accounts to a link if those accounts were not originally granted access when the
+link was created.
+
+
+```http title="HTTP"
+PUT /api/plaid/link/update/{linkId}
+```
+
+### Request Path Parameters
+
+| Attribute | Type   | Required | Description                                                                                                                                            |
+| ----      | ----   | ----     | ----                                                                                                                                                   |
+| `linkId`  | number | yes      | A link ID must be provided in order to put that link into update mode. The link must also be a Plaid link, a manual link will result in a bad request. |
+
+### Request Query Parameters
+
+| Attribute                  | Type    | Required | Description                                                                                                                                                                                                                                                 |
+| ----                       | ----    | ----     | ----                                                                                                                                                                                                                                                        |
+| `update_account_selection` | boolean | no       | This parameter is used to specify whether you want to put this link into an update mode that will allow you to add/remove accounts that are visible to monetr. This will change the Plaid Link dialog behavior slightly when it is presented to the client. |
+
+### Update Link Examples
+
+```shell title="Example Update Link Request"
+curl --request PUT \
+  --url "https://my.monetr.app/api/plaid/link/update/123?update_account_selection=true"
+```
+
+#### Successful
+
+If the link is able to be put into update mode, then a Link Token is returned to the client. This can then be used with
+the Plaid Link library to allow the user to update their account selection or re-authenticate their link with their
+bank.
+
+```json title="200 Ok"
+{
+  "linkToken": "link-sandbox-af1a0311-da53-4636-b754-dd15cc058176"
+}
+```
+
+### Update Link Errors
+
+#### Manual Link Update Requested
+
+```json title="400 Bad Request"
+{
+  "error": "cannot update a non-Plaid link"
+}
+```
+
 [^1]:
 
     monetr can be configured to limit the number of links an account can have. This is for those using development
@@ -177,3 +230,10 @@ If you do not provide any Plaid bank account IDs then the API will not attempt t
 
     If you fully authenticate a bank account, but you never exchange the `public_token` for that authenticated bank
     account. It _should not_ affect the number of accounts linked for development credentials.
+
+
+[^3]:
+
+    While working on monetr I had a link fail to receive any updates from Plaid/the bank. It still showed that it was in
+    a healthy state though. It didn't require re-authentication but at the time putting the link through "link update"
+    was ultimately what resolved it.

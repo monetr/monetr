@@ -43,13 +43,15 @@ server:
   statsport: 9000
 keyManagement:
   enabled: true
-  provider: aws
   aws:
     region: us-east-1
     accessKey: foo
     secretKey: bar
     keyId: bc436485-5092-42b8-92a3-0aa8b93536dc
     endpoint: http://kms:8080
+  google:
+    credentialsJson: /etc/monetr/google-service-account.json
+    # Resource name must be specified using MONETR_KMS_RESOURCE_NAME
 
 vault:
   enabled: false

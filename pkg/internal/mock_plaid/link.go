@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func MockCreateLinkToken(t *testing.T) {
+func MockCreateLinkToken(t *testing.T, callbacks ...func(t *testing.T, request plaid.LinkTokenCreateRequest)) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/link/token/create"),
@@ -23,6 +23,16 @@ func MockCreateLinkToken(t *testing.T) {
 			ValidatePlaidAuthentication(t, request, DoNotRequireAccessToken)
 			var createLinkTokenRequest plaid.LinkTokenCreateRequest
 			require.NoError(t, json.NewDecoder(request.Body).Decode(&createLinkTokenRequest), "must decode request")
+
+			if len(callbacks) > 0 {
+				var called int
+				for _, callback := range callbacks {
+					callback(t, createLinkTokenRequest)
+					called++
+				}
+				require.Equal(t, called, len(callbacks), "must have called every callback provided")
+			}
+
 			require.Equal(t, consts.PlaidClientName, createLinkTokenRequest.ClientName, "client name must match the shared const")
 			require.NotEmpty(t, createLinkTokenRequest.Language, "language is required")
 

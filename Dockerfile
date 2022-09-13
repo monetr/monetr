@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.18.0 as dependencies
+FROM docker.io/library/golang:1.19.1 as dependencies
 WORKDIR /build
 
 # Build args need to be present in each "FROM"

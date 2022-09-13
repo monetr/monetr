@@ -89,9 +89,9 @@ type KeyManagement struct {
 	Enabled  bool   `yaml:"enabled"`
 	Provider string `yaml:"provider"`
 	// AWS provides configuration for using AWS's KMS for encrypting and decrypting secrets.
-	AWS *AWSKMS `yaml:"aws"`
+	AWS AWSKMS `yaml:"aws"`
 	// Google provides configuration for using Google's KMS for encrypting and decrypting secrets.
-	Google *GoogleKMS `yaml:"google"`
+	Google GoogleKMS `yaml:"google"`
 }
 
 type AWSKMS struct {
@@ -499,6 +499,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
+	v.SetDefault("KeyManagement.Provider", nil)
 	v.SetDefault("KeyManagement.AWS", nil)
 	v.SetDefault("KeyManagement.Google", nil)
 	v.SetDefault("PostgreSQL.Address", "localhost")
@@ -553,8 +554,10 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	_ = v.BindEnv("Logging.Format", "MONETR_LOG_FORMAT")
 	_ = v.BindEnv("Logging.StackDriver.Enabled", "MONETR_LOG_STACKDRIVER_ENABLED")
+	_ = v.BindEnv("KeyManagement.Provider", "MONETR_KMS_PROVIDER")
 	_ = v.BindEnv("KeyManagement.AWS.AccessKey", "AWS_ACCESS_KEY_ID")
 	_ = v.BindEnv("KeyManagement.AWS.SecretKey", "AWS_ACCESS_KEY")
+	_ = v.BindEnv("KeyManagement.Google.ResourceName", "MONETR_KMS_RESOURCE_NAME")
 	_ = v.BindEnv("Plaid.ClientID", "MONETR_PLAID_CLIENT_ID")
 	_ = v.BindEnv("Plaid.ClientSecret", "MONETR_PLAID_CLIENT_SECRET")
 	_ = v.BindEnv("Plaid.Environment", "MONETR_PLAID_ENVIRONMENT")

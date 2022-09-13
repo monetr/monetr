@@ -8,11 +8,11 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/consts"
-	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type SeedAccountOption uint8
@@ -35,6 +35,11 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 	var user models.User
 	err := db.RunInTransaction(context.Background(), func(txn *pg.Tx) error {
 		email := GetUniqueEmail(t)
+		hashedPassword, err := bcrypt.GenerateFromPassword(
+			[]byte(gofakeit.Password(true, true, true, true, false, 16)),
+			consts.BcryptCost,
+		)
+		require.NoError(t, err, "must not have an error when generating the password")
 		login := models.LoginWithHash{
 			Login: models.Login{
 				Email:           email,
@@ -44,10 +49,10 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				LastName:        gofakeit.LastName(),
 				Users:           nil,
 			},
-			PasswordHash: hash.HashPassword(email, gofakeit.Password(true, true, true, true, false, 16)),
+			Crypt: hashedPassword,
 		}
 
-		_, err := txn.Model(&login).Insert(&login)
+		_, err = txn.Model(&login).Insert(&login)
 		require.NoError(t, err, "must insert new login")
 
 		account := models.Account{

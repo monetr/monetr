@@ -294,7 +294,22 @@ export default function RegisterView(): JSX.Element {
                             onChange={ handleChange }
                           />
                         }
-                        label="I agree to stuff and things"
+                        label={
+                          <Fragment>
+                            I agree to monetr's&nbsp;
+                            <a
+                              className="hover:text-blue-500 hover:underline"
+                              href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
+                              Terms of Use
+                            </a> and&nbsp;
+                            <a
+                              className="hover:text-blue-500 hover:underline"
+                              href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+                            >
+                              Privacy Policy
+                            </a>
+                          </Fragment>
+                        }
                         labelPlacement="end"
                         value="end"
                       />

@@ -16,7 +16,7 @@ function TransactionsView(): JSX.Element {
   // TODO This is a temp approach, since we don't know how many transactions we have for a given bank account, we can
   //  just request transactions until we get a page that is not full. But this is not a good way to do it. If they have
   //  a total number of transactions divisible by 25 then we could continue to try to request more.
-  const hasNextPage = transactions.size % 25 === 0 && transactions.size !== 0;
+  const hasNextPage = transactions.length % 25 === 0 && transactions.length !== 0;
   const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({
@@ -59,7 +59,7 @@ function TransactionsView(): JSX.Element {
         <li key={ group.unix() }>
           <ul>
             <Fragment>
-              <ListSubheader className="bg-white pl-0 pr-0 pt-1 bg-gray-50">
+              <ListSubheader className="pl-0 pr-0 pt-1 bg-gray-50">
                 <Typography className="ml-3 md:ml-3 font-semibold opacity-75 text-base">
                   { formatDateHeader(group) }
                 </Typography>
@@ -74,7 +74,7 @@ function TransactionsView(): JSX.Element {
           </ul>
         </li>
       )),
-    )(Array.from(transactions.values()));
+    )(transactions);
   }
 
   function TransactionListFooter(): JSX.Element {

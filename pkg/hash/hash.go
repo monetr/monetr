@@ -11,6 +11,7 @@ import (
 
 // HashEmail will take an email address as an input and output a hash that is unique to that email address. This can be
 // used to uniquely identify email addresses without needing to store the address itself.
+// DEPRECATED! 
 func HashEmail(email string) string {
 	// Cast the email to be lower case, this way we can store the email in a way that is "case-insensitive". Since every
 	// email will be hashed and checksum-ed as lower case.
@@ -33,6 +34,7 @@ func HashEmail(email string) string {
 // HashPassword will return a one way hash of the provided user's credentials.
 // The email is always converted to lowercase for this hash but the password is
 // not modified.
+// DEPRECATED! Use bcrypt instead.
 func HashPassword(email, password string) string {
 	email = strings.ToLower(email)
 	hash := sha256.New()

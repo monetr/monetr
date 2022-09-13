@@ -47,6 +47,13 @@ if [[ ! -z "${MONETR_SENTRY_DSN}" ]]; then
   export MONETR_SENTRY_ENABLED="true";
 fi
 
+
+if [[ -f "/etc/monetr/google-service-account.json" ]] && [[ ! -z "${MONETR_KMS_RESOURCE_NAME}" ]]; then
+  echo "[wrapper] Google KMS will be used for encrypting Plaid credentials...";
+  export MONETR_KMS_PROVIDER=google;
+  export MONETR_KMS_RESOURCE_NAME=${MONETR_KMS_RESOURCE_NAME};
+fi
+
 # Sometimes the old process does not get killed properly. This should do it.
 pkill monetr;
 pkill dlv;

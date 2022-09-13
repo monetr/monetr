@@ -18,6 +18,7 @@ interface PropTypes {
   open: boolean;
   onClose: () => void;
   linkId: number;
+  updateAccountSelection?: boolean;
 }
 
 interface State {
@@ -31,7 +32,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
 
   useMountEffect(() => {
     request()
-      .put(`/plaid/link/update/${ props.linkId }`)
+      .put(`/plaid/link/update/${ props.linkId }?update_account_selection=${ props.updateAccountSelection }`)
       .then(result => setState({
         loading: false,
         linkToken: result.data.linkToken,
@@ -48,7 +49,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
   });
 
 
-  async function plaidOnSuccess(token: string, metadata: PlaidLinkOnSuccessMetadata) {
+  async function plaidOnSuccess(token: string, _metadata: PlaidLinkOnSuccessMetadata) {
     setState({
       loading: true,
     });
@@ -63,8 +64,8 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       });
   }
 
-  function plaidOnEvent(event: PlaidLinkOnEventMetadata) {
-
+  function plaidOnEvent(_event: PlaidLinkOnEventMetadata) {
+    return;
   }
 
   function plaidOnExit(event: PlaidLinkOnExitMetadata) {
@@ -82,7 +83,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       </DialogTitle>
       <DialogContent>
         <Typography>
-          test
+          One moment...
         </Typography>
       </DialogContent>
       <DialogActions>

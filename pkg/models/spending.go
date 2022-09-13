@@ -2,12 +2,13 @@ package models
 
 import (
 	"context"
-	"math"
 	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
+	"github.com/monetr/monetr/pkg/util"
 	"github.com/pkg/errors"
 )
 
@@ -63,6 +64,24 @@ func (e Spending) GetProgressAmount() int64 {
 	}
 }
 
+// GetRecurrencesBefore will return an array of times that this spending item will be used (based on the recurrence
+// rule) between the provided now and before in the specified time zone. Goals will at most return a single time if the
+// goal is due within that window.
+func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
+	switch e.SpendingType {
+	case SpendingTypeExpense:
+		e.RecurrenceRule.DTStart(now.In(timezone))
+		return e.RecurrenceRule.Between(now, before, false)
+	case SpendingTypeGoal:
+		if e.NextRecurrence.After(now) && e.NextRecurrence.Before(before) {
+			return []time.Time{e.NextRecurrence}
+		}
+		fallthrough
+	default:
+		return nil
+	}
+}
+
 func (e *Spending) CalculateNextContribution(
 	ctx context.Context,
 	accountTimezone string,
@@ -83,14 +102,18 @@ func (e *Spending) CalculateNextContribution(
 	if err != nil {
 		return errors.Wrap(err, "failed to parse account's timezone")
 	}
+	// Don't change the time by convert it to the account timezone. This will make debugging easier if there is a
+	// problem.
+	now = now.In(timezone)
 
-	nextContributionDate := fundingSchedule.GetNextContributionDateAfter(now, timezone)
-
-	nextRecurrence := e.NextRecurrence
+	// Get the timestamps for the next two funding events, this is so we can determine how many spending events will
+	// happen during these two funding windows.
+	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)
+	nextRecurrence := util.MidnightInLocal(e.NextRecurrence, timezone)
 	if e.RecurrenceRule != nil {
 		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
 		// rather than the current timestamp (which is what RRule defaults to).
-		e.RecurrenceRule.DTStart(e.NextRecurrence)
+		e.RecurrenceRule.DTStart(nextRecurrence)
 
 		// If the next recurrence of the spending is in the past, then bump it as well.
 		if nextRecurrence.Before(now) {
@@ -98,86 +121,55 @@ func (e *Spending) CalculateNextContribution(
 		}
 	}
 
-	targetAmount := e.TargetAmount
+	// The number of times this item will be spent before it receives funding again. This is considered the current
+	// funding period. This is used to determine if the spending is currently behind. As the total amount that will be
+	// spent must be <= the amount currently allocated to this spending item. If it is not then there will not be enough
+	// funds to cover each spending event between now and the next funding event.
+	eventsBeforeFirst := int64(len(e.GetRecurrencesBefore(now, fundingFirst, timezone)))
+	// The number of times this item will be spent in the subsequent funding period. This is used to determine how much
+	// needs to be allocated at the beginning of the next funding period.
+	eventsBeforeSecond := int64(len(e.GetRecurrencesBefore(fundingFirst, fundingSecond, timezone)))
+
+	// The amount of funds needed for each individual spending event.
+	perSpendingAmount := e.TargetAmount
+	// The amount of funds currently allocated towards this spending item. This is not increased until the next funding
+	// event, or the user transfers funds to this spending item.
 	currentAmount := e.GetProgressAmount()
-	var nextContribution int64
-	var isBehind bool
-	switch {
-	case nextContributionDate.After(nextRecurrence) && e.SpendingType == SpendingTypeExpense:
-		// If the next contribution date happens after the next time the expense recurs, then we need to see if the
-		// expense recurs at all again before that contribution. Then make sure that we set the contribution amount to
-		// represent the total needed for every recurrence.
-		numberOfRecurrences := int64(len(e.RecurrenceRule.Between(now, nextContributionDate, false)))
-		// Multiple how much we need by how many times this expense will be needed before we will get funding again.
-		targetAmount *= numberOfRecurrences
-		// Calculate how much we need to contribute next time based on that need.
-		nextContribution = targetAmount - currentAmount
-		// We are behind if there is anything left to contribute that we cannot contribute before the next recurrence.
-		isBehind = targetAmount-currentAmount > 0
-	case nextContributionDate.After(nextRecurrence) && e.SpendingType == SpendingTypeGoal:
-		// If we won't receive another contribution before the goal is due then just set the next contribution amount to
-		// be the amount we need.
-		nextContribution = int64(math.Max(float64(targetAmount-currentAmount), 0))
-		// We are behind if there is anything left to contribute that we cannot contribute before the next recurrence.
-		isBehind = targetAmount-currentAmount > 0
-	case nextRecurrence.After(nextContributionDate) && e.SpendingType == SpendingTypeExpense:
-		// Check to see how many times this expense will be needed between the next contribution date and the
-		// contribution date succeeding it. If the expense is needed multiple times then we need to allocate more to the
-		// expense with each contribution.
-		frequent := e.RecurrenceRule.Between(
-			nextContributionDate,
-			fundingSchedule.GetNextContributionDateAfter(nextContributionDate, timezone),
-			false,
-		)
-		if len(frequent) > 1 {
-			// If the expense is needed more than one time, then multiply the target amount so we can allocate enough
-			// with the next contribution to cover us.
-			targetAmount *= int64(len(frequent))
-		}
-		fallthrough
-	case nextRecurrence.After(nextContributionDate):
-		// If the next recurrence happens after a contribution, then calculate how many contributions will occur before
-		// that recurrence and set that to be the next contribution amount.
-		// Technically this works a bit oddly with expenses that recur more frequently than they can be funded, but
-		// because we have adjusted the target amount above (if this is the case) then the calculation will still be
-		// correct.
+
+	// We are behind if we do not currently have enough funds for all the spending events between now and the next time
+	// this spending object will receive funding.
+	e.IsBehind = eventsBeforeFirst > 0 && (perSpendingAmount*eventsBeforeFirst) > currentAmount
+
+	// The total contribution amount is the amount of money that needs to be allocated to this spending item during the
+	// next funding event in order to cover all the spending events that will happen between then and the subsequent
+	// funding event.
+	var totalContributionAmount int64
+	// If there are spending events in the next funding period then we need to make sure that we calculate for those.
+	if eventsBeforeSecond > 0 {
+		// We need to subtract the spending that will happen before the next period though.
+		// We have $5 allocated but between now and the next funding we need to spend $5. So we cannot take the $5 we
+		// currently have into account when we calculate how much will be needed for the next funding event.
+		amountAfterCurrentSpending := myownsanity.Max(0, currentAmount-(perSpendingAmount*eventsBeforeFirst))
+		// The total amount we need is determined by how many times we will need the target amount during the next period
+		// between funding events multiplied by how much each spending event costs.
+		// If the current spending object is over-allocated for this funding period and the next funding period then
+		// this can result in a negative contribution amount. Because we would be subtracting more than the calculated
+		// amount that we need.
+		nextSpendingPeriodTotal := perSpendingAmount * eventsBeforeSecond
+		// By taking the min of the amount we will have allocated and the amount needed. We can safely arrive at a 0
+		// contribution amount when we are over-allocated.
+		totalContributionAmount = nextSpendingPeriodTotal - myownsanity.Min(amountAfterCurrentSpending, nextSpendingPeriodTotal)
+	} else {
+		// Otherwise we can simply look at how much we need vs how much we already have.
+		amountNeeded := myownsanity.Max(0, perSpendingAmount-currentAmount)
+		// And how many times we will have a funding event before our due date.
 		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(now, nextRecurrence)
-
-		// If for some reason there are no contributions to be made, then prevent us from trying to divide by zero.
-		if numberOfContributions == 0 {
-			nextContribution = 0
-		} else {
-			nextContribution = (targetAmount - currentAmount) / numberOfContributions
-		}
-	case nextRecurrence.Equal(nextContributionDate) && e.SpendingType == SpendingTypeExpense:
-		// Check to see how many times this expense will recur between the next contribution date and the one that
-		// succeeds it. But this time make it an inclusive search (the true at the end). Because the next contribution
-		// date is also the next recurrence we need to allocate an additional targetAmount towards the expense with the
-		// next contribution to cover everything.
-		frequent := e.RecurrenceRule.Between(
-			nextContributionDate,
-			fundingSchedule.GetNextContributionDateAfter(nextContributionDate, timezone),
-			true,
-		)
-		if len(frequent) > 1 {
-			targetAmount *= int64(len(frequent))
-		}
-		fallthrough
-	case nextRecurrence.Equal(nextContributionDate):
-		// Super simple, we know how much we need (targetAmount) and we know how much we have (currentAmount), and the
-		// next time this expense will be needed is on the same day that the expense will receive funding. So just
-		// subtract our current from what we need to determine how much we want to allocate.
-		nextContribution = int64(math.Max(float64(targetAmount-currentAmount), 0))
+		// Then determine how much we would need at each of those funding events.
+		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}
 
-	// If the next contribution would be less than zero (likely because the user manually transferred extra funds to this)
-	// spending object. Then make sure we don't actually attempt to allocate negative funds.
-	if nextContribution < 0 {
-		nextContribution = 0
-	}
-
-	e.NextContributionAmount = nextContribution
-	e.IsBehind = isBehind
+	// Update the spending item with our calculated contribution amount.
+	e.NextContributionAmount = totalContributionAmount
 
 	// If the current nextRecurrence on the object is in the past, then bump it to our new next recurrence.
 	if e.NextRecurrence.Before(now) {

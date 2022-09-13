@@ -179,17 +179,6 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 	})
 }
 
-// Update Plaid Link
-// @Summary Update Plaid Link
-// @id update-plaid-link
-// @tags Plaid
-// @description Update an existing Plaid link, this can be used to re-authenticate a link if it requires it or to potentially solve an error state.
-// @Security ApiKeyAuth
-// @Produce json
-// @Router /plaid/update/{linkId:uint64} [put]
-// @Param linkId path uint64 true "The Link Id that you wish to put into update mode, must be a Plaid link."
-// @Success 200 {object} swag.PlaidNewLinkTokenResponse
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) updatePlaidLink(ctx iris.Context) {
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
 	if linkId == 0 {
@@ -197,10 +186,15 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		return
 	}
 
+	updateAccountSelection, err := strconv.ParseBool(ctx.URLParamDefault("update_account_selection", "false"))
+	if err != nil {
+		c.badRequest(ctx, "update_account_selection must be provided a valid boolean value")
+		return
+	}
+
 	log := c.getLog(ctx).WithField("linkId", linkId)
 
-	// Retrieve the user's details. We need to pass some of these along to
-	// plaid as part of the linking process.
+	// Retrieve the user's details. We need to pass some of these along to plaid as part of the linking process.
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
@@ -231,7 +225,7 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		return
 	}
 
-	token, err := client.UpdateItem(c.getContext(ctx))
+	token, err := client.UpdateItem(c.getContext(ctx), updateAccountSelection)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token to update Plaid link")
 		return
