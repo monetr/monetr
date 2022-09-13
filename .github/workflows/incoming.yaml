@@ -9,7 +9,7 @@ jobs:
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
-    container: golang:1.18.0
+    container: golang:1.19.1
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -108,7 +108,7 @@ jobs:
       - build_ui
     name: Build Binary
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.18.0
+    container: ghcr.io/monetr/build-containers/golang:1.19.1
     strategy:
       matrix:
         architecture:
@@ -144,7 +144,7 @@ jobs:
       - go_dependencies
     name: Test Go
     runs-on: ubuntu-latest
-    container: golang:1.18.0
+    container: golang:1.19.1
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
