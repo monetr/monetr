@@ -146,7 +146,7 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
                     Convert To Manual Link
                   </MenuItem>
                 }
-                { props.link.getCanUpdateAccountSelection() &&
+                { props.link.getIsPlaid() &&
                   <MenuItem onClick={ openDialog(DialogOpen.UpdateAccountsDialog) }>
                     <PriceChange className="mr-2" />
                     Update Account Selection
