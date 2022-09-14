@@ -49,7 +49,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
   });
 
 
-  async function plaidOnSuccess(token: string, _metadata: PlaidLinkOnSuccessMetadata) {
+  async function plaidOnSuccess(token: string, metadata: PlaidLinkOnSuccessMetadata) {
     setState({
       loading: true,
     });
@@ -57,6 +57,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
     request().post('/plaid/link/update/callback', {
       linkId: props.linkId,
       publicToken: token,
+      accountIds: metadata.accounts.map(account => account.id),
     })
       .then(() => props.onClose())
       .catch(error => {

@@ -254,8 +254,9 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 	var callbackRequest struct {
-		LinkId      uint64 `json:"linkId"`
-		PublicToken string `json:"publicToken"`
+		LinkId      uint64   `json:"linkId"`
+		PublicToken string   `json:"publicToken"`
+		AccountIds  []string `json:"accountIds"`
 	}
 	if err := ctx.ReadJSON(&callbackRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
