@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.11.6](https://github.com/monetr/monetr/compare/v0.11.5...v0.11.6) (2022-09-14)
+
+
+### Features
+
+* **plaid:** Allow account selection updates at any time. ([23f070e](https://github.com/monetr/monetr/commit/23f070e67dcdf2597e477ef6bd71ec1ca44a667f))
+
+
+### Miscellaneous
+
+* **ci:** Add timeout to local development build task. ([a3282f5](https://github.com/monetr/monetr/commit/a3282f547975d131d829cdb8e7368a9431735e8a))
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors digest to 754509e ([#967](https://github.com/monetr/monetr/issues/967)) ([9fb90be](https://github.com/monetr/monetr/commit/9fb90befa1398c0cff52589ff9cb21193d81896e))
+* **api:** update golang.org/x/crypto digest to c86fa9a ([#1041](https://github.com/monetr/monetr/issues/1041)) ([d18454f](https://github.com/monetr/monetr/commit/d18454f872fa6aa8ddac93c4ec94b92450f66a5b))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.18.0 ([#989](https://github.com/monetr/monetr/issues/989)) ([190a4e6](https://github.com/monetr/monetr/commit/190a4e654d326c384838aa7a1fae094275617945))
+* **api:** update module github.com/golang-jwt/jwt/v4 to v4.4.2 ([#694](https://github.com/monetr/monetr/issues/694)) ([0e7c856](https://github.com/monetr/monetr/commit/0e7c856f947b82e1eeb7900f0bf87d0adc0d7bde))
+* **api:** update module github.com/sirupsen/logrus to v1.9.0 ([#990](https://github.com/monetr/monetr/issues/990)) ([8c5efac](https://github.com/monetr/monetr/commit/8c5efac35faa4bcb36876cf88f2c61f69d4a91e9))
+* **api:** update module github.com/stretchr/testify to v1.8.0 ([#992](https://github.com/monetr/monetr/issues/992)) ([7b86b2e](https://github.com/monetr/monetr/commit/7b86b2ea6b3573ed4fb7279b68cfdd4508a18e01))
+* **api:** update module github.com/stripe/stripe-go/v72 to v72.122.0 ([#993](https://github.com/monetr/monetr/issues/993)) ([b9e2669](https://github.com/monetr/monetr/commit/b9e266991e6be594b53b3473c902262576a33e41))
+* **containers:** update squidfunk/mkdocs-material docker tag to v8.5.0 ([#1045](https://github.com/monetr/monetr/issues/1045)) ([5071e5a](https://github.com/monetr/monetr/commit/5071e5a100325284f695a4b7d808ac12aa2cd66e))
+* **go:** Bumped bluemonday to v1.0.20 ([fdf967c](https://github.com/monetr/monetr/commit/fdf967c2fa68e6704375977addf5ce0748c08454))
+* **go:** Upgrade to Golang 1.19.1 ([#1039](https://github.com/monetr/monetr/issues/1039)) ([d6c8545](https://github.com/monetr/monetr/commit/d6c8545854bd12cab12bfed6242a534a1193666b))
+* **ui:** update babel monorepo to v7.19.0 ([#964](https://github.com/monetr/monetr/issues/964)) ([d324332](https://github.com/monetr/monetr/commit/d3243328efe6daa0b7cc8fc4d999c4459620e425))
+* **ui:** update dependency @testing-library/react to v13 ([#836](https://github.com/monetr/monetr/issues/836)) ([07d5f43](https://github.com/monetr/monetr/commit/07d5f4387d47f382f84a87b93f8e8198ae054dd3))
+* **ui:** update dependency @testing-library/user-event to v14 ([#837](https://github.com/monetr/monetr/issues/837)) ([2d73431](https://github.com/monetr/monetr/commit/2d73431481c085976e701f5cc6c77744cef11dc3))
+* **ui:** update dependency @types/react to v18 ([#838](https://github.com/monetr/monetr/issues/838)) ([412c5cd](https://github.com/monetr/monetr/commit/412c5cd53292eaacc90847e7f5c2e058f56e7564))
+* **ui:** update dependency axios to v0.27.2 ([3c9928c](https://github.com/monetr/monetr/commit/3c9928c4892f996eaa33ff2fdf7cd17a2f9f693f))
+* **ui:** update dependency eslint to v8.23.1 ([#1042](https://github.com/monetr/monetr/issues/1042)) ([959de11](https://github.com/monetr/monetr/commit/959de119956caf412e556085474ba35e00912e8b))
+* **ui:** update dependency eslint-plugin-jest to v26.9.0 ([#997](https://github.com/monetr/monetr/issues/997)) ([3172e66](https://github.com/monetr/monetr/commit/3172e66961dc73a64f8b7464fe1b4de60b0237d9))
+* **ui:** update dependency eslint-plugin-jsx-a11y to v6.6.1 ([#998](https://github.com/monetr/monetr/issues/998)) ([3c36dd5](https://github.com/monetr/monetr/commit/3c36dd5777d98188570ab1d35ecdd250f79db666))
+* **ui:** update dependency eslint-webpack-plugin to v3.2.0 ([#1001](https://github.com/monetr/monetr/issues/1001)) ([f1b2a32](https://github.com/monetr/monetr/commit/f1b2a32e121bc3e31f6952882bf89a1c24c9a6c2))
+* **ui:** update dependency postcss to v8.4.16 ([#986](https://github.com/monetr/monetr/issues/986)) ([b413631](https://github.com/monetr/monetr/commit/b413631342a0fe411a2a2cdd2838cf785e24f53f))
+* **ui:** update dependency sass to v1.54.9 ([#1043](https://github.com/monetr/monetr/issues/1043)) ([160bc56](https://github.com/monetr/monetr/commit/160bc5687759c979fd9a840672305a4e7e1b73e9))
+* **ui:** update dependency typescript to v4.8.3 ([#1044](https://github.com/monetr/monetr/issues/1044)) ([94f6fd1](https://github.com/monetr/monetr/commit/94f6fd1f049a445b6d512124ab8d126bf82f02c1))
+* **ui:** update dependency webpack-bundle-analyzer to v4.6.1 ([#1008](https://github.com/monetr/monetr/issues/1008)) ([4cb77ec](https://github.com/monetr/monetr/commit/4cb77ec5290f85c16c8e372d70bf56998bcdad21))
+* **ui:** update dependency webpack-manifest-plugin to v5 ([#842](https://github.com/monetr/monetr/issues/842)) ([c553c5a](https://github.com/monetr/monetr/commit/c553c5a63a2cad0d746c09d4b63e526d0e3c46fc))
+* **ui:** update react monorepo to v18 ([#843](https://github.com/monetr/monetr/issues/843)) ([7704445](https://github.com/monetr/monetr/commit/7704445eac61ceae63ec96e0044e98579c3dafcb))
+
 ## [0.11.5](https://github.com/monetr/monetr/compare/v0.11.4...v0.11.5) (2022-09-13)
 
 
