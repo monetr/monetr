@@ -37,7 +37,7 @@ require (
 	github.com/teambition/rrule-go v1.8.0
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
-	golang.org/x/crypto v0.0.0-20220507011949-2cf3adece122
+	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
 	google.golang.org/api v0.81.0
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc
 	google.golang.org/protobuf v1.28.1
