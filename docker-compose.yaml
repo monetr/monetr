@@ -24,7 +24,7 @@ services:
     ports:
       - 8080:8080
   documentation:
-    image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.2.16}
+    image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.5.0}
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     entrypoint: sh
