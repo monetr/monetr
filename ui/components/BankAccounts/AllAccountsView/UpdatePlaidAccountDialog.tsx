@@ -13,6 +13,7 @@ import {
 import useMountEffect from 'hooks/useMountEffect';
 import request from 'util/request';
 import { PlaidConnectButton } from 'views/FirstTimeSetup/PlaidConnectButton';
+import { useQueryClient } from 'react-query';
 
 interface PropTypes {
   open: boolean;
@@ -28,6 +29,7 @@ interface State {
 }
 
 export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element {
+  const queryClient = useQueryClient();
   const [state, setState] = useState<Partial<State>>({});
 
   useMountEffect(() => {
@@ -59,6 +61,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       publicToken: token,
       accountIds: metadata.accounts.map(account => account.id),
     })
+      .then(() => queryClient.invalidateQueries('/bank_accounts'))
       .then(() => props.onClose())
       .catch(error => {
         console.error(error);
