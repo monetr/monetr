@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.7](https://github.com/monetr/monetr/compare/v0.11.6...v0.11.7) (2022-09-16)
+
+
+### Bug Fixes
+
+* **plaid:** Updated account selections are now reflected. ([#1049](https://github.com/monetr/monetr/issues/1049)) ([aeada29](https://github.com/monetr/monetr/commit/aeada29c899b0ca700ca4177da4305a3dff214ad))
+
+
+### Dependencies
+
+* **containers:** update golang docker tag ([#1040](https://github.com/monetr/monetr/issues/1040)) ([3bf97e1](https://github.com/monetr/monetr/commit/3bf97e1f6ab996bab5946a9e083b36344ec5e6c5))
+
 ## [0.11.6](https://github.com/monetr/monetr/compare/v0.11.5...v0.11.6) (2022-09-14)
 
 
