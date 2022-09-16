@@ -20,15 +20,23 @@ export default function LinkedBankAccountItem(props: LinkedBankAccountItemProps)
           </Typography>
           <div className="flex flex-auto">
             <Typography className="w-1/2 overflow-hidden m-w-1/2 overflow-ellipsis flex-nowrap whitespace-nowrap">
-              <span
-                className="font-semibold">Safe-To-Spend:</span> { balances ? balances.getSafeToSpendString() : '...' }
+              <span className="font-semibold">
+                Safe-To-Spend:
+              </span>
+              { balances ? balances.getSafeToSpendString() : '...' }
             </Typography>
             <div className="flex w-1/2">
               <Typography className="w-1/2 overflow-hidden text-sm overflow-ellipsis flex-nowrap whitespace-nowrap">
-                <span className="font-semibold">Available:</span> { props.bankAccount.getAvailableBalanceString() }
+                <span className="font-semibold">
+                  Available:
+                </span>
+                { props.bankAccount.getAvailableBalanceString() }
               </Typography>
               <Typography className="w-1/2 overflow-hidden text-sm overflow-ellipsis flex-nowrap whitespace-nowrap">
-                <span className="font-semibold">Current:</span> { props.bankAccount.getCurrentBalanceString() }
+                <span className="font-semibold">
+                  Current:
+                </span>
+                { props.bankAccount.getCurrentBalanceString() }
               </Typography>
             </div>
           </div>
