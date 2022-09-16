@@ -254,8 +254,9 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 	var callbackRequest struct {
-		LinkId      uint64 `json:"linkId"`
-		PublicToken string `json:"publicToken"`
+		LinkId      uint64   `json:"linkId"`
+		PublicToken string   `json:"publicToken"`
+		AccountIds  []string `json:"accountIds"`
 	}
 	if err := ctx.ReadJSON(&callbackRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
@@ -308,6 +309,65 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
 		c.wrapPgError(ctx, err, "failed to update link status")
 		return
+	}
+
+	currentBankAccounts, err := repo.GetBankAccountsByLinkId(c.getContext(ctx), link.LinkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve existing bank accounts")
+		return
+	}
+	currentBankAccountPlaidIds := map[string]struct{}{}
+	for _, bankAccount := range currentBankAccounts {
+		currentBankAccountPlaidIds[bankAccount.PlaidAccountId] = struct{}{}
+	}
+	newBankAccountPlaidIds := make([]string, 0, len(callbackRequest.AccountIds))
+	for _, accountId := range callbackRequest.AccountIds {
+		if _, ok := currentBankAccountPlaidIds[accountId]; ok {
+			continue
+		}
+
+		newBankAccountPlaidIds = append(newBankAccountPlaidIds, accountId)
+	}
+
+	// If there are any new bank accounts due to the updated selection.
+	if len(newBankAccountPlaidIds) > 0 {
+		client, err := c.plaid.NewClientFromLink(c.getContext(ctx), link.AccountId, link.LinkId)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client for link")
+			return
+		}
+
+		// Retrieve the details for those bank accounts from Plaid.
+		// TODO We should just retrieve all the accounts, any that are missing in this list were probably removed during the
+		// account update selection anyway. Don't delete those bank accounts, but mark them as no longer in sync.
+		plaidAccounts, err := client.GetAccounts(c.getContext(ctx), newBankAccountPlaidIds...)
+		if err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve new bank accounts")
+			return
+		}
+
+		now := time.Now()
+		accounts := make([]models.BankAccount, len(plaidAccounts))
+		for i, plaidAccount := range plaidAccounts {
+			accounts[i] = models.BankAccount{
+				AccountId:         repo.AccountId(),
+				LinkId:            link.LinkId,
+				PlaidAccountId:    plaidAccount.GetAccountId(),
+				AvailableBalance:  plaidAccount.GetBalances().GetAvailable(),
+				CurrentBalance:    plaidAccount.GetBalances().GetCurrent(),
+				Name:              plaidAccount.GetName(),
+				Mask:              plaidAccount.GetMask(),
+				PlaidName:         plaidAccount.GetName(),
+				PlaidOfficialName: plaidAccount.GetOfficialName(),
+				Type:              models.BankAccountType(plaidAccount.GetType()),
+				SubType:           models.BankAccountSubType(plaidAccount.GetSubType()),
+				LastUpdated:       now,
+			}
+		}
+		if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create new bank accounts")
+			return
+		}
 	}
 
 	err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{

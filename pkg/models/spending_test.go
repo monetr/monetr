@@ -60,7 +60,33 @@ func GiveMeAFundingSchedule(nextContributionDate time.Time, rule *Rule) *Funding
 func TestSpending_CalculateNextContribution(t *testing.T) {
 	t.Run("next funding in the past updated", func(t *testing.T) {
 		today := util.MidnightInLocal(time.Now(), time.UTC)
-		tomorrow := util.MidnightInLocal(today.Add(24 * time.Hour), time.UTC)
+		dayAfterTomorrow := util.MidnightInLocal(today.Add(48 * time.Hour), time.UTC)
+		dayAfterDayAfterTomorrow := util.MidnightInLocal(time.Now().Add(72*time.Hour), time.UTC)
+		assert.True(t, dayAfterDayAfterTomorrow.After(today), "dayAfterDayAfterTomorrow timestamp must come after today's")
+		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
+		assert.NoError(t, err, "must be able to parse the rrule")
+
+		spending := Spending{
+			SpendingType:   SpendingTypeGoal,
+			TargetAmount:   100,
+			CurrentAmount:  0,
+			NextRecurrence: dayAfterDayAfterTomorrow,
+		}
+
+		err = spending.CalculateNextContribution(
+			context.Background(),
+			time.UTC.String(),
+			GiveMeAFundingSchedule(dayAfterTomorrow, rule),
+			time.Now(),
+		)
+		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
+		assert.False(t, spending.IsBehind, "should not be behind because it will be funded before it is spent")
+		assert.EqualValues(t, spending.TargetAmount, spending.NextContributionAmount, "next contribution should be the entire amount")
+	})
+
+	// This might eventually become obsolete, but it covers a bug scenario I discovered while working on institutions.
+	t.Run("next funding in the past is behind", func(t *testing.T) {
+		today := util.MidnightInLocal(time.Now(), time.UTC)
 		dayAfterTomorrow := util.MidnightInLocal(time.Now().Add(48*time.Hour), time.UTC)
 		assert.True(t, dayAfterTomorrow.After(today), "dayAfterTomorrow timestamp must come after today's")
 		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
@@ -76,33 +102,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(tomorrow, rule),
-			time.Now(),
-		)
-		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
-		assert.False(t, spending.IsBehind, "should not be behind because it will be funded before it is spent")
-		assert.EqualValues(t, spending.TargetAmount, spending.NextContributionAmount, "next contribution should be the entire amount")
-	})
-
-	// This might eventually become obsolete, but it covers a bug scenario I discovered while working on institutions.
-	t.Run("next funding in the past is behind", func(t *testing.T) {
-		today := util.MidnightInLocal(time.Now(), time.UTC)
-		tomorrow := util.MidnightInLocal(time.Now().Add(25*time.Hour), time.UTC)
-		assert.True(t, tomorrow.After(today), "tomorrow timestamp must come after today's")
-		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		spending := Spending{
-			SpendingType:   SpendingTypeGoal,
-			TargetAmount:   100,
-			CurrentAmount:  0,
-			NextRecurrence: tomorrow,
-		}
-
-		err = spending.CalculateNextContribution(
-			context.Background(),
-			time.UTC.String(),
-			GiveMeAFundingSchedule(tomorrow.Add(24 * time.Hour), rule),
+			GiveMeAFundingSchedule(dayAfterTomorrow.Add(25*time.Hour), rule),
 			time.Now(),
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")

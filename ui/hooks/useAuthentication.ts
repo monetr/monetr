@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import * as Sentry from '@sentry/react';
 
 import User from 'models/User';
 import request from 'util/request';
@@ -15,7 +16,16 @@ export type AuthenticationResult =
   & UseQueryResult<Partial<AuthenticationWrapper>, unknown>;
 
 export function useAuthenticationSink(): AuthenticationResult {
-  const result = useQuery<Partial<AuthenticationWrapper>>('/users/me');
+  const result = useQuery<Partial<AuthenticationWrapper>>('/users/me', {
+    onSuccess: data => {
+      if (data?.user?.accountId) {
+        Sentry.setUser({
+          id: data.user.accountId.toString(10),
+          username: `account:${data.user.accountId}`,
+        });
+      }
+    },
+  });
   return {
     ...result,
     result: {

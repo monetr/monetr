@@ -125,7 +125,7 @@ export default function InitialPlaidSetup(): JSX.Element {
       institutionName: metadata.institution.name,
       accountIds: metadata.accounts.map((account: { id: string }) => account.id),
     })
-      .then(result => {
+      .then(async result => {
         const linkId: number = result.data.linkId;
         setState({
           linkId: linkId,
