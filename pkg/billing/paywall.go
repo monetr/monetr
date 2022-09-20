@@ -22,6 +22,7 @@ type BasicPayWall interface {
 	// subscription has been canceled or past due; then the customer should not be permitted to access their
 	// application.
 	GetSubscriptionIsActive(ctx context.Context, accountId uint64) (bool, error)
+	GetSubscriptionIsTrialing(ctx context.Context, accountId uint64) (trialing bool, err error)
 }
 
 var (
@@ -105,4 +106,23 @@ func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountI
 	span.Status = sentry.SpanStatusOK
 
 	return account.IsSubscriptionActive(), nil
+}
+
+func (b *baseBasicPaywall) GetSubscriptionIsTrialing(ctx context.Context, accountId uint64) (trialing bool, err error) {
+	span := sentry.StartSpan(ctx, "Billing - GetSubscriptionIsTrialing")
+	defer span.Finish()
+
+	log := b.log.WithContext(span.Context()).WithField("accountId", accountId)
+
+	log.Debug("checking if account subscription is trial")
+
+	account, err := b.accounts.GetAccount(span.Context(), accountId)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return false, errors.Wrap(err, "cannot determine if account subscription is trial")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return account.IsTrialing(), nil
 }

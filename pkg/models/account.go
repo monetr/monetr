@@ -77,3 +77,11 @@ func (a *Account) HasSubscription() bool {
 		return false
 	}
 }
+
+func (a *Account) IsTrialing() bool {
+	if a.SubscriptionStatus != nil {
+		return *a.SubscriptionStatus == stripe.SubscriptionStatusTrialing && a.IsSubscriptionActive()
+	}
+
+	return false
+}
