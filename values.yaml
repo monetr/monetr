@@ -31,6 +31,7 @@ securityContext:
 # runAsUser: 1000
 
 service:
+  enabled: true
   separateUIAndAPI: false
   type: ClusterIP
   port: 80

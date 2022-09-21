@@ -2,11 +2,14 @@ package secrets
 
 import (
 	"context"
+	"encoding/base64"
 	"math"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/golang/mock/gomock"
 	"github.com/monetr/monetr/pkg/internal/fixtures"
+	"github.com/monetr/monetr/pkg/internal/mockgen"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,6 +40,58 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		provider := NewPostgresPlaidSecretsProvider(log, db, nil)
 		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
 		assert.NoError(t, err, "must be able to write access token for the first time")
+
+		token, err := provider.GetAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId)
+		assert.NoError(t, err, "must retrieve the written token")
+		assert.Equal(t, accessToken, token, "retrieved token must match the one written")
+	})
+
+	t.Run("first write kms", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t)
+		ctx := context.Background()
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		plaidItemId := gofakeit.UUID()
+		accessToken := gofakeit.UUID()
+
+		kms := mockgen.NewMockKeyManagement(ctrl)
+
+		encrypted := []byte(base64.StdEncoding.EncodeToString([]byte(accessToken)))
+		version := "1"
+		keyName := "project/us-east1/key"
+		kms.EXPECT().
+			Encrypt(
+				gomock.Any(),
+				gomock.Eq([]byte(accessToken)),
+			).
+			Return(
+				version,   // Key version
+				keyName,   // Key name
+				encrypted, // Encrypted value
+				nil,       // Error
+			).
+			MaxTimes(1)
+
+		provider := NewPostgresPlaidSecretsProvider(log, db, kms)
+		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
+		assert.NoError(t, err, "must be able to write access token for the first time")
+
+		kms.EXPECT().
+			Decrypt(
+				gomock.Any(),
+				gomock.Eq(version),
+				gomock.Eq(keyName),
+				gomock.Eq(encrypted),
+			).
+			Return(
+				[]byte(accessToken), // Decrypted access token
+				nil,                 // Error
+			).
+			MaxTimes(1)
 
 		token, err := provider.GetAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId)
 		assert.NoError(t, err, "must retrieve the written token")

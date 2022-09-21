@@ -1,0 +1,125 @@
+replicaCount: 6
+
+image:
+  repository: ghcr.io/monetr/monetr
+  pullPolicy: Always
+  tag: "" # Will be overwritten with the SHA for the commit of this deploy
+
+imagePullSecrets: [ ]
+
+podAnnotations:
+  prometheus.io/scrape: 'true'
+  prometheus.io/port: '9000'
+
+serviceAccountName: monetr
+
+service:
+  enabled: false
+  port: 4000
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector:
+  kubernetes.io/os: linux
+  kubernetes.io/arch: amd64
+
+disruption:
+  enabled: false
+  maxUnavailable: 1
+  minAvailable: 1
+
+customEnvFrom:
+  - secretRef:
+      name: monetr-config-secrets
+
+api:
+  name: monetr
+  customEnv:
+    - name: MONETR_ENVIRONMENT
+      value: "my.monetr.app"
+  uiDomainName: my.monetr.app
+  apiDomainName: my.monetr.app
+  allowSignUp: true
+  enableWebhooks: true # Will be deprecated soon.
+  beta:
+    enableBetaCodes: true
+  postgreSql:
+    address: postgres.production.monetr.in
+    port: 5432
+    database: monetr
+  email:
+    enabled: true
+    domain: monetr.app
+    forgotPassword:
+      enabled: true
+      tokenLifetime: 10m
+    verification:
+      enabled: true
+      tokenLifetime: 30m
+    smtp:
+      username: apikey
+      host: smtp.sendgrid.net
+      port: 587
+  sendGrid:
+    enabled: false
+    apiKey: ""
+    templates:
+      verifyEmailTemplate: ""
+      forgotPasswordTemplate: ""
+  reCaptcha:
+    enabled: true
+    verifyLogin: true
+    verifyRegister: true
+    verifyForgotPassword: true
+  plaid:
+    environment: "https://production.plaid.com"
+    enableReturningUserExperience: true
+    webhooksEnabled: true
+    webhooksDomain: my.monetr.app
+    oauthDomain: my.monetr.app
+    maxNumberOfLinks: 3
+  cors:
+    allowedOrigins:
+      - "https://my.monetr.app"
+    debug: false
+  redis:
+    enabled: true
+    address: redis.redis.svc.cluster.local
+    port: 6379
+  logging:
+    level: debug
+    format: json
+    stackDriver:
+      enabled: true
+  sentry:
+    enabled: true
+    sampleRate: 1.0
+    traceSampleRate: 1.0
+  vault:
+    enabled: false
+  keyManagement:
+    enabled: true
+    provider: google
+    google:
+      resourceName: projects/production-362403/locations/us/keyRings/monetr-production-362403-monetr-in/cryptoKeys/monetr-secrets-monetr-production-362403-monetr-in
+  stripe:
+    enabled: true
+    webhooksEnabled: true # Still working on this for now.
+    billingEnabled: true
+    taxesEnabled: true
+    initialPlan:
+      freeTrialDays: 0
+      stripePriceId: price_1LkF9dI4uGGnwpgwvGIFcfZm
+      features:
+        - ManualBudgeting
+        - LinkedBudgeting
+
