@@ -61,14 +61,16 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		kms := mockgen.NewMockKeyManagement(ctrl)
 
 		encrypted := []byte(base64.StdEncoding.EncodeToString([]byte(accessToken)))
+		version := "1"
+		keyName := "project/us-east1/key"
 		kms.EXPECT().
 			Encrypt(
 				gomock.Any(),
 				gomock.Eq([]byte(accessToken)),
 			).
 			Return(
-				"1",       // Key version
-				"abc123",  // Key name
+				version,   // Key version
+				keyName,   // Key name
 				encrypted, // Encrypted value
 				nil,       // Error
 			).
@@ -81,8 +83,8 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		kms.EXPECT().
 			Decrypt(
 				gomock.Any(),
-				gomock.Eq("1"),
-				gomock.Eq("abc123"),
+				gomock.Eq(version),
+				gomock.Eq(keyName),
 				gomock.Eq(encrypted),
 			).
 			Return(
