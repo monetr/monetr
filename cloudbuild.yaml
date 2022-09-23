@@ -1,6 +1,7 @@
 steps:
   - name: "node:17.5.0"
     timeout: "600s"
-    args:
-      - "make build-ui"
+    script: |
+      #!/usr/bin/env sh
+      make build-ui
 
