@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
@@ -50,6 +51,7 @@ func newSecretsCommand(parent *cobra.Command) {
 	newSecretInformationCommand(command)
 	newSecretMigrationCommand(command)
 	newViewSecretCommand(command)
+	newTestKMSCommand(command)
 
 	parent.AddCommand(command)
 }
@@ -450,6 +452,75 @@ func newSecretMigrationCommand(parent *cobra.Command) {
 		},
 	}
 	command.PersistentFlags().BoolVar(&dryRun, "dry-run", true, "Test the changes that would be made without making them.")
+
+	parent.AddCommand(command)
+}
+
+func newTestKMSCommand(parent *cobra.Command) {
+	var kmsProvider string
+
+	command := &cobra.Command{
+		Use:   "test-kms",
+		Short: "Tests the configured KMS provider to make sure data can be encrypted and decrypted",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			configuration := config.LoadConfiguration()
+			if kmsProvider != "" {
+				configuration.KeyManagement.Provider = kmsProvider
+			}
+
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+
+			kms, err := getKMS(log, configuration)
+			if err != nil {
+				log.WithError(err).Fatal("failed to setup KMS")
+				return err
+			}
+
+			if kms == nil {
+				log.Warn("no KMS configured")
+				return nil
+			}
+
+			testString := "Lorem ipsum dolor sit amet"
+			fmt.Printf("Testing KMS with test string: %s\n", testString)
+
+			keyId, version, result, err := kms.Encrypt(context.Background(), []byte(testString))
+			if err != nil {
+				log.WithError(err).Error("failed to encrypt test string")
+				return err
+			}
+
+			fmt.Printf("Successfully encrypted test string!\n")
+			fmt.Printf("Key ID: %s\n", keyId)
+			fmt.Printf("Version: %s\n", version)
+			fmt.Printf("Result Binary -----------\n")
+			fmt.Println()
+			fmt.Println(hex.Dump(result))
+			fmt.Println()
+			fmt.Printf("Result Formatted: %s\n", hex.EncodeToString(result))
+			fmt.Println()
+			fmt.Println("Testing decryption with test string...")
+
+			decrypted, err := kms.Decrypt(context.Background(), keyId, version, result)
+			if err != nil {
+				log.WithError(err).Error("failed to dencrypt test string")
+				return err
+			}
+
+			fmt.Printf("Successfully dencrypted test string!\n")
+
+			if !bytes.Equal([]byte(testString), decrypted) {
+				log.Error("Input string and result do not match!")
+				fmt.Println("Input:", testString)
+				fmt.Println("Output:", string(decrypted))
+				return errors.New("input string and decrytped string do not match")
+			}
+
+			fmt.Println("Input and output match! Everything is working!")
+
+			return nil
+		},
+	}
 
 	parent.AddCommand(command)
 }
