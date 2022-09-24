@@ -163,34 +163,6 @@ jobs:
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
           gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz --clobber
 
-  #  container:
-  #    if: ${{ needs.release_please.outputs.release_created }}
-  #    needs:
-  #      - "release_please"
-  #      - "build_ui"
-  #    name: Container
-  #    runs-on: ubuntu-latest
-  #    steps:
-  #      - uses: actions/checkout@v2
-  #      - uses: actions/download-artifact@v2
-  #        name: Download Compiled UI Artifacts
-  #        with:
-  #          name: '${{ needs.release_please.outputs.version }}-ui'
-  #          path: '${{ github.workspace }}/pkg/ui/static/'
-  #      - name: Login
-  #        env:
-  #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  #          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  #        run: |
-  #          buildah login -u ${{ github.repository_owner }} -p $GITHUB_TOKEN ghcr.io
-  #          buildah login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD docker.io
-  #      - name: Build
-  #        run: |
-  #          sudo apt-get update && sudo apt-get -y install qemu-user-static
-  #          make container RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
-  #          make container-push RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
-
   docker:
     if: ${{ needs.release_please.outputs.release_created }}
     needs:
@@ -200,6 +172,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: actions/download-artifact@v3
         name: Download Compiled UI Artifacts
         with:
@@ -230,17 +204,17 @@ jobs:
     needs:
       - "release_please"
       - "docker"
-    name: Deploy my.monetr.dog
+    name: Deploy my.monetr.app
     runs-on: ubuntu-latest
     steps:
       - uses: chrnorm/deployment-action@releases/v1
-        name: Create my.monetr.dog Deployment
+        name: Create my.monetr.app Deployment
         id: deployment
         with:
           initial_status: pending
           token: "${{ github.token }}"
-          target_url: https://my.monetr.dog
-          environment: my.monetr.dog
+          target_url: https://my.monetr.app
+          environment: my.monetr.app
           ref: "v${{ needs.release_please.outputs.version }}"
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -255,7 +229,7 @@ jobs:
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: monetr
         with:
-          environment: 'my.monetr.dog'
+          environment: 'my.monetr.app'
           version: 'v${{ needs.release_please.outputs.version }}'
           sourcemaps: './build/source_maps'
-          url_prefix: 'https://my.monetr.dog'
+          url_prefix: 'https://my.monetr.app'
