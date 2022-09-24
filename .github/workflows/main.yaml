@@ -326,3 +326,43 @@ jobs:
           image_name: monetr
           image_tag: ${{ steps.tag.outputs.POST_TAG }}
           push_only: true
+
+  deploy:
+    needs:
+      - "go_test"
+      - "docker"
+    name: Deploy my.monetr.dog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: chrnorm/deployment-action@releases/v1
+        name: Create my.monetr.dog Deployment
+        id: deployment
+        with:
+          initial_status: pending
+          token: "${{ github.token }}"
+          target_url: https://my.monetr.dog
+          environment: my.monetr.dog
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        name: Download Compiled UI Artifacts
+        with:
+          name: '${{ needs.release_please.outputs.version }}-source-maps'
+          path: '${{ github.workspace }}/build/source_maps'
+      - name: Save Tag Variable
+        id: tag
+        run: |
+          echo ::set-output name=POST_TAG::$(git describe --tag | cut -d "v" -f 2)
+      - name: Create Sentry Release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: monetr
+        with:
+          environment: 'my.monetr.dog'
+          version: ${{ steps.tag.outputs.POST_TAG }}
+          sourcemaps: './build/source_maps'
+          url_prefix: 'https://my.monetr.dog'
