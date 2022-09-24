@@ -15,6 +15,7 @@ import (
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/ctxkeys"
 	"github.com/monetr/monetr/pkg/repository"
+	"github.com/monetr/monetr/pkg/util"
 	"github.com/pkg/errors"
 )
 
@@ -158,7 +159,7 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		hub.Scope().SetUser(sentry.User{
 			ID:        strconv.FormatUint(claims.AccountId, 10),
 			Username:  fmt.Sprintf("account:%d", claims.AccountId),
-			IPAddress: ctx.GetHeader("X-Forwarded-For"),
+			IPAddress: util.GetForwardedFor(ctx),
 		})
 		hub.Scope().SetTag("userId", strconv.FormatUint(claims.UserId, 10))
 		hub.Scope().SetTag("accountId", strconv.FormatUint(claims.AccountId, 10))
