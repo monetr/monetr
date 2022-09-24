@@ -1,7 +1,9 @@
 steps:
-  - name: "node:17.5.0"
+  - name: "ghcr.io/monetr/build-containers/debian:11.5"
     timeout: "600s"
     script: |
       #!/usr/bin/env sh
-      make build-ui
-
+      kubectl config view
+      make container ENGINE=docker
+options:
+  workerPool: projects/$PROJECT_ID/locations/$LOCATION/workerPools/builder
