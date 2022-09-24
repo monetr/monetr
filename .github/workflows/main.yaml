@@ -317,7 +317,7 @@ jobs:
       - name: Save Tag Variable
         id: tag
         run: |
-          echo ::set-output name=POST_TAG::$(git describe --tag)
+          echo ::set-output name=POST_TAG::$(git describe --tag | cut -d "v" -f 2)
       - uses: RafikFarhad/push-to-gcr-github-action@v4.1
         with:
           gcloud_service_key: ${{ secrets.GCR_CREDENTIALS }}
