@@ -17,6 +17,7 @@ import FundingScheduleList from 'components/FundingSchedules/FundingScheduleList
 import TransferDialog from 'components/Spending/TransferDialog';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
 import { useRemoveSpending, useSelectedExpense } from 'hooks/spending';
+import EditFundingScheduleDialog from './EditFundingScheduleDialog';
 
 export default function ExpenseDetail(): JSX.Element {
   const removeSpending = useRemoveSpending();
@@ -49,8 +50,7 @@ export default function ExpenseDetail(): JSX.Element {
       case Dialog.EditDueDateDialog:
         return <EditExpenseDueDateDialog spending={ expense } isOpen onClose={ closeDialog } />;
       case Dialog.EditFundingScheduleDialog:
-        // TODO Implement.
-        return null;
+        return <EditFundingScheduleDialog spending={ expense } isOpen onClose={ closeDialog } />;
       default:
         return null;
     }
