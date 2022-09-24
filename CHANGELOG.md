@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.11.8](https://github.com/monetr/monetr/compare/v0.11.7...v0.11.8) (2022-09-24)
+
+
+### Features
+
+* **cli:** Adding `test-kms` command. ([ca8ab76](https://github.com/monetr/monetr/commit/ca8ab769dbc41b0c2d2fc66b0ca424a1a811d629))
+* **monetr:** General production preperation. ([#1054](https://github.com/monetr/monetr/issues/1054)) ([572ac15](https://github.com/monetr/monetr/commit/572ac15af3e72d322e116f7a1716e1cb7baef029))
+* **ui:** Added edit expense funding schedule dialog. ([#1063](https://github.com/monetr/monetr/issues/1063)) ([2d3de55](https://github.com/monetr/monetr/commit/2d3de55f37f9ab976a35064fd46e58a50d71e2a8)), closes [#276](https://github.com/monetr/monetr/issues/276)
+
+
+### Bug Fixes
+
+* **api:** Don't return internal errors to the client. ([#1062](https://github.com/monetr/monetr/issues/1062)) ([35098a2](https://github.com/monetr/monetr/commit/35098a2b75657d40a790be99d70009dd1ddd8bfa)), closes [#95](https://github.com/monetr/monetr/issues/95)
+* **api:** Fixed parsing of `X-Forwarded-For` ([#1060](https://github.com/monetr/monetr/issues/1060)) ([732ee19](https://github.com/monetr/monetr/commit/732ee19fbd0f0414dc6e9bcabccb2ddee05350ac)), closes [#1052](https://github.com/monetr/monetr/issues/1052)
+* **ci:** Fixed uploading sourcemaps to sentry. ([58b7f69](https://github.com/monetr/monetr/commit/58b7f694cca758c28c10d6682aed2190cb0c02ab))
+* **ci:** Fixing image tag for Google Cloud Registry. ([8c9faec](https://github.com/monetr/monetr/commit/8c9faecfbdfafcfe5e846fddd6265476acff4419))
+* **funding:** Fixed funding schedule calculation. ([#1065](https://github.com/monetr/monetr/issues/1065)) ([ffe0065](https://github.com/monetr/monetr/commit/ffe006506b69df2e3157c5dec1cf006444b6a6e0)), closes [#1064](https://github.com/monetr/monetr/issues/1064)
+* **plaid:** Fixed bug with link token caching. ([#1061](https://github.com/monetr/monetr/issues/1061)) ([62bcfff](https://github.com/monetr/monetr/commit/62bcfff2b7972f4cba794f794a67814fe7b538a7)), closes [#1025](https://github.com/monetr/monetr/issues/1025)
+* **plaid:** Fixed failure trying to reauthenticate account. ([#1059](https://github.com/monetr/monetr/issues/1059)) ([23b8d86](https://github.com/monetr/monetr/commit/23b8d86ed6ef57ed5e1f767ee259b783b2a5209a)), closes [#1058](https://github.com/monetr/monetr/issues/1058)
+* **ui:** Fixed bug in bank account sink. ([#1066](https://github.com/monetr/monetr/issues/1066)) ([ec308e8](https://github.com/monetr/monetr/commit/ec308e8ea0e2cb1dc9415422b6707b881a6c5cd5)), closes [#1053](https://github.com/monetr/monetr/issues/1053)
+
+
+### Miscellaneous
+
+* **ci:** Deploy my.monetr.dog on main. ([5e011d6](https://github.com/monetr/monetr/commit/5e011d636e08f3b44d652b7656b9a379405844cb))
+* **ci:** Making tweaks to CI to build image for each push. ([51cfa28](https://github.com/monetr/monetr/commit/51cfa283d1b4232b06191e042c90834c77423de9))
+* **ci:** Push unstable images to Google Container Registry. ([5aad674](https://github.com/monetr/monetr/commit/5aad67437b85f4a25c276669787d8f5ab1ea2a3c))
+* **ci:** Switch release CI over to deploy to production. ([fc9aaa5](https://github.com/monetr/monetr/commit/fc9aaa58f75ee5a54c59384ceeeebcea722da172))
+* **deps:** Bump mkdocs-material (insiders) to the latest version. ([ff937a2](https://github.com/monetr/monetr/commit/ff937a2a2e31848acdab78be83b9233a1836a397))
+* **docs:** Fix indention on authentication docs. ([966dc39](https://github.com/monetr/monetr/commit/966dc39a33dea56f0e6e774cfc8d2449954227af))
+* **dog:** Changed repository base for containers in my.monetr.dog ([25ad20a](https://github.com/monetr/monetr/commit/25ad20a023d35de4c5a8f420967591c62540439d))
+
 ## [0.11.7](https://github.com/monetr/monetr/compare/v0.11.6...v0.11.7) (2022-09-16)
 
 
