@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestInLocal(t *testing.T) {
@@ -29,22 +30,13 @@ func TestInLocal(t *testing.T) {
 }
 
 func TestMidnightInLocal(t *testing.T) {
-	t.Run("late in the day", func(t *testing.T) {
-		central, err := time.LoadLocation("America/Chicago")
-		assert.NoError(t, err, "must be able to load the central time location")
-		start := time.Date(2022, 06, 15, 2, 24, 38, 0, time.UTC)
-
-		midnight := MidnightInLocal(start, central)
-		assert.Equal(t, time.Date(2022, 06, 14, 0, 0, 0, 0, central), midnight, "midnight in a different timezone is a different day")
-	})
-
 	t.Run("weird timezone", func(t *testing.T) {
 		sanLuis, err := time.LoadLocation("America/Argentina/San_Luis")
 		assert.NoError(t, err, "must be able to load the sanLuis time location")
 		start := time.Date(2022, 06, 15, 2, 24, 38, 0, time.UTC)
 
 		midnight := MidnightInLocal(start, sanLuis)
-		assert.Equal(t, time.Date(2022, 06, 14, 0, 0, 0, 0, sanLuis), midnight, "midnight in a different timezone is a different day")
+		assert.Equal(t, time.Date(2022, 06, 15, 0, 0, 0, 0, sanLuis), midnight, "midnight in a different timezone is a different day")
 	})
 
 	t.Run("panics for an empty time", func(t *testing.T) {
@@ -54,5 +46,16 @@ func TestMidnightInLocal(t *testing.T) {
 		assert.Panics(t, func() {
 			_ = MidnightInLocal(time.Time{}, sanLuis)
 		})
+	})
+
+	t.Run("central time", func(t *testing.T) {
+		timezone, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must load central timezone")
+		// 12 seconds after midnight already in the desired timezone.
+		input := time.Date(2022, 9, 15, 0, 0, 12, 0, timezone)
+		expected := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
+
+		midnight := MidnightInLocal(input, timezone)
+		assert.Equal(t, expected, midnight, "should have truncated the time, but not the timezone")
 	})
 }

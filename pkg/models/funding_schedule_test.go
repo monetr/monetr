@@ -131,4 +131,22 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 		next := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
 		assert.Equal(t, expected, next, "should not show the 15th, instead should show the 31st")
 	})
+
+	t.Run("prevent regression calculating midnight", func(t *testing.T) {
+		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		next := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
+		expected := time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)
+		// 1 Second after midnight in timezone on last funding day. But in UTC because that's the server timezone.
+		now := time.Date(2022, 9, 15, 0, 0, 1, 0, timezone).UTC()
+		fundingSchedule := models.FundingSchedule{
+			Name:            "Payday",
+			Rule:            rule,
+			ExcludeWeekends: false,
+			LastOccurrence:  nil,
+			NextOccurrence:  next,
+		}
+		nextFundingOccurrence := fundingSchedule.GetNextContributionDateAfter(now, timezone)
+		assert.Equal(t, expected, nextFundingOccurrence, "should be on friday the 30th of september next")
+	})
 }
