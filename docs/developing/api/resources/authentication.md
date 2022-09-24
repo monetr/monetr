@@ -63,7 +63,7 @@ POST /api/authentication/login
 
 ??? note
 
-    When the request is successful the response body is pretty minimal. User details should be retrieved using a follow 
+    When the request is successful the response body is pretty minimal. User details should be retrieved using a follow
     up request to [Get Me](user.md#get-me-current-user)
 
 ### Login Examples
@@ -244,6 +244,17 @@ If the registration succeeds, but we need to verify the login's email address.
 {
   "message": "A verification email has been sent to your email address, please verify your email.",
   "requireVerification": true
+}
+```
+
+#### Email already exists
+
+If the provided email is already in use by someone else for monetr then you will receive a bad request response.
+
+```json title="400 Bad Request"
+{
+  "error": "email already in use",
+	"code": "EMAIL_IN_USE"
 }
 ```
 

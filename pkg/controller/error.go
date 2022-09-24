@@ -56,6 +56,7 @@ func (c *Controller) onAnyErrorCode(ctx iris.Context) {
 var (
 	ErrMFARequired            = errors.New("login requires MFA")
 	ErrEmailNotVerified       = errors.New("email address is not verified")
+	ErrEmailAlreadyExists     = errors.New("email already in use")
 	ErrPasswordChangeRequired = errors.New("password must be changed")
 )
 
@@ -109,6 +110,29 @@ func (e EmailNotVerifiedError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
 		"error": e.FriendlyMessage(),
 		"code":  "EMAIL_NOT_VERIFIED",
+	})
+}
+
+// EmailNotVerifiedError is returned to the client when they attempt to authenticate using a login with an email that
+// has not yet been verified.
+type EmailAlreadyExists struct{}
+
+func (e EmailAlreadyExists) Cause() error {
+	return ErrEmailAlreadyExists
+}
+
+func (e EmailAlreadyExists) Error() string {
+	return e.FriendlyMessage()
+}
+
+func (e EmailAlreadyExists) FriendlyMessage() string {
+	return e.Cause().Error()
+}
+
+func (e EmailAlreadyExists) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+		"error": e.FriendlyMessage(),
+		"code":  "EMAIL_IN_USE",
 	})
 }
 

@@ -696,8 +696,9 @@ func TestRegister(t *testing.T) {
 				WithJSON(registerRequest).
 				Expect()
 
-			response.Status(http.StatusInternalServerError)
-			response.JSON().Path("$.error").Equal("failed to create login: a login with the same email already exists")
+			response.Status(http.StatusBadRequest)
+			response.JSON().Path("$.code").Equal("EMAIL_IN_USE")
+			response.JSON().Path("$.error").Equal("email already in use")
 		}
 	})
 
@@ -807,7 +808,7 @@ func TestRegister(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("could not generate email verification token: lifetime must be greater than 1 second")
+			Equal("could not generate email verification token")
 		response.JSON().Object().NotContainsKey("token")
 	})
 }

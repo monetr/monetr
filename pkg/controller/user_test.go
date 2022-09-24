@@ -302,7 +302,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusInternalServerError)
-			response.JSON().Path("$.error").String().Equal("failed to retrieve current user details: user does not exist")
+			response.JSON().Path("$.error").String().Equal("failed to retrieve current user details")
 		}
 	})
 

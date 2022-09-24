@@ -17,6 +17,10 @@ import (
 )
 
 var (
+	ErrEmailAlreadyExists = errors.New("a login with the same email already exists")
+)
+
+var (
 	_ UnauthenticatedRepository = &unauthenticatedRepo{}
 )
 
@@ -56,7 +60,7 @@ func (u *unauthenticatedRepo) CreateLogin(
 
 	if count != 0 {
 		span.Status = sentry.SpanStatusInvalidArgument
-		return nil, errors.Errorf("a login with the same email already exists")
+		return nil, errors.WithStack(ErrEmailAlreadyExists)
 	}
 
 	_, err = u.txn.ModelContext(span.Context(), login).Insert(login)
