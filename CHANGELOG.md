@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.9](https://github.com/monetr/monetr/compare/v0.11.8...v0.11.9) (2022-09-24)
+
+
+### Bug Fixes
+
+* **cloud:** Fixed cloud based request IDs. ([#1068](https://github.com/monetr/monetr/issues/1068)) ([c68ee1a](https://github.com/monetr/monetr/commit/c68ee1a9ee438ef2e5dbfff401204e74ee361b75)), closes [#1067](https://github.com/monetr/monetr/issues/1067)
+* **docs:** Fixed sign in URL on the documentation site. ([#1071](https://github.com/monetr/monetr/issues/1071)) ([7d5ab20](https://github.com/monetr/monetr/commit/7d5ab20a21bf4b787f6dc4a72cc1cfa0349e9e47)), closes [#1070](https://github.com/monetr/monetr/issues/1070)
+
 ## [0.11.8](https://github.com/monetr/monetr/compare/v0.11.7...v0.11.8) (2022-09-24)
 
 
