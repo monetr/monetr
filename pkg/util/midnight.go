@@ -21,7 +21,7 @@ func MidnightInLocal(input time.Time, timezone *time.Location) time.Time {
 		input.Minute(),
 		input.Second(),
 		input.Nanosecond(),
-		timezone,
+		time.UTC,
 	)
 	// We need to do this because we need to know the offset for a given timezone at the provided input's timestamp. This
 	// way we can adjust the input to be in that timezone then truncate the time.
