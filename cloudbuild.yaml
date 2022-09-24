@@ -6,4 +6,4 @@ steps:
       kubectl config view
       make container ENGINE=docker
 options:
-  workerPool: projects/$PROJECT_ID/locations/$LOCATION/workerPools/builder
+  pool: projects/$PROJECT_ID/locations/$LOCATION/workerPools/builder
