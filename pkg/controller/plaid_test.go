@@ -148,7 +148,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().Equal("failed to create Plaid client for link: failed to retrieve access token for plaid link: pg: no rows in result set")
+		response.JSON().Path("$.error").String().Equal("failed to create Plaid client for link")
 	})
 
 	t.Run("missing link ID", func(t *testing.T) {

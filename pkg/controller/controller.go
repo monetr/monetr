@@ -440,4 +440,5 @@ func (c *Controller) reportError(ctx iris.Context, err error) {
 			sentry.CaptureException(err)
 		}
 	}
+	c.getLog(ctx).WithError(err).Errorf("error in request: %s", err)
 }

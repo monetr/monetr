@@ -345,10 +345,10 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	}
 
 	// If the registration details provided look good then we want to create an
-	// unauthenticated repository. This will give us some basic database access
+	// unauthenticated repo. This will give us some basic database access
 	// without being able to access user information directly. It is essentially
 	// a write only interface to the database.
-	repository, err := c.getUnauthenticatedRepository(ctx)
+	repo, err := c.getUnauthenticatedRepository(ctx)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"cannot register user",
@@ -363,7 +363,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 			return
 		}
 
-		beta, err = repository.ValidateBetaCode(c.getContext(ctx), *registerRequest.BetaCode)
+		beta, err = repo.ValidateBetaCode(c.getContext(ctx), *registerRequest.BetaCode)
 		if err != nil {
 			c.wrapPgError(ctx, err, "could not verify beta code")
 			return
@@ -372,7 +372,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// Create the user's login record in the database, this will return the login
 	// record including the new login's loginId which we will need below.
-	login, err := repository.CreateLogin(
+	login, err := repo.CreateLogin(
 		c.getContext(ctx),
 		registerRequest.Email,
 		registerRequest.Password,
@@ -380,9 +380,15 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		registerRequest.LastName,
 	)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
-			"failed to create login",
-		)
+		switch errors.Cause(err) {
+		case repository.ErrEmailAlreadyExists:
+			c.failure(ctx, http.StatusBadRequest, EmailAlreadyExists{})
+			break
+		default:
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+				"failed to create login",
+			)
+		}
 		return
 	}
 
@@ -417,7 +423,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// Now that the login exists we can create the account, at the time of
 	// writing this we are only using the local time zone of the server, but in
 	// the future I want to have it somehow use the user's timezone.
-	if err = repository.CreateAccountV2(c.getContext(ctx), &account); err != nil {
+	if err = repo.CreateAccountV2(c.getContext(ctx), &account); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create account",
 		)
@@ -443,7 +449,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 
 	// Now that we have an accountId we can create the user object which will
 	// bind the login and the account together.
-	err = repository.CreateUser(
+	err = repo.CreateUser(
 		c.getContext(ctx),
 		login.LoginId,
 		account.AccountId,
@@ -457,7 +463,7 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	}
 
 	if beta != nil {
-		if err = repository.UseBetaCode(c.getContext(ctx), beta.BetaID, user.UserId); err != nil {
+		if err = repo.UseBetaCode(c.getContext(ctx), beta.BetaID, user.UserId); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 				"failed to use beta code",
 			)

@@ -13,7 +13,6 @@ import (
 // wrapPgError will wrap and return an error to the client. But will try to infer a status code from the error it is
 // given. If it cannot infer a status code, an InternalServerError is used.
 func (c *Controller) wrapPgError(ctx iris.Context, err error, msg string, args ...interface{}) {
-
 	switch errors.Cause(err) {
 	case pg.ErrNoRows:
 		ctx.SetErr(errors.Errorf("%s: record does not exist", fmt.Sprintf(msg, args...)))
@@ -46,7 +45,13 @@ func (c *Controller) sanitizePgError(err pg.Error) (error, int) {
 }
 
 func (c *Controller) wrapAndReturnError(ctx iris.Context, err error, status int, msg string, args ...interface{}) {
-	ctx.SetErr(errors.Wrapf(err, msg, args...))
+	switch status {
+	case http.StatusInternalServerError:
+		c.reportError(ctx, errors.Wrapf(err, msg, args...))
+		ctx.SetErr(errors.Errorf(msg, args...))
+	default:
+		ctx.SetErr(errors.Wrapf(err, msg, args...))
+	}
 	ctx.StatusCode(status)
 	ctx.StopExecution()
 
