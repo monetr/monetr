@@ -103,6 +103,11 @@ jobs:
           name: '${{ github.sha }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
           retention-days: 7
+      - uses: actions/upload-artifact@v3
+        with:
+          name: '${{ github.sha }}-source-maps'
+          path: '${{ github.workspace }}/build/source_maps'
+          retention-days: 1
 
   build_binary:
     needs:
@@ -349,7 +354,7 @@ jobs:
       - uses: actions/download-artifact@v3
         name: Download Compiled UI Artifacts
         with:
-          name: '${{ needs.release_please.outputs.version }}-source-maps'
+          name: '${{ github.sha }}-source-maps'
           path: '${{ github.workspace }}/build/source_maps'
       - name: Save Tag Variable
         id: tag
