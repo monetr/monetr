@@ -29,6 +29,7 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/monetr/monetr/pkg/stripe_helper"
+	"github.com/monetr/monetr/pkg/util"
 	"github.com/monetr/monetr/pkg/verification"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -195,7 +196,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		}
 
 		log := c.log.WithFields(logrus.Fields{
-			"requestId": ctx.GetHeader("X-Request-Id"),
+			"requestId": util.GetRequestID(ctx),
 		})
 
 		log.Debug(ctx.RouteName())
@@ -226,12 +227,10 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.Use(func(ctx iris.Context) {
 			var span *sentry.Span
 			if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
-				var requestId string
-				if requestId = ctx.GetHeader("X-Request-Id"); requestId != "" {
-					hub.ConfigureScope(func(scope *sentry.Scope) {
-						scope.SetTag("requestId", requestId)
-					})
-				}
+				requestId := util.GetRequestID(ctx)
+				hub.ConfigureScope(func(scope *sentry.Scope) {
+					scope.SetTag("requestId", requestId)
+				})
 
 				tracingCtx := sentry.SetHubOnContext(ctx.Request().Context(), hub)
 				name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
@@ -396,7 +395,7 @@ func (c *Controller) getSpan(ctx iris.Context) *sentry.Span {
 
 func (c *Controller) getLog(ctx iris.Context) *logrus.Entry {
 	log := c.log.WithContext(c.getContext(ctx)).WithFields(logrus.Fields{
-		"requestId": ctx.GetHeader("X-Request-Id"),
+		"requestId": util.GetRequestID(ctx),
 	})
 
 	if accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0); accountId > 0 {
