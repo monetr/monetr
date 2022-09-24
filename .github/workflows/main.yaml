@@ -256,7 +256,7 @@ jobs:
     name: MkDocs
     runs-on: ubuntu-latest
     env:
-      MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:06012022
+      MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:09232022
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
