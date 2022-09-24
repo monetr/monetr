@@ -34,7 +34,7 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
 
   useMountEffect(() => {
     request()
-      .put(`/plaid/link/update/${ props.linkId }?update_account_selection=${ props.updateAccountSelection }`)
+      .put(`/plaid/link/update/${ props.linkId }?update_account_selection=${ !!props.updateAccountSelection }`)
       .then(result => setState({
         loading: false,
         linkToken: result.data.linkToken,
