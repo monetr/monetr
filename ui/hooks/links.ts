@@ -13,7 +13,7 @@ export function useLinksSink(): LinksResult {
   const result = useQuery<Array<Partial<Link>>>('/links');
   return {
     ...result,
-    result: new Map(result?.data?.map(item => {
+    result: new Map((result?.data || []).map(item => {
       const link = new Link(item);
       return [link.linkId, link];
     })),

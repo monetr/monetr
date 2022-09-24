@@ -16,7 +16,7 @@ export function useBankAccountsSink(): BankAccountsResult {
   });
   return {
     ...result,
-    result: new Map(result?.data?.map(item => {
+    result: new Map((result?.data || []).map(item => {
       const bankAccount = new BankAccount(item);
       return [bankAccount.bankAccountId, bankAccount];
     })),
