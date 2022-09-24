@@ -3,7 +3,7 @@ steps:
     timeout: "600s"
     script: |
       #!/usr/bin/env sh
-      kubectl config view
+      git fetch --all --tags
       make container ENGINE=docker
 options:
   pool:
