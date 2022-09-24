@@ -7,6 +7,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/context"
 	"github.com/monetr/monetr/pkg/config"
+	"github.com/monetr/monetr/pkg/util"
 )
 
 type Controller interface {
@@ -22,14 +23,8 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *iris
 	// the real IP due to being behind several networking layers. Masquerade only works so much and
 	// I'm not sure of a better way.
 	app.UseGlobal(func(ctx *context.Context) {
-		var ipAddress string
-		if forwardedFor := ctx.GetHeader("X-Forwarded-For"); forwardedFor != "" {
-			ipAddress = forwardedFor
-		} else if realIp := ctx.GetHeader("X-Real-Ip"); realIp != "" {
-			ipAddress = realIp
-		}
-
-		ctx.Request().RemoteAddr = ipAddress
+		ipAddress := util.GetForwardedFor(ctx)
+		ctx.Request().RemoteAddr = util.GetForwardedFor(ctx)
 
 		// This way we still have a way to correlate users even if they are not authenticated.
 		if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
