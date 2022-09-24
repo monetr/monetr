@@ -1286,6 +1286,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#email-already-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Email already exists
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1710,6 +1719,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#email-already-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      Email already exists
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1841,7 +1859,7 @@ are valid then you will receive a <code>200 OK</code> status code in the respons
 </table>
 <details class="note">
 <summary>Note</summary>
-<p>When the request is successful the response body is pretty minimal. User details should be retrieved using a follow 
+<p>When the request is successful the response body is pretty minimal. User details should be retrieved using a follow
 up request to <a href="../user/#get-me-current-user">Get Me</a></p>
 </details>
 <h3 id="login-examples">Login Examples</h3>
@@ -2057,6 +2075,13 @@ the following.</p>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A verification email has been sent to your email address, please verify your email.&quot;</span><span class="p">,</span><span class="w"></span>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">&quot;requireVerification&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h4 id="email-already-exists">Email already exists</h4>
+<p>If the provided email is already in use by someone else for monetr then you will receive a bad request response.</p>
+<div class="highlight"><span class="filename">400 Bad Request</span><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email already in use&quot;</span><span class="p">,</span><span class="w"></span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="nt">&quot;code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EMAIL_IN_USE&quot;</span><span class="w"></span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <div class="footnote">
 <hr />
