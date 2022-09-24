@@ -254,7 +254,7 @@ If the provided email is already in use by someone else for monetr then you will
 ```json title="400 Bad Request"
 {
   "error": "email already in use",
-	"code": "EMAIL_IN_USE"
+  "code": "EMAIL_IN_USE"
 }
 ```
 
