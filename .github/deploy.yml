@@ -4,12 +4,6 @@ my.monetr.dog:
   required_contexts: [ ]
   auto_merge: false
 
-my.monetr.dev:
-  environment: my.monetr.dev
-  production_environment: false
-  required_contexts: [ ]
-  auto_merge: false
-
 my.monetr.app:
   environment: my.monetr.app
   production_environment: true
