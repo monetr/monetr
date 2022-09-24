@@ -47,7 +47,7 @@ type Controller struct {
 	stats                    *metrics.Stats
 	stripe                   stripe_helper.Stripe
 	ps                       pubsub.PublishSubscribe
-	cache                    *redis.Pool
+	cache                    cache.Cache
 	accounts                 billing.AccountRepository
 	paywall                  billing.BasicPayWall
 	billing                  billing.BasicBilling
@@ -126,7 +126,7 @@ func NewController(
 		stats:                    stats,
 		stripe:                   stripe,
 		ps:                       pubSub,
-		cache:                    cachePool,
+		cache:                    caching,
 		accounts:                 accountsRepo,
 		paywall:                  basicPaywall,
 		billing:                  basicBilling,

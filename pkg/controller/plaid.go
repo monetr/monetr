@@ -30,34 +30,52 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 	p.Get("/setup/wait/{linkId:uint64}", c.waitForPlaid)
 }
 
-func (c *Controller) storeLinkTokenInCache(ctx context.Context, log *logrus.Entry, userId uint64, linkToken string, expiration time.Time) error {
+func (c *Controller) storeLinkTokenInCache(
+	ctx context.Context,
+	userId uint64,
+	linkId uint64,
+	linkToken string,
+	expiration time.Time,
+) error {
 	span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
 	defer span.Finish()
 
-	cache, err := c.cache.GetContext(ctx)
-	if err != nil {
-		log.WithError(err).Warn("failed to get cache connection")
-		return errors.Wrap(err, "failed to get cache connection")
-	}
-	defer cache.Close()
-
-	key := fmt.Sprintf("plaid:in_progress:%d", userId)
-	return errors.Wrap(cache.Send("SET", key, linkToken, "EXAT", expiration.Unix()), "failed to cache link token")
+	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	return errors.Wrap(
+		c.cache.SetEzTTL(span.Context(), key, linkToken, expiration.Sub(time.Now())),
+		"failed to cache link token",
+	)
 }
 
-func (c *Controller) removeLinkTokenFromCache(ctx context.Context, log *logrus.Entry, userId uint64) error {
+func (c *Controller) checkCacheForLinkToken(
+	ctx context.Context,
+	userId uint64,
+	linkId uint64,
+) (string, error) {
+	span := sentry.StartSpan(ctx, "StoreLinkTokenInCache")
+	defer span.Finish()
+
+	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	var token string
+	if err := c.cache.GetEz(span.Context(), key, &token); err != nil {
+		return "", errors.Wrap(err, "failed to retrieve cached link token")
+	}
+	return token, nil
+}
+
+func (c *Controller) removeLinkTokenFromCache(
+	ctx context.Context,
+	userId uint64,
+	linkId uint64,
+) error {
 	span := sentry.StartSpan(ctx, "RemoteLinkTokenFromCache")
 	defer span.Finish()
 
-	cache, err := c.cache.GetContext(ctx)
-	if err != nil {
-		log.WithError(err).Warn("failed to get cache connection")
-		return errors.Wrap(err, "failed to get cache connection")
-	}
-	defer cache.Close()
-
-	key := fmt.Sprintf("plaid:in_progress:%d", userId)
-	return errors.Wrap(cache.Send("DEL", key), "failed to remove link token from cache")
+	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
+	return errors.Wrap(
+		c.cache.Delete(span.Context(), key),
+		"failed to remove cached link token",
+	)
 }
 
 func (c *Controller) newPlaidToken(ctx iris.Context) {
@@ -112,46 +130,21 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		}
 	}
 
-	checkCacheForLinkToken := func(ctx context.Context) (linkToken string, _ error) {
-		span := sentry.StartSpan(ctx, "CheckCacheForLinkToken")
-		defer span.Finish()
-
-		cache, err := c.cache.GetContext(ctx)
-		if err != nil {
-			log.WithError(err).Warn("failed to get cache connection")
-			return "", errors.Wrap(err, "failed to get cache connection")
-		}
-		defer cache.Close()
-
-		// Check and see if there is already a plaid link in progress for the current user.
-		result, err := cache.Do("GET", fmt.Sprintf("plaid:in_progress:%d", me.UserId))
-		if err != nil {
-			log.WithError(err).Warn("failed to retrieve link token from cache")
-			return "", errors.Wrap(err, "failed to retrieve link token from cache")
-		}
-
-		switch actual := result.(type) {
-		case string:
-			return actual, nil
-		case *string:
-			if actual != nil {
-				return *actual, nil
-			}
-		case []byte:
-			return string(actual), nil
-		}
-
-		return "", nil
-	}
-
+	// If we are trying to not send a ton of requests then check the cache to see if we still have a valid link token that
+	// we can use.
 	if checkCache, err := ctx.URLParamBool("use_cache"); err == nil && checkCache {
-		if linkToken, err := checkCacheForLinkToken(c.getContext(ctx)); err == nil && len(linkToken) > 0 {
+		if linkToken, err := c.checkCacheForLinkToken(
+			c.getContext(ctx),
+			userId,
+			0,
+		); err == nil && len(linkToken) > 0 {
 			log.Info("successfully found existing link token in cache")
 			ctx.JSON(map[string]interface{}{
 				"linkToken": linkToken,
 			})
 			return
 		}
+		log.Info("no link token was found in the cache")
 	}
 
 	legalName := ""
@@ -178,7 +171,13 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		return
 	}
 
-	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.Token(), token.Expiration()); err != nil {
+	if err = c.storeLinkTokenInCache(
+		c.getContext(ctx),
+		me.UserId,
+		0, // Since no link exists this should be cached without a link Id.
+		token.Token(),
+		token.Expiration(),
+	); err != nil {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
@@ -239,7 +238,13 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		return
 	}
 
-	if err = c.storeLinkTokenInCache(c.getContext(ctx), log, me.UserId, token.Token(), token.Expiration()); err != nil {
+	if err = c.storeLinkTokenInCache(
+		c.getContext(ctx),
+		me.UserId,
+		link.LinkId, // Cache the token under the link ID, that way it is only cached for updated for that link.
+		token.Token(),
+		token.Expiration(),
+	); err != nil {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
@@ -278,14 +283,21 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 		c.wrapPgError(ctx, err, "failed to retrieve link")
 		return
 	}
+	log := c.getLog(ctx)
+
+	if err := c.removeLinkTokenFromCache(
+		c.getContext(ctx),
+		c.mustGetUserId(ctx),
+		link.LinkId,
+	); err != nil {
+		log.WithError(err).Warn("failed to remove link token from cache")
+	}
 
 	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 		return
 	}
-
-	log := c.getLog(ctx)
 
 	currentAccessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(
 		c.getContext(ctx),
@@ -417,7 +429,11 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 
 	log := c.getLog(ctx)
 
-	if err := c.removeLinkTokenFromCache(c.getContext(ctx), log, c.mustGetUserId(ctx)); err != nil {
+	if err := c.removeLinkTokenFromCache(
+		c.getContext(ctx),
+		c.mustGetUserId(ctx),
+		0,
+	); err != nil {
 		log.WithError(err).Warn("failed to remove link token from cache")
 	}
 
