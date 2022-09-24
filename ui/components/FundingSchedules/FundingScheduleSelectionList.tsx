@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Divider, List, ListItem, ListItemIcon, Typography } from '@mui/material';
 
 import NewFundingScheduleDialog from 'components/FundingSchedules/NewFundingScheduleDialog';
@@ -6,6 +6,7 @@ import { useFundingSchedules } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 
 interface Props {
+  initialValue?: number;
   onChange: (_fundingSchedule: FundingSchedule) => void;
   disabled?: boolean;
 }
@@ -15,6 +16,10 @@ export default function FundingScheduleSelectionList(props: Props): JSX.Element 
   const [selectedFundingSchedule, setSelectedFundingSchedule] = useState<FundingSchedule | null>(null);
 
   const fundingSchedules = useFundingSchedules();
+
+  useEffect(() => {
+    if (props.initialValue) setSelectedFundingSchedule(fundingSchedules.get(props.initialValue));
+  }, [setSelectedFundingSchedule, props.initialValue])
 
   function selectItem(fundingScheduleId: number) {
     const fundingSchedule = fundingSchedules.get(fundingScheduleId);
