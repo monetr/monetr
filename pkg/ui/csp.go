@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/kataras/iris/v12"
-	"github.com/mileusna/useragent"
+	ua "github.com/mileusna/useragent"
 )
 
 const (
@@ -99,6 +99,4 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 	if len(policies) > 0 {
 		ctx.Header("Content-Security-Policy", encodePolicies())
 	}
-
-	ctx.Next()
 }

@@ -38,12 +38,16 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 		)
 
 		app.Get("/*", func(ctx iris.Context) {
-			cacheExpiration := time.Now().Add(24*time.Hour).Truncate(time.Hour)
+			cacheExpiration := time.Now().Add(12 * time.Hour).Truncate(time.Hour)
 			seconds := int(cacheExpiration.Sub(time.Now()).Seconds())
 			ctx.Header("Expires", cacheExpiration.Format(http.TimeFormat))
 			ctx.Header("Cache-Control", fmt.Sprintf("max-age=%d", seconds))
-			fileHandler(ctx)
+			ctx.Header("X-Frame-Options", "DENY")
+			ctx.Header("X-Content-Type-Options", "nosniff")
+			ctx.Header("Referrer-Policy", "same-origin")
+			ctx.Header("Permissions-Policy", "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(), gamepad=(), speaker-selection=()")
 			c.ContentSecurityPolicyMiddleware(ctx)
+			fileHandler(ctx)
 		})
 	})
 }
