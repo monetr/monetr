@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.10](https://github.com/monetr/monetr/compare/v0.11.9...v0.11.10) (2022-09-25)
+
+
+### Bug Fixes
+
+* **csp:** Fixing how CSP headers are set for UI serving. ([812139b](https://github.com/monetr/monetr/commit/812139b7c793aca8d01b4ad552e8f297d0d87fc1)), closes [#1028](https://github.com/monetr/monetr/issues/1028)
+* **sentry:** Allow Sentry feedback dialog in CSP. ([4d64571](https://github.com/monetr/monetr/commit/4d64571a26e6c3f97e2279294ca6bf4e39b1526b))
+* **sentry:** Allow Sentry URLs in the CSP. ([7b5cc1d](https://github.com/monetr/monetr/commit/7b5cc1d5332b585edafcce6c3ae2a4a964ee6315))
+* **ui:** Make sure sentry.io is on the CSP list. ([dd9875a](https://github.com/monetr/monetr/commit/dd9875a726097ce2c1378c142e7acd2175dcb5b3))
+
+
+### Miscellaneous
+
+* Updated README. ([8128db8](https://github.com/monetr/monetr/commit/8128db89cea51ec6dfdc706366f2f805aafc3cd7))
+
 ## [0.11.9](https://github.com/monetr/monetr/compare/v0.11.8...v0.11.9) (2022-09-24)
 
 
