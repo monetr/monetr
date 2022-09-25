@@ -4,7 +4,6 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr?ref=badge_shield)
 [![codecov](https://codecov.io/gh/monetr/monetr/branch/main/graph/badge.svg?token=4BRVTD3VSJ)](https://codecov.io/gh/monetr/monetr)
 [![Go Report Card](https://goreportcard.com/badge/github.com/monetr/monetr)](https://goreportcard.com/report/github.com/monetr/monetr)
-[![wakatime](https://wakatime.com/badge/user/e7d2c225-af72-41dc-bf39-f4a8108dc790/project/30965d1c-e425-4da3-9a31-7b1ca82dfaef.svg)](https://wakatime.com/badge/user/e7d2c225-af72-41dc-bf39-f4a8108dc790/project/30965d1c-e425-4da3-9a31-7b1ca82dfaef)
 
 <p align="center">
   <img width="460" height="300" src="https://raw.githubusercontent.com/monetr/monetr/main/ui/assets/logo.svg">
@@ -16,12 +15,6 @@ completely free to self-host (documentation to come), but requires a Plaid accou
 monetr is currently still in heavy development; but is being alpha-tested with the latest release version constantly.
 
 ![image](https://user-images.githubusercontent.com/37967690/179381136-ece91ea9-a6f8-4b7e-be70-b483320298d2.png)
-
-## Status
-
-| Environment   | Uptime                                                                                                        | Status Page                                                       |
-|---------------|---------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
-| Alpha Testing | ![Uptime Robot ratio (30 days)](https://img.shields.io/uptimerobot/ratio/m789641931-ce8fe24a641913b47027297d) | [Status Page](https://stats.uptimerobot.com/zAjyOcGm7E/789641931) |
 
 ## Contributing
 
