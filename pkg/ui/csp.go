@@ -64,6 +64,7 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 
 	// If sentry is enabled and a DSN is configured, then setup the connect-src for sentry.
 	if c.configuration.Sentry.Enabled {
+		policies["connect-src"]["https://sentry.io"] = noop
 		if c.configuration.Sentry.ExternalDSN != "" {
 			if dsn, err := url.Parse(c.configuration.Sentry.ExternalDSN); err == nil {
 				policies["connect-src"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
