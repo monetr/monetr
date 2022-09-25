@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/kataras/iris/v12"
@@ -31,7 +33,8 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 
 	policies := map[string]map[string]struct{}{
 		"default-src": {
-			Self: noop,
+			Self:                    noop,
+			"https://cdn.plaid.com": noop,
 		},
 		"script-src-elem": {
 			Self:                      noop,
@@ -57,6 +60,19 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 			Self:    noop,
 			"data:": noop,
 		},
+	}
+
+	// If sentry is enabled and a DSN is configured, then setup the connect-src for sentry.
+	if c.configuration.Sentry.Enabled {
+		if c.configuration.Sentry.ExternalDSN != "" {
+			if dsn, err := url.Parse(c.configuration.Sentry.ExternalDSN); err == nil {
+				policies["connect-src"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
+			}
+		} else if c.configuration.Sentry.DSN != "" {
+			if dsn, err := url.Parse(c.configuration.Sentry.DSN); err == nil {
+				policies["connect-src"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
+			}
+		}
 	}
 
 	encodePolicies := func() string {
