@@ -67,10 +67,12 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 		if c.configuration.Sentry.ExternalDSN != "" {
 			if dsn, err := url.Parse(c.configuration.Sentry.ExternalDSN); err == nil {
 				policies["connect-src"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
+				policies["script-src-elem"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
 			}
 		} else if c.configuration.Sentry.DSN != "" {
 			if dsn, err := url.Parse(c.configuration.Sentry.DSN); err == nil {
 				policies["connect-src"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
+				policies["script-src-elem"][fmt.Sprintf("https://%s", dsn.Hostname())] = noop
 			}
 		}
 	}
