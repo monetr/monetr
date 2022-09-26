@@ -368,6 +368,6 @@ jobs:
           SENTRY_PROJECT: monetr
         with:
           environment: 'my.monetr.dog'
-          version: ${{ steps.tag.outputs.POST_TAG }}
+          version: 'v${{ steps.tag.outputs.POST_TAG }}'
           sourcemaps: './build/source_maps'
           url_prefix: 'https://my.monetr.dog'
