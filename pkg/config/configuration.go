@@ -118,6 +118,10 @@ type Server struct {
 	// Cookies defines the parameters used for issuing and processing cookies from clients. Cookies are used for
 	// authentication.
 	Cookies Cookies `yaml:"cookies"`
+	// UICacheHours is the number of hours that UI files should be cached by the client. This is done by including an
+	// Expires and Cache-Control header in the response for all UI related requests. If this is 0 then the headers will
+	// not be included. Defaults to 12 hours.
+	UICacheHours int `yaml:"uiCacheHours"`
 }
 
 type Cookies struct {
@@ -518,6 +522,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.Cookies.SameSiteStrict", true)
 	v.SetDefault("Server.ListenPort", 4000)
 	v.SetDefault("Server.StatsPort", 9000)
+	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.InitialPlan.FreeTrialDays", 30)
 	v.SetDefault("UIDomainName", "localhost:4000")
 	v.SetDefault("Vault.Auth", "kubernetes")

@@ -2,7 +2,9 @@
 
 package ui
 
-import "net/http"
+import (
+	"net/http"
+)
 
 var (
 	_ http.FileSystem = &FileSystem{}
