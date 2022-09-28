@@ -16,6 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
 type (
 	Client interface {
 		GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error)
@@ -212,8 +213,8 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 	var redirectUri *string
 	if p.config.OAuthDomain != "" {
 		// Normally we would substitute the configured protocol, but Plaid _requires_ that we use HTTPS for oauth callbacks.
-	// So if the monetr server is not configured for TLS that sucks because this won't work.
-	redirectUri = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
+		// So if the monetr server is not configured for TLS that sucks because this won't work.
+		redirectUri = myownsanity.StringP(fmt.Sprintf("https://%s/plaid/oauth-return", p.config.OAuthDomain))
 		log = log.WithField("redirectUri", *redirectUri)
 	}
 
