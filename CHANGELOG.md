@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.11](https://github.com/monetr/monetr/compare/v0.11.10...v0.11.11) (2022-09-27)
+
+
+### Bug Fixes
+
+* **dev:** Fixed local dev build failing. ([#1079](https://github.com/monetr/monetr/issues/1079)) ([e44c630](https://github.com/monetr/monetr/commit/e44c630d8d82382a571819ce5e20e6919d9b24b1)), closes [#1047](https://github.com/monetr/monetr/issues/1047)
+* **spending:** Fix spending contribution calculation. ([#1078](https://github.com/monetr/monetr/issues/1078)) ([fe53024](https://github.com/monetr/monetr/commit/fe53024966b05d7b20ff21c41e75592a569db64a)), closes [#1077](https://github.com/monetr/monetr/issues/1077)
+
+
+### Miscellaneous
+
+* Fix Sentry version ([370dd6c](https://github.com/monetr/monetr/commit/370dd6c91eac6c58474cbe6c2d805b87fa41d1ca))
+* General code cleanup for UI backend. ([f0706a6](https://github.com/monetr/monetr/commit/f0706a6d9359928b82cee6b4958a9df8b6831f1c))
+* **ui:** Increased refetch time for react-query. ([e020c57](https://github.com/monetr/monetr/commit/e020c57678ef7cd3de03510988eea9d9e29f819e))
+
 ## [0.11.10](https://github.com/monetr/monetr/compare/v0.11.9...v0.11.10) (2022-09-25)
 
 
