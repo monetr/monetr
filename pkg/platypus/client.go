@@ -16,6 +16,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -source=client.go -package=mockgen -destination=../internal/mockgen/platypus_client.go Client
 type (
 	Client interface {
 		GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error)
