@@ -1,9 +1,9 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { Button, Divider, List, Typography } from '@mui/material';
 
+import { showCreateExpenseDialog } from 'components/Expenses/CreateExpenseDialog';
 import ExpenseDetail from 'components/Expenses/ExpenseDetail';
 import ExpenseItem from 'components/Expenses/ExpenseItem';
-import NewExpenseDialog from 'components/Expenses/NewExpenseDialog';
 import { useSpendingFiltered } from 'hooks/spending';
 import { SpendingType } from 'models/Spending';
 
@@ -11,15 +11,6 @@ import 'components/Expenses/ExpensesView/styles/ExpensesView.scss';
 
 export default function ExpensesView(): JSX.Element {
   const { result: expenses } = useSpendingFiltered(SpendingType.Expense);
-  const [newExpenseDialogOpen, setNewExpenseDialogOpen] = useState(false);
-
-  function openNewExpenseDialog() {
-    setNewExpenseDialogOpen(true);
-  }
-
-  function closeNewExpenseDialog() {
-    setNewExpenseDialogOpen(false);
-  }
 
   function EmptyState(): JSX.Element {
     return (
@@ -33,7 +24,7 @@ export default function ExpensesView(): JSX.Element {
               You don't have any expenses yet...
             </Typography>
             <Button
-              onClick={ openNewExpenseDialog }
+              onClick={ showCreateExpenseDialog }
               color="primary"
             >
               <Typography
@@ -48,47 +39,38 @@ export default function ExpensesView(): JSX.Element {
     );
   }
 
-  function ViewContents(): JSX.Element {
-    if (expenses.size === 0) {
-      return <EmptyState />;
-    }
+  if (expenses.length === 0) {
+    return <EmptyState />;
+  }
 
-    return (
-      <div className="minus-nav bg-primary">
-        <div className="flex flex-col h-full max-h-full view-inner">
-          <div className="grid grid-cols-3 flex-grow">
-            <div className="col-span-2">
-              <div className="w-full expenses-list">
-                <List disablePadding className="w-full">
-                  {
-                    Array.from(expenses.values())
-                      .sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-                      .map(expense => (
-                        <Fragment key={ expense.spendingId }>
-                          <ExpenseItem expense={ expense } />
-                          <Divider />
-                        </Fragment>
-                      ))
-                  }
-                </List>
-              </div>
+  return (
+    <div className="minus-nav bg-primary">
+      <div className="flex flex-col h-full max-h-full view-inner">
+        <div className="grid grid-cols-3 flex-grow">
+          <div className="col-span-2">
+            <div className="w-full expenses-list">
+              <List disablePadding className="w-full">
+                {
+                  expenses
+                    .sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+                    .map(expense => (
+                      <Fragment key={ expense.spendingId }>
+                        <ExpenseItem expense={ expense } />
+                        <Divider />
+                      </Fragment>
+                    ))
+                }
+              </List>
             </div>
-            <div className="border-l">
-              <div className="w-full expenses-list">
-                <ExpenseDetail />
-              </div>
+          </div>
+          <div className="border-l">
+            <div className="w-full expenses-list">
+              <ExpenseDetail />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
-
-  return (
-    <Fragment>
-      { newExpenseDialogOpen && <NewExpenseDialog onClose={ closeNewExpenseDialog } isOpen /> }
-      <ViewContents />
-    </Fragment>
+    </div>
   );
 }
 

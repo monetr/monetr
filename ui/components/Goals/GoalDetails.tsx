@@ -4,7 +4,6 @@ import shallow from 'zustand/shallow';
 import CompletedGoalDetails from 'components/Goals/CompletedGoalDetails';
 import EditGoalView from 'components/Goals/EditGoalView';
 import InProgressGoalDetails from 'components/Goals/InProgressGoalDetails';
-import NewGoalDialog from 'components/Goals/NewGoalDialog';
 import NoGoals from 'components/Goals/NoGoals';
 import TransferDialog from 'components/Spending/TransferDialog';
 import { useSelectedGoal } from 'hooks/spending';
@@ -12,7 +11,6 @@ import useStore from 'hooks/store';
 
 export default function GoalDetails(): JSX.Element {
   enum DialogOpen {
-    NewGoal,
     Transfer,
     EditGoal,
   }
@@ -40,8 +38,6 @@ export default function GoalDetails(): JSX.Element {
 
   function DialogsMaybe(): JSX.Element {
     switch (dialog) {
-      case DialogOpen.NewGoal:
-        return <NewGoalDialog isOpen onClose={ closeDialog } />;
       case DialogOpen.Transfer:
         return <TransferDialog isOpen onClose={ closeDialog } initialToSpendingId={ goal?.spendingId } />;
       default:

@@ -1,9 +1,9 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { Button, Divider, List, Typography } from '@mui/material';
 
+import { showCreateGoalDialog } from 'components/Goals/CreateGoalDialog';
 import GoalDetails from 'components/Goals/GoalDetails';
 import GoalRow from 'components/Goals/GoalRow';
-import NewGoalDialog from 'components/Goals/NewGoalDialog';
 import { useSpendingFiltered } from 'hooks/spending';
 import { SpendingType } from 'models/Spending';
 
@@ -11,22 +11,13 @@ import 'components/Goals/styles/GoalsView.scss';
 
 export default function GoalsView(): JSX.Element {
   const { result: goals } = useSpendingFiltered(SpendingType.Goal);
-  const [newGoalDialogOpen, setNewGoalDialogOpen] = useState(false);
-
-  function openNewGoalDialog() {
-    setNewGoalDialogOpen(true);
-  }
-
-  function closeNewGoalDialog() {
-    setNewGoalDialogOpen(false);
-  }
 
   function GoalList(): JSX.Element {
     return (
       <div className="w-full goals-list">
         <List disablePadding className="w-full">
           {
-            Array.from(goals.values())
+            goals
               .sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
               .map(item => (
                 <Fragment key={ item.spendingId }>
@@ -40,10 +31,9 @@ export default function GoalsView(): JSX.Element {
     );
   }
 
-  if (goals.size === 0) {
+  if (goals.length === 0) {
     return (
       <Fragment>
-        { newGoalDialogOpen && <NewGoalDialog onClose={ closeNewGoalDialog } isOpen={ newGoalDialogOpen } /> }
         <div className="minus-nav bg-primary">
           <div className="flex flex-col h-full max-h-full bg-white view-inner">
             <div className="grid grid-cols-3 flex-grow">
@@ -58,7 +48,7 @@ export default function GoalsView(): JSX.Element {
                         You don't have any goals yet...
                       </Typography>
                       <Button
-                        onClick={ openNewGoalDialog }
+                        onClick={ showCreateGoalDialog }
                         color="primary"
                       >
                         <Typography

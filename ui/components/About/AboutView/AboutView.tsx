@@ -44,6 +44,7 @@ export default function AboutView(): JSX.Element {
   }
 
   function Revision(): JSX.Element {
+    const value = revision ? revision.slice(0, 7) : 'N/A';
     return (
       <Fragment>
         <div className="grid grid-cols-2">
@@ -51,7 +52,7 @@ export default function AboutView(): JSX.Element {
             <span className="text-lg">Git Revision</span>
           </div>
           <div className="flex items-center">
-            <CodeBasic>{ revision.slice(0, 7) }</CodeBasic>
+            <CodeBasic>{ value }</CodeBasic>
             <Button
               target="_blank"
               href={ `https://github.com/monetr/monetr/tree/${ revision }` }
