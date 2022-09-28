@@ -22,7 +22,6 @@ import (
 )
 
 func TestPullTransactionsJob_Run(t *testing.T) {
-	t.Skipf("skipping for now")
 	t.Run("invalid link", func(t *testing.T) {
 		log, hook := testutils.GetTestLog(t)
 		db := testutils.GetPgDatabase(t)
@@ -151,6 +150,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("happy path, pull new transactions", func(t *testing.T) {
+		t.Skip("not ready yet")
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
@@ -226,6 +226,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("clear pending status on existing transaction", func(t *testing.T) {
+		t.Skip("not ready yet")
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
@@ -307,6 +308,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("no transactions", func(t *testing.T) {
+		t.Skip("not ready yet")
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)

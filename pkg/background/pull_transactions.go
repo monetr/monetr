@@ -177,21 +177,51 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	plaidIdsToBankIds := map[string]uint64{}
-	plaidBankToLocalBank := map[string]models.BankAccount{}
-	bankAccountIds := make([]string, len(link.BankAccounts))
-	for i, bankAccount := range link.BankAccounts {
-		bankAccountIds[i] = bankAccount.PlaidAccountId
-		plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
-		plaidBankToLocalBank[bankAccount.PlaidAccountId] = bankAccount
-	}
-
 	now := time.Now().UTC()
 	plaidClient, err := p.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
 	if err != nil {
 		log.WithError(err).Error("failed to create plaid client for link")
 		return err
 	}
+
+	plaidBankAccounts, err := plaidClient.GetAccounts(
+		span.Context(),
+	)
+	if err != nil {
+		log.WithError(err).Error("failed to retrieve bank accounts from plaid")
+		return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
+	}
+
+	if len(plaidBankAccounts) == 0 {
+		log.Warn("no bank accounts returned by plaid, nothing to sync?")
+		crumbs.IndicateBug(span.Context(), "no bank accounts were returned from plaid", nil)
+		return nil
+	}
+
+	plaidIdsToBankIds := map[string]uint64{}
+	plaidBankToLocalBank := map[string]models.BankAccount{}
+	bankAccountIds := make([]string, 0, len(link.BankAccounts))
+
+	for _, bankAccount := range link.BankAccounts {
+		for _, plaidBankAccount := range plaidBankAccounts {
+			if plaidBankAccount.GetAccountId() == bankAccount.PlaidAccountId {
+				bankAccountIds = append(bankAccountIds, bankAccount.PlaidAccountId)
+				plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
+				plaidBankToLocalBank[bankAccount.PlaidAccountId] = bankAccount
+				break
+			}
+		}
+	}
+
+	if len(bankAccountIds) == 0 {
+		log.Warn("none of the linked bank accounts are active at plaid")
+		crumbs.IndicateBug(span.Context(), "none of the linked bank accounts are active at plaid", nil)
+		return nil
+	}
+
+	crumbs.Debug(span.Context(), "pulling transactions for bank accounts", map[string]interface{}{
+		"plaidAccountIds": bankAccountIds,
+	})
 
 	plaidTransactions, err := plaidClient.GetAllTransactions(span.Context(), p.args.Start, p.args.End, bankAccountIds)
 	if err = errors.Wrap(err, "failed to retrieve transactions from plaid for sync"); err != nil {
@@ -328,17 +358,8 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 	}
 
 	if len(transactionsToInsert)+len(transactionsToUpdate) > 0 {
-		result, err := plaidClient.GetAccounts(
-			span.Context(),
-			bankAccountIds...,
-		)
-		if err != nil {
-			log.WithError(err).Error("failed to retrieve bank accounts from plaid")
-			return errors.Wrap(err, "failed to retrieve bank accounts from plaid")
-		}
-
-		updatedBankAccounts := make([]models.BankAccount, 0, len(result))
-		for _, item := range result {
+		updatedBankAccounts := make([]models.BankAccount, 0, len(plaidBankAccounts))
+		for _, item := range plaidBankAccounts {
 			bankAccount, ok := plaidBankToLocalBank[item.GetAccountId()]
 			if !ok {
 				log.WithField("plaidBankAccountId", item.GetAccountId()).Warn("bank was not found in map")
