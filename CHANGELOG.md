@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.12](https://github.com/monetr/monetr/compare/v0.11.11...v0.11.12) (2022-09-29)
+
+
+### Bug Fixes
+
+* **plaid:** Fixing syncing after closing bank account. ([#1083](https://github.com/monetr/monetr/issues/1083)) ([7019c41](https://github.com/monetr/monetr/commit/7019c413150806d772d4beca6f1f083537d0359b))
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors digest to d3e7dfb ([#1057](https://github.com/monetr/monetr/issues/1057)) ([aa34927](https://github.com/monetr/monetr/commit/aa349275020d2240622592e028f683dfffe75dd3))
+* **api:** update module github.com/spf13/cobra to v1.5.0 ([#991](https://github.com/monetr/monetr/issues/991)) ([31bf7d9](https://github.com/monetr/monetr/commit/31bf7d9fddcf9c082ca95d16ecf66640ea05ceff))
+* **containers:** update squidfunk/mkdocs-material docker tag to v8.5.3 ([#1051](https://github.com/monetr/monetr/issues/1051)) ([d9512fe](https://github.com/monetr/monetr/commit/d9512fe8038bea2361b12b8eaa4e7026cc38a663))
+
 ## [0.11.11](https://github.com/monetr/monetr/compare/v0.11.10...v0.11.11) (2022-09-27)
 
 
