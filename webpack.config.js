@@ -38,18 +38,30 @@ module.exports = (env, argv) => {
     },
     module: {
       rules: [
-        {
+        (isDevelopment && {
           test: /\.(js|jsx)$/,
           exclude: /node_modules/,
           use: [
             {
               loader: require.resolve('babel-loader'),
               options: {
-                plugins: [isDevelopment && require.resolve('react-refresh/babel')].filter(Boolean),
+                plugins: [
+                  require.resolve('react-refresh/babel'),
+                ],
               },
             },
           ],
-        },
+        }),
+        (!isDevelopment && {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: require.resolve('swc-loader'),
+            options: {
+              parseMap: true,
+            }
+          },
+        }),
         {
           test: /\.css$/,
           use: [
@@ -63,7 +75,7 @@ module.exports = (env, argv) => {
             'postcss-loader'
           ]
         },
-        {
+        (isDevelopment && {
           test: /\.ts(x)?$/,
           exclude: /node_modules/,
           use: [
@@ -77,7 +89,21 @@ module.exports = (env, argv) => {
               },
             },
           ],
-        },
+        }),
+        (!isDevelopment && {
+          test: /\.ts(x)?$/,
+          exclude: /node_modules/,
+          use: {
+            loader: require.resolve('swc-loader'),
+            options: {
+              jsc: {
+                parser: {
+                  syntax: "typescript"
+                }
+              }
+            },
+          },
+        }),
         {
           test: /\.scss$/,
           use: [
@@ -119,7 +145,7 @@ module.exports = (env, argv) => {
             }
           ]
         },
-      ]
+      ].filter(Boolean)
     },
     resolve: {
       extensions: [
