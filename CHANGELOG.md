@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.13](https://github.com/monetr/monetr/compare/v0.11.12...v0.11.13) (2022-09-29)
+
+
+### Features
+
+* **ui:** Implemented swc-loader to improve build times. ([#1087](https://github.com/monetr/monetr/issues/1087)) ([c40b6ee](https://github.com/monetr/monetr/commit/c40b6ee507bf1c3b605d35138e1e549b233d3287))
+
+
+### Bug Fixes
+
+* **api:** Improve some logging around availability. ([ef4907a](https://github.com/monetr/monetr/commit/ef4907a247ffc8f3a9d9dd944df7c03eeb017d88))
+
 ## [0.11.12](https://github.com/monetr/monetr/compare/v0.11.11...v0.11.12) (2022-09-29)
 
 
