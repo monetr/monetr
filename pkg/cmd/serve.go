@@ -257,6 +257,7 @@ func RunServer() error {
 	})
 
 	listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)
+	log.Infof("monetr is running, listening at %s", listenAddress)
 	_ = app.Listen(listenAddress, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
 
 	<-idleConnsClosed

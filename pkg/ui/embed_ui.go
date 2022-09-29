@@ -7,4 +7,5 @@ import (
 )
 
 //go:embed static/**
+//go:embed static/index.html
 var builtUi embed.FS
