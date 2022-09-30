@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import * as Sentry from '@sentry/react';
 import { Integrations } from '@sentry/tracing';
 import axios from 'axios';
@@ -16,6 +16,9 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import './styles/styles.css';
 import './styles/index.scss';
+
+const container = document.getElementById('root');
+const root = createRoot(container);
 
 axios.get('/api/sentry', {
   // When the UI initially loads, it tries to talk to the API to see if sentry should be setup. If it should then it
@@ -59,9 +62,8 @@ axios.get('/api/sentry', {
       baseURL: '/api',
     });
 
-    ReactDOM.render(
+    root.render(
       <Root />,
-      document.getElementById('root')
     );
   });
 
