@@ -29,7 +29,7 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 			})
 		})
 
-		app.Get("/*", func(ctx iris.Context) {
+		app.Get("/{p:path}", func(ctx iris.Context) {
 			if c.configuration.Server.UICacheHours > 0 {
 				cacheExpiration := time.Now().
 					Add(time.Duration(c.configuration.Server.UICacheHours) * time.Hour).
