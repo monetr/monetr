@@ -189,22 +189,22 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		})
 	}
 
-	app.Use(func(ctx iris.Context) {
-		if ctx.Path() == APIPath+"/health" {
-			ctx.Next()
-			return
-		}
+	app.PartyFunc(APIPath, func(p router.Party) {
+		p.Use(func(ctx iris.Context) {
+			if ctx.Path() == APIPath+"/health" {
+				ctx.Next()
+				return
+			}
 
-		log := c.log.WithFields(logrus.Fields{
-			"requestId": util.GetRequestID(ctx),
+			log := c.log.WithFields(logrus.Fields{
+				"requestId": util.GetRequestID(ctx),
+			})
+
+			log.Debug(ctx.RouteName())
+
+			ctx.Next()
 		})
 
-		log.Debug(ctx.RouteName())
-
-		ctx.Next()
-	})
-
-	app.PartyFunc(APIPath, func(p router.Party) {
 		p.Get("/health", c.getHealth)
 
 		p.Use(c.loggingMiddleware)
