@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.15](https://github.com/monetr/monetr/compare/v0.11.14...v0.11.15) (2022-09-30)
+
+
+### Miscellaneous
+
+* **api:** Moving request logger into API scope. ([e0d33ae](https://github.com/monetr/monetr/commit/e0d33aeec43575b14a09a1826bfb37f9d6ed5e0b))
+
 ## [0.11.14](https://github.com/monetr/monetr/compare/v0.11.13...v0.11.14) (2022-09-30)
 
 
