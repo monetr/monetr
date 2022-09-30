@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.14](https://github.com/monetr/monetr/compare/v0.11.13...v0.11.14) (2022-09-30)
+
+
+### Bug Fixes
+
+* **test:** Fixed failing test build due to bad embed. ([3513134](https://github.com/monetr/monetr/commit/3513134fcd985b1a252825d9b43ecd6aa5dd4191))
+* **ui:** Fixed warning about `ReactDOM.render`. ([ef21ddc](https://github.com/monetr/monetr/commit/ef21ddc7e903b909ed815778eb9dea03f3ee2b9c))
+
+
+### Dependencies
+
+* **ui:** update babel monorepo to v7.19.3 ([#1086](https://github.com/monetr/monetr/issues/1086)) ([d24396c](https://github.com/monetr/monetr/commit/d24396c3d51892eb0f1bf6838112cd2c62d693e6))
+
 ## [0.11.13](https://github.com/monetr/monetr/compare/v0.11.12...v0.11.13) (2022-09-29)
 
 
