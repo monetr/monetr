@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProcessFundingScheduleJob_Run(t *testing.T) {
@@ -29,7 +30,10 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		spendingRule.DTStart(time.Now().Add(14 * 24 * time.Hour))
 		nextDue := spendingRule.After(time.Now(), false)
 
-		contributions := fundingSchedule.GetNumberOfContributionsBetween(time.Now(), nextDue)
+		timezone, err := user.Account.GetTimezone()
+		require.NoError(t, err, "must get account timezone")
+
+		contributions := fundingSchedule.GetNumberOfContributionsBetween(time.Now(), nextDue, timezone)
 		assert.NotZero(t, contributions, "must have at least one contribution, if this fails then this test is written wrong")
 
 		spending := models.Spending{
@@ -72,7 +76,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		testutils.MustHaveLogMessage(t, hook, "preparing to update 1 spending(s)")
 
 		updatedSpending := testutils.MustDBRead(t, spending)
-		assert.EqualValues(t, spending.CurrentAmount + spending.NextContributionAmount, updatedSpending.CurrentAmount, "current amount should have been incremented")
+		assert.EqualValues(t, spending.CurrentAmount+spending.NextContributionAmount, updatedSpending.CurrentAmount, "current amount should have been incremented")
 		assert.Greater(t, updatedSpending.NextContributionAmount, int64(0), "next contribution must be greater than 0")
 	})
 

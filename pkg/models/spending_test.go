@@ -538,7 +538,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 	t.Run("expense recurs on funding date", func(t *testing.T) {
 		location, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load timezone")
-		now := time.Date(2022, 9, 27, 0, 14, 0, 0, location)
+		now := time.Date(2022, 9, 27, 14, 32, 0, 0, location)
 		nextFundingDate := time.Date(2022, 9, 30, 0, 0, 0, 0, location)
 		nextDueDate := time.Date(2022, 10, 15, 0, 0, 0, 0, location)
 
@@ -569,7 +569,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 	t.Run("goal is due on a funding date", func(t *testing.T) {
 		location, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must be able to load timezone")
-		now := time.Date(2022, 1, 1, 0, 0, 0, 0, location)
+		now := time.Date(2022, 1, 1, 14, 0, 0, 0, location)
 		nextFundingDate := time.Date(2022, 1, 15, 0, 0, 0, 0, location)
 		nextDueDate := time.Date(2022, 12, 31, 0, 0, 0, 0, location)
 

@@ -70,7 +70,8 @@ func (e Spending) GetProgressAmount() int64 {
 func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
 	switch e.SpendingType {
 	case SpendingTypeExpense:
-		e.RecurrenceRule.DTStart(now.In(timezone))
+		dtMidnight := util.MidnightInLocal(now, timezone)
+		e.RecurrenceRule.DTStart(dtMidnight)
 		return e.RecurrenceRule.Between(now, before, false)
 	case SpendingTypeGoal:
 		if e.NextRecurrence.After(now) && e.NextRecurrence.Before(before) {
@@ -163,7 +164,7 @@ func (e *Spending) CalculateNextContribution(
 		// Otherwise we can simply look at how much we need vs how much we already have.
 		amountNeeded := myownsanity.Max(0, perSpendingAmount-currentAmount)
 		// And how many times we will have a funding event before our due date.
-		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(now, nextRecurrence)
+		numberOfContributions := fundingSchedule.GetNumberOfContributionsBetween(now, nextRecurrence, timezone)
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}

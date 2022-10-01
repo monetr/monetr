@@ -26,12 +26,12 @@ type FundingSchedule struct {
 	NextOccurrence    time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
 }
 
-func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time) int64 {
+func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
 	rule := f.Rule.RRule
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
-	dtStart := start.Add(-365 * 24 * time.Hour).Truncate(time.Hour)
+	dtStart := util.MidnightInLocal(start, timezone)
 	rule.DTStart(dtStart)
 	items := rule.Between(start, end, true)
 	return int64(len(items))
