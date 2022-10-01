@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.16](https://github.com/monetr/monetr/compare/v0.11.15...v0.11.16) (2022-10-01)
+
+
+### Bug Fixes
+
+* **spending:** Fixed actual spending calculation issue. ([599abc1](https://github.com/monetr/monetr/commit/599abc1bb4b3f87895f4465c277be004ca8f58c2))
+
+
+### Dependencies
+
+* **api:** update module github.com/kataras/iris/v12 to v12.2.0-beta5 ([#1090](https://github.com/monetr/monetr/issues/1090)) ([5f64bf8](https://github.com/monetr/monetr/commit/5f64bf8fc8f73d7c6b8107c52c55e3118b186d56))
+
 ## [0.11.15](https://github.com/monetr/monetr/compare/v0.11.14...v0.11.15) (2022-09-30)
 
 
