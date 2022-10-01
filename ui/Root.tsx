@@ -14,6 +14,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import axios from 'axios';
 import { IconVariant, SnackbarProvider } from 'notistack';
+import NiceModal from '@ebay/nice-modal-react';
 
 import Application from 'Application';
 import GlobalFooter from 'components/GlobalFooter';
@@ -66,9 +67,11 @@ export default function Root(): JSX.Element {
             <ThemeProvider theme={ theme }>
               <LocalizationProvider dateAdapter={ AdapterMoment }>
                 <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-                  <CssBaseline />
-                  <Application />
-                  <GlobalFooter />
+                  <NiceModal.Provider>
+                    <CssBaseline />
+                    <Application />
+                    <GlobalFooter />
+                  </NiceModal.Provider>
                 </SnackbarProvider>
               </LocalizationProvider>
             </ThemeProvider>

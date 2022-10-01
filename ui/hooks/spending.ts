@@ -8,7 +8,7 @@ import Spending, { SpendingType } from 'models/Spending';
 import request from 'util/request';
 
 export type SpendingResult =
-  { result: Map<number, Spending> }
+  { result: Array<Spending> }
   & UseQueryResult<Array<Partial<Spending>>>;
 
 export function useSpendingSink(): SpendingResult {
@@ -21,27 +21,20 @@ export function useSpendingSink(): SpendingResult {
   );
   return {
     ...result,
-    result: new Map(result?.data?.map(item => {
-      const spending = new Spending(item);
-      return [spending.spendingId, spending];
-    })),
+    result: (result?.data || []).map(item => new Spending(item)),
   };
 }
 
 export function useSpending(spendingId: number): Spending | null {
   const { result } = useSpendingSink();
-  return result.get(spendingId) || null;
+  return result.find(item => item.spendingId === spendingId) || null;
 }
 
 export function useSpendingFiltered(kind: SpendingType): SpendingResult {
   const base = useSpendingSink();
   return {
     ...base,
-    result: new Map(
-      Array.from(base.result.values())
-        .filter(item => item.spendingType === kind)
-        .map(item => [item.spendingId, item]),
-    ),
+    result: base.result.filter(item => item.spendingType === kind),
   };
 }
 
@@ -50,7 +43,7 @@ export function useSelectedExpense(): Spending | null {
   const { isLoading, result } = useSpendingFiltered(SpendingType.Expense);
   if (isLoading) return null;
 
-  return result.get(selectedExpenseId) || null;
+  return result.find(item => item.spendingId === selectedExpenseId) || null;
 }
 
 export function useSelectedGoal(): Spending | null {
@@ -58,7 +51,7 @@ export function useSelectedGoal(): Spending | null {
   const { isLoading, result } = useSpendingFiltered(SpendingType.Goal);
   if (isLoading) return null;
 
-  return result.get(selectedGoalId) || null;
+  return result.find(item => item.spendingId === selectedGoalId) || null;
 }
 
 export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
@@ -117,7 +110,7 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
   };
 }
 
-export function useCreateSpending(): (_spending: Spending) => Promise<void> {
+export function useCreateSpending(): (_spending: Spending) => Promise<Spending> {
   const queryClient = useQueryClient();
 
   async function createSpending(spending: Spending): Promise<Spending> {
@@ -126,7 +119,7 @@ export function useCreateSpending(): (_spending: Spending) => Promise<void> {
       .then(result => new Spending(result?.data));
   }
 
-  const { mutate } = useMutation(
+  const mutation = useMutation(
     createSpending,
     {
       onSuccess: (createdSpending: Spending) => Promise.all([
@@ -139,8 +132,8 @@ export function useCreateSpending(): (_spending: Spending) => Promise<void> {
     },
   );
 
-  return async (spending: Spending): Promise<void> => {
-    return mutate(spending);
+  return async (spending: Spending): Promise<Spending> => {
+    return mutation.mutateAsync(spending);
   };
 }
 
