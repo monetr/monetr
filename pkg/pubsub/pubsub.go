@@ -3,6 +3,7 @@ package pubsub
 import (
 	"context"
 	"fmt"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/pkg/errors"
@@ -77,7 +78,7 @@ func (p *postgresPubSub) Subscribe(ctx context.Context, channel string) (Listene
 		channel:      channel,
 		log:          p.log.WithContext(ctx).WithField("channel", channel),
 		listener:     listener,
-		dataChannel:  make(chan Notification, 1),
+		dataChannel:  make(chan Notification, 0),
 		closeChannel: make(chan struct{}, 1),
 	}
 	go pgListener.backgroundListener()

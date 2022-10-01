@@ -27,26 +27,24 @@ func TestPostgresPubSub_Notify(t *testing.T) {
 		wg.Add(1)
 
 		deadline := time.NewTimer(10 * time.Second)
-
 		var counter int64
 		go func() {
-			defer wg.Done()
-			defer assert.NoError(t, listener.Close(), "must close listener gracefully")
-			select {
-			case _ = <-deadline.C:
-				t.Fatalf("pubsub deadline was reached before a notification was received")
-				return
-			case _ = <-listener.Channel():
-				log.Info("NOTIFICATION RECEIVED")
-				atomic.AddInt64(&counter, 1)
-				return
-			}
+			time.Sleep(1 * time.Second)
+			log.Info("sending test notification")
+			err = ps.Notify(context.Background(), channelName, "test")
+			assert.NoError(t, err, "must be able to notify the channel")
 		}()
 
-		log.Info("sending test notification")
-		err = ps.Notify(context.Background(), channelName, "test")
-		assert.NoError(t, err, "must be able to notify the channel")
-		wg.Wait()
+		select {
+		case <-deadline.C:
+			t.Fatalf("pubsub deadline was reached before a notification was received")
+			return
+		case <-listener.Channel():
+			log.Info("NOTIFICATION RECEIVED")
+			atomic.AddInt64(&counter, 1)
+		}
+
+		assert.NoError(t, listener.Close(), "must close listener gracefully")
 		assert.Equal(t, int64(1), atomic.LoadInt64(&counter), "counter should be incremented")
 	})
 }
