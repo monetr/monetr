@@ -657,6 +657,8 @@ github.com/xeipuuv/gojsonschema v1.2.0 h1:LhYJRs+L4fBtjZUfuSZIKGeVu0QRy8e5Xi7D17
 github.com/xeipuuv/gojsonschema v1.2.0/go.mod h1:anYRn/JVcOK2ZgGU+IjEV4nwlhoK5sQluxsYJ78Id3Y=
 github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c h1:LZpKQbMSngtN4ycCtogkxYl5ec0FimAA8rSrI4ZMGTM=
 github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c/go.mod h1:ndLJ3JKzi3xLmUProq4LLxCuECL93dG9WASNLpHz8qg=
+github.com/xlzd/gotp v0.0.0-20220915034741-1546cf172da8 h1:Z/lmwsXvMx45TJlCikXzOj5WAIg3niKZ2eqkmvPN73U=
+github.com/xlzd/gotp v0.0.0-20220915034741-1546cf172da8/go.mod h1:ndLJ3JKzi3xLmUProq4LLxCuECL93dG9WASNLpHz8qg=
 github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 h1:6fRhSjgLCkTD3JnJxvaJ4Sj+TYblw757bqYgZaOq5ZY=
 github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0/go.mod h1:/LWChgwKmvncFJFHJ7Gvn9wZArjbV5/FppcK2fKk/tI=
 github.com/yosssi/ace v0.0.5 h1:tUkIP/BLdKqrlrPwcmH0shwEEhTRHoGnc1wFIWmaBUA=
