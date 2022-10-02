@@ -1,3 +1,4 @@
+.SUFFIXES:
 default: build
 
 GIT_REPOSITORY=https://github.com/monetr/monetr.git
@@ -403,14 +404,30 @@ mkdocs: $(DOCS_SITE)
 docs: mkdocs
 
 ifdef GITHUB_TOKEN
-license: $(LICENSE) $(BINARY)
+license-old: $(LICENSE) $(BINARY)
 	$(call infoMsg,Checking dependencies for open source licenses)
 	-$(LICENSE) $(PWD)/licenses.hcl $(BINARY)
 else
-.PHONY: license
-license:
+.PHONY: license-old
+license-old:
 	$(call warningMsg,GITHUB_TOKEN is required to check licenses)
 endif
+
+LICENSED_CONFIG=$(PWD)/.licensed.yaml
+LICENSED_CACHE=$(PWD)/.licenses
+$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(UI_DEPS)
+	$(LICENSED) cache --force
+	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
+
+.PHONY: license
+license: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
+	$(LICENSED) status
+	
+NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
+$(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
+	$(LICENSED) notices
+
+notices: $(NOTICES)
 
 CHART_FILE=$(PWD)/Chart.yaml
 VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml

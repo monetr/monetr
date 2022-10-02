@@ -1,0 +1,74 @@
+sources:
+  yarn: true
+  go: true
+
+go:
+  GOPATH: ~/go
+
+yarn:
+  production_only: true
+
+apps:
+  - name: monetr-API
+    source_path: pkg/cmd
+  - name: monetr-UI
+    source_path: .
+
+allowed:
+  - 0bsd
+  - apache-2.0
+  - bsd
+  - bsd-2-clause
+  - bsd-3-clause
+  - cc0-1.0
+  - isc
+  - mit
+  - mpl-2.0
+  - unlicense
+
+licensee:
+  # https://github.com/licensee/licensee/blob/master/docs/customizing.md#adjusting-the-confidence-threshold
+  confidence_threshold: 90
+
+reviewed:
+  go:
+    - github.com/alicebob/gopher-json # Unlicense
+    - github.com/google/go-cmp/**/*
+    - github.com/jmespath/go-jmespath # Apache 2.0
+    - github.com/klauspost/compress/**/* # BSD-3-Clause
+    - github.com/magiconair/properties # BSD-2-Clause
+    - github.com/microcosm-cc/bluemonday # BSD-3-Clause
+    - github.com/microcosm-cc/bluemonday/css # BSD-3-Clause
+    - github.com/oneofone/xxhash # Apache 2.0
+    - github.com/russross/blackfriday/v2 # BSD-2-Clause
+    - github.com/tmthrgd/go-hex # BSD-3-Clause + BSD-3-Clause + BSD-2-Clause
+    - golang.org/x/**/*
+    - google.golang.org/protobuf/**/*
+    - gopkg.in/ini.v1 # Apache 2.0
+  yarn:
+    - "@mui/icons-material" # MIT + CC
+    - caniuse-lite
+    - color-convert # MIT
+    - dom-serializer # MIT
+    - electron-to-chromium
+    - fs.realpath # ISC + MIT
+    - glob # ISC
+    - harmony-reflect # MPL/Apache2.0 https://github.com/tvcutsem/harmony-reflect/blob/214fe922b6d66b45e72ed0912861a14dc7e475a3/LICENSE
+    - hoist-non-react-statics # BSD-3-Clause
+    - json-parse-even-better-errors # MIT
+    - json-schema # BSD-3-Clause
+    - lodash*
+    - notistack # MIT
+    - postcss-clamp # MIT
+    - react-recaptcha # BSD-3-Clause
+    - react-transition-group # BSD-3-Clause
+    - rrule
+    - sass
+    - serialize-javascript # BSD-3-Clause
+    - terser # BSD-2-Clause
+    - uri-js
+
+ignored:
+  yarn: # Silence warning about missing license. Its not missing.
+    - harmony-reflect # MPL/Apache2.0 https://github.com/tvcutsem/harmony-reflect/blob/214fe922b6d66b45e72ed0912861a14dc7e475a3/LICENSE
+
