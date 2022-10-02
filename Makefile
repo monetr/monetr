@@ -175,6 +175,26 @@ deps: dependencies
 
 build-ui: $(STATIC_DIR)
 
+LICENSED_CONFIG=$(PWD)/.licensed.yaml
+LICENSED_CACHE=$(PWD)/.licenses
+$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(UI_DEPS)
+	$(LICENSED) cache --force
+	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
+
+.PHONY: license
+license: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
+	$(LICENSED) status
+
+NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
+$(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
+	$(LICENSED) notices
+
+NOTICE=$(GO_SRC_DIR)/build/NOTICE
+$(NOTICE): $(NOTICES)
+	cat $(NOTICES) > $@
+
+notice: $(NOTICE)
+
 SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons
 SIMPLE_ICONS_VERSION=7.7.0
 SIMPLE_ICONS_REPO=https://github.com/simple-icons/simple-icons.git
@@ -265,6 +285,7 @@ endif
 clean: shutdown $(HOSTESS)
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
+	-rm -rf $(LICENSED_CACHE)
 	-rm -rf $(NODE_MODULES)
 	-rm -rf $(LOCAL_TMP)
 	-rm -rf $(SOURCE_MAP_DIR)
@@ -412,26 +433,6 @@ else
 license-old:
 	$(call warningMsg,GITHUB_TOKEN is required to check licenses)
 endif
-
-LICENSED_CONFIG=$(PWD)/.licensed.yaml
-LICENSED_CACHE=$(PWD)/.licenses
-$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(UI_DEPS)
-	$(LICENSED) cache --force
-	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
-
-.PHONY: license
-license: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
-	$(LICENSED) status
-
-NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
-$(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
-	$(LICENSED) notices
-
-NOTICE=$(GO_SRC_DIR)/build/NOTICE
-$(NOTICE): $(NOTICES)
-	cat $(NOTICES) > $@
-
-notice: $(NOTICE)
 
 CHART_FILE=$(PWD)/Chart.yaml
 VALUES_FILE=$(PWD)/values.$(ENV_LOWER).yaml
