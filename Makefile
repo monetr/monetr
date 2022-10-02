@@ -177,7 +177,7 @@ build-ui: $(STATIC_DIR)
 
 LICENSED_CONFIG=$(PWD)/.licensed.yaml
 LICENSED_CACHE=$(PWD)/.licenses
-$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(UI_DEPS)
+$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(UI_DEPS) $(LICENSED_CONFIG)
 	$(LICENSED) cache --force
 	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
 
