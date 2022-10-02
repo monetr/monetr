@@ -21,6 +21,7 @@ Notes.md
 *terraform*
 rest-api.xml
 build
+!pkg/build/*
 .eslintcache
 package-lock.json
 reports

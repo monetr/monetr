@@ -1,9 +1,10 @@
 import React, { Fragment } from 'react';
-import { GitHub } from '@mui/icons-material';
+import { GitHub, Policy } from '@mui/icons-material';
 import { Button } from '@mui/material';
 
 import CodeBasic from 'components/Code/CodeBasic/CodeBasic';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import { showNoticeDialog } from '../NoticeDialog';
 
 export default function AboutView(): JSX.Element {
   const {
@@ -108,6 +109,30 @@ export default function AboutView(): JSX.Element {
     );
   }
 
+  function Notices(): JSX.Element {
+    return (
+      <Fragment>
+        <div className="grid grid-cols-2">
+          <div className="flex items-center">
+            <span className="text-lg">Third Party Notices</span>
+          </div>
+          <div className="flex items-center">
+            <Button
+              onClick={ showNoticeDialog }
+              variant="outlined"
+              color="inherit"
+              className="w-full"
+            >
+              <Policy className="mr-2.5" />
+              View Third Pary Notices
+            </Button>
+          </div>
+        </div>
+        <hr />
+      </Fragment>
+    );
+  }
+
   return (
     <div className="grid gap-5 w-full lg:w-2/3">
       <div>
@@ -119,6 +144,7 @@ export default function AboutView(): JSX.Element {
           <Revision />
           <BuildType />
           <BuildTime />
+          <Notices />
         </div>
       </div>
       <div>
