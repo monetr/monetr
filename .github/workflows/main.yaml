@@ -165,7 +165,7 @@ jobs:
       POSTGRES_DB: test-db
     services:
       postgres:
-        image: postgres:13
+        image: postgres:14
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
