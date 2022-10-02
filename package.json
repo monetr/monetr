@@ -103,7 +103,7 @@
     "@hot-loader/react-dom": "17.0.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.7",
     "@swc/core": "1.2.147",
-    "@testing-library/jest-dom": "5.16.4",
+    "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "13.4.0",
     "@testing-library/react-hooks": "7.0.2",
     "@testing-library/user-event": "14.4.3",
