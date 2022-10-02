@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.11.17](https://github.com/monetr/monetr/compare/v0.11.16...v0.11.17) (2022-10-02)
+
+
+### Features
+
+* Added taks to validate licenses. ([#1096](https://github.com/monetr/monetr/issues/1096)) ([9391004](https://github.com/monetr/monetr/commit/93910045e76b23233651da9748adf32884f0fef1))
+* **ui:** Create Dialogs rewrite. ([#1080](https://github.com/monetr/monetr/issues/1080)) ([978178d](https://github.com/monetr/monetr/commit/978178dafe5fa6acf143e0e13103c8b439da1d17))
+
+
+### Bug Fixes
+
+* **deps:** Fixed RRule import. ([c73a288](https://github.com/monetr/monetr/commit/c73a28880510a0ae9fae455a0be5bb5eba3f9042))
+
+
+### Documentation
+
+* **funding:** Minor documentation improvements. ([1c1c920](https://github.com/monetr/monetr/commit/1c1c920f63b3a3eeaf70a29b31e665044a3f239e))
+
+
+### Dependencies
+
+* **api:** update golang.org/x/crypto digest to eccd636 ([#1085](https://github.com/monetr/monetr/issues/1085)) ([d78f833](https://github.com/monetr/monetr/commit/d78f8332e163669dce1cd099c0db1bf10052cc21))
+* **api:** update google.golang.org/genproto digest to c98284e ([#1094](https://github.com/monetr/monetr/issues/1094)) ([65eddb5](https://github.com/monetr/monetr/commit/65eddb5c47d35d4395ea34a90fda68e46aa33c3b))
+* **ci:** Upgrading + using monetr's own build containers. ([d33d24e](https://github.com/monetr/monetr/commit/d33d24e5533d9de7e0d2550054776799bfa1058c))
+* **containers:** update squidfunk/mkdocs-material docker tag to v8.5.5 ([#1097](https://github.com/monetr/monetr/issues/1097)) ([53b91e8](https://github.com/monetr/monetr/commit/53b91e84db72f2bc050bc9f7594d0d636c2e46aa))
+* **ui:** update dependency @swc/core to v1.3.4 ([#1105](https://github.com/monetr/monetr/issues/1105)) ([ee0afb1](https://github.com/monetr/monetr/commit/ee0afb1bcef26f2121087588e06a17528ff04b5b))
+* **ui:** update dependency @testing-library/jest-dom to v5.16.5 ([#1091](https://github.com/monetr/monetr/issues/1091)) ([52dd8b3](https://github.com/monetr/monetr/commit/52dd8b3b9a2b152e9c1df9e98b413fda5f09c4e8))
+* **ui:** update dependency eslint to v8.24.0 ([#1107](https://github.com/monetr/monetr/issues/1107)) ([9016877](https://github.com/monetr/monetr/commit/9016877a9a9b51886a9d94242a1b9da88268b636))
+* **ui:** update dependency react-router-dom to v6.4.1 ([#1110](https://github.com/monetr/monetr/issues/1110)) ([3c285f5](https://github.com/monetr/monetr/commit/3c285f5b86798d1c74f957d8b1393e1833d974d8))
+* **ui:** update dependency rrule to v2.7.1 ([#1004](https://github.com/monetr/monetr/issues/1004)) ([1edddb3](https://github.com/monetr/monetr/commit/1edddb307854ddc61eac7fa114cae009dc10eeef))
+* **ui:** update dependency sass to v1.55.0 ([#1111](https://github.com/monetr/monetr/issues/1111)) ([73d1686](https://github.com/monetr/monetr/commit/73d1686cb1c70be8c68521466f86cb0dc527960c))
+* **ui:** update dependency ts-loader to v9.4.1 ([#1112](https://github.com/monetr/monetr/issues/1112)) ([a5b5e35](https://github.com/monetr/monetr/commit/a5b5e35dfed0b24c4183f6034dfbe87dad744a16))
+* **ui:** update dependency typescript to v4.8.4 ([#1100](https://github.com/monetr/monetr/issues/1100)) ([0ade516](https://github.com/monetr/monetr/commit/0ade5161ed3e92f7e48094a89ad4818c706bd2bf))
+* **ui:** update dependency webpack-dev-server to v4.11.1 ([#1113](https://github.com/monetr/monetr/issues/1113)) ([1a19d30](https://github.com/monetr/monetr/commit/1a19d30e8e4a3937f4ed70418d43110356bdf813))
+* **ui:** update jest monorepo to v29 ([#1116](https://github.com/monetr/monetr/issues/1116)) ([269e165](https://github.com/monetr/monetr/commit/269e16537f786abc5fbb244a997401e18b7c6ca8))
+
+
+### Miscellaneous
+
+* Adding NOTICE ([f55a226](https://github.com/monetr/monetr/commit/f55a226d805781d6b731b72a187dd71784d12bf6))
+* **deps:** Fixing yarn.lock ([665f5b4](https://github.com/monetr/monetr/commit/665f5b47d0fa6b36df60489ed7afc2524b99fc17))
+* Fixing gofakeit race condition. ([83d86c5](https://github.com/monetr/monetr/commit/83d86c591acf2b00018ed713983f8fb636a44768))
+* **pubsub:** Tweaking test to be more correct. ([cee8384](https://github.com/monetr/monetr/commit/cee83844f20ab3850ebc091f70dc375772839df5))
+* Updated NOTICE ([398bec3](https://github.com/monetr/monetr/commit/398bec3aed76fc3e8c0de362e1234ad33da5160a))
+* Updating NOTICE ([7401ed3](https://github.com/monetr/monetr/commit/7401ed3a4bbaa36e54b2eac635c84012d7c97348))
+* Upgraded local development node to the latest version. ([6c323a5](https://github.com/monetr/monetr/commit/6c323a53e230c03e49c863c2a140bf1bf56d12d0))
+
 ## [0.11.16](https://github.com/monetr/monetr/compare/v0.11.15...v0.11.16) (2022-10-01)
 
 
