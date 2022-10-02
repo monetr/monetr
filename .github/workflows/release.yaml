@@ -38,7 +38,7 @@ jobs:
       - release_please
     name: Build UI
     runs-on: ubuntu-latest
-    container: node:17.5.0
+    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3

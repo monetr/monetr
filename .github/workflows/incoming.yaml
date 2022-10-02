@@ -9,7 +9,7 @@ jobs:
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
-    container: golang:1.19.1
+    container: ghcr.io/monetr/build-containers/golang:1.19.1
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -28,7 +28,7 @@ jobs:
   ui_dependencies:
     name: UI Dependencies
     runs-on: ubuntu-latest
-    container: node:17.5.0
+    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -84,7 +84,7 @@ jobs:
       - ui_dependencies
     name: Build UI
     runs-on: ubuntu-latest
-    container: node:17.5.0
+    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -145,7 +145,7 @@ jobs:
       - go_dependencies
     name: Test Go
     runs-on: ubuntu-latest
-    container: golang:1.19.1
+    container: ghcr.io/monetr/build-containers/golang:1.19.1
     env:
       POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: ""
@@ -195,7 +195,7 @@ jobs:
       - ui_dependencies
     name: Test UI
     runs-on: ubuntu-latest
-    container: node:17.5.0
+    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -245,7 +245,7 @@ jobs:
     name: MkDocs
     runs-on: ubuntu-latest
     env:
-      MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:04052022
+      MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:09232022
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
