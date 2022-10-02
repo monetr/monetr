@@ -7,6 +7,7 @@ export interface LoginArguments {
   email: string;
   password: string;
   captcha?: string;
+  totp?: string;
 }
 
 export default function useLogin(): (loginArgs: LoginArguments) => Promise<void> {

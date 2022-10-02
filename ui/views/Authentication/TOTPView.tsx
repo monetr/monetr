@@ -8,6 +8,7 @@ import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CircularProgress from 'components/CircularProgress';
 import CenteredLogo from 'components/Logo/CenteredLogo';
+import useLogin from 'hooks/useLogin';
 
 interface TOTPViewParameters {
   emailAddress: string;
@@ -23,6 +24,7 @@ export default function TOTPView(): JSX.Element {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [verification, setVerification] = useState<string | null>();
+  const login = useLogin();
 
   // If the user tries to navigate here without these parameters being provided by being routed from somewhere else then
   // kick the user back to the login page.
@@ -42,9 +44,19 @@ export default function TOTPView(): JSX.Element {
 
   const initialValues: TOTPFormValues = { code: '' };
 
-  function submit(values: TOTPFormValues, helpers: FormikHelpers<TOTPFormValues>): Promise<void> {
+  async function submit(values: TOTPFormValues, helpers: FormikHelpers<TOTPFormValues>): Promise<void> {
     helpers.setSubmitting(true);
-    return Promise.resolve();
+    return login({
+      captcha: verification,
+      email: input.emailAddress,
+      password: input.password,
+      totp: values.code,
+    })
+      .catch(error => void enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }))
+      .finally(() => helpers.setSubmitting(false));
   }
 
   return (

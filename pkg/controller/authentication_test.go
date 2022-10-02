@@ -56,6 +56,39 @@ func TestLogin(t *testing.T) {
 		response.Cookies().Empty()
 	})
 
+	t.Run("login true path with TOTP", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		// Then configure the login fixture with TOTP.
+		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, user.Login)
+
+		{ // Send the initial request and make sure it responds with the error.
+			response := e.POST("/api/authentication/login").
+				WithJSON(swag.LoginRequest{
+					Email:    user.Login.Email,
+					Password: password,
+				}).
+				Expect()
+
+			response.Status(http.StatusPreconditionRequired)
+			response.JSON().Path("$.error").String().Equal("login requires MFA")
+			response.JSON().Path("$.code").String().Equal("MFA_REQUIRED")
+		}
+
+		{ // Then try to authenticate using the code.
+			response := e.POST("/api/authentication/login").
+				WithJSON(swag.LoginRequest{
+					Email:    user.Login.Email,
+					Password: password,
+					TOTP:     loginTotp.Now(),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			AssertSetTokenCookie(t, response)
+		}
+	})
+
 	t.Run("can login when TOTP is provided", func(t *testing.T) {
 		e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t)
