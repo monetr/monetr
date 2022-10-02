@@ -10,8 +10,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
+	"github.com/google/uuid"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/monetr/monetr/pkg/migrations"
 	"github.com/pkg/errors"
@@ -30,7 +30,7 @@ type queryHook struct {
 }
 
 func (q *queryHook) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (context.Context, error) {
-	queryId := gofakeit.UUID()[0:8]
+	queryId := uuid.New().String()[0:8]
 	if event.Stash != nil {
 		event.Stash["queryId"] = queryId
 	} else {
