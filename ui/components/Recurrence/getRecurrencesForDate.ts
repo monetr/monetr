@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 import Recurrence from 'components/Recurrence/Recurrence';
-import RRule, { Weekday } from 'rrule';
+import { RRule, Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(date: moment.Moment): Array<Recurrence> {
   const input = date.clone().startOf('day');
