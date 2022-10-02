@@ -206,6 +206,9 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		})
 
 		p.Get("/health", c.getHealth)
+		p.Get("/NOTICE", func(ctx iris.Context) {
+			ctx.Text(build.GetNotice())
+		})
 
 		p.Use(c.loggingMiddleware)
 		p.OnAnyErrorCode(c.onAnyErrorCode)

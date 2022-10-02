@@ -203,7 +203,7 @@ else
 endif
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
-$(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
+$(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES) $(NOTICE)
 endif
 ifneq (,$(findstring simple_icons,$(TAGS))) # If our icon packs include simple_icons then make sure the dir exists.
 $(BINARY): $(SIMPLE_ICONS)
@@ -422,14 +422,14 @@ $(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(UI_DEPS)
 .PHONY: license
 license: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
 	$(LICENSED) status
-	
+
 NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
 $(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
 	$(LICENSED) notices
 
-NOTICE=$(STATIC_DIR)/NOTICE
+NOTICE=$(GO_SRC_DIR)/build/NOTICE
 $(NOTICE): $(NOTICES)
-	cat $(NOTICES) > $(NOTICE)
+	cat $(NOTICES) > $@
 
 notice: $(NOTICE)
 

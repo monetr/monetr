@@ -27,7 +27,7 @@ func (c *UIController) RegisterRoutes(app *iris.Application) {
 			})
 		})
 
-		app.Get("/*", func(ctx iris.Context) {
+		app.Get("/{p:path}", func(ctx iris.Context) {
 			ctx.StatusCode(http.StatusNotFound)
 			return
 		})
