@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.11.18](https://github.com/monetr/monetr/compare/v0.11.17...v0.11.18) (2022-10-02)
+
+
+### Features
+
+* **notices:** Include third party notices in application. ([#1118](https://github.com/monetr/monetr/issues/1118)) ([c282028](https://github.com/monetr/monetr/commit/c282028480880ec47a07735dd6ca72fd2345caeb))
+
+
+### Bug Fixes
+
+* **build:** Fixed license task ([2078a24](https://github.com/monetr/monetr/commit/2078a24d77439f1cc77568f8c1dc117cb9bb1a72))
+
+
+### Miscellaneous
+
+* Makefile improvements. ([63e9470](https://github.com/monetr/monetr/commit/63e9470a1e4f92cc86777a4307cf5e355263e743))
+* **ui:** Minor improvements around TOTP MFA code. ([e386c57](https://github.com/monetr/monetr/commit/e386c57da24ed0e1ae9daf0f4838769926067467))
+
 ## [0.11.17](https://github.com/monetr/monetr/compare/v0.11.16...v0.11.17) (2022-10-02)
 
 
