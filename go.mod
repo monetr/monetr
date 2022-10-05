@@ -21,7 +21,7 @@ require (
 	github.com/gomodule/redigo v1.8.9
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/vault/api v1.3.1
-	github.com/iris-contrib/middleware/cors v0.0.0-20220815101939-754509eb4d57
+	github.com/iris-contrib/middleware/cors v0.0.0-20221004221944-7386a93ab90a
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/kataras/iris/v12 v12.2.0-beta5
 	github.com/mileusna/useragent v1.0.2
