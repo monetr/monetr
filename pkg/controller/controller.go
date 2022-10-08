@@ -219,7 +219,6 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 					"error": "the requested path does not exist",
 				})
 			} else {
-				c.reportError(ctx, err)
 				ctx.JSON(map[string]interface{}{
 					"error": err.Error(),
 				})

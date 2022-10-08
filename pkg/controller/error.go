@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"net/http"
 
 	"github.com/kataras/iris/v12"
 	"github.com/pkg/errors"
@@ -22,14 +21,6 @@ func (c *Controller) onAnyErrorCode(ctx iris.Context) {
 	err := ctx.GetErr()
 	if err == nil {
 		return
-	}
-
-	switch ctx.GetStatusCode() {
-	case http.StatusUnauthorized:
-		// Don't report errors for forbidden status code.
-	default:
-		// TODO Add something to exclude some custom errors like MFA required from being reported.
-		c.reportError(ctx, err)
 	}
 
 	switch actualError := err.(type) {
