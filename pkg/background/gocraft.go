@@ -41,6 +41,7 @@ func NewGoCraftWorkJobEnqueuer(log *logrus.Entry, redisPool *redis.Pool) *GoCraf
 func (g *GoCraftWorkJobEnqueuer) EnqueueJob(ctx context.Context, queue string, arguments interface{}) error {
 	span := sentry.StartSpan(ctx, "topic.send")
 	defer span.Finish()
+	span.Description = queue
 
 	span.Description = "gocraft Enqueue"
 	span.SetTag("queue", queue)
@@ -143,7 +144,7 @@ func (g *GoCraftWorkJobProcessor) RegisterJob(ctx context.Context, handler JobHa
 		// We want to have sentry tracking jobs as they are being processed. In order to do this we need to inject a
 		// sentry hub into the context and create a new span using that context.
 		highContext := sentry.SetHubOnContext(context.Background(), sentry.CurrentHub().Clone())
-		span := sentry.StartSpan(highContext, "queue.process", sentry.TransactionName(handler.QueueName()))
+		span := sentry.StartSpan(highContext, "topic.process", sentry.TransactionName(handler.QueueName()))
 		jobLog := log.WithContext(span.Context())
 		hub := sentry.GetHubFromContext(span.Context())
 		hub.ConfigureScope(func(scope *sentry.Scope) {
@@ -201,7 +202,9 @@ func (g *GoCraftWorkJobProcessor) RegisterJob(ctx context.Context, handler JobHa
 			// Each job is wrapped with an enqueuer. This enqueuer is run on a schedule to trigger the actual jobs in
 			// their batches.
 			g.queue.Job(schedulerName, func(job *work.Job) error {
-				return scheduledJob.EnqueueTriggeredJob(context.Background(), g.enqueuer)
+				span := sentry.StartSpan(context.Background(), "topic.process", sentry.TransactionName(scheduledJob.QueueName()))
+				defer span.Finish()
+				return scheduledJob.EnqueueTriggeredJob(span.Context(), g.enqueuer)
 			})
 			g.queue.PeriodicallyEnqueue(scheduledJob.DefaultSchedule(), schedulerName)
 		}

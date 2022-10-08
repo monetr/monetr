@@ -140,7 +140,7 @@ type ProcessFundingScheduleJob struct {
 }
 
 func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
-	span := sentry.StartSpan(ctx, "job.exec", sentry.TransactionName("Process Funding Schedules"))
+	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 
 	log := p.log.WithContext(ctx)

@@ -21,8 +21,9 @@ type ObservabilityRoundTripper struct {
 }
 
 func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
-	span := sentry.StartSpan(request.Context(), fmt.Sprintf("%s %s", strings.ToUpper(request.Method), request.URL.Path))
+	span := sentry.StartSpan(request.Context(), "http.client")
 	defer span.Finish()
+	span.Description = fmt.Sprintf("%s %s", strings.ToUpper(request.Method), request.URL.Path)
 	response, err := o.inner.RoundTrip(request)
 
 	o.handler(request.Context(), request, response, err)

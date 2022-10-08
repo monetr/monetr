@@ -89,8 +89,9 @@ func (e *Spending) CalculateNextContribution(
 	fundingSchedule *FundingSchedule,
 	now time.Time,
 ) error {
-	span := sentry.StartSpan(ctx, "CalculateNextContribution")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "CalculateNextContribution"
 
 	span.SetTag("spendingId", strconv.FormatUint(e.SpendingId, 10))
 

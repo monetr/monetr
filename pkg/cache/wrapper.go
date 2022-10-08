@@ -71,7 +71,7 @@ func (r *redisCache) do(ctx context.Context, commandName string, args ...interfa
 }
 
 func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
-	span := sentry.StartSpan(ctx, "Redis - Set")
+	span := sentry.StartSpan(ctx, "cache.save")
 	defer span.Finish()
 
 	if key == "" {
@@ -84,7 +84,7 @@ func (r *redisCache) Set(ctx context.Context, key string, value []byte) error {
 }
 
 func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifetime time.Duration) error {
-	span := sentry.StartSpan(ctx, "Redis - SetTTL")
+	span := sentry.StartSpan(ctx, "cache.save")
 	defer span.Finish()
 
 	if key == "" {
@@ -103,10 +103,9 @@ func (r *redisCache) SetTTL(ctx context.Context, key string, value []byte, lifet
 }
 
 func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) error {
-	span := sentry.StartSpan(ctx, "Redis - SetEz")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-
-	span.Description = key
+	span.Description = ""
 
 	data, err := msgpack.Marshal(object)
 	if err != nil {
@@ -117,10 +116,9 @@ func (r *redisCache) SetEz(ctx context.Context, key string, object interface{}) 
 }
 
 func (r *redisCache) SetEzTTL(ctx context.Context, key string, object interface{}, lifetime time.Duration) error {
-	span := sentry.StartSpan(ctx, "Redis - SetEzTTL")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-
-	span.Description = key
+	span.Description = "Redis - SetEzTTL"
 
 	data, err := msgpack.Marshal(object)
 	if err != nil {
@@ -131,7 +129,7 @@ func (r *redisCache) SetEzTTL(ctx context.Context, key string, object interface{
 }
 
 func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
-	span := sentry.StartSpan(ctx, "Redis - Get")
+	span := sentry.StartSpan(ctx, "cache.get_item")
 	defer span.Finish()
 
 	if key == "" {
@@ -167,12 +165,10 @@ func (r *redisCache) Get(ctx context.Context, key string) ([]byte, error) {
 }
 
 func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) error {
-	span := sentry.StartSpan(ctx, "Redis - GetEz")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-
 	span.Status = sentry.SpanStatusOK
-
-	span.Description = key
+	span.Description = "Redis - GetEz"
 
 	data, err := r.Get(span.Context(), key)
 	if err != nil {
@@ -193,7 +189,7 @@ func (r *redisCache) GetEz(ctx context.Context, key string, output interface{}) 
 }
 
 func (r *redisCache) Delete(ctx context.Context, key string) error {
-	span := sentry.StartSpan(ctx, "Redis - Delete")
+	span := sentry.StartSpan(ctx, "cache.delete_item")
 	defer span.Finish()
 
 	if key == "" {

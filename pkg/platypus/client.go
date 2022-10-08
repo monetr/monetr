@@ -51,8 +51,9 @@ func (p *PlaidClient) getLog(span *sentry.Span) *logrus.Entry {
 }
 
 func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error) {
-	span := sentry.StartSpan(ctx, "Plaid - GetAccount")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - GetAccounts"
 
 	span.SetTag("itemId", p.itemId)
 
@@ -120,8 +121,9 @@ func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]
 }
 
 func (p *PlaidClient) GetAllTransactions(ctx context.Context, start, end time.Time, accountIds []string) ([]Transaction, error) {
-	span := sentry.StartSpan(ctx, "Plaid - GetAllTransactions")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "Plaid - GetAllTransactions"
 
 	span.SetTag("itemId", p.itemId)
 
@@ -148,8 +150,9 @@ func (p *PlaidClient) GetAllTransactions(ctx context.Context, start, end time.Ti
 }
 
 func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time, count, offset int32, bankAccountIds []string) ([]Transaction, error) {
-	span := sentry.StartSpan(ctx, "Plaid - GetTransactions")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - GetTransactions"
 
 	span.SetTag("itemId", p.itemId)
 
@@ -203,8 +206,9 @@ func (p *PlaidClient) GetTransactions(ctx context.Context, start, end time.Time,
 }
 
 func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection bool) (LinkToken, error) {
-	span := sentry.StartSpan(ctx, "Plaid - UpdateItem")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - UpdateItem"
 
 	span.SetTag("itemId", p.itemId)
 
@@ -268,8 +272,9 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 }
 
 func (p *PlaidClient) RemoveItem(ctx context.Context) error {
-	span := sentry.StartSpan(ctx, "Plaid - RemoveItem")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - RemoveItem"
 
 	span.SetTag("itemId", p.itemId)
 

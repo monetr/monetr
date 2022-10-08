@@ -147,8 +147,9 @@ type Plaid struct {
 }
 
 func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (LinkToken, error) {
-	span := sentry.StartSpan(ctx, "Plaid - CreateLinkToken")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - CreateLinkToken"
 
 	log := p.log.WithContext(span.Context())
 
@@ -216,8 +217,9 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 }
 
 func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*ItemToken, error) {
-	span := sentry.StartSpan(ctx, "Plaid - ExchangePublicToken")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - ExchangePublicToken"
 
 	log := p.log.WithContext(span.Context())
 
@@ -248,8 +250,9 @@ func (p *Plaid) ExchangePublicToken(ctx context.Context, publicToken string) (*I
 }
 
 func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*WebhookVerificationKey, error) {
-	span := sentry.StartSpan(ctx, "Plaid - GetWebhookVerificationKey")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - GetWebhookVerificationKey"
 
 	log := p.log.WithContext(span.Context())
 
@@ -280,8 +283,9 @@ func (p *Plaid) GetWebhookVerificationKey(ctx context.Context, keyId string) (*W
 }
 
 func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plaid.Institution, error) {
-	span := sentry.StartSpan(ctx, "Plaid - GetInstitution")
+	span := sentry.StartSpan(ctx, "http.client")
 	defer span.Finish()
+	span.Description = "Plaid - GetInstitution"
 
 	log := p.log.WithContext(span.Context())
 
@@ -314,8 +318,9 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 }
 
 func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client, error) {
-	span := sentry.StartSpan(ctx, "Plaid - NewClientFromItemId")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "Plaid - NewClientFromItemId"
 
 	link, err := p.repo.GetLinkByItemId(span.Context(), itemId)
 	if err != nil {
@@ -326,8 +331,9 @@ func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client,
 }
 
 func (p *Plaid) NewClientFromLink(ctx context.Context, accountId uint64, linkId uint64) (Client, error) {
-	span := sentry.StartSpan(ctx, "Plaid - NewClientFromLink")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "Plaid - NewClientFromLink"
 
 	link, err := p.repo.GetLink(span.Context(), accountId, linkId)
 	if err != nil {
@@ -362,8 +368,9 @@ func (p *Plaid) NewClient(ctx context.Context, link *models.Link, accessToken, i
 }
 
 func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error) {
-	span := sentry.StartSpan(ctx, "Plaid - newClient")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "Plaid - newClient"
 
 	if link == nil {
 		return nil, errors.New("cannot create client without link")

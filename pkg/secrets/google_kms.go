@@ -72,8 +72,9 @@ func NewGoogleKMS(ctx context.Context, config GoogleKMSConfig) (KeyManagement, e
 }
 
 func (g *GoogleKMS) Encrypt(ctx context.Context, input []byte) (keyID, version string, result []byte, _ error) {
-	span := sentry.StartSpan(ctx, "Encrypt KMS")
+	span := sentry.StartSpan(ctx, "grpc.client")
 	defer span.Finish()
+	span.Description = "Encrypt KMS"
 	span.SetTag("kms", "google")
 
 	inputCRC32C := crc32.Checksum(input, crc32.MakeTable(crc32.Castagnoli))
@@ -103,8 +104,9 @@ func (g *GoogleKMS) Encrypt(ctx context.Context, input []byte) (keyID, version s
 }
 
 func (g *GoogleKMS) Decrypt(ctx context.Context, keyID, version string, input []byte) (result []byte, _ error) {
-	span := sentry.StartSpan(ctx, "Decrypt KMS")
+	span := sentry.StartSpan(ctx, "grpc.client")
 	defer span.Finish()
+	span.Description = "Decrypt KMS"
 	span.SetTag("kms", "google")
 
 	inputCRC32C := crc32.Checksum(input, crc32.MakeTable(crc32.Castagnoli))
