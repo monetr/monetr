@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.11.19](https://github.com/monetr/monetr/compare/v0.11.18...v0.11.19) (2022-10-08)
+
+
+### Features
+
+* **sentry:** Significantly improved sentry trace spans. ([b1d6a2f](https://github.com/monetr/monetr/commit/b1d6a2fb8da52ea353bcfba05de04a9711d06291))
+
+
+### Bug Fixes
+
+* **sentry:** Improved how errors from API requests are reported. ([75c1a2c](https://github.com/monetr/monetr/commit/75c1a2c088bca5b0013ad2aef65dff74b7e4e0dc))
+
+
+### Dependencies
+
+* **api:** Bumped go-pg to `v10.10.7` ([6cee643](https://github.com/monetr/monetr/commit/6cee64304224451b02507609ba8d45f5a7900211))
+
+
+### Miscellaneous
+
+* Add discord to README. ([8e04d3a](https://github.com/monetr/monetr/commit/8e04d3a3d0a2821f054aa6357421f99eade8eb98))
+
 ## [0.11.18](https://github.com/monetr/monetr/compare/v0.11.17...v0.11.18) (2022-10-02)
 
 
