@@ -107,7 +107,7 @@ export default function RegisterView(): JSX.Element {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  function submit(values: SignUpValues, { setSubmitting }: FormikHelpers<SignUpValues>): Promise<void> {
+  async function submit(values: SignUpValues, { setSubmitting }: FormikHelpers<SignUpValues>): Promise<void> {
     setSubmitting(true);
     return signUp({
       agree: values.agree,
@@ -142,7 +142,6 @@ export default function RegisterView(): JSX.Element {
           variant: 'error',
           disableWindowBlurListener: true,
         });
-        throw error;
       })
       .finally(() => {
         setVerification(null);
