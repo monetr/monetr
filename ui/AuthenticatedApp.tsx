@@ -1,4 +1,3 @@
-import FundingPage from 'pages/funding';
 import React, { Fragment, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Backdrop, CircularProgress } from '@mui/material';
@@ -8,6 +7,7 @@ import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import { useLinksSink } from 'hooks/links';
 import AccountsPage from 'pages/accounts';
 import ExpensesPage from 'pages/expenses';
+import FundingPage from 'pages/funding';
 import GoalsPage from 'pages/goals';
 import LogoutPage from 'pages/logout';
 import SettingsPage from 'pages/settings';
