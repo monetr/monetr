@@ -235,14 +235,24 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				})
 
 				tracingCtx := sentry.SetHubOnContext(ctx.Request().Context(), hub)
-				name := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
+				routeName := strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
+				name := fmt.Sprintf("%s %s", ctx.Method(), routeName)
 				span = sentry.StartSpan(
 					tracingCtx,
-					ctx.Method(),
+					"http.server",
 					sentry.TransactionName(name),
 					sentry.ContinueFromRequest(ctx.Request()),
 				)
-				span.Description = strings.TrimSpace(strings.TrimPrefix(ctx.RouteName(), ctx.Method()))
+				span.Description = name
+				span.SetTag("http.method", ctx.Method())
+				span.SetTag("http.route", routeName)
+				span.SetTag("http.flavor", fmt.Sprintf("%d.%d", ctx.Request().ProtoMajor, ctx.Request().ProtoMinor))
+				span.SetTag("http.scheme", ctx.Request().URL.Scheme)
+				if userAgent := ctx.Request().UserAgent(); userAgent != "" {
+					span.SetTag("http.user_agent", ctx.Request().UserAgent())
+				}
+				span.SetTag("net.host.name", ctx.Request().URL.Host)
+
 				defer func() {
 					if panicErr := recover(); panicErr != nil {
 						hub.RecoverWithContext(span.Context(), panicErr)
@@ -267,6 +277,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 							}
 						}
 					}
+					span.SetTag("http.status_code", fmt.Sprint(ctx.GetStatusCode()))
 					span.Finish()
 				}()
 

@@ -24,6 +24,9 @@ func (o *ObservabilityRoundTripper) RoundTrip(request *http.Request) (*http.Resp
 	span := sentry.StartSpan(request.Context(), "http.client")
 	defer span.Finish()
 	span.Description = fmt.Sprintf("%s %s", strings.ToUpper(request.Method), request.URL.Path)
+	span.SetTag("http.url", request.URL.String())
+	span.SetTag("net.peer.name", request.URL.Host)
+
 	response, err := o.inner.RoundTrip(request)
 
 	o.handler(request.Context(), request, response, err)
