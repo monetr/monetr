@@ -8,8 +8,6 @@ import TransactionItem from 'components/Transactions/TransactionsView/Transactio
 import { useTransactionsSink } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 
-import 'components/Transactions/TransactionsView/styles/TransactionsView.scss';
-
 function TransactionsView(): JSX.Element {
   const { isLoading, isFetching, fetchNextPage, error, result: transactions } = useTransactionsSink();
 
@@ -94,7 +92,7 @@ function TransactionsView(): JSX.Element {
 
   return (
     <div className="minus-nav">
-      <div className="w-full transaction-list bg-white">
+      <div className="w-full view-area bg-white">
         <List disablePadding className="w-full">
           { renderTransactions() }
           { (loading || hasNextPage) && (

@@ -60,3 +60,18 @@ body > #root {
     background-color: white;
   }
 }
+
+.minus-nav {
+  height: -webkit-calc(100vh - $nav-bar-height);
+  height: -moz-calc(100vh - $nav-bar-height);
+  height: calc(100vh - $nav-bar-height);
+  background-color: $primary-color;
+}
+
+.view-area {
+  height: calc(100vh - $nav-bar-height);
+  max-height: calc(100vh - $nav-bar-height);
+  overflow-y: auto !important;
+  overflow-x: unset !important;
+  border-top-left-radius: 10px;
+}

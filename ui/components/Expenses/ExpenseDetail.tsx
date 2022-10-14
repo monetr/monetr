@@ -13,11 +13,10 @@ import { Button, Divider, LinearProgress, List, ListItem, ListItemIcon, Typograp
 
 import EditSpendingAmountDialog from 'components/Expenses/EditExpenseAmountDialog';
 import EditExpenseDueDateDialog from 'components/Expenses/EditExpenseDueDateDialog';
-import FundingScheduleList from 'components/FundingSchedules/FundingScheduleList';
+import EditFundingScheduleDialog from 'components/Expenses/EditFundingScheduleDialog';
 import TransferDialog from 'components/Spending/TransferDialog';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
 import { useRemoveSpending, useSelectedExpense } from 'hooks/spending';
-import EditFundingScheduleDialog from './EditFundingScheduleDialog';
 
 export default function ExpenseDetail(): JSX.Element {
   const removeSpending = useRemoveSpending();
@@ -69,170 +68,174 @@ export default function ExpenseDetail(): JSX.Element {
   }
 
   if (!expense) {
-    return (<FundingScheduleList />);
+    return null;
   }
 
   return (
     <Fragment>
-      <Dialogs />
-      <div className="w-full pl-5 pr-5 pt-5 expense-detail">
-        <div className="grid grid-cols-3 grid-rows-4 grid-flow-col gap-1 w-auto">
-          <div className="col-span-2">
-            <Typography
-              variant="h5"
-            >
-              { expense.name }
-            </Typography>
-          </div>
-          <div className="col-span-2">
-            <Typography
-              variant="h6"
-            >
-              { expense.getCurrentAmountString() } of { expense.getTargetAmountString() }
-            </Typography>
-          </div>
-          <div className="col-span-3">
-            <Typography>
-              { expense.getNextOccurrenceString() } - { expense.description }
-            </Typography>
-          </div>
-          <div className="col-span-3">
-            <Typography>
-              { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
-            </Typography>
-          </div>
-          <div className="col-span-1 row-span-2">
-            <LinearProgress
-              className="mt-3"
-              variant="determinate"
-              value={ (expense.currentAmount / expense.targetAmount) * 100 }
-            />
-          </div>
-        </div>
-
-        <List dense>
-          <Divider />
-          <ListItem button dense onClick={ () => openDialog(Dialog.EditAmountDialog) }>
-            <ListItemIcon>
-              <AccountBalance />
-            </ListItemIcon>
-            <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
+      <div className="border-l flex-initial">
+        <div className="w-full expenses-list">
+          <Dialogs />
+          <div className="flex-auto w-full pl-5 pr-5 pt-5 expense-detail">
+            <div className="grid grid-cols-3 grid-rows-4 grid-flow-col gap-1 w-auto">
+              <div className="col-span-2">
+                <Typography
+                  variant="h5"
+                >
+                  { expense.name }
+                </Typography>
+              </div>
+              <div className="col-span-2">
+                <Typography
+                  variant="h6"
+                >
+                  { expense.getCurrentAmountString() } of { expense.getTargetAmountString() }
+                </Typography>
+              </div>
               <div className="col-span-3">
                 <Typography>
-                  Amount
+                  { expense.getNextOccurrenceString() } - { expense.description }
                 </Typography>
               </div>
-              <div className="col-span-3 opacity-50">
-                <Typography variant="body2">
-                  { expense.getTargetAmountString() }
-                </Typography>
-              </div>
-              <div className="col-span-1 row-span-2 flex justify-end">
-                <ChevronRight className="align-middle h-full" />
-              </div>
-            </div>
-          </ListItem>
-          <Divider />
-
-          <ListItem button dense onClick={ () => openDialog(Dialog.EditDueDateDialog) }>
-            <ListItemIcon>
-              <Event />
-            </ListItemIcon>
-            <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
               <div className="col-span-3">
                 <Typography>
-                  Due Date
-                </Typography>
-              </div>
-              <div className="col-span-3 opacity-50">
-                <Typography variant="body2">
-                  { expense.description }
-                </Typography>
-              </div>
-              <div className="col-span-1 row-span-2 flex justify-end">
-                <ChevronRight className="align-middle h-full" />
-              </div>
-            </div>
-          </ListItem>
-          <Divider />
-
-          <ListItem button dense onClick={ () => openDialog(Dialog.EditFundingScheduleDialog) }>
-            <ListItemIcon>
-              <ArrowForward />
-            </ListItemIcon>
-            <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
-              <div className="col-span-3">
-                <Typography>
-                  Money In
-                </Typography>
-              </div>
-              <div className="col-span-3 opacity-50">
-                <Typography variant="body2">
                   { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
                 </Typography>
               </div>
-              <div className="col-span-1 row-span-2 flex justify-end">
-                <ChevronRight className="align-middle h-full" />
+              <div className="col-span-1 row-span-2">
+                <LinearProgress
+                  className="mt-3"
+                  variant="determinate"
+                  value={ (expense.currentAmount / expense.targetAmount) * 100 }
+                />
               </div>
             </div>
-          </ListItem>
-          <Divider />
 
-          <ListItem dense className="opacity-50">
-            <ListItemIcon>
-              <TrackChanges />
-            </ListItemIcon>
-            <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
-              <div className="col-span-3">
-                <Typography>
-                  Contribution Option (WIP)
-                </Typography>
-              </div>
-              <div className="col-span-3 opacity-50">
-                <Typography variant="body2">
-                  Set aside target amount
-                </Typography>
-              </div>
-              <div className="col-span-1 row-span-2 flex justify-end">
-                <ChevronRight className="align-middle h-full" />
-              </div>
-            </div>
-          </ListItem>
-          <Divider />
+            <List dense>
+              <Divider />
+              <ListItem button dense onClick={ () => openDialog(Dialog.EditAmountDialog) }>
+                <ListItemIcon>
+                  <AccountBalance />
+                </ListItemIcon>
+                <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
+                  <div className="col-span-3">
+                    <Typography>
+                      Amount
+                    </Typography>
+                  </div>
+                  <div className="col-span-3 opacity-50">
+                    <Typography variant="body2">
+                      { expense.getTargetAmountString() }
+                    </Typography>
+                  </div>
+                  <div className="col-span-1 row-span-2 flex justify-end">
+                    <ChevronRight className="align-middle h-full" />
+                  </div>
+                </div>
+              </ListItem>
+              <Divider />
 
-          <ListItem dense className="opacity-50">
-            <ListItemIcon>
-              <ArrowBack />
-            </ListItemIcon>
-            <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
-              <div className="col-span-3">
-                <Typography>
-                  Money Out (WIP)
-                </Typography>
+              <ListItem button dense onClick={ () => openDialog(Dialog.EditDueDateDialog) }>
+                <ListItemIcon>
+                  <Event />
+                </ListItemIcon>
+                <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
+                  <div className="col-span-3">
+                    <Typography>
+                      Due Date
+                    </Typography>
+                  </div>
+                  <div className="col-span-3 opacity-50">
+                    <Typography variant="body2">
+                      { expense.description }
+                    </Typography>
+                  </div>
+                  <div className="col-span-1 row-span-2 flex justify-end">
+                    <ChevronRight className="align-middle h-full" />
+                  </div>
+                </div>
+              </ListItem>
+              <Divider />
+
+              <ListItem button dense onClick={ () => openDialog(Dialog.EditFundingScheduleDialog) }>
+                <ListItemIcon>
+                  <ArrowForward />
+                </ListItemIcon>
+                <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
+                  <div className="col-span-3">
+                    <Typography>
+                      Money In
+                    </Typography>
+                  </div>
+                  <div className="col-span-3 opacity-50">
+                    <Typography variant="body2">
+                      { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
+                    </Typography>
+                  </div>
+                  <div className="col-span-1 row-span-2 flex justify-end">
+                    <ChevronRight className="align-middle h-full" />
+                  </div>
+                </div>
+              </ListItem>
+              <Divider />
+
+              <ListItem dense className="opacity-50">
+                <ListItemIcon>
+                  <TrackChanges />
+                </ListItemIcon>
+                <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
+                  <div className="col-span-3">
+                    <Typography>
+                      Contribution Option (WIP)
+                    </Typography>
+                  </div>
+                  <div className="col-span-3 opacity-50">
+                    <Typography variant="body2">
+                      Set aside target amount
+                    </Typography>
+                  </div>
+                  <div className="col-span-1 row-span-2 flex justify-end">
+                    <ChevronRight className="align-middle h-full" />
+                  </div>
+                </div>
+              </ListItem>
+              <Divider />
+
+              <ListItem dense className="opacity-50">
+                <ListItemIcon>
+                  <ArrowBack />
+                </ListItemIcon>
+                <div className="grid grid-cols-3 grid-rows-2 grid-flow-col gap-1 w-full">
+                  <div className="col-span-3">
+                    <Typography>
+                      Money Out (WIP)
+                    </Typography>
+                  </div>
+                  <div className="col-span-3 opacity-50">
+                    <Typography variant="body2">
+                      ....
+                    </Typography>
+                  </div>
+                  <div className="col-span-1 row-span-2 flex justify-end">
+                    <ChevronRight className="align-middle h-full" />
+                  </div>
+                </div>
+              </ListItem>
+            </List>
+            <div className="grid grid-cols-2 grid-flow-col mb-5">
+              <div className="col-span-1">
+                <Button variant="outlined" color="secondary" className="w-10/12" onClick={ deleteExpense }>
+                  <DeleteOutline className="mr-2" />
+                  Delete
+                </Button>
               </div>
-              <div className="col-span-3 opacity-50">
-                <Typography variant="body2">
-                  ....
-                </Typography>
-              </div>
-              <div className="col-span-1 row-span-2 flex justify-end">
-                <ChevronRight className="align-middle h-full" />
+              <div className="col-span-1 flex justify-end">
+                <Button variant="outlined" onClick={ () => openDialog(Dialog.TransferDialog) } className="w-10/12">
+                  <SwapHoriz className="mr-2" />
+                  Transfer
+                </Button>
               </div>
             </div>
-          </ListItem>
-        </List>
-        <div className="grid grid-cols-2 grid-flow-col mb-5">
-          <div className="col-span-1">
-            <Button variant="outlined" color="secondary" className="w-10/12" onClick={ deleteExpense }>
-              <DeleteOutline className="mr-2" />
-              Delete
-            </Button>
-          </div>
-          <div className="col-span-1 flex justify-end">
-            <Button variant="outlined" onClick={ () => openDialog(Dialog.TransferDialog) } className="w-10/12">
-              <SwapHoriz className="mr-2" />
-              Transfer
-            </Button>
           </div>
         </div>
       </div>

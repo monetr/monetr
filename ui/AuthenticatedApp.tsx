@@ -7,6 +7,7 @@ import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import { useLinksSink } from 'hooks/links';
 import AccountsPage from 'pages/accounts';
 import ExpensesPage from 'pages/expenses';
+import FundingPage from 'pages/funding';
 import GoalsPage from 'pages/goals';
 import LogoutPage from 'pages/logout';
 import SettingsPage from 'pages/settings';
@@ -65,6 +66,7 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/transactions" element={ <TransactionsPage /> } />
             <Route path="/expenses" element={ <ExpensesPage /> } />
             <Route path="/goals" element={ <GoalsPage /> } />
+            <Route path="/funding" element={ <FundingPage /> } />
             <Route path="/accounts" element={ <AccountsPage /> } />
             <Route path="/settings" element={ <SettingsPage /> } />
             <Route path="/subscription" element={ <SubscriptionPage /> } />

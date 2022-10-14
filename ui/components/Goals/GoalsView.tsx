@@ -33,38 +33,28 @@ export default function GoalsView(): JSX.Element {
 
   if (goals.length === 0) {
     return (
-      <Fragment>
-        <div className="minus-nav bg-primary">
-          <div className="flex flex-col h-full max-h-full bg-white view-inner">
-            <div className="grid grid-cols-3 flex-grow">
-              <div className="col-span-3">
-                <div className="w-full goals-list ">
-                  <div className="h-full flex justify-center items-center">
-                    <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
-                      <Typography
-                        className="opacity-50"
-                        variant="h3"
-                      >
-                        You don't have any goals yet...
-                      </Typography>
-                      <Button
-                        onClick={ showCreateGoalDialog }
-                        color="primary"
-                      >
-                        <Typography
-                          variant="h6"
-                        >
-                          Create A Goal
-                        </Typography>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <div className="h-full w-full bg-primary">
+        <div className="view-inner h-full flex justify-center items-center">
+          <div className="grid grid-cols-1 grid-rows-2 grid-flow-col gap-2">
+            <Typography
+              className="opacity-50"
+              variant="h3"
+            >
+              You don't have any goals yet...
+            </Typography>
+            <Button
+              onClick={ showCreateGoalDialog }
+              color="primary"
+            >
+              <Typography
+                variant="h6"
+              >
+                Create A Goal
+              </Typography>
+            </Button>
           </div>
         </div>
-      </Fragment>
+      </div>
     );
   }
 

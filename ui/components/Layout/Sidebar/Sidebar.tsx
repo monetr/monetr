@@ -2,6 +2,7 @@ import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   AccountBalance,
+  Today,
   CreditCard,
   ExitToApp, Menu,
   PriceCheck,
@@ -57,6 +58,10 @@ export default function Sidebar(props: SidebarProps): JSX.Element {
           <SidebarButton onClick={ props.closeSidebar } to="/goals">
             <Savings className="mr-2.5" />
             Goals
+          </SidebarButton>
+          <SidebarButton onClick={ props.closeSidebar } to="/funding">
+            <Today className="mr-2.5" />
+            Funding Schedules
           </SidebarButton>
           <SidebarButton onClick={ props.closeSidebar } to="/accounts">
             <AccountBalance className="mr-2.5" />
