@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.11.20](https://github.com/monetr/monetr/compare/v0.11.19...v0.11.20) (2022-10-14)
+
+
+### Features
+
+* **ui:** New funding schedule UI. ([#1122](https://github.com/monetr/monetr/issues/1122)) ([4aea72f](https://github.com/monetr/monetr/commit/4aea72f0d356aa453191a8841e5aedc410bcedca))
+
+
+### Bug Fixes
+
+* **ui:** Fixed Sentry crash dialog during registration. ([#1125](https://github.com/monetr/monetr/issues/1125)) ([58bb97b](https://github.com/monetr/monetr/commit/58bb97b516647c3edf5bc02a9ff92201b4686ceb))
+
+
+### Miscellaneous
+
+* **sentry:** Improvements to sentry tracing. ([57a11e3](https://github.com/monetr/monetr/commit/57a11e3e4e373feef0acff0efaca1216ba86ad72))
+* Updating license notice. ([c98f046](https://github.com/monetr/monetr/commit/c98f046d2cd82ec4d4afc204dce155f30489ca14))
+
 ## [0.11.19](https://github.com/monetr/monetr/compare/v0.11.18...v0.11.19) (2022-10-08)
 
 
