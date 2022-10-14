@@ -1,5 +1,6 @@
 import React, { Fragment } from 'react';
-import { Button, Divider, List, Typography } from '@mui/material';
+import { Add } from '@mui/icons-material';
+import { Button, Divider, Fab, List, Typography } from '@mui/material';
 
 import { showCreateExpenseDialog } from 'components/Expenses/CreateExpenseDialog';
 import ExpenseDetail from 'components/Expenses/ExpenseDetail';
@@ -45,9 +46,9 @@ export default function ExpensesView(): JSX.Element {
 
   return (
     <div className="minus-nav bg-primary">
-      <div className="flex flex-col h-full max-h-full view-inner">
-        <div className="grid grid-cols-3 flex-grow">
-          <div className="col-span-2">
+      <div className="h-full max-h-full view-inner">
+        <div className="flex flex-row">
+          <div className="flex-grow">
             <div className="w-full expenses-list">
               <List disablePadding className="w-full">
                 {
@@ -63,12 +64,16 @@ export default function ExpensesView(): JSX.Element {
               </List>
             </div>
           </div>
-          <div className="border-l">
-            <div className="w-full expenses-list">
-              <ExpenseDetail />
-            </div>
-          </div>
+          <ExpenseDetail />
         </div>
+        <Fab
+          color="primary"
+          aria-label="add"
+          className="absolute z-50 bottom-0 right-5"
+          onClick={ showCreateExpenseDialog }
+        >
+          <Add />
+        </Fab>
       </div>
     </div>
   );
