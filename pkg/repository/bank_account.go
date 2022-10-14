@@ -2,14 +2,16 @@ package repository
 
 import (
 	"context"
+
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 )
 
 func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAccount, error) {
-	span := sentry.StartSpan(ctx, "GetBankAccounts")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "GetBankAccounts"
 
 	span.Data = map[string]interface{}{
 		"accountId": r.AccountId(),
@@ -23,8 +25,9 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAcco
 }
 
 func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ...models.BankAccount) error {
-	span := sentry.StartSpan(ctx, "CreateBankAccounts")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "CreateBankAccounts"
 
 	span.Data = map[string]interface{}{
 		"accountId": r.AccountId(),
@@ -45,8 +48,9 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 }
 
 func (r *repositoryBase) GetBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.BankAccount, error) {
-	span := sentry.StartSpan(ctx, "GetBankAccountsByLinkId")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "GetBankAccountsByLinkId"
 
 	span.Data = map[string]interface{}{
 		"accountId": r.AccountId(),
@@ -69,8 +73,9 @@ func (r *repositoryBase) GetBankAccountsByLinkId(ctx context.Context, linkId uin
 }
 
 func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId uint64) (*models.BankAccount, error) {
-	span := sentry.StartSpan(ctx, "GetBankAccount")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "GetBankAccount"
 
 	span.Data = map[string]interface{}{
 		"accountId":     r.AccountId(),
@@ -97,8 +102,9 @@ func (r *repositoryBase) UpdateBankAccounts(ctx context.Context, accounts []mode
 		return nil
 	}
 
-	span := sentry.StartSpan(ctx, "UpdateBankAccounts")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "UpdateBankAccounts"
 
 	// Make sure each of the accounts has the correct accountId.
 	bankAccountIds := make([]uint64, len(accounts))

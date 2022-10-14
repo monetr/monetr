@@ -11,9 +11,9 @@ import (
 )
 
 func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Link, error) {
-	span := sentry.StartSpan(ctx, "Get Link")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-
+	span.Description = "GetLink"
 	span.Data = map[string]interface{}{
 		"linkId": linkId,
 	}
@@ -33,8 +33,9 @@ func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Li
 }
 
 func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
-	span := sentry.StartSpan(ctx, "GetLinks")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "GetLinks"
 
 	var result []models.Link
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -48,8 +49,9 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 }
 
 func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error) {
-	span := sentry.StartSpan(ctx, "GetLinks")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "GetNumberOfPlaidLinks"
 
 	count, err := r.txn.ModelContext(span.Context(), &models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
@@ -63,9 +65,9 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 }
 
 func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error) {
-	span := sentry.StartSpan(ctx, "GetLinkIsManual")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-
+	span.Description = "GetLinkIsManual"
 	span.Data = map[string]interface{}{
 		"linkId": linkId,
 	}
@@ -86,9 +88,9 @@ func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bo
 }
 
 func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error) {
-	span := sentry.StartSpan(ctx, "GetLinkIsManualByBankAccountId")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-
+	span.Description = "GetLinkIsManualByBankAccountId"
 	span.Data = map[string]interface{}{
 		"bankAccountId": bankAccountId,
 	}
@@ -111,8 +113,9 @@ func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, ban
 }
 
 func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) error {
-	span := sentry.StartSpan(ctx, "CreateLink")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "CreateLink"
 
 	userId := r.UserId()
 	now := time.Now().UTC()
@@ -126,8 +129,9 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) erro
 }
 
 func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) error {
-	span := sentry.StartSpan(ctx, "UpdateLink")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "UpdateLink"
 
 	link.AccountId = r.AccountId()
 	link.UpdatedAt = time.Now().UTC()

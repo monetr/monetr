@@ -131,6 +131,7 @@ func NewPullTransactionsJob(
 func (p *PullTransactionsJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
+	span.Description = PullTransactions
 
 	log := p.log.WithContext(span.Context())
 

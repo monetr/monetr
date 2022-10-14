@@ -18,20 +18,22 @@ func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *models.Plaid
 }
 
 func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
-	span := sentry.StartSpan(ctx, "UpdatePlaidLink")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-	if span.Data == nil {
-		span.Data = map[string]interface{}{}
-	}
-
+	span.Description = "UpdatePlaidLink"
 	span.SetTag("accountId", r.AccountIdStr())
-	_, err := r.txn.ModelContext(span.Context(), link).WherePK().Update(link)
+	span.SetTag("plaidItemId", link.ItemId)
+
+	_, err := r.txn.ModelContext(span.Context(), link).
+		WherePK().
+		Update(link)
 	return errors.Wrap(err, "failed to update Plaid link")
 }
 
 func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64) error {
-	span := sentry.StartSpan(ctx, "DeletePlaidLink")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "DeletePlaidLink"
 
 	_, err := r.txn.ModelContext(span.Context(), &models.Link{}).
 		Set(`"plaid_link_id" = NULL`).
@@ -66,9 +68,9 @@ type plaidRepositoryBase struct {
 }
 
 func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string) (*models.Link, error) {
-	span := sentry.StartSpan(ctx, "GetLinkByItemId")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
-
+	span.Description = "GetLinkByItemId"
 	span.Data = map[string]interface{}{
 		"itemId": itemId,
 	}
@@ -88,8 +90,9 @@ func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string
 }
 
 func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId, linkId uint64) (*models.Link, error) {
-	span := sentry.StartSpan(ctx, "GetLink")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "GetLink"
 
 	span.Data = map[string]interface{}{
 		"accountId": accountId,

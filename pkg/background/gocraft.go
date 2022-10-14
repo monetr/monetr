@@ -145,6 +145,7 @@ func (g *GoCraftWorkJobProcessor) RegisterJob(ctx context.Context, handler JobHa
 		// sentry hub into the context and create a new span using that context.
 		highContext := sentry.SetHubOnContext(context.Background(), sentry.CurrentHub().Clone())
 		span := sentry.StartSpan(highContext, "topic.process", sentry.TransactionName(handler.QueueName()))
+		span.Description = handler.QueueName()
 		jobLog := log.WithContext(span.Context())
 		hub := sentry.GetHubFromContext(span.Context())
 		hub.ConfigureScope(func(scope *sentry.Scope) {

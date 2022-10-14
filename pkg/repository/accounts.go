@@ -13,8 +13,9 @@ func (r *repositoryBase) GetAccount(ctx context.Context) (*models.Account, error
 		return r.account, nil
 	}
 
-	span := sentry.StartSpan(ctx, "GetAccount")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "GetAccount"
 
 	var account models.Account
 	err := r.txn.ModelContext(span.Context(), &account).
@@ -36,8 +37,9 @@ func (r *repositoryBase) GetAccount(ctx context.Context) (*models.Account, error
 // DeleteAccount removes all of the records from the database related to the current account. This action cannot be
 // undone. Any Plaid links should be removed BEFORE calling this function.
 func (r *repositoryBase) DeleteAccount(ctx context.Context) error {
-	span := sentry.StartSpan(ctx, "DeleteAccount")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "DeleteAccount"
 
 	dataTypes := []interface{}{
 		&models.Transaction{},
