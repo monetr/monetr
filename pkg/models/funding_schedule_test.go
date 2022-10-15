@@ -93,7 +93,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 		assert.Equal(t, expected, next, "should contribute next on sunday the 15th of may")
 	})
 
-	t.Run("dont fall on a weekend", func(t *testing.T) {
+	t.Run("dont fall on a weekend #1", func(t *testing.T) {
 		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
@@ -108,6 +108,30 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 		expected := time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC)
 		next := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
 		assert.Equal(t, expected, next, "should contribute next on the 13th, which is a friday")
+	})
+
+	t.Run("dont fall on a weekend #2", func(t *testing.T) {
+		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+
+		fundingSchedule := models.FundingSchedule{
+			Name:            "Bogus",
+			Rule:            rule,
+			ExcludeWeekends: true,
+			LastOccurrence:  nil,
+			NextOccurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
+		}
+
+		// 12:23:10 AM on September 31st 2022.
+		now := time.Date(2022, 9, 31, 0, 23, 10, 0, timezone)
+		expected := time.Date(2022, 10, 14, 0, 0, 0, 0, timezone)
+		next := fundingSchedule.GetNextContributionDateAfter(now, timezone)
+		assert.Equal(t, expected, next, "should contribute next on the 14th, which is a friday")
+
+		fundingSchedule.ExcludeWeekends = false
+		expected = time.Date(2022, 10, 15, 0, 0, 0, 0, timezone)
+		next = fundingSchedule.GetNextContributionDateAfter(now, timezone)
+		assert.Equal(t, expected, next, "should contribute next on the 15th when we are not excluding weekends")
 	})
 
 	// This test follows the scenario where a funding schedule was performed early (on friday the 13th) when it would

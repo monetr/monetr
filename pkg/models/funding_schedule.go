@@ -22,6 +22,7 @@ type FundingSchedule struct {
 	Rule              *Rule        `json:"rule" pg:"rule,notnull,type:'text'"`
 	ExcludeWeekends   bool         `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
 	WaitForDeposit    bool         `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
+	EstimatedDeposit  *int64       `json:"estimatedDeposit" pg:"estimated_deposit"`
 	LastOccurrence    *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
 	NextOccurrence    time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
 }
@@ -100,8 +101,9 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 }
 
 func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone *time.Location) bool {
-	span := sentry.StartSpan(ctx, "CalculateNextOccurrence")
+	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
+	span.Description = "CalculateNextOccurrence"
 
 	span.Data = map[string]interface{}{
 		"fundingScheduleId": f.FundingScheduleId,

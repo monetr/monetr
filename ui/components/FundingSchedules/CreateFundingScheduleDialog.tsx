@@ -1,7 +1,8 @@
-import React, { useRef } from 'react';
+import React, { Fragment, useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
+import { Science } from '@mui/icons-material';
 import { DatePicker } from '@mui/lab';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, TextField } from '@mui/material';
+import { Button, Collapse, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Switch, TextField } from '@mui/material';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import moment from 'moment';
 
@@ -15,6 +16,8 @@ interface CreateFundingScheduleForm {
   name: string;
   nextOccurrence: moment.Moment;
   recurrenceRule: Recurrence;
+  excludeWeekends: boolean;
+  estimatedDeposit: number | null;
 }
 
 function CreateFundingScheduleDialog(): JSX.Element {
@@ -22,6 +25,8 @@ function CreateFundingScheduleDialog(): JSX.Element {
   const selectedBankAccountId = useSelectedBankAccountId();
   const createFundingSchedule = useCreateFundingSchedule();
   const ref = useRef<HTMLDivElement>(null);
+
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   function validateInput(input: CreateFundingScheduleForm): FormikErrors<CreateFundingScheduleForm> {
     const errors: FormikErrors<CreateFundingScheduleForm> = {};
@@ -40,6 +45,8 @@ function CreateFundingScheduleDialog(): JSX.Element {
       description: values.recurrenceRule.name,
       nextOccurrence: values.nextOccurrence.startOf('day'),
       rule: values.recurrenceRule.ruleString(),
+      estimatedDeposit: values.estimatedDeposit && Math.ceil(values.estimatedDeposit * 100), // Convert to an integer.,
+      excludeWeekends: values.excludeWeekends,
     });
 
     return createFundingSchedule(newFundingSchedule)
@@ -51,6 +58,8 @@ function CreateFundingScheduleDialog(): JSX.Element {
     name: '',
     nextOccurrence: moment().add(1, 'day'),
     recurrenceRule: new Recurrence(),
+    excludeWeekends: false,
+    estimatedDeposit: null,
   };
 
   return (
@@ -123,6 +132,27 @@ function CreateFundingScheduleDialog(): JSX.Element {
                     date={ values.nextOccurrence }
                     onChange={ value => setFieldValue('recurrenceRule', value) }
                   />
+                </div>
+                <div className='col-span-12'>
+                  <FormControlLabel
+                    control={ <Switch value={ showAdvanced } onChange={ (_, checked) => setShowAdvanced(checked) } /> }
+                    label="Show Advanced Options"
+                  />
+                  <Collapse in={ showAdvanced }>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          value={ values.excludeWeekends }
+                          onChange={ (_, checked) => setFieldValue('excludeWeekends', checked) }
+                        />
+                      }
+                      label={
+                        <Fragment>
+                          <span>Exclude Weekends</span> <Science className="mb-1 fill-gray-600" />
+                        </Fragment>
+                      }
+                    />
+                  </Collapse>
                 </div>
               </div>
             </DialogContent>

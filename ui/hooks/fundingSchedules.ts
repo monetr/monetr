@@ -62,3 +62,32 @@ export function useCreateFundingSchedule(): (_spending: FundingSchedule) => Prom
     return mutate(spending);
   };
 }
+
+export function useUpdateFundingSchedule(): (_fundingSchedule: FundingSchedule) => Promise<FundingSchedule> {
+  const queryClient = useQueryClient();
+
+  async function updateFundingSchedule(fundingSchedule: FundingSchedule): Promise<FundingSchedule> {
+    return request()
+      .put<Partial<FundingSchedule>>(
+        `/bank_accounts/${ fundingSchedule.bankAccountId }/funding_schedules/${ fundingSchedule.fundingScheduleId }`,
+        fundingSchedule,
+      )
+      .then(result => new FundingSchedule(result?.data));
+  }
+
+  const mutation = useMutation(
+    updateFundingSchedule,
+    {
+      onSuccess: (updatedFundingSchedule: FundingSchedule) => Promise.all([
+        queryClient.setQueriesData(
+          `/bank_accounts/${ updatedFundingSchedule.bankAccountId }/funding_schedules`,
+          (previous: Array<Partial<FundingSchedule>>) => previous.map(item =>
+            item.fundingScheduleId === updatedFundingSchedule.fundingScheduleId ? updatedFundingSchedule : item
+          ),
+        ),
+      ]),
+    },
+  );
+
+  return mutation.mutateAsync;
+}

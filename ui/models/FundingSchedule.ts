@@ -10,6 +10,8 @@ export default class FundingSchedule {
   rule: string;
   lastOccurrence?: Moment;
   nextOccurrence: Moment;
+  excludeWeekends: boolean;
+  estimatedDeposit: number | null;
 
   constructor(data?: Partial<FundingSchedule>) {
     if (data) {

@@ -189,6 +189,11 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 		return
 	}
 
+	if request.EstimatedDeposit != nil && *request.EstimatedDeposit < 0 {
+		c.badRequest(ctx, "estimated deposit must be greater than or equal to zero")
+		return
+	}
+
 	// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
 	// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
 	// next occurrence.
