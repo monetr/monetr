@@ -98,7 +98,7 @@ export default function TransferDialog(props: Props): JSX.Element {
         from = SafeToSpend;
         break;
       default:
-        from = spending.get(props.initialFromSpendingId);
+        from = spending.find(item => item.spendingId === props.initialFromSpendingId);
     }
 
     switch (props.initialToSpendingId) {
@@ -108,7 +108,7 @@ export default function TransferDialog(props: Props): JSX.Element {
         to = SafeToSpend;
         break;
       default:
-        to = spending.get(props.initialToSpendingId);
+        to = spending.find(item => item.spendingId === props.initialToSpendingId);
     }
 
     // Then persist these spending objects to state to be used.
