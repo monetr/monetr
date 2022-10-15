@@ -54,6 +54,8 @@ extra:
       link: https://github.com/monetr
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/u/monetr
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/68wTCXrhuq
 extra_css:
   - stylesheets/extra.css
 nav:
