@@ -73,8 +73,8 @@ export default function ExpenseDetail(): JSX.Element {
 
   return (
     <Fragment>
-      <div className="border-l flex-initial">
-        <div className="w-full expenses-list">
+      <div className="border-l flex-initial w-5/12">
+        <div className="expenses-list w-full">
           <Dialogs />
           <div className="flex-auto w-full pl-5 pr-5 pt-5 expense-detail">
             <div className="grid grid-cols-3 grid-rows-4 grid-flow-col gap-1 w-auto">

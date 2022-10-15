@@ -31,13 +31,13 @@ export default function ExpenseItem(props: Props): JSX.Element {
           color="primary"
         />
       </ListItemIcon>
-      <div className="w-full grid grid-cols-6 grid-rows-4 grid-flow-col">
-        <div className="col-span-4">
+      <div className="w-full grid grid-cols-12 grid-rows-4 grid-flow-col">
+        <div className="col-span-7">
           <Typography>
             <b>{ expense.name }</b>
           </Typography>
         </div>
-        <div className="col-span-4">
+        <div className="col-span-7">
           <Typography
             variant="body1"
           >
@@ -45,22 +45,23 @@ export default function ExpenseItem(props: Props): JSX.Element {
               className="opacity-80">of</span> { expense.getTargetAmountString() }
           </Typography>
         </div>
-        <div className="col-span-4">
+        <div className="col-span-7">
           <Typography
             variant="body1"
+            className="truncate"
           >
             { expense.getNextOccurrenceString() }
             { expense.description && ` - ${ expense.description }` }
           </Typography>
         </div>
-        <div className="col-span-4">
+        <div className="col-span-7">
           <Typography
             variant="body1"
           >
             { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
           </Typography>
         </div>
-        <div className="flex justify-end p-5 align-middle col-span-1 row-span-4">
+        <div className="flex justify-end p-5 align-middle col-span-3 row-span-4">
           { expense.isBehind &&
             <Chip
               className="self-center"
@@ -69,7 +70,7 @@ export default function ExpenseItem(props: Props): JSX.Element {
             />
           }
         </div>
-        <div className="flex justify-end align-middle col-span-1 row-span-4">
+        <div className="flex justify-end align-middle col-span-3 row-span-4">
           <LinearProgress
             variant="determinate"
             color="primary"
