@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.11.21](https://github.com/monetr/monetr/compare/v0.11.20...v0.11.21) (2022-10-15)
+
+
+### Features
+
+* **funding:** Exposing Exclude Weekends for funding schedules. ([2b120c7](https://github.com/monetr/monetr/commit/2b120c7cb0d076dc342001ae43e657e6b56c9719))
+* **ui:** Add help link to the sidebar. ([25acb22](https://github.com/monetr/monetr/commit/25acb224c274f7ff8c5d474e7a5e2db8eab06516))
+
+
+### Bug Fixes
+
+* **ui:** Fixed sizing on the updated expenses view. ([c7ccaec](https://github.com/monetr/monetr/commit/c7ccaec109a0678e075d7d62c1ad6e4cb0856265))
+* **ui:** Fixed transfer dialog crash. ([#1134](https://github.com/monetr/monetr/issues/1134)) ([480af70](https://github.com/monetr/monetr/commit/480af700cc5a32b5503790396738b7e0dc09db7e)), closes [#1133](https://github.com/monetr/monetr/issues/1133)
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.14.0 ([#1128](https://github.com/monetr/monetr/issues/1128)) ([14b5ff9](https://github.com/monetr/monetr/commit/14b5ff9c64e5aa9d3ea04d8a1ad34d7b2280b712))
+* **api:** update module github.com/spf13/cobra to v1.6.0 ([#1129](https://github.com/monetr/monetr/issues/1129)) ([9d4e54a](https://github.com/monetr/monetr/commit/9d4e54a19774cbe461476ebfadc77982e5536456))
+* **api:** update module github.com/spf13/viper to v1.13.0 ([#1130](https://github.com/monetr/monetr/issues/1130)) ([48a3738](https://github.com/monetr/monetr/commit/48a37384fb5587dda2dd5e489c78225e6928bdbf))
+
+
+### Miscellaneous
+
+* **docs:** Added beta note :tada: ([052504b](https://github.com/monetr/monetr/commit/052504b9130f29aa4779f6da63aca389868c4e72))
+* **docs:** Adding discord link to doc site. ([6562756](https://github.com/monetr/monetr/commit/65627560171af89296b8b3fca34911365b1233bd))
+* **docs:** Adding documentation for adding funding schedules. ([e60306e](https://github.com/monetr/monetr/commit/e60306e828ce6c15dbf456982939ac89d3325511))
+* More sentry improvements to tracing. ([dac0b87](https://github.com/monetr/monetr/commit/dac0b874e4bb9292b49fd2a47a1b9cc418ba6792))
+* Update third party NOTICE ([96d344e](https://github.com/monetr/monetr/commit/96d344e6482fc65a5c5e18a2de2e8222672edd93))
+* Updated third party NOTICE ([40bb2bc](https://github.com/monetr/monetr/commit/40bb2bc3bbda4dd38cb6252da5369f537d3d6c67))
+
 ## [0.11.20](https://github.com/monetr/monetr/compare/v0.11.19...v0.11.20) (2022-10-14)
 
 
