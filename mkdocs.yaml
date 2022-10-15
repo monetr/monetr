@@ -63,10 +63,10 @@ nav:
       - Onboarding: help/onboarding.md
       - Funding Schedules:
           - help/funding_schedules/index.md
-          - Adding: help/funding_schedules/adding.md
+          - Adding A Funding Schedule: help/funding_schedules/adding.md
       - Bank Accounts:
           - help/bank_accounts/index.md
-          - Removing: help/bank_accounts/removing.md
+          - Removing Links: help/bank_accounts/removing.md
       - Self-Hosting:
           - help/self_hosting/index.md
           - Command Line: help/self_hosting/command_line.md

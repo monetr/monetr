@@ -11,6 +11,14 @@ get paid when creating a funding schedule and select "every other friday" for th
 keep track of the days you get paid going forward and will split up your budgets to take just a bit out of each paycheck
 so you're not covering a large expense all at once.
 
+## The Funding Schedules View
+
+The funding schedules view will show you all of the funding schedules for the currently selected bank account. As 
+well as the next day that funding schedule will be processed and contribute to your expenses and goals. It will also 
+show you the total dollar amount currently estimated to be contributed at that time.
+
+![Funding schedules view](assets/funding_view_with_contribution.png)
+
 ## Guides
 
 - [Create a funding schedule](./adding.md)
