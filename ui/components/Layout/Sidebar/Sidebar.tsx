@@ -9,8 +9,9 @@ import {
   Savings,
   Settings,
   ShoppingCart,
+  Help,
 } from '@mui/icons-material';
-import { Button, IconButton } from '@mui/material';
+import { Button, IconButton, Link } from '@mui/material';
 import classnames from 'classnames';
 
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
@@ -37,7 +38,7 @@ export default function Sidebar(props: SidebarProps): JSX.Element {
     }) }>
       <div className="w-full h-full flex flex-col text-white">
         <div className="flex">
-          <div className="basis-1/5 block lg:hidden flex justify-start items-center pl-2.5">
+          <div className="basis-1/5 lg:hidden flex justify-start items-center pl-2.5">
             <IconButton onClick={ props.onToggleSidebar } aria-label="menu" className="text-white">
               <Menu />
             </IconButton>
@@ -90,6 +91,17 @@ export default function Sidebar(props: SidebarProps): JSX.Element {
           >
             <Settings className="mr-2" />
             Settings
+          </Button>
+          <Button
+            onClick={ props.closeSidebar }
+            className="justify-start"
+            target="_blank"
+            href="https://monetr.app/help"
+            component={ Link }
+            color="inherit"
+          >
+            <Help className="mr-2" />
+            Help
           </Button>
           <Button
             onClick={ props.closeSidebar }
