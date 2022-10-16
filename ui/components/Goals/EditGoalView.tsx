@@ -36,7 +36,7 @@ export default function EditGoalView(props: Props): JSX.Element {
     const updatedSpending = new Spending({
       ...props.goal,
       name: values.name,
-      targetAmount: values.amount * 100,
+      targetAmount: Math.ceil(values.amount * 100),
       nextRecurrence: values.dueDate.startOf('day'),
       fundingScheduleId: values.fundingScheduleId,
     });
