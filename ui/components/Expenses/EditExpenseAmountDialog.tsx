@@ -47,7 +47,7 @@ export default function EditExpenseAmountDialog(props: Props): JSX.Element {
     setSubmitting(true);
     const updatedSpending = new Spending({
       ...props.spending,
-      targetAmount: values.amount * 100,
+      targetAmount: Math.ceil(values.amount * 100),
     });
 
     return updateSpending(updatedSpending)

@@ -142,7 +142,7 @@ export default function TransferDialog(props: Props): JSX.Element {
 
     const fromId = from === SafeToSpend ? null : from.spendingId;
     const toId = to === SafeToSpend ? null : to.spendingId;
-    const amount = Math.round(values.amount * 100);
+    const amount = Math.ceil(values.amount * 100);
 
     return transfer(fromId, toId, amount)
       .then(() => onClose());
