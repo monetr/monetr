@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.22](https://github.com/monetr/monetr/compare/v0.11.21...v0.11.22) (2022-10-16)
+
+
+### Bug Fixes
+
+* **ui:** Fix rounding issue when updating spending objects. ([#1136](https://github.com/monetr/monetr/issues/1136)) ([bcfa44e](https://github.com/monetr/monetr/commit/bcfa44ebafe6cae2960ef96997b2a6bdad301c1f)), closes [#1135](https://github.com/monetr/monetr/issues/1135)
+
 ## [0.11.21](https://github.com/monetr/monetr/compare/v0.11.20...v0.11.21) (2022-10-15)
 
 
