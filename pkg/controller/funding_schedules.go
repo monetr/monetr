@@ -199,6 +199,8 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 	// next occurrence.
 	if !request.NextOccurrence.Equal(existingFundingSchedule.NextOccurrence) && request.NextOccurrence.Before(time.Now()) {
 		request.NextOccurrence = existingFundingSchedule.NextOccurrence
+		// TODO If the next occurrence is updated, then that means the spending objects dependent on this funding schedule
+		// could need updating. We should kick something off here.
 	}
 
 	if err = repo.UpdateFundingSchedule(c.getContext(ctx), &request); err != nil {
