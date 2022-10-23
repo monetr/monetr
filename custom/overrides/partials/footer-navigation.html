@@ -4,6 +4,7 @@
 {% if page.meta and page.meta.hide %}
 {% set hidden = "hidden" if "footer" in page.meta.hide %}
 {% endif %}
+{% if not hidden %}
 <nav
   class="md-footer__inner md-grid"
   aria-label="{{ lang.t('footer.title') }}"
@@ -55,4 +56,5 @@
   </a>
   {% endif %}
 </nav>
+{% endif %}
 {% endif %}
