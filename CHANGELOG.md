@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.24](https://github.com/monetr/monetr/compare/v0.11.23...v0.11.24) (2022-10-23)
+
+
+### Features
+
+* **build:** Use submodules for simple-icons ([#1150](https://github.com/monetr/monetr/issues/1150)) ([45ba40e](https://github.com/monetr/monetr/commit/45ba40ed0b6ff5658df42149e945610cb50c6a4b))
+* **plaid:** Automatically update account names via Plaid. ([6e624ca](https://github.com/monetr/monetr/commit/6e624ca2fa2fa91b07baa36c070a969afb6e002c))
+* **ui:** Improve institution status indicator. ([#1148](https://github.com/monetr/monetr/issues/1148)) ([e88216d](https://github.com/monetr/monetr/commit/e88216d81ac248ebf781becc6eb6d284d602e4d5)), closes [#93](https://github.com/monetr/monetr/issues/93)
+
+
+### Miscellaneous
+
+* **docs:** Adding snippet about changes to help index. ([c87e5da](https://github.com/monetr/monetr/commit/c87e5da72ae9cb469b6f8105d5d290c0f498c3f7))
+* **plaid:** Getting ready to mark removed bank accounts. ([393d533](https://github.com/monetr/monetr/commit/393d5338926e7f4c9f62166e7223174477dc35e6))
+
 ## [0.11.23](https://github.com/monetr/monetr/compare/v0.11.22...v0.11.23) (2022-10-23)
 
 
