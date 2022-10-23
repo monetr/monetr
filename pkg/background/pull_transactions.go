@@ -389,6 +389,24 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 				bankLog = bankLog.WithField("availableBalanceChanged", false)
 			}
 
+			plaidName := bankAccount.PlaidName
+			if bankAccount.PlaidName != item.GetName() {
+				plaidName = item.GetName()
+				shouldUpdate = true
+				bankLog = bankLog.WithField("plaidNameChanged", true)
+			} else {
+				bankLog = bankLog.WithField("plaidNameChanged", false)
+			}
+
+			plaidOfficialName := bankAccount.PlaidOfficialName
+			if bankAccount.PlaidOfficialName != item.GetOfficialName() {
+				plaidOfficialName = item.GetOfficialName()
+				shouldUpdate = true
+				bankLog = bankLog.WithField("plaidOfficialNameChanged", true)
+			} else {
+				bankLog = bankLog.WithField("plaidOfficialNameChanged", false)
+			}
+
 			bankLog = bankLog.WithField("willUpdate", shouldUpdate)
 
 			if shouldUpdate {
@@ -399,11 +417,13 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 
 			if shouldUpdate {
 				updatedBankAccounts = append(updatedBankAccounts, models.BankAccount{
-					BankAccountId:    bankAccount.BankAccountId,
-					AccountId:        p.args.AccountId,
-					AvailableBalance: available,
-					CurrentBalance:   current,
-					LastUpdated:      now.UTC(),
+					BankAccountId:     bankAccount.BankAccountId,
+					AccountId:         p.args.AccountId,
+					AvailableBalance:  available,
+					CurrentBalance:    current,
+					PlaidName:         plaidName,
+					PlaidOfficialName: plaidOfficialName,
+					LastUpdated:       now.UTC(),
 				})
 			}
 		}
