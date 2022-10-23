@@ -212,6 +212,15 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 				break
 			}
 		}
+
+		// I want to build something in to show if a bank account has been removed. This should help achieve that in the
+		// near future. If the current `bankAccount` is not in the map, then that means it wasnt returned by Plaid and is
+		// missing. We can then mark these accounts in the future.
+		if _, ok := plaidIdsToBankIds[bankAccount.PlaidAccountId]; !ok {
+			crumbs.Warn(span.Context(), "Found bank account that is no longer present in Plaid", "plaid", map[string]interface{}{
+				"bankAccountId": bankAccount.BankAccountId,
+			})
+		}
 	}
 
 	if len(bankAccountIds) == 0 {
