@@ -301,7 +301,7 @@ else
 	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
 endif
 .EXPORT_ALL_VARIABLES: develop
-develop: $(NODE_MODULES)
+develop: $(NODE_MODULES) $(SIMPLE_ICONS)
 ifndef GITPOD_WORKSPACE_ID
 ifndef CODESPACE_NAME
 ifneq ($(LOCAL_DOMAIN),localhost)
