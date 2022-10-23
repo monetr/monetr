@@ -83,17 +83,8 @@ export default function InProgressGoalDetails(props: Props): JSX.Element {
 
       <div className="w-full pt-5">
         <div className="w-full">
-          <Card elevation={ 3 } className="flex items-center justify-center w-full h-32">
-            <Typography
-              className="opacity-50"
-            >
-              Image here or something (WIP)
-            </Typography>
-          </Card>
-        </div>
-        <div className="w-full pt-2.5">
           <Typography
-            variant="h6"
+            variant="h4"
           >
             { goal.name }
           </Typography>
@@ -103,19 +94,17 @@ export default function InProgressGoalDetails(props: Props): JSX.Element {
 
       <div className="w-full pt-5 pb-5">
         <div className="grid grid-cols-3 grid-rows-3">
-          <div className="flex justify-start h-5 col-span-2 row-span-1">
-            <Typography
-              variant="caption"
-            >
-              { createdDate }
-            </Typography>
-          </div>
-          <div className="flex justify-end col-span-1 row-span-1">
-            <Typography
-              variant="caption"
-            >
-              { dueDate }
-            </Typography>
+          <div className="flex col-span-3 row-span-1">
+            <div className="flex-auto">
+              <Typography variant="caption">
+                { createdDate }
+              </Typography>
+            </div>
+            <div className="flex-initial justify-end">
+              <Typography variant="caption">
+                { dueDate }
+              </Typography>
+            </div>
           </div>
           <div className="col-span-3 row-span-1">
             <LinearProgress
