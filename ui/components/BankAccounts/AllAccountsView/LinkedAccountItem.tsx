@@ -10,6 +10,8 @@ import UpdatePlaidAccountDialog from 'components/BankAccounts/AllAccountsView/Up
 import PlaidIcon from 'components/Plaid/PlaidIcon';
 import BankAccount from 'models/BankAccount';
 import Link, { LinkStatus } from 'models/Link';
+import PlaidLinkStatusIndicator from './PlaidLinkStatusIndicator';
+import LinkStatusIndicator from './LinkStatusIndicator';
 
 interface LinkedAccountItemProps {
   link: Link;
@@ -45,28 +47,11 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
   }
 
   function PlaidStatus(): JSX.Element {
-    switch (props.link.linkStatus) {
-      case LinkStatus.Setup:
-        return (
-          <Tooltip title="This link is working properly.">
-            <FiberManualRecord className="mr-2 text-green-500" />
-          </Tooltip>
-        );
-      case LinkStatus.Pending:
-        return (
-          <Tooltip title="This link has not been completely setup yet.">
-            <FiberManualRecord className="mr-2 text-yellow-500" />
-          </Tooltip>
-        );
-      case LinkStatus.Error:
-        return (
-          <Tooltip title={ props.link.getErrorMessage() }>
-            <FiberManualRecord className="mr-2 text-red-500" />
-          </Tooltip>
-        );
-      case LinkStatus.Unknown:
-        return <FiberManualRecord className="mr-2 text-gray-500" />;
+    if (props.link.getIsPlaid()) {
+      return <PlaidLinkStatusIndicator link={ props.link }/ >
     }
+
+    return <LinkStatusIndicator link={ props.link }/ >
   }
 
   function PlaidInfoMaybe(): JSX.Element {
@@ -77,13 +62,6 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
     return (
       <div className="flex items-center">
         <PlaidStatus />
-        <Typography className="items-center self-center pr-5">
-          <span
-            className="font-bold">
-            Last Successful Sync:
-          </span>
-          { props.link.lastSuccessfulUpdate ? props.link.lastSuccessfulUpdate.format('MMMM Do, h:mm a') : 'N/A' }
-        </Typography>
         <PlaidIcon className="w-16 flex-none mr-6" />
       </div>
     );

@@ -22,19 +22,31 @@ export default class Institution {
 }
 
 export class InstitutionStatus {
-  login: boolean;
-  transactions: boolean;
-  balance: boolean;
+  transactions_updates: PlaidProductStatus;
   plaidIncidents: InstitutionPlaidIncident[];
 
   constructor(data?: Partial<InstitutionStatus>) {
     if (data) {
       Object.assign(this, {
         ...data,
-        plaidIncidents: data?.plaidIncidents.map(item => new InstitutionPlaidIncident(item)),
+        plaidIncidents: (data?.plaidIncidents || []).map(item => new InstitutionPlaidIncident(item)),
       });
     }
   }
+}
+
+export type PlaidStatus = 'HEALTHY' | 'DEGRADED' | 'DOWN';
+export type RefreshInterval = 'DELAYED' | 'STOPPED';
+
+export class PlaidProductStatus {
+  status: PlaidStatus;
+  last_status_change: moment.Moment;
+  breakdown: {
+    success: number;
+    error_plaid: number;
+    error_institution: number;
+    refresh_interval: RefreshInterval | null;
+  };
 }
 
 export class InstitutionPlaidIncident {
