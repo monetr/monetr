@@ -54,7 +54,10 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
             </span>
           </div>
           <div className="flex-grow flex h-full flex-col items-end justify-center">
-            <span className="text-2xl font-normal text-gray-500">
+            <span className="text-xl font-normal text-gray-500">
+              Next Contribution
+            </span>
+            <span className="text-lg font-normal text-gray-500">
               { formatAmount(contribution) }
             </span>
           </div>
