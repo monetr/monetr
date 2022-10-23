@@ -415,7 +415,7 @@ MKDOCS_YAML=$(PWD)/mkdocs.yaml
 DOCS_FILES=$(shell find $(PWD)/docs -type f)
 DOCS_SITE=$(PWD)/build/site/index.html
 $(DOCS_SITE): $(MKDOCS_YAML) $(DOCS_FILES)
-	$(DOCKER) run -v $(PWD):/work -w /work --rm --entrypoint sh $(MKDOCS_IMAGE) /work/scripts/docs-build.sh
+	$(DOCKER) run -v $(PWD):/work -e SITE_URL=https://monetr.app/ -w /work --rm --entrypoint sh $(MKDOCS_IMAGE) /work/scripts/docs-build.sh
 
 mkdocs: $(DOCS_SITE)
 

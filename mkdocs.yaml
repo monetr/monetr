@@ -1,6 +1,6 @@
 site_name: monetr
 site_description: Building an open source financial planning application.
-site_url: http://monetr.local/documentation/
+site_url: !ENV [SITE_URL, 'http://monetr.local/documentation/']
 repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
 edit_uri: edit/main/docs/
@@ -59,16 +59,22 @@ extra:
 extra_css:
   - stylesheets/extra.css
 nav:
-  - Home: README.md
+  - Home:
+    - README.md
+    - Contact: contact.md
   - Help:
       - help/index.md
       - Onboarding: help/onboarding.md
       - Funding Schedules:
           - help/funding_schedules/index.md
           - Adding A Funding Schedule: help/funding_schedules/adding.md
+      - Links:
+          - help/links/index.md
       - Bank Accounts:
           - help/bank_accounts/index.md
           - Removing Links: help/bank_accounts/removing.md
+      - Expenses:
+          - help/expenses/index.md
       - Self-Hosting:
           - help/self_hosting/index.md
           - Command Line: help/self_hosting/command_line.md
