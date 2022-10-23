@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
 import { useQueryClient } from 'react-query';
-import { Button, Typography } from '@mui/material';
+import { Backdrop, Button, CircularProgress, Typography } from '@mui/material';
 import { Severity } from '@sentry/react';
 import * as Sentry from '@sentry/react';
 
@@ -15,7 +15,6 @@ import request from 'util/request';
 interface State {
   linkId: number | null;
   loading: boolean;
-  longPollAttempts: number;
 }
 
 const InitialSetupBilling = (): JSX.Element => {
@@ -67,21 +66,19 @@ export default function InitialPlaidSetup(): JSX.Element {
   });
   const queryClient = useQueryClient();
 
-  async function longPollSetup(linkId: number): Promise<void> {
+  async function longPollSetup(recur: number, linkId: number): Promise<void> {
     setState({
       loading: true,
-      longPollAttempts: state.longPollAttempts + 1,
     });
 
-    const { longPollAttempts } = state;
-    if (longPollAttempts > 6) {
+    if (recur > 6) {
       return Promise.resolve();
     }
 
     return void request().get(`/plaid/link/setup/wait/${ linkId }`)
       .catch(error => {
         if (error.response.status === 408) {
-          return longPollSetup(linkId);
+          return longPollSetup(recur + 1, linkId);
         }
 
         throw error;
@@ -132,11 +129,12 @@ export default function InitialPlaidSetup(): JSX.Element {
           loading: true,
         });
 
-        return longPollSetup(linkId)
-          .then(() => Promise.all([
-            queryClient.invalidateQueries('/links'),
-            queryClient.invalidateQueries('/bank_accounts'),
-          ]));
+        await longPollSetup(0, linkId);
+
+        setTimeout(() => {
+          queryClient.invalidateQueries('/links');
+          queryClient.invalidateQueries('/bank_accounts');
+        }, 5000);
       })
       .catch(error => {
         setState({
@@ -148,7 +146,30 @@ export default function InitialPlaidSetup(): JSX.Element {
   }
 
   const logout = useLogout();
-  console.log('testing things');
+
+  if (state.loading) {
+    return (
+      <Backdrop open>
+        <div className="flex justify-center w-full h-full max-h-full pb-5">
+          <div className="flex flex-col w-full h-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
+            <div className="flex items-center justify-center flex-grow">
+              <div>
+                <div className="flex justify-center w-full mb-5">
+                  <img src={ Logo } className="w-1/3" />
+                </div>
+                <div className="w-full flex justify-center items-center mb-5">
+                  <CircularProgress />
+                </div>
+                <p className="w-full text-center justify-center text-xl text-white">
+                  One moment, we are getting everything setup...
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Backdrop>
+    );
+  }
 
   return (
     <div className="flex justify-center w-full h-full max-h-full pb-5">

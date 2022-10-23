@@ -65,6 +65,11 @@ export default function EditFundingScheduleDialog(props: Props): JSX.Element {
               <DialogContent>
                 <DialogContentText>
                   Change the funding schedule you want to use to make contributions to this expense.
+                  <br/>
+                  <span className="text-sm">
+                    Note: The amount contributed to the expense cannot be changed here, it is calculated based on how much
+                    is needed vs how frequently it gets funded.
+                  </span>
                 </DialogContentText>
                 <div className="mt-2">
                   <FundingScheduleSelectionList
