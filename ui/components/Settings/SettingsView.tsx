@@ -49,22 +49,18 @@ export default function SettingsView(): JSX.Element {
           aria-label="scrollable force tabs example"
           className=""
         >
-          <Tab className="h-12 min-h-0" label="General" iconPosition="start" icon={ <Settings /> } />
           <Tab className="h-12 min-h-0" label="Security" iconPosition="start" icon={ <Security /> } />
           <Tab className="h-12 min-h-0" label="About" iconPosition="start" icon={ <Info /> } />
         </Tabs>
       </div>
-      <TabPanel value={ value } index={ 0 }>
-        <h1>General</h1>
-      </TabPanel>
-      <TabPanel value={ value } index={ 1 } className="w-full h-full">
+      <TabPanel value={ value } index={ 0 } className="w-full h-full">
         <div className="w-full 2xl:w-1/2">
           <div className="grid gap-16">
             <ChangePassword />
           </div>
         </div>
       </TabPanel>
-      <TabPanel value={ value } index={ 2 }>
+      <TabPanel value={ value } index={ 1 }>
         <AboutView />
       </TabPanel>
     </div>
