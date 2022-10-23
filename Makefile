@@ -288,9 +288,10 @@ clean: shutdown $(HOSTESS)
 	-rm -rf $(LOCAL_TMP)
 	-rm -rf $(SOURCE_MAP_DIR)
 	-rm -rf $(PWD)/generated
-	-rm -rf $(PWD)/build
-	-rm -rf $(PWD)/Notes.md
+	-rm -rf $(PWD)/coverage
+	-rm -rf $(BUILD_DIR)
 	-git clean -f -X $(STATIC_DIR)
+	-git submodule deinit -f pkg/icons/sources/simple-icons
 
 DOCKER=$(shell which docker)
 DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env
