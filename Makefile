@@ -186,7 +186,7 @@ license: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
 	$(LICENSED) status
 
 NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
-$(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(GOMODULES)
+$(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(GOMODULES) $(SIMPLE_ICONS)
 	$(LICENSED) notices
 
 NOTICE=$(GO_SRC_DIR)/build/NOTICE
@@ -195,11 +195,9 @@ $(NOTICE): $(NOTICES)
 
 notice: $(NOTICE)
 
-SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons
-SIMPLE_ICONS_VERSION=7.7.0
-SIMPLE_ICONS_REPO=https://github.com/simple-icons/simple-icons.git
+SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons/README.md
 $(SIMPLE_ICONS):
-	git clone --depth 1 -b $(SIMPLE_ICONS_VERSION) $(SIMPLE_ICONS_REPO) $(SIMPLE_ICONS)
+	git submodule update --init pkg/icons/sources/simple-icons
 
 GOOS ?= $(OS)
 GOARCH ?= amd64
@@ -293,7 +291,6 @@ clean: shutdown $(HOSTESS)
 	-rm -rf $(PWD)/build
 	-rm -rf $(PWD)/Notes.md
 	-git clean -f -X $(STATIC_DIR)
-	-rm -rf $(SIMPLE_ICONS)
 
 DOCKER=$(shell which docker)
 DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env

@@ -13,6 +13,7 @@ pkg/ui/static/*
 !pkg/ui/static/README.md
 !pkg/ui/static/NOTICE
 pkg/icons/sources/*
+!pkg/icons/sources/simple-icons
 !pkg/icons/sources/README.md
 tmp
 local
