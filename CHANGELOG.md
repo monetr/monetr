@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.11.23](https://github.com/monetr/monetr/compare/v0.11.22...v0.11.23) (2022-10-23)
+
+
+### Bug Fixes
+
+* **pubsub:** Fixed another race condition in pubsub test. ([#1139](https://github.com/monetr/monetr/issues/1139)) ([b017596](https://github.com/monetr/monetr/commit/b01759655f4695ae274aaa545affa884ad84b765)), closes [#1132](https://github.com/monetr/monetr/issues/1132)
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors digest to 7386a93 ([#1098](https://github.com/monetr/monetr/issues/1098)) ([c1775d4](https://github.com/monetr/monetr/commit/c1775d420fd0d2ffa210b87b850bac192183eb79))
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.19.0 ([#1102](https://github.com/monetr/monetr/issues/1102)) ([1495b63](https://github.com/monetr/monetr/commit/1495b63ec5ff263343635ce5ce84a657aa021d9a))
+* **ui:** update dependency @pmmmwh/react-refresh-webpack-plugin to v0.5.8 ([#1140](https://github.com/monetr/monetr/issues/1140)) ([7e90fbe](https://github.com/monetr/monetr/commit/7e90fbea2c32bb6cb25f80a6064ffa7e2cbd73a1))
+* **ui:** update dependency @svgr/webpack to v6.5.0 ([#1104](https://github.com/monetr/monetr/issues/1104)) ([2143cdc](https://github.com/monetr/monetr/commit/2143cdc704afcb76cf1fd768592e91e3211ab617))
+* **ui:** update dependency @types/ramda to v0.28.18 ([#1141](https://github.com/monetr/monetr/issues/1141)) ([1c42385](https://github.com/monetr/monetr/commit/1c423852d65ba3665ac6a323fceb4c8a64d3742a))
+* **ui:** update dependency immer to v9.0.15 ([#953](https://github.com/monetr/monetr/issues/953)) ([85cdc95](https://github.com/monetr/monetr/commit/85cdc95fd81babf8fc0663023fc6f823aa45a370))
+* **ui:** update dependency postcss to v8.4.18 ([#1099](https://github.com/monetr/monetr/issues/1099)) ([eb97de2](https://github.com/monetr/monetr/commit/eb97de24d41d221e4ba85c6917bde756d8ff2364))
+* **ui:** update dependency postcss-preset-env to v7.8.2 ([#1108](https://github.com/monetr/monetr/issues/1108)) ([cb11587](https://github.com/monetr/monetr/commit/cb11587341d872f6e506978cde3eaa6388213617))
+* **ui:** update dependency react-infinite-scroll-hook to v4.0.4 ([#1142](https://github.com/monetr/monetr/issues/1142)) ([a6bfbd6](https://github.com/monetr/monetr/commit/a6bfbd6deaaa71259bd887e3821ffdac8314df01))
+* **ui:** update dependency react-select to v5.5.4 ([#1144](https://github.com/monetr/monetr/issues/1144)) ([9640061](https://github.com/monetr/monetr/commit/9640061a1179dba533c31ac7e1dd688b47d9a8a8))
+* **ui:** update dependency resolve to v1.22.1 ([#955](https://github.com/monetr/monetr/issues/955)) ([2cc2af6](https://github.com/monetr/monetr/commit/2cc2af6a9fc55a0ef6aae70ea6d12c88299415c7))
+* **ui:** update dependency tailwindcss to v3.2.1 ([#1145](https://github.com/monetr/monetr/issues/1145)) ([58820f6](https://github.com/monetr/monetr/commit/58820f6eaf6c6d0c7a4acfa5a995965ade56d31c))
+* **ui:** update dependency zustand to v4.1.2 ([#1143](https://github.com/monetr/monetr/issues/1143)) ([bf5e296](https://github.com/monetr/monetr/commit/bf5e296db7c194edb356a9055fc63a7099bce910))
+
+
+### Miscellaneous
+
+* Adding TODO for updating funding schedules. ([b602804](https://github.com/monetr/monetr/commit/b602804821e6c9fb709110cf37225c263527bc06))
+* Updating NOTICE ([b0bb7a7](https://github.com/monetr/monetr/commit/b0bb7a75191401215dfa412af716fad2b5930f9e))
+* Updating third party NOTICE ([8c175e2](https://github.com/monetr/monetr/commit/8c175e2d305a12083322e36802c3a0a069b8c097))
+
 ## [0.11.22](https://github.com/monetr/monetr/compare/v0.11.21...v0.11.22) (2022-10-16)
 
 
