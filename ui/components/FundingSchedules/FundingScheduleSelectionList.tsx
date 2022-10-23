@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Checkbox, Divider, List, ListItem, ListItemIcon, Typography } from '@mui/material';
 
-import NewFundingScheduleDialog from 'components/FundingSchedules/NewFundingScheduleDialog';
+import { showCreateFundingScheduleDialog } from 'components/FundingSchedules/CreateFundingScheduleDialog';
 import { useFundingSchedules } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 
@@ -12,14 +12,13 @@ interface Props {
 }
 
 export default function FundingScheduleSelectionList(props: Props): JSX.Element {
-  const [newFundingScheduleDialogOpen, setNewFundingScheduleDialogOpen] = useState<boolean>(false);
   const [selectedFundingSchedule, setSelectedFundingSchedule] = useState<FundingSchedule | null>(null);
 
   const fundingSchedules = useFundingSchedules();
 
   useEffect(() => {
     if (props.initialValue) setSelectedFundingSchedule(fundingSchedules.get(props.initialValue));
-  }, [setSelectedFundingSchedule, props.initialValue])
+  }, [setSelectedFundingSchedule, props.initialValue, fundingSchedules]);
 
   function selectItem(fundingScheduleId: number) {
     const fundingSchedule = fundingSchedules.get(fundingScheduleId);
@@ -29,15 +28,11 @@ export default function FundingScheduleSelectionList(props: Props): JSX.Element 
 
   return (
     <div className="w-full funding-schedule-selection-list">
-      <NewFundingScheduleDialog
-        onClose={ () => setNewFundingScheduleDialogOpen(false) }
-        isOpen={ newFundingScheduleDialogOpen }
-      />
       <Button
         className="w-full mb-2.5"
         variant="outlined"
         color="primary"
-        onClick={ () => setNewFundingScheduleDialogOpen(true) }
+        onClick={ showCreateFundingScheduleDialog }
       >
         New Funding Schedule
       </Button>
