@@ -86,7 +86,7 @@ api:
     webhooksEnabled: true
     webhooksDomain: my.monetr.app
     oauthDomain: my.monetr.app
-    maxNumberOfLinks: 3
+    maxNumberOfLinks: 2
   cors:
     allowedOrigins:
       - "https://my.monetr.app"
@@ -117,7 +117,7 @@ api:
     billingEnabled: true
     taxesEnabled: true
     initialPlan:
-      freeTrialDays: 0
+      freeTrialDays: 30
       stripePriceId: price_1LkF9dI4uGGnwpgwvGIFcfZm
       features:
         - ManualBudgeting
