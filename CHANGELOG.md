@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.11.25](https://github.com/monetr/monetr/compare/v0.11.24...v0.11.25) (2022-10-28)
+
+
+### Features
+
+* **docs:** Big documentation improvements, links + expenses. ([3c7e67d](https://github.com/monetr/monetr/commit/3c7e67de0dee5a83fc86dd358a838590354ab2ea))
+
+
+### Bug Fixes
+
+* **dev:** Fix local development bug caused by submodules ([ae93bc5](https://github.com/monetr/monetr/commit/ae93bc5961922f767f85ddb8c0dc1164760aa86a))
+* **ui:** Improved onboarding from Plaid. Other minor tweaks. ([19c63cc](https://github.com/monetr/monetr/commit/19c63cc87c4540d59f21b048932c7ceececcd368))
+* **ui:** Improvements to goals UI. ([abfd4e8](https://github.com/monetr/monetr/commit/abfd4e8e3f198fcae9a4865046dd2efe39109074))
+* **ui:** Remove usage of deprecated dialog. ([27a07ae](https://github.com/monetr/monetr/commit/27a07ae93d540e052873abec2bf52d537602e724))
+
+
+### Miscellaneous
+
+* **app:** Enable 30 day free trial period, reduce max links. ([d6a0ce1](https://github.com/monetr/monetr/commit/d6a0ce1c24f33384835a0245ad1431ee0e943157))
+* Improve `make clean` ([d2f4fce](https://github.com/monetr/monetr/commit/d2f4fce2131807ce18bbcfbf8ca8dced54d8af53))
+* Remove unused settings tab. ([3aa23ab](https://github.com/monetr/monetr/commit/3aa23abdb3cf1e8e8040616c0509d8eaf3796c3a))
+* **ui:** Tweak copyright footer. ([fec5c07](https://github.com/monetr/monetr/commit/fec5c0749c8de8c1f053e017108b68f66a6aca7f))
+* **ui:** Tweaked Funding Schedule UI. ([fa6de17](https://github.com/monetr/monetr/commit/fa6de1709131a33f706bb7a39a201121123f82d2))
+
 ## [0.11.24](https://github.com/monetr/monetr/compare/v0.11.23...v0.11.24) (2022-10-23)
 
 
