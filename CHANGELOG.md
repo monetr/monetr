@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.11.26](https://github.com/monetr/monetr/compare/v0.11.25...v0.11.26) (2022-10-29)
+
+
+### Bug Fixes
+
+* **billing:** Fixed trial period not being applied to checkout. ([7831cb9](https://github.com/monetr/monetr/commit/7831cb9eb94b914b756e325b60db79216861bfbc)), closes [#1164](https://github.com/monetr/monetr/issues/1164)
+
+
+### Miscellaneous
+
+* **docs:** Adding docs on creating a manual link. ([28ccd05](https://github.com/monetr/monetr/commit/28ccd056e6365e80e932a922f53cf8b24ff1c4b2))
+* **staging:** Disabling billing in staging. ([7e3559b](https://github.com/monetr/monetr/commit/7e3559b7c6cf120781811b141bb618af40236b02))
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors digest to 014b910 ([#1162](https://github.com/monetr/monetr/issues/1162)) ([78a2363](https://github.com/monetr/monetr/commit/78a2363e3805ad5c6ef9a1db11ff9763b3da43df))
+
 ## [0.11.25](https://github.com/monetr/monetr/compare/v0.11.24...v0.11.25) (2022-10-28)
 
 
