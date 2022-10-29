@@ -12,6 +12,7 @@ type SpendingEvent struct {
 	Amount            int64
 	RollingAllocation int64
 	Funding           []FundingEvent
+	SpendingId        uint64
 }
 
 var (

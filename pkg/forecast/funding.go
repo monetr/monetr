@@ -9,6 +9,8 @@ import (
 
 type FundingEvent struct {
 	Date              time.Time
+	OriginalDate      time.Time
+	WeekendAvoided    bool
 	FundingScheduleId uint64
 }
 
@@ -38,19 +40,21 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone
 	input = input.In(timezone)
 	rule := f.fundingSchedule.Rule.RRule
 	var nextContributionDate time.Time
-	if !f.fundingSchedule.NextOccurrence.IsZero() {
-		nextContributionDate = util.MidnightInLocal(f.fundingSchedule.NextOccurrence, timezone)
-	} else {
+	if f.fundingSchedule.NextOccurrence.IsZero() {
 		// Hack to determine the previous contribution date before we figure out the next one.
 		rule.DTStart(input.AddDate(-1, 0, 0))
 		nextContributionDate = util.MidnightInLocal(rule.Before(input, false), timezone)
+	} else {
+		nextContributionDate = util.MidnightInLocal(f.fundingSchedule.NextOccurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.
 		// This might be goofy if we want to test stuff in the distant past?
 		return FundingEvent{
 			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
+			WeekendAvoided:    false,
 			Date:              nextContributionDate,
+			OriginalDate:      nextContributionDate,
 		}
 	}
 
@@ -65,6 +69,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone
 	// funding, we need to make sure we are still incrementing relative to the _real_ contribution dates. Not the
 	// adjusted ones.
 	actualNextContributionDate := nextContributionDate
+	weekendAvoided := false
 	for !nextContributionDate.After(input) {
 		// If the next contribution date is not after now, then increment it.
 		nextContributionDate = nextContributionRule.After(actualNextContributionDate, false)
@@ -78,9 +83,13 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone
 			case time.Sunday:
 				// If it lands on a sunday then subtract 2 days to put the contribution date on a Friday.
 				nextContributionDate = nextContributionDate.AddDate(0, 0, -2)
+				weekendAvoided = true
 			case time.Saturday:
 				// If it lands on a sunday then subtract 1 day to put the contribution date on a Friday.
 				nextContributionDate = nextContributionDate.AddDate(0, 0, -1)
+				weekendAvoided = true
+			default:
+				weekendAvoided = false
 			}
 		}
 
@@ -89,7 +98,9 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone
 
 	return FundingEvent{
 		FundingScheduleId: f.fundingSchedule.FundingScheduleId,
+		WeekendAvoided:    weekendAvoided,
 		Date:              nextContributionDate,
+		OriginalDate:      actualNextContributionDate,
 	}
 }
 

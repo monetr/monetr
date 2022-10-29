@@ -143,8 +143,16 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		expected := []FundingEvent{
-			{Date: time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)},
-			{Date: time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)},
+			{
+				Date:           time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
+			{
+				Date:           time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
 		}
 		fundingSchedule := models.FundingSchedule{
 			Rule:            rule,
@@ -161,10 +169,26 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		expected := []FundingEvent{
-			{Date: time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)},
-			{Date: time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)},
-			{Date: time.Date(2022, 10, 15, 0, 0, 0, 0, timezone)},
-			{Date: time.Date(2022, 10, 31, 0, 0, 0, 0, timezone)},
+			{
+				Date:           time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
+			{
+				Date:           time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
+			{
+				Date:           time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
+			{
+				Date:           time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
 		}
 		fundingSchedule := models.FundingSchedule{
 			Rule:            rule,
@@ -181,10 +205,26 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		expected := []FundingEvent{
-			{Date: time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)},
-			{Date: time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)},
-			{Date: time.Date(2022, 10, 14, 0, 0, 0, 0, timezone)}, // Exclude weekend
-			{Date: time.Date(2022, 10, 31, 0, 0, 0, 0, timezone)},
+			{
+				Date:           time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
+			{
+				Date:           time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
+			{
+				Date:           time.Date(2022, 10, 14, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+				WeekendAvoided: true, // Exclude weekend, moved back one day.
+			},
+			{
+				Date:           time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+				OriginalDate:   time.Date(2022, 10, 31, 0, 0, 0, 0, timezone),
+				WeekendAvoided: false,
+			},
 		}
 		fundingSchedule := models.FundingSchedule{
 			Rule:            rule,
