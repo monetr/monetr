@@ -37,7 +37,7 @@ func NewFundingScheduleFundingInstructions(fundingSchedule models.FundingSchedul
 }
 
 func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone *time.Location) FundingEvent {
-	input = input.In(timezone)
+	input = util.MidnightInLocal(input, timezone)
 	rule := f.fundingSchedule.Rule.RRule
 	var nextContributionDate time.Time
 	if f.fundingSchedule.NextOccurrence.IsZero() {
@@ -45,6 +45,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone
 		rule.DTStart(input.AddDate(-1, 0, 0))
 		nextContributionDate = util.MidnightInLocal(rule.Before(input, false), timezone)
 	} else {
+		rule.DTStart(f.fundingSchedule.NextOccurrence)
 		nextContributionDate = util.MidnightInLocal(f.fundingSchedule.NextOccurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {
@@ -131,6 +132,7 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(start, end time.Time, time
 		events[i] = FundingEvent{
 			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
 			Date:              item,
+			OriginalDate:      item,
 		}
 	}
 	return events

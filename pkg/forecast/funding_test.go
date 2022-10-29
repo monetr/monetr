@@ -292,3 +292,4 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		assert.EqualValues(t, 12, count, "should have 12 contributions")
 	})
 }
+
