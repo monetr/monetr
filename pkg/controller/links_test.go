@@ -15,14 +15,15 @@ func TestPostLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
+		createdAndUpdatedBogus := time.Now().Add(-1 * time.Hour)
 		link := models.Link{
 			LinkId:                math.MaxInt64,        // Set it to something so we can verify its different in the result.
 			LinkType:              models.PlaidLinkType, // This should be changed to manual in the response.
 			InstitutionName:       "U.S. Bank",
 			CustomInstitutionName: "US Bank",
 			PlaidInstitutionId:    myownsanity.StringP("ins_123"),
-			CreatedAt:             time.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
-			UpdatedAt:             time.Now().Add(1 * time.Hour),
+			CreatedAt:             createdAndUpdatedBogus, // Set these to something to make sure it gets overwritten.
+			UpdatedAt:             createdAndUpdatedBogus,
 		}
 
 		response := e.POST("/api/links").
@@ -36,6 +37,36 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
 		response.JSON().Path("$.plaidInstitutionId").Null()
+	})
+
+	t.Run("missing name", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+		link := models.Link{
+			InstitutionName:       "",
+			CustomInstitutionName: "",
+		}
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(link).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").Equal("link must have an institution name")
+	})
+
+	t.Run("malformed json", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithBytes([]byte("I'm not json")).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").Equal("invalid JSON body")
 	})
 
 	t.Run("unauthenticated", func(t *testing.T) {

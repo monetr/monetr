@@ -89,7 +89,7 @@ func (c *Controller) postLinks(ctx iris.Context) {
 		CustomInstitutionName string `json:"customInstitutionName"`
 	}
 	if err := ctx.ReadJSON(&request); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		c.invalidJson(ctx)
 		return
 	}
 
