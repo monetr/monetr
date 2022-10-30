@@ -292,6 +292,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		}, fundingInstructions)
 
 		events := spendingInstructions.GetSpendingEventsBetween(now, now.AddDate(1, 0, 0), timezone)
-		assert.Len(t, events, 36, "should have 36 events")
+		// Should have 36 events, 12 spending events and 24 funding events.
+		assert.Len(t, events, 12 + 24, "should have 36 events")
 	})
 }
