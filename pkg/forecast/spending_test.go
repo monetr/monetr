@@ -1,6 +1,7 @@
 package forecast
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -28,7 +29,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			RecurrenceRule: spendingRule,
 		}, fundingInstructions)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(3, now, timezone)
+		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -89,7 +90,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			RecurrenceRule: spendingRule,
 		}, fundingInstructions)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(7, now, timezone)
+		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -189,7 +190,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			RecurrenceRule: spendingRule,
 		}, fundingInstructions)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(7, now, timezone)
+		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -291,7 +292,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			RecurrenceRule: spendingRule,
 		}, fundingInstructions)
 
-		events := spendingInstructions.GetSpendingEventsBetween(now, now.AddDate(1, 0, 0), timezone)
+		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
 		// Should have 36 events, 12 spending events and 24 funding events.
 		assert.Len(t, events, 12 + 24, "should have 36 events")
 	})

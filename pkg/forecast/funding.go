@@ -1,8 +1,10 @@
 package forecast
 
 import (
+	"context"
 	"time"
 
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
 )
@@ -20,10 +22,10 @@ var (
 )
 
 type FundingInstructions interface {
-	GetNFundingEventsAfter(n int, input time.Time, timezone *time.Location) []FundingEvent
-	GetNumberOfFundingEventsBetween(start, end time.Time, timezone *time.Location) int64
-	GetNextFundingEventAfter(input time.Time, timezone *time.Location) FundingEvent
-	GetFundingEventsBetween(start, end time.Time, timezone *time.Location) []FundingEvent
+	GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent
+	GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64
+	GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent
+	GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent
 }
 
 type fundingScheduleBase struct {
@@ -36,7 +38,14 @@ func NewFundingScheduleFundingInstructions(fundingSchedule models.FundingSchedul
 	}
 }
 
-func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone *time.Location) FundingEvent {
+func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"input":           input,
+		"timezone":        timezone.String(),
+		"excludeWeekends": f.fundingSchedule.ExcludeWeekends,
+	}
 	input = util.MidnightInLocal(input, timezone)
 	rule := f.fundingSchedule.Rule.RRule
 	var nextContributionDate time.Time
@@ -105,21 +114,35 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(input time.Time, timezone
 	}
 }
 
-func (f *fundingScheduleBase) GetNFundingEventsAfter(n int, input time.Time, timezone *time.Location) []FundingEvent {
+func (f *fundingScheduleBase) GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"n":        n,
+		"input":    input,
+		"timezone": timezone.String(),
+	}
 	events := make([]FundingEvent, n)
 	for i := 0; i < n; i++ {
 		if i == 0 {
-			events[i] = f.GetNextFundingEventAfter(input, timezone)
+			events[i] = f.GetNextFundingEventAfter(span.Context(), input, timezone)
 			continue
 		}
 
-		events[i] = f.GetNextFundingEventAfter(events[i-1].Date, timezone)
+		events[i] = f.GetNextFundingEventAfter(span.Context(), events[i-1].Date, timezone)
 	}
 
 	return events
 }
 
-func (f *fundingScheduleBase) GetFundingEventsBetween(start, end time.Time, timezone *time.Location) []FundingEvent {
+func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
+	}
 	rule := f.fundingSchedule.Rule.RRule
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
@@ -139,8 +162,15 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(start, end time.Time, time
 	return events
 }
 
-func (f *fundingScheduleBase) GetNumberOfFundingEventsBetween(start, end time.Time, timezone *time.Location) int64 {
-	return int64(len(f.GetFundingEventsBetween(start, end, timezone)))
+func (f *fundingScheduleBase) GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
+	}
+	return int64(len(f.GetFundingEventsBetween(span.Context(), start, end, timezone)))
 }
 
 // multipleFundingInstructions isn't in use yet. It's kind of a proof of concept that with the funding instruction
@@ -159,43 +189,70 @@ func NewMultipleFundingInstructions(instructions []FundingInstructions) FundingI
 	}
 }
 
-func (m *multipleFundingInstructions) GetNFundingEventsAfter(n int, input time.Time, timezone *time.Location) []FundingEvent {
+func (m *multipleFundingInstructions) GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"n":        n,
+		"input":    input,
+		"timezone": timezone.String(),
+	}
 	events := make([]FundingEvent, n)
 	for i := 0; i < n; i++ {
 		if i == 0 {
-			events[i] = m.GetNextFundingEventAfter(input, timezone)
+			events[i] = m.GetNextFundingEventAfter(span.Context(), input, timezone)
 			continue
 		}
 
-		events[i] = m.GetNextFundingEventAfter(events[i-1].Date, timezone)
+		events[i] = m.GetNextFundingEventAfter(span.Context(), events[i-1].Date, timezone)
 	}
 
 	return events
 }
 
-func (m *multipleFundingInstructions) GetFundingEventsBetween(start, end time.Time, timezone *time.Location) []FundingEvent {
+func (m *multipleFundingInstructions) GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
+	}
 	result := make([]FundingEvent, 0)
 	for _, instruction := range m.instructions {
-		result = append(result, instruction.GetFundingEventsBetween(start, end, timezone)...)
+		result = append(result, instruction.GetFundingEventsBetween(span.Context(), start, end, timezone)...)
 	}
 
 	return result
 }
 
-func (m *multipleFundingInstructions) GetNumberOfFundingEventsBetween(start, end time.Time, timezone *time.Location) int64 {
-	return int64(len(m.GetFundingEventsBetween(start, end, timezone)))
+func (m *multipleFundingInstructions) GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
+	}
+	return int64(len(m.GetFundingEventsBetween(span.Context(), start, end, timezone)))
 }
 
-func (m *multipleFundingInstructions) GetNextFundingEventAfter(input time.Time, timezone *time.Location) FundingEvent {
+func (m *multipleFundingInstructions) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"input":      input,
+		"timezone": timezone.String(),
+	}
 	var earliest FundingEvent
 	for _, instruction := range m.instructions {
 		if earliest.Date.IsZero() {
-			earliest = instruction.GetNextFundingEventAfter(input, timezone)
+			earliest = instruction.GetNextFundingEventAfter(span.Context(), input, timezone)
 			continue
 		}
 
 		// If one of our instructions happens before the earliest one we've seen, then use that one instead.
-		if next := instruction.GetNextFundingEventAfter(input, timezone); next.Date.Before(earliest.Date) {
+		if next := instruction.GetNextFundingEventAfter(span.Context(), input, timezone); next.Date.Before(earliest.Date) {
 			earliest = next
 		}
 	}

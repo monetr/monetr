@@ -1,9 +1,11 @@
 package forecast
 
 import (
+	"context"
 	"time"
 
 	"github.com/ahmetb/go-linq/v3"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 )
 
@@ -24,8 +26,8 @@ type Forecast struct {
 }
 
 type Forecaster interface {
-	GetForecast(start, end time.Time, timezone *time.Location) Forecast
-	GetAverageContribution(start, end time.Time, timezone *time.Location) int64
+	GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast
+	GetAverageContribution(ctx context.Context, start, end time.Time, timezone *time.Location) int64
 }
 
 type forecasterBase struct {
@@ -55,7 +57,14 @@ func NewForecaster(spending []models.Spending, funding []models.FundingSchedule)
 	return forecaster
 }
 
-func (f *forecasterBase) GetForecast(start, end time.Time, timezone *time.Location) Forecast {
+func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":           start,
+		"end":             end,
+		"timezone":        timezone.String(),
+	}
 	forecast := Forecast{
 		StartingBalance: f.currentBalance,
 		EndingBalance:   0,
@@ -67,7 +76,7 @@ func (f *forecasterBase) GetForecast(start, end time.Time, timezone *time.Locati
 			return item.Value.(SpendingInstructions)
 		}).
 		SelectManyT(func(spending SpendingInstructions) linq.Query {
-			return linq.From(spending.GetSpendingEventsBetween(start, end, timezone))
+			return linq.From(spending.GetSpendingEventsBetween(span.Context(), start, end, timezone))
 		}).
 		GroupByT(
 			func(item SpendingEvent) int64 {
@@ -138,8 +147,15 @@ func (f *forecasterBase) GetForecast(start, end time.Time, timezone *time.Locati
 	return forecast
 }
 
-func (f *forecasterBase) GetAverageContribution(start, end time.Time, timezone *time.Location) int64 {
-	forecast := f.GetForecast(start, end, timezone)
+func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":           start,
+		"end":             end,
+		"timezone":        timezone.String(),
+	}
+	forecast := f.GetForecast(span.Context(), start, end, timezone)
 	var contributions, count int64
 	for _, event := range forecast.Events {
 		if event.Contribution == 0 {

@@ -82,7 +82,7 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 	end := start.AddDate(1, 0, 0)
 	timezone := c.mustGetTimezone(ctx)
 	ctx.JSON(map[string]interface{}{
-		"beforeAverageContribution": beforeForecast.GetAverageContribution(start, end, timezone),
-		"afterAverageContribution":  afterForecast.GetAverageContribution(start, end, timezone),
+		"beforeAverageContribution": beforeForecast.GetAverageContribution(c.getContext(ctx), start, end, timezone),
+		"afterAverageContribution":  afterForecast.GetAverageContribution(c.getContext(ctx), start, end, timezone),
 	})
 }

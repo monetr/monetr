@@ -1,8 +1,10 @@
 package forecast
 
 import (
+	"context"
 	"time"
 
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
@@ -23,8 +25,8 @@ var (
 )
 
 type SpendingInstructions interface {
-	GetNextNSpendingEventsAfter(n int, input time.Time, timezone *time.Location) []SpendingEvent
-	GetSpendingEventsBetween(start, end time.Time, timezone *time.Location) []SpendingEvent
+	GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []SpendingEvent
+	GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent
 }
 
 type spendingInstructionBase struct {
@@ -39,15 +41,22 @@ func NewSpendingInstructions(spending models.Spending, fundingInstructions Fundi
 	}
 }
 
-func (s spendingInstructionBase) GetSpendingEventsBetween(start, end time.Time, timezone *time.Location) []SpendingEvent {
+func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
+	}
 	events := make([]SpendingEvent, 0)
 
 	for i := 0; ; i++ {
 		var event *SpendingEvent
 		if i == 0 {
-			event = s.getNextSpendingEventAfter(start, timezone, s.spending.CurrentAmount)
+			event = s.getNextSpendingEventAfter(span.Context(), start, timezone, s.spending.CurrentAmount)
 		} else {
-			event = s.getNextSpendingEventAfter(events[i-1].Date, timezone, events[i-1].RollingAllocation)
+			event = s.getNextSpendingEventAfter(span.Context(), events[i-1].Date, timezone, events[i-1].RollingAllocation)
 		}
 
 		if event == nil {
@@ -64,14 +73,21 @@ func (s spendingInstructionBase) GetSpendingEventsBetween(start, end time.Time, 
 	return events
 }
 
-func (s spendingInstructionBase) GetNextNSpendingEventsAfter(n int, input time.Time, timezone *time.Location) []SpendingEvent {
+func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []SpendingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"n":        n,
+		"input":    input,
+		"timezone": timezone.String(),
+	}
 	events := make([]SpendingEvent, 0, n)
 	for i := 0; i < n; i++ {
 		var event *SpendingEvent
 		if i == 0 {
-			event = s.getNextSpendingEventAfter(input, timezone, s.spending.CurrentAmount)
+			event = s.getNextSpendingEventAfter(span.Context(), input, timezone, s.spending.CurrentAmount)
 		} else {
-			event = s.getNextSpendingEventAfter(events[i-1].Date, timezone, events[i-1].RollingAllocation)
+			event = s.getNextSpendingEventAfter(span.Context(), events[i-1].Date, timezone, events[i-1].RollingAllocation)
 		}
 
 		if event == nil {
@@ -84,7 +100,15 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(n int, input time.T
 	return events
 }
 
-func (s *spendingInstructionBase) GetRecurrencesBetween(start, end time.Time, timezone *time.Location) []time.Time {
+func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []time.Time {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
+	}
+
 	switch s.spending.SpendingType {
 	case models.SpendingTypeExpense:
 		dtMidnight := util.MidnightInLocal(start, timezone)
@@ -102,7 +126,13 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(start, end time.Time, ti
 	}
 }
 
-func (s *spendingInstructionBase) getNextSpendingEventAfter(input time.Time, timezone *time.Location, balance int64) *SpendingEvent {
+func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context, input time.Time, timezone *time.Location, balance int64) *SpendingEvent {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"input":    input,
+		"timezone": timezone.String(),
+	}
 	input = util.MidnightInLocal(input, timezone)
 
 	var rule *rrule.RRule
@@ -136,7 +166,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(input time.Time, tim
 
 	var fundingFirst, fundingSecond FundingEvent
 	{ // Get our next two funding events
-		fundingEvents := s.funding.GetNFundingEventsAfter(2, input, timezone)
+		fundingEvents := s.funding.GetNFundingEventsAfter(span.Context(), 2, input, timezone)
 		if len(fundingEvents) != 2 {
 			// TODO, if there are multiple funding schedules and they land on the same day, this will happen.
 			panic("invalid number of funding events returned;")
@@ -149,10 +179,10 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(input time.Time, tim
 	// funding period. This is used to determine if the spending is currently behind. As the total amount that will be
 	// spent must be <= the amount currently allocated to this spending item. If it is not then there will not be enough
 	// funds to cover each spending event between now and the next funding event.
-	eventsBeforeFirst := int64(len(s.GetRecurrencesBetween(input, fundingFirst.Date, timezone)))
+	eventsBeforeFirst := int64(len(s.GetRecurrencesBetween(span.Context(), input, fundingFirst.Date, timezone)))
 	// The number of times this item will be spent in the subsequent funding period. This is used to determine how much
 	// needs to be allocated at the beginning of the next funding period.
-	eventsBeforeSecond := int64(len(s.GetRecurrencesBetween(fundingFirst.Date, fundingSecond.Date, timezone)))
+	eventsBeforeSecond := int64(len(s.GetRecurrencesBetween(span.Context(), fundingFirst.Date, fundingSecond.Date, timezone)))
 
 	// The amount of funds needed for each individual spending event.
 	perSpendingAmount := s.spending.TargetAmount
@@ -199,7 +229,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(input time.Time, tim
 		// Otherwise we can simply look at how much we need vs how much we already have.
 		amountNeeded := myownsanity.Max(0, perSpendingAmount-balance)
 		// And how many times we will have a funding event before our due date.
-		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(input, nextRecurrence, timezone)
+		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(span.Context(), input, nextRecurrence, timezone)
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}

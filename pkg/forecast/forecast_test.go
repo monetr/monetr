@@ -1,6 +1,7 @@
 package forecast
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -63,9 +64,9 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		var firstAverage, secondAverage int64
 		{ // Initial
 			forecaster := NewForecaster(spending, fundingSchedules)
-			forecast := forecaster.GetForecast(now, now.AddDate(0, 1, 4), timezone)
+			forecast := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
 			assert.Greater(t, forecast.StartingBalance, int64(0))
-			firstAverage = forecaster.GetAverageContribution(now, now.AddDate(0, 1, 4), timezone)
+			firstAverage = forecaster.GetAverageContribution(context.Background(), now, now.AddDate(0, 1, 4), timezone)
 		}
 
 		{ // With added expense
@@ -75,9 +76,9 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				CurrentAmount:  0,
 				NextRecurrence: util.MidnightInLocal(now.AddDate(1, 0, 0), timezone),
 			}), fundingSchedules)
-			forecast := forecaster.GetForecast(now, now.AddDate(0, 1, 4), timezone)
+			forecast := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
 			assert.Greater(t, forecast.StartingBalance, int64(0))
-			secondAverage = forecaster.GetAverageContribution(now, now.AddDate(0, 1, 4), timezone)
+			secondAverage = forecaster.GetAverageContribution(context.Background(), now, now.AddDate(0, 1, 4), timezone)
 		}
 		assert.Greater(t, secondAverage, firstAverage, "should need to contribute more per funding")
 	})
