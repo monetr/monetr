@@ -55,34 +55,32 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	spending, err := repo.GetSpending(c.getContext(ctx), bankAccountId)
-	if err != nil {
-		c.wrapPgError(ctx, err, "could not retrieve spending")
-		return
-	}
-
 	fundingSchedules, err := repo.GetFundingSchedules(c.getContext(ctx), bankAccountId)
 	if err != nil {
 		c.wrapPgError(ctx, err, "could not retrieve funding schedules")
 		return
 	}
 
-	beforeForecast := forecast.NewForecaster(spending, fundingSchedules)
-	afterForecast := forecast.NewForecaster(append(spending, models.Spending{
-		FundingScheduleId: request.FundingScheduleId,
-		SpendingType:      request.SpendingType,
-		TargetAmount:      request.TargetAmount,
-		CurrentAmount:     request.CurrentAmount,
-		NextRecurrence:    request.NextRecurrence,
-		RecurrenceRule:    request.RecurrenceRule,
-		SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
-	}), fundingSchedules)
+	afterForecast := forecast.NewForecaster([]models.Spending{
+		{
+			FundingScheduleId: request.FundingScheduleId,
+			SpendingType:      request.SpendingType,
+			TargetAmount:      request.TargetAmount,
+			CurrentAmount:     request.CurrentAmount,
+			NextRecurrence:    request.NextRecurrence,
+			RecurrenceRule:    request.RecurrenceRule,
+			SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
+		},
+	}, fundingSchedules)
 
-	start := time.Now()
-	end := start.AddDate(1, 0, 0)
+	end := request.NextRecurrence.AddDate(2, 0, 0)
 	timezone := c.mustGetTimezone(ctx)
 	ctx.JSON(map[string]interface{}{
-		"beforeAverageContribution": beforeForecast.GetAverageContribution(c.getContext(ctx), start, end, timezone),
-		"afterAverageContribution":  afterForecast.GetAverageContribution(c.getContext(ctx), start, end, timezone),
+		"estimatedCost": afterForecast.GetAverageContribution(
+			c.getContext(ctx),
+			request.NextRecurrence.AddDate(0, 0, -1),
+			end,
+			timezone,
+		),
 	})
 }

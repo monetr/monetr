@@ -114,7 +114,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 		dtMidnight := util.MidnightInLocal(start, timezone)
 		rule := s.spending.RecurrenceRule.RRule
 		rule.DTStart(dtMidnight)
-		items := rule.Between(start, end.Add(1*time.Second), false)
+		items := rule.Between(start.Add(1 * time.Second), end.Add(-1*time.Second), false)
 		return items
 	case models.SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
@@ -189,13 +189,6 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	// The amount of funds currently allocated towards this spending item. This is not increased until the next funding
 	// event, or the user transfers funds to this spending item.
 
-	if rule != nil { // Hack to make it so we can calculate based on previous windows
-		nextNext := rule.After(nextRecurrence, false)
-		diff := nextNext.Sub(nextRecurrence) * 30 // 30 periods ago (roughly)
-		previous := util.MidnightInLocal(nextRecurrence.Add(-diff), timezone)
-		rule.DTStart(previous)
-	}
-
 	event := SpendingEvent{
 		Date:               time.Time{},
 		TransactionAmount:  0,
@@ -229,7 +222,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// Otherwise we can simply look at how much we need vs how much we already have.
 		amountNeeded := myownsanity.Max(0, perSpendingAmount-balance)
 		// And how many times we will have a funding event before our due date.
-		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(span.Context(), input, nextRecurrence, timezone)
+		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(span.Context(), input, nextRecurrence.Add(-1 * time.Second), timezone)
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}
