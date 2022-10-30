@@ -2,6 +2,8 @@ package forecast
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -30,6 +32,12 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		}, fundingInstructions)
 
 		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
+		for i, item := range events {
+			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
+				j, _ := json.MarshalIndent(item, "                        \t", "  ")
+				fmt.Println("                        \t" + string(j))
+			}
+		}
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -91,6 +99,12 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		}, fundingInstructions)
 
 		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
+		for i, item := range events {
+			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
+				j, _ := json.MarshalIndent(item, "                        \t", "  ")
+				fmt.Println("                        \t" + string(j))
+			}
+		}
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -191,6 +205,12 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		}, fundingInstructions)
 
 		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
+		for i, item := range events {
+			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
+				j, _ := json.MarshalIndent(item, "                        \t", "  ")
+				fmt.Println("                        \t" + string(j))
+			}
+		}
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -295,5 +315,39 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
 		// Should have 36 events, 12 spending events and 24 funding events.
 		assert.Len(t, events, 12 + 24, "should have 36 events")
+		for i, item := range events {
+			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
+				j, _ := json.MarshalIndent(item, "                        \t", "  ")
+				fmt.Println("                        \t" + string(j))
+			}
+		}
+	})
+
+	t.Run("every other week for a year", func(t *testing.T) {
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 1, 2, 13, 0, 1, 0, timezone).UTC()
+		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
+			Rule:            fundingRule,
+			ExcludeWeekends: true,
+			NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+		})
+		spendingInstructions := NewSpendingInstructions(models.Spending{
+			SpendingType:   models.SpendingTypeExpense,
+			TargetAmount:   1395,
+			CurrentAmount:  1395,
+			NextRecurrence: time.Date(2022, 1, 7, 0, 0, 0, 0, timezone),
+			RecurrenceRule: spendingRule,
+		}, fundingInstructions)
+
+		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		assert.Len(t, events, 45, "should have 45 events")
+		for i, item := range events {
+			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
+				j, _ := json.MarshalIndent(item, "                        \t", "  ")
+				fmt.Println("                        \t" + string(j))
+			}
+		}
 	})
 }

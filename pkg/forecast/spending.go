@@ -114,7 +114,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 		dtMidnight := util.MidnightInLocal(start, timezone)
 		rule := s.spending.RecurrenceRule.RRule
 		rule.DTStart(dtMidnight)
-		items := rule.Between(start.Add(1 * time.Second), end.Add(-1*time.Second), false)
+		items := rule.Between(start.Add(1 * time.Second), end, true)
 		return items
 	case models.SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
@@ -222,7 +222,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// Otherwise we can simply look at how much we need vs how much we already have.
 		amountNeeded := myownsanity.Max(0, perSpendingAmount-balance)
 		// And how many times we will have a funding event before our due date.
-		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(span.Context(), input, nextRecurrence.Add(-1 * time.Second), timezone)
+		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(span.Context(), input, nextRecurrence, timezone)
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}
@@ -242,7 +242,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		event.TransactionAmount = s.spending.TargetAmount
 		// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
 		// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
-		event.RollingAllocation = myownsanity.Max(0, event.RollingAllocation-s.spending.TargetAmount)
+		event.RollingAllocation = event.RollingAllocation-s.spending.TargetAmount
 	case nextRecurrence.Equal(fundingFirst.Date):
 		// The next event will be both a contribution and a transaction.
 		event.Date = nextRecurrence
@@ -250,7 +250,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		event.TransactionAmount = s.spending.TargetAmount
 		// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
 		// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
-		event.RollingAllocation = myownsanity.Max(0, (event.RollingAllocation+totalContributionAmount)-s.spending.TargetAmount)
+		event.RollingAllocation = (event.RollingAllocation+totalContributionAmount)-s.spending.TargetAmount
 		event.Funding = []FundingEvent{
 			fundingFirst,
 		}
