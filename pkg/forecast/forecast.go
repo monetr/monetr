@@ -8,21 +8,24 @@ import (
 )
 
 type Event struct {
-	Date     time.Time `json:"date"`
-	Delta    int64 `json:"delta"`
-	Balance  int64 `json:"balance"`
-	Spending []SpendingEvent `json:"spending"`
-	Funding  []FundingEvent `json:"funding"`
+	Date         time.Time       `json:"date"`
+	Delta        int64           `json:"delta"`
+	Contribution int64           `json:"contribution"`
+	Transaction  int64           `json:"transaction"`
+	Balance      int64           `json:"balance"`
+	Spending     []SpendingEvent `json:"spending"`
+	Funding      []FundingEvent  `json:"funding"`
 }
 
 type Forecast struct {
-	StartingBalance int64 `json:"startingBalance"`
-	EndingBalance   int64 `json:"endingBalance"`
+	StartingBalance int64   `json:"startingBalance"`
+	EndingBalance   int64   `json:"endingBalance"`
 	Events          []Event `json:"events"`
 }
 
 type Forecaster interface {
 	GetForecast(start, end time.Time, timezone *time.Location) Forecast
+	GetAverageContribution(start, end time.Time, timezone *time.Location) int64
 }
 
 type forecasterBase struct {
@@ -79,10 +82,14 @@ func (f *forecasterBase) GetForecast(start, end time.Time, timezone *time.Locati
 			items := make([]SpendingEvent, len(group.Group))
 			fundingMap := map[uint64]FundingEvent{}
 			var delta int64 = 0
+			var transaction int64
+			var contribution int64
 			for i, item := range group.Group {
 				spendingEvent := item.(SpendingEvent)
 				delta += spendingEvent.ContributionAmount
+				contribution += spendingEvent.ContributionAmount
 				delta -= spendingEvent.TransactionAmount
+				transaction += spendingEvent.TransactionAmount
 
 				for _, funding := range spendingEvent.Funding {
 					if _, ok := fundingMap[funding.FundingScheduleId]; !ok {
@@ -99,11 +106,13 @@ func (f *forecasterBase) GetForecast(start, end time.Time, timezone *time.Locati
 			}
 
 			return Event{
-				Date:     date,
-				Delta:    delta,
-				Balance:  0,
-				Spending: items,
-				Funding:  fundingItems,
+				Date:         date,
+				Delta:        delta,
+				Balance:      0,
+				Transaction:  transaction,
+				Contribution: contribution,
+				Spending:     items,
+				Funding:      fundingItems,
 			}
 		}).
 		OrderByT(func(event Event) int64 {
@@ -123,8 +132,23 @@ func (f *forecasterBase) GetForecast(start, end time.Time, timezone *time.Locati
 	}
 
 	if len(forecast.Events) > 0 {
-		forecast.EndingBalance = forecast.Events[len(forecast.Events) - 1].Balance
+		forecast.EndingBalance = forecast.Events[len(forecast.Events)-1].Balance
 	}
 
 	return forecast
+}
+
+func (f *forecasterBase) GetAverageContribution(start, end time.Time, timezone *time.Location) int64 {
+	forecast := f.GetForecast(start, end, timezone)
+	var contributions, count int64
+	for _, event := range forecast.Events {
+		if event.Contribution == 0 {
+			continue
+		}
+
+		contributions += event.Contribution
+		count++
+	}
+
+	return contributions / count
 }

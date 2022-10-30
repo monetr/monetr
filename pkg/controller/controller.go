@@ -350,6 +350,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 				c.handleTransactions(bankParty)
 				c.handleFundingSchedules(bankParty)
 				c.handleSpending(bankParty)
+				c.handleForecasting(bankParty)
 			})
 
 			repoParty.PartyFunc("/plaid/link", c.handlePlaidLinkEndpoints)

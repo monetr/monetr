@@ -1,13 +1,13 @@
 package forecast
 
 import (
-	"encoding/json"
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/monetr/monetr/pkg/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestForecasterBase_GetForecast(t *testing.T) {
@@ -60,9 +60,25 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			},
 		}
 
-		forecaster := NewForecaster(spending, fundingSchedules)
-		forecast := forecaster.GetForecast(now, now.AddDate(0, 1, 4), timezone)
-		j, _ := json.MarshalIndent(forecast, "", "  ")
-		fmt.Println(string(j))
+		var firstAverage, secondAverage int64
+		{ // Initial
+			forecaster := NewForecaster(spending, fundingSchedules)
+			forecast := forecaster.GetForecast(now, now.AddDate(0, 1, 4), timezone)
+			assert.Greater(t, forecast.StartingBalance, int64(0))
+			firstAverage = forecaster.GetAverageContribution(now, now.AddDate(0, 1, 4), timezone)
+		}
+
+		{ // With added expense
+			forecaster := NewForecaster(append(spending, models.Spending{
+				SpendingType:   models.SpendingTypeGoal,
+				TargetAmount:   1000000,
+				CurrentAmount:  0,
+				NextRecurrence: util.MidnightInLocal(now.AddDate(1, 0, 0), timezone),
+			}), fundingSchedules)
+			forecast := forecaster.GetForecast(now, now.AddDate(0, 1, 4), timezone)
+			assert.Greater(t, forecast.StartingBalance, int64(0))
+			secondAverage = forecaster.GetAverageContribution(now, now.AddDate(0, 1, 4), timezone)
+		}
+		assert.Greater(t, secondAverage, firstAverage, "should need to contribute more per funding")
 	})
 }
