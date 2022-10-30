@@ -24,7 +24,7 @@ var (
 
 type SpendingInstructions interface {
 	GetNextNSpendingEventsAfter(n int, input time.Time, timezone *time.Location) []SpendingEvent
-	GetNextSpendingEventAfter(input time.Time, timezone *time.Location) *SpendingEvent
+	GetSpendingEventsBetween(start, end time.Time, timezone *time.Location) []SpendingEvent
 }
 
 type spendingInstructionBase struct {
@@ -37,6 +37,31 @@ func NewSpendingInstructions(spending models.Spending, fundingInstructions Fundi
 		spending: spending,
 		funding:  fundingInstructions,
 	}
+}
+
+func (s spendingInstructionBase) GetSpendingEventsBetween(start, end time.Time, timezone *time.Location) []SpendingEvent {
+	events := make([]SpendingEvent, 0)
+
+	for i := 0; ; i++ {
+		var event *SpendingEvent
+		if i == 0 {
+			event = s.getNextSpendingEventAfter(start, timezone, s.spending.CurrentAmount)
+		} else {
+			event = s.getNextSpendingEventAfter(events[i - 1].Date, timezone, events[i - 1].RollingAllocation)
+		}
+
+		if event == nil {
+			break
+		}
+
+		if event.Date.After(end) {
+			break
+		}
+
+		events = append(events, *event)
+	}
+
+	return events
 }
 
 func (s spendingInstructionBase) GetNextNSpendingEventsAfter(n int, input time.Time, timezone *time.Location) []SpendingEvent {
@@ -75,10 +100,6 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(start, end time.Time, ti
 	default:
 		return nil
 	}
-}
-
-func (s *spendingInstructionBase) GetNextSpendingEventAfter(input time.Time, timezone *time.Location) *SpendingEvent {
-	return s.getNextSpendingEventAfter(input, timezone, s.spending.CurrentAmount)
 }
 
 func (s *spendingInstructionBase) getNextSpendingEventAfter(input time.Time, timezone *time.Location, balance int64) *SpendingEvent {
