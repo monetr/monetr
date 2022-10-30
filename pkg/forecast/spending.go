@@ -10,12 +10,12 @@ import (
 )
 
 type SpendingEvent struct {
-	Date               time.Time
-	TransactionAmount  int64
-	ContributionAmount int64
-	RollingAllocation  int64
-	Funding            []FundingEvent
-	SpendingId         uint64
+	Date               time.Time      `json:"date"`
+	TransactionAmount  int64          `json:"transactionAmount"`
+	ContributionAmount int64          `json:"contributionAmount"`
+	RollingAllocation  int64          `json:"rollingAllocation"`
+	Funding            []FundingEvent `json:"funding"`
+	SpendingId         uint64         `json:"spendingId"`
 }
 
 var (
@@ -47,7 +47,7 @@ func (s spendingInstructionBase) GetSpendingEventsBetween(start, end time.Time, 
 		if i == 0 {
 			event = s.getNextSpendingEventAfter(start, timezone, s.spending.CurrentAmount)
 		} else {
-			event = s.getNextSpendingEventAfter(events[i - 1].Date, timezone, events[i - 1].RollingAllocation)
+			event = s.getNextSpendingEventAfter(events[i-1].Date, timezone, events[i-1].RollingAllocation)
 		}
 
 		if event == nil {
@@ -90,7 +90,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(start, end time.Time, ti
 		dtMidnight := util.MidnightInLocal(start, timezone)
 		rule := s.spending.RecurrenceRule.RRule
 		rule.DTStart(dtMidnight)
-		items := rule.Between(start, end.Add(1 * time.Second), false)
+		items := rule.Between(start, end.Add(1*time.Second), false)
 		return items
 	case models.SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
@@ -159,7 +159,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(input time.Time, tim
 	// The amount of funds currently allocated towards this spending item. This is not increased until the next funding
 	// event, or the user transfers funds to this spending item.
 
-	{ // Hack to make it so we can calculate based on previous windows
+	if rule != nil { // Hack to make it so we can calculate based on previous windows
 		nextNext := rule.After(nextRecurrence, false)
 		diff := nextNext.Sub(nextRecurrence) * 30 // 30 periods ago (roughly)
 		previous := util.MidnightInLocal(nextRecurrence.Add(-diff), timezone)

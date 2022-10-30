@@ -8,10 +8,10 @@ import (
 )
 
 type FundingEvent struct {
-	Date              time.Time
-	OriginalDate      time.Time
-	WeekendAvoided    bool
-	FundingScheduleId uint64
+	Date              time.Time `json:"date"`
+	OriginalDate      time.Time `json:"originalDate"`
+	WeekendAvoided    bool      `json:"weekendAvoided"`
+	FundingScheduleId uint64    `json:"fundingScheduleId"`
 }
 
 var (
@@ -129,6 +129,7 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(start, end time.Time, time
 	items := rule.Between(start, end, true)
 	events := make([]FundingEvent, len(items))
 	for i, item := range items {
+		// TODO Implement the skip weekends here too.
 		events[i] = FundingEvent{
 			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
 			Date:              item,
@@ -150,6 +151,12 @@ func (f *fundingScheduleBase) GetNumberOfFundingEventsBetween(start, end time.Ti
 //     on a given day. But also, what if both of those schedules fall on the same day?
 type multipleFundingInstructions struct {
 	instructions []FundingInstructions
+}
+
+func NewMultipleFundingInstructions(instructions []FundingInstructions) FundingInstructions {
+	return &multipleFundingInstructions{
+		instructions: instructions,
+	}
 }
 
 func (m *multipleFundingInstructions) GetNFundingEventsAfter(n int, input time.Time, timezone *time.Location) []FundingEvent {
