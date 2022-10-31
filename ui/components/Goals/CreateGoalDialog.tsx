@@ -180,7 +180,7 @@ function CreateGoalDialog(): JSX.Element {
                 Cancel
               </Button>
               <Button
-                disabled={ isSubmitting || !isValid }
+                disabled={ isSubmitting || !isValid || values.fundingScheduleId === null }
                 onClick={ submitForm }
                 color="primary"
                 type="submit"
