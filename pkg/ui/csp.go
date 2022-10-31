@@ -41,6 +41,7 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 			"https://www.gstatic.com": noop,
 			"https://www.google.com":  noop,
 			"https://*.plaid.com":     noop,
+			UnsafeInline:              noop,
 		},
 		"font-src": {
 			Self: noop,
@@ -94,8 +95,8 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 	}
 
 	switch {
-	case userAgent.IsChrome():
-		// Chrome actually works.
+	case userAgent.IsChrome() || (!userAgent.IsIOS() && userAgent.IsSafari()):
+		// Safari and Chrome desktop seem to work.
 	case userAgent.IsFirefox() || (userAgent.IsIOS() && userAgent.IsSafari()):
 		{ // script-src-elem is not supported on firefox, or safari for ios.
 			for item := range policies["script-src-elem"] {
@@ -113,6 +114,20 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 	case userAgent.IsInternetExplorer():
 		// No CSP policies for IE. If you're using it you hate security anyway.
 		policies = map[string]map[string]struct{}{}
+	default:
+		{ // script-src-elem is not supported on firefox, or safari for ios.
+			for item := range policies["script-src-elem"] {
+				policies["default-src"][item] = noop
+			}
+			delete(policies, "script-src-elem")
+		}
+
+		{ // style-src-elem is not supported on firefox, or safari for ios.
+			for item := range policies["style-src-elem"] {
+				policies["default-src"][item] = noop
+			}
+			delete(policies, "style-src-elem")
+		}
 	}
 
 	if len(policies) > 0 {
