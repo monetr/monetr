@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@date-io/moment": "2.14.0",
-    "@ebay/nice-modal-react": "1.2.7",
+    "@ebay/nice-modal-react": "1.2.8",
     "@emotion/react": "11.10.0",
     "@emotion/styled": "11.10.0",
     "@fontsource/roboto": "4.5.8",
