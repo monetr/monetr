@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@date-io/moment": "2.14.0",
+    "@date-io/moment": "2.16.1",
     "@ebay/nice-modal-react": "1.2.8",
     "@emotion/react": "11.10.0",
     "@emotion/styled": "11.10.0",
