@@ -24,7 +24,7 @@ require (
 	github.com/iris-contrib/middleware/cors v0.0.0-20221023021543-014b91018351
 	github.com/jarcoal/httpmock v1.2.0
 	github.com/kataras/iris/v12 v12.2.0-beta6
-	github.com/mileusna/useragent v1.0.2
+	github.com/mileusna/useragent v1.2.1
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/olekukonko/tablewriter v0.0.5
