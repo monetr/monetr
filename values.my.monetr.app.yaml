@@ -76,10 +76,10 @@ api:
       verifyEmailTemplate: ""
       forgotPasswordTemplate: ""
   reCaptcha:
-    enabled: true
-    verifyLogin: true
-    verifyRegister: true
-    verifyForgotPassword: true
+    enabled: false
+    verifyLogin: false
+    verifyRegister: false
+    verifyForgotPassword: false
   plaid:
     environment: "https://production.plaid.com"
     enableReturningUserExperience: true
