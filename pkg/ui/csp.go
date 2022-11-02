@@ -37,11 +37,9 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 			"https://cdn.plaid.com": noop,
 		},
 		"script-src-elem": {
-			Self:                      noop,
-			"https://www.gstatic.com": noop,
-			"https://www.google.com":  noop,
-			"https://*.plaid.com":     noop,
-			UnsafeInline:              noop,
+			Self:                  noop,
+			"https://*.plaid.com": noop,
+			UnsafeInline:          noop,
 		},
 		"font-src": {
 			Self: noop,
@@ -53,14 +51,20 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 			Self: noop, // Add ws if its in development mode.
 		},
 		"frame-src": {
-			Self:                     noop,
-			"https://*.plaid.com":    noop,
-			"https://www.google.com": noop, // For ReCAPTCHA
+			Self:                  noop,
+			"https://*.plaid.com": noop,
 		},
 		"img-src": {
 			Self:    noop,
 			"data:": noop,
 		},
+	}
+
+	// Only allow google to connect when ReCAPTCHA is enabled.
+	if c.configuration.ReCAPTCHA.Enabled {
+		policies["script-src-elem"]["https://www.gstatic.com"] = noop
+		policies["script-src-elem"]["https://www.google.com"] = noop
+		policies["frame-src"]["https://www.google.com"] = noop
 	}
 
 	// If sentry is enabled and a DSN is configured, then setup the connect-src for sentry.
