@@ -51,7 +51,7 @@
     "react-plaid-link": "3.3.2",
     "react-query": "3.39.2",
     "react-recaptcha": "2.3.10",
-    "react-router-dom": "6.4.1",
+    "react-router-dom": "6.4.3",
     "react-select": "5.5.9",
     "resolve": "1.22.1",
     "resolve-url-loader": "5.0.0",
