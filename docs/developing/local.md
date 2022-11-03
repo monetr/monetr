@@ -61,10 +61,35 @@ brew bundle --verbose
 But they can also be installed manually through your own preferred methods. As long as `docker`, `make` and `yarn` are
 all available in your `PATH` variable, the rest of this guide should work just fine.
 
+## Configuration & Credentials
+
+At the moment monetr requires at least Plaid credentials in order to run properly, even for development. You can read
+more about obtaining these credentials here: [Credentials](credentials.md)
+
+The makefile will look for these development credentials and some configuration options in the following path:
+
+```shell title="monetr development env file"
+$HOME/.monetr/development.env
+```
+
+You can create this file using the following commands:
+
+```shell title="Creating the development env file"
+mkdir $HOME/.monetr
+touch $HOME/.monetr/development.env
+vim $HOME/.monetr/development.env
+```
+
+Once you've opened this file you'll need to provide the Plaid Client ID as `PLAID_CLIENT_ID` and Plaid Client Secret as
+`PLAID_CLIENT_SECRET` here.
+
 ## Starting It Up
 
 With the above requirements installed. You should be able to spin up the local development environment that runs inside
 of Docker compose.
+
+This command will also load any of the environment variables specified in the development env file (mentioned above) 
+into the `monetr` container where the API is running.
 
 ```shell title="Shell"
 make develop
@@ -153,17 +178,27 @@ you can start the containers again with the following command.
 make start
 ```
 
-### Completely Clean up
+### Shutting Down Development Environment
 
 If you want to completely shut everything down (1) then you can run the following command:
-{ .annotate }
 
-1. **This will delete all of your local development data, including any Plaid links, expenses, goals, etc...**
+??? danger
+    This will delete all of your local development data, including any Plaid links, expenses, goals, etc...
+
+```shell title="Shell"
+make shutdown
+```
+
+This removes the Plaid links that are active, takes down the Docker compose containers, removes their volumes.
+
+### Completely Clean up
+
+If you want to completely start fresh you can run the following make task. This will shut down the local development
+environment if it is running, but it will also delete any files created or generated during development. This deletes
+your `node_modules` folder, any submodules, and generated UI code.
 
 ```shell title="Shell"
 make clean
 ```
 
-This removes the Plaid links that are active, takes down the Docker compose containers, removes their volumes, and
-removes all temporary directories and generated code in the project directory. It might miss a few things, but this
-should essentially return the project directory to a state akin to having freshly cloned it.
+This should leave the project directory in a state similar to when it was initially cloned.
