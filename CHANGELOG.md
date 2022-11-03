@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.11.27](https://github.com/monetr/monetr/compare/v0.11.26...v0.11.27) (2022-11-03)
+
+
+### Features
+
+* **forecasting:** Made funding forecasting more verbose. ([eb22cb5](https://github.com/monetr/monetr/commit/eb22cb53113affd2539dd7fbc0a5a9ff86e4ae24))
+* **forecast:** Laying groundwork for forecasting funding. ([9a3620e](https://github.com/monetr/monetr/commit/9a3620e8002e5ac86e420d5559f117c91061eacd))
+
+
+### Bug Fixes
+
+* **csp:** Tweaking Content-Security-Policy ([e1ba913](https://github.com/monetr/monetr/commit/e1ba913ef2edc727b873678d6108c1083cf44afa))
+* **ui:** Added condition for disabling create button ([#1173](https://github.com/monetr/monetr/issues/1173)) ([e9e5c93](https://github.com/monetr/monetr/commit/e9e5c93b7b47871921520e2dc48c58ac7199b18e)), closes [#1171](https://github.com/monetr/monetr/issues/1171)
+
+
+### Dependencies
+
+* **api:** update module github.com/mileusna/useragent to v1.2.1 ([#1190](https://github.com/monetr/monetr/issues/1190)) ([c3f9376](https://github.com/monetr/monetr/commit/c3f937651f1e7dfb1ae28f5fa20e57aeb01f709b))
+* **api:** update module github.com/spf13/cobra to v1.6.1 ([#1165](https://github.com/monetr/monetr/issues/1165)) ([cfeb0a4](https://github.com/monetr/monetr/commit/cfeb0a464efc93531cd59479d792db0d301aa339))
+* **api:** update module github.com/stretchr/testify to v1.8.1 ([#1179](https://github.com/monetr/monetr/issues/1179)) ([fd99c97](https://github.com/monetr/monetr/commit/fd99c9724c851fdaa605c59a1bed515079438ab2))
+* **containers:** update squidfunk/mkdocs-material docker tag to v8.5.7 ([#1180](https://github.com/monetr/monetr/issues/1180)) ([45b08e6](https://github.com/monetr/monetr/commit/45b08e641e487715f5490a9313bc35ae64711fe2))
+* **ui:** update dependency @ebay/nice-modal-react to v1.2.8 ([#1181](https://github.com/monetr/monetr/issues/1181)) ([3e755d4](https://github.com/monetr/monetr/commit/3e755d45ca000ea3190acbde17180ac382fdbd4d))
+* **ui:** update dependency @svgr/webpack to v6.5.1 ([#1182](https://github.com/monetr/monetr/issues/1182)) ([cf423c9](https://github.com/monetr/monetr/commit/cf423c9b3fb9c632e408d464eef8fd05577860f0))
+* **ui:** update dependency @swc/core to v1.3.11 ([#1183](https://github.com/monetr/monetr/issues/1183)) ([b4e2ffb](https://github.com/monetr/monetr/commit/b4e2ffb50d20745d251f3671d13115c795cfd1b9))
+* **ui:** update dependency @types/react to v18.0.24 ([#1184](https://github.com/monetr/monetr/issues/1184)) ([6ed440a](https://github.com/monetr/monetr/commit/6ed440a3ceeb3483f6a6ea7b8650b373400eae0e))
+* **ui:** update dependency @types/react-dom to v18.0.8 ([#1185](https://github.com/monetr/monetr/issues/1185)) ([fd56a7b](https://github.com/monetr/monetr/commit/fd56a7b750b916307e352f61fcf2eadfac1dc733))
+* **ui:** update dependency eslint to v8.26.0 ([#1191](https://github.com/monetr/monetr/issues/1191)) ([5a0454f](https://github.com/monetr/monetr/commit/5a0454f97dfa01785cdfefaec36bf30d7f9b2e01))
+* **ui:** update dependency notistack to v2.0.8 ([#1186](https://github.com/monetr/monetr/issues/1186)) ([c20f9ea](https://github.com/monetr/monetr/commit/c20f9eabccff67e67886de95cfe91c4b13a4ee7d))
+* **ui:** update dependency react-router-dom to v6.4.3 ([#1187](https://github.com/monetr/monetr/issues/1187)) ([62fa273](https://github.com/monetr/monetr/commit/62fa273864cb338e38bf4f7c66078999ae5f8cd6))
+* **ui:** update dependency react-select to v5.5.9 ([#1188](https://github.com/monetr/monetr/issues/1188)) ([a68d213](https://github.com/monetr/monetr/commit/a68d213025efa3d7e773bea69c2d36c84db88351))
+* **ui:** update dependency zustand to v4.1.4 ([#1189](https://github.com/monetr/monetr/issues/1189)) ([bde0712](https://github.com/monetr/monetr/commit/bde0712ce5a89ccb3265ba728d0b99d42cdb9322))
+* **ui:** update jest monorepo ([#1106](https://github.com/monetr/monetr/issues/1106)) ([4b080da](https://github.com/monetr/monetr/commit/4b080da8b751bc438d8d02b9739619b0250ed9aa))
+* **ui:** update typescript-eslint monorepo to v5.42.0 ([#1192](https://github.com/monetr/monetr/issues/1192)) ([c991dfc](https://github.com/monetr/monetr/commit/c991dfc2784077bfb460ea80c077c19d4032c058))
+
+
+### Miscellaneous
+
+* **csp:** Tweak Content-Security-Policy for ReCAPTCHA. ([7235635](https://github.com/monetr/monetr/commit/7235635e98ba5bb0c1b6bde136d5b8a78894a7c8))
+* **docs:** Add more documentation for local development. ([3be5361](https://github.com/monetr/monetr/commit/3be536198922ff8ede0718a356bd8aac0ddac6ed))
+* **NOTICE:** Updated third party notice. ([427cc55](https://github.com/monetr/monetr/commit/427cc55c730a6774b1a3aa4ee1d68d124ff80d97))
+* **prod:** Disabling ReCAPTCHA in prod. ([34d54f3](https://github.com/monetr/monetr/commit/34d54f368bd9300a9ea0486e4985105d0b117efc))
+
 ## [0.11.26](https://github.com/monetr/monetr/compare/v0.11.25...v0.11.26) (2022-10-29)
 
 
