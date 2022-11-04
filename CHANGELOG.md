@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.12.0](https://github.com/monetr/monetr/compare/v0.11.27...v0.12.0) (2022-11-04)
+
+
+### Features
+
+* **forecast:** Change forecasted amount to be popularity based. ([5710c91](https://github.com/monetr/monetr/commit/5710c91148e835b86f72f6b012dae05fd175928c))
+* **forecasting:** Building out spending forecasting groundwork. ([#1168](https://github.com/monetr/monetr/issues/1168)) ([b852748](https://github.com/monetr/monetr/commit/b852748b3d6d367120d6ae09af76add1ba8bcd56))
+
+
+### Bug Fixes
+
+* **forecast:** Reduce number of forecast requests, reduce sentry trace. ([f374fcb](https://github.com/monetr/monetr/commit/f374fcbcd98fe9fc1b9b806ed6a0dfad3f2408c3))
+* **test:** Fixed failing funding schedule test. ([38d027d](https://github.com/monetr/monetr/commit/38d027df265e16aee9a0dd5db6e801a82684d1a9))
+
+
+### Miscellaneous
+
+* release 0.12.0 ([2754368](https://github.com/monetr/monetr/commit/27543684f8110d2b5d5c8fcc6f36d191a8cc5771))
+
 ## [0.11.27](https://github.com/monetr/monetr/compare/v0.11.26...v0.11.27) (2022-11-03)
 
 
