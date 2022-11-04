@@ -156,15 +156,21 @@ func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end 
 		"timezone":        timezone.String(),
 	}
 	forecast := f.GetForecast(span.Context(), start, end, timezone)
-	var contributions, count int64
+	contributionAmounts := map[int64]int64{}
 	for _, event := range forecast.Events {
 		if event.Contribution == 0 {
 			continue
 		}
 
-		contributions += event.Contribution
-		count++
+		contributionAmounts[event.Contribution] += 1
+	}
+	var popularContribution, popularCount int64
+	for contribution, contributionCount := range contributionAmounts {
+		if contributionCount > popularCount {
+			popularContribution = contribution
+			popularCount = contributionCount
+		}
 	}
 
-	return contributions / count
+	return popularContribution
 }

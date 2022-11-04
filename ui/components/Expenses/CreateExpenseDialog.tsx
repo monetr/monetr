@@ -243,7 +243,9 @@ function CreateExpenseDialog(): JSX.Element {
                   </span>
                   <span className="font-normal ml-1">
                     <Tooltip
-                      title="This is the estimated amount that will be contributed to this expense each time it is funded. This may not be an accurate representation of the actual amount each time, but is an average of all the contributions over the next year.">
+                      title={ "This is the estimated amount that will be contributed to this expense each time it is " +
+                              "funded. This may not be an accurate representation of the actual amount each time, " +
+                              "but is calculated based on all the contributions made over the next year." }>
                       <span className="font-normal">
                         { estimatedCost || '$--.--' }
                       </span>
