@@ -296,18 +296,22 @@ export default function RegisterView(): JSX.Element {
                         }
                         label={
                           <Fragment>
+                            <a
+                            className="hover:text-red-500">
                             I agree to monetr's&nbsp;
                             <a
-                              className="hover:text-blue-500 hover:underline"
+                              className="hover:text-blue-500 underline hover:underline text-black-500"
                               href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
                               Terms of Use
                             </a> and&nbsp;
                             <a
-                              className="hover:text-blue-500 hover:underline"
+                              className="hover:text-blue-500 underline hover:underline text-black-500"
                               href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
                             >
                               Privacy Policy
                             </a>
+                            </a>
+                            
                           </Fragment>
                         }
                         labelPlacement="end"
