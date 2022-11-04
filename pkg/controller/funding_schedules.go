@@ -197,7 +197,7 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 	// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
 	// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
 	// next occurrence.
-	if !request.NextOccurrence.Equal(existingFundingSchedule.NextOccurrence) && request.NextOccurrence.Before(time.Now()) {
+	if !request.NextOccurrence.Equal(existingFundingSchedule.NextOccurrence) || request.NextOccurrence.Before(time.Now()) {
 		request.NextOccurrence = existingFundingSchedule.NextOccurrence
 		// TODO If the next occurrence is updated, then that means the spending objects dependent on this funding schedule
 		// could need updating. We should kick something off here.
@@ -225,6 +225,18 @@ func (c *Controller) deleteFundingSchedules(ctx iris.Context) {
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	spending, err := repo.GetSpendingByFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "Failed to retrieve spending for the funding schedule to be deleted")
+		return
+	}
+
+	if len(spending) > 0 {
+		c.badRequest(ctx, "Cannot delete a funding schedule with goals or expenses associated with it")
+		return
+	}
+
 	if err := repo.DeleteFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId); err != nil {
 		if errors.Is(errors.Cause(err), repository.ErrFundingScheduleNotFound) {
 			c.notFound(ctx, "cannot remove funding schedule, it does not exist")
