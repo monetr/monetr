@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostFundingSchedules(t *testing.T) {
@@ -71,8 +72,9 @@ func TestPostFundingSchedules(t *testing.T) {
 
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		rule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;BYDAY=FR")
-		rule.DTStart(time.Now().In(timezone).Add(-30 * 24 * time.Hour)) // Force the Rule to be in the correct TZ.
+		rule.DTStart(util.MidnightInLocal(time.Now().In(timezone).Add(-30*24*time.Hour), timezone)) // Force the Rule to be in the correct TZ.
 		nextFriday := rule.After(time.Now(), false)
+		assert.Greater(t, nextFriday, time.Now(), "next friday should be in the future relative to now")
 		nextFriday = util.MidnightInLocal(nextFriday, timezone)
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 			WithPath("bankAccountId", bank.BankAccountId).
