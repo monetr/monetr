@@ -63,20 +63,6 @@ function CreateExpenseDialog(): JSX.Element {
       errors['amount'] = 'Can only have up to 2 decimal places.';
     }
 
-    if (input.fundingScheduleId > 0 &&
-        input.recurrenceRule &&
-        input.nextOccurrence &&
-        Object.keys(errors).length === 0)  {
-      spendingForecast({
-        bankAccountId: selectedBankAccountId,
-        nextRecurrence: input.nextOccurrence.startOf('day'),
-        spendingType: SpendingType.Expense,
-        fundingScheduleId: input.fundingScheduleId,
-        targetAmount: Math.ceil(input.amount * 100), // Convert to an integer.
-        recurrenceRule: input.recurrenceRule.ruleString(),
-      }).then(result => setEstimatedCost(formatAmount(result.estimatedCost)));
-    }
-
     return errors;
   }
 
@@ -115,6 +101,31 @@ function CreateExpenseDialog(): JSX.Element {
     fundingScheduleId: 0,
   };
 
+  type handleBlurFunction = {
+    (e: React.FocusEvent<any>): void;
+    <T = any>(fieldOrEvent: T): T extends string ? (e: any) => void : void;
+  }
+
+  function onBlur(input: CreateExpenseForm, afterFn: handleBlurFunction): (e: React.FocusEvent<any>) => void {
+    return (e: React.FocusEvent<any>) => {
+      afterFn(e);
+      if (input.nextOccurrence &&
+        input.recurrenceRule &&
+        input.fundingScheduleId &&
+        input.amount &&
+        Object.keys(validateInput(input) || {}).length === 0) {
+        spendingForecast({
+          bankAccountId: selectedBankAccountId,
+          nextRecurrence: input.nextOccurrence.startOf('day'),
+          spendingType: SpendingType.Expense,
+          fundingScheduleId: input.fundingScheduleId,
+          targetAmount: Math.ceil(input.amount * 100), // Convert to an integer.
+          recurrenceRule: input.recurrenceRule.ruleString(),
+        }).then(result => setEstimatedCost(formatAmount(result.estimatedCost)));
+      }
+    };
+  }
+
   return (
     <Formik
       initialValues={ initialValues }
@@ -143,9 +154,9 @@ function CreateExpenseDialog(): JSX.Element {
                 Expenses let you budget for things that happen on a regular basis automatically. Money is allocated
                 to expenses whenever you get paid so that you don't have to pay something from a single paycheck.
               </DialogContentText>
-              <div className='grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-2'>
-                <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
+              <div className="grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-2">
+                <div className="col-span-12">
+                  <span className="font-normal ml-3">
                     What are you budgeting for?
                   </span>
                   <TextField
@@ -156,14 +167,14 @@ function CreateExpenseDialog(): JSX.Element {
                     name="name"
                     className="w-full"
                     onChange={ handleChange }
-                    onBlur={ handleBlur }
+                    onBlur={ onBlur(values, handleBlur) }
                     value={ values.name }
                     disabled={ isSubmitting }
                     required
                   />
                 </div>
-                <div className='col-span-12 md:col-span-6'>
-                  <span className='font-normal ml-3'>
+                <div className="col-span-12 md:col-span-6">
+                  <span className="font-normal ml-3">
                     How much do you need?
                   </span>
                   <TextField
@@ -173,7 +184,7 @@ function CreateExpenseDialog(): JSX.Element {
                     className="w-full"
                     type="number"
                     onChange={ handleChange }
-                    onBlur={ handleBlur }
+                    onBlur={ onBlur(values, handleBlur) }
                     value={ values.amount }
                     disabled={ isSubmitting }
                     required
@@ -183,8 +194,8 @@ function CreateExpenseDialog(): JSX.Element {
                     } }
                   />
                 </div>
-                <div className='col-span-12 md:col-span-6'>
-                  <span className='font-normal ml-3'>
+                <div className="col-span-12 md:col-span-6">
+                  <span className="font-normal ml-3">
                     When do you need it next?
                   </span>
                   <DatePicker
@@ -193,14 +204,15 @@ function CreateExpenseDialog(): JSX.Element {
                     onChange={ value => setFieldValue('nextOccurrence', value.startOf('day')) }
                     inputFormat="MM/DD/yyyy"
                     value={ values.nextOccurrence }
+                    onClose={ onBlur(values, () => {}) }
                     renderInput={ params => (
-                      <TextField label="When do you need it next?"  fullWidth { ...params } />
+                      <TextField label="When do you need it next?" fullWidth { ...params } />
                     ) }
                   />
                 </div>
-                <Divider className='col-span-12 mt-4' />
-                <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
+                <Divider className="col-span-12 mt-4"/>
+                <div className="col-span-12">
+                  <span className="font-normal ml-3">
                     How often do you need to pay for { values.name || 'your expense' }?
                   </span>
                   <RecurrenceSelect
@@ -208,33 +220,36 @@ function CreateExpenseDialog(): JSX.Element {
                     disabled={ isSubmitting }
                     date={ values.nextOccurrence }
                     onChange={ value => setFieldValue('recurrenceRule', value) }
+                    onBlur={ onBlur(values, handleBlur) }
                   />
                 </div>
-                <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
+                <div className="col-span-12">
+                  <span className="font-normal ml-3">
                     How do you want to fund your expense?
                   </span>
                   <FundingScheduleSelect
-                    className='w-full'
+                    className="w-full"
                     menuRef={ ref.current }
                     disabled={ isSubmitting }
                     onChange={ value => setFieldValue('fundingScheduleId', value) }
+                    onBlur={ onBlur(values, handleBlur) }
                     value={ values.fundingScheduleId }
                   />
                 </div>
-                <Divider className='col-span-12 mt-4' />
-                <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
+                <Divider className="col-span-12 mt-4"/>
+                <div className="col-span-12">
+                  <span className="font-normal ml-3">
                     Estimated cost per { values.fundingScheduleId ? fundingSchedules.get(values.fundingScheduleId).name : 'pay check' }.
                   </span>
-                  <span className='font-normal ml-1'>
-                    <Tooltip title="This is the estimated amount that will be contributed to this expense each time it is funded. This may not be an accurate representation of the actual amount each time, but is an average of all the contributions over the next year.">
-                      <span className='font-normal'>
+                  <span className="font-normal ml-1">
+                    <Tooltip
+                      title="This is the estimated amount that will be contributed to this expense each time it is funded. This may not be an accurate representation of the actual amount each time, but is an average of all the contributions over the next year.">
+                      <span className="font-normal">
                         { estimatedCost || '$--.--' }
                       </span>
                     </Tooltip>
                     <Tooltip title="This feature is still in development and is subject to change.">
-                      <Science className="mb-1 fill-gray-600" />
+                      <Science className="mb-1 fill-gray-600"/>
                     </Tooltip>
                   </span>
                 </div>

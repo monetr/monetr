@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { FocusEventHandler, useEffect, useState } from 'react';
 import Select, { ActionMeta, FormatOptionLabelMeta, OnChangeValue, Theme } from 'react-select';
 import { lighten } from '@mui/material';
 
@@ -14,6 +14,7 @@ interface Props<T extends HTMLElement>{
   date: moment.Moment;
   onChange: { (value: Recurrence | null): void };
   disabled?: boolean;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
 }
 
 export default function RecurrenceSelect<T extends HTMLElement>(props: Props<T>): JSX.Element {
@@ -96,6 +97,7 @@ export default function RecurrenceSelect<T extends HTMLElement>(props: Props<T>)
       styles={ customStyles }
       menuPlacement="auto"
       menuPortalTarget={ ref }
+      onBlur={ props.onBlur }
     />
   );
 }

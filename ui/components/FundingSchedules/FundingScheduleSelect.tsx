@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FocusEventHandler } from 'react';
 import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
 import { Button, lighten } from '@mui/material';
 import moment from 'moment';
@@ -19,6 +19,7 @@ interface Props<T extends HTMLElement>{
   onChange: { (value: number): void };
   disabled?: boolean;
   value?: number;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
 }
 
 function FundingSelectionOption({ children, ...props }: OptionProps<SelectOption>): JSX.Element {
@@ -116,6 +117,7 @@ export default function FundingScheduleSelect<T extends HTMLElement>(props: Prop
       styles={ customStyles }
       menuPlacement="auto"
       menuPortalTarget={ ref }
+      onBlur={ props.onBlur }
     />
   );
 }
