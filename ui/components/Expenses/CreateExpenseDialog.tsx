@@ -1,7 +1,21 @@
-import React, { useRef } from 'react';
+import { Science } from '@mui/icons-material';
+import { useSpendingForecast } from 'hooks/forecast';
+import { useFundingSchedules } from 'hooks/fundingSchedules';
+import React, { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { DatePicker } from '@mui/lab';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, InputAdornment, TextField } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  InputAdornment,
+  TextField,
+  Tooltip,
+} from '@mui/material';
 import { AxiosError } from 'axios';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import moment from 'moment';
@@ -13,6 +27,7 @@ import RecurrenceSelect from 'components/Recurrence/RecurrenceSelect';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
+import formatAmount from 'util/formatAmount';
 
 interface CreateExpenseForm {
   name: string;
@@ -26,7 +41,10 @@ function CreateExpenseDialog(): JSX.Element {
   const modal = useModal();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createSpending = useCreateSpending();
+  const fundingSchedules = useFundingSchedules();
+  const spendingForecast = useSpendingForecast();
   const { enqueueSnackbar } = useSnackbar();
+  const [estimatedCost, setEstimatedCost] = useState<string | null>(null);
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -43,6 +61,20 @@ function CreateExpenseDialog(): JSX.Element {
 
     if ((input.amount % 1) != 0 && input.amount.toString().split('.')[1].length > 2) {
       errors['amount'] = 'Can only have up to 2 decimal places.';
+    }
+
+    if (input.fundingScheduleId > 0 &&
+        input.recurrenceRule &&
+        input.nextOccurrence &&
+        Object.keys(errors).length === 0)  {
+      spendingForecast({
+        bankAccountId: selectedBankAccountId,
+        nextRecurrence: input.nextOccurrence.startOf('day'),
+        spendingType: SpendingType.Expense,
+        fundingScheduleId: input.fundingScheduleId,
+        targetAmount: Math.ceil(input.amount * 100), // Convert to an integer.
+        recurrenceRule: input.recurrenceRule.ruleString(),
+      }).then(result => setEstimatedCost(formatAmount(result.estimatedCost)));
     }
 
     return errors;
@@ -189,6 +221,22 @@ function CreateExpenseDialog(): JSX.Element {
                     onChange={ value => setFieldValue('fundingScheduleId', value) }
                     value={ values.fundingScheduleId }
                   />
+                </div>
+                <Divider className='col-span-12 mt-4' />
+                <div className='col-span-12'>
+                  <span className='font-normal ml-3'>
+                    Estimated cost per { values.fundingScheduleId ? fundingSchedules.get(values.fundingScheduleId).name : 'pay check' }.
+                  </span>
+                  <span className='font-normal ml-1'>
+                    <Tooltip title="This is the estimated amount that will be contributed to this expense each time it is funded. This may not be an accurate representation of the actual amount each time, but is an average of all the contributions over the next year.">
+                      <span className='font-normal'>
+                        { estimatedCost || '$--.--' }
+                      </span>
+                    </Tooltip>
+                    <Tooltip title="This feature is still in development and is subject to change.">
+                      <Science className="mb-1 fill-gray-600" />
+                    </Tooltip>
+                  </span>
                 </div>
               </div>
             </DialogContent>

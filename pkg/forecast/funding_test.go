@@ -1,6 +1,7 @@
 package forecast
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -22,7 +23,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		now := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
 		expected := time.Date(2022, 5, 15, 0, 0, 0, 0, time.UTC)
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		next := instructions.GetNextFundingEventAfter(now, time.UTC)
+		next := instructions.GetNextFundingEventAfter(context.Background(), now, time.UTC)
 		assert.Equal(t, expected, next.Date, "should contribute next on sunday the 15th of may")
 	})
 
@@ -38,7 +39,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		now := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
 		expected := time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC)
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		next := instructions.GetNextFundingEventAfter(now, time.UTC)
+		next := instructions.GetNextFundingEventAfter(context.Background(), now, time.UTC)
 		assert.Equal(t, expected, next.Date, "should contribute next on the 13th, which is a friday")
 	})
 
@@ -56,13 +57,13 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		now := time.Date(2022, 9, 31, 0, 23, 10, 0, timezone)
 		expected := time.Date(2022, 10, 14, 0, 0, 0, 0, timezone)
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		next := instructions.GetNextFundingEventAfter(now, timezone)
+		next := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, expected, next.Date, "should contribute next on the 14th, which is a friday")
 
 		fundingSchedule.ExcludeWeekends = false
 		expected = time.Date(2022, 10, 15, 0, 0, 0, 0, timezone)
 		instructions = NewFundingScheduleFundingInstructions(fundingSchedule)
-		next = instructions.GetNextFundingEventAfter(now, timezone)
+		next = instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, expected, next.Date, "should contribute next on the 15th when we are not excluding weekends")
 	})
 
@@ -83,7 +84,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		now := time.Date(2022, 5, 14, 0, 0, 0, 0, time.UTC)
 		expected := time.Date(2022, 5, 31, 0, 0, 0, 0, time.UTC)
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		next := instructions.GetNextFundingEventAfter(now, time.UTC)
+		next := instructions.GetNextFundingEventAfter(context.Background(), now, time.UTC)
 		assert.Equal(t, expected, next.Date, "should not show the 15th, instead should show the 31st")
 	})
 
@@ -100,7 +101,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 			NextOccurrence:  next,
 		}
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		nextFundingOccurrence := instructions.GetNextFundingEventAfter(now, timezone)
+		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, expected, nextFundingOccurrence.Date, "should be on friday the 30th of september next")
 	})
 
@@ -116,7 +117,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 			NextOccurrence:  time.Time{},
 		}
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		nextFundingOccurrence := instructions.GetNextFundingEventAfter(now, timezone)
+		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, expected, nextFundingOccurrence.Date, "should be on friday the 30th of september next")
 	})
 
@@ -132,7 +133,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 			NextOccurrence:  next,
 		}
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		nextFundingOccurrence := instructions.GetNextFundingEventAfter(now, timezone)
+		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, next, nextFundingOccurrence.Date, "should be on friday the 30th of september next")
 	})
 }
@@ -160,7 +161,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			NextOccurrence:  expected[0].Date,
 		}
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		nextN := instructions.GetNFundingEventsAfter(2, now, timezone)
+		nextN := instructions.GetNFundingEventsAfter(context.Background(), 2, now, timezone)
 		assert.Equal(t, expected, nextN, "should have the next two be the 15th and the 30th of september")
 	})
 
@@ -196,7 +197,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			NextOccurrence:  expected[0].Date,
 		}
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		nextN := instructions.GetNFundingEventsAfter(4, now, timezone)
+		nextN := instructions.GetNFundingEventsAfter(context.Background(), 4, now, timezone)
 		assert.Equal(t, expected, nextN)
 	})
 
@@ -232,7 +233,7 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			NextOccurrence:  expected[0].Date,
 		}
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		nextN := instructions.GetNFundingEventsAfter(4, now, timezone)
+		nextN := instructions.GetNFundingEventsAfter(context.Background(), 4, now, timezone)
 		assert.Equal(t, expected, nextN)
 	})
 }
@@ -252,7 +253,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		count := instructions.GetNumberOfFundingEventsBetween(now, end, timezone)
+		count := instructions.GetNumberOfFundingEventsBetween(context.Background(), now, end, timezone)
 		assert.EqualValues(t, 7, count, "should have seven contributions")
 	})
 
@@ -270,7 +271,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		count := instructions.GetNumberOfFundingEventsBetween(now, end, timezone)
+		count := instructions.GetNumberOfFundingEventsBetween(context.Background(), now, end, timezone)
 		assert.EqualValues(t, 24, count, "should have 24 contributions")
 	})
 
@@ -288,7 +289,8 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		count := instructions.GetNumberOfFundingEventsBetween(now, end, timezone)
+		count := instructions.GetNumberOfFundingEventsBetween(context.Background(), now, end, timezone)
 		assert.EqualValues(t, 12, count, "should have 12 contributions")
 	})
 }
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Select, { ActionMeta, FormatOptionLabelMeta, OnChangeValue, Theme } from 'react-select';
 import { lighten } from '@mui/material';
 
@@ -12,13 +12,23 @@ interface Props<T extends HTMLElement>{
   className?: string;
   menuRef?: T;
   date: moment.Moment;
-  onChange: { (value: Recurrence): void };
+  onChange: { (value: Recurrence | null): void };
   disabled?: boolean;
 }
 
 export default function RecurrenceSelect<T extends HTMLElement>(props: Props<T>): JSX.Element {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const rules = getRecurrencesForDate(props.date);
+
+  useEffect(() => {
+    if (selectedIndex === rules.length) {
+      setSelectedIndex(null);
+      props.onChange(null);
+      return
+    }
+
+    props.onChange(rules[selectedIndex]);
+  }, [props.date])
 
   function handleRecurrenceChange(newValue: OnChangeValue<SelectOption, false>, _: ActionMeta<SelectOption>) {
     const { onChange } = props;
