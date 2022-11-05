@@ -126,7 +126,7 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		}
 	}
 
-	if token != "" {
+	if token == "" {
 		if token = ctx.GetHeader(c.configuration.Server.Cookies.Name); token != "" {
 			data["source"] = "header"
 		}
