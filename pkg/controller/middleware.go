@@ -88,11 +88,11 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		defer func() {
 			var message string
 			if err == nil {
-				message = "Token is valid"
+				message = "Auth is valid"
 				data["accountId"] = c.mustGetAccountId(ctx)
 				data["userId"] = c.mustGetUserId(ctx)
 			} else {
-				message = "Request did not have valid Token"
+				message = "Request did not have valid auth"
 			}
 
 			hub.AddBreadcrumb(&sentry.Breadcrumb{
@@ -123,6 +123,12 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 			cookieOptions...,
 		); token != "" {
 			data["source"] = "cookie"
+		}
+	}
+
+	if token != "" {
+		if token = ctx.GetHeader(c.configuration.Server.Cookies.Name); token != "" {
+			data["source"] = "header"
 		}
 	}
 
