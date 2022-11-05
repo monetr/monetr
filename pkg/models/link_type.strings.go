@@ -11,11 +11,12 @@ func _() {
 	_ = x[UnknownLinkType-0]
 	_ = x[PlaidLinkType-1]
 	_ = x[ManualLinkType-2]
+	_ = x[StripeLinkType-3]
 }
 
-const _LinkType_name = "UnknownLinkTypePlaidLinkTypeManualLinkType"
+const _LinkType_name = "UnknownLinkTypePlaidLinkTypeManualLinkTypeStripeLinkType"
 
-var _LinkType_index = [...]uint8{0, 15, 28, 42}
+var _LinkType_index = [...]uint8{0, 15, 28, 42, 56}
 
 func (i LinkType) String() string {
 	if i >= LinkType(len(_LinkType_index)-1) {
