@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/kataras/iris/v12"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
@@ -194,13 +195,54 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 		return
 	}
 
-	// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
-	// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
-	// next occurrence.
-	if !request.NextOccurrence.Equal(existingFundingSchedule.NextOccurrence) || request.NextOccurrence.Before(time.Now()) {
-		request.NextOccurrence = existingFundingSchedule.NextOccurrence
-		// TODO If the next occurrence is updated, then that means the spending objects dependent on this funding schedule
-		// could need updating. We should kick something off here.
+	recalculateSpending := false
+	// If the next occurrence changes then we need to recalulate spending.
+	if !request.NextOccurrence.Equal(existingFundingSchedule.NextOccurrence) {
+		// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
+		// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
+		// next occurrence.
+		if request.NextOccurrence.Before(time.Now()) {
+			request.NextOccurrence = existingFundingSchedule.NextOccurrence
+		}
+		recalculateSpending = true
+	}
+
+	// If the recurrence rule has changed then we need to recalculate spending too.
+	if request.Rule.String() != existingFundingSchedule.Rule.String() {
+		recalculateSpending = true
+	}
+
+	if recalculateSpending {
+		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]interface{}{
+			"bankAccountId":     bankAccountId,
+			"fundingScheduleId": fundingScheduleId,
+		})
+		spending, err := repo.GetSpendingByFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
+		if err != nil {
+			c.wrapPgError(ctx, err, "failed to retrieve existing spending objects for funding schedule")
+			return
+		}
+
+		if len(spending) > 0 {
+			account, err := repo.GetAccount(c.getContext(ctx))
+			if err != nil {
+				c.wrapPgError(ctx, err, "failed to retrieve account data to update funding schedule")
+				return
+			}
+
+			now := time.Now()
+			for _, spend := range spending {
+				if err := spend.CalculateNextContribution(c.getContext(ctx), account.Timezone, &request, now); err != nil {
+					c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to recalculate spending object")
+					return
+				}
+			}
+
+			if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spending); err != nil {
+				c.wrapPgError(ctx, err, "failed to update spending objects for updated funding schedule")
+				return
+			}
+		}
 	}
 
 	if err = repo.UpdateFundingSchedule(c.getContext(ctx), &request); err != nil {
