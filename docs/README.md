@@ -1,3 +1,4 @@
 ---
+title: ""
 template: home.html
 ---
