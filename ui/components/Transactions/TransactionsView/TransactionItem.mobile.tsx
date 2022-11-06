@@ -53,6 +53,9 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
         </ListItemAvatar>
         <ListItemText
           className="flex-initial w-7/12"
+          primaryTypographyProps={{
+            className: "text-ellipsis overflow-hidden truncate"
+          }}
           primary={ props.transaction.getName() }
           secondaryTypographyProps={{
             className: "text-ellipsis overflow-hidden truncate"
