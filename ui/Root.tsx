@@ -61,7 +61,7 @@ export default function Root(): JSX.Element {
   });
 
   return (
-    <div className={ clsx({
+    <div className={ clsx('w-full h-full', {
       'dark': theme.palette.mode === 'dark',
     })}>
       <React.StrictMode>
