@@ -275,7 +275,7 @@ LOCAL_PROTOCOL:=https
 CLOUD_MAGIC:=magic
 else
 LOCAL_DOMAIN ?= monetr.local
-LOCAL_PROTOCOL=http
+LOCAL_PROTOCOL=https
 CLOUD_MAGIC=false
 endif
 endif
@@ -293,6 +293,18 @@ clean: shutdown $(HOSTESS)
 	-git clean -f -X $(STATIC_DIR)
 	-git submodule deinit -f pkg/icons/sources/simple-icons
 
+LOCAL_CERTIFICATE_DIR=$(MONETR_DIR)/certs/$(LOCAL_DOMAIN)
+$(LOCAL_CERTIFICATE_DIR): $(MONETR_DIR)
+	mkdir -p $(LOCAL_CERTIFICATE_DIR)
+
+LOCAL_CERTIFICATE_KEY=$(LOCAL_CERTIFICATE_DIR)/key.pem
+LOCAL_CERTIFICATE_CERT=$(LOCAL_CERTIFICATE_DIR)/cert.pem
+LOCAL_CERTIFICATE=$(LOCAL_CERTIFICATE_KEY) $(LOCAL_CERTIFICATE_CERT)
+$(LOCAL_CERTIFICATE) &: $(LOCAL_CERTIFICATE_DIR) $(MKCERT)
+	$(call infoMsg,Setting up local development TLS certificate; This is required for OAuth2)
+	sudo $(MKCERT) -install
+	$(MKCERT) -key-file $(LOCAL_CERTIFICATE_KEY) -cert-file $(LOCAL_CERTIFICATE_CERT) $(LOCAL_DOMAIN)
+
 DOCKER=$(shell which docker)
 DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env
 COMPOSE_FILE=$(PWD)/docker-compose.yaml
@@ -306,7 +318,9 @@ develop: $(NODE_MODULES) $(SIMPLE_ICONS)
 ifndef GITPOD_WORKSPACE_ID
 ifndef CODESPACE_NAME
 ifneq ($(LOCAL_DOMAIN),localhost)
-develop: $(HOSTESS) $(GOOGLE_KMS_AUTH)
+develop: $(HOSTESS) $(GOOGLE_KMS_AUTH) $(LOCAL_CERTIFICATE)
+develop: export LOCAL_CERTIFICATE_DIRECTORY=$(LOCAL_CERTIFICATE_DIR)
+develop:
 	$(call infoMsg,Setting up $(LOCAL_DOMAIN) domain with your /etc/hosts file)
 	$(call infoMsg,If you would prefer to not use this; add)
 	$(call infoMsg,	LOCAL_DOMAIN=localhost)
