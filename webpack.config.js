@@ -17,8 +17,7 @@ module.exports = (env, argv) => {
     filename = `[name].js`;
   }
 
-  let insecureWebsocket = process.env.INSECURE_WS === 'true';
-  let websocketUrl = insecureWebsocket ? 'ws://localhost/ws' : 'wss://app.monetr.mini/ws';
+  let websocketUrl = 'wss://monetr.local/ws';
 
   // This is used for GitPod and CodeSpaces editor environments. Allowing hot reloading when working in the cloud.
   if (process.env.CLOUD_MAGIC === 'magic' && process.env.MONETR_UI_DOMAIN_NAME) {
