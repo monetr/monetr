@@ -76,7 +76,7 @@ jobs:
         timeout-minutes: 30
         run: |
           make develop || (make logs && exit 1)
-          curl https://monetr.local
+          curl -I https://monetr.local
           make shutdown
 
   build_ui:
