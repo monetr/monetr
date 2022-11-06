@@ -63,7 +63,7 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
           { props.transaction.isPending && <AccessTime />
         }
         </div>
-        <span className={ classnames('h-full flex-none amount align-middle self-center justify-end place-self-center text-sm', {
+        <span className={ classnames('h-full flex-none amount align-middle self-center justify-end place-self-center text-sm pr-1', {
           'text-green-600': props.transaction.getIsAddition(),
           'text-red-600': !props.transaction.getIsAddition(),
         }) }>
