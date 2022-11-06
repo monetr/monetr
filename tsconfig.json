@@ -14,7 +14,8 @@
     "target": "ES2022"
   },
   "include": [
-    "ui/**/*"
+    "ui/**/*",
+    "../tailwind.config.js"
   ],
   "exclude": [
     "pkg/ui/static"

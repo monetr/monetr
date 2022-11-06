@@ -1,8 +1,11 @@
+import { useTheme } from '@mui/styles';
+import useIsMobile from 'hooks/useIsMobile';
 import React from 'react';
 import { Avatar } from '@mui/material';
 
 import { useIconSearch } from 'hooks/useIconSearch';
 import Transaction from 'models/Transaction';
+import theme from 'theme';
 
 interface Props {
   transaction: Transaction;
@@ -12,6 +15,7 @@ export default function TransactionIcon(props: Props): JSX.Element {
   // Try to retrieve the icon. If the icon cannot be retrieved or icons are not currently enabled in the application
   // config then this will simply return null.
   const icon = useIconSearch(props.transaction.name);
+  const isMobile = useIsMobile();
   if (icon?.svg) {
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.
     const colorStyles = icon?.colors?.length > 0 ?

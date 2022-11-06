@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React from 'react';
 import {
   QueryClient,
@@ -60,24 +61,28 @@ export default function Root(): JSX.Element {
   });
 
   return (
-    <React.StrictMode>
-      <Sentry.ErrorBoundary>
-        <QueryClientProvider client={ queryClient }>
-          <Router>
-            <ThemeProvider theme={ theme }>
-              <LocalizationProvider dateAdapter={ AdapterMoment }>
-                <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-                  <NiceModal.Provider>
-                    <CssBaseline />
-                    <Application />
-                    <GlobalFooter />
-                  </NiceModal.Provider>
-                </SnackbarProvider>
-              </LocalizationProvider>
-            </ThemeProvider>
-          </Router>
-        </QueryClientProvider>
-      </Sentry.ErrorBoundary>
-    </React.StrictMode>
+    <div className={ clsx({
+      'dark': theme.palette.mode === 'dark',
+    })}>
+      <React.StrictMode>
+        <Sentry.ErrorBoundary>
+          <QueryClientProvider client={ queryClient }>
+            <Router>
+              <ThemeProvider theme={ theme }>
+                <LocalizationProvider dateAdapter={ AdapterMoment }>
+                  <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+                    <NiceModal.Provider>
+                      <CssBaseline />
+                      <Application />
+                      <GlobalFooter />
+                    </NiceModal.Provider>
+                  </SnackbarProvider>
+                </LocalizationProvider>
+              </ThemeProvider>
+            </Router>
+          </QueryClientProvider>
+        </Sentry.ErrorBoundary>
+      </React.StrictMode>
+    </div>
   );
 }

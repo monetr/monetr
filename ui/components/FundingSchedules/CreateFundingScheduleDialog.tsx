@@ -1,3 +1,4 @@
+import useIsMobile from 'hooks/useIsMobile';
 import React, { Fragment, useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Science } from '@mui/icons-material';
@@ -22,6 +23,7 @@ interface CreateFundingScheduleForm {
 
 function CreateFundingScheduleDialog(): JSX.Element {
   const modal = useModal();
+  const isMobile = useIsMobile();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createFundingSchedule = useCreateFundingSchedule();
   const ref = useRef<HTMLDivElement>(null);
@@ -80,7 +82,7 @@ function CreateFundingScheduleDialog(): JSX.Element {
         submitForm,
       }) => (
         <form onSubmit={ handleSubmit }>
-          <Dialog open={ modal.visible } maxWidth="xs" ref={ ref }>
+          <Dialog open={ modal.visible } maxWidth="xs" ref={ ref } fullScreen={ isMobile }>
             <DialogTitle>
               Create A New Funding Schedule
             </DialogTitle>

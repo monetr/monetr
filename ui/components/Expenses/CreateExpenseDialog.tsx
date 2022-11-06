@@ -1,6 +1,7 @@
 import { Science } from '@mui/icons-material';
 import { useSpendingForecast } from 'hooks/forecast';
 import { useFundingSchedules } from 'hooks/fundingSchedules';
+import useIsMobile from 'hooks/useIsMobile';
 import React, { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { DatePicker } from '@mui/lab';
@@ -43,6 +44,7 @@ function CreateExpenseDialog(): JSX.Element {
   const createSpending = useCreateSpending();
   const fundingSchedules = useFundingSchedules();
   const spendingForecast = useSpendingForecast();
+  const isMobile = useIsMobile();
   const { enqueueSnackbar } = useSnackbar();
   const [estimatedCost, setEstimatedCost] = useState<string | null>(null);
 
@@ -145,7 +147,7 @@ function CreateExpenseDialog(): JSX.Element {
         isValid,
       }) => (
         <form onSubmit={ handleSubmit }>
-          <Dialog open={ modal.visible } maxWidth="sm" ref={ ref }>
+          <Dialog open={ modal.visible } maxWidth="sm" ref={ ref } fullScreen={ isMobile }>
             <DialogTitle>
               Create A New Expense
             </DialogTitle>

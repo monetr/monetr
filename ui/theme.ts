@@ -1,14 +1,25 @@
 import { createTheme, darken } from '@mui/material';
+import resolveConfig from 'tailwindcss/resolveConfig';
+import tailwindConfig from '../tailwind.config.js';
 
+const fullConfig = resolveConfig(tailwindConfig);
 const darkMode = false; // window.localStorage.getItem('darkMode') === 'true';
 const inputHeight = 56; // Default is 56
 const defaultPrimary = '#4E1AA0';
 const defaultSecondary = '#FF5798';
+
 const theme = createTheme({
   shape: {
     borderRadius: 10,
   },
   components: {
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: defaultPrimary,
+        },
+      },
+    },
     MuiInputBase: {
       styleOverrides: {
         root: {
@@ -44,7 +55,8 @@ const theme = createTheme({
       contrastText: '#FFFFFF',
     },
     background: {
-      default: darkMode ? '#2f2f2f' : '#FFFFFF',
+      default: darkMode ? fullConfig.theme.colors['neutral']['800'] : 'white',
+      // default: darkMode ? '#2f2f2f' : '#FFFFFF',
     },
   },
 });

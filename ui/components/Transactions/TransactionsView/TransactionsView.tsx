@@ -57,10 +57,10 @@ function TransactionsView(): JSX.Element {
         <li key={ group.unix() }>
           <ul>
             <Fragment>
-              <ListSubheader className="pl-0 pr-0 pt-1 bg-gray-50">
-                <Typography className="ml-3 md:ml-3 font-semibold opacity-75 text-base">
+              <ListSubheader className="pl-0 pr-0 pt-1 bg-gray-50 dark:bg-neutral-900 leading-none">
+                <span className="ml-3 md:ml-3 font-semibold opacity-75 text-base text-sm text-gray-700 dark:text-gray-100">
                   { formatDateHeader(group) }
-                </Typography>
+                </span>
                 <Divider />
               </ListSubheader>
             </Fragment>
@@ -92,7 +92,7 @@ function TransactionsView(): JSX.Element {
 
   return (
     <div className="minus-nav">
-      <div className="w-full view-area bg-white">
+      <div className="w-full view-area bg-white dark:bg-neutral-800">
         <List disablePadding className="w-full">
           { renderTransactions() }
           { (loading || hasNextPage) && (
