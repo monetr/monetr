@@ -86,9 +86,14 @@ export default function TransactionSpentFromSelectionMobile(props: Props): JSX.E
       disableSwipeToOpen
       onOpen={ () => {} }
     >
-      <List className="w-[80vw]">
-        { items }
-      </List>
+      <div className="w-[80vw]">
+        <div className="w-full flex p-3 justify-center">
+          <p>What should this be spent from?</p>
+        </div>
+        <List disablePadding>
+          { items }
+        </List>
+      </div>
     </SwipeableDrawer>
   )
 }
