@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.12.1](https://github.com/monetr/monetr/compare/v0.12.0...v0.12.1) (2022-11-07)
+
+
+### Features
+
+* **api:** Adding basic support for mobile authentication. ([89da686](https://github.com/monetr/monetr/commit/89da686da04200a0e7da29dd85485a4f94228b86))
+* **dev:** Added support for HTTPS local development. ([#1200](https://github.com/monetr/monetr/issues/1200)) ([95114cb](https://github.com/monetr/monetr/commit/95114cbf5bac0fd4f9c21926e7e133b686e5c96f))
+* **mobile:** Significantly improving mobile UI. ([ea6557e](https://github.com/monetr/monetr/commit/ea6557e1386bb8c1a0cfcaa9c3282fcfc659220f))
+* **ui:** Adding transaction edit screen for mobile. ([#1201](https://github.com/monetr/monetr/issues/1201)) ([6b2596b](https://github.com/monetr/monetr/commit/6b2596bc4f64e2d0a6d5ab868a6d568e2a274276))
+* **ui:** Significantly improved edit transaction UI for mobile. ([a1329df](https://github.com/monetr/monetr/commit/a1329df2286e518c4da6536d25ca8f9f461c1d82))
+
+
+### Bug Fixes
+
+* **api:** Fixed funding schedules updating + deleting. ([1e46066](https://github.com/monetr/monetr/commit/1e46066a5e6ba5e7921d9de62543925f64d7baf9))
+* **api:** Tweaking routes for API vs UI handling. ([bbb9b1d](https://github.com/monetr/monetr/commit/bbb9b1d97cbe4b9bfebc2fe012242af06fe095f2))
+* **api:** Update spending when a funding schedule is updated. ([9470a34](https://github.com/monetr/monetr/commit/9470a34de4277b9126f7b637214d679acb9f534a))
+* **auth:** Fix bug causing authentication to fail. ([304eec1](https://github.com/monetr/monetr/commit/304eec1e149f318ace61ef2c77b1d789a5f9aac0))
+* **build:** Fixing failing build from mobile UI changes. ([a285622](https://github.com/monetr/monetr/commit/a285622ba36cd32eb2b624c52fe82ef773aee40f))
+* **docs:** Fixed title of home page. ([5a7988d](https://github.com/monetr/monetr/commit/5a7988dddf71cc85a730c69217faa11e6b58ebe4))
+* **ui:** Create goal dialog should be fullscreen on mobile. ([e6efdd6](https://github.com/monetr/monetr/commit/e6efdd69456db5b1cff89d7bd8a34d40a6bff99c))
+* **ui:** Fixed page height for unauthenticated routes. ([e205e2c](https://github.com/monetr/monetr/commit/e205e2c3a14086fa3f44726b89aad81124f8b1aa))
+* **ui:** Gracefully truncate long transaction names in mobile. ([b2ab185](https://github.com/monetr/monetr/commit/b2ab185d5dcc9e70501157aa5860e9edf463b113))
+* **ui:** Tweak padding on mobile transactions. ([beb903e](https://github.com/monetr/monetr/commit/beb903e9f765d9801d477372a83eff8335543828))
+
+
+### Miscellaneous
+
+* **ci:** Removing old workflow that isn't used anymore. ([54bf0ad](https://github.com/monetr/monetr/commit/54bf0ad1586a9d3d32cb38ae0556fd7143100e7f))
+* **links:** Adding `stripe` link type for the future. ([14e9ac0](https://github.com/monetr/monetr/commit/14e9ac0256754c1acf2204826511cedfdb50b6b3))
+* **ui:** Adding small info header to spend select. ([3c68821](https://github.com/monetr/monetr/commit/3c68821d01a550e538e72559dff10df6b0be8722))
+
 ## [0.12.0](https://github.com/monetr/monetr/compare/v0.11.27...v0.12.0) (2022-11-04)
 
 
