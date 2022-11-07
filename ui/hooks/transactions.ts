@@ -63,7 +63,7 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<v
         queryClient.setQueriesData(
           `/bank_accounts/${ response.transaction.bankAccountId }/spending`,
           (previous: Array<Partial<Spending>>) => previous
-            .map(item => response.spending.find(updated => updated.spendingId === item.spendingId) || item),
+            .map(item => (response.spending || []).find(updated => updated.spendingId === item.spendingId) || item),
         ),
         queryClient.setQueriesData(
           `/bank_accounts/${ response.transaction.bankAccountId }/balances`,

@@ -1,7 +1,7 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { Edit, ExpandMore } from '@mui/icons-material';
-import { Accordion, AccordionDetails, AccordionSummary, Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, FormLabel, InputBase, List, ListItem, ListItemText, Radio, RadioGroup, Slide, TextField, Typography } from '@mui/material';
+import { Edit, ExpandMore, Inbox, Inbox, Mail, Mail } from '@mui/icons-material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Button, ButtonBase, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, FormLabel, InputBase, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Radio, RadioGroup, Slide, SwipeableDrawer, TextField, Typography } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 
@@ -10,7 +10,11 @@ import TransactionIcon from '../components/TransactionIcon';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import useIsMobile from 'hooks/useIsMobile';
 import Transaction from 'models/Transaction';
-import { useSpending } from 'hooks/spending';
+import { useSpending, useSpendingSink } from 'hooks/spending';
+import TransactionSpentFromSelectionMobile from './TransactionSpentFromSelection.mobile';
+import clsx from 'clsx';
+import { AxiosError } from 'axios';
+import { useUpdateTransaction } from 'hooks/transactions';
 
 
 export interface EditTransactionDialogMobileProps {
@@ -34,8 +38,9 @@ const Transition = React.forwardRef(function Transition(
 function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): JSX.Element {
   const modal = useModal();
   const isMobile = useIsMobile();
-  const selectedBankAccountId = useSelectedBankAccountId();
-  const spending = useSpending(props.transaction.spendingId);
+  const updateTransaction = useUpdateTransaction();
+  const { result: allSpending } = useSpendingSink();
+  const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 
   const { transaction } = props;
 
@@ -49,7 +54,19 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
   }
 
   async function submit(values: EditTransactionForm, helper: FormikHelpers<EditTransactionForm>): Promise<void> {
-    return Promise.resolve();
+    helper.setSubmitting(true);
+    const updatedTransaction = new Transaction({
+      ...transaction,
+      spendingId: values.spendingId,
+      name: values.name,
+    });
+
+    return updateTransaction(updatedTransaction)
+      .then(() => closeDialog())
+      .catch((error: AxiosError) => {
+        alert(error?.response?.data?.error || 'Could not save transaction name.')
+        helper.setSubmitting(false);
+      });
   }
 
   const initialValues: EditTransactionForm = {
@@ -81,59 +98,16 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
     );
   }
 
-  function SpentFrom(): JSX.Element {
-    let name: JSX.Element | string;
-    if (transaction.spendingId && spending) {
-      name = <span className="text-semibold">{ spending.name }</span>
-    } else if (transaction.spendingId && !spending) {
-      name = <span className="text-semibold">...</span>
-    } else {
-      name = 'Safe-To-Spend';
+  function spendingName(spendingId: number | null): JSX.Element | string {
+    if (spendingId === null) {
+      return 'Safe-To-Spend';
+    }
+    const spending = allSpending.find(item => item.spendingId === spendingId);
+    if (spending) {
+      return <span className="text-semibold">{ spending.name }</span>
     }
 
-    return (
-      <Fragment>
-        <ListItem className='pl-0 pr-0'>
-          <Accordion square className='pl-0 pr-0 shadow-none w-full'>
-            <AccordionSummary
-              style={{
-                height: 28 + 16,
-                minHeight: 28 + 16,
-              }}
-              classes={{
-                content: 'p-0 m-0 text-xl',
-              }}
-              className='p-0 m-0'
-            >
-              <ListItemText
-                className='flex-none'
-                primary={ 'Spent From' }
-                primaryTypographyProps={ {
-                  className: 'text-xl',
-                } }
-              />
-              <span className="self-center flex-1 text-end text-xl">
-                { name }
-              </span>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormControl>
-                <RadioGroup
-                  aria-labelledby="demo-radio-buttons-group-label"
-                  defaultValue="female"
-                  name="radio-buttons-group"
-                >
-                  <FormControlLabel value="female" control={<Radio />} label="Safe-To-Spend" />
-                  <FormControlLabel value="male" control={<Radio />} label="Amazon" />
-                  <FormControlLabel value="other" control={<Radio />} label="Vacation" />
-                </RadioGroup>
-              </FormControl>
-            </AccordionDetails>
-          </Accordion>
-        </ListItem>
-        <Divider />
-      </Fragment>
-    )
+    return <span className="text-semibold">...</span>
   }
 
   return (
@@ -174,6 +148,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                   <InputBase
                     name='name'
                     className='flex-1 flex text-end'
+                    disabled={ isSubmitting }
                     style={ { height: 28 } }
                     onChange={ handleChange }
                     onBlur={ handleBlur }
@@ -190,6 +165,14 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                   </span>
                 </EditItem>
                 <EditItem name="Date">
+                  <span className={ clsx("flex-1 text-end text-xl opacity-75",{
+                    'text-green-600': props.transaction.getIsAddition(),
+                    'text-red-600': !props.transaction.getIsAddition(),
+                  })}>
+                    { transaction.getAmountString() }
+                  </span>
+                </EditItem>
+                <EditItem name="Date">
                   <span className="flex-1 text-end text-xl opacity-75">
                     { transaction.date.format('MMMM Do, YYYY') }
                   </span>
@@ -199,20 +182,46 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                     { transaction.isPending ? 'Pending' : 'Complete' }
                   </span>
                 </EditItem>
-                <SpentFrom />
+                { !transaction.getIsAddition() && 
+                  <Fragment>
+                    <TransactionSpentFromSelectionMobile
+                      open={ drawerOpen }
+                      onClose={ () => setDrawerOpen(false) }
+                      onChange={ (value) => setFieldValue('spendingId', value) }
+                      value={ values.spendingId }
+                    />
+                    <ListItemButton
+                      className='pl-0 pr-0'
+                      onClick={ () => setDrawerOpen(true) }
+                      disabled={ isSubmitting }
+                    >
+                      <ListItemText
+                        className='flex-none'
+                        primary={ "Spent From" }
+                        primaryTypographyProps={ {
+                          className: 'text-xl',
+                        } }
+                      />
+                      <span className="flex-1 text-end text-xl">
+                        { spendingName(values.spendingId) }
+                      </span>
+                    </ListItemButton>
+                    <Divider />
+                  </Fragment>
+                }
               </List>
             </DialogContent>
             <DialogActions>
               <Button
                 color="secondary"
-                disabled={ false }
+                disabled={ isSubmitting }
                 onClick={ closeDialog }
               >
                 Cancel
               </Button>
               <Button
-                disabled={ false }
-                onClick={ () => {} }
+                disabled={ isSubmitting }
+                onClick={ submitForm }
                 color="primary"
                 type="submit"
               >
