@@ -1,20 +1,19 @@
 import React, { Fragment, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { Edit, ExpandMore, Inbox, Inbox, Mail, Mail } from '@mui/icons-material';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, ButtonBase, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, FormControlLabel, FormLabel, InputBase, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Radio, RadioGroup, Slide, SwipeableDrawer, TextField, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, InputBase, List, ListItem, ListItemButton, ListItemText, Slide } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
+import { AxiosError } from 'axios';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
+
+import TransactionSpentFromSelectionMobile from './TransactionSpentFromSelection.mobile';
 
 import TransactionIcon from '../components/TransactionIcon';
 
-import { useSelectedBankAccountId } from 'hooks/bankAccounts';
+import clsx from 'clsx';
+import { useSpendingSink } from 'hooks/spending';
+import { useUpdateTransaction } from 'hooks/transactions';
 import useIsMobile from 'hooks/useIsMobile';
 import Transaction from 'models/Transaction';
-import { useSpending, useSpendingSink } from 'hooks/spending';
-import TransactionSpentFromSelectionMobile from './TransactionSpentFromSelection.mobile';
-import clsx from 'clsx';
-import { AxiosError } from 'axios';
-import { useUpdateTransaction } from 'hooks/transactions';
 
 
 export interface EditTransactionDialogMobileProps {
@@ -64,7 +63,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
     return updateTransaction(updatedTransaction)
       .then(() => closeDialog())
       .catch((error: AxiosError) => {
-        alert(error?.response?.data?.error || 'Could not save transaction name.')
+        alert(error?.response?.data?.error || 'Could not save transaction name.');
         helper.setSubmitting(false);
       });
   }
@@ -104,10 +103,10 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
     }
     const spending = allSpending.find(item => item.spendingId === spendingId);
     if (spending) {
-      return <span className="text-semibold">{ spending.name }</span>
+      return <span className="text-semibold">{ spending.name }</span>;
     }
 
-    return <span className="text-semibold">...</span>
+    return <span className="text-semibold">...</span>;
   }
 
   return (
@@ -165,10 +164,10 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                   </span>
                 </EditItem>
                 <EditItem name="Date">
-                  <span className={ clsx("flex-1 text-end text-xl opacity-75",{
+                  <span className={ clsx('flex-1 text-end text-xl opacity-75', {
                     'text-green-600': props.transaction.getIsAddition(),
                     'text-red-600': !props.transaction.getIsAddition(),
-                  })}>
+                  }) }>
                     { transaction.getAmountString() }
                   </span>
                 </EditItem>
@@ -182,12 +181,12 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                     { transaction.isPending ? 'Pending' : 'Complete' }
                   </span>
                 </EditItem>
-                { !transaction.getIsAddition() && 
+                { !transaction.getIsAddition() &&
                   <Fragment>
                     <TransactionSpentFromSelectionMobile
                       open={ drawerOpen }
                       onClose={ () => setDrawerOpen(false) }
-                      onChange={ (value) => setFieldValue('spendingId', value) }
+                      onChange={ value => setFieldValue('spendingId', value) }
                       value={ values.spendingId }
                     />
                     <ListItemButton
@@ -197,7 +196,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                     >
                       <ListItemText
                         className='flex-none'
-                        primary={ "Spent From" }
+                        primary="Spent From"
                         primaryTypographyProps={ {
                           className: 'text-xl',
                         } }
