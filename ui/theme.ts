@@ -17,6 +17,7 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: defaultPrimary,
+          backgroundImage: 'none',
         },
       },
     },

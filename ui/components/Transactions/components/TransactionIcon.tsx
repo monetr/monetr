@@ -9,13 +9,13 @@ import theme from 'theme';
 
 interface Props {
   transaction: Transaction;
+  size?: number;
 }
 
 export default function TransactionIcon(props: Props): JSX.Element {
   // Try to retrieve the icon. If the icon cannot be retrieved or icons are not currently enabled in the application
   // config then this will simply return null.
   const icon = useIconSearch(props.transaction.name);
-  const isMobile = useIsMobile();
   if (icon?.svg) {
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.
     const colorStyles = icon?.colors?.length > 0 ?
@@ -25,8 +25,8 @@ export default function TransactionIcon(props: Props): JSX.Element {
     const styles = {
       WebkitMaskImage: `url(data:image/svg+xml;base64,${ icon.svg })`,
       WebkitMaskRepeat: 'no-repeat',
-      height: '40px',
-      width: '40px',
+      height: `${props.size || 40}px`,
+      width: `${props.size || 40}px`,
       ...colorStyles,
     };
 

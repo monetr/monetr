@@ -1,20 +1,19 @@
-import { AccessTime } from '@mui/icons-material';
-import classnames from 'classnames';
-import { useSpending } from 'hooks/spending';
 import React, { Fragment } from 'react';
-import { Chip, Divider, ListItem, ListItemAvatar, ListItemButton, ListItemText, Skeleton } from '@mui/material';
+import { AccessTime, ChevronRight } from '@mui/icons-material';
+import { Divider, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material';
+import classnames from 'classnames';
 
 import TransactionIcon from 'components/Transactions/components/TransactionIcon';
+import { useSpending } from 'hooks/spending';
 import Transaction from 'models/Transaction';
-
-import 'components/Transactions/TransactionsView/styles/TransactionItem.scss';
+import { showEditTransactionMobileDialog } from './EditTransactionDialog.mobile';
 
 interface Props {
   transaction: Transaction;
 }
 
 export default function TransactionItemMobile(props: Props): JSX.Element {
-  const spending = useSpending(props.transaction.spendingId)
+  const spending = useSpending(props.transaction.spendingId);
 
   function SpentFromLine(): JSX.Element {
     if (props.transaction.getIsAddition()) {
@@ -30,7 +29,7 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
         <span className="text-ellipsis overflow-hidden">
           Spent From <span className="opacity-75">...</span>
         </span>
-      )
+      );
     }
 
     const name = spending ?
@@ -45,26 +44,30 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
     );
   }
 
+  const showEditDialog = () => showEditTransactionMobileDialog({
+    transaction: props.transaction,
+  });
+
   return (
     <Fragment>
-      <ListItemButton className="pr-0">
+      <ListItemButton className="pr-0" onClick={ showEditDialog }>
         <ListItemAvatar>
-          <TransactionIcon transaction={ props.transaction }/>
+          <TransactionIcon transaction={ props.transaction } />
         </ListItemAvatar>
         <ListItemText
           className="flex-initial w-7/12"
-          primaryTypographyProps={{
-            className: "text-ellipsis overflow-hidden truncate"
-          }}
+          primaryTypographyProps={ {
+            className: 'text-ellipsis overflow-hidden truncate',
+          } }
           primary={ props.transaction.getName() }
-          secondaryTypographyProps={{
-            className: "text-ellipsis overflow-hidden truncate"
-          }}
+          secondaryTypographyProps={ {
+            className: 'text-ellipsis overflow-hidden truncate',
+          } }
           secondary={ <SpentFromLine /> }
         />
         <div className="flex-1 flex justify-start">
           { props.transaction.isPending && <AccessTime />
-        }
+          }
         </div>
         <span className={ classnames('h-full flex-none amount align-middle self-center justify-end place-self-center text-sm pr-1', {
           'text-green-600': props.transaction.getIsAddition(),
@@ -72,6 +75,7 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
         }) }>
           <b>{ props.transaction.getAmountString() }</b>
         </span>
+        <ChevronRight className='opacity-75' />
       </ListItemButton>
       <Divider />
     </Fragment>
