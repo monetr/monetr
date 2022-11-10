@@ -1,4 +1,3 @@
-import MButton from 'components/MButton';
 import React, { Fragment, useEffect, useState } from 'react';
 import {
   PlaidLinkOnEvent,
@@ -6,7 +5,7 @@ import {
   PlaidLinkOnSuccess,
   PlaidLinkOptionsWithLinkToken,
   usePlaidLink } from 'react-plaid-link';
-import { Button, ButtonBase, ButtonProps, CircularProgress } from '@mui/material';
+import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import classnames from 'classnames';
 import { useSnackbar } from 'notistack';
@@ -136,7 +135,7 @@ const HookedPlaidButton = (props: HookedPropTypes) => {
   };
 
   return (
-    <MButton { ...newProps } />
+    <Button { ...newProps } />
   );
 };
 

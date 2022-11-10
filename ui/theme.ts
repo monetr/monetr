@@ -1,11 +1,13 @@
 import { createTheme, darken } from '@mui/material';
-import resolveConfig from 'tailwindcss/resolveConfig';
+
 import tailwindConfig from '../tailwind.config.js';
+
+import resolveConfig from 'tailwindcss/resolveConfig';
 
 const fullConfig = resolveConfig(tailwindConfig);
 const darkMode = false; // window.localStorage.getItem('darkMode') === 'true';
 const inputHeight = 56; // Default is 56
-const defaultPrimary = '#4E1AA0';
+const defaultPrimary = fullConfig.theme.colors['purple']['500']; // '#4E1AA0';
 const defaultSecondary = '#FF5798';
 
 const theme = createTheme({
