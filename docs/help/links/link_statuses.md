@@ -11,10 +11,8 @@ Plaid links can have a few different statuses. But the primary ones are as follo
 - `Healthy`: monetr is receiving updates from Plaid, transaction and balance data might be a few hours delayed but 
    should generally be accurate.
 - `Degraded`: In the UI this will show as a yellow circle next to the Plaid icon. With a message
-   > Updates might be delayed
-   
-   Plaid is still sending data for this link, but data might be significantly delayed. It is perfectly normal for 
-   links to go in and out of this status over time.
+  `Updates might be delayed`. Plaid is still sending data for this link, but data might be significantly delayed. It is
+  perfectly normal for links to go in and out of this status over time.
 - `Down`: The institution is unavailable via Plaid. This can happen if the bank themselves are having problems or if 
    Plaid is offline.
 - `Error`: Plaid is no longer sending monetr updates from your financial institution. This can happen for a variety 
