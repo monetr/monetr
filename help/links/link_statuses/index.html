@@ -1578,17 +1578,14 @@ to keep monetr up to date, those links can sometimes fail or become degraded.</p
 <ul>
 <li><code>Healthy</code>: monetr is receiving updates from Plaid, transaction and balance data might be a few hours delayed but 
    should generally be accurate.</li>
-<li><code>Degraded</code>: In the UI this will show as a yellow circle next to the Plaid icon. With a message<blockquote>
-<p>Updates might be delayed</p>
-</blockquote>
-</li>
+<li><code>Degraded</code>: In the UI this will show as a yellow circle next to the Plaid icon. With a message
+  <code>Updates might be delayed</code>. Plaid is still sending data for this link, but data might be significantly delayed. It is
+  perfectly normal for links to go in and out of this status over time.</li>
+<li><code>Down</code>: The institution is unavailable via Plaid. This can happen if the bank themselves are having problems or if 
+   Plaid is offline.</li>
+<li><code>Error</code>: Plaid is no longer sending monetr updates from your financial institution. This can happen for a variety 
+  of reasons but is usually resolved by re-authenticating your link.</li>
 </ul>
-<p>Plaid is still sending data for this link, but data might be significantly delayed. It is perfectly normal for 
-   links to go in and out of this status over time.
-- <code>Down</code>: The institution is unavailable via Plaid. This can happen if the bank themselves are having problems or if 
-   Plaid is offline.
-- <code>Error</code>: Plaid is no longer sending monetr updates from your financial institution. This can happen for a variety 
-  of reasons but is usually resolved by re-authenticating your link.</p>
 <p>If your link is missing transactions that are more than 2 days old and your link is not in a "Down" or "Error" state,
 please reach out to monetr support, so we may help resolve the issue.</p>
 <p><strong>Note</strong>: Please do not remove a link in an attempt to resolve an issue with it. Removing links deletes all of the data 
