@@ -312,10 +312,7 @@ export default function RegisterView(): JSX.Element {
             
                             
                           </Fragment>
-                        }
-                        labelPlacement="end"
-                        value="end"
-                        }
+                         }
                         labelPlacement="end"
                         value="end"
                       />
