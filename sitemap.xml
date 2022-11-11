@@ -136,6 +136,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://monetr.app/help/links/link_statuses/</loc>
+         <lastmod>2022-11-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://monetr.app/help/self_hosting/</loc>
          <lastmod>2022-11-11</lastmod>
          <changefreq>daily</changefreq>
