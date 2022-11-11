@@ -9,6 +9,7 @@ import formatAmount from 'util/formatAmount';
 import getColor from 'util/getColor';
 import getFundingScheduleContribution from 'util/getFundingScheduleContribution';
 import FundingSchedule from 'models/FundingSchedule';
+import { showRemoveFundingScheduleDialog } from './RemoveFundingScheduleDialog';
 
 interface Props {
   fundingScheduleId: number;
@@ -36,6 +37,17 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     });
 
     return updateFundingSchedule(updatedFunding);
+  }
+
+  if (!schedule) {
+    return null;
+  }
+
+  function removeDialog() {
+    closeMenu();
+    showRemoveFundingScheduleDialog({
+      fundingSchedule: schedule,
+    });
   }
 
   return (
@@ -76,7 +88,10 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
                 <Weekend className="mr-2" />
                 { schedule.excludeWeekends ? 'Include weekends' : 'Exclude weekends' }
               </MenuItem>
-              <MenuItem className="text-red-500" disabled>
+              <MenuItem
+                className="text-red-500"
+                onClick={ removeDialog }
+              >
                 <Remove className="mr-2" />
                 Remove
               </MenuItem>
