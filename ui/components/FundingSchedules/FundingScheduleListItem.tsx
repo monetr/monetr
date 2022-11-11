@@ -58,18 +58,18 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
             <AttachMoney className="col-span-1 h-16 w-10 m-auto fill-gray-500" />
           </div>
           <div className="flex h-full flex-col">
-            <span className="text-2xl font-semibold mt-auto text-gray-700">
+            <span className="sm:text-2xl font-semibold mt-auto text-gray-700 text-lg">
               { schedule.name }
             </span>
-            <span className="text-xl font-normal mt-auto text-gray-400">
+            <span className="sm:text-xl font-normal mt-auto text-gray-400 text-md">
               { nextOccurrenceString }
             </span>
           </div>
           <div className="flex-grow flex h-full flex-col items-end justify-center">
-            <span className="text-xl font-normal text-gray-500">
+            <span className="sm:text-xl font-normal text-gray-500 text-md">
               Next Contribution
             </span>
-            <span className="text-lg font-normal text-gray-500">
+            <span className="sm:text-lg font-normal text-gray-500 text-sm">
               { formatAmount(contribution) }
             </span>
           </div>
