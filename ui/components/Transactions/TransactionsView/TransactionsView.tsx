@@ -57,7 +57,7 @@ function TransactionsView(): JSX.Element {
         <li key={ group.unix() }>
           <ul>
             <Fragment>
-              <ListSubheader className="pl-0 pr-0 pt-1 bg-gray-50 dark:bg-neutral-900 leading-none">
+              <ListSubheader className="pl-0 pr-0 pt-1 bg-zinc-100 dark:bg-neutral-900 leading-none dark:opacity-100">
                 <span className="ml-3 md:ml-3 font-semibold opacity-75 text-base text-sm text-gray-700 dark:text-gray-100">
                   { formatDateHeader(group) }
                 </span>

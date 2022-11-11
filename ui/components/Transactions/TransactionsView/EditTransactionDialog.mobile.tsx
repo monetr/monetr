@@ -159,12 +159,12 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                   />
                 </EditItem>
                 <EditItem name="Original Name">
-                  <span className="flex-1 text-end text-xl opacity-75">
+                  <span className="flex-1 text-end text-xl opacity-60">
                     { transaction.getOriginalName() }
                   </span>
                 </EditItem>
                 <EditItem name="Date">
-                  <span className={ clsx('flex-1 text-end text-xl opacity-75', {
+                  <span className={ clsx('flex-1 text-end text-xl opacity-60', {
                     'text-green-600': props.transaction.getIsAddition(),
                     'text-red-600': !props.transaction.getIsAddition(),
                   }) }>
@@ -172,12 +172,12 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                   </span>
                 </EditItem>
                 <EditItem name="Date">
-                  <span className="flex-1 text-end text-xl opacity-75">
+                  <span className="flex-1 text-end text-xl opacity-60">
                     { transaction.date.format('MMMM Do, YYYY') }
                   </span>
                 </EditItem>
                 <EditItem name="Status">
-                  <span className="flex-1 text-end text-xl opacity-75">
+                  <span className="flex-1 text-end text-xl opacity-60">
                     { transaction.isPending ? 'Pending' : 'Complete' }
                   </span>
                 </EditItem>
@@ -210,11 +210,12 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                 }
               </List>
             </DialogContent>
-            <DialogActions>
+            <DialogActions className="bg-purple-900">
               <Button
                 color="secondary"
                 disabled={ isSubmitting }
                 onClick={ closeDialog }
+                variant="outlined"
               >
                 Cancel
               </Button>
@@ -223,6 +224,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                 onClick={ submitForm }
                 color="primary"
                 type="submit"
+                variant="contained"
               >
                 Save
               </Button>
