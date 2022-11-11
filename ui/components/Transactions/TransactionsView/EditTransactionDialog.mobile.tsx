@@ -1,7 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, InputBase, List, ListItem, ListItemButton, ListItemText, Slide } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
+import { Button, DialogActions, DialogContent, DialogTitle, Divider, InputBase, List, ListItem, ListItemButton, ListItemText, SwipeableDrawer } from '@mui/material';
 import { AxiosError } from 'axios';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 
@@ -10,9 +9,9 @@ import TransactionSpentFromSelectionMobile from './TransactionSpentFromSelection
 import TransactionIcon from '../components/TransactionIcon';
 
 import clsx from 'clsx';
+import VerticalPuller from 'components/VerticalPuller';
 import { useSpendingSink } from 'hooks/spending';
 import { useUpdateTransaction } from 'hooks/transactions';
-import useIsMobile from 'hooks/useIsMobile';
 import Transaction from 'models/Transaction';
 
 
@@ -25,18 +24,8 @@ interface EditTransactionForm {
   spendingId: number | null;
 }
 
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<any, any>;
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction="left" ref={ ref } { ...props } />;
-});
-
 function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): JSX.Element {
   const modal = useModal();
-  const isMobile = useIsMobile();
   const updateTransaction = useUpdateTransaction();
   const { result: allSpending } = useSpendingSink();
   const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
@@ -110,129 +99,130 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
   }
 
   return (
-    <Dialog
+    <SwipeableDrawer
+      style={ {
+        zIndex: 1100,
+      } }
+      anchor='right'
       open={ modal.visible }
-      maxWidth="sm"
-      fullScreen={ isMobile }
-      TransitionComponent={ Transition }
-      keepMounted={ false }
+      onClose={ closeDialog }
+      onOpen={ () => {} }
     >
-      <Formik
-        initialValues={ initialValues }
-        validate={ validateInput }
-        onSubmit={ submit }
-      >
-        { ({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          setFieldValue,
-          isSubmitting,
-          submitForm,
-          isValid,
-        }) => (
-          <Fragment>
-            <DialogTitle>
-              <div className='w-full flex justify-center'>
-                <TransactionIcon transaction={ transaction } size={ 80 }  />
-              </div>
-            </DialogTitle>
-            <DialogContent>
-              <List className='pl-0 pr-0'>
-                <Divider />
-                <EditItem name="Name">
-                  <InputBase
-                    name='name'
-                    className='flex-1 flex text-end'
-                    disabled={ isSubmitting }
-                    style={ { height: 28 } }
-                    onChange={ handleChange }
-                    onBlur={ handleBlur }
-                    onFocus={ onFocus }
-                    value={ values.name }
-                    inputProps={ {
-                      className: 'flex text-end text-xl',
-                    } }
-                  />
-                </EditItem>
-                <EditItem name="Original Name">
-                  <span className="flex-1 text-end text-xl opacity-60">
-                    { transaction.getOriginalName() }
-                  </span>
-                </EditItem>
-                <EditItem name="Date">
-                  <span className={ clsx('flex-1 text-end text-xl opacity-60', {
-                    'text-green-600': props.transaction.getIsAddition(),
-                    'text-red-600': !props.transaction.getIsAddition(),
-                  }) }>
-                    { transaction.getAmountString() }
-                  </span>
-                </EditItem>
-                <EditItem name="Date">
-                  <span className="flex-1 text-end text-xl opacity-60">
-                    { transaction.date.format('MMMM Do, YYYY') }
-                  </span>
-                </EditItem>
-                <EditItem name="Status">
-                  <span className="flex-1 text-end text-xl opacity-60">
-                    { transaction.isPending ? 'Pending' : 'Complete' }
-                  </span>
-                </EditItem>
-                { !transaction.getIsAddition() &&
-                  <Fragment>
-                    <TransactionSpentFromSelectionMobile
-                      open={ drawerOpen }
-                      onClose={ () => setDrawerOpen(false) }
-                      onChange={ value => setFieldValue('spendingId', value) }
-                      value={ values.spendingId }
-                    />
-                    <ListItemButton
-                      className='pl-0 pr-0'
-                      onClick={ () => setDrawerOpen(true) }
+      <div className='h-full flex flex-col w-[100vw]'>
+        <VerticalPuller />
+        <Formik
+          initialValues={ initialValues }
+          validate={ validateInput }
+          onSubmit={ submit }
+        >
+          { ({
+            values,
+            handleChange,
+            handleBlur,
+            setFieldValue,
+            isSubmitting,
+            submitForm,
+          }) => (
+            <Fragment>
+              <DialogTitle>
+                <div className='w-full flex justify-center'>
+                  <TransactionIcon transaction={ transaction } size={ 80 }  />
+                </div>
+              </DialogTitle>
+              <DialogContent>
+                <List className='pl-0 pr-0'>
+                  <Divider />
+                  <EditItem name="Name">
+                    <InputBase
+                      name='name'
+                      className='flex-1 flex text-end'
                       disabled={ isSubmitting }
-                    >
-                      <ListItemText
-                        className='flex-none'
-                        primary="Spent From"
-                        primaryTypographyProps={ {
-                          className: 'text-xl',
-                        } }
+                      style={ { height: 28 } }
+                      onChange={ handleChange }
+                      onBlur={ handleBlur }
+                      onFocus={ onFocus }
+                      value={ values.name }
+                      inputProps={ {
+                        className: 'flex text-end text-xl',
+                      } }
+                    />
+                  </EditItem>
+                  <EditItem name="Original Name">
+                    <span className="flex-1 text-end text-xl opacity-60">
+                      { transaction.getOriginalName() }
+                    </span>
+                  </EditItem>
+                  <EditItem name="Date">
+                    <span className={ clsx('flex-1 text-end text-xl opacity-60', {
+                      'text-green-600': props.transaction.getIsAddition(),
+                      'text-red-600': !props.transaction.getIsAddition(),
+                    }) }>
+                      { transaction.getAmountString() }
+                    </span>
+                  </EditItem>
+                  <EditItem name="Date">
+                    <span className="flex-1 text-end text-xl opacity-60">
+                      { transaction.date.format('MMMM Do, YYYY') }
+                    </span>
+                  </EditItem>
+                  <EditItem name="Status">
+                    <span className="flex-1 text-end text-xl opacity-60">
+                      { transaction.isPending ? 'Pending' : 'Complete' }
+                    </span>
+                  </EditItem>
+                  { !transaction.getIsAddition() &&
+                    <Fragment>
+                      <TransactionSpentFromSelectionMobile
+                        open={ drawerOpen }
+                        onClose={ () => setDrawerOpen(false) }
+                        onChange={ value => setFieldValue('spendingId', value) }
+                        value={ values.spendingId }
                       />
-                      <span className="flex-1 text-end text-xl">
-                        { spendingName(values.spendingId) }
-                      </span>
-                    </ListItemButton>
-                    <Divider />
-                  </Fragment>
-                }
-              </List>
-            </DialogContent>
-            <DialogActions className="bg-purple-900">
-              <Button
-                color="secondary"
-                disabled={ isSubmitting }
-                onClick={ closeDialog }
-                variant="outlined"
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={ isSubmitting }
-                onClick={ submitForm }
-                color="primary"
-                type="submit"
-                variant="contained"
-              >
-                Save
-              </Button>
-            </DialogActions>
-          </Fragment>
-        ) }
-      </Formik>
-    </Dialog>
+                      <ListItemButton
+                        className='pl-0 pr-0'
+                        onClick={ () => setDrawerOpen(true) }
+                        disabled={ isSubmitting }
+                      >
+                        <ListItemText
+                          className='flex-none'
+                          primary="Spent From"
+                          primaryTypographyProps={ {
+                            className: 'text-xl',
+                          } }
+                        />
+                        <span className="flex-1 text-end text-xl">
+                          { spendingName(values.spendingId) }
+                        </span>
+                      </ListItemButton>
+                      <Divider />
+                    </Fragment>
+                  }
+                </List>
+              </DialogContent>
+              <DialogActions className="bg-purple-900">
+                <Button
+                  color="secondary"
+                  disabled={ isSubmitting }
+                  onClick={ closeDialog }
+                  variant="outlined"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={ isSubmitting }
+                  onClick={ submitForm }
+                  color="primary"
+                  type="submit"
+                  variant="contained"
+                >
+                  Save
+                </Button>
+              </DialogActions>
+            </Fragment>
+          ) }
+        </Formik>
+      </div>
+    </SwipeableDrawer>
   );
 }
 
