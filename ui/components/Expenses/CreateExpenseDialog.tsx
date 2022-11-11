@@ -65,6 +65,10 @@ function CreateExpenseDialog(): JSX.Element {
       errors['amount'] = 'Can only have up to 2 decimal places.';
     }
 
+    if (!input.fundingScheduleId) {
+      errors['fundingScheduleId'] = 'Must select a funding schedule.';
+    }
+
     return errors;
   }
 
