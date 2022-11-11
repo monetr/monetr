@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.12.2](https://github.com/monetr/monetr/compare/v0.12.1...v0.12.2) (2022-11-11)
+
+
+### Features
+
+* **ui:** Edit transaction is now swipeable. ([7c68af1](https://github.com/monetr/monetr/commit/7c68af1e254a8f7847487b382e5cc0b6e531d964))
+
+
+### Bug Fixes
+
+* **docs:** Fixed Get Started button on the home page. ([a0422a8](https://github.com/monetr/monetr/commit/a0422a852b04d2361bd52f10be39c7317eaa1b6d)), closes [#1178](https://github.com/monetr/monetr/issues/1178)
+* **ui:** Fix page crash trying to create an expense. ([f1a21fd](https://github.com/monetr/monetr/commit/f1a21fd14798cdee4bc3157caa67e91f6fea8dc5)), closes [#1209](https://github.com/monetr/monetr/issues/1209)
+* **ui:** Fixed colors in the UI. ([3fea099](https://github.com/monetr/monetr/commit/3fea0995a508d1379b58ffffdfcc92b10f5a307d))
+* **ui:** Fixing some color issues. ([8698d43](https://github.com/monetr/monetr/commit/8698d435b6c0b91fbe79f700716294c9302f5b5b))
+* **ui:** Visual improvements to the transactions view. ([9497d17](https://github.com/monetr/monetr/commit/9497d17c9fa590d720e58020a9b56aef72967c37))
+
+
+### Miscellaneous
+
+* **deps:** bump loader-utils from 2.0.0 to 2.0.3 ([#1206](https://github.com/monetr/monetr/issues/1206)) ([bc66e9a](https://github.com/monetr/monetr/commit/bc66e9aeef30a00f59ee53b4be6ad67a2919fbb1))
+* **readme:** Adding deepsource badge to readme. ([c9a007c](https://github.com/monetr/monetr/commit/c9a007c73925cd3ebec12bd0680f29b4f8531656))
+
 ## [0.12.1](https://github.com/monetr/monetr/compare/v0.12.0...v0.12.1) (2022-11-07)
 
 
