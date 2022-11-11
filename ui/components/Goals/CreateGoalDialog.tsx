@@ -1,3 +1,4 @@
+import useIsMobile from 'hooks/useIsMobile';
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { DatePicker } from '@mui/lab';
@@ -21,6 +22,7 @@ interface CreateGoalForm {
 
 function CreateGoalDialog(): JSX.Element {
   const modal = useModal();
+  const isMobile = useIsMobile();
   const bankAccountId = useSelectedBankAccountId();
   const createSpending = useCreateSpending();
   const { enqueueSnackbar } = useSnackbar();
@@ -92,7 +94,7 @@ function CreateGoalDialog(): JSX.Element {
         isValid,
       }) => (
         <form onSubmit={ handleSubmit }>
-          <Dialog open={ modal.visible } maxWidth="sm" ref={ ref }>
+          <Dialog open={ modal.visible } maxWidth="sm" ref={ ref } fullScreen={ isMobile }>
             <DialogTitle>
               Create A New Goal
             </DialogTitle>

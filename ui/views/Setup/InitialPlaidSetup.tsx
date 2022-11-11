@@ -188,7 +188,7 @@ export default function InitialPlaidSetup(): JSX.Element {
             </div>
             <div className="w-full pt-2.5 pb-2.5">
               <PlaidButton
-                className="w-full"
+                className='w-full'
                 color="primary"
                 disabled={ state.loading }
                 plaidOnSuccess={ onPlaidSuccess }
@@ -205,7 +205,7 @@ export default function InitialPlaidSetup(): JSX.Element {
         <div className="flex-initial w-full pt-2.5 pb-2.5">
           <Button
             onClick={ logout }
-            className="w-full opacity-50"
+            className="w-full"
           >
             Logout
           </Button>

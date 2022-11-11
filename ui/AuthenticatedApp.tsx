@@ -57,7 +57,7 @@ const AuthenticatedApp = (): JSX.Element => {
           onToggleSidebar={ toggleSidebar }
           closeSidebar={ () => setSidebarClosed(true) }
         />
-        <div className="relative flex flex-col flex-1 w-0 min-w-0 mb-8 lg:ml-64">
+        <div className="relative flex flex-col flex-1 w-0 min-w-0 mb-0 lg:ml-64">
           <NavigationBar onToggleSidebar={ toggleSidebar } />
           <Routes>
             <Route path="/register" element={ <Navigate replace to="/" /> } />

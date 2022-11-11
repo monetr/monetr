@@ -7,4 +7,5 @@ const (
 	UnknownLinkType LinkType = iota
 	PlaidLinkType
 	ManualLinkType
+	StripeLinkType
 )

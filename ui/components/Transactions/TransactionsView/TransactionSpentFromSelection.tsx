@@ -1,3 +1,4 @@
+import { lighten } from '@mui/material';
 import React, { Fragment } from 'react';
 import Select, { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
@@ -9,6 +10,7 @@ import { useSpendingSink } from 'hooks/spending';
 import { useUpdateTransaction } from 'hooks/transactions';
 import Spending from 'models/Spending';
 import Transaction from 'models/Transaction';
+import theme from 'theme';
 
 interface Props {
   transaction: Transaction;
@@ -89,13 +91,22 @@ function TransactionSpentFromSelection(props: Props): JSX.Element {
     return option.label;
   }
 
+  const uiTheme = theme;
+
   return (
     <Select
       theme={ (theme: Theme): Theme => ({
         ...theme,
         colors: {
           ...theme.colors,
-          primary: '#4E1AA0',
+          primary: uiTheme.palette.primary.main,
+          ...( uiTheme.palette.mode === 'dark' && {
+            neutral0: uiTheme.palette.background.default,
+            primary25: lighten(uiTheme.palette.background.default, 0.1),
+            primary50: lighten(uiTheme.palette.background.default, 0.5),
+            neutral80: 'white',
+            neutral90: 'white',
+          }), // Text
         },
       }) }
       components={ {

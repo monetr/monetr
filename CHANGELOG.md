@@ -1,5 +1,78 @@
 # Changelog
 
+## [0.12.2](https://github.com/monetr/monetr/compare/v0.12.1...v0.12.2) (2022-11-11)
+
+
+### Features
+
+* **ui:** Edit transaction is now swipeable. ([7c68af1](https://github.com/monetr/monetr/commit/7c68af1e254a8f7847487b382e5cc0b6e531d964))
+
+
+### Bug Fixes
+
+* **docs:** Fixed Get Started button on the home page. ([a0422a8](https://github.com/monetr/monetr/commit/a0422a852b04d2361bd52f10be39c7317eaa1b6d)), closes [#1178](https://github.com/monetr/monetr/issues/1178)
+* **ui:** Fix page crash trying to create an expense. ([f1a21fd](https://github.com/monetr/monetr/commit/f1a21fd14798cdee4bc3157caa67e91f6fea8dc5)), closes [#1209](https://github.com/monetr/monetr/issues/1209)
+* **ui:** Fixed colors in the UI. ([3fea099](https://github.com/monetr/monetr/commit/3fea0995a508d1379b58ffffdfcc92b10f5a307d))
+* **ui:** Fixing some color issues. ([8698d43](https://github.com/monetr/monetr/commit/8698d435b6c0b91fbe79f700716294c9302f5b5b))
+* **ui:** Visual improvements to the transactions view. ([9497d17](https://github.com/monetr/monetr/commit/9497d17c9fa590d720e58020a9b56aef72967c37))
+
+
+### Miscellaneous
+
+* **deps:** bump loader-utils from 2.0.0 to 2.0.3 ([#1206](https://github.com/monetr/monetr/issues/1206)) ([bc66e9a](https://github.com/monetr/monetr/commit/bc66e9aeef30a00f59ee53b4be6ad67a2919fbb1))
+* **readme:** Adding deepsource badge to readme. ([c9a007c](https://github.com/monetr/monetr/commit/c9a007c73925cd3ebec12bd0680f29b4f8531656))
+
+## [0.12.1](https://github.com/monetr/monetr/compare/v0.12.0...v0.12.1) (2022-11-07)
+
+
+### Features
+
+* **api:** Adding basic support for mobile authentication. ([89da686](https://github.com/monetr/monetr/commit/89da686da04200a0e7da29dd85485a4f94228b86))
+* **dev:** Added support for HTTPS local development. ([#1200](https://github.com/monetr/monetr/issues/1200)) ([95114cb](https://github.com/monetr/monetr/commit/95114cbf5bac0fd4f9c21926e7e133b686e5c96f))
+* **mobile:** Significantly improving mobile UI. ([ea6557e](https://github.com/monetr/monetr/commit/ea6557e1386bb8c1a0cfcaa9c3282fcfc659220f))
+* **ui:** Adding transaction edit screen for mobile. ([#1201](https://github.com/monetr/monetr/issues/1201)) ([6b2596b](https://github.com/monetr/monetr/commit/6b2596bc4f64e2d0a6d5ab868a6d568e2a274276))
+* **ui:** Significantly improved edit transaction UI for mobile. ([a1329df](https://github.com/monetr/monetr/commit/a1329df2286e518c4da6536d25ca8f9f461c1d82))
+
+
+### Bug Fixes
+
+* **api:** Fixed funding schedules updating + deleting. ([1e46066](https://github.com/monetr/monetr/commit/1e46066a5e6ba5e7921d9de62543925f64d7baf9))
+* **api:** Tweaking routes for API vs UI handling. ([bbb9b1d](https://github.com/monetr/monetr/commit/bbb9b1d97cbe4b9bfebc2fe012242af06fe095f2))
+* **api:** Update spending when a funding schedule is updated. ([9470a34](https://github.com/monetr/monetr/commit/9470a34de4277b9126f7b637214d679acb9f534a))
+* **auth:** Fix bug causing authentication to fail. ([304eec1](https://github.com/monetr/monetr/commit/304eec1e149f318ace61ef2c77b1d789a5f9aac0))
+* **build:** Fixing failing build from mobile UI changes. ([a285622](https://github.com/monetr/monetr/commit/a285622ba36cd32eb2b624c52fe82ef773aee40f))
+* **docs:** Fixed title of home page. ([5a7988d](https://github.com/monetr/monetr/commit/5a7988dddf71cc85a730c69217faa11e6b58ebe4))
+* **ui:** Create goal dialog should be fullscreen on mobile. ([e6efdd6](https://github.com/monetr/monetr/commit/e6efdd69456db5b1cff89d7bd8a34d40a6bff99c))
+* **ui:** Fixed page height for unauthenticated routes. ([e205e2c](https://github.com/monetr/monetr/commit/e205e2c3a14086fa3f44726b89aad81124f8b1aa))
+* **ui:** Gracefully truncate long transaction names in mobile. ([b2ab185](https://github.com/monetr/monetr/commit/b2ab185d5dcc9e70501157aa5860e9edf463b113))
+* **ui:** Tweak padding on mobile transactions. ([beb903e](https://github.com/monetr/monetr/commit/beb903e9f765d9801d477372a83eff8335543828))
+
+
+### Miscellaneous
+
+* **ci:** Removing old workflow that isn't used anymore. ([54bf0ad](https://github.com/monetr/monetr/commit/54bf0ad1586a9d3d32cb38ae0556fd7143100e7f))
+* **links:** Adding `stripe` link type for the future. ([14e9ac0](https://github.com/monetr/monetr/commit/14e9ac0256754c1acf2204826511cedfdb50b6b3))
+* **ui:** Adding small info header to spend select. ([3c68821](https://github.com/monetr/monetr/commit/3c68821d01a550e538e72559dff10df6b0be8722))
+
+## [0.12.0](https://github.com/monetr/monetr/compare/v0.11.27...v0.12.0) (2022-11-04)
+
+
+### Features
+
+* **forecast:** Change forecasted amount to be popularity based. ([5710c91](https://github.com/monetr/monetr/commit/5710c91148e835b86f72f6b012dae05fd175928c))
+* **forecasting:** Building out spending forecasting groundwork. ([#1168](https://github.com/monetr/monetr/issues/1168)) ([b852748](https://github.com/monetr/monetr/commit/b852748b3d6d367120d6ae09af76add1ba8bcd56))
+
+
+### Bug Fixes
+
+* **forecast:** Reduce number of forecast requests, reduce sentry trace. ([f374fcb](https://github.com/monetr/monetr/commit/f374fcbcd98fe9fc1b9b806ed6a0dfad3f2408c3))
+* **test:** Fixed failing funding schedule test. ([38d027d](https://github.com/monetr/monetr/commit/38d027df265e16aee9a0dd5db6e801a82684d1a9))
+
+
+### Miscellaneous
+
+* release 0.12.0 ([2754368](https://github.com/monetr/monetr/commit/27543684f8110d2b5d5c8fcc6f36d191a8cc5771))
+
 ## [0.11.27](https://github.com/monetr/monetr/compare/v0.11.26...v0.11.27) (2022-11-03)
 
 

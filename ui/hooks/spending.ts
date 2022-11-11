@@ -25,7 +25,11 @@ export function useSpendingSink(): SpendingResult {
   };
 }
 
-export function useSpending(spendingId: number): Spending | null {
+export function useSpending(spendingId?: number): Spending | null {
+  if (!spendingId) {
+    return null;
+  }
+
   const { result } = useSpendingSink();
   return result.find(item => item.spendingId === spendingId) || null;
 }

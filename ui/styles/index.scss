@@ -73,5 +73,7 @@ body > #root {
   max-height: calc(100vh - $nav-bar-height);
   overflow-y: auto !important;
   overflow-x: unset !important;
-  border-top-left-radius: 10px;
+  @media (min-width: 600px) {
+    border-top-left-radius: 10px;
+  }
 }

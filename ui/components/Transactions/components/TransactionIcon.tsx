@@ -1,11 +1,15 @@
+import { useTheme } from '@mui/styles';
+import useIsMobile from 'hooks/useIsMobile';
 import React from 'react';
 import { Avatar } from '@mui/material';
 
 import { useIconSearch } from 'hooks/useIconSearch';
 import Transaction from 'models/Transaction';
+import theme from 'theme';
 
 interface Props {
   transaction: Transaction;
+  size?: number;
 }
 
 export default function TransactionIcon(props: Props): JSX.Element {
@@ -21,8 +25,8 @@ export default function TransactionIcon(props: Props): JSX.Element {
     const styles = {
       WebkitMaskImage: `url(data:image/svg+xml;base64,${ icon.svg })`,
       WebkitMaskRepeat: 'no-repeat',
-      height: '40px',
-      width: '40px',
+      height: `${props.size || 40}px`,
+      width: `${props.size || 40}px`,
       ...colorStyles,
     };
 

@@ -1,3 +1,5 @@
+import { darken, lighten } from '@mui/material';
+import { useTheme } from '@mui/styles';
 import React, { useState } from 'react';
 import { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
@@ -5,6 +7,7 @@ import CreatableSelect from 'react-select/creatable';
 
 import { useUpdateTransaction } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
+import theme from 'theme';
 
 interface Props {
   transaction: Transaction;
@@ -81,13 +84,22 @@ const TransactionNameEditor = (props: Props): JSX.Element => {
 
   const value = customTransactionName || originalTransactionName;
 
+  const uiTheme = theme;
+
   return (
     <CreatableSelect
       theme={ (theme: Theme): Theme => ({
         ...theme,
         colors: {
           ...theme.colors,
-          primary: '#4E1AA0',
+          primary: uiTheme.palette.primary.main,
+          ...( uiTheme.palette.mode === 'dark' && {
+            neutral0: uiTheme.palette.background.default,
+            primary25: lighten(uiTheme.palette.background.default, 0.1),
+            primary50: lighten(uiTheme.palette.background.default, 0.5),
+            neutral80: 'white',
+            neutral90: 'white',
+          }), // Text
         },
       }) }
       classNamePrefix="transaction-select"

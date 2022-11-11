@@ -109,7 +109,7 @@ services:
       retries: 12
       start_period: 60s
     environment:
-      INSECURE_WS: "true" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
+      INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
       IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
       MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
@@ -174,7 +174,7 @@ services:
   nginx:
     tty: true
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      test: [ "CMD", "curl", "-f", "--insecure", "https://localhost" ]
       interval: 10s
       timeout: 10s
       retries: 12
@@ -182,9 +182,10 @@ services:
     image: nginx:latest
     restart: unless-stopped
     ports:
-      - 80:80
+      - 443:443
     volumes:
       - ./compose/nginx.conf:/etc/nginx/nginx.conf
+      - ${LOCAL_CERTIFICATE_DIRECTORY:-./}:/etc/nginx/tls
     depends_on:
       - monetr
       - ui

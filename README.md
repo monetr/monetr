@@ -4,6 +4,7 @@
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmonetr%2Fmonetr?ref=badge_shield)
 [![codecov](https://codecov.io/gh/monetr/monetr/branch/main/graph/badge.svg?token=4BRVTD3VSJ)](https://codecov.io/gh/monetr/monetr)
 [![Go Report Card](https://goreportcard.com/badge/github.com/monetr/monetr)](https://goreportcard.com/report/github.com/monetr/monetr)
+[![DeepSource](https://deepsource.io/gh/monetr/monetr.svg/?label=active+issues&show_trend=true&token=aGbSggz8nyhTexdqi1AK1ByR)](https://deepsource.io/gh/monetr/monetr/?ref=repository-badge)
 [![Discord](https://discordapp.com/api/guilds/1006270466123636836/widget.png)](https://discord.gg/68wTCXrhuq)
 
 <p align="center">
@@ -15,7 +16,7 @@ completely free to self-host (documentation to come), but requires a Plaid accou
 
 monetr is currently still in heavy development; but is being alpha-tested with the latest release version constantly.
 
-![image](https://user-images.githubusercontent.com/37967690/179381136-ece91ea9-a6f8-4b7e-be70-b483320298d2.png)
+![image](https://user-images.githubusercontent.com/37967690/201261822-0103fdc6-f8a9-4cdf-9c21-0ed72bc080e3.png)
 
 ## Contributing
 

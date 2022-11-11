@@ -104,6 +104,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
 		TOTP     string `json:"totp"`
+		IsMobile bool   `json:"isMobile"`
 	}
 	if err := ctx.ReadJSON(&loginRequest); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
@@ -223,13 +224,19 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			return
 		}
 
-		c.updateAuthenticationCookie(ctx, token)
+		result := map[string]interface{}{
+				"isActive": true,
+		}
+
+		if !loginRequest.IsMobile {
+			c.updateAuthenticationCookie(ctx, token)
+		} else {
+			result["token"] = token
+		}
 
 		if !c.configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.
-			ctx.JSON(map[string]interface{}{
-				"isActive": true,
-			})
+			ctx.JSON(result)
 			return
 		}
 
@@ -239,9 +246,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			return
 		}
 
-		result := map[string]interface{}{
-			"isActive": subscriptionIsActive,
-		}
+		result["isActive"] = subscriptionIsActive
 
 		if !subscriptionIsActive {
 			result["nextUrl"] = "/account/subscribe"
@@ -258,11 +263,17 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			return
 		}
 
-		c.updateAuthenticationCookie(ctx, token)
-
-		ctx.JSON(map[string]interface{}{
+		result := map[string]interface{}{
 			"users": login.Users,
-		})
+		}
+
+		if !loginRequest.IsMobile {
+			c.updateAuthenticationCookie(ctx, token)
+		} else {
+			result["token"] = token
+		}
+
+		ctx.JSON(result)
 	}
 }
 
