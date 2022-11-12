@@ -32,14 +32,17 @@ export default function PlaidLinkStatusIndicator(props: Props): JSX.Element {
   }
 
   const plaidStatusString = {
-    ['HEALTHY']: 'Healthy',
-    ['DEGRADED']: 'Having problems',
-    ['DOWN']: 'Offline',
+    ['HEALTHY']:  'Healthy',
+    ['DEGRADED']: 'Updates might be delayed',
+    ['DOWN']:     'This link is currently offline via Plaid',
   }
 
-  const statusString = institution?.status?.transactions_updates?.status ?
+  let statusString = institution?.status?.transactions_updates?.status ?
     plaidStatusString[institution.status.transactions_updates.status] :
     'Unknown';
+  if (props.link.linkStatus === LinkStatus.Error) {
+    statusString = 'Disconnected, please reauthenticate.'
+  }
 
   const NoMaxWidthTooltip = styled(({ className, ...props }: TooltipProps ) => (
     <Tooltip {...props} classes={{ popper: className }} />

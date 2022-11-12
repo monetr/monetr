@@ -91,3 +91,32 @@ export function useUpdateFundingSchedule(): (_fundingSchedule: FundingSchedule) 
 
   return mutation.mutateAsync;
 }
+
+export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) => Promise<void> {
+  const queryClient = useQueryClient();
+
+  async function removeFundingSchedule(fundingSchedule: FundingSchedule): Promise<FundingSchedule> {
+    return request()
+      .delete(
+        `/bank_accounts/${ fundingSchedule.bankAccountId }/funding_schedules/${ fundingSchedule.fundingScheduleId }`,
+      )
+      .then(() => fundingSchedule);
+  }
+
+  const mutation = useMutation(
+    removeFundingSchedule,
+    {
+      onSuccess: (removed: FundingSchedule) => Promise.all([
+        queryClient.setQueriesData(
+          `/bank_accounts/${ removed.bankAccountId }/funding_schedules`,
+          (previous: Array<Partial<FundingSchedule>>) => previous
+            .filter(item => item.fundingScheduleId !== removed.fundingScheduleId),
+        ),
+      ]),
+    },
+  );
+
+  return async function (fundingSchedule: FundingSchedule): Promise<void> {
+    return mutation.mutateAsync(fundingSchedule).then(() => { return; });
+  };
+}

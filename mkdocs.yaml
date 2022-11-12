@@ -70,6 +70,7 @@ nav:
           - Adding A Funding Schedule: help/funding_schedules/adding.md
       - Links:
           - help/links/index.md
+          - Link Statuses: help/links/link_statuses.md
       - Bank Accounts:
           - help/bank_accounts/index.md
           - Removing Links: help/bank_accounts/removing.md

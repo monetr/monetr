@@ -9,6 +9,7 @@ import formatAmount from 'util/formatAmount';
 import getColor from 'util/getColor';
 import getFundingScheduleContribution from 'util/getFundingScheduleContribution';
 import FundingSchedule from 'models/FundingSchedule';
+import { showRemoveFundingScheduleDialog } from './RemoveFundingScheduleDialog';
 
 interface Props {
   fundingScheduleId: number;
@@ -38,6 +39,17 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     return updateFundingSchedule(updatedFunding);
   }
 
+  if (!schedule) {
+    return null;
+  }
+
+  function removeDialog() {
+    closeMenu();
+    showRemoveFundingScheduleDialog({
+      fundingSchedule: schedule,
+    });
+  }
+
   return (
     <Fragment>
       <ListItem>
@@ -46,18 +58,18 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
             <AttachMoney className="col-span-1 h-16 w-10 m-auto fill-gray-500" />
           </div>
           <div className="flex h-full flex-col">
-            <span className="text-2xl font-semibold mt-auto text-gray-700">
+            <span className="sm:text-2xl font-semibold mt-auto text-gray-700 text-lg">
               { schedule.name }
             </span>
-            <span className="text-xl font-normal mt-auto text-gray-400">
+            <span className="sm:text-xl font-normal mt-auto text-gray-400 text-md">
               { nextOccurrenceString }
             </span>
           </div>
           <div className="flex-grow flex h-full flex-col items-end justify-center">
-            <span className="text-xl font-normal text-gray-500">
+            <span className="sm:text-xl font-normal text-gray-500 text-md">
               Next Contribution
             </span>
-            <span className="text-lg font-normal text-gray-500">
+            <span className="sm:text-lg font-normal text-gray-500 text-sm">
               { formatAmount(contribution) }
             </span>
           </div>
@@ -76,7 +88,10 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
                 <Weekend className="mr-2" />
                 { schedule.excludeWeekends ? 'Include weekends' : 'Exclude weekends' }
               </MenuItem>
-              <MenuItem className="text-red-500" disabled>
+              <MenuItem
+                className="text-red-500"
+                onClick={ removeDialog }
+              >
                 <Remove className="mr-2" />
                 Remove
               </MenuItem>

@@ -13,12 +13,20 @@ export default function FundingScheduleList(): JSX.Element {
     <div className="w-full funding-schedule-list">
       <div className="w-full p-5">
         <ButtonGroup color="primary" className="w-full">
-          <Button variant="outlined" className="w-full" color="primary"
-            onClick={ showCreateFundingScheduleDialog }>
+          <Button
+            variant="outlined"
+            className="w-full"
+            color="primary"
+            onClick={ showCreateFundingScheduleDialog }
+          >
             New Funding Schedule
           </Button>
-          <Button variant="outlined" className="w-full" color="primary"
-            onClick={ showCreateExpenseDialog }>
+          <Button
+            variant="outlined"
+            className="w-full"
+            color="primary"
+            onClick={ showCreateExpenseDialog }
+          >
             New Expense
           </Button>
         </ButtonGroup>
