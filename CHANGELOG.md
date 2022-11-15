@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.12.3](https://github.com/monetr/monetr/compare/v0.12.2...v0.12.3) (2022-11-11)
+
+
+### Features
+
+* **docs:** Added basic documentation on link status. ([7ed88d8](https://github.com/monetr/monetr/commit/7ed88d89c2701b08a5e85ac33e9d4003163d98e6)), closes [#1203](https://github.com/monetr/monetr/issues/1203)
+* **ui:** Allow funding schedules to be deleted. ([dcc16d4](https://github.com/monetr/monetr/commit/dcc16d4de92c5edd54048dfe1ed8022d0af2f00a)), closes [#1210](https://github.com/monetr/monetr/issues/1210)
+
+
+### Bug Fixes
+
+* **docs:** Fixed formatting on link status page. ([0438e8a](https://github.com/monetr/monetr/commit/0438e8a48089bd393f6d7492df72a7548a658834))
+* **ui:** Fixed Plaid link status indicator error state. ([8bd7172](https://github.com/monetr/monetr/commit/8bd71720e71d1305ceea195adf4e492be614d45b)), closes [#1208](https://github.com/monetr/monetr/issues/1208)
+* **ui:** Slightly improved mobile ui for funding schedules. ([652e82e](https://github.com/monetr/monetr/commit/652e82e584a6374c4d9bb37edd8b74de0b46e938))
+
+
+### Dependencies
+
+* **icons:** Bumping simple icons to the latest version. ([ec1ad53](https://github.com/monetr/monetr/commit/ec1ad53b86999618884825e4bf9e20f9a09b51fb))
+
+
+### Miscellaneous
+
+* **ui:** Minor funding schedule list refactor. ([ccd8218](https://github.com/monetr/monetr/commit/ccd82184bb8467087802961798543d851b59e197))
+* Updating notices. ([4c2407b](https://github.com/monetr/monetr/commit/4c2407bd1ab7fab007bb34e261803243840ac6bf))
+* Updating README screenshot. ([e1dbb0d](https://github.com/monetr/monetr/commit/e1dbb0dade3a07a00fa83c5e6ca496f52aa5a85c))
+
 ## [0.12.2](https://github.com/monetr/monetr/compare/v0.12.1...v0.12.2) (2022-11-11)
 
 
