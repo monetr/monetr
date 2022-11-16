@@ -19,7 +19,7 @@ require (
 	github.com/gocraft/work v0.5.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/golang/mock v1.6.0
-	github.com/gomodule/redigo v1.8.9
+	github.com/gomodule/redigo/v2 v2.0.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/vault/api v1.3.1
 	github.com/iris-contrib/middleware/cors v0.0.0-20221023021543-014b91018351
