@@ -309,7 +309,7 @@ export default function RegisterView(): JSX.Element {
                               Privacy Policy
                             </a>
                           </Fragment>
-                         }
+                        }
                         labelPlacement="end"
                         value="end"
                       />
