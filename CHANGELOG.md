@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.12.4](https://github.com/monetr/monetr/compare/v0.12.3...v0.12.4) (2022-11-17)
+
+
+### Features
+
+* **plaid:** Laying groundwork for Plaid transaction sync. ([82bf294](https://github.com/monetr/monetr/commit/82bf294dae45fb3ee70fa85a7b58c180833d279b))
+
+
+### Bug Fixes
+
+* **ui:** Fixed accessibility of terms of use and privacy on login page ([#1212](https://github.com/monetr/monetr/issues/1212)) ([4523237](https://github.com/monetr/monetr/commit/4523237638abc5e532b5348602414f1c7d0f853f)), closes [#1196](https://github.com/monetr/monetr/issues/1196)
+
+
+### Dependencies
+
+* **Brew:** Updating brewfile. ([b985e9c](https://github.com/monetr/monetr/commit/b985e9c6c2b755260b159579ce6f1bdd760c6373))
+
 ## [0.12.3](https://github.com/monetr/monetr/compare/v0.12.2...v0.12.3) (2022-11-11)
 
 
