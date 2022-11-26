@@ -9,6 +9,8 @@ import getColor from 'util/getColor';
 import FundingSchedule from 'models/FundingSchedule';
 import { showRemoveFundingScheduleDialog } from './RemoveFundingScheduleDialog';
 import { useNextFundingForecast } from 'hooks/forecast';
+import { useCurrentBalance } from 'hooks/balances';
+import clsx from 'clsx';
 
 interface Props {
   fundingScheduleId: number;
@@ -20,6 +22,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
   const closeMenu = () => setMenuAnchor(null);
 
   const schedule = useFundingSchedule(props.fundingScheduleId);
+  const balance = useCurrentBalance();
   const updateFundingSchedule = useUpdateFundingSchedule();
   const contributionForecast = useNextFundingForecast(props.fundingScheduleId);
 
@@ -72,26 +75,60 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     )
   }
 
+  function EstimatedSafeToSpend(): JSX.Element {
+    if (!schedule.estimatedDeposit) {
+      return null;
+    }
+
+    let loader = <Skeleton variant="text" width={80} height={28} />;
+
+    let textColor = 'text-gray-500'
+
+    let amount: string | null;
+    if (!contributionForecast.isLoading) {
+      const est = (balance.safe + schedule.estimatedDeposit) - contributionForecast.result
+      console.log({
+        safe: balance.safe,
+        deposit: schedule.estimatedDeposit,
+        contribution: contributionForecast.result,
+      });
+      amount = formatAmount(est);
+      textColor = est > 0 ? 'text-green-500' : 'text-red-500';
+    }
+
+    return (
+      <div className="flex-grow flex h-full flex-col items-end justify-center">
+        <span className="font-normal text-gray-500 text-lg">
+          Estimated Safe-To-Spend
+        </span>
+        <span className= { clsx('text-md font-normal', textColor) }>
+          { amount || loader }
+        </span>
+      </div>
+    )
+  }
+
   return (
     <Fragment>
       <ListItem>
-        <div className="flex flex-row gap-2 h-16 w-full mt-1 mb-1">
-          <div className="rounded-lg flex w-16" style={ { backgroundColor: `${color}` } }>
-            <AttachMoney className="col-span-1 h-16 w-10 m-auto fill-gray-500" />
+        <div className="flex flex-row gap-2 h-14 w-full mt-1 mb-1">
+          <div className="rounded-lg flex w-14" style={ { backgroundColor: `${color}` } }>
+            <AttachMoney className="col-span-1 h-14 w-10 m-auto fill-gray-500" />
           </div>
           <div className="flex h-full flex-col">
-            <span className="sm:text-2xl font-semibold mt-auto text-gray-700 text-lg">
+            <span className="font-semibold mt-auto text-gray-700 text-xl">
               { schedule.name }
             </span>
-            <span className="sm:text-xl font-normal mt-auto text-gray-400 text-md">
+            <span className="font-normal mt-auto text-gray-400 text-md">
               { nextOccurrenceString }
             </span>
           </div>
+          <EstimatedSafeToSpend />
           <div className="flex-grow flex h-full flex-col items-end justify-center">
-            <span className="sm:text-xl font-normal text-gray-500 text-md">
+            <span className="font-normal text-gray-500 text-lg">
               Next Contribution
             </span>
-            <span className="sm:text-lg font-normal text-gray-500 text-sm">
+            <span className="font-normal text-gray-500 text-md">
               <Contribution />
             </span>
           </div>
