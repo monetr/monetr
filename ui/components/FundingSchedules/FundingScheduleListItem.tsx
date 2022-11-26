@@ -56,7 +56,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     if (contributionForecast.isLoading) {
       return (
         // TODO This will break with the next MUI upgrade.
-        <Skeleton variant="text" width={80} height={28} />
+        <Skeleton variant="text" width={80} height={24} />
       );
     }
 
@@ -80,7 +80,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
       return null;
     }
 
-    let loader = <Skeleton variant="text" width={80} height={28} />;
+    let loader = <Skeleton variant="text" width={80} height={24} />;
 
     let textColor = 'text-gray-500'
 
