@@ -376,6 +376,8 @@ github.com/inconshreveable/mousetrap v1.0.1/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLf
 github.com/iris-contrib/httpexpect/v2 v2.3.1 h1:A69ilxKGW1jDRKK5UAhjTL4uJYh3RjD4qzt9vNZ7fpY=
 github.com/iris-contrib/middleware/cors v0.0.0-20221023021543-014b91018351 h1:nx64fE+YHJRmnUhF3P/NpsotsU1gNGcH8Ni622HZ3lc=
 github.com/iris-contrib/middleware/cors v0.0.0-20221023021543-014b91018351/go.mod h1:iFSl605/+jpJ85dMSphU4upAT9IMiet9ZPFBqMgNOZs=
+github.com/iris-contrib/middleware/cors v0.0.0-20221109225525-f806663b83a0 h1:dZFxTnzuso4gDphIBPmgJY7KmySSf9qcGxV98+hzrmY=
+github.com/iris-contrib/middleware/cors v0.0.0-20221109225525-f806663b83a0/go.mod h1:iFSl605/+jpJ85dMSphU4upAT9IMiet9ZPFBqMgNOZs=
 github.com/iris-contrib/schema v0.0.6 h1:CPSBLyx2e91H2yJzPuhGuifVRnZBBJ3pCOMbOvPZaTw=
 github.com/iris-contrib/schema v0.0.6/go.mod h1:iYszG0IOsuIsfzjymw1kMzTL8YQcCWlm65f3wX8J5iA=
 github.com/jarcoal/httpmock v1.2.0 h1:gSvTxxFR/MEMfsGrvRbdfpRUMBStovlSRLw0Ep1bwwc=
