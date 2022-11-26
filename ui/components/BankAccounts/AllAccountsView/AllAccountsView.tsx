@@ -108,7 +108,7 @@ export default function AllAccountsView(): JSX.Element {
         <Fab
           color="primary"
           aria-label="add"
-          className="absolute z-50 bottom-0 right-5"
+          className="absolute z-50 bottom-5 right-5"
           onClick={ openDialog(DialogOpen.CreateBankAccount) }
         >
           <Add />
