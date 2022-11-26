@@ -105,10 +105,8 @@ function CreateGoalDialog(): JSX.Element {
               </DialogContentText>
               <div className='grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-2'>
                 <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
-                    What are you budgeting for?
-                  </span>
                   <TextField
+                    label="What are you budgeting for?"
                     error={ touched.name && !!errors.name }
                     placeholder="Example: Vacation..."
                     helperText={ (touched.name && errors.name) ? errors.name : ' ' }
@@ -123,10 +121,8 @@ function CreateGoalDialog(): JSX.Element {
                   />
                 </div>
                 <div className='col-span-12 md:col-span-6'>
-                  <span className='font-normal ml-3'>
-                    How much do you need?
-                  </span>
                   <TextField
+                    label="How much do you need?"
                     error={ touched.amount && !!errors.amount }
                     helperText={ (touched.amount && errors.amount) ? errors.amount : ' ' }
                     name="amount"
@@ -144,10 +140,8 @@ function CreateGoalDialog(): JSX.Element {
                   />
                 </div>
                 <div className='col-span-12 md:col-span-6'>
-                  <span className='font-normal ml-3'>
-                    When do you want to have it by?
-                  </span>
                   <DatePicker
+                    label="What do you want to have it by?"
                     disabled={ isSubmitting }
                     minDate={ moment().startOf('day').add(1, 'day') }
                     onChange={ value => setFieldValue('byDate', value.startOf('day')) }
@@ -158,12 +152,10 @@ function CreateGoalDialog(): JSX.Element {
                     ) }
                   />
                 </div>
-                <Divider className='col-span-12 mt-4' />
+                <Divider className='col-span-12' />
                 <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
-                    How do you want to fund your goal?
-                  </span>
                   <FundingScheduleSelect
+                    label="How do you want to fund your goal?"
                     className='w-full'
                     menuRef={ ref.current }
                     disabled={ isSubmitting }

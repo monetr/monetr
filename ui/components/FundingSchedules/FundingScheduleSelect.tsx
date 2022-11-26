@@ -20,6 +20,7 @@ interface Props<T extends HTMLElement>{
   disabled?: boolean;
   value?: number;
   onBlur?: FocusEventHandler<HTMLInputElement>;
+  label?: string;
 }
 
 function FundingSelectionOption({ children, ...props }: OptionProps<SelectOption>): JSX.Element {
@@ -85,40 +86,62 @@ export default function FundingScheduleSelect<T extends HTMLElement>(props: Prop
     );
   }
 
+  const labelStyles = {
+    lineHeight: '1.4375em',
+    fontSize: '1rem',
+    fontWeight: '400',
+    color: 'rgba(0, 0, 0, 0.6)',
+    letterSpacing: '0.00938em',
+    transform: 'translate(9px, 14px) scale(0.75)',
+    position: 'relative',
+    zIndex: '1',
+    display: 'block',
+    background: 'white',
+    transformOrigin: 'top left',
+    paddingLeft: '5px',
+    paddingRight: '5px',
+    width: 'fit-content',
+  };
+
   return (
-    <Select
-      theme={ (theme: Theme): Theme => ({
-        ...theme,
-        borderRadius: +appTheme.shape.borderRadius,
-        colors: {
-          ...theme.colors,
-          primary: appTheme.palette.primary.main,
-          primary25: lighten(appTheme.palette.primary.main, 0.75),
-          primary50: lighten(appTheme.palette.primary.main, 0.50),
-          primary75: lighten(appTheme.palette.primary.main, 0.25),
-          neutral0: appTheme.palette.background.default,
-          // neutral30: appTheme.palette.primary.main,
-          // neutral80: appTheme.palette.primary.contrastText,
-          // neutral90: appTheme.palette.primary.contrastText,
-        },
-      }) }
-      components={ {
-        Option: FundingSelectionOption,
-      } }
-      classNamePrefix="recurrence-select"
-      className={ props.className }
-      isClearable={ false }
-      isDisabled={ props.disabled }
-      isLoading={ false }
-      onChange={ handleChange }
-      options={ options }
-      value={ value }
-      formatOptionLabel={ formatOptionsLabel }
-      styles={ customStyles }
-      menuPlacement="auto"
-      menuPortalTarget={ ref }
-      onBlur={ props.onBlur }
-    />
+    <div style={ { marginTop: `-${labelStyles.lineHeight}` }}>
+      <span style={ labelStyles }>
+        {props.label}
+      </span>
+      <Select
+        theme={ (theme: Theme): Theme => ({
+          ...theme,
+          borderRadius: +appTheme.shape.borderRadius,
+          colors: {
+            ...theme.colors,
+            primary: appTheme.palette.primary.main,
+            primary25: lighten(appTheme.palette.primary.main, 0.75),
+            primary50: lighten(appTheme.palette.primary.main, 0.50),
+            primary75: lighten(appTheme.palette.primary.main, 0.25),
+            neutral0: appTheme.palette.background.default,
+            // neutral30: appTheme.palette.primary.main,
+            // neutral80: appTheme.palette.primary.contrastText,
+            // neutral90: appTheme.palette.primary.contrastText,
+          },
+        }) }
+        components={ {
+          Option: FundingSelectionOption,
+        } }
+        classNamePrefix="recurrence-select"
+        className={ props.className }
+        isClearable={ false }
+        isDisabled={ props.disabled }
+        isLoading={ false }
+        onChange={ handleChange }
+        options={ options }
+        value={ value }
+        formatOptionLabel={ formatOptionsLabel }
+        styles={ customStyles }
+        menuPlacement="auto"
+        menuPortalTarget={ ref }
+        onBlur={ props.onBlur }
+      />
+    </div>
   );
 }
 

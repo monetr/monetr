@@ -162,10 +162,8 @@ function CreateExpenseDialog(): JSX.Element {
               </DialogContentText>
               <div className="grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-2">
                 <div className="col-span-12">
-                  <span className="font-normal ml-3">
-                    What are you budgeting for?
-                  </span>
                   <TextField
+                    label="What are you budgeting for?"
                     error={ touched.name && !!errors.name }
                     placeholder="Example: Amazon..."
                     helperText={ (touched.name && errors.name) ? errors.name : ' ' }
@@ -180,10 +178,8 @@ function CreateExpenseDialog(): JSX.Element {
                   />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <span className="font-normal ml-3">
-                    How much do you need?
-                  </span>
                   <TextField
+                    label="How much do you need?"
                     error={ touched.amount && !!errors.amount }
                     helperText={ (touched.amount && errors.amount) ? errors.amount : ' ' }
                     name="amount"
@@ -201,10 +197,8 @@ function CreateExpenseDialog(): JSX.Element {
                   />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <span className="font-normal ml-3">
-                    When do you need it next?
-                  </span>
                   <DatePicker
+                    label="When do you need it next?"
                     disabled={ isSubmitting }
                     minDate={ moment().startOf('day').add(1, 'day') }
                     onChange={ value => setFieldValue('nextOccurrence', value.startOf('day')) }
@@ -218,10 +212,8 @@ function CreateExpenseDialog(): JSX.Element {
                 </div>
                 <Divider className="col-span-12 mt-4"/>
                 <div className="col-span-12">
-                  <span className="font-normal ml-3">
-                    How often do you need to pay for { values.name || 'your expense' }?
-                  </span>
                   <RecurrenceSelect
+                    label={ `How often do you need to pay for ${ values.name || 'your expense' }`}
                     menuRef={ ref.current }
                     disabled={ isSubmitting }
                     date={ values.nextOccurrence }
@@ -230,10 +222,8 @@ function CreateExpenseDialog(): JSX.Element {
                   />
                 </div>
                 <div className="col-span-12">
-                  <span className="font-normal ml-3">
-                    How do you want to fund your expense?
-                  </span>
                   <FundingScheduleSelect
+                    label="How do you want to fund your expense?"
                     className="w-full"
                     menuRef={ ref.current }
                     disabled={ isSubmitting }

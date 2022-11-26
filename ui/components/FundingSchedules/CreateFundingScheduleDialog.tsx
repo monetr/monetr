@@ -3,7 +3,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Science } from '@mui/icons-material';
 import { DatePicker } from '@mui/lab';
-import { Button, Collapse, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Switch, TextField } from '@mui/material';
+import { Button, Collapse, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, InputAdornment, Switch, TextField } from '@mui/material';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import moment from 'moment';
 
@@ -86,20 +86,18 @@ function CreateFundingScheduleDialog(): JSX.Element {
             <DialogTitle>
               Create A New Funding Schedule
             </DialogTitle>
-            <DialogContent>
+            <DialogContent className='pb-0 pt-0'>
               <DialogContentText>
                 Funding schedules tell monetr when you get paid. This way monetr can allocate funds towards your goals
                 and expenses each time you get paid, in order to make sure you are covered when those expenses are due.
               </DialogContentText>
-              <div className='grid sm:grid-cols-1 md:grid-cols-12 mt-5 gap-x-5 gap-y-5'>
+              <div className='grid sm:grid-cols-1 md:grid-cols-12 mt-5 mb-6 gap-x-5 gap-y-5'>
                 <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
-                    What do you want to call your funding schedule?
-                  </span>
                   <TextField
-                    error={ touched.name && !!errors.name }
+                    label="What do you want to call your funding schedule?"
+                    error={ touched.name && values.name && !!errors.name }
                     placeholder="Example: Payday..."
-                    helperText={ (touched.name && errors.name) ? errors.name : ' ' }
+                    helperText={ (touched.name && values.name && errors.name) ? errors.name : ' ' }
                     name="name"
                     className="w-full"
                     onChange={ handleChange }
@@ -110,10 +108,8 @@ function CreateFundingScheduleDialog(): JSX.Element {
                   />
                 </div>
                 <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
-                    When do you get paid next?
-                  </span>
                   <DatePicker
+                    label="When do you get paid next?"
                     disabled={ isSubmitting }
                     minDate={ moment().startOf('day').add(1, 'day') }
                     onChange={ value => setFieldValue('nextOccurrence', value.startOf('day')) }
@@ -125,10 +121,8 @@ function CreateFundingScheduleDialog(): JSX.Element {
                   />
                 </div>
                 <div className='col-span-12'>
-                  <span className='font-normal ml-3'>
-                    How often do you get paid?
-                  </span>
                   <RecurrenceSelect
+                    label="How often do you get paid?"
                     menuRef={ ref.current }
                     disabled={ isSubmitting }
                     date={ values.nextOccurrence }
@@ -154,6 +148,25 @@ function CreateFundingScheduleDialog(): JSX.Element {
                         </Fragment>
                       }
                     />
+                    <div className='col-span-12 pt-5'>
+                      <TextField
+                        label="About how much do you get paid each time?"
+                        error={ touched.estimatedDeposit && !!errors.estimatedDeposit }
+                        placeholder="Example: $1200"
+                        helperText={ (touched.estimatedDeposit && errors.estimatedDeposit) ? errors.estimatedDeposit : ' ' }
+                        name="estimatedDeposit"
+                        className="w-full"
+                        onChange={ handleChange }
+                        onBlur={ handleBlur }
+                        value={ values.estimatedDeposit }
+                        disabled={ isSubmitting }
+                        type="number"
+                        InputProps={ {
+                          startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                          inputProps: { min: 0 },
+                        } }
+                      />
+                    </div>
                   </Collapse>
                 </div>
               </div>
