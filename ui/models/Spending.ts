@@ -1,5 +1,6 @@
 import moment, { Moment } from 'moment';
 
+import formatAmount from 'util/formatAmount';
 import { parseToMomentMaybe } from 'util/parseToMoment';
 
 export enum SpendingType {
@@ -46,7 +47,7 @@ export default class Spending {
   }
 
   getTargetAmountString(): string {
-    return `$${ (this.targetAmount / 100).toFixed(2) }`;
+    return formatAmount(this.targetAmount);
   }
 
   getTargetAmountDollars(): number {
@@ -54,15 +55,15 @@ export default class Spending {
   }
 
   getCurrentAmountString(): string {
-    return `$${ (this.currentAmount / 100).toFixed(2) }`;
+    return formatAmount(this.currentAmount);
   }
 
   getUsedAmountString(): string {
-    return `$${ (this.usedAmount / 100).toFixed(2) }`;
+    return formatAmount(this.usedAmount);
   }
 
   getNextContributionAmountString(): string {
-    return `$${ (this.nextContributionAmount / 100).toFixed(2) }`;
+    return formatAmount(this.nextContributionAmount);
   }
 
   getIsExpense(): boolean {
@@ -81,6 +82,6 @@ export default class Spending {
   }
 
   getGoalSavedAmountString(): string {
-    return `$${ ((this.currentAmount + this.usedAmount) / 100).toFixed(2) }`;
+    return formatAmount(this.currentAmount + this.usedAmount);
   }
 }
