@@ -129,13 +129,19 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) erro
 }
 
 func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "UpdateLink"
+
+	span.Data = map[string]interface{}{
+		"link": *link,
+	}
 
 	link.AccountId = r.AccountId()
 	link.UpdatedAt = time.Now().UTC()
 
-	_, err := r.txn.ModelContext(span.Context(), link).WherePK().Returning(`*`).UpdateNotZero(link)
+	_, err := r.txn.ModelContext(span.Context(), link).
+		WherePK().
+		Returning(`*`).
+		Update(link)
 	return errors.Wrap(err, "failed to update link")
 }
