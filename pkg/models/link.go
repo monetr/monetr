@@ -24,7 +24,7 @@ type Link struct {
 	PlaidLinkId               *uint64    `json:"-" pg:"plaid_link_id,on_delete:SET NULL"`
 	PlaidLink                 *PlaidLink `json:"-" pg:"rel:has-one"`
 	PlaidInstitutionId        *string    `json:"plaidInstitutionId" pg:"plaid_institution_id"`
-	PlaidNewAccountsAvailable bool       `json:"plaidNewAccountsAvailable" pg:"plaid_new_accounts_available"`
+	PlaidNewAccountsAvailable bool       `json:"plaidNewAccountsAvailable" pg:"plaid_new_accounts_available,use_zero"`
 	LinkStatus                LinkStatus `json:"linkStatus" pg:"link_status,notnull,default:0"`
 	ErrorCode                 *string    `json:"errorCode,omitempty" pg:"error_code"`
 	ExpirationDate            *time.Time `json:"expirationDate" pg:"expiration_date"`
