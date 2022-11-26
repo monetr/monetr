@@ -58,7 +58,7 @@ func NewSecurityRepository(db pg.DBI) SecurityRepository {
 }
 
 func (b *baseSecurityRepository) Login(ctx context.Context, email, password string) (*models.Login, bool, error) {
-	span := sentry.StartSpan(ctx, "Login")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	requiresPasswordChange := false
@@ -109,7 +109,7 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, password stri
 }
 
 func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId uint64, oldPassword, newPassword string) error {
-	span := sentry.StartSpan(ctx, "ChangePassword")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	var login models.LoginWithHash

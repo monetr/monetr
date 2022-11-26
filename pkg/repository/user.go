@@ -3,13 +3,13 @@ package repository
 import (
 	"context"
 
-	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 )
 
 func (r *repositoryBase) UpdateUser(ctx context.Context, user *models.User) error {
-	span := sentry.StartSpan(ctx, "UpdateUser")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	user.UserId = r.UserId()

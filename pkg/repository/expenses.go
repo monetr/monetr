@@ -2,14 +2,16 @@ package repository
 
 import (
 	"context"
+	"time"
+
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
-	"time"
 )
 
 func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error) {
-	span := sentry.StartSpan(ctx, "GetSpending")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
@@ -33,7 +35,7 @@ func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) 
 }
 
 func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId, spendingId uint64) (bool, error) {
-	span := sentry.StartSpan(ctx, "GetSpendingExists")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
@@ -58,7 +60,7 @@ func (r *repositoryBase) GetSpendingExists(ctx context.Context, bankAccountId, s
 }
 
 func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error) {
-	span := sentry.StartSpan(ctx, "GetSpendingByFundingSchedule")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
@@ -84,7 +86,7 @@ func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankA
 }
 
 func (r *repositoryBase) CreateSpending(ctx context.Context, spending *models.Spending) error {
-	span := sentry.StartSpan(ctx, "CreateSpending")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
@@ -109,7 +111,7 @@ func (r *repositoryBase) CreateSpending(ctx context.Context, spending *models.Sp
 // UpdateSpending should only be called with complete expense models. Do not use partial models with missing data for
 // this action.
 func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error {
-	span := sentry.StartSpan(ctx, "UpdateSpending")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	spendingIds := make([]uint64, len(updates))
@@ -138,7 +140,7 @@ func (r *repositoryBase) UpdateSpending(ctx context.Context, bankAccountId uint6
 }
 
 func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId, spendingId uint64) (*models.Spending, error) {
-	span := sentry.StartSpan(ctx, "GetSpendingById")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{
@@ -165,7 +167,7 @@ func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId, spe
 }
 
 func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spendingId uint64) error {
-	span := sentry.StartSpan(ctx, "Delete Spending")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	span.Data = map[string]interface{}{

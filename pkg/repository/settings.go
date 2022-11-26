@@ -10,7 +10,7 @@ import (
 )
 
 func (r *repositoryBase) GetSettings(ctx context.Context) (*models.Settings, error) {
-	span := sentry.StartSpan(ctx, "GetSettings")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	result := models.Settings{

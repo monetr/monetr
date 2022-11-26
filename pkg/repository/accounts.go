@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 )
@@ -13,9 +14,8 @@ func (r *repositoryBase) GetAccount(ctx context.Context) (*models.Account, error
 		return r.account, nil
 	}
 
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetAccount"
 
 	var account models.Account
 	err := r.txn.ModelContext(span.Context(), &account).
@@ -37,9 +37,8 @@ func (r *repositoryBase) GetAccount(ctx context.Context) (*models.Account, error
 // DeleteAccount removes all of the records from the database related to the current account. This action cannot be
 // undone. Any Plaid links should be removed BEFORE calling this function.
 func (r *repositoryBase) DeleteAccount(ctx context.Context) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "DeleteAccount"
 
 	dataTypes := []interface{}{
 		&models.Transaction{},

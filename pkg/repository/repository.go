@@ -42,7 +42,6 @@ type BaseRepository interface {
 	GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error)
 	GetLinks(ctx context.Context) ([]models.Link, error)
 	GetNumberOfPlaidLinks(ctx context.Context) (int, error)
-	GetPendingTransactionsForBankAccount(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error)
 	GetSettings(ctx context.Context) (*models.Settings, error)
 	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)
 	GetSpendingByFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) ([]models.Spending, error)

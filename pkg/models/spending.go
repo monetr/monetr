@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/util"
@@ -89,9 +88,8 @@ func (e *Spending) CalculateNextContribution(
 	fundingSchedule *FundingSchedule,
 	now time.Time,
 ) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "CalculateNextContribution"
 
 	span.SetTag("spendingId", strconv.FormatUint(e.SpendingId, 10))
 

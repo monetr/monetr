@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/pkg/errors"
 )
 
@@ -20,7 +21,7 @@ type Balances struct {
 }
 
 func (r *repositoryBase) GetBalances(ctx context.Context, bankAccountId uint64) (*Balances, error) {
-	span := sentry.StartSpan(ctx, "GetBalances")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	var balance Balances
@@ -50,8 +51,11 @@ type FundingStats struct {
 }
 
 func (r *repositoryBase) GetFundingStats(ctx context.Context, bankAccountId uint64) ([]FundingStats, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
 	stats := make([]FundingStats, 0)
-	err := r.txn.ModelContext(ctx, &stats).
+	err := r.txn.ModelContext(span.Context(), &stats).
 		Where(`"funding_stats"."account_id" = ?`, r.AccountId()).
 		Where(`"funding_stats"."bank_account_id" = ?`, bankAccountId).
 		Select(&stats)

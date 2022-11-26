@@ -17,9 +17,8 @@ type TransactionUpdateId struct {
 }
 
 func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []models.Transaction) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "InsertTransactions"
 
 	for i := range transactions {
 		transactions[i].AccountId = r.AccountId()
@@ -28,28 +27,13 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
-func (r *repositoryBase) GetPendingTransactionsForBankAccount(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error) {
-	var result []models.Transaction
-	err := r.txn.Model(&result).
-		Where(`"transaction"."account_id" = ?`, r.AccountId()).
-		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction"."is_pending" = ?`, true).
-		Select(&result)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not retrieve pending transactions for bank account")
-	}
-
-	return result, nil
-}
-
 func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
 	if len(plaidTransactionIds) == 0 {
 		return map[string]models.Transaction{}, nil
 	}
 
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetTransactionsByPlaidId"
 
 	span.Data = map[string]interface{}{
 		"linkId":              linkId,
@@ -80,9 +64,8 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 }
 
 func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetTransactions"
 
 	span.Data = map[string]interface{}{
 		"accountId":     r.AccountId(),
@@ -111,9 +94,8 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 }
 
 func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetTransactionsForSpending"
 
 	span.Data = map[string]interface{}{
 		"accountId":     r.AccountId(),
@@ -144,9 +126,8 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 }
 
 func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetTransaction"
 
 	span.Data = map[string]interface{}{
 		"bankAccountId": bankAccountId,
@@ -170,9 +151,8 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, tran
 }
 
 func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "CreateTransaction"
 
 	span.Data = map[string]interface{}{
 		"bankAccountId": bankAccountId,
@@ -193,9 +173,8 @@ func (r *repositoryBase) CreateTransaction(ctx context.Context, bankAccountId ui
 }
 
 func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "UpdateTransaction"
 
 	span.Data = map[string]interface{}{
 		"bankAccountId": bankAccountId,
@@ -221,9 +200,8 @@ func (r *repositoryBase) UpdateTransaction(ctx context.Context, bankAccountId ui
 // UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is doing a
 // bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "UpdateTransactions"
 
 	for i := range transactions {
 		transactions[i].AccountId = r.AccountId()
@@ -248,9 +226,8 @@ func (r *repositoryBase) UpdateTransactions(ctx context.Context, transactions []
 }
 
 func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, transactionId uint64) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "DeleteTransaction"
 
 	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
@@ -262,9 +239,8 @@ func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, t
 }
 
 func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetTransactionsByPlaidTransactionId"
 
 	result := make([]models.Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -282,9 +258,8 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context
 }
 
 func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetRecentDepositTransactions"
 
 	result := make([]models.Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
@@ -301,9 +276,8 @@ func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankA
 }
 
 func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "ProcessTransactionSpentFrom"
 
 	account, err := r.GetAccount(span.Context())
 	if err != nil {
@@ -422,9 +396,8 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 }
 
 func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "AddExpenseToTransaction"
 
 	account, err := r.GetAccount(span.Context())
 	if err != nil {
