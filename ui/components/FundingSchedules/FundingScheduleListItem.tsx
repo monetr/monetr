@@ -1,15 +1,14 @@
 import React, { Fragment, useMemo, useState } from 'react';
 import { MoreVert, AttachMoney, Remove, Weekend } from '@mui/icons-material';
-import { Divider, IconButton, ListItem, Menu, MenuItem } from '@mui/material';
+import { Divider, IconButton, ListItem, Menu, MenuItem, Skeleton } from '@mui/material';
 import moment from 'moment';
 
 import { useFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
-import { useSpendingSink } from 'hooks/spending';
 import formatAmount from 'util/formatAmount';
 import getColor from 'util/getColor';
-import getFundingScheduleContribution from 'util/getFundingScheduleContribution';
 import FundingSchedule from 'models/FundingSchedule';
 import { showRemoveFundingScheduleDialog } from './RemoveFundingScheduleDialog';
+import { useNextFundingForecast } from 'hooks/forecast';
 
 interface Props {
   fundingScheduleId: number;
@@ -22,8 +21,8 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
 
   const schedule = useFundingSchedule(props.fundingScheduleId);
   const updateFundingSchedule = useUpdateFundingSchedule();
-  const { result: spending } = useSpendingSink();
-  const contribution = getFundingScheduleContribution(props.fundingScheduleId, spending);
+  const contributionForecast = useNextFundingForecast(props.fundingScheduleId);
+
   const color = useMemo(() => getColor(schedule.name), [schedule.name]);
 
   const next = schedule.nextOccurrence;
@@ -50,6 +49,29 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     });
   }
 
+  function Contribution(): JSX.Element {
+    if (contributionForecast.isLoading) {
+      return (
+        // TODO This will break with the next MUI upgrade.
+        <Skeleton variant="text" width={80} height={28} />
+      );
+    }
+
+    if (contributionForecast.result) {
+      return (
+        <Fragment>
+          { formatAmount(contributionForecast.result) }
+        </Fragment>
+      )
+    }
+
+    return (
+      <Fragment>
+        N/A
+      </Fragment>
+    )
+  }
+
   return (
     <Fragment>
       <ListItem>
@@ -70,7 +92,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
               Next Contribution
             </span>
             <span className="sm:text-lg font-normal text-gray-500 text-sm">
-              { formatAmount(contribution) }
+              <Contribution />
             </span>
           </div>
           <div className="flex h-full flex-col items-center justify-center">

@@ -28,6 +28,7 @@ type Forecast struct {
 type Forecaster interface {
 	GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast
 	GetAverageContribution(ctx context.Context, start, end time.Time, timezone *time.Location) int64
+	GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId uint64, timezone *time.Location) int64
 }
 
 type forecasterBase struct {
@@ -61,9 +62,9 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
-		"start":           start,
-		"end":             end,
-		"timezone":        timezone.String(),
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
 	}
 	forecast := Forecast{
 		StartingBalance: f.currentBalance,
@@ -151,9 +152,9 @@ func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end 
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
-		"start":           start,
-		"end":             end,
-		"timezone":        timezone.String(),
+		"start":    start,
+		"end":      end,
+		"timezone": timezone.String(),
 	}
 	forecast := f.GetForecast(span.Context(), start, end, timezone)
 	contributionAmounts := map[int64]int64{}
@@ -173,4 +174,29 @@ func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end 
 	}
 
 	return popularContribution
+}
+
+func (f *forecasterBase) GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId uint64, timezone *time.Location) int64 {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	end := f.funding[fundingScheduleId].GetNextFundingEventAfter(span.Context(), start, timezone)
+
+	span.Data = map[string]interface{}{
+		"start":             start,
+		"end":               end,
+		"fundingScheduleId": fundingScheduleId,
+		"timezone":          timezone.String(),
+	}
+
+	forecast := f.GetForecast(span.Context(), start, end.Date.AddDate(0, 0, 1), timezone)
+	for _, event := range forecast.Events {
+		if len(event.Funding) == 0 {
+			continue
+		}
+
+		return event.Contribution
+	}
+
+	return 0
 }

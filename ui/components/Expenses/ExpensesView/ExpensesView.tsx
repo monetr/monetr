@@ -11,7 +11,7 @@ import { SpendingType } from 'models/Spending';
 import 'components/Expenses/ExpensesView/styles/ExpensesView.scss';
 
 export default function ExpensesView(): JSX.Element {
-  const { result: expenses } = useSpendingFiltered(SpendingType.Expense);
+  const { isLoading, result: expenses } = useSpendingFiltered(SpendingType.Expense);
 
   function EmptyState(): JSX.Element {
     return (
@@ -40,7 +40,7 @@ export default function ExpensesView(): JSX.Element {
     );
   }
 
-  if (expenses.length === 0) {
+  if (expenses.length === 0 && !isLoading) {
     return <EmptyState />;
   }
 

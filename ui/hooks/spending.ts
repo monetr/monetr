@@ -26,11 +26,11 @@ export function useSpendingSink(): SpendingResult {
 }
 
 export function useSpending(spendingId?: number): Spending | null {
+  const { result } = useSpendingSink();
   if (!spendingId) {
     return null;
   }
 
-  const { result } = useSpendingSink();
   return result.find(item => item.spendingId === spendingId) || null;
 }
 
@@ -77,6 +77,7 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
         ),
         queryClient.invalidateQueries(`/bank_accounts/${ selectedBankAccountId }/balances`),
+        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
       ]),
     },
   );
@@ -105,6 +106,7 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
             previous.map(item => item.spendingId === updatedSpending.spendingId ? updatedSpending : item),
         ),
         queryClient.invalidateQueries(`/bank_accounts/${ updatedSpending.bankAccountId }/balances`),
+        queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
   );
@@ -132,6 +134,7 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
           (previous: Array<Partial<Spending>>) => (previous || []).concat(createdSpending),
         ),
         queryClient.invalidateQueries(`/bank_accounts/${ createdSpending.bankAccountId }/balances`),
+        queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
   );
@@ -183,6 +186,7 @@ export function useTransfer(): (
             ...result.balance,
           }),
         ),
+        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
       ]),
     },
   );

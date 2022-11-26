@@ -10,6 +10,7 @@ import (
 
 func (c *Controller) handleForecasting(p iris.Party) {
 	p.Post("/{bankAccountId:uint64}/forecast/spending", c.postForecastNewSpending)
+	p.Post("/{bankAccountId:uint64}/forecast/next_funding", c.postForecastNextFunding)
 }
 
 func (c *Controller) postForecastNewSpending(ctx iris.Context) {
@@ -80,6 +81,57 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 			c.getContext(ctx),
 			request.NextRecurrence.AddDate(0, 0, -1),
 			end,
+			timezone,
+		),
+	})
+}
+
+func (c *Controller) postForecastNextFunding(ctx iris.Context) {
+	var request struct {
+		FundingScheduleId uint64 `json:"fundingScheduleId"`
+	}
+	if err := ctx.ReadJSON(&request); err != nil {
+		c.invalidJson(ctx)
+		return
+	}
+
+	if request.FundingScheduleId == 0 {
+		c.badRequest(ctx, "Funding schedule must be specified")
+		return
+	}
+
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.badRequest(ctx, "Must specify a valid bank account Id")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, request.FundingScheduleId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not retrieve funding schedule")
+		return
+	}
+
+	spending, err := repo.GetSpendingByFundingSchedule(c.getContext(ctx), bankAccountId, request.FundingScheduleId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not retrieve spending for forecast")
+		return
+	}
+
+	fundingForecast := forecast.NewForecaster(
+		spending,
+		[]models.FundingSchedule{
+			*fundingSchedule,
+		},
+	)
+	timezone := c.mustGetTimezone(ctx)
+	ctx.JSON(map[string]interface{}{
+		"nextContribution": fundingForecast.GetNextContribution(
+			c.getContext(ctx),
+			time.Now(),
+			request.FundingScheduleId,
 			timezone,
 		),
 	})
