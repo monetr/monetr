@@ -23,5 +23,6 @@ func TestRuleString(t *testing.T) {
 		rule, err := NewRule(input)
 		assert.NoError(t, err, "must be able to parse semi-monthly rule")
 		assert.NotEmpty(t, rule.String(), "should produce a string")
+		assert.Equal(t, input, rule.RRule.OrigOptions.RRuleString(), "should produce the expect string rule")
 	})
 }
