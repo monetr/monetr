@@ -32,14 +32,14 @@ export default function Root(): JSX.Element {
   async function queryFn<T = unknown, TQueryKey extends QueryKey = QueryKey>(
     context: QueryFunctionContext<TQueryKey>,
   ): Promise<T> {
-    const { data } = await axios.get<T>(
-      `/api${ context.queryKey[0] }`,
-      {
-        params: context.pageParam && {
-          offset: context.pageParam,
-        },
+    const { data } = await axios.request<T>({
+      url: `/api${ context.queryKey[0] }`,
+      method: context.queryKey.length === 1 ? 'GET' : 'POST',
+      params: context.pageParam && {
+        offset: context.pageParam,
       },
-    )
+      data: context.queryKey.length === 2 && context.queryKey[1],
+    })
       .catch(result => {
         switch (result.response.status) {
           case 500:
