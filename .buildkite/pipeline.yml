@@ -7,3 +7,5 @@ steps:
       ENVIRONMENT: ${BUILDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT}
     agents:
       environment: "${BUILDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT}"
+    concurrency: 1
+    concurrency_group: "deploy/${BUILDKITE_GITHUB_DEPLOYMENT_ENVIRONMENT}"
