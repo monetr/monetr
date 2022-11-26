@@ -103,7 +103,7 @@ function CreateGoalDialog(): JSX.Element {
                 Goals let you budget for things that don't repeat on a regular basis. Like saving up for something or
                 paying something off. Once a goal reaches its target amount no more contributions to it will be made.
               </DialogContentText>
-              <div className='grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-2'>
+              <div className='grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-5'>
                 <div className='col-span-12'>
                   <TextField
                     label="What are you budgeting for?"

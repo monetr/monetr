@@ -160,7 +160,7 @@ function CreateExpenseDialog(): JSX.Element {
                 Expenses let you budget for things that happen on a regular basis automatically. Money is allocated
                 to expenses whenever you get paid so that you don't have to pay something from a single paycheck.
               </DialogContentText>
-              <div className="grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-2">
+              <div className="grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-5">
                 <div className="col-span-12">
                   <TextField
                     label="What are you budgeting for?"
@@ -210,7 +210,7 @@ function CreateExpenseDialog(): JSX.Element {
                     ) }
                   />
                 </div>
-                <Divider className="col-span-12 mt-4"/>
+                <Divider className="col-span-12"/>
                 <div className="col-span-12">
                   <RecurrenceSelect
                     label={ `How often do you need to pay for ${ values.name || 'your expense' }`}
@@ -232,7 +232,7 @@ function CreateExpenseDialog(): JSX.Element {
                     value={ values.fundingScheduleId }
                   />
                 </div>
-                <Divider className="col-span-12 mt-4"/>
+                <Divider className="col-span-12"/>
                 <div className="col-span-12">
                   <span className="font-normal ml-3">
                     Estimated cost per { values.fundingScheduleId ? fundingSchedules.get(values.fundingScheduleId).name : 'pay check' }.
