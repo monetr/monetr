@@ -41,6 +41,7 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 	}
 
 	var items []models.Transaction
+	// Deliberatly include all transactions, regardless of delete status.
 	err := r.txn.ModelContext(span.Context(), &items).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
@@ -78,6 +79,7 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."deleted_at" IS NULL`).
 		Limit(limit).
 		Offset(offset).
 		Order(`date DESC`).
@@ -110,6 +112,7 @@ func (r *repositoryBase) GetTransactionsForSpending(ctx context.Context, bankAcc
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."spending_id" = ?`, spendingId).
+		Where(`"transaction"."deleted_at" IS NULL`).
 		Limit(limit).
 		Offset(offset).
 		Order(`date DESC`).
@@ -233,9 +236,10 @@ func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, t
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
-		Delete()
+		Set(`"deleted_at" = ?`, time.Now().UTC()).
+		Update()
 
-	return errors.Wrap(err, "failed to delete transaction")
+	return errors.Wrap(err, "failed to soft-delete transaction")
 }
 
 func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error) {
@@ -267,6 +271,7 @@ func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankA
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."amount" < 0`). // Negative transactions are deposits.
 		Where(`"transaction"."date" >= ?`, time.Now().Add(-24*time.Hour)).
+		Where(`"transaction"."deleted_at" IS NULL`).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve recent deposit transactions")

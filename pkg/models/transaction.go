@@ -36,6 +36,7 @@ type Transaction struct {
 	OriginalMerchantName string     `json:"originalMerchantName" pg:"original_merchant_name"`
 	IsPending            bool       `json:"isPending" pg:"is_pending,notnull,use_zero"`
 	CreatedAt            time.Time  `json:"createdAt" pg:"created_at,notnull,default:now()"`
+	DeletedAt            *time.Time `json:"deletedAt" pg:"deleted_at"`
 }
 
 func (t Transaction) IsAddition() bool {
