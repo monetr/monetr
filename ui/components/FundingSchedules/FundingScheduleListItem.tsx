@@ -62,16 +62,24 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
 
     if (contributionForecast.result) {
       return (
-        <Fragment>
+        <span className="font-normal text-gray-500 text-md">
           { formatAmount(contributionForecast.result) }
-        </Fragment>
+        </span>
+      )
+    }
+
+    if (contributionForecast.isError) {
+      return (
+        <span className="font-normal text-red-500 text-md">
+          Error
+        </span>
       )
     }
 
     return (
-      <Fragment>
+      <span className="font-normal text-red-500 text-md">
         N/A
-      </Fragment>
+      </span>
     )
   }
 
@@ -85,10 +93,13 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     let textColor = 'text-gray-500'
 
     let amount: string | null;
-    if (!contributionForecast.isLoading && balance !== null) {
+    if (!contributionForecast.isLoading && !contributionForecast.isError && balance !== null) {
       const est = (balance.safe + schedule.estimatedDeposit) - contributionForecast.result
       amount = formatAmount(est);
       textColor = est > 0 ? 'text-green-500' : 'text-red-500';
+    } else if (contributionForecast.isError) {
+      textColor = 'text-red-500'
+      amount = 'Error'
     }
 
     return (
@@ -123,9 +134,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
             <span className="font-normal text-gray-500 text-lg">
               Next Contribution
             </span>
-            <span className="font-normal text-gray-500 text-md">
-              <Contribution />
-            </span>
+            <Contribution />
           </div>
           <div className="flex h-full flex-col items-center justify-center">
             <IconButton onClick={ openMenu }>

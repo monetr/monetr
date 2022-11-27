@@ -5,6 +5,7 @@ import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import useStore from 'hooks/store';
 import Balance from 'models/Balance';
 import Spending, { SpendingType } from 'models/Spending';
+import SpendingFunding from 'models/SpendingFunding';
 import request from 'util/request';
 
 export type SpendingResult =
@@ -106,6 +107,9 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
             previous.map(item => item.spendingId === updatedSpending.spendingId ? updatedSpending : item),
         ),
         queryClient.invalidateQueries(`/bank_accounts/${ updatedSpending.bankAccountId }/balances`),
+        queryClient.invalidateQueries(
+          `/bank_accounts/${ updatedSpending.bankAccountId }/spending/${ updatedSpending.spendingId }/funding`,
+        ),
         queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -173,21 +177,26 @@ export function useTransfer(): (
   const { mutate } = useMutation(
     transfer,
     {
-      onSuccess: (result: BalanceTransferResponse) => Promise.all([
-        queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/spending`,
-          (previous: Array<Partial<Spending>>) => previous
-            .map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
-        ),
-        queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/balances`,
-          (previous: Partial<Balance>) => new Balance({
-            ...previous,
-            ...result.balance,
-          }),
-        ),
-        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
-      ]),
+      onSuccess: (result: BalanceTransferResponse) => {
+        const fundingUrls = result.spending
+          .map(item => `/bank_accounts/${ item.bankAccountId }/spending/${ item.spendingId }/funding`);
+        return Promise.all([
+          queryClient.setQueriesData(
+            `/bank_accounts/${ selectedBankAccountId }/spending`,
+            (previous: Array<Partial<Spending>>) => previous
+              .map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
+          ),
+          queryClient.setQueriesData(
+            `/bank_accounts/${ selectedBankAccountId }/balances`,
+            (previous: Partial<Balance>) => new Balance({
+              ...previous,
+              ...result.balance,
+            }),
+          ),
+          queryClient.invalidateQueries(fundingUrls),
+          queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
+        ]);
+      },
     },
   );
 
@@ -201,5 +210,19 @@ export function useTransfer(): (
       toSpendingId,
       amount,
     });
+  };
+}
+
+export type SpendingFundingResult =
+  { result: Array<SpendingFunding> }
+  & UseQueryResult<Array<Partial<SpendingFunding>>>;
+
+export function useSpendingFunding(spending: Spending): SpendingFundingResult {
+  const result = useQuery<Array<Partial<SpendingFunding>>>(
+    `/bank_accounts/${ spending.bankAccountId }/spending/${ spending.spendingId }/funding`,
+  );
+  return {
+    ...result,
+    result: (result?.data || []).map(item => new SpendingFunding(item)),
   };
 }

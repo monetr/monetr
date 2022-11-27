@@ -11,7 +11,6 @@ export enum SpendingType {
 export default class Spending {
   spendingId: number;
   bankAccountId: number;
-  fundingScheduleId?: number;
   name: string;
   description?: string;
   spendingType: SpendingType;
@@ -21,7 +20,6 @@ export default class Spending {
   recurrenceRule: string;
   lastRecurrence: Moment | null;
   nextRecurrence: Moment | null;
-  nextContributionAmount: number;
   isBehind: boolean;
   isPaused: boolean;
   dateCreated: Moment | null;
@@ -63,7 +61,8 @@ export default class Spending {
   }
 
   getNextContributionAmountString(): string {
-    return formatAmount(this.nextContributionAmount);
+    console.warn("DEPRECATED");
+    return "DEPRECATED";
   }
 
   getIsExpense(): boolean {

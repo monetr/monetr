@@ -1,9 +1,12 @@
 import React from 'react';
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
 
-import { useFundingSchedule } from 'hooks/fundingSchedules';
+import { useFundingSchedule, useFundingSchedules } from 'hooks/fundingSchedules';
 import useStore from 'hooks/store';
 import Spending from 'models/Spending';
+import { useSpendingFunding } from 'hooks/spending';
+import FundingSchedule from 'models/FundingSchedule';
+import formatAmount from 'util/formatAmount';
 
 export interface Props {
   expense: Spending;
@@ -18,8 +21,14 @@ export default function ExpenseItem(props: Props): JSX.Element {
   } = useStore();
 
   const isSelected = expense.spendingId === selectedExpenseId;
-  const fundingSchedule = useFundingSchedule(expense.fundingScheduleId);
+  const spendingFunding = useSpendingFunding(expense);
+  const fundingSchedules = useFundingSchedules();
+
   const onClick = () => setCurrentExpense(isSelected ? null : expense.spendingId);
+
+  const nextFunding = spendingFunding.result.length > 0 && spendingFunding.result
+    .sort((a, b) => fundingSchedules.get(a.fundingScheduleId).nextOccurrence.unix() > fundingSchedules.get(b.fundingScheduleId).nextOccurrence.unix() ? 1 : -1)[0]
+  const fundingSchedule = nextFunding && fundingSchedules.get(nextFunding.fundingScheduleId);
 
   return (
     <ListItem button onClick={ onClick }>
@@ -41,8 +50,9 @@ export default function ExpenseItem(props: Props): JSX.Element {
           <Typography
             variant="body1"
           >
-            { expense.getCurrentAmountString() } <span
-              className="opacity-80">of</span> { expense.getTargetAmountString() }
+            { expense.getCurrentAmountString() }
+            <span className="opacity-80"> of </span>
+            { expense.getTargetAmountString() }
           </Typography>
         </div>
         <div className="col-span-7">
@@ -58,7 +68,7 @@ export default function ExpenseItem(props: Props): JSX.Element {
           <Typography
             variant="body1"
           >
-            { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
+            { formatAmount(nextFunding.nextContributionAmount) }/{ fundingSchedule?.name }
           </Typography>
         </div>
         <div className="flex justify-end p-5 align-middle col-span-3 row-span-4">

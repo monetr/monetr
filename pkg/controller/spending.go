@@ -15,6 +15,7 @@ import (
 // @tag.description Spending endpoints handle the underlying spending object. The spending object is used to represent a goal or an expense.
 func (c *Controller) handleSpending(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/spending", c.getSpending)
+	p.Get("/{bankAccountId:uint64}/spending/{spendingId:uint64}/funding", c.getSpendingFunding)
 	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)
 	p.Post("/{bankAccountId:uint64}/spending/transfer", c.postSpendingTransfer)
 	p.Put("/{bankAccountId:uint64}/spending/{spendingId:uint64}", c.putSpending)
@@ -53,6 +54,30 @@ func (c *Controller) getSpending(ctx *context.Context) {
 	ctx.JSON(expenses)
 }
 
+func (c *Controller) getSpendingFunding(ctx *context.Context) {
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
+
+	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
+	if spendingId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	funding, err := repo.GetSpendingFunding(c.getContext(ctx), bankAccountId, spendingId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not retrieve funding for spending")
+		return
+	}
+
+	ctx.JSON(funding)
+}
+
 // Create Spending
 // @id create-spending
 // @tags Spending
@@ -89,7 +114,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		NextRecurrence    time.Time           `json:"nextRecurrence"`
 		IsPaused          bool                `json:"isPaused"`
 	}
-	if err := ctx.ReadJSON(request); err != nil {
+	if err := ctx.ReadJSON(&request); err != nil {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return

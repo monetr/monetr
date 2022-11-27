@@ -27,7 +27,7 @@ type Spending struct {
 	Account         *Account          `json:"-" pg:"rel:has-one"`
 	BankAccountId   uint64            `json:"bankAccountId" pg:"bank_account_id,notnull,pk,unique:per_bank,on_delete:CASCADE,type:'bigint'"`
 	BankAccount     *BankAccount      `json:"bankAccount,omitempty" pg:"rel:has-one" swaggerignore:"true"`
-	SpendingFunding []SpendingFunding `json:"spendingFunding" pg:"rel:has-many"`
+	SpendingFunding []SpendingFunding `json:"-" pg:"rel:has-many"`
 	SpendingType    SpendingType      `json:"spendingType" pg:"spending_type,notnull,use_zero,unique:per_bank"`
 	Name            string            `json:"name" pg:"name,notnull,unique:per_bank"`
 	Description     string            `json:"description,omitempty" pg:"description"`
