@@ -71,6 +71,7 @@ func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankA
 
 	result := make([]models.Spending, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("SpendingFunding").
 		Join(`INNER JOIN "spending_funding" AS "funding"`).
 		JoinOn(`"funding"."spending_id" = "spending"."spending_id" AND "funding"."account_id" = "spending"."account_id" AND "funding"."bank_account_id" = "spending"."bank_account_id"`).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
@@ -182,7 +183,16 @@ func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spen
 		"spendingId":    spendingId,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
+	_, err := r.txn.ModelContext(span.Context(), &models.SpendingFunding{}).
+		Where(`"spending_funding"."spending_id" = ?`, spendingId).
+		Where(`"spending_funding"."account_id" = ?`, r.AccountId()).
+		Delete()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to remove spending funding")
+	}
+
+	_, err = r.txn.ModelContext(span.Context(), &models.Transaction{}).
 		Set(`"spending_id" = NULL`).
 		Set(`"spending_amount" = NULL`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
