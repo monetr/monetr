@@ -1,11 +1,10 @@
 import React from 'react';
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
 
-import { useFundingSchedule, useFundingSchedules } from 'hooks/fundingSchedules';
+import { useFundingSchedules } from 'hooks/fundingSchedules';
 import useStore from 'hooks/store';
 import Spending from 'models/Spending';
 import { useSpendingFunding } from 'hooks/spending';
-import FundingSchedule from 'models/FundingSchedule';
 import formatAmount from 'util/formatAmount';
 
 export interface Props {
