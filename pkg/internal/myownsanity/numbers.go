@@ -8,6 +8,10 @@ func Int32P(value int32) *int32 {
 	return &value
 }
 
+func Int64P(value int64) *int64 {
+	return &value
+}
+
 type Number interface {
 	int | int32 | int64
 }
