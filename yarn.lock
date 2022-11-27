@@ -10197,10 +10197,10 @@ jest-message-util@^29.2.1:
     slash "^3.0.0"
     stack-utils "^2.0.3"
 
-jest-mock-axios@4.6.1:
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/jest-mock-axios/-/jest-mock-axios-4.6.1.tgz#a436445ea839513972d9913d5b6d84f4e1cb9c81"
-  integrity sha512-ygTAaOc8N/DGodoJ+JJKP0QLLx12lvYDYgIhrLjFXVGWp5qtQDgtyGq+VciVC2ySdYH8W04y+CTY10qM6BpsjQ==
+jest-mock-axios@4.6.2:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/jest-mock-axios/-/jest-mock-axios-4.6.2.tgz#b86107d4920d888339da89202279b7444a747de0"
+  integrity sha512-alfzHdOCg2A81hSzasmwydsUxGPEbdAGQMRxNvLqOhNgrR1eW7YSUykIHmsTfgBUpAFHf0N+0IncH2hZ72dmlw==
   dependencies:
     "@jest/globals" "^27.5.1"
     jest "^27.5.1"
