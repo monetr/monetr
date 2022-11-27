@@ -158,6 +158,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 	}
 
 	expensesToUpdate := make([]models.Spending, 0)
+	fundingToUpdate := make([]models.SpendingFunding, 0)
 
 	initialBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)
 	if err != nil {
@@ -254,18 +255,36 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 					continue
 				}
 
+				spendingFunding, err := p.repo.GetSpendingFunding(span.Context(), spending.BankAccountId, spending.SpendingId)
+				if err != nil {
+					crumbs.Error(span.Context(), "Failed to retrieve funding instructions for spending object", "spending", map[string]interface{}{
+						"spendingId": spending.SpendingId,
+					})
+				}
+
+				var contribution int64
+				for _, funding := range spendingFunding {
+					if funding.FundingScheduleId != fundingScheduleId {
+						continue
+					}
+
+					contribution = funding.NextContributionAmount
+					break
+				}
+
 				// TODO Take safe-to-spend into account when allocating to expenses.
 				//  As of writing this I am not going to consider that balance. I'm going to assume that the user has
 				//  enough money in their account at the time of this running that this will accurately reflect a real
 				//  allocated balance. This can be impacted though by a delay in a deposit showing in Plaid and thus us
 				//  over-allocating temporarily until the deposit shows properly in Plaid.
-				spending.CurrentAmount += spending.NextContributionAmount
-				if err = (&spending).CalculateNextContribution(
+				spending.CurrentAmount += contribution
+				updatedFunding, err := (&spending).CalculateNextContribution(
 					span.Context(),
 					account.Timezone,
-					fundingSchedule,
+					models.NewSpendingFundingHelper(spendingFunding),
 					time.Now(),
-				); err != nil {
+				)
+				if err != nil {
 					crumbs.Error(span.Context(), "Failed to calculate next contribution for spending", "spending", map[string]interface{}{
 						"fundingScheduleId": fundingScheduleId,
 						"spendingId":        spending.SpendingId,
@@ -275,6 +294,9 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				}
 
 				expensesToUpdate = append(expensesToUpdate, spending)
+				if updatedFunding != nil {
+					fundingToUpdate = append(fundingToUpdate, *updatedFunding)
+				}
 			}
 		}
 	}
@@ -294,6 +316,13 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 	if err = p.repo.UpdateSpending(span.Context(), p.args.BankAccountId, expensesToUpdate); err != nil {
 		log.WithError(err).Error("failed to update spending")
 		return err
+	}
+
+	if len(fundingToUpdate) > 0 {
+		if err = p.repo.UpdateSpendingFunding(span.Context(), p.args.BankAccountId, fundingToUpdate); err != nil {
+			log.WithError(err).Error("failed to update spending funding")
+			return err
+		}
 	}
 
 	updatedBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)

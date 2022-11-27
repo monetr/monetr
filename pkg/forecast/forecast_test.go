@@ -22,13 +22,19 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				Rule:            fundingRule,
-				ExcludeWeekends: true,
-				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+				Rule:              fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 			},
 		}
 		spending := []models.Spending{
 			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
 				SpendingType:   models.SpendingTypeExpense,
 				TargetAmount:   5000,
 				CurrentAmount:  0,
@@ -37,6 +43,11 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				SpendingId:     1,
 			},
 			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
 				SpendingType:   models.SpendingTypeExpense,
 				TargetAmount:   12354,
 				CurrentAmount:  6177,
@@ -45,6 +56,11 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				SpendingId:     2,
 			},
 			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
 				SpendingType:   models.SpendingTypeExpense,
 				TargetAmount:   180000,
 				CurrentAmount:  0,
@@ -53,6 +69,11 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				SpendingId:     3,
 			},
 			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
 				SpendingType:   models.SpendingTypeGoal,
 				TargetAmount:   1000000,
 				CurrentAmount:  0,
@@ -71,6 +92,11 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		{ // With added expense
 			forecaster := NewForecaster(append(spending, models.Spending{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
 				SpendingType:   models.SpendingTypeGoal,
 				TargetAmount:   1000000,
 				CurrentAmount:  0,

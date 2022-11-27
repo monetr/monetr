@@ -46,10 +46,16 @@ func NewForecaster(spending []models.Spending, funding []models.FundingSchedule)
 		forecaster.funding[fundingSchedule.FundingScheduleId] = NewFundingScheduleFundingInstructions(fundingSchedule)
 	}
 	for _, spendingItem := range spending {
-		fundingInstructions, ok := forecaster.funding[spendingItem.FundingScheduleId]
-		if !ok {
-			panic("missing funding schedule required by spending object")
+		fundingItems := make([]FundingInstructions, len(spendingItem.SpendingFunding))
+		for i, fundingItem := range spendingItem.SpendingFunding {
+			funding, ok := forecaster.funding[fundingItem.FundingScheduleId]
+			if !ok {
+				panic("missing funding schedule required by spending object")
+			}
+			fundingItems[i] = funding
 		}
+
+		fundingInstructions := NewMultipleFundingInstructions(fundingItems)
 
 		forecaster.spending[spendingItem.SpendingId] = NewSpendingInstructions(spendingItem, fundingInstructions)
 		forecaster.currentBalance += spendingItem.GetProgressAmount()

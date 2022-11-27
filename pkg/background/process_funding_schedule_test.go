@@ -36,28 +36,31 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		contributions := fundingSchedule.GetNumberOfContributionsBetween(time.Now(), nextDue, timezone)
 		assert.NotZero(t, contributions, "must have at least one contribution, if this fails then this test is written wrong")
 
-		spending := models.Spending{
-			AccountId:              user.AccountId,
-			Account:                user.Account,
+		spending := testutils.MustInsert(t, models.Spending{
+			AccountId:      user.AccountId,
+			Account:        user.Account,
+			BankAccountId:  bankAccount.BankAccountId,
+			BankAccount:    &bankAccount,
+			SpendingType:   models.SpendingTypeExpense,
+			Name:           "Amazon",
+			Description:    "Amazon Prime Subscription",
+			TargetAmount:   1395,
+			CurrentAmount:  697,
+			UsedAmount:     0,
+			RecurrenceRule: spendingRule,
+			LastRecurrence: nil,
+			NextRecurrence: nextDue,
+			IsBehind:       false,
+			IsPaused:       false,
+			DateCreated:    time.Now(),
+		})
+		spendingFunding := testutils.MustInsert(t, models.SpendingFunding{
+			AccountId:              bankAccount.AccountId,
 			BankAccountId:          bankAccount.BankAccountId,
-			BankAccount:            &bankAccount,
+			SpendingId:             spending.SpendingId,
 			FundingScheduleId:      fundingSchedule.FundingScheduleId,
-			FundingSchedule:        fundingSchedule,
-			SpendingType:           models.SpendingTypeExpense,
-			Name:                   "Amazon",
-			Description:            "Amazon Prime Subscription",
-			TargetAmount:           1395,
-			CurrentAmount:          697,
-			UsedAmount:             0,
-			RecurrenceRule:         spendingRule,
-			LastRecurrence:         nil,
-			NextRecurrence:         nextDue,
 			NextContributionAmount: 100,
-			IsBehind:               false,
-			IsPaused:               false,
-			DateCreated:            time.Now(),
-		}
-		testutils.MustDBInsert(t, &spending)
+		})
 
 		handler := NewProcessFundingScheduleHandler(log, db)
 		args := ProcessFundingScheduleArguments{
@@ -76,8 +79,9 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		testutils.MustHaveLogMessage(t, hook, "preparing to update 1 spending(s)")
 
 		updatedSpending := testutils.MustDBRead(t, spending)
-		assert.EqualValues(t, spending.CurrentAmount+spending.NextContributionAmount, updatedSpending.CurrentAmount, "current amount should have been incremented")
-		assert.Greater(t, updatedSpending.NextContributionAmount, int64(0), "next contribution must be greater than 0")
+		updatedFunding := testutils.MustDBRead(t, spendingFunding)
+		assert.EqualValues(t, spending.CurrentAmount+spendingFunding.NextContributionAmount, updatedSpending.CurrentAmount, "current amount should have been incremented")
+		assert.Greater(t, updatedFunding.NextContributionAmount, int64(0), "next contribution must be greater than 0")
 	})
 
 	t.Run("will fail for a fake account", func(t *testing.T) {

@@ -5,5 +5,7 @@ import (
 )
 
 func Assert(predicate bool, message string) {
-	panic(fmt.Sprintf("ASSERT FAILED: %s", message))
+	if !predicate {
+		panic(fmt.Sprintf("ASSERT FAILED: %s", message))
+	}
 }

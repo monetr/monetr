@@ -64,13 +64,17 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 
 	afterForecast := forecast.NewForecaster([]models.Spending{
 		{
-			FundingScheduleId: request.FundingScheduleId,
-			SpendingType:      request.SpendingType,
-			TargetAmount:      request.TargetAmount,
-			CurrentAmount:     request.CurrentAmount,
-			NextRecurrence:    request.NextRecurrence,
-			RecurrenceRule:    request.RecurrenceRule,
-			SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
+			SpendingFunding: []models.SpendingFunding{
+				{
+					FundingScheduleId: request.FundingScheduleId,
+				},
+			},
+			SpendingType:   request.SpendingType,
+			TargetAmount:   request.TargetAmount,
+			CurrentAmount:  request.CurrentAmount,
+			NextRecurrence: request.NextRecurrence,
+			RecurrenceRule: request.RecurrenceRule,
+			SpendingId:     0, // Make sure this ID does not overlap with any real spending objects.
 		},
 	}, fundingSchedules)
 

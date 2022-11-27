@@ -22,5 +22,6 @@ SELECT
   "spending"."next_contribution_amount"
 FROM "spending";
 
-ALTER TABLE "spending" DROP COLUMN "funding_schedule_id";
+ALTER TABLE "spending" DROP CONSTRAINT "fk_spending_funding_schedules_funding_schedule_id_account_id_ba";
+ALTER TABLE "spending" DROP COLUMN "funding_schedule_id" CASCADE;
 ALTER TABLE "spending" DROP COLUMN "next_contribution_amount";

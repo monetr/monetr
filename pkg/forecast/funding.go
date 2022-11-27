@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
 )
@@ -155,6 +156,7 @@ type multipleFundingInstructions struct {
 }
 
 func NewMultipleFundingInstructions(instructions []FundingInstructions) FundingInstructions {
+	myownsanity.Assert(len(instructions) > 0, "Must provide at least a single funding instruction")
 	return &multipleFundingInstructions{
 		instructions: instructions,
 	}

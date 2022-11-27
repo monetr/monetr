@@ -164,9 +164,8 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	fundingSchedules := map[uint64]*models.FundingSchedule{}
-
 	spendingToUpdate := make([]models.Spending, 0, len(allSpending))
+	fundingToUpdate := make([]models.SpendingFunding, 0)
 	for i := range allSpending {
 		// Avoid funky pointer issues with arrays and for loops.
 		spending := allSpending[i]
@@ -176,28 +175,35 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 			continue
 		}
 
-		fundingSchedule, ok := fundingSchedules[spending.FundingScheduleId]
-		if !ok {
-			fundingSchedule, err = p.repo.GetFundingSchedule(span.Context(), spending.BankAccountId, spending.FundingScheduleId)
-			if err != nil {
-				log.WithError(err).Warn("failed to retrieve funding schedule for spending object, it will not be processed")
-				continue
-			}
-
-			fundingSchedules[spending.FundingScheduleId] = fundingSchedule
+		funding, err := p.repo.GetSpendingFunding(span.Context(), spending.BankAccountId, spending.SpendingId)
+		if err != nil {
+			log.WithError(err).Warn("failed to retrieve funding schedule for spending object, it will not be processed")
+			continue
 		}
 
-		if err = spending.CalculateNextContribution(
+		if len(funding) == 0 {
+			crumbs.IndicateBug(span.Context(), "spending object has no funding instructions", map[string]interface{}{
+				"spendingId": spending.SpendingId,
+			})
+			log.Warn("spending object has no funding instructions, it will not be processed")
+			continue
+		}
+
+		updatedFunding, err := spending.CalculateNextContribution(
 			span.Context(),
 			account.Timezone,
-			fundingSchedule,
+			models.NewSpendingFundingHelper(funding),
 			now,
-		); err != nil {
+		)
+		if err != nil {
 			log.WithError(err).Warn("failed to calculate next contribution for spending object")
 			continue
 		}
 
 		spendingToUpdate = append(spendingToUpdate, spending)
+		if updatedFunding != nil {
+			fundingToUpdate = append(fundingToUpdate, *updatedFunding)
+		}
 	}
 
 	if len(spendingToUpdate) == 0 {
@@ -207,5 +213,15 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 
 	log.WithField("count", len(spendingToUpdate)).Info("updating stale spending objects")
 
-	return errors.Wrap(p.repo.UpdateSpending(span.Context(), p.args.BankAccountId, spendingToUpdate), "failed to update stale spending")
+	if err = p.repo.UpdateSpending(span.Context(), p.args.BankAccountId, spendingToUpdate); err != nil {
+		return errors.Wrap(err, "failed to update stale spending")
+	}
+
+	if len(fundingToUpdate) > 0 {
+		if err = p.repo.UpdateSpendingFunding(span.Context(), p.args.BankAccountId, fundingToUpdate); err != nil {
+			return errors.Wrap(err, "failed to update spending funding")
+		}
+	}
+
+	return nil
 }

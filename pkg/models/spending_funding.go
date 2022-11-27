@@ -18,7 +18,7 @@ type SpendingFunding struct {
 	Spending               *Spending        `json:"-" pg:"rel:has-one"`
 	FundingScheduleId      uint64           `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,on_delete:CASCADE,type:'bigint'"`
 	FundingSchedule        *FundingSchedule `json:"-" pg:"rel:has-one"`
-	NextContributionAmount int64            `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,usezero"`
+	NextContributionAmount int64            `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`
 }
 
 type SpendingFundingHelper []SpendingFunding
