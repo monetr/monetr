@@ -280,13 +280,17 @@ func (r *repositoryBase) GetRecentDepositTransactions(ctx context.Context, bankA
 	return result, nil
 }
 
-func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error) {
+func (r *repositoryBase) ProcessTransactionSpentFrom(
+	ctx context.Context,
+	bankAccountId uint64,
+	input, existing *models.Transaction,
+) (updatedExpenses []models.Spending, updatedFunding []models.SpendingFunding, _ error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	account, err := r.GetAccount(span.Context())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	const (
@@ -319,7 +323,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		expensePlan = RemoveExpense
 	default:
 		// TODO Handle transaction amount changes with expenses.
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	// Retrieve the expenses that we need to work with and potentially update.
@@ -338,12 +342,13 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 	// If we failed to retrieve either of the expenses then something is wrong and we need to stop.
 	switch {
 	case currentErr != nil:
-		return nil, errors.Wrap(currentErr, "failed to retrieve the current expense for the transaction")
+		return nil, nil, errors.Wrap(currentErr, "failed to retrieve the current expense for the transaction")
 	case newErr != nil:
-		return nil, errors.Wrap(newErr, "failed to retrieve the new expense for the transaction")
+		return nil, nil, errors.Wrap(newErr, "failed to retrieve the new expense for the transaction")
 	}
 
 	expenseUpdates := make([]models.Spending, 0)
+	fundingUpdates := make([]models.SpendingFunding, 0)
 
 	switch expensePlan {
 	case ChangeExpense, RemoveExpense:
@@ -368,17 +373,21 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		input.SpendingAmount = nil
 
 		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
-		if err = currentExpense.CalculateNextContribution(
+		funding, err := currentExpense.CalculateNextContribution(
 			span.Context(),
 			account.Timezone,
-			currentExpense.FundingSchedule,
+			currentExpense.SpendingFunding,
 			time.Now(),
-		); err != nil {
-			return nil, errors.Wrap(err, "failed to calculate next contribution for current transaction expense")
+		)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "failed to calculate next contribution for current transaction expense")
 		}
 
 		// Then take all the fields that have changed and throw them in our list of things to update.
 		expenseUpdates = append(expenseUpdates, *currentExpense)
+		if funding != nil {
+			fundingUpdates = append(fundingUpdates, *funding)
+		}
 
 		// If we are only removing the expense then we are done with this part.
 		if expensePlan == RemoveExpense {
@@ -389,24 +398,45 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(ctx context.Context, bankAc
 		// expense.
 		fallthrough
 	case AddExpense:
-		if err = input.AddSpendingToTransaction(span.Context(), newExpense, account); err != nil {
-			return nil, err
+		funding, err := input.AddSpendingToTransaction(span.Context(), newExpense, account)
+		if err != nil {
+			return nil, nil, err
 		}
 
 		// Then take all the fields that have changed and throw them in our list of things to update.
 		expenseUpdates = append(expenseUpdates, *newExpense)
+		if funding != nil {
+			fundingUpdates = append(fundingUpdates, *funding)
+		}
 	}
 
-	return expenseUpdates, r.UpdateSpending(span.Context(), bankAccountId, expenseUpdates)
+	if err = r.UpdateSpending(span.Context(), bankAccountId, expenseUpdates); err != nil {
+		return nil, nil, errors.Wrap(err, "failed to update spending for transaction update")
+	}
+
+	if len(fundingUpdates) > 0 {
+		if err = r.UpdateSpendingFunding(span.Context(), bankAccountId, fundingUpdates); err != nil {
+			return nil, nil, errors.Wrap(err, "failed to update spending funding instructions")
+		}
+	}
+
+	return expenseUpdates, fundingUpdates, nil
 }
 
-func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error {
+// AddExpenseToTransaction is meant to be used when a transaction is being created with a spending object associated
+// with it immediately. This will consume funds from the provided spending object (Which must have funding instructions)
+// attached to it. It will return an updated spending funding object if there are changes that need to be made.
+func (r *repositoryBase) AddExpenseToTransaction(
+	ctx context.Context,
+	transaction *models.Transaction,
+	spending *models.Spending,
+) (*models.SpendingFunding, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	account, err := r.GetAccount(span.Context())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var allocationAmount int64
@@ -434,14 +464,11 @@ func (r *repositoryBase) AddExpenseToTransaction(ctx context.Context, transactio
 	transaction.SpendingAmount = &allocationAmount
 
 	// Now that we have deducted the amount we need from the spending we need to recalculate it's next contribution.
-	if err = spending.CalculateNextContribution(
+	funding, err := spending.CalculateNextContribution(
 		span.Context(),
 		account.Timezone,
-		spending.FundingSchedule,
+		spending.SpendingFunding,
 		time.Now(),
-	); err != nil {
-		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
-	}
-
-	return nil
+	)
+	return funding, errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
 }
