@@ -111,7 +111,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 	t.Run("simple expense monthly, one funding schedule", func(t *testing.T) {
 		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 11, 3, 0, 0, 1, 0, timezone).UTC()
 
@@ -168,7 +168,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 	t.Run("simple monthly expense, split funding", func(t *testing.T) {
 		fundingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15")
 		fundingRuleTwo := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=-1")
-		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 11, 3, 0, 0, 1, 0, timezone).UTC()
 
