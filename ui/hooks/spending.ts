@@ -77,8 +77,10 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
           `/bank_accounts/${ selectedBankAccountId }/spending`,
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ selectedBankAccountId }/balances`),
-        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
+        queryClient.invalidateQueries([
+          `/bank_accounts/${ selectedBankAccountId }/balances`,
+          [`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`],
+        ]),
       ]),
     },
   );
@@ -106,11 +108,11 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => item.spendingId === updatedSpending.spendingId ? updatedSpending : item),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ updatedSpending.bankAccountId }/balances`),
-        queryClient.invalidateQueries(
+        queryClient.invalidateQueries([
+          `/bank_accounts/${ updatedSpending.bankAccountId }/balances`,
           `/bank_accounts/${ updatedSpending.bankAccountId }/spending/${ updatedSpending.spendingId }/funding`,
-        ),
-        queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`]),
+          [`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`],
+        ]),
       ]),
     },
   );
@@ -137,8 +139,10 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
           `/bank_accounts/${ createdSpending.bankAccountId }/spending`,
           (previous: Array<Partial<Spending>>) => (previous || []).concat(createdSpending),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ createdSpending.bankAccountId }/balances`),
-        queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/forecast/next_funding`]),
+        queryClient.invalidateQueries([
+          `/bank_accounts/${ createdSpending.bankAccountId }/balances`,
+          [`/bank_accounts/${ createdSpending.bankAccountId }/forecast/next_funding`],
+        ]),
       ]),
     },
   );
