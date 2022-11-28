@@ -6,6 +6,7 @@ import (
 
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 )
 
@@ -49,9 +50,7 @@ func NewForecaster(spending []models.Spending, funding []models.FundingSchedule)
 		fundingItems := make([]FundingInstructions, len(spendingItem.SpendingFunding))
 		for i, fundingItem := range spendingItem.SpendingFunding {
 			funding, ok := forecaster.funding[fundingItem.FundingScheduleId]
-			if !ok {
-				panic("missing funding schedule required by spending object")
-			}
+			myownsanity.Assert(ok, "Funding schedule required by spending object not provided to forecast.")
 			fundingItems[i] = funding
 		}
 

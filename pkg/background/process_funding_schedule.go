@@ -318,11 +318,9 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	if len(fundingToUpdate) > 0 {
-		if err = p.repo.UpdateSpendingFunding(span.Context(), p.args.BankAccountId, fundingToUpdate); err != nil {
-			log.WithError(err).Error("failed to update spending funding")
-			return err
-		}
+	if err = p.repo.UpdateSpendingFunding(span.Context(), p.args.BankAccountId, fundingToUpdate); err != nil {
+		log.WithError(err).Error("failed to update spending funding")
+		return err
 	}
 
 	updatedBalances, err := p.repo.GetBalances(ctx, p.args.BankAccountId)

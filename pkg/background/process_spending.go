@@ -217,10 +217,8 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 		return errors.Wrap(err, "failed to update stale spending")
 	}
 
-	if len(fundingToUpdate) > 0 {
-		if err = p.repo.UpdateSpendingFunding(span.Context(), p.args.BankAccountId, fundingToUpdate); err != nil {
-			return errors.Wrap(err, "failed to update spending funding")
-		}
+	if err = p.repo.UpdateSpendingFunding(span.Context(), p.args.BankAccountId, fundingToUpdate); err != nil {
+		return errors.Wrap(err, "failed to update spending funding")
 	}
 
 	return nil
