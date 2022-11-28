@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
@@ -42,23 +41,17 @@ func NewSpendingInstructions(spending models.Spending, fundingInstructions Fundi
 }
 
 func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
-	span := crumbs.StartFnTrace(ctx)
-	defer span.Finish()
-	span.Data = map[string]interface{}{
-		"start":    start,
-		"end":      end,
-		"timezone": timezone.String(),
-	}
 	events := make([]SpendingEvent, 0)
 
 	for i := 0; ; i++ {
 		var event *SpendingEvent
 		if i == 0 {
-			event = s.getNextSpendingEventAfter(span.Context(), start, timezone, s.spending.CurrentAmount)
+			event = s.getNextSpendingEventAfter(ctx, start, timezone, s.spending.CurrentAmount)
 		} else {
-			event = s.getNextSpendingEventAfter(span.Context(), events[i-1].Date, timezone, events[i-1].RollingAllocation)
+			event = s.getNextSpendingEventAfter(ctx, events[i-1].Date, timezone, events[i-1].RollingAllocation)
 		}
 
+		// No event returned means there are no more.
 		if event == nil {
 			break
 		}
@@ -83,6 +76,7 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context
 			event = s.getNextSpendingEventAfter(ctx, events[i-1].Date, timezone, events[i-1].RollingAllocation)
 		}
 
+		// No event returned means there are no more.
 		if event == nil {
 			break
 		}
@@ -112,6 +106,11 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 }
 
 func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context, input time.Time, timezone *time.Location, balance int64) *SpendingEvent {
+	// If the spending object is paused then there wont be any events for it at all.
+	if s.spending.IsPaused {
+		return nil
+	}
+
 	input = util.MidnightInLocal(input, timezone)
 
 	var rule *rrule.RRule

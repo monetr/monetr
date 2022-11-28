@@ -314,7 +314,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 
 		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
 		// Should have 36 events, 12 spending events and 24 funding events.
-		assert.Len(t, events, 12 + 24, "should have 36 events")
+		assert.Len(t, events, 12+24, "should have 36 events")
 		for i, item := range events {
 			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
 				j, _ := json.MarshalIndent(item, "                        \t", "  ")
@@ -349,5 +349,26 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				fmt.Println("                        \t" + string(j))
 			}
 		}
+	})
+
+	t.Run("no spending events for paused spending objects", func(t *testing.T) {
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 1, 2, 13, 0, 1, 0, timezone).UTC()
+		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
+			Rule:            fundingRule,
+			ExcludeWeekends: true,
+			NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+		})
+		spendingInstructions := NewSpendingInstructions(models.Spending{
+			SpendingType:   models.SpendingTypeGoal,
+			TargetAmount:   10000,
+			CurrentAmount:  0,
+			NextRecurrence: time.Date(2023, 1, 3, 0, 0, 0, 0, timezone),
+			IsPaused:       true,
+		}, fundingInstructions)
+
+		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		assert.Empty(t, events, "there should be no spending events for paused spending")
 	})
 }
