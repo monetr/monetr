@@ -112,9 +112,9 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, request.FundingScheduleId)
+	fundingSchedules, err := repo.GetFundingSchedules(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not retrieve funding schedule")
+		c.wrapPgError(ctx, err, "could not retrieve funding schedules for forecast")
 		return
 	}
 
@@ -124,14 +124,9 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 		return
 	}
 
-	// TODO This currently does not really work. If you have multiple funding schedules then the math for a single funding
-	// schedule will be wrong. But the result of these calculations would be for every funding schedule not just a single
-	// one. So maybe it would be better to better account for data on a funding schedule specific level.
 	fundingForecast := forecast.NewForecaster(
 		spending,
-		[]models.FundingSchedule{
-			*fundingSchedule,
-		},
+		fundingSchedules,
 	)
 	timezone := c.mustGetTimezone(ctx)
 	ctx.JSON(map[string]interface{}{
