@@ -42,7 +42,6 @@ func NewSpendingInstructions(spending models.Spending, fundingInstructions Fundi
 
 func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
 	events := make([]SpendingEvent, 0)
-
 	for i := 0; ; i++ {
 		var event *SpendingEvent
 		if i == 0 {
@@ -130,9 +129,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 			return nil
 		}
 	case models.SpendingTypeExpense:
-		if rule == nil {
-			panic("expense spending type must have a recurrence rule!")
-		}
+		myownsanity.Assert(rule != nil, "Expense spending types must have a recurrence rule to be forecast!")
 
 		// If we are working with a spending object, but the next recurrence is before our start time. Then figure out
 		// what the next recurrence would be after the start time.

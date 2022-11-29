@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
+func TestFundingScheduleBase_GetNextFundingEventAfter(t *testing.T) {
 	t.Run("dont skip weekends", func(t *testing.T) {
 		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
@@ -136,9 +136,29 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, next, nextFundingOccurrence.Date, "should be on friday the 30th of september next")
 	})
+
+	t.Run("should panic for multiple funding schedules", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 10, 11, 0, 0, 1, 0, timezone).UTC()
+		multipleInstructions := NewMultipleFundingInstructions([]FundingInstructions{
+			NewFundingScheduleFundingInstructions(models.FundingSchedule{
+				Rule:            testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"),
+				NextOccurrence:  time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+				ExcludeWeekends: false,
+			}),
+			NewFundingScheduleFundingInstructions(models.FundingSchedule{
+				Rule:            testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR"),
+				NextOccurrence:  time.Date(2022, 10, 14, 0, 0, 0, 0, timezone),
+				ExcludeWeekends: false,
+			}),
+		})
+		assert.PanicsWithValue(t, "GetNextFundingEventAfter should not be used with the multiple funding instructions interface, use GetNextFundingDayAfter instead", func() {
+			multipleInstructions.GetNextFundingEventAfter(context.Background(), now, timezone)
+		})
+	})
 }
 
-func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
+func TestFundingScheduleBase_GetNFundingEventsAfter(t *testing.T) {
 	t.Run("get next 2 funding dates", func(t *testing.T) {
 		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
@@ -236,9 +256,29 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 		nextN := instructions.GetNFundingEventsAfter(context.Background(), 4, now, timezone)
 		assert.Equal(t, expected, nextN)
 	})
+
+	t.Run("should panic for multiple funding schedules", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 10, 11, 0, 0, 1, 0, timezone).UTC()
+		multipleInstructions := NewMultipleFundingInstructions([]FundingInstructions{
+			NewFundingScheduleFundingInstructions(models.FundingSchedule{
+				Rule:            testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"),
+				NextOccurrence:  time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+				ExcludeWeekends: false,
+			}),
+			NewFundingScheduleFundingInstructions(models.FundingSchedule{
+				Rule:            testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR"),
+				NextOccurrence:  time.Date(2022, 10, 14, 0, 0, 0, 0, timezone),
+				ExcludeWeekends: false,
+			}),
+		})
+		assert.PanicsWithValue(t, "GetNFundingEventsAfter should not be used with the multiple funding instructions interface, use GetNFundingDaysAfter", func() {
+			multipleInstructions.GetNFundingEventsAfter(context.Background(), 1, now, timezone)
+		})
+	})
 }
 
-func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
+func TestFundingScheduleBase_GetNumberOfFundingDaysBetween(t *testing.T) {
 	t.Run("september to christmas", func(t *testing.T) {
 		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
@@ -253,7 +293,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		count := instructions.GetNumberOfFundingEventsBetween(context.Background(), now, end, timezone)
+		count := instructions.GetNumberOfFundingDaysBetween(context.Background(), now, end, timezone)
 		assert.EqualValues(t, 7, count, "should have seven contributions")
 	})
 
@@ -271,7 +311,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		count := instructions.GetNumberOfFundingEventsBetween(context.Background(), now, end, timezone)
+		count := instructions.GetNumberOfFundingDaysBetween(context.Background(), now, end, timezone)
 		assert.EqualValues(t, 24, count, "should have 24 contributions")
 	})
 
@@ -289,8 +329,7 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(fundingSchedule)
-		count := instructions.GetNumberOfFundingEventsBetween(context.Background(), now, end, timezone)
+		count := instructions.GetNumberOfFundingDaysBetween(context.Background(), now, end, timezone)
 		assert.EqualValues(t, 12, count, "should have 12 contributions")
 	})
 }
-

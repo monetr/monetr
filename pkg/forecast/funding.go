@@ -29,7 +29,6 @@ var (
 type FundingInstructions interface {
 	GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent
 	GetNFundingDaysAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingDay
-	GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64
 	GetNumberOfFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64
 	GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent
 	GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent
@@ -191,10 +190,6 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start
 	return events
 }
 
-func (f *fundingScheduleBase) GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
-	return int64(len(f.GetFundingEventsBetween(ctx, start, end, timezone)))
-}
-
 func (f *fundingScheduleBase) GetFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingDay {
 	// Because a single funding schedule cannot have multiple events on a single day we can streamline this quite a bit.
 	events := f.GetFundingEventsBetween(ctx, start, end, timezone)
@@ -242,17 +237,7 @@ func NewMultipleFundingInstructions(instructions []FundingInstructions) FundingI
 }
 
 func (m *multipleFundingInstructions) GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent {
-	events := make([]FundingEvent, n)
-	for i := 0; i < n; i++ {
-		if i == 0 {
-			events[i] = m.GetNextFundingEventAfter(ctx, input, timezone)
-			continue
-		}
-
-		events[i] = m.GetNextFundingEventAfter(ctx, events[i-1].Date, timezone)
-	}
-
-	return events
+	panic("GetNFundingEventsAfter should not be used with the multiple funding instructions interface, use GetNFundingDaysAfter")
 }
 
 func (m *multipleFundingInstructions) GetNFundingDaysAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingDay {
@@ -278,10 +263,8 @@ func (m *multipleFundingInstructions) GetFundingEventsBetween(ctx context.Contex
 	return result
 }
 
-func (m *multipleFundingInstructions) GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
-	return int64(len(m.GetFundingEventsBetween(ctx, start, end, timezone)))
-}
-
+// GetFundingDaysBetween returns an array of funding days for the range provided. The array is returned unordered and
+// must be sorted by the caller if it is important.
 func (m *multipleFundingInstructions) GetFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingDay {
 	events := m.GetFundingEventsBetween(ctx, start, end, timezone)
 	result := map[int64][]FundingEvent{}
@@ -310,24 +293,7 @@ func (m *multipleFundingInstructions) GetNumberOfFundingDaysBetween(ctx context.
 }
 
 func (m *multipleFundingInstructions) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
-	var earliest FundingEvent
-	for _, instruction := range m.instructions {
-		if earliest.Date.IsZero() {
-			earliest = instruction.GetNextFundingEventAfter(ctx, input, timezone)
-			continue
-		}
-
-		// If one of our instructions happens before the earliest one we've seen, then use that one instead.
-		if next := instruction.GetNextFundingEventAfter(ctx, input, timezone); next.Date.Before(earliest.Date) {
-			earliest = next
-		}
-	}
-
-	if earliest.Date.IsZero() {
-		panic("the earliest next contribution cannot be zero, something is wrong with the provided instructions")
-	}
-
-	return earliest
+	panic("GetNextFundingEventAfter should not be used with the multiple funding instructions interface, use GetNextFundingDayAfter instead")
 }
 
 func (m *multipleFundingInstructions) GetNextFundingDayAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingDay {
