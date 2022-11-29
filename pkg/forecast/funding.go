@@ -219,12 +219,6 @@ func (f *fundingScheduleBase) GetNextFundingDayAfter(ctx context.Context, input 
 	}
 }
 
-// multipleFundingInstructions isn't in use yet. It's kind of a proof of concept that with the funding instruction
-// interface, it is easy to wrap multiple funding schedules to appear as one. But it fails to address some things that I
-// want to be able to offer.
-//   - How does one differentiate between the multiple funding schedules? I could see a case where person A contributes X
-//     amount, and person B contributes Y amount. For us to do this we would need to know which schedule we are processing
-//     on a given day. But also, what if both of those schedules fall on the same day?
 type multipleFundingInstructions struct {
 	instructions []FundingInstructions
 }
