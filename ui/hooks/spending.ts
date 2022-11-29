@@ -79,8 +79,9 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
         ),
         queryClient.invalidateQueries([
           `/bank_accounts/${ selectedBankAccountId }/balances`,
-          [`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`],
+          `/bank_accounts/${ selectedBankAccountId }/spending/${ removedSpendingId }/funding`,
         ]),
+        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
       ]),
     },
   );
@@ -111,8 +112,8 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
         queryClient.invalidateQueries([
           `/bank_accounts/${ updatedSpending.bankAccountId }/balances`,
           `/bank_accounts/${ updatedSpending.bankAccountId }/spending/${ updatedSpending.spendingId }/funding`,
-          [`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`],
         ]),
+        queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
   );
@@ -139,10 +140,8 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
           `/bank_accounts/${ createdSpending.bankAccountId }/spending`,
           (previous: Array<Partial<Spending>>) => (previous || []).concat(createdSpending),
         ),
-        queryClient.invalidateQueries([
-          `/bank_accounts/${ createdSpending.bankAccountId }/balances`,
-          [`/bank_accounts/${ createdSpending.bankAccountId }/forecast/next_funding`],
-        ]),
+        queryClient.invalidateQueries(`/bank_accounts/${ createdSpending.bankAccountId }/balances`),
+        queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
   );
@@ -221,9 +220,12 @@ export type SpendingFundingResult =
   { result: Array<SpendingFunding> }
   & UseQueryResult<Array<Partial<SpendingFunding>>>;
 
-export function useSpendingFunding(spending: Spending): SpendingFundingResult {
+export function useSpendingFunding(spending: Spending | null): SpendingFundingResult {
   const result = useQuery<Array<Partial<SpendingFunding>>>(
-    `/bank_accounts/${ spending.bankAccountId }/spending/${ spending.spendingId }/funding`,
+    `/bank_accounts/${ spending?.bankAccountId }/spending/${ spending?.spendingId }/funding`,
+    {
+      enabled: !!spending,
+    }
   );
   return {
     ...result,

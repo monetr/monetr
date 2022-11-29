@@ -15,13 +15,18 @@ import EditSpendingAmountDialog from 'components/Expenses/EditExpenseAmountDialo
 import EditExpenseDueDateDialog from 'components/Expenses/EditExpenseDueDateDialog';
 import EditFundingScheduleDialog from 'components/Expenses/EditFundingScheduleDialog';
 import TransferDialog from 'components/Spending/TransferDialog';
-import { useFundingSchedule } from 'hooks/fundingSchedules';
-import { useRemoveSpending, useSelectedExpense } from 'hooks/spending';
+import { useRemoveSpending, useSelectedExpense, useSpendingFunding } from 'hooks/spending';
+import { useFundingSchedules } from 'hooks/fundingSchedules';
+import formatAmount from 'util/formatAmount';
 
 export default function ExpenseDetail(): JSX.Element {
   const removeSpending = useRemoveSpending();
   const expense = useSelectedExpense();
-  const fundingSchedule = useFundingSchedule(expense?.fundingScheduleId);
+  const spendingFunding = useSpendingFunding(expense);
+  const fundingSchedules = useFundingSchedules();
+  const nextFunding = spendingFunding.result.length > 0 && spendingFunding.result
+    .sort((a, b) => fundingSchedules.get(a.fundingScheduleId).nextOccurrence.unix() > fundingSchedules.get(b.fundingScheduleId).nextOccurrence.unix() ? 1 : -1)[0]
+  const fundingSchedule = nextFunding && fundingSchedules.get(nextFunding.fundingScheduleId);
 
   enum Dialog {
     TransferDialog,
@@ -99,7 +104,7 @@ export default function ExpenseDetail(): JSX.Element {
               </div>
               <div className="col-span-3">
                 <Typography>
-                  { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
+                  { formatAmount(nextFunding?.nextContributionAmount) }/{ fundingSchedule?.name }
                 </Typography>
               </div>
               <div className="col-span-1 row-span-2">
