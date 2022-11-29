@@ -142,15 +142,10 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		}
 	}
 
-	var fundingFirst, fundingSecond FundingEvent
+	var fundingFirst, fundingSecond FundingDay
 	{ // Get our next two funding events
-		fundingEvents := s.funding.GetNFundingEventsAfter(ctx, 2, input, timezone)
-		if len(fundingEvents) != 2 {
-			// TODO, if there are multiple funding schedules and they land on the same day, this will happen.
-			panic("invalid number of funding events returned;")
-		}
-
-		fundingFirst, fundingSecond = fundingEvents[0], fundingEvents[1]
+		fundingDays := s.funding.GetNFundingDaysAfter(ctx, 2, input, timezone)
+		fundingFirst, fundingSecond = fundingDays[0], fundingDays[1]
 	}
 
 	// The number of times this item will be spent before it receives funding again. This is considered the current
@@ -200,7 +195,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// Otherwise we can simply look at how much we need vs how much we already have.
 		amountNeeded := myownsanity.Max(0, perSpendingAmount-balance)
 		// And how many times we will have a funding event before our due date.
-		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(ctx, input, nextRecurrence, timezone)
+		numberOfContributions := s.funding.GetNumberOfFundingDaysBetween(ctx, input, nextRecurrence, timezone)
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}
@@ -210,9 +205,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// The next event will be a contribution.
 		event.Date = fundingFirst.Date
 		event.ContributionAmount = totalContributionAmount
-		event.Funding = []FundingEvent{
-			fundingFirst,
-		}
+		event.Funding = fundingFirst.Events
 		event.RollingAllocation = event.RollingAllocation + totalContributionAmount
 	case nextRecurrence.Before(fundingFirst.Date):
 		// The next event will be a transaction.
@@ -229,9 +222,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
 		// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
 		event.RollingAllocation = (event.RollingAllocation + totalContributionAmount) - s.spending.TargetAmount
-		event.Funding = []FundingEvent{
-			fundingFirst,
-		}
+		event.Funding = fundingFirst.Events
 	}
 
 	return &event

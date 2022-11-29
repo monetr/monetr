@@ -9,6 +9,11 @@ import (
 	"github.com/monetr/monetr/pkg/util"
 )
 
+type FundingDay struct {
+	Date   time.Time      `json:"date"`
+	Events []FundingEvent `json:"events"`
+}
+
 type FundingEvent struct {
 	Date              time.Time `json:"date"`
 	OriginalDate      time.Time `json:"originalDate"`
@@ -23,9 +28,12 @@ var (
 
 type FundingInstructions interface {
 	GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent
+	GetNFundingDaysAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingDay
 	GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64
+	GetNumberOfFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64
 	GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent
 	GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent
+	GetNextFundingDayAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingDay
 }
 
 type fundingScheduleBase struct {
@@ -36,6 +44,38 @@ func NewFundingScheduleFundingInstructions(fundingSchedule models.FundingSchedul
 	return &fundingScheduleBase{
 		fundingSchedule: fundingSchedule,
 	}
+}
+
+func (f *fundingScheduleBase) needsWeekendAdjust(input time.Time) bool {
+	if f.fundingSchedule.ExcludeWeekends {
+		switch input.Weekday() {
+		case time.Sunday, time.Saturday:
+			return true
+		default:
+			return false
+		}
+	}
+
+	return false
+}
+
+func (f *fundingScheduleBase) adjustForWeekendMaybe(input time.Time) (output time.Time, weekendAvoided bool) {
+	output = input
+	if f.fundingSchedule.ExcludeWeekends {
+		switch output.Weekday() {
+		case time.Sunday:
+			// If it lands on a sunday then subtract 2 days to put the contribution date on a Friday.
+			output = output.AddDate(0, 0, -2)
+			weekendAvoided = true
+		case time.Saturday:
+			// If it lands on a sunday then subtract 1 day to put the contribution date on a Friday.
+			output = output.AddDate(0, 0, -1)
+			weekendAvoided = true
+		default:
+			weekendAvoided = false
+		}
+	}
+	return output, weekendAvoided
 }
 
 func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
@@ -51,13 +91,14 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 		nextContributionDate = util.MidnightInLocal(f.fundingSchedule.NextOccurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {
-		// If now is before the already established next occurrence, then just return that.
-		// This might be goofy if we want to test stuff in the distant past?
+		// TODO this is kind of a hack to make the adjusted date and weekend avoided show properly when we are working
+		//   off the else clause above. Idk how to improve it right now, but this gives us the correct data.
+		realContributionDate := util.MidnightInLocal(rule.After(input, false), timezone)
 		return FundingEvent{
 			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
-			WeekendAvoided:    false,
+			WeekendAvoided:    f.needsWeekendAdjust(realContributionDate),
 			Date:              nextContributionDate,
-			OriginalDate:      nextContributionDate,
+			OriginalDate:      realContributionDate,
 		}
 	}
 
@@ -81,21 +122,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 
 		// If we are excluding weekends, and the next contribution date falls on a weekend; then we need to adjust the
 		// date to the previous business day.
-		if f.fundingSchedule.ExcludeWeekends {
-			switch nextContributionDate.Weekday() {
-			case time.Sunday:
-				// If it lands on a sunday then subtract 2 days to put the contribution date on a Friday.
-				nextContributionDate = nextContributionDate.AddDate(0, 0, -2)
-				weekendAvoided = true
-			case time.Saturday:
-				// If it lands on a sunday then subtract 1 day to put the contribution date on a Friday.
-				nextContributionDate = nextContributionDate.AddDate(0, 0, -1)
-				weekendAvoided = true
-			default:
-				weekendAvoided = false
-			}
-		}
-
+		nextContributionDate, weekendAvoided = f.adjustForWeekendMaybe(nextContributionDate)
 		nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
 	}
 
@@ -121,6 +148,20 @@ func (f *fundingScheduleBase) GetNFundingEventsAfter(ctx context.Context, n int,
 	return events
 }
 
+func (f *fundingScheduleBase) GetNFundingDaysAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingDay {
+	days := make([]FundingDay, n)
+	for i := 0; i < n; i++ {
+		if i == 0 {
+			days[i] = f.GetNextFundingDayAfter(ctx, input, timezone)
+			continue
+		}
+
+		days[i] = f.GetNextFundingDayAfter(ctx, days[i-1].Date, timezone)
+	}
+
+	return days
+}
+
 func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent {
 	rule := f.fundingSchedule.Rule.RRule
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
@@ -128,21 +169,59 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start
 	// midnight.
 	dtStart := util.MidnightInLocal(start, timezone)
 	rule.DTStart(dtStart)
+	// We need this to be inclusive because we want to account for the scenario when we could contribute to a spending
+	// object on the day it is actually due. However, we do not want to include the start date as it should have been
+	// accounted for elsewhere (hard to explain). So we do inclusive here, but we exclude any instance that happens on
+	// or before the provided start date below.
 	items := rule.Between(start, end, true)
-	events := make([]FundingEvent, len(items))
-	for i, item := range items {
-		// TODO Implement the skip weekends here too.
-		events[i] = FundingEvent{
-			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
-			Date:              item,
-			OriginalDate:      item,
+	events := make([]FundingEvent, 0, len(items))
+	for _, item := range items {
+		adjustedDate, avoidedWeekend := f.adjustForWeekendMaybe(item)
+		// If we are on the funding day then we need to exclude it _after_ the weekend has been adjusted for.
+		if adjustedDate.Equal(start) || adjustedDate.Before(start) {
+			continue
 		}
+		events = append(events, FundingEvent{
+			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
+			Date:              adjustedDate,
+			OriginalDate:      item,
+			WeekendAvoided:    avoidedWeekend,
+		})
 	}
 	return events
 }
 
 func (f *fundingScheduleBase) GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
 	return int64(len(f.GetFundingEventsBetween(ctx, start, end, timezone)))
+}
+
+func (f *fundingScheduleBase) GetFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingDay {
+	// Because a single funding schedule cannot have multiple events on a single day we can streamline this quite a bit.
+	events := f.GetFundingEventsBetween(ctx, start, end, timezone)
+	days := make([]FundingDay, len(events))
+	for i, event := range events {
+		days[i] = FundingDay{
+			Date: event.Date,
+			Events: []FundingEvent{
+				event,
+			},
+		}
+	}
+	return days
+}
+
+func (f *fundingScheduleBase) GetNumberOfFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
+	return int64(len(f.GetFundingDaysBetween(ctx, start, end, timezone)))
+}
+
+func (f *fundingScheduleBase) GetNextFundingDayAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingDay {
+	event := f.GetNextFundingEventAfter(ctx, input, timezone)
+	return FundingDay{
+		Date: event.Date,
+		Events: []FundingEvent{
+			event,
+		},
+	}
 }
 
 // multipleFundingInstructions isn't in use yet. It's kind of a proof of concept that with the funding instruction
@@ -176,6 +255,20 @@ func (m *multipleFundingInstructions) GetNFundingEventsAfter(ctx context.Context
 	return events
 }
 
+func (m *multipleFundingInstructions) GetNFundingDaysAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingDay {
+	days := make([]FundingDay, n)
+	for i := 0; i < n; i++ {
+		if i == 0 {
+			days[i] = m.GetNextFundingDayAfter(ctx, input, timezone)
+			continue
+		}
+
+		days[i] = m.GetNextFundingDayAfter(ctx, days[i-1].Date, timezone)
+	}
+
+	return days
+}
+
 func (m *multipleFundingInstructions) GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent {
 	result := make([]FundingEvent, 0)
 	for _, instruction := range m.instructions {
@@ -187,6 +280,33 @@ func (m *multipleFundingInstructions) GetFundingEventsBetween(ctx context.Contex
 
 func (m *multipleFundingInstructions) GetNumberOfFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
 	return int64(len(m.GetFundingEventsBetween(ctx, start, end, timezone)))
+}
+
+func (m *multipleFundingInstructions) GetFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingDay {
+	events := m.GetFundingEventsBetween(ctx, start, end, timezone)
+	result := map[int64][]FundingEvent{}
+	for _, event := range events {
+		date := event.Date.Unix()
+		items, ok := result[date]
+		if !ok {
+			items = make([]FundingEvent, 0)
+		}
+		items = append(items, event)
+		result[date] = items
+	}
+	days := make([]FundingDay, 0, len(result))
+	for date, items := range result {
+		days = append(days, FundingDay{
+			Date:   time.Unix(date, 0),
+			Events: items,
+		})
+	}
+	return days
+}
+
+func (m *multipleFundingInstructions) GetNumberOfFundingDaysBetween(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
+	days := m.GetFundingDaysBetween(ctx, start, end, timezone)
+	return int64(len(days))
 }
 
 func (m *multipleFundingInstructions) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
@@ -208,4 +328,34 @@ func (m *multipleFundingInstructions) GetNextFundingEventAfter(ctx context.Conte
 	}
 
 	return earliest
+}
+
+func (m *multipleFundingInstructions) GetNextFundingDayAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingDay {
+	var earliest time.Time
+	result := make([]FundingEvent, 0, len(m.instructions))
+	for _, instruction := range m.instructions {
+		next := instruction.GetNextFundingEventAfter(ctx, input, timezone)
+
+		switch {
+		case earliest.IsZero():
+			earliest = next.Date
+			fallthrough // Add the current one to the array.
+		case next.Date.Equal(earliest):
+			result = append(result, next)
+		case next.Date.Before(earliest):
+			// If we find one before the earliest we've seen then we need to clear the result array and only add this one.
+			earliest = next.Date
+			result = []FundingEvent{
+				next,
+			}
+			continue
+		}
+	}
+
+	myownsanity.Assert(!earliest.IsZero(), "The earliest next contribution cannot be zero, something is wrong with the provided funding instructions.")
+
+	return FundingDay{
+		Date:   earliest,
+		Events: result,
+	}
 }

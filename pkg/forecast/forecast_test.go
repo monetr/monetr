@@ -2,6 +2,8 @@ package forecast
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -148,6 +150,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.EqualValues(t, 50000, event.Contribution, "should have contributed $500")
 			assert.EqualValues(t, 50000, event.Balance, "should have a balance of $500")
 			assert.Zero(t, event.Transaction, "should not be spending anything yet")
+			assert.Equal(t, "2022-11-15", event.Date.Format("2006-01-02"), "should be funded a bit on the 15th of november")
 		}
 
 		{ // Second event should also be funding for $500, but will have the balance from the previous event.
@@ -155,6 +158,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.EqualValues(t, 50000, event.Contribution, "should have contributed $500")
 			assert.EqualValues(t, 100000, event.Balance, "should have a balance of $1000")
 			assert.Zero(t, event.Transaction, "should not be spending anything yet")
+			assert.Equal(t, "2022-11-30", event.Date.Format("2006-01-02"), "should be funded a bit on the 30th of november")
 		}
 
 		{ // Third event should be spending the entire amount of the expense.
@@ -162,6 +166,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.Zero(t, event.Contribution, "should not have contributed anything")
 			assert.Zero(t, event.Balance, "should not have anything left after spending")
 			assert.EqualValues(t, 100000, event.Transaction, "should have spend the $1000 expense")
+			assert.Equal(t, "2022-12-01", event.Date.Format("2006-01-02"), "on the 1st of december it should be spent")
 		}
 	})
 
@@ -215,6 +220,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.EqualValues(t, 50000, event.Balance, "should have a balance of $500")
 			assert.Zero(t, event.Transaction, "should not be spending anything yet")
 			assert.EqualValues(t, 1, event.Funding[0].FundingScheduleId, "should be the first funding schedule")
+			assert.Equal(t, "2022-11-15", event.Date.Format("2006-01-02"), "should be funded a bit on the 15th of november")
 		}
 
 		{ // Second event should also be funding for $500, but will have the balance from the previous event.
@@ -223,6 +229,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.EqualValues(t, 100000, event.Balance, "should have a balance of $1000")
 			assert.Zero(t, event.Transaction, "should not be spending anything yet")
 			assert.EqualValues(t, 2, event.Funding[0].FundingScheduleId, "should be the second funding schedule")
+			assert.Equal(t, "2022-11-30", event.Date.Format("2006-01-02"), "should be funded a bit on the 30th of november")
 		}
 
 		{ // Third event should be spending the entire amount of the expense.
@@ -230,6 +237,75 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.Zero(t, event.Contribution, "should not have contributed anything")
 			assert.Zero(t, event.Balance, "should not have anything left after spending")
 			assert.EqualValues(t, 100000, event.Transaction, "should have spend the $1000 expense")
+			assert.Empty(t, event.Funding, "should not have any funding events")
+			assert.Equal(t, "2022-12-01", event.Date.Format("2006-01-02"), "on the 1st of december it should be spent")
+		}
+	})
+
+	t.Run("simple monthly expense, split funding overlap", func(t *testing.T) {
+		fundingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		fundingRuleTwo := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
+		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 10, 3, 0, 0, 1, 0, timezone).UTC()
+
+		fundingSchedules := []models.FundingSchedule{
+			{
+				FundingScheduleId: 1,
+				Rule:              fundingRuleOne,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 10, 14, 0, 0, 0, 0, timezone),
+			},
+			{
+				FundingScheduleId: 2,
+				Rule:              fundingRuleTwo,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 10, 7, 0, 0, 0, 0, timezone),
+			},
+		}
+		spending := []models.Spending{
+			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+					{
+						FundingScheduleId: 2,
+					},
+				},
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   100000,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2022, 11, 1, 0, 0, 0, 0, timezone),
+				RecurrenceRule: spendingRuleOne,
+				SpendingId:     1,
+			},
+		}
+
+		forecaster := NewForecaster(spending, fundingSchedules)
+		start, end := now, now.AddDate(0, 1, 0)
+		forecast := forecaster.GetForecast(context.Background(), start, end, timezone)
+
+		j, _ := json.MarshalIndent(forecast, "", "  ")
+		fmt.Println(string(j))
+
+		{ // First event should be on the 7th, funded by only the weekly funding schedule.
+			event := forecast.Events[0]
+			assert.EqualValues(t, 20000, event.Contribution, "should have contributed $200")
+			assert.EqualValues(t, 20000, event.Balance, "should have a balance of $200")
+			assert.Zero(t, event.Transaction, "should not be spending anything yet")
+			assert.EqualValues(t, 2, event.Funding[0].FundingScheduleId, "should be the weekly funding schedule")
+			assert.Len(t, event.Funding, 1, "should only have a single funding event")
+			assert.Equal(t, "2022-10-07", event.Date.Format("2006-01-02"), "should be on the 7th of october")
+		}
+
+		{ // Second event should be on the 14th, excluding the weekend.
+			event := forecast.Events[1]
+			assert.EqualValues(t, 20000, event.Contribution, "should have contributed $200")
+			assert.EqualValues(t, 40000, event.Balance, "should have a balance of $400 now")
+			assert.Zero(t, event.Transaction, "should not be spending anything yet")
+			assert.Len(t, event.Funding, 2, "should have two funding events overlap")
+			assert.Equal(t, "2022-10-14", event.Date.Format("2006-01-02"), "should be on the 14th of october")
 		}
 	})
 }
