@@ -307,5 +307,44 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.Len(t, event.Funding, 2, "should have two funding events overlap")
 			assert.Equal(t, "2022-10-14", event.Date.Format("2006-01-02"), "should be on the 14th of october")
 		}
+
+		{
+			event := forecast.Events[2]
+			assert.EqualValues(t, 20000, event.Contribution, "should have contributed $200")
+			assert.EqualValues(t, 60000, event.Balance, "should have a balance of $600 now")
+			assert.Zero(t, event.Transaction, "should not be spending anything yet")
+			assert.EqualValues(t, 2, event.Funding[0].FundingScheduleId, "should be the weekly funding schedule")
+			assert.Len(t, event.Funding, 1, "should be only the friday funding event")
+			assert.Equal(t, "2022-10-21", event.Date.Format("2006-01-02"), "should be on the 21st of october")
+		}
+
+		{
+			event := forecast.Events[3]
+			assert.EqualValues(t, 20000, event.Contribution, "should have contributed $200")
+			assert.EqualValues(t, 80000, event.Balance, "should have a balance of $800 now")
+			assert.Zero(t, event.Transaction, "should not be spending anything yet")
+			assert.EqualValues(t, 2, event.Funding[0].FundingScheduleId, "should be the weekly funding schedule")
+			assert.Len(t, event.Funding, 1, "should be only the friday funding event")
+			assert.Equal(t, "2022-10-28", event.Date.Format("2006-01-02"), "should be on the 28th of october")
+		}
+
+		{
+			event := forecast.Events[4]
+			assert.EqualValues(t, 20000, event.Contribution, "should have contributed $200")
+			assert.EqualValues(t, 100000, event.Balance, "should have a balance of $1000 now")
+			assert.Zero(t, event.Transaction, "should not be spending anything yet")
+			assert.EqualValues(t, 1, event.Funding[0].FundingScheduleId, "should be the semi-monthly funding schedule")
+			assert.Len(t, event.Funding, 1, "should be only the semi-monthly funding event")
+			assert.Equal(t, "2022-10-31", event.Date.Format("2006-01-02"), "should be on the 31st of october")
+		}
+
+		{
+			event := forecast.Events[5]
+			assert.Zero(t, event.Contribution, "nothing should be contributed on this day")
+			assert.Zero(t, event.Balance, "balance should now be zero")
+			assert.EqualValues(t, 100000, event.Transaction, "should have spent $1000 now")
+			assert.Empty(t, event.Funding, "should not have any funding events today")
+			assert.Equal(t, "2022-11-01", event.Date.Format("2006-01-02"), "should be on the 31st of october")
+		}
 	})
 }
