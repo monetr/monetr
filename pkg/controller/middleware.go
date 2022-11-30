@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/form3tech-oss/jwt-go"
@@ -35,7 +36,15 @@ func (c *Controller) setupRepositoryMiddleware(ctx iris.Context) {
 	switch ctx.Method() {
 	case "GET", "OPTIONS":
 		dbi = c.db
-	case "POST", "PUT", "DELETE":
+	case "POST":
+		// Some endpoints need a POST even though they do not require data access.
+		// This is a short term fix. (Hopefully)
+		if strings.HasSuffix(ctx.Path(), "/icons/search") {
+			dbi = c.db
+			break
+		}
+		fallthrough
+	case "PUT", "DELETE":
 		txn, err := c.db.BeginContext(c.getContext(ctx))
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to begin transaction")
