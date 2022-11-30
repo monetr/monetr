@@ -308,7 +308,6 @@ func (m *multipleFundingInstructions) GetNextFundingDayAfter(ctx context.Context
 			result = []FundingEvent{
 				next,
 			}
-			continue
 		}
 	}
 

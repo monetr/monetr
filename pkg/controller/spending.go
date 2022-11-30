@@ -232,7 +232,9 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		c.wrapPgError(ctx, err, "failed to create spending")
 		return
 	}
-	updatedFunding.SpendingId = spending.SpendingId
+	for i := range updatedFunding {
+		updatedFunding[i].SpendingId = spending.SpendingId
+	}
 	if err = repo.CreateSpendingFunding(c.getContext(ctx), updatedFunding); err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
 		c.wrapPgError(ctx, err, "failed to create spending funding")
@@ -334,9 +336,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		}
 
 		spendingToUpdate = append(spendingToUpdate, *fromExpense)
-		if updatedFunding != nil {
-			fundingToUpdate = append(fundingToUpdate, *updatedFunding)
-		}
+		fundingToUpdate = append(fundingToUpdate, updatedFunding...)
 	}
 
 	// If we are transferring the allocated funds to another spending object then we need to update that object. If we
@@ -362,9 +362,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		}
 
 		spendingToUpdate = append(spendingToUpdate, *toExpense)
-		if updatedFunding != nil {
-			fundingToUpdate = append(fundingToUpdate, *updatedFunding)
-		}
+		fundingToUpdate = append(fundingToUpdate, updatedFunding...)
 	}
 
 	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spendingToUpdate); err != nil {
@@ -500,13 +498,9 @@ func (c *Controller) putSpending(ctx *context.Context) {
 			return
 		}
 
-		if updatedFunding != nil {
-			if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, []models.SpendingFunding{
-				*updatedFunding,
-			}); err != nil {
-				c.wrapPgError(ctx, err, "failed to update spending funding")
-				return
-			}
+		if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, updatedFunding); err != nil {
+			c.wrapPgError(ctx, err, "failed to update spending funding")
+			return
 		}
 	}
 

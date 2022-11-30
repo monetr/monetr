@@ -294,9 +294,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 				}
 
 				expensesToUpdate = append(expensesToUpdate, spending)
-				if updatedFunding != nil {
-					fundingToUpdate = append(fundingToUpdate, *updatedFunding)
-				}
+				fundingToUpdate = append(fundingToUpdate, updatedFunding...)
 			}
 		}
 	}

@@ -85,7 +85,7 @@ func (e *Spending) CalculateNextContribution(
 	accountTimezone string,
 	funding SpendingFundingHelper,
 	now time.Time,
-) (*SpendingFunding, error) {
+) ([]SpendingFunding, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -106,7 +106,11 @@ func (e *Spending) CalculateNextContribution(
 
 	// Get the timestamps for the next two funding events, this is so we can determine how many spending events will
 	// happen during these two funding windows.
-	fundingFirst, fundingSecond := funding.GetNextTwoContributionDatesAfter(now, timezone)
+	var fundingFirst, fundingSecond SpendingFundingDay
+	{
+		fundingDays := funding.GetNextTwoContributionDatesAfter(now, timezone)
+		fundingFirst, fundingSecond = fundingDays[0], fundingDays[1]
+	}
 	nextRecurrence := util.MidnightInLocal(e.NextRecurrence, timezone)
 	if e.RecurrenceRule != nil {
 		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
@@ -123,10 +127,10 @@ func (e *Spending) CalculateNextContribution(
 	// funding period. This is used to determine if the spending is currently behind. As the total amount that will be
 	// spent must be <= the amount currently allocated to this spending item. If it is not then there will not be enough
 	// funds to cover each spending event between now and the next funding event.
-	eventsBeforeFirst := int64(len(e.GetRecurrencesBefore(now, fundingFirst, timezone)))
+	eventsBeforeFirst := int64(len(e.GetRecurrencesBefore(now, fundingFirst.Date, timezone)))
 	// The number of times this item will be spent in the subsequent funding period. This is used to determine how much
 	// needs to be allocated at the beginning of the next funding period.
-	eventsBeforeSecond := int64(len(e.GetRecurrencesBefore(fundingFirst, fundingSecond, timezone)))
+	eventsBeforeSecond := int64(len(e.GetRecurrencesBefore(fundingFirst.Date, fundingSecond.Date, timezone)))
 
 	// The amount of funds needed for each individual spending event.
 	perSpendingAmount := e.TargetAmount
@@ -172,8 +176,17 @@ func (e *Spending) CalculateNextContribution(
 		e.NextRecurrence = nextRecurrence
 	}
 
-	// Update the funding item with our calculated contribution amount.
-	nextFunding := funding.GetNextFunding(now, timezone)
-	nextFunding.NextContributionAmount = totalContributionAmount
-	return &nextFunding, nil
+	var soFar int64
+	for i := range fundingFirst.Funding {
+		amount := (totalContributionAmount - soFar) / int64(len(fundingFirst.Funding))
+		soFar += amount
+		if i == 0 {
+			fundingFirst.Funding[i].NextContributionAmount = amount
+			continue
+		}
+
+		fundingFirst.Funding[i].NextContributionAmount = amount
+	}
+
+	return fundingFirst.Funding, nil
 }

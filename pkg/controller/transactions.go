@@ -212,13 +212,9 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 			return
 		}
 
-		if funding != nil {
-			if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, []models.SpendingFunding{
-				*funding,
-			}); err != nil {
-				c.wrapPgError(ctx, err, "failed to update funding for spending")
-				return
-			}
+		if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, funding); err != nil {
+			c.wrapPgError(ctx, err, "failed to update funding for spending")
+			return
 		}
 	}
 

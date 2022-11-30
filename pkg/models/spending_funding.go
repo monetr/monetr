@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/util"
 )
 
@@ -21,6 +22,11 @@ type SpendingFunding struct {
 	NextContributionAmount int64            `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`
 }
 
+type SpendingFundingDay struct {
+	Date    time.Time
+	Funding []SpendingFunding
+}
+
 type SpendingFundingHelper []SpendingFunding
 
 func NewSpendingFundingHelper(funding []SpendingFunding) SpendingFundingHelper {
@@ -30,23 +36,46 @@ func NewSpendingFundingHelper(funding []SpendingFunding) SpendingFundingHelper {
 	return funding
 }
 
-func (s SpendingFundingHelper) GetNextTwoContributionDatesAfter(start time.Time, timezone *time.Location) (time.Time, time.Time) {
-	var first, second time.Time
+func (s SpendingFundingHelper) GetNextContributionDateAfter(input time.Time, timezone *time.Location) SpendingFundingDay {
+	var earliest time.Time
+	result := make([]SpendingFunding, 0, len(s))
 	for _, schedule := range s {
-		next := schedule.FundingSchedule.GetNextContributionDateAfter(start, timezone)
-		if next.Before(first) || first.IsZero() {
-			first = next
+		next := schedule.FundingSchedule.GetNextContributionDateAfter(input, timezone)
+
+		switch {
+		case earliest.IsZero():
+			earliest = next
+			fallthrough
+		case next.Equal(earliest):
+			result = append(result, schedule)
+		case next.Before(earliest):
+			earliest = next
+			result = []SpendingFunding{
+				schedule,
+			}
 		}
 	}
 
-	for _, schedule := range s {
-		next := schedule.FundingSchedule.GetNextContributionDateAfter(first, timezone)
-		if next.Before(second) || second.IsZero() {
-			second = next
+	myownsanity.Assert(!earliest.IsZero(), "The earliest next contribution cannot be zero, something is wrong with the provided funding instructions.")
+
+	return SpendingFundingDay{
+		Date:    earliest,
+		Funding: result,
+	}
+}
+
+func (s SpendingFundingHelper) GetNextTwoContributionDatesAfter(start time.Time, timezone *time.Location) [2]SpendingFundingDay {
+	var result [2]SpendingFundingDay
+	for i := 0; i < len(result); i ++ {
+		if i == 0 {
+			result[i] = s.GetNextContributionDateAfter(start, timezone)
+			continue
 		}
+
+		result[i] = s.GetNextContributionDateAfter(result[i - 1].Date, timezone)
 	}
 
-	return first, second
+	return result
 }
 
 func (s SpendingFundingHelper) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
@@ -66,19 +95,4 @@ func (s SpendingFundingHelper) GetNumberOfContributionsBetween(start, end time.T
 	}
 
 	return int64(len(contributions))
-}
-
-func (s SpendingFundingHelper) GetNextFunding(start time.Time, timezone *time.Location) SpendingFunding {
-	var first time.Time
-	var funding SpendingFunding
-	for _, schedule := range s {
-		next := schedule.FundingSchedule.GetNextContributionDateAfter(start, timezone)
-
-		if next.Before(first) || first.IsZero() {
-			first = next
-			funding = schedule
-		}
-	}
-
-	return funding
 }

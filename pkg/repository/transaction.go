@@ -385,9 +385,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(
 
 		// Then take all the fields that have changed and throw them in our list of things to update.
 		expenseUpdates = append(expenseUpdates, *currentExpense)
-		if funding != nil {
-			fundingUpdates = append(fundingUpdates, *funding)
-		}
+		fundingUpdates = append(fundingUpdates, funding...)
 
 		// If we are only removing the expense then we are done with this part.
 		if expensePlan == RemoveExpense {
@@ -405,9 +403,7 @@ func (r *repositoryBase) ProcessTransactionSpentFrom(
 
 		// Then take all the fields that have changed and throw them in our list of things to update.
 		expenseUpdates = append(expenseUpdates, *newExpense)
-		if funding != nil {
-			fundingUpdates = append(fundingUpdates, *funding)
-		}
+		fundingUpdates = append(fundingUpdates, funding...)
 	}
 
 	if err = r.UpdateSpending(span.Context(), bankAccountId, expenseUpdates); err != nil {
@@ -430,7 +426,7 @@ func (r *repositoryBase) AddExpenseToTransaction(
 	ctx context.Context,
 	transaction *models.Transaction,
 	spending *models.Spending,
-) (*models.SpendingFunding, error) {
+) ([]models.SpendingFunding, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

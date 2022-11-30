@@ -67,7 +67,7 @@ type BaseRepository interface {
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error
 
-	CreateSpendingFunding(ctx context.Context, funding *models.SpendingFunding) error
+	CreateSpendingFunding(ctx context.Context, funding []models.SpendingFunding) error
 	UpdateSpendingFunding(ctx context.Context, bankAccountId uint64, updates []models.SpendingFunding) error
 	GetSpendingFunding(ctx context.Context, bankAccountId uint64, spendingId uint64) ([]models.SpendingFunding, error)
 	ProcessTransactionSpentFrom(
@@ -75,7 +75,7 @@ type BaseRepository interface {
 		bankAccountId uint64,
 		input, existing *models.Transaction,
 	) (updatedExpenses []models.Spending, updatedFunding []models.SpendingFunding, _ error)
-	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) (*models.SpendingFunding, error)
+	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) ([]models.SpendingFunding, error)
 }
 
 type Repository interface {

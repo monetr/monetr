@@ -50,7 +50,7 @@ func (t *Transaction) AddSpendingToTransaction(
 	ctx context.Context,
 	spending *Spending,
 	account *Account,
-) (*SpendingFunding, error) {
+) ([]SpendingFunding, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

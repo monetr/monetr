@@ -47,15 +47,17 @@ func TestRepositoryBase_GetSpendingById(t *testing.T) {
 		}
 		assert.NoError(t, repo.CreateSpending(context.Background(), &spending), "must create goal")
 
-		spendingFunding := models.SpendingFunding{
-			BankAccountId:          bankAccount.BankAccountId,
-			SpendingId:             spending.SpendingId,
-			FundingScheduleId:      fundingSchedule.FundingScheduleId,
-			NextContributionAmount: 0,
+		input := []models.SpendingFunding{
+			{
+				BankAccountId:          bankAccount.BankAccountId,
+				SpendingId:             spending.SpendingId,
+				FundingScheduleId:      fundingSchedule.FundingScheduleId,
+				NextContributionAmount: 0,
+			},
 		}
-		assert.NoError(t, repo.CreateSpendingFunding(context.Background(), &spendingFunding), "must create spending funding")
-		assert.NotZero(t, spendingFunding.SpendingFundingId, "must have a spending funding ID")
-		assert.NotZero(t, spendingFunding.AccountId, "must have a spending funding ID")
+		assert.NoError(t, repo.CreateSpendingFunding(context.Background(), input), "must create spending funding")
+		assert.NotZero(t, input[0].SpendingFundingId, "must have a spending funding ID")
+		assert.NotZero(t, input[0].AccountId, "must have a spending funding ID")
 
 		fullSpending, err := repo.GetSpendingById(context.Background(), bankAccount.BankAccountId, spending.SpendingId)
 		assert.NoError(t, err, "must not return an error reading a valid spending")

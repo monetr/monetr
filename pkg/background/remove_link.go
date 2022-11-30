@@ -158,6 +158,19 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 		}
 
 		{
+			result, err := r.db.ModelContext(span.Context(), &models.SpendingFunding{}).
+				Where(`"spending_funding"."account_id" = ?`, accountId).
+				WhereIn(`"spending_funding"."bank_account_id" IN (?)`, bankAccountIds).
+				Delete()
+			if err != nil {
+				log.WithError(err).Errorf("failed to remove spending funding for link")
+				return errors.Wrap(err, "failed to remove spending funding for link")
+			}
+
+			log.WithField("removed", result.RowsAffected()).Info("removed spending funding(s)")
+		}
+
+		{
 			result, err := r.db.ModelContext(span.Context(), &models.Spending{}).
 				Where(`"spending"."account_id" = ?`, accountId).
 				WhereIn(`"spending"."bank_account_id" IN (?)`, bankAccountIds).

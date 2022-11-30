@@ -256,13 +256,9 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 					return
 				}
 
-				if updatedFunding != nil {
-					if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, []models.SpendingFunding{
-						*updatedFunding,
-					}); err != nil {
-						c.wrapPgError(ctx, err, "failed to update spending funding")
-						return
-					}
+				if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, updatedFunding); err != nil {
+					c.wrapPgError(ctx, err, "failed to update spending funding")
+					return
 				}
 			}
 

@@ -61,13 +61,14 @@ func (r *repositoryBase) GetSpendingFunding(ctx context.Context, bankAccountId u
 	return result, errors.Wrap(err, "failed to retrieve spending funding")
 }
 
-func (r *repositoryBase) CreateSpendingFunding(ctx context.Context, funding *models.SpendingFunding) error {
+func (r *repositoryBase) CreateSpendingFunding(ctx context.Context, funding []models.SpendingFunding) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	myownsanity.Assert(funding.BankAccountId > 0, "SpendingFunding bank account ID must be set by the caller")
+	for i, item := range funding {
+		myownsanity.Assert(item.BankAccountId > 0, "SpendingFunding bank account ID must be set by the caller")
+		funding[i].AccountId = r.AccountId()
+	}
 
-	funding.AccountId = r.AccountId()
-
-	_, err := r.txn.ModelContext(span.Context(), funding).Insert(funding)
+	_, err := r.txn.ModelContext(span.Context(), &funding).Insert(&funding)
 	return errors.Wrap(err, "failed to create spending funding")
 }
