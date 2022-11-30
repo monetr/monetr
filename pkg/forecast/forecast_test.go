@@ -347,4 +347,109 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			assert.Equal(t, "2022-11-01", event.Date.Format("2006-01-02"), "should be on the 31st of october")
 		}
 	})
+
+	t.Run("simple goal day after payday", func(t *testing.T) {
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 11, 29, 14, 30, 1, 0, timezone).UTC()
+		end := time.Date(2022, 12, 2, 0, 0, 0, 0, timezone).UTC()
+
+		fundingSchedules := []models.FundingSchedule{
+			{
+				Rule:              fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		}
+		spending := []models.Spending{
+			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      1000,
+				CurrentAmount:     0,
+				NextRecurrence:    time.Date(2022, 12, 1, 0, 0, 0, 0, timezone),
+				RecurrenceRule:    nil,
+				SpendingId:        1,
+			},
+		}
+
+		forecaster := NewForecaster(spending, fundingSchedules)
+		forecast := forecaster.GetForecast(context.Background(), now, end, timezone)
+		assert.NotEmpty(t, forecast)
+	})
+
+	t.Run("goal due before payday", func(t *testing.T) {
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 11, 27, 14, 30, 1, 0, timezone).UTC()
+		end := time.Date(2022, 12, 2, 0, 0, 0, 0, timezone).UTC()
+
+		fundingSchedules := []models.FundingSchedule{
+			{
+				Rule:              fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		}
+		spending := []models.Spending{
+			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      1000,
+				CurrentAmount:     0,
+				NextRecurrence:    time.Date(2022, 11, 28, 0, 0, 0, 0, timezone),
+				RecurrenceRule:    nil,
+				SpendingId:        1,
+			},
+		}
+
+		forecaster := NewForecaster(spending, fundingSchedules)
+		forecast := forecaster.GetForecast(context.Background(), now, end, timezone)
+		assert.Empty(t, forecast.Events, "goals that would not be funded should not have any events")
+	})
+
+	t.Run("goal due on payday", func(t *testing.T) {
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 11, 27, 14, 30, 1, 0, timezone).UTC()
+		end := time.Date(2022, 12, 2, 0, 0, 0, 0, timezone).UTC()
+
+		fundingSchedules := []models.FundingSchedule{
+			{
+				Rule:              fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		}
+		spending := []models.Spending{
+			{
+				SpendingFunding: []models.SpendingFunding{
+					{
+						FundingScheduleId: 1,
+					},
+				},
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      1000,
+				CurrentAmount:     0,
+				NextRecurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				RecurrenceRule:    nil,
+				SpendingId:        1,
+			},
+		}
+
+		forecaster := NewForecaster(spending, fundingSchedules)
+		forecast := forecaster.GetForecast(context.Background(), now, end, timezone)
+		assert.Len(t, forecast.Events, 1, "should have one funding event for the goal")
+	})
 }
