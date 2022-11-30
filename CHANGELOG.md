@@ -1,5 +1,60 @@
 # Changelog
 
+## [0.12.4](https://github.com/monetr/monetr/compare/v0.12.3...v0.12.4) (2022-11-28)
+
+
+### Features
+
+* **api:** Adding basic soft-delete for transactions. ([4db5734](https://github.com/monetr/monetr/commit/4db57349ced77111d7c4dbdb1896ce8948b4a350))
+* **plaid:** Laying groundwork for Plaid transaction sync. ([82bf294](https://github.com/monetr/monetr/commit/82bf294dae45fb3ee70fa85a7b58c180833d279b))
+* **ui:** Adding an estimated Safe-To-Spend amount. ([c5e6434](https://github.com/monetr/monetr/commit/c5e6434aad4049cc6911dec0f28d7cee0f3d0d44))
+* **ui:** Allow icons to be searched via POST request. ([#1216](https://github.com/monetr/monetr/issues/1216)) ([775f8c8](https://github.com/monetr/monetr/commit/775f8c81b6972f7a5024cd9aef4a78653cabdc7b)), closes [#1175](https://github.com/monetr/monetr/issues/1175)
+* **ui:** Improving form appearance for modals. ([bae905d](https://github.com/monetr/monetr/commit/bae905da8f150ab3f8f1f80ac9bdc31a8113a221))
+* **ui:** Next funding contribution is based on forecasting. ([5c918c7](https://github.com/monetr/monetr/commit/5c918c70ce712e197501d1fd1baef051c4f3d886))
+
+
+### Bug Fixes
+
+* **api:** Fixed forecasting including paused spending. ([a1abc08](https://github.com/monetr/monetr/commit/a1abc08ce0111a1a071943da114551fbe0d7f6ef)), closes [#1238](https://github.com/monetr/monetr/issues/1238)
+* **api:** Fixed issue where link `errorCode` would not be dismissed. ([527b26e](https://github.com/monetr/monetr/commit/527b26ee58362a633d097afd0bf600ec5f816cdf))
+* **api:** Fixed issue with link caused by update change. ([0308f5e](https://github.com/monetr/monetr/commit/0308f5e17d4390b187107fec0479edd7dcaab380))
+* **ui:** Fixed accessibility of terms of use and privacy on login page ([#1212](https://github.com/monetr/monetr/issues/1212)) ([4523237](https://github.com/monetr/monetr/commit/4523237638abc5e532b5348602414f1c7d0f853f)), closes [#1196](https://github.com/monetr/monetr/issues/1196)
+* **ui:** Fixed dialog spacing on mobile. ([94377d9](https://github.com/monetr/monetr/commit/94377d944c629de9075df185dc0ccb18355be11f))
+* **ui:** Fixed FAB buttin on all screens. ([e991e8d](https://github.com/monetr/monetr/commit/e991e8daf17ad599505b375e825369aff86846d7)), closes [#1218](https://github.com/monetr/monetr/issues/1218)
+* **ui:** Format dollar amounts properly. ([4b7ec8d](https://github.com/monetr/monetr/commit/4b7ec8d3e523f881a0b1943fb3566caba6ae3e32)), closes [#1169](https://github.com/monetr/monetr/issues/1169)
+
+
+### Dependencies
+
+* **api:** update github.com/iris-contrib/middleware/cors digest to f806663 ([#1215](https://github.com/monetr/monetr/issues/1215)) ([da1de7c](https://github.com/monetr/monetr/commit/da1de7c0797d666017628f654e2adbacdb3bde6c))
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.23.1 ([#1101](https://github.com/monetr/monetr/issues/1101)) ([b15a9c2](https://github.com/monetr/monetr/commit/b15a9c221f8c275287ae84492d76b79c3b4ce69c))
+* **api:** update module github.com/teambition/rrule-go to v1.8.1 ([#1219](https://github.com/monetr/monetr/issues/1219)) ([76061b7](https://github.com/monetr/monetr/commit/76061b7fe1d5aee90893f88d5b2352f202199332))
+* **Brew:** Updating brewfile. ([b985e9c](https://github.com/monetr/monetr/commit/b985e9c6c2b755260b159579ce6f1bdd760c6373))
+* **containers:** update docker.io/library/golang docker tag to v1.19.3 ([#1146](https://github.com/monetr/monetr/issues/1146)) ([a470c9c](https://github.com/monetr/monetr/commit/a470c9c362f9edc03820d21116ccdc4432c574de))
+* **containers:** update golang docker tag to v1.19.3 ([#1147](https://github.com/monetr/monetr/issues/1147)) ([14dc27c](https://github.com/monetr/monetr/commit/14dc27c6a1fb77d4cc3bd50ef8cb60c808e60379))
+* **renovate:** update ghcr.io/monetr/build-containers/golang docker tag to v1.19.3 ([#1221](https://github.com/monetr/monetr/issues/1221)) ([6d30d5c](https://github.com/monetr/monetr/commit/6d30d5c34db0702a01f9fe292f6ef1fbf384d79a))
+* **renovate:** update guyarb/golang-test-annotations action to v0.6.0 ([#1103](https://github.com/monetr/monetr/issues/1103)) ([587797f](https://github.com/monetr/monetr/commit/587797f29846d8fcdc018ba6e438fd18d7b89d98))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.4.1 ([#1193](https://github.com/monetr/monetr/issues/1193)) ([09f83e2](https://github.com/monetr/monetr/commit/09f83e2c26e64837bc6a929ab26137ce814a08b9))
+* **ui:** update babel monorepo ([#1194](https://github.com/monetr/monetr/issues/1194)) ([1845089](https://github.com/monetr/monetr/commit/18450892cbb41fcae06d62a9e80b620620d73baa))
+* **ui:** update dependency @date-io/moment to v2.16.1 ([#1046](https://github.com/monetr/monetr/issues/1046)) ([9b1c3a7](https://github.com/monetr/monetr/commit/9b1c3a7a6baae8ebc07d1086d8d8894ba9e36411))
+* **ui:** update dependency @pmmmwh/react-refresh-webpack-plugin to v0.5.10 ([#1222](https://github.com/monetr/monetr/issues/1222)) ([99aa30f](https://github.com/monetr/monetr/commit/99aa30ff9d1f2904532320daeeac513cceddf5c6))
+* **ui:** update dependency eslint-plugin-jest to v27 ([#1013](https://github.com/monetr/monetr/issues/1013)) ([39f08aa](https://github.com/monetr/monetr/commit/39f08aacb479d6c73b0061e9399543ca1a34ac79))
+* **ui:** update dependency eslint-plugin-react to v7.31.11 ([#999](https://github.com/monetr/monetr/issues/999)) ([a2254a2](https://github.com/monetr/monetr/commit/a2254a233c099d85843eb83aa47b0fea0bd68980))
+* **ui:** update dependency eslint-plugin-testing-library to v5.9.1 ([#1000](https://github.com/monetr/monetr/issues/1000)) ([1d8732a](https://github.com/monetr/monetr/commit/1d8732aea10b012d04bb4555d90d7335da83ee44))
+* **ui:** update dependency mini-css-extract-plugin to v2.7.0 ([#954](https://github.com/monetr/monetr/issues/954)) ([80004fe](https://github.com/monetr/monetr/commit/80004fef926135d3114415c8482f77a5e3fc09d5))
+* **ui:** update dependency prettier to v2.8.0 ([#1109](https://github.com/monetr/monetr/issues/1109)) ([79bcf56](https://github.com/monetr/monetr/commit/79bcf562dd6697a3117c7d5895334dca6046ff34))
+
+
+### Miscellaneous
+
+* Adding test to prevent regression with RRule. ([81581f9](https://github.com/monetr/monetr/commit/81581f9f57e4976f2b5f8723dd7edeff76e07a5f))
+* **debug:** Improving sentry usage. ([a993291](https://github.com/monetr/monetr/commit/a99329111d399eb98a8e68e8b47be89865cfa8fd))
+* **deps:** bump loader-utils from 2.0.3 to 2.0.4 ([#1214](https://github.com/monetr/monetr/issues/1214)) ([8fe32e1](https://github.com/monetr/monetr/commit/8fe32e17ee1bf61fbd41e21b13abc6f111529ed0))
+* **ui:** Improving the funding schedule empty view. ([f300d94](https://github.com/monetr/monetr/commit/f300d94cc8a2c623860dfb5d486898aeb891dfd0))
+* **ui:** Tweaking loader placeholders. ([191c6d0](https://github.com/monetr/monetr/commit/191c6d07d6e4e1260849a8d7357524a18664fe4f))
+* Update NOTICE ([3e1b813](https://github.com/monetr/monetr/commit/3e1b8139d3530b7f4f036e4082f76faf85722d43))
+* Update NOTICE + Deploy concurrency ([b2cc1fd](https://github.com/monetr/monetr/commit/b2cc1fd95058c82aaa2ee30fbafa0e9fa62fe876))
+
 ## [0.12.3](https://github.com/monetr/monetr/compare/v0.12.2...v0.12.3) (2022-11-11)
 
 
