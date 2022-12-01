@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.5](https://github.com/monetr/monetr/compare/v0.12.4...v0.12.5) (2022-11-30)
+
+
+### Bug Fixes
+
+* **api:** Fix transaction error for icon search endpoint. ([0b5f13b](https://github.com/monetr/monetr/commit/0b5f13b2de3c36becf4a22dee6dd2476709ca9e2)), closes [#1245](https://github.com/monetr/monetr/issues/1245)
+
 ## [0.12.4](https://github.com/monetr/monetr/compare/v0.12.3...v0.12.4) (2022-11-28)
 
 
