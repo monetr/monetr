@@ -85,13 +85,8 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     let textColor = 'text-gray-500'
 
     let amount: string | null;
-    if (!contributionForecast.isLoading) {
+    if (!contributionForecast.isLoading && balance !== null) {
       const est = (balance.safe + schedule.estimatedDeposit) - contributionForecast.result
-      console.log({
-        safe: balance.safe,
-        deposit: schedule.estimatedDeposit,
-        contribution: contributionForecast.result,
-      });
       amount = formatAmount(est);
       textColor = est > 0 ? 'text-green-500' : 'text-red-500';
     }
