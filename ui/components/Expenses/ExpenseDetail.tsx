@@ -15,14 +15,15 @@ import EditSpendingAmountDialog from 'components/Expenses/EditExpenseAmountDialo
 import EditExpenseDueDateDialog from 'components/Expenses/EditExpenseDueDateDialog';
 import EditFundingScheduleDialog from 'components/Expenses/EditFundingScheduleDialog';
 import TransferDialog from 'components/Spending/TransferDialog';
-import { useRemoveSpending, useSelectedExpense, useSpendingFunding } from 'hooks/spending';
+import { useRemoveSpending, useSelectedExpense } from 'hooks/spending';
 import { useFundingSchedules } from 'hooks/fundingSchedules';
 import formatAmount from 'util/formatAmount';
+import { useSpendingFundingSink } from 'hooks/spendingFunding';
 
 export default function ExpenseDetail(): JSX.Element {
   const removeSpending = useRemoveSpending();
   const expense = useSelectedExpense();
-  const spendingFunding = useSpendingFunding(expense);
+  const spendingFunding = useSpendingFundingSink(expense);
   const fundingSchedules = useFundingSchedules();
   const nextFunding = spendingFunding.result.length > 0 && spendingFunding.result
     .sort((a, b) => fundingSchedules.get(a.fundingScheduleId).nextOccurrence.unix() > fundingSchedules.get(b.fundingScheduleId).nextOccurrence.unix() ? 1 : -1)[0]

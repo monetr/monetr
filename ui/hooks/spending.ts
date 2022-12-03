@@ -5,7 +5,6 @@ import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import useStore from 'hooks/store';
 import Balance from 'models/Balance';
 import Spending, { SpendingType } from 'models/Spending';
-import SpendingFunding from 'models/SpendingFunding';
 import request from 'util/request';
 
 export type SpendingResult =
@@ -216,19 +215,3 @@ export function useTransfer(): (
   };
 }
 
-export type SpendingFundingResult =
-  { result: Array<SpendingFunding> }
-  & UseQueryResult<Array<Partial<SpendingFunding>>>;
-
-export function useSpendingFunding(spending: Spending | null): SpendingFundingResult {
-  const result = useQuery<Array<Partial<SpendingFunding>>>(
-    `/bank_accounts/${ spending?.bankAccountId }/spending/${ spending?.spendingId }/funding`,
-    {
-      enabled: !!spending,
-    }
-  );
-  return {
-    ...result,
-    result: (result?.data || []).map(item => new SpendingFunding(item)),
-  };
-}

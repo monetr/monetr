@@ -4,8 +4,8 @@ import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } fr
 import { useFundingSchedules } from 'hooks/fundingSchedules';
 import useStore from 'hooks/store';
 import Spending from 'models/Spending';
-import { useSpendingFunding } from 'hooks/spending';
 import formatAmount from 'util/formatAmount';
+import { useSpendingFundingSink } from 'hooks/spendingFunding';
 
 export interface Props {
   expense: Spending;
@@ -20,7 +20,7 @@ export default function ExpenseItem(props: Props): JSX.Element {
   } = useStore();
 
   const isSelected = expense.spendingId === selectedExpenseId;
-  const spendingFunding = useSpendingFunding(expense);
+  const spendingFunding = useSpendingFundingSink(expense);
   const fundingSchedules = useFundingSchedules();
 
   const onClick = () => setCurrentExpense(isSelected ? null : expense.spendingId);
