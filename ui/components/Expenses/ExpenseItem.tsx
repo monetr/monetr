@@ -5,7 +5,7 @@ import { useFundingSchedules } from 'hooks/fundingSchedules';
 import useStore from 'hooks/store';
 import Spending from 'models/Spending';
 import formatAmount from 'util/formatAmount';
-import { useSpendingFundingSink } from 'hooks/spendingFunding';
+import { useSpendingFunding } from 'hooks/spendingFunding';
 
 export interface Props {
   expense: Spending;
@@ -20,14 +20,11 @@ export default function ExpenseItem(props: Props): JSX.Element {
   } = useStore();
 
   const isSelected = expense.spendingId === selectedExpenseId;
-  const spendingFunding = useSpendingFundingSink(expense);
-  const fundingSchedules = useFundingSchedules();
+  const spendingFunding = useSpendingFunding(expense);
 
   const onClick = () => setCurrentExpense(isSelected ? null : expense.spendingId);
 
-  const nextFunding = spendingFunding.result.length > 0 && spendingFunding.result
-    .sort((a, b) => fundingSchedules.get(a.fundingScheduleId).nextOccurrence.unix() > fundingSchedules.get(b.fundingScheduleId).nextOccurrence.unix() ? 1 : -1)[0]
-  const fundingSchedule = nextFunding && fundingSchedules.get(nextFunding.fundingScheduleId);
+  const { funding, schedule } = spendingFunding.next.length > 0 && spendingFunding.next[0] || { };
 
   return (
     <ListItem button onClick={ onClick }>
@@ -67,7 +64,7 @@ export default function ExpenseItem(props: Props): JSX.Element {
           <Typography
             variant="body1"
           >
-            { formatAmount(nextFunding.nextContributionAmount) }/{ fundingSchedule?.name }
+            { formatAmount(funding?.nextContributionAmount) }/{ schedule?.name }
           </Typography>
         </div>
         <div className="flex justify-end p-5 align-middle col-span-3 row-span-4">

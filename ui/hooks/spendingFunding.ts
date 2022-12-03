@@ -48,12 +48,15 @@ export function useSpendingFunding(spending: Spending | null): SpendingFundingRe
   }));
 
   // Then group the funding by the next funding date.
-  const next = combined
-    .reduce((result: Record<number, Array<SpendingFundingCombined>>, item: SpendingFundingCombined) => {
-      const date = item.schedule.nextOccurrence.unix();
-      (result[date] = result[date] || []).push(item);
-      return result;
-    }, {});
+  let next: Record<number, Array<SpendingFundingCombined>> = {};
+  if (!schedules.isLoading) {
+    next = combined
+      .reduce((result: Record<number, Array<SpendingFundingCombined>>, item: SpendingFundingCombined) => {
+        const date = item.schedule.nextOccurrence.unix();
+        (result[date] = result[date] || []).push(item);
+        return result;
+      }, {});
+  }
 
   // Sort the funding dates in ascending order.
   const first = Object.keys(next).sort();

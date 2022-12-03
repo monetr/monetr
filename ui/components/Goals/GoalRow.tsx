@@ -3,11 +3,12 @@ import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } fr
 import moment from 'moment';
 import shallow from 'zustand/shallow';
 
-import { useFundingSchedule } from 'hooks/fundingSchedules';
 import useStore from 'hooks/store';
 import Spending from 'models/Spending';
 
 import './styles/GoalRow.scss';
+import { useSpendingFunding } from 'hooks/spendingFunding';
+import formatAmount from 'util/formatAmount';
 
 interface Props {
   goal: Spending;
@@ -19,7 +20,8 @@ export default function GoalRow(props: Props): JSX.Element  {
     setCurrentGoal: state.setCurrentGoal,
   }), shallow);
   const isSelected = props.goal.spendingId === selectedGoalId;
-  const fundingSchedule = useFundingSchedule(props.goal.fundingScheduleId);
+  const spendingFunding = useSpendingFunding(props.goal);
+  const { funding, schedule } = spendingFunding.next.length > 0 && spendingFunding.next[0] || { };
 
   function InProgress(): JSX.Element {
     const { goal } = props;
@@ -64,7 +66,7 @@ export default function GoalRow(props: Props): JSX.Element  {
             { goal.isPaused && 'Paused' }
             { !goal.isPaused &&
               <Fragment>
-                <b>{ goal.getNextContributionAmountString() }</b> on { fundingSchedule?.name }
+                <b>{ formatAmount(funding?.nextContributionAmount) }</b> on { schedule?.name }
               </Fragment>
             }
           </Typography>

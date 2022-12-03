@@ -16,18 +16,14 @@ import EditExpenseDueDateDialog from 'components/Expenses/EditExpenseDueDateDial
 import EditFundingScheduleDialog from 'components/Expenses/EditFundingScheduleDialog';
 import TransferDialog from 'components/Spending/TransferDialog';
 import { useRemoveSpending, useSelectedExpense } from 'hooks/spending';
-import { useFundingSchedules } from 'hooks/fundingSchedules';
 import formatAmount from 'util/formatAmount';
-import { useSpendingFundingSink } from 'hooks/spendingFunding';
+import { useSpendingFunding } from 'hooks/spendingFunding';
 
 export default function ExpenseDetail(): JSX.Element {
   const removeSpending = useRemoveSpending();
   const expense = useSelectedExpense();
-  const spendingFunding = useSpendingFundingSink(expense);
-  const fundingSchedules = useFundingSchedules();
-  const nextFunding = spendingFunding.result.length > 0 && spendingFunding.result
-    .sort((a, b) => fundingSchedules.get(a.fundingScheduleId).nextOccurrence.unix() > fundingSchedules.get(b.fundingScheduleId).nextOccurrence.unix() ? 1 : -1)[0]
-  const fundingSchedule = nextFunding && fundingSchedules.get(nextFunding.fundingScheduleId);
+  const spendingFunding = useSpendingFunding(expense);
+  const { funding, schedule } = spendingFunding.next.length > 0 && spendingFunding.next[0] || { };
 
   enum Dialog {
     TransferDialog,
@@ -105,7 +101,7 @@ export default function ExpenseDetail(): JSX.Element {
               </div>
               <div className="col-span-3">
                 <Typography>
-                  { formatAmount(nextFunding?.nextContributionAmount) }/{ fundingSchedule?.name }
+                  { formatAmount(funding?.nextContributionAmount) }/{ schedule?.name }
                 </Typography>
               </div>
               <div className="col-span-1 row-span-2">
@@ -175,7 +171,7 @@ export default function ExpenseDetail(): JSX.Element {
                   </div>
                   <div className="col-span-3 opacity-50">
                     <Typography variant="body2">
-                      { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
+                      { formatAmount(funding?.nextContributionAmount) }/{ schedule?.name }
                     </Typography>
                   </div>
                   <div className="col-span-1 row-span-2 flex justify-end">
