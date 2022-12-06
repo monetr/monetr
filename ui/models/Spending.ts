@@ -60,11 +60,6 @@ export default class Spending {
     return formatAmount(this.usedAmount);
   }
 
-  getNextContributionAmountString(): string {
-    console.warn("DEPRECATED");
-    return "DEPRECATED";
-  }
-
   getIsExpense(): boolean {
     return this.spendingType === SpendingType.Expense;
   }
