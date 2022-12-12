@@ -76,7 +76,10 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
           `/bank_accounts/${ selectedBankAccountId }/spending`,
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ selectedBankAccountId }/balances`),
+        queryClient.invalidateQueries([
+          `/bank_accounts/${ selectedBankAccountId }/balances`,
+          `/bank_accounts/${ selectedBankAccountId }/spending/${ removedSpendingId }/funding`,
+        ]),
         queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -105,7 +108,10 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => item.spendingId === updatedSpending.spendingId ? updatedSpending : item),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ updatedSpending.bankAccountId }/balances`),
+        queryClient.invalidateQueries([
+          `/bank_accounts/${ updatedSpending.bankAccountId }/balances`,
+          `/bank_accounts/${ updatedSpending.bankAccountId }/spending/${ updatedSpending.spendingId }/funding`,
+        ]),
         queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -173,21 +179,26 @@ export function useTransfer(): (
   const { mutate } = useMutation(
     transfer,
     {
-      onSuccess: (result: BalanceTransferResponse) => Promise.all([
-        queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/spending`,
-          (previous: Array<Partial<Spending>>) => previous
-            .map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
-        ),
-        queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/balances`,
-          (previous: Partial<Balance>) => new Balance({
-            ...previous,
-            ...result.balance,
-          }),
-        ),
-        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
-      ]),
+      onSuccess: (result: BalanceTransferResponse) => {
+        const fundingUrls = result.spending
+          .map(item => `/bank_accounts/${ item.bankAccountId }/spending/${ item.spendingId }/funding`);
+        return Promise.all([
+          queryClient.setQueriesData(
+            `/bank_accounts/${ selectedBankAccountId }/spending`,
+            (previous: Array<Partial<Spending>>) => previous
+              .map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
+          ),
+          queryClient.setQueriesData(
+            `/bank_accounts/${ selectedBankAccountId }/balances`,
+            (previous: Partial<Balance>) => new Balance({
+              ...previous,
+              ...result.balance,
+            }),
+          ),
+          queryClient.invalidateQueries(fundingUrls),
+          queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
+        ]);
+      },
     },
   );
 
@@ -203,3 +214,4 @@ export function useTransfer(): (
     });
   };
 }
+

@@ -162,7 +162,7 @@ func (r *RemoveTransactionsJob) Run(ctx context.Context) error {
 			panic("original transaction modified")
 		}
 
-		_, err = r.repo.ProcessTransactionSpentFrom(
+		_, _, err = r.repo.ProcessTransactionSpentFrom(
 			span.Context(),
 			existingTransaction.BankAccountId,
 			&updatedTransaction,

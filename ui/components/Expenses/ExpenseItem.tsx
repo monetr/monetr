@@ -1,9 +1,11 @@
 import React from 'react';
 import { Checkbox, Chip, LinearProgress, ListItem, ListItemIcon, Typography } from '@mui/material';
 
-import { useFundingSchedule } from 'hooks/fundingSchedules';
+import { useFundingSchedules } from 'hooks/fundingSchedules';
 import useStore from 'hooks/store';
 import Spending from 'models/Spending';
+import formatAmount from 'util/formatAmount';
+import { useSpendingFunding } from 'hooks/spendingFunding';
 
 export interface Props {
   expense: Spending;
@@ -18,8 +20,11 @@ export default function ExpenseItem(props: Props): JSX.Element {
   } = useStore();
 
   const isSelected = expense.spendingId === selectedExpenseId;
-  const fundingSchedule = useFundingSchedule(expense.fundingScheduleId);
+  const spendingFunding = useSpendingFunding(expense);
+
   const onClick = () => setCurrentExpense(isSelected ? null : expense.spendingId);
+
+  const { funding, schedule } = spendingFunding.next.length > 0 && spendingFunding.next[0] || { };
 
   return (
     <ListItem button onClick={ onClick }>
@@ -41,8 +46,9 @@ export default function ExpenseItem(props: Props): JSX.Element {
           <Typography
             variant="body1"
           >
-            { expense.getCurrentAmountString() } <span
-              className="opacity-80">of</span> { expense.getTargetAmountString() }
+            { expense.getCurrentAmountString() }
+            <span className="opacity-80"> of </span>
+            { expense.getTargetAmountString() }
           </Typography>
         </div>
         <div className="col-span-7">
@@ -58,7 +64,7 @@ export default function ExpenseItem(props: Props): JSX.Element {
           <Typography
             variant="body1"
           >
-            { expense.getNextContributionAmountString() }/{ fundingSchedule?.name }
+            { formatAmount(funding?.nextContributionAmount) }/{ schedule?.name }
           </Typography>
         </div>
         <div className="flex justify-end p-5 align-middle col-span-3 row-span-4">

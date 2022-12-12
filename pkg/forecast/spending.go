@@ -15,6 +15,7 @@ type SpendingEvent struct {
 	TransactionAmount  int64          `json:"transactionAmount"`
 	ContributionAmount int64          `json:"contributionAmount"`
 	RollingAllocation  int64          `json:"rollingAllocation"`
+	CompletedGoal      bool           `json:"completedGoal"`
 	Funding            []FundingEvent `json:"funding"`
 	SpendingId         uint64         `json:"spendingId"`
 }
@@ -42,7 +43,6 @@ func NewSpendingInstructions(spending models.Spending, fundingInstructions Fundi
 
 func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
 	events := make([]SpendingEvent, 0)
-
 	for i := 0; ; i++ {
 		var event *SpendingEvent
 		if i == 0 {
@@ -130,9 +130,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 			return nil
 		}
 	case models.SpendingTypeExpense:
-		if rule == nil {
-			panic("expense spending type must have a recurrence rule!")
-		}
+		myownsanity.Assert(rule != nil, "Expense spending types must have a recurrence rule to be forecast!")
 
 		// If we are working with a spending object, but the next recurrence is before our start time. Then figure out
 		// what the next recurrence would be after the start time.
@@ -142,15 +140,10 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		}
 	}
 
-	var fundingFirst, fundingSecond FundingEvent
+	var fundingFirst, fundingSecond FundingDay
 	{ // Get our next two funding events
-		fundingEvents := s.funding.GetNFundingEventsAfter(ctx, 2, input, timezone)
-		if len(fundingEvents) != 2 {
-			// TODO, if there are multiple funding schedules and they land on the same day, this will happen.
-			panic("invalid number of funding events returned;")
-		}
-
-		fundingFirst, fundingSecond = fundingEvents[0], fundingEvents[1]
+		fundingDays := s.funding.GetNFundingDaysAfter(ctx, 2, input, timezone)
+		fundingFirst, fundingSecond = fundingDays[0], fundingDays[1]
 	}
 
 	// The number of times this item will be spent before it receives funding again. This is considered the current
@@ -200,37 +193,58 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// Otherwise we can simply look at how much we need vs how much we already have.
 		amountNeeded := myownsanity.Max(0, perSpendingAmount-balance)
 		// And how many times we will have a funding event before our due date.
-		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(ctx, input, nextRecurrence, timezone)
+		numberOfContributions := s.funding.GetNumberOfFundingDaysBetween(ctx, input, nextRecurrence, timezone)
 		// Then determine how much we would need at each of those funding events.
 		totalContributionAmount = amountNeeded / myownsanity.Max(1, numberOfContributions)
 	}
 
-	switch {
-	case fundingFirst.Date.Before(nextRecurrence):
-		// The next event will be a contribution.
-		event.Date = fundingFirst.Date
-		event.ContributionAmount = totalContributionAmount
-		event.Funding = []FundingEvent{
-			fundingFirst,
+	switch s.spending.SpendingType {
+	case models.SpendingTypeExpense:
+		switch {
+		case fundingFirst.Date.Before(nextRecurrence):
+			// The next event will be a contribution.
+			event.Date = fundingFirst.Date
+			event.ContributionAmount = totalContributionAmount
+			event.Funding = fundingFirst.Events
+			event.RollingAllocation = event.RollingAllocation + totalContributionAmount
+		case nextRecurrence.Before(fundingFirst.Date):
+			// The next event will be a transaction.
+			event.Date = nextRecurrence
+			event.TransactionAmount = s.spending.TargetAmount
+			// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
+			// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
+			event.RollingAllocation = event.RollingAllocation - s.spending.TargetAmount
+		case nextRecurrence.Equal(fundingFirst.Date):
+			// The next event will be both a contribution and a transaction.
+			event.Date = nextRecurrence
+			event.ContributionAmount = totalContributionAmount
+			event.TransactionAmount = s.spending.TargetAmount
+			event.RollingAllocation = (event.RollingAllocation + totalContributionAmount) - s.spending.TargetAmount
+			event.Funding = fundingFirst.Events
 		}
-		event.RollingAllocation = event.RollingAllocation + totalContributionAmount
-	case nextRecurrence.Before(fundingFirst.Date):
-		// The next event will be a transaction.
-		event.Date = nextRecurrence
-		event.TransactionAmount = s.spending.TargetAmount
-		// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
-		// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
-		event.RollingAllocation = event.RollingAllocation - s.spending.TargetAmount
-	case nextRecurrence.Equal(fundingFirst.Date):
-		// The next event will be both a contribution and a transaction.
-		event.Date = nextRecurrence
-		event.ContributionAmount = totalContributionAmount
-		event.TransactionAmount = s.spending.TargetAmount
-		// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
-		// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
-		event.RollingAllocation = (event.RollingAllocation + totalContributionAmount) - s.spending.TargetAmount
-		event.Funding = []FundingEvent{
-			fundingFirst,
+	case models.SpendingTypeGoal:
+		// Goals are done once there is no more to contribute to them.
+		if totalContributionAmount == 0 {
+			return nil
+		}
+		switch {
+		case fundingFirst.Date.Before(nextRecurrence):
+			// The next event will be a contribution.
+			event.Date = fundingFirst.Date
+			event.ContributionAmount = totalContributionAmount
+			event.Funding = fundingFirst.Events
+			event.RollingAllocation = event.RollingAllocation + totalContributionAmount
+			event.CompletedGoal = event.RollingAllocation >= s.spending.TargetAmount
+		case nextRecurrence.Before(fundingFirst.Date):
+			// No-op, goals do nothing when they are completed.
+			return nil
+		case nextRecurrence.Equal(fundingFirst.Date):
+			// Next event will the completion of the goal.
+			event.Date = nextRecurrence
+			event.ContributionAmount = totalContributionAmount
+			event.RollingAllocation = event.RollingAllocation + totalContributionAmount
+			event.Funding = fundingFirst.Events
+			event.CompletedGoal = event.RollingAllocation >= s.spending.TargetAmount
 		}
 	}
 

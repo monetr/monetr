@@ -212,6 +212,13 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 		recalculateSpending = true
 	}
 
+	// Update this first, the request is scoped within a transaction so we can modify this funding schedule first and then
+	// kind of re-use it below when we read spending funding from the DB.
+	if err = repo.UpdateFundingSchedule(c.getContext(ctx), &request); err != nil {
+		c.wrapPgError(ctx, err, "failed to update funding schedule")
+		return
+	}
+
 	if recalculateSpending {
 		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]interface{}{
 			"bankAccountId":     bankAccountId,
@@ -232,8 +239,25 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 
 			now := time.Now()
 			for _, spend := range spending {
-				if err := spend.CalculateNextContribution(c.getContext(ctx), account.Timezone, &request, now); err != nil {
+				funding, err := repo.GetSpendingFunding(c.getContext(ctx), bankAccountId, spend.SpendingId)
+				if err != nil {
+					c.wrapPgError(ctx, err, "failed to read funding instructions for spending")
+					return
+				}
+
+				updatedFunding, err := spend.CalculateNextContribution(
+					c.getContext(ctx),
+					account.Timezone,
+					models.NewSpendingFundingHelper(funding),
+					now,
+				)
+				if err != nil {
 					c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to recalculate spending object")
+					return
+				}
+
+				if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, updatedFunding); err != nil {
+					c.wrapPgError(ctx, err, "failed to update spending funding")
 					return
 				}
 			}
@@ -243,11 +267,6 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 				return
 			}
 		}
-	}
-
-	if err = repo.UpdateFundingSchedule(c.getContext(ctx), &request); err != nil {
-		c.wrapPgError(ctx, err, "failed to update funding schedule")
-		return
 	}
 
 	ctx.JSON(request)

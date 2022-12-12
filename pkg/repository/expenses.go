@@ -71,9 +71,15 @@ func (r *repositoryBase) GetSpendingByFundingSchedule(ctx context.Context, bankA
 
 	result := make([]models.Spending, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("SpendingFunding").
+		Join(`INNER JOIN "spending_funding" AS "funding"`).
+		JoinOn(`"funding"."spending_id" = "spending"."spending_id" AND "funding"."account_id" = "spending"."account_id" AND "funding"."bank_account_id" = "spending"."bank_account_id"`).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
-		Where(`"spending"."funding_schedule_id" = ?`, fundingScheduleId).
+		// This might look a bit odd because there might be multiple funding rows for a single spending row.
+		// But because there can only be a single funding row per schedule per spending. There will still be
+		// only one of each spending object returned here.
+		Where(`"funding"."funding_schedule_id" = ?`, fundingScheduleId).
 		Select(&result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -151,7 +157,8 @@ func (r *repositoryBase) GetSpendingById(ctx context.Context, bankAccountId, spe
 
 	var result models.Spending
 	err := r.txn.ModelContext(span.Context(), &result).
-		Relation("FundingSchedule").
+		Relation("SpendingFunding").
+		Relation("SpendingFunding.FundingSchedule").
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).
 		Where(`"spending"."spending_id" = ?`, spendingId).
@@ -176,7 +183,16 @@ func (r *repositoryBase) DeleteSpending(ctx context.Context, bankAccountId, spen
 		"spendingId":    spendingId,
 	}
 
-	_, err := r.txn.ModelContext(span.Context(), &models.Transaction{}).
+	_, err := r.txn.ModelContext(span.Context(), &models.SpendingFunding{}).
+		Where(`"spending_funding"."spending_id" = ?`, spendingId).
+		Where(`"spending_funding"."account_id" = ?`, r.AccountId()).
+		Delete()
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to remove spending funding")
+	}
+
+	_, err = r.txn.ModelContext(span.Context(), &models.Transaction{}).
 		Set(`"spending_id" = NULL`).
 		Set(`"spending_amount" = NULL`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).

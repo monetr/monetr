@@ -14,7 +14,6 @@ import (
 type BaseRepository interface {
 	AccountId() uint64
 
-	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error
 	CreateBankAccounts(ctx context.Context, bankAccounts ...models.BankAccount) error
 	CreateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error
 	CreateLink(ctx context.Context, link *models.Link) error
@@ -56,7 +55,6 @@ type BaseRepository interface {
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
 	GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error)
 	InsertTransactions(ctx context.Context, transactions []models.Transaction) error
-	ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
 	UpdateBankAccounts(ctx context.Context, accounts []models.BankAccount) error
 	UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error
 	UpdateLink(ctx context.Context, link *models.Link) error
@@ -68,6 +66,16 @@ type BaseRepository interface {
 	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error
+
+	CreateSpendingFunding(ctx context.Context, funding []models.SpendingFunding) error
+	UpdateSpendingFunding(ctx context.Context, bankAccountId uint64, updates []models.SpendingFunding) error
+	GetSpendingFunding(ctx context.Context, bankAccountId uint64, spendingId uint64) ([]models.SpendingFunding, error)
+	ProcessTransactionSpentFrom(
+		ctx context.Context,
+		bankAccountId uint64,
+		input, existing *models.Transaction,
+	) (updatedExpenses []models.Spending, updatedFunding []models.SpendingFunding, _ error)
+	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) ([]models.SpendingFunding, error)
 }
 
 type Repository interface {

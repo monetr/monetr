@@ -64,13 +64,17 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 
 	afterForecast := forecast.NewForecaster([]models.Spending{
 		{
-			FundingScheduleId: request.FundingScheduleId,
-			SpendingType:      request.SpendingType,
-			TargetAmount:      request.TargetAmount,
-			CurrentAmount:     request.CurrentAmount,
-			NextRecurrence:    request.NextRecurrence,
-			RecurrenceRule:    request.RecurrenceRule,
-			SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
+			SpendingFunding: []models.SpendingFunding{
+				{
+					FundingScheduleId: request.FundingScheduleId,
+				},
+			},
+			SpendingType:   request.SpendingType,
+			TargetAmount:   request.TargetAmount,
+			CurrentAmount:  request.CurrentAmount,
+			NextRecurrence: request.NextRecurrence,
+			RecurrenceRule: request.RecurrenceRule,
+			SpendingId:     0, // Make sure this ID does not overlap with any real spending objects.
 		},
 	}, fundingSchedules)
 
@@ -108,9 +112,9 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, request.FundingScheduleId)
+	fundingSchedules, err := repo.GetFundingSchedules(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not retrieve funding schedule")
+		c.wrapPgError(ctx, err, "could not retrieve funding schedules for forecast")
 		return
 	}
 
@@ -122,9 +126,7 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 
 	fundingForecast := forecast.NewForecaster(
 		spending,
-		[]models.FundingSchedule{
-			*fundingSchedule,
-		},
+		fundingSchedules,
 	)
 	timezone := c.mustGetTimezone(ctx)
 	ctx.JSON(map[string]interface{}{

@@ -15,6 +15,7 @@ import (
 // @tag.description Spending endpoints handle the underlying spending object. The spending object is used to represent a goal or an expense.
 func (c *Controller) handleSpending(p iris.Party) {
 	p.Get("/{bankAccountId:uint64}/spending", c.getSpending)
+	p.Get("/{bankAccountId:uint64}/spending/{spendingId:uint64}/funding", c.getSpendingFunding)
 	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)
 	p.Post("/{bankAccountId:uint64}/spending/transfer", c.postSpendingTransfer)
 	p.Put("/{bankAccountId:uint64}/spending/{spendingId:uint64}", c.putSpending)
@@ -53,6 +54,30 @@ func (c *Controller) getSpending(ctx *context.Context) {
 	ctx.JSON(expenses)
 }
 
+func (c *Controller) getSpendingFunding(ctx *context.Context) {
+	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
+	if bankAccountId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
+
+	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
+	if spendingId == 0 {
+		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
+		return
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	funding, err := repo.GetSpendingFunding(c.getContext(ctx), bankAccountId, spendingId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "could not retrieve funding for spending")
+		return
+	}
+
+	ctx.JSON(funding)
+}
+
 // Create Spending
 // @id create-spending
 // @tags Spending
@@ -78,17 +103,39 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		return
 	}
 
-	spending := &models.Spending{}
-	if err := ctx.ReadJSON(spending); err != nil {
+	var request struct {
+		BankAccountId     uint64              `json:"bankAccountId"`
+		FundingScheduleId uint64              `json:"fundingScheduleId"`
+		SpendingType      models.SpendingType `json:"spendingType"`
+		Name              string              `json:"name"`
+		Description       string              `json:"description,omitempty"`
+		TargetAmount      int64               `json:"targetAmount"`
+		RecurrenceRule    *models.Rule        `json:"recurrenceRule"`
+		NextRecurrence    time.Time           `json:"nextRecurrence"`
+		IsPaused          bool                `json:"isPaused"`
+	}
+	if err := ctx.ReadJSON(&request); err != nil {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
 	}
 
-	spending.SpendingId = 0 // Make sure we create a new spending.
-	spending.BankAccountId = bankAccountId
-	spending.Name = strings.TrimSpace(spending.Name)
-	spending.Description = strings.TrimSpace(spending.Description)
+	spending := models.Spending{
+		BankAccountId:   bankAccountId,
+		SpendingFunding: []models.SpendingFunding{},
+		SpendingType:    request.SpendingType,
+		Name:            strings.TrimSpace(request.Name),
+		Description:     strings.TrimSpace(request.Description),
+		TargetAmount:    request.TargetAmount,
+		CurrentAmount:   0,
+		UsedAmount:      0,
+		RecurrenceRule:  request.RecurrenceRule,
+		LastRecurrence:  nil,
+		NextRecurrence:  request.NextRecurrence,
+		IsBehind:        false,
+		IsPaused:        request.IsPaused,
+		DateCreated:     time.Now().UTC(),
+	}
 
 	if spending.Name == "" {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
@@ -106,11 +153,23 @@ func (c *Controller) postSpending(ctx *context.Context) {
 
 	// We need to calculate what the next contribution will be for this new spending. So we need to retrieve it's funding
 	// schedule. This also helps us validate that the user has provided a valid funding schedule id.
-	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, spending.FundingScheduleId)
+	fundingSchedule, err := repo.GetFundingSchedule(
+		c.getContext(ctx),
+		bankAccountId,
+		request.FundingScheduleId,
+	)
 	if err != nil {
 		requestSpan.Status = sentry.SpanStatusNotFound
 		c.wrapPgError(ctx, err, "could not find funding schedule specified")
 		return
+	}
+
+	spendingFunding := models.SpendingFunding{
+		BankAccountId:          bankAccountId,
+		SpendingId:             0,
+		FundingScheduleId:      request.FundingScheduleId,
+		FundingSchedule:        fundingSchedule,
+		NextContributionAmount: 0,
 	}
 
 	// We also need to know the current account's timezone, as contributions are made at midnight in that user's
@@ -154,20 +213,31 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	spending.NextRecurrence = nextRecurrence
 
 	// Once we have all that data we can calculate the new expenses next contribution amount.
-	if err = spending.CalculateNextContribution(
+	updatedFunding, err := spending.CalculateNextContribution(
 		c.getContext(ctx),
 		account.Timezone,
-		fundingSchedule,
+		models.NewSpendingFundingHelper([]models.SpendingFunding{
+			spendingFunding,
+		}),
 		time.Now(),
-	); err != nil {
+	)
+	if err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
 		return
 	}
 
-	if err = repo.CreateSpending(c.getContext(ctx), spending); err != nil {
+	if err = repo.CreateSpending(c.getContext(ctx), &spending); err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
 		c.wrapPgError(ctx, err, "failed to create spending")
+		return
+	}
+	for i := range updatedFunding {
+		updatedFunding[i].SpendingId = spending.SpendingId
+	}
+	if err = repo.CreateSpendingFunding(c.getContext(ctx), updatedFunding); err != nil {
+		requestSpan.Status = sentry.SpanStatusInternalError
+		c.wrapPgError(ctx, err, "failed to create spending funding")
 		return
 	}
 
@@ -229,14 +299,13 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	}
 
 	spendingToUpdate := make([]models.Spending, 0)
+	fundingToUpdate := make([]models.SpendingFunding, 0)
 
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
 		return
 	}
-
-	var fundingSchedule *models.FundingSchedule
 
 	if transfer.FromSpendingId == nil && balances.Safe < transfer.Amount {
 		c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
@@ -253,25 +322,21 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 			return
 		}
 
-		fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fromExpense.FundingScheduleId)
-		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve funding schedule for source goal/expense")
-			return
-		}
-
 		fromExpense.CurrentAmount -= transfer.Amount
 
-		if err = fromExpense.CalculateNextContribution(
+		updatedFunding, err := fromExpense.CalculateNextContribution(
 			c.getContext(ctx),
 			account.Timezone,
-			fundingSchedule,
+			models.NewSpendingFundingHelper(fromExpense.SpendingFunding),
 			time.Now(),
-		); err != nil {
+		)
+		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 			return
 		}
 
 		spendingToUpdate = append(spendingToUpdate, *fromExpense)
+		fundingToUpdate = append(fundingToUpdate, updatedFunding...)
 	}
 
 	// If we are transferring the allocated funds to another spending object then we need to update that object. If we
@@ -283,33 +348,30 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 			return
 		}
 
-		// If the funding schedule that we already have put aside is not the same as the one we need for this spending
-		// then we need to retrieve the proper one.
-		if fundingSchedule == nil || fundingSchedule.FundingScheduleId != toExpense.FundingScheduleId {
-			fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, toExpense.FundingScheduleId)
-			if err != nil {
-				c.wrapPgError(ctx, err, "failed to retrieve funding schedule for destination goal/expense")
-				return
-			}
-		}
-
 		toExpense.CurrentAmount += transfer.Amount
 
-		if err = toExpense.CalculateNextContribution(
+		updatedFunding, err := toExpense.CalculateNextContribution(
 			c.getContext(ctx),
 			account.Timezone,
-			fundingSchedule,
+			models.NewSpendingFundingHelper(toExpense.SpendingFunding),
 			time.Now(),
-		); err != nil {
+		)
+		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 			return
 		}
 
 		spendingToUpdate = append(spendingToUpdate, *toExpense)
+		fundingToUpdate = append(fundingToUpdate, updatedFunding...)
 	}
 
 	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spendingToUpdate); err != nil {
 		c.wrapPgError(ctx, err, "failed to update spending for transfer")
+		return
+	}
+
+	if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, fundingToUpdate); err != nil {
+		c.wrapPgError(ctx, err, "failed to update spending funding instructions for transfer")
 		return
 	}
 
@@ -384,7 +446,6 @@ func (c *Controller) putSpending(ctx *context.Context) {
 	updatedSpending.BankAccountId = existingSpending.BankAccountId
 	updatedSpending.IsBehind = existingSpending.IsBehind
 	updatedSpending.LastRecurrence = existingSpending.LastRecurrence
-	updatedSpending.NextContributionAmount = existingSpending.NextContributionAmount
 
 	if updatedSpending.SpendingType == models.SpendingTypeGoal {
 		updatedSpending.RecurrenceRule = nil
@@ -406,8 +467,6 @@ func (c *Controller) putSpending(ctx *context.Context) {
 
 	if updatedSpending.TargetAmount != existingSpending.TargetAmount {
 		recalculateSpending = true
-	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
-		recalculateSpending = true
 	} else if !recalculateSpending && updatedSpending.RecurrenceRule != nil {
 		recalculateSpending = updatedSpending.RecurrenceRule.String() == existingSpending.RecurrenceRule.String()
 	}
@@ -428,19 +487,19 @@ func (c *Controller) putSpending(ctx *context.Context) {
 			return
 		}
 
-		fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, updatedSpending.FundingScheduleId)
+		updatedFunding, err := updatedSpending.CalculateNextContribution(
+			c.getContext(ctx),
+			account.Timezone,
+			models.NewSpendingFundingHelper(existingSpending.SpendingFunding),
+			time.Now(),
+		)
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
+			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
 			return
 		}
 
-		if err = updatedSpending.CalculateNextContribution(
-			c.getContext(ctx),
-			account.Timezone,
-			fundingSchedule,
-			time.Now(),
-		); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
+		if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, updatedFunding); err != nil {
+			c.wrapPgError(ctx, err, "failed to update spending funding")
 			return
 		}
 	}

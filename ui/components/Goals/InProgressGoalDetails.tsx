@@ -6,6 +6,8 @@ import moment from 'moment';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
 import { useRemoveSpending, useUpdateSpending } from 'hooks/spending';
 import Spending from 'models/Spending';
+import { useSpendingFunding } from 'hooks/spendingFunding';
+import formatAmount from 'util/formatAmount';
 
 interface Props {
   goal: Spending;
@@ -16,9 +18,10 @@ interface Props {
 
 export default function InProgressGoalDetails(props: Props): JSX.Element {
   const { goal, onBack, openEditView, openTransferDialog } = props;
-  const fundingSchedule = useFundingSchedule(goal.fundingScheduleId);
   const removeSpending = useRemoveSpending();
   const updateSpending = useUpdateSpending();
+  const spendingFunding = useSpendingFunding(props.goal);
+  const { funding, schedule } = spendingFunding.next.length > 0 && spendingFunding.next[0] || { };
 
   function deleteGoal(): Promise<void> {
     if (!goal) {
@@ -139,13 +142,13 @@ export default function InProgressGoalDetails(props: Props): JSX.Element {
                   className="flex justify-center flex-1"
                   variant="caption"
                 >
-                  <b>{ goal.getNextContributionAmountString() }</b>
+                  <b>{ formatAmount(funding?.nextContributionAmount) }</b>
                 </Typography>
                 <Typography
                   className="relative flex justify-center flex-1 top-1"
                   variant="caption"
                 >
-                  on { fundingSchedule.name }
+                  on { schedule?.name }
                 </Typography>
               </Fragment>
             }
@@ -228,7 +231,7 @@ export default function InProgressGoalDetails(props: Props): JSX.Element {
             <Typography
               variant="subtitle2"
             >
-              { fundingSchedule.name } · Next on { fundingSchedule.nextOccurrence.format('MMMM Do') }
+              { schedule.name } · Next on { schedule.nextOccurrence.format('MMMM Do') }
             </Typography>
           </div>
         </div>

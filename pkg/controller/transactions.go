@@ -199,7 +199,8 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 			return
 		}
 
-		if err = repo.AddExpenseToTransaction(c.getContext(ctx), &transaction, updatedExpense); err != nil {
+		funding, err := repo.AddExpenseToTransaction(c.getContext(ctx), &transaction, updatedExpense)
+		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
 			return
 		}
@@ -208,6 +209,11 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 			*updatedExpense,
 		}); err != nil {
 			c.wrapPgError(ctx, err, "failed to update expense for transaction")
+			return
+		}
+
+		if err = repo.UpdateSpendingFunding(c.getContext(ctx), bankAccountId, funding); err != nil {
+			c.wrapPgError(ctx, err, "failed to update funding for spending")
 			return
 		}
 	}
@@ -325,7 +331,12 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		transaction.OriginalCategories = existingTransaction.OriginalCategories
 	}
 
-	updatedExpenses, err := repo.ProcessTransactionSpentFrom(c.getContext(ctx), bankAccountId, &transaction, existingTransaction)
+	updatedExpenses, _, err := repo.ProcessTransactionSpentFrom(
+		c.getContext(ctx),
+		bankAccountId,
+		&transaction,
+		existingTransaction,
+	)
 	if err != nil {
 		c.wrapPgError(ctx, err, "failed to process expense changes")
 		return

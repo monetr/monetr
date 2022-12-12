@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/pkg/errors"
 )
 
@@ -45,9 +46,15 @@ func (t Transaction) IsAddition() bool {
 
 // AddSpendingToTransaction will take the provided spending object and deduct as much as possible from this transaction
 // from that spending object. It does not change the spendingId on the transaction, it simply performs the deductions.
-func (t *Transaction) AddSpendingToTransaction(ctx context.Context, spending *Spending, account *Account) error {
-	span := sentry.StartSpan(ctx, "AddSpendingToTransaction")
+func (t *Transaction) AddSpendingToTransaction(
+	ctx context.Context,
+	spending *Spending,
+	account *Account,
+) ([]SpendingFunding, error) {
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+
+	myownsanity.Assert(len(spending.SpendingFunding) > 0, "Provided spending object must have funding instructions")
 
 	var allocationAmount int64
 	// If the amount allocated to the spending we are adding to the transaction is less than the amount of the
@@ -74,14 +81,12 @@ func (t *Transaction) AddSpendingToTransaction(ctx context.Context, spending *Sp
 	t.SpendingAmount = &allocationAmount
 
 	// Now that we have deducted the amount we need from the spending we need to recalculate it's next contribution.
-	if err := spending.CalculateNextContribution(
+	funding, err := spending.CalculateNextContribution(
 		span.Context(),
 		account.Timezone,
-		spending.FundingSchedule,
+		spending.SpendingFunding,
 		time.Now(),
-	); err != nil {
-		return errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
-	}
+	)
 
-	return nil
+	return funding, errors.Wrap(err, "failed to calculate next contribution for new transaction expense")
 }
