@@ -8,7 +8,6 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
-	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
@@ -63,9 +62,6 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, password stri
 
 	requiresPasswordChange := false
 
-	// Used for backwards compatability.
-	hashedPassword := hash.HashPassword(email, password)
-
 	var login models.LoginWithHash
 	err := b.db.ModelContext(span.Context(), &login).
 		Relation("Users").
@@ -83,25 +79,8 @@ func (b *baseSecurityRepository) Login(ctx context.Context, email, password stri
 		return nil, requiresPasswordChange, crumbs.WrapError(span.Context(), err, "failed to verify credentials")
 	}
 
-	switch {
-	case login.Crypt != nil:
-		if err = bcrypt.CompareHashAndPassword(login.Crypt, []byte(password)); err != nil {
-			return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
-		}
-	case login.PasswordHash != nil:
-		if *login.PasswordHash != hashedPassword {
-			return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
-		}
-		requiresPasswordChange = true
-	default:
-		span.Status = sentry.SpanStatusDataLoss
-		crumbs.IndicateBug(
-			span.Context(),
-			"Login is missing bcrypt and legacy password hash, cannot authenticate",
-			map[string]interface{}{
-				"loginId": login.LoginId,
-			})
-		return nil, requiresPasswordChange, errors.Errorf("failed to verify credentials")
+	if err = bcrypt.CompareHashAndPassword(login.Crypt, []byte(password)); err != nil {
+		return nil, requiresPasswordChange, errors.WithStack(ErrInvalidCredentials)
 	}
 
 	span.Status = sentry.SpanStatusOK
@@ -121,25 +100,8 @@ func (b *baseSecurityRepository) ChangePassword(ctx context.Context, loginId uin
 		return crumbs.WrapError(span.Context(), err, "failed to find login record to change password")
 	}
 
-	switch {
-	case login.Crypt != nil:
-		if err = bcrypt.CompareHashAndPassword(login.Crypt, []byte(oldPassword)); err != nil {
-			return errors.WithStack(ErrInvalidCredentials)
-		}
-	case login.PasswordHash != nil:
-		hashedPassword := hash.HashPassword(login.Email, newPassword)
-		if *login.PasswordHash != hashedPassword {
-			return errors.WithStack(ErrInvalidCredentials)
-		}
-	default:
-		span.Status = sentry.SpanStatusDataLoss
-		crumbs.IndicateBug(
-			span.Context(),
-			"Login is missing bcrypt and legacy password hash, cannot authenticate",
-			map[string]interface{}{
-				"loginId": login.LoginId,
-			})
-		return errors.Errorf("failed to verify credentials")
+	if err = bcrypt.CompareHashAndPassword(login.Crypt, []byte(oldPassword)); err != nil {
+		return errors.WithStack(ErrInvalidCredentials)
 	}
 
 	newPasswordHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), consts.BcryptCost)
