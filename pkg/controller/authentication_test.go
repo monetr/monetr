@@ -9,13 +9,11 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/pkg/config"
-	"github.com/monetr/monetr/pkg/hash"
 	"github.com/monetr/monetr/pkg/internal/fixtures"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/mock_stripe"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
-	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/swag"
 	"github.com/monetr/monetr/pkg/verification"
 	"github.com/stretchr/testify/assert"
@@ -369,76 +367,6 @@ func TestLogin(t *testing.T) {
 		response.JSON().Path("$.error").String().Equal("email address is not verified")
 		response.JSON().Path("$.code").String().Equal("EMAIL_NOT_VERIFIED")
 		response.JSON().Object().NotContainsKey("token")
-	})
-
-	t.Run("require password change unconfigured", func(t *testing.T) {
-		e := NewTestApplication(t)
-
-		email := testutils.GetUniqueEmail(t)
-		password := gofakeit.Password(true, true, true, true, false, 32)
-		hashedPassword := hash.HashPassword(email, password)
-
-		// Seed a "legacy" login record for us to login with
-		testutils.MustInsert(t, models.LoginWithHash{
-			Login: models.Login{
-				Email:           email,
-				FirstName:       gofakeit.FirstName(),
-				LastName:        gofakeit.LastName(),
-				IsEnabled:       true,
-				IsEmailVerified: true,
-				EmailVerifiedAt: myownsanity.TimeP(time.Now()),
-			},
-			PasswordHash: &hashedPassword, // Make sure we are using the old password format.
-			Crypt:        nil,             // Make sure that we have not migrated to the new password format.
-		})
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
-			}).
-			Expect()
-
-		response.Status(http.StatusNotAcceptable)
-		response.JSON().Path("$.error").String().Equal("login requires password reset, but password reset is not allowed")
-	})
-
-	t.Run("require password change", func(t *testing.T) {
-		conf := NewTestApplicationConfig(t)
-		conf.Email.Enabled = true
-		conf.Email.ForgotPassword.Enabled = true
-		conf.Email.ForgotPassword.TokenLifetime = 5 * time.Second
-		conf.Email.ForgotPassword.TokenSecret = gofakeit.Generate("????????????????????????")
-		conf.Email.Domain = "monetr.mini"
-		e := NewTestApplicationWithConfig(t, conf)
-		email := testutils.GetUniqueEmail(t)
-		password := gofakeit.Password(true, true, true, true, false, 32)
-		hashedPassword := hash.HashPassword(email, password)
-
-		// Seed a "legacy" login record for us to login with
-		testutils.MustInsert(t, models.LoginWithHash{
-			Login: models.Login{
-				Email:           email,
-				FirstName:       gofakeit.FirstName(),
-				LastName:        gofakeit.LastName(),
-				IsEnabled:       true,
-				IsEmailVerified: true,
-				EmailVerifiedAt: myownsanity.TimeP(time.Now()),
-			},
-			PasswordHash: &hashedPassword, // Make sure we are using the old password format.
-			Crypt:        nil,             // Make sure that we have not migrated to the new password format.
-		})
-
-		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
-			}).
-			Expect()
-
-		response.Status(http.StatusPreconditionRequired)
-		response.JSON().Path("$.resetToken").String().NotEmpty()
-		response.JSON().Path("$.code").String().Equal("PASSWORD_CHANGE_REQUIRED")
 	})
 }
 

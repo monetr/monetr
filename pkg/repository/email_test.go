@@ -5,17 +5,23 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func seedLogin(t *testing.T, login *models.Login) {
-	password := gofakeit.Generate("?????????????????????")
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(gofakeit.Password(true, true, true, true, false, 16)),
+		consts.BcryptCost,
+	)
+	require.NoError(t, err, "must not have an error when generating the password")
 	loginWithPassword := models.LoginWithHash{
 		Login: *login,
-		// TODO Migrate this to bcrypt? Does password even matter here?
-		PasswordHash: &password,
+		Crypt: hashedPassword,
 	}
 
 	db := testutils.GetPgDatabase(t)
