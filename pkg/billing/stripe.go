@@ -3,7 +3,6 @@ package billing
 import (
 	"context"
 	"encoding/json"
-	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -107,11 +106,7 @@ func (b *baseStripeWebhookHandler) HandleWebhook(ctx context.Context, event stri
 			return nil
 		}
 
-		if hub := sentry.GetHubFromContext(span.Context()); hub != nil {
-			hub.Scope().SetUser(sentry.User{
-				ID: strconv.FormatUint(account.AccountId, 10),
-			})
-		}
+		crumbs.IncludeUserInScope(span.Context(), account.AccountId)
 
 		// Remove the stripe customer Id from the account record.
 		account.StripeCustomerId = nil

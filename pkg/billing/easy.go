@@ -3,7 +3,6 @@ package billing
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -228,14 +227,7 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(
 
 	// Set the user for this event, this way webhooks are properly associated with the destination user in our
 	// application.
-	if hub := sentry.GetHubFromContext(ctx); hub != nil {
-		hub.ConfigureScope(func(scope *sentry.Scope) {
-			scope.SetUser(sentry.User{
-				ID:       strconv.FormatUint(account.AccountId, 10),
-				Username: fmt.Sprintf("account:%d", account.AccountId),
-			})
-		})
-	}
+	crumbs.IncludeUserInScope(span.Context(), account.AccountId)
 
 	currentlyActive := account.IsSubscriptionActive()
 
