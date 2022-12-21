@@ -21,8 +21,6 @@ services:
     restart: always # If something goes wrong just restart the container, this is for development only.
     volumes:
       - ./compose/kms.yaml:/init/seed.yaml
-    ports:
-      - 8080:8080
   documentation:
     image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.5.7}
     restart: always # If something goes wrong just restart the container, this is for development only.
@@ -173,18 +171,12 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
   nginx:
     tty: true
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "--insecure", "https://localhost" ]
-      interval: 10s
-      timeout: 10s
-      retries: 12
-      start_period: 60s
     image: nginx:latest
     restart: unless-stopped
     ports:
-      - 443:443
+      - ${NGINX_PORT:-443}:${NGINX_PORT:-443}
     volumes:
-      - ./compose/nginx.conf:/etc/nginx/nginx.conf
+      - ./compose/${NGINX_CONFIG_NAME:-nginx.conf}:/etc/nginx/nginx.conf
       - ${LOCAL_CERTIFICATE_DIRECTORY:-./}:/etc/nginx/tls
     depends_on:
       - monetr

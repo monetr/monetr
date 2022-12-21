@@ -1,0 +1,20 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/universal:2",
+    "forwardPorts": [
+        "monetr:80",
+        "delve:2345"
+    ],
+    "portsAttributes": {
+        "80": {
+            "label": "monetr",
+            "onAutoForward": "openBrowser",
+            "elevateIfNeeded": true
+        }
+    },
+    "shutdownAction": "stopContainer",
+    "hostRequirements": {
+        "cpus": 4,
+        "memory": "4gb"
+    },
+    "features": {}
+}

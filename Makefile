@@ -328,7 +328,15 @@ develop:
 	sudo $(HOSTESS) add $(LOCAL_DOMAIN) 127.0.0.1
 	sudo $(HOSTESS) add vault.local 127.0.0.1
 endif
+else
+	$(call infoMsg,Detected cloud environment; nginx will not use builtin TLS.)
+	$(eval export NGINX_CONFIG_NAME=nginx-cloud.conf)
+	$(eval export NGINX_PORT=80)
 endif
+else
+	$(call infoMsg,Detected cloud environment; nginx will not use builtin TLS.)
+	$(eval export NGINX_CONFIG_NAME=nginx-cloud.conf)
+	$(eval export NGINX_PORT=80)
 endif
 ifdef MKDOCS_IMAGE
 	$(call infoMsg,Using custom MKDocs container image; $(MKDOCS_IMAGE))
