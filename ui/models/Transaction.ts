@@ -1,5 +1,6 @@
 import moment from 'moment';
 
+import formatAmount from 'util/formatAmount';
 import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export default class Transaction {
@@ -31,11 +32,12 @@ export default class Transaction {
   }
 
   getAmountString(): string {
+    const amount = Math.abs(this.amount);
     if (this.amount < 0) {
-      return `+ $${ (-this.amount / 100).toFixed(2) }`;
+      return `+ ${ formatAmount(amount) }`;
     }
 
-    return `$${ (this.amount / 100).toFixed(2) }`;
+    return formatAmount(amount);
   }
 
   getIsAddition(): boolean {

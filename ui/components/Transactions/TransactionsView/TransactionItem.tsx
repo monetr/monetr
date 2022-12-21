@@ -1,8 +1,8 @@
 import TransactionItemMobile from 'components/Transactions/TransactionsView/TransactionItem.mobile';
 import useIsMobile from 'hooks/useIsMobile';
 import React, { Fragment } from 'react';
-import { AccessTime, Work } from '@mui/icons-material';
-import { Avatar, Chip, Divider, ListItem, ListItemAvatar, ListItemText, useMediaQuery } from '@mui/material';
+import { AccessTime } from '@mui/icons-material';
+import { Chip, Divider, ListItem } from '@mui/material';
 import classnames from 'classnames';
 
 import TransactionIcon from 'components/Transactions/components/TransactionIcon';
