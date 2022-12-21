@@ -44,6 +44,11 @@ export default function PlaidLinkStatusIndicator(props: Props): JSX.Element {
     statusString = 'Disconnected, please reauthenticate.'
   }
 
+  // If the institution is down use an orange color for the status indicator.
+  if (institution?.status?.transactions_updates?.status === 'DOWN') {
+    colorClassName = 'text-orange-500';
+  }
+
   const NoMaxWidthTooltip = styled(({ className, ...props }: TooltipProps ) => (
     <Tooltip {...props} classes={{ popper: className }} />
   ))({
