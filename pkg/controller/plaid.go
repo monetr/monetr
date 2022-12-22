@@ -104,16 +104,14 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 	}
 
 	// If there is a configured limit on Plaid links then enforce that limit.
-	if maxLinks := c.configuration.Plaid.MaxNumberOfLinks; maxLinks > 0 {
-		if numberOfLinks >= maxLinks {
-			c.badRequest(ctx, "max number of Plaid links already reached")
-			return
-		}
+	if maxLinks := c.configuration.Plaid.MaxNumberOfLinks; maxLinks > 0 && numberOfLinks >= maxLinks {
+		c.badRequest(ctx, "max number of Plaid links already reached")
+		return
 	}
 
 	// If billing is enabled and the current account is trialing, then limit them to a single Plaid link until their
 	// trial has expired.
-	if c.configuration.Stripe.BillingEnabled {
+	if c.configuration.Stripe.IsBillingEnabled() {
 		trialing, err := c.paywall.GetSubscriptionIsTrialing(c.getContext(ctx), c.mustGetAccountId(ctx))
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine trial status")
