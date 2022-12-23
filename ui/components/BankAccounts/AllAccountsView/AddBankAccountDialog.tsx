@@ -10,6 +10,7 @@ import PlaidButton from 'components/Plaid/PlaidButton';
 import { useDetectDuplicateLink } from 'hooks/links';
 import plaidLinkTokenCallback from 'util/plaidLinkTokenCallback';
 import request from 'util/request';
+import NiceModal, { useModal } from '@ebay/nice-modal-react';
 
 interface State {
   loading: boolean;
@@ -23,12 +24,8 @@ interface State {
   } | null;
 }
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
-
-export default function AddBankAccountDialog(props: Props): JSX.Element {
+export function AddBankAccountDialog(): JSX.Element {
+  const modal = useModal();
   const queryClient = useQueryClient();
   const detectDuplicateLink = useDetectDuplicateLink();
 
@@ -67,6 +64,7 @@ export default function AddBankAccountDialog(props: Props): JSX.Element {
             queryClient.invalidateQueries('/bank_accounts'),
           ]));
       })
+      .then(() => modal.remove())
       .catch(error => {
         setState({
           ...state,
@@ -74,9 +72,6 @@ export default function AddBankAccountDialog(props: Props): JSX.Element {
         });
 
         throw error;
-      })
-      .finally(() => {
-        props.onClose();
       });
   }
 
@@ -119,7 +114,7 @@ export default function AddBankAccountDialog(props: Props): JSX.Element {
     if (duplicateDialogOpen) {
       return <DuplicateInstitutionDialog
         open={ true }
-        onCancel={ props.onClose }
+        onCancel={ modal.remove }
         onConfirm={ () => alert('TODO') }
       />;
     }
@@ -127,17 +122,16 @@ export default function AddBankAccountDialog(props: Props): JSX.Element {
     return null;
   }
 
-  const { open, onClose } = props;
   return (
     <Fragment>
       <Dialogs />
-      <Dialog open={ open } disableEnforceFocus={ true } maxWidth="xs">
+      <Dialog open={ modal.visible } disableEnforceFocus={ true } maxWidth="xs">
         <DialogTitle>
           <div className="flex items-center">
             <span className="text-2xl flex-auto">
                 Add a bank account
             </span>
-            <IconButton className="flex-none" onClick={ onClose }>
+            <IconButton className="flex-none" onClick={ modal.remove }>
               <Close />
             </IconButton>
           </div>
@@ -168,4 +162,12 @@ export default function AddBankAccountDialog(props: Props): JSX.Element {
       </Dialog>
     </Fragment>
   );
+}
+
+const modal = NiceModal.create(AddBankAccountDialog);
+
+export default modal;
+
+export function showAddBankAccountDialog(): void {
+  NiceModal.show(modal);
 }

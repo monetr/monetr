@@ -1,38 +1,18 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment } from 'react';
 import { AccountBalance, Add } from '@mui/icons-material';
 import { Button, Fab, List, Typography } from '@mui/material';
 import * as R from 'ramda';
 
-import AddBankAccountDialog from 'components/BankAccounts/AllAccountsView/AddBankAccountDialog';
 import LinkedAccountItem from 'components/BankAccounts/AllAccountsView/LinkedAccountItem';
 import { useBankAccounts } from 'hooks/bankAccounts';
 import { useLinks } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
 import Link from 'models/Link';
+import { showAddBankAccountDialog } from './AddBankAccountDialog';
 
 export default function AllAccountsView(): JSX.Element {
-  enum DialogOpen {
-    CreateBankAccount,
-  }
-
   const bankAccounts = useBankAccounts();
   const links = useLinks();
-  const [dialog, setDialog] = useState<DialogOpen | null>();
-
-  const openDialog = (dialog: DialogOpen) => () => setDialog(dialog);
-
-  function closeDialog() {
-    return setDialog(null);
-  }
-
-  function Dialogs(): JSX.Element {
-    switch (dialog) {
-      case DialogOpen.CreateBankAccount:
-        return <AddBankAccountDialog open={ true } onClose={ closeDialog } />;
-      default:
-        return null;
-    }
-  }
 
   function Empty(): JSX.Element {
     return (
@@ -49,7 +29,7 @@ export default function AllAccountsView(): JSX.Element {
           </div>
           <div className="w-full">
             <Button
-              onClick={ openDialog(DialogOpen.CreateBankAccount) }
+              onClick={ showAddBankAccountDialog }
               color="primary"
               className="w-full"
             >
@@ -100,7 +80,6 @@ export default function AllAccountsView(): JSX.Element {
 
   return (
     <Fragment>
-      <Dialogs />
       <div className="minus-nav bg-primary">
         <div className="w-full h-full view-inner">
           <Content />
@@ -109,7 +88,7 @@ export default function AllAccountsView(): JSX.Element {
           color="primary"
           aria-label="add"
           className="absolute z-50 bottom-5 right-5"
-          onClick={ openDialog(DialogOpen.CreateBankAccount) }
+          onClick={ showAddBankAccountDialog }
         >
           <Add />
         </Fab>
