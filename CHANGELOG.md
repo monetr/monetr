@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.13.0](https://github.com/monetr/monetr/compare/v0.12.5...v0.13.0) (2022-12-23)
+
+
+### Features
+
+* **github:** Improving support for github codespaces ([5b82749](https://github.com/monetr/monetr/commit/5b82749849abf7afa13294648b9c62d85d0b1b41))
+* **ui:** Improve offline state of the UI. ([de68d25](https://github.com/monetr/monetr/commit/de68d2507c4ca082b6dfa4627697d07f3337f730))
+
+
+### Bug Fixes
+
+* **api:** Deprecate old icon search endpoint. ([#1261](https://github.com/monetr/monetr/issues/1261)) ([164a65f](https://github.com/monetr/monetr/commit/164a65f51cf4b2890add9c4450647a499d847af6)), closes [#1217](https://github.com/monetr/monetr/issues/1217)
+* **api:** Fixed crash when trying to add a Plaid link. ([9fa0067](https://github.com/monetr/monetr/commit/9fa0067316583ad43f6efda42999adb9edcd3c19)), closes [#1172](https://github.com/monetr/monetr/issues/1172)
+* **ui:** Better indicate an offline institution in the UI. ([ca92917](https://github.com/monetr/monetr/commit/ca9291752750693c207a2209409b64a776bc597e)), closes [#1264](https://github.com/monetr/monetr/issues/1264)
+* **ui:** Fixed amount formatting for transactions view. ([5702a3b](https://github.com/monetr/monetr/commit/5702a3b4f4f7877b4380843e867d4757f97384ed))
+* **ui:** Fixed crash on the funding schedule page. ([#1247](https://github.com/monetr/monetr/issues/1247)) ([22b07d3](https://github.com/monetr/monetr/commit/22b07d37411c550df08f51442f8b6ba7f3dd9bc6)), closes [#1244](https://github.com/monetr/monetr/issues/1244)
+* **ui:** Fixed Plaid dialog closing randomly. ([a95f030](https://github.com/monetr/monetr/commit/a95f0300058379bd48c7ce8d525d0c3bac6479e7)), closes [#1205](https://github.com/monetr/monetr/issues/1205)
+* **ui:** Fixed transfer dialog not working. ([575f2a9](https://github.com/monetr/monetr/commit/575f2a93928240e0aa09191bfc1b2c8fc579fb70)), closes [#1237](https://github.com/monetr/monetr/issues/1237)
+
+
+### Dependencies
+
+* **api:** update google.golang.org/genproto digest to a2ec334 ([#1249](https://github.com/monetr/monetr/issues/1249)) ([db72199](https://github.com/monetr/monetr/commit/db7219988ac04ccd034f88adef4cf9e8448f1dcd))
+* **ui:** update dependency @swc/core to v1.3.21 ([#1224](https://github.com/monetr/monetr/issues/1224)) ([87bad0a](https://github.com/monetr/monetr/commit/87bad0a21374fb67a6e73a3f463dc48baa1dd709))
+* **ui:** update dependency @types/ramda to v0.28.20 ([#1225](https://github.com/monetr/monetr/issues/1225)) ([899be02](https://github.com/monetr/monetr/commit/899be02b55696e1208fac252b79c50d419baf592))
+* **ui:** update dependency @types/react-dom to v18.0.9 ([#1227](https://github.com/monetr/monetr/issues/1227)) ([f5d8ace](https://github.com/monetr/monetr/commit/f5d8acea51f7408caad33ee365d9ac2334de18f4))
+* **ui:** update dependency autoprefixer to v10.4.13 ([#1229](https://github.com/monetr/monetr/issues/1229)) ([9dc99bb](https://github.com/monetr/monetr/commit/9dc99bb7c0f38b353854f5a4b14d418836f214ed))
+* **ui:** update dependency classnames to v2.3.2 ([#1230](https://github.com/monetr/monetr/issues/1230)) ([afbe8d0](https://github.com/monetr/monetr/commit/afbe8d0e439279742dc40deb87db22362df67844))
+* **ui:** update dependency dotenv to v16.0.3 ([#1232](https://github.com/monetr/monetr/issues/1232)) ([df2e16e](https://github.com/monetr/monetr/commit/df2e16e01dfd1560336b84eea9cb0e480032db8e))
+* **ui:** update dependency immer to v9.0.16 ([#1233](https://github.com/monetr/monetr/issues/1233)) ([f8b42b7](https://github.com/monetr/monetr/commit/f8b42b7e5b7e0270f5cef61061313e65b6b47ba7))
+* **ui:** update dependency jest-mock-axios to v4.6.2 ([#1235](https://github.com/monetr/monetr/issues/1235)) ([74bf77f](https://github.com/monetr/monetr/commit/74bf77fc6f0b4f87798391c3485dab69a7bec555))
+* **ui:** update dependency postcss to v8.4.19 ([#1236](https://github.com/monetr/monetr/issues/1236)) ([53fb7a5](https://github.com/monetr/monetr/commit/53fb7a541488143f65b918c18ba6077deb0945a7))
+
+
+### Miscellaneous
+
+* **api:** Deprecate old password encryption. ([#1260](https://github.com/monetr/monetr/issues/1260)) ([2c31827](https://github.com/monetr/monetr/commit/2c3182747acbd3314ff210d54faf1aaae5ad9b13)), closes [#1242](https://github.com/monetr/monetr/issues/1242)
+* **api:** Minor sentry usage cleanup. ([aa78afa](https://github.com/monetr/monetr/commit/aa78afa8057b6f58cacd82affc68eaae8b37858f))
+* **github:** Adding codespaces badge. ([e7bd60e](https://github.com/monetr/monetr/commit/e7bd60ea730a4464c9480151edba6ad216e28575))
+* release 0.13.0 ([cff9245](https://github.com/monetr/monetr/commit/cff92459aa2369eb4dcae2059af6efae4bd7c416))
+* Tweak devcontainer. ([45f32bb](https://github.com/monetr/monetr/commit/45f32bb08ac3a0c10a15fdc5500f48ac3a4ab1ee))
+* Updated NOTICE ([79d15f2](https://github.com/monetr/monetr/commit/79d15f2107a1310653709b5451af79f12f5ac982))
+
 ## [0.12.5](https://github.com/monetr/monetr/compare/v0.12.4...v0.12.5) (2022-11-30)
 
 
