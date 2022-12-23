@@ -22,7 +22,7 @@ export default function SpendingSelectionList(props: Props): JSX.Element {
       return;
     }
 
-    return onChange(spending.get(spendingId));
+    return onChange(spending.find(item => item.spendingId === spendingId));
   };
 
   const { value, disabled, excludeIds, excludeSafeToSpend } = props;
