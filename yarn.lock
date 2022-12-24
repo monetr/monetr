@@ -12310,7 +12310,7 @@ postcss-value-parser@^4.0.2, postcss-value-parser@^4.1.0:
   resolved "https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.1.0.tgz"
   integrity sha512-97DXOFbQJhk71ne5/Mt6cOu6yxsSfM0QGQyl0L25Gca4yGWEGJaig7l7gbCX623VqTBNGLRLaVUCnNkcedlRSQ==
 
-postcss@8.4.19:
+postcss@8.4.19, postcss@^8.4.18:
   version "8.4.19"
   resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.19.tgz#61178e2add236b17351897c8bcc0b4c8ecab56fc"
   integrity sha512-h+pbPsyhlYj6N2ozBmHhHrs9DzGmbaarbLvWipMRO7RLS+v4onj26MPFXA5OBYFxyqYhUJK456SwDcY9H2/zsA==
@@ -12336,15 +12336,6 @@ postcss@^8.2.14:
     nanoid "^3.1.30"
     picocolors "^1.0.0"
     source-map-js "^1.0.1"
-
-postcss@^8.4.17:
-  version "8.4.18"
-  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.18.tgz#6d50046ea7d3d66a85e0e782074e7203bc7fbca2"
-  integrity sha512-Wi8mWhncLJm11GATDaQKobXSNEYGUHeQLiQqDFG1qQ5UTDPTEvKw0Xt5NsTpktGTwLps3ByrWsBrG0rB8YQ9oA==
-  dependencies:
-    nanoid "^3.3.4"
-    picocolors "^1.0.0"
-    source-map-js "^1.0.2"
 
 postcss@^8.4.7:
   version "8.4.12"
@@ -13689,10 +13680,10 @@ synchronous-promise@^2.0.15:
   resolved "https://registry.npmjs.org/synchronous-promise/-/synchronous-promise-2.0.15.tgz"
   integrity sha512-k8uzYIkIVwmT+TcglpdN50pS2y1BDcUnBPK9iJeGu0Pl1lOI8pD6wtzgw91Pjpe+RxtTncw32tLxs/R0yNL2Mg==
 
-tailwindcss@3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.2.1.tgz#1bd828fff3172489962357f8d531c184080a6786"
-  integrity sha512-Uw+GVSxp5CM48krnjHObqoOwlCt5Qo6nw1jlCRwfGy68dSYb/LwS9ZFidYGRiM+w6rMawkZiu1mEMAsHYAfoLg==
+tailwindcss@3.2.4:
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/tailwindcss/-/tailwindcss-3.2.4.tgz#afe3477e7a19f3ceafb48e4b083e292ce0dc0250"
+  integrity sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==
   dependencies:
     arg "^5.0.2"
     chokidar "^3.5.3"
@@ -13708,7 +13699,7 @@ tailwindcss@3.2.1:
     normalize-path "^3.0.0"
     object-hash "^3.0.0"
     picocolors "^1.0.0"
-    postcss "^8.4.17"
+    postcss "^8.4.18"
     postcss-import "^14.1.0"
     postcss-js "^4.0.0"
     postcss-load-config "^3.1.4"
