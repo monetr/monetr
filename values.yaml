@@ -131,6 +131,8 @@ api:
   jwt:
     loginJwtSecret: ""
     registrationJwtSecret: ""
+    # Number of days a login JWT token should be considered valid.
+    loginExpiration: 7
   postgreSql:
     address: localhost
     port: 5432

@@ -87,6 +87,8 @@ api:
     webhooksDomain: my.monetr.app
     oauthDomain: my.monetr.app
     maxNumberOfLinks: 2
+  jwt:
+    loginExpiration: 14
   cors:
     allowedOrigins:
       - "https://my.monetr.app"

@@ -102,6 +102,8 @@ api:
     webhooksDomain: my.monetr.dog
     oauthDomain: my.monetr.dog
     maxNumberOfLinks: 3
+  jwt:
+    loginExpiration: 14
   cors:
     allowedOrigins:
       - "https://my.monetr.dog"

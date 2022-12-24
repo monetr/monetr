@@ -145,6 +145,14 @@ type Beta struct {
 type JWT struct {
 	LoginJwtSecret        string `yaml:"loginJwtSecret"`
 	RegistrationJwtSecret string `yaml:"registrationJwtSecret"`
+	// LoginExpiration is the number of days that the issued login JWT token should be considered valid.
+	LoginExpiration int `yaml:"loginExpiration"`
+}
+
+// GetLoginExpirationTimestamp will return a timestamp in the future relative to time.Now. This should be the expiration
+// timestamp used for issued JWT tokens for authentication.
+func (j JWT) GetLoginExpirationTimestamp() time.Time {
+	return time.Now().Add(time.Duration(j.LoginExpiration * 24 * int(time.Hour)))
 }
 
 type PostgreSQL struct {
@@ -423,9 +431,6 @@ func getViper(configFilePath *string) *viper.Viper {
 		v.AddConfigPath(".")
 	}
 
-	setupDefaults(v)
-	setupEnv(v)
-
 	return v
 }
 
@@ -440,6 +445,9 @@ func LoadConfigurationFromFile(configFilePath *string) Configuration {
 }
 
 func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
+	setupDefaults(v)
+	setupEnv(v)
+
 	if err := v.ReadInConfig(); err != nil {
 		fmt.Printf("failed to read in config from file: %+v\n", err)
 	}
@@ -503,6 +511,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
+	v.SetDefault("JWT.LoginExpiration", 7)
 	v.SetDefault("KeyManagement.Provider", nil)
 	v.SetDefault("KeyManagement.AWS", nil)
 	v.SetDefault("KeyManagement.Google", nil)

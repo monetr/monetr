@@ -43,7 +43,7 @@ func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) 
 		sameSite = http.SameSiteStrictMode
 	}
 
-	expiration := time.Now().Add(7 * 24 * time.Hour)
+	expiration := c.configuration.JWT.GetLoginExpirationTimestamp()
 	if token == "" {
 		expiration = time.Now().Add(-1 * time.Second)
 	}
@@ -225,7 +225,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		}
 
 		result := map[string]interface{}{
-				"isActive": true,
+			"isActive": true,
 		}
 
 		if !loginRequest.IsMobile {
@@ -881,6 +881,9 @@ func (c *Controller) validateLogin(email, password string) error {
 
 func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {
 	now := time.Now()
+
+	expiration := c.configuration.JWT.GetLoginExpirationTimestamp()
+
 	claims := &MonetrClaims{
 		LoginId:   loginId,
 		UserId:    userId,
@@ -889,7 +892,7 @@ func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, e
 			Audience: []string{
 				c.configuration.APIDomainName,
 			},
-			ExpiresAt: now.Add(31 * 24 * time.Hour).Unix(),
+			ExpiresAt: expiration.Unix(),
 			Id:        "",
 			IssuedAt:  now.Unix(),
 			Issuer:    c.configuration.APIDomainName,
