@@ -394,7 +394,6 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		switch errors.Cause(err) {
 		case repository.ErrEmailAlreadyExists:
 			c.failure(ctx, http.StatusBadRequest, EmailAlreadyExists{})
-			break
 		default:
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 				"failed to create login",
@@ -540,7 +539,6 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		"isActive":            false,
 		"requireVerification": false,
 	})
-	return
 }
 
 // Verify Email
@@ -643,8 +641,6 @@ func (c *Controller) resendVerification(ctx iris.Context) {
 	}); err != nil {
 		c.reportWrappedError(ctx, err, "failed to send (re-send) verification email")
 	}
-
-	return
 }
 
 // Send Password Reset Link
@@ -741,7 +737,6 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 	}
 
 	ctx.StatusCode(http.StatusOK)
-	return
 }
 
 // Reset Password
@@ -872,7 +867,7 @@ func (c *Controller) validateLogin(email, password string) error {
 		return errors.New("email address provided is not valid")
 	}
 
-	if strings.ToLower(address.Address) != strings.ToLower(email) {
+	if !strings.EqualFold(address.Address, email) {
 		return errors.New("email address provided is not valid")
 	}
 
