@@ -165,13 +165,13 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 	}
 
 	if !isManual {
-		c.returnError(ctx, http.StatusBadRequest, "cannot create transactions for non-manual links")
+		c.badRequest(ctx, "cannot create transactions for non-manual links")
 		return
 	}
 
 	var transaction models.Transaction
 	if err = ctx.ReadJSON(&transaction); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
+		c.invalidJson(ctx)
 		return
 	}
 
@@ -190,24 +190,23 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 		return
 	}
 
-	var updatedExpense *models.Spending
-
+	var updatedSpending *models.Spending
 	if transaction.SpendingId != nil && *transaction.SpendingId > 0 {
-		updatedExpense, err = repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transaction.SpendingId)
+		updatedSpending, err = repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transaction.SpendingId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "could not get expense provided for transaction")
+			c.wrapPgError(ctx, err, "could not get spending provided for transaction")
 			return
 		}
 
-		if err = repo.AddExpenseToTransaction(c.getContext(ctx), &transaction, updatedExpense); err != nil {
+		if err = repo.AddExpenseToTransaction(c.getContext(ctx), &transaction, updatedSpending); err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
 			return
 		}
 
 		if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []models.Spending{
-			*updatedExpense,
+			*updatedSpending,
 		}); err != nil {
-			c.wrapPgError(ctx, err, "failed to update expense for transaction")
+			c.wrapPgError(ctx, err, "failed to update spending for transaction")
 			return
 		}
 	}
@@ -223,8 +222,8 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 
 	// If an expense was updated as part of this transaction being created then we want to include that updated expense
 	// in our response so the UI can update its redux store.
-	if updatedExpense != nil {
-		returnedObject["expense"] = *updatedExpense
+	if updatedSpending != nil {
+		returnedObject["spending"] = *updatedSpending
 	}
 
 	ctx.JSON(returnedObject)
