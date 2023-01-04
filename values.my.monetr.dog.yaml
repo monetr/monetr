@@ -130,7 +130,7 @@ api:
     timeout: "10s"
     idleConnTimeout: "9m"
   keyManagement:
-    enabled: false
+    enabled: true
     provider: google
     google:
       resourceName: projects/acceptance-327322/locations/us/keyRings/monetr-acceptance-327322-monetr-in/cryptoKeys/monetr-secrets-monetr-acceptance-327322-monetr-in
