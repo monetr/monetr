@@ -26,7 +26,7 @@ type CleanupJobsHandler struct {
 }
 
 func TriggerCleanupJobs(ctx context.Context, backgroundJobs JobController) error {
-	return backgroundJobs.triggerJob(ctx, CleanupJobs, nil)
+	return backgroundJobs.TriggerJob(ctx, CleanupJobs, nil)
 }
 
 func NewCleanupJobsHandler(log *logrus.Entry, db *pg.DB) *CleanupJobsHandler {

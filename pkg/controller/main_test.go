@@ -90,7 +90,15 @@ type TestApp struct {
 	Mail *mock_mail.MockMailCommunication
 }
 
+type TestAppInterfaces struct {
+	JobController *background.JobController
+}
+
 func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
+	return NewTestApplicationPatched(t, configuration, TestAppInterfaces{})
+}
+
+func NewTestApplicationPatched(t *testing.T, configuration config.Configuration, patched TestAppInterfaces) (*TestApp, *httpexpect.Expect) {
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
@@ -111,7 +119,12 @@ func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configura
 	})
 	plaidSecrets := mock_secrets.NewMockPlaidSecrets()
 
-	jobRunner := background.NewSynchronousJobRunner(t, plaidClient, plaidSecrets)
+	var jobRunner background.JobController
+	if patched.JobController != nil {
+		jobRunner = *patched.JobController
+	} else {
+		jobRunner = background.NewSynchronousJobRunner(t, plaidClient, plaidSecrets)
+	}
 
 	mockMail := mock_mail.NewMockMail()
 

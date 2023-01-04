@@ -21,15 +21,16 @@ var (
 	_ JobController = &BackgroundJobs{}
 )
 
+//go:generate mockgen -source=jobs.go -package=mockgen -destination=../internal/mockgen/jobs.go JobController
 type (
 	// JobController is an interface that can be safely provided to packages outside this one that will allow jobs to be
 	// triggered manually by other events. For a job to be triggered it must have its own trigger function that accepts
 	// this interface as an argument. This is to keep interaction with the background job processing to a minimum by
 	// code outside this package.
 	JobController interface {
-		// triggerJob is used internally to allow other areas of monetr to trigger jobs safely. This must be called by a
+		// TriggerJob is used internally to allow other areas of monetr to trigger jobs safely. This must be called by a
 		// wrapping function for the specific job.
-		triggerJob(ctx context.Context, queue string, data interface{}) error
+		TriggerJob(ctx context.Context, queue string, data interface{}) error
 	}
 
 	BackgroundJobs struct {
@@ -122,6 +123,6 @@ func (b *BackgroundJobs) Close() error {
 	return b.processor.Close()
 }
 
-func (b *BackgroundJobs) triggerJob(ctx context.Context, queue string, data interface{}) error {
+func (b *BackgroundJobs) TriggerJob(ctx context.Context, queue string, data interface{}) error {
 	return b.enqueuer.EnqueueJob(ctx, queue, data)
 }

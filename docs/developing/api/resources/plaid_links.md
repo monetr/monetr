@@ -219,6 +219,87 @@ bank.
 }
 ```
 
+## Manually Resync Plaid Link
+
+Sometimes you might need to manually trigger a resync with Plaid; this can happen if there were issues where a webhook
+was not properly received. By triggering a manual resync, transactions for the last 14 days and balances for all
+bank accounts within the specified link will be checked.
+
+??? note
+
+    This will not send a "sync" request to Plaid. This will only retrieve data already available via Plaid's API
+    and update monetr's data accordingly.
+
+??? attention
+
+    This will not sync any removed transactions at this time. This will be resolved in the future by using the Plaid
+    sync changes API, which will allow us to see all changes over a given period of time. But at the moment this will
+    not update removed transactions.
+
+    [![GitHub issue/pull request detail](https://img.shields.io/github/issues/detail/state/monetr/monetr/1270?label=bug%28plaid%29%3A%20Allow%20manually%20syncing%20to%20support%20removed%20transactions.&logo=github)](https://github.com/monetr/monetr/issues/1270){:target="_blank"}
+
+```http title="HTTP"
+POST /api/plaid/link/sync
+```
+
+### Request Body
+
+| Attribute           | Type       | Required   | Description                                                                                                                                                          |
+| ------------------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------         |
+| `linkId`            | number     | yes        | The link ID that you want to manually resync. This must be a Plaid link that is in a status of `Setup` or `Error`. Other link statuses will result in a bad request. |
+
+
+### Manually Resync Examples
+
+```shell title="Example manual resync request"
+curl --request POST \
+  --url "https://my.monetr.app/api/plaid/link/sync" \
+  --header "content-type: application/json" \
+  --data '{
+    "linkId": 1234
+}'
+```
+
+#### Successful
+
+If the manual sync is kicked off successfully, you will recieve a `202 Accepted` status code with no response body.
+
+### Errors
+
+If the request fails then you will receive a JSON response body.
+
+#### Provided Link does not exist
+
+```json title="404 Not Found"
+{
+  "error": "failed to retrieve link: record does not exist"
+}
+```
+
+#### Link is not a Plaid link
+
+```json title="400 Bad Request"
+{
+  "error": "cannot manually sync a non-Plaid link"
+}
+```
+
+#### Link is not in a valid status
+
+```json title="400 Bad Request"
+{
+  "error": "link is not in a valid status, it cannot be manually synced"
+}
+```
+
+#### Failed to enqueue sync job
+
+```json title="500 Internal Server Error"
+{
+  "error": "failed to trigger manual sync"
+}
+```
+
 [^1]:
 
     monetr can be configured to limit the number of links an account can have. This is for those using development

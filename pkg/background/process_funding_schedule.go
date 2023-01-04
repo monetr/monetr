@@ -22,7 +22,7 @@ var (
 )
 
 func TriggerProcessFundingSchedules(ctx context.Context, runner JobController, args ProcessFundingScheduleArguments) error {
-	return runner.triggerJob(ctx, ProcessFundingSchedules, args)
+	return runner.TriggerJob(ctx, ProcessFundingSchedules, args)
 }
 
 type ProcessFundingScheduleHandler struct {

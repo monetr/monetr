@@ -55,7 +55,7 @@ type (
 )
 
 func TriggerPullTransactions(ctx context.Context, backgroundJobs JobController, arguments PullTransactionsArguments) error {
-	return backgroundJobs.triggerJob(ctx, PullTransactions, arguments)
+	return backgroundJobs.TriggerJob(ctx, PullTransactions, arguments)
 }
 
 func NewPullTransactionsHandler(

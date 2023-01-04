@@ -43,7 +43,7 @@ type (
 )
 
 func TriggerRemoveTransactions(ctx context.Context, backgroundJobs JobController, arguments RemoveTransactionsArguments) error {
-	return backgroundJobs.triggerJob(ctx, RemoveTransactions, arguments)
+	return backgroundJobs.TriggerJob(ctx, RemoveTransactions, arguments)
 }
 
 func NewRemoveTransactionsHandler(
