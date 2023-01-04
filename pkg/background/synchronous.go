@@ -61,7 +61,7 @@ func NewSynchronousJobRunner(
 	return runner
 }
 
-func (s *SynchronousJobRunner) triggerJob(ctx context.Context, queue string, data interface{}) error {
+func (s *SynchronousJobRunner) TriggerJob(ctx context.Context, queue string, data interface{}) error {
 	require.Contains(s.t, s.jobs, queue, "job must be registered in order to be triggered, might need to be updated?")
 	jobHandler := s.jobs[queue]
 

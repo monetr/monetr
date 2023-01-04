@@ -28,6 +28,7 @@ func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
 	p.Get("/token/new", c.newPlaidToken)
 	p.Post("/token/callback", c.plaidTokenCallback)
 	p.Get("/setup/wait/{linkId:uint64}", c.waitForPlaid)
+	p.Post("/sync", c.postSyncPlaidManually)
 }
 
 func (c *Controller) storeLinkTokenInCache(
@@ -634,4 +635,52 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 		log.Trace("link setup successfully")
 		return
 	}
+}
+
+func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
+	var request struct {
+		LinkId uint64 `json:"linkId"`
+	}
+	if err := ctx.ReadJSON(&request); err != nil {
+		c.invalidJson(ctx)
+		return
+	}
+
+	log := c.getLog(ctx).WithFields(logrus.Fields{
+		"linkId": request.LinkId,
+	})
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	link, err := repo.GetLink(c.getContext(ctx), request.LinkId)
+	if err != nil {
+		c.wrapPgError(ctx, err, "failed to retrieve link")
+		return
+	}
+
+	if link.LinkType != models.PlaidLinkType {
+		c.badRequest(ctx, "cannot manually sync a non-Plaid link")
+		return
+	}
+
+	switch link.LinkStatus {
+	case models.LinkStatusSetup, models.LinkStatusError:
+		log.Debug("link is not revoked, triggering manual sync")
+	default:
+		log.WithField("status", link.LinkStatus).Warn("link is not in a valid status, it cannot be manually synced")
+		c.badRequest(ctx, "link is not in a valid status, it cannot be manually synced")
+		return
+	}
+
+	err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+		AccountId: link.AccountId,
+		LinkId:    link.LinkId,
+		Start:     time.Now().Add(-14 * 24 * time.Hour), // Last 14 days.
+		End:       time.Now(),
+	})
+	if err != nil {
+		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to trigger manual sync")
+		return
+	}
+
+	ctx.StatusCode(http.StatusAccepted)
 }

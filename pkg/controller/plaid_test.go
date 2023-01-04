@@ -2,13 +2,18 @@ package controller_test
 
 import (
 	"context"
+	"errors"
+	"math"
 	"net/http"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/golang/mock/gomock"
 	"github.com/jarcoal/httpmock"
+	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/internal/fixtures"
 	"github.com/monetr/monetr/pkg/internal/mock_plaid"
+	"github.com/monetr/monetr/pkg/internal/mockgen"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/plaid/plaid-go/plaid"
@@ -200,5 +205,121 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().Equal("failed to retrieve link: record does not exist")
+	})
+}
+
+func TestPostSyncPlaidManually(t *testing.T) {
+	t.Run("successful with account select enabled", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		jobController := mockgen.NewMockJobController(ctrl)
+		var controller background.JobController = jobController
+
+		config := NewTestApplicationConfig(t)
+		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
+			JobController: &controller,
+		})
+
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		jobController.EXPECT().
+			TriggerJob(
+				gomock.Any(),
+				gomock.Eq(background.PullTransactions),
+				testutils.NewGenericMatcher(func(args background.PullTransactionsArguments) bool {
+					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
+					return a && b
+				}),
+			).
+			MaxTimes(1).
+			Return(nil)
+
+		response := e.POST("/api/plaid/link/sync").
+			WithJSON(map[string]interface{}{
+				"linkId": link.LinkId,
+			}).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusAccepted)
+	})
+
+	t.Run("failed to enque job", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		jobController := mockgen.NewMockJobController(ctrl)
+		var controller background.JobController = jobController
+
+		config := NewTestApplicationConfig(t)
+		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
+			JobController: &controller,
+		})
+
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		jobController.EXPECT().
+			TriggerJob(
+				gomock.Any(),
+				gomock.Eq(background.PullTransactions),
+				testutils.NewGenericMatcher(func(args background.PullTransactionsArguments) bool {
+					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
+					return a && b
+				}),
+			).
+			MaxTimes(1).
+			Return(errors.New("queue is offline"))
+
+		response := e.POST("/api/plaid/link/sync").
+			WithJSON(map[string]interface{}{
+				"linkId": link.LinkId,
+			}).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusInternalServerError)
+		response.JSON().Path("$.error").String().Equal("failed to trigger manual sync")
+	})
+
+	t.Run("invalid link ID", func(t *testing.T) {
+		e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/plaid/link/sync").
+			WithJSON(map[string]interface{}{
+				"linkId": math.MaxInt32,
+			}).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusNotFound)
+		response.JSON().Path("$.error").String().Equal("failed to retrieve link: record does not exist")
+	})
+
+	t.Run("manual link", func(t *testing.T) {
+		e := NewTestApplication(t)
+
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAManualLink(t, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		response := e.POST("/api/plaid/link/sync").
+			WithJSON(map[string]interface{}{
+				"linkId": link.LinkId,
+			}).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("cannot manually sync a non-Plaid link")
 	})
 }

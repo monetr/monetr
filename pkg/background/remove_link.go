@@ -48,7 +48,7 @@ type (
 // the desired account. This will return an error if the job fails to be enqueued, but does not indicate the status of
 // the actual job.
 func TriggerRemoveLink(ctx context.Context, backgroundJobs JobController, arguments RemoveLinkArguments) error {
-	return backgroundJobs.triggerJob(ctx, RemoveLink, arguments)
+	return backgroundJobs.TriggerJob(ctx, RemoveLink, arguments)
 }
 
 func NewRemoveLinkHandler(

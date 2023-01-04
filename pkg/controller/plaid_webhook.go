@@ -41,7 +41,7 @@ func (c PlaidClaims) Valid() error {
 
 	// The claims below are optional, by default, so if they are set to the
 	// default value in Go, let's not fail the verification for them.
-	if c.VerifyExpiresAt(now, false) == false {
+	if !c.VerifyExpiresAt(now, false) {
 		delta := time.Unix(now, 0).Sub(time.Unix(c.ExpiresAt, 0))
 		vErr.Inner = fmt.Errorf("token is expired by %v", delta)
 		vErr.Errors |= jwt.ValidationErrorExpired
@@ -51,12 +51,12 @@ func (c PlaidClaims) Valid() error {
 	// the server would be slightly different than the clock on Plaid's side. And the issued at was causing a conflict
 	// where it was just a few seconds (sometimes just one) out of bounds for this to be handled. So adding a buffer of
 	// 5 seconds to account for any clock drift between our servers and Plaid's.
-	if c.VerifyIssuedAt(now+5, false) == false {
-		vErr.Inner = fmt.Errorf("Token used before issued, %d | %d", now, c.IssuedAt)
+	if !c.VerifyIssuedAt(now+5, false) {
+		vErr.Inner = fmt.Errorf("token used before issued, %d | %d", now, c.IssuedAt)
 		vErr.Errors |= jwt.ValidationErrorIssuedAt
 	}
 
-	if c.VerifyNotBefore(now, false) == false {
+	if !c.VerifyNotBefore(now, false) {
 		vErr.Inner = fmt.Errorf("token is not valid yet")
 		vErr.Errors |= jwt.ValidationErrorNotValidYet
 	}
