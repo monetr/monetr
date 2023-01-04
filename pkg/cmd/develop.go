@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
-	"github.com/monetr/monetr/pkg/vault_helper"
 	"github.com/spf13/cobra"
 )
 
@@ -43,28 +42,6 @@ func newDevelopCommand(parent *cobra.Command) {
 				log.WithField("config", configFileName).Info("config file loaded")
 			}
 
-			var vault vault_helper.VaultHelper
-			if configuration.Vault.Enabled {
-				log.Debug("vault is enabled for secret storage")
-				client, err := vault_helper.NewVaultHelper(log, vault_helper.Config{
-					Address:         configuration.Vault.Address,
-					Role:            configuration.Vault.Role,
-					Auth:            configuration.Vault.Auth,
-					Token:           configuration.Vault.Token,
-					TokenFile:       configuration.Vault.TokenFile,
-					Timeout:         configuration.Vault.Timeout,
-					IdleConnTimeout: configuration.Vault.IdleConnTimeout,
-					Username:        configuration.Vault.Username,
-					Password:        configuration.Vault.Password,
-				})
-				if err != nil {
-					log.WithError(err).Fatalf("failed to create vault helper")
-					return err
-				}
-
-				vault = client
-			}
-
 			db, err := getDatabase(log, configuration, nil)
 			if err != nil {
 				log.WithError(err).Fatal("failed to setup database")
@@ -77,14 +54,7 @@ func newDevelopCommand(parent *cobra.Command) {
 				return err
 			}
 
-			var plaidSecrets secrets.PlaidSecretsProvider
-			if configuration.Vault.Enabled {
-				log.Debugf("secrets will be stored in vault")
-				plaidSecrets = secrets.NewVaultPlaidSecretsProvider(log, vault)
-			} else {
-				log.Debugf("secrets will be stored in postgres")
-				plaidSecrets = secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
-			}
+			plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
 
 			log.Info("retrieving Plaid links from the database")
 			var plaidLinks []models.Link

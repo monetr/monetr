@@ -27,7 +27,9 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 	switch strings.ToLower(configuration.KeyManagement.Provider) {
 	case "aws":
 		kmsConfig := configuration.KeyManagement.AWS
-		log.Trace("using AWS KMS")
+		log.WithFields(logrus.Fields{
+			"keyId": kmsConfig.KeyID,
+		}).Trace("using AWS KMS")
 		kms, err = secrets.NewAWSKMS(context.Background(), secrets.AWSKMSConfig{
 			Log:       log,
 			KeyID:     kmsConfig.KeyID,
