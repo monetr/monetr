@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1.19.3 as dependencies
+FROM docker.io/library/golang:1.19.4 as dependencies
 WORKDIR /build
 
 # Build args need to be present in each "FROM"
@@ -21,10 +21,10 @@ ARG GOFLAGS
 ENV GOFLAGS=$GOFLAGS
 RUN go build -ldflags "-s -w -X main.buildType=container -X main.buildHost=${BUILD_HOST:-`hostname`} -X main.buildTime=`date -u +"%Y-%m-%dT%H:%M:%SZ"` -X main.buildRevision=${REVISION} -X main.release=${RELEASE}" -o /usr/bin/monetr /build/pkg/cmd
 
-FROM docker.io/library/debian:bookworm-20220622-slim
+FROM docker.io/library/debian:11.6-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      tzdata=2022a-1  \
-      ca-certificates=20211016 \
+      tzdata=2021a-*  \
+      ca-certificates=20210119 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
