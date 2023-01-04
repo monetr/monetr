@@ -123,12 +123,6 @@ api:
     traceSampleRate: 1.0
   vault:
     enabled: false
-    address: "http://vault.internal.svc.cluster.local:8200"
-    role: "monetr"
-    insecureSkipVerify: false
-    auth: "kubernetes"
-    timeout: "10s"
-    idleConnTimeout: "9m"
   keyManagement:
     enabled: true
     provider: google
