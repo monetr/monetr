@@ -122,7 +122,7 @@ api:
     sampleRate: 1.0
     traceSampleRate: 1.0
   vault:
-    enabled: true
+    enabled: false
     address: "http://vault.internal.svc.cluster.local:8200"
     role: "monetr"
     insecureSkipVerify: false
