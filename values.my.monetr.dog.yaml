@@ -121,8 +121,6 @@ api:
     enabled: true
     sampleRate: 1.0
     traceSampleRate: 1.0
-  vault:
-    enabled: false
   keyManagement:
     enabled: true
     provider: google

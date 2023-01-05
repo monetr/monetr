@@ -65,7 +65,6 @@ type Configuration struct {
 	Sentry              Sentry         `yaml:"sentry"`
 	Server              Server         `yaml:"server"`
 	Stripe              Stripe         `yaml:"stripe"`
-	Vault               Vault          `yaml:"vault"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -335,23 +334,6 @@ func (s Stripe) IsBillingEnabled() bool {
 	return s.Enabled && s.BillingEnabled
 }
 
-type Vault struct {
-	Enabled            bool          `yaml:"enabled"`
-	Address            string        `yaml:"address"`
-	Auth               string        `yaml:"auth"`
-	Token              string        `yaml:"token"`
-	TokenFile          string        `yaml:"tokenFile"`
-	Username           string        `yaml:"username"`
-	Password           string        `yaml:"password"`
-	Role               string        `yaml:"role"`
-	CertificatePath    string        `yaml:"certificatePath"`
-	KeyPath            string        `yaml:"keyPath"`
-	CACertificatePath  string        `yaml:"caCertificatePath"`
-	InsecureSkipVerify bool          `yaml:"insecureSkipVerify"`
-	Timeout            time.Duration `yaml:"timeout"`
-	IdleConnTimeout    time.Duration `yaml:"idleConnTimeout"`
-}
-
 type RabbitMQ struct {
 	Enabled  bool   `yaml:"enabled"`
 	Hostname string `yaml:"hostname"`
@@ -534,10 +516,6 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.InitialPlan.FreeTrialDays", 30)
 	v.SetDefault("UIDomainName", "localhost:4000")
-	v.SetDefault("Vault.Auth", "kubernetes")
-	v.SetDefault("Vault.IdleConnTimeout", 9*time.Minute)
-	v.SetDefault("Vault.Timeout", 10*time.Second)
-	v.SetDefault("Vault.TokenFile", "/var/run/secrets/kubernetes.io/serviceaccount/token")
 }
 
 func setupEnv(v *viper.Viper) {
@@ -613,16 +591,4 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
 	_ = v.BindEnv("Stripe.InitialPlan.FreeTrialDays", "MONETR_STRIPE_DEFAULT_TRIAL_DAYS")
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
-	_ = v.BindEnv("Vault.Enabled", "MONETR_VAULT_ENABLED")
-	_ = v.BindEnv("Vault.Address", "MONETR_VAULT_ADDRESS")
-	_ = v.BindEnv("Vault.Auth", "MONETR_VAULT_AUTH")
-	_ = v.BindEnv("Vault.Token", "MONETR_VAULT_TOKEN")
-	_ = v.BindEnv("Vault.TokenFile", "MONETR_VAULT_TOKEN_FILE")
-	_ = v.BindEnv("Vault.Role", "MONETR_VAULT_ROLE")
-	_ = v.BindEnv("Vault.CertificatePath", "MONETR_VAULT_TLS_CERT_PATH")
-	_ = v.BindEnv("Vault.KeyPath", "MONETR_VAULT_TLS_KEY_PATH")
-	_ = v.BindEnv("Vault.CACertificatePath", "MONETR_VAULT_TLS_CA_PATH")
-	_ = v.BindEnv("Vault.InsecureSkipVerify", "MONETR_VAULT_INSECURE_SKIP_VERIFY")
-	_ = v.BindEnv("Vault.Timeout", "MONETR_VAULT_TIMEOUT")
-	_ = v.BindEnv("Vault.IdleConnTimeout", "MONETR_VAULT_IDLE_CONN_TIMEOUT")
 }

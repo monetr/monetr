@@ -217,17 +217,4 @@ api:
       secretKey: null
       keyId: ""
       endpoint: null
-  vault:
-    enabled: false
-    address: ""
-    role: "default"
-    caCertificatePath: ""
-    certificatePath: ""
-    keyPath: ""
-    insecureSkipVerify: false
-    token: ""
-    tokenFile: ""
-    auth: "kubernetes"
-    timeout: "30s"
-    idleConnTimeout: "9m"
 
