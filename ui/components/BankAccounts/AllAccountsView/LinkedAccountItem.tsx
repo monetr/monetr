@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { useQuery } from 'react-query';
-import { Autorenew, CloudOff, Edit, FiberManualRecord, MoreVert, PriceChange, Remove } from '@mui/icons-material';
-import { Divider, IconButton, ListSubheader, Menu, MenuItem, Tooltip, Typography } from '@mui/material';
+import { Autorenew, CloudOff, Edit, MoreVert, PriceChange, Remove } from '@mui/icons-material';
+import { Divider, IconButton, ListSubheader, Menu, MenuItem } from '@mui/material';
 import * as R from 'ramda';
 
 import LinkedBankAccountItem from 'components/BankAccounts/AllAccountsView/LinkedBankAccountItem';
