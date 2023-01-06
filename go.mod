@@ -27,7 +27,7 @@ require (
 	github.com/mileusna/useragent v1.2.1
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.0.75
-	github.com/pkg/errors v0.9.2-0.20201214064552-5dd12d0cfe7f
+	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go v1.10.0
 	github.com/plaid/plaid-go/v3 v3.5.0
 	github.com/prometheus/client_golang v1.12.2
