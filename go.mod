@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.174
 	github.com/brianvoe/gofakeit/v6 v6.20.1
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
-	github.com/fsnotify/fsnotify v1.5.4
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/getsentry/sentry-go v0.14.0
 	github.com/go-pg/migrations/v8 v8.1.0
