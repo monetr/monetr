@@ -1,7 +1,7 @@
 import useIsMobile from 'hooks/useIsMobile';
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { DatePicker } from '@mui/lab';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, InputAdornment, TextField } from '@mui/material';
 import { AxiosError } from 'axios';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';

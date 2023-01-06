@@ -2,7 +2,7 @@ import useIsMobile from 'hooks/useIsMobile';
 import React, { Fragment, useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Science } from '@mui/icons-material';
-import { DatePicker } from '@mui/lab';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Button, Collapse, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, InputAdornment, Switch, TextField } from '@mui/material';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import moment from 'moment';

@@ -1,5 +1,5 @@
 import React, {  useState } from 'react';
-import { DatePicker } from '@mui/lab';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
   Alert,
   Dialog,
