@@ -61,7 +61,7 @@
     "sass": "1.55.0",
     "selector-action": "1.2.0",
     "semver": "7.3.8",
-    "terser-webpack-plugin": "5.3.3",
+    "terser-webpack-plugin": "5.3.6",
     "ts-pnp": "1.2.0",
     "web-vitals": "2.1.4",
     "webpack-manifest-plugin": "5.0.0",
