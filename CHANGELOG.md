@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.14.0](https://github.com/monetr/monetr/compare/v0.13.0...v0.14.0) (2023-01-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* Values in helm `values.yaml` or in the monetr config that reference Vault will be ignored going forward and will have no affect on the behavior of monetr.
+* Hashicorp vault will no longer be supported starting with the next release.
+
+### Features
+
+* **api:** Allow Plaid links to be manually synced via API. ([#1271](https://github.com/monetr/monetr/issues/1271)) ([b122425](https://github.com/monetr/monetr/commit/b12242547170e4597b44858f54711a995faf6aaf))
+* **api:** Improved manual sync endpoint + docs. ([fd4bc66](https://github.com/monetr/monetr/commit/fd4bc660eb9fb6ac8176cb684f5edc351250ba6a))
+* **api:** Small improvements to manually creating transactions. ([57f23bc](https://github.com/monetr/monetr/commit/57f23bc5a31261bb56b97c4fb2d9135cb19f2d82))
+* **config:** Allow configurable login expiration. ([81f4ab6](https://github.com/monetr/monetr/commit/81f4ab674e275ad78990e1a519fe6b2abb49f424)), closes [#1263](https://github.com/monetr/monetr/issues/1263)
+* **ui:** Adding support for manual resyncing Plaid links. ([d89fc2e](https://github.com/monetr/monetr/commit/d89fc2ea69812739cfdfb408bead66cada7c438f)), closes [#1265](https://github.com/monetr/monetr/issues/1265)
+
+
+### Bug Fixes
+
+* **ui:** Fixed spacing of balance text on accounts view. ([6dc39a3](https://github.com/monetr/monetr/commit/6dc39a3538241b23cf69649281a0a3c5a44fe6d0))
+
+
+### Dependencies
+
+* **api:** update module github.com/brianvoe/gofakeit/v6 to v6.20.1 ([#1278](https://github.com/monetr/monetr/issues/1278)) ([f0cac6a](https://github.com/monetr/monetr/commit/f0cac6a9f93514bc491f47ddab5b0c84bcf262a5))
+* **api:** update module github.com/go-pg/pg/v10 to v10.11.0 ([#1280](https://github.com/monetr/monetr/issues/1280)) ([3ed764c](https://github.com/monetr/monetr/commit/3ed764c4460ac08e7acf699e9a8fc0d2f8ec4484))
+* **api:** update module github.com/plaid/plaid-go to v3 ([#1276](https://github.com/monetr/monetr/issues/1276)) ([17b6056](https://github.com/monetr/monetr/commit/17b60567a578127e2c37198238ee9734eac630b0))
+* **api:** update module github.com/stripe/stripe-go/v72 to v74 ([#1279](https://github.com/monetr/monetr/issues/1279)) ([9397d68](https://github.com/monetr/monetr/commit/9397d68cb51212f2bab4fccd631597e97756d523))
+* Bumped to Golang 1.19.4 and changed to Debian 11.6. ([5ab6400](https://github.com/monetr/monetr/commit/5ab64008f011485c321fe0341130afb256b2f879))
+* **containers:** update golang docker tag to v1.19.4 ([#1273](https://github.com/monetr/monetr/issues/1273)) ([84b9a34](https://github.com/monetr/monetr/commit/84b9a3435ec7601a1f8255bed22e4d6669caee20))
+* **ui:** update dependency @babel/core to v7.20.12 ([#1252](https://github.com/monetr/monetr/issues/1252)) ([666c663](https://github.com/monetr/monetr/commit/666c663d65cb0b2deb49eac1e22f5bfca774e90c))
+* **ui:** update dependency @types/react to v18.0.26 ([#1226](https://github.com/monetr/monetr/issues/1226)) ([7c281fb](https://github.com/monetr/monetr/commit/7c281fb9a0ea90d495448bc873bb6101692d9515))
+* **ui:** update dependency postcss-loader to v7.0.2 ([#1254](https://github.com/monetr/monetr/issues/1254)) ([a4309c5](https://github.com/monetr/monetr/commit/a4309c5953e94411e8467cf1c1eff74f9a128a2e))
+* **ui:** update dependency postcss-preset-env to v7.8.3 ([#1255](https://github.com/monetr/monetr/issues/1255)) ([39d6c12](https://github.com/monetr/monetr/commit/39d6c122cb8b749c137860d81cda9e2c573202e8))
+* **ui:** update dependency semver to v7.3.8 ([#1257](https://github.com/monetr/monetr/issues/1257)) ([29ab4f6](https://github.com/monetr/monetr/commit/29ab4f696fd4825c5886cfce1b507ed79f723a3a))
+* **ui:** update dependency tailwindcss to v3.2.4 ([#1258](https://github.com/monetr/monetr/issues/1258)) ([2cf37cc](https://github.com/monetr/monetr/commit/2cf37ccdb1d1d9d6306a4a6aeab87e2c28b78801))
+
+
+### Miscellaneous
+
+* Bumped License date for the next year. ([b2acb38](https://github.com/monetr/monetr/commit/b2acb3832d54937639bff303bf6f1fdc7e999f7c))
+* **deploy:** Completely deprecate vault in test env. ([a0e86d8](https://github.com/monetr/monetr/commit/a0e86d8ac046cf97a0062ae5e8742d7ded4a92d3))
+* **deploy:** Disabling Hashicorp Vault in test environment. ([5a30ed1](https://github.com/monetr/monetr/commit/5a30ed155dbebe44ec4e7b9bf7567407e320b008))
+* **deploy:** Enabling KMS in the testing environment. ([20e962c](https://github.com/monetr/monetr/commit/20e962c9c5c48c18845b0ca652e40b6235978c22))
+* Deprecate Hashicorp Vault. ([5d80114](https://github.com/monetr/monetr/commit/5d80114d57188c5bedadc0ec88a9142025f4648e))
+* **deps:** bump json5 from 1.0.1 to 1.0.2 ([#1272](https://github.com/monetr/monetr/issues/1272)) ([6a2d4e8](https://github.com/monetr/monetr/commit/6a2d4e8f7674c854b39ee9cb90263e19103864b1))
+* **lint:** Fixing some lint warnings. ([0a6369d](https://github.com/monetr/monetr/commit/0a6369dabd5e67141cb06c74f8c8cae48cac632b))
+* release 0.14.0 ([4a289a6](https://github.com/monetr/monetr/commit/4a289a6c86f864d23dcb48e1ee2314cf9ce69c4c))
+* Remove references to Vault in helm and config files. ([8c6def9](https://github.com/monetr/monetr/commit/8c6def9caa44938b58b854e10a6b2e758cf5dec9))
+* Tidy go dependencies, and regenerate third party notice. ([f9186bf](https://github.com/monetr/monetr/commit/f9186bf23ee827c0f9fee1f0c01f9a07ed503fdb))
+* **ui:** Removing unused imports in LinkedAccountItem. ([2644b25](https://github.com/monetr/monetr/commit/2644b25e1f505c14ef5bfc0368e51426d2e30d95))
+* Updating NOTICE ([f9f7b70](https://github.com/monetr/monetr/commit/f9f7b70cfcae6acf0e05ae4c90f7de964a4f7320))
+* Updating NOTICE file. ([d3e22ad](https://github.com/monetr/monetr/commit/d3e22ad38184854ed25884402bcaeefadcde35d9))
+
 ## [0.13.0](https://github.com/monetr/monetr/compare/v0.12.5...v0.13.0) (2022-12-23)
 
 
