@@ -1763,6 +1763,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#previous-manual-sync-was-too-recent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Previous manual sync was too recent
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#failed-to-enqueue-sync-job" class="md-nav__link">
     <span class="md-ellipsis">
       Failed to enqueue sync job
@@ -2253,6 +2262,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#previous-manual-sync-was-too-recent" class="md-nav__link">
+    <span class="md-ellipsis">
+      Previous manual sync was too recent
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#failed-to-enqueue-sync-job" class="md-nav__link">
     <span class="md-ellipsis">
       Failed to enqueue sync job
@@ -2548,6 +2566,7 @@ bank.</p>
 <p>Sometimes you might need to manually trigger a resync with Plaid; this can happen if there were issues where a webhook
 was not properly received. By triggering a manual resync, transactions for the last 14 days and balances for all
 bank accounts within the specified link will be checked.</p>
+<p>Links can be manually synced once every 30 minutes, an error will be returned if you try to resync a link too quickly.</p>
 <details class="note">
 <summary>Note</summary>
 <p>This will not send a "sync" request to Plaid. This will only retrieve data already available via Plaid's API
@@ -2608,10 +2627,15 @@ not update removed transactions.</p>
 <a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;link is not in a valid status, it cannot be manually synced&quot;</span><span class="w"></span>
 <a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
-<h4 id="failed-to-enqueue-sync-job">Failed to enqueue sync job</h4>
-<div class="highlight"><span class="filename">500 Internal Server Error</span><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{</span><span class="w"></span>
-<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;failed to trigger manual sync&quot;</span><span class="w"></span>
+<h4 id="previous-manual-sync-was-too-recent">Previous manual sync was too recent</h4>
+<div class="highlight"><span class="filename">425 Too Early</span><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;link has been manually synced too recently&quot;</span><span class="w"></span>
 <a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h4 id="failed-to-enqueue-sync-job">Failed to enqueue sync job</h4>
+<div class="highlight"><span class="filename">500 Internal Server Error</span><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span><span class="nt">&quot;error&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;failed to trigger manual sync&quot;</span><span class="w"></span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <div class="footnote">
 <hr />
