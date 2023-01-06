@@ -60,6 +60,10 @@ type BaseRepository interface {
 	UpdateBankAccounts(ctx context.Context, accounts []models.BankAccount) error
 	UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error
 	UpdateLink(ctx context.Context, link *models.Link) error
+	// UpdateLinkManualSyncTimestampMaybe will take a link ID as a candidate to be manually resynced. If that link has not
+	// been manually synced in the last 30 minutes then it will bump the last manual sync timestamp on that link and
+	// return `true`. If the link has been manually synced in the last 30 minutes, then it will return `false`.
+	UpdateLinkManualSyncTimestampMaybe(ctx context.Context, linkId uint64) (ok bool, err error)
 	UpdateNextFundingScheduleDate(ctx context.Context, fundingScheduleId uint64, nextOccurrence time.Time) error
 	UpdateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error
 	UpdatePlaidLink(ctx context.Context, plaidLink *models.PlaidLink) error

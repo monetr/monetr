@@ -269,6 +269,8 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 							span.Status = sentry.SpanStatusPermissionDenied
 						case http.StatusBadRequest:
 							span.Status = sentry.SpanStatusInvalidArgument
+						case http.StatusTooManyRequests:
+							span.Status = sentry.SpanStatusResourceExhausted
 						default:
 							if ctx.GetErr() != nil {
 								span.Status = sentry.SpanStatusInternalError

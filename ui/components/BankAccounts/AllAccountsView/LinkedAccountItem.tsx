@@ -12,6 +12,7 @@ import BankAccount from 'models/BankAccount';
 import Link, { LinkStatus } from 'models/Link';
 import PlaidLinkStatusIndicator from './PlaidLinkStatusIndicator';
 import LinkStatusIndicator from './LinkStatusIndicator';
+import { useTriggerManualSync } from 'hooks/links';
 
 interface LinkedAccountItemProps {
   link: Link;
@@ -29,6 +30,12 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
     enabled: !!props.link.plaidInstitutionId,
     staleTime: 60 * 60 * 1000, // 60 minutes
   });
+
+  const triggerManualSync = useTriggerManualSync();
+
+  async function doManualSync() {
+    return triggerManualSync(props.link.linkId)
+  }
 
   const [menuAnchor, setMenuAnchor] = useState<Element | null>();
   const [dialog, setDialog] = useState<DialogOpen | null>();
@@ -122,6 +129,12 @@ export default function LinkedAccountItem(props: LinkedAccountItemProps): JSX.El
                   <MenuItem>
                     <CloudOff className="mr-2" />
                     Convert To Manual Link
+                  </MenuItem>
+                }
+                { props.link.getIsPlaid() &&
+                  <MenuItem onClick={ doManualSync }>
+                    <Autorenew className="mr-2" />
+                    Manually Resync
                   </MenuItem>
                 }
                 { props.link.getIsPlaid() &&

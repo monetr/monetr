@@ -139,3 +139,33 @@ func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) erro
 		Update(link)
 	return errors.Wrap(err, "failed to update link")
 }
+
+func (r *repositoryBase) UpdateLinkManualSyncTimestampMaybe(ctx context.Context, linkId uint64) (ok bool, err error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"linkId": linkId,
+	}
+
+	var link models.Link
+	now := time.Now()
+	result, err := r.txn.ModelContext(span.Context(), &link).
+		Where(`"link"."account_id" = ?`, r.AccountId()).
+		Where(`"link"."link_id" = ?`, linkId).
+		// Only let them manually sync once every 30 minutes.
+		Where(`("link"."last_manual_sync" < ? OR "link"."last_manual_sync" IS NULL)`, now.Add(-30*time.Minute)).
+		Set(`"last_manual_sync" = ?`, now).
+		Update()
+	if err != nil {
+		return false, errors.Wrap(err, "failed to update last manual sync timestamp")
+	}
+
+	// If we actually updated a row then that means we can proceed with the syncing.
+	if result.RowsAffected() == 1 {
+		return true, nil
+	}
+
+	// If we didn't update the row then that means we cannot do a manual resync right now.
+	return false, nil
+}

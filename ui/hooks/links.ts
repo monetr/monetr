@@ -4,6 +4,7 @@ import { useQuery, useQueryClient, UseQueryResult } from 'react-query';
 import { useBankAccounts } from 'hooks/bankAccounts';
 import Link from 'models/Link';
 import request from 'util/request';
+import { useSnackbar } from 'notistack';
 
 export type LinksResult =
   { result: Map<number, Link> }
@@ -57,4 +58,23 @@ export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata
     return Array.from(bankAccounts.values()).some(bankAccount => linksForInstitution.has(bankAccount.linkId) &&
       !!metadata.accounts.find(account => account.mask === bankAccount.mask));
   };
+}
+
+export function useTriggerManualSync(): (_linkId: number) => Promise<void> {
+  const { enqueueSnackbar } = useSnackbar();
+  return async (linkId: number): Promise<void> => {
+    return request()
+      .post('/plaid/link/sync', {
+        linkId,
+      })
+      .then(() => void enqueueSnackbar('Triggered a manual sync in the background!', {
+        variant: 'success',
+        disableWindowBlurListener: true,
+
+      }))
+      .catch(error => void enqueueSnackbar(`Failed to trigger a manual sync: ${ error?.response?.data?.error || 'unknown error' }.`, {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }));
+  }
 }

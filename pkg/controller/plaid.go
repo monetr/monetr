@@ -671,6 +671,14 @@ func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
 		return
 	}
 
+	if ok, err := repo.UpdateLinkManualSyncTimestampMaybe(c.getContext(ctx), link.LinkId); err != nil {
+		c.wrapPgError(ctx, err, "could not manually sync link")
+		return
+	} else if !ok {
+		c.returnError(ctx, http.StatusTooManyRequests, "link has been manually synced too recently")
+		return
+	}
+
 	err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
 		AccountId: link.AccountId,
 		LinkId:    link.LinkId,
