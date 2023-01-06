@@ -145,7 +145,7 @@
     "jest-mock-axios": "4.6.2",
     "jest-resolve": "29.2.2",
     "js-yaml": "4.1.0",
-    "postcss": "8.4.19",
+    "postcss": "8.4.20",
     "postcss-loader": "7.0.2",
     "prettier": "2.8.1",
     "react-refresh": "0.14.0",
