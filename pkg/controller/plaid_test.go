@@ -248,6 +248,59 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		response.Status(http.StatusAccepted)
 	})
 
+	t.Run("fails on subsequent attempt", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		jobController := mockgen.NewMockJobController(ctrl)
+		var controller background.JobController = jobController
+
+		config := NewTestApplicationConfig(t)
+		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
+			JobController: &controller,
+		})
+
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		jobController.EXPECT().
+			TriggerJob(
+				gomock.Any(),
+				gomock.Eq(background.PullTransactions),
+				testutils.NewGenericMatcher(func(args background.PullTransactionsArguments) bool {
+					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
+					return a && b
+				}),
+			).
+			MaxTimes(1).
+			Return(nil)
+
+		{ // First request should succeed.
+			response := e.POST("/api/plaid/link/sync").
+				WithJSON(map[string]interface{}{
+					"linkId": link.LinkId,
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusAccepted)
+		}
+
+		{ // Second request should fail, its too soon.
+			response := e.POST("/api/plaid/link/sync").
+				WithJSON(map[string]interface{}{
+					"linkId": link.LinkId,
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusTooEarly)
+			response.JSON().Path("$.error").String().Equal("link has been manually synced too recently")
+		}
+	})
+
 	t.Run("failed to enque job", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()

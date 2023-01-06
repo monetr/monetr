@@ -675,7 +675,7 @@ func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
 		c.wrapPgError(ctx, err, "could not manually sync link")
 		return
 	} else if !ok {
-		c.returnError(ctx, http.StatusTooManyRequests, "link has been manually synced too recently")
+		c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
 		return
 	}
 

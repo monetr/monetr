@@ -225,6 +225,8 @@ Sometimes you might need to manually trigger a resync with Plaid; this can happe
 was not properly received. By triggering a manual resync, transactions for the last 14 days and balances for all
 bank accounts within the specified link will be checked.
 
+Links can be manually synced once every 30 minutes, an error will be returned if you try to resync a link too quickly.
+
 ??? note
 
     This will not send a "sync" request to Plaid. This will only retrieve data already available via Plaid's API
@@ -289,6 +291,14 @@ If the request fails then you will receive a JSON response body.
 ```json title="400 Bad Request"
 {
   "error": "link is not in a valid status, it cannot be manually synced"
+}
+```
+
+#### Previous manual sync was too recent
+
+```json title="425 Too Early"
+{
+  "error": "link has been manually synced too recently"
 }
 ```
 
