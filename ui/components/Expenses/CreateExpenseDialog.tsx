@@ -4,7 +4,7 @@ import { useFundingSchedules } from 'hooks/fundingSchedules';
 import useIsMobile from 'hooks/useIsMobile';
 import React, { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { DatePicker } from '@mui/lab';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
   Button,
   Dialog,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowBack, DeleteOutline } from '@mui/icons-material';
-import { DatePicker } from '@mui/lab';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
   Divider,
   FormControl,
