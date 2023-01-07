@@ -4,7 +4,7 @@
     "baseUrl": "ui",
     "esModuleInterop": true,
     "jsx": "react",
-    "module": "ES2022",
+    "module": "ESNEXT",
     "moduleResolution": "node",
     "noImplicitAny": false,
     "noImplicitReturns": true,
@@ -14,10 +14,15 @@
     "target": "ES2022"
   },
   "include": [
+    "../make.ts",
     "ui/**/*",
-    "../tailwind.config.js"
+    "../tailwind.config.cjs"
   ],
   "exclude": [
     "pkg/ui/static"
-  ]
+  ],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
 }

@@ -1,6 +1,6 @@
 import { createTheme, darken } from '@mui/material';
 
-import tailwindConfig from '../tailwind.config.js';
+import tailwindConfig from '../tailwind.config.cjs';
 
 import resolveConfig from 'tailwindcss/resolveConfig';
 
