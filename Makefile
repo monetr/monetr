@@ -177,7 +177,7 @@ build-ui: $(STATIC_DIR)
 
 LICENSED_CONFIG=$(PWD)/.licensed.yaml
 LICENSED_CACHE=$(PWD)/.licenses
-$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(UI_DEPS) $(LICENSED_CONFIG)
+$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG)
 	$(LICENSED) cache --force
 	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
 
@@ -305,7 +305,7 @@ $(LOCAL_CERTIFICATE) &: $(LOCAL_CERTIFICATE_DIR) $(MKCERT)
 	sudo $(MKCERT) -install
 	$(MKCERT) -key-file $(LOCAL_CERTIFICATE_KEY) -cert-file $(LOCAL_CERTIFICATE_CERT) $(LOCAL_DOMAIN)
 
-DOCKER=$(shell which docker)
+DOCKER=$(shell which docker || echo 'docker')
 DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env
 COMPOSE_FILE=$(PWD)/docker-compose.yaml
 ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")

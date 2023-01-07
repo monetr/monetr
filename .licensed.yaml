@@ -46,6 +46,7 @@ reviewed:
     - golang.org/x/**/*
     - google.golang.org/protobuf/**/*
     - gopkg.in/ini.v1 # Apache 2.0
+    - github.com/googleapis/enterprise-certificate-proxy/**/* # Apache 2.0 https://github.com/googleapis/enterprise-certificate-proxy/blob/main/LICENSE
   yarn:
     - "@mui/icons-material" # MIT + CC
     - caniuse-lite
@@ -72,4 +73,5 @@ reviewed:
 ignored:
   yarn: # Silence warning about missing license. Its not missing.
     - harmony-reflect # MPL/Apache2.0 https://github.com/tvcutsem/harmony-reflect/blob/214fe922b6d66b45e72ed0912861a14dc7e475a3/LICENSE
+    - fsevents # MIT License https://github.com/fsevents/fsevents/blob/master/LICENSE
 

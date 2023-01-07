@@ -265,7 +265,7 @@ $(LICENSED):
 	@if [ ! -f "$(LICENSED)" ]; then $(MAKE) install-$(LICENSED); fi
 
 install-$(LICENSED): $(CURL)
-install-$(LICENSED): LICENSED_VERSION=3.7.3
+install-$(LICENSED): LICENSED_VERSION=3.9.1
 install-$(LICENSED): LICENSED_URL=https://github.com/github/licensed/releases/download/$(LICENSED_VERSION)/licensed-$(LICENSED_VERSION)-$(OS)-x64.tar.gz
 install-$(LICENSED): $(LOCAL_BIN)
 	$(call infoMsg,Installing licensed to $(LICENSED))
