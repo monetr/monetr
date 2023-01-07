@@ -123,7 +123,7 @@ APP_UI_FILES=$(filter-out $(TEST_UI_FILES),$(ALL_UI_FILES))
 PUBLIC_FILES=$(wildcard $(PUBLIC_DIR)/*)
 # Of the public files, these are the files that should be copied to the static_dir before the go build.
 COPIED_PUBLIC_FILES=$(filter-out $(PUBLIC_DIR)/index.html,$(PUBLIC_FILES))
-UI_CONFIG_FILES=$(PWD)/tsconfig.json $(wildcard $(PWD)/*.config.js)
+UI_CONFIG_FILES=$(PWD)/tsconfig.json $(wildcard $(PWD)/*.config.js) $(wildcard $(PWD)/*.config.cjs)
 
 GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
 UI_DEPS=$(PWD)/package.json $(PWD)/yarn.lock
