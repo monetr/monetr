@@ -1,5 +1,5 @@
 import useIsMobile from 'hooks/useIsMobile';
-import React, { Fragment, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Science } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -136,6 +136,13 @@ function CreateFundingScheduleDialog(): JSX.Element {
                   />
                   <Collapse in={ showAdvanced }>
                     <FormControlLabel
+                      className='flex w-full bg-gray-100 pl-4 pr-2 py-2 rounded-lg ml-0 mr-0'
+                      labelPlacement='start'
+                      componentsProps={{
+                        typography: {
+                          className: 'w-full'
+                        }
+                      }}
                       control={
                         <Switch
                           value={ values.excludeWeekends }
@@ -143,9 +150,12 @@ function CreateFundingScheduleDialog(): JSX.Element {
                         />
                       }
                       label={
-                        <Fragment>
-                          <span>Exclude Weekends</span> <Science className="mb-1 fill-gray-600" />
-                        </Fragment>
+                        <div>
+                          <span className='font-normal'>
+                            Exclude Weekends
+                          </span>
+                          <Science className="mb-1 fill-gray-600" />
+                        </div>
                       }
                     />
                     <div className='col-span-12 pt-5'>

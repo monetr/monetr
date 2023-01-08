@@ -25,14 +25,14 @@ export default function FundingSchedulesView(): JSX.Element {
     return (
       <div className="h-full w-full bg-primary">
         <div className="view-inner h-full flex justify-center items-center">
-          <div className="grid grid-cols-1 grid-rows-3 grid-flow-col gap-2">
+          <div className="grid grid-cols-1 grid-rows-3 grid-flow-col gap-2 px-2">
             <div className="w-full flex justify-center space-x-4">
               <Today className='h-full text-5xl opacity-50' />
               <ArrowForward className='h-full text-5xl opacity-50' />
               <AccountBalance className='h-full text-5xl opacity-50' />
             </div>
             <Typography
-              className="opacity-50"
+              className="opacity-50 text-center"
               variant="h3"
             >
               You don't have any funding schedules yet...
