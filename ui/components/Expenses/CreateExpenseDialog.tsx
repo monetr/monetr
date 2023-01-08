@@ -4,7 +4,6 @@ import { useFundingSchedules } from 'hooks/fundingSchedules';
 import useIsMobile from 'hooks/useIsMobile';
 import React, { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import {
   Button,
   Dialog,
@@ -14,7 +13,6 @@ import {
   DialogTitle,
   Divider,
   InputAdornment,
-  TextField,
   Tooltip,
 } from '@mui/material';
 import { AxiosError } from 'axios';
@@ -29,6 +27,9 @@ import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
 import formatAmount from 'util/formatAmount';
+import MForm from 'components/MForm';
+import MTextField from 'components/MTextField';
+import MDatePicker from 'components/MDatePicker';
 
 interface CreateExpenseForm {
   name: string;
@@ -140,17 +141,13 @@ function CreateExpenseDialog(): JSX.Element {
     >
       { ({
         values,
-        errors,
-        touched,
-        handleChange,
         handleBlur,
-        handleSubmit,
         setFieldValue,
         isSubmitting,
         submitForm,
         isValid,
       }) => (
-        <form onSubmit={ handleSubmit }>
+        <MForm>
           <Dialog open={ modal.visible } maxWidth="sm" ref={ ref } fullScreen={ isMobile }>
             <DialogTitle>
               Create A New Expense
@@ -162,33 +159,19 @@ function CreateExpenseDialog(): JSX.Element {
               </DialogContentText>
               <div className="grid sm:grid-cols-12 md:grid-cols-12 mt-5 md:gap-x-5 md:gap-y-5 gap-y-5">
                 <div className="col-span-12">
-                  <TextField
+                  <MTextField
                     label="What are you budgeting for?"
-                    error={ touched.name && !!errors.name }
                     placeholder="Example: Amazon..."
-                    helperText={ (touched.name && errors.name) ? errors.name : ' ' }
                     autoFocus
                     name="name"
-                    className="w-full"
-                    onChange={ handleChange }
-                    onBlur={ onBlur(values, handleBlur) }
-                    value={ values.name }
-                    disabled={ isSubmitting }
                     required
                   />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <TextField
+                  <MTextField
                     label="How much do you need?"
-                    error={ touched.amount && !!errors.amount }
-                    helperText={ (touched.amount && errors.amount) ? errors.amount : ' ' }
                     name="amount"
-                    className="w-full"
                     type="number"
-                    onChange={ handleChange }
-                    onBlur={ onBlur(values, handleBlur) }
-                    value={ values.amount }
-                    disabled={ isSubmitting }
                     required
                     InputProps={ {
                       startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -197,17 +180,10 @@ function CreateExpenseDialog(): JSX.Element {
                   />
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  <DatePicker
+                  <MDatePicker
                     label="When do you need it next?"
-                    disabled={ isSubmitting }
-                    minDate={ moment().startOf('day').add(1, 'day') }
-                    onChange={ value => setFieldValue('nextOccurrence', value.startOf('day')) }
-                    inputFormat="MM/DD/yyyy"
-                    value={ values.nextOccurrence }
                     onClose={ onBlur(values, () => {}) }
-                    renderInput={ params => (
-                      <TextField label="When do you need it next?" fullWidth { ...params } />
-                    ) }
+                    required
                   />
                 </div>
                 <Divider className="col-span-12"/>
@@ -271,7 +247,7 @@ function CreateExpenseDialog(): JSX.Element {
               </Button>
             </DialogActions>
           </Dialog>
-        </form>
+        </MForm>
       ) }
     </Formik>
   );

@@ -2,7 +2,6 @@ import useIsMobile from 'hooks/useIsMobile';
 import React, { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Science } from '@mui/icons-material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Button, Collapse, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, InputAdornment, Switch, TextField } from '@mui/material';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import moment from 'moment';
@@ -12,6 +11,9 @@ import RecurrenceSelect from 'components/Recurrence/RecurrenceSelect';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
+import MTextField from 'components/MTextField';
+import MForm from 'components/MForm';
+import MDatePicker from 'components/MDatePicker';
 
 interface CreateFundingScheduleForm {
   name: string;
@@ -47,7 +49,7 @@ function CreateFundingScheduleDialog(): JSX.Element {
       description: values.recurrenceRule.name,
       nextOccurrence: values.nextOccurrence.startOf('day'),
       rule: values.recurrenceRule.ruleString(),
-      estimatedDeposit: values.estimatedDeposit && Math.ceil(values.estimatedDeposit * 100), // Convert to an integer.,
+      estimatedDeposit: values.estimatedDeposit && values.estimatedDeposit > 0 && Math.ceil(values.estimatedDeposit * 100), // Convert to an integer.,
       excludeWeekends: values.excludeWeekends,
     });
 
@@ -61,7 +63,7 @@ function CreateFundingScheduleDialog(): JSX.Element {
     nextOccurrence: moment().add(1, 'day'),
     recurrenceRule: new Recurrence(),
     excludeWeekends: false,
-    estimatedDeposit: null,
+    estimatedDeposit: 0,
   };
 
   return (
@@ -72,17 +74,17 @@ function CreateFundingScheduleDialog(): JSX.Element {
     >
       { ({
         values,
-        errors,
-        touched,
-        handleChange,
-        handleBlur,
-        handleSubmit,
-        setFieldValue,
         isSubmitting,
+        setFieldValue,
         submitForm,
       }) => (
-        <form onSubmit={ handleSubmit }>
-          <Dialog open={ modal.visible } maxWidth="xs" ref={ ref } fullScreen={ isMobile }>
+        <MForm>
+          <Dialog
+            open={ modal.visible }
+            maxWidth="xs"
+            ref={ ref }
+            fullScreen={ isMobile }
+          >
             <DialogTitle>
               Create A New Funding Schedule
             </DialogTitle>
@@ -93,31 +95,18 @@ function CreateFundingScheduleDialog(): JSX.Element {
               </DialogContentText>
               <div className='grid sm:grid-cols-1 md:grid-cols-12 mt-5 mb-6 gap-x-5 gap-y-5'>
                 <div className='col-span-12'>
-                  <TextField
-                    label="What do you want to call your funding schedule?"
-                    error={ touched.name && values.name && !!errors.name }
-                    placeholder="Example: Payday..."
-                    helperText={ (touched.name && values.name && errors.name) ? errors.name : ' ' }
+                  <MTextField
                     name="name"
-                    className="w-full"
-                    onChange={ handleChange }
-                    onBlur={ handleBlur }
-                    value={ values.name }
-                    disabled={ isSubmitting }
+                    label="What do you want to call your funding schedule?"
+                    placeholder="Example: Payday..."
                     required
+                    autoFocus
                   />
                 </div>
                 <div className='col-span-12'>
-                  <DatePicker
+                  <MDatePicker
+                    name="nextOccurrence"
                     label="When do you get paid next?"
-                    disabled={ isSubmitting }
-                    minDate={ moment().startOf('day').add(1, 'day') }
-                    onChange={ value => setFieldValue('nextOccurrence', value.startOf('day')) }
-                    inputFormat="MM/DD/yyyy"
-                    value={ values.nextOccurrence }
-                    renderInput={ params => (
-                      <TextField label="When do you get paid next?"  fullWidth { ...params } />
-                    ) }
                   />
                 </div>
                 <div className='col-span-12'>
@@ -159,17 +148,10 @@ function CreateFundingScheduleDialog(): JSX.Element {
                       }
                     />
                     <div className='col-span-12 pt-5'>
-                      <TextField
+                      <MTextField
                         label="About how much do you get paid each time?"
-                        error={ touched.estimatedDeposit && !!errors.estimatedDeposit }
                         placeholder="Example: $1200"
-                        helperText={ (touched.estimatedDeposit && errors.estimatedDeposit) ? errors.estimatedDeposit : ' ' }
                         name="estimatedDeposit"
-                        className="w-full"
-                        onChange={ handleChange }
-                        onBlur={ handleBlur }
-                        value={ values.estimatedDeposit }
-                        disabled={ isSubmitting }
                         type="number"
                         InputProps={ {
                           startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -199,7 +181,7 @@ function CreateFundingScheduleDialog(): JSX.Element {
               </Button>
             </DialogActions>
           </Dialog>
-        </form>
+        </MForm>
       ) }
     </Formik>
   );
