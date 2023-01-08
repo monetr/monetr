@@ -48,23 +48,43 @@ export default function Sidebar(props: SidebarProps): JSX.Element {
           </div>
         </div>
         <div className="flex-1 flex flex-col pl-2.5 pt-2.5 pr-2.5 lg:pr-0">
-          <SidebarButton onClick={ props.closeSidebar } to="/transactions">
+          <SidebarButton
+            onClick={ props.closeSidebar }
+            to="/transactions"
+            prefix="/transactions"
+          >
             <ShoppingCart className="mr-2.5" />
             Transactions
           </SidebarButton>
-          <SidebarButton onClick={ props.closeSidebar } to="/expenses">
+          <SidebarButton
+            onClick={ props.closeSidebar }
+            to="/expenses"
+            prefix="/expenses"
+          >
             <PriceCheck className="mr-2.5" />
             Expenses
           </SidebarButton>
-          <SidebarButton onClick={ props.closeSidebar } to="/goals">
+          <SidebarButton
+            onClick={ props.closeSidebar }
+            to="/goals"
+            prefix="/goals"
+          >
             <Savings className="mr-2.5" />
             Goals
           </SidebarButton>
-          <SidebarButton onClick={ props.closeSidebar } to="/funding">
+          <SidebarButton
+            onClick={ props.closeSidebar }
+            to="/funding"
+            prefix="/funding"
+          >
             <Today className="mr-2.5" />
             Funding Schedules
           </SidebarButton>
-          <SidebarButton onClick={ props.closeSidebar } to="/accounts">
+          <SidebarButton
+            onClick={ props.closeSidebar }
+            to="/accounts"
+            prefix="/accounts"
+          >
             <AccountBalance className="mr-2.5" />
             Accounts
           </SidebarButton>

@@ -15,6 +15,7 @@ import SubscriptionPage from 'pages/subscription';
 import TransactionsPage from 'pages/transactions';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
+import FundingEditPage from 'pages/funding/edit';
 
 const AuthenticatedApp = (): JSX.Element => {
 
@@ -68,6 +69,7 @@ const AuthenticatedApp = (): JSX.Element => {
             <Route path="/expenses" element={ <ExpensesPage /> } />
             <Route path="/goals" element={ <GoalsPage /> } />
             <Route path="/funding" element={ <FundingPage /> } />
+            <Route path="/funding/:fundingScheduleId/edit" element={ <FundingEditPage /> } />
             <Route path="/accounts" element={ <AccountsPage /> } />
             <Route path="/settings" element={ <SettingsPage /> } />
             <Route path="/subscription" element={ <SubscriptionPage /> } />
