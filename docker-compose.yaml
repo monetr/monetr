@@ -1,21 +1,4 @@
 services:
-  vault:
-    image: vault:1.8.0
-    cap_add:
-      - IPC_LOCK
-    depends_on:
-      - kms
-    command:
-      - "bin/sh"
-      - "-ec"
-      - "/usr/local/bin/docker-entrypoint.sh vault server -config=/tmp/config.hcl"
-    ports:
-      - 8200:8200
-    volumes:
-      - ./compose/vault.hcl:/tmp/config.hcl
-      - vaultData:/vault/data
-    profiles:
-      - donotstart
   kms:
     image: nsmithuk/local-kms
     restart: always # If something goes wrong just restart the container, this is for development only.
@@ -184,7 +167,6 @@ services:
       - mail
 
 volumes:
-  vaultData:
   kmsData:
   tmpData:
   goData:
