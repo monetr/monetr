@@ -14165,7 +14165,7 @@ ts-loader@9.4.2:
     micromatch "^4.0.0"
     semver "^7.3.4"
 
-ts-node@^10.9.1:
+ts-node@10.9.1:
   version "10.9.1"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.9.1.tgz#e73de9102958af9e1f0b168a6ff320e25adcff4b"
   integrity sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==
@@ -15120,7 +15120,7 @@ zustand@4.1.4:
   dependencies:
     use-sync-external-store "1.2.0"
 
-zx@^7.1.1:
+zx@7.1.1:
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/zx/-/zx-7.1.1.tgz#8dc709fb8acd90ae5f39476145e5a2f3883dca1e"
   integrity sha512-5YlTO2AJ+Ku2YuZKSSSqnUKuagcM/f/j4LmHs15O84Ch80Z9gzR09ZK3gR7GV+rc8IFpz2H/XNFtFVmj31yrZA==
