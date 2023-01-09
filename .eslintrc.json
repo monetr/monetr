@@ -13,6 +13,7 @@
     "simple-import-sort"
   ],
   "rules": {
+    "@typescript-eslint/strict-boolean-expressions": "warn",
     "indent": [
       2,
       2,
