@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.174
 	github.com/brianvoe/gofakeit/v6 v6.20.1
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
-	github.com/fsnotify/fsnotify v1.5.4
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/getsentry/sentry-go v0.16.0
 	github.com/go-pg/migrations/v8 v8.1.0
@@ -33,7 +33,7 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
-	github.com/spf13/viper v1.13.0
+	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	github.com/stripe/stripe-go/v72 v72.122.0
 	github.com/stripe/stripe-go/v74 v74.5.0
@@ -108,7 +108,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
-	github.com/spf13/afero v1.8.2 // indirect
+	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
