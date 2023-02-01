@@ -128,8 +128,14 @@ func (c *Controller) postSpending(ctx *context.Context) {
 
 	switch spending.SpendingType {
 	case models.SpendingTypeExpense:
-		// If this is an expense then we need to figure out when it happens next.
-		next = spending.RecurrenceRule.After(time.Now(), false)
+		if next.Before(time.Now()) {
+			requestSpan.Status = sentry.SpanStatusInvalidArgument
+			c.badRequest(ctx, "next due date cannot be inthe past")
+			return
+		}
+		// Once we know that the next recurrence is not in the past we can just store it here;
+		// itll be sanitized and converted to midnight below.
+		next = spending.NextRecurrence
 	case models.SpendingTypeGoal:
 		// If the spending is a goal, then we don't need the rule at all.
 		next = spending.NextRecurrence
