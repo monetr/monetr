@@ -31,6 +31,14 @@ const (
 	// I'll add other bank account sub types later. Right now I'm really only working with depository anyway.
 )
 
+type BankAccountStatus string
+
+const (
+	UnknownBankAccountStatus  BankAccountStatus = "unknown"
+	ActiveBankAccountStatus   BankAccountStatus = "active"
+	InactiveBankAccountStatus BankAccountStatus = "inactive"
+)
+
 type BankAccount struct {
 	tableName string `pg:"bank_accounts"`
 
@@ -50,5 +58,6 @@ type BankAccount struct {
 	PlaidOfficialName string             `json:"officialName" pg:"plaid_official_name" example:"US Bank - Checking Account"`
 	Type              BankAccountType    `json:"accountType" pg:"account_type" example:"depository"`
 	SubType           BankAccountSubType `json:"accountSubType" pg:"account_sub_type" example:"checking"`
+	Status            BankAccountStatus  `json:"status" pg:"status,notnull"`
 	LastUpdated       time.Time          `json:"lastUpdated" pg:"last_updated,notnull"`
 }

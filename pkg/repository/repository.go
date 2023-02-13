@@ -57,7 +57,7 @@ type BaseRepository interface {
 	GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error)
 	InsertTransactions(ctx context.Context, transactions []models.Transaction) error
 	ProcessTransactionSpentFrom(ctx context.Context, bankAccountId uint64, input, existing *models.Transaction) (updatedExpenses []models.Spending, _ error)
-	UpdateBankAccounts(ctx context.Context, accounts []models.BankAccount) error
+	UpdateBankAccounts(ctx context.Context, accounts ...models.BankAccount) error
 	UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error
 	UpdateLink(ctx context.Context, link *models.Link) error
 	// UpdateLinkManualSyncTimestampMaybe will take a link ID as a candidate to be manually resynced. If that link has not

@@ -36,6 +36,9 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 	for i := range bankAccounts {
 		bankAccounts[i].BankAccountId = 0
 		bankAccounts[i].AccountId = r.AccountId()
+		if bankAccounts[i].Status == "" {
+			bankAccounts[i].Status = models.ActiveBankAccountStatus
+		}
 	}
 	if _, err := r.txn.ModelContext(span.Context(), &bankAccounts).Insert(&bankAccounts); err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -97,7 +100,7 @@ func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId uint6
 	return &result, nil
 }
 
-func (r *repositoryBase) UpdateBankAccounts(ctx context.Context, accounts []models.BankAccount) error {
+func (r *repositoryBase) UpdateBankAccounts(ctx context.Context, accounts ...models.BankAccount) error {
 	if len(accounts) == 0 {
 		return nil
 	}

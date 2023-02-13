@@ -213,13 +213,24 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 			}
 		}
 
-		// I want to build something in to show if a bank account has been removed. This should help achieve that in the
-		// near future. If the current `bankAccount` is not in the map, then that means it wasnt returned by Plaid and is
-		// missing. We can then mark these accounts in the future.
+		// If an account is no longer visible in plaid that means that we won't receive updates for that account anymore. If
+		// this happens, log something and mark that account as inactive. This way we can inform the user that the account
+		// is no longer receiving updates.
 		if _, ok := plaidIdsToBankIds[bankAccount.PlaidAccountId]; !ok {
+			log.WithFields(logrus.Fields{
+				"bankAccountId": bankAccount.BankAccountId,
+			}).Info("found bank account that is no longer present in plaid, it will be updated as inactive")
 			crumbs.Warn(span.Context(), "Found bank account that is no longer present in Plaid", "plaid", map[string]interface{}{
 				"bankAccountId": bankAccount.BankAccountId,
 			})
+			bankAccount.Status = models.InactiveBankAccountStatus
+			if err = p.repo.UpdateBankAccounts(span.Context(), bankAccount); err != nil {
+				log.WithFields(logrus.Fields{
+					"bankAccountId": bankAccount.BankAccountId,
+				}).
+					WithError(err).
+					Error("failed to update bank account as inactive")
+			}
 		}
 	}
 
@@ -437,7 +448,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 			}
 		}
 
-		if err = p.repo.UpdateBankAccounts(span.Context(), updatedBankAccounts); err != nil {
+		if err = p.repo.UpdateBankAccounts(span.Context(), updatedBankAccounts...); err != nil {
 			log.WithError(err).Error("failed to update bank account balances")
 			crumbs.ReportError(span.Context(), err, "Failed to update bank account balances", "job", nil)
 		}
