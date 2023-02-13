@@ -11,8 +11,8 @@ import (
 	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/crumbs"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
-	"github.com/monetr/monetr/pkg/swag"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -85,8 +85,9 @@ func (c *Controller) getLink(ctx iris.Context) {
 
 func (c *Controller) postLinks(ctx iris.Context) {
 	var request struct {
-		InstitutionName       string `json:"institutionName"`
-		CustomInstitutionName string `json:"customInstitutionName"`
+		InstitutionName       string  `json:"institutionName"`
+		CustomInstitutionName string  `json:"customInstitutionName"`
+		Description           *string `json:"description"`
 	}
 	if err := ctx.ReadJSON(&request); err != nil {
 		c.invalidJson(ctx)
@@ -100,9 +101,15 @@ func (c *Controller) postLinks(ctx iris.Context) {
 		return
 	}
 
+	// If a description is provided. Trim the space on the description.
+	if request.Description != nil {
+		request.Description = myownsanity.StringP(strings.TrimSpace(*request.Description))
+	}
+
 	link := models.Link{
 		InstitutionName:       request.InstitutionName,
 		CustomInstitutionName: request.CustomInstitutionName,
+		Description:           request.Description,
 		LinkType:              models.ManualLinkType,
 		LinkStatus:            models.LinkStatusSetup,
 	}
@@ -141,8 +148,10 @@ func (c *Controller) putLink(ctx iris.Context) {
 		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to update")
 		return
 	}
-
-	var link swag.UpdateLinkRequest
+	var link struct {
+		CustomInstitutionName string  `json:"customInstitutionName"`
+		Description           *string `json:"description"`
+	}
 	if err := ctx.ReadJSON(&link); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 		return
@@ -159,6 +168,10 @@ func (c *Controller) putLink(ctx iris.Context) {
 
 	if link.CustomInstitutionName != "" {
 		existingLink.CustomInstitutionName = link.CustomInstitutionName
+		hasUpdate = true
+	}
+	if link.Description != nil {
+		existingLink.Description = link.Description
 		hasUpdate = true
 	}
 

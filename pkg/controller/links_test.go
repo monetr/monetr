@@ -21,6 +21,7 @@ func TestPostLink(t *testing.T) {
 			LinkType:              models.PlaidLinkType, // This should be changed to manual in the response.
 			InstitutionName:       "U.S. Bank",
 			CustomInstitutionName: "US Bank",
+			Description:           myownsanity.StringP("My personal link"),
 			PlaidInstitutionId:    myownsanity.StringP("ins_123"),
 			CreatedAt:             createdAndUpdatedBogus, // Set these to something to make sure it gets overwritten.
 			UpdatedAt:             createdAndUpdatedBogus,
@@ -36,6 +37,7 @@ func TestPostLink(t *testing.T) {
 		response.JSON().Path("$.linkId").Number().Gt(0)
 		response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
+		response.JSON().Path("$.description").String().Equal("My personal link")
 		response.JSON().Path("$.plaidInstitutionId").Null()
 	})
 

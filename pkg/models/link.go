@@ -30,6 +30,7 @@ type Link struct {
 	ExpirationDate            *time.Time `json:"expirationDate" pg:"expiration_date"`
 	InstitutionName           string     `json:"institutionName" pg:"institution_name"`
 	CustomInstitutionName     string     `json:"customInstitutionName,omitempty" pg:"custom_institution_name"`
+	Description               *string    `json:"description" pg:"description"`
 	CreatedAt                 time.Time  `json:"createdAt" pg:"created_at,notnull"`
 	CreatedByUserId           uint64     `json:"createdByUserId" pg:"created_by_user_id,notnull,on_delete:CASCADE"`
 	CreatedByUser             *User      `json:"-,omitempty" pg:"rel:has-one,fk:created_by_user_id"`
