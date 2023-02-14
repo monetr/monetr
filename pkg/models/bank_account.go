@@ -25,7 +25,7 @@ const (
 	CashManagementBankAccountSubType BankAccountSubType = "cash management"
 	EBTBankAccountSubType            BankAccountSubType = "ebt"
 
-	CreditCartBankAccountSubType BankAccountSubType = "credit card"
+	CreditCardBankAccountSubType BankAccountSubType = "credit card"
 
 	AutoBankAccountSubType BankAccountSubType = "auto"
 	// I'll add other bank account sub types later. Right now I'm really only working with depository anyway.
