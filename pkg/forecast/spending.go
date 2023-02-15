@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
@@ -44,6 +45,17 @@ func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, s
 	events := make([]SpendingEvent, 0)
 
 	for i := 0; ; i++ {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				panic(err)
+			}
+			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
+			return events
+		default:
+			// Do nothing
+		}
+
 		var event *SpendingEvent
 		if i == 0 {
 			event = s.getNextSpendingEventAfter(ctx, start, timezone, s.spending.CurrentAmount)
@@ -69,6 +81,17 @@ func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, s
 func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []SpendingEvent {
 	events := make([]SpendingEvent, 0, n)
 	for i := 0; i < n; i++ {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				panic(err)
+			}
+			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
+			return events
+		default:
+			// Do nothing
+		}
+
 		var event *SpendingEvent
 		if i == 0 {
 			event = s.getNextSpendingEventAfter(ctx, input, timezone, s.spending.CurrentAmount)
