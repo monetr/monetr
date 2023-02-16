@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
 )
@@ -72,7 +73,19 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 	// adjusted ones.
 	actualNextContributionDate := nextContributionDate
 	weekendAvoided := false
+AfterLoop:
 	for !nextContributionDate.After(input) {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				panic(err)
+			}
+			crumbs.Warn(ctx, "Received done context signal with no error", "funding", nil)
+			break AfterLoop
+		default:
+			// Do nothing
+		}
+
 		// If the next contribution date is not after now, then increment it.
 		nextContributionDate = nextContributionRule.After(actualNextContributionDate, false)
 		// Store the real contribution date for later use.
@@ -109,6 +122,17 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 func (f *fundingScheduleBase) GetNFundingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []FundingEvent {
 	events := make([]FundingEvent, n)
 	for i := 0; i < n; i++ {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				panic(err)
+			}
+			crumbs.Warn(ctx, "Received done context signal with no error", "funding", nil)
+			return events
+		default:
+			// Do nothing
+		}
+
 		if i == 0 {
 			events[i] = f.GetNextFundingEventAfter(ctx, input, timezone)
 			continue
@@ -130,6 +154,17 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start
 	items := rule.Between(start, end, true)
 	events := make([]FundingEvent, len(items))
 	for i, item := range items {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				panic(err)
+			}
+			crumbs.Warn(ctx, "Received done context signal with no error", "funding", nil)
+			return events
+		default:
+			// Do nothing
+		}
+
 		// TODO Implement the skip weekends here too.
 		events[i] = FundingEvent{
 			FundingScheduleId: f.fundingSchedule.FundingScheduleId,

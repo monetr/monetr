@@ -82,4 +82,43 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		}
 		assert.Greater(t, secondAverage, firstAverage, "should need to contribute more per funding")
 	})
+
+	t.Run("timeout bug test", func(t *testing.T) {
+		// This test is here to prove that the forecasting code has a bug in it that causes it to load forever. Typically
+		// even with many spending objects the forecaster should resolve all of its data in several hundred milliseconds for
+		// a very long period. But that doesn't seem to be the case for certain data sets? This test proves that specific
+		// inputs result in a timeout; But also that the forecaster does properly time out.
+		// This is part of: https://github.com/monetr/monetr/issues/1243
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2022, 11, 29, 14, 30, 1, 0, timezone).UTC()
+		end := time.Date(2022, 12, 2, 0, 0, 0, 0, timezone).UTC()
+
+		fundingSchedules := []models.FundingSchedule{
+			{
+				Rule:              fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		}
+		spending := []models.Spending{
+			{
+				FundingScheduleId: 1,
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      1000,
+				CurrentAmount:     0,
+				NextRecurrence:    time.Date(2022, 12, 1, 0, 0, 0, 0, timezone),
+				RecurrenceRule:    nil,
+				SpendingId:        1,
+			},
+		}
+
+		forecaster := NewForecaster(spending, fundingSchedules)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		assert.PanicsWithValue(t, context.DeadlineExceeded, func() {
+			_ = forecaster.GetForecast(ctx, now, end, timezone)
+		})
+	})
 }
