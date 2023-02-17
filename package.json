@@ -6,8 +6,8 @@
   "dependencies": {
     "@date-io/moment": "2.16.1",
     "@ebay/nice-modal-react": "1.2.8",
-    "@emotion/react": "11.10.0",
-    "@emotion/styled": "11.10.0",
+    "@emotion/react": "11.10.6",
+    "@emotion/styled": "11.10.6",
     "@fontsource/roboto": "4.5.8",
     "@mui/icons-material": "5.11.0",
     "@mui/lab": "5.0.0-alpha.114",
