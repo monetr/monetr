@@ -33,8 +33,13 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
   const { transaction } = props;
 
   async function closeDialog() {
-    modal.hide()
-      .then(() => modal.remove());
+    modal.keepMounted = false;
+    modal.hide();
+    setTimeout(() => modal.remove(), 500);
+    // TODO The promise from `modal.hide()` never resolves, so modal.remove is never called; causing issues with
+    //   the same modal being re-used here.
+    // modal.hide()
+    //   .then(() => console.warn(modal.remove()));
   }
 
   async function validateInput(input: EditTransactionForm): FormikErrors<EditTransactionForm> {
@@ -100,6 +105,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
 
   return (
     <SwipeableDrawer
+      transitionDuration={ 250 }
       style={ {
         zIndex: 1100,
       } }
