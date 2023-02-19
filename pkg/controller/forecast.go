@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"time"
 
 	"github.com/kataras/iris/v12"
@@ -76,9 +77,11 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 
 	end := request.NextRecurrence.AddDate(2, 0, 0)
 	timezone := c.mustGetTimezone(ctx)
+	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
+	defer cancel()
 	ctx.JSON(map[string]interface{}{
 		"estimatedCost": afterForecast.GetAverageContribution(
-			c.getContext(ctx),
+			timeout,
 			request.NextRecurrence.AddDate(0, 0, -1),
 			end,
 			timezone,
@@ -127,9 +130,11 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 		},
 	)
 	timezone := c.mustGetTimezone(ctx)
+	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
+	defer cancel()
 	ctx.JSON(map[string]interface{}{
 		"nextContribution": fundingForecast.GetNextContribution(
-			c.getContext(ctx),
+			timeout,
 			time.Now(),
 			request.FundingScheduleId,
 			timezone,
