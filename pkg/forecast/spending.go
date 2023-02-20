@@ -77,13 +77,15 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 		}
 
 		var event *SpendingEvent
-		if i == 0 {
-			ilog = ilog.WithField("after", start)
-			event = s.getNextSpendingEventAfter(ctx, start, timezone, s.spending.CurrentAmount)
-		} else {
-			ilog = ilog.WithField("after", events[i-1].Date)
-			event = s.getNextSpendingEventAfter(ctx, events[i-1].Date, timezone, events[i-1].RollingAllocation)
+		afterDate := start
+		allocation := s.spending.CurrentAmount
+		if i > 0 {
+			afterDate = events[i-1].Date
+			allocation = events[i-1].RollingAllocation
 		}
+
+		ilog = ilog.WithField("after", start)
+		event = s.getNextSpendingEventAfter(ctx, afterDate, timezone, allocation)
 
 		// No event returned means there are no more.
 		if event == nil {
@@ -94,6 +96,24 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 		if event.Date.After(end) {
 			ilog.Trace("calculated next spending event, but it happens after the end window, discarding and exiting calculation")
 			break
+		}
+
+		// This should not happen, and to some degree there are now tests to prove this. But if it does happen that means
+		// there has been a regression. Send something to sentry with some contextual data so it can be diagnosted.
+		if !event.Date.After(afterDate) {
+			ilog.Error("calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!")
+			crumbs.IndicateBug(ctx, "Calculated a spending event that does not come after the after date specified", map[string]interface{}{
+				"spending":   s.spending,
+				"afterDate":  afterDate,
+				"start":      start,
+				"end":        end,
+				"allocation": allocation,
+				"i":          i,
+				"event":      event,
+				"timezone":   timezone.String(),
+				"count":      len(events),
+			})
+			panic("calculated a spending event that does not come after the after date specified")
 		}
 
 		ilog.Trace("calculated next spending event, adding to return set")
