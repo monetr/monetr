@@ -7,6 +7,7 @@ import (
 	"github.com/ahmetb/go-linq/v3"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
+	"github.com/sirupsen/logrus"
 )
 
 type Event struct {
@@ -32,18 +33,20 @@ type Forecaster interface {
 }
 
 type forecasterBase struct {
+	log            *logrus.Entry
 	currentBalance int64
 	funding        map[uint64]FundingInstructions
 	spending       map[uint64]SpendingInstructions
 }
 
-func NewForecaster(spending []models.Spending, funding []models.FundingSchedule) Forecaster {
+func NewForecaster(log *logrus.Entry, spending []models.Spending, funding []models.FundingSchedule) Forecaster {
 	forecaster := &forecasterBase{
+		log:      log,
 		funding:  map[uint64]FundingInstructions{},
 		spending: map[uint64]SpendingInstructions{},
 	}
 	for _, fundingSchedule := range funding {
-		forecaster.funding[fundingSchedule.FundingScheduleId] = NewFundingScheduleFundingInstructions(fundingSchedule)
+		forecaster.funding[fundingSchedule.FundingScheduleId] = NewFundingScheduleFundingInstructions(log, fundingSchedule)
 	}
 	for _, spendingItem := range spending {
 		fundingInstructions, ok := forecaster.funding[spendingItem.FundingScheduleId]
@@ -51,7 +54,11 @@ func NewForecaster(spending []models.Spending, funding []models.FundingSchedule)
 			panic("missing funding schedule required by spending object")
 		}
 
-		forecaster.spending[spendingItem.SpendingId] = NewSpendingInstructions(spendingItem, fundingInstructions)
+		forecaster.spending[spendingItem.SpendingId] = NewSpendingInstructions(
+			log,
+			spendingItem,
+			fundingInstructions,
+		)
 		forecaster.currentBalance += spendingItem.GetProgressAmount()
 	}
 

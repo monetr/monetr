@@ -63,18 +63,23 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 		c.wrapPgError(ctx, err, "could not retrieve funding schedules")
 		return
 	}
+	log := c.getLog(ctx)
 
-	afterForecast := forecast.NewForecaster([]models.Spending{
-		{
-			FundingScheduleId: request.FundingScheduleId,
-			SpendingType:      request.SpendingType,
-			TargetAmount:      request.TargetAmount,
-			CurrentAmount:     request.CurrentAmount,
-			NextRecurrence:    request.NextRecurrence,
-			RecurrenceRule:    request.RecurrenceRule,
-			SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
+	afterForecast := forecast.NewForecaster(
+		log,
+		[]models.Spending{
+			{
+				FundingScheduleId: request.FundingScheduleId,
+				SpendingType:      request.SpendingType,
+				TargetAmount:      request.TargetAmount,
+				CurrentAmount:     request.CurrentAmount,
+				NextRecurrence:    request.NextRecurrence,
+				RecurrenceRule:    request.RecurrenceRule,
+				SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
+			},
 		},
-	}, fundingSchedules)
+		fundingSchedules,
+	)
 
 	end := request.NextRecurrence.AddDate(2, 0, 0)
 	timezone := c.mustGetTimezone(ctx)
@@ -137,8 +142,10 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 		c.wrapPgError(ctx, err, "could not retrieve spending for forecast")
 		return
 	}
+	log := c.getLog(ctx)
 
 	fundingForecast := forecast.NewForecaster(
+		log,
 		spending,
 		[]models.FundingSchedule{
 			*fundingSchedule,

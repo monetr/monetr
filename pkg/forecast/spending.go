@@ -8,6 +8,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/util"
+	"github.com/sirupsen/logrus"
 	"github.com/teambition/rrule-go"
 )
 
@@ -30,24 +31,43 @@ type SpendingInstructions interface {
 }
 
 type spendingInstructionBase struct {
+	log      *logrus.Entry
 	spending models.Spending
 	funding  FundingInstructions
 }
 
-func NewSpendingInstructions(spending models.Spending, fundingInstructions FundingInstructions) SpendingInstructions {
+func NewSpendingInstructions(log *logrus.Entry, spending models.Spending, fundingInstructions FundingInstructions) SpendingInstructions {
 	return &spendingInstructionBase{
+		log:      log,
 		spending: spending,
 		funding:  fundingInstructions,
 	}
 }
 
-func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
+func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
 	events := make([]SpendingEvent, 0)
 
+	log := s.log.
+		WithContext(ctx).
+		WithFields(logrus.Fields{
+			"start":    start,
+			"end":      end,
+			"timezone": timezone.String(),
+		})
 	for i := 0; ; i++ {
+		ilog := log.WithField("i", i)
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
+				ilog.
+					WithError(err).
+					Error("timed out while trying to determine spending events between dates")
+				crumbs.Error(ctx, "Timed out while trying to determine spending events between dates", "forecast", map[string]interface{}{
+					"start":    start,
+					"end":      end,
+					"timezone": timezone.String(),
+					"i":        i,
+				})
 				panic(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
@@ -57,23 +77,51 @@ func (s spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, s
 		}
 
 		var event *SpendingEvent
-		if i == 0 {
-			event = s.getNextSpendingEventAfter(ctx, start, timezone, s.spending.CurrentAmount)
-		} else {
-			event = s.getNextSpendingEventAfter(ctx, events[i-1].Date, timezone, events[i-1].RollingAllocation)
+		afterDate := start
+		allocation := s.spending.CurrentAmount
+		if i > 0 {
+			afterDate = events[i-1].Date
+			allocation = events[i-1].RollingAllocation
 		}
+
+		ilog = ilog.WithField("after", start)
+		event = s.getNextSpendingEventAfter(ctx, afterDate, timezone, allocation)
 
 		// No event returned means there are no more.
 		if event == nil {
+			ilog.Trace("no more spending events to calculate")
 			break
 		}
 
 		if event.Date.After(end) {
+			ilog.Trace("calculated next spending event, but it happens after the end window, discarding and exiting calculation")
 			break
 		}
 
+		// This should not happen, and to some degree there are now tests to prove this. But if it does happen that means
+		// there has been a regression. Send something to sentry with some contextual data so it can be diagnosted.
+		if !event.Date.After(afterDate) {
+			ilog.Error("calculated a spending event that does not come after the after date specified! there is a bug somewhere!!!")
+			crumbs.IndicateBug(ctx, "Calculated a spending event that does not come after the after date specified", map[string]interface{}{
+				"spending":   s.spending,
+				"afterDate":  afterDate,
+				"start":      start,
+				"end":        end,
+				"allocation": allocation,
+				"i":          i,
+				"event":      event,
+				"timezone":   timezone.String(),
+				"count":      len(events),
+			})
+			panic("calculated a spending event that does not come after the after date specified")
+		}
+
+		ilog.Trace("calculated next spending event, adding to return set")
+
 		events = append(events, *event)
 	}
+
+	log.WithField("count", len(events)).Trace("returning calculated events")
 
 	return events
 }
@@ -149,7 +197,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	case models.SpendingTypeGoal:
 		// If we are working with a goal and it has already "completed" then there is nothing more to do, no more events
 		// will come up for this spending object.
-		if nextRecurrence.Before(input) {
+		if !nextRecurrence.After(input) {
 			return nil
 		}
 	case models.SpendingTypeExpense:
@@ -160,7 +208,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// If we are working with a spending object, but the next recurrence is before our start time. Then figure out
 		// what the next recurrence would be after the start time.
 		rule.DTStart(nextRecurrence)
-		if nextRecurrence.Before(input) || nextRecurrence.Equal(input) {
+		if !nextRecurrence.After(input) {
 			nextRecurrence = rule.After(input, false)
 		}
 	}
