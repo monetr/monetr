@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/kataras/iris/v12"
@@ -79,6 +80,20 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 	timezone := c.mustGetTimezone(ctx)
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
+	defer func(ctx iris.Context) {
+		if err := recover(); err != nil {
+			if err == context.DeadlineExceeded {
+				ctx.StatusCode(http.StatusRequestTimeout)
+				ctx.JSON(map[string]interface{}{
+					"error": "timeout forecasting",
+				})
+				return
+			}
+
+			// Repanic
+			panic(err)
+		}
+	}(ctx)
 	ctx.JSON(map[string]interface{}{
 		"estimatedCost": afterForecast.GetAverageContribution(
 			timeout,
@@ -132,6 +147,20 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 	timezone := c.mustGetTimezone(ctx)
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
+	defer func(ctx iris.Context) {
+		if err := recover(); err != nil {
+			if err == context.DeadlineExceeded {
+				ctx.StatusCode(http.StatusRequestTimeout)
+				ctx.JSON(map[string]interface{}{
+					"error": "timeout forecasting",
+				})
+				return
+			}
+
+			// Repanic
+			panic(err)
+		}
+	}(ctx)
 	ctx.JSON(map[string]interface{}{
 		"nextContribution": fundingForecast.GetNextContribution(
 			timeout,
