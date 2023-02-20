@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.14.2](https://github.com/monetr/monetr/compare/v0.14.1...v0.14.2) (2023-02-20)
+
+
+### Bug Fixes
+
+* **api:** Add proper timeout handling in forecasting. ([#1314](https://github.com/monetr/monetr/issues/1314)) ([e24e4cd](https://github.com/monetr/monetr/commit/e24e4cd066c3f32b184f4f21dcb57afa9c6056e4))
+* **api:** Adding timeout to forecast requests. ([ef87c03](https://github.com/monetr/monetr/commit/ef87c0353bbd04711ed9f9a5614c0a843a2fb554))
+* **forecasting:** Fix forecasting timeouts ([#1317](https://github.com/monetr/monetr/issues/1317)) ([e56bb62](https://github.com/monetr/monetr/commit/e56bb62b8286eae8fee76eaf20a0ae72205a1074))
+* **ui:** Fix OAuth links not working if they were not the first. ([799589a](https://github.com/monetr/monetr/commit/799589a24a522d1548f074bf07e38dd19753ad17)), closes [#488](https://github.com/monetr/monetr/issues/488)
+* **ui:** Fixed mobile transaction edit. ([d4a8298](https://github.com/monetr/monetr/commit/d4a8298868557f45246c0eeca157670e5471e8ec)), closes [#1312](https://github.com/monetr/monetr/issues/1312)
+* **ui:** Fixed Plaid dialog closing when updating/reauthenticating. ([5a8bd13](https://github.com/monetr/monetr/commit/5a8bd13ecd4baa31d7e3ef0f0022d432d0018124)), closes [#1205](https://github.com/monetr/monetr/issues/1205)
+
+
+### Miscellaneous
+
+* **deps:** bump golang.org/x/net from 0.5.0 to 0.7.0 ([#1316](https://github.com/monetr/monetr/issues/1316)) ([057819c](https://github.com/monetr/monetr/commit/057819c77a1e1e8de50f90adb4d8a9cecf7024e1))
+* Improving timeout error responses. ([c9c6391](https://github.com/monetr/monetr/commit/c9c63916e143636825d85fe5ee27482a03828da7))
+* Tweaked refetching of authentication state. ([0a18a05](https://github.com/monetr/monetr/commit/0a18a054f35f28671c9f3ddb3f6e13425dbbe057))
+* Updating NOTICE ([d39c100](https://github.com/monetr/monetr/commit/d39c100c5e525363670e3ecd7249ef782342d940))
+
 ## [0.14.1](https://github.com/monetr/monetr/compare/v0.14.0...v0.14.1) (2023-02-14)
 
 
