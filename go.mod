@@ -21,9 +21,9 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gomodule/redigo v1.8.9
 	github.com/google/uuid v1.3.0
-	github.com/iris-contrib/middleware/cors v0.0.0-20221109225525-f806663b83a0
+	github.com/iris-contrib/middleware/cors v0.0.0-20230203164339-425b08ba1830
 	github.com/jarcoal/httpmock v1.2.0
-	github.com/kataras/iris/v12 v12.2.0-beta7
+	github.com/kataras/iris/v12 v12.2.0-beta7.0.20230202111503-bd04dea30d6f
 	github.com/mileusna/useragent v1.2.1
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.0.75
@@ -87,12 +87,12 @@ require (
 	github.com/kataras/pio v0.0.11 // indirect
 	github.com/kataras/sitemap v0.0.6 // indirect
 	github.com/kataras/tunnel v0.0.4 // indirect
-	github.com/klauspost/compress v1.15.13 // indirect
+	github.com/klauspost/compress v1.15.15 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mailgun/raymond/v2 v2.0.48 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.21 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.22 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
