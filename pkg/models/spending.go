@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/util"
@@ -18,6 +19,8 @@ const (
 	SpendingTypeGoal
 	SpendingTypeOverflow
 )
+
+var _ pg.BeforeInsertHook = (*Spending)(nil)
 
 type Spending struct {
 	tableName string `pg:"spending"`
@@ -42,6 +45,7 @@ type Spending struct {
 	IsBehind               bool             `json:"isBehind" pg:"is_behind,notnull,use_zero"`
 	IsPaused               bool             `json:"isPaused" pg:"is_paused,notnull,use_zero"`
 	DateCreated            time.Time        `json:"dateCreated" pg:"date_created,notnull"`
+	DateStarted            time.Time        `json:"dateStarted" pg:"date_started,notnull"`
 }
 
 func (e Spending) GetIsStale(now time.Time) bool {
@@ -178,4 +182,14 @@ func (e *Spending) CalculateNextContribution(
 	}
 
 	return nil
+}
+
+func (s *Spending) BeforeInsert(ctx context.Context) (context.Context, error) {
+	// Make sure when we are creating a funding schedule that we set the date started field for the first instance. This
+	// way subsequent rule evaluations can use this date started as a reference point.
+	if s.DateStarted.IsZero() {
+		s.DateStarted = s.NextRecurrence
+	}
+
+	return ctx, nil
 }

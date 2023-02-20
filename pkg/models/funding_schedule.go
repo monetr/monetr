@@ -5,9 +5,12 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/util"
 )
+
+var _ pg.BeforeInsertHook = (*FundingSchedule)(nil)
 
 type FundingSchedule struct {
 	tableName string `pg:"funding_schedules"`
@@ -25,6 +28,7 @@ type FundingSchedule struct {
 	EstimatedDeposit  *int64       `json:"estimatedDeposit" pg:"estimated_deposit"`
 	LastOccurrence    *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
 	NextOccurrence    time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
+	DateStarted       time.Time    `json:"dateStarted" pg:"date_started,notnull"`
 }
 
 func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
@@ -127,4 +131,14 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone 
 	f.NextOccurrence = nextFundingOccurrence
 
 	return true
+}
+
+func (f *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, error) {
+	// Make sure when we are creating a funding schedule that we set the date started field for the first instance. This
+	// way subsequent rule evaluations can use this date started as a reference point.
+	if f.DateStarted.IsZero() {
+		f.DateStarted = f.NextOccurrence
+	}
+
+	return ctx, nil
 }
