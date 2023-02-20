@@ -25,6 +25,7 @@ export function useAuthenticationSink(): AuthenticationResult {
         });
       }
     },
+    refetchOnWindowFocus: true, // Might want to change this to 'always' at some point?
   });
   return {
     ...result,

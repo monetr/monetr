@@ -42,7 +42,7 @@ export default function Root(): JSX.Element {
     })
       .catch(result => {
         switch (result.response.status) {
-          case 500:
+          case 500: // Internal Server Error
             throw result;
           default:
             return result.response;
