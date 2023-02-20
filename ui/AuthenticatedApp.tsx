@@ -60,6 +60,7 @@ const AuthenticatedApp = (): JSX.Element => {
         <div className="relative flex flex-col flex-1 w-0 min-w-0 mb-0 lg:ml-64">
           <NavigationBar onToggleSidebar={ toggleSidebar } />
           <Routes>
+            <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
             <Route path="/register" element={ <Navigate replace to="/" /> } />
             <Route path="/login" element={ <Navigate replace to="/" /> } />
             <Route path="/logout" element={ <LogoutPage /> } />
