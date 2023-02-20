@@ -19,6 +19,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		spendingRuleThree := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
 
 		fundingSchedules := []models.FundingSchedule{
 			{
@@ -63,14 +64,14 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 
 		var firstAverage, secondAverage int64
 		{ // Initial
-			forecaster := NewForecaster(spending, fundingSchedules)
+			forecaster := NewForecaster(log, spending, fundingSchedules)
 			forecast := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
 			assert.Greater(t, forecast.StartingBalance, int64(0))
 			firstAverage = forecaster.GetAverageContribution(context.Background(), now, now.AddDate(0, 1, 4), timezone)
 		}
 
 		{ // With added expense
-			forecaster := NewForecaster(append(spending, models.Spending{
+			forecaster := NewForecaster(log, append(spending, models.Spending{
 				SpendingType:   models.SpendingTypeGoal,
 				TargetAmount:   1000000,
 				CurrentAmount:  0,
@@ -83,16 +84,15 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		assert.Greater(t, secondAverage, firstAverage, "should need to contribute more per funding")
 	})
 
-	t.Run("timeout bug test", func(t *testing.T) {
-		// This test is here to prove that the forecasting code has a bug in it that causes it to load forever. Typically
-		// even with many spending objects the forecaster should resolve all of its data in several hundred milliseconds for
-		// a very long period. But that doesn't seem to be the case for certain data sets? This test proves that specific
-		// inputs result in a timeout; But also that the forecaster does properly time out.
+	t.Run("dont timeout", func(t *testing.T) {
 		// This is part of: https://github.com/monetr/monetr/issues/1243
+		// This test previously proved that a timeout bug existed, but now proves that one does not; at least not the one
+		// that was originally causing the problem.
 		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 11, 29, 14, 30, 1, 0, timezone).UTC()
 		end := time.Date(2022, 12, 2, 0, 0, 0, 0, timezone).UTC()
+		log := testutils.GetLog(t)
 
 		fundingSchedules := []models.FundingSchedule{
 			{
@@ -114,11 +114,12 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			},
 		}
 
-		forecaster := NewForecaster(spending, fundingSchedules)
+		forecaster := NewForecaster(log, spending, fundingSchedules)
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		assert.PanicsWithValue(t, context.DeadlineExceeded, func() {
-			_ = forecaster.GetForecast(ctx, now, end, timezone)
+		assert.NotPanics(t, func() {
+			result := forecaster.GetForecast(ctx, now, end, timezone)
+			assert.NotNil(t, result, "just make sure something is returned, this is to make sure we dont timeout")
 		})
 	})
 }

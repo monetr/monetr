@@ -113,7 +113,7 @@ api:
     address: redis.redis.svc.cluster.local
     port: 6379
   logging:
-    level: trace
+    level: debug
     format: json
     stackDriver:
       enabled: true

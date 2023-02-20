@@ -18,18 +18,26 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
-		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
-			Rule:            fundingRule,
-			ExcludeWeekends: false,
-			NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-		})
-		spendingInstructions := NewSpendingInstructions(models.Spending{
-			SpendingType:   models.SpendingTypeExpense,
-			TargetAmount:   5000,
-			CurrentAmount:  0,
-			NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
-			RecurrenceRule: spendingRule,
-		}, fundingInstructions)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				Rule:            fundingRule,
+				ExcludeWeekends: false,
+				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   5000,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
+				RecurrenceRule: spendingRule,
+			},
+			fundingInstructions,
+		)
 
 		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
 		for i, item := range events {
@@ -85,18 +93,26 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 14, 13, 0, 1, 0, timezone).UTC()
-		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
-			Rule:            fundingRule,
-			ExcludeWeekends: false,
-			NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-		})
-		spendingInstructions := NewSpendingInstructions(models.Spending{
-			SpendingType:   models.SpendingTypeExpense,
-			TargetAmount:   7500,
-			CurrentAmount:  0,
-			NextRecurrence: time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
-			RecurrenceRule: spendingRule,
-		}, fundingInstructions)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				Rule:            fundingRule,
+				ExcludeWeekends: false,
+				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   7500,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
+				RecurrenceRule: spendingRule,
+			},
+			fundingInstructions,
+		)
 
 		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
 		for i, item := range events {
@@ -191,18 +207,26 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 14, 13, 0, 1, 0, timezone).UTC()
-		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
-			Rule:            fundingRule,
-			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-		})
-		spendingInstructions := NewSpendingInstructions(models.Spending{
-			SpendingType:   models.SpendingTypeExpense,
-			TargetAmount:   7500,
-			CurrentAmount:  0,
-			NextRecurrence: time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
-			RecurrenceRule: spendingRule,
-		}, fundingInstructions)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				Rule:            fundingRule,
+				ExcludeWeekends: true,
+				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   7500,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
+				RecurrenceRule: spendingRule,
+			},
+			fundingInstructions,
+		)
 
 		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
 		for i, item := range events {
@@ -299,18 +323,26 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 1, 2, 13, 0, 1, 0, timezone).UTC()
-		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
-			Rule:            fundingRule,
-			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
-		})
-		spendingInstructions := NewSpendingInstructions(models.Spending{
-			SpendingType:   models.SpendingTypeExpense,
-			TargetAmount:   1395,
-			CurrentAmount:  1395,
-			NextRecurrence: time.Date(2022, 1, 8, 0, 0, 0, 0, timezone),
-			RecurrenceRule: spendingRule,
-		}, fundingInstructions)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				Rule:            fundingRule,
+				ExcludeWeekends: true,
+				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   1395,
+				CurrentAmount:  1395,
+				NextRecurrence: time.Date(2022, 1, 8, 0, 0, 0, 0, timezone),
+				RecurrenceRule: spendingRule,
+			},
+			fundingInstructions,
+		)
 
 		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
 		// Should have 36 events, 12 spending events and 24 funding events.
@@ -328,18 +360,26 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 1, 2, 13, 0, 1, 0, timezone).UTC()
-		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
-			Rule:            fundingRule,
-			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
-		})
-		spendingInstructions := NewSpendingInstructions(models.Spending{
-			SpendingType:   models.SpendingTypeExpense,
-			TargetAmount:   1395,
-			CurrentAmount:  1395,
-			NextRecurrence: time.Date(2022, 1, 7, 0, 0, 0, 0, timezone),
-			RecurrenceRule: spendingRule,
-		}, fundingInstructions)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				Rule:            fundingRule,
+				ExcludeWeekends: true,
+				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   1395,
+				CurrentAmount:  1395,
+				NextRecurrence: time.Date(2022, 1, 7, 0, 0, 0, 0, timezone),
+				RecurrenceRule: spendingRule,
+			},
+			fundingInstructions,
+		)
 
 		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
 		assert.Len(t, events, 45, "should have 45 events")
@@ -355,20 +395,66 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 1, 2, 13, 0, 1, 0, timezone).UTC()
-		fundingInstructions := NewFundingScheduleFundingInstructions(models.FundingSchedule{
-			Rule:            fundingRule,
-			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
-		})
-		spendingInstructions := NewSpendingInstructions(models.Spending{
-			SpendingType:   models.SpendingTypeGoal,
-			TargetAmount:   10000,
-			CurrentAmount:  0,
-			NextRecurrence: time.Date(2023, 1, 3, 0, 0, 0, 0, timezone),
-			IsPaused:       true,
-		}, fundingInstructions)
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				Rule:            fundingRule,
+				ExcludeWeekends: true,
+				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeGoal,
+				TargetAmount:   10000,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2023, 1, 3, 0, 0, 0, 0, timezone),
+				IsPaused:       true,
+			},
+			fundingInstructions,
+		)
 
 		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
 		assert.Empty(t, events, "there should be no spending events for paused spending")
+	})
+
+	t.Run("spending events infinite loop bug", func(t *testing.T) {
+		// This is part of: https://github.com/monetr/monetr/issues/1243
+		// Make sure we don't timeout when a goal lands on the funding day.
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		// now := time.Date(2022, 11, 29, 14, 30, 1, 0, timezone).UTC()
+		start := time.Date(2022, 12, 1, 0, 0, 0, 0, timezone)
+		// end := time.Date(2022, 12, 2, 0, 0, 0, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				Rule:              fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		)
+
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				FundingScheduleId: 1,
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      1000,
+				CurrentAmount:     0,
+				NextRecurrence:    start,
+				RecurrenceRule:    nil,
+				SpendingId:        1,
+			},
+			fundingInstructions,
+		).(*spendingInstructionBase)
+
+		result := spendingInstructions.getNextSpendingEventAfter(context.Background(), start, timezone, 0)
+		assert.Nil(t, result, "result should be nil because the goal is completed as of the start timestamp")
 	})
 }
