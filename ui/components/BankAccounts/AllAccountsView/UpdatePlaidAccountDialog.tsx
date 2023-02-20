@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { PlaidLinkOnEventMetadata, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
+import { useQueryClient } from 'react-query';
+import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import {
   Button,
   CircularProgress,
@@ -9,15 +11,13 @@ import {
   DialogTitle,
   Typography,
 } from '@mui/material';
+import * as Sentry from '@sentry/react';
 
 import useMountEffect from 'hooks/useMountEffect';
 import request from 'util/request';
 import { PlaidConnectButton } from 'views/FirstTimeSetup/PlaidConnectButton';
-import { useQueryClient } from 'react-query';
 
-interface PropTypes {
-  open: boolean;
-  onClose: () => void;
+interface UpdatePlaidAccountDialogProps {
   linkId: number;
   updateAccountSelection?: boolean;
 }
@@ -28,7 +28,8 @@ interface State {
   error: string | null;
 }
 
-export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element {
+function UpdatePlaidAccountDialog(props: UpdatePlaidAccountDialogProps): JSX.Element {
+  const modal = useModal();
   const queryClient = useQueryClient();
   const [state, setState] = useState<Partial<State>>({});
 
@@ -50,7 +51,6 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       });
   });
 
-
   async function plaidOnSuccess(token: string, metadata: PlaidLinkOnSuccessMetadata) {
     setState({
       loading: true,
@@ -62,8 +62,11 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       accountIds: metadata.accounts.map(account => account.id),
     })
       .then(() => queryClient.invalidateQueries('/bank_accounts'))
-      .then(() => props.onClose())
+      .then(() => modal.remove())
       .catch(error => {
+        // If sentry is configured I want to know when errors happen, mostly because the changes I'm making right now
+        // are to reduce errors. But I need visibility into whether or not it actually does anything.
+        Sentry.captureException(error);
         console.error(error);
       });
   }
@@ -77,11 +80,15 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       return;
     }
 
-    props.onClose();
+    modal.remove();
   }
 
   return (
-    <Dialog disableEnforceFocus={ true } open={ props.open } onClose={ props.onClose }>
+    <Dialog
+      disableEnforceFocus={ true }
+      open={ modal.visible }
+      onClose={ modal.remove }
+    >
       <DialogTitle>
         Update your plaid link.
       </DialogTitle>
@@ -91,7 +98,12 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={ props.onClose } color="secondary">Cancel</Button>
+        <Button
+          onClick={ modal.remove }
+          color="secondary"
+        >
+          Cancel
+        </Button>
         { state.loading && <CircularProgress /> }
         { (!state.loading && state.linkToken) && <PlaidConnectButton
           token={ state.linkToken }
@@ -103,4 +115,11 @@ export default function UpdatePlaidAccountDialog(props: PropTypes): JSX.Element 
       </DialogActions>
     </Dialog>
   );
+}
+
+const updatePlaidAccountModal = NiceModal.create(UpdatePlaidAccountDialog);
+export default updatePlaidAccountModal;
+
+export function showUpdatePlaidAccountDialog(props: UpdatePlaidAccountDialogProps): void {
+  NiceModal.show(updatePlaidAccountModal, props);
 }

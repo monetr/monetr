@@ -1,5 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { useQueryClient } from 'react-query';
+import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close } from '@mui/icons-material';
 import {
   Alert,
@@ -17,13 +18,12 @@ import classnames from 'classnames';
 
 import { useLink, useRemoveLink } from 'hooks/links';
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
+interface RemoveLinkConfirmationDialogProps {
   linkId: number;
 }
 
-export default function RemoveLinkConfirmationDialog(props: Props): JSX.Element {
+function RemoveLinkConfirmationDialog(props: RemoveLinkConfirmationDialogProps): JSX.Element {
+  const modal = useModal();
   const queryClient = useQueryClient();
   const link = useLink(props.linkId);
   const [loading, setLoading] = useState<boolean>(false);
@@ -33,11 +33,11 @@ export default function RemoveLinkConfirmationDialog(props: Props): JSX.Element 
   async function doRemoveLink(): Promise<void> {
     setLoading(true);
     return removeLink(props.linkId)
-      .then(() => props.onClose())
       .then(() => void Promise.all([
         queryClient.invalidateQueries('/links'),
         queryClient.invalidateQueries('/bank_accounts'),
       ]))
+      .then(() => modal.remove())
       .catch((error: AxiosError<{ error: string; }>) => setError(error?.response?.data?.error))
       .finally(() => setLoading(false));
   }
@@ -58,12 +58,13 @@ export default function RemoveLinkConfirmationDialog(props: Props): JSX.Element 
     );
   }
 
-  const { open, onClose } = props;
-
   return (
     <Fragment>
       <ErrorMaybe />
-      <Dialog open={ open } onClose={ onClose }>
+      <Dialog
+        open={ modal.visible }
+        onClose={ modal.remove }
+      >
         <DialogTitle>
           <div className="flex items-center">
             <span className="text-2xl flex-auto">
@@ -72,7 +73,7 @@ export default function RemoveLinkConfirmationDialog(props: Props): JSX.Element 
             <IconButton
               disabled={ loading }
               className="flex-none"
-              onClick={ onClose }
+              onClick={ modal.remove }
             >
               <Close />
             </IconButton>
@@ -87,7 +88,7 @@ export default function RemoveLinkConfirmationDialog(props: Props): JSX.Element 
         <DialogActions>
           <Button
             disabled={ loading }
-            onClick={ onClose }
+            onClick={ modal.remove }
           >
             Cancel
           </Button>
@@ -104,4 +105,11 @@ export default function RemoveLinkConfirmationDialog(props: Props): JSX.Element 
       </Dialog>
     </Fragment>
   );
+}
+
+const removeLinkConfirmationModal = NiceModal.create(RemoveLinkConfirmationDialog);
+export default removeLinkConfirmationModal;
+
+export function showRemoveLinkConfirmationDialog(props: RemoveLinkConfirmationDialogProps): void {
+  NiceModal.show(removeLinkConfirmationModal, props);
 }
