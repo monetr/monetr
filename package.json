@@ -13,7 +13,7 @@
     "@mui/lab": "5.0.0-alpha.114",
     "@mui/material": "5.11.3",
     "@mui/styles": "5.11.2",
-    "@mui/x-date-pickers": "5.0.13",
+    "@mui/x-date-pickers": "5.0.20",
     "@sentry/browser": "6.19.7",
     "@sentry/react": "6.19.7",
     "@sentry/tracing": "6.19.7",
