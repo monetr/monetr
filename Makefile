@@ -9,6 +9,7 @@ HOME=$(shell echo ~$(USERNAME))
 NOOP=
 SPACE = $(NOOP) $(NOOP)
 COMMA=,
+EDITOR ?= vim
 
 # This stuff is used for versioning monetr when doing a release or developing locally.
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -29,6 +30,21 @@ PWD=$(shell git rev-parse --show-toplevel)
 # Then include the colors file to make a lot of the printing prettier.
 include $(PWD)/scripts/Colors.mk
 
+MONETR_DIR=$(HOME)/.monetr
+$(MONETR_DIR):
+	if [ ! -d "$(MONETR_DIR)" ]; then mkdir -p $(MONETR_DIR); fi
+
+# If the developer has a development.env file, then include that in the makefile variables.
+MONETR_ENV=$(MONETR_DIR)/development.env
+$(MONETR_ENV): $(MONETR_DIR)
+	cat $(PWD)/compose/development.example.env > $(MONETR_ENV) && $(EDITOR) $(MONETR_ENV)
+
+settings: $(MONETR_ENV)
+
+ifneq (,$(wildcard $(MONETR_ENV)))
+include $(MONETR_ENV)
+endif
+
 # These are some working directories we need for local development.
 LOCAL_TMP = $(PWD)/tmp
 LOCAL_BIN = $(PWD)/bin
@@ -36,18 +52,6 @@ BUILD_DIR = $(PWD)/build
 
 MONETR_CLI_PACKAGE = github.com/monetr/monetr/pkg/cmd
 COVERAGE_TXT = $(PWD)/coverage.txt
-
-MONETR_DIR=$(HOME)/.monetr
-$(MONETR_DIR):
-	if [ ! -d "$(MONETR_DIR)" ]; then mkdir -p $(MONETR_DIR); fi
-
-# If the developer has a development.env file, then include that in the makefile variables.
-MONETR_ENV=$(MONETR_DIR)/development.env
-ifneq (,$(wildcard $(MONETR_ENV)))
-include $(MONETR_ENV)
-endif
-
-KUBERNETES_VERSION=1.20.1
 
 ifeq ($(OS),Windows_NT)
 	OS=windows
@@ -306,7 +310,7 @@ $(LOCAL_CERTIFICATE) &: $(LOCAL_CERTIFICATE_DIR) $(MKCERT)
 	$(MKCERT) -key-file $(LOCAL_CERTIFICATE_KEY) -cert-file $(LOCAL_CERTIFICATE_CERT) $(LOCAL_DOMAIN)
 
 DOCKER=$(shell which docker || echo 'docker')
-DEVELOPMENT_ENV_FILE=$(MONETR_DIR)/development.env
+DEVELOPMENT_ENV_FILE=$(MONETR_ENV)
 COMPOSE_FILE=$(PWD)/docker-compose.yaml
 ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")
 	COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(COMPOSE_FILE)

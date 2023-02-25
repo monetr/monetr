@@ -23,7 +23,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 24
-      start_period: 60s
+      start_period: 40s
     environment:
       air_wd: /build
       DISABLE_GO_RELOAD: ${DISABLE_GO_RELOAD:-false}
