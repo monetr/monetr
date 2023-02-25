@@ -74,7 +74,16 @@ $HOME/.monetr/development.env
 
 You can create this file using the following commands:
 
-```shell title="Creating the development env file"
+```shell title="Creating with the helper"
+make settings
+```
+
+This will create the directory for you and seed the development environment file with a template for you to start with.
+It will also open the file created in your `$EDITOR`.
+
+You can also create the file manually like this:
+
+```shell title="Manually creating the development env file"
 mkdir $HOME/.monetr
 touch $HOME/.monetr/development.env
 vim $HOME/.monetr/development.env
@@ -88,7 +97,7 @@ Once you've opened this file you'll need to provide the Plaid Client ID as `PLAI
 With the above requirements installed. You should be able to spin up the local development environment that runs inside
 of Docker compose.
 
-This command will also load any of the environment variables specified in the development env file (mentioned above) 
+This command will also load any of the environment variables specified in the development env file (mentioned above)
 into the `monetr` container where the API is running.
 
 ```shell title="Shell"
