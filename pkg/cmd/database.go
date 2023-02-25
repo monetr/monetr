@@ -158,6 +158,10 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 		defer watchCertificate.Stop()
 	}
 
+	if err := db.Ping(context.Background()); err != nil {
+		return db, errors.Wrap(err, "failed to ping postgresql")
+	}
+
 	if MigrateDatabaseFlag {
 		migrations.RunMigrations(log, db)
 	} else {

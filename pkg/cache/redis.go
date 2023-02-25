@@ -2,12 +2,13 @@ package cache
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/alicebob/miniredis/v2"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 type RedisController struct {
@@ -30,7 +31,7 @@ func NewRedisCache(log *logrus.Entry, conf config.Redis) (*RedisController, erro
 
 		// Store our "embedded" redis address for use below.
 		redisAddress = controller.mini.Server().Addr().String()
-		log.Debug("using miniredis")
+		log.Info("no redis config was provided, using miniredis!")
 	}
 
 	// Setup the redis pool for running jobs.

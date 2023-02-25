@@ -123,6 +123,11 @@ func RunServer() error {
 	}
 
 	db, err := getDatabase(log, configuration, stats)
+	if err != nil {
+		log.WithError(err).Fatalf("failed to setup database connection: %+v", err)
+		return err
+	}
+	defer db.Close()
 
 	redisController, err := cache.NewRedisCache(log, configuration.Redis)
 	if err != nil {
