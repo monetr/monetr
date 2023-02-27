@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.14.3](https://github.com/monetr/monetr/compare/v0.14.2...v0.14.3) (2023-02-27)
+
+
+### Features
+
+* **api:** Add DTSTART equivalent support to spending/funding. ([#1329](https://github.com/monetr/monetr/issues/1329)) ([4db243e](https://github.com/monetr/monetr/commit/4db243e1472deadb3bd60ef59c3d88daaf4577d3))
+
+
+### Dependencies
+
+* **api:** update module github.com/kataras/iris/v12 to v12.2.0-beta7 ([#1268](https://github.com/monetr/monetr/issues/1268)) ([8f59835](https://github.com/monetr/monetr/commit/8f59835fc0f6ea4278b745715d142b43af524971))
+* **api:** update module github.com/teambition/rrule-go to v1.8.2 ([#1311](https://github.com/monetr/monetr/issues/1311)) ([dbedac8](https://github.com/monetr/monetr/commit/dbedac8ba12bc6b44533eb8e9d36ef03227052b9))
+* **ui:** update dependency @mui/x-date-pickers to v5.0.20 ([#1319](https://github.com/monetr/monetr/issues/1319)) ([3cdb27a](https://github.com/monetr/monetr/commit/3cdb27a9af60782c8771fd62bf9a2b547fb4677b))
+* **ui:** update dependency eslint to v8.34.0 ([#1321](https://github.com/monetr/monetr/issues/1321)) ([9773c67](https://github.com/monetr/monetr/commit/9773c6704cfb21f44173f90a31bb4005b835cabd))
+* **ui:** update dependency eslint-plugin-import to v2.27.5 ([#1322](https://github.com/monetr/monetr/issues/1322)) ([b874e35](https://github.com/monetr/monetr/commit/b874e353c5ee37a2c138883472b7bd5b686a4365))
+* **ui:** update dependency eslint-plugin-jest to v27.2.1 ([#1323](https://github.com/monetr/monetr/issues/1323)) ([7f614c5](https://github.com/monetr/monetr/commit/7f614c5cad8c1538b219fe16dd9f22b1c644f62e))
+* **ui:** update dependency eslint-plugin-jsx-a11y to v6.7.1 ([#1324](https://github.com/monetr/monetr/issues/1324)) ([14cd9d1](https://github.com/monetr/monetr/commit/14cd9d10f13a5b5acf94930c046367fa496aee60))
+* **ui:** update dependency eslint-plugin-react to v7.32.2 ([#1325](https://github.com/monetr/monetr/issues/1325)) ([48b6eb2](https://github.com/monetr/monetr/commit/48b6eb2abafbd93a021ef8f933dc57f82af28136))
+* **ui:** update dependency eslint-plugin-simple-import-sort to v10 ([#1327](https://github.com/monetr/monetr/issues/1327)) ([927e27e](https://github.com/monetr/monetr/commit/927e27edbd77ff5415ccb334e9c7719abfe3b327))
+* **ui:** update dependency eslint-plugin-testing-library to v5.10.2 ([#1326](https://github.com/monetr/monetr/issues/1326)) ([697d796](https://github.com/monetr/monetr/commit/697d796a2cb579fa277d1c88943ceae32ab1082b))
+* **ui:** update dependency eslint-webpack-plugin to v4 ([#1328](https://github.com/monetr/monetr/issues/1328)) ([a453160](https://github.com/monetr/monetr/commit/a453160550fb779e768c8df5d8f15b6d2d2ee0cd))
+* **ui:** update dependency typescript to v4.9.5 ([#1330](https://github.com/monetr/monetr/issues/1330)) ([d27edfa](https://github.com/monetr/monetr/commit/d27edfaf53bcece5dd530456d7671292d2995b15))
+
+
+### Miscellaneous
+
+* **api:** Cleaning up logging for platypus cache. ([09307bf](https://github.com/monetr/monetr/commit/09307bf18c0f698395435a7cd9adb7e7ed4cf21f))
+* **cmd:** Refactoring the serve command. ([9b4348f](https://github.com/monetr/monetr/commit/9b4348fd33467a1c2f7f60704f9401b3e65a8b20))
+* **docs:** Updating documentation, local dev + spending. ([4a6bbb8](https://github.com/monetr/monetr/commit/4a6bbb8e3619fc4113ae7b66e8d063cf9a5072fb))
+* **local:** Adding example for local env file. ([bf305eb](https://github.com/monetr/monetr/commit/bf305ebc8d3198dfc7dcb61ab1c4b606dab95d25))
+* **local:** Removing reference to vault in local dev. ([71c5c62](https://github.com/monetr/monetr/commit/71c5c62d4a0610d58665c08b34631e6def5d940c))
+* Updating NOTICE ([bcb4523](https://github.com/monetr/monetr/commit/bcb4523e884a6e37db7b141d6470933d60d6023f))
+
 ## [0.14.2](https://github.com/monetr/monetr/compare/v0.14.1...v0.14.2) (2023-02-20)
 
 
