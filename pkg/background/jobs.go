@@ -70,7 +70,7 @@ func NewBackgroundJobs(
 	}
 
 	jobs := []JobHandler{
-		NewDeactivateLinksHandler(log, db, plaidSecrets, plaidPlatypus),
+		NewDeactivateLinksHandler(log, db, configuration, plaidSecrets, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db),
 		NewProcessSpendingHandler(log, db),
 		NewPullTransactionsHandler(log, db, plaidSecrets, plaidPlatypus, publisher),

@@ -5,6 +5,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/repository"
@@ -21,6 +22,7 @@ type (
 	DeactivateLinksHandler struct {
 		log           *logrus.Entry
 		db            *pg.DB
+		configuration config.Configuration
 		repo          repository.JobRepository
 		plaidSecrets  secrets.PlaidSecretsProvider
 		plaidPlatypus platypus.Platypus
@@ -44,12 +46,14 @@ type (
 func NewDeactivateLinksHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	configuration config.Configuration,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 ) *DeactivateLinksHandler {
 	return &DeactivateLinksHandler{
 		log:           log,
 		db:            db,
+		configuration: configuration,
 		repo:          repository.NewJobRepository(db),
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
@@ -98,6 +102,12 @@ func (d DeactivateLinksHandler) DefaultSchedule() string {
 
 func (d *DeactivateLinksHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
 	log := d.log.WithContext(ctx)
+
+	if !d.configuration.Stripe.IsBillingEnabled() {
+		log.Debug("billing is not enabled, plaid links will not automatically be deactivated")
+		crumbs.Debug(ctx, "Billing is not enabled, plaid links will not automatically be deactivated", nil)
+		return nil
+	}
 
 	log.Info("retrieving links for expired accounts")
 	expiredLinks, err := d.repo.GetLinksForExpiredAccounts(ctx)
