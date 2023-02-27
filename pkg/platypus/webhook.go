@@ -158,7 +158,7 @@ func (m *memoryWebhookVerification) GetVerificationKey(ctx context.Context, keyI
 func (m *memoryWebhookVerification) cacheWorker() {
 	for {
 		select {
-		case _ = <-m.cleanupTicker.C:
+		case <-m.cleanupTicker.C:
 			m.cleanup()
 		case promise := <-m.closer:
 			m.log.Debug("closing jwk cache, stopping background worker")
@@ -173,11 +173,11 @@ func (m *memoryWebhookVerification) cleanup() {
 	defer m.lock.Unlock()
 
 	if len(m.cache) == 0 {
-		m.log.Debug("no items in Plaid jwk cache, nothing to cleanup")
+		m.log.Trace("no items in Plaid jwk cache, nothing to cleanup")
 		return
 	}
 
-	m.log.Debug("cleaning up Plaid jwk cache")
+	m.log.Trace("cleaning up Plaid jwk cache")
 
 	itemsToRemove := make([]string, 0, len(m.cache))
 	for key, item := range m.cache {
@@ -188,17 +188,15 @@ func (m *memoryWebhookVerification) cleanup() {
 	}
 
 	if len(itemsToRemove) == 0 {
-		m.log.Debug("no items have expired in cache")
+		m.log.Trace("no items have expired in cache")
 		return
 	}
 
-	m.log.Debugf("found %d expired item(s); cleaning them up", len(itemsToRemove))
+	m.log.Tracef("found %d expired item(s); cleaning them up", len(itemsToRemove))
 
 	for _, key := range itemsToRemove {
 		delete(m.cache, key)
 	}
-
-	return
 }
 
 func (m *memoryWebhookVerification) Close() error {
