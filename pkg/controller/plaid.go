@@ -10,6 +10,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/core/router"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
@@ -18,8 +19,6 @@ import (
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	"github.com/kataras/iris/v12/core/router"
 )
 
 func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
@@ -481,6 +480,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		WebhookUrl:      webhook,
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
+		UsePlaidSync:    true,
 	}
 	if err = repo.CreatePlaidLink(c.getContext(ctx), &plaidLink); err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
@@ -544,12 +544,19 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	if !c.configuration.Plaid.WebhooksEnabled {
-		err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-			AccountId: link.AccountId,
-			LinkId:    link.LinkId,
-			Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
-			End:       time.Now(),
-		})
+		if plaidLink.UsePlaidSync {
+			err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+			})
+		} else {
+			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+				AccountId: link.AccountId,
+				LinkId:    link.LinkId,
+				Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
+				End:       time.Now(),
+			})
+		}
 		if err != nil {
 			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to pull initial transactions")
 			return
@@ -679,12 +686,19 @@ func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
 		return
 	}
 
-	err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-		AccountId: link.AccountId,
-		LinkId:    link.LinkId,
-		Start:     time.Now().Add(-14 * 24 * time.Hour), // Last 14 days.
-		End:       time.Now(),
-	})
+	if link.PlaidLink.UsePlaidSync {
+		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+		})
+	} else {
+		err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+			Start:     time.Now().Add(-14 * 24 * time.Hour), // Last 14 days.
+			End:       time.Now(),
+		})
+	}
 	if err != nil {
 		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to trigger manual sync")
 		return

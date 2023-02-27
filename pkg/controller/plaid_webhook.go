@@ -205,36 +205,45 @@ func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
 
 	switch hook.WebhookType {
 	case "TRANSACTIONS":
-		switch hook.WebhookCode {
-		case "INITIAL_UPDATE":
-			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+		switch link.PlaidLink.UsePlaidSync {
+		case true:
+			err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
 				AccountId: link.AccountId,
 				LinkId:    link.LinkId,
-				Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
-				End:       time.Now(),
-			})
-		case "HISTORICAL_UPDATE":
-			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-				Start:     time.Now().Add(-2 * 365 * 24 * time.Hour), // Last 2 years.
-				End:       time.Now(),
-			})
-		case "DEFAULT_UPDATE":
-			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-				Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
-				End:       time.Now(),
-			})
-		case "TRANSACTIONS_REMOVED":
-			err = background.TriggerRemoveTransactions(c.getContext(ctx), c.jobRunner, background.RemoveTransactionsArguments{
-				AccountId:           link.AccountId,
-				LinkId:              link.LinkId,
-				PlaidTransactionIds: hook.RemovedTransactions,
+				Trigger:   "webhook",
 			})
 		default:
-			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
+			switch hook.WebhookCode {
+			case "INITIAL_UPDATE":
+				err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
+					End:       time.Now(),
+				})
+			case "HISTORICAL_UPDATE":
+				err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Start:     time.Now().Add(-2 * 365 * 24 * time.Hour), // Last 2 years.
+					End:       time.Now(),
+				})
+			case "DEFAULT_UPDATE":
+				err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
+					End:       time.Now(),
+				})
+			case "TRANSACTIONS_REMOVED":
+				err = background.TriggerRemoveTransactions(c.getContext(ctx), c.jobRunner, background.RemoveTransactionsArguments{
+					AccountId:           link.AccountId,
+					LinkId:              link.LinkId,
+					PlaidTransactionIds: hook.RemovedTransactions,
+				})
+			default:
+				crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
+			}
 		}
 	case "ITEM":
 		switch hook.WebhookCode {

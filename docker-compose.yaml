@@ -6,6 +6,7 @@ services:
       - ./compose/kms.yaml:/init/seed.yaml
   documentation:
     image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.5.7}
+    user: "${UID:-0}:${GID:-0}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     entrypoint: sh
@@ -16,6 +17,7 @@ services:
   monetr:
     tty: true # Makes color output work nicely.
     image: golang:1.19.4
+    user: "${UID:-0}:${GID:-0}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
     healthcheck:
@@ -81,6 +83,7 @@ services:
     # do `yarn install` before doing docker compose up.
     tty: true # Color output.
     image: node:18.10.0-buster
+    user: "${UID:-0}:${GID:-0}"
     working_dir: /build
     restart: always
     healthcheck:

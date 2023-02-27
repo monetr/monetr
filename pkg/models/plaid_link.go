@@ -9,4 +9,5 @@ type PlaidLink struct {
 	WebhookUrl      string   `json:"-" pg:"webhook_url"`
 	InstitutionId   string   `json:"-" pg:"institution_id"`
 	InstitutionName string   `json:"-" pg:"institution_name"`
+	UsePlaidSync    bool     `json:"-" pg:"use_plaid_sync,notnull"`
 }

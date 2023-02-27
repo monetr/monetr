@@ -76,6 +76,7 @@ func NewBackgroundJobs(
 		NewPullTransactionsHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
 		NewRemoveLinkHandler(log, db, publisher),
 		NewRemoveTransactionsHandler(log, db),
+		NewSyncPlaidHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
 	}
 
 	// Setup jobs

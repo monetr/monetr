@@ -85,19 +85,19 @@ func (mr *MockClientMockRecorder) RemoveItem(ctx interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveItem", reflect.TypeOf((*MockClient)(nil).RemoveItem), ctx)
 }
 
-// SyncTransactions mocks base method.
-func (m *MockClient) SyncTransactions(ctx context.Context, cursor *string) (platypus.SyncResult, error) {
+// Sync mocks base method.
+func (m *MockClient) Sync(ctx context.Context, cursor *string) (*platypus.SyncResult, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SyncTransactions", ctx, cursor)
-	ret0, _ := ret[0].(platypus.SyncResult)
+	ret := m.ctrl.Call(m, "Sync", ctx, cursor)
+	ret0, _ := ret[0].(*platypus.SyncResult)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// SyncTransactions indicates an expected call of SyncTransactions.
-func (mr *MockClientMockRecorder) SyncTransactions(ctx, cursor interface{}) *gomock.Call {
+// Sync indicates an expected call of Sync.
+func (mr *MockClientMockRecorder) Sync(ctx, cursor interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncTransactions", reflect.TypeOf((*MockClient)(nil).SyncTransactions), ctx, cursor)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sync", reflect.TypeOf((*MockClient)(nil).Sync), ctx, cursor)
 }
 
 // UpdateItem mocks base method.

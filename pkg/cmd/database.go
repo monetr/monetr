@@ -78,7 +78,7 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 	db = pg.Connect(pgOptions)
 	db.AddQueryHook(logging.NewPostgresHooks(log, stats))
 	pgOptions.OnConnect = func(ctx context.Context, cn *pg.Conn) error {
-		log.Debugf("new connection with cert")
+		log.Trace("new connection with cert")
 
 		return nil
 	}
