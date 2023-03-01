@@ -31,7 +31,7 @@
     "fs-extra": "10.1.0",
     "identity-obj-proxy": "3.0.0",
     "immer": "9.0.17",
-    "is-svg": "4.3.2",
+    "is-svg": "4.4.0",
     "lodash": "4.17.21",
     "mini-css-extract-plugin": "2.7.2",
     "moment": "2.29.4",
