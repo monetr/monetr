@@ -30,7 +30,7 @@
     "formik": "2.2.9",
     "fs-extra": "10.1.0",
     "identity-obj-proxy": "3.0.0",
-    "immer": "9.0.17",
+    "immer": "9.0.19",
     "is-svg": "4.4.0",
     "lodash": "4.17.21",
     "mini-css-extract-plugin": "2.7.2",
