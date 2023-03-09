@@ -11,7 +11,7 @@ export default function BankLogo(props: BankLogoProps): JSX.Element {
     staleTime: 60 * 60 * 1000, // 60 minutes
   });
 
-  if (!data) {
+  if (!data || !data?.logo) {
     return null;
   }
 
