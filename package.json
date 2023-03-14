@@ -33,7 +33,7 @@
     "immer": "9.0.19",
     "is-svg": "4.4.0",
     "lodash": "4.17.21",
-    "mini-css-extract-plugin": "2.7.2",
+    "mini-css-extract-plugin": "2.7.3",
     "moment": "2.29.4",
     "node-notifier": "10.0.1",
     "notistack": "2.0.8",
