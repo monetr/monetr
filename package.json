@@ -117,7 +117,7 @@
     "@types/react-google-recaptcha": "2.1.5",
     "@typescript-eslint/eslint-plugin": "5.42.0",
     "@typescript-eslint/parser": "5.42.0",
-    "autoprefixer": "10.4.13",
+    "autoprefixer": "10.4.14",
     "babel-jest": "29.3.1",
     "babel-loader": "8.3.0",
     "case-sensitive-paths-webpack-plugin": "2.4.0",
