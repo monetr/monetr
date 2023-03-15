@@ -52,7 +52,7 @@
     "react-google-recaptcha": "2.1.0",
     "react-infinite-scroll-hook": "4.0.4",
     "react-plaid-link": "3.3.2",
-    "react-query": "3.39.2",
+    "react-query": "3.39.3",
     "react-recaptcha": "2.3.10",
     "react-router-dom": "6.6.1",
     "react-select": "5.5.9",
