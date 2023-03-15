@@ -26,6 +26,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       tzdata=2021a-*  \
       ca-certificates=20210119 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -rm -d /home/monetr -s /bin/bash -g root -G sudo -u 1000 monetr
+USER monetr
+WORKDIR /home/monetr
+
 EXPOSE 4000
 VOLUME ["/etc/monetr"]
 ENTRYPOINT ["/usr/bin/monetr"]
