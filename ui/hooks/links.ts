@@ -50,6 +50,7 @@ export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata
 
   return function (metadata: PlaidLinkOnSuccessMetadata): boolean {
     const linksForInstitution = new Map(Array.from(links.values())
+      .filter(item => item.getIsPlaid())
       .filter(item => item.plaidInstitutionId === metadata.institution.institution_id)
       .map(item => [item.linkId, item]));
 
