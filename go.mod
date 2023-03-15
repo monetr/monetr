@@ -1,6 +1,6 @@
 module github.com/monetr/monetr
 
-go 1.20
+go 1.19
 
 require (
 	cloud.google.com/go/kms v1.8.0
