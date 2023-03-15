@@ -55,7 +55,7 @@ func TestCountTransactions(t *testing.T) {
 		link := GivenIHaveAPlaidLink(t, user)
 		GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
-		assert.EqualValues(t, 0, CountTransactions(t, user.AccountId))
+		assert.EqualValues(t, 0, CountNonDeletedTransactions(t, user.AccountId))
 	})
 
 	t.Run("with transactions", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestCountTransactions(t *testing.T) {
 		bankAccount := GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		GivenIHaveATransaction(t, bankAccount)
 
-		assert.EqualValues(t, 1, CountTransactions(t, user.AccountId))
+		assert.EqualValues(t, 1, CountNonDeletedTransactions(t, user.AccountId))
 	})
 }
 
@@ -121,7 +121,7 @@ func TestCountPendingTransactions(t *testing.T) {
 		err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)
 		require.NoError(t, err, "must be able to seed transaction")
 
-		assert.EqualValues(t, 2, CountTransactions(t, user.AccountId))
+		assert.EqualValues(t, 2, CountNonDeletedTransactions(t, user.AccountId))
 		assert.EqualValues(t, 1, CountPendingTransactions(t, user.AccountId))
 	})
 }

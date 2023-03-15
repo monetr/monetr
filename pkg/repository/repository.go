@@ -41,6 +41,11 @@ type BaseRepository interface {
 	GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error)
 	GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error)
 	GetLinks(ctx context.Context) ([]models.Link, error)
+
+	// Plaid syncing
+	GetLastPlaidSync(ctx context.Context, linkId uint64) (*models.PlaidSync, error)
+	RecordPlaidSync(ctx context.Context, plaidLinkId uint64, trigger, nextCursor string, added, modified, removed int) error
+
 	GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 	GetSettings(ctx context.Context) (*models.Settings, error)
 	GetSpending(ctx context.Context, bankAccountId uint64) ([]models.Spending, error)

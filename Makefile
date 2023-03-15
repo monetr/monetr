@@ -37,7 +37,8 @@ $(MONETR_DIR):
 # If the developer has a development.env file, then include that in the makefile variables.
 MONETR_ENV=$(MONETR_DIR)/development.env
 settings: $(MONETR_DIR)
-	cat $(PWD)/compose/development.example.env > $(MONETR_ENV) && $(EDITOR) $(MONETR_ENV)
+	if [ ! -f "$(MONETR_ENV)" ]; then cat $(PWD)/compose/development.example.env > $(MONETR_ENV); fi
+	$(EDITOR) $(MONETR_ENV)
 
 ifneq (,$(wildcard $(MONETR_ENV)))
 include $(MONETR_ENV)

@@ -12,8 +12,8 @@ import (
 type SyncResult struct {
 	NextCursor string
 	HasMore    bool
-	New        map[string]Transaction
-	Updated    map[string]Transaction
+	New        []Transaction
+	Updated    []Transaction
 	Deleted    []string
 }
 
@@ -25,9 +25,12 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		"cursor": cursor,
 	}
 
-	log := p.getLog(span).WithFields(logrus.Fields{
-		"cursor": cursor,
-	})
+	log := p.getLog(span)
+	if cursor != nil {
+		log = log.WithField("cursor", cursor)
+	} else {
+		log = log.WithField("cursor", nil)
+	}
 
 	log.Trace("syncing with plaid")
 
@@ -44,24 +47,24 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 		span,
 		response,
 		err,
-		"Syncing transactions with Plaid",
-		"failed to sync transaction data with Plaid",
+		"Syncing with Plaid",
+		"failed to sync data with Plaid",
 	); err != nil {
-		log.WithError(err).Error("failed to sync transaction data with Plaid")
+		log.WithError(err).Error("failed to sync data with Plaid")
 		return nil, err
 	}
 
-	added := map[string]Transaction{}
-	for _, transaction := range result.Added {
-		added[transaction.TransactionId], err = NewTransactionFromPlaid(transaction)
+	added := make([]Transaction, len(result.Added))
+	for i, transaction := range result.Added {
+		added[i], err = NewTransactionFromPlaid(transaction)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	modified := map[string]Transaction{}
-	for _, transaction := range result.Modified {
-		modified[transaction.TransactionId], err = NewTransactionFromPlaid(transaction)
+	modified := make([]Transaction, len(result.Modified))
+	for i, transaction := range result.Modified {
+		modified[i], err = NewTransactionFromPlaid(transaction)
 		if err != nil {
 			return nil, err
 		}

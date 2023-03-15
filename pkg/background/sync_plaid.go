@@ -19,16 +19,16 @@ import (
 )
 
 const (
-	PullTransactions = "PullTransactions"
+	SyncPlaid = "SyncPlaid"
 )
 
 var (
-	_ JobHandler = &PullTransactionsHandler{}
-	_ Job        = &PullTransactionsJob{}
+	_ ScheduledJobHandler = &SyncPlaidHandler{}
+	_ Job                 = &SyncPlaidJob{}
 )
 
 type (
-	PullTransactionsHandler struct {
+	SyncPlaidHandler struct {
 		log           *logrus.Entry
 		db            *pg.DB
 		plaidSecrets  secrets.PlaidSecretsProvider
@@ -37,15 +37,15 @@ type (
 		unmarshaller  JobUnmarshaller
 	}
 
-	PullTransactionsArguments struct {
-		AccountId uint64    `json:"accountId"`
-		LinkId    uint64    `json:"linkId"`
-		Start     time.Time `json:"start"`
-		End       time.Time `json:"end"`
+	SyncPlaidArguments struct {
+		AccountId uint64 `json:"accountId"`
+		LinkId    uint64 `json:"linkId"`
+		// Trigger will be "webhook" or "manual"
+		Trigger string `json:"trigger"`
 	}
 
-	PullTransactionsJob struct {
-		args          PullTransactionsArguments
+	SyncPlaidJob struct {
+		args          SyncPlaidArguments
 		log           *logrus.Entry
 		repo          repository.BaseRepository
 		plaidSecrets  secrets.PlaidSecretsProvider
@@ -54,22 +54,25 @@ type (
 	}
 )
 
-func TriggerPullTransactions(
+func TriggerSyncPlaid(
 	ctx context.Context,
 	backgroundJobs JobController,
-	arguments PullTransactionsArguments,
+	arguments SyncPlaidArguments,
 ) error {
-	return backgroundJobs.TriggerJob(ctx, PullTransactions, arguments)
+	if arguments.Trigger == "" {
+		arguments.Trigger = "manual"
+	}
+	return backgroundJobs.TriggerJob(ctx, SyncPlaid, arguments)
 }
 
-func NewPullTransactionsHandler(
+func NewSyncPlaidHandler(
 	log *logrus.Entry,
 	db *pg.DB,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
-) *PullTransactionsHandler {
-	return &PullTransactionsHandler{
+) *SyncPlaidHandler {
+	return &SyncPlaidHandler{
 		log:           log,
 		db:            db,
 		plaidSecrets:  plaidSecrets,
@@ -79,14 +82,14 @@ func NewPullTransactionsHandler(
 	}
 }
 
-func (p PullTransactionsHandler) QueueName() string {
-	return PullTransactions
+func (s SyncPlaidHandler) QueueName() string {
+	return SyncPlaid
 }
 
-func (p *PullTransactionsHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
-	var args PullTransactionsArguments
-	if err := errors.Wrap(p.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
-		crumbs.Error(ctx, "Failed to unmarshal arguments for Pull Transactions job.", "job", map[string]interface{}{
+func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+	var args SyncPlaidArguments
+	if err := errors.Wrap(s.unmarshaller(data, &args), "failed to unmarshal arguments"); err != nil {
+		crumbs.Error(ctx, "Failed to unmarshal arguments for Sync Plaid job.", "job", map[string]interface{}{
 			"data": data,
 		})
 		return err
@@ -94,17 +97,17 @@ func (p *PullTransactionsHandler) HandleConsumeJob(ctx context.Context, data []b
 
 	crumbs.IncludeUserInScope(ctx, args.AccountId)
 
-	return p.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
+	return s.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
 		repo := repository.NewRepositoryFromSession(0, args.AccountId, txn)
-		job, err := NewPullTransactionsJob(
-			p.log.WithContext(span.Context()),
+		job, err := NewSyncPlaidJob(
+			s.log.WithContext(span.Context()),
 			repo,
-			p.plaidSecrets,
-			p.plaidPlatypus,
-			p.publisher,
+			s.plaidSecrets,
+			s.plaidPlatypus,
+			s.publisher,
 			args,
 		)
 		if err != nil {
@@ -114,15 +117,72 @@ func (p *PullTransactionsHandler) HandleConsumeJob(ctx context.Context, data []b
 	})
 }
 
-func NewPullTransactionsJob(
+func (s SyncPlaidHandler) DefaultSchedule() string {
+	// Run every 2 hours. Links that have not received any updates in the last 6 hours will be synced with Plaid. If no
+	// updates have been detected then nothing will happen.
+	return "0 0 */2 * * *"
+}
+
+func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
+	log := s.log.WithContext(ctx)
+
+	log.Info("retrieving links to sync with Plaid")
+
+	links := make([]models.Link, 0)
+	cutoff := time.Now().Add(-6 * time.Hour)
+	err := s.db.ModelContext(ctx, &links).
+		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
+		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
+		Where(`"plaid_link"."use_plaid_sync" = ?`, true).
+		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+		Where(`"link"."link_status" = ?`, models.LinkStatusSetup).
+		Where(`"link"."last_successful_update" < ?`, cutoff).
+		Select(&links)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve links that need to by synced with plaid")
+	}
+
+	if len(links) == 0 {
+		log.Debug("no plaid links need to be synced at this time")
+		return nil
+	}
+
+	log.WithField("count", len(links)).Info("syncing plaid links")
+
+	for _, item := range links {
+		itemLog := log.WithFields(logrus.Fields{
+			"accountId": item.AccountId,
+			"linkId":    item.LinkId,
+		})
+		itemLog.Trace("enqueuing link to be synced with plaid")
+		err := enqueuer.EnqueueJob(ctx, s.QueueName(), SyncPlaidArguments{
+			AccountId: item.AccountId,
+			LinkId:    item.LinkId,
+			Trigger:   "cron",
+		})
+		if err != nil {
+			itemLog.WithError(err).Warn("failed to enqueue job to sync with plaid")
+			crumbs.Warn(ctx, "Failed to enqueue job to sync with plaid", "job", map[string]interface{}{
+				"error": err,
+			})
+			continue
+		}
+
+		itemLog.Trace("successfully enqueued link to be synced with plaid")
+	}
+
+	return nil
+}
+
+func NewSyncPlaidJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
-	args PullTransactionsArguments,
-) (*PullTransactionsJob, error) {
-	return &PullTransactionsJob{
+	args SyncPlaidArguments,
+) (*SyncPlaidJob, error) {
+	return &SyncPlaidJob{
 		args:          args,
 		log:           log,
 		repo:          repo,
@@ -132,16 +192,16 @@ func NewPullTransactionsJob(
 	}, nil
 }
 
-func (p *PullTransactionsJob) Run(ctx context.Context) error {
+func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
 	span.Description = PullTransactions
 
-	log := p.log.WithContext(span.Context())
+	log := s.log.WithContext(span.Context())
 
-	link, err := p.repo.GetLink(span.Context(), p.args.LinkId)
-	if err = errors.Wrap(err, "failed to retrieve link to pull transactions"); err != nil {
-		log.WithError(err).Error("cannot retrieve transactions without link")
+	link, err := s.repo.GetLink(span.Context(), s.args.LinkId)
+	if err = errors.Wrap(err, "failed to retrieve link to sync with plaid"); err != nil {
+		log.WithError(err).Error("cannot sync without link")
 		return err
 	}
 
@@ -149,7 +209,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		log.Warn("provided link does not have any plaid credentials")
 		crumbs.IndicateBug(
 			span.Context(),
-			"BUG: Link was queued to pull transactions, but has no plaid details",
+			"BUG: Link was queued to sync with plaid, but has no plaid details",
 			map[string]interface{}{
 				"link": link,
 			},
@@ -166,7 +226,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	accessToken, err := p.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), p.args.AccountId, link.PlaidLink.ItemId)
+	accessToken, err := s.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), s.args.AccountId, link.PlaidLink.ItemId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
 		// If the token is simply missing from vault then something is goofy. Don't retry the job but mark it as a
 		// failure.
@@ -187,7 +247,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 	}
 
 	now := time.Now().UTC()
-	plaidClient, err := p.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
+	plaidClient, err := s.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
 	if err != nil {
 		log.WithError(err).Error("failed to create plaid client for link")
 		return err
@@ -232,7 +292,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 				"bankAccountId": bankAccount.BankAccountId,
 			})
 			bankAccount.Status = models.InactiveBankAccountStatus
-			if err = p.repo.UpdateBankAccounts(span.Context(), bankAccount); err != nil {
+			if err = s.repo.UpdateBankAccounts(span.Context(), bankAccount); err != nil {
 				log.WithFields(logrus.Fields{
 					"bankAccountId": bankAccount.BankAccountId,
 				}).
@@ -252,23 +312,47 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		"plaidAccountIds": bankAccountIds,
 	})
 
-	plaidTransactions, err := plaidClient.GetAllTransactions(span.Context(), p.args.Start, p.args.End, bankAccountIds)
-	if err = errors.Wrap(err, "failed to retrieve transactions from plaid for sync"); err != nil {
-		log.WithError(err).Error("failed to pull transactions")
-		return err
+	lastSync, err := s.repo.GetLastPlaidSync(span.Context(), *link.PlaidLinkId)
+	if err != nil {
+		return errors.Wrap(err, "failed to retrieve details about previous plaid sync")
 	}
 
-	if len(plaidTransactions) == 0 {
-		log.Warn("no transactions were retrieved from plaid")
-		crumbs.Debug(span.Context(), "No transactions were retrieved from plaid.", nil)
+	var cursor *string
+	if lastSync != nil {
+		cursor = &lastSync.NextCursor
 	}
+
+	syncData, err := plaidClient.Sync(span.Context(), cursor)
+	if err != nil {
+		return errors.Wrap(err, "failed to sync with plaid")
+	}
+
+	if err = s.repo.RecordPlaidSync(
+		span.Context(),
+		*link.PlaidLinkId,
+		syncData.NextCursor,
+		s.args.Trigger,
+		len(syncData.New),
+		len(syncData.Updated),
+		len(syncData.Deleted),
+	); err != nil {
+		return errors.Wrap(err, "failed to record plaid sync progress")
+	}
+
+	// If we received nothing to insert/update/remove then do nothing
+	if len(syncData.New)+len(syncData.Updated)+len(syncData.Deleted) == 0 {
+		log.Info("no new data from plaid, nothing to be done")
+		return nil
+	}
+
+	plaidTransactions := append(syncData.New, syncData.Updated...)
 
 	log.WithField("count", len(plaidTransactions)).Debugf("retrieved transactions from plaid")
 	crumbs.Debug(span.Context(), "Retrieved transactions from plaid.", map[string]interface{}{
 		"count": len(plaidTransactions),
 	})
 
-	account, err := p.repo.GetAccount(span.Context())
+	account, err := s.repo.GetAccount(span.Context())
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve account for job")
 		return err
@@ -285,7 +369,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		plaidTransactionIds[i] = transaction.GetTransactionId()
 	}
 
-	transactionsByPlaidId, err := p.repo.GetTransactionsByPlaidId(span.Context(), link.LinkId, plaidTransactionIds)
+	transactionsByPlaidId, err := s.repo.GetTransactionsByPlaidId(span.Context(), link.LinkId, plaidTransactionIds)
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve transaction ids for updating plaid transactions")
 		return err
@@ -312,7 +396,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		existingTransaction, ok := transactionsByPlaidId[plaidTransaction.GetTransactionId()]
 		if !ok {
 			transactionsToInsert = append(transactionsToInsert, models.Transaction{
-				AccountId:                 p.repo.AccountId(),
+				AccountId:                 s.repo.AccountId(),
 				BankAccountId:             plaidIdsToBankIds[plaidTransaction.GetBankAccountId()],
 				PlaidTransactionId:        plaidTransaction.GetTransactionId(),
 				Amount:                    amount,
@@ -365,7 +449,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		crumbs.Debug(span.Context(), "Updating transactions.", map[string]interface{}{
 			"count": len(transactionsToUpdate),
 		})
-		if err = p.repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
+		if err = s.repo.UpdateTransactions(span.Context(), transactionsToUpdate); err != nil {
 			log.WithError(err).Errorf("failed to update transactions for job")
 			return err
 		}
@@ -376,11 +460,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		crumbs.Debug(span.Context(), "Creating transactions.", map[string]interface{}{
 			"count": len(transactionsToInsert),
 		})
-		// Reverse the list so the oldest records are inserted first.
-		for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
-			transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
-		}
-		if err = p.repo.InsertTransactions(span.Context(), transactionsToInsert); err != nil {
+		if err = s.repo.InsertTransactions(span.Context(), transactionsToInsert); err != nil {
 			log.WithError(err).Error("failed to insert new transactions")
 			return err
 		}
@@ -446,7 +526,7 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 			if shouldUpdate {
 				updatedBankAccounts = append(updatedBankAccounts, models.BankAccount{
 					BankAccountId:     bankAccount.BankAccountId,
-					AccountId:         p.args.AccountId,
+					AccountId:         s.args.AccountId,
 					AvailableBalance:  available,
 					CurrentBalance:    current,
 					PlaidName:         plaidName,
@@ -456,10 +536,74 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 			}
 		}
 
-		if err = p.repo.UpdateBankAccounts(span.Context(), updatedBankAccounts...); err != nil {
+		if err = s.repo.UpdateBankAccounts(span.Context(), updatedBankAccounts...); err != nil {
 			log.WithError(err).Error("failed to update bank account balances")
 			crumbs.ReportError(span.Context(), err, "Failed to update bank account balances", "job", nil)
 		}
+	}
+
+	if len(syncData.Deleted) > 0 { // Handle removed transactions
+		log.Infof("removing %d transaction(s)", len(syncData.Deleted))
+
+		transactions, err := s.repo.GetTransactionsByPlaidTransactionId(span.Context(), s.args.LinkId, syncData.Deleted)
+		if err != nil {
+			log.WithError(err).Error("failed to retrieve transactions by plaid transaction Id for removal")
+			return err
+		}
+
+		if len(transactions) == 0 {
+			log.Warnf("no transactions retrieved, nothing to be done. transactions might already have been deleted")
+			return nil
+		}
+
+		if len(transactions) != len(syncData.Deleted) {
+			log.Warnf("number of transactions retrieved does not match expected number of transactions, expected: %d found: %d", len(syncData.Deleted), len(transactions))
+			crumbs.IndicateBug(span.Context(), "The number of transactions retrieved does not match the expected number of transactions", map[string]interface{}{
+				"expected":            len(syncData.Deleted),
+				"found":               len(transactions),
+				"plaidTransactionIds": syncData.Deleted,
+			})
+		}
+
+		for _, existingTransaction := range transactions {
+			if existingTransaction.SpendingId == nil {
+				continue
+			}
+
+			// If the transaction is spent from something then we need to remove the spent from before deleting it to
+			// maintain our balances correctly.
+			updatedTransaction := existingTransaction
+			updatedTransaction.SpendingId = nil
+
+			// This is a simple sanity check, working with objects in slices and for loops can be goofy, or my
+			// understanding of the way objects works with how they are referenced in memory is poor. This is to make
+			// sure im not doing it wrong though. I'm worried that making a "copy" of the object and then modifying the
+			// copy will modify the original as well.
+			if existingTransaction.SpendingId == nil {
+				sentry.CaptureMessage("original transaction modified")
+				panic("original transaction modified")
+			}
+
+			_, err = s.repo.ProcessTransactionSpentFrom(
+				span.Context(),
+				existingTransaction.BankAccountId,
+				&updatedTransaction,
+				&existingTransaction,
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, transaction := range transactions {
+			if err = s.repo.DeleteTransaction(span.Context(), transaction.BankAccountId, transaction.TransactionId); err != nil {
+				log.WithField("transactionId", transaction.TransactionId).WithError(err).
+					Error("failed to delete transaction")
+				return err
+			}
+		}
+
+		log.Debugf("successfully removed %d transaction(s)", len(transactions))
 	}
 
 	linkWasSetup := false
@@ -476,14 +620,14 @@ func (p *PullTransactionsJob) Run(ctx context.Context) error {
 		linkWasSetup = true
 	}
 	link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
-	if err = p.repo.UpdateLink(span.Context(), link); err != nil {
+	if err = s.repo.UpdateLink(span.Context(), link); err != nil {
 		log.WithError(err).Error("failed to update link after transaction sync")
 		return err
 	}
 
 	if linkWasSetup { // Send the notification that the link has been set up.
-		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", p.args.AccountId, p.args.LinkId)
-		if notifyErr := p.publisher.Notify(
+		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", s.args.AccountId, s.args.LinkId)
+		if notifyErr := s.publisher.Notify(
 			span.Context(),
 			channelName,
 			"success",

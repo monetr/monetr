@@ -202,7 +202,7 @@ func (g *GoCraftWorkJobProcessor) RegisterJob(ctx context.Context, handler JobHa
 			schedulerName := scheduledJob.QueueName() + "GoCraftScheduler"
 			// Each job is wrapped with an enqueuer. This enqueuer is run on a schedule to trigger the actual jobs in
 			// their batches.
-			g.queue.Job(schedulerName, func(job *work.Job) error {
+			g.queue.Job(schedulerName, func(_ *work.Job) error {
 				span := sentry.StartSpan(context.Background(), "topic.process", sentry.TransactionName(scheduledJob.QueueName()))
 				defer span.Finish()
 				return scheduledJob.EnqueueTriggeredJob(span.Context(), g.enqueuer)

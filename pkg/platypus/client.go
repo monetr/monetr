@@ -11,7 +11,6 @@ import (
 	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/pkg/errors"
 	"github.com/plaid/plaid-go/plaid"
 	"github.com/sirupsen/logrus"
 )
@@ -26,9 +25,8 @@ type (
 		// has access to via Plaid's API.
 		UpdateItem(ctx context.Context, updateAccountSelection bool) (LinkToken, error)
 		RemoveItem(ctx context.Context) error
-		// SyncTransactions takes a cursor (or lack of one) and retrieves transaction data from Plaid that is newer than
-		// that cursor.
-		SyncTransactions(ctx context.Context, cursor *string) (SyncResult, error)
+		// Sync takes a cursor (or lack of one) and retrieves transaction data from Plaid that is newer than that cursor.
+		Sync(ctx context.Context, cursor *string) (*SyncResult, error)
 	}
 )
 
@@ -64,78 +62,6 @@ func (p *PlaidClient) toTransactionMap(input []plaid.Transaction) (map[string]Tr
 	}
 
 	return transactions, nil
-}
-
-func (p *PlaidClient) SyncTransactions(ctx context.Context, cursor *string) (SyncResult, error) {
-	span := sentry.StartSpan(ctx, "http.client")
-	defer span.Finish()
-	span.Description = "Plaid - SyncTransactions"
-	span.SetTag("itemId", p.itemId)
-	span.Data = map[string]interface{}{
-		"cursor": cursor,
-	}
-
-	log := p.getLog(span).WithFields(logrus.Fields{
-		"itemId": p.itemId,
-		"cursor": cursor,
-	})
-
-	log.Trace("performing transaction sync with Plaid")
-
-	request := p.client.PlaidApi.
-		TransactionsSync(span.Context()).
-		TransactionsSyncRequest(plaid.TransactionsSyncRequest{
-			AccessToken: p.accessToken,
-			Cursor:      cursor,
-			Count:       myownsanity.Int32P(500),
-		})
-
-	// Send the request.
-	result, response, err := request.Execute()
-	// And handle the response.
-	if err = after(
-		span,
-		response,
-		err,
-		"Syncing transactions with Plaid",
-		"failed to sync transactions with Plaid",
-	); err != nil {
-		log.WithError(err).Errorf("failed to sync transactions with Plaid")
-		return SyncResult{}, err
-	}
-
-	syncResult := SyncResult{
-		NextCursor: result.GetNextCursor(),
-		HasMore:    result.GetHasMore(),
-		New:        map[string]Transaction{},
-		Updated:    map[string]Transaction{},
-		Deleted:    []string{},
-	}
-
-	syncResult.New, err = p.toTransactionMap(result.GetAdded())
-	if err != nil {
-		return syncResult, errors.Wrap(err, "failed to read new transactions from sync")
-	}
-
-	syncResult.Updated, err = p.toTransactionMap(result.GetModified())
-	if err != nil {
-		return syncResult, errors.Wrap(err, "failed to read new transactions from sync")
-	}
-
-	removed := result.GetRemoved()
-	syncResult.Deleted = make([]string, len(removed))
-	for i, transaction := range removed {
-		syncResult.Deleted[i] = transaction.GetTransactionId()
-	}
-
-	crumbs.Debug(span.Context(), "Finished retrieving data from Plaid sync", map[string]interface{}{
-		"nextCursor": syncResult.NextCursor,
-		"new":        len(syncResult.New),
-		"updated":    len(syncResult.Updated),
-		"deleted":    len(syncResult.Deleted),
-	})
-
-	return syncResult, nil
 }
 
 func (p *PlaidClient) GetAccounts(ctx context.Context, accountIds ...string) ([]BankAccount, error) {
