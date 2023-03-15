@@ -16,7 +16,7 @@ services:
       - ./:/build
   monetr:
     tty: true # Makes color output work nicely.
-    image: golang:1.19.4
+    image: golang:1.20.2
     user: "${UID:-0}:${GID:-0}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
