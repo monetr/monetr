@@ -120,6 +120,9 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.EqualValues(t, 1, count, "should have one transaction now!")
 
+		count = fixtures.CountAllTransactions(t, user.AccountId)
+		assert.EqualValues(t, 1, count, "there should not be any EXTRA transactions that are deleted yet")
+
 		plaidClient.EXPECT().
 			Sync(
 				gomock.Any(),
@@ -139,7 +142,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 						Date:                   time.Date(2023, 01, 01, 0, 0, 0, 0, time.Local),
 						ISOCurrencyCode:        "USD",
 						UnofficialCurrencyCode: "USD",
-						IsPending:              true,
+						IsPending:              false, // Replaces the pending transaction.
 						MerchantName:           "Acme Corp",
 						Name:                   "Acme Corp",
 						OriginalDescription:    "ACME CORP",
@@ -169,5 +172,8 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		// We should have a few transactions now.
 		count = fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.EqualValues(t, 1, count, "should have one transaction now!")
+
+		count = fixtures.CountAllTransactions(t, user.AccountId)
+		assert.EqualValues(t, 2, count, "should have a total of two transactions including the deleted one")
 	})
 }

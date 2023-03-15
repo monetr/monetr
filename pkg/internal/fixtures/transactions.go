@@ -100,11 +100,22 @@ func CountNonDeletedTransactions(t *testing.T, accountId uint64) int64 {
 	return int64(count)
 }
 
+func CountAllTransactions(t *testing.T, accountId uint64) int64 {
+	db := testutils.GetPgDatabase(t)
+	count, err := db.Model(&models.Transaction{}).
+		Where(`"transaction"."account_id" = ?`, accountId).
+		Count()
+	require.NoError(t, err, "must be able to query transactions successfully")
+
+	return int64(count)
+}
+
 func CountPendingTransactions(t *testing.T, accountId uint64) int64 {
 	db := testutils.GetPgDatabase(t)
 	count, err := db.Model(&models.Transaction{}).
 		Where(`"transaction"."account_id" = ?`, accountId).
 		Where(`"transaction"."is_pending" = ?`, true).
+		Where(`"transaction"."deleted_at" IS NULL`).
 		Count()
 	require.NoError(t, err, "must be able to query transactions successfully")
 
