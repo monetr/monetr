@@ -230,7 +230,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
 
 		// Should not have any transactions before this job runs.
-		count := fixtures.CountTransactions(t, user.AccountId)
+		count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.Zero(t, count, "should not have any transactions yet")
 
 		{ // Do our first pull of transactions.
@@ -251,7 +251,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		}
 
 		// We should have a few transactions now.
-		count = fixtures.CountTransactions(t, user.AccountId)
+		count = fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.NotZero(t, count, "should have more than zero transactions now")
 	})
 
@@ -377,7 +377,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		}
 
 		// We should have a few transactions now.
-		count := fixtures.CountTransactions(t, user.AccountId)
+		count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.NotZero(t, count, "should have more than zero transactions now")
 
 		{ // Do our second pull of transactions.
@@ -395,7 +395,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		}
 
 		// We should have two transactions now.
-		count = fixtures.CountTransactions(t, user.AccountId)
+		count = fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.EqualValues(t, 2, count, "should have 2 transactions now")
 	})
 
@@ -496,7 +496,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		}
 
 		// We should have a few transactions now.
-		count := fixtures.CountTransactions(t, user.AccountId)
+		count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.NotZero(t, count, "should have more than zero transactions now")
 
 		pendingCount := fixtures.CountPendingTransactions(t, user.AccountId)
@@ -531,7 +531,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			assert.NoError(t, err, "must process job successfully")
 		}
 
-		newCount := fixtures.CountTransactions(t, user.AccountId)
+		newCount := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.EqualValues(t, newCount, count, "must have more transactions after second run")
 
 		pendingCount = fixtures.CountPendingTransactions(t, user.AccountId)
@@ -617,7 +617,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
 
 		// Should not have any transactions before this job runs.
-		count := fixtures.CountTransactions(t, user.AccountId)
+		count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.Zero(t, count, "should not have any transactions yet")
 
 		{ // Do our first pull of transactions.
@@ -638,7 +638,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		}
 
 		// We should have a few transactions now.
-		count = fixtures.CountTransactions(t, user.AccountId)
+		count = fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.NotZero(t, count, "should have more than zero transactions now")
 	})
 

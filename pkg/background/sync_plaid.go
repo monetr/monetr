@@ -158,6 +158,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 		err := enqueuer.EnqueueJob(ctx, s.QueueName(), SyncPlaidArguments{
 			AccountId: item.AccountId,
 			LinkId:    item.LinkId,
+			Trigger:   "cron",
 		})
 		if err != nil {
 			itemLog.WithError(err).Warn("failed to enqueue job to sync with plaid")
