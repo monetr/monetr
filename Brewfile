@@ -5,7 +5,7 @@ tap "homebrew/cask"
 brew 'docker'
 cask 'docker'
 
-brew 'go@1.19'
+brew 'go@1.20'
 
 # For macOS the included version of make is :trash:. Install a real one.
 brew 'make'
