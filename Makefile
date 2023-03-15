@@ -23,8 +23,8 @@ RELEASE_VERSION ?= $(shell git describe --tags --dirty)
 CONTAINER_VERSION ?= $(RELEASE_VERSION:v%=%)
 
 # We want ALL of our paths to be relative to the repository path on the computer we are on. Never relative to anything
-# else. This will fall back to the regular pwd, but this can break stuff run from subdirectories sometimes.
-PWD=$(shell git rev-parse --show-toplevel || pwd)
+# else.
+PWD=$(shell git rev-parse --show-toplevel)
 
 
 # Then include the colors file to make a lot of the printing prettier.
