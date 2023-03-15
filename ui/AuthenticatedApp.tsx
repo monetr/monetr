@@ -1,20 +1,21 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, lazy, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Backdrop, CircularProgress } from '@mui/material';
 
 import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
 import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import { useLinksSink } from 'hooks/links';
-import AccountsPage from 'pages/accounts';
-import ExpensesPage from 'pages/expenses';
-import FundingPage from 'pages/funding';
-import GoalsPage from 'pages/goals';
 import LogoutPage from 'pages/logout';
-import SettingsPage from 'pages/settings';
-import SubscriptionPage from 'pages/subscription';
-import TransactionsPage from 'pages/transactions';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
-import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
+
+const AccountsPage = lazy(() => import('pages/accounts'));
+const ExpensesPage = lazy(() => import('pages/expenses'));
+const FundingPage = lazy(() => import('pages/funding'));
+const GoalsPage = lazy(() => import('pages/goals'));
+const SettingsPage = lazy(() => import('pages/settings'));
+const SubscriptionPage = lazy(() => import('pages/subscription'));
+const TransactionsPage = lazy(() => import('pages/transactions'));
+const InitialPlaidSetup = lazy(() => import('views/Setup/InitialPlaidSetup'));
 
 const AuthenticatedApp = (): JSX.Element => {
 
