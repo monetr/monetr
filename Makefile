@@ -14,36 +14,17 @@ EDITOR ?= vim
 # This stuff is used for versioning monetr when doing a release or developing locally.
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_HOST=$(shell hostname)
-
-# Derive the release revision from the current commit, if we are in CI then derive it from the
-# environment variable instead.
-ifneq ($(and $(CI),$(GITHUB_SHA)),)
-RELEASE_REVISION=$(GITHUB_SHA)
-else
-RELEASE_REVISION=$(shell git rev-parse HEAD)
-endif
-
-# The release version is either provided as an argument, or is derived from git directly. If we
-# are in CI though then we can allow it to be provided via the environment variable.
-ifneq ($(and $(CI),$(GITHUB_REF_NAME)),)
-RELEASE_REVISION ?= $(GITHUB_REF_NAME)
-BRANCH=$(GITHUB_REF_NAME)
-else
-RELEASE_VERSION ?= $(shell git describe --tags --dirty)
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
-endif
+RELEASE_REVISION=$(shell git rev-parse HEAD)
+RELEASE_VERSION ?= $(shell git describe --tags --dirty)
 
 # Containers should not have the `v` prefix. So we take the release version variable and trim the `v` at the beginning
 # if it is there.
 CONTAINER_VERSION ?= $(RELEASE_VERSION:v%=%)
 
 # We want ALL of our paths to be relative to the repository path on the computer we are on. Never relative to anything
-# else. When we are in Github actions CI though, derive this from the environment.
-ifneq ($(and $(CI),$(GITHUB_WORKSPACE)),)
-PWD=$(GITHUB_WORKSPACE)
-else
-PWD=$(shell git rev-parse --show-toplevel)
-endif
+# else. This will fall back to the regular pwd, but this can break stuff run from subdirectories sometimes.
+PWD=$(shell git rev-parse --show-toplevel || pwd)
 
 
 # Then include the colors file to make a lot of the printing prettier.
