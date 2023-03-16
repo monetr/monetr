@@ -1,5 +1,4 @@
 .SUFFIXES:
-default: build
 
 GIT_REPOSITORY=https://github.com/monetr/monetr.git
 
@@ -43,6 +42,11 @@ settings: $(MONETR_DIR)
 ifneq (,$(wildcard $(MONETR_ENV)))
 include $(MONETR_ENV)
 endif
+
+
+default:
+	cmake -B $(PWD)/build
+	$(MAKE) -C $(PWD)/build -B $(PWD)/build/Makefile monetr
 
 # These are some working directories we need for local development.
 LOCAL_TMP = $(PWD)/tmp
