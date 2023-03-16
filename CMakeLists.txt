@@ -19,7 +19,7 @@ foreach(CFGNAME ${CMAKE_CONFIGURATION_TYPES})
 endforeach()
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/build/monetr"
-                   COMMAND "${CMAKE_Go_COMPILER} build -o ${TARGET_FILE} github.com/monetr/monetr/pkg/cmd")
+                   COMMAND ${CMAKE_Go_COMPILER} build -o ${TARGET_FILE} github.com/monetr/monetr/pkg/cmd)
 
 add_custom_target(monetr
                   COMMENT "Building monetr!"
