@@ -7,7 +7,10 @@ import Transaction from 'models/Transaction';
 import request from 'util/request';
 
 export type TransactionsResult =
-  { result: Array<Transaction> }
+  {
+    result: Array<Transaction>;
+    hasNextPage: boolean;
+  }
   & UseInfiniteQueryResult<Array<Partial<Transaction>>>;
 
 export function useTransactionsSink(): TransactionsResult {
@@ -22,6 +25,7 @@ export function useTransactionsSink(): TransactionsResult {
   );
   return {
     ...result,
+    hasNextPage: !result?.data?.pages.some(page => page.length < 25),
     // Take all the pages and build an array. Make sure we actually return an array here even if it's empty.
     result: result?.data?.pages.flatMap(x => x).map(item => new Transaction(item)) || [],
   };

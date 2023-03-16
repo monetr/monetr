@@ -9,12 +9,7 @@ import { useTransactionsSink } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 
 function TransactionsView(): JSX.Element {
-  const { isLoading, isFetching, fetchNextPage, error, result: transactions } = useTransactionsSink();
-
-  // TODO This is a temp approach, since we don't know how many transactions we have for a given bank account, we can
-  //  just request transactions until we get a page that is not full. But this is not a good way to do it. If they have
-  //  a total number of transactions divisible by 25 then we could continue to try to request more.
-  const hasNextPage = transactions.length % 25 === 0 && transactions.length !== 0;
+  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactionsSink();
   const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({
