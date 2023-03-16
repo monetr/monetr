@@ -1,15 +1,14 @@
-import React, { lazy } from 'react';
+import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import LoginPage from 'pages/login';
-
-const ForgotPasswordPage = lazy(() => import('pages/password/forgot'));
-const ResetPasswordPage = lazy(() => import('pages/password/reset'));
-const RegisterPage = lazy(() => import('pages/register'));
-const VerifyEmailPage = lazy(() => import('pages/verify/email'));
-const ResendVerificationPage = lazy(() => import('pages/verify/email/resend'));
-const TOTPView = lazy(() => import('views/Authentication/TOTPView'));
+import ForgotPasswordPage from 'pages/password/forgot';
+import ResetPasswordPage from 'pages/password/reset';
+import RegisterPage from 'pages/register';
+import VerifyEmailPage from 'pages/verify/email';
+import ResendVerificationPage from 'pages/verify/email/resend';
+import TOTPView from 'views/Authentication/TOTPView';
 
 export default function UnauthenticatedApplication(): JSX.Element {
   const {
