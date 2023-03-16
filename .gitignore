@@ -34,3 +34,8 @@ Brewfile.lock.json
 .vscode
 docs/developing/api/swagger.*
 .licenses
+
+**/CMakeCache.txt
+**/CMakeFiles
+cmake_install.cmake
+**/.cmake
