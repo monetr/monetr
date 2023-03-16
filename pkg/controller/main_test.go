@@ -39,7 +39,6 @@ const (
 
 func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	return config.Configuration{
-		Name:          t.Name(),
 		UIDomainName:  TestUIDomainName,
 		APIDomainName: TestAPIDomainName,
 		AllowSignUp:   true,

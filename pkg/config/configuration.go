@@ -37,12 +37,6 @@ type Configuration struct {
 	// configuration.
 	configFile string `yaml:"-"`
 
-	// DEPRECATED: This is not used anymore. It serves no function at all.
-	Name string `yaml:"name"`
-	// DEPRECATED: This is not used anymore. Use Server.ListenPort instead.
-	ListenPort int `yaml:"listenPort"`
-	// DEPRECATED: This is not used anymore. Use Server.StatsPort instead.
-	StatsPort   int    `yaml:"statsPort"`
 	Environment string `yaml:"environment"`
 	// ExternalURLProtocol is used to determine what protocol should be used in things like email templates. It defaults
 	// to https.
