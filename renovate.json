@@ -1,10 +1,10 @@
 {
   "extends": [
     "config:base",
-    ":semanticCommitTypeAll(deps)"
+    ":semanticCommitTypeAll(chore)"
   ],
   "semanticCommits": "enabled",
-  "semanticCommitType": "deps",
+  "semanticCommitType": "chore",
   "semanticCommitScope": "Renovate",
   "branchConcurrentLimit": 20,
   "prConcurrentLimit": 20,
@@ -23,7 +23,7 @@
         "go",
         "golang"
       ],
-      "semanticCommitScope": "api"
+      "semanticCommitScope": "go"
     },
     {
       "matchLanguages": [
@@ -31,7 +31,7 @@
         "javascript",
         "typescript"
       ],
-      "semanticCommitScope": "ui"
+      "semanticCommitScope": "js"
     },
     {
       "matchLanguages": [
