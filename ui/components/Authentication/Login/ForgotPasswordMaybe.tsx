@@ -13,7 +13,7 @@ export default function ForgotPasswordMaybe(): JSX.Element {
   }
 
   return (
-    <div className="w-full flex justify-end mt-2.5 text-sm">
+    <div className="w-full flex justify-end mt-5 text-sm">
       <RouterLink className="opacity-50 hover:underline" to="/password/forgot">Forgot Password?</RouterLink>
     </div>
   );

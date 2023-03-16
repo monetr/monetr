@@ -68,7 +68,7 @@ export default function LoginView(): JSX.Element {
     values: LoginValues,
   ): JSX.Element {
     return (
-      <div>
+      <div className='mt-2.5'>
         <div className="w-full pt-2.5 pb-2.5">
           <Button
             className="w-full"
@@ -116,7 +116,7 @@ export default function LoginView(): JSX.Element {
         }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
-              <div className="w-full p-2.5 md:p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
+              <div className="w-full p-2.5 md:p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0 bg-white rounded-xl drop-shadow-2xl">
                 <CenteredLogo />
                 { allowSignUp && (
                   <div>
@@ -139,8 +139,8 @@ export default function LoginView(): JSX.Element {
                     </div>
                   </div>
                 ) }
-                <div className="w-full">
-                  <div className="w-full pb-2.5">
+                <div className="w-full space-y-5">
+                  <div className="w-full">
                     <TextField
                       autoComplete="username"
                       autoFocus
@@ -157,7 +157,7 @@ export default function LoginView(): JSX.Element {
                       variant="outlined"
                     />
                   </div>
-                  <div className="w-full pt-2.5 pb-2.5">
+                  <div className="w-full">
                     <TextField
                       autoComplete="current-password"
                       className="w-full"

@@ -17,15 +17,17 @@ export default function UnauthenticatedApplication(): JSX.Element {
   } = useAppConfiguration();
 
   return (
-    <Routes>
-      <Route path="/login" element={ <LoginPage /> } />
-      <Route path="/login/mfa" element={ <TOTPView /> } />
-      { allowSignUp && <Route path="/register" element={ <RegisterPage /> } /> }
-      { allowForgotPassword && <Route path="/password/forgot" element={ <ForgotPasswordPage /> } /> }
-      <Route path="/password/reset" element={ <ResetPasswordPage /> } />
-      <Route path="/verify/email" element={ <VerifyEmailPage /> } />
-      <Route path="/verify/email/resend" element={ <ResendVerificationPage /> } />
-      <Route path="*" element={ <Navigate replace to="/login" /> } />
-    </Routes>
+    <div className='w-full h-full bg-purple-500'>
+      <Routes>
+        <Route path="/login" element={ <LoginPage /> } />
+        <Route path="/login/mfa" element={ <TOTPView /> } />
+        { allowSignUp && <Route path="/register" element={ <RegisterPage /> } /> }
+        { allowForgotPassword && <Route path="/password/forgot" element={ <ForgotPasswordPage /> } /> }
+        <Route path="/password/reset" element={ <ResetPasswordPage /> } />
+        <Route path="/verify/email" element={ <VerifyEmailPage /> } />
+        <Route path="/verify/email/resend" element={ <ResendVerificationPage /> } />
+        <Route path="*" element={ <Navigate replace to="/login" /> } />
+      </Routes>
+    </div>
   );
 }
