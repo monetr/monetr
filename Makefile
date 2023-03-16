@@ -255,7 +255,6 @@ test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr REST API)
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 	$(GOTESTSUM) --junitfile $(PWD)/rest-api-junit.xml \
-		--rerun-fails \
 		--jsonfile $(PWD)/rest-api-tests.json \
 		--format testname -- $(TEST_FLAGS) \
 		-coverprofile=$(COVERAGE_TXT) \
