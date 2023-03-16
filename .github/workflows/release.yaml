@@ -16,6 +16,17 @@ jobs:
       - uses: GoogleCloudPlatform/release-please-action@v3
         id: release
         with:
+          changelog-types: |
+            [
+              {"type":"feat","section":"Features","hidden":false},
+              {"type":"feature","section":"Features","hidden":false},
+              {"type":"deps","section":"Dependencies","hidden":false},
+              {"type":"fix","section":"Bug Fixes","hidden":false},
+              {"type":"chore","section":"Miscellaneous","hidden":false},
+              {"type":"doc","section":"Documentation","hidden":false},
+              {"type":"docs","section":"Documentation","hidden":false},
+              {"type":"ci","section":"Build Automation","hidden":false}
+            ]
           release-type: simple
           package-name: monetr
           version-file: version.txt
