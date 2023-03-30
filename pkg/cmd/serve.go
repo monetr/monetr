@@ -80,6 +80,7 @@ func RunServer() error {
 			Release:          build.Release,
 			Environment:      configuration.Environment,
 			SampleRate:       configuration.Sentry.SampleRate,
+			EnableTracing:    configuration.Sentry.TraceSampleRate > 0,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
 			BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
 				// Make sure user authentication doesn't make its way into sentry.

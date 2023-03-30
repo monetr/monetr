@@ -13,7 +13,7 @@ require (
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.14.0
-	github.com/getsentry/sentry-go v0.14.0
+	github.com/getsentry/sentry-go v0.19.0
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.11.0
 	github.com/gocraft/work v0.5.1
