@@ -3,16 +3,9 @@
 ## [0.14.5](https://github.com/monetr/monetr/compare/v0.14.4...v0.14.5) (2023-03-30)
 
 
-### Features
-
-* **ui:** Adding more lazy routes to unauthenticated components. ([6beafb3](https://github.com/monetr/monetr/commit/6beafb3c2499fa05504f8bbb93fa5933b59da521))
-* **ui:** Implemented basic lazy loading of UI routes. ([f5de50c](https://github.com/monetr/monetr/commit/f5de50c7e65b9903a2ff5f67353854ffd35704e7))
-
 
 ### Bug Fixes
 
-* **ci:** Fixing flaking TOTP test with allowed retry. ([70bec73](https://github.com/monetr/monetr/commit/70bec73461a362afd038314e3e7de7880f1dc1ee))
-* **ci:** Fixing git commands in CI ([ec05bab](https://github.com/monetr/monetr/commit/ec05bab7ad4ebef2cc0730cb71a58c9fee6ad7f9))
 * **ui:** Fixed requesting more transactions. ([#1367](https://github.com/monetr/monetr/issues/1367)) ([2e4b869](https://github.com/monetr/monetr/commit/2e4b8695e5a19be370fe6eb98ed6b5e3ab4ad00d)), closes [#1331](https://github.com/monetr/monetr/issues/1331)
 
 
