@@ -48,7 +48,7 @@ export default function FundingEditPage(): JSX.Element {
     name: fundingSchedule.name,
     nextOccurrence: fundingSchedule.nextOccurrence,
     recurrenceRule: new Recurrence({
-      rule: RRule.fromText(`RRULE: ${ fundingSchedule.rule}`),
+      rule: RRule.fromString(fundingSchedule.rule),
     }),
     excludeWeekends: false,
     estimatedDeposit: null,
