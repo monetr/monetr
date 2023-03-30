@@ -2,7 +2,7 @@ import useIsMobile from 'hooks/useIsMobile';
 import React, { useRef, useState } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Science } from '@mui/icons-material';
-import { Button, Collapse, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, InputAdornment, Switch, TextField } from '@mui/material';
+import { Button, Collapse, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, InputAdornment, Switch } from '@mui/material';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import moment from 'moment';
 
@@ -81,7 +81,7 @@ function CreateFundingScheduleDialog(): JSX.Element {
         <MForm>
           <Dialog
             open={ modal.visible }
-            maxWidth="xs"
+            maxWidth="sm"
             ref={ ref }
             fullScreen={ isMobile }
           >

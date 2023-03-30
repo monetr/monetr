@@ -44,6 +44,13 @@ const theme = createTheme({
         },
       },
     },
+    MuiFormLabel: {
+      styleOverrides: {
+        asterisk: {
+          color: fullConfig.theme.colors['red']['500'],
+        },
+      },
+    },
   },
   palette: {
     mode: darkMode ? 'dark' : 'light',

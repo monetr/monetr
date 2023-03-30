@@ -15,13 +15,14 @@ export default function MTextField<T>(props: MTextFieldProps): JSX.Element {
   const error = formik.errors[props.name] as string;
   const hasError = Boolean(touched && value && !!error);
   const helperText = hasError ? error : '';
+  const className = props?.className || 'w-full';
 
   return (
     <TextField
       { ...props }
       error={ hasError }
       helperText={ helperText }
-      className="w-full"
+      className={ className }
       onChange={ formik.handleChange }
       onBlur={ formik.handleBlur }
       value={ value }

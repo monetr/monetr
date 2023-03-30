@@ -1,4 +1,5 @@
-import { TextField } from '@mui/material';
+import { Button, TextField } from '@mui/material';
+import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MTextField from 'components/MTextField';
 import Recurrence from 'components/Recurrence/Recurrence';
@@ -7,6 +8,7 @@ import { useFundingSchedule } from 'hooks/fundingSchedules';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { RRule } from 'rrule';
+import capitalize from 'util/capitalize';
 
 interface FundingScheduleEditForm {
   name: string;
@@ -60,15 +62,17 @@ export default function FundingEditPage(): JSX.Element {
     return null;
   }
 
+  const rule = RRule.fromString(fundingSchedule.rule);
+
   return (
     <div className='minus-nav'>
-      <div className='w-full view-area bg-white px-2 py-2'>
+      <div className='w-full view-area bg-white px-5 py-5'>
         <div>
           <div>
             <span className='font-medium text-2xl w-full'>
               Edit Funding Schedule
             </span>
-            <p className='md:w-1/2 w-full font-normal text-slate-600'>
+            <p className='md:w-2/3 w-full font-normal text-slate-600'>
               Here you can edit your funding schedule, update when you'll get paid next, how frequently you get paid, or
               how much you get paid. As well as some other tweaks to help make your budgeting experience even easier.
             </p>
@@ -79,11 +83,29 @@ export default function FundingEditPage(): JSX.Element {
               validate={ validateInput }
               onSubmit={ submit }
             >
-              <MForm>
+              <MForm className='space-y-8 max-w-lg'>
                 <MTextField
                   name="name"
                   label="Funding Schedule Name"
                   required
+                />
+                <MDatePicker
+                  name="nextOccurrence"
+                  label="When does this funding schedule happen next?"
+                  required
+                />
+                <TextField
+                  className='w-full'
+                  label="How often do you want to this schedule to happen?"
+                  value={ capitalize(rule.toText()) }
+                  onChange={ () => {} }
+                  InputProps={ {
+                    endAdornment: (
+                      <Button>
+                        Edit
+                      </Button>
+                    )
+                  }}
                 />
               </MForm>
             </Formik>
