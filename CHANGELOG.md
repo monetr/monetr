@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.14.5](https://github.com/monetr/monetr/compare/v0.14.4...v0.14.5) (2023-03-30)
+
+
+### Features
+
+* **ui:** Adding more lazy routes to unauthenticated components. ([6beafb3](https://github.com/monetr/monetr/commit/6beafb3c2499fa05504f8bbb93fa5933b59da521))
+* **ui:** Implemented basic lazy loading of UI routes. ([f5de50c](https://github.com/monetr/monetr/commit/f5de50c7e65b9903a2ff5f67353854ffd35704e7))
+
+
+### Bug Fixes
+
+* **ci:** Fixing flaking TOTP test with allowed retry. ([70bec73](https://github.com/monetr/monetr/commit/70bec73461a362afd038314e3e7de7880f1dc1ee))
+* **ci:** Fixing git commands in CI ([ec05bab](https://github.com/monetr/monetr/commit/ec05bab7ad4ebef2cc0730cb71a58c9fee6ad7f9))
+* **ui:** Fixed requesting more transactions. ([#1367](https://github.com/monetr/monetr/issues/1367)) ([2e4b869](https://github.com/monetr/monetr/commit/2e4b8695e5a19be370fe6eb98ed6b5e3ab4ad00d)), closes [#1331](https://github.com/monetr/monetr/issues/1331)
+
+
+### Miscellaneous
+
+* **config:** Removing unused config references. ([d7d2d18](https://github.com/monetr/monetr/commit/d7d2d184ded77b574a960ca35d2257fa28cda3e3))
+* **renovate:** Tweaked renovate config for commits. ([00023fc](https://github.com/monetr/monetr/commit/00023fce24294f24f06b9b9b05d21b2ecb9af106))
+* Tweak Makefile to fix CI ([7795bc8](https://github.com/monetr/monetr/commit/7795bc81fbea073aee967ebc21764cffdd78e370))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.10.0 ([#1362](https://github.com/monetr/monetr/issues/1362)) ([e788ae1](https://github.com/monetr/monetr/commit/e788ae1266a716c76f25df1c3dd8a6e3b35080d6))
+* **api:** update module github.com/gavv/httpexpect/v2 to v2.14.0 ([#1363](https://github.com/monetr/monetr/issues/1363)) ([ce964be](https://github.com/monetr/monetr/commit/ce964bebe8445fbecab48ac8c463460d74d32ceb))
+* **api:** update module github.com/getsentry/sentry-go to v0.19.0 ([#1364](https://github.com/monetr/monetr/issues/1364)) ([3b45740](https://github.com/monetr/monetr/commit/3b45740c1c8c9737fe3672b8d53c829fe8634cc5))
+* **api:** update module github.com/golang-jwt/jwt/v4 to v4.5.0 ([#1365](https://github.com/monetr/monetr/issues/1365)) ([51a6f32](https://github.com/monetr/monetr/commit/51a6f322f972ab544ca70e3f6c27b945995061d1))
+* **api:** update module github.com/jarcoal/httpmock to v1.3.0 ([#1372](https://github.com/monetr/monetr/issues/1372)) ([31ce6fd](https://github.com/monetr/monetr/commit/31ce6fd59839216e439894d701d0187a2341514b))
+* **api:** update module github.com/spf13/viper to v1.15.0 ([#1373](https://github.com/monetr/monetr/issues/1373)) ([af3dc35](https://github.com/monetr/monetr/commit/af3dc3527c64656fc1c4859d1a6d91814bd3924f))
+* **go:** Upgrading Golang to 1.20.2 ([7218ba2](https://github.com/monetr/monetr/commit/7218ba2ebea50cfe68a95ae8cde4f2dbdbfa5afb))
+* **ui:** update dependency tailwindcss to v3.2.7 ([#1358](https://github.com/monetr/monetr/issues/1358)) ([58c8f84](https://github.com/monetr/monetr/commit/58c8f8402728e86075f5bc9400e225266278fbde))
+* **ui:** update dependency webpack to v5.76.2 ([#1360](https://github.com/monetr/monetr/issues/1360)) ([5a29f9b](https://github.com/monetr/monetr/commit/5a29f9b316982a0018613a6e3b83c7c9e265ab14))
+* **ui:** update react monorepo ([#1361](https://github.com/monetr/monetr/issues/1361)) ([edc1ab1](https://github.com/monetr/monetr/commit/edc1ab11eadaf5638bae7e050e98f8b366a1aa17))
+
 ## [0.14.4](https://github.com/monetr/monetr/compare/v0.14.3...v0.14.4) (2023-03-15)
 
 
