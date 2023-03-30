@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.14.6](https://github.com/monetr/monetr/compare/v0.14.5...v0.14.6) (2023-03-30)
+
+
+### Bug Fixes
+
+* **sync:** Fixed plaid sync only doing 500 updates at a time. ([3e7261c](https://github.com/monetr/monetr/commit/3e7261cde9d2155b9c58ef773e22db25fa33b088))
+
+
+### Miscellaneous
+
+* Bump license copyright year. ([6ec9ef8](https://github.com/monetr/monetr/commit/6ec9ef8f84a0bb458489633b588e5fb5b87e4761))
+* Correcting changelog ([939a4e6](https://github.com/monetr/monetr/commit/939a4e6669966ecc0ac673c5f62545063808feb5))
+* **docs:** Bump documentation copyright year. ([14b0233](https://github.com/monetr/monetr/commit/14b0233944e3a73da487f2a0b95d63139db1878b))
+* Update NOTICE file ([c9be0d0](https://github.com/monetr/monetr/commit/c9be0d0cda16f91fe5f83c57c34fb498b3df0364))
+
 ## [0.14.5](https://github.com/monetr/monetr/compare/v0.14.4...v0.14.5) (2023-03-30)
 
 
