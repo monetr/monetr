@@ -4,7 +4,7 @@ site_url: !ENV [SITE_URL, 'http://monetr.local/documentation/']
 repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
 edit_uri: edit/main/docs/
-copyright: © monetr LLC 2022
+copyright: © monetr LLC 2023
 site_dir: build/site
 watch:
   - docs
