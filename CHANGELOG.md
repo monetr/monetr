@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.7](https://github.com/monetr/monetr/compare/v0.14.6...v0.14.7) (2023-04-01)
+
+
+### Features
+
+* **plaid:** Transitioning to Plaid sync for all links. ([a17e698](https://github.com/monetr/monetr/commit/a17e698fa2804f1c8826c7575cd40490cbf7a55c))
+
+
+### Dependencies
+
+* **api:** update module github.com/getsentry/sentry-go to v0.20.0 ([#1379](https://github.com/monetr/monetr/issues/1379)) ([7957e61](https://github.com/monetr/monetr/commit/7957e6156c5ff78b60b03816ec977a3054fe036a))
+
 ## [0.14.6](https://github.com/monetr/monetr/compare/v0.14.5...v0.14.6) (2023-03-30)
 
 
