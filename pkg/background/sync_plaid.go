@@ -220,6 +220,10 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
 
+	if link.PlaidInstitutionId != nil {
+		crumbs.AddTag(span.Context(), "plaid.institution_id", *link.PlaidInstitutionId)
+	}
+
 	if len(link.BankAccounts) == 0 {
 		log.Warn("no bank accounts for plaid link")
 		crumbs.Debug(span.Context(), "No bank accounts setup for plaid link", nil)
