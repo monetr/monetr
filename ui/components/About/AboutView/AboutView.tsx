@@ -180,6 +180,20 @@ export default function AboutView(): JSX.Element {
             </div>
           </div>
           <hr />
+          <div className="grid grid-cols-2">
+            <div className="flex items-center">
+              <span className="text-lg">Discord</span>
+            </div>
+            <div className="flex items-center">
+              <a
+                target="_blank"
+                href="https://discord.gg/68wTCXrhuq"
+              >
+                https://discord.gg/68wTCXrhuq
+              </a>
+            </div>
+          </div>
+          <hr />
         </div>
       </div>
     </div>
