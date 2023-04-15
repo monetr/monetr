@@ -298,12 +298,12 @@ export default function RegisterView(): JSX.Element {
                           <Fragment>
                             I agree to monetr's&nbsp;
                             <a
-                              className="hover:text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                              className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
                               href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
                               Terms of Use
                             </a> and&nbsp;
                             <a
-                              className="hover:text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                              className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
                               href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
                             >
                               Privacy Policy
