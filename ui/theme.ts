@@ -64,6 +64,8 @@ const theme = createTheme({
     },
     background: {
       default: darkMode ? fullConfig.theme.colors['purple']['800'] :
+        fullConfig.theme.colors['purple']['400'],
+      paper: darkMode ? fullConfig.theme.colors['purple']['700'] :
         fullConfig.theme.colors['purple']['50'],
     },
   },

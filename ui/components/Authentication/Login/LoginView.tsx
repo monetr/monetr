@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Button, CircularProgress, TextField } from '@mui/material';
+import { Button, CircularProgress, Paper, TextField } from '@mui/material';
 import classnames from 'classnames';
 import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -116,72 +116,74 @@ export default function LoginView(): JSX.Element {
         }) => (
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
-              <div className="w-full p-2.5 md:p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo />
-                { allowSignUp && (
-                  <div>
+              <div className="w-full xl:w-1/3 lg:w-1/2 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
+                <Paper className='p-2.5 md:p-10 flex flex-col gap-y-2.5' elevation={ 4 }>
+                  <CenteredLogo />
+                  {allowSignUp && (
+                    <div>
+                      <div className="w-full pb-2.5">
+                        <Button
+                          className="w-full"
+                          color="secondary"
+                          component={RouterLink}
+                          disabled={isSubmitting}
+                          to="/register"
+                          variant="contained"
+                        >
+                          Sign Up For monetr
+                        </Button>
+                      </div>
+                      <div className="w-full opacity-50 pb-2.5">
+                        <TextWithLine>
+                          or sign in with your email
+                        </TextWithLine>
+                      </div>
+                    </div>
+                  )}
+                  <div className="w-full">
                     <div className="w-full pb-2.5">
-                      <Button
+                      <TextField
+                        autoComplete="username"
+                        autoFocus
                         className="w-full"
-                        color="secondary"
-                        component={ RouterLink }
-                        disabled={ isSubmitting }
-                        to="/register"
-                        variant="contained"
-                      >
-                        Sign Up For monetr
-                      </Button>
+                        disabled={isSubmitting}
+                        error={touched.email && !!errors.email}
+                        helperText={(touched.email && errors.email) ? errors.email : null}
+                        id="login-email"
+                        label="Email"
+                        name="email"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.email}
+                        variant="outlined"
+                      />
                     </div>
-                    <div className="w-full opacity-50 pb-2.5">
-                      <TextWithLine>
-                        or sign in with your email
-                      </TextWithLine>
+                    <div className="w-full pt-2.5 pb-2.5">
+                      <TextField
+                        autoComplete="current-password"
+                        className="w-full"
+                        disabled={isSubmitting}
+                        error={values.password?.length > 0 && touched.password && !!errors.password}
+                        helperText={(values.password?.length > 0 && touched.password && errors.password) ? errors.password : null}
+                        id="login-password"
+                        label="Password"
+                        name="password"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        type="password"
+                        value={values.password}
+                        variant="outlined"
+                      />
+                      <ForgotPasswordMaybe />
                     </div>
                   </div>
-                ) }
-                <div className="w-full">
-                  <div className="w-full pb-2.5">
-                    <TextField
-                      autoComplete="username"
-                      autoFocus
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.email && !!errors.email }
-                      helperText={ (touched.email && errors.email) ? errors.email : null }
-                      id="login-email"
-                      label="Email"
-                      name="email"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      value={ values.email }
-                      variant="outlined"
-                    />
-                  </div>
-                  <div className="w-full pt-2.5 pb-2.5">
-                    <TextField
-                      autoComplete="current-password"
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ values.password?.length > 0 && touched.password && !!errors.password }
-                      helperText={ (values.password?.length > 0 && touched.password && errors.password) ? errors.password : null }
-                      id="login-password"
-                      label="Password"
-                      name="password"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      type="password"
-                      value={ values.password }
-                      variant="outlined"
-                    />
-                    <ForgotPasswordMaybe />
-                  </div>
-                </div>
-                <CaptchaMaybe
-                  loading={ isSubmitting }
-                  show={ verifyLogin }
-                  onVerify={ setCaptcha }
-                />
-                { renderBottomButtons(isSubmitting, disableForVerification, values) }
+                  <CaptchaMaybe
+                    loading={isSubmitting}
+                    show={verifyLogin}
+                    onVerify={setCaptcha}
+                  />
+                  {renderBottomButtons(isSubmitting, disableForVerification, values)}
+                </Paper>
               </div>
             </div>
           </form>
