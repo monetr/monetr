@@ -12,6 +12,7 @@ import TextWithLine from 'components/TextWithLine';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useLogin from 'hooks/useLogin';
 import verifyEmailAddress from 'util/verifyEmailAddress';
+import useIsMobile from 'hooks/useIsMobile';
 
 interface LoginValues {
   email: string | null;
@@ -25,6 +26,7 @@ export default function LoginView(): JSX.Element {
     allowSignUp,
     verifyLogin,
   } = useAppConfiguration();
+  const isMobile = useIsMobile();
 
   const login = useLogin();
 
@@ -98,6 +100,22 @@ export default function LoginView(): JSX.Element {
 
   const disableForVerification = !verifyLogin || Boolean(ReCAPTCHAKey && captcha);
 
+  function LoginWrapper({ children }: { children: React.ReactNode }): JSX.Element {
+    if (!isMobile) {
+      return (
+        <Paper className='p-2.5 md:p-10 flex flex-col gap-y-2.5' elevation={ 4 }>
+          { children }
+        </Paper>
+      );
+    }
+
+    return (
+     <div className='p-2.5 md:p-10 flex flex-col gap-y-2.5'>
+       { children }
+     </div>
+    )
+  }
+
   return (
     <Fragment>
       <Formik
@@ -117,7 +135,7 @@ export default function LoginView(): JSX.Element {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex items-center justify-center w-full h-full max-h-full">
               <div className="w-full xl:w-1/3 lg:w-1/2 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <Paper className='p-2.5 md:p-10 flex flex-col gap-y-2.5' elevation={ 4 }>
+                <LoginWrapper>
                   <CenteredLogo />
                   {allowSignUp && (
                     <div>
@@ -183,7 +201,7 @@ export default function LoginView(): JSX.Element {
                     onVerify={setCaptcha}
                   />
                   {renderBottomButtons(isSubmitting, disableForVerification, values)}
-                </Paper>
+                </LoginWrapper>
               </div>
             </div>
           </form>
