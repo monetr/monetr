@@ -30,7 +30,7 @@ export default function Root(): JSX.Element {
   const queryClient = createQueryClient();
 
   return (
-    <div className={ clsx('w-full h-full bg-purple-900', {
+    <div className={ clsx('w-full h-full', {
       'dark': theme.palette.mode === 'dark',
     })}>
       <React.StrictMode>

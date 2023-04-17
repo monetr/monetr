@@ -162,8 +162,8 @@ export default function LoginView(): JSX.Element {
                       autoComplete="current-password"
                       className="w-full"
                       disabled={ isSubmitting }
-                      error={ touched.password && !!errors.password }
-                      helperText={ (touched.password && errors.password) ? errors.password : null }
+                      error={ values.password?.length > 0 && touched.password && !!errors.password }
+                      helperText={ (values.password?.length > 0 && touched.password && errors.password) ? errors.password : null }
                       id="login-password"
                       label="Password"
                       name="password"

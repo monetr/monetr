@@ -7,7 +7,6 @@ interface PropTypes extends WithTheme<Theme> {
 }
 
 class TextWithLine extends Component<PropTypes> {
-
   render() {
     return (
       <Fragment>
@@ -15,7 +14,7 @@ class TextWithLine extends Component<PropTypes> {
           top: '1.2em',
         } } />
         <div className="relative flex justify-center inline w-full">
-          <span className="relative p-1.5" style={ {
+          <span className="relative p-1.5 dark:text-white" style={ {
             backgroundColor: this.props.theme.palette.background.default,
           } }>
             { this.props.children }

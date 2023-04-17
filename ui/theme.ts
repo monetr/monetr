@@ -5,7 +5,7 @@ import tailwindConfig from '../tailwind.config.cjs';
 import resolveConfig from 'tailwindcss/resolveConfig';
 
 const fullConfig = resolveConfig(tailwindConfig);
-const darkMode = false; // window.localStorage.getItem('darkMode') === 'true';
+const darkMode = true; // window.localStorage.getItem('darkMode') === 'true';
 const inputHeight = 56; // Default is 56
 const defaultPrimary = fullConfig.theme.colors['purple']['500']; // '#4E1AA0';
 const defaultSecondary = '#FF5798';
@@ -47,10 +47,15 @@ const theme = createTheme({
   },
   palette: {
     mode: darkMode ? 'dark' : 'light',
+    text: darkMode ? {
+      primary:  fullConfig.theme.colors['purple']['200'],
+    } : {},
     primary: {
-      main: darkMode ? '#712ddd' : defaultPrimary,
-      light: defaultPrimary,
-      dark: '#712ddd',
+      main: darkMode ?
+        fullConfig.theme.colors['purple']['100'] :
+        fullConfig.theme.colors['purple']['500'],
+      dark: fullConfig.theme.colors['purple']['100'],
+      light: fullConfig.theme.colors['purple']['500'],
       contrastText: '#FFFFFF',
     },
     secondary: {
@@ -58,8 +63,8 @@ const theme = createTheme({
       contrastText: '#FFFFFF',
     },
     background: {
-      default: darkMode ? fullConfig.theme.colors['neutral']['800'] : '#FFFFFF',
-      // default: darkMode ? '#2f2f2f' : '#FFFFFF',
+      default: darkMode ? fullConfig.theme.colors['purple']['800'] :
+        fullConfig.theme.colors['purple']['50'],
     },
   },
 });

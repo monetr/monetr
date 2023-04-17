@@ -20,10 +20,10 @@ export default function Application(): JSX.Element {
         <div className='w-1/4'>
           <CenteredLogo />
         </div>
-        <p className='text-center text-white text-3xl'>
+        <p className='text-center dark:text-white text-3xl'>
           Something isn't quite right...
         </p>
-        <p className='text-center text-white text-lg'>
+        <p className='text-center dark:text-white text-lg'>
           It looks like monetr is having some problems right now; we should be back online shortly.
         </p>
       </div>
@@ -37,7 +37,7 @@ export default function Application(): JSX.Element {
           <CenteredLogo />
         </div>
         <CircularProgress color="secondary" />
-        <p className='text-center text-3xl text-white'>One moment...</p>
+        <p className='text-center text-3xl dark:text-white'>One moment...</p>
       </div>
     );
   }
