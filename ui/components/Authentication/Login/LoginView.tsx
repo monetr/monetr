@@ -79,7 +79,7 @@ export default function LoginView(): JSX.Element {
           >
             { isSubmitting && <CircularProgress
               className={ classnames('mr-2', {
-                'opacity-50': isSubmitting,
+                'something': isSubmitting,
               }) }
               size="1em"
               thickness={ 5 }

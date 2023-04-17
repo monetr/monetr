@@ -1,8 +1,7 @@
 import clsx from 'clsx';
 import React from 'react';
 import {
-  QueryClient,
-  QueryClientProvider, QueryFunctionContext, QueryKey,
+  QueryClientProvider,
 } from 'react-query';
 import { BrowserRouter as Router } from 'react-router-dom';
 import DoneIcon from '@mui/icons-material/Done';
@@ -13,13 +12,12 @@ import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import * as Sentry from '@sentry/react';
-import axios from 'axios';
 import { IconVariant, SnackbarProvider } from 'notistack';
 import NiceModal from '@ebay/nice-modal-react';
 
 import Application from 'Application';
-import GlobalFooter from 'components/GlobalFooter';
 import theme from 'theme';
+import createQueryClient from 'util/createQueryClient';
 
 export default function Root(): JSX.Element {
   const snackbarIcons: Partial<IconVariant> = {
@@ -29,39 +27,10 @@ export default function Root(): JSX.Element {
     info: <InfoIcon className="mr-2.5" />,
   };
 
-  async function queryFn<T = unknown, TQueryKey extends QueryKey = QueryKey>(
-    context: QueryFunctionContext<TQueryKey>,
-  ): Promise<T> {
-    const { data } = await axios.request<T>({
-      url: `/api${ context.queryKey[0] }`,
-      method: context.queryKey.length === 1 ? 'GET' : 'POST',
-      params: context.pageParam && {
-        offset: context.pageParam,
-      },
-      data: context.queryKey.length === 2 && context.queryKey[1],
-    })
-      .catch(result => {
-        switch (result.response.status) {
-          case 500: // Internal Server Error
-            throw result;
-          default:
-            return result.response;
-        }
-      });
-    return data;
-  }
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        staleTime: 10 * 60 * 1000, // 10 minute default stale time,
-        queryFn: queryFn,
-      },
-    },
-  });
+  const queryClient = createQueryClient();
 
   return (
-    <div className={ clsx('w-full h-full', {
+    <div className={ clsx('w-full h-full bg-purple-900', {
       'dark': theme.palette.mode === 'dark',
     })}>
       <React.StrictMode>
@@ -74,7 +43,6 @@ export default function Root(): JSX.Element {
                     <NiceModal.Provider>
                       <CssBaseline />
                       <Application />
-                      <GlobalFooter />
                     </NiceModal.Provider>
                   </SnackbarProvider>
                 </LocalizationProvider>
