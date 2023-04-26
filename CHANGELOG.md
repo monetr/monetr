@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.14.8](https://github.com/monetr/monetr/compare/v0.14.7...v0.14.8) (2023-04-26)
+
+
+### Bug Fixes
+
+* **job:** Improved background job diagnostics. ([ca2b3d3](https://github.com/monetr/monetr/commit/ca2b3d3f8210104578126e7e348578a9d629f509))
+* **ui:** Added Discord to the about view "Getting Help" section. ([972044b](https://github.com/monetr/monetr/commit/972044b46dde3a1bf53ed98ccbdfdb3f0cddbe4d)), closes [#1126](https://github.com/monetr/monetr/issues/1126)
+* **ui:** Fixed color of TOS and privacy policy links. ([a0e1bb6](https://github.com/monetr/monetr/commit/a0e1bb639e7aa557b717bd04e2e76dac94663549))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.10.1 ([#1382](https://github.com/monetr/monetr/issues/1382)) ([aeb032f](https://github.com/monetr/monetr/commit/aeb032f87c4c17eafceac833e98bb0f2091dbb0e))
+
+
+### Miscellaneous
+
+* **sync:** Adjust sync frequency for Plaid. ([61e2d1b](https://github.com/monetr/monetr/commit/61e2d1bc304de0414dc988f45e8659565547a652))
+* Updating NOTICE ([a75e93b](https://github.com/monetr/monetr/commit/a75e93b950d9dd596ee290c8d65a7b7dd13aaa2d))
+
 ## [0.14.7](https://github.com/monetr/monetr/compare/v0.14.6...v0.14.7) (2023-04-01)
 
 
