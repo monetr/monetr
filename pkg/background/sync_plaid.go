@@ -118,9 +118,9 @@ func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) er
 }
 
 func (s SyncPlaidHandler) DefaultSchedule() string {
-	// Run every 2 hours. Links that have not received any updates in the last 6 hours will be synced with Plaid. If no
+	// Run every 12 hours. Links that have not received any updates in the last 13 hours will be synced with Plaid. If no
 	// updates have been detected then nothing will happen.
-	return "0 0 */2 * * *"
+	return "0 0 */12 * * *"
 }
 
 func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
@@ -129,7 +129,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 	log.Info("retrieving links to sync with Plaid")
 
 	links := make([]models.Link, 0)
-	cutoff := time.Now().Add(-6 * time.Hour)
+	cutoff := time.Now().Add(-13 * time.Hour)
 	err := s.db.ModelContext(ctx, &links).
 		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
