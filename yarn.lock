@@ -3864,10 +3864,10 @@
   resolved "https://registry.npmjs.org/@discoveryjs/json-ext/-/json-ext-0.5.5.tgz"
   integrity sha512-6nFkfkmSeV/rqSaS4oWHgmpnYw194f6hmWF5is6b0J1naJZoiD0NTc9AiUwPHvWsowkjuHErCZT1wa0jg+BLIA==
 
-"@ebay/nice-modal-react@1.2.9":
-  version "1.2.9"
-  resolved "https://registry.yarnpkg.com/@ebay/nice-modal-react/-/nice-modal-react-1.2.9.tgz#b96bc3b61a45bf72456e7f4661ed4e09e05dd02d"
-  integrity sha512-IxTE4jEMx7curG7WOv8qiYEfAY/NJXXX/94MH4imOvefea4vOlWdV+B7Xj5CMgpUowybsKe9T0F0Dqp5fj0gng==
+"@ebay/nice-modal-react@1.2.10":
+  version "1.2.10"
+  resolved "https://registry.yarnpkg.com/@ebay/nice-modal-react/-/nice-modal-react-1.2.10.tgz#6b2406bfce4a5daffc43f5b85f5f238311cdfe93"
+  integrity sha512-qNp8vQo5kPRwB9bHlkh8lcwH/0KFWpp58X/b9KaLB/gNlJ3W24nCT2l/qBBSnWgV7NEIq25uLowaPS2mbfpZiw==
 
 "@emotion/babel-plugin@^11.10.6":
   version "11.10.6"
