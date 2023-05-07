@@ -21,7 +21,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/gomodule/redigo v1.8.9
 	github.com/google/uuid v1.3.0
-	github.com/iris-contrib/middleware/cors v0.0.0-20230311205048-b568fe9b470f
+	github.com/iris-contrib/middleware/cors v0.0.0-20230429193704-33473bd2dc16
 	github.com/jarcoal/httpmock v1.3.0
 	github.com/kataras/iris/v12 v12.2.0
 	github.com/mileusna/useragent v1.2.1
