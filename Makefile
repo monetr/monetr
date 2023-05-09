@@ -329,7 +329,6 @@ develop:
 	$(call infoMsg,	LOCAL_DOMAIN=localhost)
 	$(call infoMsg,to your $(DEVELOPMENT_ENV_FILE) file)
 	sudo $(HOSTESS) add $(LOCAL_DOMAIN) 127.0.0.1
-	sudo $(HOSTESS) add vault.local 127.0.0.1
 endif
 else
 	$(call infoMsg,Detected cloud environment; nginx will not use builtin TLS.)
