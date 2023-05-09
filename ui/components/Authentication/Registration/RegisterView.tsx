@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
+import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, Paper, TextField } from '@mui/material';
 import { AxiosError } from 'axios';
 import classnames from 'classnames';
 import { Formik, FormikHelpers } from 'formik';
@@ -15,6 +15,7 @@ import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useSignUp, { SignUpResponse } from 'hooks/useSignUp';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 import { APIError } from 'util/request';
+import useIsMobile from 'hooks/useIsMobile';
 
 interface SignUpValues {
   agree: boolean;
@@ -35,6 +36,7 @@ export default function RegisterView(): JSX.Element {
     initialPlan,
     verifyRegister,
   } = useAppConfiguration();
+  const isMobile = useIsMobile();
 
   function validateInput(values: SignUpValues): Partial<SignUpValues> {
     const errors: Partial<SignUpValues> = {};
@@ -163,6 +165,22 @@ export default function RegisterView(): JSX.Element {
     return <AfterEmailVerificationSent />;
   }
 
+  function RegisterWrapper({ children }: { children: React.ReactNode }): JSX.Element {
+    if (!isMobile) {
+      return (
+        <Paper className='p-2.5 md:p-10 flex flex-col gap-y-4' elevation={ 4 }>
+          { children }
+        </Paper>
+      );
+    }
+
+    return (
+     <div className='p-2.5 md:p-10 flex flex-col gap-y-4'>
+       { children }
+     </div>
+    )
+  }
+
   return (
     <Fragment>
       <BackToLoginButton />
@@ -184,157 +202,159 @@ export default function RegisterView(): JSX.Element {
           <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
             <div className="flex justify-center w-full h-full max-h-full">
               <div className="w-full p-2.5 md:p-10 max-w-screen-sm sm:p-0 mt-5">
-                <CenteredLogo />
-                <div className="w-full">
-                  <div className="w-full pb-1.5 pt-1.5">
-                    <TextField
-                      autoFocus
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.email && !!errors.email }
-                      helperText={ (touched.email && errors.email) ? errors.email : null }
-                      id="login-email"
-                      label="Email"
-                      name="email"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      value={ values.email }
-                      variant="outlined"
-                      autoComplete="username"
-                    />
-                  </div>
-                  <div className="w-full pb-1.5 pt-1.5 grid grid-flow-row gap-2 sm:grid-flow-col">
-                    <TextField
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.firstName && !!errors.firstName }
-                      helperText={ (touched.firstName && errors.firstName) ? errors.firstName : null }
-                      id="login-firstName"
-                      label="First Name"
-                      name="firstName"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      value={ values.firstName }
-                      variant="outlined"
-                    />
-                    <TextField
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.lastName && !!errors.lastName }
-                      helperText={ (touched.lastName && errors.lastName) ? errors.lastName : null }
-                      id="login-lastName"
-                      label="Last Name"
-                      name="lastName"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      value={ values.lastName }
-                      variant="outlined"
-                    />
-                  </div>
-                  <div className="w-full pb-1.5 pt-1.5 grid grid-flow-row gap-2 sm:grid-flow-col">
-                    <TextField
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.password && !!errors.password }
-                      helperText={ (touched.password && errors.password) ? errors.password : null }
-                      id="login-password"
-                      label="Password"
-                      name="password"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      type="password"
-                      value={ values.password }
-                      variant="outlined"
-                      autoComplete="new-password"
-                    />
-                    <TextField
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.verifyPassword && !!errors.verifyPassword }
-                      helperText={ (touched.verifyPassword && errors.verifyPassword) ? errors.verifyPassword : null }
-                      id="login-verifyPassword"
-                      label="Verify Password"
-                      name="verifyPassword"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      type="password"
-                      value={ values.verifyPassword }
-                      variant="outlined"
-                      autoComplete="new-password"
-                    />
-                  </div>
-                  { requireBetaCode &&
-                    <div className="w-full pt-1.5 pb-1.5">
+                <RegisterWrapper>
+                  <CenteredLogo />
+                  <div className="w-full">
+                    <div className="w-full pb-1.5 pt-1.5">
+                      <TextField
+                        autoFocus
+                        className="w-full"
+                        disabled={isSubmitting}
+                        error={touched.email && !!errors.email}
+                        helperText={(touched.email && errors.email) ? errors.email : null}
+                        id="login-email"
+                        label="Email"
+                        name="email"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.email}
+                        variant="outlined"
+                        autoComplete="username"
+                      />
+                    </div>
+                    <div className="w-full pb-1.5 pt-1.5 grid grid-flow-row gap-2 sm:grid-flow-col">
                       <TextField
                         className="w-full"
-                        disabled={ isSubmitting }
-                        error={ touched.betaCode && !!errors.betaCode }
-                        helperText={ (touched.betaCode && errors.betaCode) ? errors.betaCode : null }
-                        id="login-betaCode"
-                        label="Beta Code"
-                        name="betaCode"
-                        onBlur={ handleBlur }
-                        onChange={ handleChange }
-                        type="betaCode"
-                        value={ values.betaCode }
+                        disabled={isSubmitting}
+                        error={touched.firstName && !!errors.firstName}
+                        helperText={(touched.firstName && errors.firstName) ? errors.firstName : null}
+                        id="login-firstName"
+                        label="First Name"
+                        name="firstName"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.firstName}
+                        variant="outlined"
+                      />
+                      <TextField
+                        className="w-full"
+                        disabled={isSubmitting}
+                        error={touched.lastName && !!errors.lastName}
+                        helperText={(touched.lastName && errors.lastName) ? errors.lastName : null}
+                        id="login-lastName"
+                        label="Last Name"
+                        name="lastName"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        value={values.lastName}
                         variant="outlined"
                       />
                     </div>
-                  }
-                </div>
-                <CaptchaMaybe onVerify={ setVerification } show={ verifyRegister } />
-                <div className="w-full flex justify-center items-center pt-1.5 pb-1">
-                  <FormControl component="fieldset">
-                    <FormGroup aria-label="position" row>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            color="primary"
-                            name="agree"
-                            onChange={ handleChange }
-                          />
-                        }
-                        label={
-                          <Fragment>
-                            I agree to monetr's&nbsp;
-                            <a
-                              className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
-                              href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
-                              Terms of Use
-                            </a> and&nbsp;
-                            <a
-                              className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
-                              href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
-                            >
-                              Privacy Policy
-                            </a>
-                          </Fragment>
-                        }
-                        labelPlacement="end"
-                        value="end"
+                    <div className="w-full pb-1.5 pt-1.5 grid grid-flow-row gap-2 sm:grid-flow-col">
+                      <TextField
+                        className="w-full"
+                        disabled={isSubmitting}
+                        error={touched.password && !!errors.password}
+                        helperText={(touched.password && errors.password) ? errors.password : null}
+                        id="login-password"
+                        label="Password"
+                        name="password"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        type="password"
+                        value={values.password}
+                        variant="outlined"
+                        autoComplete="new-password"
                       />
-                    </FormGroup>
-                  </FormControl>
-                </div>
-                <div className="w-full pt-1.5 flex justify-center pb-10">
-                  <Button
-                    className="w-full"
-                    color="primary"
-                    disabled={ isSubmitting || cannotSubmit(values) }
-                    onClick={ submitForm }
-                    type="submit"
-                    variant="contained"
-                  >
-                    { isSubmitting && <CircularProgress
-                      className={ classnames('mr-2', {
-                        'opacity-50': isSubmitting,
-                      }) }
-                      size="1em"
-                      thickness={ 5 }
-                    /> }
-                    { renderSignUpText(isSubmitting) }
-                  </Button>
-                </div>
+                      <TextField
+                        className="w-full"
+                        disabled={isSubmitting}
+                        error={touched.verifyPassword && !!errors.verifyPassword}
+                        helperText={(touched.verifyPassword && errors.verifyPassword) ? errors.verifyPassword : null}
+                        id="login-verifyPassword"
+                        label="Verify Password"
+                        name="verifyPassword"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        type="password"
+                        value={values.verifyPassword}
+                        variant="outlined"
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    {requireBetaCode &&
+                      <div className="w-full pt-1.5 pb-1.5">
+                        <TextField
+                          className="w-full"
+                          disabled={isSubmitting}
+                          error={touched.betaCode && !!errors.betaCode}
+                          helperText={(touched.betaCode && errors.betaCode) ? errors.betaCode : null}
+                          id="login-betaCode"
+                          label="Beta Code"
+                          name="betaCode"
+                          onBlur={handleBlur}
+                          onChange={handleChange}
+                          type="betaCode"
+                          value={values.betaCode}
+                          variant="outlined"
+                        />
+                      </div>
+                    }
+                  </div>
+                  <CaptchaMaybe onVerify={setVerification} show={verifyRegister} />
+                  <div className="w-full flex justify-center items-center pt-1.5 pb-1">
+                    <FormControl component="fieldset">
+                      <FormGroup aria-label="position" row>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              color="primary"
+                              name="agree"
+                              onChange={handleChange}
+                            />
+                          }
+                          label={
+                            <Fragment>
+                              I agree to monetr's&nbsp;
+                              <a
+                                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
+                                Terms of Use
+                              </a> and&nbsp;
+                              <a
+                                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                                href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+                              >
+                                Privacy Policy
+                              </a>
+                            </Fragment>
+                          }
+                          labelPlacement="end"
+                          value="end"
+                        />
+                      </FormGroup>
+                    </FormControl>
+                  </div>
+                  <div className="w-full pt-1.5 flex justify-center">
+                    <Button
+                      className="w-full"
+                      color="primary"
+                      disabled={isSubmitting || cannotSubmit(values)}
+                      onClick={submitForm}
+                      type="submit"
+                      variant="contained"
+                    >
+                      {isSubmitting && <CircularProgress
+                        className={classnames('mr-2', {
+                          'opacity-50': isSubmitting,
+                        })}
+                        size="1em"
+                        thickness={5}
+                      />}
+                      {renderSignUpText(isSubmitting)}
+                    </Button>
+                  </div>
+                </RegisterWrapper>
               </div>
             </div>
           </form>
