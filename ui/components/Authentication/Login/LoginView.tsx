@@ -103,14 +103,14 @@ export default function LoginView(): JSX.Element {
   function LoginWrapper({ children }: { children: React.ReactNode }): JSX.Element {
     if (!isMobile) {
       return (
-        <Paper className='p-2.5 md:p-10 flex flex-col gap-y-2.5' elevation={ 4 }>
+        <Paper className='p-2.5 md:p-10 flex flex-col gap-y-4' elevation={ 4 }>
           { children }
         </Paper>
       );
     }
 
     return (
-     <div className='p-2.5 md:p-10 flex flex-col gap-y-2.5'>
+     <div className='p-2.5 md:p-10 flex flex-col gap-y-4'>
        { children }
      </div>
     )
@@ -158,43 +158,37 @@ export default function LoginView(): JSX.Element {
                       </div>
                     </div>
                   )}
-                  <div className="w-full">
-                    <div className="w-full pb-2.5">
-                      <TextField
-                        autoComplete="username"
-                        autoFocus
-                        className="w-full"
-                        disabled={isSubmitting}
-                        error={touched.email && !!errors.email}
-                        helperText={(touched.email && errors.email) ? errors.email : null}
-                        id="login-email"
-                        label="Email"
-                        name="email"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        value={values.email}
-                        variant="outlined"
-                      />
-                    </div>
-                    <div className="w-full pt-2.5 pb-2.5">
-                      <TextField
-                        autoComplete="current-password"
-                        className="w-full"
-                        disabled={isSubmitting}
-                        error={values.password?.length > 0 && touched.password && !!errors.password}
-                        helperText={(values.password?.length > 0 && touched.password && errors.password) ? errors.password : null}
-                        id="login-password"
-                        label="Password"
-                        name="password"
-                        onBlur={handleBlur}
-                        onChange={handleChange}
-                        type="password"
-                        value={values.password}
-                        variant="outlined"
-                      />
-                      <ForgotPasswordMaybe />
-                    </div>
-                  </div>
+                  <TextField
+                    autoComplete="username"
+                    autoFocus
+                    className="w-full"
+                    disabled={isSubmitting}
+                    error={touched.email && !!errors.email}
+                    helperText={(touched.email && errors.email) ? errors.email : null}
+                    id="login-email"
+                    label="Email"
+                    name="email"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    value={values.email}
+                    variant="outlined"
+                  />
+                  <TextField
+                    autoComplete="current-password"
+                    className="w-full"
+                    disabled={isSubmitting}
+                    error={values.password?.length > 0 && touched.password && !!errors.password}
+                    helperText={(values.password?.length > 0 && touched.password && errors.password) ? errors.password : null}
+                    id="login-password"
+                    label="Password"
+                    name="password"
+                    onBlur={handleBlur}
+                    onChange={handleChange}
+                    type="password"
+                    value={values.password}
+                    variant="outlined"
+                  />
+                  <ForgotPasswordMaybe />
                   <CaptchaMaybe
                     loading={isSubmitting}
                     show={verifyLogin}

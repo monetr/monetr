@@ -28,6 +28,9 @@ const theme = createTheme({
         root: {
           height: inputHeight,
         },
+        input: darkMode ? {
+          color: 'white',
+        } : {},
       },
     },
     MuiTextField: {
@@ -39,9 +42,9 @@ const theme = createTheme({
     },
     MuiInputLabel: {
       styleOverrides: {
-        root: {
-          // transform: `translate(14px, ${(inputHeight / 3.5).toFixed(0)}px) scale(1)`,
-        },
+        root: darkMode ? {
+          color: fullConfig.theme.colors['neutral']['300'],
+        } : {},
       },
     },
   },
@@ -49,6 +52,7 @@ const theme = createTheme({
     mode: darkMode ? 'dark' : 'light',
     text: darkMode ? {
       primary:  fullConfig.theme.colors['purple']['200'],
+      secondary: '#FFFFFF',
     } : {},
     primary: {
       main: darkMode ?
