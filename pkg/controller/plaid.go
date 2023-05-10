@@ -89,6 +89,11 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		return
 	}
 
+	if !c.configuration.Plaid.Enabled {
+		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return
+	}
+
 	userId := c.mustGetUserId(ctx)
 
 	log := c.getLog(ctx).WithFields(logrus.Fields{
@@ -185,6 +190,11 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 }
 
 func (c *Controller) updatePlaidLink(ctx iris.Context) {
+	if !c.configuration.Plaid.Enabled {
+		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return
+	}
+
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
 	if linkId == 0 {
 		c.badRequest(ctx, "must specify a link Id")
@@ -264,6 +274,11 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 // @Success 200 {object} swag.LinkResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
+	if !c.configuration.Plaid.Enabled {
+		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return
+	}
+
 	var callbackRequest struct {
 		LinkId      uint64   `json:"linkId"`
 		PublicToken string   `json:"publicToken"`
@@ -414,6 +429,11 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 // @Success 200 {object} swag.PlaidTokenCallbackResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) plaidTokenCallback(ctx iris.Context) {
+	if !c.configuration.Plaid.Enabled {
+		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return
+	}
+
 	var callbackRequest struct {
 		PublicToken     string   `json:"publicToken"`
 		InstitutionId   string   `json:"institutionId"`
@@ -580,6 +600,11 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 // @Success 200
 // @Success 408
 func (c *Controller) waitForPlaid(ctx iris.Context) {
+	if !c.configuration.Plaid.Enabled {
+		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return
+	}
+
 	linkId := ctx.Params().GetUint64Default("linkId", 0)
 	if linkId == 0 {
 		c.badRequest(ctx, "must specify a job Id")
@@ -645,6 +670,11 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 }
 
 func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
+	if !c.configuration.Plaid.Enabled {
+		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
+		return
+	}
+
 	var request struct {
 		LinkId uint64 `json:"linkId"`
 	}

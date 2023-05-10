@@ -237,6 +237,7 @@ func (r ReCAPTCHA) ShouldVerifyForgotPassword() bool {
 }
 
 type Plaid struct {
+	Enabled      bool              `yaml:"enabled"`
 	ClientID     string            `yaml:"clientId"`
 	ClientSecret string            `yaml:"clientSecret"`
 	Environment  plaid.Environment `yaml:"environment"`
@@ -491,6 +492,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("KeyManagement.Provider", nil)
 	v.SetDefault("KeyManagement.AWS", nil)
 	v.SetDefault("KeyManagement.Google", nil)
+	v.SetDefault("Plaid.Enabled", true)
 	v.SetDefault("PostgreSQL.Address", "localhost")
 	v.SetDefault("PostgreSQL.Database", "postgres")
 	v.SetDefault("PostgreSQL.Port", 5432)

@@ -315,7 +315,7 @@ func (c *Controller) RegisterRoutes(app *iris.Application) {
 		p.PartyFunc("/", func(repoParty router.Party) {
 			repoParty.Use(c.setupRepositoryMiddleware)
 
-			if c.configuration.Plaid.WebhooksEnabled {
+			if c.configuration.Plaid.Enabled && c.configuration.Plaid.WebhooksEnabled {
 				// Webhooks use their own authentication, so we want to declare this first.
 				repoParty.Post("/plaid/webhook", c.handlePlaidWebhook)
 			}
