@@ -1,11 +1,11 @@
-import { createTheme, darken } from '@mui/material';
+import { createTheme } from '@mui/material';
 
 import tailwindConfig from '../tailwind.config.cjs';
 
 import resolveConfig from 'tailwindcss/resolveConfig';
 
 const fullConfig = resolveConfig(tailwindConfig);
-const darkMode = true; // window.localStorage.getItem('darkMode') === 'true';
+const darkMode = false; // window.localStorage.getItem('darkMode') === 'true';
 const inputHeight = 56; // Default is 56
 const defaultPrimary = fullConfig.theme.colors['purple']['500']; // '#4E1AA0';
 const defaultSecondary = '#FF5798';
@@ -56,19 +56,19 @@ const theme = createTheme({
     } : {},
     primary: {
       main: darkMode ?
-        fullConfig.theme.colors['purple']['100'] :
+        fullConfig.theme.colors['pink']['500'] :
         fullConfig.theme.colors['purple']['500'],
       dark: fullConfig.theme.colors['purple']['100'],
       light: fullConfig.theme.colors['purple']['500'],
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: darkMode ? darken(defaultSecondary, 0.2) : defaultSecondary,
+      main: darkMode ? fullConfig.theme.colors['purple']['400'] : fullConfig.theme.colors['pink']['500'],
       contrastText: '#FFFFFF',
     },
     background: {
       default: darkMode ? fullConfig.theme.colors['purple']['800'] :
-        fullConfig.theme.colors['purple']['400'],
+        fullConfig.theme.colors['purple']['50'],
       paper: darkMode ? fullConfig.theme.colors['purple']['700'] :
         fullConfig.theme.colors['purple']['50'],
     },
