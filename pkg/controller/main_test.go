@@ -67,6 +67,7 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 		},
 		ReCAPTCHA: config.ReCAPTCHA{},
 		Plaid: config.Plaid{
+			Enabled:      true,
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
 			Environment:  plaid.Sandbox,
