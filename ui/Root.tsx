@@ -74,7 +74,6 @@ export default function Root(): JSX.Element {
                     <NiceModal.Provider>
                       <CssBaseline />
                       <Application />
-                      <GlobalFooter />
                     </NiceModal.Provider>
                   </SnackbarProvider>
                 </LocalizationProvider>
