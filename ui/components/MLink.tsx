@@ -1,11 +1,11 @@
 import clsx from "clsx";
 import React from "react";
 import { Link, LinkProps } from "react-router-dom";
-import { TextSize } from "./types";
+import { ReactElement, TextSize } from "./types";
 
 type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>
 export interface MLinkProps extends BaseLinkProps {
-  children: string | React.ReactNode | JSX.Element;
+  children: ReactElement;
   size?: TextSize;
 }
 

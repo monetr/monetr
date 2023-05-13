@@ -5,7 +5,7 @@ import MTextField from "./MTextField";
 
 
 export default {
-  title: 'Text Field',
+  title: 'Components/Text Field',
   component: MTextField,
 } as Meta<typeof MTextField>
 

@@ -15,7 +15,7 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: transparent;
+    background-color: inherit;
 }
 
 ::-webkit-scrollbar-thumb {

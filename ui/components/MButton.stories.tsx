@@ -3,7 +3,7 @@ import MButton from './MButton';
 import { StoryFn, Meta } from '@storybook/react';
 
 export default {
-  title: 'Button',
+  title: 'Components/Button',
   component: MButton,
 } as Meta<typeof MButton>;
 
