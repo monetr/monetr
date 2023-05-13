@@ -9,7 +9,7 @@ const meta: Meta<typeof LoginPage> = {
 export default meta;
 
 export const Default: StoryObj<typeof LoginPage> = {
-  name: 'Login View',
+  name: 'Default',
   args: {
     requests: [
       {
@@ -18,6 +18,40 @@ export const Default: StoryObj<typeof LoginPage> = {
         status: 200,
         response: {
           allowForgotPassword: true,
+          allowSignUp: true,
+        }
+      }
+    ]
+  }
+}
+
+export const NoSignup: StoryObj<typeof LoginPage> = {
+  name: 'No Signup',
+  args: {
+    requests: [
+      {
+        method: 'GET',
+        path: '/api/config',
+        status: 200,
+        response: {
+          allowForgotPassword: true,
+          allowSignUp: false,
+        }
+      }
+    ]
+  }
+}
+
+export const NoForgotPassword: StoryObj<typeof LoginPage> = {
+  name: 'No Forgot Password',
+  args: {
+    requests: [
+      {
+        method: 'GET',
+        path: '/api/config',
+        status: 200,
+        response: {
+          allowForgotPassword: false,
           allowSignUp: true,
         }
       }

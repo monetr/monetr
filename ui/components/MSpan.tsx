@@ -1,13 +1,16 @@
 import clsx from "clsx";
 import React from "react";
+import { TextSize } from "./types";
 
 export interface MSpanProps {
   variant?: 'normal' | 'light';
   children: string | React.ReactNode | JSX.Element;
+  size?: TextSize;
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
   variant: 'normal',
+  size: 'md',
 }
 
 export default function MSpan(props: MSpanProps): JSX.Element {
@@ -21,6 +24,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
       'text-gray-900': props.variant === 'normal',
       'text-gray-500': props.variant === 'light',
     },
+    `text-${props.size}`,
   );
 
   return (

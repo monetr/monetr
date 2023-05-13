@@ -28,11 +28,9 @@ export default function LoginNew(): JSX.Element {
     }
 
     return (
-      <div className="text-sm">
-        <MLink to="/forgot">
-          Forgot password?
-        </MLink>
-      </div>
+      <MLink to="/forgot" size="sm">
+        Forgot password?
+      </MLink>
     );
   }
 
@@ -40,9 +38,9 @@ export default function LoginNew(): JSX.Element {
     if (!config.allowSignUp) return null;
 
     return (
-      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1 text-sm">
-        <MSpan variant="light">Not a user?</MSpan>
-        <MLink to="/register">Sign up now</MLink>
+      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
+        <MSpan variant="light" size="sm">Not a user?</MSpan>
+        <MLink to="/register" size="sm">Sign up now</MLink>
       </div>
     );
   }

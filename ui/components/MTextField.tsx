@@ -5,16 +5,23 @@ type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputEle
 export interface MTextFieldProps extends InputProps {
   label?: string;
   error?: string;
+  uppercase?: boolean;
   labelDecorator?: () => JSX.Element;
 }
 
-const MTextFieldPropsDefaults: MTextFieldProps = {
+const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
   label: null,
   labelDecorator: () => null,
   disabled: false,
+  uppercase: false,
 };
 
 export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
+  props = {
+    ...MTextFieldPropsDefaults,
+    ...props,
+  };
+
   const labelClassNames = clsx(
     'mb-1',
     'block',
@@ -61,6 +68,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'ring-gray-300': !props.disabled && !props.error,
       'ring-red-300': !props.disabled && !!props.error,
       'ring-gray-200': props.disabled,
+      'uppercase': props.uppercase,
     },
     'block',
     'border-0',
