@@ -36,7 +36,7 @@ export default function TransactionIcon(props: Props): JSX.Element {
   }
 
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
-  const letter = props.transaction.name.toUpperCase().charAt(0);
+  const letter = props.transaction.getName().toUpperCase().charAt(0);
   return (
     <Avatar>
       { letter }

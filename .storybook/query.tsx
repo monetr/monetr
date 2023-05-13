@@ -36,6 +36,7 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
       return item.path === request.url && item.method === request.method;
     });
     if (!response) {
+      console.warn(`No response found for: ${ request.method } ${ request.url }`)
       return Promise.reject<T>({
         error: 'No response found!',
       });
@@ -49,6 +50,7 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
       queries: {
         staleTime: 10 * 60 * 1000, // 10 minute default stale time,
         queryFn: queryFn,
+        retry: false,
       },
     },
   });

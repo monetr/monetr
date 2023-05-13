@@ -1,9 +1,14 @@
 import { ArrowBackOutlined, Menu } from "@mui/icons-material";
 import MSidebar from "components/MSidebar";
+import { ReactElement } from "components/types";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function MLayout(): JSX.Element {
+export interface MLayoutProps {
+  children?: ReactElement;
+}
+
+export default function MLayout(props: MLayoutProps): JSX.Element {
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
@@ -33,8 +38,8 @@ export default function MLayout(): JSX.Element {
           </div>
 
         </div>
-        <div className="w-full flex justify-center items-center h-full">
-          <h1>[ CONTENT ]</h1>
+        <div className="w-full flex h-full mt-16">
+          { props.children }
         </div>
       </div>
     </div>

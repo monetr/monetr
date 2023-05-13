@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 import MLayout from ".";
 
 const meta: Meta<typeof MLayout> = {
@@ -8,8 +9,15 @@ const meta: Meta<typeof MLayout> = {
 
 export default meta;
 
-export const Default: StoryObj<typeof MLayout> = {
+export const Default: StoryObj = {
   name: 'Default',
+  render: () => (
+    <MLayout>
+      <div className="flex justify-center items-center h-full w-full">
+        <h1>[ CONTENT ]</h1>
+      </div>
+    </MLayout>
+  ),
   args: {
     requests: [
       {
