@@ -1,13 +1,15 @@
 import clsx from "clsx";
-import React from "react";
+import React, { Fragment } from "react";
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
   label?: string;
+  labelDecorator?: () => JSX.Element;
 }
 
 const MTextFieldPropsDefaults: MTextFieldProps = {
   label: null,
+  labelDecorator: () => null,
   disabled: false,
 };
 
@@ -24,16 +26,22 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     },
   )
 
+  const { labelDecorator, ...otherProps } = props;
   function Label() {
     if (!props.label ) return null;
+    const LabelDecorator = labelDecorator || MTextFieldPropsDefaults.labelDecorator;
 
     return (
-      <label
-        htmlFor={ props.id }
-        className={ labelClassNames }
-      >
-        { props.label }
-      </label>
+      <div className="flex items-center justify-between">
+        <label
+          htmlFor={ props.id }
+          className={ labelClassNames }
+        >
+          { props.label }
+        </label>
+
+        <LabelDecorator />
+      </div>
     );
   }
 
@@ -61,12 +69,13 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     props.className,
   );
 
+
   return (
     <div className={ props.className }>
       <Label />
       <div>
         <input
-          { ...props }
+          { ...otherProps }
           className={ classNames }
         />
       </div>

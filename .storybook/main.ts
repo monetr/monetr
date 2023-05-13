@@ -1,4 +1,5 @@
 import type { StorybookConfig } from "@storybook/react-webpack5";
+import { RuleSetRule } from "webpack";
 
 import getParentWebpackConfig from '../webpack.config.cjs';
 
@@ -10,6 +11,7 @@ const config: StorybookConfig = {
     "@storybook/addon-links",
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
+    "@storybook/addon-viewport",
     {
       name: '@storybook/addon-styling',
       options: {
@@ -21,7 +23,9 @@ const config: StorybookConfig = {
   ],
   framework: {
     name: "@storybook/react-webpack5",
-    options: {},
+    options: {
+      fastRefresh: true,
+    },
   },
   docs: {
     autodocs: "tag",
@@ -30,7 +34,26 @@ const config: StorybookConfig = {
     config.resolve = {
       ...config.resolve,
       ...webpackConfig.resolve,
-    }
+    };
+
+
+    // @ts-ignore
+    const fileLoaderRule = config.module.rules.filter(
+      // @ts-ignore
+      (rule) => rule.test && rule.test.test('.svg'),
+    )
+    // @ts-ignore
+    fileLoaderRule!.forEach(rule => rule.exclude = /\.svg$/)
+
+    config!.module!.rules?.push({
+      test: /\.(svg)$/,
+      use: [
+        {
+          loader: 'file-loader',
+        },
+      ],
+    });
+
 
     return config;
   },

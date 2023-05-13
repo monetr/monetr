@@ -8,7 +8,7 @@ export default {
 } as Meta<typeof MButton>;
 
 export const Default: StoryFn<typeof MButton> = () => (
-  <div className='w-full h-full flex'>
+  <div className='w-full flex'>
     <div className='max-w-5xl grid grid-cols-4 grid-flow-row gap-6'>
       <span className='w-full text-center'>Enabled</span>
       <span className='w-full text-center'>No Fill</span>

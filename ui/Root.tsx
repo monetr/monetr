@@ -18,7 +18,6 @@ import { IconVariant, SnackbarProvider } from 'notistack';
 import NiceModal from '@ebay/nice-modal-react';
 
 import Application from 'Application';
-import GlobalFooter from 'components/GlobalFooter';
 import theme from 'theme';
 
 export default function Root(): JSX.Element {

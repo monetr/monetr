@@ -10,7 +10,7 @@ export default {
 } as Meta<typeof MTextField>
 
 export const Default: StoryFn<typeof MTextField> = () => (
-  <div className="w-full h-full flex">
+  <div className="w-full flex">
     <div className="w-full max-w-xl grid grid-cols-1 grid-flow-row gap-6">
       <MTextField label="Name" type='text' name='name' />
       <MTextField label="Email Address" type='email' name='email' />

@@ -5830,7 +5830,7 @@
     remark-slug "^6.0.0"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-essentials@^7.0.11":
+"@storybook/addon-essentials@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/addon-essentials/-/addon-essentials-7.0.11.tgz#2f7aa6b117b7da4170980ab9aa0bcdf66f407708"
   integrity sha512-46nIoGJXC0clbjgE4Y0xUW9eT1h4uvDXugb2Z79m5L+KvmRk+J0/rqiRpHz5Gou9iFLxAFCRT9Y3BUP2zOXTZQ==
@@ -5859,7 +5859,7 @@
     "@storybook/global" "^5.0.0"
     "@storybook/preview-api" "7.0.11"
 
-"@storybook/addon-interactions@^7.0.11":
+"@storybook/addon-interactions@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/addon-interactions/-/addon-interactions-7.0.11.tgz#4d0dfa27aba2d9f470131fce2176ed904f7ec860"
   integrity sha512-mIcv64Yo1z6Mmj/5/Ulyk2peFeUNT3YcZ5oqsq29MdQf3V4xJz+9KYaLHr8eZn2VpjsKtc0Hq21BUp/FIduYQg==
@@ -5878,7 +5878,7 @@
     polished "^4.2.2"
     ts-dedent "^2.2.0"
 
-"@storybook/addon-links@^7.0.11":
+"@storybook/addon-links@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/addon-links/-/addon-links-7.0.11.tgz#a3109b2fccea331551b8ccbe730b2b8e5b0a54d3"
   integrity sha512-6UpRCs3lIYN0V+0kP+VHChc836sJN/n35OVnfZNd/lRBzewBmuOW6s7Hy2iNZtYg1vWlXR2/wOFzljkkjiWtSQ==
@@ -5921,7 +5921,7 @@
     "@storybook/types" "7.0.11"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-styling@^1.0.8":
+"@storybook/addon-styling@1.0.8":
   version "1.0.8"
   resolved "https://registry.yarnpkg.com/@storybook/addon-styling/-/addon-styling-1.0.8.tgz#3533c4c5322b286575c235adcec246e39dcdf913"
   integrity sha512-Ubi75gHNFO60Sjti2n/i3f0utERNOYcpsRkWHdzV+C26kUemLG+2riKHUt8zVbNskyJxA0EZxh84HYItRe4coA==
@@ -5952,7 +5952,7 @@
     "@storybook/preview-api" "7.0.11"
     "@storybook/theming" "7.0.11"
 
-"@storybook/addon-viewport@7.0.11":
+"@storybook/addon-viewport@7.0.11", "@storybook/addon-viewport@^7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/addon-viewport/-/addon-viewport-7.0.11.tgz#7964d1fd2aab891d058013183f9a52359ef4e936"
   integrity sha512-O2Wu/jWSFDvvjP2ERc3wXbRuKvfM3Ttj8MJQZ0FphPwIxe1zSSAA5jk3mhXmEyIJfAe+upyAhV9EqIs8+L6kLg==
@@ -5984,7 +5984,7 @@
     "@storybook/client-logger" "7.0.11"
     "@storybook/manager-api" "7.0.11"
 
-"@storybook/blocks@7.0.11", "@storybook/blocks@^7.0.11":
+"@storybook/blocks@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/blocks/-/blocks-7.0.11.tgz#6329dda62b972e17322a3368fce2e25b42810a08"
   integrity sha512-WfqRnKLk3Ke9Pr9G7BrtGJZKuOj32WxbQUbPlCi9oVysYQm69hgcO3+MTft96ur62p8e7gcoIFKrhFi0x4rXiw==
@@ -6482,7 +6482,7 @@
   resolved "https://registry.yarnpkg.com/@storybook/react-dom-shim/-/react-dom-shim-7.0.11.tgz#2474bc0cbe0e81758ca3909683a277cf98751710"
   integrity sha512-G7fdaIdDlED6m7f4c+5adXLb5LCaSv3aWrW1mL+pwaFboFzUMR5VAF4XwVFadYgasLZRxcrPdWRY1AZ+y6/dlw==
 
-"@storybook/react-webpack5@^7.0.11":
+"@storybook/react-webpack5@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/react-webpack5/-/react-webpack5-7.0.11.tgz#765c681a27ce1a420c135de8bd5c92385f0f2784"
   integrity sha512-BL/ldZwFttUhU8FwXpG8gHbXk0ydQiSf4IVcQIh4yB8K1NHGOn9DFX+vGAtkGkdgda3x+ywolaZGUTO86rR/jg==
@@ -6492,7 +6492,7 @@
     "@storybook/react" "7.0.11"
     "@types/node" "^16.0.0"
 
-"@storybook/react@7.0.11", "@storybook/react@^7.0.11":
+"@storybook/react@7.0.11":
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/@storybook/react/-/react-7.0.11.tgz#6d6760150f985a49b86301a5c911118081890bd7"
   integrity sha512-BfUcJP1fAuMc8gDc/sCISY2dXIG/1IonPCxXSP6iO8Yzy5sucM+pl0tbsmeZ8ic35cH9j75+BZyT6iBIV9+o3A==
@@ -6551,7 +6551,7 @@
     nanoid "^3.3.1"
     read-pkg-up "^7.0.1"
 
-"@storybook/testing-library@^0.0.14-next.2":
+"@storybook/testing-library@0.0.14-next.2":
   version "0.0.14-next.2"
   resolved "https://registry.yarnpkg.com/@storybook/testing-library/-/testing-library-0.0.14-next.2.tgz#458e6c7623118e24826ba73b80db0a887f3f57e8"
   integrity sha512-i/SLSGm0o978ELok/SB4Qg1sZ3zr+KuuCkzyFqcCD0r/yf+bG35aQGkFqqxfSAdDxuQom0NO02FE+qys5Eapdg==
@@ -10782,7 +10782,7 @@ eslint-plugin-simple-import-sort@10.0.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-simple-import-sort/-/eslint-plugin-simple-import-sort-10.0.0.tgz#cc4ceaa81ba73252427062705b64321946f61351"
   integrity sha512-AeTvO9UCMSNzIHRkg8S6c3RPy5YEwKWSQPx3DYghLedo2ZQxowPFLGDN1AZ2evfg6r6mjBSZSLxLFsWSu3acsw==
 
-eslint-plugin-storybook@^0.6.12:
+eslint-plugin-storybook@0.6.12:
   version "0.6.12"
   resolved "https://registry.yarnpkg.com/eslint-plugin-storybook/-/eslint-plugin-storybook-0.6.12.tgz#7bdb3392bb03bebde40ed19accfd61246e9d6301"
   integrity sha512-XbIvrq6hNVG6rpdBr+eBw63QhOMLpZneQVSooEDow8aQCWGCk/5vqtap1yxpVydNfSxi3S/3mBBRLQqKUqQRww==
