@@ -103,7 +103,7 @@ const TransactionNameEditor = (props: Props): JSX.Element => {
         },
       }) }
       components={ {
-          Option: NameSelectionOption,
+        Option: NameSelectionOption,
       } }
       classNamePrefix="transaction-select"
       className="w-full md:basis-1/2 pl-0 pr-0 md:pl-2.5 md:pt-0 md:pb-0 transaction-item-name"

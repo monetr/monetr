@@ -41,3 +41,46 @@ button:focus {
     backface-visibility: hidden;
 }
 
+.m-content {
+  height: -webkit-calc(100vh - theme(spacing.16));
+  height: -moz-calc(100vh - theme(spacing.16));
+  height: calc(100vh - theme(spacing.16));
+  margin-top: theme(spacing.16);
+  width: 100%;
+  display: flex;
+}
+
+.m-view-area {
+  width: 100%;
+  height: calc(100vh - theme(spacing.16));
+  max-height: calc(100vh - theme(spacing.16));
+  overflow-y: auto !important;
+  overflow-x: unset !important;
+}
+
+.transactions-item {
+  .transaction-select__control {
+    background-color: transparent;
+  }
+  .transaction-select__control:not(:hover) {
+    &:not(:focus-within) {
+      border-color: transparent;
+
+      .transaction-select__indicators {
+        opacity: 0;
+      }
+    }
+  }
+
+  .transaction-select__menu {
+    z-index: 2;
+  }
+
+  .amount {
+    color: red;
+
+    &.addition {
+      color: green;
+    }
+  }
+}

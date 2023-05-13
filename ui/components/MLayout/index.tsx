@@ -36,10 +36,11 @@ export default function MLayout(props: MLayoutProps): JSX.Element {
               <span className="text-white">bank</span>
             </div>
           </div>
-
         </div>
-        <div className="w-full flex h-full mt-16">
-          { props.children }
+        <div className="m-content">
+          <div className="m-view-area">
+            { props.children }
+          </div>
         </div>
       </div>
     </div>
