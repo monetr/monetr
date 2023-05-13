@@ -2,7 +2,7 @@ import { StoryObj, Meta } from '@storybook/react';
 import RegisterPage from './register-new';
 
 const meta: Meta<typeof RegisterPage> = {
-  title: 'Register',
+  title: 'Pages/Authentication/Register',
   component: RegisterPage,
 }
 

@@ -2,7 +2,7 @@ import { StoryObj, Meta } from '@storybook/react';
 import LoginPage from './login-new';
 
 const meta: Meta<typeof LoginPage> = {
-  title: 'Login',
+  title: 'Pages/Authentication/Login',
   component: LoginPage,
 }
 
@@ -26,7 +26,7 @@ export const Default: StoryObj<typeof LoginPage> = {
 }
 
 export const NoSignup: StoryObj<typeof LoginPage> = {
-  name: 'No Signup',
+  name: 'No Sign Up',
   args: {
     requests: [
       {
