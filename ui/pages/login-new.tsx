@@ -1,10 +1,10 @@
 import MButton from "components/MButton";
+import MLink from "components/MLink";
 import MLogo from "components/MLogo";
 import MSpan from "components/MSpan";
 import MTextField from "components/MTextField";
 import { useAppConfiguration } from "hooks/useAppConfiguration";
 import React from "react";
-import { Link } from "react-router-dom";
 
 export default function LoginNew(): JSX.Element {
   const config = useAppConfiguration();
@@ -17,9 +17,9 @@ export default function LoginNew(): JSX.Element {
 
     return (
       <div className="text-sm">
-        <Link to="/forgot" className="font-semibold text-purple-500 hover:text-purple-600">
+        <MLink to="/forgot">
           Forgot password?
-        </Link>
+        </MLink>
       </div>
     );
   }

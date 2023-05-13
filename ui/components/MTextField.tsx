@@ -1,9 +1,10 @@
 import clsx from "clsx";
-import React, { Fragment } from "react";
+import React from "react";
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
   label?: string;
+  error?: string;
   labelDecorator?: () => JSX.Element;
 }
 
@@ -45,9 +46,20 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     );
   }
 
+  function Error() {
+    if (!props.error) return null;
+
+    return (
+      <p className="text-sm font-medium text-red-500 mt-2">
+        { props.error }
+      </p>
+    );
+  }
+
   const classNames = clsx(
     {
-      'ring-gray-300': !props.disabled,
+      'ring-gray-300': !props.disabled && !props.error,
+      'ring-red-300': !props.disabled && !!props.error,
       'ring-gray-200': props.disabled,
     },
     'block',
@@ -79,6 +91,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
           className={ classNames }
         />
       </div>
+      <Error />
     </div>
   )
 }

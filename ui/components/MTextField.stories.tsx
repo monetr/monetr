@@ -18,6 +18,7 @@ export const Default: StoryFn<typeof MTextField> = () => (
       <MTextField label="Amount" type='number' name='amount' />
       <Divider />
       <MTextField label="Name" type='text' name='name' disabled />
+      <MTextField label="Name" type='text' name='name' error="Name cannot be blank!" />
     </div>
   </div>
 );
