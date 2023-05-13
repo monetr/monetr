@@ -78,7 +78,6 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'sm:text-sm',
     'text-gray-900',
     'w-full',
-    props.className,
   );
 
 

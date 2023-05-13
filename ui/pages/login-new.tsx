@@ -42,25 +42,23 @@ export default function LoginNew(): JSX.Element {
         <MLogo />
       </div>
       <MSpan>Sign into your monetr account</MSpan>
-      <div className="w-full lg:w-1/4 sm:w-1/3">
-        <MTextField
-          label="Email Address"
-          name='email'
-          type='email'
-          required
-        />
-      </div>
-      <div className="w-full lg:w-1/4 sm:w-1/3">
-        <MTextField
-          label="Password"
-          name='password'
-          type='password'
-          required
-          labelDecorator={ ForgotPasswordButton }
-        />
-      </div>
+      <MTextField
+        label="Email Address"
+        name='email'
+        type='email'
+        required
+        className="w-full lg:w-1/4 sm:w-1/3"
+      />
+      <MTextField
+        label="Password"
+        name='password'
+        type='password'
+        required
+        labelDecorator={ ForgotPasswordButton }
+        className="w-full lg:w-1/4 sm:w-1/3"
+      />
       <div className="w-full lg:w-1/4 sm:w-1/3 mt-1">
-        <MButton theme="primary" kind="solid">
+        <MButton color="primary" variant="solid">
           Sign In
         </MButton>
       </div>

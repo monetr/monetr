@@ -14,42 +14,42 @@ export const Default: StoryFn<typeof MButton> = () => (
       <span className='w-full text-center'>No Fill</span>
       <span className='w-full text-center'>Disabled</span>
       <span className='w-full text-center'>Disabled No Fill</span>
-      <MButton theme='primary'>
+      <MButton color='primary'>
         Login
       </MButton>
-      <MButton theme='primary' kind='text'>
+      <MButton color='primary' variant='text'>
         Login
       </MButton>
-      <MButton theme='primary' disabled>
+      <MButton color='primary' disabled>
         Login
       </MButton>
-      <MButton theme='primary' disabled kind='text'>
+      <MButton color='primary' disabled variant='text'>
         Login
       </MButton>
 
-      <MButton theme='secondary'>
+      <MButton color='secondary'>
         Sign up
       </MButton>
-      <MButton theme='secondary' kind='text'>
+      <MButton color='secondary' variant='text'>
         Sign up
       </MButton>
-      <MButton theme='secondary' disabled>
+      <MButton color='secondary' disabled>
         Sign up
       </MButton>
-      <MButton theme='secondary' disabled kind='text'>
+      <MButton color='secondary' disabled variant='text'>
         Sign up
       </MButton>
 
-      <MButton theme='cancel'>
+      <MButton color='cancel'>
         Cancel
       </MButton>
-      <MButton theme='cancel' kind='text'>
+      <MButton color='cancel' variant='text'>
         Cancel
       </MButton>
-      <MButton theme='cancel' disabled>
+      <MButton color='cancel' disabled>
         Cancel
       </MButton>
-      <MButton theme='cancel' disabled kind='text'>
+      <MButton color='cancel' disabled variant='text'>
         Cancel
       </MButton>
     </div>
