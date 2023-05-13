@@ -1,10 +1,11 @@
-import MButton from "components/MButton";
-import MLink from "components/MLink";
-import MLogo from "components/MLogo";
-import MSpan from "components/MSpan";
-import MTextField from "components/MTextField";
-import { useAppConfiguration } from "hooks/useAppConfiguration";
-import React from "react";
+import React from 'react';
+
+import MButton from 'components/MButton';
+import MLink from 'components/MLink';
+import MLogo from 'components/MLogo';
+import MSpan from 'components/MSpan';
+import MTextField from 'components/MTextField';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 export default function LoginNew(): JSX.Element {
   const config = useAppConfiguration();
@@ -24,8 +25,19 @@ export default function LoginNew(): JSX.Element {
     );
   }
 
+  function SignUpButton(): JSX.Element {
+    if (!config.allowSignUp) return null;
+
+    return (
+      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1 text-sm">
+        <MSpan variant="light">Not a user?</MSpan>
+        <MLink to="/register">Sign up now</MLink>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5">
+    <form className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5">
       <div className="max-w-[128px] w-full">
         <MLogo />
       </div>
@@ -52,7 +64,8 @@ export default function LoginNew(): JSX.Element {
           Sign In
         </MButton>
       </div>
-    </div>
-  )
+      <SignUpButton />
+    </form>
+  );
 }
 

@@ -18,6 +18,7 @@ export const Default: StoryObj<typeof LoginPage> = {
         status: 200,
         response: {
           allowForgotPassword: true,
+          allowSignUp: true,
         }
       }
     ]
