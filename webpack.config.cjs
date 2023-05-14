@@ -112,37 +112,16 @@ module.exports = (env, argv) => {
           ]
         },
         {
-          test: /\.(svg)$/,
-          use: [
-            {
-              loader: 'file-loader',
-              options: {
-                name: argv.hot ? 'images/[name].[hash].[ext]' : 'images/[name].[ext]',
-              }
+          test: /\.(png|jpe?g|gif|svg|xlsx)$/,
+          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 4 * 1024,
             },
-          ],
-        },
-        {
-          test: /\.png$/,
-          use: [
-            {
-              loader: 'url-loader',
-              options: {
-                mimetype: 'image/png'
-              }
-            }
-          ]
-        },
-        {
-          test: /\.jpe?g$/,
-          use: [
-            {
-              loader: 'url-loader',
-              options: {
-                mimetype: 'image/jpeg'
-              }
-            }
-          ]
+          },
+          generator: {
+            filename: 'assets/img/[hash][ext][query]',
+          },
         },
       ].filter(Boolean)
     },

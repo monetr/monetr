@@ -58,29 +58,18 @@ button:focus {
   overflow-x: unset !important;
 }
 
-.transactions-item {
-  .transaction-select__control {
-    background-color: transparent;
-  }
-  .transaction-select__control:not(:hover) {
-    &:not(:focus-within) {
-      border-color: transparent;
-
-      .transaction-select__indicators {
-        opacity: 0;
-      }
-    }
-  }
-
-  .transaction-select__menu {
-    z-index: 2;
-  }
-
-  .amount {
-    color: red;
-
-    &.addition {
-      color: green;
-    }
-  }
+.transactions-item .transaction-select__control:not(:hover):not(:focus-within) {
+  border-color: transparent;
+}
+.transactions-item .transaction-select__control:not(:hover):not(:focus-within) .transaction-select__indicators {
+  opacity: 0;
+}
+.transactions-item .transaction-select__menu {
+  z-index: 2;
+}
+.transactions-item .amount {
+  color: red;
+}
+.transactions-item .amount.addition {
+  color: green;
 }

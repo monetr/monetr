@@ -48,11 +48,15 @@ const config: StorybookConfig = {
 
     config!.module!.rules?.push({
       test: /\.(svg)$/,
-      use: [
-        {
-          loader: 'file-loader',
+      type: 'asset',
+      parser: {
+        dataUrlCondition: {
+          maxSize: 4 * 1024,
         },
-      ],
+      },
+      generator: {
+        filename: 'assets/img/[hash][ext][query]',
+      },
     });
 
 
