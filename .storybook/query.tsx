@@ -42,7 +42,12 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
       });
     }
 
-    return Promise.resolve<T>(response.response as T);
+    // Add a tiny bit of latency, as a treat.
+    return new Promise<T>((resolve) => {
+      setTimeout(() => {
+        resolve(response.response as T);
+      }, 50)
+    });
   }
 
   const queryClient = new QueryClient({

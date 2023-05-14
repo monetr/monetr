@@ -7,10 +7,14 @@ import WarningIcon from '@mui/icons-material/Warning';
 import React from "react";
 import { BrowserRouter as Router } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
+import { LocalizationProvider } from '@mui/x-date-pickers'
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 
 import '../ui/styles/styles.css'
 import './preview.css';
 import MockQueryClient, { MockRequest } from "./query";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import theme from '../ui/theme';
 
 export interface StoryArgs {
   requests: Array<MockRequest>;
@@ -29,11 +33,16 @@ const preview: Preview = {
       return (
         <MockQueryClient requests={ args.requests || [] }>
           <Router>
-            <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-              <NiceModal.Provider>
-                <Story />
-              </NiceModal.Provider>
-            </SnackbarProvider>
+            <ThemeProvider theme={ theme }>
+              <LocalizationProvider dateAdapter={ AdapterMoment }>
+                <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+                  <NiceModal.Provider>
+                    <CssBaseline />
+                    <Story />
+                  </NiceModal.Provider>
+                </SnackbarProvider>
+              </LocalizationProvider>
+            </ThemeProvider>
           </Router>
         </MockQueryClient>
       );
