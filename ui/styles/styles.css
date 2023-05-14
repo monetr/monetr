@@ -58,6 +58,9 @@ button:focus {
   overflow-x: unset !important;
 }
 
+.transactions-item .transaction-select__control {
+  background-color: transparent;
+}
 .transactions-item .transaction-select__control:not(:hover):not(:focus-within) {
   border-color: transparent;
 }
