@@ -164,6 +164,19 @@ Tests can be run using the `go test` CLI, or all tests can be run using:
 make test
 ```
 
+### Running Storybook
+
+monetr now provides a storybook setup for working on UI components outside of running the entire application locally. To
+start storybook you can run the following command.
+
+```shell title="Shell"
+make storybook
+```
+
+This will kick off the storybook server and build process. Once it is ready it will open the storybook in your default
+browser. You can then make changes to the components in the stories and see the changes in real time without needing to
+run the entire application stack locally.
+
 ## Cleaning Up
 
 Once you have finished your work and you want to take the local development environment down you have a few options.
