@@ -387,6 +387,9 @@ development-info:
 	$(call infoMsg,)
 	$(call infoMsg,=====================================================================================================)
 
+storybook: $(NODE_MODULES)
+	$(YARN) storybook
+
 up:
 ifndef CONTAINER
 	$(error Must provide a CONTAINER to up)

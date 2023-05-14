@@ -6059,7 +6059,7 @@
     lodash "^4.17.21"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-coverage@^0.0.8":
+"@storybook/addon-coverage@0.0.8":
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/@storybook/addon-coverage/-/addon-coverage-0.0.8.tgz#6da3edf8c50038c6fe13b0575320632ae5bab41d"
   integrity sha512-SVcDZhBybHDxFYjMzPqHPypboRJjSn2xJKxIOTIFONfb//Jg2/3uATyyamBPjvoxWRkNIqBpANGm+BpJlWZtog==
@@ -6817,7 +6817,7 @@
     nanoid "^3.3.1"
     read-pkg-up "^7.0.1"
 
-"@storybook/test-runner@^0.10.0":
+"@storybook/test-runner@0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@storybook/test-runner/-/test-runner-0.10.0.tgz#c869e12be97ac24929cc49ff90c15dfed335487b"
   integrity sha512-37xgdNcba5tJgEZa//S4ooh52hKgXoKvNWC+CZJRksKFlFObzhlCstTo4q9SSkX6LNTXiEj174eZBBa/Yd28JQ==

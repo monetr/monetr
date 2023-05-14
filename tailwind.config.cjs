@@ -19,6 +19,7 @@ module.exports = {
     'text-3xl',
     'text-2xl',
     'text-xl',
+    'cursor-pointer',
   ],
   theme: {
     colors: {
