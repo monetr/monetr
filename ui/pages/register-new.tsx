@@ -1,9 +1,11 @@
-import MButton from "components/MButton";
-import MLink from "components/MLink";
-import MSpan from "components/MSpan";
-import MTextField from "components/MTextField";
-import { useAppConfiguration } from "hooks/useAppConfiguration";
-import React from "react";
+import React, { Fragment } from 'react';
+
+import MButton from 'components/MButton';
+import MCheckbox from 'components/MCheckbox';
+import MLink from 'components/MLink';
+import MSpan from 'components/MSpan';
+import MTextField from 'components/MTextField';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 export default function RegisterNew(): JSX.Element {
   const config = useAppConfiguration();
@@ -20,7 +22,7 @@ export default function RegisterNew(): JSX.Element {
         uppercase
         className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
       />
-    )
+    );
   }
 
   return (
@@ -72,7 +74,28 @@ export default function RegisterNew(): JSX.Element {
         className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
       />
       <BetaCodeInput />
-      <p>[ CHECKBOX HERE ]</p>
+      <MCheckbox
+        id="terms"
+        name="agree"
+        label={
+          <Fragment>
+            I agree to monetr's&nbsp;
+            <a
+              target="_blank"
+              className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+              href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
+              Terms of Use
+            </a> and&nbsp;
+            <a
+              target="_blank"
+              className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+              href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+            >
+              Privacy Policy
+            </a>
+          </Fragment>
+        }
+      />
       <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1">
         <MButton color="primary" variant="solid" role="form" type="submit">
           Sign Up
@@ -83,5 +106,5 @@ export default function RegisterNew(): JSX.Element {
         <MLink to="/login" size="sm">Sign in instead</MLink>
       </div>
     </form>
-  )
+  );
 }
