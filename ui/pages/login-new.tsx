@@ -54,7 +54,7 @@ export default function LoginNew(): JSX.Element {
       initialValues={ initialValues }
       onSubmit={ submit }
     >
-      <form className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5">
+      <form className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5 px-5">
         <div className="max-w-[128px] w-full">
           <MLogo />
         </div>
