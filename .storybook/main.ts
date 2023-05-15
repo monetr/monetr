@@ -1,18 +1,19 @@
-import type { StorybookConfig } from "@storybook/react-webpack5";
-import { RuleSetRule } from "webpack";
+import type { StorybookConfig } from '@storybook/react-webpack5';
 
 import getParentWebpackConfig from '../webpack.config.cjs';
+
+import { RuleSetRule } from 'webpack';
 
 const webpackConfig = getParentWebpackConfig({}, {});
 
 const config: StorybookConfig = {
-  stories: ["../ui/**/*.mdx", "../ui/**/*.stories.@(js|jsx|ts|tsx)"],
+  stories: ['../ui/**/*.mdx', '../ui/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: [
-    "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
-    "@storybook/addon-viewport",
-    "@storybook/addon-coverage",
+    '@storybook/addon-links',
+    '@storybook/addon-essentials',
+    '@storybook/addon-interactions',
+    '@storybook/addon-viewport',
+    '@storybook/addon-coverage',
     {
       name: '@storybook/addon-styling',
       options: {
@@ -23,15 +24,15 @@ const config: StorybookConfig = {
     },
   ],
   framework: {
-    name: "@storybook/react-webpack5",
+    name: '@storybook/react-webpack5',
     options: {
       fastRefresh: true,
     },
   },
   docs: {
-    autodocs: "tag",
+    autodocs: 'tag',
   },
-  webpackFinal: async (config) => {
+  webpackFinal: async config => {
     config.resolve = {
       ...config.resolve,
       ...webpackConfig.resolve,
@@ -41,10 +42,10 @@ const config: StorybookConfig = {
     // @ts-ignore
     const fileLoaderRule = config.module.rules.filter(
       // @ts-ignore
-      (rule) => rule.test && rule.test.test('.svg'),
-    )
+      rule => rule.test && rule.test.test('.svg'),
+    );
     // @ts-ignore
-    fileLoaderRule!.forEach(rule => rule.exclude = /\.svg$/)
+    fileLoaderRule!.forEach(rule => rule.exclude = /\.svg$/);
 
     config!.module!.rules?.push({
       test: /\.(svg)$/,

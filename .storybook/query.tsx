@@ -30,23 +30,23 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
         offset: context.pageParam,
       },
       data: context.queryKey.length === 2 && context.queryKey[1],
-    }
+    };
     const response = requests.find(item => {
       // TODO Implement params matching.
       return item.path === request.url && item.method === request.method;
     });
     if (!response) {
-      console.warn(`No response found for: ${ request.method } ${ request.url }`)
+      console.warn(`No response found for: ${ request.method } ${ request.url }`);
       return Promise.reject<T>({
         error: 'No response found!',
       });
     }
 
     // Add a tiny bit of latency, as a treat.
-    return new Promise<T>((resolve) => {
+    return new Promise<T>(resolve => {
       setTimeout(() => {
         resolve(response.response as T);
-      }, 50)
+      }, 50);
     });
   }
 
@@ -61,6 +61,6 @@ export default function MockQueryClient(props: MockQueryClientProps): JSX.Elemen
   });
 
   return (
-    <QueryClientProvider client={ queryClient } children={ props.children} />
+    <QueryClientProvider client={ queryClient } children={ props.children } />
   );
 }

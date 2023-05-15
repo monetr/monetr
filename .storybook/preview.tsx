@@ -1,20 +1,22 @@
-import type { Preview } from "@storybook/react";
-import { IconVariant, SnackbarProvider } from 'notistack';
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import NiceModal from '@ebay/nice-modal-react';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
-import React from "react";
-import { BrowserRouter as Router } from 'react-router-dom';
-import NiceModal from '@ebay/nice-modal-react';
-import { LocalizationProvider } from '@mui/x-date-pickers'
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import type { Preview } from '@storybook/react';
+import { IconVariant, SnackbarProvider } from 'notistack';
 
-import '../ui/styles/styles.css'
-import './preview.css';
-import MockQueryClient, { MockRequest } from "./query";
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import MockQueryClient, { MockRequest } from './query';
+
 import theme from '../ui/theme';
+
+import '../ui/styles/styles.css';
+import './preview.css';
 
 export interface StoryArgs {
   requests: Array<MockRequest>;
@@ -52,7 +54,7 @@ const preview: Preview = {
 
   },
   parameters: {
-    actions: { argTypesRegex: "^on[A-Z].*" },
+    actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
       matchers: {
         color: /(background|color)$/i,
