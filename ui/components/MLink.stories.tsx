@@ -8,5 +8,7 @@ export default {
 } as Meta<typeof MLink>;
 
 export const Default: StoryFn<typeof MLink> = () => (
-  <MLink to="#">I am a link!</MLink>
+  <div className="w-full flex p-4">
+    <MLink to="#">I am a link!</MLink>
+  </div>
 );
