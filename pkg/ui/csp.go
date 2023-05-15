@@ -42,10 +42,12 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 			UnsafeInline:          noop,
 		},
 		"font-src": {
-			Self: noop,
+			Self:    noop,
+			"data:": noop,
 		},
 		"style-src-elem": {
 			UnsafeInline: noop,
+			Self:         noop,
 		},
 		"connect-src": {
 			Self: noop, // Add ws if its in development mode.

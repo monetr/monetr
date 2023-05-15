@@ -51,7 +51,7 @@ module.exports = (env, argv) => {
       filename: filename,
       // Source maps are automatically moved to $(PWD)/build/source_maps each time the UI is compiled. They will not be
       // in the path above.
-      sourceMapFilename: isDevelopment ? `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js.map` : '[name].js.map',
+      // sourceMapFilename: isDevelopment ? `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js.map` : '[name].[hash:8].js.map',
     },
     resolve: {
       extensions: [
@@ -70,7 +70,6 @@ module.exports = (env, argv) => {
         directory: path.resolve(__dirname, 'public'),
       },
       historyApiFallback: true,
-      hot: 'only',
       host: '0.0.0.0',
       port: 30000,
       webSocketServer: 'ws',
@@ -170,7 +169,7 @@ module.exports = (env, argv) => {
             filename: 'assets/img/[name][ext][query]',
           },
         },
-      ].filter(Boolean),
+      ],
     },
   };
 
