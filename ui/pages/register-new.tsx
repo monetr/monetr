@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 
 import MButton from 'components/MButton';
 import MCheckbox from 'components/MCheckbox';
+import MForm from 'components/MForm';
 import MLink from 'components/MLink';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
@@ -26,7 +27,7 @@ export default function RegisterNew(): JSX.Element {
   }
 
   return (
-    <form className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5">
+    <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5">
       <div className="flex flex-col items-center">
         <MSpan size="5xl">
           Get Started
@@ -105,6 +106,6 @@ export default function RegisterNew(): JSX.Element {
         <MSpan variant="light" size="sm">Already have an account?</MSpan>
         <MLink to="/login" size="sm">Sign in instead</MLink>
       </div>
-    </form>
+    </MForm>
   );
 }

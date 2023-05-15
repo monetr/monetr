@@ -1,5 +1,6 @@
 import React from 'react';
 import { ButtonBase, ButtonBaseProps } from '@mui/material';
+import { useFormikContext } from 'formik';
 
 import clsx from 'clsx';
 
@@ -15,6 +16,8 @@ const MButtonPropsDefaults: MButtonProps = {
 };
 
 export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX.Element {
+  const formikContext = useFormikContext();
+
   const { disabled, color: theme, variant: kind }: MButtonProps = {
     ...MButtonPropsDefaults,
     ...props,
@@ -83,6 +86,8 @@ export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX
   );
 
   return <ButtonBase
+    onSubmit={ props.type === 'submit' ? formikContext?.submitForm : null }
+    disabled={ formikContext?.isSubmitting || props.disabled }
     { ...props }
     className={ classNames }
   />;
