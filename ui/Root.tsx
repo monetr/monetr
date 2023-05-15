@@ -1,24 +1,23 @@
-import clsx from 'clsx';
 import React from 'react';
 import {
   QueryClient,
   QueryClientProvider, QueryFunctionContext, QueryKey,
 } from 'react-query';
 import { BrowserRouter as Router } from 'react-router-dom';
+import NiceModal from '@ebay/nice-modal-react';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
-import { LocalizationProvider } from '@mui/x-date-pickers'
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import * as Sentry from '@sentry/react';
 import axios from 'axios';
 import { IconVariant, SnackbarProvider } from 'notistack';
-import NiceModal from '@ebay/nice-modal-react';
 
 import Application from 'Application';
-import GlobalFooter from 'components/GlobalFooter';
+import clsx from 'clsx';
 import theme from 'theme';
 
 export default function Root(): JSX.Element {
@@ -63,7 +62,7 @@ export default function Root(): JSX.Element {
   return (
     <div className={ clsx('w-full h-full', {
       'dark': theme.palette.mode === 'dark',
-    })}>
+    }) }>
       <React.StrictMode>
         <Sentry.ErrorBoundary>
           <QueryClientProvider client={ queryClient }>
@@ -74,7 +73,6 @@ export default function Root(): JSX.Element {
                     <NiceModal.Provider>
                       <CssBaseline />
                       <Application />
-                      <GlobalFooter />
                     </NiceModal.Provider>
                   </SnackbarProvider>
                 </LocalizationProvider>

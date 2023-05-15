@@ -1,10 +1,10 @@
-import { darken, lighten } from '@mui/material';
-import { useTheme } from '@mui/styles';
 import React, { useState } from 'react';
-import { ActionMeta, OnChangeValue, Theme } from 'react-select';
+import { ActionMeta, components, OnChangeValue, OptionProps, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
 import CreatableSelect from 'react-select/creatable';
+import { lighten } from '@mui/material';
 
+import clsx from 'clsx';
 import { useUpdateTransaction } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 import theme from 'theme';
@@ -93,7 +93,7 @@ const TransactionNameEditor = (props: Props): JSX.Element => {
         colors: {
           ...theme.colors,
           primary: uiTheme.palette.primary.main,
-          ...( uiTheme.palette.mode === 'dark' && {
+          ...(uiTheme.palette.mode === 'dark' && {
             neutral0: uiTheme.palette.background.default,
             primary25: lighten(uiTheme.palette.background.default, 0.1),
             primary50: lighten(uiTheme.palette.background.default, 0.5),
@@ -102,6 +102,9 @@ const TransactionNameEditor = (props: Props): JSX.Element => {
           }), // Text
         },
       }) }
+      components={ {
+        Option: NameSelectionOption,
+      } }
       classNamePrefix="transaction-select"
       className="w-full md:basis-1/2 pl-0 pr-0 md:pl-2.5 md:pt-0 md:pb-0 transaction-item-name"
       createOptionPosition="first"
@@ -119,3 +122,22 @@ const TransactionNameEditor = (props: Props): JSX.Element => {
 };
 
 export default TransactionNameEditor;
+
+
+export interface NameOption {
+  readonly label: string;
+  readonly value: number | null;
+}
+
+export function NameSelectionOption({ children, ...props }: OptionProps<Option>): JSX.Element {
+  const optionClassNames = clsx(props.className);
+  const labelClassNames = clsx(
+    'font-medium',
+  );
+
+  return (
+    <components.Option { ...props } className={ optionClassNames }>
+      <span className={ labelClassNames }>{ props.label }</span>
+    </components.Option>
+  );
+}

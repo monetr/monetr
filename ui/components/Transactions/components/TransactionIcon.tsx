@@ -1,9 +1,9 @@
-import { useTheme } from '@mui/styles';
-import useIsMobile from 'hooks/useIsMobile';
 import React from 'react';
 import { Avatar } from '@mui/material';
+import { useTheme } from '@mui/styles';
 
 import { useIconSearch } from 'hooks/useIconSearch';
+import useIsMobile from 'hooks/useIsMobile';
 import Transaction from 'models/Transaction';
 import theme from 'theme';
 
@@ -36,7 +36,7 @@ export default function TransactionIcon(props: Props): JSX.Element {
   }
 
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
-  const letter = props.transaction.name.toUpperCase().charAt(0);
+  const letter = props.transaction.getName().toUpperCase().charAt(0);
   return (
     <Avatar>
       { letter }

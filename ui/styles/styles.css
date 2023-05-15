@@ -6,6 +6,7 @@
 
 html, body {
     height: 100%;
+    background-color: #F8F8F8;
 }
 
 /* custom scrollbar */
@@ -14,7 +15,7 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: transparent;
+    background-color: inherit;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -40,3 +41,38 @@ button:focus {
     backface-visibility: hidden;
 }
 
+.m-content {
+  height: -webkit-calc(100vh - theme(spacing.16));
+  height: -moz-calc(100vh - theme(spacing.16));
+  height: calc(100vh - theme(spacing.16));
+  margin-top: theme(spacing.16);
+  width: 100%;
+  display: flex;
+}
+
+.m-view-area {
+  width: 100%;
+  height: calc(100vh - theme(spacing.16));
+  max-height: calc(100vh - theme(spacing.16));
+  overflow-y: auto !important;
+  overflow-x: unset !important;
+}
+
+.transactions-item .transaction-select__control {
+  background-color: transparent;
+}
+.transactions-item .transaction-select__control:not(:hover):not(:focus-within) {
+  border-color: transparent;
+}
+.transactions-item .transaction-select__control:not(:hover):not(:focus-within) .transaction-select__indicators {
+  opacity: 0;
+}
+.transactions-item .transaction-select__menu {
+  z-index: 2;
+}
+.transactions-item .amount {
+  color: red;
+}
+.transactions-item .amount.addition {
+  color: green;
+}

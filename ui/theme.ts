@@ -58,7 +58,8 @@ const theme = createTheme({
       contrastText: '#FFFFFF',
     },
     background: {
-      default: darkMode ? fullConfig.theme.colors['neutral']['800'] : '#FFFFFF',
+      default: '#F8F8F8',
+      // default: darkMode ? fullConfig.theme.colors['neutral']['800'] : '#FFFFFF',
       // default: darkMode ? '#2f2f2f' : '#FFFFFF',
     },
   },

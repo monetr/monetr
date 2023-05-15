@@ -29,5 +29,4 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
       <div className="navigation-after" />
     </div>
   );
-
 }
