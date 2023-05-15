@@ -8,11 +8,13 @@ import clsx from 'clsx';
 type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>
 export interface MLinkProps extends BaseLinkProps {
   children: ReactElement;
+  color?: 'primary' | 'secondary';
   size?: TextSize;
 }
 
 const MLinkPropsDefaults: Omit<MLinkProps, 'children' | 'to'> = {
   size: 'md',
+  color: 'primary',
 };
 
 export default function MLink(props: MLinkProps): JSX.Element {
@@ -21,11 +23,22 @@ export default function MLink(props: MLinkProps): JSX.Element {
     ...props,
   };
 
+  const colors = {
+    'primary': [
+      'text-purple-500',
+      'hover:text-purple-600',
+    ],
+    'secondary': [
+      'text-gray-400',
+      'hover:text-gray-500',
+    ],
+  };
+
   const classNames = clsx(
     'font-semibold',
-    'text-purple-500',
-    'hover:text-purple-600',
+    ...colors[props.color],
     `text-${props.size}`,
+    props.className,
   );
 
   return (

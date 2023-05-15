@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFormikContext } from 'formik';
 
 import clsx from 'clsx';
 
@@ -18,6 +19,8 @@ const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
 };
 
 export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
+  const formikContext = useFormikContext();
+
   props = {
     ...MTextFieldPropsDefaults,
     ...props,
@@ -89,12 +92,15 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'w-full',
   );
 
-
   return (
     <div className={ props.className }>
       <Label />
       <div>
         <input
+          value={ formikContext?.values[props.name] }
+          onChange={ formikContext?.handleChange }
+          onBlur={ formikContext?.handleBlur }
+          disabled={ formikContext?.isSubmitting || props.disabled }
           { ...otherProps }
           className={ classNames }
         />

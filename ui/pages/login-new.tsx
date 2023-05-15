@@ -2,6 +2,7 @@ import React from 'react';
 import { Formik, FormikHelpers } from 'formik';
 
 import MButton from 'components/MButton';
+import MForm from 'components/MForm';
 import MLink from 'components/MLink';
 import MLogo from 'components/MLogo';
 import MSpan from 'components/MSpan';
@@ -28,7 +29,7 @@ export default function LoginNew(): JSX.Element {
     }
 
     return (
-      <MLink to="/forgot" size="sm">
+      <MLink to="/password/forgot" size="sm">
         Forgot password?
       </MLink>
     );
@@ -54,7 +55,7 @@ export default function LoginNew(): JSX.Element {
       initialValues={ initialValues }
       onSubmit={ submit }
     >
-      <form className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5 px-5">
+      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5 px-5">
         <div className="max-w-[128px] w-full">
           <MLogo />
         </div>
@@ -81,7 +82,7 @@ export default function LoginNew(): JSX.Element {
           </MButton>
         </div>
         <SignUpButton />
-      </form>
+      </MForm>
     </Formik>
   );
 }
