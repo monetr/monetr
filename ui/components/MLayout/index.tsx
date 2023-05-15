@@ -1,8 +1,9 @@
-import { ArrowBackOutlined, Menu } from "@mui/icons-material";
-import MSidebar from "components/MSidebar";
-import { ReactElement } from "components/types";
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowBackOutlined, Menu } from '@mui/icons-material';
+
+import MSidebar from 'components/MSidebar';
+import { ReactElement } from 'components/types';
 
 export interface MLayoutProps {
   children?: ReactElement;
@@ -44,5 +45,5 @@ export default function MLayout(props: MLayoutProps): JSX.Element {
         </div>
       </div>
     </div>
-  )
+  );
 }

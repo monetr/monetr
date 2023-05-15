@@ -1,7 +1,9 @@
-import clsx from "clsx";
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ReactElement } from "./types";
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+
+import { ReactElement } from './types';
+
+import clsx from 'clsx';
 
 export interface MSidebarButton {
   children: ReactElement;
@@ -23,7 +25,7 @@ export default function MSidebarButton(props: MSidebarButton): JSX.Element {
     'text-gray-50',
     {
       'bg-purple-700': active,
-      'hover:bg-purple-700': !active
+      'hover:bg-purple-700': !active,
     },
   );
 
@@ -31,5 +33,5 @@ export default function MSidebarButton(props: MSidebarButton): JSX.Element {
     <li>
       <Link { ...props } className={ className } />
     </li>
-  )
+  );
 }

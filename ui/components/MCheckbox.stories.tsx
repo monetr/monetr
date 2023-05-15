@@ -1,6 +1,7 @@
-import { Meta, StoryFn } from "@storybook/react";
-import React, { Fragment } from "react";
-import MCheckbox from "./MCheckbox";
+import React, { Fragment } from 'react';
+import { Meta, StoryFn } from '@storybook/react';
+
+import MCheckbox from './MCheckbox';
 
 export default {
   title: 'Components/Checkbox',
@@ -101,4 +102,4 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
       </div>
     </fieldset>
   </div>
-)
+);

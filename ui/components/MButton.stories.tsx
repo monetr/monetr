@@ -1,6 +1,7 @@
 import React from 'react';
+import { Meta, StoryFn } from '@storybook/react';
+
 import MButton from './MButton';
-import { StoryFn, Meta } from '@storybook/react';
 
 export default {
   title: 'Components/Button',
@@ -54,6 +55,6 @@ export const Default: StoryFn<typeof MButton> = () => (
       </MButton>
     </div>
   </div>
-)
+);
 
 

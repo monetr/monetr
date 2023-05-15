@@ -1,6 +1,8 @@
-import clsx from "clsx";
-import React from "react";
-import { TextSize } from "./types";
+import React from 'react';
+
+import { TextSize } from './types';
+
+import clsx from 'clsx';
 
 export interface MSpanProps {
   variant?: 'normal' | 'light';
@@ -11,7 +13,7 @@ export interface MSpanProps {
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
   variant: 'normal',
   size: 'md',
-}
+};
 
 export default function MSpan(props: MSpanProps): JSX.Element {
   props = {
@@ -31,6 +33,6 @@ export default function MSpan(props: MSpanProps): JSX.Element {
     <span className={ classNames }>
       { props.children }
     </span>
-  )
+  );
 
 }

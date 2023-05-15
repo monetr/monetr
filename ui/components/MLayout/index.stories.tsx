@@ -1,6 +1,7 @@
-import { Meta, StoryObj } from "@storybook/react";
-import React from "react";
-import MLayout from ".";
+import React from 'react';
+import { Meta, StoryObj } from '@storybook/react';
+
+import MLayout from '.';
 
 const meta: Meta<typeof MLayout> = {
   title: 'Pages/Templates/Layout',
@@ -26,8 +27,8 @@ export const Default: StoryObj = {
         status: 200,
         response: {
           billingEnabled: true,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};

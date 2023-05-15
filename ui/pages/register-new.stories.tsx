@@ -1,10 +1,11 @@
-import { StoryObj, Meta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
+
 import RegisterPage from './register-new';
 
 const meta: Meta<typeof RegisterPage> = {
   title: 'Pages/Authentication/Register',
   component: RegisterPage,
-}
+};
 
 export default meta;
 
@@ -20,11 +21,11 @@ export const Default: StoryObj<typeof RegisterPage> = {
           allowForgotPassword: true,
           allowSignUp: true,
           requireBetaCode: false,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};
 
 export const WithBetaCode: StoryObj<typeof RegisterPage> = {
   name: 'Require Beta Code',
@@ -38,8 +39,8 @@ export const WithBetaCode: StoryObj<typeof RegisterPage> = {
           allowForgotPassword: true,
           allowSignUp: true,
           requireBetaCode: true,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};

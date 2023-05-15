@@ -1,13 +1,14 @@
-import { Divider } from "@mui/material";
-import { Meta, StoryFn } from "@storybook/react";
-import React from "react";
-import MTextField from "./MTextField";
+import React from 'react';
+import { Divider } from '@mui/material';
+import { Meta, StoryFn } from '@storybook/react';
+
+import MTextField from './MTextField';
 
 
 export default {
   title: 'Components/Text Field',
   component: MTextField,
-} as Meta<typeof MTextField>
+} as Meta<typeof MTextField>;
 
 export const Default: StoryFn<typeof MTextField> = () => (
   <div className="w-full flex p-4">

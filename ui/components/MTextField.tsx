@@ -1,5 +1,6 @@
-import clsx from "clsx";
-import React from "react";
+import React from 'react';
+
+import clsx from 'clsx';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
@@ -32,11 +33,11 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'text-gray-900': !props.disabled,
       'text-gray-400': props.disabled,
     },
-  )
+  );
 
   const { labelDecorator, ...otherProps } = props;
   function Label() {
-    if (!props.label ) return null;
+    if (!props.label) return null;
     const LabelDecorator = labelDecorator || MTextFieldPropsDefaults.labelDecorator;
 
     return (
@@ -100,5 +101,5 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       </div>
       <Error />
     </div>
-  )
+  );
 }

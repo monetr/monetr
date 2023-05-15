@@ -14,7 +14,7 @@ export const Default: StoryObj = {
   name: 'Default',
   render: () => (
     <MLayout>
-      <TransactionsNew/>
+      <TransactionsNew />
     </MLayout>
   ),
   args: {
@@ -712,7 +712,7 @@ export const Default: StoryObj = {
             'isPending': false,
             'createdAt': '2023-03-14T07:07:49Z',
             'deletedAt': null,
-          }
+          },
         ],
       },
     ],

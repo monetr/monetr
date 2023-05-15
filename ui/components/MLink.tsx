@@ -1,7 +1,9 @@
-import clsx from "clsx";
-import React from "react";
-import { Link, LinkProps } from "react-router-dom";
-import { ReactElement, TextSize } from "./types";
+import React from 'react';
+import { Link, LinkProps } from 'react-router-dom';
+
+import { ReactElement, TextSize } from './types';
+
+import clsx from 'clsx';
 
 type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>
 export interface MLinkProps extends BaseLinkProps {
@@ -11,7 +13,7 @@ export interface MLinkProps extends BaseLinkProps {
 
 const MLinkPropsDefaults: Omit<MLinkProps, 'children' | 'to'> = {
   size: 'md',
-}
+};
 
 export default function MLink(props: MLinkProps): JSX.Element {
   props = {
@@ -33,5 +35,5 @@ export default function MLink(props: MLinkProps): JSX.Element {
     >
       { props.children }
     </Link>
-  )
+  );
 }

@@ -1,6 +1,7 @@
-import { ButtonBase, ButtonBaseProps } from '@mui/material';
-import clsx from 'clsx';
 import React from 'react';
+import { ButtonBase, ButtonBaseProps } from '@mui/material';
+
+import clsx from 'clsx';
 
 export interface MButtonProps extends ButtonBaseProps {
   color?: 'primary' | 'secondary' | 'cancel';
@@ -49,7 +50,7 @@ export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX
         'focus-visible:outline-purple-200': !disabled,
         'text-gray-900': !disabled,
         'text-gray-400': disabled,
-      }
+      },
     },
     'cancel': {
       'solid': {
@@ -64,7 +65,7 @@ export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX
         'text-red-200': disabled,
         'focus-visible:outline-red-600': !disabled,
       },
-    }
+    },
   }[theme][kind];
   const classNames = clsx(
     themeClasses,

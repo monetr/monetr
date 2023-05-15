@@ -1,5 +1,6 @@
-import { Logo } from "assets";
-import React from "react";
+import React from 'react';
+
+import { Logo } from 'assets';
 
 type ImgProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
@@ -13,5 +14,5 @@ export default function MLogo(props: MLogoProps): JSX.Element {
       { ...props }
       src={ Logo }
     />
-  )
+  );
 }

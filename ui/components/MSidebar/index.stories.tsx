@@ -1,10 +1,11 @@
-import { StoryObj, Meta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
+
 import MSidebar from '.';
 
 const meta: Meta<typeof MSidebar> = {
   title: 'Pages/Templates/Sidebar',
   component: MSidebar,
-}
+};
 
 export default meta;
 
@@ -20,11 +21,11 @@ export const Default: StoryObj<typeof MSidebar> = {
         status: 200,
         response: {
           billingEnabled: true,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};
 
 export const BillingDisabled: StoryObj<typeof MSidebar> = {
   name: 'Billing Disabled',
@@ -38,8 +39,8 @@ export const BillingDisabled: StoryObj<typeof MSidebar> = {
         status: 200,
         response: {
           billingEnabled: false,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};

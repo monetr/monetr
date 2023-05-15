@@ -1,4 +1,5 @@
 import React from 'react';
+import { Formik, FormikHelpers } from 'formik';
 
 import MButton from 'components/MButton';
 import MLink from 'components/MLink';
@@ -6,7 +7,6 @@ import MLogo from 'components/MLogo';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { Formik, FormikHelpers } from 'formik';
 
 interface LoginValues {
   email: string;

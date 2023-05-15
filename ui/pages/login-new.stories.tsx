@@ -1,10 +1,11 @@
-import { StoryObj, Meta } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
+
 import LoginPage from './login-new';
 
 const meta: Meta<typeof LoginPage> = {
   title: 'Pages/Authentication/Login',
   component: LoginPage,
-}
+};
 
 export default meta;
 
@@ -19,11 +20,11 @@ export const Default: StoryObj<typeof LoginPage> = {
         response: {
           allowForgotPassword: true,
           allowSignUp: true,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};
 
 export const NoSignup: StoryObj<typeof LoginPage> = {
   name: 'No Sign Up',
@@ -36,11 +37,11 @@ export const NoSignup: StoryObj<typeof LoginPage> = {
         response: {
           allowForgotPassword: true,
           allowSignUp: false,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};
 
 export const NoForgotPassword: StoryObj<typeof LoginPage> = {
   name: 'No Forgot Password',
@@ -53,8 +54,8 @@ export const NoForgotPassword: StoryObj<typeof LoginPage> = {
         response: {
           allowForgotPassword: false,
           allowSignUp: true,
-        }
-      }
-    ]
-  }
-}
+        },
+      },
+    ],
+  },
+};

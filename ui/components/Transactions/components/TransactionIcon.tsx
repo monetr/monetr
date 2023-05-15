@@ -1,9 +1,9 @@
-import { useTheme } from '@mui/styles';
-import useIsMobile from 'hooks/useIsMobile';
 import React from 'react';
 import { Avatar } from '@mui/material';
+import { useTheme } from '@mui/styles';
 
 import { useIconSearch } from 'hooks/useIconSearch';
+import useIsMobile from 'hooks/useIsMobile';
 import Transaction from 'models/Transaction';
 import theme from 'theme';
 
