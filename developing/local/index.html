@@ -1200,6 +1200,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#running-storybook" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Storybook
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1772,6 +1781,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#running-storybook" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Storybook
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1944,6 +1962,14 @@ editor or other tools you will need to run the database migrations.</p>
 <p>Tests can be run using the <code>go test</code> CLI, or all tests can be run using:</p>
 <div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>make <span class="nb">test</span>
 </code></pre></div>
+<h3 id="running-storybook">Running Storybook</h3>
+<p>monetr now provides a storybook setup for working on UI components outside of running the entire application locally. To
+start storybook you can run the following command.</p>
+<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>make storybook
+</code></pre></div>
+<p>This will kick off the storybook server and build process. Once it is ready it will open the storybook in your default
+browser. You can then make changes to the components in the stories and see the changes in real time without needing to
+run the entire application stack locally.</p>
 <h2 id="cleaning-up">Cleaning Up</h2>
 <p>Once you have finished your work and you want to take the local development environment down you have a few options.</p>
 <h3 id="stopping">Stopping</h3>
@@ -1952,11 +1978,11 @@ helpful if you are working on a larger feature or bug. But overall it is recomme
 your development environment each time you start working on something. This keeps the development environment tidy, but
 does have the downside of not introducing edge cases that might otherwise be harder to find. You can pause your
 development environment by running:</p>
-<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>make stop
+<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>make stop
 </code></pre></div>
 <p>This will stop all of the Docker containers that were started, but will not remove any of their data. When you are ready
 you can start the containers again with the following command.</p>
-<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>make start
+<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>make start
 </code></pre></div>
 <h3 id="shutting-down-development-environment">Shutting Down Development Environment</h3>
 <p>If you want to completely shut everything down (1) then you can run the following command:</p>
@@ -1964,14 +1990,14 @@ you can start the containers again with the following command.</p>
 <summary>Danger</summary>
 <p>This will delete all of your local development data, including any Plaid links, expenses, goals, etc...</p>
 </details>
-<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>make shutdown
+<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>make shutdown
 </code></pre></div>
 <p>This removes the Plaid links that are active, takes down the Docker compose containers, removes their volumes.</p>
 <h3 id="completely-clean-up">Completely Clean up</h3>
 <p>If you want to completely start fresh you can run the following make task. This will shut down the local development
 environment if it is running, but it will also delete any files created or generated during development. This deletes
 your <code>node_modules</code> folder, any submodules, and generated UI code.</p>
-<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>make clean
+<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>make clean
 </code></pre></div>
 <p>This should leave the project directory in a state similar to when it was initially cloned.</p>
 
