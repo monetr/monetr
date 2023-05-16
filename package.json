@@ -19,7 +19,7 @@
     "@sentry/tracing": "6.19.7",
     "@svgr/webpack": "6.5.1",
     "axios": "0.27.2",
-    "babel-eslint": "10.1.0",
+    "@babel/eslint-parser": "7.11.0",
     "babel-plugin-named-asset-import": "0.3.8",
     "babel-preset-react-app": "10.0.1",
     "bfj": "7.0.2",
