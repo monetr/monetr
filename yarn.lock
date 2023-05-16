@@ -1643,7 +1643,7 @@
     semver "^7.3.7"
     tinypool "^0.4.0"
 
-"@fy-dev/react-rspack@^7.0.0-rc.16":
+"@fy-dev/react-rspack@7.0.0-rc.16":
   version "7.0.0-rc.16"
   resolved "https://registry.yarnpkg.com/@fy-dev/react-rspack/-/react-rspack-7.0.0-rc.16.tgz#2c84b1d4c3072f1f4d83aac8bc86051ed8988bb0"
   integrity sha512-a/Y2sDGwQ5VwFdPmzB1826ORQd5H5Z5I7BujBT8Uj6feD8NHRc/Xy9X8mtsXbVcZdP/SImnw8wbtzi4HO/mI/A==
@@ -2640,6 +2640,11 @@
   resolved "https://registry.yarnpkg.com/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-0.1.10.tgz#4f270e625c33123b9c9111af86fe2a3fbf5c767d"
   integrity sha512-yNs9PJqIZjK6mMtnSvn7EaU3lorymYRR8qW/7FG9zO5xvQQu4VwojOXA3sKxU9fCtw5EW8Uw6ZX92ZZzYrAz9g==
 
+"@rspack/binding-linux-x64-gnu@0.1.11":
+  version "0.1.11"
+  resolved "https://registry.yarnpkg.com/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-0.1.11.tgz#67a738840e9a9ce47eb27bbba43572262baa2618"
+  integrity sha512-M0CFPuwsVYAQFLgIX5hU751bqgutOP/Hki/I+f8r80l+VFSkwvXh+RQ/zhKxGnUW6A3Zjb7XGu8fdxbM1yJTqg==
+
 "@rspack/binding-linux-x64-gnu@0.1.8":
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-0.1.8.tgz#7adf4f4dac0ddf0aa188169bccd554b86cbec157"
@@ -2750,7 +2755,7 @@
     "@rspack/binding-win32-ia32-msvc" "0.1.8"
     "@rspack/binding-win32-x64-msvc" "0.1.8"
 
-"@rspack/cli@^0.1.10":
+"@rspack/cli@0.1.10":
   version "0.1.10"
   resolved "https://registry.yarnpkg.com/@rspack/cli/-/cli-0.1.10.tgz#8562c372b7abcbba9c9c4c5a10555b19d2e0847f"
   integrity sha512-vE5wEQL3r0RGVmOg2NiFKmMWJcZm2otlq5RBwer/IWQHlXEnbFyszIGp9Mm+k3JFjyrhO2Ay7EhofhMQDXGOlQ==
@@ -4245,7 +4250,7 @@
   dependencies:
     tslib "^2.4.0"
 
-"@swc/jest@^0.2.26":
+"@swc/jest@0.2.26":
   version "0.2.26"
   resolved "https://registry.yarnpkg.com/@swc/jest/-/jest-0.2.26.tgz#6ef2d6d31869e3aaddc132603bc21f2e4c57cc5d"
   integrity sha512-7lAi7q7ShTO3E5Gt1Xqf3pIhRbERxR1DUxvtVa9WKzIB+HGQ7wZP5sYx86zqnaEoKKGhmOoZ7gyW0IRu8Br5+A==
@@ -13864,7 +13869,7 @@ storybook-preset-react-rspack@7.0.0-rc.17:
     semver "^7.3.7"
     tinypool "^0.4.0"
 
-storybook-react-rspack@^7.0.0-rc.17:
+storybook-react-rspack@7.0.0-rc.17:
   version "7.0.0-rc.17"
   resolved "https://registry.yarnpkg.com/storybook-react-rspack/-/storybook-react-rspack-7.0.0-rc.17.tgz#1af91524902220e3ee2bba8fd698fa5c8ae62180"
   integrity sha512-hnIW82Renc2NQtiEQTKQojNJ+V8U+fgWWnMb1vu1zfE58yXioR4+oP4rMkiTaErqLftFEV5/VHEY2fIYzc+Bcw==
@@ -13874,7 +13879,7 @@ storybook-react-rspack@^7.0.0-rc.17:
     storybook-builder-rspack "7.0.0-rc.17"
     storybook-preset-react-rspack "7.0.0-rc.17"
 
-storybook@^7.0.11:
+storybook@7.0.11:
   version "7.0.11"
   resolved "https://registry.yarnpkg.com/storybook/-/storybook-7.0.11.tgz#b13876720de6920d11ea7360e8de85c01b23a4ce"
   integrity sha512-3MdQ90doYuGZpC052zyMnWLIK1GqyPrYN0sCkGyiNAO8wdxcuCG8jHK2s4b1I/yWLCGv03jCjoc6w9F5iRcrHw==

@@ -144,7 +144,11 @@ YARN=$(shell which yarn)
 
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
+ifneq ($(OS),linux)
+	$(YARN) install --ignore-platform
+else
 	$(YARN) install
+endif
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
