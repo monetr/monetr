@@ -12,8 +12,8 @@
     "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
     "test": "jest",
     "coverage": "jest --coverage --collectCoverageFrom=ui/**/*.{js,jsx,ts,tsx} --coverageDirectory=./reports",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "storybook dev -p 6006 --disable-telemetry",
+    "build-storybook": "storybook build --disable-telemetry"
   },
   "eslintConfig": {
     "extends": [
