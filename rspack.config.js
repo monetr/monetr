@@ -23,6 +23,9 @@ module.exports = (env, argv) => {
   }
   const config = {
     builtins: {
+      react: {
+        refresh: isDevelopment,
+      },
       presetEnv: {
         coreJs: '3',
       },
