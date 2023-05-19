@@ -39,6 +39,10 @@
         "dockerfile"
       ],
       "semanticCommitScope": "containers"
+    },
+    {
+      "matchPakagePrefixes": ["@rspack/"],
+      "groupName": "rspack"
     }
   ]
 }

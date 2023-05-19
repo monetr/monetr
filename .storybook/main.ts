@@ -1,6 +1,7 @@
+import type { StorybookConfig } from '@storybook/types';
 
-const config = {
-  stories: ['../ui/**/*.mdx', '../ui/**/*.stories.@(js|jsx|ts|tsx)'],
+const config: StorybookConfig = {
+  stories: ['../ui/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-essentials',
@@ -18,6 +19,9 @@ const config = {
   ],
   framework: {
     name: 'storybook-react-rspack',
+    options: {
+      fastRefresh: true,
+    },
   },
   docs: {
     autodocs: 'tag',
