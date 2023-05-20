@@ -225,7 +225,10 @@ else
 endif
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
-$(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES) $(NOTICE)
+$(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
+ifndef LITE
+$(BINARY): $(NOTICE)
+endif
 endif
 ifneq (,$(findstring simple_icons,$(TAGS))) # If our icon packs include simple_icons then make sure the dir exists.
 $(BINARY): $(SIMPLE_ICONS)
@@ -235,6 +238,9 @@ endif
 	$(call infoMsg,          Build Version: $(RELEASE_VERSION))
 
 build: $(BINARY)
+
+lite:
+	$(MAKE) $(BINARY) LITE=true
 
 BINARY_TAR=$(BUILD_DIR)/monetr-$(RELEASE_VERSION)-$(GOOS)-$(GOARCH).tar.gz
 $(BINARY_TAR): $(BINARY)
