@@ -8,10 +8,10 @@
     "build:production": "yarn build --mode production",
     "build-dev": "rspack --mode development",
     "build-prod": "rspack --mode production",
-    "clean": "rm -rf build/* || true",
+    "clean": "make clean",
     "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
     "test": "jest",
-    "coverage": "jest --coverage --collectCoverageFrom=ui/**/*.{js,jsx,ts,tsx} --coverageDirectory=./reports",
+    "coverage": "jest --coverage --coverageDirectory=./reports",
     "storybook": "storybook dev -p 6006 --disable-telemetry",
     "build-storybook": "storybook build --disable-telemetry"
   },
@@ -47,7 +47,8 @@
     "timers": "fakeTimers",
     "collectCoverageFrom": [
       "ui/**/*.{js,jsx,ts,tsx}",
-      "!ui/**/*.d.ts"
+      "!ui/**/*.d.ts",
+      "!ui/**/*.stories.{js,jsx,ts,tsx}"
     ],
     "notify": true,
     "testEnvironment": "jest-environment-jsdom",
