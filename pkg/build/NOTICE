@@ -53872,7 +53872,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 *****
-cosmiconfig@7.0.1
+cosmiconfig@7.1.0
 
 The MIT License (MIT)
 
@@ -55178,7 +55178,7 @@ ISC
 [gitter-image]: https://badges.gitter.im/gulpjs/gulp.svg
 
 *****
-graceful-fs@4.2.11
+graceful-fs@4.2.10
 
 The ISC License
 
