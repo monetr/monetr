@@ -12,14 +12,12 @@ import (
 
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/router"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
-	"github.com/monetr/monetr/pkg/swag"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
 )
@@ -37,7 +35,7 @@ const ClearAuthentication = ""
 // with the API. When this is called with a token that token will be returned to the client in the response as a
 // Set-Cookie header. If a blank token is provided then the cookie is updated to expire immediately and the value of the
 // cookie is set to blank.
-func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) {
+func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) {
 	sameSite := http.SameSiteDefaultMode
 	if c.configuration.Server.Cookies.SameSiteStrict {
 		sameSite = http.SameSiteStrictMode
@@ -65,25 +63,6 @@ func (c *Controller) updateAuthenticationCookie(ctx iris.Context, token string) 
 	})
 }
 
-func (c *Controller) handleAuthentication(p router.Party) {
-	p.Post("/login", c.loginEndpoint)
-	p.Get("/logout", c.logoutEndpoint)
-
-	if c.configuration.AllowSignUp {
-		p.Post("/register", c.registerEndpoint)
-	}
-
-	if c.configuration.Email.ShouldVerifyEmails() {
-		p.Post("/verify", c.verifyEndpoint)
-		p.Post("/verify/resend", c.resendVerification)
-	}
-
-	if c.configuration.Email.AllowPasswordReset() {
-		p.Post("/forgot", c.sendForgotPassword)
-		p.Post("/reset", c.resetPassword)
-	}
-}
-
 // Login
 // @Summary Login
 // @id login
@@ -98,7 +77,7 @@ func (c *Controller) handleAuthentication(p router.Party) {
 // @Failure 401 {object} swag.LoginInvalidCredentialsResponse Invalid credentials.
 // @Failure 428 {object} swag.LoginPreconditionRequiredResponse Login requirements are missing.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) loginEndpoint(ctx iris.Context) {
+func (c *Controller) loginEndpoint(ctx echo.Context) error {
 	var loginRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -106,9 +85,8 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 		TOTP     string `json:"totp"`
 		IsMobile bool   `json:"isMobile"`
 	}
-	if err := ctx.ReadJSON(&loginRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
-		return
+	if err := ctx.Bind(&loginRequest); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
 	}
 
 	// This will take the captcha from the request and validate it if the API is
@@ -116,31 +94,27 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	// is returned to the client.
 
 	if err := c.validateLoginCaptcha(c.getContext(ctx), loginRequest.Captcha); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 	}
 
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
 	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
 	loginRequest.TOTP = strings.TrimSpace(loginRequest.TOTP)
 
-	if err := c.validateLogin(loginRequest.Email, loginRequest.Password); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "login is not valid")
-		return
+	if err := c.validateLogin(ctx, loginRequest.Email, loginRequest.Password); err != nil {
+		return err // Validate login errors are valid http errors.
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
 	login, requiresPasswordChange, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, loginRequest.Password)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
-		c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
-		return
+		return c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
 	case nil:
 		// If no error was returned then do nothing.
 		break
 	default:
-		c.wrapPgError(ctx, err, "failed to authenticate")
-		return
+		return c.wrapPgError(ctx, err, "failed to authenticate")
 	}
 
 	// I want to track how many of these types of things we get.
@@ -152,15 +126,13 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	// user.
 	if c.configuration.Email.ShouldVerifyEmails() && !login.IsEmailVerified {
 		log.Debug("login email address is not verified, please verify before continuing")
-		c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
-		return
+		return c.failure(ctx, http.StatusPreconditionRequired, EmailNotVerifiedError{})
 	}
 
 	if requiresPasswordChange {
 		// If the server is not configured to allow password resets return an error.
 		if !c.configuration.Email.AllowPasswordReset() {
-			c.returnError(ctx, http.StatusNotAcceptable, "login requires password reset, but password reset is not allowed")
-			return
+			return c.returnError(ctx, http.StatusNotAcceptable, "login requires password reset, but password reset is not allowed")
 		}
 
 		passwordResetToken, err := c.passwordResetTokens.GenerateToken(
@@ -169,22 +141,19 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
 		)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
 		}
 
 		log.Info("login requires a password change")
-		c.failure(ctx, http.StatusPreconditionRequired, PasswordResetRequiredError{
+		return c.failure(ctx, http.StatusPreconditionRequired, PasswordResetRequiredError{
 			ResetToken: passwordResetToken,
 		})
-		return
 	}
 
 	// Check if the login requires MFA in order to authenticate.
 	if login.TOTP != "" && loginRequest.TOTP == "" {
 		log.Debug("login requires TOTP MFA, but none was provided")
-		c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
-		return
+		return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
 	} else if login.TOTP != "" && loginRequest.TOTP != "" {
 		// If the login does require TOTP and a code was provided in the request, then validate that the provided code is
 		// correct.
@@ -192,8 +161,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 		if err := login.VerifyTOTP(loginRequest.TOTP); err != nil {
 			log.Trace("provided TOTP MFA code is not valid")
-			c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
-			return
+			return c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
 		}
 
 		log.Trace("provided TOTP MFA code is valid")
@@ -204,8 +172,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 	switch len(login.Users) {
 	case 0:
 		// TODO (elliotcourant) Should we allow them to create an account?
-		c.returnError(ctx, http.StatusInternalServerError, "user has no accounts")
-		return
+		return c.returnError(ctx, http.StatusInternalServerError, "user has no accounts")
 	case 1:
 		user := login.Users[0]
 
@@ -220,8 +187,7 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
 		}
 
 		result := map[string]interface{}{
@@ -236,14 +202,12 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 
 		if !c.configuration.Stripe.IsBillingEnabled() {
 			// Return their account token.
-			ctx.JSON(result)
-			return
+			return ctx.JSON(http.StatusOK, result)
 		}
 
 		subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), user.AccountId)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
 		}
 
 		result["isActive"] = subscriptionIsActive
@@ -252,15 +216,14 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			result["nextUrl"] = "/account/subscribe"
 		}
 
-		ctx.JSON(result)
+		return ctx.JSON(http.StatusOK, result)
 	default:
 		// If the login has more than one user then we want to generate a temp
 		// JWT that will only grant them access to API endpoints not specific to
 		// an account.
 		token, err := c.generateToken(login.LoginId, 0, 0)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
 		}
 
 		result := map[string]interface{}{
@@ -273,41 +236,24 @@ func (c *Controller) loginEndpoint(ctx iris.Context) {
 			result["token"] = token
 		}
 
-		ctx.JSON(result)
+		return ctx.JSON(http.StatusOK, result)
 	}
 }
 
-// Logout
-// @Summary Logout
-// @id logout
-// @tags Authentication
-// @description Removes the `HttpOnly` authentication cookie for the user. This request does require the authentication
-// @description cookie is present. It will return a `403` if the cookie is not present.
-// @Router /authentication/logout [get]
-// @Security ApiKeyAuth
-// @Success 200
-func (c *Controller) logoutEndpoint(ctx iris.Context) {
-	if cookie := ctx.GetCookie(c.configuration.Server.Cookies.Name); cookie == "" {
-		return
+func (c *Controller) logoutEndpoint(ctx echo.Context) error {
+	if _, err := ctx.Cookie(c.configuration.Server.Cookies.Name); err == http.ErrNoCookie {
+		return ctx.NoContent(http.StatusOK)
 	}
 
 	c.updateAuthenticationCookie(ctx, ClearAuthentication)
+	return ctx.NoContent(http.StatusOK)
 }
 
-// Register
-// @Summary Register
-// @id register
-// @tags Authentication
-// @description Register creates a new login, user and account. Logins are used for authentication, users tie authentication to an account, and accounts hold budgeting data.
-// @Produce json
-// @Accept json
-// @Param Registration body swag.RegisterRequest true "New User Registration"
-// @Router /authentication/register [post]
-// @Success 200 {object} swag.RegisterResponse
-// @Failure 400 {object} ApiError Required data is missing.
-// @Failure 401 {object} ApiError Invalid credentials.
-// @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) registerEndpoint(ctx iris.Context) {
+func (c *Controller) registerEndpoint(ctx echo.Context) error {
+	if !c.configuration.AllowSignUp {
+		return c.notFound(ctx, "sign up is not enabled on this server")
+	}
+
 	var registerRequest struct {
 		Email     string  `json:"email"`
 		Password  string  `json:"password"`
@@ -318,17 +264,15 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		BetaCode  *string `json:"betaCode"`
 		Agree     bool    `json:"agree"`
 	}
-	if err := ctx.ReadJSON(&registerRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid register JSON")
-		return
+	if err := ctx.Bind(&registerRequest); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	// This will take the captcha from the request and validate it if the API is
 	// configured to do so. If it is enabled and the captcha fails then an error
 	// is returned to the client.
 	if err := c.validateRegistrationCaptcha(c.getContext(ctx), registerRequest.Captcha); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 	}
 
 	registerRequest.Email = strings.TrimSpace(registerRequest.Email)
@@ -339,20 +283,17 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	}
 
 	if err := c.validateRegistration(
+		ctx,
 		registerRequest.Email,
 		registerRequest.Password,
 		registerRequest.FirstName,
 	); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest,
-			"invalid registration",
-		)
-		return
+		return err // validateRegistration also returns a valid http error that can just be passed through.
 	}
 
 	timezone, err := time.LoadLocation(registerRequest.Timezone)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse timezone")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to parse timezone")
 	}
 
 	// If the registration details provided look good then we want to create an
@@ -361,23 +302,20 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// a write only interface to the database.
 	repo, err := c.getUnauthenticatedRepository(ctx)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"cannot register user",
 		)
-		return
 	}
 
 	var beta *models.Beta
 	if c.configuration.Beta.EnableBetaCodes {
 		if registerRequest.BetaCode == nil || *registerRequest.BetaCode == "" {
-			c.badRequest(ctx, "beta code required for registration")
-			return
+			return c.badRequest(ctx, "beta code required for registration")
 		}
 
 		beta, err = repo.ValidateBetaCode(c.getContext(ctx), *registerRequest.BetaCode)
 		if err != nil {
-			c.wrapPgError(ctx, err, "could not verify beta code")
-			return
+			return c.wrapPgError(ctx, err, "could not verify beta code")
 		}
 	}
 
@@ -393,13 +331,12 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	if err != nil {
 		switch errors.Cause(err) {
 		case repository.ErrEmailAlreadyExists:
-			c.failure(ctx, http.StatusBadRequest, EmailAlreadyExists{})
+			return c.failure(ctx, http.StatusBadRequest, EmailAlreadyExists{})
 		default:
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 				"failed to create login",
 			)
 		}
-		return
 	}
 
 	var stripeCustomerId *string
@@ -418,8 +355,12 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 			},
 		})
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
-			return
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to create stripe customer",
+			)
 		}
 
 		stripeCustomerId = &result.ID
@@ -434,20 +375,12 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	// writing this we are only using the local time zone of the server, but in
 	// the future I want to have it somehow use the user's timezone.
 	if err = repo.CreateAccountV2(c.getContext(ctx), &account); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create account",
 		)
-		return
 	}
 
-	if hub := sentry.GetHubFromContext(c.getContext(ctx)); hub != nil {
-		hub.ConfigureScope(func(scope *sentry.Scope) {
-			scope.SetUser(sentry.User{
-				ID:       strconv.FormatUint(account.AccountId, 10),
-				Username: fmt.Sprintf("account:%d", account.AccountId),
-			})
-		})
-	}
+	crumbs.IncludeUserInScope(c.getContext(ctx), account.AccountId)
 
 	user := models.User{
 		LoginId:          login.LoginId,
@@ -466,18 +399,16 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 		&user,
 	)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create user",
 		)
-		return
 	}
 
 	if beta != nil {
 		if err = repo.UseBetaCode(c.getContext(ctx), beta.BetaID, user.UserId); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 				"failed to use beta code",
 			)
-			return
 		}
 	}
 
@@ -486,8 +417,12 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	if c.configuration.Email.ShouldVerifyEmails() {
 		verificationToken, err := c.emailVerification.CreateEmailVerificationToken(c.getContext(ctx), registerRequest.Email)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate email verification token")
-			return
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"could not generate email verification token",
+			)
 		}
 
 		if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
@@ -497,25 +432,27 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 				url.QueryEscape(verificationToken),
 			),
 		}); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to send verification email")
-			return
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"failed to send verification email",
+			)
 		}
 
-		ctx.JSON(map[string]interface{}{
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"message":             "A verification email has been sent to your email address, please verify your email.",
 			"requireVerification": true,
 		})
-		return
 	}
 
 	// If we are not requiring email verification to activate an account we can
 	// simply return a token here for the user to be signed in.
 	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
 			"failed to create JWT",
 		)
-		return
 	}
 
 	user.Login = login
@@ -524,16 +461,15 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 	c.updateAuthenticationCookie(ctx, token)
 
 	if !c.configuration.Stripe.IsBillingEnabled() {
-		ctx.JSON(map[string]interface{}{
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"nextUrl":             "/setup",
 			"user":                user,
 			"isActive":            true,
 			"requireVerification": false,
 		})
-		return
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"nextUrl":             "/account/subscribe",
 		"user":                user,
 		"isActive":            false,
@@ -555,26 +491,27 @@ func (c *Controller) registerEndpoint(ctx iris.Context) {
 // @Success 200 {object} swag.VerifyResponse
 // @Failure 400 {object} ApiError Required data is missing. The token is invalid or expired. Or the email has already been verified.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) verifyEndpoint(ctx iris.Context) {
+func (c *Controller) verifyEndpoint(ctx echo.Context) error {
+	if !c.configuration.Email.ShouldVerifyEmails() {
+		return c.notFound(ctx, "email verification is not enabled")
+	}
+
 	var verifyRequest struct {
 		Token string `json:"token"`
 	}
-	if err := ctx.ReadJSON(&verifyRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(&verifyRequest); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	if strings.TrimSpace(verifyRequest.Token) == "" {
-		c.badRequest(ctx, "token cannot be blank")
-		return
+		return c.badRequest(ctx, "Token cannot be blank")
 	}
 
 	if err := c.emailVerification.UseEmailVerificationToken(c.getContext(ctx), verifyRequest.Token); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid email verification")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"nextUrl": "/login",
 		"message": "Your email is now verified. Please login.",
 	})
@@ -597,39 +534,38 @@ func (c *Controller) verifyEndpoint(ctx iris.Context) {
 // @Success 200
 // @Failure 400 {object} ApiError Cannot resend verification link.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) resendVerification(ctx iris.Context) {
-	var request swag.ResendVerificationRequest
-	if err := ctx.ReadJSON(&request); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+func (c *Controller) resendVerification(ctx echo.Context) error {
+	if !c.configuration.Email.ShouldVerifyEmails() {
+		return c.notFound(ctx, "email verification is not enabled")
+	}
+
+	var request struct {
+		Email   string  `json:"email"`
+		Captcha *string `json:"captcha"`
+	}
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	request.Email = strings.TrimSpace(strings.ToLower(request.Email))
-
 	if request.Email == "" {
-		c.badRequest(ctx, "email must be provided to resend verification link")
-		return
+		return c.badRequest(ctx, "email must be provided to resend verification link")
 	}
 
 	if c.configuration.ReCAPTCHA.Enabled {
 		if request.Captcha == nil {
-			c.badRequest(ctx, "must provide ReCAPTCHA")
-			return
+			return c.badRequest(ctx, "must provide ReCAPTCHA")
 		}
 
 		if err := c.validateCaptchaMaybe(c.getContext(ctx), *request.Captcha); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid ReCAPTCHA provided")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "invalid ReCAPTCHA provided")
 		}
 	}
-
-	// Make sure that no matter what, after this point we always return successful.
-	ctx.StatusCode(http.StatusOK)
 
 	login, verificationToken, err := c.emailVerification.RegenerateEmailVerificationToken(c.getContext(ctx), request.Email)
 	if err != nil {
 		c.reportWrappedError(ctx, err, "failed to regenerate email verification token")
-		return
+		return ctx.NoContent(http.StatusOK)
 	}
 
 	if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
@@ -640,7 +576,10 @@ func (c *Controller) resendVerification(ctx iris.Context) {
 		),
 	}); err != nil {
 		c.reportWrappedError(ctx, err, "failed to send (re-send) verification email")
+		return ctx.NoContent(http.StatusOK)
 	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
 // Send Password Reset Link
@@ -656,14 +595,17 @@ func (c *Controller) resendVerification(ctx iris.Context) {
 // @Failure 400 {object} swag.ForgotPasswordBadRequest
 // @Failure 428 {object} swag.ForgotPasswordEmailNotVerifiedError Email verification required.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) sendForgotPassword(ctx iris.Context) {
+func (c *Controller) sendForgotPassword(ctx echo.Context) error {
+	if !c.configuration.Email.AllowPasswordReset() {
+		return c.notFound(ctx, "password reset not enabled")
+	}
+
 	var sendForgotPasswordRequest struct {
 		Email     string `json:"email"`
 		ReCAPTCHA string `json:"captcha"`
 	}
-	if err := ctx.ReadJSON(&sendForgotPasswordRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(&sendForgotPasswordRequest); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	// Clean up some of the input provided just in case.
@@ -671,20 +613,17 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 	sendForgotPasswordRequest.ReCAPTCHA = strings.TrimSpace(sendForgotPasswordRequest.ReCAPTCHA)
 
 	if sendForgotPasswordRequest.Email == "" {
-		c.badRequest(ctx, "Must provide an email address.")
-		return
+		return c.badRequest(ctx, "Must provide an email address.")
 	}
 
 	// If we require ReCAPTCHA then make sure they provide it.
 	if c.configuration.ReCAPTCHA.ShouldVerifyForgotPassword() {
 		if sendForgotPasswordRequest.ReCAPTCHA == "" {
-			c.badRequest(ctx, "Must provide a valid ReCAPTCHA.")
-			return
+			return c.badRequest(ctx, "Must provide a valid ReCAPTCHA.")
 		}
 
 		if err := c.validateCaptchaMaybe(c.getContext(ctx), sendForgotPasswordRequest.ReCAPTCHA); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Valid ReCAPTCHA is required")
 		}
 	}
 
@@ -699,14 +638,16 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 			"error": err.Error(),
 		})
 		// Don't return an error to the client, don't want them to know if it failed to send.
-		ctx.StatusCode(http.StatusOK)
-		return
+		return ctx.NoContent(http.StatusOK)
 	}
 
 	// If the login's email is not verified then return an error to the client.
 	if c.configuration.Email.ShouldVerifyEmails() && !login.GetEmailIsVerified() {
-		c.returnError(ctx, http.StatusPreconditionRequired, "You must verify your email before you can send forgot password requests.")
-		return
+		return c.returnError(
+			ctx,
+			http.StatusPreconditionRequired,
+			"You must verify your email before you can send forgot password requests.",
+		)
 	}
 
 	// Generate the password reset token.
@@ -721,8 +662,12 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 		c.configuration.Email.ForgotPassword.TokenLifetime,
 	)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
-		return
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to generate a password reset token",
+		)
 	}
 
 	if err = c.communication.SendPasswordResetEmail(c.getContext(ctx), communication.ForgotPasswordParams{
@@ -732,11 +677,15 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 			url.QueryEscape(passwordResetToken),
 		),
 	}); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to send password reset email")
-		return
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to send password reset email",
+		)
 	}
 
-	ctx.StatusCode(http.StatusOK)
+	return ctx.NoContent(http.StatusOK)
 }
 
 // Reset Password
@@ -753,14 +702,17 @@ func (c *Controller) sendForgotPassword(ctx iris.Context) {
 // @Success 200
 // @Failure 400 {object} swag.ResetPasswordBadRequest
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) resetPassword(ctx iris.Context) {
+func (c *Controller) resetPassword(ctx echo.Context) error {
+	if !c.configuration.Email.AllowPasswordReset() {
+		return c.notFound(ctx, "password reset not enabled")
+	}
+
 	var resetPasswordRequest struct {
 		Token    string `json:"token"`
 		Password string `json:"password"`
 	}
-	if err := ctx.ReadJSON(&resetPasswordRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(&resetPasswordRequest); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	resetPasswordRequest.Token = strings.TrimSpace(resetPasswordRequest.Token)
@@ -769,19 +721,21 @@ func (c *Controller) resetPassword(ctx iris.Context) {
 	// The token is what verifies that the user is who they say they are even without a password. The token is emailed
 	// to their verified email address.
 	if resetPasswordRequest.Token == "" {
-		c.badRequest(ctx, "Token must be provided to reset password.")
-		return
+		return c.badRequest(ctx, "Token must be provided to reset password.")
 	}
 
 	if len(resetPasswordRequest.Password) < 8 {
-		c.badRequest(ctx, "Password must be at least 8 characters long.")
-		return
+		return c.badRequest(ctx, "Password must be at least 8 characters long.")
 	}
 
 	validation, err := c.passwordResetTokens.ValidateTokenEx(c.getContext(ctx), resetPasswordRequest.Token)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Failed to validate password reset token")
-		return
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusBadRequest,
+			"Failed to validate password reset token",
+		)
 	}
 
 	unauthenticatedRepo := c.mustGetUnauthenticatedRepository(ctx)
@@ -789,15 +743,16 @@ func (c *Controller) resetPassword(ctx iris.Context) {
 	// Retrieve the login for the email address in the token.
 	login, err := unauthenticatedRepo.GetLoginForEmail(c.getContext(ctx), validation.Email)
 	if err != nil {
-		c.wrapPgError(ctx, err, "Failed to verify login for email address")
-		return
+		return c.wrapPgError(ctx, err, "Failed to verify login for email address")
 	}
 
 	// If the login's password has been changed since this token was issued, then this token is no longer valid. This
 	// will basically make sure that a token cannot be used twice.
 	if login.PasswordResetAt != nil && login.PasswordResetAt.After(validation.CreatedAt) {
-		c.badRequest(ctx, "Password has already been reset, you must request another password reset link.")
-		return
+		return c.badRequest(
+			ctx,
+			"Password has already been reset, you must request another password reset link.",
+		)
 	}
 
 	if err = unauthenticatedRepo.ResetPassword(
@@ -805,24 +760,23 @@ func (c *Controller) resetPassword(ctx iris.Context) {
 		login.LoginId,
 		resetPasswordRequest.Password,
 	); err != nil {
-		c.wrapPgError(ctx, err, "Failed to reset password")
-		return
+		return c.wrapPgError(ctx, err, "Failed to reset password")
 	}
 
-	ctx.StatusCode(http.StatusOK)
+	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) validateRegistration(email, password, firstName string) error {
+func (c *Controller) validateRegistration(ctx echo.Context, email, password, firstName string) error {
 	if email == "" {
-		return errors.Errorf("email cannot be blank")
+		return c.badRequest(ctx, "Email cannot be blank")
 	}
 
 	if len(password) < 8 {
-		return errors.Errorf("password must be at least 8 characters")
+		return c.badRequest(ctx, "Password must be at least 8 characters")
 	}
 
 	if firstName == "" {
-		return errors.Errorf("first name cannot be blank")
+		return c.badRequest(ctx, "First name cannot be left blank")
 	}
 
 	return nil
@@ -857,18 +811,22 @@ func (c *Controller) validateCaptchaMaybe(ctx context.Context, captcha string) e
 	return c.captcha.VerifyCaptcha(ctx, captcha)
 }
 
-func (c *Controller) validateLogin(email, password string) error {
+// validateLogin takes the current request context and the provided email and password, it then validates thats the
+// credentials are valid based on some basic constraints. The password must be so long and the email address provided
+// must be at least a valid email formated string. If the credentials are not valid in this regard then an http error is
+// returned and can be passed immediately back up through the controller.
+func (c *Controller) validateLogin(ctx echo.Context, email, password string) error {
 	if len(password) < 8 {
-		return errors.New("password must be at least 8 characters")
+		return c.badRequest(ctx, "Password must be at least 8 characters")
 	}
 
 	address, err := mail.ParseAddress(email)
 	if err != nil {
-		return errors.New("email address provided is not valid")
+		return c.badRequest(ctx, "Email address provided is not valid")
 	}
 
 	if !strings.EqualFold(address.Address, email) {
-		return errors.New("email address provided is not valid")
+		return c.badRequest(ctx, "Email address provided is not valid")
 	}
 
 	return nil

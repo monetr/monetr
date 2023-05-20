@@ -3,7 +3,6 @@ package ui
 import (
 	"net/http"
 
-	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/application"
 	"github.com/monetr/monetr/pkg/config"
 )
@@ -14,7 +13,7 @@ var (
 
 type UIController struct {
 	configuration config.Configuration
-	fileServer    iris.Handler
+	filesystem    http.FileSystem
 }
 
 // NewUIController creates a UI controller that uses the default embedded filesystem to serve UI files to the client.
@@ -32,12 +31,13 @@ func NewUIControllerCustomFS(
 ) *UIController {
 	return &UIController{
 		configuration: configuration,
-		fileServer: iris.FileServer(
-			NewFileSystem("static", filesystem),
-			iris.DirOptions{
-				IndexName: "index.html",
-				SPA:       true,
-			},
-		),
+		filesystem:    filesystem,
+		// fileServer: iris.FileServer(
+		// 	NewFileSystem("static", filesystem),
+		// 	iris.DirOptions{
+		// 		IndexName: "index.html",
+		// 		SPA:       true,
+		// 	},
+		// ),
 	}
 }

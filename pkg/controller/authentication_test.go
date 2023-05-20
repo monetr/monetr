@@ -194,7 +194,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("login is not valid: email address provided is not valid")
+		response.JSON().Path("$.error").String().Equal("Email address provided is not valid")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -209,7 +209,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("login is not valid: email address provided is not valid")
+		response.JSON().Path("$.error").String().Equal("Email address provided is not valid")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -224,7 +224,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("login is not valid: password must be at least 8 characters")
+		response.JSON().Path("$.error").String().Equal("Password must be at least 8 characters")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -327,7 +327,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("valid ReCAPTCHA is required: captcha is not valid")
+		response.JSON().Path("$.error").Equal("valid ReCAPTCHA is required")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -341,7 +341,7 @@ func TestLogin(t *testing.T) {
 		response.Status(http.StatusBadRequest)
 		response.JSON().
 			Path("$.error").
-			Equal("malformed json: invalid character 'b' looking for beginning of object key string")
+			Equal("malformed json")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -509,7 +509,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("invalid registration: password must be at least 8 characters")
+		response.JSON().Path("$.error").Equal("Password must be at least 8 characters")
 	})
 
 	t.Run("bad timezone", func(t *testing.T) {
@@ -532,7 +532,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("failed to parse timezone: unknown time zone going for broke")
+		response.JSON().Path("$.error").Equal("failed to parse timezone")
 	})
 
 	t.Run("valid captcha", func(t *testing.T) {
@@ -614,7 +614,7 @@ func TestRegister(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("valid ReCAPTCHA is required: invalid ReCAPTCHA: remote error codes: [invalid-input-secret]")
+			Equal("valid ReCAPTCHA is required")
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -624,7 +624,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("invalid register JSON: invalid character 'I' looking for beginning of value")
+		response.JSON().Path("$.error").Equal("invalid JSON body")
 	})
 
 	t.Run("email already exists", func(t *testing.T) {
@@ -905,7 +905,7 @@ func TestVerifyEmail(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("invalid email verification: could not verify email: invalid token: signature is invalid")
+				Equal("Invalid email verification")
 		}
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
@@ -967,7 +967,7 @@ func TestVerifyEmail(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("invalid email verification: could not verify email: invalid token: token is expired by 1s")
+				Equal("Invalid email verification")
 		}
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
@@ -993,7 +993,7 @@ func TestVerifyEmail(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("token cannot be blank")
+		response.JSON().Path("$.error").String().Equal("Token cannot be blank")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -1007,7 +1007,7 @@ func TestVerifyEmail(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("malformed JSON: invalid character 'b' looking for beginning of object key string")
+			Equal("invalid JSON body")
 	})
 }
 
@@ -1248,7 +1248,7 @@ func TestSendForgotPassword(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("malformed JSON: invalid character 'o' in literal null (expecting 'u')")
+				Equal("invalid JSON body")
 		}
 	})
 
@@ -1467,7 +1467,7 @@ func TestResetPassword(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Contains("Failed to validate password reset token: invalid token: token is expired by")
+				Equal("Failed to validate password reset token")
 		}
 	})
 
@@ -1497,7 +1497,10 @@ func TestResetPassword(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("malformed JSON: invalid character 'I' looking for beginning of value")
+		response.JSON().
+			Path("$.error").
+			String().
+			Equal("invalid JSON body")
 	})
 
 	t.Run("token is empty", func(t *testing.T) {
@@ -1546,6 +1549,6 @@ func TestResetPassword(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("Failed to validate password reset token: invalid token: token contains an invalid number of segments")
+			Equal("Failed to validate password reset token")
 	})
 }

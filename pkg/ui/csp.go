@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	ua "github.com/mileusna/useragent"
 )
 
@@ -18,17 +18,13 @@ var (
 	noop = struct{}{}
 )
 
-var (
-	_ iris.Handler = (&UIController{}).ContentSecurityPolicyMiddleware
-)
-
 // At the time of writing this, it seems that Chrome is the only browser engine that has implemented a majority of the
 // content security policy items. See https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
 // Because of this, it is not easy (or reasonable) to have a single CSP header that will securely cover every browser.
 // This code aims to provide a header based on the user-agent of the browser in the request.
 
-func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
-	userAgentString := ctx.GetHeader("User-Agent")
+func (c *UIController) ContentSecurityPolicyMiddleware(ctx echo.Context) {
+	userAgentString := ctx.Request().UserAgent()
 	userAgent := ua.Parse(userAgentString)
 
 	policies := map[string]map[string]struct{}{
@@ -137,6 +133,6 @@ func (c *UIController) ContentSecurityPolicyMiddleware(ctx iris.Context) {
 	}
 
 	if len(policies) > 0 {
-		ctx.Header("Content-Security-Policy", encodePolicies())
+		ctx.Response().Header().Set("Content-Security-Policy", encodePolicies())
 	}
 }

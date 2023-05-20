@@ -165,8 +165,8 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			WithCookie(TestCookieName, token).
 			Expect()
 
-		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("the requested path does not exist")
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("must specify a link Id")
 	})
 
 	t.Run("bad link ID", func(t *testing.T) {
@@ -180,19 +180,6 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 
 		response.Status(http.StatusBadRequest)
 		response.JSON().Path("$.error").String().Equal("must specify a link Id")
-	})
-
-	t.Run("invalid update_account_selection", func(t *testing.T) {
-		e := NewTestApplication(t)
-		token := GivenIHaveToken(t, e)
-
-		response := e.PUT("/api/plaid/link/update/123").
-			WithQuery("update_account_selection", "bogus").
-			WithCookie(TestCookieName, token).
-			Expect()
-
-		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("update_account_selection must be provided a valid boolean value")
 	})
 
 	t.Run("missing link", func(t *testing.T) {

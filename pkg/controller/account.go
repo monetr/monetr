@@ -1,27 +1,23 @@
 package controller
 
 import (
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/router"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
-func (c *Controller) handleAccounts(p router.Party) {
-	p.Get("/settings", c.getAccountSettings)
-	p.Delete("/", c.deleteAccount)
-}
-
-func (c *Controller) getAccountSettings(ctx iris.Context) {
+func (c *Controller) getAccountSettings(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	settings, err := repo.GetSettings(c.getContext(ctx))
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve account settings")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve account settings")
 	}
 
-	ctx.JSON(settings)
+	return ctx.JSON(http.StatusOK, settings)
 }
 
-func (c *Controller) deleteAccount(ctx iris.Context) {
+func (c *Controller) deleteAccount(ctx echo.Context) error {
 	// TODO Implement a way to delete account data.
+	return echo.NewHTTPError(http.StatusNotImplemented, "account deletion not yet implemented")
 }

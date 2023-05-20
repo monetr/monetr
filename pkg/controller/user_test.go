@@ -280,7 +280,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().Equal("malformed json: invalid character 'i' looking for beginning of value")
+			response.JSON().Path("$.error").String().Equal("invalid JSON body")
 		}
 	})
 

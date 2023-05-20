@@ -87,7 +87,7 @@ func TestPostLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("token must be provided")
+		response.JSON().Path("$.error").String().Equal("unauthorized")
 	})
 }
 
@@ -168,7 +168,7 @@ func TestGetLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("token must be provided")
+		response.JSON().Path("$.error").String().Equal("unauthorized")
 	})
 
 	t.Run("precise", func(t *testing.T) {
@@ -337,7 +337,7 @@ func TestPutLink(t *testing.T) {
 			Expect()
 
 		updated.Status(http.StatusUnauthorized)
-		updated.JSON().Path("$.error").String().Equal("token must be provided")
+		updated.JSON().Path("$.error").String().Equal("unauthorized")
 	})
 
 	t.Run("cannot update someone elses", func(t *testing.T) {

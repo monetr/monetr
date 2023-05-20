@@ -7,21 +7,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/stripe_helper"
-	"github.com/monetr/monetr/pkg/swag"
 	"github.com/stripe/stripe-go/v72"
 )
-
-func (c *Controller) handleBilling(p iris.Party) {
-	p.Post("/create_checkout", c.handlePostCreateCheckout)
-	p.Get("/checkout/{checkoutSessionId:string}", c.handleGetAfterCheckout)
-	p.Get("/portal", c.handleGetStripePortal)
-}
 
 // Create Checkout Session
 // @Summary Create Checkout Session
@@ -38,11 +31,14 @@ func (c *Controller) handleBilling(p iris.Party) {
 // @Success 200 {object} swag.CreateCheckoutSessionResponse
 // @Failure 400 {object} ApiError A bad request can be returned if the account already has an active subscription, or an incomplete subscription already created.
 // @Failure 500 {object} ApiError Something went wrong on our end or when communicating with Stripe.
-func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
+func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
+	if !c.configuration.Stripe.IsBillingEnabled() {
+		return c.notFound(ctx, "billing is not enabled")
+	}
+
 	isActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify there is not already an active subscription")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify there is not already an active subscription")
 	}
 
 	// If the customer already has an active subscription we do not want them to try to use this at this time. I don't
@@ -50,25 +46,27 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 	// manage the subscriptions that already exist via the stripe portal. So existing subscriptions should be managed
 	// there instead.
 	if isActive {
-		c.badRequest(ctx, "there is already an active subscription for your account")
-		return
+		return c.badRequest(ctx, "there is already an active subscription for your account")
 	}
 
 	hasSubscription, err := c.paywall.GetHasSubscription(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify that a subscription does not already exist")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify that a subscription does not already exist")
 	}
 
 	if hasSubscription {
-		c.badRequest(ctx, "there is already a subscription associated with your account")
-		return
+		return c.badRequest(ctx, "there is already a subscription associated with your account")
 	}
 
-	var request swag.CreateCheckoutSessionRequest
-	if err := ctx.ReadJSON(&request); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	var request struct {
+		// Specify a specific Stripe Price ID to be used when creating the checkout session. If this is left blank then
+		// the default price will be used for the checkout session.
+		PriceId *string `json:"priceId"`
+		// The path that the user should be returned to if they exit the checkout session.
+		CancelPath *string `json:"cancelPath"`
+	}
+	if err := ctx.Bind(&request); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 	}
 
 	log := c.getLog(ctx)
@@ -84,8 +82,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		plan = *c.configuration.Stripe.InitialPlan
 	} else {
 		if priceId == "" {
-			c.badRequest(ctx, "must provide a price id")
-			return
+			return c.badRequest(ctx, "must provide a price id")
 		}
 
 		{ // Validate the price against our configuration.
@@ -99,8 +96,7 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 			}
 
 			if !foundValidPlan {
-				c.badRequest(ctx, "invalid price Id provided")
-				return
+				return c.badRequest(ctx, "invalid price Id provided")
 			}
 		}
 	}
@@ -114,14 +110,12 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve account")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve account")
 	}
 
 	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve current user details")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve current user details")
 	}
 
 	// Check to see if the account does not already have a stripe customer Id. If they don't have one then we want to
@@ -144,15 +138,13 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 		})
 		if err != nil {
 			log.WithError(err).Error("failed to create stripe customer for checkout")
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create stripe customer")
 		}
 
 		account.StripeCustomerId = &customer.ID
 		if err = c.accounts.UpdateAccount(c.getContext(ctx), account); err != nil {
 			log.WithError(err).Error("failed to update account with new customer Id")
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to update account with new customer Id")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to update account with new customer Id")
 		}
 
 		log.Info("successfully created stripe customer for account")
@@ -234,13 +226,12 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 
 	result, err := c.stripe.NewCheckoutSession(c.getContext(ctx), checkoutParams)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create checkout session")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create checkout session")
 	}
 
-	ctx.JSON(swag.CreateCheckoutSessionResponse{
-		SessionId: result.ID,
-		URL:       result.URL,
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"sessionId": result.ID,
+		"url":       result.URL,
 	})
 }
 
@@ -256,23 +247,24 @@ func (c *Controller) handlePostCreateCheckout(ctx iris.Context) {
 // @Success 200 {object} swag.AfterCheckoutResponse
 // @Failure 400 {object} ApiError Invalid request.
 // @Failure 500 {object} ApiError Something went wrong on our end or when communicating with Stripe.
-func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
-	checkoutSessionId := ctx.Params().GetStringTrim("checkoutSessionId")
+func (c *Controller) handleGetAfterCheckout(ctx echo.Context) error {
+	if !c.configuration.Stripe.IsBillingEnabled() {
+		return c.notFound(ctx, "billing is not enabled")
+	}
+
+	checkoutSessionId := ctx.Param("checkoutSessionId")
 	if checkoutSessionId == "" {
-		c.badRequest(ctx, "checkout session Id is required")
-		return
+		return c.badRequest(ctx, "checkout session Id is required")
 	}
 
 	checkoutSession, err := c.stripe.GetCheckoutSession(c.getContext(ctx), checkoutSessionId)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not retrieve Stripe checkout session")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not retrieve Stripe checkout session")
 	}
 
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve account details")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve account details")
 	}
 
 	stripeCustomerId := ""
@@ -281,7 +273,7 @@ func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
 	}
 
 	if checkoutSession.Customer.ID != stripeCustomerId {
-		crumbs.Warn(c.getContext(ctx), "BUG: The Stripe customer Id for this account does not match the one from the checkout session", "bug", map[string]interface{}{
+		crumbs.IndicateBug(c.getContext(ctx), "BUG: The Stripe customer Id for this account does not match the one from the checkout session", map[string]interface{}{
 			"accountCustomerId":         account.StripeCustomerId,
 			"checkoutSessionCustomerId": checkoutSession.Customer.ID,
 		})
@@ -290,8 +282,7 @@ func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
 	// Now retrieve the subscription status for the latest subscription.
 	subscription, err := c.stripe.GetSubscription(c.getContext(ctx), checkoutSession.Subscription.ID)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve subscription details from stripe")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve subscription details from stripe")
 	}
 
 	validUntil := myownsanity.TimeP(time.Unix(subscription.CurrentPeriodEnd, 0))
@@ -304,19 +295,17 @@ func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
 		validUntil,
 		time.Now(),
 	); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to update subscription state")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to update subscription state")
 	}
 
 	if stripe_helper.SubscriptionIsActive(*subscription) {
-		ctx.JSON(map[string]interface{}{
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"nextUrl":  "/",
 			"isActive": true,
 		})
-		return
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"message":  "Subscription is not active.",
 		"nextUrl":  "/account/subscribe",
 		"isActive": false,
@@ -334,16 +323,14 @@ func (c *Controller) handleGetAfterCheckout(ctx iris.Context) {
 // @Success 200 {array} swag.CreatePortalSessionResponse
 // @Failure 400 {object} ApiError Returned if the customer does not have a subscription, even if that subscription is expired.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) handleGetStripePortal(ctx iris.Context) {
+func (c *Controller) handleGetStripePortal(ctx echo.Context) error {
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify subscription is active")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to verify subscription is active")
 	}
 
 	if !account.HasSubscription() {
-		c.badRequest(ctx, "account does not have a subscription")
-		return
+		return c.badRequest(ctx, "account does not have a subscription")
 	}
 
 	if account.StripeCustomerId == nil {
@@ -352,8 +339,7 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 		me, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
 		if err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to retrieve the current user to create a Stripe customer", "error", nil)
-			c.wrapPgError(ctx, err, "failed to retrieve current user details")
-			return
+			return c.wrapPgError(ctx, err, "failed to retrieve current user details")
 		}
 
 		name := me.Login.FirstName + " " + me.Login.LastName
@@ -369,15 +355,13 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 			},
 		})
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve current user details")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve current user details")
 		}
 
 		account.StripeCustomerId = &customer.ID
 
 		if err = c.accounts.UpdateAccount(c.getContext(ctx), account); err != nil {
-			c.wrapPgError(ctx, err, "failed to store stripe customer Id")
-			return
+			return c.wrapPgError(ctx, err, "failed to store stripe customer Id")
 		}
 	}
 
@@ -393,11 +377,10 @@ func (c *Controller) handleGetStripePortal(ctx iris.Context) {
 
 	session, err := c.stripe.NewPortalSession(c.getContext(ctx), params)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create new stripe portal session")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create new stripe portal session")
 	}
 
-	ctx.JSON(swag.CreatePortalSessionResponse{
-		URL: session.URL,
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"url": session.URL,
 	})
 }

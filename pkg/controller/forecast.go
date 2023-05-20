@@ -3,19 +3,15 @@ package controller
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/forecast"
 	"github.com/monetr/monetr/pkg/models"
 )
 
-func (c *Controller) handleForecasting(p iris.Party) {
-	p.Post("/{bankAccountId:uint64}/forecast/spending", c.postForecastNewSpending)
-	p.Post("/{bankAccountId:uint64}/forecast/next_funding", c.postForecastNextFunding)
-}
-
-func (c *Controller) postForecastNewSpending(ctx iris.Context) {
+func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	var request struct {
 		FundingScheduleId uint64              `json:"fundingScheduleId"`
 		SpendingType      models.SpendingType `json:"spendingType"`
@@ -24,44 +20,36 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 		NextRecurrence    time.Time           `json:"nextRecurrence"`
 		RecurrenceRule    *models.Rule        `json:"recurrenceRule"`
 	}
-	if err := ctx.ReadJSON(&request); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	if request.TargetAmount <= 0 {
-		c.badRequest(ctx, "Target amount must be greater than 0")
-		return
+		return c.badRequest(ctx, "Target amount must be greater than 0")
 	}
 	if request.CurrentAmount < 0 {
-		c.badRequest(ctx, "Current amount cannot be less than 0")
-		return
+		return c.badRequest(ctx, "Current amount cannot be less than 0")
 	}
 	if request.FundingScheduleId == 0 {
-		c.badRequest(ctx, "Funding schedule must be specified")
-		return
+		return c.badRequest(ctx, "Funding schedule must be specified")
 	}
 	if request.SpendingType == models.SpendingTypeExpense && request.RecurrenceRule == nil {
-		c.badRequest(ctx, "Expense spending must have a recurrence rule")
-		return
+		return c.badRequest(ctx, "Expense spending must have a recurrence rule")
 	}
 	if request.SpendingType == models.SpendingTypeGoal && request.RecurrenceRule != nil {
-		c.badRequest(ctx, "Goal spending must not have a recurrence rule")
-		return
+		return c.badRequest(ctx, "Goal spending must not have a recurrence rule")
 	}
 
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "Must specify a valid bank account Id")
-		return
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	fundingSchedules, err := repo.GetFundingSchedules(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not retrieve funding schedules")
-		return
+		return c.wrapPgError(ctx, err, "could not retrieve funding schedules")
 	}
 	log := c.getLog(ctx)
 
@@ -85,62 +73,59 @@ func (c *Controller) postForecastNewSpending(ctx iris.Context) {
 	timezone := c.mustGetTimezone(ctx)
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
-	defer func(ctx iris.Context) {
-		if err := recover(); err != nil {
-			if err == context.DeadlineExceeded {
-				ctx.StatusCode(http.StatusRequestTimeout)
-				ctx.JSON(map[string]interface{}{
-					"error": "timeout forecasting",
-				})
+
+	result, err := func(ctx echo.Context) (result int64, err error) {
+		defer func() {
+			if err = recover().(error); err != nil {
 				return
 			}
-
-			// Repanic
-			panic(err)
-		}
-	}(ctx)
-	ctx.JSON(map[string]interface{}{
-		"estimatedCost": afterForecast.GetAverageContribution(
+		}()
+		result = afterForecast.GetAverageContribution(
 			timeout,
 			request.NextRecurrence.AddDate(0, 0, -1),
 			end,
 			timezone,
-		),
+		)
+		return result, nil
+	}(ctx)
+	if err == context.DeadlineExceeded {
+		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
+	} else if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to forecast")
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"estimatedCost": result,
 	})
 }
 
-func (c *Controller) postForecastNextFunding(ctx iris.Context) {
+func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 	var request struct {
 		FundingScheduleId uint64 `json:"fundingScheduleId"`
 	}
-	if err := ctx.ReadJSON(&request); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	if request.FundingScheduleId == 0 {
-		c.badRequest(ctx, "Funding schedule must be specified")
-		return
+		return c.badRequest(ctx, "Funding schedule must be specified")
 	}
 
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "Must specify a valid bank account Id")
-		return
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, request.FundingScheduleId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not retrieve funding schedule")
-		return
+		return c.wrapPgError(ctx, err, "could not retrieve funding schedule")
 	}
 
 	spending, err := repo.GetSpendingByFundingSchedule(c.getContext(ctx), bankAccountId, request.FundingScheduleId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not retrieve spending for forecast")
-		return
+		return c.wrapPgError(ctx, err, "could not retrieve spending for forecast")
 	}
 	log := c.getLog(ctx)
 
@@ -154,26 +139,27 @@ func (c *Controller) postForecastNextFunding(ctx iris.Context) {
 	timezone := c.mustGetTimezone(ctx)
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
-	defer func(ctx iris.Context) {
-		if err := recover(); err != nil {
-			if err == context.DeadlineExceeded {
-				ctx.StatusCode(http.StatusRequestTimeout)
-				ctx.JSON(map[string]interface{}{
-					"error": "timeout forecasting",
-				})
+	result, err := func(ctx echo.Context) (result int64, err error) {
+		defer func() {
+			if err = recover().(error); err != nil {
 				return
 			}
-
-			// Repanic
-			panic(err)
-		}
-	}(ctx)
-	ctx.JSON(map[string]interface{}{
-		"nextContribution": fundingForecast.GetNextContribution(
+		}()
+		result = fundingForecast.GetNextContribution(
 			timeout,
 			time.Now(),
 			request.FundingScheduleId,
 			timezone,
-		),
+		)
+		return result, nil
+	}(ctx)
+	if err == context.DeadlineExceeded {
+		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
+	} else if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to forecast")
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"nextContribution": result,
 	})
 }

@@ -9,8 +9,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
@@ -68,11 +67,14 @@ func (c PlaidClaims) Valid() error {
 	return vErr
 }
 
-func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
-	verification := ctx.GetHeader("Plaid-Verification")
+func (c *Controller) handlePlaidWebhook(ctx echo.Context) error {
+	if !c.configuration.Plaid.Enabled || !c.configuration.Plaid.WebhooksEnabled {
+		return c.notFound(ctx, "plaid webhooks are not enabled")
+	}
+
+	verification := ctx.Request().Header.Get("Plaid-Verification")
 	if strings.TrimSpace(verification) == "" {
-		c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
-		return
+		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
 	var kid string
@@ -115,28 +117,26 @@ func (c *Controller) handlePlaidWebhook(ctx *context.Context) {
 		return keyFunction.Keyfunc(token)
 	})
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "unauthorized")
 	}
 
 	if !result.Valid {
-		c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
-		return
+		return c.returnError(ctx, http.StatusUnauthorized, "unauthorized")
 	}
 
 	var hook PlaidWebhook
-	if err = ctx.ReadJSON(&hook); err != nil {
-		c.badRequest(ctx, "malformed JSON")
-		return
+	if err = ctx.Bind(&hook); err != nil {
+		return c.badRequest(ctx, "malformed JSON")
 	}
 
 	if err = c.processWebhook(ctx, hook); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to handle webhook")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to handle webhook")
 	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) processWebhook(ctx iris.Context, hook PlaidWebhook) error {
+func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	log := c.log.WithFields(logrus.Fields{
 		"webhookType": hook.WebhookType,
 		"webhookCode": hook.WebhookCode,

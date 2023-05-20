@@ -170,7 +170,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("must specify valid bank account Id")
+		response.JSON().Path("$.error").Equal("must specify a valid bank account Id")
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -187,7 +187,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("malformed JSON: invalid character 'o' in literal null (expecting 'u')")
+		response.JSON().Path("$.error").Equal("invalid JSON body")
 	})
 }
 

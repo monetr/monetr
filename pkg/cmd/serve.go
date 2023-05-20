@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/kataras/iris/v12"
 	"github.com/monetr/monetr/pkg/application"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/billing"
@@ -219,23 +220,23 @@ func RunServer() error {
 		smtpClient,
 	)...)
 
-	idleConnsClosed := make(chan struct{})
-	iris.RegisterOnInterrupt(func() {
-		log.Info("shutting down")
-		timeout := 10 * time.Second
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		// close all hosts.
-		_ = app.Shutdown(ctx)
-		log.Info("http server shutdown complete")
-		close(idleConnsClosed)
-	})
-
 	listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)
+	go func() {
+		if err := app.Start(listenAddress); err != nil && err != http.ErrServerClosed {
+			log.WithError(err).Fatal("failed to start the server")
+		}
+	}()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
 	log.Infof("monetr is running, listening at %s", listenAddress)
-	_ = app.Listen(listenAddress, iris.WithoutInterruptHandler, iris.WithoutServerError(iris.ErrServerClosed))
-
-	<-idleConnsClosed
+	<-quit
+	log.Info("shutting down")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := app.Shutdown(ctx); err != nil {
+		log.WithError(err).Fatal("failed to gracefully shutdown the server")
+	}
+	log.Info("http server shutdown complete")
 
 	return nil
 }
