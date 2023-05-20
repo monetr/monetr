@@ -46,7 +46,7 @@ export default function LoginNew(): JSX.Element {
     );
   }
 
-  async function submit(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
+  async function submit(_values: LoginValues, _helpers: FormikHelpers<LoginValues>) {
     return Promise.resolve();
   }
 

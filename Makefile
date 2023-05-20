@@ -144,17 +144,18 @@ YARN=$(shell which yarn)
 
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
+ifneq ($(OS),linux)
+	$(YARN) install --ignore-platform
+else
 	$(YARN) install
+endif
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
-WEBPACK=$(word 1,$(wildcard $(YARN_BIN)/webpack) $(NODE_MODULES)/.bin/webpack)
-$(WEBPACK): $(NODE_MODULES)
-
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
-$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(WEBPACK) $(SOURCE_MAP_DIR)
+$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(SOURCE_MAP_DIR)
 	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
-	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(WEBPACK) --mode production
+	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(YARN) build --mode production
 	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
 	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
 	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png
