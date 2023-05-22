@@ -12399,11 +12399,6 @@ react-query@3.39.3:
     broadcast-channel "^3.4.1"
     match-sorter "^6.0.2"
 
-react-recaptcha@2.3.10:
-  version "2.3.10"
-  resolved "https://registry.npmjs.org/react-recaptcha/-/react-recaptcha-2.3.10.tgz"
-  integrity sha512-IyanbozsYCuHvTYDuskZTIEcRAMG/sdvAu5b29iQWoC8Kd3Zk9WGCv2oNxh6RfGHvSvgHAyaLjmC6ei/yMsJ7g==
-
 react-refresh-typescript@2.0.8:
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/react-refresh-typescript/-/react-refresh-typescript-2.0.8.tgz#84d086f9da742d7de87ad15824301763bf8135ba"
