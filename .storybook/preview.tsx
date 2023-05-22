@@ -8,6 +8,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 import type { Preview } from '@storybook/react';
 import { IconVariant, SnackbarProvider } from 'notistack';
 
@@ -54,6 +55,9 @@ const preview: Preview = {
 
   },
   parameters: {
+    viewport: {
+      viewports: INITIAL_VIEWPORTS,
+    },
     actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
       matchers: {
