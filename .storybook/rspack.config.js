@@ -1,9 +1,9 @@
-const path = require('path');
+import { resolve } from 'path';
 
-const root = path.resolve(__dirname, '../');
-const uiDir = path.resolve(root, 'ui');
+const root = resolve(__dirname, '../');
+const uiDir = resolve(root, 'ui');
 
-module.exports = ({ config, mode }) => {
+export default ({ config, mode }) => {
   config = {
     ...config,
     devServer: {
