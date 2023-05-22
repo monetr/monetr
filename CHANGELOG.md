@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.14.9](https://github.com/monetr/monetr/compare/v0.14.8...v0.14.9) (2023-05-20)
+
+
+### Features
+
+* **config:** Allow Plaid to be disabled via the config. ([4d3ab57](https://github.com/monetr/monetr/commit/4d3ab57a3d1a36eeb85c4687e34edf40b196808b))
+* **ui:** Adding storybook support, improved webpack. ([#1391](https://github.com/monetr/monetr/issues/1391)) ([a56effa](https://github.com/monetr/monetr/commit/a56effa60c44982cfa79c224b8f35c5cc0cc9033))
+* **ui:** Building out new forgot password screen. ([#1392](https://github.com/monetr/monetr/issues/1392)) ([3c13507](https://github.com/monetr/monetr/commit/3c13507b260d414e50d94ae112816c290044ffc1))
+* **ui:** Use rspack instead of webpack going forward. ([#1393](https://github.com/monetr/monetr/issues/1393)) ([5231979](https://github.com/monetr/monetr/commit/52319798f29ea03ad598639aef58f36102c21741))
+
+
+### Bug Fixes
+
+* **test:** Fixed tests failing following Plaid config change. ([d83bb50](https://github.com/monetr/monetr/commit/d83bb505e2c3a499a4220007f90d89fad02adebf))
+
+
+### Dependencies
+
+* **ui:** update dependency @ebay/nice-modal-react to v1.2.10 ([#1383](https://github.com/monetr/monetr/issues/1383)) ([9a25890](https://github.com/monetr/monetr/commit/9a25890191340d42bfb02e29e8d981a8b4091c5c))
+* **ui:** update react monorepo ([#1377](https://github.com/monetr/monetr/issues/1377)) ([dc241ab](https://github.com/monetr/monetr/commit/dc241abbb3a3dab7dc2a7a4fe906caf617f6fa07))
+
+
+### Documentation
+
+* **spending:** Adding more documentation for the Spending API. ([78b9987](https://github.com/monetr/monetr/commit/78b9987e5204c16530cf5a39dd73119e97c9873e))
+
+
+### Miscellaneous
+
+* **build:** Added `make lite` command to skip notice gen. ([bbdc0df](https://github.com/monetr/monetr/commit/bbdc0df00deadcfa02b3ef4c52d3a90b22ea9af8))
+* **dev:** Removed lingering vault reference for local development. ([192f8a9](https://github.com/monetr/monetr/commit/192f8a9e6344f932aa5d16d7da6e6fe4389a001e))
+
 ## [0.14.8](https://github.com/monetr/monetr/compare/v0.14.7...v0.14.8) (2023-04-26)
 
 
