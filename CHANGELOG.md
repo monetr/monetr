@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.14.10](https://github.com/monetr/monetr/compare/v0.14.9...v0.14.10) (2023-05-22)
+
+
+### Bug Fixes
+
+* **api:** Fixed bug preventing transfers from working. ([c8259d8](https://github.com/monetr/monetr/commit/c8259d82b94cfa59af4b2b29f2610950d6700c7e)), closes [#1397](https://github.com/monetr/monetr/issues/1397)
+* **story:** Added more viewports to storybook. ([a4efc07](https://github.com/monetr/monetr/commit/a4efc07c23a934477253f25431481987a055c4f8)), closes [#1399](https://github.com/monetr/monetr/issues/1399)
+* **story:** Improved storybook rspack config. ([ec87531](https://github.com/monetr/monetr/commit/ec8753135004dc8001e442995f46810353cb83d5))
+* **ui:** Removing old ReCAPTCHA library. ([31cbac1](https://github.com/monetr/monetr/commit/31cbac1a2dafdf149ddb799bfed1af3871587a3a))
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.30.2 ([#1387](https://github.com/monetr/monetr/issues/1387)) ([2bc05b1](https://github.com/monetr/monetr/commit/2bc05b113e5dda67b959fe06fe77c98a57ded111))
+
+
+### Miscellaneous
+
+* **deps:** Cleaned unused deps out of UI, updated notice. ([5d48197](https://github.com/monetr/monetr/commit/5d48197a7c672d7cf9f06c71d38a0c952687c361))
+
 ## [0.14.9](https://github.com/monetr/monetr/compare/v0.14.8...v0.14.9) (2023-05-20)
 
 
