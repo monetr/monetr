@@ -129,8 +129,6 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	switch spending.SpendingType {
 	case models.SpendingTypeExpense:
 		next = spending.NextRecurrence
-
-		return
 		// Once we know that the next recurrence is not in the past we can just store it here;
 		// itll be sanitized and converted to midnight below.
 		if next.Before(time.Now()) {
@@ -282,7 +280,6 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		spendingToUpdate = append(spendingToUpdate, *fromExpense)
 	}
 
-	return
 	// If we are transferring the allocated funds to another spending object then we need to update that object. If we
 	// are transferring it back to "Safe to spend" then we can just subtract the allocation from the source.
 	if transfer.ToSpendingId != nil {
