@@ -27,6 +27,9 @@ export default function MLink(props: MLinkProps): JSX.Element {
     'primary': [
       'text-purple-500',
       'hover:text-purple-600',
+      'rounded',
+      'focus:ring-1',
+      'focus:ring-purple-500',
     ],
     'secondary': [
       'text-gray-400',

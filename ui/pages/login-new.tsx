@@ -1,26 +1,33 @@
 import React from 'react';
 import { Formik, FormikHelpers } from 'formik';
+import { useSnackbar } from 'notistack';
 
 import MButton from 'components/MButton';
+import MCaptcha from 'components/MCaptcha';
 import MForm from 'components/MForm';
 import MLink from 'components/MLink';
 import MLogo from 'components/MLogo';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import useLogin from 'hooks/useLogin';
 
 interface LoginValues {
   email: string;
   password: string;
+  captcha: string | null;
 }
 
 const initialValues: LoginValues = {
   email: '',
   password: '',
+  captcha: null,
 };
 
 export default function LoginNew(): JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
   const config = useAppConfiguration();
+  const login = useLogin();
 
   function ForgotPasswordButton(): JSX.Element {
     // If the application is not configured to allow forgot password then don't show the button.
@@ -46,8 +53,19 @@ export default function LoginNew(): JSX.Element {
     );
   }
 
-  async function submit(_values: LoginValues, _helpers: FormikHelpers<LoginValues>) {
-    return Promise.resolve();
+  async function submit(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
+    helpers.setSubmitting(true);
+
+    return login({
+      captcha: values.captcha,
+      email: values.email,
+      password: values.password,
+    })
+      .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to authenticate.', {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }))
+      .finally(() => helpers.setSubmitting(false));
   }
 
   return (
@@ -76,8 +94,17 @@ export default function LoginNew(): JSX.Element {
           labelDecorator={ ForgotPasswordButton }
           className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
         />
+        <MCaptcha
+          name="captcha"
+          show={ Boolean(config.verifyLogin) }
+        />
         <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
-          <MButton color="primary" variant="solid" role="form" type="submit">
+          <MButton
+            color="primary"
+            variant="solid"
+            role="form"
+            type="submit"
+          >
             Sign In
           </MButton>
         </div>
