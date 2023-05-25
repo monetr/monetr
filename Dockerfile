@@ -1,4 +1,14 @@
-FROM docker.io/library/golang:1.19.4 as dependencies
+FROM docker.io/library/node:18.10 as ui_dependencies
+WORKDIR /build
+COPY package.json .
+COPY yarn.lock .
+RUN yarn install --frozen-lockfile
+
+FROM ui_dependencies AS ui_builder
+COPY . /build
+RUN yarn build:production
+
+FROM docker.io/library/golang:1.19.4 as go_dependencies
 WORKDIR /build
 
 # Build args need to be present in each "FROM"
@@ -9,8 +19,9 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-FROM dependencies AS monetr_builder
+FROM go_dependencies AS monetr_builder
 COPY . /build
+COPY --from=ui_builder /build/pkg/ui/static /build/pkg/ui/static
 
 # Build args need to be present in each "FROM"
 ARG REVISION

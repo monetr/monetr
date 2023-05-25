@@ -1,6 +1,13 @@
 # Ignore everything
 **
 
+!ui
+!.swcrc
+!*.json
+!*.cjs
+!*.js
+!public
+!yarn.lock
 !pkg
 !go.mod
 !go.sum
