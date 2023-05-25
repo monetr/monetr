@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@aspect_bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+
+# Moves the simple icons repo into scope for embedding into the icons package.
+copy_to_directory(
+    name = "simple-icons",
+    srcs = ["@simple-icons//:icons"],
+    out = "sources/simple-icons",
+    include_external_repositories = ["simple-*"],
+    hardlink = "off", # Always make a copy of the file, don't create links. Go can't embed links.
+)
+
+go_library(
+    name = "icons",
+    srcs = [
+        "icons.go",
+        "index.go",
+        "simple_icons.go",
+        "status.go",
+        "util.go",
+    ],
+    embedsrcs = [":simple-icons"],
+    importpath = "github.com/monetr/monetr/pkg/icons",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "icons_test",
+    srcs = ["util_test.go"],
+    embed = [":icons"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

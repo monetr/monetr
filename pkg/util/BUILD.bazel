@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "util",
+    srcs = [
+        "forwarded.go",
+        "midnight.go",
+        "request.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/util",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_google_uuid//:uuid",
+        "@com_github_labstack_echo_v4//:echo",
+        "@com_github_pkg_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "util_test",
+    srcs = ["midnight_test.go"],
+    embed = [":util"],
+    deps = [
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

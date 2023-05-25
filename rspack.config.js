@@ -2,7 +2,9 @@ module.exports = (env, _argv) => {
   const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
 
   const isDevelopment = envName === 'development';
+  const output = process.env.BUILD_PATH || 'pkg/ui/static';
   console.log(`environment: ${envName}`);
+  console.log(`output: ${output}`);
 
   if (!env.PUBLIC_URL) {
     env.PUBLIC_URL = '';
@@ -70,10 +72,10 @@ module.exports = (env, _argv) => {
     },
     mode: isDevelopment ? 'development' : 'production',
     target: 'web',
-    entry: './ui/index.tsx',
+    entry: 'index.tsx',
     output: {
       publicPath: '/',
-      path: 'pkg/ui/static',
+      path: output,
       filename: `assets/scripts/${filename}.js`,
       cssFilename: `assets/styles/${filename}.css`,
       cssChunkFilename: `assets/styles/${filename}.css`,
@@ -86,7 +88,7 @@ module.exports = (env, _argv) => {
         '.ts',
         '.svg',
       ],
-      modules: ['ui', 'node_modules'],
+      modules: ['ui', 'node_modules'], // Cannot be absolute paths otherwise it fucks up in bazel.
     },
     devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
     devServer: {

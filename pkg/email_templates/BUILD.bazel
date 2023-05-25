@@ -1,0 +1,21 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "email_templates",
+    srcs = ["templates.go"],
+    embedsrcs = [
+        "templates/forgot.html",
+        "templates/password_changed.html",
+        "templates/verify.html",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/email_templates",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_pkg_errors//:errors"],
+)
+
+go_test(
+    name = "email_templates_test",
+    srcs = ["templates_test.go"],
+    embed = [":email_templates"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

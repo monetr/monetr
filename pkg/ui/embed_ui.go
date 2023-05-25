@@ -6,5 +6,5 @@ import (
 	"embed"
 )
 
-//go:embed static/**
+//go:embed static/*
 var builtUi embed.FS

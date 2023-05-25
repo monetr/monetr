@@ -1,0 +1,34 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "logging",
+    srcs = [
+        "context_formatter.go",
+        "logger.go",
+        "logrus.go",
+        "pg.go",
+        "stackdriver.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/logging",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/config",
+        "//pkg/internal/ctxkeys",
+        "//pkg/metrics",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_go_pg_pg_v10//:pg",
+        "@com_github_go_pg_pg_v10//orm",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)
+
+go_test(
+    name = "logging_test",
+    srcs = ["stackdriver_test.go"],
+    embed = [":logging"],
+    deps = [
+        "@com_github_sirupsen_logrus//:logrus",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

@@ -21,11 +21,15 @@ values.local.yaml
 Notes.md
 *terraform*
 rest-api.xml
-/build
 pkg/build/NOTICE.md
+!pkg/build/*
 .eslintcache
+.ijwb
+.idea
 package-lock.json
 reports
+bazel-*
+dist
 
 rest-api-junit.xml
 rest-api-tests.json
@@ -34,3 +38,7 @@ Brewfile.lock.json
 .vscode
 docs/developing/api/swagger.*
 .licenses
+
+.aspect
+output
+

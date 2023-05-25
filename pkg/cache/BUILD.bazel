@@ -1,0 +1,36 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "cache",
+    srcs = [
+        "redis.go",
+        "transactions.go",
+        "wrapper.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/cache",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/config",
+        "//pkg/models",
+        "@com_github_alicebob_miniredis_v2//:miniredis",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_gomodule_redigo//redis",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+        "@com_github_vmihailenco_msgpack_v5//:msgpack",
+    ],
+)
+
+go_test(
+    name = "cache_test",
+    srcs = ["wrapper_test.go"],
+    deps = [
+        ":cache",
+        "//pkg/internal/testutils",
+        "@com_github_alicebob_miniredis_v2//:miniredis",
+        "@com_github_gomodule_redigo//redis",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

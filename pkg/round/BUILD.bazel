@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "round",
+    srcs = ["trip.go"],
+    importpath = "github.com/monetr/monetr/pkg/round",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_getsentry_sentry_go//:sentry-go"],
+)

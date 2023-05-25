@@ -1,0 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "crumbs",
+    srcs = [
+        "crumbs.go",
+        "plaid.go",
+        "tracing.go",
+        "user.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/crumbs",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_pkg_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "crumbs_test",
+    srcs = ["tracing_test.go"],
+    embed = [":crumbs"],
+    deps = [
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "communication",
+    srcs = ["comms.go"],
+    importpath = "github.com/monetr/monetr/pkg/communication",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/config",
+        "//pkg/email_templates",
+        "//pkg/mail",
+        "//pkg/models",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)
+
+go_test(
+    name = "communication_test",
+    srcs = ["comms_test.go"],
+    embed = [":communication"],
+    deps = [
+        "//pkg/config",
+        "//pkg/internal/mock_mail",
+        "//pkg/internal/testutils",
+        "//pkg/models",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

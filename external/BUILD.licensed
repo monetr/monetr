@@ -1,0 +1,11 @@
+# vim: set ft=bzl
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_library")
+
+ruby_library(
+    name = "licensed",
+    srcs = glob(["lib/**/*.rb"]),
+    includes = ["lib"],
+    deps = [],
+    visibility = ["//visibility:public"],
+)
+

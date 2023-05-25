@@ -116,11 +116,10 @@ func newSimpleIconsIndex() *simpleIconsIndex {
 		_ = json.Unmarshal(packageJsonBytes, &packageInfo)
 	}
 
-
 	return &simpleIconsIndex{
 		slugs:    icons,
 		searches: nameToSlug,
-		version: packageInfo.Version,
+		version:  packageInfo.Version,
 	}
 }
 

@@ -1,0 +1,62 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "testutils",
+    srcs = [
+        "account.go",
+        "database.go",
+        "email.go",
+        "gomock.go",
+        "log.go",
+        "plaid.go",
+        "redis.go",
+        "seed.go",
+        "strings.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/internal/testutils",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "//pkg/cache",
+        "//pkg/consts",
+        "//pkg/internal/myownsanity",
+        "//pkg/logging",
+        "//pkg/metrics",
+        "//pkg/migrations",
+        "//pkg/models",
+        "@com_github_alicebob_miniredis_v2//:miniredis",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_go_pg_pg_v10//:pg",
+        "@com_github_golang_mock//gomock",
+        "@com_github_gomodule_redigo//redis",
+        "@com_github_google_uuid//:uuid",
+        "@com_github_oneofone_xxhash//:xxhash",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_plaid_plaid_go_v14//plaid",
+        "@com_github_prometheus_client_golang//prometheus",
+        "@com_github_sirupsen_logrus//:logrus",
+        "@com_github_sirupsen_logrus//hooks/test",
+        "@com_github_stretchr_testify//require",
+        "@org_golang_x_crypto//bcrypt",
+    ],
+)
+
+go_test(
+    name = "testutils_test",
+    srcs = [
+        "account_test.go",
+        "database_test.go",
+        "email_test.go",
+        "log_test.go",
+        "redis_test.go",
+        "strings_test.go",
+    ],
+    embed = [":testutils"],
+    env_inherit = [
+      "POSTGRES_HOST",
+      "POSTGRES_DB",
+      "POSTGRES_USER",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_PORT",
+    ],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

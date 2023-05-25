@@ -8,7 +8,7 @@
     "moduleResolution": "node",
     "noImplicitAny": false,
     "noImplicitReturns": true,
-    "outDir": "pkg/ui/static",
+    "outDir": "output",
     "sourceMap": true,
     "strict": false,
     "target": "ES2022"

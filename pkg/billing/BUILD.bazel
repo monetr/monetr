@@ -1,0 +1,44 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "billing",
+    srcs = [
+        "easy.go",
+        "paywall.go",
+        "stripe.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/billing",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/cache",
+        "//pkg/crumbs",
+        "//pkg/internal/myownsanity",
+        "//pkg/models",
+        "//pkg/pubsub",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_go_pg_pg_v10//:pg",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+    ],
+)
+
+go_test(
+    name = "billing_test",
+    srcs = ["paywall_test.go"],
+    embed = [":billing"],
+    env_inherit = [
+      "POSTGRES_HOST",
+      "POSTGRES_DB",
+      "POSTGRES_USER",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_PORT",
+    ],
+    deps = [
+        "//pkg/internal/fixtures",
+        "//pkg/internal/myownsanity",
+        "//pkg/internal/testutils",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+    ],
+)

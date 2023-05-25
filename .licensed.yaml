@@ -1,7 +1,6 @@
 sources:
   npm: true
   go: true
-  git_submodule: true
 
 go:
   GOPATH: ~/go

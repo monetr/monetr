@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "mock_stripe",
+    srcs = [
+        "checkout.go",
+        "customers.go",
+        "errors.go",
+        "ids.go",
+        "parser.go",
+        "payment_methods.go",
+        "prices.go",
+        "products.go",
+        "stripe.go",
+        "subscriptions.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/internal/mock_stripe",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "//pkg/internal/mock_http_helper",
+        "//pkg/internal/testutils",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+    ],
+)
+
+go_test(
+    name = "mock_stripe_test",
+    srcs = [
+        "checkout_test.go",
+        "parser_test.go",
+    ],
+    embed = [":mock_stripe"],
+    deps = [
+        "@com_github_jarcoal_httpmock//:httpmock",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+    ],
+)

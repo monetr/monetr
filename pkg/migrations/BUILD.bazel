@@ -1,0 +1,25 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "migrations",
+    srcs = [
+        "migrations.go",
+        "schema.go",
+    ],
+    embedsrcs = glob(['schema/*.sql']),
+    importpath = "github.com/monetr/monetr/pkg/migrations",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/migrations/functional",
+        "@com_github_go_pg_migrations_v8//:migrations",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)
+
+go_test(
+    name = "migrations_test",
+    srcs = ["schema_test.go"],
+    embed = [":migrations"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

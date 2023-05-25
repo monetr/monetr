@@ -1,4 +1,5 @@
 //go:build icons
+
 package icons
 
 func init() {

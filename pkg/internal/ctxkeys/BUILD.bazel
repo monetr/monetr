@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "ctxkeys",
+    srcs = ["keys.go"],
+    importpath = "github.com/monetr/monetr/pkg/internal/ctxkeys",
+    visibility = ["//pkg:__subpackages__"],
+    deps = ["@com_github_sirupsen_logrus//:logrus"],
+)
+
+go_test(
+    name = "ctxkeys_test",
+    srcs = ["keys_test.go"],
+    embed = [":ctxkeys"],
+    deps = [
+        "@com_github_sirupsen_logrus//:logrus",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

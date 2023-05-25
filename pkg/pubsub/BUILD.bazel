@@ -1,0 +1,32 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "pubsub",
+    srcs = ["pubsub.go"],
+    importpath = "github.com/monetr/monetr/pkg/pubsub",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_go_pg_pg_v10//:pg",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)
+
+go_test(
+    name = "pubsub_test",
+    srcs = ["pubsub_test.go"],
+    embed = [":pubsub"],
+    env_inherit = [
+      "POSTGRES_HOST",
+      "POSTGRES_DB",
+      "POSTGRES_USER",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_PORT",
+    ],
+    deps = [
+        "//pkg/internal/testutils",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

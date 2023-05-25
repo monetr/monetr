@@ -1,0 +1,43 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "forecast",
+    srcs = [
+        "forecast.go",
+        "funding.go",
+        "spending.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/forecast",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/crumbs",
+        "//pkg/internal/myownsanity",
+        "//pkg/models",
+        "//pkg/util",
+        "@com_github_ahmetb_go_linq_v3//:go-linq",
+        "@com_github_sirupsen_logrus//:logrus",
+        "@com_github_teambition_rrule_go//:rrule-go",
+    ],
+)
+
+go_test(
+    name = "forecast_test",
+    srcs = [
+        "forecast_test.go",
+        "funding_test.go",
+        "main_test.go",
+        "spending_test.go",
+    ],
+    embed = [":forecast"],
+    embedsrcs = [
+        "fixtures/elliots-funding-20230705.json",
+        "fixtures/elliots-result-20230705.json",
+        "fixtures/elliots-spending-20230705.json",
+    ],
+    deps = [
+        "//pkg/internal/testutils",
+        "//pkg/models",
+        "//pkg/util",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "certhelper",
+    srcs = ["helper.go"],
+    importpath = "github.com/monetr/monetr/pkg/certhelper",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_fsnotify_fsnotify//:fsnotify",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)
+
+go_test(
+    name = "certhelper_test",
+    srcs = ["helper_test.go"],
+    embed = [":certhelper"],
+    deps = [
+        "//pkg/internal/testutils",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

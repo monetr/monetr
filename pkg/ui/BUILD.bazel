@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@aspect_bazel_lib//lib:copy_directory.bzl", "copy_directory")
+
+copy_directory(
+    name = "ui_assets",
+    src = "//:ui",
+    out = "static",
+    hardlink = "off", # Always make a copy of the file, don't create links. Go can't embed links.
+)
+
+go_library(
+    name = "ui",
+    srcs = [
+        "csp.go",
+        "embed_ui.go",
+        "filesystem.go",
+        "permissions.go",
+        "routes.go",
+        "ui_server.go",
+    ],
+    embedsrcs = [":ui_assets"],
+    importpath = "github.com/monetr/monetr/pkg/ui",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/application",
+        "//pkg/config",
+        "@com_github_labstack_echo_v4//:echo",
+        "@com_github_mileusna_useragent//:useragent",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)

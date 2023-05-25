@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "mock_http_helper",
+    srcs = ["responder.go"],
+    importpath = "github.com/monetr/monetr/pkg/internal/mock_http_helper",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "@com_github_jarcoal_httpmock//:httpmock",
+        "@com_github_stretchr_testify//require",
+    ],
+)
+
+go_test(
+    name = "mock_http_helper_test",
+    srcs = ["responder_test.go"],
+    embed = [":mock_http_helper"],
+    deps = [
+        "@com_github_jarcoal_httpmock//:httpmock",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

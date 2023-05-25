@@ -1,0 +1,37 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "mock_plaid",
+    srcs = [
+        "accounts.go",
+        "authentication.go",
+        "link.go",
+        "mock_exchange.go",
+        "path.go",
+        "plaid.go",
+        "transactions.go",
+        "verification.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/internal/mock_plaid",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "//pkg/consts",
+        "//pkg/internal/mock_http_helper",
+        "//pkg/internal/myownsanity",
+        "//pkg/internal/testutils",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_plaid_plaid_go_v14//plaid",
+        "@com_github_stretchr_testify//require",
+    ],
+)
+
+go_test(
+    name = "mock_plaid_test",
+    srcs = [
+        "accounts_test.go",
+        "plaid_test.go",
+        "transactions_test.go",
+    ],
+    embed = [":mock_plaid"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)

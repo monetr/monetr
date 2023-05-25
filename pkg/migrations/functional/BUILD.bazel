@@ -1,0 +1,12 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "functional",
+    srcs = [
+        "2021050999_TestGoMigration.go",
+        "all.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/migrations/functional",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_go_pg_migrations_v8//:migrations"],
+)

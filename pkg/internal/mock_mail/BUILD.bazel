@@ -1,0 +1,22 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "mock_mail",
+    srcs = ["mail.go"],
+    importpath = "github.com/monetr/monetr/pkg/internal/mock_mail",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "//pkg/mail",
+        "@com_github_pkg_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "mock_mail_test",
+    srcs = ["mail_test.go"],
+    embed = [":mock_mail"],
+    deps = [
+        "//pkg/mail",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

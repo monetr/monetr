@@ -1,0 +1,41 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "stripe_helper",
+    srcs = [
+        "cache.go",
+        "stripe.go",
+        "subscriptions.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/stripe_helper",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/cache",
+        "//pkg/crumbs",
+        "//pkg/round",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+        "@com_github_stripe_stripe_go_v72//client",
+    ],
+)
+
+go_test(
+    name = "stripe_helper_test",
+    srcs = [
+        "main_test.go",
+        "stripe_test.go",
+        "subscriptions_test.go",
+    ],
+    embed = [":stripe_helper"],
+    deps = [
+        "//pkg/internal/mock_stripe",
+        "//pkg/internal/testutils",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_jarcoal_httpmock//:httpmock",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+    ],
+)

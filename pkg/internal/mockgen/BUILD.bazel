@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "mockgen",
+    srcs = [
+        "jobs.go",
+        "key_management.go",
+        "platypus.go",
+        "platypus_client.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/internal/mockgen",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "//pkg/models",
+        "//pkg/platypus",
+        "@com_github_golang_mock//gomock",
+        "@com_github_plaid_plaid_go_v14//plaid",
+    ],
+)

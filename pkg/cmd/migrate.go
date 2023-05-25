@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/config"
@@ -114,11 +115,34 @@ var (
 func getDatabaseCommandConfiguration() *pg.Options {
 	configuration := config.LoadConfiguration()
 
-	address := myownsanity.CoalesceStrings(postgresAddress, configuration.PostgreSQL.Address, "localhost")
-	port := myownsanity.CoalesceInts(postgresPort, configuration.PostgreSQL.Port, 5432)
-	username := myownsanity.CoalesceStrings(postgresUsername, configuration.PostgreSQL.Username, "postgres")
-	password := myownsanity.CoalesceStrings(postgresPassword, configuration.PostgreSQL.Password)
-	database := myownsanity.CoalesceStrings(postgresDatabase, configuration.PostgreSQL.Database, "postgres")
+	address := myownsanity.CoalesceStrings(
+		postgresAddress,
+		configuration.PostgreSQL.Address,
+		os.Getenv("POSTGRES_HOST"),
+		"localhost",
+	)
+	port := myownsanity.CoalesceInts(
+		postgresPort,
+		configuration.PostgreSQL.Port,
+		5432,
+	)
+	username := myownsanity.CoalesceStrings(
+		postgresUsername,
+		configuration.PostgreSQL.Username,
+		os.Getenv("POSTGRES_USER"),
+		"postgres",
+	)
+	password := myownsanity.CoalesceStrings(
+		postgresPassword,
+		configuration.PostgreSQL.Password,
+		os.Getenv("POSTGRES_PASSWORD"),
+	)
+	database := myownsanity.CoalesceStrings(
+		postgresDatabase,
+		configuration.PostgreSQL.Database,
+		os.Getenv("POSTGRES_DB"),
+		"postgres",
+	)
 
 	options := &pg.Options{
 		Addr:            fmt.Sprintf("%s:%d", address, port),

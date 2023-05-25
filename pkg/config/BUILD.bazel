@@ -1,0 +1,26 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "config",
+    srcs = [
+        "billing.go",
+        "configuration.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/config",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/feature",
+        "@com_github_plaid_plaid_go_v14//plaid",
+        "@com_github_spf13_viper//:viper",
+    ],
+)
+
+go_test(
+    name = "config_test",
+    srcs = ["configuration_test.go"],
+    deps = [
+        ":config",
+        "@com_github_spf13_viper//:viper",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

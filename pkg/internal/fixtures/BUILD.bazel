@@ -1,0 +1,55 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "fixtures",
+    srcs = [
+        "bank_account.go",
+        "funding_schedules.go",
+        "link.go",
+        "login.go",
+        "transactions.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/internal/fixtures",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "//pkg/consts",
+        "//pkg/internal/mock_stripe",
+        "//pkg/internal/myownsanity",
+        "//pkg/internal/testutils",
+        "//pkg/models",
+        "//pkg/repository",
+        "//pkg/util",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_stretchr_testify//require",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+        "@com_github_xlzd_gotp//:gotp",
+    ],
+)
+
+go_test(
+    name = "fixtures_test",
+    srcs = [
+        "bank_account_test.go",
+        "funding_schedules_test.go",
+        "link_test.go",
+        "login_test.go",
+        "transactions_test.go",
+    ],
+    embed = [":fixtures"],
+    env_inherit = [
+      "POSTGRES_HOST",
+      "POSTGRES_DB",
+      "POSTGRES_USER",
+      "POSTGRES_PASSWORD",
+      "POSTGRES_PORT",
+    ],
+    deps = [
+        "//pkg/internal/testutils",
+        "//pkg/models",
+        "//pkg/repository",
+        "//pkg/util",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

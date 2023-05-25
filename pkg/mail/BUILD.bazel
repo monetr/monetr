@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "mail",
+    srcs = [
+        "smtp.go",
+        "smtp_auth.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/mail",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/config",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)

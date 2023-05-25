@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "build",
+    srcs = ["variables.go"],
+    embedsrcs = glob(["*.md"]),
+    importpath = "github.com/monetr/monetr/pkg/build",
+    visibility = ["//visibility:public"],
+)

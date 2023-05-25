@@ -1,0 +1,2 @@
+build --stamp --workspace_status_command "scripts/workplace_status.sh"
+test --test_output=errors --stamp --workspace_status_command "scripts/workplace_status.sh"

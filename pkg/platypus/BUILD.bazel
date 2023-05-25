@@ -1,0 +1,58 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "platypus",
+    srcs = [
+        "account.go",
+        "client.go",
+        "institutions.go",
+        "platypus.go",
+        "sync.go",
+        "token.go",
+        "transaction.go",
+        "webhook.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/platypus",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/cache",
+        "//pkg/config",
+        "//pkg/consts",
+        "//pkg/crumbs",
+        "//pkg/internal/myownsanity",
+        "//pkg/models",
+        "//pkg/repository",
+        "//pkg/secrets",
+        "//pkg/util",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_micahparks_keyfunc//:keyfunc",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_plaid_plaid_go_v14//plaid",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)
+
+go_test(
+    name = "platypus_test",
+    srcs = [
+        "account_test.go",
+        "client_test.go",
+        "platypus_test.go",
+        "transaction_test.go",
+        "webhook_test.go",
+    ],
+    embed = [":platypus"],
+    deps = [
+        "//pkg/config",
+        "//pkg/internal/mock_plaid",
+        "//pkg/internal/myownsanity",
+        "//pkg/internal/testutils",
+        "//pkg/models",
+        "//pkg/repository",
+        "//pkg/secrets",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_jarcoal_httpmock//:httpmock",
+        "@com_github_plaid_plaid_go_v14//plaid",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

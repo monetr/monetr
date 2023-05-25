@@ -1,0 +1,24 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "captcha",
+    srcs = ["captcha.go"],
+    importpath = "github.com/monetr/monetr/pkg/captcha",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_pkg_errors//:errors",
+        "@in_gopkg_ezzarghili_recaptcha_go_v4//:recaptcha-go_v4",
+    ],
+)
+
+go_test(
+    name = "captcha_test",
+    srcs = ["captcha_test.go"],
+    embed = [":captcha"],
+    deps = [
+        "//pkg/internal/mock_http_helper",
+        "@com_github_jarcoal_httpmock//:httpmock",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

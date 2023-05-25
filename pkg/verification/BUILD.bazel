@@ -1,0 +1,35 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "verification",
+    srcs = [
+        "token.go",
+        "verification.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/verification",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/models",
+        "//pkg/repository",
+        "@com_github_form3tech_oss_jwt_go//:jwt-go",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_sirupsen_logrus//:logrus",
+    ],
+)
+
+go_test(
+    name = "verification_test",
+    srcs = [
+        "token_test.go",
+        "verification_test.go",
+    ],
+    embed = [":verification"],
+    deps = [
+        "//pkg/internal/testutils",
+        "//pkg/repository",
+        "@com_github_brianvoe_gofakeit_v6//:gofakeit",
+        "@com_github_form3tech_oss_jwt_go//:jwt-go",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

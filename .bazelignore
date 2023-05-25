@@ -1,0 +1,5 @@
+node_modules
+pkg/ui/static
+!pkg/ui/static/README.md
+pkg/icons/sources
+!pkg/icons/sources/README.md

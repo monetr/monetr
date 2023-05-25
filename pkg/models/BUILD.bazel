@@ -1,0 +1,62 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "models",
+    srcs = [
+        "account.go",
+        "all.go",
+        "bank_account.go",
+        "beta.go",
+        "funding_schedule.go",
+        "job.go",
+        "link.go",
+        "link.strings.go",
+        "link_type.go",
+        "link_type.strings.go",
+        "login.go",
+        "phone_number.go",
+        "plaid_link.go",
+        "plaid_sync.go",
+        "plaid_tokens.go",
+        "rule.go",
+        "settings.go",
+        "spending.go",
+        "transaction.go",
+        "user.go",
+    ],
+    importpath = "github.com/monetr/monetr/pkg/models",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/crumbs",
+        "//pkg/feature",
+        "//pkg/internal/myownsanity",
+        "//pkg/util",
+        "@com_github_getsentry_sentry_go//:sentry-go",
+        "@com_github_go_pg_pg_v10//:pg",
+        "@com_github_go_pg_pg_v10//types",
+        "@com_github_nleeper_goment//:goment",
+        "@com_github_nyaruka_phonenumbers//:phonenumbers",
+        "@com_github_pkg_errors//:errors",
+        "@com_github_stripe_stripe_go_v72//:stripe-go",
+        "@com_github_teambition_rrule_go//:rrule-go",
+        "@com_github_xlzd_gotp//:gotp",
+    ],
+)
+
+go_test(
+    name = "models_test",
+    srcs = [
+        "funding_schedule_test.go",
+        "phone_number_test.go",
+        "rule_test.go",
+        "spending_test.go",
+    ],
+    embed = [":models"],
+    deps = [
+        "//pkg/internal/testutils",
+        "//pkg/util",
+        "@com_github_nyaruka_phonenumbers//:phonenumbers",
+        "@com_github_stretchr_testify//assert",
+        "@com_github_stretchr_testify//require",
+    ],
+)

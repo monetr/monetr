@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "mock_secrets",
+    srcs = ["secrets.go"],
+    importpath = "github.com/monetr/monetr/pkg/internal/mock_secrets",
+    visibility = ["//pkg:__subpackages__"],
+    deps = [
+        "//pkg/secrets",
+        "@com_github_pkg_errors//:errors",
+    ],
+)
+
+go_test(
+    name = "mock_secrets_test",
+    srcs = ["secrets_test.go"],
+    embed = [":mock_secrets"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)
