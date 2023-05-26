@@ -74,9 +74,11 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
 
-	result, err := func(ctx echo.Context) (result int64, err error) {
+	result, err := func() (result int64, err error) {
 		defer func() {
-			if err = recover().(error); err != nil {
+			switch panicResult := recover().(type) {
+			case error:
+				err = panicResult
 				return
 			}
 		}()
@@ -87,7 +89,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 			timezone,
 		)
 		return result, nil
-	}(ctx)
+	}()
 	if err == context.DeadlineExceeded {
 		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
 	} else if err != nil {
@@ -139,9 +141,11 @@ func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 	timezone := c.mustGetTimezone(ctx)
 	timeout, cancel := context.WithTimeout(c.getContext(ctx), 25*time.Second)
 	defer cancel()
-	result, err := func(ctx echo.Context) (result int64, err error) {
+	result, err := func() (result int64, err error) {
 		defer func() {
-			if err = recover().(error); err != nil {
+			switch panicResult := recover().(type) {
+			case error:
+				err = panicResult
 				return
 			}
 		}()
@@ -152,7 +156,7 @@ func (c *Controller) postForecastNextFunding(ctx echo.Context) error {
 			timezone,
 		)
 		return result, nil
-	}(ctx)
+	}()
 	if err == context.DeadlineExceeded {
 		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
 	} else if err != nil {
