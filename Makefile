@@ -61,7 +61,7 @@ else
 	OS ?= $(shell uname -s | tr A-Z a-z)
     UNAME_P := $(shell uname -p)
     ifeq ($(UNAME_P),x86_64)
-		ARCH=amd64make
+		ARCH=amd64
     endif
     ifneq ($(filter %86,$(UNAME_P)),)
     	# This can happen on macOS with Intel CPUs, we get an i386 arch.
