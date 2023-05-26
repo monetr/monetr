@@ -3,48 +3,98 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
+	"io/ioutil"
 	"net/http"
+	"path"
+	"strings"
 	"time"
 
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/router"
+	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 )
 
 const (
 	EmbeddedUI = true
+	indexFile  = "/index.html"
 )
 
-func (c *UIController) RegisterRoutes(app *iris.Application) {
-	app.PartyFunc("/", func(p router.Party) {
-		p.Any("/api/{p:path}", func(ctx iris.Context) {
-			ctx.Next()
-			ctx.StatusCode(http.StatusNotFound)
-			return
+func (c *UIController) fixFilesystemError(err error) error {
+	unwrappedError := errors.Unwrap(err)
+	switch unwrappedError {
+	case fs.ErrNotExist, fs.ErrInvalid:
+		return unwrappedError
+	default:
+		return err
+	}
+}
+
+func (c *UIController) RegisterRoutes(app *echo.Echo) {
+	app.GET("/*", func(ctx echo.Context) error {
+		ctx.Response().Header().Set("X-Frame-Options", "DENY")
+		ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
+		ctx.Response().Header().Set("Referrer-Policy", "same-origin")
+		ctx.Response().Header().Set("Permissions-Policy", "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(), gamepad=(), speaker-selection=()")
+		c.ContentSecurityPolicyMiddleware(ctx)
+
+		requestedPath := ctx.Request().URL.Path
+
+		log := c.log.WithFields(logrus.Fields{
+			"path":            requestedPath,
+			"ext":             path.Ext(requestedPath),
+			"resolvedToIndex": false,
 		})
 
-		p.Get("/config.json", func(ctx iris.Context) {
-			ctx.JSONP(map[string]interface{}{
-				"apiUrl": "/api",
-			})
-		})
-
-		app.Get("/{p:path}", func(ctx iris.Context) {
+		resolvedToIndex := false
+		content, err := c.filesystem.Open(requestedPath)
+		switch c.fixFilesystemError(err) {
+		case fs.ErrNotExist, fs.ErrInvalid:
+			content, err = c.filesystem.Open(indexFile)
+			resolvedToIndex = true
+			log = log.WithField("resolvedToIndex", true)
+			ctx.Response().Header().Set("Cache-Control", "no-cache")
+			if err != nil {
+				panic("could not find index file")
+			}
+		case nil:
 			if c.configuration.Server.UICacheHours > 0 {
 				cacheExpiration := time.Now().
 					Add(time.Duration(c.configuration.Server.UICacheHours) * time.Hour).
 					Truncate(time.Hour)
-				seconds := int(cacheExpiration.Sub(time.Now()).Seconds())
-				ctx.Header("Expires", cacheExpiration.Format(http.TimeFormat))
-				ctx.Header("Cache-Control", fmt.Sprintf("max-age=%d", seconds))
+				seconds := int(time.Until(cacheExpiration).Seconds())
+				ctx.Response().Header().Set("Expires", cacheExpiration.Format(http.TimeFormat))
+				ctx.Response().Header().Set("Cache-Control", fmt.Sprintf("max-age=%d", seconds))
 			}
+		default:
+			log.WithError(err).Error("failed to read the embedded file specified")
+			return ctx.NoContent(http.StatusInternalServerError)
+		}
 
-			ctx.Header("X-Frame-Options", "DENY")
-			ctx.Header("X-Content-Type-Options", "nosniff")
-			ctx.Header("Referrer-Policy", "same-origin")
-			ctx.Header("Permissions-Policy", "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(), gamepad=(), speaker-selection=()")
-			c.ContentSecurityPolicyMiddleware(ctx)
-			c.fileServer(ctx)
-		})
+		data, err := ioutil.ReadAll(content)
+		if err != nil {
+			log.WithError(err).Error("failed to read content from embedded file")
+			return ctx.NoContent(http.StatusInternalServerError)
+		}
+
+		if resolvedToIndex {
+			log.WithField("contentType", "text/html").Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
+			return ctx.HTMLBlob(http.StatusOK, data)
+		}
+
+		contentType := "text/plain"
+		switch strings.ToLower(path.Ext(requestedPath)) {
+		case ".json", "json":
+			contentType = "application/json"
+		case ".js", "js":
+			contentType = "text/javascript"
+		case ".css", "css":
+			contentType = "text/css"
+		default:
+			contentType = http.DetectContentType(data)
+		}
+		log.WithField("contentType", contentType).Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
+		return ctx.Blob(http.StatusOK, contentType, data)
 	})
 }

@@ -3,22 +3,14 @@ package controller
 import (
 	"math"
 	"net/http"
+	"strconv"
 	"strings"
 
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/sirupsen/logrus"
 )
-
-func (c *Controller) handleTransactions(p iris.Party) {
-	p.Get("/{bankAccountId:uint64}/transactions", c.getTransactions)
-	p.Get("/{bankAccountId:uint64/transactions/spending/{spendingId:uint64}", c.getTransactionsForSpending)
-	p.Post("/{bankAccountId:uint64}/transactions", c.postTransactions)
-	p.Put("/{bankAccountId:uint64}/transactions/{transactionId:uint64}", c.putTransactions)
-	p.Delete("/{bankAccountId:uint64}/transactions/{transactionId:uint64}", c.deleteTransactions)
-}
 
 // List Transactions
 // @Summary List Transactions
@@ -37,27 +29,25 @@ func (c *Controller) handleTransactions(p iris.Party) {
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getTransactions(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) getTransactions(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	limit := ctx.URLParamIntDefault("limit", 25)
-	offset := ctx.URLParamIntDefault("offset", 0)
+	ctx.QueryParam("limit")
+
+	limit := urlParamIntDefault(ctx, "limit", 25)
+	offset := urlParamIntDefault(ctx, "offset", 0)
 
 	if limit < 1 {
-		c.badRequest(ctx, "limit must be at least 1")
-		return
+		return c.badRequest(ctx, "limit must be at least 1")
 	} else if limit > 100 {
-		c.badRequest(ctx, "limit cannot be greater than 100")
-		return
+		return c.badRequest(ctx, "limit cannot be greater than 100")
 	}
 
 	if offset < 0 {
-		c.badRequest(ctx, "offset cannot be less than 0")
-		return
+		return c.badRequest(ctx, "offset cannot be less than 0")
 	}
 
 	// Only let a maximum of 100 transactions be requested at a time.
@@ -67,18 +57,16 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 
 	transactions, err := repo.GetTransactions(c.getContext(ctx), bankAccountId, limit, offset)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve transactions")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve transactions")
 	}
 
 	// If transactions are null or empty then make sure what we return is an empty array. Otherwise we can accidentally
 	// return null.
 	if len(transactions) == 0 {
-		ctx.JSON(make([]models.Transaction, 0))
-		return
+		return ctx.JSON(http.StatusOK, make([]models.Transaction, 0))
 	}
 
-	ctx.JSON(transactions)
+	return ctx.JSON(http.StatusOK, transactions)
 }
 
 // List Transactions For Spending
@@ -98,81 +86,72 @@ func (c *Controller) getTransactions(ctx *context.Context) {
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 404 {object} SpendingNotFoundError Invalid Spending ID provided.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getTransactionsForSpending(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) getTransactionsForSpending(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
-	if spendingId == 0 {
-		c.badRequest(ctx, "must specify a valid spending Id")
-		return
+	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
+	if err != nil || spendingId == 0 {
+		return c.badRequest(ctx, "must specify a valid spending Id")
 	}
 
-	limit := ctx.URLParamIntDefault("limit", 5)
-	offset := ctx.URLParamIntDefault("offset", 0)
+	limit := urlParamIntDefault(ctx, "limit", 25)
+	offset := urlParamIntDefault(ctx, "offset", 0)
 
 	if limit < 1 {
-		c.badRequest(ctx, "limit must be at least 1")
-		return
+		return c.badRequest(ctx, "limit must be at least 1")
 	} else if limit > 100 {
-		c.badRequest(ctx, "limit cannot be greater than 100")
-		return
+		return c.badRequest(ctx, "limit cannot be greater than 100")
 	}
 
 	if offset < 0 {
-		c.badRequest(ctx, "offset cannot be less than 0")
-		return
+		return c.badRequest(ctx, "offset cannot be less than 0")
 	}
+
+	// Only let a maximum of 100 transactions be requested at a time.
+	limit = int(math.Min(100, float64(limit)))
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	ok, err := repo.GetSpendingExists(c.getContext(ctx), bankAccountId, spendingId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to verify spending exists")
-		return
+		return c.wrapPgError(ctx, err, "failed to verify spending exists")
 	}
 
 	if !ok {
-		c.returnError(ctx, http.StatusNotFound, "spending object does not exist")
-		return
+		return c.returnError(ctx, http.StatusNotFound, "spending object does not exist")
 	}
 
 	transactions, err := repo.GetTransactionsForSpending(c.getContext(ctx), bankAccountId, spendingId, limit, offset)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve transactions for spending")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve transactions for spending")
 	}
 
-	ctx.JSON(transactions)
+	return ctx.JSON(http.StatusOK, transactions)
 }
 
-func (c *Controller) postTransactions(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) postTransactions(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to validate if link is manual")
-		return
+		return c.wrapPgError(ctx, err, "failed to validate if link is manual")
 	}
 
 	if !isManual {
-		c.badRequest(ctx, "cannot create transactions for non-manual links")
-		return
+		return c.badRequest(ctx, "cannot create transactions for non-manual links")
 	}
 
 	var transaction models.Transaction
-	if err = ctx.ReadJSON(&transaction); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err = ctx.Bind(&transaction); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	transaction.BankAccountId = bankAccountId
@@ -181,39 +160,33 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 	transaction.OriginalName = transaction.Name
 
 	if transaction.Name == "" {
-		c.badRequest(ctx, "transaction must have a name")
-		return
+		return c.badRequest(ctx, "transaction must have a name")
 	}
 
 	if transaction.Amount <= 0 {
-		c.badRequest(ctx, "transaction amount must be greater than 0")
-		return
+		return c.badRequest(ctx, "transaction amount must be greater than 0")
 	}
 
 	var updatedSpending *models.Spending
 	if transaction.SpendingId != nil && *transaction.SpendingId > 0 {
 		updatedSpending, err = repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transaction.SpendingId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "could not get spending provided for transaction")
-			return
+			return c.wrapPgError(ctx, err, "could not get spending provided for transaction")
 		}
 
 		if err = repo.AddExpenseToTransaction(c.getContext(ctx), &transaction, updatedSpending); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to add expense to transaction")
 		}
 
 		if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []models.Spending{
 			*updatedSpending,
 		}); err != nil {
-			c.wrapPgError(ctx, err, "failed to update spending for transaction")
-			return
+			return c.wrapPgError(ctx, err, "failed to update spending for transaction")
 		}
 	}
 
 	if err = repo.CreateTransaction(c.getContext(ctx), bankAccountId, &transaction); err != nil {
-		c.wrapPgError(ctx, err, "could not create transaction")
-		return
+		return c.wrapPgError(ctx, err, "could not create transaction")
 	}
 
 	returnedObject := map[string]interface{}{
@@ -226,7 +199,7 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 		returnedObject["spending"] = *updatedSpending
 	}
 
-	ctx.JSON(returnedObject)
+	return ctx.JSON(http.StatusOK, returnedObject)
 }
 
 // Update Transaction
@@ -246,23 +219,20 @@ func (c *Controller) postTransactions(ctx *context.Context) {
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 404 {object} ApiError Specified transaction does not exist.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) putTransactions(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) putTransactions(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	transactionId := ctx.Params().GetUint64Default("transactionId", 0)
-	if transactionId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify a valid transaction Id")
-		return
+	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
+	if err != nil || transactionId == 0 {
+		return c.badRequest(ctx, "must specify a valid transaction Id")
 	}
 
 	var transaction models.Transaction
-	if err := ctx.ReadJSON(&transaction); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(&transaction); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	transaction.TransactionId = transactionId
@@ -272,19 +242,16 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 
 	isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to validate if link is manual")
-		return
+		return c.wrapPgError(ctx, err, "failed to validate if link is manual")
 	}
 
 	existingTransaction, err := repo.GetTransaction(c.getContext(ctx), bankAccountId, transactionId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve existing transaction for update")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve existing transaction for update")
 	}
 
 	if transaction.IsAddition() && transaction.SpendingId != nil {
-		c.badRequest(ctx, "cannot specify a spent from on a deposit")
-		return
+		return c.badRequest(ctx, "cannot specify a spent from on a deposit")
 	}
 
 	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId
@@ -292,13 +259,11 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 	if !isManual {
 		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
 		if existingTransaction.Amount != transaction.Amount {
-			c.returnError(ctx, http.StatusBadRequest, "cannot change transaction amount on non-manual links")
-			return
+			return c.badRequest(ctx, "cannot change transaction amount on non-manual links")
 		}
 
 		if existingTransaction.IsPending != transaction.IsPending {
-			c.badRequest(ctx, "cannot change transaction pending state on non-manual links")
-			return
+			return c.badRequest(ctx, "cannot change transaction pending state on non-manual links")
 		}
 
 		if !existingTransaction.Date.Equal(transaction.Date) {
@@ -306,8 +271,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 				"existingDate": existingTransaction.Date,
 				"newDate":      transaction.Date,
 			}).Warn("cannot change transaction date on non-manual links")
-			c.badRequest(ctx, "cannot change transaction date on non-manual links")
-			return
+			return c.badRequest(ctx, "cannot change transaction date on non-manual links")
 		}
 
 		if !myownsanity.TimesPEqual(existingTransaction.AuthorizedDate, transaction.AuthorizedDate) {
@@ -315,8 +279,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 				"existingAuthorizedDate": existingTransaction.AuthorizedDate,
 				"newAuthorizedDate":      transaction.AuthorizedDate,
 			}).Warn("cannot change transaction authorized date on non-manual links")
-			c.badRequest(ctx, "cannot change transaction authorized date on non-manual links")
-			return
+			return c.badRequest(ctx, "cannot change transaction authorized date on non-manual links")
 		}
 
 		transaction.OriginalName = existingTransaction.OriginalName
@@ -326,8 +289,7 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 
 	updatedExpenses, err := repo.ProcessTransactionSpentFrom(c.getContext(ctx), bankAccountId, &transaction, existingTransaction)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to process expense changes")
-		return
+		return c.wrapPgError(ctx, err, "failed to process expense changes")
 	}
 
 	// TODO Handle more complex transaction updates via the API.
@@ -335,14 +297,12 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 	//  like the name field; we might update the name to be blank?
 
 	if err = repo.UpdateTransaction(c.getContext(ctx), bankAccountId, &transaction); err != nil {
-		c.wrapPgError(ctx, err, "could not update transaction")
-		return
+		return c.wrapPgError(ctx, err, "could not update transaction")
 	}
 
 	balance, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not get updated balances")
-		return
+		return c.wrapPgError(ctx, err, "could not get updated balances")
 	}
 
 	c.getLog(ctx).Debugf("successfully updated transaction")
@@ -356,32 +316,30 @@ func (c *Controller) putTransactions(ctx *context.Context) {
 		result["spending"] = updatedExpenses
 	}
 
-	ctx.JSON(result)
+	return ctx.JSON(http.StatusOK, result)
 }
 
-func (c *Controller) deleteTransactions(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) deleteTransactions(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	transactionId := ctx.Params().GetUint64Default("transactionId", 0)
-	if transactionId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid transaction Id")
-		return
+	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
+	if err != nil || transactionId == 0 {
+		return c.badRequest(ctx, "must specify a valid transaction Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	isManual, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to validate if link is manual")
-		return
+		return c.wrapPgError(ctx, err, "failed to validate if link is manual")
 	}
 
 	if !isManual {
-		c.returnError(ctx, http.StatusBadRequest, "cannot delete transactions for non-manual links")
-		return
+		return c.returnError(ctx, http.StatusBadRequest, "cannot delete transactions for non-manual links")
 	}
+
+	return ctx.NoContent(http.StatusOK)
 }

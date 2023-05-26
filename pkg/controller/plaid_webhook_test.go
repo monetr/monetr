@@ -24,7 +24,7 @@ func TestPlaidWebhook(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("the requested path does not exist")
+		response.JSON().Path("$.error").String().Equal("plaid webhooks are not enabled")
 	})
 
 	t.Run("not authorized", func(t *testing.T) {
@@ -61,6 +61,6 @@ func TestPlaidWebhook(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("unauthorized: token contains an invalid number of segments")
+		response.JSON().Path("$.error").String().Equal("unauthorized")
 	})
 }

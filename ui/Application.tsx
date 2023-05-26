@@ -1,8 +1,9 @@
 import React from 'react';
 import { Backdrop, CircularProgress } from '@mui/material';
 
-import AuthenticatedApp from 'AuthenticatedApp';
-import BillingRequiredRouter from 'BillingRequiredRouter';
+const AuthenticatedApp = React.lazy(() => import('AuthenticatedApp'));
+const BillingRequiredRouter = React.lazy(() => import('BillingRequiredRouter'));
+
 import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
 import { useAuthenticationSink } from 'hooks/useAuthentication';
 import UnauthenticatedApplication from 'UnauthenticatedApplication';

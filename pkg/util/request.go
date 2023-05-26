@@ -3,15 +3,14 @@ package util
 import (
 	"strings"
 
-	"github.com/kataras/iris/v12"
-
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
-func GetRequestID(ctx iris.Context) string {
+func GetRequestID(ctx echo.Context) string {
 	values := []string{
-		ctx.GetHeader("X-Request-Id"),
-		ctx.GetHeader("X-Cloud-Trace-Context"),
+		ctx.Request().Header.Get("X-Request-Id"),
+		ctx.Request().Header.Get("X-Cloud-Trace-Context"),
 	}
 
 	for _, value := range values {
@@ -22,12 +21,12 @@ func GetRequestID(ctx iris.Context) string {
 		}
 	}
 
-	if storedRequestId, ok := ctx.Values().Get("X-Request-Id").(string); ok {
+	if storedRequestId, ok := ctx.Get("X-Request-Id").(string); ok {
 		return storedRequestId
 	}
 
 	id := uuid.New().String()
-	ctx.Values().Set("X-Request-Id", id)
+	ctx.Set("X-Request-Id", id)
 
 	return id
 }

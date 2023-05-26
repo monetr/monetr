@@ -4,16 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/router"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 )
-
-func (c *Controller) handleUsers(p router.Party) {
-	p.Get("/me", c.getMe)
-	p.Put("/security/password", c.changePassword)
-}
 
 // Get Current User Information
 // @id get-current-user
@@ -29,11 +23,10 @@ func (c *Controller) handleUsers(p router.Party) {
 // @Success 200 {object} swag.MeResponse
 // @Failure 401 {object} ApiError There is no authenticated user.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getMe(ctx iris.Context) {
+func (c *Controller) getMe(ctx echo.Context) error {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "cannot retrieve user details")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusUnauthorized, "cannot retrieve user details")
 	}
 
 	user, err := repo.GetMe(c.getContext(ctx))
@@ -41,40 +34,36 @@ func (c *Controller) getMe(ctx iris.Context) {
 		// Remove the cookie if this happens, it means that somehow the user may have gotten a token for a user that
 		// doesn't exist?
 		c.removeCookieIfPresent(ctx)
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "cannot retrieve user details")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "cannot retrieve user details")
 	}
 
 	isSetup, err := repo.GetIsSetup(c.getContext(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine if account is setup")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine if account is setup")
 	}
 
 	if !c.configuration.Stripe.IsBillingEnabled() {
-		ctx.JSON(map[string]interface{}{
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"user":            user,
 			"isSetup":         isSetup,
 			"isActive":        true,
 			"hasSubscription": true,
 		})
-		return
 	}
 
 	subscriptionIsActive := user.Account.IsSubscriptionActive()
 
 	if !subscriptionIsActive {
-		ctx.JSON(map[string]interface{}{
+		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"user":            user,
 			"isSetup":         isSetup,
 			"isActive":        subscriptionIsActive,
 			"hasSubscription": user.Account.HasSubscription(),
 			"nextUrl":         "/account/subscribe",
 		})
-		return
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"user":            user,
 		"isSetup":         isSetup,
 		"isActive":        subscriptionIsActive,
@@ -98,33 +87,29 @@ func (c *Controller) getMe(ctx iris.Context) {
 // @Failure 400 {object} ApiError
 // @Failure 401 {object} ApiError
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) changePassword(ctx iris.Context) {
+func (c *Controller) changePassword(ctx echo.Context) error {
 	var changePasswordRequest struct {
 		CurrentPassword string `json:"currentPassword"`
 		NewPassword     string `json:"newPassword"`
 	}
-	if err := ctx.ReadJSON(&changePasswordRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
-		return
+	if err := ctx.Bind(&changePasswordRequest); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	changePasswordRequest.CurrentPassword = strings.TrimSpace(changePasswordRequest.CurrentPassword)
 	changePasswordRequest.NewPassword = strings.TrimSpace(changePasswordRequest.NewPassword)
 
 	if len(changePasswordRequest.NewPassword) < 8 {
-		c.badRequest(ctx, "new password is not valid")
-		return
+		return c.badRequest(ctx, "new password is not valid")
 	}
 
 	if changePasswordRequest.NewPassword == changePasswordRequest.CurrentPassword {
-		c.badRequest(ctx, "new password must be different from the current password")
-		return
+		return c.badRequest(ctx, "new password must be different from the current password")
 	}
 
 	user, err := c.mustGetAuthenticatedRepository(ctx).GetMe(c.getContext(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve current user details")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve current user details")
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
@@ -136,10 +121,10 @@ func (c *Controller) changePassword(ctx iris.Context) {
 	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
-		c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
+		return c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
 	case nil:
-		ctx.StatusCode(http.StatusOK)
+		return ctx.NoContent(http.StatusOK)
 	default:
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to change password")
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to change password")
 	}
 }

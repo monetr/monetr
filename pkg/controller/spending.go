@@ -2,24 +2,14 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/models"
 )
-
-// @tag.name Spending
-// @tag.description Spending endpoints handle the underlying spending object. The spending object is used to represent a goal or an expense.
-func (c *Controller) handleSpending(p iris.Party) {
-	p.Get("/{bankAccountId:uint64}/spending", c.getSpending)
-	p.Post("/{bankAccountId:uint64}/spending", c.postSpending)
-	p.Post("/{bankAccountId:uint64}/spending/transfer", c.postSpendingTransfer)
-	p.Put("/{bankAccountId:uint64}/spending/{spendingId:uint64}", c.putSpending)
-	p.Delete("/{bankAccountId:uint64}/spending/{spendingId:uint64}", c.deleteSpending)
-}
 
 // List Spending
 // @id list-spending
@@ -35,22 +25,20 @@ func (c *Controller) handleSpending(p iris.Party) {
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getSpending(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) getSpending(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	expenses, err := repo.GetSpending(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not retrieve expenses")
-		return
+		return c.wrapPgError(ctx, err, "could not retrieve expenses")
 	}
 
-	ctx.JSON(expenses)
+	return ctx.JSON(http.StatusOK, expenses)
 }
 
 // Create Spending
@@ -69,20 +57,18 @@ func (c *Controller) getSpending(ctx *context.Context) {
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
-func (c *Controller) postSpending(ctx *context.Context) {
+func (c *Controller) postSpending(ctx echo.Context) error {
 	requestSpan := c.getSpan(ctx)
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
-		c.badRequest(ctx, "must specify valid bank account Id")
-		return
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	spending := &models.Spending{}
-	if err := ctx.ReadJSON(spending); err != nil {
+	if err := ctx.Bind(spending); err != nil {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+		return c.invalidJson(ctx)
 	}
 
 	spending.SpendingId = 0 // Make sure we create a new spending.
@@ -92,14 +78,12 @@ func (c *Controller) postSpending(ctx *context.Context) {
 
 	if spending.Name == "" {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
-		c.badRequest(ctx, "spending must have a name")
-		return
+		return c.badRequest(ctx, "spending must have a name")
 	}
 
 	if spending.TargetAmount <= 0 {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
-		c.badRequest(ctx, "target amount must be greater than 0")
-		return
+		return c.badRequest(ctx, "target amount must be greater than 0")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -109,8 +93,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, spending.FundingScheduleId)
 	if err != nil {
 		requestSpan.Status = sentry.SpanStatusNotFound
-		c.wrapPgError(ctx, err, "could not find funding schedule specified")
-		return
+		return c.wrapPgError(ctx, err, "could not find funding schedule specified")
 	}
 
 	// We also need to know the current account's timezone, as contributions are made at midnight in that user's
@@ -118,8 +101,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	account, err := repo.GetAccount(c.getContext(ctx))
 	if err != nil {
 		requestSpan.Status = sentry.SpanStatusNotFound
-		c.wrapPgError(ctx, err, "failed to retrieve account details")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve account details")
 	}
 
 	spending.LastRecurrence = nil
@@ -133,16 +115,14 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		// itll be sanitized and converted to midnight below.
 		if next.Before(time.Now()) {
 			requestSpan.Status = sentry.SpanStatusInvalidArgument
-			c.badRequest(ctx, "next due date cannot be inthe past")
-			return
+			return c.badRequest(ctx, "next due date cannot be inthe past")
 		}
 	case models.SpendingTypeGoal:
 		// If the spending is a goal, then we don't need the rule at all.
 		next = spending.NextRecurrence
 		if next.Before(time.Now()) {
 			requestSpan.Status = sentry.SpanStatusInvalidArgument
-			c.badRequest(ctx, "due date cannot be in the past")
-			return
+			return c.badRequest(ctx, "due date cannot be in the past")
 		}
 
 		// Goals do not recur.
@@ -153,8 +133,7 @@ func (c *Controller) postSpending(ctx *context.Context) {
 	nextRecurrence, err := c.midnightInLocal(ctx, next)
 	if err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not determine next recurrence")
 	}
 
 	spending.NextRecurrence = nextRecurrence
@@ -167,17 +146,15 @@ func (c *Controller) postSpending(ctx *context.Context) {
 		time.Now(),
 	); err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
 	}
 
 	if err = repo.CreateSpending(c.getContext(ctx), spending); err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
-		c.wrapPgError(ctx, err, "failed to create spending")
-		return
+		return c.wrapPgError(ctx, err, "failed to create spending")
 	}
 
-	ctx.JSON(spending)
+	return ctx.JSON(http.StatusOK, spending)
 }
 
 type SpendingTransfer struct {
@@ -202,67 +179,57 @@ type SpendingTransfer struct {
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
-func (c *Controller) postSpendingTransfer(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	transfer := &SpendingTransfer{}
-	if err := ctx.ReadJSON(transfer); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err := ctx.Bind(transfer); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	if transfer.Amount <= 0 {
-		c.badRequest(ctx, "transfer amount must be greater than 0")
-		return
+		return c.badRequest(ctx, "transfer amount must be greater than 0")
 	}
 
 	if (transfer.FromSpendingId == nil || *transfer.FromSpendingId == 0) &&
 		(transfer.ToSpendingId == nil || *transfer.ToSpendingId == 0) {
-		c.badRequest(ctx, "both a from and a to must be specified to transfer allocated funds")
-		return
+		return c.badRequest(ctx, "both a from and a to must be specified to transfer allocated funds")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	balances, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to get balances for transfer")
-		return
+		return c.wrapPgError(ctx, err, "failed to get balances for transfer")
 	}
 
 	spendingToUpdate := make([]models.Spending, 0)
 
 	account, err := c.accounts.GetAccount(c.getContext(ctx), c.mustGetAccountId(ctx))
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve account for transfer")
 	}
 
 	var fundingSchedule *models.FundingSchedule
 
 	if transfer.FromSpendingId == nil && balances.Safe < transfer.Amount {
-		c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
-		return
+		return c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
 	} else if transfer.FromSpendingId != nil {
 		fromExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.FromSpendingId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
-			return
+			return c.wrapPgError(ctx, err, "failed to retrieve source expense for transfer")
 		}
 
 		if fromExpense.CurrentAmount < transfer.Amount {
-			c.badRequest(ctx, "cannot transfer more than is available in source goal/expense")
-			return
+			return c.badRequest(ctx, "cannot transfer more than is available in source goal/expense")
 		}
 
 		fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fromExpense.FundingScheduleId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve funding schedule for source goal/expense")
-			return
+			return c.wrapPgError(ctx, err, "failed to retrieve funding schedule for source goal/expense")
 		}
 
 		fromExpense.CurrentAmount -= transfer.Amount
@@ -273,8 +240,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 			fundingSchedule,
 			time.Now(),
 		); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 		}
 
 		spendingToUpdate = append(spendingToUpdate, *fromExpense)
@@ -285,8 +251,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 	if transfer.ToSpendingId != nil {
 		toExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.ToSpendingId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to get destination goal/expense for transfer")
-			return
+			return c.wrapPgError(ctx, err, "failed to get destination goal/expense for transfer")
 		}
 
 		// If the funding schedule that we already have put aside is not the same as the one we need for this spending
@@ -294,8 +259,7 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 		if fundingSchedule == nil || fundingSchedule.FundingScheduleId != toExpense.FundingScheduleId {
 			fundingSchedule, err = repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, toExpense.FundingScheduleId)
 			if err != nil {
-				c.wrapPgError(ctx, err, "failed to retrieve funding schedule for destination goal/expense")
-				return
+				return c.wrapPgError(ctx, err, "failed to retrieve funding schedule for destination goal/expense")
 			}
 		}
 
@@ -307,25 +271,22 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 			fundingSchedule,
 			time.Now(),
 		); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 		}
 
 		spendingToUpdate = append(spendingToUpdate, *toExpense)
 	}
 
 	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spendingToUpdate); err != nil {
-		c.wrapPgError(ctx, err, "failed to update spending for transfer")
-		return
+		return c.wrapPgError(ctx, err, "failed to update spending for transfer")
 	}
 
 	balance, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not get updated balances")
-		return
+		return c.wrapPgError(ctx, err, "could not get updated balances")
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"balance":  balance,
 		"spending": spendingToUpdate,
 	})
@@ -347,23 +308,20 @@ func (c *Controller) postSpendingTransfer(ctx *context.Context) {
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
-func (c *Controller) putSpending(ctx *context.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) putSpending(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
-	if spendingId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid spending Id")
-		return
+	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
+	if err != nil || spendingId == 0 {
+		return c.badRequest(ctx, "must specify valid spending Id")
 	}
 
 	updatedSpending := &models.Spending{}
-	if err := ctx.ReadJSON(updatedSpending); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(updatedSpending); err != nil {
+		return c.invalidJson(ctx)
 	}
 	updatedSpending.SpendingId = spendingId
 	updatedSpending.BankAccountId = bankAccountId
@@ -372,13 +330,11 @@ func (c *Controller) putSpending(ctx *context.Context) {
 
 	existingSpending, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, updatedSpending.SpendingId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to find existing spending")
-		return
+		return c.wrapPgError(ctx, err, "failed to find existing spending")
 	}
 
 	if updatedSpending.TargetAmount <= 0 {
-		c.badRequest(ctx, "target amount must be greater than 0")
-		return
+		return c.badRequest(ctx, "target amount must be greater than 0")
 	}
 
 	// These fields cannot be changed by the end user and must be maintained by the API, some of these fields are
@@ -400,8 +356,7 @@ func (c *Controller) putSpending(ctx *context.Context) {
 	if updatedSpending.NextRecurrence != existingSpending.NextRecurrence {
 		newNext, err := c.midnightInLocal(ctx, updatedSpending.NextRecurrence)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to update next recurrence")
-			return
+			return c.badRequest(ctx, "failed to update next recurrence")
 		}
 
 		if newNext != existingSpending.NextRecurrence {
@@ -430,14 +385,12 @@ func (c *Controller) putSpending(ctx *context.Context) {
 	if recalculateSpending {
 		account, err := repo.GetAccount(c.getContext(ctx))
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve account details")
-			return
+			return c.wrapPgError(ctx, err, "failed to retrieve account details")
 		}
 
 		fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, updatedSpending.FundingScheduleId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
-			return
+			return c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
 		}
 
 		if err = updatedSpending.CalculateNextContribution(
@@ -446,19 +399,17 @@ func (c *Controller) putSpending(ctx *context.Context) {
 			fundingSchedule,
 			time.Now(),
 		); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
 		}
 	}
 
 	if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, []models.Spending{
 		*updatedSpending,
 	}); err != nil {
-		c.wrapPgError(ctx, err, "failed to update spending")
-		return
+		return c.wrapPgError(ctx, err, "failed to update spending")
 	}
 
-	ctx.JSON(updatedSpending)
+	return ctx.JSON(http.StatusOK, updatedSpending)
 }
 
 // Delete Spending
@@ -475,22 +426,21 @@ func (c *Controller) putSpending(ctx *context.Context) {
 // @Success 200
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 500 {object} ApiError "Failed to persist data."
-func (c *Controller) deleteSpending(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) deleteSpending(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	spendingId := ctx.Params().GetUint64Default("spendingId", 0)
-	if spendingId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid spending Id")
-		return
+	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
+	if err != nil || spendingId == 0 {
+		return c.badRequest(ctx, "must specify valid spending Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	if err := repo.DeleteSpending(c.getContext(ctx), bankAccountId, spendingId); err != nil {
-		c.wrapPgError(ctx, err, "failed to delete spending")
-		return
+		return c.wrapPgError(ctx, err, "failed to delete spending")
 	}
+
+	return ctx.NoContent(http.StatusOK)
 }

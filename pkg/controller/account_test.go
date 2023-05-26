@@ -31,6 +31,6 @@ func TestGetAccountSettings(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("token is not valid")
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
 }

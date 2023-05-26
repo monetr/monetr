@@ -1,20 +1,14 @@
 package controller
 
 import (
-	"github.com/kataras/iris/v12"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/icons"
 )
 
-// Application Configuration
-// @Summary Get Config
-// @tags Config
-// @id app-config
-// @description Provides the configuration that should be used by the frontend application or UI.
-// @Produce json
-// @Router /config [get]
-// @Success 200 {object} swag.ConfigResponse
-func (c *Controller) configEndpoint(ctx iris.Context) {
+func (c *Controller) configEndpoint(ctx echo.Context) error {
 	type InitialPlan struct {
 		Price         int64 `json:"price"`
 		FreeTrialDays int32 `json:"freeTrialDays"`
@@ -95,22 +89,15 @@ func (c *Controller) configEndpoint(ctx iris.Context) {
 
 	configuration.IconsEnabled = icons.GetIconsEnabled()
 
-	ctx.JSON(configuration)
+	return ctx.JSON(http.StatusOK, configuration)
 }
 
-// Get Public Sentry DSN
-// @Summary Get Public Sentry DSN
-// @tags Config
-// @id get-ui-sentry-dsn
-// @description Is used to allow the Sentry DSN for the UI to be configurable at runtime. This endpoint is only
-// @description accessible when Sentry is enabled. The DSN it returns is the public DSN only. More information about how
-// @description the DSN works can be found here:
-// @description https://docs.sentry.io/product/sentry-basics/dsn-explainer/#dsn-utilization
-// @Produce json
-// @Router /sentry [get]
-// @Success 200 {object} swag.SentryDSNResponse
-func (c *Controller) getSentryUI(ctx iris.Context) {
-	ctx.JSON(map[string]interface{}{
+func (c *Controller) getSentryUI(ctx echo.Context) error {
+	if !c.configuration.Sentry.ExternalSentryEnabled() {
+		return c.notFound(ctx, "public sentry key is not enabled")
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"dsn": c.configuration.Sentry.ExternalDSN,
 	})
 }

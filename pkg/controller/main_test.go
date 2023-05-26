@@ -143,8 +143,6 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	)
 	app := application.NewApp(configuration, c)
 
-	require.NoError(t, app.Build(), "must build app")
-
 	// run server using httptest
 	server := httptest.NewServer(app)
 	t.Cleanup(func() {

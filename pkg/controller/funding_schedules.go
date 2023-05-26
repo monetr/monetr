@@ -2,23 +2,16 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 )
-
-func (c *Controller) handleFundingSchedules(p iris.Party) {
-	p.Get("/{bankAccountId:uint64}/funding_schedules", c.getFundingSchedules)
-	p.Get("/{bankAccountId:uint64}/funding_schedules/stats", c.getFundingScheduleStats)
-	p.Post("/{bankAccountId:uint64}/funding_schedules", c.postFundingSchedules)
-	p.Put("/{bankAccountId:uint64}/funding_schedules/{fundingScheduleId:uint64}", c.putFundingSchedules)
-	p.Delete("/{bankAccountId:uint64}/funding_schedules/{fundingScheduleId:uint64}", c.deleteFundingSchedules)
-}
 
 // List Funding Schedules
 // @Summary List Funding Schedules
@@ -33,26 +26,24 @@ func (c *Controller) handleFundingSchedules(p iris.Party) {
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getFundingSchedules(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) getFundingSchedules(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	fundingSchedules, err := repo.GetFundingSchedules(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
 	}
 
 	if fundingSchedules == nil {
 		fundingSchedules = make([]models.FundingSchedule, 0)
 	}
 
-	ctx.JSON(fundingSchedules)
+	return ctx.JSON(http.StatusOK, fundingSchedules)
 }
 
 // Get Funding Stats
@@ -68,22 +59,20 @@ func (c *Controller) getFundingSchedules(ctx iris.Context) {
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getFundingScheduleStats(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) getFundingScheduleStats(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	stats, err := repo.GetFundingStats(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve funding schedules")
 	}
 
-	ctx.JSON(stats)
+	return ctx.JSON(http.StatusOK, stats)
 }
 
 // Create Funding Schedule
@@ -100,17 +89,15 @@ func (c *Controller) getFundingScheduleStats(ctx iris.Context) {
 // @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError "Failed to persist data."
-func (c *Controller) postFundingSchedules(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) postFundingSchedules(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	var fundingSchedule models.FundingSchedule
-	if err := ctx.ReadJSON(&fundingSchedule); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(&fundingSchedule); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	fundingSchedule.FundingScheduleId = 0 // Make sure we create a new funding schedule.
@@ -119,13 +106,11 @@ func (c *Controller) postFundingSchedules(ctx iris.Context) {
 	fundingSchedule.BankAccountId = bankAccountId
 
 	if fundingSchedule.Name == "" {
-		c.returnError(ctx, http.StatusBadRequest, "funding schedule must have a name")
-		return
+		return c.badRequest(ctx, "funding schedule must have a name")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	var err error
 	// Set the next occurrence based on the provided rule.
 
 	// If the next occurrence is not specified then assume that the rule is relative to now. If it is specified though
@@ -141,36 +126,32 @@ func (c *Controller) postFundingSchedules(ctx iris.Context) {
 	fundingSchedule.LastOccurrence = nil
 
 	if err = repo.CreateFundingSchedule(c.getContext(ctx), &fundingSchedule); err != nil {
-		c.wrapPgError(ctx, err, "failed to create funding schedule")
-		return
+		return c.wrapPgError(ctx, err, "failed to create funding schedule")
 	}
 
-	ctx.JSON(fundingSchedule)
+	return ctx.JSON(http.StatusOK, fundingSchedule)
 }
 
-func (c *Controller) putFundingSchedules(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) putFundingSchedules(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
-	fundingScheduleId := ctx.Params().GetUint64Default("fundingScheduleId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid funding schedule Id")
-		return
+
+	fundingScheduleId, err := strconv.ParseUint(ctx.Param("fundingScheduleId"), 10, 64)
+	if err != nil || fundingScheduleId == 0 {
+		return c.badRequest(ctx, "must specify valid funding schedule Id")
 	}
 	var request models.FundingSchedule
-	if err := ctx.ReadJSON(&request); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	// Retrieve the existing funding schedule to make sure some fields cannot be overridden
 	existingFundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
-		return
+		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
 
 	request.FundingScheduleId = fundingScheduleId
@@ -181,18 +162,15 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 	request.LastOccurrence = existingFundingSchedule.LastOccurrence
 
 	if request.Name == "" {
-		c.badRequest(ctx, "funding schedule must have a name")
-		return
+		return c.badRequest(ctx, "funding schedule must have a name")
 	}
 
 	if request.Rule == nil {
-		c.badRequest(ctx, "funding schedule must include a rule")
-		return
+		return c.badRequest(ctx, "funding schedule must include a rule")
 	}
 
 	if request.EstimatedDeposit != nil && *request.EstimatedDeposit < 0 {
-		c.badRequest(ctx, "estimated deposit must be greater than or equal to zero")
-		return
+		return c.badRequest(ctx, "estimated deposit must be greater than or equal to zero")
 	}
 
 	recalculateSpending := false
@@ -219,73 +197,64 @@ func (c *Controller) putFundingSchedules(ctx iris.Context) {
 		})
 		spending, err := repo.GetSpendingByFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
 		if err != nil {
-			c.wrapPgError(ctx, err, "failed to retrieve existing spending objects for funding schedule")
-			return
+			return c.wrapPgError(ctx, err, "failed to retrieve existing spending objects for funding schedule")
 		}
 
 		if len(spending) > 0 {
 			account, err := repo.GetAccount(c.getContext(ctx))
 			if err != nil {
-				c.wrapPgError(ctx, err, "failed to retrieve account data to update funding schedule")
-				return
+				return c.wrapPgError(ctx, err, "failed to retrieve account data to update funding schedule")
 			}
 
 			now := time.Now()
 			for _, spend := range spending {
 				if err := spend.CalculateNextContribution(c.getContext(ctx), account.Timezone, &request, now); err != nil {
-					c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to recalculate spending object")
-					return
+					return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to recalculate spending object")
 				}
 			}
 
 			if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spending); err != nil {
-				c.wrapPgError(ctx, err, "failed to update spending objects for updated funding schedule")
-				return
+				return c.wrapPgError(ctx, err, "failed to update spending objects for updated funding schedule")
 			}
 		}
 	}
 
 	if err = repo.UpdateFundingSchedule(c.getContext(ctx), &request); err != nil {
-		c.wrapPgError(ctx, err, "failed to update funding schedule")
-		return
+		return c.wrapPgError(ctx, err, "failed to update funding schedule")
 	}
 
-	ctx.JSON(request)
+	return ctx.JSON(http.StatusOK, request)
 }
 
-func (c *Controller) deleteFundingSchedules(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) deleteFundingSchedules(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
-	fundingScheduleId := ctx.Params().GetUint64Default("fundingScheduleId", 0)
-	if fundingScheduleId == 0 {
-		c.badRequest(ctx, "must specify a valid funding schedule Id")
-		return
+	fundingScheduleId, err := strconv.ParseUint(ctx.Param("fundingScheduleId"), 10, 64)
+	if err != nil || fundingScheduleId == 0 {
+		return c.badRequest(ctx, "must specify a valid funding schedule Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	spending, err := repo.GetSpendingByFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "Failed to retrieve spending for the funding schedule to be deleted")
-		return
+		return c.wrapPgError(ctx, err, "Failed to retrieve spending for the funding schedule to be deleted")
 	}
 
 	if len(spending) > 0 {
-		c.badRequest(ctx, "Cannot delete a funding schedule with goals or expenses associated with it")
-		return
+		return c.badRequest(ctx, "Cannot delete a funding schedule with goals or expenses associated with it")
 	}
 
 	if err := repo.DeleteFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId); err != nil {
 		if errors.Is(errors.Cause(err), repository.ErrFundingScheduleNotFound) {
-			c.notFound(ctx, "cannot remove funding schedule, it does not exist")
-			return
+			return c.notFound(ctx, "cannot remove funding schedule, it does not exist")
 		}
 
-		c.wrapPgError(ctx, err, "failed to remove funding schedule")
-		return
+		return c.wrapPgError(ctx, err, "failed to remove funding schedule")
 	}
+
+	return ctx.NoContent(http.StatusOK)
 }

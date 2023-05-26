@@ -10,9 +10,9 @@ import (
 
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
-	sentryiris "github.com/getsentry/sentry-go/iris"
+	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-pg/pg/v10"
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/ctxkeys"
 	"github.com/monetr/monetr/pkg/repository"
@@ -30,62 +30,69 @@ const (
 	spanKey                      = "_span_"
 )
 
-func (c *Controller) setupRepositoryMiddleware(ctx iris.Context) {
-	var cleanup func()
-	var dbi pg.DBI
-	switch ctx.Method() {
-	case "GET", "OPTIONS":
-		dbi = c.db
-	case "POST":
-		// Some endpoints need a POST even though they do not require data access.
-		// This is a short term fix. (Hopefully)
-		if strings.HasSuffix(ctx.Path(), "/icons/search") {
+func (c *Controller) databaseRepositoryMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		var cleanup func()
+		var dbi pg.DBI
+		var handlerError error
+		switch strings.ToUpper(ctx.Request().Method) {
+		case "GET", "OPTIONS":
 			dbi = c.db
-			break
-		}
-		fallthrough
-	case "PUT", "DELETE":
-		txn, err := c.db.BeginContext(c.getContext(ctx))
-		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to begin transaction")
-			return
-		}
+		case "POST":
+			// Some endpoints need a POST even though they do not require data access.
+			// This is a short term fix. (Hopefully)
+			if strings.HasSuffix(ctx.Path(), "/icons/search") {
+				dbi = c.db
+				break
+			}
+			fallthrough
+		case "PUT", "DELETE":
+			txn, err := c.db.BeginContext(c.getContext(ctx))
+			if err != nil {
+				return c.wrapAndReturnError(
+					ctx,
+					err,
+					http.StatusInternalServerError,
+					"failed to begin transaction",
+				)
+			}
 
-		cleanup = func() {
-			// TODO (elliotcourant) Add proper logging here that the request has failed
-			//  and we are rolling back the transaction.
-			if ctx.GetErr() != nil {
-				if err := txn.RollbackContext(c.getContext(ctx)); err != nil {
-					// Rollback
-					c.log.WithError(err).Errorf("failed to rollback request")
-				}
-			} else {
-				if err = txn.CommitContext(c.getContext(ctx)); err != nil {
-					// failed to commit
-					fmt.Println(err)
+			cleanup = func() {
+				// TODO (elliotcourant) Add proper logging here that the request has failed
+				//  and we are rolling back the transaction.
+				if handlerError != nil {
+					if err := txn.RollbackContext(c.getContext(ctx)); err != nil {
+						// Rollback
+						c.log.WithError(err).Errorf("failed to rollback request")
+					}
+				} else {
+					if err = txn.CommitContext(c.getContext(ctx)); err != nil {
+						// failed to commit
+						panic(err)
+					}
 				}
 			}
+
+			dbi = txn
 		}
 
-		dbi = txn
+		ctx.Set(databaseContextKey, dbi)
+
+		handlerError = next(ctx)
+
+		if cleanup != nil {
+			cleanup()
+		}
+
+		return handlerError
 	}
-
-	ctx.Values().Set(databaseContextKey, dbi)
-
-	ctx.Next()
-
-	if cleanup != nil {
-		cleanup()
-	}
-
-	ctx.Next()
 }
 
-func (c *Controller) removeCookieIfPresent(ctx iris.Context) {
-	c.updateAuthenticationCookie(ctx, "")
+func (c *Controller) removeCookieIfPresent(ctx echo.Context) {
+	c.updateAuthenticationCookie(ctx, ClearAuthentication)
 }
 
-func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
+func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
 	now := time.Now()
 	var token string
 
@@ -115,28 +122,17 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		}()
 	}
 
-	{ // Read the token from the request.
-		// We can allocate a max capacity of 2 right away because we know (at least at the time of writing this) that we
-		// will have _at most_ 2 cookie options.
-		cookieOptions := make([]iris.CookieOption, 0, 2)
-		cookieOptions = append(cookieOptions, iris.CookieHTTPOnly(true))
-
-		// If the server is configured to use secure cookies then add that to the options.
-		if c.configuration.Server.Cookies.Secure {
-			cookieOptions = append(cookieOptions, iris.CookieSecure)
-		}
-
-		// Try to retrieve the cookie from the request with the options.
-		if token = ctx.GetCookie(
+	{ // Try to retrieve the cookie from the request with the options.
+		if tokenCookie, err := ctx.Cookie(
 			c.configuration.Server.Cookies.Name,
-			cookieOptions...,
-		); token != "" {
+		); err == nil && tokenCookie.Value != "" {
+			token = tokenCookie.Value
 			data["source"] = "cookie"
 		}
 	}
 
 	if token == "" {
-		if token = ctx.GetHeader(c.configuration.Server.Cookies.Name); token != "" {
+		if token = ctx.Request().Header.Get(c.configuration.Server.Cookies.Name); token != "" {
 			data["source"] = "header"
 		}
 	}
@@ -155,7 +151,7 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		return []byte(c.configuration.JWT.LoginJwtSecret), nil
 	})
 	if err != nil {
-		c.removeCookieIfPresent(ctx)
+		c.updateAuthenticationCookie(ctx, ClearAuthentication)
 		// Don't return the JWT error to the client, but throw it in Sentry so it can still be used for debugging.
 		crumbs.Error(c.getContext(ctx), "failed to validate token", "authentication", map[string]interface{}{
 			"error": err,
@@ -170,7 +166,7 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 
 	// If we can pull the hub from the current context, then we want to try to set some of our user data on it so that
 	// way we can grab it later if there is an error.
-	if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
+	if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
 		hub.Scope().SetUser(sentry.User{
 			ID:        strconv.FormatUint(claims.AccountId, 10),
 			Username:  fmt.Sprintf("account:%d", claims.AccountId),
@@ -181,61 +177,56 @@ func (c *Controller) authenticateUser(ctx iris.Context) (err error) {
 		hub.Scope().SetTag("loginId", strconv.FormatUint(claims.LoginId, 10))
 	}
 
-	ctx.Values().Set(accountIdContextKey, claims.AccountId)
-	ctx.Values().Set(userIdContextKey, claims.UserId)
-	ctx.Values().Set(loginIdContextKey, claims.LoginId)
+	ctx.Set(accountIdContextKey, claims.AccountId)
+	ctx.Set(userIdContextKey, claims.UserId)
+	ctx.Set(loginIdContextKey, claims.LoginId)
 
 	{ // Add some basic values onto our context for logging later on.
-		spanContext := ctx.Values().Get(spanContextKey).(context.Context)
+		spanContext := ctx.Get(spanContextKey).(context.Context)
 		spanContext = context.WithValue(spanContext, ctxkeys.AccountID, claims.AccountId)
 		spanContext = context.WithValue(spanContext, ctxkeys.UserID, claims.UserId)
 		spanContext = context.WithValue(spanContext, ctxkeys.LoginID, claims.LoginId)
-		ctx.Values().Set(spanContextKey, spanContext)
+		ctx.Set(spanContextKey, spanContext)
 	}
 
 	return nil
 }
 
-func (c *Controller) authenticationMiddleware(ctx iris.Context) {
-	if err := c.authenticateUser(ctx); err != nil {
-		c.updateAuthenticationCookie(ctx, ClearAuthentication)
-		ctx.SetErr(err)
-		ctx.StatusCode(http.StatusUnauthorized)
-		ctx.StopExecution()
-		return
-	}
+func (c *Controller) authenticationMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		if err := c.authenticateUser(ctx); err != nil {
+			c.updateAuthenticationCookie(ctx, ClearAuthentication)
+			return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+		}
 
-	ctx.Next()
-}
-
-func (c *Controller) requireActiveSubscriptionMiddleware(ctx iris.Context) {
-	accountId := c.mustGetAccountId(ctx)
-
-	active, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), accountId)
-	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to validate subscription is active")
-		return
-	}
-
-	if !active {
-		c.getSpan(ctx).Status = sentry.SpanStatusPermissionDenied
-		c.returnError(ctx, http.StatusPaymentRequired, "subscription is not active")
-		return
-	}
-
-	ctx.Next()
-}
-
-func (c *Controller) loggingMiddleware(ctx iris.Context) {
-	ctx.Next()
-
-	if err := ctx.GetErr(); err != nil {
-		c.getLog(ctx).WithError(err).Errorf("%s", ctx.GetErr().Error())
+		return next(ctx)
 	}
 }
 
-func (c *Controller) mustGetDatabase(ctx iris.Context) pg.DBI {
-	txn, ok := ctx.Values().Get(databaseContextKey).(*pg.Tx)
+func (c *Controller) requireActiveSubscriptionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		if !c.configuration.Stripe.IsBillingEnabled() {
+			return next(ctx)
+		}
+
+		accountId := c.mustGetAccountId(ctx)
+
+		active, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), accountId)
+		if err != nil {
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to validate subscription is active")
+		}
+
+		if !active {
+			c.getSpan(ctx).Status = sentry.SpanStatusPermissionDenied
+			return c.returnError(ctx, http.StatusPaymentRequired, "subscription is not active")
+		}
+
+		return next(ctx)
+	}
+}
+
+func (c *Controller) mustGetDatabase(ctx echo.Context) pg.DBI {
+	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 	if !ok {
 		panic("no database on context")
 	}
@@ -246,8 +237,8 @@ func (c *Controller) mustGetDatabase(ctx iris.Context) pg.DBI {
 // mustGetSecurityRepository is used to retrieve/create a repository interface that can interact with more security
 // sensitive parts of the data layer. This interface is not specific to a single tenant. If the interface cannot be
 // created due then this method will panic.
-func (c *Controller) mustGetSecurityRepository(ctx iris.Context) repository.SecurityRepository {
-	db, ok := ctx.Values().Get(databaseContextKey).(pg.DBI)
+func (c *Controller) mustGetSecurityRepository(ctx echo.Context) repository.SecurityRepository {
+	db, ok := ctx.Get(databaseContextKey).(pg.DBI)
 	if !ok {
 		panic("failed to retrieve database object from controller context")
 	}
@@ -255,8 +246,8 @@ func (c *Controller) mustGetSecurityRepository(ctx iris.Context) repository.Secu
 	return repository.NewSecurityRepository(db)
 }
 
-func (c *Controller) getUnauthenticatedRepository(ctx iris.Context) (repository.UnauthenticatedRepository, error) {
-	txn, ok := ctx.Values().Get(databaseContextKey).(*pg.Tx)
+func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.UnauthenticatedRepository, error) {
+	txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
 	}
@@ -264,7 +255,7 @@ func (c *Controller) getUnauthenticatedRepository(ctx iris.Context) (repository.
 	return repository.NewUnauthenticatedRepository(txn), nil
 }
 
-func (c *Controller) mustGetUnauthenticatedRepository(ctx iris.Context) repository.UnauthenticatedRepository {
+func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) repository.UnauthenticatedRepository {
 	repo, err := c.getUnauthenticatedRepository(ctx)
 	if err != nil {
 		panic(err)
@@ -273,41 +264,41 @@ func (c *Controller) mustGetUnauthenticatedRepository(ctx iris.Context) reposito
 	return repo
 }
 
-func (c *Controller) mustGetUserId(ctx iris.Context) uint64 {
-	userId := ctx.Values().GetUint64Default(userIdContextKey, 0)
-	if userId == 0 {
+func (c *Controller) mustGetUserId(ctx echo.Context) uint64 {
+	userId, ok := ctx.Get(userIdContextKey).(uint64)
+	if userId == 0 || !ok {
 		panic("unauthorized")
 	}
 
 	return userId
 }
 
-func (c *Controller) mustGetAccountId(ctx iris.Context) uint64 {
-	accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0)
-	if accountId == 0 {
+func (c *Controller) mustGetAccountId(ctx echo.Context) uint64 {
+	accountId, ok := ctx.Get(accountIdContextKey).(uint64)
+	if accountId == 0 || !ok {
 		panic("unauthorized")
 	}
 
 	return accountId
 }
 
-func (c *Controller) getAuthenticatedRepository(ctx iris.Context) (repository.Repository, error) {
-	loginId := ctx.Values().GetUint64Default(loginIdContextKey, 0)
-	if loginId == 0 {
+func (c *Controller) getAuthenticatedRepository(ctx echo.Context) (repository.Repository, error) {
+	loginId, ok := ctx.Get(loginIdContextKey).(uint64)
+	if loginId == 0 || !ok {
 		return nil, errors.Errorf("not authorized")
 	}
 
-	userId := ctx.Values().GetUint64Default(userIdContextKey, 0)
-	if userId == 0 {
+	userId, ok := ctx.Get(userIdContextKey).(uint64)
+	if userId == 0 || !ok {
 		return nil, errors.Errorf("you are not authenticated to an account")
 	}
 
-	accountId := ctx.Values().GetUint64Default(accountIdContextKey, 0)
-	if accountId == 0 {
+	accountId, ok := ctx.Get(accountIdContextKey).(uint64)
+	if accountId == 0 || !ok {
 		return nil, errors.Errorf("you are not authenticated to an account")
 	}
 
-	txn, ok := ctx.Values().Get(databaseContextKey).(pg.DBI)
+	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
 	if !ok {
 		return nil, errors.Errorf("no transaction for request")
 	}
@@ -315,7 +306,7 @@ func (c *Controller) getAuthenticatedRepository(ctx iris.Context) (repository.Re
 	return repository.NewRepositoryFromSession(userId, accountId, txn), nil
 }
 
-func (c *Controller) mustGetAuthenticatedRepository(ctx iris.Context) repository.Repository {
+func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository.Repository {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
 		panic("unauthorized")

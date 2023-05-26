@@ -1,10 +1,10 @@
 const path = require('path');
 
-
 module.exports = (env, argv) => {
   const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
 
   const isDevelopment = envName === 'development';
+  console.log(`environment: ${envName}`);
 
   if (!env.PUBLIC_URL) {
     env.PUBLIC_URL = '';
@@ -23,9 +23,6 @@ module.exports = (env, argv) => {
   }
   const config = {
     builtins: {
-      react: {
-        refresh: isDevelopment,
-      },
       presetEnv: {
         coreJs: '3',
       },
@@ -34,6 +31,26 @@ module.exports = (env, argv) => {
         REVISION: JSON.stringify(process.env.RELEASE_REVISION),
         RELEASE: JSON.stringify(process.env.RELEASE_VERSION),
         NODE_VERSION: process.version,
+      },
+      copy: {
+        patterns: [
+          {
+            from: 'public/logo192.png',
+            to: 'public/logo192.png',
+          },
+          {
+            from: 'public/manifest.json',
+            to: 'public/manifest.json',
+          },
+          {
+            from: 'public/logo512.png',
+            to: 'public/logo512.png',
+          },
+          {
+            from: 'public/robots.txt',
+            to: 'robots.txt',
+          },
+        ],
       },
       html: [
         {
@@ -51,7 +68,9 @@ module.exports = (env, argv) => {
     entry: './ui/index.tsx',
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),
-      filename: filename,
+      filename: isDevelopment ? 'assets/scripts/[name]_[contenthash][ext]' : 'assets/scripts/[contenthash][ext]',
+      cssFilename: 'assets/styles/[contenthash][ext]',
+      cssChunkFilename: 'assets/styles/[contenthash][ext]',
       // Source maps are automatically moved to $(PWD)/build/source_maps each time the UI is compiled. They will not be
       // in the path above.
       // sourceMapFilename: isDevelopment ? `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js.map` : '[name].[hash:8].js.map',
@@ -66,7 +85,7 @@ module.exports = (env, argv) => {
       ],
       modules: [path.resolve(__dirname, 'ui'), 'node_modules'],
     },
-    devtool: isDevelopment ? 'inline-source-map' : 'source-map',
+    devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
     devServer: {
       allowedHosts: 'all',
       static: {
@@ -84,10 +103,10 @@ module.exports = (env, argv) => {
       },
     },
     optimization: {
-      runtimeChunk: 'single',
+      runtimeChunk: true,
       splitChunks: {
-        chunks: 'async',
-        minSize: 20000,
+        chunks: 'all',
+        minSize: 1000,
         minRemainingSize: 0,
         minChunks: 1,
         maxAsyncRequests: 30,
@@ -97,14 +116,13 @@ module.exports = (env, argv) => {
           defaultVendors: {
             test: /[\\/]node_modules[\\/]/,
             priority: -10,
+            minChunks: 2,
+          },
+          default: {
+            minChunks: 2,
+            priority: -20,
             reuseExistingChunk: true,
           },
-          default:
-             {
-               minChunks: 2,
-               priority: -20,
-               reuseExistingChunk: true,
-             },
         },
       },
     },
@@ -122,6 +140,7 @@ module.exports = (env, argv) => {
               loader: 'postcss-loader',
             },
           ],
+          type: 'css',
         },
         {
           test: /\.scss$/,
@@ -142,34 +161,35 @@ module.exports = (env, argv) => {
           type: 'asset',
           parser: {
             dataUrlCondition: {
-              maxSize: 4 * 1024,
+              maxSize: 8 * 1024,
             },
           },
           generator: {
-            filename: 'assets/font/[hash][ext][query]',
+            filename: 'assets/font/[contenthash][ext][query]',
           },
         },
         {
-          test: /\.(png|jpe?g|gif|svg|xlsx)$/,
+          test: /\.svg$/,
           type: 'asset',
           parser: {
             dataUrlCondition: {
-              maxSize: 4 * 1024,
+              maxSize: 1 * 1024 * 1024, // 1MB
             },
           },
           generator: {
-            filename: 'assets/img/[hash][ext][query]',
+            filename: 'assets/img/[contenthash][ext][query]',
           },
         },
         {
-          test: /\.yml$/,
+          test: /\.(png|jpe?g|gif)$/,
           type: 'asset',
-        },
-        {
-          test: /\.ico$/,
-          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 8 * 1024,
+            },
+          },
           generator: {
-            filename: 'assets/img/[name][ext][query]',
+            filename: 'assets/img/[chashontenthash][ext][query]',
           },
         },
       ],

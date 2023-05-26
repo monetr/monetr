@@ -3,14 +3,14 @@ package util
 import (
 	"strings"
 
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 )
 
 // GetForwardedFor will return the IP address provided by the request header X-Forwarded-For or X-Real-Ip.
-func GetForwardedFor(ctx iris.Context) string {
+func GetForwardedFor(ctx echo.Context) string {
 	values := []string{
-		ctx.GetHeader("X-Forwarded-For"),
-		ctx.GetHeader("X-Real-Ip"),
+		ctx.Request().Header.Get("X-Forwarded-For"),
+		ctx.Request().Header.Get("X-Real-Ip"),
 	}
 	for _, value := range values {
 		// The value of the forwared for header can be comma delimited coming from a cloud load balancer.

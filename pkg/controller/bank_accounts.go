@@ -2,19 +2,13 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/models"
 )
-
-func (c *Controller) handleBankAccounts(p iris.Party) {
-	p.Get("/", c.getBankAccounts)
-	p.Put("/{bankAccountId:uint64}", c.putBankAccounts)
-	p.Get("/{bankAccountId:uint64}/balances", c.getBalances)
-	p.Post("/", c.postBankAccounts)
-}
 
 // List All Bank Accounts
 // @Summary List All Bank Accounts
@@ -27,15 +21,14 @@ func (c *Controller) handleBankAccounts(p iris.Party) {
 // @Success 200 {array} swag.BankAccountResponse
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getBankAccounts(ctx iris.Context) {
+func (c *Controller) getBankAccounts(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	bankAccounts, err := repo.GetBankAccounts(c.getContext(ctx))
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve bank accounts")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve bank accounts")
 	}
 
-	ctx.JSON(bankAccounts)
+	return ctx.JSON(http.StatusOK, bankAccounts)
 }
 
 // Get Bank Account Balances
@@ -51,22 +44,20 @@ func (c *Controller) getBankAccounts(ctx iris.Context) {
 // @Failure 400 {object} InvalidBankAccountIdError Invalid Bank Account ID.
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getBalances(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify valid bank account Id")
-		return
+func (c *Controller) getBalances(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	balances, err := repo.GetBalances(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve balances")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve balances")
 	}
 
-	ctx.JSON(balances)
+	return ctx.JSON(http.StatusOK, balances)
 }
 
 // Create Bank Account
@@ -82,16 +73,14 @@ func (c *Controller) getBalances(ctx iris.Context) {
 // @Success 200 {object} swag.BankAccountResponse
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) postBankAccounts(ctx iris.Context) {
+func (c *Controller) postBankAccounts(ctx echo.Context) error {
 	var bankAccount models.BankAccount
-	if err := ctx.ReadJSON(&bankAccount); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(&bankAccount); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	if bankAccount.LinkId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "link Id must be provided")
-		return
+		return c.badRequest(ctx, "link ID must be provided")
 	}
 
 	bankAccount.BankAccountId = 0
@@ -100,8 +89,7 @@ func (c *Controller) postBankAccounts(ctx iris.Context) {
 	bankAccount.LastUpdated = time.Now().UTC()
 
 	if bankAccount.Name == "" {
-		c.returnError(ctx, http.StatusBadRequest, "bank account must have a name")
-		return
+		return c.badRequest(ctx, "bank account must have a name")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -110,35 +98,30 @@ func (c *Controller) postBankAccounts(ctx iris.Context) {
 	// management. If the link they specified does not, then a bank account cannot be created for this link.
 	isManual, err := repo.GetLinkIsManual(c.getContext(ctx), bankAccount.LinkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "could not validate link is manual")
-		return
+		return c.wrapPgError(ctx, err, "could not validate link is manual")
 	}
 
 	if !isManual {
-		c.returnError(ctx, http.StatusBadRequest, "cannot create a bank account for a non-manual link")
-		return
+		return c.badRequest(ctx, "cannot create a bank account for a non-manual link")
 	}
 
 	if err := repo.CreateBankAccounts(c.getContext(ctx), bankAccount); err != nil {
-		c.wrapPgError(ctx, err, "could not create bank account")
-		return
+		return c.wrapPgError(ctx, err, "could not create bank account")
 	}
 
-	ctx.JSON(bankAccount)
+	return ctx.JSON(http.StatusOK, bankAccount)
 }
 
-func (c *Controller) putBankAccounts(ctx iris.Context) {
-	bankAccountId := ctx.Params().GetUint64Default("bankAccountId", 0)
-	if bankAccountId == 0 {
-		c.badRequest(ctx, "must specify a valid bank account Id")
-		return
+func (c *Controller) putBankAccounts(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	existingBankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve bank account")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
 	}
 
 	var request struct {
@@ -148,9 +131,8 @@ func (c *Controller) putBankAccounts(ctx iris.Context) {
 		Name             string                   `json:"name"`
 		Status           models.BankAccountStatus `json:"status"`
 	}
-	if err = ctx.ReadJSON(&request); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err = ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	// TODO Eventually we should just query the link to see if its a manual link. But for now if the bank account has a
@@ -169,9 +151,8 @@ func (c *Controller) putBankAccounts(ctx iris.Context) {
 	// TODO This might not reflect a correct updatedAt in the resulting value. Because this is not being passed by
 	//   reference.
 	if err = repo.UpdateBankAccounts(c.getContext(ctx), *existingBankAccount); err != nil {
-		c.wrapPgError(ctx, err, "failed to update bank account")
-		return
+		return c.wrapPgError(ctx, err, "failed to update bank account")
 	}
 
-	ctx.JSON(*existingBankAccount)
+	return ctx.JSON(http.StatusOK, *existingBankAccount)
 }

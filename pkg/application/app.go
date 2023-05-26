@@ -1,68 +1,49 @@
 package application
 
 import (
-	"github.com/getsentry/sentry-go"
-	sentryiris "github.com/getsentry/sentry-go/iris"
-	"github.com/iris-contrib/middleware/cors"
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/context"
+	"net/http"
+	"time"
+
+	sentryecho "github.com/getsentry/sentry-go/echo"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/pkg/config"
-	"github.com/monetr/monetr/pkg/util"
 )
 
 type Controller interface {
-	RegisterRoutes(app *iris.Application)
+	RegisterRoutes(app *echo.Echo)
 }
 
-func NewApp(configuration config.Configuration, controllers ...Controller) *iris.Application {
-	app := iris.New()
-
-	app.Configure(iris.WithoutBanner)
-
-	// This will properly display IP addresses as most of the time the API will not be able to see
-	// the real IP due to being behind several networking layers. Masquerade only works so much and
-	// I'm not sure of a better way.
-	app.UseGlobal(func(ctx *context.Context) {
-		ipAddress := util.GetForwardedFor(ctx)
-		ctx.Request().RemoteAddr = util.GetForwardedFor(ctx)
-
-		// This way we still have a way to correlate users even if they are not authenticated.
-		if hub := sentryiris.GetHubFromContext(ctx); hub != nil {
-			hub.Scope().SetUser(sentry.User{
-				IPAddress: ipAddress,
-			})
-		}
-
-		ctx.Next()
-	})
-
-	app.Use(sentryiris.New(sentryiris.Options{
-		Repanic: false,
+func NewApp(configuration config.Configuration, controllers ...Controller) *echo.Echo {
+	app := echo.New()
+	app.HideBanner = true
+	app.HidePort = true
+	app.Use(sentryecho.New(sentryecho.Options{
+		Repanic:         false,
+		WaitForDelivery: false,
+		Timeout:         10 * time.Second,
 	}))
 
-	app.UseRouter(cors.New(cors.Options{
-		AllowedOrigins:  configuration.CORS.AllowedOrigins,
-		AllowOriginFunc: nil,
-		AllowedMethods: []string{
-			"HEAD",
-			"OPTIONS",
-			"GET",
-			"POST",
-			"PUT",
-			"DELETE",
+	app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: configuration.CORS.AllowedOrigins,
+		AllowMethods: []string{
+			http.MethodDelete,
+			http.MethodGet,
+			http.MethodHead,
+			http.MethodOptions,
+			http.MethodPost,
+			http.MethodPut,
 		},
-		AllowedHeaders: []string{
+		AllowHeaders: []string{
 			"Cookies",
 			"Content-Type",
 			"M-Token",
 			"sentry-trace",
 			"Authorization",
 		},
-		ExposedHeaders:     nil,
-		MaxAge:             0,
-		AllowCredentials:   true,
-		OptionsPassthrough: false,
-		Debug:              configuration.CORS.Debug,
+		ExposeHeaders:    nil,
+		MaxAge:           0,
+		AllowCredentials: true,
 	}))
 
 	for _, controller := range controllers {

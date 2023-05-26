@@ -3,11 +3,10 @@ package metrics
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -132,10 +131,10 @@ func (s *Stats) JobFinished(name string, accountId uint64, start time.Time) {
 	}).Inc()
 }
 
-func (s *Stats) FinishedRequest(ctx iris.Context, responseTime time.Duration) {
+func (s *Stats) FinishedRequest(ctx echo.Context, responseTime time.Duration) {
 	s.HTTPResponseTime.With(prometheus.Labels{
-		"path":   strings.TrimPrefix(ctx.RouteName(), ctx.Method()),
-		"method": ctx.Method(),
-		"status": strconv.FormatInt(int64(ctx.GetStatusCode()), 10),
+		"path":   ctx.Path(),
+		"method": ctx.Request().Method,
+		"status": strconv.FormatInt(int64(ctx.Response().Status), 10),
 	}).Observe(float64(responseTime.Milliseconds()))
 }

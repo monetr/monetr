@@ -9,8 +9,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/core/router"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
@@ -20,15 +19,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
-
-func (c *Controller) handlePlaidLinkEndpoints(p router.Party) {
-	p.Put("/update/{linkId:uint64}", c.updatePlaidLink)
-	p.Post("/update/callback", c.updatePlaidTokenCallback)
-	p.Get("/token/new", c.newPlaidToken)
-	p.Post("/token/callback", c.plaidTokenCallback)
-	p.Get("/setup/wait/{linkId:uint64}", c.waitForPlaid)
-	p.Post("/sync", c.postSyncPlaidManually)
-}
 
 func (c *Controller) storeLinkTokenInCache(
 	ctx context.Context,
@@ -78,20 +68,18 @@ func (c *Controller) removeLinkTokenFromCache(
 	)
 }
 
-func (c *Controller) newPlaidToken(ctx iris.Context) {
+func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	// Retrieve the user's details. We need to pass some of these along to
 	// plaid as part of the linking process.
 	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to get user details for link")
 	}
 
 	if !c.configuration.Plaid.Enabled {
-		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
-		return
+		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
 	userId := c.mustGetUserId(ctx)
@@ -104,14 +92,12 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 
 	numberOfLinks, err := repo.GetNumberOfPlaidLinks(c.getContext(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine the number of existing plaid links")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine the number of existing plaid links")
 	}
 
 	// If there is a configured limit on Plaid links then enforce that limit.
 	if maxLinks := c.configuration.Plaid.MaxNumberOfLinks; maxLinks > 0 && numberOfLinks >= maxLinks {
-		c.badRequest(ctx, "max number of Plaid links already reached")
-		return
+		return c.badRequest(ctx, "max number of Plaid links already reached")
 	}
 
 	// If billing is enabled and the current account is trialing, then limit them to a single Plaid link until their
@@ -119,8 +105,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 	if c.configuration.Stripe.IsBillingEnabled() {
 		trialing, err := c.paywall.GetSubscriptionIsTrialing(c.getContext(ctx), c.mustGetAccountId(ctx))
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine trial status")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine trial status")
 		}
 
 		if trialing && numberOfLinks > 0 {
@@ -128,24 +113,22 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 				"numberOfLinks": numberOfLinks,
 				"trialing":      trialing,
 			}).Debug("cannot add more Plaid links during trial")
-			c.badRequest(ctx, "cannot add additional Plaid links during trial")
-			return
+			return c.badRequest(ctx, "cannot add additional Plaid links during trial")
 		}
 	}
 
 	// If we are trying to not send a ton of requests then check the cache to see if we still have a valid link token that
 	// we can use.
-	if checkCache, err := ctx.URLParamBool("use_cache"); err == nil && checkCache {
+	if checkCache, err := strconv.ParseBool(ctx.QueryParam("use_cache")); err == nil && checkCache {
 		if linkToken, err := c.checkCacheForLinkToken(
 			c.getContext(ctx),
 			userId,
 			0,
 		); err == nil && len(linkToken) > 0 {
 			log.Info("successfully found existing link token in cache")
-			ctx.JSON(map[string]interface{}{
+			return ctx.JSON(http.StatusOK, map[string]interface{}{
 				"linkToken": linkToken,
 			})
-			return
 		}
 		log.Info("no link token was found in the cache")
 	}
@@ -170,8 +153,7 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		EmailAddressVerifiedTime: me.Login.EmailVerifiedAt,
 	})
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token")
 	}
 
 	if err = c.storeLinkTokenInCache(
@@ -184,28 +166,22 @@ func (c *Controller) newPlaidToken(ctx iris.Context) {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"linkToken": token.Token(),
 	})
 }
 
-func (c *Controller) updatePlaidLink(ctx iris.Context) {
+func (c *Controller) updatePlaidLink(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
-		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
-		return
+		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
-	linkId := ctx.Params().GetUint64Default("linkId", 0)
-	if linkId == 0 {
-		c.badRequest(ctx, "must specify a link Id")
-		return
+	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
+	if err != nil || linkId == 0 {
+		return c.badRequest(ctx, "must specify a link Id")
 	}
 
-	updateAccountSelection, err := strconv.ParseBool(ctx.URLParamDefault("update_account_selection", "false"))
-	if err != nil {
-		c.badRequest(ctx, "update_account_selection must be provided a valid boolean value")
-		return
-	}
+	updateAccountSelection := urlParamBoolDefault(ctx, "update_account_selection", false)
 
 	log := c.getLog(ctx).WithField("linkId", linkId)
 
@@ -214,36 +190,30 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve link")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
 	if link.LinkType != models.PlaidLinkType {
-		c.badRequest(ctx, "cannot update a non-Plaid link")
-		return
+		return c.badRequest(ctx, "cannot update a non-Plaid link")
 	}
 
 	if link.PlaidLink == nil {
-		c.returnError(ctx, http.StatusInternalServerError, "no Plaid details associated with link")
-		return
+		return c.returnError(ctx, http.StatusInternalServerError, "no Plaid details associated with link")
 	}
 
 	me, err := repo.GetMe(c.getContext(ctx))
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve user details")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve user details")
 	}
 
 	client, err := c.plaid.NewClientFromLink(c.getContext(ctx), me.AccountId, linkId)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client for link")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client for link")
 	}
 
 	token, err := client.UpdateItem(c.getContext(ctx), updateAccountSelection)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token to update Plaid link")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link token to update Plaid link")
 	}
 
 	if err = c.storeLinkTokenInCache(
@@ -256,7 +226,7 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 		log.WithError(err).Warn("failed to cache link token")
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"linkToken": token.Token(),
 	})
 }
@@ -273,10 +243,9 @@ func (c *Controller) updatePlaidLink(ctx iris.Context) {
 // @Router /plaid/update/callback [post]
 // @Success 200 {object} swag.LinkResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
+func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
-		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
-		return
+		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
 	var callbackRequest struct {
@@ -284,17 +253,15 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 		PublicToken string   `json:"publicToken"`
 		AccountIds  []string `json:"accountIds"`
 	}
-	if err := ctx.ReadJSON(&callbackRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
-		return
+	if err := ctx.Bind(&callbackRequest); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	link, err := repo.GetLink(c.getContext(ctx), callbackRequest.LinkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve link")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 	log := c.getLog(ctx)
 
@@ -308,8 +275,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 
 	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 	}
 
 	currentAccessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(
@@ -330,8 +296,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 			result.AccessToken,
 		); err != nil {
 			log.WithError(err).Warn("failed to store updated access token")
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
 		}
 	} else {
 		log.Info("access token for link has not changed")
@@ -340,14 +305,12 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 	link.LinkStatus = models.LinkStatusSetup
 	link.ErrorCode = nil
 	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
-		c.wrapPgError(ctx, err, "failed to update link status")
-		return
+		return c.wrapPgError(ctx, err, "failed to update link status")
 	}
 
 	currentBankAccounts, err := repo.GetBankAccountsByLinkId(c.getContext(ctx), link.LinkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve existing bank accounts")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve existing bank accounts")
 	}
 	currentBankAccountPlaidIds := map[string]struct{}{}
 	for _, bankAccount := range currentBankAccounts {
@@ -366,8 +329,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 	if len(newBankAccountPlaidIds) > 0 {
 		client, err := c.plaid.NewClientFromLink(c.getContext(ctx), link.AccountId, link.LinkId)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client for link")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client for link")
 		}
 
 		// Retrieve the details for those bank accounts from Plaid.
@@ -375,8 +337,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 		// account update selection anyway. Don't delete those bank accounts, but mark them as no longer in sync.
 		plaidAccounts, err := client.GetAccounts(c.getContext(ctx), newBankAccountPlaidIds...)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve new bank accounts")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve new bank accounts")
 		}
 
 		now := time.Now()
@@ -398,8 +359,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 			}
 		}
 		if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create new bank accounts")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create new bank accounts")
 		}
 	}
 
@@ -413,7 +373,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 		log.WithError(err).Warn("failed to trigger pulling latest transactions after updating plaid link")
 	}
 
-	ctx.JSON(link)
+	return ctx.JSON(http.StatusOK, link)
 }
 
 // Plaid Token Callback
@@ -428,10 +388,9 @@ func (c *Controller) updatePlaidTokenCallback(ctx iris.Context) {
 // @Router /plaid/token/callback [post]
 // @Success 200 {object} swag.PlaidTokenCallbackResponse
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) plaidTokenCallback(ctx iris.Context) {
+func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
-		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
-		return
+		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
 	var callbackRequest struct {
@@ -440,9 +399,8 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		InstitutionName string   `json:"institutionName"`
 		AccountIds      []string `json:"accountIds"`
 	}
-	if err := ctx.ReadJSON(&callbackRequest); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
-		return
+	if err := ctx.Bind(&callbackRequest); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	log := c.getLog(ctx)
@@ -456,21 +414,18 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 	}
 
 	if len(callbackRequest.AccountIds) == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must select at least one account")
-		return
+		return c.badRequest(ctx, "must select at least one account")
 	}
 
 	callbackRequest.PublicToken = strings.TrimSpace(callbackRequest.PublicToken)
 	if callbackRequest.PublicToken == "" {
-		c.badRequest(ctx, "must provide a public token")
-		return
+		return c.badRequest(ctx, "must provide a public token")
 	}
 
 	log.Debug("exchanging public token for plaid access token")
 	result, err := c.plaid.ExchangePublicToken(c.getContext(ctx), callbackRequest.PublicToken)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -490,8 +445,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		result.AccessToken,
 	); err != nil {
 		log.WithError(err).Errorf("failed to store access token")
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
 	}
 
 	plaidLink := models.PlaidLink{
@@ -503,8 +457,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		UsePlaidSync:    true,
 	}
 	if err = repo.CreatePlaidLink(c.getContext(ctx), &plaidLink); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
 	}
 
 	link := models.Link{
@@ -517,27 +470,23 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		CreatedByUserId:    repo.UserId(),
 	}
 	if err = repo.CreateLink(c.getContext(ctx), &link); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
 	}
 
 	// Create a plaid client for the new link.
 	client, err := c.plaid.NewClient(c.getContext(ctx), &link, result.AccessToken, result.ItemId)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid client")
 	}
 
 	// Then use that client to retrieve that link's bank accounts.
 	plaidAccounts, err := client.GetAccounts(c.getContext(ctx), callbackRequest.AccountIds...)
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve accounts")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve accounts")
 	}
 
 	if len(plaidAccounts) == 0 {
-		c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
-		return
+		return c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
 	}
 
 	now := time.Now().UTC()
@@ -559,8 +508,7 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 		}
 	}
 	if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
 	}
 
 	if !c.configuration.Plaid.WebhooksEnabled {
@@ -578,12 +526,11 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 			})
 		}
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to pull initial transactions")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to pull initial transactions")
 		}
 	}
 
-	ctx.JSON(map[string]interface{}{
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"success": true,
 		"linkId":  link.LinkId,
 	})
@@ -599,16 +546,13 @@ func (c *Controller) plaidTokenCallback(ctx iris.Context) {
 // @Router /plaid/link/setup/wait/{linkId:uint64} [get]
 // @Success 200
 // @Success 408
-func (c *Controller) waitForPlaid(ctx iris.Context) {
+func (c *Controller) waitForPlaid(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
-		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
-		return
+		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
-
-	linkId := ctx.Params().GetUint64Default("linkId", 0)
+	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
 	if linkId == 0 {
-		c.badRequest(ctx, "must specify a job Id")
-		return
+		return c.badRequest(ctx, "must specify a job Id")
 	}
 
 	log := c.log.WithFields(logrus.Fields{
@@ -619,22 +563,20 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve link")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
 	// If the link is done just return.
 	if link.LinkStatus == models.LinkStatusSetup {
 		crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
-		return
+		return ctx.NoContent(http.StatusOK)
 	}
 
 	channelName := fmt.Sprintf("initial:plaid:link:%d:%d", link.AccountId, link.LinkId)
 
 	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to listen on channel")
-		return
+		return c.wrapPgError(ctx, err, "failed to listen on channel")
 	}
 	defer func() {
 		if err = listener.Close(); err != nil {
@@ -659,28 +601,25 @@ func (c *Controller) waitForPlaid(ctx iris.Context) {
 
 	select {
 	case <-deadLine.C:
-		ctx.StatusCode(http.StatusRequestTimeout)
 		log.Trace("timed out waiting for link to be setup")
-		return
+		return ctx.NoContent(http.StatusRequestTimeout)
 	case <-listener.Channel():
 		// Just exit successfully, any message on this channel is considered a success.
 		log.Trace("link setup successfully")
-		return
+		return ctx.NoContent(http.StatusOK)
 	}
 }
 
-func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
+func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
-		c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
-		return
+		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
 
 	var request struct {
 		LinkId uint64 `json:"linkId"`
 	}
-	if err := ctx.ReadJSON(&request); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	log := c.getLog(ctx).WithFields(logrus.Fields{
@@ -690,13 +629,11 @@ func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), request.LinkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve link")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
 	if link.LinkType != models.PlaidLinkType {
-		c.badRequest(ctx, "cannot manually sync a non-Plaid link")
-		return
+		return c.badRequest(ctx, "cannot manually sync a non-Plaid link")
 	}
 
 	switch link.LinkStatus {
@@ -704,16 +641,13 @@ func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
 		log.Debug("link is not revoked, triggering manual sync")
 	default:
 		log.WithField("status", link.LinkStatus).Warn("link is not in a valid status, it cannot be manually synced")
-		c.badRequest(ctx, "link is not in a valid status, it cannot be manually synced")
-		return
+		return c.badRequest(ctx, "link is not in a valid status, it cannot be manually synced")
 	}
 
 	if ok, err := repo.UpdateLinkManualSyncTimestampMaybe(c.getContext(ctx), link.LinkId); err != nil {
-		c.wrapPgError(ctx, err, "could not manually sync link")
-		return
+		return c.wrapPgError(ctx, err, "could not manually sync link")
 	} else if !ok {
-		c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
-		return
+		return c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
 	}
 
 	if link.PlaidLink.UsePlaidSync {
@@ -730,9 +664,8 @@ func (c *Controller) postSyncPlaidManually(ctx iris.Context) {
 		})
 	}
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to trigger manual sync")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to trigger manual sync")
 	}
 
-	ctx.StatusCode(http.StatusAccepted)
+	return ctx.NoContent(http.StatusAccepted)
 }

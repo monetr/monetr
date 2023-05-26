@@ -152,16 +152,13 @@ endif
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
-$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(SOURCE_MAP_DIR)
+UI_ENTRYPOINT=$(STATIC_DIR)/index.html
+$(UI_ENTRYPOINT): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(SOURCE_MAP_DIR)
 	$(call infoMsg,Building UI files)
+	rm -rf $(SOURCE_MAP_DIR)/*.js.map # Removing old map files
 	git clean -f -X $(STATIC_DIR)
 	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(YARN) build --mode production
-	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
-	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
-	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png
-	cp $(PWD)/public/manifest.json $(STATIC_DIR)/manifest.json
-	cp $(PWD)/public/robots.txt $(STATIC_DIR)/robots.txt
-	mv $(STATIC_DIR)/*.js.map $(SOURCE_MAP_DIR)
+	cp $(STATIC_DIR)/assets/scripts/*.js.map $(SOURCE_MAP_DIR)
 
 GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS)
@@ -225,7 +222,7 @@ else
 endif
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
-$(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
+$(BINARY): $(BUILD_DIR) $(UI_ENTRYPOINT) $(GOMODULES)
 ifndef LITE
 $(BINARY): $(NOTICE)
 endif

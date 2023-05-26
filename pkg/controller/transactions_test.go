@@ -177,11 +177,27 @@ func TestPutTransactions(t *testing.T) {
 		response.JSON().Path("$.error").String().Equal("must specify a valid bank account Id")
 	})
 
-	t.Run("invalid transaction Id", func(t *testing.T) {
+	t.Run("invalid transaction Id numeric", func(t *testing.T) {
 		e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/0000`).
+			WithCookie(TestCookieName, token).
+			WithJSON(models.Transaction{
+				Name:   "PayPal",
+				Amount: 1243,
+			}).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").String().Equal("must specify a valid transaction Id")
+	})
+
+	t.Run("invalid transaction Id word", func(t *testing.T) {
+		e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		response := e.PUT(`/api/bank_accounts/1234/transactions/foo`).
 			WithCookie(TestCookieName, token).
 			WithJSON(models.Transaction{
 				Name:   "PayPal",
@@ -203,7 +219,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("malformed JSON: invalid character 'I' looking for beginning of value")
+		response.JSON().Path("$.error").String().Equal("invalid JSON body")
 	})
 
 	t.Run("no authentication token", func(t *testing.T) {
@@ -217,7 +233,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("token must be provided")
+		response.JSON().Path("$.error").String().Equal("unauthorized")
 	})
 
 	t.Run("bad authentication token", func(t *testing.T) {
@@ -232,6 +248,6 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("token is not valid")
+		response.JSON().Path("$.error").String().Equal("unauthorized")
 	})
 }

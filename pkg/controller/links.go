@@ -3,12 +3,13 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
-	"github.com/kataras/iris/v12"
+	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
@@ -16,17 +17,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
-
-func (c *Controller) linksController(p iris.Party) {
-	// GET will list all the links in the current account.
-	p.Get("/", c.getLinks)
-	p.Get("/{linkId:uint64}", c.getLink)
-	p.Post("/", c.postLinks)
-	p.Put("/{linkId:uint64}", c.putLink)
-	p.Put("/convert/{linkId:uint64}", c.convertLink)
-	p.Delete("/{linkId:uint64}", c.deleteLink)
-	p.Get("/wait/{linkId:uint64}", c.waitForDeleteLink)
-}
 
 // List all links
 // @Summary List All Links
@@ -39,16 +29,15 @@ func (c *Controller) linksController(p iris.Party) {
 // @Success 200 {array} swag.LinkResponse
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getLinks(ctx iris.Context) {
+func (c *Controller) getLinks(ctx echo.Context) error {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	links, err := repo.GetLinks(c.getContext(ctx))
 	if err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve links")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve links")
 	}
 
-	ctx.JSON(links)
+	return ctx.JSON(http.StatusOK, links)
 }
 
 // Get Link
@@ -65,40 +54,36 @@ func (c *Controller) getLinks(ctx iris.Context) {
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 404 {object} LinkNotFoundError The link could not be found.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) getLink(ctx iris.Context) {
-	linkId := ctx.Params().GetUint64Default("linkId", 0)
-	if linkId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to retrieve")
-		return
+func (c *Controller) getLink(ctx echo.Context) error {
+	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
+	if err != nil || linkId == 0 {
+		return c.badRequest(ctx, "must specify a link Id to retrieve")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	links, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve link")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
-	ctx.JSON(links)
+	return ctx.JSON(http.StatusOK, links)
 }
 
-func (c *Controller) postLinks(ctx iris.Context) {
+func (c *Controller) postLinks(ctx echo.Context) error {
 	var request struct {
 		InstitutionName       string  `json:"institutionName"`
 		CustomInstitutionName string  `json:"customInstitutionName"`
 		Description           *string `json:"description"`
 	}
-	if err := ctx.ReadJSON(&request); err != nil {
-		c.invalidJson(ctx)
-		return
+	if err := ctx.Bind(&request); err != nil {
+		return c.invalidJson(ctx)
 	}
 
 	request.InstitutionName = strings.TrimSpace(request.InstitutionName)
 	request.CustomInstitutionName = strings.TrimSpace(request.CustomInstitutionName)
 	if request.InstitutionName == "" {
-		c.badRequest(ctx, "link must have an institution name")
-		return
+		return c.badRequest(ctx, "link must have an institution name")
 	}
 
 	// If a description is provided. Trim the space on the description.
@@ -119,11 +104,10 @@ func (c *Controller) postLinks(ctx iris.Context) {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create manual link")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not create manual link")
 	}
 
-	ctx.JSON(link)
+	return ctx.JSON(http.StatusOK, link)
 }
 
 // Update Link
@@ -142,26 +126,24 @@ func (c *Controller) postLinks(ctx iris.Context) {
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 404 {object} LinkNotFoundError The link could not be found.
 // @Failure 500 {object} ApiError "Something went wrong on our end."
-func (c *Controller) putLink(ctx iris.Context) {
-	linkId := ctx.Params().GetUint64Default("linkId", 0)
-	if linkId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to update")
-		return
+func (c *Controller) putLink(ctx echo.Context) error {
+	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
+	if err != nil {
+		return c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to update")
 	}
+
 	var link struct {
 		CustomInstitutionName string  `json:"customInstitutionName"`
 		Description           *string `json:"description"`
 	}
-	if err := ctx.ReadJSON(&link); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
-		return
+	if err := ctx.Bind(&link); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	existingLink, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve existing link for update")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve existing link for update")
 	}
 
 	hasUpdate := false
@@ -176,17 +158,14 @@ func (c *Controller) putLink(ctx iris.Context) {
 	}
 
 	if !hasUpdate {
-		ctx.JSON(&existingLink)
-		ctx.StatusCode(http.StatusNotModified)
-		return
+		return ctx.JSON(http.StatusNotModified, existingLink)
 	}
 
 	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {
-		c.wrapPgError(ctx, err, "could not update link")
-		return
+		return c.wrapPgError(ctx, err, "could not update link")
 	}
 
-	ctx.JSON(existingLink)
+	return ctx.JSON(http.StatusOK, existingLink)
 }
 
 // Convert A Link To Manual
@@ -203,11 +182,10 @@ func (c *Controller) putLink(ctx iris.Context) {
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 404 {object} LinkNotFoundError A not found status code and an error is returned if the provided link ID does not exist.
 // @Failure 500 {object} ApiError "Something went wrong on our end."
-func (c *Controller) convertLink(ctx iris.Context) {
-	linkId := ctx.Params().GetUint64Default("linkId", 0)
-	if linkId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to convert")
-		return
+func (c *Controller) convertLink(ctx echo.Context) error {
+	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
+	if err != nil {
+		return c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to convert")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -215,28 +193,24 @@ func (c *Controller) convertLink(ctx iris.Context) {
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
 		if errors.Is(errors.Cause(err), pg.ErrNoRows) {
-			c.notFound(ctx, "the specified link ID does not exist")
-			return
+			return c.notFound(ctx, "the specified link ID does not exist")
 		}
 
-		c.wrapPgError(ctx, err, "could not retrieve link to convert")
-		return
+		return c.wrapPgError(ctx, err, "could not retrieve link to convert")
 	}
 
 	if link.LinkType == models.ManualLinkType {
-		c.badRequest(ctx, "link is already manual")
-		return
+		return c.badRequest(ctx, "link is already manual")
 	}
 
 	link.LinkType = models.ManualLinkType
 	link.LinkStatus = models.LinkStatusSetup
 
 	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
-		c.wrapPgError(ctx, err, "failed to convert link to manual")
-		return
+		return c.wrapPgError(ctx, err, "failed to convert link to manual")
 	}
 
-	ctx.JSON(link)
+	return ctx.JSON(http.StatusOK, link)
 }
 
 // Delete Link
@@ -260,23 +234,20 @@ func (c *Controller) convertLink(ctx iris.Context) {
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 404 {object} LinkNotFoundError A not found status code and an error is returned if the provided link ID does not exist.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) deleteLink(ctx iris.Context) {
-	linkId := ctx.Params().GetUint64Default("linkId", 0)
-	if linkId == 0 {
-		c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to update")
-		return
+func (c *Controller) deleteLink(ctx echo.Context) error {
+	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
+	if err != nil {
+		return c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to delete")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
 		if errors.Is(errors.Cause(err), pg.ErrNoRows) {
-			c.notFound(ctx, "the specified link ID does not exist")
-			return
+			return c.notFound(ctx, "the specified link ID does not exist")
 		}
 
-		c.wrapPgError(ctx, err, "failed to retrieve the specified link")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
 	if link.LinkType == models.PlaidLinkType {
@@ -284,8 +255,7 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 			crumbs.Error(c.getContext(ctx), "BUG: Plaid Link object was missing on the link object", "bug", map[string]interface{}{
 				"linkId": link.LinkId,
 			})
-			c.returnError(ctx, http.StatusInternalServerError, "missing plaid data to remove link")
-			return
+			return c.returnError(ctx, http.StatusInternalServerError, "missing plaid data to remove link")
 		}
 
 		accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId)
@@ -294,14 +264,12 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 				"linkId": link.LinkId,
 				"itemId": link.PlaidLink.ItemId,
 			})
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
 		}
 
 		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken, link.PlaidLink.ItemId)
 		if err != nil {
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
 		}
 
 		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
@@ -310,8 +278,7 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 				"itemId": link.PlaidLink.ItemId,
 				"error":  err.Error(),
 			})
-			c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
-			return
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
 		}
 
 		if err = c.plaidSecrets.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId); err != nil {
@@ -330,9 +297,10 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 		AccountId: link.AccountId,
 		LinkId:    link.LinkId,
 	}); err != nil {
-		c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to enqueue link removal job")
-		return
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to enqueue link removal job")
 	}
+
+	return ctx.NoContent(http.StatusOK)
 }
 
 // Wait For Link Deletion
@@ -350,11 +318,10 @@ func (c *Controller) deleteLink(ctx iris.Context) {
 // @Success 408
 // @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
 // @Failure 500 {object} ApiError Something went wrong on our end.
-func (c *Controller) waitForDeleteLink(ctx iris.Context) {
-	linkId := ctx.Params().GetUint64Default("linkId", 0)
-	if linkId == 0 {
-		c.badRequest(ctx, "must specify a job Id")
-		return
+func (c *Controller) waitForDeleteLink(ctx echo.Context) error {
+	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
+	if err != nil {
+		return c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to wait for")
 	}
 
 	log := c.getLog(ctx).WithFields(logrus.Fields{
@@ -363,22 +330,22 @@ func (c *Controller) waitForDeleteLink(ctx iris.Context) {
 	repo := c.mustGetAuthenticatedRepository(ctx)
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to retrieve link")
-		return
+		return c.wrapPgError(ctx, err, "failed to retrieve link")
 	}
 
 	// If the link is done just return.
+	// TODO This is all wrong, why are we checking for link status setup for deleting?
+	//      Just going to have it return nothing for now.
 	if link.LinkStatus == models.LinkStatusSetup {
 		crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
-		return
+		return ctx.NoContent(http.StatusNoContent)
 	}
 
 	channelName := fmt.Sprintf("link:remove:%d:%d", repo.AccountId(), linkId)
 
 	listener, err := c.ps.Subscribe(c.getContext(ctx), channelName)
 	if err != nil {
-		c.wrapPgError(ctx, err, "failed to listen on channel")
-		return
+		return c.wrapPgError(ctx, err, "failed to listen on channel")
 	}
 	defer func() {
 		if err = listener.Close(); err != nil {
@@ -403,12 +370,11 @@ func (c *Controller) waitForDeleteLink(ctx iris.Context) {
 
 	select {
 	case <-deadLine.C:
-		ctx.StatusCode(http.StatusRequestTimeout)
 		log.Trace("timed out waiting for link to be removed")
-		return
+		return ctx.NoContent(http.StatusRequestTimeout)
 	case <-listener.Channel():
 		// Just exit successfully, any message on this channel is considered a success.
 		log.Trace("link removed successfully")
-		return
+		return ctx.NoContent(http.StatusOK)
 	}
 }
