@@ -8,7 +8,6 @@ import (
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/mock_stripe"
-	"github.com/monetr/monetr/pkg/swag"
 )
 
 func TestGetAfterCheckout(t *testing.T) {
@@ -45,9 +44,9 @@ func TestGetAfterCheckout(t *testing.T) {
 		{ // Create a checkout session
 			result := e.POST("/api/billing/create_checkout").
 				WithCookie(TestCookieName, token).
-				WithJSON(swag.CreateCheckoutSessionRequest{
-					PriceId:    nil,
-					CancelPath: nil,
+				WithJSON(map[string]interface{}{
+					"priceId":    nil,
+					"cancelPath": nil,
 				}).
 				Expect()
 
@@ -114,9 +113,9 @@ func TestGetAfterCheckout(t *testing.T) {
 		{ // Create a checkout session
 			result := e.POST("/api/billing/create_checkout").
 				WithCookie(TestCookieName, token).
-				WithJSON(swag.CreateCheckoutSessionRequest{
-					PriceId:    nil,
-					CancelPath: nil,
+				WithJSON(map[string]interface{}{
+					"priceId":    nil,
+					"cancelPath": nil,
 				}).
 				Expect()
 
@@ -154,9 +153,9 @@ func TestGetAfterCheckout(t *testing.T) {
 		{
 			result := e.POST("/api/billing/create_checkout").
 				WithCookie(TestCookieName, token).
-				WithJSON(swag.CreateCheckoutSessionRequest{
-					PriceId:    nil,
-					CancelPath: nil,
+				WithJSON(map[string]interface{}{
+					"priceId":    nil,
+					"cancelPath": nil,
 				}).
 				Expect()
 

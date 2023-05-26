@@ -12,9 +12,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/fixtures"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/mock_stripe"
-	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
-	"github.com/monetr/monetr/pkg/swag"
 	"github.com/monetr/monetr/pkg/verification"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,9 +23,9 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    email,
+				"password": password,
 			}).
 			Expect()
 
@@ -42,9 +40,9 @@ func TestLogin(t *testing.T) {
 		fixtures.GivenIHaveTOTPForLogin(t, user.Login)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    user.Login.Email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    user.Login.Email,
+				"password": password,
 			}).
 			Expect()
 
@@ -62,9 +60,9 @@ func TestLogin(t *testing.T) {
 
 		{ // Send the initial request and make sure it responds with the error.
 			response := e.POST("/api/authentication/login").
-				WithJSON(swag.LoginRequest{
-					Email:    user.Login.Email,
-					Password: password,
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
 				}).
 				Expect()
 
@@ -75,10 +73,10 @@ func TestLogin(t *testing.T) {
 
 		{ // Then try to authenticate using the code.
 			response := e.POST("/api/authentication/login").
-				WithJSON(swag.LoginRequest{
-					Email:    user.Login.Email,
-					Password: password,
-					TOTP:     loginTotp.Now(),
+				WithJSON(map[string]interface{}{
+					"email":    user.Login.Email,
+					"password": password,
+					"totp":     loginTotp.Now(),
 				}).
 				Expect()
 
@@ -94,10 +92,10 @@ func TestLogin(t *testing.T) {
 		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, user.Login)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    user.Login.Email,
-				Password: password,
-				TOTP:     loginTotp.Now(),
+			WithJSON(map[string]interface{}{
+				"email":    user.Login.Email,
+				"password": password,
+				"totp":     loginTotp.Now(),
 			}).
 			Expect()
 
@@ -110,10 +108,10 @@ func TestLogin(t *testing.T) {
 		user, password := fixtures.GivenIHaveABasicAccount(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    user.Login.Email,
-				Password: password,
-				TOTP:     "123456",
+			WithJSON(map[string]interface{}{
+				"email":    user.Login.Email,
+				"password": password,
+				"totp":     "123456",
 			}).
 			Expect()
 
@@ -131,9 +129,9 @@ func TestLogin(t *testing.T) {
 		fixtures.GivenIHaveAnAccount(t, login)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    login.Email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    login.Email,
+				"password": password,
 			}).
 			Expect()
 
@@ -148,9 +146,9 @@ func TestLogin(t *testing.T) {
 		login, password := fixtures.GivenIHaveLogin(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    login.Email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    login.Email,
+				"password": password,
 			}).
 			Expect()
 
@@ -170,9 +168,9 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, login.LoginId, user2.LoginId, "user should have the given login")
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    login.Email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    login.Email,
+				"password": password,
 			}).
 			Expect()
 
@@ -187,9 +185,9 @@ func TestLogin(t *testing.T) {
 		e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    "notan.email",
-				Password: "atLeastThisIsAPassword",
+			WithJSON(map[string]interface{}{
+				"email":    "notan.email",
+				"password": "atLeastThisIsAPassword",
 			}).
 			Expect()
 
@@ -202,9 +200,9 @@ func TestLogin(t *testing.T) {
 		e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    "Barry Gibbs <bg@example.com>",
-				Password: "atLeastThisIsAPassword",
+			WithJSON(map[string]interface{}{
+				"email":    "Barry Gibbs <bg@example.com>",
+				"password": "atLeastThisIsAPassword",
 			}).
 			Expect()
 
@@ -217,9 +215,9 @@ func TestLogin(t *testing.T) {
 		e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    "example@example.com",
-				Password: "short",
+			WithJSON(map[string]interface{}{
+				"email":    "example@example.com",
+				"password": "short",
 			}).
 			Expect()
 
@@ -244,9 +242,9 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    email,
+				"password": password,
 			}).
 			Expect()
 
@@ -261,9 +259,9 @@ func TestLogin(t *testing.T) {
 		e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    gofakeit.Email(),
-				Password: "badPassword",
+			WithJSON(map[string]interface{}{
+				"email":    gofakeit.Email(),
+				"password": "badPassword",
 			}).
 			Expect()
 
@@ -298,10 +296,10 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
-				Captcha:  myownsanity.StringP("Believe it or not, I am a valid captcha"),
+			WithJSON(map[string]interface{}{
+				"email":    email,
+				"password": password,
+				"captcha":  "Believe it or not, I am a valid captcha",
 			}).
 			Expect()
 
@@ -320,9 +318,9 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    email,
+				"password": password,
 			}).
 			Expect()
 
@@ -357,9 +355,9 @@ func TestLogin(t *testing.T) {
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
-			WithJSON(swag.LoginRequest{
-				Email:    email,
-				Password: password,
+			WithJSON(map[string]interface{}{
+				"email":    email,
+				"password": password,
 			}).
 			Expect()
 
@@ -378,9 +376,9 @@ func TestLogout(t *testing.T) {
 		var token string
 		{ // Login to monetr and retrieve our token cookie.
 			response := e.POST("/api/authentication/login").
-				WithJSON(swag.LoginRequest{
-					Email:    email,
-					Password: password,
+				WithJSON(map[string]interface{}{
+					"email":    email,
+					"password": password,
 				}).
 				Expect()
 
@@ -821,9 +819,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Now that we have registered using this email. Try to login without verifying.
 			response := e.POST("/api/authentication/login").
-				WithJSON(swag.LoginRequest{
-					Email:    registerRequest.Email,
-					Password: registerRequest.Password,
+				WithJSON(map[string]interface{}{
+					"email":    registerRequest.Email,
+					"password": registerRequest.Password,
 				}).
 				Expect()
 
@@ -837,8 +835,8 @@ func TestVerifyEmail(t *testing.T) {
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(swag.VerifyRequest{
-					Token: verificationToken,
+				WithJSON(map[string]interface{}{
+					"token": verificationToken,
 				}).
 				Expect()
 
@@ -849,9 +847,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Now try to login AFTER we have verified the email address.
 			response := e.POST("/api/authentication/login").
-				WithJSON(swag.LoginRequest{
-					Email:    registerRequest.Email,
-					Password: registerRequest.Password,
+				WithJSON(map[string]interface{}{
+					"email":    registerRequest.Email,
+					"password": registerRequest.Password,
 				}).
 				Expect()
 
@@ -896,8 +894,8 @@ func TestVerifyEmail(t *testing.T) {
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(swag.VerifyRequest{
-					Token: verificationToken,
+				WithJSON(map[string]interface{}{
+					"token": verificationToken,
 				}).
 				Expect()
 
@@ -910,9 +908,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
 			response := e.POST("/api/authentication/login").
-				WithJSON(swag.LoginRequest{
-					Email:    registerRequest.Email,
-					Password: registerRequest.Password,
+				WithJSON(map[string]interface{}{
+					"email":    registerRequest.Email,
+					"password": registerRequest.Password,
 				}).
 				Expect()
 
@@ -958,8 +956,8 @@ func TestVerifyEmail(t *testing.T) {
 			time.Sleep(2 * time.Second) // Make the code expire
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(swag.VerifyRequest{
-					Token: verificationToken,
+				WithJSON(map[string]interface{}{
+					"token": verificationToken,
 				}).
 				Expect()
 
@@ -972,9 +970,9 @@ func TestVerifyEmail(t *testing.T) {
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
 			response := e.POST("/api/authentication/login").
-				WithJSON(swag.LoginRequest{
-					Email:    registerRequest.Email,
-					Password: registerRequest.Password,
+				WithJSON(map[string]interface{}{
+					"email":    registerRequest.Email,
+					"password": registerRequest.Password,
 				}).
 				Expect()
 
@@ -987,8 +985,8 @@ func TestVerifyEmail(t *testing.T) {
 		e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST("/api/authentication/verify").
-			WithJSON(swag.VerifyRequest{
-				Token: "",
+			WithJSON(map[string]interface{}{
+				"token": "",
 			}).
 			Expect()
 
@@ -1056,8 +1054,8 @@ func TestResendVerificationEmail(t *testing.T) {
 
 		{ // Now try to resend the verification email.
 			response := e.POST("/api/authentication/verify/resend").
-				WithJSON(swag.ResendVerificationRequest{
-					Email: registerRequest.Email,
+				WithJSON(map[string]interface{}{
+					"email": registerRequest.Email,
 				}).
 				Expect()
 
@@ -1076,8 +1074,8 @@ func TestResendVerificationEmail(t *testing.T) {
 		app, e := NewTestApplicationExWithConfig(t, config)
 
 		response := e.POST("/api/authentication/verify/resend").
-			WithJSON(swag.ResendVerificationRequest{
-				Email: testutils.GetUniqueEmail(t),
+			WithJSON(map[string]interface{}{
+				"email": testutils.GetUniqueEmail(t),
 			}).
 			Expect()
 
@@ -1091,8 +1089,8 @@ func TestResendVerificationEmail(t *testing.T) {
 		e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST("/api/authentication/verify/resend").
-			WithJSON(swag.ResendVerificationRequest{
-				Email: "",
+			WithJSON(map[string]interface{}{
+				"email": "",
 			}).
 			Expect()
 
@@ -1214,8 +1212,8 @@ func TestSendForgotPassword(t *testing.T) {
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
 			response := e.POST("/api/authentication/verify").
-				WithJSON(swag.VerifyRequest{
-					Token: verificationToken,
+				WithJSON(map[string]interface{}{
+					"token": verificationToken,
 				}).
 				Expect()
 
