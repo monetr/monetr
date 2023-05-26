@@ -16,6 +16,8 @@ type Controller interface {
 
 func NewApp(configuration config.Configuration, controllers ...Controller) *echo.Echo {
 	app := echo.New()
+	app.HideBanner = true
+	app.HidePort = true
 	app.Use(sentryecho.New(sentryecho.Options{
 		Repanic:         false,
 		WaitForDelivery: false,

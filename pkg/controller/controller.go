@@ -14,6 +14,7 @@ import (
 	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/build"
@@ -178,6 +179,20 @@ func (c *Controller) Close() error {
 // @in header
 // @name Cookies
 func (c *Controller) RegisterRoutes(app *echo.Echo) {
+	app.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
+		OnTimeoutRouteErrorHandler: func(err error, ctx echo.Context) {
+			txn, ok := ctx.Get(databaseContextKey).(*pg.Tx)
+			if ok {
+				log := c.getLog(ctx)
+				log.WithError(err).Warn("request timed out, rolling back transaction")
+				if terr := txn.Rollback(); terr != nil {
+					log.WithError(terr).Error("failed to rollback transaction for timed out request")
+				}
+			}
+		},
+		Timeout: 30 * time.Second,
+	}))
+
 	if c.stats != nil {
 		app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 			return func(ctx echo.Context) error {
@@ -200,10 +215,12 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			}
 
 			log := c.log.WithFields(logrus.Fields{
+				"method":    ctx.Request().Method,
+				"path":      ctx.Path(),
 				"requestId": util.GetRequestID(ctx),
 			})
 
-			log.Debug(ctx.Path())
+			log.Debugf("%s %s", ctx.Request().Method, ctx.Path())
 
 			return next(ctx)
 		}

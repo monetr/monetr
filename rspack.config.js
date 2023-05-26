@@ -85,7 +85,7 @@ module.exports = (env, argv) => {
       ],
       modules: [path.resolve(__dirname, 'ui'), 'node_modules'],
     },
-    devtool: isDevelopment ? 'inline-source-map' : 'source-map',
+    devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
     devServer: {
       allowedHosts: 'all',
       static: {
