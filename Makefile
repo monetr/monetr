@@ -156,12 +156,7 @@ $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES
 	$(call infoMsg,Building UI files)
 	git clean -f -X $(STATIC_DIR)
 	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(YARN) build --mode production
-	cp $(PWD)/public/favicon.ico $(STATIC_DIR)/favicon.ico
-	cp $(PWD)/public/logo192.png $(STATIC_DIR)/logo192.png
-	cp $(PWD)/public/logo512.png $(STATIC_DIR)/logo512.png
-	cp $(PWD)/public/manifest.json $(STATIC_DIR)/manifest.json
-	cp $(PWD)/public/robots.txt $(STATIC_DIR)/robots.txt
-	mv $(STATIC_DIR)/*.js.map $(SOURCE_MAP_DIR)
+	mv $(STATIC_DIR)/assets/scripts/*.js.map $(SOURCE_MAP_DIR)
 
 GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS)

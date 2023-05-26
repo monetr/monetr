@@ -42,6 +42,14 @@ module.exports = (env, argv) => {
             from: 'public/manifest.json',
             to: 'public/manifest.json',
           },
+          {
+            from: 'public/logo512.png',
+            to: 'public/logo512.png',
+          },
+          {
+            from: 'public/robots.txt',
+            to: 'robots.txt',
+          },
         ],
       },
       html: [
@@ -77,8 +85,7 @@ module.exports = (env, argv) => {
       ],
       modules: [path.resolve(__dirname, 'ui'), 'node_modules'],
     },
-    devtool: isDevelopment ? 'inline-source-map' : false,
-    // devtool: isDevelopment ? 'inline-source-map' : 'source-map',
+    devtool: isDevelopment ? 'inline-source-map' : 'source-map',
     devServer: {
       allowedHosts: 'all',
       static: {
