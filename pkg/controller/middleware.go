@@ -12,7 +12,6 @@ import (
 	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-pg/pg/v10"
-	"github.com/kataras/iris/v12"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/ctxkeys"
@@ -123,18 +122,7 @@ func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
 		}()
 	}
 
-	{ // Read the token from the request.
-		// We can allocate a max capacity of 2 right away because we know (at least at the time of writing this) that we
-		// will have _at most_ 2 cookie options.
-		cookieOptions := make([]iris.CookieOption, 0, 2)
-		cookieOptions = append(cookieOptions, iris.CookieHTTPOnly(true))
-
-		// If the server is configured to use secure cookies then add that to the options.
-		if c.configuration.Server.Cookies.Secure {
-			cookieOptions = append(cookieOptions, iris.CookieSecure)
-		}
-
-		// Try to retrieve the cookie from the request with the options.
+	{ // Try to retrieve the cookie from the request with the options.
 		if tokenCookie, err := ctx.Cookie(
 			c.configuration.Server.Cookies.Name,
 		); err == nil && tokenCookie.Value != "" {
