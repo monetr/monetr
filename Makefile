@@ -61,7 +61,7 @@ else
 	OS ?= $(shell uname -s | tr A-Z a-z)
     UNAME_P := $(shell uname -p)
     ifeq ($(UNAME_P),x86_64)
-		ARCH=amd64
+		ARCH=amd64make
     endif
     ifneq ($(filter %86,$(UNAME_P)),)
     	# This can happen on macOS with Intel CPUs, we get an i386 arch.
@@ -152,8 +152,7 @@ endif
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
-UI_ENTRYPOINT=$(STATIC_DIR)/index.html
-$(UI_ENTRYPOINT): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(SOURCE_MAP_DIR)
+$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(SOURCE_MAP_DIR)
 	$(call infoMsg,Building UI files)
 	rm -rf $(SOURCE_MAP_DIR)/*.js.map # Removing old map files
 	git clean -f -X $(STATIC_DIR)
@@ -222,7 +221,7 @@ else
 endif
 $(BINARY): $(GO) $(APP_GO_FILES)
 ifndef CI
-$(BINARY): $(BUILD_DIR) $(UI_ENTRYPOINT) $(GOMODULES)
+$(BINARY): $(BUILD_DIR) $(STATIC_DIR) $(GOMODULES)
 ifndef LITE
 $(BINARY): $(NOTICE)
 endif
