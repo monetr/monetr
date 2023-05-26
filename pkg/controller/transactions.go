@@ -31,7 +31,7 @@ import (
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactions(ctx echo.Context) error {
 	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	if err != nil || bankAccountId == 0 {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -88,12 +88,12 @@ func (c *Controller) getTransactions(ctx echo.Context) error {
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getTransactionsForSpending(ctx echo.Context) error {
 	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	if err != nil || bankAccountId == 0 {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
-	if err != nil {
+	if err != nil || spendingId == 0 {
 		return c.badRequest(ctx, "must specify a valid spending Id")
 	}
 
@@ -134,7 +134,7 @@ func (c *Controller) getTransactionsForSpending(ctx echo.Context) error {
 
 func (c *Controller) postTransactions(ctx echo.Context) error {
 	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	if err != nil || bankAccountId == 0 {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
@@ -321,12 +321,12 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 
 func (c *Controller) deleteTransactions(ctx echo.Context) error {
 	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
-	if err != nil {
+	if err != nil || bankAccountId == 0 {
 		return c.badRequest(ctx, "must specify a valid bank account Id")
 	}
 
 	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
-	if transactionId == 0 {
+	if err != nil || transactionId == 0 {
 		return c.badRequest(ctx, "must specify a valid transaction Id")
 	}
 

@@ -233,7 +233,7 @@ func (c *Controller) deleteFundingSchedules(ctx echo.Context) error {
 	}
 
 	fundingScheduleId, err := strconv.ParseUint(ctx.Param("fundingScheduleId"), 10, 64)
-	if fundingScheduleId == 0 {
+	if err != nil || fundingScheduleId == 0 {
 		return c.badRequest(ctx, "must specify a valid funding schedule Id")
 	}
 

@@ -315,7 +315,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	}
 
 	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
-	if spendingId == 0 {
+	if err != nil || spendingId == 0 {
 		return c.badRequest(ctx, "must specify valid spending Id")
 	}
 
@@ -433,7 +433,7 @@ func (c *Controller) deleteSpending(ctx echo.Context) error {
 	}
 
 	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
-	if spendingId == 0 {
+	if err != nil || spendingId == 0 {
 		return c.badRequest(ctx, "must specify valid spending Id")
 	}
 
