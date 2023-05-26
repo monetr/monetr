@@ -264,15 +264,6 @@ func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) reposito
 	return repo
 }
 
-func (c *Controller) mustGetLoginId(ctx echo.Context) uint64 {
-	loginId, ok := ctx.Get(loginIdContextKey).(uint64)
-	if loginId == 0 || !ok {
-		panic("unauthorized")
-	}
-
-	return loginId
-}
-
 func (c *Controller) mustGetUserId(ctx echo.Context) uint64 {
 	userId, ok := ctx.Get(userIdContextKey).(uint64)
 	if userId == 0 || !ok {
