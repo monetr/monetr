@@ -36,8 +36,8 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 		ctx.Response().Header().Set("X-Frame-Options", "DENY")
 		ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
 		ctx.Response().Header().Set("Referrer-Policy", "same-origin")
-		ctx.Response().Header().Set("Permissions-Policy", "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(), gamepad=(), speaker-selection=()")
-		c.ContentSecurityPolicyMiddleware(ctx)
+		c.ApplyContentSecurityPolicy(ctx)
+		c.ApplyPermissionsPolicy(ctx)
 
 		requestedPath := ctx.Request().URL.Path
 

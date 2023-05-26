@@ -23,7 +23,7 @@ var (
 // Because of this, it is not easy (or reasonable) to have a single CSP header that will securely cover every browser.
 // This code aims to provide a header based on the user-agent of the browser in the request.
 
-func (c *UIController) ContentSecurityPolicyMiddleware(ctx echo.Context) {
+func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 	userAgentString := ctx.Request().UserAgent()
 	userAgent := ua.Parse(userAgentString)
 
