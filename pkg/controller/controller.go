@@ -241,7 +241,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 				span = sentry.StartSpan(
 					tracingCtx,
 					"http.server",
-					sentry.TransactionName(name),
+					sentry.WithTransactionName(name),
 					sentry.ContinueFromRequest(ctx.Request()),
 				)
 				span.Description = name
