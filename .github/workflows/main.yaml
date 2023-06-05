@@ -322,7 +322,7 @@ jobs:
       - name: Save Tag Variable
         id: tag
         run: |
-          echo ::set-output name=POST_TAG::$(git describe --tag | cut -d "v" -f 2)
+          echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
       - uses: RafikFarhad/push-to-gcr-github-action@v4.1
         with:
           gcloud_service_key: ${{ secrets.GCR_CREDENTIALS }}
@@ -359,7 +359,7 @@ jobs:
       - name: Save Tag Variable
         id: tag
         run: |
-          echo ::set-output name=POST_TAG::$(git describe --tag | cut -d "v" -f 2)
+          echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
         env:
