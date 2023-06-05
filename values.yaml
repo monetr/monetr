@@ -32,7 +32,6 @@ securityContext:
 
 service:
   enabled: true
-  separateUIAndAPI: false
   type: ClusterIP
   port: 80
 
@@ -41,6 +40,7 @@ ingress:
   annotations: { }
   # kubernetes.io/ingress.class: nginx
   # kubernetes.io/tls-acme: "true"
+  ingressClass: ""
   hosts:
     - host: monetr.local
       paths: [ ]
