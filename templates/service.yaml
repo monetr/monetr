@@ -2,11 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  {{ if .Values.service.separateUIAndAPI }}
-  name: {{ include "api.name" . }}-api
-  {{ else }}
   name: {{ include "api.name" . }}
-  {{ end }}
   labels:
     {{- include "api.labels" . | nindent 4 }}
 spec:
@@ -18,23 +14,4 @@ spec:
       name: http
   selector:
     {{- include "api.selectorLabels" . | nindent 4 }}
-
-{{ if .Values.service.separateUIAndAPI }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ include "api.name" . }}-ui
-  labels:
-  {{- include "api.labels" . | nindent 4 }}
-spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
-  selector:
-  {{- include "api.selectorLabels" . | nindent 4 }}
-{{ end }}
 {{- end }}
