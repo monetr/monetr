@@ -6,6 +6,22 @@ on:
       - main
 
 jobs:
+  test_thing:
+    name: Container (Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Save Tag Variable
+        id: tag
+        run: |
+          echo POST_TAG=$(git describe --tag | cut -d "v" -f 2)
+      - name: Print Tag Variable
+        run: |
+          echo "${{ steps.tag.outputs.POST_TAG }}"
+
+
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
