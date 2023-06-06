@@ -23,6 +23,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/jarcoal/httpmock v1.3.0
 	github.com/labstack/echo/v4 v4.10.2
+	github.com/magefile/mage v1.15.0
 	github.com/mileusna/useragent v1.2.1
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.1.6
@@ -42,6 +43,13 @@ require (
 	google.golang.org/genproto v0.0.0-20230330154414-c0448cd141ea
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
+)
+
+require (
+	github.com/VividCortex/ewma v1.2.0 // indirect
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
 )
 
 require (
@@ -97,6 +105,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.40.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
+	github.com/vbauerster/mpb/v8 v8.4.0
 	github.com/vmihailenco/bufpool v0.1.11 // indirect
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
@@ -110,7 +119,7 @@ require (
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

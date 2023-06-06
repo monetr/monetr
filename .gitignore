@@ -6,6 +6,7 @@ telepresence.log
 telepresence
 coverage.txt
 node_modules
+vendor
 generated
 values.mayview.yaml
 redoc-static.html
