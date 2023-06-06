@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.15.1](https://github.com/monetr/monetr/compare/v0.15.0...v0.15.1) (2023-06-06)
+
+
+### Bug Fixes
+
+* **ci:** Fixed renovatebot config ([a5466d2](https://github.com/monetr/monetr/commit/a5466d2ed96ac0aa11e6f46a059ad266e498e9b1))
+* **ui:** Fixed permission policy header. ([f725c7a](https://github.com/monetr/monetr/commit/f725c7aa0410ac17a9d54e57c428f6900403f5a1)), closes [#1407](https://github.com/monetr/monetr/issues/1407)
+
+
+### Dependencies
+
+* **api:** update module github.com/alicebob/miniredis/v2 to v2.30.3 ([#1408](https://github.com/monetr/monetr/issues/1408)) ([4321ece](https://github.com/monetr/monetr/commit/4321ece915a8d0eaaf415e580337118ee46b95ee))
+* **api:** update module github.com/nyaruka/phonenumbers to v1.1.7 ([#1409](https://github.com/monetr/monetr/issues/1409)) ([2e8b6a6](https://github.com/monetr/monetr/commit/2e8b6a61849370cddf8f38ff0ae73b29e5f8e845))
+* **api:** update module github.com/sirupsen/logrus to v1.9.3 ([#1416](https://github.com/monetr/monetr/issues/1416)) ([2cb1adf](https://github.com/monetr/monetr/commit/2cb1adfb109eab8e7bc22a8a42154a28242fe844))
+* **api:** update module github.com/stretchr/testify to v1.8.4 ([#1417](https://github.com/monetr/monetr/issues/1417)) ([d5ca544](https://github.com/monetr/monetr/commit/d5ca5447f09744117a5e3687cd4a66c2d9bc3a66))
+* **api:** update module google.golang.org/api to v0.125.0 ([#1376](https://github.com/monetr/monetr/issues/1376)) ([05cd04b](https://github.com/monetr/monetr/commit/05cd04bc90f08e9b95692b2a745afdbf3cced7f1))
+* **renovate:** update jamesives/github-pages-deploy-action action to v4.4.2 ([#1418](https://github.com/monetr/monetr/issues/1418)) ([1b84fe2](https://github.com/monetr/monetr/commit/1b84fe2acd16d8b4ce96f8154735b3ec9817a348))
+* **ui:** update dependency @rspack/binding-linux-x64-gnu to v0.2.0 ([#1411](https://github.com/monetr/monetr/issues/1411)) ([707a75a](https://github.com/monetr/monetr/commit/707a75aae7adfaa95426f55f239114ab07a68b91))
+* **ui:** update dependency @rspack/cli to v0.2.0 ([#1412](https://github.com/monetr/monetr/issues/1412)) ([fed3c62](https://github.com/monetr/monetr/commit/fed3c62f96002e024eee27e5d5197e903507bf05))
+* **ui:** update dependency notistack to v3 ([#1414](https://github.com/monetr/monetr/issues/1414)) ([5f525a8](https://github.com/monetr/monetr/commit/5f525a8ac409588a5e1d181da52382c94872deca))
+* **ui:** update dependency tailwindcss to v3.3.2 ([#1413](https://github.com/monetr/monetr/issues/1413)) ([b0a1f59](https://github.com/monetr/monetr/commit/b0a1f599387e0cd1f1f2dec898ade24d2b25d58c))
+* **ui:** update dependency typescript to v5 ([#1415](https://github.com/monetr/monetr/issues/1415)) ([6245a63](https://github.com/monetr/monetr/commit/6245a6305a2c580ef85c8736be8776d2dea3a82f))
+* **ui:** update storybook monorepo ([#1410](https://github.com/monetr/monetr/issues/1410)) ([60727e6](https://github.com/monetr/monetr/commit/60727e65678cf32fe1ef72b17abf729e4c8ca2da))
+
+
+### Miscellaneous
+
+* **ui:** Added logo to the new reigster screen ([2847e8a](https://github.com/monetr/monetr/commit/2847e8ae807df99545ea4b58449ade974f5ceb47))
+* **ui:** Improving monetr UI components. ([6515b5f](https://github.com/monetr/monetr/commit/6515b5f7bdbf8b88cfe68ea5caee46b925157107))
+* **ui:** Tweaked colors for new sidebar ([e244aa6](https://github.com/monetr/monetr/commit/e244aa6f37f38ff16e3c877e8e9fce9511a2f719))
+* Updated NOTICE ([3b76913](https://github.com/monetr/monetr/commit/3b7691358aef096002bb9a1a7b9ddd32bfbd7245))
+
 ## [0.15.0](https://github.com/monetr/monetr/compare/v0.14.10...v0.15.0) (2023-06-06)
 
 
