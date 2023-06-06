@@ -8,6 +8,7 @@ export interface MSpanProps {
   variant?: 'normal' | 'light';
   children: string | React.ReactNode | JSX.Element;
   size?: TextSize;
+  className?: string;
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
@@ -27,6 +28,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
       'text-gray-500': props.variant === 'light',
     },
     `text-${props.size}`,
+    props.className,
   );
 
   return (

@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react";
-import ForgotPasswordPage from "./forgot-new";
+import React from "react";
+import ForgotPasswordPage, { ForgotPasswordComplete } from "./forgot-new";
 
 const meta: Meta<typeof ForgotPasswordPage> = {
   title: 'Pages/Authentication/Forgot Password',
@@ -10,4 +11,9 @@ export default meta;
 
 export const Default: StoryObj<typeof ForgotPasswordPage> = {
   name: 'Default',
+};
+
+export const Complete: StoryObj<typeof ForgotPasswordComplete> = {
+  name: 'Complete',
+  render: () => <ForgotPasswordComplete />
 };
