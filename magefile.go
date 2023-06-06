@@ -29,7 +29,7 @@ var (
 type Go mg.Namespace
 
 func (Go) Dependencies() error {
-	bar := progress.AddBar(100,
+	bar := progress.AddSpinner(100,
 		mpb.PrependDecorators(
 			// simple name decorator
 			decor.Name("go:dependencies"),
@@ -60,7 +60,7 @@ func (Go) Dependencies() error {
 type UI mg.Namespace
 
 func (UI) Dependencies() error {
-	bar := progress.AddBar(100,
+	bar := progress.AddSpinner(100,
 		mpb.PrependDecorators(
 			// simple name decorator
 			decor.Name("ui:dependencies"),
@@ -104,7 +104,7 @@ func (UI) Dependencies() error {
 }
 
 func (UI) Build() error {
-	bar := progress.AddBar(100,
+	bar := progress.AddSpinner(100,
 		mpb.PrependDecorators(
 			// simple name decorator
 			decor.Name("ui:build"),
@@ -137,7 +137,7 @@ func (UI) Build() error {
 }
 
 func Build() error {
-	bar := progress.AddBar(100,
+	bar := progress.AddSpinner(100,
 		mpb.PrependDecorators(
 			// simple name decorator
 			decor.Name("build"),
