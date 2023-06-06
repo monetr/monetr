@@ -68,9 +68,9 @@ module.exports = (env, argv) => {
     entry: './ui/index.tsx',
     output: {
       path: path.resolve(__dirname, 'pkg/ui/static'),
-      filename: isDevelopment ? 'assets/scripts/[name]_[contenthash][ext]' : 'assets/scripts/[contenthash][ext]',
-      cssFilename: 'assets/styles/[contenthash][ext]',
-      cssChunkFilename: 'assets/styles/[contenthash][ext]',
+      filename: isDevelopment ? 'assets/scripts/[name]_[contenthash].js' : 'assets/scripts/[contenthash].js',
+      cssFilename: 'assets/styles/[contenthash].css',
+      cssChunkFilename: 'assets/styles/[contenthash].css',
       // Source maps are automatically moved to $(PWD)/build/source_maps each time the UI is compiled. They will not be
       // in the path above.
       // sourceMapFilename: isDevelopment ? `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js.map` : '[name].[hash:8].js.map',
