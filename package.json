@@ -79,7 +79,7 @@
     "fs-extra": "10.1.0",
     "lodash": "4.17.21",
     "moment": "2.29.4",
-    "notistack": "2.0.8",
+    "notistack": "3.0.1",
     "path-to-regexp": "6.2.1",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-normalize": "10.0.1",
