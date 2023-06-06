@@ -88,7 +88,7 @@ export default function MSidebar(props: MSidebarProps): JSX.Element {
             <div
               className="absolute z-40 w-screen h-screen left-0 top-0 bottom-0 right-0 bg-purple-800 opacity-50"
             />
-            <div className="flex flex-col w-64 z-50 left-0 top-0 bottom-0 fixed bg-purple-800">
+            <div className="flex flex-col w-64 z-50 left-0 top-0 bottom-0 fixed bg-purple-600">
               <div className="pb-4 px-6 overflow-y-auto flex-col gap-y-5 flex-grow flex">
                 <div className="items-center flex-shrink-0 h-16 flex gap-x-3">
                   <MLogo className="h-8 w-auto" />
@@ -109,7 +109,7 @@ export default function MSidebar(props: MSidebarProps): JSX.Element {
         </div>
       </div>
 
-      <div className="lg:flex lg:flex-col lg:w-64 lg:z-50 left-0 top-0 bottom-0 lg:fixed bg-purple-800 hidden">
+      <div className="lg:flex lg:flex-col lg:w-64 lg:z-50 left-0 top-0 bottom-0 lg:fixed bg-purple-600 hidden">
         <div className="pb-4 px-6 overflow-y-auto flex-col gap-y-5 flex-grow flex">
           <div className="items-center flex-shrink-0 h-16 flex gap-x-3">
             <MLogo className="h-8 w-auto" />
