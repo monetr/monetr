@@ -7,6 +7,7 @@ import MLink from 'components/MLink';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import MLogo from 'components/MLogo';
 
 export default function RegisterNew(): JSX.Element {
   const config = useAppConfiguration();
@@ -27,7 +28,10 @@ export default function RegisterNew(): JSX.Element {
   }
 
   return (
-    <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5">
+    <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5 px-5">
+      <div className="max-w-[96px] w-full">
+        <MLogo />
+      </div>
       <div className="flex flex-col items-center">
         <MSpan size="5xl">
           Get Started
