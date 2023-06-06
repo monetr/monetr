@@ -38,7 +38,7 @@ func init() {
 		"xr-spatial-tracking":       {},
 	}
 
-	items := make([]string, len(permissions))
+	items := make([]string, 0, len(permissions))
 	for permission, props := range permissions {
 		items = append(items, fmt.Sprintf("%s=(%s)", permission, strings.Join(props, " ")))
 	}
