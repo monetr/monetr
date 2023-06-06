@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.15.0](https://github.com/monetr/monetr/compare/v0.14.10...v0.15.0) (2023-06-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **helm:** Fixed ingress resource ([#1405](https://github.com/monetr/monetr/issues/1405))
+* **api:** Deprecating kataras/iris, moving to echo. ([#1396](https://github.com/monetr/monetr/issues/1396))
+
+### Features
+
+* **api:** Deprecating kataras/iris, moving to echo. ([#1396](https://github.com/monetr/monetr/issues/1396)) ([52db2b9](https://github.com/monetr/monetr/commit/52db2b9c16e43b7ed6969ef08782cb2ee7b9555b))
+* **server:** Improved permission policy header. ([6b4a47a](https://github.com/monetr/monetr/commit/6b4a47aa38567ffdd034aa7a97ce4d45e7d98339))
+* **ui:** Adding new captcha component for new views. ([400d5fd](https://github.com/monetr/monetr/commit/400d5fdefeeb5a31a1a43734265d184da55a7fb2))
+
+
+### Bug Fixes
+
+* **api:** Fixed interface conversion panic in forecasting endpoint. ([4b05fbe](https://github.com/monetr/monetr/commit/4b05fbecb077663f246409d900a5db76e8877f28)), closes [#1401](https://github.com/monetr/monetr/issues/1401)
+* **build:** Fix github action variable script ([#1404](https://github.com/monetr/monetr/issues/1404)) ([45af10c](https://github.com/monetr/monetr/commit/45af10c8db37a1e567724151317e2b6675e65915))
+* **helm:** Fixed ingress resource ([#1405](https://github.com/monetr/monetr/issues/1405)) ([b3c27e1](https://github.com/monetr/monetr/commit/b3c27e15de75123934673839f5cf306672a3b6d2)), closes [#1403](https://github.com/monetr/monetr/issues/1403)
+* **ui:** Fixed bug where UI was not being built right in CI. ([ff1b51e](https://github.com/monetr/monetr/commit/ff1b51ecb0ec7150a33d209f7157bf23cf45ec13))
+
+
+### Miscellaneous
+
+* **make:** Fixed typo in makefile ([3ba1980](https://github.com/monetr/monetr/commit/3ba1980adafe786ca8f025b6ac9b2a22dbed3a55))
+* release 0.15.0 ([45b4a77](https://github.com/monetr/monetr/commit/45b4a776ace3e36bb9bdd850249235c41b67c639))
+* Removing old swag files ([8fda6a3](https://github.com/monetr/monetr/commit/8fda6a307fcb2136893ef9a5be9f34e34634dca9))
+* **ui:** Added completed view for new forgot password UI. ([64f460b](https://github.com/monetr/monetr/commit/64f460b3fbb318ce3e2ebae6429f8c81f348eea6))
+
 ## [0.14.10](https://github.com/monetr/monetr/compare/v0.14.9...v0.14.10) (2023-05-22)
 
 
