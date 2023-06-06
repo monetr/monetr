@@ -24,6 +24,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
   props = {
     ...MTextFieldPropsDefaults,
     ...props,
+    error: props?.error || formikContext?.errors[props?.name]
   };
 
   const labelClassNames = clsx(

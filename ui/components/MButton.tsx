@@ -21,6 +21,7 @@ export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX
   const { disabled, color: theme, variant: kind }: MButtonProps = {
     ...MButtonPropsDefaults,
     ...props,
+    disabled: formikContext?.isSubmitting || props.disabled,
   };
   const themeClasses = {
     'primary': {
