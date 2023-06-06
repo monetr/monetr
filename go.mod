@@ -25,7 +25,7 @@ require (
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/mileusna/useragent v1.2.1
 	github.com/nleeper/goment v1.4.4
-	github.com/nyaruka/phonenumbers v1.1.6
+	github.com/nyaruka/phonenumbers v1.1.7
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go v1.10.0
 	github.com/prometheus/client_golang v1.14.0
