@@ -105,7 +105,7 @@
     "zustand": "4.1.4"
   },
   "devDependencies": {
-    "@rspack/binding-linux-x64-gnu": "0.2.0",
+    "@rspack/binding-linux-x64-gnu": "0.2.1",
     "@rspack/cli": "0.2.0",
     "@storybook/addon-coverage": "0.0.8",
     "@storybook/addon-essentials": "7.0.18",

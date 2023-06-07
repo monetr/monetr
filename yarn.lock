@@ -2541,6 +2541,11 @@
   resolved "https://registry.yarnpkg.com/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-0.2.0.tgz#a97b56490138c7168aa91e6508940174ff2eb03a"
   integrity sha512-IQizo9PDJXfV6KGze2jALtvaPw31r/cV9gPSS/fBKIMFovDSJckJ2w3ZmUiBRX38vcYFtIBujD0Gnr7xSba9Eg==
 
+"@rspack/binding-linux-x64-gnu@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@rspack/binding-linux-x64-gnu/-/binding-linux-x64-gnu-0.2.1.tgz#33a9f96536554ab7ef0c5c6ca47ef1afa1a4dae6"
+  integrity sha512-NhMksLETcqPNTVaIs4qDcJv3lohriNB75VW3C3lfgQDbpmvdzPptYsfSAI7heUeNSHHch217p7aakjj2wP/K0w==
+
 "@rspack/binding-linux-x64-musl@0.1.12":
   version "0.1.12"
   resolved "https://registry.yarnpkg.com/@rspack/binding-linux-x64-musl/-/binding-linux-x64-musl-0.1.12.tgz#f4c97ff781742cb34253aa5eb2d7cedf67edaf5b"
