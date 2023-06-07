@@ -3,7 +3,7 @@ module github.com/monetr/monetr
 go 1.19
 
 require (
-	cloud.google.com/go/kms v1.10.1
+	cloud.google.com/go/kms v1.11.0
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/ahmetb/go-linq/v3 v3.2.0
@@ -47,7 +47,7 @@ require (
 require (
 	cloud.google.com/go/compute v1.19.3 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v0.13.0 // indirect
+	cloud.google.com/go/iam v1.0.1 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
