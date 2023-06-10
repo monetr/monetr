@@ -55,18 +55,19 @@ TMP=$(BUILD_DIR)/tmp
 TOOLS=$(BUILD_DIR)/tools
 TOOLS_BIN=$(TOOLS)/bin
 
-export PATH := $(TOOLS_BIN):$(PATH)
 
 $(BUILD_DIR): # If the build directory does not exist, create it.
 	mkdir $@
 
-$(TOOLS_BIN): $(BUILD_DIR) # If the tools bin directory does not exist, create it.
-	mkdir -p $@
+$(TOOLS): $(BUILD_DIR)
+	mkdir $@
+
+$(TOOLS_BIN): $(TOOLS) # If the tools bin directory does not exist, create it.
+	mkdir $@
 
 $(TMP): $(BUILD_DIR) # If the temp dir doesnt exist, create it.
 	mkdir $@
 
-NODE=$(TOOLS_BIN)/node
 NODE_VERSION=18.16.0
 ifeq ($(ARCH),amd64)
 NODE_ARCH=x64
@@ -74,27 +75,39 @@ else
 NODE_ARCH=$(ARCH)
 endif
 NODE_NAME = node-v$(NODE_VERSION)-$(OS)-$(NODE_ARCH)
-$(NODE): NODE_BINARY_URL = "https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-$(OS)-$(NODE_ARCH).tar.gz"
-$(NODE): NODE_TAR = $(TMP)/$(NODE_NAME).tar.gz
-$(NODE): | $(TOOLS_BIN) $(TMP)
+NODE_TOOLCHAIN=$(TOOLS)/$(NODE_NAME)
+$(NODE_TOOLCHAIN): NODE_BINARY_URL = "https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-$(OS)-$(NODE_ARCH).tar.gz"
+$(NODE_TOOLCHAIN): NODE_TAR = $(TMP)/$(NODE_NAME).tar.gz
+$(NODE_TOOLCHAIN): | $(TOOLS) $(TMP)
 	-rm -rf $(NODE_TAR)
 	curl -L $(NODE_BINARY_URL) --output $(NODE_TAR)
 	tar -xzf $(NODE_TAR) -C $(TOOLS)
-	ln -sf $(TOOLS)/$(NODE_NAME)/bin/node $(NODE)
-	touch -a -m $(NODE)
 	-rm -rf $(NODE_TAR)
 
-NPX=$(TOOLS_BIN)/npx
-$(NPX): $(NODE)
-	ln -sf $(TOOLS)/$(NODE_NAME)/bin/npx $(NPX)
+export PATH := $(TOOLS_BIN):$(NODE_TOOLCHAIN)/bin:$(PATH)
 
+NODE=$(NODE_TOOLCHAIN)/bin/node
+$(NODE): $(NODE_TOOLCHAIN)
 
+NPX=$(NODE_TOOLCHAIN)/bin/npx
+$(NPX): $(NODE_TOOLCHAIN)
 
+NPM=$(NODE_TOOLCHAIN)/bin/npm
+$(NPM): $(NODE_TOOLCHAIN)
 
+YARN=$(TOOLS_BIN)/yarn
+$(YARN): $(NPM) # Install yarn in the tools directory.
+	$(NPM) install --global --prefix $(TOOLS) yarn
 
+export PATH := $(TOOLS_BIN):$(PATH)
 
+NODE_MODULES=$(PWD)/node_modules
 
+$(NODE_MODULES): $(YARN)
+ifneq ($(OS),linux)
+	$(YARN) install --ignore-platform
+else
+	$(YARN) install
+endif
 
-
-node_modules: $(NPX)
-	$(NPX) yarn install
+deps: $(NODE_MODULES)
