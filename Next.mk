@@ -45,30 +45,30 @@ ARCH ?= amd64
 
 ###############################################################################
 #
-#  DEPENDENCIES
+#  DEPENDENCIES & TOOLCHAINS
 #
 ###############################################################################
 
+NODE_VERSION=18.16.0
+GO_VERSION=1.19.2
 
 BUILD_DIR=$(PWD)/build
 TMP=$(BUILD_DIR)/tmp
 TOOLS=$(BUILD_DIR)/tools
 TOOLS_BIN=$(TOOLS)/bin
 
-
 $(BUILD_DIR): # If the build directory does not exist, create it.
 	mkdir $@
 
-$(TOOLS): $(BUILD_DIR)
+$(TOOLS): | $(BUILD_DIR)
 	mkdir $@
 
-$(TOOLS_BIN): $(TOOLS) # If the tools bin directory does not exist, create it.
+$(TOOLS_BIN): | $(TOOLS) # If the tools bin directory does not exist, create it.
 	mkdir $@
 
-$(TMP): $(BUILD_DIR) # If the temp dir doesnt exist, create it.
+$(TMP): | $(BUILD_DIR) # If the temp dir doesnt exist, create it.
 	mkdir $@
 
-NODE_VERSION=18.16.0
 ifeq ($(ARCH),amd64)
 NODE_ARCH=x64
 else
@@ -99,15 +99,47 @@ YARN=$(TOOLS_BIN)/yarn
 $(YARN): $(NPM) # Install yarn in the tools directory.
 	$(NPM) install --global --prefix $(TOOLS) yarn
 
+GO_NAME = go$(GO_VERSION).$(OS)-$(ARCH)
+GO_TOOLCHAIN=$(TOOLS)/$(GO_NAME)
+$(GO_TOOLCHAIN): GO_URL = "https://go.dev/dl/$(GO_NAME).tar.gz"
+$(GO_TOOLCHAIN): GO_TAR = $(TMP)/$(GO_NAME).tar.gz
+$(GO_TOOLCHAIN): | $(TOOLS) $(TMP)
+	-rm -rf $(GO_TAR)
+	curl -L $(GO_URL) --output $(GO_TAR)
+	mkdir $(GO_TOOLCHAIN)
+	tar -xzf $(GO_TAR) -C $(GO_TOOLCHAIN) --strip-components 1
+	-rm -rf $(GO_TAR)
+
+GO=$(GO_TOOLCHAIN)/bin/go
+$(GO): $(GO_TOOLCHAIN)
+
+export GOROOT := $(GO_TOOLCHAIN)
 export PATH := $(TOOLS_BIN):$(PATH)
 
-NODE_MODULES=$(PWD)/node_modules
 
-$(NODE_MODULES): $(YARN)
+###############################################################################
+#
+#  ACTUAL TARGETS
+#
+###############################################################################
+GO_SRC_DIR=$(PWD)/pkg
+
+GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
+GO_MODULES=$(GOPATH)/pkg/mod
+## TODO Figure out a better way for this
+$(GO_MODULES): $(GO) $*
+	$(GO) get -t $(GO_SRC_DIR)/...
+	touch -a -m go env GOMODCACHE
+
+UI_DEPS=$(PWD)/package.json $(PWD)/yarn.lock
+NODE_MODULES=$(PWD)/node_modules
+$(NODE_MODULES): $(YARN) $(UI_DEPS)
 ifneq ($(OS),linux)
 	$(YARN) install --ignore-platform
 else
 	$(YARN) install
 endif
 
-deps: $(NODE_MODULES)
+ui\:deps: $(NODE_MODULES)
+
+deps: $(NODE_MODULES) $(GO_MODULES)
