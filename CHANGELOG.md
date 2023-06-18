@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.15.2](https://github.com/monetr/monetr/compare/v0.15.1...v0.15.2) (2023-06-18)
+
+
+### Bug Fixes
+
+* **api:** Fixed health endpoint sending traces to sentry. ([4031f0d](https://github.com/monetr/monetr/commit/4031f0dc1510bb2d202489b54b8a0b20c2234fd5))
+* **deps:** Fixed rspack builds faling. ([cae4992](https://github.com/monetr/monetr/commit/cae4992d2566f284a43275c8cc481ec07efbc887))
+
+
+### Miscellaneous
+
+* **ci:** Create gitlab-ci ([deca887](https://github.com/monetr/monetr/commit/deca887c9080cbc04d4486c8b05d0303d46f76ca))
+* Removed gitlab-ci for now ([c551fb1](https://github.com/monetr/monetr/commit/c551fb182e8f46feaf9dea1ad89d359c98986fcf))
+* Updated third party notice ([6228ade](https://github.com/monetr/monetr/commit/6228ade508d2475d852ec684d1570d907476618f))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.11.0 ([#1429](https://github.com/monetr/monetr/issues/1429)) ([5d4246b](https://github.com/monetr/monetr/commit/5d4246b4cb07ea26929b5d70a09ffdf6c7d5a122))
+* **api:** update module github.com/plaid/plaid-go to v3 ([#1434](https://github.com/monetr/monetr/issues/1434)) ([ce0e142](https://github.com/monetr/monetr/commit/ce0e14273c84a57fb306b7f77207d8bc8ed015ae))
+* **ui:** update dependency @rspack/binding-linux-x64-gnu to v0.2.1 ([#1427](https://github.com/monetr/monetr/issues/1427)) ([9694421](https://github.com/monetr/monetr/commit/96944211cd5b7ed4b150ff25123374df25f2b9f8))
+* **ui:** update dependency @rspack/cli to v0.2.1 ([#1428](https://github.com/monetr/monetr/issues/1428)) ([ab5ba9e](https://github.com/monetr/monetr/commit/ab5ba9e371c919e074f4c0dbe2d768846267ff89))
+* **ui:** update dependency @types/react to v18.2.8 ([#1419](https://github.com/monetr/monetr/issues/1419)) ([ee03a3e](https://github.com/monetr/monetr/commit/ee03a3e06a2aa40638a32c1a978182daf77650a6))
+* **ui:** update dependency postcss to v8.4.24 ([#1420](https://github.com/monetr/monetr/issues/1420)) ([3bf978c](https://github.com/monetr/monetr/commit/3bf978cc77ab3286802c5aa91d751cac74420451))
+* **ui:** update dependency react-refresh-typescript to v2.0.9 ([#1422](https://github.com/monetr/monetr/issues/1422)) ([24a64b3](https://github.com/monetr/monetr/commit/24a64b3142d193ac6ab916d8bd65597ef60c0898))
+* **ui:** update dependency ts-loader to v9.4.3 ([#1425](https://github.com/monetr/monetr/issues/1425)) ([31366ba](https://github.com/monetr/monetr/commit/31366ba44979441a584d68b0785b192b53c73930))
+* **ui:** update react monorepo ([#1431](https://github.com/monetr/monetr/issues/1431)) ([388a157](https://github.com/monetr/monetr/commit/388a1579fcb754f56514e17fd37341a73b200989))
+
 ## [0.15.1](https://github.com/monetr/monetr/compare/v0.15.0...v0.15.1) (2023-06-06)
 
 
