@@ -260,18 +260,3 @@ install-$(KUBECTL): $(LOCAL_BIN)
 	chmod +x $(KUBECTL)
 endif
 
-LICENSED=$(LOCAL_BIN)/licensed
-$(LICENSED):
-	@if [ ! -f "$(LICENSED)" ]; then $(MAKE) install-$(LICENSED); fi
-
-install-$(LICENSED): $(CURL)
-install-$(LICENSED): LICENSED_VERSION=3.9.1
-install-$(LICENSED): LICENSED_URL=https://github.com/github/licensed/releases/download/$(LICENSED_VERSION)/licensed-$(LICENSED_VERSION)-$(OS)-x64.tar.gz
-install-$(LICENSED): $(LOCAL_BIN)
-	$(call infoMsg,Installing licensed to $(LICENSED))
-	-rm -rf $(LICENSED).tar.gz
-	curl -L $(LICENSED_URL) --output $(LICENSED).tar.gz
-	tar -xzf $(LICENSED).tar.gz -C $(LOCAL_BIN)
-	-rm -rf $(LICENSED).tar.gz
-
-

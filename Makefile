@@ -175,29 +175,48 @@ deps: dependencies
 
 build-ui: $(STATIC_DIR)
 
+SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons/README.md
+$(SIMPLE_ICONS):
+	git submodule update --init pkg/icons/sources/simple-icons
+
+LICENSED_IMAGE=$(BUILD_DIR)/licensed-$(RELEASE_VERSION).image
+$(LICENSED_IMAGE): $(PWD)/scripts/Licensed.containerfile
+$(LICENSED_IMAGE) |: $(BUILD_DIR)
+$(LICENSED_IMAGE): IMAGE=licensed:$(RELEASE_VERSION)
+$(LICENSED_IMAGE):
+	$(DOCKER) build -f $< $(dir $<) -t $(IMAGE)
+	echo $(IMAGE) > $@
+
+lic: $(LICENSED_IMAGE)
+lic: IMAGE=$(shell cat $(LICENSED_IMAGE))
+lic:
+	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed version"
+
 LICENSED_CONFIG=$(PWD)/.licensed.yaml
 LICENSED_CACHE=$(PWD)/.licenses
-$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG)
-	$(LICENSED) cache --force
+$(LICENSED_CACHE): $(LICENSED_IMAGE) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG) $(SIMPLE_ICONS)
+$(LICENSED_CACHE): IMAGE=$(shell cat $(LICENSED_IMAGE))
+$(LICENSED_CACHE):
+	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed cache --force"
 	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
 
 .PHONY: license
-license: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
-	$(LICENSED) status
+license: $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG)
+license: IMAGE=$(shell cat $(LICENSED_IMAGE))
+license:
+	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed status"
 
 NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
-$(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(GOMODULES) $(SIMPLE_ICONS)
-	$(LICENSED) notices
+$(NOTICES): $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(GOMODULES) $(SIMPLE_ICONS)
+$(NOTICES): IMAGE=$(shell cat $(LICENSED_IMAGE))
+$(NOTICES):
+	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed notices"
 
 NOTICE=$(GO_SRC_DIR)/build/NOTICE
 $(NOTICE): $(NOTICES)
 	cat $(NOTICES) > $@
 
 notice: $(NOTICE)
-
-SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons/README.md
-$(SIMPLE_ICONS):
-	git submodule update --init pkg/icons/sources/simple-icons
 
 GOOS ?= $(OS)
 GOARCH ?= amd64
@@ -287,6 +306,7 @@ endif
 endif
 
 clean: shutdown $(HOSTESS)
+	-rm -rf $(NOTICE)
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
 	-rm -rf $(LICENSED_CACHE)
