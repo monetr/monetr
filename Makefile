@@ -1,4 +1,7 @@
 .SUFFIXES:
+MAKEFLAGS += --no-print-directory
+MAKEFLAGS += --no-builtin-rules
+
 default: build
 
 GIT_REPOSITORY=https://github.com/monetr/monetr.git
@@ -187,11 +190,6 @@ $(LICENSED_IMAGE):
 	$(DOCKER) build -f $< $(dir $<) -t $(IMAGE)
 	echo $(IMAGE) > $@
 
-lic: $(LICENSED_IMAGE)
-lic: IMAGE=$(shell cat $(LICENSED_IMAGE))
-lic:
-	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed version"
-
 LICENSED_CONFIG=$(PWD)/.licensed.yaml
 LICENSED_CACHE=$(PWD)/.licenses
 $(LICENSED_CACHE): $(LICENSED_IMAGE) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG) $(SIMPLE_ICONS)
@@ -212,7 +210,7 @@ $(NOTICES): IMAGE=$(shell cat $(LICENSED_IMAGE))
 $(NOTICES):
 	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed notices"
 
-NOTICE=$(GO_SRC_DIR)/build/NOTICE
+NOTICE=$(GO_SRC_DIR)/build/NOTICE.md
 $(NOTICE): $(NOTICES)
 	cat $(NOTICES) > $@
 

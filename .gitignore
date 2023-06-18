@@ -21,8 +21,8 @@ values.local.yaml
 Notes.md
 *terraform*
 rest-api.xml
-build
-!pkg/build/*
+/build
+pkg/build/NOTICE.md
 .eslintcache
 package-lock.json
 reports

@@ -10,11 +10,11 @@ var (
 	Release   string
 )
 
-//go:embed NOTICE
+//go:embed *.md
 var noticeFS embed.FS
 
 func GetNotice() string {
-	data, err := noticeFS.ReadFile("NOTICE")
+	data, err := noticeFS.ReadFile("NOTICE.md")
 	if err != nil {
 		return ""
 	}
