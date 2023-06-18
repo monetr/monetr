@@ -196,7 +196,9 @@ $(LICENSED_CACHE): $(LICENSED_IMAGE) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFI
 $(LICENSED_CACHE): IMAGE=$(shell cat $(LICENSED_IMAGE))
 $(LICENSED_CACHE):
 	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed cache --force"
+ifndef CI
 	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
+endif
 
 .PHONY: license
 license: $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG)
