@@ -195,20 +195,20 @@ LICENSED_CACHE=$(PWD)/.licenses
 $(LICENSED_CACHE): $(LICENSED_IMAGE) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG) $(SIMPLE_ICONS)
 $(LICENSED_CACHE): IMAGE=$(shell cat $(LICENSED_IMAGE))
 $(LICENSED_CACHE):
-	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed cache --force"
+	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed cache --force"
 	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
 
 .PHONY: license
 license: $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG)
 license: IMAGE=$(shell cat $(LICENSED_IMAGE))
 license:
-	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed status"
+	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed status"
 
 NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
 $(NOTICES): $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(GOMODULES) $(SIMPLE_ICONS)
 $(NOTICES): IMAGE=$(shell cat $(LICENSED_IMAGE))
 $(NOTICES):
-	$(DOCKER) run -v "$(PWD):/workspace" -it $(IMAGE) "licensed notices"
+	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed notices"
 
 NOTICE=$(GO_SRC_DIR)/build/NOTICE.md
 $(NOTICE): $(NOTICES)
