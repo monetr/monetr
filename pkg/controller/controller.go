@@ -230,7 +230,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	api.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) (returnErr error) {
 			var span *sentry.Span
-			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
+			if hub := sentryecho.GetHubFromContext(ctx); hub != nil && ctx.Path() != APIPath+"/health" {
 				requestId := util.GetRequestID(ctx)
 				hub.ConfigureScope(func(scope *sentry.Scope) {
 					scope.SetTag("requestId", requestId)
