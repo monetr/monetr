@@ -166,7 +166,9 @@ GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS)
 	$(call infoMsg,Installing dependencies for monetr)
 	$(GO) get -t $(GO_SRC_DIR)/...
+ifndef CI
 	touch -a -m $(GOMODULES)
+endif
 
 go-dependencies: $(GOMODULES)
 
@@ -207,7 +209,7 @@ license:
 	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed status"
 
 NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
-$(NOTICES): $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(GOMODULES) $(SIMPLE_ICONS)
+$(NOTICES): $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(SIMPLE_ICONS)
 $(NOTICES): IMAGE=$(shell cat $(LICENSED_IMAGE))
 $(NOTICES):
 	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed notices"
