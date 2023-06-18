@@ -49,7 +49,7 @@ else
 CONTAINER_EXTRA_ARGS=$(CONTAINER_TAG_ARGS)
 endif
 
-container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES) $(NOTICE)
+container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
 ifneq (,$(findstring simple_icons,$(TAGS))) # If our icon packs include simple_icons then make sure the dir exists.
 container: $(SIMPLE_ICONS)
 endif
@@ -77,12 +77,12 @@ endif
 else
 ifeq ($(ENGINE),docker)
 container: DOCKER=$(shell which docker)
-container: $(STATIC_DIR)
+container: $(STATIC_DIR) $(NOTICE)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	$(DOCKER) build -f $(DOCKERFILE) $(CONTAINER_VAR_ARGS) $(CONTAINER_TAG_ARGS) $(PWD)
 else
-container: $(PODMAN) $(STATIC_DIR)
+container: $(PODMAN) $(STATIC_DIR) $(NOTICE)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	$(PODMAN) build $(CONTAINER_VAR_ARGS) --ignorefile=$(DOCKER_IGNORE) $(CONTAINER_PLATFORM_ARGS) \
