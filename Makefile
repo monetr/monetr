@@ -17,9 +17,9 @@ EDITOR ?= vim
 # This stuff is used for versioning monetr when doing a release or developing locally.
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_HOST=$(shell hostname)
-BRANCH=$(shell git rev-parse --abbrev-ref HEAD || 'branch-unknown')
-RELEASE_REVISION=$(shell git rev-parse HEAD || 'rev-unknown')
-RELEASE_VERSION ?= $(shell git describe --tags --dirty || 'dev-unknown')
+BRANCH=$(shell git rev-parse --abbrev-ref HEAD || echo 'branch-unknown')
+RELEASE_REVISION=$(shell git rev-parse HEAD || echo 'rev-unknown')
+RELEASE_VERSION ?= $(shell git describe --tags --dirty || echo 'dev-unknown')
 
 # Containers should not have the `v` prefix. So we take the release version variable and trim the `v` at the beginning
 # if it is there.
@@ -27,7 +27,7 @@ CONTAINER_VERSION ?= $(RELEASE_VERSION:v%=%)
 
 # We want ALL of our paths to be relative to the repository path on the computer we are on. Never relative to anything
 # else.
-PWD=$(shell git rev-parse --show-toplevel || '.')
+PWD=$(shell git rev-parse --show-toplevel || echo '.')
 
 
 # Then include the colors file to make a lot of the printing prettier.
