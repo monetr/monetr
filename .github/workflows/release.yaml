@@ -100,6 +100,10 @@ jobs:
         with:
           name: '${{ needs.release_please.outputs.version }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Build # I hate so much that I have to do this, but GitHub actions are awful at network connections.
         uses: nick-invision/retry@v2
         with:

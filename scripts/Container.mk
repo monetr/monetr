@@ -1,4 +1,6 @@
 
+ENGINE ?= docker
+
 PODMAN_MACHINE=monetr
 PODMAN_CPUS=4
 PODMAN_DISK_SIZE=4 # GB of disk for podman
@@ -47,7 +49,7 @@ else
 CONTAINER_EXTRA_ARGS=$(CONTAINER_TAG_ARGS)
 endif
 
-container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
+container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES) $(NOTICE)
 ifneq (,$(findstring simple_icons,$(TAGS))) # If our icon packs include simple_icons then make sure the dir exists.
 container: $(SIMPLE_ICONS)
 endif

@@ -73,7 +73,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Setup local development environment
-        timeout-minutes: 30
+        timeout-minutes: 15
         run: |
           make develop || (make logs && exit 1)
           curl -k https://monetr.local
@@ -112,6 +112,10 @@ jobs:
     container: ghcr.io/monetr/build-containers/golang:1.19.4
     strategy:
       matrix:
+        os:
+          - linux
+          - darwin
+          - windows
         architecture:
           - amd64
           - arm64
@@ -132,12 +136,19 @@ jobs:
         with:
           name: '${{ github.sha }}-ui'
           path: '${{ github.workspace }}/pkg/ui/static/'
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
       - name: Build
-        run: GOARCH=${{ matrix.architecture }} make build
+        run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
       - uses: actions/upload-artifact@v3
         with:
-          name: '${{ github.sha }}-binary-${{ matrix.architecture }}'
-          path: '${{ github.workspace }}/build/monetr'
+          name: '${{ github.sha }}-binary-${{ matrix.os }}-${{ matrix.architecture }}'
+          path: |
+            ${{ github.workspace }}/build/monetr
+            ${{ github.workspace }}/build/monetr.exe
+          if-no-files-found: ignore
           retention-days: 7
 
   go_test:
@@ -267,24 +278,6 @@ jobs:
           path: '${{ github.workspace }}/build/site'
           retention-days: 7
 
-  buildah:
-    needs:
-      - "ui_dependencies"
-      - "build_ui"
-    name: Container (Buildah)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        name: Download Compiled UI Artifacts
-        with:
-          name: '${{ github.sha }}-ui'
-          path: '${{ github.workspace }}/pkg/ui/static/'
-      - name: Build
-        run: |
-          sudo apt-get update && sudo apt-get -y install qemu-user-static
-          make container
-
   docker:
     needs:
       - "ui_dependencies"
@@ -303,4 +296,4 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Build
-        run: make container ENGINE=docker
+        run: make container
