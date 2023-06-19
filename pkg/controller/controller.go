@@ -226,11 +226,40 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		}
 	})
 
-	// More complete error handler.
-	api.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+	// TODO implement not found error handler.
+
+	api.GET("/NOTICE", func(ctx echo.Context) error {
+		return ctx.String(http.StatusOK, build.GetNotice())
+	})
+	api.GET("/health", func(ctx echo.Context) error {
+		status := http.StatusOK
+		err := c.db.Ping(ctx.Request().Context())
+		if err != nil {
+			c.getLog(ctx).WithError(err).Warn("failed to ping database")
+			status = http.StatusInternalServerError
+		}
+
+		result := map[string]interface{}{
+			"dbHealthy":  err == nil,
+			"apiHealthy": true,
+			"revision":   build.Revision,
+			"buildTime":  build.BuildTime,
+			"serverTime": time.Now().UTC(),
+		}
+
+		if build.Release != "" {
+			result["release"] = build.Release
+		} else {
+			result["release"] = nil
+		}
+
+		return ctx.JSON(status, result)
+	})
+
+	baseParty := api.Group("", func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) (returnErr error) {
 			var span *sentry.Span
-			if hub := sentryecho.GetHubFromContext(ctx); hub != nil && ctx.Path() != APIPath+"/health" {
+			if hub := sentryecho.GetHubFromContext(ctx); hub != nil {
 				requestId := util.GetRequestID(ctx)
 				hub.ConfigureScope(func(scope *sentry.Scope) {
 					scope.SetTag("requestId", requestId)
@@ -326,37 +355,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 		}
 	})
 
-	// TODO implement not found error handler.
-
-	api.GET("/NOTICE", func(ctx echo.Context) error {
-		return ctx.String(http.StatusOK, build.GetNotice())
-	})
-	api.GET("/health", func(ctx echo.Context) error {
-		status := http.StatusOK
-		err := c.db.Ping(ctx.Request().Context())
-		if err != nil {
-			c.getLog(ctx).WithError(err).Warn("failed to ping database")
-			status = http.StatusInternalServerError
-		}
-
-		result := map[string]interface{}{
-			"dbHealthy":  err == nil,
-			"apiHealthy": true,
-			"revision":   build.Revision,
-			"buildTime":  build.BuildTime,
-			"serverTime": time.Now().UTC(),
-		}
-
-		if build.Release != "" {
-			result["release"] = build.Release
-		} else {
-			result["release"] = nil
-		}
-
-		return ctx.JSON(status, result)
-	})
-
-	repoParty := api.Group("", c.databaseRepositoryMiddleware)
+	repoParty := baseParty.Group("", c.databaseRepositoryMiddleware)
 	// Plaid incoming webhooks
 	repoParty.POST("/plaid/webhook", c.handlePlaidWebhook)
 	// Stripe incoming webhooks

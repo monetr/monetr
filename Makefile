@@ -1,4 +1,7 @@
 .SUFFIXES:
+MAKEFLAGS += --no-print-directory
+MAKEFLAGS += --no-builtin-rules
+
 default: build
 
 GIT_REPOSITORY=https://github.com/monetr/monetr.git
@@ -14,9 +17,9 @@ EDITOR ?= vim
 # This stuff is used for versioning monetr when doing a release or developing locally.
 BUILD_TIME=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 BUILD_HOST=$(shell hostname)
-BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
-RELEASE_REVISION=$(shell git rev-parse HEAD)
-RELEASE_VERSION ?= $(shell git describe --tags --dirty)
+BRANCH=$(shell git rev-parse --abbrev-ref HEAD || echo 'branch-unknown')
+RELEASE_REVISION=$(shell git rev-parse HEAD || echo 'rev-unknown')
+RELEASE_VERSION ?= $(shell git describe --tags --dirty || echo 'dev-unknown')
 
 # Containers should not have the `v` prefix. So we take the release version variable and trim the `v` at the beginning
 # if it is there.
@@ -24,7 +27,7 @@ CONTAINER_VERSION ?= $(RELEASE_VERSION:v%=%)
 
 # We want ALL of our paths to be relative to the repository path on the computer we are on. Never relative to anything
 # else.
-PWD=$(shell git rev-parse --show-toplevel)
+PWD=$(shell git rev-parse --show-toplevel || echo '.')
 
 
 # Then include the colors file to make a lot of the printing prettier.
@@ -163,7 +166,9 @@ GOMODULES=$(GOPATH)/pkg/mod
 $(GOMODULES): $(GO) $(GO_DEPS)
 	$(call infoMsg,Installing dependencies for monetr)
 	$(GO) get -t $(GO_SRC_DIR)/...
+ifndef CI
 	touch -a -m $(GOMODULES)
+endif
 
 go-dependencies: $(GOMODULES)
 
@@ -175,29 +180,45 @@ deps: dependencies
 
 build-ui: $(STATIC_DIR)
 
+SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons/README.md
+$(SIMPLE_ICONS):
+	git submodule update --init pkg/icons/sources/simple-icons
+
+LICENSED_IMAGE=$(BUILD_DIR)/licensed-$(RELEASE_VERSION).image
+$(LICENSED_IMAGE): $(PWD)/scripts/Licensed.containerfile
+$(LICENSED_IMAGE) |: $(BUILD_DIR)
+$(LICENSED_IMAGE): IMAGE=licensed:$(RELEASE_VERSION)
+$(LICENSED_IMAGE):
+	$(DOCKER) build -f $< $(dir $<) -t $(IMAGE)
+	echo $(IMAGE) > $@
+
 LICENSED_CONFIG=$(PWD)/.licensed.yaml
 LICENSED_CACHE=$(PWD)/.licenses
-$(LICENSED_CACHE): $(LICENSED) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG)
-	$(LICENSED) cache --force
+$(LICENSED_CACHE): $(LICENSED_IMAGE) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG) $(SIMPLE_ICONS)
+$(LICENSED_CACHE): IMAGE=$(shell cat $(LICENSED_IMAGE))
+$(LICENSED_CACHE):
+	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed cache --force"
+ifndef CI
 	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
+endif
 
 .PHONY: license
-license: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG)
-	$(LICENSED) status
+license: $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG)
+license: IMAGE=$(shell cat $(LICENSED_IMAGE))
+license:
+	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed status"
 
 NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
-$(NOTICES) &: $(LICENSED) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(GOMODULES) $(SIMPLE_ICONS)
-	$(LICENSED) notices
+$(NOTICES): $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(SIMPLE_ICONS)
+$(NOTICES): IMAGE=$(shell cat $(LICENSED_IMAGE))
+$(NOTICES):
+	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed notices"
 
-NOTICE=$(GO_SRC_DIR)/build/NOTICE
+NOTICE=$(GO_SRC_DIR)/build/NOTICE.md
 $(NOTICE): $(NOTICES)
 	cat $(NOTICES) > $@
 
 notice: $(NOTICE)
-
-SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons/README.md
-$(SIMPLE_ICONS):
-	git submodule update --init pkg/icons/sources/simple-icons
 
 GOOS ?= $(OS)
 GOARCH ?= amd64
@@ -287,6 +308,7 @@ endif
 endif
 
 clean: shutdown $(HOSTESS)
+	-rm -rf $(NOTICE)
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
 	-rm -rf $(LICENSED_CACHE)

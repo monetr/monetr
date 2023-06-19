@@ -1,4 +1,6 @@
 
+ENGINE ?= docker
+
 PODMAN_MACHINE=monetr
 PODMAN_CPUS=4
 PODMAN_DISK_SIZE=4 # GB of disk for podman
@@ -75,12 +77,12 @@ endif
 else
 ifeq ($(ENGINE),docker)
 container: DOCKER=$(shell which docker)
-container: $(STATIC_DIR)
+container: $(STATIC_DIR) $(NOTICE)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	$(DOCKER) build -f $(DOCKERFILE) $(CONTAINER_VAR_ARGS) $(CONTAINER_TAG_ARGS) $(PWD)
 else
-container: $(PODMAN) $(STATIC_DIR)
+container: $(PODMAN) $(STATIC_DIR) $(NOTICE)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	$(PODMAN) build $(CONTAINER_VAR_ARGS) --ignorefile=$(DOCKER_IGNORE) $(CONTAINER_PLATFORM_ARGS) \
