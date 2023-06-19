@@ -18,14 +18,8 @@ const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
   uppercase: false,
 };
 
-export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
-  const formikContext = useFormikContext();
-
-  props = {
-    ...MTextFieldPropsDefaults,
-    ...props,
-    error: props?.error || formikContext?.errors[props?.name]
-  };
+function LabelText(props: MTextFieldProps): JSX.Element {
+  if (!props.label) return null;
 
   const labelClassNames = clsx(
     'mb-1',
@@ -39,24 +33,36 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     },
   );
 
+  return (
+    <label
+      htmlFor={ props.id }
+      className={ labelClassNames }
+    >
+      { props.label }
+    </label>
+  );
+}
+
+function LabelRequired(props: MTextFieldProps): JSX.Element {
+  if (!props.required) return null;
+  return (
+    <span className='text-red-500'>
+      *
+    </span>
+  );
+}
+
+export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
+  const formikContext = useFormikContext();
+
+  props = {
+    ...MTextFieldPropsDefaults,
+    ...props,
+    error: props?.error || formikContext?.errors[props?.name],
+  };
+
   const { labelDecorator, ...otherProps } = props;
-  function Label() {
-    if (!props.label) return null;
-    const LabelDecorator = labelDecorator || MTextFieldPropsDefaults.labelDecorator;
-
-    return (
-      <div className="flex items-center justify-between">
-        <label
-          htmlFor={ props.id }
-          className={ labelClassNames }
-        >
-          { props.label }
-        </label>
-
-        <LabelDecorator />
-      </div>
-    );
-  }
+  const LabelDecorator = labelDecorator || MTextFieldPropsDefaults.labelDecorator;
 
   function Error() {
     if (!props.error) return null;
@@ -98,7 +104,13 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
 
   return (
     <div className={ props.className }>
-      <Label />
+      <div className="flex items-center justify-between">
+        <div className='flex items-center gap-0.5'>
+          <LabelText { ...props } />
+          <LabelRequired { ...props } />
+        </div>
+        <LabelDecorator />
+      </div>
       <div>
         <input
           value={ formikContext?.values[props.name] }

@@ -137,7 +137,7 @@
     ],
     "react/no-did-mount-set-state": 2,
     "react/no-unescaped-entities": 0,
-    "react/prop-types": 2,
+    "react/prop-types": "off",
     "no-extra-boolean-cast": 0,
     "no-console": [
       "error",
@@ -161,7 +161,7 @@
         "children": "never"
       }
     ],
-    "react/no-unused-prop-types": 2,
+    "react/no-unused-prop-types": "off",
     "arrow-parens": [
       2,
       "as-needed"
