@@ -11,6 +11,13 @@ const defaultPrimary = fullConfig.theme.colors['purple']['500']; // '#4E1AA0';
 const defaultSecondary = '#FF5798';
 
 const theme = createTheme({
+  typography: {
+    fontFamily: [
+      'Helvetica',
+      'Arial',
+      'sans-serif',
+    ].join(','),
+  },
   shape: {
     borderRadius: 10,
   },
