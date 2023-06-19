@@ -62,7 +62,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     if (!props.error) return null;
 
     return (
-      <p className="text-sm font-medium text-red-500 mt-2">
+      <p className="text-xs font-medium text-red-500 mt-0.5">
         { props.error }
       </p>
     );
@@ -75,11 +75,14 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'ring-gray-200': props.disabled,
       'uppercase': props.uppercase,
     },
+    {
+      'focus:ring-purple-400': !props.error,
+      'focus:ring-red-400': props.error,
+    },
     'block',
     'border-0',
     'focus:ring-2',
     'focus:ring-inset',
-    'focus:ring-purple-400',
     'placeholder:text-gray-400',
     'px-3',
     'py-1.5',
