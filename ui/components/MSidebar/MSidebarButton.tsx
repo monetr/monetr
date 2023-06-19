@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import { ReactElement } from './types';
-
 import clsx from 'clsx';
+import { ReactElement } from 'components/types';
 
 export interface MSidebarButton {
   children: ReactElement;
@@ -24,7 +23,7 @@ export default function MSidebarButton(props: MSidebarButton): JSX.Element {
     'leading-6',
     'text-gray-50',
     {
-      'bg-purple-700': active,
+      'bg-gradient-to-br from-purple-400 to-purple-500 hover:from-purple-400 hover:to-purple-400': active,
       'hover:bg-purple-700': !active,
     },
   );
