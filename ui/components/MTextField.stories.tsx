@@ -12,7 +12,7 @@ export default {
 
 export const Default: StoryFn<typeof MTextField> = () => (
   <div className="w-full flex p-4">
-    <div className="w-full max-w-xl grid grid-cols-1 grid-flow-row gap-6">
+    <div className="w-full max-w-xl grid grid-cols-1 grid-flow-row gap-1">
       <MTextField label="Name" type='text' name='name' />
       <MTextField label="Email Address" type='email' name='email' />
       <MTextField label="Password" type='password' name='password' />
