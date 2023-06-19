@@ -4,10 +4,10 @@ import MButton from 'components/MButton';
 import MCheckbox from 'components/MCheckbox';
 import MForm from 'components/MForm';
 import MLink from 'components/MLink';
+import MLogo from 'components/MLogo';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import MLogo from 'components/MLogo';
 
 export default function RegisterNew(): JSX.Element {
   const config = useAppConfiguration();
