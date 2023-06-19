@@ -20,7 +20,7 @@ const initialValues: Values = {
 
 export function ForgotPasswordComplete(): JSX.Element {
   return (
-    <div className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5 px-5">
+    <div className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5">
       <div className="max-w-[128px] w-full">
         <MLogo />
       </div>
@@ -38,7 +38,7 @@ export function ForgotPasswordComplete(): JSX.Element {
         <MLink to="/login" size="sm">Sign in</MLink>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ForgotPasswordNew(): JSX.Element {
@@ -74,7 +74,7 @@ export default function ForgotPasswordNew(): JSX.Element {
 
   return (
     <Formik initialValues={ initialValues } validate={ validate } onSubmit={ submit }>
-      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5 px-5">
+      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5">
         <div className="max-w-[128px] w-full">
           <MLogo />
         </div>

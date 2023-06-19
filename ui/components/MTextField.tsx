@@ -7,7 +7,7 @@ type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputEle
 export interface MTextFieldProps extends InputProps {
   label?: string;
   error?: string;
-  uppercase?: boolean;
+  uppercasetext?: boolean;
   labelDecorator?: () => JSX.Element;
 }
 
@@ -15,7 +15,7 @@ const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
   label: null,
   labelDecorator: () => null,
   disabled: false,
-  uppercase: false,
+  uppercasetext: undefined,
 };
 
 function LabelText(props: MTextFieldProps): JSX.Element {
@@ -54,11 +54,16 @@ function LabelRequired(props: MTextFieldProps): JSX.Element {
 
 export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
   const formikContext = useFormikContext();
+  const getFormikError = () => {
+    if (!formikContext?.touched[props?.name]) return null;
+
+    return formikContext?.errors[props?.name];
+  };
 
   props = {
     ...MTextFieldPropsDefaults,
     ...props,
-    error: props?.error || formikContext?.errors[props?.name],
+    error: props?.error || getFormikError(),
   };
 
   const { labelDecorator, ...otherProps } = props;
@@ -79,7 +84,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'ring-gray-300': !props.disabled && !props.error,
       'ring-red-300': !props.disabled && !!props.error,
       'ring-gray-200': props.disabled,
-      'uppercase': props.uppercase,
+      'uppercase': props.uppercasetext,
     },
     {
       'focus:ring-purple-400': !props.error,
@@ -102,8 +107,13 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'w-full',
   );
 
+  const wrapperClassNames = clsx({
+    // This will make it so the space below the input is the same when there is and isn't an error.
+    'pb-[18px]': !props.error,
+  }, props.className);
+
   return (
-    <div className={ props.className }>
+    <div className={ wrapperClassNames }>
       <div className="flex items-center justify-between">
         <div className='flex items-center gap-0.5'>
           <LabelText { ...props } />

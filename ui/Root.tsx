@@ -14,14 +14,14 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import * as Sentry from '@sentry/react';
 import axios from 'axios';
-import { IconVariant, SnackbarProvider } from 'notistack';
+import { SnackbarProvider, VariantType } from 'notistack';
 
 import Application from 'Application';
 import clsx from 'clsx';
 import theme from 'theme';
 
 export default function Root(): JSX.Element {
-  const snackbarIcons: Partial<IconVariant> = {
+  const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
     error: <ErrorIcon className="mr-2.5" />,
     success: <DoneIcon className="mr-2.5" />,
     warning: <WarningIcon className="mr-2.5" />,

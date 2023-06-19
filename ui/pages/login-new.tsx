@@ -1,5 +1,5 @@
 import React from 'react';
-import { Formik, FormikHelpers } from 'formik';
+import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import MButton from 'components/MButton';
@@ -11,6 +11,7 @@ import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useLogin from 'hooks/useLogin';
+import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface LoginValues {
   email: string;
@@ -23,6 +24,24 @@ const initialValues: LoginValues = {
   password: '',
   captcha: null,
 };
+
+function validator(values: LoginValues): FormikErrors<LoginValues> {
+  const errors = {};
+
+  if (values?.email.length === 0) {
+    errors['email'] = 'Email must be provided.';
+  }
+
+  if (values?.email && !verifyEmailAddress(values?.email)) {
+    errors['email'] = 'Email must be valid.';
+  }
+
+  if (values?.password.length < 8) {
+    errors['password'] = 'Password must be at least 8 characters long.';
+  }
+
+  return errors;
+}
 
 export default function LoginNew(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
@@ -71,9 +90,10 @@ export default function LoginNew(): JSX.Element {
   return (
     <Formik
       initialValues={ initialValues }
+      validate={ validator }
       onSubmit={ submit }
     >
-      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-5 px-5">
+      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5">
         <div className="max-w-[128px] w-full">
           <MLogo />
         </div>

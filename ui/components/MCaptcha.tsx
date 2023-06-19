@@ -1,13 +1,15 @@
 import React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { CircularProgress } from '@mui/material';
 import { useFormikContext } from 'formik';
 
+import clsx from 'clsx';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { CircularProgress } from '@mui/material';
 
 export interface MCaptchaProps {
   name?: string;
   show?: boolean;
+  className?: string;
 }
 
 export default function MCaptcha(props: MCaptchaProps): JSX.Element {
@@ -30,8 +32,15 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   const loading = Boolean(formikContext?.isSubmitting);
 
+  const classes = clsx([
+    'flex',
+    'items-center',
+    'justify-center',
+    'w-full',
+  ], props.className);
+
   return (
-    <div className="flex items-center justify-center w-full">
+    <div className={ classes }>
       {!loading && <ReCAPTCHA
         sitekey={ ReCAPTCHAKey }
         onChange={ onVerify }
