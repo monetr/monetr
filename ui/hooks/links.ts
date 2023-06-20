@@ -1,10 +1,10 @@
 import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
 import { useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import { useSnackbar } from 'notistack';
 
 import { useBankAccounts } from 'hooks/bankAccounts';
 import Link from 'models/Link';
 import request from 'util/request';
-import { useSnackbar } from 'notistack';
 
 export type LinksResult =
   { result: Map<number, Link> }
@@ -35,7 +35,7 @@ export function useRemoveLink(): (_linkId: number) => Promise<void> {
   const queryClient = useQueryClient();
   return async function (linkId: number): Promise<void> {
     return request()
-      .delete(`/links/${ linkId }`)
+      .delete(`/links/${linkId}`)
       .then(() => void Promise.all([
         queryClient.invalidateQueries('/links'),
         queryClient.invalidateQueries('/bank_accounts'),
@@ -73,9 +73,9 @@ export function useTriggerManualSync(): (_linkId: number) => Promise<void> {
         disableWindowBlurListener: true,
 
       }))
-      .catch(error => void enqueueSnackbar(`Failed to trigger a manual sync: ${ error?.response?.data?.error || 'unknown error' }.`, {
+      .catch(error => void enqueueSnackbar(`Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`, {
         variant: 'error',
         disableWindowBlurListener: true,
       }));
-  }
+  };
 }

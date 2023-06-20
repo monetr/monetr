@@ -12,7 +12,7 @@ export type BankAccountsResult =
 export function useBankAccountsSink(): BankAccountsResult {
   const links = useLinks();
   const result = useQuery<Array<Partial<BankAccount>>>('/bank_accounts', {
-    enabled: links.size > 0,
+    enabled: !!links && links.size > 0,
   });
   return {
     ...result,

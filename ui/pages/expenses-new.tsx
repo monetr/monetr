@@ -10,7 +10,7 @@ import { SpendingType } from 'models/Spending';
 export default function ExpensesNew(): JSX.Element {
   const { isLoading, result: expenses } = useSpendingFiltered(SpendingType.Expense);
 
-  if (expenses?.length === 0) {
+  if (!expenses || expenses?.length === 0) {
     return <EmptyState />;
   }
 
@@ -18,7 +18,7 @@ export default function ExpensesNew(): JSX.Element {
     <List disablePadding className='w-full'>
       {
         expenses
-          .sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+          ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
           .map(expense => (
             <Fragment key={ expense.spendingId }>
               <ExpenseItem expense={ expense } />

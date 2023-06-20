@@ -29,7 +29,7 @@ function LabelText(props: MTextFieldProps): JSX.Element {
     'leading-6',
     {
       'text-gray-900': !props.disabled,
-      'text-gray-400': props.disabled,
+      'text-gray-500': props.disabled,
     },
   );
 
@@ -38,7 +38,7 @@ function LabelText(props: MTextFieldProps): JSX.Element {
       htmlFor={ props.id }
       className={ labelClassNames }
     >
-      { props.label }
+      {props.label}
     </label>
   );
 }
@@ -63,6 +63,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
   props = {
     ...MTextFieldPropsDefaults,
     ...props,
+    disabled: props?.disabled || formikContext?.isSubmitting,
     error: props?.error || getFormikError(),
   };
 
@@ -74,7 +75,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
 
     return (
       <p className="text-xs font-medium text-red-500 mt-0.5">
-        { props.error }
+        {props.error}
       </p>
     );
   }
@@ -90,6 +91,10 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'focus:ring-purple-400': !props.error,
       'focus:ring-red-400': props.error,
     },
+    {
+      'text-gray-900': !props.disabled,
+      'text-gray-500': props.disabled,
+    },
     'block',
     'border-0',
     'focus:ring-2',
@@ -103,7 +108,6 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'shadow-sm',
     'sm:leading-6',
     'sm:text-sm',
-    'text-gray-900',
     'w-full',
   );
 
