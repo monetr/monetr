@@ -7,6 +7,7 @@ import clsx from 'clsx';
 export interface MButtonProps extends ButtonBaseProps {
   color?: 'primary' | 'secondary' | 'cancel';
   variant?: 'solid' | 'text';
+  submitting?: boolean;
 }
 
 const MButtonPropsDefaults: MButtonProps = {
@@ -15,13 +16,12 @@ const MButtonPropsDefaults: MButtonProps = {
   variant: 'solid',
 };
 
-export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX.Element {
-  const formikContext = useFormikContext();
-
+// MBaseButton is the button implementation without the formik hook in and overrides.
+// If you need to use a monetr button without formik then this should be used instead.
+export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Element {
   const { disabled, color: theme, variant: kind }: MButtonProps = {
     ...MButtonPropsDefaults,
     ...props,
-    disabled: formikContext?.isSubmitting || props.disabled,
   };
   const themeClasses = {
     'primary': {
@@ -87,9 +87,21 @@ export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX
   );
 
   return <ButtonBase
-    onSubmit={ props.type === 'submit' ? formikContext?.submitForm : null }
-    disabled={ formikContext?.isSubmitting || props.disabled }
     { ...props }
     className={ classNames }
   />;
+};
+
+// MButton is a wrapper around MBaseButton but includes a formik hook in with some basic overrides.
+export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX.Element {
+  const formikContext = useFormikContext();
+  props = {
+    ...MButtonPropsDefaults,
+    ...props,
+    disabled: formikContext?.isSubmitting || props?.disabled,
+    onSubmit: props?.onSubmit || (props.type === 'submit' ? formikContext?.submitForm : undefined),
+  };
+  return (
+    <MBaseButton { ...props } />
+  );
 }

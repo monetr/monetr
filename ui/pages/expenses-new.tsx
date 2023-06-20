@@ -3,7 +3,7 @@ import { Divider, List } from '@mui/material';
 
 import { showCreateExpenseDialog } from 'components/Expenses/CreateExpenseDialog';
 import ExpenseItem from 'components/Expenses/ExpenseItem';
-import MButton from 'components/MButton';
+import { MBaseButton } from 'components/MButton';
 import { useSpendingFiltered } from 'hooks/spending';
 import { SpendingType } from 'models/Spending';
 
@@ -32,19 +32,19 @@ export default function ExpensesNew(): JSX.Element {
 
 function EmptyState(): JSX.Element {
   return (
-    <div className="h-full w-full flex justify-center items-center">
+    <div className="h-full w-full flex justify-center items-center px-2">
       <div className="flex flex-col gap-2">
-        <p className='text-3xl opacity-50'>
+        <p className='text-3xl opacity-50 text-center'>
           You don't have any expenses yet...
         </p>
-        <MButton
+        <MBaseButton
           onClick={ showCreateExpenseDialog }
           color="primary"
         >
           <p className='text-lg'>
             Create An Expense
           </p>
-        </MButton>
+        </MBaseButton>
       </div>
     </div>
   );
