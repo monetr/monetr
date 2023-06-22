@@ -179,10 +179,9 @@ jobs:
         name: Download Third Party Notice Artifacts
         with:
           name: '${{ github.sha }}-notice'
-          path: '${{ github.workspace }}/pkg/build/NOTICE.md'
+          path: '${{ github.workspace }}/pkg/build/'
       - name: Build
         run: |
-          ls pkg/build
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
       - uses: actions/upload-artifact@v3
         with:
