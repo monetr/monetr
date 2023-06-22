@@ -363,12 +363,19 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-		AccountId: link.AccountId,
-		LinkId:    link.LinkId,
-		Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
-		End:       time.Now(),
-	})
+	if link.PlaidLink.UsePlaidSync {
+		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+		})
+	} else {
+		err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+			Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
+			End:       time.Now(),
+		})
+	}
 	if err != nil {
 		log.WithError(err).Warn("failed to trigger pulling latest transactions after updating plaid link")
 	}
