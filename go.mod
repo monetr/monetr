@@ -34,7 +34,6 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.4
-	github.com/stripe/stripe-go/v72 v72.122.0
 	github.com/stripe/stripe-go/v74 v74.22.0
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.3.5

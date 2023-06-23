@@ -1,15 +1,16 @@
 package mock_stripe
 
 import (
-	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
-	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v72"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
+	"github.com/stretchr/testify/require"
+	"github.com/stripe/stripe-go/v74"
 )
 
 func MockStripeAttachPaymentMethodSuccess(t *testing.T) {
@@ -34,8 +35,8 @@ func MockStripeAttachPaymentMethodSuccess(t *testing.T) {
 					Brand:       "visa",
 					Country:     "US",
 					Description: "Test credit card",
-					ExpMonth:    uint64(time.Now().Month() + 1),
-					ExpYear:     uint64(time.Now().Year() + 1),
+					ExpMonth:    int64(time.Now().Month() + 1),
+					ExpYear:     int64(time.Now().Year() + 1),
 					Last4:       "1234",
 				},
 				Customer: &stripe.Customer{

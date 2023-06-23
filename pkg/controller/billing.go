@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/stripe_helper"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 )
 
 // Create Checkout Session
@@ -189,7 +189,6 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				// Number of bank accounts?
-				Amount:   nil,
 				Quantity: stripe.Int64(1),
 				Price:    &plan.StripePriceId,
 			},

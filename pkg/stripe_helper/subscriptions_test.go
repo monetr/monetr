@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 )
 
 func TestSubscriptionIsActive(t *testing.T) {

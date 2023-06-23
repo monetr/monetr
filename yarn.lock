@@ -11295,14 +11295,14 @@ ms@2.1.3, ms@^2.1.1:
   resolved "https://registry.npmjs.org/ms/-/ms-2.1.3.tgz"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-msw-storybook-addon@^1.8.0:
+msw-storybook-addon@1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/msw-storybook-addon/-/msw-storybook-addon-1.8.0.tgz#090b55b9a586f3e1620782dc156e8d5ce951ab7a"
   integrity sha512-dw3vZwqjixmiur0vouRSOax7wPSu9Og2Hspy9JZFHf49bZRjwDiLF0Pfn2NXEkGviYJOJiGxS1ejoTiUwoSg4A==
   dependencies:
     is-node-process "^1.0.1"
 
-msw@^1.2.2:
+msw@1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/msw/-/msw-1.2.2.tgz#126c3150c07f651e97b24fbd405821f3aeaf9397"
   integrity sha512-GsW3PE/Es/a1tYThXcM8YHOZ1S1MtivcS3He/LQbbTCx3rbWJYCtWD5XXyJ53KlNPT7O1VI9sCW3xMtgFe8XpQ==
