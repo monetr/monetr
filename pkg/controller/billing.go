@@ -189,7 +189,6 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
 				// Number of bank accounts?
-				Amount:   nil,
 				Quantity: stripe.Int64(1),
 				Price:    &plan.StripePriceId,
 			},
