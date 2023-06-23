@@ -19,7 +19,7 @@ import (
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/monetr/monetr/pkg/secrets"
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v3/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

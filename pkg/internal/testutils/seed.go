@@ -10,7 +10,7 @@ import (
 	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v3/plaid"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -197,8 +197,8 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				checkingAccountId: {
 					AccountId: checkingAccountId,
 					Balances: plaid.AccountBalance{
-						Available:              *plaid.NewNullableFloat32(myownsanity.Float32P(float32(checkingBalance) / 100)),
-						Current:                *plaid.NewNullableFloat32(myownsanity.Float32P(float32(checkingBalance) / 100)),
+						Available:              *plaid.NewNullableFloat64(myownsanity.Float64P(float64(checkingBalance) / 100)),
+						Current:                *plaid.NewNullableFloat64(myownsanity.Float64P(float64(checkingBalance) / 100)),
 						IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP("USD")),
 						UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP("USD")),
 					},
@@ -211,8 +211,8 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 				savingsAccountId: {
 					AccountId: savingsAccountId,
 					Balances: plaid.AccountBalance{
-						Available:              *plaid.NewNullableFloat32(myownsanity.Float32P(float32(savingBalance) / 100)),
-						Current:                *plaid.NewNullableFloat32(myownsanity.Float32P(float32(savingBalance) / 100)),
+						Available:              *plaid.NewNullableFloat64(myownsanity.Float64P(float64(savingBalance) / 100)),
+						Current:                *plaid.NewNullableFloat64(myownsanity.Float64P(float64(savingBalance) / 100)),
 						IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP("USD")),
 						UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP("USD")),
 					},

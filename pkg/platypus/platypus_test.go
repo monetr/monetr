@@ -9,7 +9,7 @@ import (
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/mock_plaid"
 	"github.com/monetr/monetr/pkg/internal/testutils"
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v3/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

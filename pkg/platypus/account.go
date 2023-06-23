@@ -1,6 +1,6 @@
 package platypus
 
-import "github.com/plaid/plaid-go/plaid"
+import "github.com/plaid/plaid-go/v3/plaid"
 
 type (
 	BankAccount interface {
