@@ -14,7 +14,7 @@ import (
 	"github.com/monetr/monetr/pkg/pubsub"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 )
 
 func buildAccountCacheKey(accountId uint64) string {

@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/stripe_helper"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 )
 
 // Create Checkout Session

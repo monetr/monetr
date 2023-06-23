@@ -2,7 +2,7 @@ package mock_stripe
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 	"net/http"
 	"testing"
 )

@@ -13,7 +13,7 @@ import (
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 	"github.com/xlzd/gotp"
 )
 

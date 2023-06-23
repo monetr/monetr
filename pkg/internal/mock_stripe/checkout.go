@@ -5,7 +5,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 	"io/ioutil"
 	"net/http"
 	"net/url"

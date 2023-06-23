@@ -8,7 +8,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/cache"
 	"github.com/sirupsen/logrus"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 )
 
 type StripeCache interface {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 	"net/http"
 	"strings"
 	"testing"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/monetr/monetr/pkg/feature"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v74"
 )
 
 type Account struct {
