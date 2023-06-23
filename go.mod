@@ -27,7 +27,6 @@ require (
 	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.1.7
 	github.com/pkg/errors v0.9.1
-	github.com/plaid/plaid-go v1.10.0
 	github.com/plaid/plaid-go/v3 v3.5.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/sirupsen/logrus v1.9.3
