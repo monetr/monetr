@@ -161,7 +161,7 @@
     "react-test-renderer": "18.2.0",
     "sass": "1.55.0",
     "sass-loader": "13.0.2",
-    "semver": "7.3.8",
+    "semver": "7.5.2",
     "storybook": "7.0.18",
     "storybook-react-rspack": "7.0.0-rc.24",
     "style-loader": "3.3.2",
