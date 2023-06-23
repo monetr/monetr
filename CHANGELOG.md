@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.15.3](https://github.com/monetr/monetr/compare/v0.15.2...v0.15.3) (2023-06-23)
+
+
+### Features
+
+* **build:** Improved license build step ([#1438](https://github.com/monetr/monetr/issues/1438)) ([83f4e3b](https://github.com/monetr/monetr/commit/83f4e3b1eb0424e75b226bea213d785ccb5bad5c))
+* **ui:** Added support for MSW in storybook. ([c1c132e](https://github.com/monetr/monetr/commit/c1c132e150a5e944630bb5c6b8e714d6136546ab))
+* **ui:** Improve text field required support. ([e73e0f3](https://github.com/monetr/monetr/commit/e73e0f3e01b1e2f3c8c6dcd3941e7061bb1b88ad))
+* **ui:** Improved appearance of new text fields in error state. ([5f81bbd](https://github.com/monetr/monetr/commit/5f81bbd359b9b1f8369b1cdd49d1cd9ec07297e3))
+* **ui:** Significant improvements to new register + components. ([b8a5498](https://github.com/monetr/monetr/commit/b8a54981456d33433e9a5a32bbf1033843c49d62))
+* **ui:** Starting to work on the new expenses view. ([340eb91](https://github.com/monetr/monetr/commit/340eb917e83c640f608e153ee3a75c24130b8e63))
+
+
+### Bug Fixes
+
+* **build:** Fixed issue with container missing third party notices. ([2ceb7bb](https://github.com/monetr/monetr/commit/2ceb7bb2f417e527a6b53cd67f2d98cac6fae8e7))
+* **build:** Fixing build not including third party notices. ([#1447](https://github.com/monetr/monetr/issues/1447)) ([14d5627](https://github.com/monetr/monetr/commit/14d5627cd01dd29b9368aa46e22d219fa5c46a21)), closes [#1442](https://github.com/monetr/monetr/issues/1442)
+* **deps:** Fixed plaid version update to v3. ([#1453](https://github.com/monetr/monetr/issues/1453)) ([efd47d1](https://github.com/monetr/monetr/commit/efd47d1af59e2b56541745758f60200948e833b6))
+* **deps:** Fixed stripe dependency update to v74. ([#1449](https://github.com/monetr/monetr/issues/1449)) ([1c72fc5](https://github.com/monetr/monetr/commit/1c72fc5b865d5a71af062d0b4036d2efe52a734a))
+* **plaid:** Fixed an issue with Plaid update callback syncing. ([#1446](https://github.com/monetr/monetr/issues/1446)) ([6e03f0b](https://github.com/monetr/monetr/commit/6e03f0b835192e5b55ff37dcd66eeef41f5c0488)), closes [#1445](https://github.com/monetr/monetr/issues/1445)
+* **ui:** Broke formik hook for MButton out. ([5a46253](https://github.com/monetr/monetr/commit/5a4625344a672ab36ec53df234bfc42234366a2b))
+* **ui:** Fixed storybook spacing for text field. ([42c89c6](https://github.com/monetr/monetr/commit/42c89c67d4f755e78c0208fc584e126a28bf84cb))
+
+
+### Dependencies
+
+* **api:** update module github.com/mileusna/useragent to v1.3.3 ([#1433](https://github.com/monetr/monetr/issues/1433)) ([e1410c7](https://github.com/monetr/monetr/commit/e1410c703fb45d787b96e33c9d700c090758fb29))
+* **api:** update module github.com/stripe/stripe-go/v72 to v74 ([#1435](https://github.com/monetr/monetr/issues/1435)) ([3ac0f3d](https://github.com/monetr/monetr/commit/3ac0f3d1ff32f1ad9d1e8258e88581cc63b1a671))
+
+
+### Miscellaneous
+
+* **deps-dev:** bump semver from 7.3.8 to 7.5.2 ([#1448](https://github.com/monetr/monetr/issues/1448)) ([b497f47](https://github.com/monetr/monetr/commit/b497f4700f4efc900d9b48c873363fee41817566))
+* **deps:** Cleaning up old deps ([9b7d7e8](https://github.com/monetr/monetr/commit/9b7d7e808dbc86ca088c5a662c73aeb4c5021ffa))
+* **ui:** Eslint new register screen. ([f307128](https://github.com/monetr/monetr/commit/f3071285d424328d47ffde6d560575796c14d664))
+* **ui:** Improve appearance of new sidebar button. ([3d7448f](https://github.com/monetr/monetr/commit/3d7448f7992c78cba7360ff099bc1b3e8a949e22))
+* **ui:** Removed Roboto font. ([ad3fda1](https://github.com/monetr/monetr/commit/ad3fda176beaeb21714b1db7a1be421f6c8b9360))
+
 ## [0.15.2](https://github.com/monetr/monetr/compare/v0.15.1...v0.15.2) (2023-06-18)
 
 
