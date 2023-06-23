@@ -4,6 +4,10 @@ func Float32P(value float32) *float32 {
 	return &value
 }
 
+func Float64P(value float64) *float64 {
+	return &value
+}
+
 func Int32P(value int32) *int32 {
 	return &value
 }

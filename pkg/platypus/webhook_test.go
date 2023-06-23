@@ -12,7 +12,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v3/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

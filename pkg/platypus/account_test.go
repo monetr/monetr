@@ -5,21 +5,21 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v3/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewPlaidBankAccountBalances(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		var available, current, limit float32
+		var available, current, limit float64
 		available = 101.34
 		current = 110.25
 		limit = 500.13
 
 		plaidBalances := plaid.AccountBalance{
-			Available:              *plaid.NewNullableFloat32(&available),
-			Current:                *plaid.NewNullableFloat32(&current),
-			Limit:                  *plaid.NewNullableFloat32(&limit),
+			Available:              *plaid.NewNullableFloat64(&available),
+			Current:                *plaid.NewNullableFloat64(&current),
+			Limit:                  *plaid.NewNullableFloat64(&limit),
 			IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP("USD")),
 			UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP("USD")),
 			LastUpdatedDatetime:    plaid.NullableTime{}, // Leave this be so that is has no value.
@@ -38,9 +38,9 @@ func TestNewPlaidBankAccountBalances(t *testing.T) {
 
 	t.Run("missing value", func(t *testing.T) {
 		plaidBalances := plaid.AccountBalance{
-			Available:              *plaid.NewNullableFloat32(nil),
-			Current:                *plaid.NewNullableFloat32(nil),
-			Limit:                  *plaid.NewNullableFloat32(nil),
+			Available:              *plaid.NewNullableFloat64(nil),
+			Current:                *plaid.NewNullableFloat64(nil),
+			Limit:                  *plaid.NewNullableFloat64(nil),
 			IsoCurrencyCode:        *plaid.NewNullableString(nil),
 			UnofficialCurrencyCode: *plaid.NewNullableString(nil),
 		}

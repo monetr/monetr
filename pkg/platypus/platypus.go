@@ -16,7 +16,7 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v3/plaid"
 	"github.com/sirupsen/logrus"
 )
 

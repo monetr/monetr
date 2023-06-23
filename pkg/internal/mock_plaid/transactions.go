@@ -9,7 +9,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/plaid/plaid-go/plaid"
+	"github.com/plaid/plaid-go/v3/plaid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +19,7 @@ func GenerateTransactions(t *testing.T, start, end time.Time, numberOfTransactio
 		bankAccountId := bankAccountIds[i%len(bankAccountIds)]
 
 		transaction := plaid.Transaction{}
-		transaction.SetAmount(gofakeit.Float32Range(0.99, 100))
+		transaction.SetAmount(gofakeit.Float64Range(0.99, 100))
 		transaction.SetCategory([]string{
 			"Bank Fees",
 		})

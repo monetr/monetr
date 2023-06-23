@@ -339,6 +339,7 @@ github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/sftp v1.13.1/go.mod h1:3HaPG6Dq1ILlpPZRO0HVMrsydcdLt6HRDccSgb87qRg=
 github.com/plaid/plaid-go v1.10.0 h1:Ka7zYLaA7UzqlABxeIUG/87lLBHsvljGgWC+O9LfMdk=
 github.com/plaid/plaid-go v1.10.0/go.mod h1:jsPs/+TSYwDPNxMhY2uwlpDUJBnqppGg+pNXNgdITc0=
+github.com/plaid/plaid-go/v3 v3.5.0 h1:+w6+WxpwrT5Hw2e9tsXP2RlRG1Qj5lROhSsPQ/8xVoM=
 github.com/plaid/plaid-go/v3 v3.5.0/go.mod h1:vgndfiYrbkwekEkmQGXpsxTToqEanyi0RaJVunwipXc=
 github.com/pmezard/go-difflib v0.0.0-20151028094244-d8ed2627bdf0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
