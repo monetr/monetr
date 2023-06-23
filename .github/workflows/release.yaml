@@ -142,7 +142,7 @@ jobs:
         name: Download Third Party Notice Artifacts
         with:
           name: '${{ needs.release_please.outputs.version }}-notice'
-          path: '${{ github.workspace }}/pkg/build/NOTICE.md'
+          path: '${{ github.workspace }}/pkg/build/'
       - name: Build # I hate so much that I have to do this, but GitHub actions are awful at network connections.
         uses: nick-invision/retry@v2
         with:
