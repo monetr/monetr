@@ -19,7 +19,7 @@ func GenerateTransactions(t *testing.T, start, end time.Time, numberOfTransactio
 		bankAccountId := bankAccountIds[i%len(bankAccountIds)]
 
 		transaction := plaid.Transaction{}
-		transaction.SetAmount(gofakeit.Float32Range(0.99, 100))
+		transaction.SetAmount(gofakeit.Float64Range(0.99, 100))
 		transaction.SetCategory([]string{
 			"Bank Fees",
 		})

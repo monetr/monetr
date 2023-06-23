@@ -51,16 +51,16 @@ func BankAccountFixture(t *testing.T) plaid.AccountBase {
 
 	currencyCode := "USD"
 
-	current := gofakeit.Float32Range(100, 500)
-	available := gofakeit.Float32Range(current-10, current)
-	limit := gofakeit.Float32Range(current, current+100)
+	current := gofakeit.Float64Range(100, 500)
+	available := gofakeit.Float64Range(current-10, current)
+	limit := gofakeit.Float64Range(current, current+100)
 
 	return plaid.AccountBase{
 		AccountId: gofakeit.Generate("????????????????"),
 		Balances: plaid.AccountBalance{
-			Available:              *plaid.NewNullableFloat32(myownsanity.Float32P(available)),
-			Current:                *plaid.NewNullableFloat32(myownsanity.Float32P(current)),
-			Limit:                  *plaid.NewNullableFloat32(myownsanity.Float32P(limit)),
+			Available:              *plaid.NewNullableFloat64(myownsanity.Float64P(available)),
+			Current:                *plaid.NewNullableFloat64(myownsanity.Float64P(current)),
+			Limit:                  *plaid.NewNullableFloat64(myownsanity.Float64P(limit)),
 			IsoCurrencyCode:        *plaid.NewNullableString(myownsanity.StringP(currencyCode)),
 			UnofficialCurrencyCode: *plaid.NewNullableString(myownsanity.StringP(currencyCode)),
 		},
