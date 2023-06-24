@@ -84,7 +84,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
               className: 'text-xl',
             } }
           />
-          { children }
+          {children}
         </ListItem>
         <Divider />
       </Fragment>
@@ -93,11 +93,11 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
 
   function spendingName(spendingId: number | null): JSX.Element | string {
     if (spendingId === null) {
-      return 'Safe-To-Spend';
+      return 'Free-To-Use';
     }
     const spending = allSpending.find(item => item.spendingId === spendingId);
     if (spending) {
-      return <span className="text-semibold">{ spending.name }</span>;
+      return <span className="text-semibold">{spending.name}</span>;
     }
 
     return <span className="text-semibold">...</span>;
@@ -112,7 +112,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
       anchor='right'
       open={ modal.visible }
       onClose={ closeDialog }
-      onOpen={ () => {} }
+      onOpen={ () => { } }
     >
       <div className='h-full flex flex-col w-[100vw]'>
         <VerticalPuller />
@@ -121,7 +121,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
           validate={ validateInput }
           onSubmit={ submit }
         >
-          { ({
+          {({
             values,
             handleChange,
             handleBlur,
@@ -132,7 +132,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
             <Fragment>
               <DialogTitle>
                 <div className='w-full flex justify-center'>
-                  <TransactionIcon transaction={ transaction } size={ 80 }  />
+                  <TransactionIcon transaction={ transaction } size={ 80 } />
                 </div>
               </DialogTitle>
               <DialogContent>
@@ -155,7 +155,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                   </EditItem>
                   <EditItem name="Original Name">
                     <span className="flex-1 text-end text-xl opacity-60">
-                      { transaction.getOriginalName() }
+                      {transaction.getOriginalName()}
                     </span>
                   </EditItem>
                   <EditItem name="Date">
@@ -163,20 +163,20 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                       'text-green-600': props.transaction.getIsAddition(),
                       'text-red-600': !props.transaction.getIsAddition(),
                     }) }>
-                      { transaction.getAmountString() }
+                      {transaction.getAmountString()}
                     </span>
                   </EditItem>
                   <EditItem name="Date">
                     <span className="flex-1 text-end text-xl opacity-60">
-                      { transaction.date.format('MMMM Do, YYYY') }
+                      {transaction.date.format('MMMM Do, YYYY')}
                     </span>
                   </EditItem>
                   <EditItem name="Status">
                     <span className="flex-1 text-end text-xl opacity-60">
-                      { transaction.isPending ? 'Pending' : 'Complete' }
+                      {transaction.isPending ? 'Pending' : 'Complete'}
                     </span>
                   </EditItem>
-                  { !transaction.getIsAddition() &&
+                  {!transaction.getIsAddition() &&
                     <Fragment>
                       <TransactionSpentFromSelectionMobile
                         open={ drawerOpen }
@@ -197,7 +197,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                           } }
                         />
                         <span className="flex-1 text-end text-xl">
-                          { spendingName(values.spendingId) }
+                          {spendingName(values.spendingId)}
                         </span>
                       </ListItemButton>
                       <Divider />
@@ -225,7 +225,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                 </Button>
               </DialogActions>
             </Fragment>
-          ) }
+          )}
         </Formik>
       </div>
     </SwipeableDrawer>

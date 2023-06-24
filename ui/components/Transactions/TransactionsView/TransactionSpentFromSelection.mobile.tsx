@@ -28,8 +28,8 @@ export default function TransactionSpentFromSelectionMobile(props: Props): JSX.E
   const items: Array<JSX.Element> = [
     {
       spendingId: null,
-      name: 'Safe-To-Spend',
-      currentAmount: balances?.safe,
+      name: 'Free-To-Use',
+      currentAmount: balances?.free,
     },
     ...(Array.from(allSpending.values()).sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)),
   ]
@@ -39,7 +39,7 @@ export default function TransactionSpentFromSelectionMobile(props: Props): JSX.E
           key={ item.spendingId }
           secondaryAction={
             <span className="opacity-90 text-md">
-              { formatAmount(item.currentAmount) }
+              {formatAmount(item.currentAmount)}
             </span>
           }
           disablePadding
@@ -83,7 +83,7 @@ export default function TransactionSpentFromSelectionMobile(props: Props): JSX.E
       open={ open }
       onClose={ onClose }
       disableSwipeToOpen
-      onOpen={ () => {} }
+      onOpen={ () => { } }
     >
       <div className="w-[90vw] pl-5">
         <VerticalPuller />
@@ -92,7 +92,7 @@ export default function TransactionSpentFromSelectionMobile(props: Props): JSX.E
         </div>
         <List disablePadding>
           <Divider />
-          { items }
+          {items}
         </List>
       </div>
     </SwipeableDrawer>

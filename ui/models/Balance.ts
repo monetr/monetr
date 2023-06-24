@@ -4,7 +4,7 @@ export default class Balance {
   bankAccountId: number;
   available: number;
   current: number;
-  safe: number;
+  free: number;
   expenses: number;
   goals: number;
 
@@ -12,8 +12,8 @@ export default class Balance {
     if (data) Object.assign(this, data);
   }
 
-  getSafeToSpendString(): string {
-    return formatAmount(this.safe);
+  getFreeToUseString(): string {
+    return formatAmount(this.free);
   }
 
   getAvailableString(): string {

@@ -254,7 +254,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 					continue
 				}
 
-				// TODO Take safe-to-spend into account when allocating to expenses.
+				// TODO Take free-to-use into account when allocating to expenses.
 				//  As of writing this I am not going to consider that balance. I'm going to assume that the user has
 				//  enough money in their account at the time of this running that this will accurately reflect a real
 				//  allocated balance. This can be impacted though by a delay in a deposit showing in Plaid and thus us
@@ -306,11 +306,11 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 		"before": initialBalances,
 		"after":  updatedBalances,
 	})
-	if initialBalances.Safe > 0 && updatedBalances.Safe < 0 {
-		crumbs.Warn(ctx, "Safe to spend has gone negative!", "balance", nil)
-		crumbs.AddTag(ctx, "safe-to-spend", "negative")
-	} else if updatedBalances.Safe > 0 {
-		crumbs.AddTag(ctx, "safe-to-spend", "positive")
+	if initialBalances.Free > 0 && updatedBalances.Free < 0 {
+		crumbs.Warn(ctx, "Free to use has gone negative!", "balance", nil)
+		crumbs.AddTag(ctx, "free-to-use", "negative")
+	} else if updatedBalances.Free > 0 {
+		crumbs.AddTag(ctx, "free-to-use", "positive")
 	}
 
 	return nil

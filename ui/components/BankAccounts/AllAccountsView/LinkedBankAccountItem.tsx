@@ -16,15 +16,15 @@ export default function LinkedBankAccountItem(props: LinkedBankAccountItemProps)
       <ListItem button>
         <div className="flex w-full">
           <Typography className="w-1/3 overflow-hidden font-bold overflow-ellipsis flex-nowrap whitespace-nowrap">
-            { props.bankAccount.name }
+            {props.bankAccount.name}
           </Typography>
           <div className="flex flex-auto">
             <Typography className="w-1/2 overflow-hidden m-w-1/2 overflow-ellipsis flex-nowrap whitespace-nowrap">
               <span className="font-semibold">
-                Safe-To-Spend:
+                Free-To-Use:
               </span>
               &nbsp;
-              { balances ? balances.getSafeToSpendString() : '...' }
+              {balances ? balances.getFreeToUseString() : '...'}
             </Typography>
             <div className="flex w-1/2">
               <Typography className="w-1/2 overflow-hidden text-sm overflow-ellipsis flex-nowrap whitespace-nowrap">
@@ -32,14 +32,14 @@ export default function LinkedBankAccountItem(props: LinkedBankAccountItemProps)
                   Available:
                 </span>
                 &nbsp;
-                { props.bankAccount.getAvailableBalanceString() }
+                {props.bankAccount.getAvailableBalanceString()}
               </Typography>
               <Typography className="w-1/2 overflow-hidden text-sm overflow-ellipsis flex-nowrap whitespace-nowrap">
                 <span className="font-semibold">
                   Current:
                 </span>
                 &nbsp;
-                { props.bankAccount.getCurrentBalanceString() }
+                {props.bankAccount.getCurrentBalanceString()}
               </Typography>
             </div>
           </div>

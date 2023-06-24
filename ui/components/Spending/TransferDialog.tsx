@@ -32,9 +32,9 @@ enum Target {
   From,
 }
 
-const SafeToSpend = new Spending({
+const FreeToUse = new Spending({
   spendingId: null, // Indicates that this is safe to spend.
-  name: 'Safe-To-Spend',
+  name: 'Free-To-Use',
 });
 
 interface transferForm {
@@ -54,7 +54,7 @@ interface Props {
 
 export default function TransferDialog(props: Props): JSX.Element {
   if (props.initialFromSpendingId === 0 &&
-      props.initialToSpendingId === 0) {
+    props.initialToSpendingId === 0) {
     throw new Error('the initial from and to spending IDs cannot both be 0');
   }
   const { result: spending } = useSpendingSink();
@@ -77,25 +77,25 @@ export default function TransferDialog(props: Props): JSX.Element {
   function handleToOnChange(spending: Spending | null) {
     setState({
       from: state.from,
-      to: spending ?? SafeToSpend,
+      to: spending ?? FreeToUse,
     });
   }
 
   function handleFromOnChange(spending: Spending | null) {
     setState({
       to: state.to,
-      from: spending ?? SafeToSpend,
+      from: spending ?? FreeToUse,
     });
   }
 
   useEffect(() => {
     let to: Spending, from: Spending;
-    SafeToSpend.currentAmount = balance.safe;
+    FreeToUse.currentAmount = balance.free;
     switch (props.initialFromSpendingId) {
       case null:
       case undefined:
-      case 0: // a 0 for a spending ID represents safe-to-spend.
-        from = SafeToSpend;
+      case 0: // a 0 for a spending ID represents free-to-use.
+        from = FreeToUse;
         break;
       default:
         from = spending.find(item => item.spendingId === props.initialFromSpendingId);
@@ -104,8 +104,8 @@ export default function TransferDialog(props: Props): JSX.Element {
     switch (props.initialToSpendingId) {
       case null:
       case undefined:
-      case 0: // a 0 for a spending ID represents safe-to-spend.
-        to = SafeToSpend;
+      case 0: // a 0 for a spending ID represents free-to-use.
+        to = FreeToUse;
         break;
       default:
         to = spending.find(item => item.spendingId === props.initialToSpendingId);
@@ -140,8 +140,8 @@ export default function TransferDialog(props: Props): JSX.Element {
       return null;
     }
 
-    const fromId = from === SafeToSpend ? null : from.spendingId;
-    const toId = to === SafeToSpend ? null : to.spendingId;
+    const fromId = from === FreeToUse ? null : from.spendingId;
+    const toId = to === FreeToUse ? null : to.spendingId;
     const amount = Math.ceil(values.amount * 100);
 
     return transfer(fromId, toId, amount)
@@ -168,14 +168,14 @@ export default function TransferDialog(props: Props): JSX.Element {
           <Typography
             variant="h6"
           >
-            { selection.name }
+            {selection.name}
           </Typography>
         </div>
         <div className="col-span-3 row-span-1 opacity-75">
           <Typography
             variant="body2"
           >
-            { selection.getCurrentAmountString() } balance
+            {selection.getCurrentAmountString()} balance
           </Typography>
         </div>
       </Fragment>
@@ -188,7 +188,7 @@ export default function TransferDialog(props: Props): JSX.Element {
       initialValues={ initialValues }
       onSubmit={ doTransfer }
     >
-      { ({
+      {({
         values,
         handleChange,
         handleBlur,
@@ -239,7 +239,7 @@ export default function TransferDialog(props: Props): JSX.Element {
                       value={ state.from?.spendingId }
                       onChange={ handleFromOnChange }
                       excludeIds={ state.to ? [state.to.spendingId] : null }
-                      excludeSafeToSpend={ state.to === SafeToSpend }
+                      excludeSafeToSpend={ state.to === FreeToUse }
                     />
                   </AccordionDetails>
                 </Accordion>
@@ -263,7 +263,7 @@ export default function TransferDialog(props: Props): JSX.Element {
                       value={ state.to?.spendingId }
                       onChange={ handleToOnChange }
                       excludeIds={ state.from ? [state.from.spendingId] : null }
-                      excludeSafeToSpend={ state.from === SafeToSpend }
+                      excludeSafeToSpend={ state.from === FreeToUse }
                     />
                   </AccordionDetails>
                 </Accordion>

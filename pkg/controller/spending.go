@@ -215,7 +215,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 
 	var fundingSchedule *models.FundingSchedule
 
-	if transfer.FromSpendingId == nil && balances.Safe < transfer.Amount {
+	if transfer.FromSpendingId == nil && balances.Free < transfer.Amount {
 		return c.badRequest(ctx, "cannot transfer more than is available in safe to spend")
 	} else if transfer.FromSpendingId != nil {
 		fromExpense, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, *transfer.FromSpendingId)
@@ -412,20 +412,6 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, updatedSpending)
 }
 
-// Delete Spending
-// @id delete-spending
-// @tags Spending
-// @summary Delete Spending
-// @description Delete a spending object. This will set any transactions that have spent from this object back to spent from "Safe-To-Spend". If the spending object is successfully deleted, this endpoint simply returns 200 with an empty body.
-// @security ApiKeyAuth
-// @accept json
-// @produce json
-// @Param bankAccountId path int true "Bank Account ID"
-// @Param spendingId path int true "Spending ID to be deleted"
-// @Router /bank_accounts/{bankAccountId}/spending/{spendingId} [delete]
-// @Success 200
-// @Failure 400 {object} ApiError "Malformed JSON or invalid RRule."
-// @Failure 500 {object} ApiError "Failed to persist data."
 func (c *Controller) deleteSpending(ctx echo.Context) error {
 	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
 	if err != nil {

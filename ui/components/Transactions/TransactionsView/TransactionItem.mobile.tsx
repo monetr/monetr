@@ -3,10 +3,11 @@ import { AccessTime, ChevronRight } from '@mui/icons-material';
 import { Divider, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material';
 import classnames from 'classnames';
 
+import { showEditTransactionMobileDialog } from './EditTransactionDialog.mobile';
+
 import TransactionIcon from 'components/Transactions/components/TransactionIcon';
 import { useSpending } from 'hooks/spending';
 import Transaction from 'models/Transaction';
-import { showEditTransactionMobileDialog } from './EditTransactionDialog.mobile';
 
 interface Props {
   transaction: Transaction;
@@ -19,7 +20,7 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
     if (props.transaction.getIsAddition()) {
       return (
         <span className="text-ellipsis overflow-hidden">
-         Deposit
+          Deposit
         </span>
       );
     }
@@ -34,12 +35,12 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
 
     const name = spending ?
       <span className="text-black font-medium dark:text-white text-ellipsis overflow-hidden">
-        { spending?.name }
-      </span> : 'Safe-To-Spend';
+        {spending?.name}
+      </span> : 'Free-To-Use';
 
     return (
       <span className="text-ellipsis overflow-hidden">
-        Spent From { name }
+        Spent From {name}
       </span>
     );
   }
@@ -66,14 +67,14 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
           secondary={ <SpentFromLine /> }
         />
         <div className="flex-1 flex justify-start">
-          { props.transaction.isPending && <AccessTime />
+          {props.transaction.isPending && <AccessTime />
           }
         </div>
         <span className={ classnames('h-full flex-none amount align-middle self-center justify-end place-self-center text-sm pr-1', {
           'text-green-600': props.transaction.getIsAddition(),
           'text-red-600': !props.transaction.getIsAddition(),
         }) }>
-          <b>{ props.transaction.getAmountString() }</b>
+          <b>{props.transaction.getAmountString()}</b>
         </span>
         <ChevronRight className='opacity-75' />
       </ListItemButton>

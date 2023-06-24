@@ -1,7 +1,7 @@
-import { lighten } from '@mui/material';
 import React, { Fragment } from 'react';
 import Select, { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
+import { lighten } from '@mui/material';
 import classnames from 'classnames';
 
 import { SpendingOption, SpendingSelectOption } from 'components/Transactions/components/SpendingSelectOption';
@@ -53,13 +53,13 @@ function TransactionSpentFromSelection(props: Props): JSX.Element {
   }
 
   const safeToSpend = {
-    label: 'Safe-To-Spend',
+    label: 'Free-To-Use',
     value: null,
     spending: {
       // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
       // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
       // until the balance is loaded.
-      currentAmount: balances?.safe,
+      currentAmount: balances?.free,
     },
   };
   const items: Map<number, SpendingOption> = new Map(Array.from(allSpending.values())
@@ -82,7 +82,7 @@ function TransactionSpentFromSelection(props: Props): JSX.Element {
       return (
         <Fragment>
           Spent From <span className={ classnames({ 'font-bold': !!option.value }) }>
-            { option.label }
+            {option.label}
           </span>
         </Fragment>
       );
@@ -100,7 +100,7 @@ function TransactionSpentFromSelection(props: Props): JSX.Element {
         colors: {
           ...theme.colors,
           primary: uiTheme.palette.primary.main,
-          ...( uiTheme.palette.mode === 'dark' && {
+          ...(uiTheme.palette.mode === 'dark' && {
             neutral0: uiTheme.palette.background.default,
             primary25: lighten(uiTheme.palette.background.default, 0.1),
             primary50: lighten(uiTheme.palette.background.default, 0.5),

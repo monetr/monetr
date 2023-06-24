@@ -558,7 +558,7 @@
 
 * **api:** Adding basic soft-delete for transactions. ([4db5734](https://github.com/monetr/monetr/commit/4db57349ced77111d7c4dbdb1896ce8948b4a350))
 * **plaid:** Laying groundwork for Plaid transaction sync. ([82bf294](https://github.com/monetr/monetr/commit/82bf294dae45fb3ee70fa85a7b58c180833d279b))
-* **ui:** Adding an estimated Safe-To-Spend amount. ([c5e6434](https://github.com/monetr/monetr/commit/c5e6434aad4049cc6911dec0f28d7cee0f3d0d44))
+* **ui:** Adding an estimated Free-To-Use amount. ([c5e6434](https://github.com/monetr/monetr/commit/c5e6434aad4049cc6911dec0f28d7cee0f3d0d44))
 * **ui:** Allow icons to be searched via POST request. ([#1216](https://github.com/monetr/monetr/issues/1216)) ([775f8c8](https://github.com/monetr/monetr/commit/775f8c81b6972f7a5024cd9aef4a78653cabdc7b)), closes [#1175](https://github.com/monetr/monetr/issues/1175)
 * **ui:** Improving form appearance for modals. ([bae905d](https://github.com/monetr/monetr/commit/bae905da8f150ab3f8f1f80ac9bdc31a8113a221))
 * **ui:** Next funding contribution is based on forecasting. ([5c918c7](https://github.com/monetr/monetr/commit/5c918c70ce712e197501d1fd1baef051c4f3d886))
