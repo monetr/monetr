@@ -209,8 +209,9 @@ jobs:
   docker:
     if: ${{ needs.release_please.outputs.release_created }}
     needs:
-      - "release_please"
-      - "build_ui"
+      - build_notic
+      - build_ui
+      - release_please
     name: Container (Docker)
     runs-on: ubuntu-latest
     steps:
