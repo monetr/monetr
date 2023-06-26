@@ -359,7 +359,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Plaid incoming webhooks
 	repoParty.POST("/plaid/webhook", c.handlePlaidWebhook)
 	// Stripe incoming webhooks
-	repoParty.POST("/stripe/webook", c.handleStripeWebhook)
+	repoParty.POST("/stripe/webhook", c.handleStripeWebhook)
 	repoParty.GET("/sentry", c.getSentryUI)
 	repoParty.GET("/config", c.configEndpoint)
 	// Authentication
