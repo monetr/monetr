@@ -209,7 +209,7 @@ jobs:
   docker:
     if: ${{ needs.release_please.outputs.release_created }}
     needs:
-      - build_notic
+      - build_notice
       - build_ui
       - release_please
     name: Container (Docker)
