@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.6](https://github.com/monetr/monetr/compare/v0.15.5...v0.15.6) (2023-06-26)
+
+
+### Bug Fixes
+
+* **stripe:** Rolling back stripe to v72. ([54de022](https://github.com/monetr/monetr/commit/54de022089359a7e2bad3e4582b64b50ee2d2ae8))
+
 ## [0.15.5](https://github.com/monetr/monetr/compare/v0.15.4...v0.15.5) (2023-06-26)
 
 
