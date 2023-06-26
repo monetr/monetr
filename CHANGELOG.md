@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.15.4](https://github.com/monetr/monetr/compare/v0.15.3...v0.15.4) (2023-06-26)
+
+
+### Bug Fixes
+
+* **build:** Fixed third party notice dependency in release pipeline. ([4ef494b](https://github.com/monetr/monetr/commit/4ef494bcd8042a626158c97ce11c2498076df368)), closes [#1456](https://github.com/monetr/monetr/issues/1456)
+* **build:** Fixed typo in release pipeline. ([6e31689](https://github.com/monetr/monetr/commit/6e3168958d9a65b8fcad19751db74aad22e64cf3))
+* **stripe:** Fixed billing issue. ([da0276e](https://github.com/monetr/monetr/commit/da0276e4326de8177646c0c3486972af321db908)), closes [#1459](https://github.com/monetr/monetr/issues/1459)
+
+
+### Miscellaneous
+
+* **deps:** Bumping simple-icons to the latest version ([a8cecfa](https://github.com/monetr/monetr/commit/a8cecfa9beed6539b1ed1b401a45d03db83e644d))
+* Whitespace. ([75ab8fc](https://github.com/monetr/monetr/commit/75ab8fcf63f9ddbb4d97794a8c39a58749435485))
+
 ## [0.15.3](https://github.com/monetr/monetr/compare/v0.15.2...v0.15.3) (2023-06-23)
 
 
