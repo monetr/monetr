@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.5](https://github.com/monetr/monetr/compare/v0.15.4...v0.15.5) (2023-06-26)
+
+
+### Bug Fixes
+
+* **stripe:** Fixing issue with echo handler and stripe ([d7ba189](https://github.com/monetr/monetr/commit/d7ba1893b4e3a9f19c31d28861d6aaae2fc73b3e))
+
 ## [0.15.4](https://github.com/monetr/monetr/compare/v0.15.3...v0.15.4) (2023-06-26)
 
 
