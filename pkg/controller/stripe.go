@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/stripe/stripe-go/v74/webhook"
 )
 
@@ -18,12 +19,14 @@ func (c *Controller) handleStripeWebhook(ctx echo.Context) error {
 		return c.badRequest(ctx, "stripe signature is missing")
 	}
 
-	reader, err := ctx.Request().GetBody()
-	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to read request body")
+	body := ctx.Request().Body
+	if body == nil {
+		crumbs.IndicateBug(c.getContext(ctx), "body on request is nil for stripe webhook", nil)
+		return c.badRequest(ctx, "cannot read body")
 	}
+	defer body.Close()
 
-	requestBody, err := ioutil.ReadAll(reader)
+	requestBody, err := ioutil.ReadAll(body)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to read request body")
 	}
