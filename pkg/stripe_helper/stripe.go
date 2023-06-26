@@ -11,8 +11,8 @@ import (
 	"github.com/monetr/monetr/pkg/round"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stripe/stripe-go/v74"
-	stripe_client "github.com/stripe/stripe-go/v74/client"
+	"github.com/stripe/stripe-go/v72"
+	stripe_client "github.com/stripe/stripe-go/v72/client"
 )
 
 type Stripe interface {

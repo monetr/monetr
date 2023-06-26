@@ -3,7 +3,7 @@ package mock_stripe
 import (
 	"fmt"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
-	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v72"
 	"net/http"
 	"strings"
 	"testing"

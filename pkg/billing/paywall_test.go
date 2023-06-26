@@ -10,7 +10,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v72"
 )
 
 func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {

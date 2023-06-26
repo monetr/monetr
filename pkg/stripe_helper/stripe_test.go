@@ -10,7 +10,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v72"
 )
 
 func TestStripeBase_CreateCustomer(t *testing.T) {

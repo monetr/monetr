@@ -2,6 +2,10 @@ package mock_stripe
 
 import (
 	"fmt"
+	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/stripe/stripe-go/v72"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -9,11 +13,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v74"
 )
 
 func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
@@ -86,6 +85,7 @@ func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 				},
 				CustomerDetails: nil,
 				CustomerEmail:   "",
+				Deleted:         false,
 				ID:              "",
 				LineItems: &stripe.LineItemList{
 					Data: lineItems,
@@ -100,6 +100,7 @@ func (m *MockStripeHelper) MockNewCheckoutSession(t *testing.T) {
 				PaymentMethodTypes:        nil,
 				PaymentStatus:             "",
 				SetupIntent:               nil,
+				Shipping:                  nil,
 				ShippingAddressCollection: nil,
 				SubmitType:                "",
 				Subscription:              nil,
@@ -191,11 +192,13 @@ func (m *MockStripeHelper) CompleteCheckoutSession(t *testing.T, checkoutSession
 		NextPendingInvoiceItemInvoice: 0,
 		Object:                        "subscription",
 		OnBehalfOf:                    nil,
-		PauseCollection:               nil,
+		PauseCollection:               stripe.SubscriptionPauseCollection{},
 		PaymentSettings:               nil,
-		PendingInvoiceItemInterval:    nil,
+		PendingInvoiceItemInterval:    stripe.SubscriptionPendingInvoiceItemInterval{},
 		PendingSetupIntent:            nil,
 		PendingUpdate:                 nil,
+		Plan:                          nil,
+		Quantity:                      0,
 		Schedule:                      nil,
 		StartDate:                     0,
 		Status:                        stripe.SubscriptionStatusActive,

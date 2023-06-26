@@ -19,7 +19,7 @@ import (
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v72"
 )
 
 type MonetrClaims struct {

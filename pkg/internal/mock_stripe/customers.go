@@ -3,7 +3,7 @@ package mock_stripe
 import (
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/stretchr/testify/require"
-	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v72"
 	"io/ioutil"
 	"net/http"
 	"net/url"
