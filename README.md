@@ -16,7 +16,7 @@ completely free to self-host (documentation to come), but requires a Plaid accou
 
 monetr is currently still in heavy development; but is being alpha-tested with the latest release version constantly.
 
-![image](https://user-images.githubusercontent.com/37967690/201261822-0103fdc6-f8a9-4cdf-9c21-0ed72bc080e3.png)
+![image](https://github.com/monetr/monetr/assets/37967690/14e82b3d-9f02-4d38-9d81-5d89e3d7dbe7)
 
 ## Contributing
 
