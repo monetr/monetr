@@ -1,16 +1,17 @@
 import React, { Fragment, useMemo, useState } from 'react';
-import { MoreVert, AttachMoney, Remove, Weekend } from '@mui/icons-material';
+import { AttachMoney, MoreVert, Remove, Weekend } from '@mui/icons-material';
 import { Divider, IconButton, ListItem, Menu, MenuItem, Skeleton } from '@mui/material';
 import moment from 'moment';
 
+import { showRemoveFundingScheduleDialog } from './RemoveFundingScheduleDialog';
+
+import clsx from 'clsx';
+import { useCurrentBalance } from 'hooks/balances';
+import { useNextFundingForecast } from 'hooks/forecast';
 import { useFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
+import FundingSchedule from 'models/FundingSchedule';
 import formatAmount from 'util/formatAmount';
 import getColor from 'util/getColor';
-import FundingSchedule from 'models/FundingSchedule';
-import { showRemoveFundingScheduleDialog } from './RemoveFundingScheduleDialog';
-import { useNextFundingForecast } from 'hooks/forecast';
-import { useCurrentBalance } from 'hooks/balances';
-import clsx from 'clsx';
 
 interface Props {
   fundingScheduleId: number;
@@ -30,9 +31,9 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
 
   const next = schedule.nextOccurrence;
   const dateFormatString = next.year() !== moment().year() ? 'dddd MMMM Do, yyyy' : 'dddd MMMM Do';
-  const nextOccurrenceString = `${ next.format(dateFormatString) } (${ next.fromNow() })`;
+  const nextOccurrenceString = `${next.format(dateFormatString)} (${next.fromNow()})`;
 
-  async function updateWeekends(excludeWeekends: boolean){
+  async function updateWeekends(excludeWeekends: boolean) {
     const updatedFunding = new FundingSchedule({
       ...schedule,
       excludeWeekends,
@@ -56,23 +57,23 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     if (contributionForecast.isLoading) {
       return (
         // TODO This will break with the next MUI upgrade.
-        <Skeleton variant="text" width={80} height={24} />
+        <Skeleton variant="text" width={ 80 } height={ 24 } />
       );
     }
 
     if (contributionForecast.result) {
       return (
         <Fragment>
-          { formatAmount(contributionForecast.result) }
+          {formatAmount(contributionForecast.result)}
         </Fragment>
-      )
+      );
     }
 
     return (
       <Fragment>
         N/A
       </Fragment>
-    )
+    );
   }
 
   function EstimatedSafeToSpend(): JSX.Element {
@@ -80,13 +81,13 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
       return null;
     }
 
-    let loader = <Skeleton variant="text" width={80} height={24} />;
+    const loader = <Skeleton variant="text" width={ 80 } height={ 24 } />;
 
-    let textColor = 'text-gray-500'
+    let textColor = 'text-gray-500';
 
     let amount: string | null;
     if (!contributionForecast.isLoading && balance !== null) {
-      const est = (balance.safe + schedule.estimatedDeposit) - contributionForecast.result
+      const est = (balance.free + schedule.estimatedDeposit) - contributionForecast.result;
       amount = formatAmount(est);
       textColor = est > 0 ? 'text-green-500' : 'text-red-500';
     }
@@ -94,13 +95,13 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
     return (
       <div className="flex-grow flex h-full flex-col items-end justify-center">
         <span className="font-normal text-gray-500 text-lg">
-          Estimated Safe-To-Spend
+          Estimated Free-To-Use
         </span>
-        <span className= { clsx('text-md font-normal', textColor) }>
-          { amount || loader }
+        <span className={ clsx('text-md font-normal', textColor) }>
+          {amount || loader}
         </span>
       </div>
-    )
+    );
   }
 
   return (
@@ -112,10 +113,10 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
           </div>
           <div className="flex h-full flex-col">
             <span className="font-semibold mt-auto text-gray-700 text-xl">
-              { schedule.name }
+              {schedule.name}
             </span>
             <span className="font-normal mt-auto text-gray-400 text-md">
-              { nextOccurrenceString }
+              {nextOccurrenceString}
             </span>
           </div>
           <EstimatedSafeToSpend />
@@ -140,7 +141,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
             >
               <MenuItem onClick={ () => updateWeekends(!schedule.excludeWeekends) }>
                 <Weekend className="mr-2" />
-                { schedule.excludeWeekends ? 'Include weekends' : 'Exclude weekends' }
+                {schedule.excludeWeekends ? 'Include weekends' : 'Exclude weekends'}
               </MenuItem>
               <MenuItem
                 className="text-red-500"

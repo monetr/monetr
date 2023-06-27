@@ -12,17 +12,17 @@ export default function BalanceNavDisplay(): JSX.Element {
 
   return (
     <div className="flex-1 flex justify-center gap-2 items-center">
-      <Typography data-testid="safe-to-spend">
-        <b>Safe-To-Spend:</b> { balance.getSafeToSpendString() }
+      <Typography data-testid="free-to-use">
+        <b>Free-To-Use</b> {balance.getFreeToUseString()}
       </Typography>
       <Typography variant="body2" className="hidden lg:block">
-        <b>Expenses:</b> { balance.getExpensesString() }
+        <b>Expenses:</b> {balance.getExpensesString()}
       </Typography>
       <Typography variant="body2" className="hidden lg:block">
-        <b>Goals:</b> { balance.getGoalsString() }
+        <b>Goals:</b> {balance.getGoalsString()}
       </Typography>
       <Typography variant="body2" className="hidden lg:block">
-        <b>Available:</b> { balance.getAvailableString() }
+        <b>Available:</b> {balance.getAvailableString()}
       </Typography>
     </div>
   );

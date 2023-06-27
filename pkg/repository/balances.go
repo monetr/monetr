@@ -15,7 +15,7 @@ type Balances struct {
 	AccountId     uint64 `json:"-" pg:"account_id"`
 	Current       int64  `json:"current" pg:"current"`
 	Available     int64  `json:"available" pg:"available"`
-	Safe          int64  `json:"safe" pg:"safe"`
+	Free          int64  `json:"free" pg:"free"`
 	Expenses      int64  `json:"expenses" pg:"expenses"`
 	Goals         int64  `json:"goals" pg:"goals"`
 }
