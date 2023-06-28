@@ -2,7 +2,7 @@
 MAKEFLAGS += --no-print-directory
 MAKEFLAGS += --no-builtin-rules
 
-default: build
+default: lite
 
 GIT_REPOSITORY=https://github.com/monetr/monetr.git
 
