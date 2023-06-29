@@ -10,7 +10,6 @@ import { useIconSearch } from 'hooks/useIconSearch';
 
 
 export default function NewMonetr(): JSX.Element {
-
   return (
     <div className='w-full h-full bg-zinc-900/90 flex'>
       <BankSidebar />
@@ -92,7 +91,9 @@ export default function NewMonetr(): JSX.Element {
           </List>
         </div>
         <div className='w-56 h-full flex-none bg-zinc-800'>
-
+          <span className='text-zinc-50 font-semibold'>
+            Free-To-Use: $150.64
+          </span>
         </div>
       </div>
     </div>
@@ -113,11 +114,12 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
     'align-middle',
     'flex',
     'font-medium',
-    'gap-1',
+    'gap-2',
     'hover:bg-zinc-700',
     'hover:text-zinc-50',
     'items-center',
-    'p-1',
+    'px-2',
+    'py-1',
     'rounded-md',
     'w-full',
   ]);
