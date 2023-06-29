@@ -93,7 +93,16 @@ const preview: Preview = {
   },
   parameters: {
     viewport: {
-      viewports: INITIAL_VIEWPORTS,
+      viewports: {
+        desktop: {
+          name: 'Desktop',
+          styles: {
+            width: '1280px',
+            height: '720px',
+          },
+        },
+        ...INITIAL_VIEWPORTS,
+      },
     },
     actions: { argTypesRegex: '^on[A-Z].*' },
     controls: {
