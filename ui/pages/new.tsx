@@ -3,6 +3,7 @@ import React from 'react';
 import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
 import { Avatar, Divider, List, ListItem, ListSubheader } from '@mui/material';
 
+import { Logo } from 'assets';
 import clsx from 'clsx';
 import { ReactElement } from 'components/types';
 import { useInstitution } from 'hooks/institutions';
@@ -11,16 +12,17 @@ import { useIconSearch } from 'hooks/useIconSearch';
 
 export default function NewMonetr(): JSX.Element {
   return (
-    <div className='w-full h-full bg-zinc-900/90 flex'>
+    <div className='w-full h-full bg-zinc-900 flex'>
       <BankSidebar />
       <div className='w-full h-full flex'>
-        <div className='w-60 h-full bg-zinc-800 flex-none flex flex-col'>
-          <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-12 flex items-center p-2'>
+        <div className='w-60 h-full bg-zinc-900 flex-none flex flex-col border-r-zinc-800 border border-transparent items-center'>
+          <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-16 flex items-center p-2'>
             <span className='text-zinc-50 font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
               Navy Federal Credit Union
             </span>
             <MoreVert />
           </div>
+          <Divider className='border-zinc-600 w-1/2' />
           <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
             <div className='w-full'>
               <span className='hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
@@ -90,11 +92,6 @@ export default function NewMonetr(): JSX.Element {
             </li>
           </List>
         </div>
-        <div className='w-56 h-full flex-none bg-zinc-800'>
-          <span className='text-zinc-50 font-semibold'>
-            Free-To-Use: $150.64
-          </span>
-        </div>
       </div>
     </div>
   );
@@ -139,11 +136,17 @@ function BankSidebar(): JSX.Element {
   // gap-2 makes sure they are evenly spaced.
   // TODO: Need to show an active state on the icon somehow. This might need more padding.
   return (
-    <div className='w-16 h-full bg-zinc-900 flex items-center py-2 gap-2 flex-col flex-none'>
-      <LinkItem instituionId='ins_15' />
-      <LinkItem instituionId='ins_116794' />
-      <LinkItem instituionId='ins_127990' />
-      <LinkItem instituionId='ins_3' />
+    <div className='w-16 h-full bg-zinc-900 flex items-center py-2 gap-4 flex-col flex-none border-r-zinc-800 border border-transparent'>
+      <div className='h-10 w-10'>
+        <img src={ Logo } className="w-full" />
+      </div>
+      <Divider className='border-zinc-600 w-1/2' />
+      <div className='h-full flex items-center gap-2 flex-col overflow-y-auto'>
+        <LinkItem instituionId='ins_15' />
+        <LinkItem instituionId='ins_116794' />
+        <LinkItem instituionId='ins_127990' />
+        <LinkItem instituionId='ins_3' />
+      </div>
     </div>
   );
 }
@@ -166,7 +169,7 @@ function LinkItem(props: LinkItemProps): JSX.Element {
   };
 
   return (
-    <div className='rounded-full w-12 h-12 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
+    <div className='rounded-full w-10 h-10 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
       <InstitutionLogo />
     </div>
   );
@@ -196,14 +199,14 @@ interface TransactionItemProps {
 function TransactionItem(props: TransactionItemProps): JSX.Element {
 
   return (
-    <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-2'>
-      <div className='w-1/3 flex flex-row gap-2 items-center'>
+    <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-4'>
+      <div className='w-1/3 flex flex-row gap-4 items-center'>
         <TransactionIcon name={ props.name } />
         <div className='flex flex-col overflow-hidden'>
           <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap'>
             {props.name}
           </span>
-          <span className='text-zinc-200 font-medium text-base w-full overflow-hidden text-ellipsis whitespace-nowrap'>
+          <span className='text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap'>
             Spent from {props.from || 'Free-To-Use'}
           </span>
         </div>
@@ -242,7 +245,7 @@ function TransactionIcon(props: TransactionIconProps): JSX.Element {
     };
 
     return (
-      <Avatar className='bg-white flex items-center justify-center'>
+      <Avatar className='bg-white flex items-center justify-center h-10 w-10'>
         <div style={ styles } />
       </Avatar>
     );
@@ -251,7 +254,7 @@ function TransactionIcon(props: TransactionIconProps): JSX.Element {
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
   const letter = props.name.toUpperCase().charAt(0);
   return (
-    <Avatar className='bg-zinc-800'>
+    <Avatar className='bg-zinc-800 h-10 w-10'>
       {letter}
     </Avatar>
   );
