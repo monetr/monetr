@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, Logout, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
+import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, Logout, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
 import { Avatar, Divider, List, ListItem, ListSubheader } from '@mui/material';
 
 import { Logo } from 'assets';
@@ -15,56 +15,13 @@ export default function NewMonetr(): JSX.Element {
     <div className='w-full h-full bg-zinc-900 flex'>
       <BankSidebar />
       <div className='w-full h-full flex'>
-        <div className='w-60 h-full bg-zinc-900 flex-none flex flex-col border-r-zinc-800 border border-transparent items-center'>
-          <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-16 flex items-center p-2'>
-            <span className='text-zinc-50 font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
-              Navy Federal Credit Union
-            </span>
-            <MoreVert />
-          </div>
-          <Divider className='border-zinc-600 w-1/2' />
-          <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
-            <div className='w-full'>
-              <span className='hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
-                <AccountBalanceOutlined />
-                Checking
-                <span className='ml-auto text-xs bg-purple-500 text-zinc-50 rounded-sm py-0.5 px-1'>
-                  4567
-                </span>
-                <KeyboardArrowDown />
-              </span>
-            </div>
-            <Divider className='border-zinc-600 w-1/2' />
-            <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
-              <NavigationItem>
-                <HomeOutlined />
-                Overview
-              </NavigationItem>
-              <NavigationItem active>
-                <ShoppingCartOutlined />
-                Transactions
-              </NavigationItem>
-              <NavigationItem>
-                <PriceCheckOutlined />
-                Expenses
-              </NavigationItem>
-              <NavigationItem>
-                <SavingsOutlined />
-                Goals
-              </NavigationItem>
-              <NavigationItem>
-                <TodayOutlined />
-                Funding Schedules
-              </NavigationItem>
-            </div>
-          </div>
-        </div>
+        <BudgetingSideBar />
         <div className='w-full h-full flex-grow overflow-y-scroll px-2'>
           <List dense disablePadding className='w-full'>
             <li>
               <ul className='flex gap-2 flex-col'>
                 <TransactionDateHeader date='28 June, 2023' />
-                <TransactionItem name='Starbucks Coffee' category='Food & Drink' amount='$10.24' />
+                <TransactionItem name='Starbucks Coffee' category='Food & Drink' amount='$10.24' from='Eating Out Budget' />
                 <TransactionItem name='Arbys' category='Food & Drink' amount='$5.67' />
                 <TransactionItem name='GitHub' category='Software' amount='$10.24' />
                 <TransactionItem name='Target' category='Shops' amount='$10.24' />
@@ -74,8 +31,8 @@ export default function NewMonetr(): JSX.Element {
             <li>
               <ul className='flex gap-2 flex-col'>
                 <TransactionDateHeader date='25 June, 2023' />
-                <TransactionItem name='Discord' category='Games & Entertainment' amount='$10.24' />
-                <TransactionItem name='GitLab Inc' category='Service' amount='$10.24' />
+                <TransactionItem name='Discord' category='Games & Entertainment' amount='$10.24' from='Discord' />
+                <TransactionItem name='GitLab Inc' category='Service' amount='$10.24' from='Tools' />
                 <TransactionItem name='Buildkite' category='Transfer' amount='$10.24' />
                 <TransactionItem name='Sentry' category='Shops' amount='$10.24' />
                 <TransactionItem name='Ngrok' category='Transfer' amount='$10.24' />
@@ -152,6 +109,55 @@ function BankSidebar(): JSX.Element {
   );
 }
 
+function BudgetingSideBar(): JSX.Element {
+  return (
+    <div className='w-60 h-full bg-zinc-900 flex-none flex flex-col border-r-zinc-800 border border-transparent items-center'>
+      <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-16 flex items-center p-2'>
+        <span className='text-zinc-50 font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
+          Navy Federal Credit Union
+        </span>
+        <MoreVert />
+      </div>
+      <Divider className='border-zinc-600 w-1/2' />
+      <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
+        <div className='w-full'>
+          <span className='hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
+            <AccountBalanceOutlined />
+            Checking
+            <span className='ml-auto text-xs bg-purple-500 text-zinc-50 rounded-sm py-0.5 px-1'>
+              4567
+            </span>
+            <KeyboardArrowDown />
+          </span>
+        </div>
+        <Divider className='border-zinc-600 w-1/2' />
+        <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
+          <NavigationItem>
+            <HomeOutlined />
+            Overview
+          </NavigationItem>
+          <NavigationItem active>
+            <ShoppingCartOutlined />
+            Transactions
+          </NavigationItem>
+          <NavigationItem>
+            <PriceCheckOutlined />
+            Expenses
+          </NavigationItem>
+          <NavigationItem>
+            <SavingsOutlined />
+            Goals
+          </NavigationItem>
+          <NavigationItem>
+            <TodayOutlined />
+            Funding Schedules
+          </NavigationItem>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface LinkItemProps {
   instituionId: string;
 }
@@ -198,26 +204,46 @@ interface TransactionItemProps {
 }
 
 function TransactionItem(props: TransactionItemProps): JSX.Element {
+  const SpentFrom = () => {
+    if (props.from) {
+      return (
+        <span className='text-zinc-50 font-bold text-base text-ellipsis whitespace-nowrap overflow-hidden'>
+          {props.from || 'Free-To-Use'}
+        </span>
+      );
+    }
+
+    return (
+      <span className='text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden'>
+        Free-To-Use
+      </span>
+    );
+  };
 
   return (
-    <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-4'>
-      <div className='w-1/3 flex flex-row gap-4 items-center'>
+    <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-4 group'>
+      <div className='w-2/6 flex flex-row gap-4 items-center flex-shrink'>
         <TransactionIcon name={ props.name } />
         <div className='flex flex-col overflow-hidden'>
           <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap'>
             {props.name}
           </span>
           <span className='text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap'>
-            Spent from {props.from || 'Free-To-Use'}
+            {props.category}
           </span>
         </div>
       </div>
-      <span className='text-zinc-50 font-semibold text-base w-1/3 overflow-hidden text-ellipsis whitespace-nowrap'>
-        {props.category}
-      </span>
-      <span className='flex-none w-1/3 text-end text-red-500 font-semibold'>
+      <div className='w-3/6 overflow-hidden flex-shrink'>
+        <span className='text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden'>
+          Spent from
+        </span>
+        &nbsp;
+        <SpentFrom />
+      </div>
+      <span className='flex-none w-1/6 text-end text-red-500 font-semibold'>
         {props.amount}
       </span>
+      <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50' />
     </ListItem>
   );
 }
