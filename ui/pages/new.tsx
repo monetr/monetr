@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
+import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, Logout, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
 import { Avatar, Divider, List, ListItem, ListSubheader } from '@mui/material';
 
 import { Logo } from 'assets';
@@ -28,7 +28,7 @@ export default function NewMonetr(): JSX.Element {
               <span className='hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
                 <AccountBalanceOutlined />
                 Checking
-                <span className='ml-auto text-xs bg-blue-500 text-zinc-50 rounded-sm py-0.5 px-1'>
+                <span className='ml-auto text-xs bg-purple-500 text-zinc-50 rounded-sm py-0.5 px-1'>
                   4567
                 </span>
                 <KeyboardArrowDown />
@@ -136,7 +136,7 @@ function BankSidebar(): JSX.Element {
   // gap-2 makes sure they are evenly spaced.
   // TODO: Need to show an active state on the icon somehow. This might need more padding.
   return (
-    <div className='w-16 h-full bg-zinc-900 flex items-center py-2 gap-4 flex-col flex-none border-r-zinc-800 border border-transparent'>
+    <div className='w-16 h-full bg-zinc-900 flex items-center py-4 gap-4 flex-col flex-none border-r-zinc-800 border border-transparent'>
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
@@ -147,6 +147,7 @@ function BankSidebar(): JSX.Element {
         <LinkItem instituionId='ins_127990' />
         <LinkItem instituionId='ins_3' />
       </div>
+      <Logout className='text-zinc-400' />
     </div>
   );
 }
