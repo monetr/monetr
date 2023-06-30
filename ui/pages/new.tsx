@@ -14,9 +14,9 @@ export default function NewMonetr(): JSX.Element {
   return (
     <div className='w-full h-full bg-zinc-900 flex'>
       <BankSidebar />
-      <div className='w-full h-full flex'>
+      <div className='w-full h-full flex min-w-0'>
         <BudgetingSideBar />
-        <div className='w-full h-full flex-grow overflow-y-scroll px-2'>
+        <div className='w-full h-full overflow-y-scroll min-w-0'>
           <List dense disablePadding className='w-full'>
             <li>
               <ul className='flex gap-2 flex-col'>
@@ -93,7 +93,7 @@ function BankSidebar(): JSX.Element {
   // gap-2 makes sure they are evenly spaced.
   // TODO: Need to show an active state on the icon somehow. This might need more padding.
   return (
-    <div className='hidden md:visible w-16 h-full bg-zinc-900 md:flex items-center py-4 gap-4 md:flex-col flex-none border-r-zinc-800 border border-transparent'>
+    <div className='hidden md:visible w-16 h-full bg-zinc-900 md:flex items-center md:py-4 gap-4 md:flex-col flex-none border-r-zinc-800 border border-transparent'>
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
@@ -111,7 +111,7 @@ function BankSidebar(): JSX.Element {
 
 function BudgetingSideBar(): JSX.Element {
   return (
-    <div className='w-60 h-full bg-zinc-900 flex-none flex flex-col border-r-zinc-800 border border-transparent items-center'>
+    <div className='hidden md:w-60 h-full bg-zinc-900 flex-none md:flex flex-col border-r-zinc-800 border border-transparent items-center'>
       <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-16 flex items-center p-2'>
         <span className='text-zinc-50 font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
           Navy Federal Credit Union
@@ -207,14 +207,14 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
   const SpentFrom = () => {
     if (props.from) {
       return (
-        <span className='text-zinc-50 font-bold text-base text-ellipsis whitespace-nowrap overflow-hidden'>
+        <span className='text-zinc-50 font-bold text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
           {props.from || 'Free-To-Use'}
         </span>
       );
     }
 
     return (
-      <span className='text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden'>
+      <span className='text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
         Free-To-Use
       </span>
     );
@@ -222,28 +222,30 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
 
   return (
     <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-4 group'>
-      <div className='w-5/12 flex flex-row gap-4 items-center flex-shrink'>
+      <div className='w-5/12 flex flex-row gap-4 items-center flex-shrink min-w-0'>
         <TransactionIcon name={ props.name } />
-        <div className='flex flex-col overflow-hidden'>
-          <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap'>
+        <div className='flex flex-col overflow-hidden min-w-0'>
+          <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
             {props.name}
           </span>
-          <span className='text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap'>
+          <span className='text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
             {props.category}
           </span>
         </div>
       </div>
-      <div className='w-5/12 overflow-hidden flex-shrink'>
-        <span className='text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden'>
+      <div className='flex w-5/12 overflow-hidden flex-shrink min-w-0'>
+        <span className='flex-none text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
           Spent from
         </span>
         &nbsp;
         <SpentFrom />
       </div>
-      <span className='flex-none w-2/12 text-end text-red-500 font-semibold'>
-        {props.amount}
-      </span>
-      <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50' />
+      <div className='flex w-2/12 flex-none justify-end gap-2 min-w-fit'>
+        <span className='text-end text-red-500 font-semibold'>
+          {props.amount}
+        </span>
+        <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none' />
+      </div>
     </ListItem>
   );
 }
