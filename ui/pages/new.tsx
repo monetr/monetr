@@ -93,7 +93,7 @@ function BankSidebar(): JSX.Element {
   // gap-2 makes sure they are evenly spaced.
   // TODO: Need to show an active state on the icon somehow. This might need more padding.
   return (
-    <div className='w-16 h-full bg-zinc-900 flex items-center py-4 gap-4 flex-col flex-none border-r-zinc-800 border border-transparent'>
+    <div className='hidden md:visible w-16 h-full bg-zinc-900 md:flex items-center py-4 gap-4 md:flex-col flex-none border-r-zinc-800 border border-transparent'>
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
@@ -222,7 +222,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
 
   return (
     <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-4 group'>
-      <div className='w-2/6 flex flex-row gap-4 items-center flex-shrink'>
+      <div className='w-5/12 flex flex-row gap-4 items-center flex-shrink'>
         <TransactionIcon name={ props.name } />
         <div className='flex flex-col overflow-hidden'>
           <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap'>
@@ -233,14 +233,14 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
           </span>
         </div>
       </div>
-      <div className='w-3/6 overflow-hidden flex-shrink'>
+      <div className='w-5/12 overflow-hidden flex-shrink'>
         <span className='text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden'>
           Spent from
         </span>
         &nbsp;
         <SpentFrom />
       </div>
-      <span className='flex-none w-1/6 text-end text-red-500 font-semibold'>
+      <span className='flex-none w-2/12 text-end text-red-500 font-semibold'>
         {props.amount}
       </span>
       <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50' />
