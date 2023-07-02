@@ -186,6 +186,17 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	crumbs.IncludeUserInScope(c.getContext(ctx), link.AccountId)
 	crumbs.AddTag(c.getContext(ctx), "linkId", strconv.FormatUint(link.LinkId, 10))
 
+	if link.PlaidLink != nil {
+		// If we have the plaid link in scope then add the institution ID onto the sentry scope.
+		crumbs.AddTag(c.getContext(ctx), "plaid.institution_id", link.PlaidLink.InstitutionId)
+	} else {
+		// If we don't have it for some reason, indicate that there is a bug.
+		crumbs.IndicateBug(c.getContext(ctx), "Plaid link should be in scope when retrieved by Plaid item ID", map[string]interface{}{
+			"itemId": hook.ItemId,
+			"link":   link,
+		})
+	}
+
 	log = c.log.WithFields(logrus.Fields{
 		"accountId": link.AccountId,
 		"linkId":    link.LinkId,
