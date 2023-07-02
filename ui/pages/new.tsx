@@ -222,7 +222,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
 
   return (
     <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-4 group'>
-      <div className='w-5/12 flex flex-row gap-4 items-center flex-shrink min-w-0'>
+      <div className='w-1/2 flex flex-row gap-4 items-center flex-1 min-w-0'>
         <TransactionIcon name={ props.name } />
         <div className='flex flex-col overflow-hidden min-w-0'>
           <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
@@ -233,14 +233,14 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
           </span>
         </div>
       </div>
-      <div className='flex w-5/12 overflow-hidden flex-shrink min-w-0'>
+      <div className='flex w-1/2 overflow-hidden flex-1 min-w-0'>
         <span className='flex-none text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
           Spent from
         </span>
         &nbsp;
         <SpentFrom />
       </div>
-      <div className='flex w-2/12 flex-none justify-end gap-2 min-w-fit'>
+      <div className='flex min-w-[8em] shrink-0 justify-end gap-2'>
         <span className='text-end text-red-500 font-semibold'>
           {props.amount}
         </span>
