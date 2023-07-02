@@ -93,13 +93,13 @@ function BankSidebar(): JSX.Element {
   // gap-2 makes sure they are evenly spaced.
   // TODO: Need to show an active state on the icon somehow. This might need more padding.
   return (
-    <div className='hidden md:visible w-16 h-full bg-zinc-900 md:flex items-center md:py-4 gap-4 md:flex-col flex-none border-r-zinc-800 border border-transparent'>
+    <div className='hidden md:visible w-16 h-full bg-zinc-900 md:flex items-center md:py-4 gap-4 md:flex-col border-r-zinc-800 flex-none border border-transparent'>
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
       <Divider className='border-zinc-600 w-1/2' />
-      <div className='h-full flex items-center gap-2 flex-col overflow-y-auto'>
-        <LinkItem instituionId='ins_15' />
+      <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
+        <LinkItem instituionId='ins_15' active />
         <LinkItem instituionId='ins_116794' />
         <LinkItem instituionId='ins_127990' />
         <LinkItem instituionId='ins_3' />
@@ -160,6 +160,7 @@ function BudgetingSideBar(): JSX.Element {
 
 interface LinkItemProps {
   instituionId: string;
+  active?: boolean;
 }
 
 function LinkItem(props: LinkItemProps): JSX.Element {
@@ -176,8 +177,11 @@ function LinkItem(props: LinkItemProps): JSX.Element {
   };
 
   return (
-    <div className='rounded-full w-10 h-10 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
-      <InstitutionLogo />
+    <div className='w-full h-12 flex items-center justify-center relative group'>
+      <div className='bg-purple-500 absolute right-0 active:h-8 h-4 scale-y-50 group-hover:scale-y-100 transition-transform w-1.5 group-hover:scale-x-100 scale-x-0 rounded-l-xl' />
+      <div className='absolute rounded-full w-10 h-10 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
+        <InstitutionLogo />
+      </div>
     </div>
   );
 }
