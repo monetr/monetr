@@ -266,7 +266,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
             <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
               {props.name}
             </span>
-            <span className='hidden md:visible text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
+            <span className='hidden md:block text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
               {props.category}
             </span>
             <span className='flex md:hidden text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
