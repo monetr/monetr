@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import React from 'react';
+import React, { useState } from 'react';
 import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, Logout, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
 import { Avatar, Divider, List, ListItem, ListSubheader } from '@mui/material';
 
@@ -92,6 +92,9 @@ function BankSidebar(): JSX.Element {
   // py-2 pushes the icons down the same distance they are from the side.
   // gap-2 makes sure they are evenly spaced.
   // TODO: Need to show an active state on the icon somehow. This might need more padding.
+
+  const [activeOne, setActiveOne] = useState('ins_15');
+
   return (
     <div className='hidden md:visible w-16 h-full bg-zinc-900 md:flex items-center md:py-4 gap-4 md:flex-col border-r-zinc-800 flex-none border border-transparent'>
       <div className='h-10 w-10'>
@@ -99,10 +102,10 @@ function BankSidebar(): JSX.Element {
       </div>
       <Divider className='border-zinc-600 w-1/2' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
-        <LinkItem instituionId='ins_15' active />
-        <LinkItem instituionId='ins_116794' />
-        <LinkItem instituionId='ins_127990' />
-        <LinkItem instituionId='ins_3' />
+        <LinkItem instituionId='ins_15' active={ activeOne === 'ins_15' } onClick={ () => setActiveOne('ins_15') } />
+        <LinkItem instituionId='ins_116794' active={ activeOne === 'ins_116794' } onClick={ () => setActiveOne('ins_116794') }  />
+        <LinkItem instituionId='ins_127990' active={ activeOne === 'ins_127990' } onClick={ () => setActiveOne('ins_127990') }  />
+        <LinkItem instituionId='ins_3' active={ activeOne === 'ins_3' }  onClick={ () => setActiveOne('ins_3') } />
       </div>
       <Logout className='text-zinc-400' />
     </div>
@@ -161,6 +164,7 @@ function BudgetingSideBar(): JSX.Element {
 interface LinkItemProps {
   instituionId: string;
   active?: boolean;
+  onClick: () => void;
 }
 
 function LinkItem(props: LinkItemProps): JSX.Element {
@@ -176,10 +180,30 @@ function LinkItem(props: LinkItemProps): JSX.Element {
     );
   };
 
+  const classes = clsx(
+    'absolute',
+    'bg-zinc-300',
+    'right-0',
+    'rounded-l-xl',
+    'transition-transform',
+    'w-1.5',
+    {
+      'h-8': props.active,
+      'scale-y-100': props.active,
+    },
+    {
+      'h-4': !props.active,
+      'group-hover:scale-y-100': !props.active,
+      'group-hover:scale-x-100': !props.active,
+      'scale-x-0': !props.active,
+      'scale-y-50': !props.active,
+    },
+  );
+
   return (
-    <div className='w-full h-12 flex items-center justify-center relative group'>
-      <div className='bg-purple-500 absolute right-0 active:h-8 h-4 scale-y-50 group-hover:scale-y-100 transition-transform w-1.5 group-hover:scale-x-100 scale-x-0 rounded-l-xl' />
-      <div className='absolute rounded-full w-10 h-10 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
+    <div className='w-full h-12 flex items-center justify-center relative group' onClick={ props.onClick }>
+      <div className={ classes } />
+      <div className='cursor-pointer absolute rounded-full w-10 h-10 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
         <InstitutionLogo />
       </div>
     </div>
