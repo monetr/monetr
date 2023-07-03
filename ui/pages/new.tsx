@@ -16,7 +16,7 @@ export default function NewMonetr(): JSX.Element {
       <BankSidebar />
       <div className='w-full h-full flex min-w-0'>
         <BudgetingSideBar />
-        <div className='w-full h-full overflow-y-scroll min-w-0'>
+        <div className='w-full h-full overflow-y-scroll min-w-0 pl-2'>
           <List dense disablePadding className='w-full'>
             <li>
               <ul className='flex gap-2 flex-col'>
@@ -218,14 +218,14 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
     }
 
     return (
-      <span className='text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+      <span className='text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
         Free-To-Use
       </span>
     );
   };
 
   return (
-    <ListItem className='w-full flex rounded-lg hover:bg-zinc-600 gap-4 group'>
+    <ListItem className='flex rounded-lg hover:bg-zinc-600 gap-4 group'>
       <div className='w-1/2 flex flex-row gap-4 items-center flex-1 min-w-0'>
         <TransactionIcon name={ props.name } />
         <div className='flex flex-col overflow-hidden min-w-0'>
@@ -238,7 +238,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
         </div>
       </div>
       <div className='flex w-1/2 overflow-hidden flex-1 min-w-0'>
-        <span className='flex-none text-zinc-50 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+        <span className='flex-none text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
           Spent from
         </span>
         &nbsp;

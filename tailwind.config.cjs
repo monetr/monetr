@@ -10,16 +10,16 @@ module.exports = {
     './ui/**/*.js',
   ],
   safelist: [
-    'text-green-500',
-    'text-yellow-500',
-    'text-red-500',
-    'text-gray-500',
-    'text-4xl',
-    'text-5xl',
-    'text-3xl',
-    'text-2xl',
-    'text-xl',
     'cursor-pointer',
+    {
+      pattern: /(bg|text)-(\w+)-(\d+)/,
+    },
+    {
+      pattern: /text-(\w+)/,
+    },
+    {
+      pattern: /(w|h)-(\w+)/,
+    },
   ],
   theme: {
     colors: {
