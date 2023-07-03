@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
-import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, Logout, MenuOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
+import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, Logout, MenuOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, Settings, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
 import { Avatar, Divider } from '@mui/material';
 
 import { Logo } from 'assets';
@@ -18,7 +18,7 @@ export default function NewMonetr(): JSX.Element {
         <BudgetingSideBar />
         <div className='w-full h-full min-w-0 flex flex-col'>
           <div className='w-full h-12 flex items-center px-4 gap-4'>
-            <MenuOutlined className='visible md:hidden text-zinc-50 cursor-pointer' />
+            <MenuOutlined className='visible lg:hidden text-zinc-50 cursor-pointer' />
             <span className='text-2xl text-zinc-50 font-bold flex gap-2 items-center'>
               <ShoppingCartOutlined />
               Transactions
@@ -72,11 +72,14 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   const className = clsx({
     'bg-zinc-700': props.active,
     'text-zinc-50': props.active,
+    'font-semibold': props.active,
     'text-zinc-400': !props.active,
+    'font-medium': !props.active,
   }, [
     'align-middle',
+    'cursor-pointer',
     'flex',
-    'font-medium',
+    'text-lg',
     'gap-2',
     'hover:bg-zinc-700',
     'hover:text-zinc-50',
@@ -105,7 +108,7 @@ function BankSidebar(): JSX.Element {
   const [activeOne, setActiveOne] = useState('ins_15');
 
   return (
-    <div className='hidden md:visible w-16 h-full bg-zinc-900 md:flex items-center md:py-4 gap-4 md:flex-col border-r-zinc-800 flex-none border border-transparent'>
+    <div className='hidden lg:visible w-16 h-full bg-zinc-900 lg:flex items-center lg:py-4 gap-4 lg:flex-col border-r-zinc-800 flex-none border border-transparent'>
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
@@ -116,24 +119,25 @@ function BankSidebar(): JSX.Element {
         <LinkItem instituionId='ins_127990' active={ activeOne === 'ins_127990' } onClick={ () => setActiveOne('ins_127990') }  />
         <LinkItem instituionId='ins_3' active={ activeOne === 'ins_3' }  onClick={ () => setActiveOne('ins_3') } />
       </div>
-      <Logout className='text-zinc-400' />
+      <Settings className='hover:text-zinc-50 text-zinc-400 cursor-pointer' />
+      <Logout className='hover:text-zinc-50 text-zinc-400 cursor-pointer' />
     </div>
   );
 }
 
 function BudgetingSideBar(): JSX.Element {
   return (
-    <div className='hidden md:w-60 h-full bg-zinc-900 flex-none md:flex flex-col border-r-zinc-800 border border-transparent items-center'>
+    <div className='hidden lg:w-72 h-full bg-zinc-900 flex-none lg:flex flex-col border-r-zinc-800 border border-transparent items-center'>
       <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-12 flex items-center p-2'>
         <span className='text-zinc-50 font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
           Navy Federal Credit Union
         </span>
-        <MoreVert />
+        <MoreVert className='ml-auto' />
       </div>
       <Divider className='border-zinc-600 w-1/2' />
       <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
         <div className='w-full'>
-          <span className='hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
+          <span className='cursor-pointer hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
             <AccountBalanceOutlined />
             Checking
             <span className='ml-auto text-xs bg-purple-500 text-zinc-50 rounded-sm py-0.5 px-1'>
@@ -143,6 +147,20 @@ function BudgetingSideBar(): JSX.Element {
           </span>
         </div>
         <Divider className='border-zinc-600 w-1/2' />
+
+        <div className='w-full flex items-center flex-col gap-2'>
+          <span className='text-zinc-50 font-semibold'>
+            Free-To-Use: $154.65
+          </span>
+          <span className='text-zinc-50 font-semibold'>
+            Available: $4241.30
+          </span>
+          <span className='text-zinc-50 font-semibold'>
+            Current: $4241.30
+          </span>
+        </div>
+        <Divider className='border-zinc-600 w-1/2' />
+
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
           <NavigationItem>
             <HomeOutlined />
@@ -155,14 +173,23 @@ function BudgetingSideBar(): JSX.Element {
           <NavigationItem>
             <PriceCheckOutlined />
             Expenses
+            <span className='ml-auto text-sm bg-purple-500 text-zinc-50 rounded-md py-0.5 px-1.5'>
+              $1,554.43
+            </span>
           </NavigationItem>
           <NavigationItem>
             <SavingsOutlined />
             Goals
+            <span className='ml-auto text-sm bg-purple-500 text-zinc-50 rounded-md py-0.5 px-1.5'>
+              $2,549.43
+            </span>
           </NavigationItem>
           <NavigationItem>
             <TodayOutlined />
             Funding Schedules
+            <span className='ml-auto text-sm bg-purple-500 text-zinc-50 rounded-md py-0.5 px-1.5'>
+              7/15
+            </span>
           </NavigationItem>
         </div>
       </div>
@@ -226,7 +253,7 @@ interface TransactionDateHeaderProps {
 function TransactionDateHeader(props: TransactionDateHeaderProps): JSX.Element {
   return (
     <li className='sticky top-0 z-10 h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent to-zinc-900 via-90%'>
-      <span className='text-zinc-300 font-semibold text-base bg-inherit z-10 px-4'>
+      <span className='text-zinc-300 font-semibold text-base bg-inherit z-10 px-3 md:px-4'>
         {props.date}
       </span>
     </li>
@@ -244,14 +271,14 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
   const SpentFrom = () => {
     if (props.from) {
       return (
-        <span className='text-zinc-50 font-bold text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+        <span className='text-zinc-50 font-bold text-sm md:text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
           {props.from || 'Free-To-Use'}
         </span>
       );
     }
 
     return (
-      <span className='text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+      <span className='text-zinc-50/75 font-medium text-sm md:text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
         Free-To-Use
       </span>
     );
@@ -270,7 +297,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
               {props.category}
             </span>
             <span className='flex md:hidden text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-              <span className='flex-none text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+              <span className='flex-none text-zinc-50/75 font-medium text-sm text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
                 Spent from
               </span>
               &nbsp;
