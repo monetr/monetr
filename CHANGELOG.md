@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.15.7](https://github.com/monetr/monetr/compare/v0.15.6...v0.15.7) (2023-07-02)
+
+
+### Features
+
+* **sentry:** Added plaid.institution_id tag to Plaid webhooks. ([37b4141](https://github.com/monetr/monetr/commit/37b4141a9d648a73167f00eadd56f8e6fbdc90f8))
+
+
+### Bug Fixes
+
+* Changing terminology to Free-To-Use. ([#1458](https://github.com/monetr/monetr/issues/1458)) ([0e3922d](https://github.com/monetr/monetr/commit/0e3922d88fd264389af35834e8e087e047f3c2e7))
+
+
+### Miscellaneous
+
+* Tweaking makefile defailt task ([029a093](https://github.com/monetr/monetr/commit/029a093531477e17d74ab2f3b841e84e73aa5b3b))
+* Updated README ([71d1944](https://github.com/monetr/monetr/commit/71d19448ca8ba439a73ecd002b9075cd5eb132e7))
+
 ## [0.15.6](https://github.com/monetr/monetr/compare/v0.15.5...v0.15.6) (2023-06-26)
 
 
