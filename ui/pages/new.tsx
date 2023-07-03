@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
-import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, Logout, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
-import { Avatar, Divider, List, ListItem, ListSubheader } from '@mui/material';
+import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, Logout, MenuOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
+import { Avatar, Divider } from '@mui/material';
 
 import { Logo } from 'assets';
 import clsx from 'clsx';
@@ -16,38 +16,47 @@ export default function NewMonetr(): JSX.Element {
       <BankSidebar />
       <div className='w-full h-full flex min-w-0'>
         <BudgetingSideBar />
-        <div className='w-full h-full overflow-y-scroll min-w-0 pl-2'>
-          <List dense disablePadding className='w-full'>
-            <li>
-              <ul className='flex gap-2 flex-col'>
-                <TransactionDateHeader date='28 June, 2023' />
-                <TransactionItem name='Starbucks Coffee' category='Food & Drink' amount='$10.24' from='Eating Out Budget' />
-                <TransactionItem name='Arbys' category='Food & Drink' amount='$5.67' />
-                <TransactionItem name='GitHub' category='Software' amount='$10.24' />
-                <TransactionItem name='Target' category='Shops' amount='$10.24' />
-                <TransactionItem name='Rocket Mortgage' category='Loan' amount='$1800.00' />
-              </ul>
-            </li>
-            <li>
-              <ul className='flex gap-2 flex-col'>
-                <TransactionDateHeader date='25 June, 2023' />
-                <TransactionItem name='Discord' category='Games & Entertainment' amount='$10.24' from='Discord' />
-                <TransactionItem name='GitLab Inc' category='Service' amount='$10.24' from='Tools' />
-                <TransactionItem name='Buildkite' category='Transfer' amount='$10.24' />
-                <TransactionItem name='Sentry' category='Shops' amount='$10.24' />
-                <TransactionItem name='Ngrok' category='Transfer' amount='$10.24' />
-              </ul>
-            </li>
-            <li>
-              <ul className='flex gap-2 flex-col'>
-                <TransactionDateHeader date='21 June, 2023' />
-                <TransactionItem name='GitHub' category='Service' amount='$10.24' />
-                <TransactionItem name='Plaid' category='Service' amount='$2.40' />
-                <TransactionItem name='Elliots Contribution' category='Payroll' amount='+ $250.00' />
-                <TransactionItem name='FreshBooks' category='Accounting and Bookkeeping' amount='$17.00' />
-              </ul>
-            </li>
-          </List>
+        <div className='w-full h-full min-w-0 flex flex-col'>
+          <div className='w-full h-12 flex items-center px-4 gap-4'>
+            <MenuOutlined className='visible md:hidden text-zinc-50 cursor-pointer' />
+            <span className='text-2xl text-zinc-50 font-bold flex gap-2 items-center'>
+              <ShoppingCartOutlined />
+              Transactions
+            </span>
+          </div>
+          <div className='w-full h-full overflow-y-scroll min-w-0 pl-2'>
+            <ul className='w-full'>
+              <li>
+                <ul className='flex gap-2 flex-col'>
+                  <TransactionDateHeader date='28 June, 2023' />
+                  <TransactionItem name='Starbucks Coffee' category='Food & Drink' amount='$10.24' from='Eating Out Budget' />
+                  <TransactionItem name='Arbys' category='Food & Drink' amount='$5.67' />
+                  <TransactionItem name='GitHub' category='Software' amount='$10.24' />
+                  <TransactionItem name='Target' category='Shops' amount='$10.24' />
+                  <TransactionItem name='Rocket Mortgage' category='Loan' amount='$1800.00' />
+                </ul>
+              </li>
+              <li>
+                <ul className='flex gap-2 flex-col'>
+                  <TransactionDateHeader date='25 June, 2023' />
+                  <TransactionItem name='Discord' category='Games & Entertainment' amount='$10.24' from='Discord' />
+                  <TransactionItem name='GitLab Inc' category='Service' amount='$10.24' from='Tools' />
+                  <TransactionItem name='Buildkite' category='Transfer' amount='$10.24' />
+                  <TransactionItem name='Sentry' category='Shops' amount='$10.24' />
+                  <TransactionItem name='Ngrok' category='Transfer' amount='$10.24' />
+                </ul>
+              </li>
+              <li>
+                <ul className='flex gap-2 flex-col'>
+                  <TransactionDateHeader date='21 June, 2023' />
+                  <TransactionItem name='GitHub' category='Service' amount='$10.24' />
+                  <TransactionItem name='Plaid' category='Service' amount='$2.40' />
+                  <TransactionItem name='Elliots Contribution' category='Payroll' amount='+ $250.00' />
+                  <TransactionItem name='FreshBooks' category='Accounting and Bookkeeping' amount='$17.00' />
+                </ul>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -115,7 +124,7 @@ function BankSidebar(): JSX.Element {
 function BudgetingSideBar(): JSX.Element {
   return (
     <div className='hidden md:w-60 h-full bg-zinc-900 flex-none md:flex flex-col border-r-zinc-800 border border-transparent items-center'>
-      <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-16 flex items-center p-2'>
+      <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-12 flex items-center p-2'>
         <span className='text-zinc-50 font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
           Navy Federal Credit Union
         </span>
@@ -216,11 +225,11 @@ interface TransactionDateHeaderProps {
 
 function TransactionDateHeader(props: TransactionDateHeaderProps): JSX.Element {
   return (
-    <ListSubheader className='bg-inherit backdrop-filter backdrop-blur-sm'>
-      <span className='text-zinc-300 font-semibold text-base w-full h-full bg-inherit z-10'>
+    <li className='sticky top-0 z-10 h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent to-zinc-900 via-90%'>
+      <span className='text-zinc-300 font-semibold text-base bg-inherit z-10 px-4'>
         {props.date}
       </span>
-    </ListSubheader>
+    </li>
   );
 }
 
@@ -249,32 +258,41 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
   };
 
   return (
-    <ListItem className='flex rounded-lg hover:bg-zinc-600 gap-4 group'>
-      <div className='w-1/2 flex flex-row gap-4 items-center flex-1 min-w-0'>
-        <TransactionIcon name={ props.name } />
-        <div className='flex flex-col overflow-hidden min-w-0'>
-          <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-            {props.name}
+    <li className='w-full px-1 md:px-2'>
+      <div className='flex rounded-lg hover:bg-zinc-600 gap-4 group px-2 py-1 h-full cursor-pointer md:cursor-auto'>
+        <div className='w-full md:w-1/2 flex flex-row gap-4 items-center flex-1 min-w-0'>
+          <TransactionIcon name={ props.name } />
+          <div className='flex flex-col overflow-hidden min-w-0'>
+            <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
+              {props.name}
+            </span>
+            <span className='hidden md:visible text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
+              {props.category}
+            </span>
+            <span className='flex md:hidden text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
+              <span className='flex-none text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+                Spent from
+              </span>
+              &nbsp;
+              <SpentFrom />
+            </span>
+          </div>
+        </div>
+        <div className='hidden md:flex w-1/2 overflow-hidden flex-1 min-w-0 items-center'>
+          <span className='flex-none text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+            Spent from
           </span>
-          <span className='text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-            {props.category}
+          &nbsp;
+          <SpentFrom />
+        </div>
+        <div className='flex min-w-[8em] shrink-0 justify-end gap-2 items-center'>
+          <span className='text-end text-red-500 font-semibold'>
+            {props.amount}
           </span>
+          <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' />
         </div>
       </div>
-      <div className='flex w-1/2 overflow-hidden flex-1 min-w-0'>
-        <span className='flex-none text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
-          Spent from
-        </span>
-        &nbsp;
-        <SpentFrom />
-      </div>
-      <div className='flex min-w-[8em] shrink-0 justify-end gap-2'>
-        <span className='text-end text-red-500 font-semibold'>
-          {props.amount}
-        </span>
-        <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none' />
-      </div>
-    </ListItem>
+    </li>
   );
 }
 
