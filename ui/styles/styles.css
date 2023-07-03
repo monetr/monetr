@@ -11,7 +11,7 @@ html, body {
 
 /* custom scrollbar */
 ::-webkit-scrollbar {
-    width: 20px;
+    width: 16px;
 }
 
 ::-webkit-scrollbar-track {
@@ -19,14 +19,14 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #dedede;
+    @apply bg-zinc-700;
     border-radius: 20px;
     border: 6px solid transparent;
     background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #b1b1b1;
+    @apply bg-zinc-500;
 }
 
 *:focus {

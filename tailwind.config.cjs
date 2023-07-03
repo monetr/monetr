@@ -13,9 +13,11 @@ module.exports = {
     'cursor-pointer',
     {
       pattern: /(bg|text)-(\w+)-(\d+)/,
+      variants: ['hover'],
     },
     {
       pattern: /text-(\w+)/,
+      variants: ['hover'],
     },
     {
       pattern: /(w|h)-(\w+)/,

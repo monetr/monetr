@@ -227,6 +227,7 @@
                 "^@.+",
                 "^axios",
                 "^classnames",
+                "^clsx",
                 "^formik",
                 "^moment",
                 "^notistack",

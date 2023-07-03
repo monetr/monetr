@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
-import { AccountBalance, AccountBalanceOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, Logout, MenuOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, Settings, ShoppingCartOutlined, TodayOutlined } from '@mui/icons-material';
-import { Avatar, Divider } from '@mui/material';
+import { AccountBalance, AccountBalanceOutlined, AccountBalanceWalletOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, LocalAtmOutlined, Logout, MenuOutlined, MoreVert, PendingOutlined, PriceCheckOutlined, SavingsOutlined, Settings, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+import { Avatar } from '@mui/material';
+import clsx from 'clsx';
 
 import { Logo } from 'assets';
-import clsx from 'clsx';
 import { ReactElement } from 'components/types';
 import { useInstitution } from 'hooks/institutions';
 import { useIconSearch } from 'hooks/useIconSearch';
@@ -24,8 +24,14 @@ export default function NewMonetr(): JSX.Element {
               Transactions
             </span>
           </div>
-          <div className='w-full h-full overflow-y-scroll min-w-0 pl-2'>
+          <div className='w-full h-full overflow-y-auto min-w-0'>
             <ul className='w-full'>
+              <li>
+                <ul className='flex gap-2 flex-col'>
+                  <TransactionDateHeader date='1 July, 2023' />
+                  <TransactionItem name='Lunds & Byerlys' category='Food & Drink' amount='$248.14' pending />
+                </ul>
+              </li>
               <li>
                 <ul className='flex gap-2 flex-col'>
                   <TransactionDateHeader date='28 June, 2023' />
@@ -112,7 +118,7 @@ function BankSidebar(): JSX.Element {
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
-      <Divider className='border-zinc-600 w-1/2' />
+      <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
         <LinkItem instituionId='ins_15' active={ activeOne === 'ins_15' } onClick={ () => setActiveOne('ins_15') } />
         <LinkItem instituionId='ins_116794' active={ activeOne === 'ins_116794' } onClick={ () => setActiveOne('ins_116794') }  />
@@ -134,7 +140,7 @@ function BudgetingSideBar(): JSX.Element {
         </span>
         <MoreVert className='ml-auto' />
       </div>
-      <Divider className='border-zinc-600 w-1/2' />
+      <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
       <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
         <div className='w-full'>
           <span className='cursor-pointer hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
@@ -146,20 +152,41 @@ function BudgetingSideBar(): JSX.Element {
             <KeyboardArrowDown />
           </span>
         </div>
-        <Divider className='border-zinc-600 w-1/2' />
+        <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
 
-        <div className='w-full flex items-center flex-col gap-2'>
-          <span className='text-zinc-50 font-semibold'>
-            Free-To-Use: $154.65
-          </span>
-          <span className='text-zinc-50 font-semibold'>
-            Available: $4241.30
-          </span>
-          <span className='text-zinc-50 font-semibold'>
-            Current: $4241.30
-          </span>
+        <div className='w-full flex items-center flex-col gap-2 px-2'>
+          <div className='w-full flex justify-between'>
+            <span className='flex gap-2 items-center text-zinc-200 text-lg font-semibold'>
+              <AccountBalanceWalletOutlined />
+              Free-To-Use:
+            </span>
+            &nbsp;
+            <span className='text-zinc-200 text-lg font-semibold'>
+               $154.65
+            </span>
+          </div>
+          <div className='w-full flex justify-between'>
+            <span className='flex gap-2 items-center text-zinc-200 text-lg font-semibold'>
+              <LocalAtmOutlined />
+              Available:
+            </span>
+            &nbsp;
+            <span className='text-zinc-200 text-lg font-semibold'>
+              $4,241.30
+            </span>
+          </div>
+          <div className='w-full flex justify-between'>
+            <span className='flex gap-2 items-center text-zinc-200 text-lg font-semibold'>
+              <TollOutlined />
+              Current:
+            </span>
+            &nbsp;
+            <span className='text-zinc-200 text-lg font-semibold'>
+              $4,241.30
+            </span>
+          </div>
         </div>
-        <Divider className='border-zinc-600 w-1/2' />
+        <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
 
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
           <NavigationItem>
@@ -263,6 +290,7 @@ function TransactionDateHeader(props: TransactionDateHeaderProps): JSX.Element {
 interface TransactionItemProps {
   name: string;
   from?: string;
+  pending?: boolean;
   category: string;
   amount: string;
 }
@@ -312,6 +340,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
           &nbsp;
           <SpentFrom />
         </div>
+        { props.pending && <PendingOutlined className='text-zinc-500' /> }
         <div className='flex md:min-w-[8em] shrink-0 justify-end gap-2 items-center'>
           <span className='text-end text-red-500 font-semibold'>
             {props.amount}
@@ -347,9 +376,9 @@ function TransactionIcon(props: TransactionIconProps): JSX.Element {
     };
 
     return (
-      <Avatar className='bg-white flex items-center justify-center h-10 w-10'>
+      <div className='bg-white flex items-center justify-center h-10 w-10 rounded-full'>
         <div style={ styles } />
-      </Avatar>
+      </div>
     );
   }
 
