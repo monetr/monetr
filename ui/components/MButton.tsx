@@ -2,7 +2,7 @@ import React from 'react';
 import { ButtonBase, ButtonBaseProps } from '@mui/material';
 import { useFormikContext } from 'formik';
 
-import clsx from 'clsx';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MButtonProps extends ButtonBaseProps {
   color?: 'primary' | 'secondary' | 'cancel';
@@ -71,7 +71,7 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
       },
     },
   }[theme][kind];
-  const classNames = clsx(
+  const classNames = mergeTailwind(
     themeClasses,
     { 'shadow-sm': kind === 'solid' },
     'focus-visible:outline',
@@ -83,7 +83,7 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
     'py-1.5',
     'rounded-lg',
     'text-sm',
-    'w-full',
+    props.className,
   );
 
   return <ButtonBase

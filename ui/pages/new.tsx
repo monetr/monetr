@@ -1,17 +1,15 @@
 /* eslint-disable max-len */
-import React, { Fragment, useState } from 'react';
-import { AccountBalance, AccountBalanceOutlined, AccountBalanceWalletOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, LocalAtmOutlined, Logout, MenuOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, Settings, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+import React, { Fragment } from 'react';
+import { AccountBalanceOutlined, AccountBalanceWalletOutlined, HomeOutlined, KeyboardArrowDown, KeyboardArrowRight, LocalAtmOutlined, MenuOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
 import { Avatar, Badge, styled } from '@mui/material';
 import clsx from 'clsx';
 
+import BankSidebar from './new/BankSidebar';
 import ExpenseList from './new/ExpenseList';
 
-import { Logo } from 'assets';
 import { ReactElement } from 'components/types';
-import { useInstitution } from 'hooks/institutions';
 import { useIconSearch } from 'hooks/useIconSearch';
 import useTheme from 'hooks/useTheme';
-import { rrulestr } from 'rrule';
 
 interface MonetrWrapperProps {
   children: ReactElement;
@@ -136,34 +134,6 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   );
 }
 
-function BankSidebar(): JSX.Element {
-  // Important things to note. The width is 16. The width of the icons is 12.
-  // This leaves a padding of 2 on each side, which isn't even needed with items-center? Not sure which
-  // would be better.
-  // py-2 pushes the icons down the same distance they are from the side.
-  // gap-2 makes sure they are evenly spaced.
-  // TODO: Need to show an active state on the icon somehow. This might need more padding.
-
-  const [activeOne, setActiveOne] = useState('ins_15');
-
-  return (
-    <div className='hidden lg:visible w-16 h-full bg-zinc-900 lg:flex items-center lg:py-4 gap-4 lg:flex-col border-r-zinc-800 flex-none border border-transparent'>
-      <div className='h-10 w-10'>
-        <img src={ Logo } className="w-full" />
-      </div>
-      <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
-      <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
-        <LinkItem instituionId='ins_15' active={ activeOne === 'ins_15' } onClick={ () => setActiveOne('ins_15') } />
-        <LinkItem instituionId='ins_116794' active={ activeOne === 'ins_116794' } onClick={ () => setActiveOne('ins_116794') }  />
-        <LinkItem instituionId='ins_127990' active={ activeOne === 'ins_127990' } onClick={ () => setActiveOne('ins_127990') }  />
-        <LinkItem instituionId='ins_3' active={ activeOne === 'ins_3' }  onClick={ () => setActiveOne('ins_3') } />
-      </div>
-      <Settings className='hover:text-zinc-50 text-zinc-400 cursor-pointer' />
-      <Logout className='hover:text-zinc-50 text-zinc-400 cursor-pointer' />
-    </div>
-  );
-}
-
 function BudgetingSideBar(): JSX.Element {
   return (
     <div className='hidden lg:w-72 h-full bg-zinc-900 flex-none lg:flex flex-col border-r-zinc-800 border border-transparent items-center'>
@@ -257,54 +227,6 @@ function BudgetingSideBar(): JSX.Element {
   );
 }
 
-interface LinkItemProps {
-  instituionId: string;
-  active?: boolean;
-  onClick: () => void;
-}
-
-function LinkItem(props: LinkItemProps): JSX.Element {
-  const { result: institution } = useInstitution(props.instituionId);
-
-  const InstitutionLogo = () => {
-    if (!institution?.logo) return <AccountBalance color='info' />;
-
-    return (
-      <img
-        src={ `data:image/png;base64,${institution.logo}` }
-      />
-    );
-  };
-
-  const classes = clsx(
-    'absolute',
-    'bg-zinc-300',
-    'right-0',
-    'rounded-l-xl',
-    'transition-transform',
-    'w-1.5',
-    {
-      'h-8': props.active,
-      'scale-y-100': props.active,
-    },
-    {
-      'h-4': !props.active,
-      'group-hover:scale-y-100': !props.active,
-      'group-hover:scale-x-100': !props.active,
-      'scale-x-0': !props.active,
-      'scale-y-50': !props.active,
-    },
-  );
-
-  return (
-    <div className='w-full h-12 flex items-center justify-center relative group' onClick={ props.onClick }>
-      <div className={ classes } />
-      <div className='cursor-pointer absolute rounded-full w-10 h-10 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
-        <InstitutionLogo />
-      </div>
-    </div>
-  );
-}
 
 interface TransactionDateHeaderProps {
   date: string;

@@ -14,7 +14,7 @@ import type { Preview } from '@storybook/react';
 import axios from 'axios';
 import { SnackbarProvider, VariantType } from 'notistack';
 
-import theme from '../ui/theme';
+import theme, { newTheme } from '../ui/theme';
 
 import { initialize, mswLoader } from 'msw-storybook-addon';
 
@@ -70,10 +70,12 @@ const preview: Preview = {
         },
       });
 
+      document.querySelector('html')?.setAttribute('class', 'dark');
+
       return (
         <QueryClientProvider client={ queryClient }>
           <Router>
-            <ThemeProvider theme={ theme }>
+            <ThemeProvider theme={ newTheme }>
               <LocalizationProvider dateAdapter={ AdapterMoment }>
                 <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
                   <NiceModal.Provider>
