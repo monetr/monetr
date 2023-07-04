@@ -79,11 +79,11 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
                 { spending.getCurrentAmountString() }
               </span>
               &nbsp;
-              <span className='text-end text-zinc-500 font-medium'>
+              <span className='text-end text-zinc-500 group-hover:text-zinc-400 font-medium'>
                 of
               </span>
               &nbsp;
-              <span className='text-end text-zinc-400 font-medium'>
+              <span className='text-end text-zinc-400 group-hover:text-zinc-300 font-medium'>
                 { spending.getTargetAmountString() }
               </span>
             </div>
