@@ -1,20 +1,14 @@
 /* eslint-disable max-len */
+import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 
-import NewMonetr from './new';
+import MonetrWrapper, { BankView, ExpensesView, TransactionsView } from './new';
 
 import { rest } from 'msw';
 
-
-const meta: Meta<typeof NewMonetr> = {
-  title: 'New UI/Base',
-  component: NewMonetr,
-};
-
-export default meta;
-
-export const Default: StoryObj<typeof NewMonetr> = {
-  name: 'Default',
+const meta: Meta<typeof MonetrWrapper> = {
+  title: 'New UI',
+  component: MonetrWrapper,
   parameters: {
     msw: {
       handlers: [
@@ -321,45 +315,402 @@ export const Default: StoryObj<typeof NewMonetr> = {
             'url': 'https://www.chase.com',
           }));
         }),
-        rest.post('/api/icons/search', (req, res, ctx) => {
-          return req.json().then(body => {
-            switch (body['name']) {
-              case 'Discord':
-                return res(ctx.json({
-                  'colors': [
-                    '5865F2',
-                  ],
-                  'library': 'simple-icons',
-                  'slug': 'discord',
-                  'svg': 'PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+RGlzY29yZDwvdGl0bGU+PHBhdGggZD0iTTIwLjMxNyA0LjM2OThhMTkuNzkxMyAxOS43OTEzIDAgMDAtNC44ODUxLTEuNTE1Mi4wNzQxLjA3NDEgMCAwMC0uMDc4NS4wMzcxYy0uMjExLjM3NTMtLjQ0NDcuODY0OC0uNjA4MyAxLjI0OTUtMS44NDQ3LS4yNzYyLTMuNjgtLjI3NjItNS40ODY4IDAtLjE2MzYtLjM5MzMtLjQwNTgtLjg3NDItLjYxNzctMS4yNDk1YS4wNzcuMDc3IDAgMDAtLjA3ODUtLjAzNyAxOS43MzYzIDE5LjczNjMgMCAwMC00Ljg4NTIgMS41MTUuMDY5OS4wNjk5IDAgMDAtLjAzMjEuMDI3N0MuNTMzNCA5LjA0NTgtLjMxOSAxMy41Nzk5LjA5OTIgMTguMDU3OGEuMDgyNC4wODI0IDAgMDAuMDMxMi4wNTYxYzIuMDUyOCAxLjUwNzYgNC4wNDEzIDIuNDIyOCA1Ljk5MjkgMy4wMjk0YS4wNzc3LjA3NzcgMCAwMC4wODQyLS4wMjc2Yy40NjE2LS42MzA0Ljg3MzEtMS4yOTUyIDEuMjI2LTEuOTk0MmEuMDc2LjA3NiAwIDAwLS4wNDE2LS4xMDU3Yy0uNjUyOC0uMjQ3Ni0xLjI3NDMtLjU0OTUtMS44NzIyLS44OTIzYS4wNzcuMDc3IDAgMDEtLjAwNzYtLjEyNzdjLjEyNTgtLjA5NDMuMjUxNy0uMTkyMy4zNzE4LS4yOTE0YS4wNzQzLjA3NDMgMCAwMS4wNzc2LS4wMTA1YzMuOTI3OCAxLjc5MzMgOC4xOCAxLjc5MzMgMTIuMDYxNCAwYS4wNzM5LjA3MzkgMCAwMS4wNzg1LjAwOTVjLjEyMDIuMDk5LjI0Ni4xOTgxLjM3MjguMjkyNGEuMDc3LjA3NyAwIDAxLS4wMDY2LjEyNzYgMTIuMjk4NiAxMi4yOTg2IDAgMDEtMS44NzMuODkxNC4wNzY2LjA3NjYgMCAwMC0uMDQwNy4xMDY3Yy4zNjA0LjY5OC43NzE5IDEuMzYyOCAxLjIyNSAxLjk5MzJhLjA3Ni4wNzYgMCAwMC4wODQyLjAyODZjMS45NjEtLjYwNjcgMy45NDk1LTEuNTIxOSA2LjAwMjMtMy4wMjk0YS4wNzcuMDc3IDAgMDAuMDMxMy0uMDU1MmMuNTAwNC01LjE3Ny0uODM4Mi05LjY3MzktMy41NDg1LTEzLjY2MDRhLjA2MS4wNjEgMCAwMC0uMDMxMi0uMDI4NnpNOC4wMiAxNS4zMzEyYy0xLjE4MjUgMC0yLjE1NjktMS4wODU3LTIuMTU2OS0yLjQxOSAwLTEuMzMzMi45NTU1LTIuNDE4OSAyLjE1Ny0yLjQxODkgMS4yMTA4IDAgMi4xNzU3IDEuMDk1MiAyLjE1NjggMi40MTkgMCAxLjMzMzItLjk1NTUgMi40MTg5LTIuMTU2OSAyLjQxODl6bTcuOTc0OCAwYy0xLjE4MjUgMC0yLjE1NjktMS4wODU3LTIuMTU2OS0yLjQxOSAwLTEuMzMzMi45NTU0LTIuNDE4OSAyLjE1NjktMi40MTg5IDEuMjEwOCAwIDIuMTc1NyAxLjA5NTIgMi4xNTY4IDIuNDE5IDAgMS4zMzMyLS45NDYgMi40MTg5LTIuMTU2OCAyLjQxODlaIi8+PC9zdmc+',
-                  'title': 'discord',
-                }));
-              case 'Target':
-                return res(ctx.json({
-                  'colors': [
-                    'CC0000',
-                  ],
-                  'library': 'simple-icons',
-                  'slug': 'target',
-                  'svg': 'PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+VGFyZ2V0PC90aXRsZT48cGF0aCBkPSJNMTIuMDAwNSAwQzE4LjYyNyAwIDI0IDUuMzczIDI0IDEyLjAwMDUgMjQgMTguNjI3IDE4LjYyNyAyNCAxMS45OTk1IDI0IDUuMzczIDI0IDAgMTguNjI3IDAgMTEuOTk5NSAwIDUuMzczIDUuMzczIDAgMTIuMDAwNSAwem0wIDE5LjgyNmE3LjgyNjUgNy44MjY1IDAgMTAtLjAwMS0xNS42NTJDNy43MTMzIDQuMjI0NiA0LjI2NTMgNy43MTM2IDQuMjY1MyAxMmMwIDQuMjg2NCAzLjQ0OCA3Ljc3NTQgNy43MzQyIDcuODI2aC4wMDF6bTAtMy45ODUzYTMuODQwMiAzLjg0MDIgMCAxMTAtNy42ODAzYzIuMTIwNC4wMDA2IDMuODM5IDEuNzE5NyAzLjgzOSAzLjg0MDFzLTEuNzE4NiAzLjgzOTYtMy44MzkgMy44NDAyeiIvPjwvc3ZnPg==',
-                  'title': 'target',
-                }));
-              case 'GitHub':
-                return res(ctx.json({
-                  'colors': [
-                    '181717',
-                  ],
-                  'library': 'simple-icons',
-                  'slug': 'github',
-                  'svg': 'PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R2l0SHViPC90aXRsZT48cGF0aCBkPSJNMTIgLjI5N2MtNi42MyAwLTEyIDUuMzczLTEyIDEyIDAgNS4zMDMgMy40MzggOS44IDguMjA1IDExLjM4NS42LjExMy44Mi0uMjU4LjgyLS41NzcgMC0uMjg1LS4wMS0xLjA0LS4wMTUtMi4wNC0zLjMzOC43MjQtNC4wNDItMS42MS00LjA0Mi0xLjYxQzQuNDIyIDE4LjA3IDMuNjMzIDE3LjcgMy42MzMgMTcuN2MtMS4wODctLjc0NC4wODQtLjcyOS4wODQtLjcyOSAxLjIwNS4wODQgMS44MzggMS4yMzYgMS44MzggMS4yMzYgMS4wNyAxLjgzNSAyLjgwOSAxLjMwNSAzLjQ5NS45OTguMTA4LS43NzYuNDE3LTEuMzA1Ljc2LTEuNjA1LTIuNjY1LS4zLTUuNDY2LTEuMzMyLTUuNDY2LTUuOTMgMC0xLjMxLjQ2NS0yLjM4IDEuMjM1LTMuMjItLjEzNS0uMzAzLS41NC0xLjUyMy4xMDUtMy4xNzYgMCAwIDEuMDA1LS4zMjIgMy4zIDEuMjMuOTYtLjI2NyAxLjk4LS4zOTkgMy0uNDA1IDEuMDIuMDA2IDIuMDQuMTM4IDMgLjQwNSAyLjI4LTEuNTUyIDMuMjg1LTEuMjMgMy4yODUtMS4yMy42NDUgMS42NTMuMjQgMi44NzMuMTIgMy4xNzYuNzY1Ljg0IDEuMjMgMS45MSAxLjIzIDMuMjIgMCA0LjYxLTIuODA1IDUuNjI1LTUuNDc1IDUuOTIuNDIuMzYuODEgMS4wOTYuODEgMi4yMiAwIDEuNjA2LS4wMTUgMi44OTYtLjAxNSAzLjI4NiAwIC4zMTUuMjEuNjkuODI1LjU3QzIwLjU2NSAyMi4wOTIgMjQgMTcuNTkyIDI0IDEyLjI5N2MwLTYuNjI3LTUuMzczLTEyLTEyLTEyIi8+PC9zdmc+',
-                  'title': 'github',
-                }));
-              default:
-                return res(ctx.status(204));
-            }
-          });
+        rest.post('/api/icons/search', async (req, res, ctx) => {
+          const body = await req.json();
+          switch (body['name']) {
+            case 'Discord':
+              return res(ctx.json({
+                'colors': [
+                  '5865F2',
+                ],
+                'library': 'simple-icons',
+                'slug': 'discord',
+                'svg': 'PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+RGlzY29yZDwvdGl0bGU+PHBhdGggZD0iTTIwLjMxNyA0LjM2OThhMTkuNzkxMyAxOS43OTEzIDAgMDAtNC44ODUxLTEuNTE1Mi4wNzQxLjA3NDEgMCAwMC0uMDc4NS4wMzcxYy0uMjExLjM3NTMtLjQ0NDcuODY0OC0uNjA4MyAxLjI0OTUtMS44NDQ3LS4yNzYyLTMuNjgtLjI3NjItNS40ODY4IDAtLjE2MzYtLjM5MzMtLjQwNTgtLjg3NDItLjYxNzctMS4yNDk1YS4wNzcuMDc3IDAgMDAtLjA3ODUtLjAzNyAxOS43MzYzIDE5LjczNjMgMCAwMC00Ljg4NTIgMS41MTUuMDY5OS4wNjk5IDAgMDAtLjAzMjEuMDI3N0MuNTMzNCA5LjA0NTgtLjMxOSAxMy41Nzk5LjA5OTIgMTguMDU3OGEuMDgyNC4wODI0IDAgMDAuMDMxMi4wNTYxYzIuMDUyOCAxLjUwNzYgNC4wNDEzIDIuNDIyOCA1Ljk5MjkgMy4wMjk0YS4wNzc3LjA3NzcgMCAwMC4wODQyLS4wMjc2Yy40NjE2LS42MzA0Ljg3MzEtMS4yOTUyIDEuMjI2LTEuOTk0MmEuMDc2LjA3NiAwIDAwLS4wNDE2LS4xMDU3Yy0uNjUyOC0uMjQ3Ni0xLjI3NDMtLjU0OTUtMS44NzIyLS44OTIzYS4wNzcuMDc3IDAgMDEtLjAwNzYtLjEyNzdjLjEyNTgtLjA5NDMuMjUxNy0uMTkyMy4zNzE4LS4yOTE0YS4wNzQzLjA3NDMgMCAwMS4wNzc2LS4wMTA1YzMuOTI3OCAxLjc5MzMgOC4xOCAxLjc5MzMgMTIuMDYxNCAwYS4wNzM5LjA3MzkgMCAwMS4wNzg1LjAwOTVjLjEyMDIuMDk5LjI0Ni4xOTgxLjM3MjguMjkyNGEuMDc3LjA3NyAwIDAxLS4wMDY2LjEyNzYgMTIuMjk4NiAxMi4yOTg2IDAgMDEtMS44NzMuODkxNC4wNzY2LjA3NjYgMCAwMC0uMDQwNy4xMDY3Yy4zNjA0LjY5OC43NzE5IDEuMzYyOCAxLjIyNSAxLjk5MzJhLjA3Ni4wNzYgMCAwMC4wODQyLjAyODZjMS45NjEtLjYwNjcgMy45NDk1LTEuNTIxOSA2LjAwMjMtMy4wMjk0YS4wNzcuMDc3IDAgMDAuMDMxMy0uMDU1MmMuNTAwNC01LjE3Ny0uODM4Mi05LjY3MzktMy41NDg1LTEzLjY2MDRhLjA2MS4wNjEgMCAwMC0uMDMxMi0uMDI4NnpNOC4wMiAxNS4zMzEyYy0xLjE4MjUgMC0yLjE1NjktMS4wODU3LTIuMTU2OS0yLjQxOSAwLTEuMzMzMi45NTU1LTIuNDE4OSAyLjE1Ny0yLjQxODkgMS4yMTA4IDAgMi4xNzU3IDEuMDk1MiAyLjE1NjggMi40MTkgMCAxLjMzMzItLjk1NTUgMi40MTg5LTIuMTU2OSAyLjQxODl6bTcuOTc0OCAwYy0xLjE4MjUgMC0yLjE1NjktMS4wODU3LTIuMTU2OS0yLjQxOSAwLTEuMzMzMi45NTU0LTIuNDE4OSAyLjE1NjktMi40MTg5IDEuMjEwOCAwIDIuMTc1NyAxLjA5NTIgMi4xNTY4IDIuNDE5IDAgMS4zMzMyLS45NDYgMi40MTg5LTIuMTU2OCAyLjQxODlaIi8+PC9zdmc+',
+                'title': 'discord',
+              }));
+            case 'Target':
+              return res(ctx.json({
+                'colors': [
+                  'CC0000',
+                ],
+                'library': 'simple-icons',
+                'slug': 'target',
+                'svg': 'PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+VGFyZ2V0PC90aXRsZT48cGF0aCBkPSJNMTIuMDAwNSAwQzE4LjYyNyAwIDI0IDUuMzczIDI0IDEyLjAwMDUgMjQgMTguNjI3IDE4LjYyNyAyNCAxMS45OTk1IDI0IDUuMzczIDI0IDAgMTguNjI3IDAgMTEuOTk5NSAwIDUuMzczIDUuMzczIDAgMTIuMDAwNSAwem0wIDE5LjgyNmE3LjgyNjUgNy44MjY1IDAgMTAtLjAwMS0xNS42NTJDNy43MTMzIDQuMjI0NiA0LjI2NTMgNy43MTM2IDQuMjY1MyAxMmMwIDQuMjg2NCAzLjQ0OCA3Ljc3NTQgNy43MzQyIDcuODI2aC4wMDF6bTAtMy45ODUzYTMuODQwMiAzLjg0MDIgMCAxMTAtNy42ODAzYzIuMTIwNC4wMDA2IDMuODM5IDEuNzE5NyAzLjgzOSAzLjg0MDFzLTEuNzE4NiAzLjgzOTYtMy44MzkgMy44NDAyeiIvPjwvc3ZnPg==',
+                'title': 'target',
+              }));
+            case 'GitHub':
+              return res(ctx.json({
+                'colors': [
+                  '181717',
+                ],
+                'library': 'simple-icons',
+                'slug': 'github',
+                'svg': 'PHN2ZyByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+R2l0SHViPC90aXRsZT48cGF0aCBkPSJNMTIgLjI5N2MtNi42MyAwLTEyIDUuMzczLTEyIDEyIDAgNS4zMDMgMy40MzggOS44IDguMjA1IDExLjM4NS42LjExMy44Mi0uMjU4LjgyLS41NzcgMC0uMjg1LS4wMS0xLjA0LS4wMTUtMi4wNC0zLjMzOC43MjQtNC4wNDItMS42MS00LjA0Mi0xLjYxQzQuNDIyIDE4LjA3IDMuNjMzIDE3LjcgMy42MzMgMTcuN2MtMS4wODctLjc0NC4wODQtLjcyOS4wODQtLjcyOSAxLjIwNS4wODQgMS44MzggMS4yMzYgMS44MzggMS4yMzYgMS4wNyAxLjgzNSAyLjgwOSAxLjMwNSAzLjQ5NS45OTguMTA4LS43NzYuNDE3LTEuMzA1Ljc2LTEuNjA1LTIuNjY1LS4zLTUuNDY2LTEuMzMyLTUuNDY2LTUuOTMgMC0xLjMxLjQ2NS0yLjM4IDEuMjM1LTMuMjItLjEzNS0uMzAzLS41NC0xLjUyMy4xMDUtMy4xNzYgMCAwIDEuMDA1LS4zMjIgMy4zIDEuMjMuOTYtLjI2NyAxLjk4LS4zOTkgMy0uNDA1IDEuMDIuMDA2IDIuMDQuMTM4IDMgLjQwNSAyLjI4LTEuNTUyIDMuMjg1LTEuMjMgMy4yODUtMS4yMy42NDUgMS42NTMuMjQgMi44NzMuMTIgMy4xNzYuNzY1Ljg0IDEuMjMgMS45MSAxLjIzIDMuMjIgMCA0LjYxLTIuODA1IDUuNjI1LTUuNDc1IDUuOTIuNDIuMzYuODEgMS4wOTYuODEgMi4yMiAwIDEuNjA2LS4wMTUgMi44OTYtLjAxNSAzLjI4NiAwIC4zMTUuMjEuNjkuODI1LjU3QzIwLjU2NSAyMi4wOTIgMjQgMTcuNTkyIDI0IDEyLjI5N2MwLTYuNjI3LTUuMzczLTEyLTEyLTEyIi8+PC9zdmc+',
+                'title': 'github',
+              }));
+            default:
+              return res(ctx.status(204));
+          }
+        }),
+        rest.get('/api/links', (_req, res, ctx) => {
+          return res(ctx.json([
+            {
+              'linkId': 4,
+              'linkType': 1,
+              'plaidInstitutionId': 'ins_116794',
+              'plaidNewAccountsAvailable': false,
+              'linkStatus': 2,
+              'expirationDate': null,
+              'institutionName': 'Mercury',
+              'description': null,
+              'createdAt': '2022-09-25T02:08:40.758642Z',
+              'createdByUserId': 1,
+              'updatedAt': '2023-07-02T04:22:52.969206Z',
+              'lastManualSync': '2023-05-02T19:56:34.953077Z',
+              'lastSuccessfulUpdate': '2023-07-02T04:22:52.96916Z',
+            },
+          ]));
+        }),
+        rest.get('/api/bank_accounts', (_req, res, ctx) => {
+          return res(ctx.json([
+            {
+              'bankAccountId': 12,
+              'linkId': 4,
+              'availableBalance': 48635,
+              'currentBalance': 48635,
+              'mask': '2982',
+              'name': 'Mercury Checking',
+              'originalName': 'Mercury Checking',
+              'officialName': 'Mercury Checking',
+              'accountType': 'depository',
+              'accountSubType': 'checking',
+              'status': 'active',
+              'lastUpdated': '2023-07-02T04:22:52.48118Z',
+            },
+          ]));
+        }),
+        rest.get('/api/bank_accounts/12/balances', (_req, res, ctx) => {
+          return res(ctx.json({
+            'bankAccountId': 12,
+            'current': 48635,
+            'available': 48635,
+            'free': -1345,
+            'expenses': 49311,
+            'goals': 669,
+          }));
+        }),
+        rest.get('/api/bank_accounts/12/spending', (_req, res, ctx) => {
+          return res(ctx.json([
+            {
+              'spendingId': 59,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Domains',
+              'description': 'Every year on the 1st of April',
+              'targetAmount': 14000,
+              'currentAmount': 1998,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=YEARLY;INTERVAL=1;BYMONTH=4;BYMONTHDAY=1',
+              'lastRecurrence': null,
+              'nextRecurrence': '2024-04-01T05:00:00Z',
+              'nextContributionAmount': 666,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2023-05-16T14:47:58.09301Z',
+              'dateStarted': '2024-04-01T05:00:00Z',
+            },
+            {
+              'spendingId': 58,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Plaid',
+              'description': 'Every month on the 10th',
+              'targetAmount': 500,
+              'currentAmount': 500,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10',
+              'lastRecurrence': '2023-07-10T05:00:00Z',
+              'nextRecurrence': '2023-07-10T05:00:00Z',
+              'nextContributionAmount': 0,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2023-05-14T20:01:47.09268Z',
+              'dateStarted': '2023-06-10T05:00:00Z',
+            },
+            {
+              'spendingId': 63,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'GitLab',
+              'description': 'Every year on the 16th of June',
+              'targetAmount': 34800,
+              'currentAmount': 1450,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=YEARLY;INTERVAL=1;BYMONTH=6;BYMONTHDAY=16',
+              'lastRecurrence': '2024-06-16T05:00:00Z',
+              'nextRecurrence': '2024-06-16T05:00:00Z',
+              'nextContributionAmount': 1450,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2023-06-05T16:07:02.780623Z',
+              'dateStarted': '2023-06-06T05:00:00Z',
+            },
+            {
+              'spendingId': 192,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Cloud Staging',
+              'description': 'Every month on the 1st',
+              'targetAmount': 10000,
+              'currentAmount': 10000,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1',
+              'lastRecurrence': '2023-08-01T05:00:00Z',
+              'nextRecurrence': '2023-08-01T05:00:00Z',
+              'nextContributionAmount': 0,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2022-11-07T15:09:32Z',
+              'dateStarted': '2023-03-01T06:00:00Z',
+            },
+            {
+              'spendingId': 189,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Google Voice',
+              'description': 'Every month on the 1st',
+              'targetAmount': 1366,
+              'currentAmount': 1366,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1',
+              'lastRecurrence': '2023-08-01T05:00:00Z',
+              'nextRecurrence': '2023-08-01T05:00:00Z',
+              'nextContributionAmount': 0,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2022-11-02T14:11:24Z',
+              'dateStarted': '2023-03-01T06:00:00Z',
+            },
+            {
+              'spendingId': 201,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 1,
+              'name': 'Rainy Day',
+              'targetAmount': 100,
+              'currentAmount': 669,
+              'usedAmount': 0,
+              'recurrenceRule': null,
+              'lastRecurrence': '2022-12-31T06:00:00Z',
+              'nextRecurrence': '2023-12-31T06:00:00Z',
+              'nextContributionAmount': 0,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2022-11-29T16:32:58Z',
+              'dateStarted': '2022-12-31T06:00:00Z',
+            },
+            {
+              'spendingId': 208,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Google Domains ($12)',
+              'description': 'Every year on the 29th of January',
+              'targetAmount': 1200,
+              'currentAmount': 547,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=YEARLY;INTERVAL=1;BYMONTH=1;BYMONTHDAY=29',
+              'lastRecurrence': null,
+              'nextRecurrence': '2024-01-29T06:00:00Z',
+              'nextContributionAmount': 50,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2023-01-30T22:16:20Z',
+              'dateStarted': '2024-01-29T06:00:00Z',
+            },
+            {
+              'spendingId': 138,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'GitHub',
+              'description': 'Every month on the 19th',
+              'targetAmount': 2600,
+              'currentAmount': 1300,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=19',
+              'lastRecurrence': '2023-07-19T05:00:00Z',
+              'nextRecurrence': '2023-07-19T05:00:00Z',
+              'nextContributionAmount': 1300,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2021-12-14T16:43:04Z',
+              'dateStarted': '2023-03-19T05:00:00Z',
+            },
+            {
+              'spendingId': 136,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'BuildKite',
+              'description': 'Every month on the 27th',
+              'targetAmount': 1500,
+              'currentAmount': 750,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=27',
+              'lastRecurrence': '2023-07-27T05:00:00Z',
+              'nextRecurrence': '2023-07-27T05:00:00Z',
+              'nextContributionAmount': 750,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2021-12-14T16:42:11Z',
+              'dateStarted': '2023-02-28T06:00:00Z',
+            },
+            {
+              'spendingId': 134,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Freshbooks',
+              'description': 'Every month on the 10th',
+              'targetAmount': 1700,
+              'currentAmount': 1700,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10',
+              'lastRecurrence': '2023-07-10T05:00:00Z',
+              'nextRecurrence': '2023-07-10T05:00:00Z',
+              'nextContributionAmount': 0,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2021-12-14T16:40:46Z',
+              'dateStarted': '2023-03-10T06:00:00Z',
+            },
+            {
+              'spendingId': 137,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Sentry',
+              'description': 'Every month on the 25th',
+              'targetAmount': 2900,
+              'currentAmount': 1450,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=25',
+              'lastRecurrence': '2023-07-25T05:00:00Z',
+              'nextRecurrence': '2023-07-25T05:00:00Z',
+              'nextContributionAmount': 1450,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2021-12-14T16:42:41Z',
+              'dateStarted': '2023-03-25T05:00:00Z',
+            },
+            {
+              'spendingId': 171,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'ngrok',
+              'description': 'Every year on the 26th of June',
+              'targetAmount': 6000,
+              'currentAmount': 250,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=YEARLY;INTERVAL=1;BYMONTH=6;BYMONTHDAY=26',
+              'lastRecurrence': '2024-06-26T05:00:00Z',
+              'nextRecurrence': '2024-06-26T05:00:00Z',
+              'nextContributionAmount': 250,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2022-06-28T15:59:10Z',
+              'dateStarted': '2023-06-25T05:00:00Z',
+            },
+            {
+              'spendingId': 191,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'Cloud Production',
+              'description': 'Every month on the 1st',
+              'targetAmount': 28000,
+              'currentAmount': 28000,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1',
+              'lastRecurrence': '2023-08-01T05:00:00Z',
+              'nextRecurrence': '2023-08-01T05:00:00Z',
+              'nextContributionAmount': 0,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2022-11-07T15:09:16Z',
+              'dateStarted': '2023-03-01T06:00:00Z',
+            },
+            {
+              'spendingId': 135,
+              'bankAccountId': 12,
+              'fundingScheduleId': 3,
+              'spendingType': 0,
+              'name': 'G-Suite ($12)',
+              'description': 'Every month on the 1st',
+              'targetAmount': 1200,
+              'currentAmount': 0,
+              'usedAmount': 0,
+              'recurrenceRule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1',
+              'lastRecurrence': '2023-08-01T05:00:00Z',
+              'nextRecurrence': '2023-08-01T05:00:00Z',
+              'nextContributionAmount': 600,
+              'isBehind': false,
+              'isPaused': false,
+              'dateCreated': '2021-12-14T16:41:18Z',
+              'dateStarted': '2023-03-01T06:00:00Z',
+            },
+          ]));
+        }),
+        rest.get('/api/bank_accounts/12/funding_schedules', (_req, res, ctx) => {
+          return res(ctx.json([
+            {
+              'fundingScheduleId': 3,
+              'bankAccountId': 12,
+              'name': 'Elliot\'s Contribution',
+              'description': '15th and last day of every month',
+              'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+              'excludeWeekends': true,
+              'waitForDeposit': false,
+              'estimatedDeposit': null,
+              'lastOccurrence': '2023-06-30T05:00:00Z',
+              'nextOccurrence': '2023-07-14T05:00:00Z',
+              'dateStarted': '2023-02-28T06:00:00Z',
+            },
+          ]));
         }),
       ],
     },
   },
 };
+
+export default meta;
+
+export const Transactions: StoryObj<typeof MonetrWrapper> = {
+  name: 'Transactions',
+  render: () => (
+    <MonetrWrapper>
+      <BankView>
+        <TransactionsView />
+      </BankView>
+    </MonetrWrapper>
+  ),
+};
+
+export const Expenses: StoryObj<typeof MonetrWrapper> = {
+  name: 'Expenses',
+  render: () => (
+    <MonetrWrapper>
+      <BankView>
+        <ExpensesView />
+      </BankView>
+    </MonetrWrapper>
+  ),
+};
+
