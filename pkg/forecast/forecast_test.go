@@ -26,6 +26,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		}
 		spending := []models.Spending{
@@ -100,6 +101,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				ExcludeWeekends:   true,
 				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
+				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		}
 		spending := []models.Spending{

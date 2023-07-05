@@ -47,10 +47,19 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 	var nextContributionDate time.Time
 	if f.fundingSchedule.NextOccurrence.IsZero() {
 		// Hack to determine the previous contribution date before we figure out the next one.
-		rule.DTStart(input.AddDate(-1, 0, 0))
+		if f.fundingSchedule.DateStarted.IsZero() {
+			rule.DTStart(input.AddDate(-1, 0, 0))
+		} else {
+			rule.DTStart(f.fundingSchedule.DateStarted)
+		}
 		nextContributionDate = util.MidnightInLocal(rule.Before(input, false), timezone)
 	} else {
-		rule.DTStart(f.fundingSchedule.NextOccurrence)
+		// If we have the date started defined on the funding schedule. Then use that so we can see the past and the future.
+		if f.fundingSchedule.DateStarted.IsZero() {
+			rule.DTStart(f.fundingSchedule.NextOccurrence)
+		} else {
+			rule.DTStart(f.fundingSchedule.DateStarted)
+		}
 		nextContributionDate = util.MidnightInLocal(f.fundingSchedule.NextOccurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {

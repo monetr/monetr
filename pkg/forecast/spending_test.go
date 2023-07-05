@@ -25,6 +25,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: false,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -100,6 +101,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: false,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -214,6 +216,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -330,6 +333,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -367,6 +371,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -402,6 +407,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -437,6 +443,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				ExcludeWeekends:   true,
 				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
+				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 			},
 		)
 

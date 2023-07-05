@@ -124,6 +124,7 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 
 	// It has never occurred so this needs to be nil.
 	fundingSchedule.LastOccurrence = nil
+	fundingSchedule.DateStarted = fundingSchedule.NextOccurrence
 
 	if err = repo.CreateFundingSchedule(c.getContext(ctx), &fundingSchedule); err != nil {
 		return c.wrapPgError(ctx, err, "failed to create funding schedule")
