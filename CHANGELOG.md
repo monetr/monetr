@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.8](https://github.com/monetr/monetr/compare/v0.15.7...v0.15.8) (2023-07-05)
+
+
+### Bug Fixes
+
+* **forecast:** Fixed paused goals affecting funding forecast. ([f4acc3a](https://github.com/monetr/monetr/commit/f4acc3aedce84fb15a4d22ad27cc8378a6d68daa))
+
 ## [0.15.7](https://github.com/monetr/monetr/compare/v0.15.6...v0.15.7) (2023-07-02)
 
 
