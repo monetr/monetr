@@ -74,6 +74,12 @@ func NewForecaster(log *logrus.Entry, spending []models.Spending, funding []mode
 	return forecaster
 }
 
+// GetForecast combines the instructions from the spending and funding objects and returns a timeline of events that are
+// expected to happen based on those instructions. All dates returned by this function will be in UTC. Dates returned by
+// other functions may be in the timezone provided by the caller. Timezones are converted in this function because they
+// will likely be surfaced via an API to a client. For the sake of consistency they should be in UTC. Events are
+// returned in order, with the most recent event being first. Objects related to a date are sorted in ascending order by
+// their ID.
 func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -82,11 +88,9 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 		"end":      end,
 		"timezone": timezone.String(),
 	}
-	startCorrected := start.In(timezone)
-	endCorrected := end.In(timezone)
 	forecast := Forecast{
-		StartingTime:    startCorrected,
-		EndingTime:      endCorrected,
+		StartingTime:    start,
+		EndingTime:      end,
 		StartingBalance: f.currentBalance,
 		EndingBalance:   0,
 		Events:          make([]Event, 0),
@@ -121,11 +125,15 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 				delta -= spendingEvent.TransactionAmount
 				transaction += spendingEvent.TransactionAmount
 
-				for _, funding := range spendingEvent.Funding {
+				for x, funding := range spendingEvent.Funding {
+					funding.Date = funding.Date.UTC()
+					funding.OriginalDate = funding.OriginalDate.UTC()
+					spendingEvent.Funding[x] = funding
 					if _, ok := fundingMap[funding.FundingScheduleId]; !ok {
 						fundingMap[funding.FundingScheduleId] = funding
 					}
 				}
+				spendingEvent.Date = spendingEvent.Date.UTC()
 
 				spendingItems[i] = spendingEvent
 			}
@@ -145,7 +153,7 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 			})
 
 			return Event{
-				Date:         date,
+				Date:         date.UTC(),
 				Delta:        delta,
 				Balance:      0,
 				Transaction:  transaction,
