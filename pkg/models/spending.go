@@ -117,7 +117,11 @@ func (e *Spending) CalculateNextContribution(
 	if e.RecurrenceRule != nil {
 		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
 		// rather than the current timestamp (which is what RRule defaults to).
-		e.RecurrenceRule.DTStart(nextRecurrence)
+		if !e.DateStarted.IsZero() {
+			e.RecurrenceRule.DTStart(e.DateStarted)
+		} else {
+			e.RecurrenceRule.DTStart(nextRecurrence)
+		}
 
 		// If the next recurrence of the spending is in the past, then bump it as well.
 		if nextRecurrence.Before(now) {

@@ -161,9 +161,13 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context
 func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []time.Time {
 	switch s.spending.SpendingType {
 	case models.SpendingTypeExpense:
-		dtMidnight := util.MidnightInLocal(start, timezone)
 		rule := s.spending.RecurrenceRule.RRule
-		rule.DTStart(dtMidnight)
+		if s.spending.DateStarted.IsZero() {
+			dtMidnight := util.MidnightInLocal(start, timezone)
+			rule.DTStart(dtMidnight)
+		} else {
+			rule.DTStart(s.spending.DateStarted)
+		}
 		items := rule.Between(start.Add(1*time.Second), end, true)
 		return items
 	case models.SpendingTypeGoal:
@@ -207,7 +211,11 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 
 		// If we are working with a spending object, but the next recurrence is before our start time. Then figure out
 		// what the next recurrence would be after the start time.
-		rule.DTStart(nextRecurrence)
+		if s.spending.DateStarted.IsZero() {
+			rule.DTStart(nextRecurrence)
+		} else {
+			rule.DTStart(s.spending.DateStarted)
+		}
 		if !nextRecurrence.After(input) {
 			nextRecurrence = rule.After(input, false)
 		}
