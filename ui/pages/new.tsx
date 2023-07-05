@@ -10,6 +10,7 @@ import ExpenseList from './new/ExpenseList';
 import { ReactElement } from 'components/types';
 import { useIconSearch } from 'hooks/useIconSearch';
 import useTheme from 'hooks/useTheme';
+import MDivider from 'components/MDivider';
 
 interface MonetrWrapperProps {
   children: ReactElement;
@@ -143,7 +144,7 @@ function BudgetingSideBar(): JSX.Element {
         </span>
         <MoreVert className='ml-auto' />
       </div>
-      <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
+      <MDivider className='w-1/2' />
       <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
         <div className='w-full'>
           <span className='cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
@@ -155,7 +156,7 @@ function BudgetingSideBar(): JSX.Element {
             <KeyboardArrowDown />
           </span>
         </div>
-        <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
+        <MDivider className='w-1/2' />
 
         <div className='w-full flex items-center flex-col gap-2 px-2'>
           <div className='w-full flex justify-between dark:text-monetr-dark-content'>
@@ -189,7 +190,7 @@ function BudgetingSideBar(): JSX.Element {
             </span>
           </div>
         </div>
-        <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
+        <MDivider className='w-1/2' />
 
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
           <NavigationItem>

@@ -5,6 +5,7 @@ import { Logout, Settings } from '@mui/icons-material';
 import BankSidebarItem from './BankSidebarItem';
 
 import { Logo } from 'assets';
+import MDivider from 'components/MDivider';
 
 
 export default function BankSidebar(): JSX.Element {
@@ -22,7 +23,7 @@ export default function BankSidebar(): JSX.Element {
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
-      <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
+      <MDivider className='w-1/2' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
         <BankSidebarItem instituionId='ins_15' active={ activeOne === 'ins_15' } onClick={ () => setActiveOne('ins_15') } />
         <BankSidebarItem instituionId='ins_116794' active={ activeOne === 'ins_116794' } onClick={ () => setActiveOne('ins_116794') }  />
