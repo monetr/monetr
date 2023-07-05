@@ -47,7 +47,9 @@ module.exports = {
         },
         'dark-monetr': {
           brand: {
-            faint: '#9461E5',
+            bright: '#CFB9F4',
+            faint: '#AC84EB',
+            muted: '#9461E5',
             subtle: '#5D1FC1',
             DEFAULT: '#4E1AA0',
           },

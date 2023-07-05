@@ -144,7 +144,7 @@ export default function RegisterNew(): JSX.Element {
           id="terms"
           name="agree"
           label={
-            <Fragment>
+            <MSpan>
               I agree to monetr's&nbsp;
               <a
                 target="_blank"
@@ -159,11 +159,11 @@ export default function RegisterNew(): JSX.Element {
               >
                 Privacy Policy
               </a>
-            </Fragment>
+            </MSpan>
           }
         />
         <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1">
-          <MFormButton color="primary" variant="solid" role="form" type="submit">
+          <MFormButton color="primary" variant="solid" role="form" type="submit" className='w-full'>
             Sign Up
           </MFormButton>
         </div>

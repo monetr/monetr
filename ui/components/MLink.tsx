@@ -3,7 +3,7 @@ import { Link, LinkProps } from 'react-router-dom';
 
 import { ReactElement, TextSize } from './types';
 
-import clsx from 'clsx';
+import mergeTailwind from 'util/mergeTailwind';
 
 type BaseLinkProps = LinkProps & React.RefAttributes<HTMLAnchorElement>
 export interface MLinkProps extends BaseLinkProps {
@@ -25,6 +25,8 @@ export default function MLink(props: MLinkProps): JSX.Element {
 
   const colors = {
     'primary': [
+      'dark:text-dark-monetr-brand-faint',
+      'dark:hover:text-dark-monetr-brand-bright',
       'text-purple-500',
       'hover:text-purple-600',
       'rounded',
@@ -37,7 +39,7 @@ export default function MLink(props: MLinkProps): JSX.Element {
     ],
   };
 
-  const classNames = clsx(
+  const classNames = mergeTailwind(
     'font-semibold',
     ...colors[props.color],
     `text-${props.size}`,

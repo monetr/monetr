@@ -22,6 +22,10 @@ export interface MCheckboxProps {
 export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   const theme = useTheme();
 
+  const borderColor = theme.mediaColorSchema === 'dark' ?
+    theme.tailwind.colors['dark-monetr']['border']['subtle'] :
+    theme.tailwind.colors['gray']['300'];
+
   const Checkbox = styled('input')(() => ({
     MozAppearance: 'none',
     WebkitAppearance: 'none',
@@ -39,7 +43,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     height: '1rem',
     width: '1rem',
     backgroundColor: props.disabled ? theme.tailwind.colors['gray']['100'] : ['white'],
-    borderColor: theme.tailwind.colors['gray']['300'],
+    borderColor: borderColor,
     borderWidth: '1px',
     backgroundSize: '100% 100%',
     cursor: props.disabled ? 'default' : 'pointer',
@@ -59,6 +63,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     const labelClasses = clsx(
       'font-medium',
       {
+        'dark:text-dark-monetr-content-emphasis': !props.disabled,
         'text-gray-900': !props.disabled,
         'text-gray-500': props.disabled,
         'cursor-pointer': !props.disabled,
@@ -76,7 +81,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     if (!props.description) return null;
 
     return (
-      <p className="text-gray-500">
+      <p className="text-gray-500 dark:text-dark-monetr-content">
         { props.description }
       </p>
     );

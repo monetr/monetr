@@ -3,20 +3,17 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Formik } from 'formik';
 import moment from 'moment';
 
+import MFormButton from 'components/MButton';
 import MForm from 'components/MForm';
 import MModal from 'components/MModal';
+import MSelect from 'components/MSelect';
+import MSpan from 'components/MSpan';
+import MTextField from 'components/MTextField';
 import Recurrence from 'components/Recurrence/Recurrence';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useFundingSchedules } from 'hooks/fundingSchedules';
 import { useCreateSpending } from 'hooks/spending';
-import MFormButton from 'components/MButton';
-import MTextField from 'components/MTextField';
-import { TextInput } from '@tremor/react';
-import MSpan from 'components/MSpan';
-
-import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
 import useTheme from 'hooks/useTheme';
-import MSelect from 'components/MSelect';
 
 
 interface NewExpenseValues {
@@ -64,22 +61,25 @@ function NewExpenseModal(): JSX.Element {
           </MSpan>
           <div className='flex flex-col'>
             <MTextField
+              name='name'
               label='What are you budgeting for?'
               required
               placeholder='Amazon, Netflix...'
             />
-            <div className='flex gap-4'>
+            <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
               <MTextField
+                name='amount'
                 label='How much do you need?'
                 required
                 type='number'
-                className='w-1/2'
+                className='w-full md:w-1/2'
               />
               <MTextField
+                name='nextOccurrence'
                 label='When do you need it next?'
                 required
                 type='date'
-                className='w-1/2'
+                className='w-full md:w-1/2'
               />
             </div>
             <MSelect
@@ -98,6 +98,7 @@ function NewExpenseModal(): JSX.Element {
               label='When do you want to fund the expense?'
               placeholder='Select a funding schedule...'
               required
+              name='fundingScheduleId'
             />
             <MSelect
               options={ [
@@ -115,15 +116,14 @@ function NewExpenseModal(): JSX.Element {
               label='How frequently do you need this expense?'
               placeholder='Select a spending frequency...'
               required
+              name='recurrenceRule'
             />
           </div>
-
-
           <div className='flex justify-end gap-2'>
             <MFormButton color='cancel' onClick={ modal.remove }>
               Cancel
             </MFormButton>
-            <MFormButton color='primary'>
+            <MFormButton color='primary' type='submit'>
               Create
             </MFormButton>
           </div>

@@ -124,6 +124,7 @@ export default function LoginNew(): JSX.Element {
             variant="solid"
             role="form"
             type="submit"
+            className='w-full'
           >
             Sign In
           </MFormButton>
