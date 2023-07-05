@@ -177,7 +177,8 @@ func (e *Spending) CalculateNextContribution(
 
 	// If the current nextRecurrence on the object is in the past, then bump it to our new next recurrence.
 	if e.NextRecurrence.Before(now) {
-		e.LastRecurrence = &e.NextRecurrence
+		lastRecurrence := e.NextRecurrence
+		e.LastRecurrence = &lastRecurrence
 		e.NextRecurrence = nextRecurrence
 	}
 
