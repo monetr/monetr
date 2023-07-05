@@ -49,6 +49,12 @@ func NewForecaster(log *logrus.Entry, spending []models.Spending, funding []mode
 		forecaster.funding[fundingSchedule.FundingScheduleId] = NewFundingScheduleFundingInstructions(log, fundingSchedule)
 	}
 	for _, spendingItem := range spending {
+		if spendingItem.GetIsPaused() {
+			log.WithField("spendingId", spendingItem.SpendingId).
+				Debug("spending item will be excluded from forecast because it is paused")
+			continue
+		}
+
 		fundingInstructions, ok := forecaster.funding[spendingItem.FundingScheduleId]
 		if !ok {
 			panic("missing funding schedule required by spending object")
