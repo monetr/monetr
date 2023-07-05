@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { Formik, FormikErrors } from 'formik';
 
-import MButton from 'components/MButton';
+import MFormButton from 'components/MButton';
 import MCaptcha from 'components/MCaptcha';
 import MCheckbox from 'components/MCheckbox';
 import MForm from 'components/MForm';
@@ -163,9 +163,9 @@ export default function RegisterNew(): JSX.Element {
           }
         />
         <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1">
-          <MButton color="primary" variant="solid" role="form" type="submit">
+          <MFormButton color="primary" variant="solid" role="form" type="submit">
             Sign Up
-          </MButton>
+          </MFormButton>
         </div>
         <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1 flex justify-center gap-1">
           <MSpan variant="light" size="sm">Already have an account?</MSpan>

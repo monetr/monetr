@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 
-import MButton from 'components/MButton';
+import MFormButton from 'components/MButton';
 import MForm from 'components/MForm';
 import MLink from 'components/MLink';
 import MLogo from 'components/MLogo';
@@ -96,14 +96,14 @@ export default function ForgotPasswordNew(): JSX.Element {
           className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
         />
         <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
-          <MButton
+          <MFormButton
             color="primary"
             variant="solid"
             role="form"
             type="submit"
           >
             Reset Password
-          </MButton>
+          </MFormButton>
         </div>
         <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
           <MSpan variant="light" size="sm">Remembered your password?</MSpan>

@@ -26,7 +26,7 @@ export default function BankSidebarItem(props: BankSidebarItemProps): JSX.Elemen
 
   const classes = clsx(
     'absolute',
-    'bg-zinc-300',
+    'dark:bg-dark-monetr-border',
     'right-0',
     'rounded-l-xl',
     'transition-transform',
@@ -47,7 +47,7 @@ export default function BankSidebarItem(props: BankSidebarItemProps): JSX.Elemen
   return (
     <div className='w-full h-12 flex items-center justify-center relative group' onClick={ props.onClick }>
       <div className={ classes } />
-      <div className='cursor-pointer absolute rounded-full w-10 h-10 bg-zinc-800 drop-shadow-md flex justify-center items-center'>
+      <div className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'>
         <InstitutionLogo />
       </div>
     </div>

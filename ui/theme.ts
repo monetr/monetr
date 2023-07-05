@@ -13,6 +13,7 @@ const defaultSecondary = '#FF5798';
 export const newTheme = createTheme({
   typography: {
     fontFamily: [
+      'Inter Variable',
       'Helvetica',
       'Arial',
       'sans-serif',

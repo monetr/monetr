@@ -24,6 +24,8 @@ export default function MSpan(props: MSpanProps): JSX.Element {
 
   const classNames = clsx(
     {
+      'dark:text-dark-monetr-content': props.variant === 'normal',
+      'dark:text-dark-monetr-content-subtle': props.variant === 'light',
       'text-gray-900': props.variant === 'normal',
       'text-gray-500': props.variant === 'light',
     },

@@ -18,19 +18,19 @@ export default function BankSidebar(): JSX.Element {
   const [activeOne, setActiveOne] = useState('ins_15');
 
   return (
-    <div className='hidden lg:visible w-16 h-full bg-zinc-900 lg:flex items-center lg:py-4 gap-4 lg:flex-col border-r-zinc-800 flex-none border border-transparent'>
+    <div className='hidden lg:visible w-16 h-full lg:flex items-center lg:py-4 gap-4 lg:flex-col dark:border-r-dark-monetr-border flex-none border border-transparent'>
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
-      <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
+      <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
         <BankSidebarItem instituionId='ins_15' active={ activeOne === 'ins_15' } onClick={ () => setActiveOne('ins_15') } />
         <BankSidebarItem instituionId='ins_116794' active={ activeOne === 'ins_116794' } onClick={ () => setActiveOne('ins_116794') }  />
         <BankSidebarItem instituionId='ins_127990' active={ activeOne === 'ins_127990' } onClick={ () => setActiveOne('ins_127990') }  />
         <BankSidebarItem instituionId='ins_3' active={ activeOne === 'ins_3' }  onClick={ () => setActiveOne('ins_3') } />
       </div>
-      <Settings className='hover:text-zinc-50 text-zinc-400 cursor-pointer' />
-      <Logout className='hover:text-zinc-50 text-zinc-400 cursor-pointer' />
+      <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+      <Logout className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
     </div>
   );
 }

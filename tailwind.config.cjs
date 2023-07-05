@@ -10,23 +10,64 @@ module.exports = {
     './ui/**/*.js',
     './node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
   ],
-  safelist: [
-    'cursor-pointer',
-    {
-      pattern: /(bg|text)-(\w+)-(\d+)/,
-      variants: ['hover'],
-    },
-    {
-      pattern: /text-(\w+)/,
-      variants: ['hover'],
-    },
-    {
-      pattern: /(w|h)-(\w+)/,
-    },
-  ],
+  // safelist: [
+  //   'cursor-pointer',
+  //   {
+  //     pattern: /(bg|text)-(\w+)-(\d+)/,
+  //     variants: ['hover'],
+  //   },
+  //   {
+  //     pattern: /text-(\w+)/,
+  //     variants: ['hover'],
+  //   },
+  //   {
+  //     pattern: /(w|h)-(\w+)/,
+  //   },
+  // ],
   theme: {
     extend: {
       colors: {
+        'monetr': {
+          brand: {
+            DEFAULT: '#4E1AA0',
+          },
+          background: {
+            subtle: '',
+            DEFAULT: '#F8F8F8',
+            emphasis: '',
+          },
+          border: {
+            DEFAULT: '', // zinc-700
+          },
+          content: {
+            subtle: '', // zinc-400
+            DEFAULT: '', // zinc-200
+            emphasis: '', // zinc-50
+          },
+        },
+        'dark-monetr': {
+          brand: {
+            faint: '#9461E5',
+            subtle: '#5D1FC1',
+            DEFAULT: '#4E1AA0',
+          },
+          background: {
+            subtle: '#27272a', // zinc-800
+            DEFAULT: '#19161f',
+            emphasis: '#3f3f46', // zinc-700
+          },
+          border: {
+            subtle: '#27272a', // zinc-800
+            DEFAULT: '#3f3f46', // zinc-700
+            string: '#71717a',
+          },
+          content: {
+            muted: '#52525b',
+            subtle: '#a1a1aa', // zinc-400
+            DEFAULT: '#d4d4d8', // zinc-200
+            emphasis: '#fafafa', // zinc-50
+          },
+        },
         // light mode
         tremor: {
           brand: {
@@ -59,6 +100,35 @@ module.exports = {
         },
         // dark mode
         'dark-tremor': {
+          brand: {
+            faint: '#0B1229', // custom
+            muted: '#172554', // blue-950
+            subtle: '#1e40af', // blue-800
+            DEFAULT: '#3b82f6', // blue-500
+            emphasis: '#60a5fa', // blue-400
+            inverted: '#030712', // gray-950
+          },
+          background: {
+            muted: '#1C1924', // custom
+            subtle: '#27272a', // zinc-800
+            DEFAULT: '#19161f', // zinc-900
+            emphasis: '#d1d5db', // gray-300
+          },
+          border: {
+            DEFAULT: '#1f2937', // gray-800
+          },
+          ring: {
+            DEFAULT: '#1f2937', // gray-800
+          },
+          content: {
+            subtle: '#4b5563', // gray-600
+            DEFAULT: '#6b7280', // gray-600
+            emphasis: '#e5e7eb', // gray-200
+            strong: '#f9fafb', // gray-50
+            inverted: '#000000', // black
+          },
+        },
+        'old-dark-tremor': {
           brand: {
             faint: '#0B1229', // custom
             muted: '#172554', // blue-950

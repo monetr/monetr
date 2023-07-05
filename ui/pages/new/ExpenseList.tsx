@@ -16,8 +16,8 @@ export default function ExpenseList(): JSX.Element {
     <Fragment>
       <div className='w-full h-12 flex items-center px-4 gap-4 justify-between'>
         <div className='flex items-center gap-4'>
-          <MenuOutlined className='visible lg:hidden text-zinc-50 cursor-pointer' />
-          <span className='text-2xl text-zinc-50 font-bold flex gap-2 items-center'>
+          <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer' />
+          <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold flex gap-2 items-center'>
             <PriceCheckOutlined />
             Expenses
           </span>

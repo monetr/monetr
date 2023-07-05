@@ -2,7 +2,7 @@ import React from 'react';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MButton from 'components/MButton';
+import MFormButton from 'components/MButton';
 import MCaptcha from 'components/MCaptcha';
 import MForm from 'components/MForm';
 import MLink from 'components/MLink';
@@ -119,14 +119,14 @@ export default function LoginNew(): JSX.Element {
           show={ Boolean(config.verifyLogin) }
         />
         <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
-          <MButton
+          <MFormButton
             color="primary"
             variant="solid"
             role="form"
             type="submit"
           >
             Sign In
-          </MButton>
+          </MFormButton>
         </div>
         <SignUpButton />
       </MForm>

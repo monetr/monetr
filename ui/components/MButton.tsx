@@ -26,6 +26,8 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
   const themeClasses = {
     'primary': {
       'solid': {
+        'dark:bg-dark-monetr-brand': !disabled,
+        'dark:hover:bg-dark-monetr-brand-subtle': !disabled,
         'bg-purple-400': !disabled,
         'bg-purple-200': disabled,
         'hover:bg-purple-500': !disabled,
@@ -33,6 +35,7 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
         'text-white': true,
       },
       'text': {
+        'dark:text-dark-monetr-brand-faint': !disabled,
         'focus-visible:outline-purple-600': !disabled,
         'text-purple-400': !disabled,
         'text-purple-200': disabled,
@@ -41,23 +44,34 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
     'secondary': {
       'solid': {
         'bg-white': !disabled,
-        'hover:bg-gray-100': !disabled,
+        'dark:bg-dark-monetr-background-subtle': !disabled,
+        'dark:hover:bg-dark-monetr-background-emphasis': !disabled,
+        'dark:ring-dark-monetr-border': !disabled,
+        'dark:ring-dark-monetr-border-subtle': disabled,
+        'dark:text-dark-monetr-content-emphasis': !disabled,
+        'dark:text-dark-monetr-content-muted': disabled,
         'focus-visible:outline-purple-200': !disabled,
+        'hover:bg-gray-100': !disabled,
         'ring-1': true,
-        'ring-gray-300': !disabled,
-        'ring-gray-200': disabled,
+        'ring-monetr-border-subtle': disabled,
+        'ring-monetr-border': !disabled,
         'ring-inset': true,
-        'text-gray-900': !disabled,
         'text-gray-400': disabled,
+        'text-gray-900': !disabled,
       },
       'text': {
+        'dark:hover:bg-dark-monetr-background-emphasis': !disabled,
+        'dark:text-dark-monetr-content-emphasis': !disabled,
+        'dark:text-dark-monetr-content-muted': disabled,
         'focus-visible:outline-purple-200': !disabled,
-        'text-gray-900': !disabled,
         'text-gray-400': disabled,
+        'text-gray-900': !disabled,
       },
     },
     'cancel': {
       'solid': {
+        'dark:bg-red-600': !disabled,
+        'dark:hover:bg-red-500': !disabled,
         'bg-red-500': !disabled,
         'bg-red-200': disabled,
         'hover:bg-red-600': !disabled,
@@ -93,7 +107,7 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
 };
 
 // MButton is a wrapper around MBaseButton but includes a formik hook in with some basic overrides.
-export default function MButton(props: MButtonProps = MButtonPropsDefaults): JSX.Element {
+export default function MFormButton(props: MButtonProps = MButtonPropsDefaults): JSX.Element {
   const formikContext = useFormikContext();
   props = {
     ...MButtonPropsDefaults,

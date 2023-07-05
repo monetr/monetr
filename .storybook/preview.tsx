@@ -1,3 +1,5 @@
+import '@fontsource-variable/inter';
+
 import React from 'react';
 import { QueryClient, QueryClientProvider, QueryFunctionContext, QueryKey } from 'react-query';
 import { BrowserRouter as Router } from 'react-router-dom';

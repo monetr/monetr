@@ -17,7 +17,7 @@ interface MonetrWrapperProps {
 
 export default function MonetrWrapper(props: MonetrWrapperProps): JSX.Element {
   return (
-    <div className='w-full h-full bg-zinc-900 flex'>
+    <div className='w-full h-full dark:bg-dark-monetr-background flex'>
       <BankSidebar />
       <div className='w-full h-full flex min-w-0'>
         { props.children }
@@ -45,8 +45,8 @@ export function TransactionsView(): JSX.Element {
   return (
     <Fragment>
       <div className='w-full h-12 flex items-center px-4 gap-4'>
-        <MenuOutlined className='visible lg:hidden text-zinc-50 cursor-pointer' />
-        <span className='text-2xl text-zinc-50 font-bold flex gap-2 items-center'>
+        <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer' />
+        <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold flex gap-2 items-center'>
           <ShoppingCartOutlined />
           Transactions
         </span>
@@ -108,9 +108,9 @@ interface NavigationItemProps {
 function NavigationItem(props: NavigationItemProps): JSX.Element {
   const className = clsx({
     'bg-zinc-700': props.active,
-    'text-zinc-50': props.active,
+    'dark:text-dark-monetr-content-emphasis': props.active,
+    'dark:text-dark-monetr-content-subtle': !props.active,
     'font-semibold': props.active,
-    'text-zinc-400': !props.active,
     'font-medium': !props.active,
   }, [
     'align-middle',
@@ -118,8 +118,8 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
     'flex',
     'text-lg',
     'gap-2',
-    'hover:bg-zinc-700',
-    'hover:text-zinc-50',
+    'dark:hover:bg-dark-monetr-background-emphasis',
+    'dark:hover:text-dark-monetr-content-emphasis',
     'items-center',
     'px-2',
     'py-1',
@@ -136,60 +136,60 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
 
 function BudgetingSideBar(): JSX.Element {
   return (
-    <div className='hidden lg:w-72 h-full bg-zinc-900 flex-none lg:flex flex-col border-r-zinc-800 border border-transparent items-center'>
-      <div className='w-full hover:bg-zinc-700/50 text-zinc-50 border-b-zinc-900 border-transparent border-[1px] h-12 flex items-center p-2'>
-        <span className='text-zinc-50 font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
+    <div className='hidden lg:w-72 h-full flex-none lg:flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center'>
+      <div className='w-full dark:hover:bg-dark-monetr-background-emphasis dark:text-dark-monetr-content-emphasis h-12 flex items-center p-2'>
+        <span className='font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
           Navy Federal Credit Union
         </span>
         <MoreVert className='ml-auto' />
       </div>
-      <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
+      <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
       <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
         <div className='w-full'>
-          <span className='cursor-pointer hover:bg-zinc-700 hover:text-zinc-50 text-zinc-400 text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
+          <span className='cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
             <AccountBalanceOutlined />
             Checking
-            <span className='ml-auto text-xs bg-purple-500 text-zinc-50 rounded-sm py-0.5 px-1'>
+            <span className='ml-auto text-xs dark:bg-dark-monetr-brand dark:text-dark-monetr-content-emphasis rounded-sm py-0.5 px-1'>
               4567
             </span>
             <KeyboardArrowDown />
           </span>
         </div>
-        <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
+        <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
 
         <div className='w-full flex items-center flex-col gap-2 px-2'>
-          <div className='w-full flex justify-between'>
-            <span className='flex gap-2 items-center text-zinc-200 text-lg font-semibold'>
+          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
+            <span className='flex gap-2 items-center text-lg font-semibold'>
               <AccountBalanceWalletOutlined />
               Free-To-Use:
             </span>
             &nbsp;
-            <span className='text-zinc-200 text-lg font-semibold'>
+            <span className='text-lg font-semibold'>
                $154.65
             </span>
           </div>
-          <div className='w-full flex justify-between'>
-            <span className='flex gap-2 items-center text-zinc-200 text-lg font-semibold'>
+          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
+            <span className='flex gap-2 items-center text-lg font-semibold'>
               <LocalAtmOutlined />
               Available:
             </span>
             &nbsp;
-            <span className='text-zinc-200 text-lg font-semibold'>
+            <span className='text-lg font-semibold'>
               $4,241.30
             </span>
           </div>
-          <div className='w-full flex justify-between'>
-            <span className='flex gap-2 items-center text-zinc-200 text-lg font-semibold'>
+          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
+            <span className='flex gap-2 items-center text-lg font-semibold'>
               <TollOutlined />
               Current:
             </span>
             &nbsp;
-            <span className='text-zinc-200 text-lg font-semibold'>
+            <span className='text-lg font-semibold'>
               $4,241.30
             </span>
           </div>
         </div>
-        <hr className='w-1/2 border-0 border-b-[thin] border-zinc-600' />
+        <hr className='w-1/2 border-0 border-b-[thin] dark:border-dark-monetr-border' />
 
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
           <NavigationItem>
@@ -203,21 +203,21 @@ function BudgetingSideBar(): JSX.Element {
           <NavigationItem>
             <PriceCheckOutlined />
             Expenses
-            <span className='ml-auto text-sm bg-purple-500 text-zinc-50 rounded-md py-0.5 px-1.5'>
+            <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
               $1,554.43
             </span>
           </NavigationItem>
           <NavigationItem>
             <SavingsOutlined />
             Goals
-            <span className='ml-auto text-sm bg-purple-500 text-zinc-50 rounded-md py-0.5 px-1.5'>
+            <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
               $2,549.43
             </span>
           </NavigationItem>
           <NavigationItem>
             <TodayOutlined />
             Funding Schedules
-            <span className='ml-auto text-sm bg-purple-500 text-zinc-50 rounded-md py-0.5 px-1.5'>
+            <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
               7/15
             </span>
           </NavigationItem>
@@ -234,8 +234,8 @@ interface TransactionDateHeaderProps {
 
 function TransactionDateHeader(props: TransactionDateHeaderProps): JSX.Element {
   return (
-    <li className='sticky top-0 z-10 h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent to-zinc-900 via-90%'>
-      <span className='text-zinc-300 font-semibold text-base bg-inherit z-10 px-3 md:px-4'>
+    <li className='sticky top-0 z-10 h-10 flex items-center backdrop-blur-sm bg-gradient-to-t from-transparent dark:to-dark-monetr-background via-90%'>
+      <span className='dark:text-dark-monetr-content-subtle font-semibold text-base z-10 px-3 md:px-4'>
         {props.date}
       </span>
     </li>
@@ -254,14 +254,14 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
   const SpentFrom = () => {
     if (props.from) {
       return (
-        <span className='text-zinc-50 font-bold text-sm md:text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+        <span className='dark:text-dark-monetr-content-emphasis font-bold text-sm md:text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
           {props.from || 'Free-To-Use'}
         </span>
       );
     }
 
     return (
-      <span className='text-zinc-50/75 font-medium text-sm md:text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+      <span className='dark:text-dark-monetr-content font-medium text-sm md:text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
         Free-To-Use
       </span>
     );
@@ -276,11 +276,11 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
             <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
               {props.name}
             </span>
-            <span className='hidden md:block text-zinc-200 font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
+            <span className='hidden md:block dark:text-dark-monetr-content font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
               {props.category}
             </span>
             <span className='flex md:hidden text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-              <span className='flex-none text-zinc-50/75 font-medium text-sm text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+              <span className='flex-none dark:text-dark-monetr-content font-medium text-sm text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
                 Spent from
               </span>
               &nbsp;
@@ -289,7 +289,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
           </div>
         </div>
         <div className='hidden md:flex w-1/2 overflow-hidden flex-1 min-w-0 items-center'>
-          <span className='flex-none text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+          <span className='flex-none dark:text-dark-monetr-content font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
             Spent from
           </span>
           &nbsp;
@@ -299,7 +299,7 @@ function TransactionItem(props: TransactionItemProps): JSX.Element {
           <span className='text-end text-red-500 font-semibold'>
             {props.amount}
           </span>
-          <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' />
+          <KeyboardArrowRight className='dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis flex-none md:cursor-pointer' />
         </div>
       </div>
     </li>
@@ -332,7 +332,7 @@ function TransactionIcon(props: TransactionIconProps): JSX.Element {
       };
 
       return (
-        <div className='bg-white flex items-center justify-center h-10 w-10 rounded-full'>
+        <div className='dark:bg-white flex items-center justify-center h-10 w-10 rounded-full'>
           <div style={ styles } />
         </div>
       );
@@ -341,7 +341,7 @@ function TransactionIcon(props: TransactionIconProps): JSX.Element {
     // If we have no icon to work with then create an avatar with the first character of the transaction name.
     const letter = props.name.toUpperCase().charAt(0);
     return (
-      <Avatar className='bg-zinc-800 h-10 w-10'>
+      <Avatar className='dark:bg-dark-monetr-background-subtle dark:text-dark-monetr-content h-10 w-10'>
         {letter}
       </Avatar>
     );
@@ -350,7 +350,7 @@ function TransactionIcon(props: TransactionIconProps): JSX.Element {
     '& .MuiBadge-badge': {
       backgroundColor: windTheme.tailwind.colors['blue']['500'],
       color:  windTheme.tailwind.colors['blue']['500'],
-      boxShadow: `0 0 0 2px ${windTheme.tailwind.colors['zinc']['900']}`,
+      boxShadow: `0 0 0 2px ${windTheme.tailwind.colors['dark-monetr']['background']['DEFAULT']}`,
       '&::after': {
         position: 'absolute',
         top: 0,
