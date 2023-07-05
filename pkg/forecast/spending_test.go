@@ -25,7 +25,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: false,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -101,7 +101,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: false,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -127,8 +127,8 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 				TransactionAmount:  0,
-				ContributionAmount: 22500,
-				RollingAllocation:  22500,
+				ContributionAmount: 15000,
+				RollingAllocation:  15000,
 				Funding: []FundingEvent{
 					{
 						Date:              time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -143,7 +143,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Date:               time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
 				ContributionAmount: 0,
-				RollingAllocation:  15000,
+				RollingAllocation:  7500,
 				Funding:            []FundingEvent{},
 				SpendingId:         0,
 			},
@@ -151,14 +151,14 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Date:               time.Date(2022, 9, 23, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
 				ContributionAmount: 0,
-				RollingAllocation:  7500,
+				RollingAllocation:  0,
 				Funding:            []FundingEvent{},
 				SpendingId:         0,
 			},
 			{
 				Date:               time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
-				ContributionAmount: 15000,
+				ContributionAmount: 22500,
 				RollingAllocation:  15000,
 				Funding: []FundingEvent{
 					{
@@ -216,7 +216,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -231,7 +231,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
+		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
 		for i, item := range events {
 			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
 				j, _ := json.MarshalIndent(item, "                        \t", "  ")
@@ -242,8 +242,8 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
 				TransactionAmount:  0,
-				ContributionAmount: 22500,
-				RollingAllocation:  22500,
+				ContributionAmount: 15000,
+				RollingAllocation:  15000,
 				Funding: []FundingEvent{
 					{
 						Date:              time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -258,7 +258,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Date:               time.Date(2022, 9, 16, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
 				ContributionAmount: 0,
-				RollingAllocation:  15000,
+				RollingAllocation:  7500,
 				Funding:            []FundingEvent{},
 				SpendingId:         0,
 			},
@@ -266,7 +266,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Date:               time.Date(2022, 9, 23, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
 				ContributionAmount: 0,
-				RollingAllocation:  7500,
+				RollingAllocation:  0,
 				Funding:            []FundingEvent{},
 				SpendingId:         0,
 			},
@@ -274,7 +274,7 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Date:               time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
 				ContributionAmount: 15000,
-				RollingAllocation:  15000,
+				RollingAllocation:  7500,
 				Funding: []FundingEvent{
 					{
 						Date:              time.Date(2022, 9, 30, 0, 0, 0, 0, timezone),
@@ -289,14 +289,14 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				Date:               time.Date(2022, 10, 7, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
 				ContributionAmount: 0,
-				RollingAllocation:  7500,
+				RollingAllocation:  0,
 				Funding:            []FundingEvent{},
 				SpendingId:         0,
 			},
 			{
 				Date:               time.Date(2022, 10, 14, 0, 0, 0, 0, timezone),
 				TransactionAmount:  7500,
-				ContributionAmount: 15000,
+				ContributionAmount: 22500,
 				RollingAllocation:  15000,
 				Funding: []FundingEvent{
 					{
@@ -313,6 +313,14 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 				TransactionAmount:  7500,
 				ContributionAmount: 0,
 				RollingAllocation:  7500,
+				Funding:            []FundingEvent{},
+				SpendingId:         0,
+			},
+			{
+				Date:               time.Date(2022, 10, 28, 0, 0, 0, 0, timezone),
+				TransactionAmount:  7500,
+				ContributionAmount: 0,
+				RollingAllocation:  0,
 				Funding:            []FundingEvent{},
 				SpendingId:         0,
 			},
@@ -333,7 +341,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
-				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -371,7 +379,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
-				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -407,7 +415,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
-				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		)
 		spendingInstructions := NewSpendingInstructions(
@@ -443,7 +451,7 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 				ExcludeWeekends:   true,
 				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
-				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		)
 

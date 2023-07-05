@@ -166,9 +166,16 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 			dtMidnight := util.MidnightInLocal(start, timezone)
 			rule.DTStart(dtMidnight)
 		} else {
-			rule.DTStart(s.spending.DateStarted)
+			dateStarted := s.spending.DateStarted
+			corrected := dateStarted.In(timezone)
+			rule.DTStart(corrected)
 		}
-		items := rule.Between(start.Add(1*time.Second), end, true)
+		// This little bit is really confusing. Basically we want to know how many times this spending boi happens
+		// before the specified end date. This can include the start date, but we want to exclude the end date. This is
+		// because this function is **INTENDED** to be called with the start being now or the next funding event, and
+		// end being the next funding event immediately after that. We can't control what happens after the later
+		// funding event, so we need to know how much will be spent before then, so we know how much to allocate.
+		items := rule.Between(start, end.Add(-1 * time.Second), true)
 		return items
 	case models.SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
@@ -201,7 +208,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	case models.SpendingTypeGoal:
 		// If we are working with a goal and it has already "completed" then there is nothing more to do, no more events
 		// will come up for this spending object.
-		if !nextRecurrence.After(input) {
+		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			return nil
 		}
 	case models.SpendingTypeExpense:
@@ -214,9 +221,11 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		if s.spending.DateStarted.IsZero() {
 			rule.DTStart(nextRecurrence)
 		} else {
-			rule.DTStart(s.spending.DateStarted)
+			dateStarted := s.spending.DateStarted
+			corrected := dateStarted.In(timezone)
+			rule.DTStart(corrected)
 		}
-		if !nextRecurrence.After(input) {
+		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			nextRecurrence = rule.After(input, false)
 		}
 	}

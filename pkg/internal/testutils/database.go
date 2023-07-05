@@ -3,6 +3,7 @@ package testutils
 import (
 	"context"
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -225,6 +226,11 @@ func Must[T any, A any](t *testing.T, generalFunction func(arg A) (T, error), ar
 	result, err := generalFunction(arg)
 	require.NoError(t, err, "function must succeed without an error")
 	return result
+}
+
+func MustUnmarshalJSON(t *testing.T, data []byte, destination interface{}) {
+	err := json.Unmarshal(data, destination)
+	require.NoError(t, err, "must be able to unmarshal the provided json without an error")
 }
 
 func MustDBUpdate[T any](t *testing.T, model *T) {
