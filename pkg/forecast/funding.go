@@ -47,10 +47,23 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 	var nextContributionDate time.Time
 	if f.fundingSchedule.NextOccurrence.IsZero() {
 		// Hack to determine the previous contribution date before we figure out the next one.
-		rule.DTStart(input.AddDate(-1, 0, 0))
+		if f.fundingSchedule.DateStarted.IsZero() {
+			rule.DTStart(input.AddDate(-1, 0, 0))
+		} else {
+			dateStarted := f.fundingSchedule.DateStarted
+			corrected := dateStarted.In(timezone)
+			rule.DTStart(corrected)
+		}
 		nextContributionDate = util.MidnightInLocal(rule.Before(input, false), timezone)
 	} else {
-		rule.DTStart(f.fundingSchedule.NextOccurrence)
+		// If we have the date started defined on the funding schedule. Then use that so we can see the past and the future.
+		if f.fundingSchedule.DateStarted.IsZero() {
+			rule.DTStart(f.fundingSchedule.NextOccurrence)
+		} else {
+			dateStarted := f.fundingSchedule.DateStarted
+			corrected := dateStarted.In(timezone)
+			rule.DTStart(corrected)
+		}
 		nextContributionDate = util.MidnightInLocal(f.fundingSchedule.NextOccurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {
@@ -69,7 +82,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 	// Force the start of the rule to be the next contribution date. This fixes a bug where the rule would increment
 	// properly, but would include the current timestamp in that increment causing incorrect comparisons below. This
 	// makes sure that the rule will increment in the user's timezone as intended.
-	nextContributionRule.DTStart(nextContributionDate)
+	//nextContributionRule.DTStart(nextContributionDate)
 
 	// Keep track of an un-adjusted next contribution date. Because we might subtract days to account for early
 	// funding, we need to make sure we are still incrementing relative to the _real_ contribution dates. Not the
@@ -168,8 +181,14 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
-	dtStart := util.MidnightInLocal(start, timezone)
-	rule.DTStart(dtStart)
+	if f.fundingSchedule.DateStarted.IsZero() {
+		dtStart := util.MidnightInLocal(start, timezone)
+		rule.DTStart(dtStart)
+	} else {
+		dateStarted := f.fundingSchedule.DateStarted
+		corrected := dateStarted.In(timezone)
+		rule.DTStart(corrected)
+	}
 	items := rule.Between(start, end, true)
 	events := make([]FundingEvent, len(items))
 	for i, item := range items {

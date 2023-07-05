@@ -2,6 +2,7 @@ package forecast
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"github.com/ahmetb/go-linq/v3"
@@ -21,9 +22,11 @@ type Event struct {
 }
 
 type Forecast struct {
-	StartingBalance int64   `json:"startingBalance"`
-	EndingBalance   int64   `json:"endingBalance"`
-	Events          []Event `json:"events"`
+	StartingTime    time.Time `json:"startingTime"`
+	EndingTime      time.Time `json:"endingTime"`
+	StartingBalance int64     `json:"startingBalance"`
+	EndingBalance   int64     `json:"endingBalance"`
+	Events          []Event   `json:"events"`
 }
 
 type Forecaster interface {
@@ -65,12 +68,18 @@ func NewForecaster(log *logrus.Entry, spending []models.Spending, funding []mode
 			spendingItem,
 			fundingInstructions,
 		)
-		forecaster.currentBalance += spendingItem.GetProgressAmount()
+		forecaster.currentBalance += spendingItem.CurrentAmount
 	}
 
 	return forecaster
 }
 
+// GetForecast combines the instructions from the spending and funding objects and returns a timeline of events that are
+// expected to happen based on those instructions. All dates returned by this function will be in UTC. Dates returned by
+// other functions may be in the timezone provided by the caller. Timezones are converted in this function because they
+// will likely be surfaced via an API to a client. For the sake of consistency they should be in UTC. Events are
+// returned in order, with the most recent event being first. Objects related to a date are sorted in ascending order by
+// their ID.
 func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -80,6 +89,8 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 		"timezone": timezone.String(),
 	}
 	forecast := Forecast{
+		StartingTime:    start,
+		EndingTime:      end,
 		StartingBalance: f.currentBalance,
 		EndingBalance:   0,
 		Events:          make([]Event, 0),
@@ -102,7 +113,7 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 		).
 		SelectT(func(group linq.Group) Event {
 			date := time.Unix(group.Key.(int64), 0)
-			items := make([]SpendingEvent, len(group.Group))
+			spendingItems := make([]SpendingEvent, len(group.Group))
 			fundingMap := map[uint64]FundingEvent{}
 			var delta int64 = 0
 			var transaction int64
@@ -114,13 +125,17 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 				delta -= spendingEvent.TransactionAmount
 				transaction += spendingEvent.TransactionAmount
 
-				for _, funding := range spendingEvent.Funding {
+				for x, funding := range spendingEvent.Funding {
+					funding.Date = funding.Date.UTC()
+					funding.OriginalDate = funding.OriginalDate.UTC()
+					spendingEvent.Funding[x] = funding
 					if _, ok := fundingMap[funding.FundingScheduleId]; !ok {
 						fundingMap[funding.FundingScheduleId] = funding
 					}
 				}
+				spendingEvent.Date = spendingEvent.Date.UTC()
 
-				items[i] = spendingEvent
+				spendingItems[i] = spendingEvent
 			}
 
 			fundingItems := make([]FundingEvent, 0, len(fundingMap))
@@ -128,13 +143,22 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 				fundingItems = append(fundingItems, item)
 			}
 
+			// Sort the items in the result set. This way the output is consistent no matter what. The same inputs will
+			// result in the exact same outputs in the exact same output order every time.
+			sort.Slice(spendingItems, func(i, j int) bool {
+				return spendingItems[i].SpendingId < spendingItems[j].SpendingId
+			})
+			sort.Slice(fundingItems, func(i, j int) bool {
+				return fundingItems[i].FundingScheduleId < fundingItems[j].FundingScheduleId
+			})
+
 			return Event{
-				Date:         date,
+				Date:         date.UTC(),
 				Delta:        delta,
 				Balance:      0,
 				Transaction:  transaction,
 				Contribution: contribution,
-				Spending:     items,
+				Spending:     spendingItems,
 				Funding:      fundingItems,
 			}
 		}).

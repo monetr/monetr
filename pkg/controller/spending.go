@@ -137,6 +137,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	}
 
 	spending.NextRecurrence = nextRecurrence
+	spending.DateStarted = nextRecurrence
 
 	// Once we have all that data we can calculate the new expenses next contribution amount.
 	if err = spending.CalculateNextContribution(

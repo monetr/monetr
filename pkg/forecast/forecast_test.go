@@ -2,6 +2,8 @@ package forecast
 
 import (
 	"context"
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -26,6 +28,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
+				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		}
 		spending := []models.Spending{
@@ -100,6 +103,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				ExcludeWeekends:   true,
 				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
 				FundingScheduleId: 1,
+				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		}
 		spending := []models.Spending{
@@ -121,5 +125,38 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			result := forecaster.GetForecast(ctx, now, end, timezone)
 			assert.NotNil(t, result, "just make sure something is returned, this is to make sure we dont timeout")
 		})
+	})
+
+	t.Run("with elliot fixtures 20230705", func(t *testing.T) {
+		funding := make([]models.FundingSchedule, 0)
+		spending := make([]models.Spending, 0)
+
+		{ // Read fixture data into the test.
+			fundingJson := testutils.Must(t, forecastingFixtureData.ReadFile, "fixtures/elliots-funding-20230705.json")
+			spendingJson := testutils.Must(t, forecastingFixtureData.ReadFile, "fixtures/elliots-spending-20230705.json")
+			testutils.MustUnmarshalJSON(t, fundingJson, &funding)
+			testutils.MustUnmarshalJSON(t, spendingJson, &spending)
+			assert.NotEmpty(t, funding, "must have funding schedules loaded")
+			assert.NotEmpty(t, spending, "must have spending data loaded")
+		}
+
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		now := time.Date(2023, 07, 05, 15, 9, 0, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+
+		end := funding[0].NextOccurrence
+		end = end.AddDate(0, 0, 20)
+		assert.Greater(t, end, now, "make sure that our end is actually in the future")
+
+		forecaster := NewForecaster(log, spending, funding)
+		ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+		defer cancel()
+		result := forecaster.GetForecast(ctx, now, end, timezone)
+		assert.NotNil(t, result, "just make sure something is returned, this is to make sure we dont timeout")
+		pretty, err := json.MarshalIndent(result, "", "  ")
+		assert.NoError(t, err, "must be able to convert the forecast into a pretty json")
+		resultingJson := strings.TrimSpace(string(pretty))
+		expectedJson := strings.TrimSpace(string(testutils.Must(t, forecastingFixtureData.ReadFile, "fixtures/elliots-result-20230705.json")))
+		assert.Equal(t, expectedJson, resultingJson, "the result should match the saved fixture")
 	})
 }

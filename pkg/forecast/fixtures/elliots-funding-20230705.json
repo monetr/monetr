@@ -1,0 +1,10 @@
+[
+  {
+    "fundingScheduleId": 1,
+    "rule": "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+    "excludeWeekends": true,
+    "lastOccurrence": "2023-06-30T05:00:00Z",
+    "nextOccurrence": "2023-07-14T05:00:00Z",
+    "dateStarted": "2023-02-28T06:00:00Z"
+  }
+]

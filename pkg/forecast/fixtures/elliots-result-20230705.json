@@ -1,0 +1,1432 @@
+{
+  "startingTime": "2023-07-05T20:09:00Z",
+  "endingTime": "2023-08-03T05:00:00Z",
+  "startingBalance": 223600,
+  "endingBalance": 357106,
+  "events": [
+    {
+      "date": "2023-07-06T05:00:00Z",
+      "delta": -1600,
+      "contribution": 0,
+      "transaction": 1600,
+      "balance": 222000,
+      "spending": [
+        {
+          "date": "2023-07-06T05:00:00Z",
+          "transactionAmount": 1600,
+          "contributionAmount": 0,
+          "rollingAllocation": 1342,
+          "funding": [],
+          "spendingId": 111
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-08T05:00:00Z",
+      "delta": -1200,
+      "contribution": 0,
+      "transaction": 1200,
+      "balance": 220800,
+      "spending": [
+        {
+          "date": "2023-07-08T05:00:00Z",
+          "transactionAmount": 1200,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 130
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-09T05:00:00Z",
+      "delta": -2400,
+      "contribution": 0,
+      "transaction": 2400,
+      "balance": 218400,
+      "spending": [
+        {
+          "date": "2023-07-09T05:00:00Z",
+          "transactionAmount": 2400,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 106
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-10T05:00:00Z",
+      "delta": -47500,
+      "contribution": 0,
+      "transaction": 47500,
+      "balance": 170900,
+      "spending": [
+        {
+          "date": "2023-07-10T05:00:00Z",
+          "transactionAmount": 47500,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 105
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-14T05:00:00Z",
+      "delta": 324859,
+      "contribution": 324859,
+      "transaction": 0,
+      "balance": 495759,
+      "spending": [
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 500,
+          "rollingAllocation": 2000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 49
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 500,
+          "rollingAllocation": 500,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 50
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 306,
+          "rollingAllocation": 2409,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 53
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 4185,
+          "rollingAllocation": 33040,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 54
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 189,
+          "rollingAllocation": 378,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 55
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 500,
+          "rollingAllocation": 1000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 64
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 805,
+          "rollingAllocation": 806,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 102
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 999,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 103
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 23750,
+          "rollingAllocation": 23750,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 105
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 1200,
+          "rollingAllocation": 1200,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 106
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 441,
+          "rollingAllocation": 6027,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 107
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 16189,
+          "rollingAllocation": 36300,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 109
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 129,
+          "rollingAllocation": 1471,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 111
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 1073,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 112
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 1998,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 113
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 90000,
+          "rollingAllocation": 90000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 114
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 20000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 120
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 1234,
+          "rollingAllocation": 2468,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 121
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 6962,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 122
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 600,
+          "rollingAllocation": 600,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 130
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 450,
+          "rollingAllocation": 1000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 131
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 14925,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 142
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 168,
+          "rollingAllocation": 1816,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 144
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 3150,
+          "rollingAllocation": 3150,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 145
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 100,
+          "rollingAllocation": 214,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 150
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 21678,
+          "rollingAllocation": 42033,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 152
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 805,
+          "rollingAllocation": 1609,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 154
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 241,
+          "rollingAllocation": 1888,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 155
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 2000,
+          "rollingAllocation": 2000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 162
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 4000,
+          "rollingAllocation": 4000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 165
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 375,
+          "rollingAllocation": 1125,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 166
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 460,
+          "rollingAllocation": 9540,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 174
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 999,
+          "rollingAllocation": 999,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 182
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 100000,
+          "rollingAllocation": 100000,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 197
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 33432,
+          "rollingAllocation": 49443,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 205
+        },
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 16473,
+          "rollingAllocation": 29036,
+          "funding": [
+            {
+              "date": "2023-07-14T05:00:00Z",
+              "originalDate": "2023-07-14T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 206
+        }
+      ],
+      "funding": [
+        {
+          "date": "2023-07-14T05:00:00Z",
+          "originalDate": "2023-07-14T05:00:00Z",
+          "weekendAvoided": false,
+          "fundingScheduleId": 1
+        }
+      ]
+    },
+    {
+      "date": "2023-07-15T05:00:00Z",
+      "delta": -100000,
+      "contribution": 0,
+      "transaction": 100000,
+      "balance": 395759,
+      "spending": [
+        {
+          "date": "2023-07-15T05:00:00Z",
+          "transactionAmount": 100000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 197
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-16T05:00:00Z",
+      "delta": -2468,
+      "contribution": 0,
+      "transaction": 2468,
+      "balance": 393291,
+      "spending": [
+        {
+          "date": "2023-07-16T05:00:00Z",
+          "transactionAmount": 2468,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 121
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-18T05:00:00Z",
+      "delta": -1000,
+      "contribution": 0,
+      "transaction": 1000,
+      "balance": 392291,
+      "spending": [
+        {
+          "date": "2023-07-18T05:00:00Z",
+          "transactionAmount": 1000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 131
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-20T05:00:00Z",
+      "delta": -36300,
+      "contribution": 0,
+      "transaction": 36300,
+      "balance": 355991,
+      "spending": [
+        {
+          "date": "2023-07-20T05:00:00Z",
+          "transactionAmount": 36300,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 109
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-25T05:00:00Z",
+      "delta": -1214,
+      "contribution": 0,
+      "transaction": 1214,
+      "balance": 354777,
+      "spending": [
+        {
+          "date": "2023-07-25T05:00:00Z",
+          "transactionAmount": 1000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 64
+        },
+        {
+          "date": "2023-07-25T05:00:00Z",
+          "transactionAmount": 214,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 150
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-26T05:00:00Z",
+      "delta": -1987,
+      "contribution": 0,
+      "transaction": 1987,
+      "balance": 352790,
+      "spending": [
+        {
+          "date": "2023-07-26T05:00:00Z",
+          "transactionAmount": 378,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 55
+        },
+        {
+          "date": "2023-07-26T05:00:00Z",
+          "transactionAmount": 1609,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 154
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-28T05:00:00Z",
+      "delta": -4000,
+      "contribution": 0,
+      "transaction": 4000,
+      "balance": 348790,
+      "spending": [
+        {
+          "date": "2023-07-28T05:00:00Z",
+          "transactionAmount": 4000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 165
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-29T05:00:00Z",
+      "delta": -999,
+      "contribution": 0,
+      "transaction": 999,
+      "balance": 347791,
+      "spending": [
+        {
+          "date": "2023-07-29T05:00:00Z",
+          "transactionAmount": 999,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 182
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-30T05:00:00Z",
+      "delta": -2000,
+      "contribution": 0,
+      "transaction": 2000,
+      "balance": 345791,
+      "spending": [
+        {
+          "date": "2023-07-30T05:00:00Z",
+          "transactionAmount": 2000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 162
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-07-31T05:00:00Z",
+      "delta": 204925,
+      "contribution": 314925,
+      "transaction": 110000,
+      "balance": 550716,
+      "spending": [
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 470,
+          "rollingAllocation": 2470,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 49
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 500,
+          "rollingAllocation": 1000,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 50
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 286,
+          "rollingAllocation": 2695,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 53
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 3938,
+          "rollingAllocation": 36978,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 54
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 189,
+          "rollingAllocation": 189,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 55
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 500,
+          "rollingAllocation": 500,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 64
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 805,
+          "rollingAllocation": 1611,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 102
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 999,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 103
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 23750,
+          "rollingAllocation": 47500,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 105
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 1200,
+          "rollingAllocation": 2400,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 106
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 397,
+          "rollingAllocation": 6424,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 107
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 18150,
+          "rollingAllocation": 18150,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 109
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 129,
+          "rollingAllocation": 1600,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 111
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 1073,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 112
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 1998,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 113
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 90000,
+          "rollingAllocation": 180000,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 114
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 20000,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 120
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 1234,
+          "rollingAllocation": 1234,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 121
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 6962,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 122
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 600,
+          "rollingAllocation": 1200,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 130
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 500,
+          "rollingAllocation": 500,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 131
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 0,
+          "rollingAllocation": 14925,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 142
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 156,
+          "rollingAllocation": 1972,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 144
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 3150,
+          "rollingAllocation": 6300,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 145
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 107,
+          "rollingAllocation": 107,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 150
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 18065,
+          "rollingAllocation": 60098,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 152
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 804,
+          "rollingAllocation": 804,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 154
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 227,
+          "rollingAllocation": 2115,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 155
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 1000,
+          "rollingAllocation": 1000,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 162
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 2000,
+          "rollingAllocation": 2000,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 165
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 357,
+          "rollingAllocation": 1482,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 166
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 10000,
+          "contributionAmount": 460,
+          "rollingAllocation": 0,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 174
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 499,
+          "rollingAllocation": 499,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 182
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 100000,
+          "contributionAmount": 100000,
+          "rollingAllocation": 0,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 197
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 29253,
+          "rollingAllocation": 78696,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 205
+        },
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "transactionAmount": 0,
+          "contributionAmount": 16199,
+          "rollingAllocation": 45235,
+          "funding": [
+            {
+              "date": "2023-07-31T05:00:00Z",
+              "originalDate": "2023-07-31T05:00:00Z",
+              "weekendAvoided": false,
+              "fundingScheduleId": 1
+            }
+          ],
+          "spendingId": 206
+        }
+      ],
+      "funding": [
+        {
+          "date": "2023-07-31T05:00:00Z",
+          "originalDate": "2023-07-31T05:00:00Z",
+          "weekendAvoided": false,
+          "fundingScheduleId": 1
+        }
+      ]
+    },
+    {
+      "date": "2023-08-01T05:00:00Z",
+      "delta": -192611,
+      "contribution": 0,
+      "transaction": 192611,
+      "balance": 358105,
+      "spending": [
+        {
+          "date": "2023-08-01T05:00:00Z",
+          "transactionAmount": 1000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 50
+        },
+        {
+          "date": "2023-08-01T05:00:00Z",
+          "transactionAmount": 1611,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 102
+        },
+        {
+          "date": "2023-08-01T05:00:00Z",
+          "transactionAmount": 180000,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 114
+        },
+        {
+          "date": "2023-08-01T05:00:00Z",
+          "transactionAmount": 10000,
+          "contributionAmount": 0,
+          "rollingAllocation": -10000,
+          "funding": [],
+          "spendingId": 174
+        }
+      ],
+      "funding": []
+    },
+    {
+      "date": "2023-08-03T05:00:00Z",
+      "delta": -999,
+      "contribution": 0,
+      "transaction": 999,
+      "balance": 357106,
+      "spending": [
+        {
+          "date": "2023-08-03T05:00:00Z",
+          "transactionAmount": 999,
+          "contributionAmount": 0,
+          "rollingAllocation": 0,
+          "funding": [],
+          "spendingId": 103
+        }
+      ],
+      "funding": []
+    }
+  ]
+}

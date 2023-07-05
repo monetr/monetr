@@ -161,10 +161,21 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context
 func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []time.Time {
 	switch s.spending.SpendingType {
 	case models.SpendingTypeExpense:
-		dtMidnight := util.MidnightInLocal(start, timezone)
 		rule := s.spending.RecurrenceRule.RRule
-		rule.DTStart(dtMidnight)
-		items := rule.Between(start.Add(1*time.Second), end, true)
+		if s.spending.DateStarted.IsZero() {
+			dtMidnight := util.MidnightInLocal(start, timezone)
+			rule.DTStart(dtMidnight)
+		} else {
+			dateStarted := s.spending.DateStarted
+			corrected := dateStarted.In(timezone)
+			rule.DTStart(corrected)
+		}
+		// This little bit is really confusing. Basically we want to know how many times this spending boi happens
+		// before the specified end date. This can include the start date, but we want to exclude the end date. This is
+		// because this function is **INTENDED** to be called with the start being now or the next funding event, and
+		// end being the next funding event immediately after that. We can't control what happens after the later
+		// funding event, so we need to know how much will be spent before then, so we know how much to allocate.
+		items := rule.Between(start, end.Add(-1 * time.Second), true)
 		return items
 	case models.SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
@@ -197,7 +208,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	case models.SpendingTypeGoal:
 		// If we are working with a goal and it has already "completed" then there is nothing more to do, no more events
 		// will come up for this spending object.
-		if !nextRecurrence.After(input) {
+		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			return nil
 		}
 	case models.SpendingTypeExpense:
@@ -207,8 +218,14 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 
 		// If we are working with a spending object, but the next recurrence is before our start time. Then figure out
 		// what the next recurrence would be after the start time.
-		rule.DTStart(nextRecurrence)
-		if !nextRecurrence.After(input) {
+		if s.spending.DateStarted.IsZero() {
+			rule.DTStart(nextRecurrence)
+		} else {
+			dateStarted := s.spending.DateStarted
+			corrected := dateStarted.In(timezone)
+			rule.DTStart(corrected)
+		}
+		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			nextRecurrence = rule.After(input, false)
 		}
 	}

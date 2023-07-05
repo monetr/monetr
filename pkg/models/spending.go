@@ -73,8 +73,14 @@ func (e Spending) GetProgressAmount() int64 {
 func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
 	switch e.SpendingType {
 	case SpendingTypeExpense:
-		dtMidnight := util.MidnightInLocal(now, timezone)
-		e.RecurrenceRule.DTStart(dtMidnight)
+		if e.DateStarted.IsZero() {
+			dtMidnight := util.MidnightInLocal(now, timezone)
+			e.RecurrenceRule.DTStart(dtMidnight)
+		} else {
+			dateStarted := e.DateStarted
+			corrected := dateStarted.In(timezone)
+			e.RecurrenceRule.DTStart(corrected)
+		}
 		return e.RecurrenceRule.Between(now, before, false)
 	case SpendingTypeGoal:
 		if e.NextRecurrence.After(now) && e.NextRecurrence.Before(before) {
@@ -117,7 +123,13 @@ func (e *Spending) CalculateNextContribution(
 	if e.RecurrenceRule != nil {
 		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
 		// rather than the current timestamp (which is what RRule defaults to).
-		e.RecurrenceRule.DTStart(nextRecurrence)
+		if !e.DateStarted.IsZero() {
+			dateStarted := e.DateStarted
+			corrected := dateStarted.In(timezone)
+			e.RecurrenceRule.DTStart(corrected)
+		} else {
+			e.RecurrenceRule.DTStart(nextRecurrence)
+		}
 
 		// If the next recurrence of the spending is in the past, then bump it as well.
 		if nextRecurrence.Before(now) {
