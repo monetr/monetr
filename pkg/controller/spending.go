@@ -41,6 +41,31 @@ func (c *Controller) getSpending(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, expenses)
 }
 
+// getSpendingById serves a spending object by its specific ID, eventually it will also support serving soft-deleted
+// spending items that might not be present in the index endpoint for spending.
+func (c *Controller) getSpendingById(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "Must specify a valid bank account ID")
+	}
+
+	spendingId, err := strconv.ParseUint(ctx.Param("spendingId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "Must specify a valid spending ID")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	spending, err := repo.GetSpendingById(c.getContext(ctx), bankAccountId, spendingId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not retrieve spending")
+	}
+	// Unset this for the API.
+	spending.FundingSchedule = nil
+
+	return ctx.JSON(http.StatusOK, spending)
+}
+
 // Create Spending
 // @id create-spending
 // @tags Spending

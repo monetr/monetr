@@ -25,6 +25,12 @@ export function useSpendingSink(): SpendingResult {
   };
 }
 
+/**
+ * useSpending retrieves a single spending item that would have been returned from the index endpoint for the currently
+ * selected bank account.
+ *
+ * @deprecated A better implementation of this will be available soon.
+ */
 export function useSpending(spendingId?: number): Spending | null {
   const { result } = useSpendingSink();
   if (!spendingId) {
