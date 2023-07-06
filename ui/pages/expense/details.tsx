@@ -64,14 +64,13 @@ export default function ExpenseDetails(props: ExpenseDetailsProps): JSX.Element 
       label: fundingSchedule.name,
       value: fundingSchedule.fundingScheduleId,
     }));
-  const currentOption = options.find(option => option.value === spending?.fundingScheduleId) || undefined;
 
   return (
     <Formik
       initialValues={ initialValues }
       onSubmit={ submit }
     >
-      <MForm className='w-full h-full'>
+      <MForm className='flex w-full h-full flex-col'>
         <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 md:justify-between'>
           <div className='flex items-center gap-2 mt-2 md:mt-0'>
             <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer mr-2' />
@@ -100,7 +99,7 @@ export default function ExpenseDetails(props: ExpenseDetailsProps): JSX.Element 
           </div>
         </div>
         <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
-          <div className='flex flex-col md:flex-row w-full h-full gap-8 items-center md:items-stretch'>
+          <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
             <div className='w-full md:w-1/2 flex flex-col items-center'>
               <div className='w-full flex justify-center mb-2'>
                 <MerchantIcon name={ spending?.name } />
