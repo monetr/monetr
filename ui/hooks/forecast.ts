@@ -2,6 +2,7 @@ import { useQuery, UseQueryResult } from 'react-query';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { SpendingType } from 'models/Spending';
+import { mustParseToMoment } from 'util/parseToMoment';
 import request from 'util/request';
 
 interface SpendingBareMinimum {
@@ -51,5 +52,93 @@ export function useNextFundingForecast(fundingScheduleId: number): NextFundingRe
   return {
     ...result,
     result: result?.data?.nextContribution,
+  };
+}
+
+export class Forecast {
+  startingTime: moment.Moment;
+  endingTime: moment.Moment;
+  startingBalance: number;
+  endingBalance: number;
+  events: Array<Event>;
+
+  constructor(data?: Partial<Forecast>) {
+    if (data) Object.assign(this, {
+      ...data,
+      startingTime: mustParseToMoment(data.startingTime),
+      endingTime: mustParseToMoment(data.endingTime),
+      events: (data?.events || []).map(item => new Event(item)),
+    });
+  }
+}
+
+export class Event {
+  balance: number;
+  contribution: number;
+  date: moment.Moment;
+  delta: number;
+  funding: Array<FundingEvent>;
+  spending: Array<SpendingEvent>;
+  transaction: number;
+
+  constructor(data?: Partial<Event>) {
+    if (data) Object.assign(this, {
+      ...data,
+      date: mustParseToMoment(data.date),
+      funding: (data?.funding || []).map(item => new FundingEvent(item)),
+      spending: (data?.spending || []).map(item => new SpendingEvent(item)),
+    });
+  }
+}
+
+export class SpendingEvent {
+  contributionAmount: number;
+  date: moment.Moment;
+  funding: Array<FundingEvent>;
+  rollingAllocation: number;
+  spendingId: number;
+  transactionAmount: number;
+
+  constructor(data?: Partial<SpendingEvent>) {
+    if (data) Object.assign(this, {
+      ...data,
+      date: mustParseToMoment(data.date),
+      funding: (data?.funding || []).map(item => new FundingEvent(item)),
+    });
+  }
+}
+
+export class FundingEvent {
+  date: moment.Moment;
+  fundingScheduleId: number;
+  originalDate: moment.Moment;
+  weekendAvoided: boolean;
+
+  constructor(data?: Partial<FundingEvent>) {
+    if (data) Object.assign(this, {
+      ...data,
+      date: mustParseToMoment(data.date),
+      originalDate: mustParseToMoment(data.originalDate),
+    });
+  }
+}
+
+export type ForecastResult =
+  { result: Forecast | null }
+  & UseQueryResult<Partial<Forecast>>;
+
+export function useForecast(): ForecastResult {
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const result = useQuery<Partial<Forecast>>(
+    `/bank_accounts/${ selectedBankAccountId }/forecast`,
+    {
+      // TODO long cache time for forecast endpoints.
+      enabled: !!selectedBankAccountId,
+    }
+  );
+
+  return {
+    ...result,
+    result: !!result?.data ? new Forecast(result.data) : null,
   };
 }
