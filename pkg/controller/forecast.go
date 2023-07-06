@@ -4,12 +4,88 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/pkg/forecast"
 	"github.com/monetr/monetr/pkg/models"
 )
+
+func (c *Controller) getForecast(ctx echo.Context) error {
+	now := time.Now()
+	log := c.getLog(ctx)
+	var endDate time.Time
+	end := ctx.QueryParam("end")
+	if strings.TrimSpace(end) == "" {
+		log.Trace("no end date specified for forecast, will default to 31 days")
+		endDate = now.AddDate(0, 0, 31).UTC()
+	} else {
+		var err error
+		endDate, err = time.Parse(time.RFC3339, end)
+		if err != nil {
+			return c.badRequest(ctx, "invalid end time provided, end time must be in RFC3339 format")
+		}
+	}
+
+	if endDate.Before(now) {
+		return c.badRequest(ctx, "invalid end time provided, end time must be in the future")
+	}
+	if endDate.After(now.AddDate(0, 3, 0)) {
+		return c.badRequest(ctx, "you are not allowed for forecast more than 3 months into the future")
+	}
+
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	fundingSchedules, err := repo.GetFundingSchedules(c.getContext(ctx), bankAccountId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not retrieve funding schedules")
+	}
+
+	spending, err := repo.GetSpending(c.getContext(ctx), bankAccountId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "could not retreive spending")
+	}
+
+	forecaster := forecast.NewForecaster(
+		log,
+		spending,
+		fundingSchedules,
+	)
+
+	timezone := c.mustGetTimezone(ctx)
+	timeout, cancel := context.WithTimeout(c.getContext(ctx), 15*time.Second)
+	defer cancel()
+
+	result, err := func() (result forecast.Forecast, err error) {
+		defer func() {
+			switch panicResult := recover().(type) {
+			case error:
+				err = panicResult
+				return
+			}
+		}()
+		result = forecaster.GetForecast(
+			timeout,
+			now,
+			endDate,
+			timezone,
+		)
+		return result, nil
+	}()
+	if err == context.DeadlineExceeded {
+		return c.returnError(ctx, http.StatusRequestTimeout, "timeout forecasting")
+	} else if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to forecast")
+	}
+
+	return ctx.JSON(http.StatusOK, result)
+}
 
 func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	var request struct {

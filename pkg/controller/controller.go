@@ -420,6 +420,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.PUT("/bank_accounts/:bankAccountId/spending/:spendingId", c.putSpending)
 	billed.DELETE("/bank_accounts/:bankAccountId/spending/:spendingId", c.deleteSpending)
 	// Forecasting
+	billed.GET("/bank_accounts/:bankAccountId/forecast", c.getForecast)
 	billed.POST("/bank_accounts/:bankAccountId/forecast/spending", c.postForecastNewSpending)
 	billed.POST("/bank_accounts/:bankAccountId/forecast/next_funding", c.postForecastNextFunding)
 	// Plaid Link
