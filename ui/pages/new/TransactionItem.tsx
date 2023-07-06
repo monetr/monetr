@@ -15,23 +15,6 @@ export interface TransactionItemProps {
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
   const spending = useSpending(transaction.spendingId);
 
-  const spentFromClasses = mergeTailwind(
-    {
-      // Transaction does have spending
-      'font-bold': !!transaction.spendingId,
-      'dark:text-dark-monetr-content-emphasis': !!transaction.spendingId,
-      // No spending for the transaction
-      'font-medium': !transaction.spendingId,
-      'dark:text-dark-monetr-content': !transaction.spendingId,
-    },
-    'text-sm',
-    'md:text-base',
-    'text-ellipsis',
-    'whitespace-nowrap',
-    'overflow-hidden',
-    'min-w-0',
-  );
-
   const amountClassnames = mergeTailwind(
     {
       'text-green-500': transaction.getIsAddition(),
@@ -40,6 +23,59 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
     'text-end',
     'font-semibold',
   );
+
+  interface BudgetingInfoProps {
+    className: string;
+  }
+
+  function BudgetingInfo(props: BudgetingInfoProps): JSX.Element {
+    const className = mergeTailwind(
+      'overflow-hidden',
+      'text-ellipsis',
+      'whitespace-nowrap',
+      'min-w-0',
+      props.className,
+    );
+
+    const spentFromClasses = mergeTailwind(
+      {
+      // Transaction does have spending
+        'font-bold': !!transaction.spendingId,
+        'dark:text-dark-monetr-content-emphasis': !!transaction.spendingId,
+        // No spending for the transaction
+        'font-medium': !transaction.spendingId,
+        'dark:text-dark-monetr-content': !transaction.spendingId,
+      },
+      'text-sm',
+      'md:text-base',
+      'text-ellipsis',
+      'whitespace-nowrap',
+      'overflow-hidden',
+      'min-w-0',
+    );
+
+    if (transaction.getIsAddition()) {
+      return (
+        <span className={ className }>
+          <span className='flex-none dark:text-dark-monetr-content-subtle font-medium text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+            Contribution
+          </span>
+        </span>
+      );
+    }
+
+    return (
+      <span className={ className }>
+        <span className='flex-none dark:text-dark-monetr-content font-medium text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
+          Spent from
+        </span>
+        &nbsp;
+        <span className={ spentFromClasses }>
+          { spending?.name || 'Free-To-Use' }
+        </span>
+      </span>
+    );
+  }
 
   return (
     <li className='w-full px-1 md:px-2'>
@@ -53,26 +89,10 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
             <span className='hidden md:block dark:text-dark-monetr-content font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
               { transaction.getMainCategory() }
             </span>
-            <span className='flex md:hidden text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-              <span className='flex-none dark:text-dark-monetr-content font-medium text-sm text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
-                Spent from
-              </span>
-              &nbsp;
-              <span className={ spentFromClasses }>
-                { spending?.name || 'Free-To-Use' }
-              </span>
-            </span>
+            <BudgetingInfo className='flex md:hidden text-sm w-full' />
           </div>
         </div>
-        <div className='hidden md:flex w-1/2 overflow-hidden flex-1 min-w-0 items-center'>
-          <span className='flex-none dark:text-dark-monetr-content font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
-            Spent from
-          </span>
-          &nbsp;
-          <span className={ spentFromClasses }>
-            { spending?.name || 'Free-To-Use' }
-          </span>
-        </div>
+        <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center' />
         <div className='flex md:min-w-[8em] shrink-0 justify-end gap-2 items-center'>
           <span className={ amountClassnames }>
             { transaction.getAmountString() }
