@@ -2,6 +2,7 @@ import React from 'react';
 import { useFormikContext } from 'formik';
 
 import clsx from 'clsx';
+import moment from 'moment';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
@@ -126,6 +127,12 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'pb-[18px]': !props.error,
   }, props.className);
 
+  // If we are working with a date picker, then take the current value and transform it for the actual input.
+  let value = formikContext?.values[props.name];
+  if (props?.type === 'date') {
+    value = moment(value).format('YYYY-MM-DD');
+  }
+
   return (
     <div className={ wrapperClassNames }>
       <div className="flex items-center justify-between monetr-">
@@ -137,7 +144,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       </div>
       <div>
         <input
-          value={ formikContext?.values[props.name] }
+          value={ value }
           onChange={ formikContext?.handleChange }
           onBlur={ formikContext?.handleBlur }
           disabled={ formikContext?.isSubmitting || props.disabled }
