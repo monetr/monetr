@@ -2,7 +2,6 @@ import '@fontsource-variable/inter';
 
 import React from 'react';
 import { QueryClient, QueryClientProvider, QueryFunctionContext, QueryKey } from 'react-query';
-import { BrowserRouter as Router } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -12,6 +11,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
+import { useEffect, useGlobals } from '@storybook/addons';
 import type { Preview } from '@storybook/react';
 import axios from 'axios';
 import { SnackbarProvider, VariantType } from 'notistack';
@@ -19,6 +19,7 @@ import { SnackbarProvider, VariantType } from 'notistack';
 import theme, { newTheme } from '../ui/theme';
 
 import { initialize, mswLoader } from 'msw-storybook-addon';
+import { withRouter } from 'storybook-addon-react-router-v6';
 
 import '../ui/styles/styles.css';
 import './preview.css';
@@ -31,8 +32,20 @@ window.API = axios.create({
   baseURL: '/api',
 });
 
+export const useTheme = (StoryFn: () => unknown) => {
+  const [{ theme }] = useGlobals();
+
+  useEffect(() => {
+    document.querySelector('html')?.setAttribute('class', theme || 'dark');
+  }, [theme]);
+
+  return StoryFn();
+};
+
 const preview: Preview = {
   decorators: [
+    useTheme,
+    withRouter,
     (Story, _context) => {
       const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
         error: <ErrorIcon className="mr-2.5" />,
@@ -72,22 +85,18 @@ const preview: Preview = {
         },
       });
 
-      document.querySelector('html')?.setAttribute('class', 'dark');
-
       return (
         <QueryClientProvider client={ queryClient }>
-          <Router>
-            <ThemeProvider theme={ newTheme }>
-              <LocalizationProvider dateAdapter={ AdapterMoment }>
-                <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-                  <NiceModal.Provider>
-                    <CssBaseline />
-                    <Story />
-                  </NiceModal.Provider>
-                </SnackbarProvider>
-              </LocalizationProvider>
-            </ThemeProvider>
-          </Router>
+          <ThemeProvider theme={ newTheme }>
+            <LocalizationProvider dateAdapter={ AdapterMoment }>
+              <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+                <NiceModal.Provider>
+                  <CssBaseline />
+                  <Story />
+                </NiceModal.Provider>
+              </SnackbarProvider>
+            </LocalizationProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       );
     },
@@ -120,3 +129,18 @@ const preview: Preview = {
 };
 
 export default preview;
+
+// TODO This will sometimes crash chrome for some reason?
+export const globalTypes = {
+  theme: {
+    name: 'Toggle theme',
+    description: 'Global theme for components',
+    defaultValue: 'dark',
+    toolbar: {
+      icon: 'circlehollow',
+      items: ['dark'], // 'light',
+      showName: true,
+      dynamicTitle: true,
+    },
+  },
+};

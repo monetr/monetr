@@ -117,6 +117,7 @@
     "@storybook/test-runner": "0.10.0",
     "@storybook/testing-library": "0.0.14-next.2",
     "storybook": "7.0.18",
+    "storybook-addon-react-router-v6": "^1.0.2",
     "storybook-react-rspack": "7.0.0-rc.24"
   },
   "devDependencies": {
