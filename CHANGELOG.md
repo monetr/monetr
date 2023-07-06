@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.15.9](https://github.com/monetr/monetr/compare/v0.15.8...v0.15.9) (2023-07-06)
+
+
+### Features
+
+* **api:** Added proper forecast endpoint. ([584245b](https://github.com/monetr/monetr/commit/584245b3e00f5fcaaa84c3ade89538bc9af3759a))
+
+
+### Bug Fixes
+
+* **bug:** Fixed DTStart bug in rrule processing. ([#1468](https://github.com/monetr/monetr/issues/1468)) ([c9cf496](https://github.com/monetr/monetr/commit/c9cf496fa94a7f37a9b568f4e2f59067bfd4daa1))
+* **bug:** Fixed weird pointer issue with spending backdates. ([5d1976f](https://github.com/monetr/monetr/commit/5d1976f3ebea9099b432cbf16a8251ad3ad82b7d))
+
 ## [0.15.8](https://github.com/monetr/monetr/compare/v0.15.7...v0.15.8) (2023-07-05)
 
 
