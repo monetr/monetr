@@ -28,13 +28,13 @@ export function ForgotPasswordComplete(): JSX.Element {
         <MSpan>
           Check your email
         </MSpan>
-        <MSpan size="sm" variant="light" className="max-w-[248px] text-center">
+        <MSpan variant="light" className="max-w-[248px] text-center text-sm">
           If a user was found with the email provided, then you should receive an email with instructions on how to
           reset your password.
         </MSpan>
       </div>
       <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-        <MSpan variant="light" size="sm">Return to</MSpan>
+        <MSpan variant="light" className='text-sm'>Return to</MSpan>
         <MLink to="/login" size="sm">Sign in</MLink>
       </div>
     </div>
@@ -69,7 +69,7 @@ export default function ForgotPasswordNew(): JSX.Element {
   if (isComplete) {
     return (
       <ForgotPasswordComplete />
-    )
+    );
   }
 
   return (
@@ -82,7 +82,7 @@ export default function ForgotPasswordNew(): JSX.Element {
           <MSpan>
             Forgot your password?
           </MSpan>
-          <MSpan size="sm" variant="light">
+          <MSpan variant="light" className='text-sm'>
             We can email you a link to reset it.
           </MSpan>
         </div>
@@ -106,7 +106,7 @@ export default function ForgotPasswordNew(): JSX.Element {
           </MFormButton>
         </div>
         <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-          <MSpan variant="light" size="sm">Remembered your password?</MSpan>
+          <MSpan variant="light" className='text-sm'>Remembered your password?</MSpan>
           <MLink to="/login" size="sm">Sign in</MLink>
         </div>
       </MForm>

@@ -66,7 +66,7 @@ export default function LoginNew(): JSX.Element {
 
     return (
       <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-        <MSpan variant="light" size="sm">Not a user?</MSpan>
+        <MSpan variant="light" className='text-sm'>Not a user?</MSpan>
         <MLink to="/register" size="sm">Sign up now</MLink>
       </div>
     );

@@ -4,11 +4,11 @@ import { Avatar } from '@mui/material';
 import { useIconSearch } from 'hooks/useIconSearch';
 
 export interface MerchantIconProps {
-  name: string;
+  name?: string;
 }
 
 export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
-  const icon = useIconSearch(props.name);
+  const icon = useIconSearch(props?.name);
   if (icon?.svg) {
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.
     const colorStyles = icon?.colors?.length > 0 ?
@@ -31,7 +31,7 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
   }
 
   // If we have no icon to work with then create an avatar with the first character of the transaction name.
-  const letter = props.name.toUpperCase().charAt(0);
+  const letter = props?.name?.toUpperCase().charAt(0) || '?';
   return (
     <Avatar className='bg-zinc-800 h-10 w-10 text-zinc-200'>
       {letter}

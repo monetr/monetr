@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Formik, FormikErrors } from 'formik';
 
 import MFormButton from 'components/MButton';
@@ -89,10 +89,10 @@ export default function RegisterNew(): JSX.Element {
           <MLogo />
         </div>
         <div className="flex flex-col items-center">
-          <MSpan size="5xl">
+          <MSpan className='text-5xl'>
             Get Started
           </MSpan>
-          <MSpan size="lg" variant="light">
+          <MSpan variant="light" className='text-lg'>
             Create your monetr account now
           </MSpan>
         </div>
@@ -168,7 +168,7 @@ export default function RegisterNew(): JSX.Element {
           </MFormButton>
         </div>
         <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1 flex justify-center gap-1">
-          <MSpan variant="light" size="sm">Already have an account?</MSpan>
+          <MSpan variant="light" className='text-sm'>Already have an account?</MSpan>
           <MLink to="/login" size="sm">Sign in instead</MLink>
         </div>
       </MForm>

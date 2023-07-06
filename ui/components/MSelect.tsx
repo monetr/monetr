@@ -93,6 +93,16 @@ export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
         }) }
         { ...props }
         styles={ {
+          placeholder: (base: object) => ({
+            ...base,
+            fontSize: '0.875rem', // Equivalent to text-sm and leading-6
+            lineHeight: '1.5rem',
+          }),
+          valueContainer: (base: object) => ({
+            ...base,
+            fontSize: '0.875rem', // Equivalent to text-sm and leading-6
+            lineHeight: '1.5rem',
+          }),
           option: (base: object) => ({
             ...base,
             color: theme.tailwind.colors['dark-monetr']['content']['emphasized'],

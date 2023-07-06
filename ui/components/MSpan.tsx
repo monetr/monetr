@@ -1,19 +1,15 @@
 import React from 'react';
 
-import { TextSize } from './types';
-
-import clsx from 'clsx';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MSpanProps {
   variant?: 'normal' | 'light';
   children: string | React.ReactNode | JSX.Element;
-  size?: TextSize;
   className?: string;
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
   variant: 'normal',
-  size: 'md',
 };
 
 export default function MSpan(props: MSpanProps): JSX.Element {
@@ -22,14 +18,14 @@ export default function MSpan(props: MSpanProps): JSX.Element {
     ...props,
   };
 
-  const classNames = clsx(
+  const classNames = mergeTailwind(
     {
       'dark:text-dark-monetr-content': props.variant === 'normal',
       'dark:text-dark-monetr-content-subtle': props.variant === 'light',
       'text-gray-900': props.variant === 'normal',
       'text-gray-500': props.variant === 'light',
     },
-    `text-${props.size}`,
+    'text-md',
     props.className,
   );
 
@@ -38,5 +34,4 @@ export default function MSpan(props: MSpanProps): JSX.Element {
       { props.children }
     </span>
   );
-
 }
