@@ -28,26 +28,54 @@ export function useBankAccounts(): Map<number, BankAccount> {
   return bankAccounts;
 }
 
-export function useSelectedBankAccountId(): number | null {
+export interface SelectedBankAccountResult {
+  isLoading: boolean;
+  isError: boolean;
+  bankAccount: BankAccount | null;
+}
+
+export function useSelectedBankAccount(): SelectedBankAccountResult {
   const { selectedBankAccountId, setCurrentBankAccount } = useStore(state => ({
     selectedBankAccountId: state.selectedBankAccountId,
     setCurrentBankAccount: state.setCurrentBankAccount,
   }), shallow);
-  const { isLoading, result: bankAccounts } = useBankAccountsSink();
-
-  if (isLoading) {
-    return selectedBankAccountId;
+  const { isError, isLoading, result: bankAccounts } = useBankAccountsSink();
+  if (isLoading || isError) {
+    return {
+      isLoading,
+      isError,
+      bankAccount: null,
+    };
   }
 
-  if (!isLoading && !bankAccounts.has(selectedBankAccountId)) {
+  if (!bankAccounts.has(selectedBankAccountId)) {
     if (bankAccounts.size === 0) {
-      return null;
+      return {
+        isLoading: false,
+        isError: true,
+        bankAccount: null,
+      };
     }
 
     const id = Array.from(bankAccounts.keys())[0];
     setCurrentBankAccount(id);
-    return id;
+    return {
+      isLoading: false,
+      isError: false,
+      bankAccount: bankAccounts.get(id),
+    };
   }
 
-  return selectedBankAccountId;
+  return {
+    isLoading: false,
+    isError: false,
+    bankAccount: bankAccounts.get(selectedBankAccountId),
+  };
 }
+
+export function useSelectedBankAccountId(): number | null {
+  const { bankAccount } = useSelectedBankAccount();
+
+  return bankAccount?.bankAccountId || null;
+}
+
