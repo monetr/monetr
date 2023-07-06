@@ -14,10 +14,7 @@ import MTextField from 'components/MTextField';
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 import { useSpending } from 'hooks/spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
-
-export interface ExpenseDetailsProps {
-  spendingId?: number;
-}
+import { Link, useParams } from 'react-router-dom';
 
 interface ExpenseValues {
   name: string;
@@ -27,11 +24,13 @@ interface ExpenseValues {
   recurrenceRule: string;
 }
 
-export default function ExpenseDetails(props: ExpenseDetailsProps): JSX.Element {
-  const spending = useSpending(props.spendingId);
+export default function ExpenseDetails(): JSX.Element {
+  const { spendingId } = useParams();
+
+  const spending = useSpending(spendingId && +spendingId);
   const { result: fundingSchedules } = useFundingSchedulesSink();
 
-  if (!props.spendingId) {
+  if (!spendingId) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
@@ -79,9 +78,12 @@ export default function ExpenseDetails(props: ExpenseDetailsProps): JSX.Element 
             <span className='text-2xl dark:text-dark-monetr-content-subtle font-bold'>
               <PriceCheckOutlined />
             </span>
-            <span className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis font-bold cursor-pointer'>
-            Expenses
-            </span>
+            <Link
+              className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis font-bold cursor-pointer'
+              to='/expenses'
+            >
+              Expenses
+            </Link>
             <span className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle font-bold'>
             /
             </span>

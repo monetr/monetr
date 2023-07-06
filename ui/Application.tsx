@@ -1,13 +1,13 @@
 import React from 'react';
 import { Backdrop, CircularProgress } from '@mui/material';
 
-const AuthenticatedApp = React.lazy(() => import('AuthenticatedApp'));
-const BillingRequiredRouter = React.lazy(() => import('BillingRequiredRouter'));
-
+import CenteredLogo from 'components/Logo/CenteredLogo';
 import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
 import { useAuthenticationSink } from 'hooks/useAuthentication';
 import UnauthenticatedApplication from 'UnauthenticatedApplication';
-import CenteredLogo from 'components/Logo/CenteredLogo';
+
+const AuthenticatedApp = React.lazy(() => import('AuthenticatedApp'));
+const BillingRequiredRouter = React.lazy(() => import('BillingRequiredRouter'));
 
 export default function Application(): JSX.Element {
   const { isLoading: isLoadingConfig, isError } = useAppConfigurationSink();

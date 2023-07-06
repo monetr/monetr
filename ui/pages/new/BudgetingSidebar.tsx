@@ -7,6 +7,7 @@ import { ReactElement } from 'components/types';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSelectedBankAccount } from 'hooks/bankAccounts';
 import mergeTailwind from 'util/mergeTailwind';
+import { Link, useLocation, useParams } from 'react-router-dom';
 
 export default function BudgetingSidebar(): JSX.Element {
   const { bankAccount, isLoading, isError } = useSelectedBankAccount();
@@ -79,29 +80,29 @@ export default function BudgetingSidebar(): JSX.Element {
         <MDivider className='w-1/2' />
 
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
-          <NavigationItem>
+          <NavigationItem to='#'>
             <HomeOutlined />
             Overview
           </NavigationItem>
-          <NavigationItem active>
+          <NavigationItem to='/transactions'>
             <ShoppingCartOutlined />
             Transactions
           </NavigationItem>
-          <NavigationItem>
+          <NavigationItem to='/expenses'>
             <PriceCheckOutlined />
             Expenses
             <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
               { balance?.getExpensesString() }
             </span>
           </NavigationItem>
-          <NavigationItem>
+          <NavigationItem  to='#'>
             <SavingsOutlined />
             Goals
             <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
               { balance?.getGoalsString() }
             </span>
           </NavigationItem>
-          <NavigationItem>
+          <NavigationItem  to='#'>
             <TodayOutlined />
             Funding Schedules
             <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
@@ -116,16 +117,19 @@ export default function BudgetingSidebar(): JSX.Element {
 
 interface NavigationItemProps {
   children: ReactElement;
-  active?: boolean;
+  to: string;
 }
 
 function NavigationItem(props: NavigationItemProps): JSX.Element {
+  const location = useLocation();
+  const active = location.pathname.endsWith(props.to.replaceAll('.', ''));
+
   const className = mergeTailwind({
-    'bg-zinc-700': props.active,
-    'dark:text-dark-monetr-content-emphasis': props.active,
-    'dark:text-dark-monetr-content-subtle': !props.active,
-    'font-semibold': props.active,
-    'font-medium': !props.active,
+    'bg-zinc-700': active,
+    'dark:text-dark-monetr-content-emphasis': active,
+    'dark:text-dark-monetr-content-subtle': !active,
+    'font-semibold': active,
+    'font-medium': !active,
   }, [
     'align-middle',
     'cursor-pointer',
@@ -142,8 +146,8 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   ]);
 
   return (
-    <a className={ className }>
+    <Link className={ className } to={ props.to }>
       {props.children}
-    </a>
+    </Link>
   );
 }

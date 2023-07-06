@@ -8,6 +8,7 @@ import { useFundingSchedule } from 'hooks/fundingSchedules';
 import Spending from 'models/Spending';
 import { rrulestr } from 'rrule';
 import mergeTailwind from 'util/mergeTailwind';
+import { useNavigate } from 'react-router-dom';
 
 export interface ExpenseItemProps {
   spending: Spending;
@@ -15,6 +16,7 @@ export interface ExpenseItemProps {
 
 export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element {
   const fundingSchedule = useFundingSchedule(spending.fundingScheduleId);
+  const navigate = useNavigate();
   const rule = rrulestr(spending.recurrenceRule);
 
   const amountClass = mergeTailwind(
@@ -25,6 +27,10 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
     'text-end',
     'font-semibold',
   );
+
+  function openDetails() {
+    navigate(`/expenses/${spending.spendingId}/details`);
+  }
 
   return (
     <li className='w-full px-2'>
@@ -76,7 +82,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
               </span>
             </div>
           </div>
-          <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' />
+          <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' onClick={ openDetails } />
         </div>
       </div>
     </li>
