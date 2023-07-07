@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AccountBalance } from '@mui/icons-material';
 import shallow from 'zustand/shallow';
 
@@ -17,6 +18,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   const { result: institution } = useInstitution(link.plaidInstitutionId);
   const { bankAccount } = useSelectedBankAccount();
   const { result: bankAccounts } = useBankAccountsSink();
+  const navigate = useNavigate();
   const { setCurrentBankAccount } = useStore(state => ({
     setCurrentBankAccount: state.setCurrentBankAccount,
   }), shallow);
@@ -26,6 +28,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     const newSelectedBankAccount = Array.from(bankAccounts.values()).find(bankAccount => bankAccount.linkId === link.linkId);
     if (newSelectedBankAccount?.bankAccountId) {
       setCurrentBankAccount(newSelectedBankAccount.bankAccountId);
+      navigate('/transactions');
       return;
     }
     console.warn('no bank account could be selected, something is wrong');

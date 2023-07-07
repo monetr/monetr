@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
 
 import BankSidebarItem from './BankSidebarItem';
@@ -7,8 +8,6 @@ import BankSidebarItem from './BankSidebarItem';
 import { Logo } from 'assets';
 import MDivider from 'components/MDivider';
 import { useLinksSink } from 'hooks/links';
-import { Link } from 'react-router-dom';
-
 
 export default function BankSidebar(): JSX.Element {
   // Important things to note. The width is 16. The width of the icons is 12.
@@ -26,7 +25,7 @@ export default function BankSidebar(): JSX.Element {
         <MDivider className='w-1/2' />
         <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
         </div>
-        <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+        <SettingsButton />
         <LogoutButton />
       </div>
     );
@@ -46,7 +45,7 @@ export default function BankSidebar(): JSX.Element {
             </div>
           </div>
         </div>
-        <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+        <SettingsButton />
         <LogoutButton />
       </div>
     );
@@ -66,9 +65,17 @@ export default function BankSidebar(): JSX.Element {
           </div>
         </div>
       </div>
-      <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+      <SettingsButton />
       <LogoutButton />
     </div>
+  );
+}
+
+function SettingsButton(): JSX.Element {
+  return (
+    <Link to='/settings'>
+      <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+    </Link>
   );
 }
 
