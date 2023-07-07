@@ -87,9 +87,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'dark:focus:ring-dark-monetr-brand': !props.disabled && !props.error,
       'dark:hover:ring-zinc-400': !props.disabled && !props.error,
       'dark:ring-dark-monetr-border-string': !props.disabled && !props.error,
-      'dark:ring-dark-monetr-border-subtle': props.disabled,
       'dark:ring-red-500': !props.disabled && !!props.error,
-      'ring-gray-200': props.disabled,
       'ring-gray-300': !props.disabled && !props.error,
       'ring-red-300': !props.disabled && !!props.error,
       'uppercase': props.uppercasetext,
@@ -99,8 +97,16 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'focus:ring-red-400': props.error,
     },
     {
+    },
+    {
+      'dark:bg-dark-monetr-background': !props.disabled,
       'dark:text-zinc-200': !props.disabled,
       'text-gray-900': !props.disabled,
+    },
+    {
+      'dark:bg-dark-monetr-background-subtle': props.disabled,
+      'dark:ring-dark-monetr-background-emphasis': props.disabled,
+      'ring-gray-200': props.disabled,
       'text-gray-500': props.disabled,
     },
     'block',
@@ -117,7 +123,6 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'sm:leading-6',
     'sm:text-sm',
     'w-full',
-    'dark:bg-dark-monetr-background',
     'dark:caret-zinc-50',
     'min-h-[38px]',
   );

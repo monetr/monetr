@@ -4,7 +4,7 @@ import Select, { Theme } from 'react-select';
 import useTheme from 'hooks/useTheme';
 import mergeTailwind from 'util/mergeTailwind';
 
-interface MSelectProps<V> extends Omit<Omit<Parameters<Select>[0], 'theme'>, 'styles'> {
+interface MSelectProps<V> extends Omit<Parameters<Select>[0], 'theme'|'styles'|'isDisabled'> {
   label?: string;
   error?: string;
   required?: boolean;
@@ -80,6 +80,8 @@ export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
           colors: {
             ...baseTheme.colors,
             neutral0: theme.tailwind.colors['dark-monetr']['background']['DEFAULT'],
+            neutral5: theme.tailwind.colors['dark-monetr']['background']['subtle'],
+            neutral10: theme.tailwind.colors['dark-monetr']['background']['emphasis'],
             neutral20: theme.tailwind.colors['dark-monetr']['border']['string'],
             neutral30: theme.tailwind.colors['dark-monetr']['content']['DEFAULT'],
             neutral60: theme.tailwind.colors['dark-monetr']['content']['emphasis'],
@@ -92,6 +94,7 @@ export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
           },
         }) }
         { ...props }
+        isDisabled={ props.disabled }
         styles={ {
           placeholder: (base: object) => ({
             ...base,
