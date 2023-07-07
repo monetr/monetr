@@ -34,11 +34,9 @@ export class AppConfiguration {
   }
 }
 
-export interface AppConfigurationWrapper {
-  result: AppConfiguration;
-}
-
-export type AppConfigurationResult = AppConfigurationWrapper & UseQueryResult<Partial<AppConfiguration>, unknown>;
+export type AppConfigurationResult =
+  { result: AppConfiguration | null }
+  & UseQueryResult<Partial<AppConfiguration>, unknown>;
 
 export function useAppConfigurationSink(): AppConfigurationResult {
   const result = useQuery<Partial<AppConfiguration>>('/config', {
@@ -48,7 +46,7 @@ export function useAppConfigurationSink(): AppConfigurationResult {
     refetchOnMount: false,
   });
   return {
-    result: new AppConfiguration(result.data),
+    result: (result?.data && new AppConfiguration(result.data)) || null,
     ...result,
   };
 }

@@ -16,9 +16,8 @@ import * as Sentry from '@sentry/react';
 import axios from 'axios';
 import { SnackbarProvider, VariantType } from 'notistack';
 
-import Application from 'Application';
-import clsx from 'clsx';
-import theme from 'theme';
+import Monetr from 'monetr';
+import theme, { newTheme } from 'theme';
 
 export default function Root(): JSX.Element {
   const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
@@ -60,27 +59,23 @@ export default function Root(): JSX.Element {
   });
 
   return (
-    <div className={ clsx('w-full h-full', {
-      'dark': theme.palette.mode === 'dark',
-    }) }>
-      <React.StrictMode>
-        <Sentry.ErrorBoundary>
-          <QueryClientProvider client={ queryClient }>
-            <Router>
-              <ThemeProvider theme={ theme }>
-                <LocalizationProvider dateAdapter={ AdapterMoment }>
-                  <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-                    <NiceModal.Provider>
-                      <CssBaseline />
-                      <Application />
-                    </NiceModal.Provider>
-                  </SnackbarProvider>
-                </LocalizationProvider>
-              </ThemeProvider>
-            </Router>
-          </QueryClientProvider>
-        </Sentry.ErrorBoundary>
-      </React.StrictMode>
-    </div>
+    <React.StrictMode>
+      <Sentry.ErrorBoundary>
+        <QueryClientProvider client={ queryClient }>
+          <Router>
+            <ThemeProvider theme={ newTheme }>
+              <LocalizationProvider dateAdapter={ AdapterMoment }>
+                <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+                  <NiceModal.Provider>
+                    <CssBaseline />
+                    <Monetr />
+                  </NiceModal.Provider>
+                </SnackbarProvider>
+              </LocalizationProvider>
+            </ThemeProvider>
+          </Router>
+        </QueryClientProvider>
+      </Sentry.ErrorBoundary>
+    </React.StrictMode>
   );
 }

@@ -14,9 +14,9 @@ export interface MCaptchaProps {
 
 export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   const formikContext = useFormikContext();
-  const { ReCAPTCHAKey } = useAppConfiguration();
+  const config = useAppConfiguration();
 
-  if (!props.show || !ReCAPTCHAKey) {
+  if (!props.show || !config?.ReCAPTCHAKey) {
     return null;
   }
 
@@ -42,7 +42,7 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   return (
     <div className={ classes }>
       {!loading && <ReCAPTCHA
-        sitekey={ ReCAPTCHAKey }
+        sitekey={ config.ReCAPTCHAKey }
         onChange={ onVerify }
       />}
       { loading && <CircularProgress /> }

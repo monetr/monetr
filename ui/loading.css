@@ -1,0 +1,31 @@
+.dot {
+  transform: translateX(0);
+  animation: dot 3.2s infinite;
+}
+
+.dots {
+  transform: translateX(0);
+  animation: dots 3.2s infinite;
+}
+
+.blobs {
+  filter: url("#magic");
+  gap: 2rem;
+}
+
+.blob {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 100%;
+}
+
+@keyframes dot {
+  50% {
+    transform: translateX(18rem);
+  }
+}
+@keyframes dots {
+  50% {
+    transform: translateX(-6rem);
+  }
+}

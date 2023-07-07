@@ -9,6 +9,10 @@ export default ({ config, mode }) => {
   // rspack and storybook actually need.
   config = {
     ...config,
+    experiments: {
+      ...config?.experiments,
+      incrementalRebuild: false,
+    },
     builtins: {
       ...config?.builtins,
       copy: {

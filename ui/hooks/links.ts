@@ -2,6 +2,8 @@ import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
 import { useQuery, useQueryClient, UseQueryResult } from 'react-query';
 import { useSnackbar } from 'notistack';
 
+import { useAuthenticationSink } from './useAuthentication';
+
 import { useBankAccounts } from 'hooks/bankAccounts';
 import Link from 'models/Link';
 import request from 'util/request';
@@ -11,7 +13,12 @@ export type LinksResult =
   & UseQueryResult<Array<Partial<Link>>>;
 
 export function useLinksSink(): LinksResult {
-  const result = useQuery<Array<Partial<Link>>>('/links');
+  const { result: { user } } = useAuthenticationSink();
+  const result = useQuery<Array<Partial<Link>>>(
+    '/links', {
+      // Only request links if there is an authenticated user.
+      enabled: !!user,
+    });
   return {
     ...result,
     result: new Map((result?.data || []).map(item => {

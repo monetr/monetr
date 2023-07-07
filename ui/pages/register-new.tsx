@@ -1,5 +1,9 @@
-import React from 'react';
-import { Formik, FormikErrors } from 'formik';
+import React, { useState } from 'react';
+import { useQueryClient } from 'react-query';
+import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
+import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { useSnackbar } from 'notistack';
 
 import MFormButton from 'components/MButton';
 import MCaptcha from 'components/MCaptcha';
@@ -10,18 +14,23 @@ import MLogo from 'components/MLogo';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import useSignUp, { SignUpResponse } from 'hooks/useSignUp';
+import { APIError } from 'util/request';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface RegisterValues {
+  agree: boolean;
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
+  captcha?: string;
   betaCode?: string;
 }
 
 const initialValues: RegisterValues = {
+  agree: false,
   firstName: '',
   lastName: '',
   email: '',
@@ -59,12 +68,28 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
   return errors;
 }
 
+export function RegisterSuccessful(): JSX.Element {
+  // TODO Add a link to return to the login page, or close this window maybe?
+  return (
+    <div className='w-full h-full flex justify-center items-center flex-col'>
+      <MLogo className='h-24 w-24' />
+      <MSpan className='text-xl font-medium max-w-md text-center'>
+        A verification message has been sent to your email address, please verify your email.
+      </MSpan>
+    </div>
+  );
+}
 
 export default function RegisterNew(): JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
   const config = useAppConfiguration();
+  const signUp = useSignUp();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [successful, setSuccessful] = useState(false);
 
   function BetaCodeInput(): JSX.Element {
-    if (!config.requireBetaCode) return null;
+    if (!config?.requireBetaCode) return null;
 
     return (
       <MTextField
@@ -78,11 +103,55 @@ export default function RegisterNew(): JSX.Element {
     );
   }
 
+  async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
+    helpers.setSubmitting(true);
+    return signUp({
+      agree: values.agree,
+      betaCode: values.betaCode,
+      captcha: values.captcha,
+      email: values.email,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      password: values.password,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    })
+      .then((result: SignUpResponse) => {
+        // After sending the sign up request, if the user needs to verify their email then the requires verification
+        // field will be true. We can stop here and just show the user a successful screen.
+        if (result.requireVerification) {
+          return setSuccessful(true);
+        }
+
+        return queryClient.invalidateQueries('/users/me')
+          .then(() => {
+            if (result.nextUrl) {
+              return navigate(result.nextUrl);
+            }
+
+            return navigate('/');
+          });
+      })
+      .catch((error: AxiosError<APIError>) => {
+        const message = error.response.data.error || 'Failed to sign up.';
+        enqueueSnackbar(message, {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
+      })
+      .finally(() => helpers.setSubmitting(false));
+  }
+
+  if (successful) {
+    return (
+      <RegisterSuccessful />
+    );
+  }
+
   return (
     <Formik
       initialValues={ initialValues }
       validate={ validator }
-      onSubmit={ () => {} }
+      onSubmit={ submit }
     >
       <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5">
         <div className="max-w-[96px] w-full">
@@ -138,7 +207,7 @@ export default function RegisterNew(): JSX.Element {
         <MCaptcha
           className='mb-1'
           name="captcha"
-          show={ Boolean(config.verifyRegister) }
+          show={ Boolean(config?.verifyRegister) }
         />
         <MCheckbox
           id="terms"

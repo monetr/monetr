@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Backdrop, CircularProgress } from '@mui/material';
 
 import useLogout from 'hooks/useLogout';
@@ -7,9 +6,8 @@ import useMountEffect from 'hooks/useMountEffect';
 
 export default function LogoutPage(): JSX.Element {
   const logout = useLogout();
-  const navigate = useNavigate();
   useMountEffect(() => {
-    logout().finally(() => navigate('/login'));
+    logout().finally(() => window.location.replace('/login'));
   });
 
   return (

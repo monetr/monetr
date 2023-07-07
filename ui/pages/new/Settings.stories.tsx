@@ -5,6 +5,7 @@ import Settings from './Settings';
 
 import { rest } from 'msw';
 import MonetrWrapper from 'pages/new';
+import { Route, Routes } from 'react-router-dom';
 
 
 const meta: Meta<typeof Settings> = {
@@ -151,4 +152,10 @@ export const Default: StoryObj<typeof Settings> = {
       <Settings />
     </MonetrWrapper>
   ),
+  parameters: {
+    reactRouter: {
+      routePath: '/*',
+      browserPath: '/settings',
+    },
+  },
 };
