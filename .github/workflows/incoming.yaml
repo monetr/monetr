@@ -15,8 +15,8 @@ jobs:
           fetch-depth: 0
       - uses: yesolutions/mirror-action@master
         with:
-          REMOTE: 'https://gitlab.com/spyoungtech/mirror-action.git'
-          GIT_USERNAME: spyoungtech
+          REMOTE: 'https://gitlab.com/monetr/monetr.git'
+          GIT_USERNAME: monetr
           GIT_PASSWORD: ${{ secrets.GITLAB_PUSH }}
 
   go_dependencies:
