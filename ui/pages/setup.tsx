@@ -46,12 +46,10 @@ interface GreetingProps {
 
 function Greeting(props: GreetingProps): JSX.Element {
   const [active, setActive] = useState<'plaid'|'manual'|null>(null);
-
-  // TODO Make this more compatible with portrait mode mobile.
   return (
-    <div className='w-full h-full flex justify-center items-center gap-8 flex-col overflow-hidden text-center'>
-      <MLogo className='w-24 h-24' />
-      <div className='flex flex-col justify-center items-center'>
+    <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto py-4'>
+      <MLogo className='w-16 h-16 md:w-24 md:h-24' />
+      <div className='flex flex-col justify-center items-center text-center'>
         <MSpan className='text-2xl font-medium'>
           Welcome to monetr!
         </MSpan>
@@ -59,7 +57,7 @@ function Greeting(props: GreetingProps): JSX.Element {
           Before we get started, please select how you would like to continue.
         </MSpan>
       </div>
-      <div className='flex gap-4'>
+      <div className='flex gap-4 flex-col md:flex-row p-2'>
         <OnboardingTile
           icon={ <LinkOutlined /> }
           name='Connected'
@@ -131,16 +129,20 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   const wrapperClasses = mergeTailwind(
     { [nonDisabled]: !props.comingSoon },
     { [disabled]: props.comingSoon },
+    'text-center',
     'flex',
-    'flex-col',
+    'flex-row',
+    'md:flex-col',
     'gap-4',
     'group',
-    'h-72',
+    'md:h-72',
+    'md:w-56',
     'items-center',
-    'p-4',
+    'p-2',
+    'py-4',
+    'md:p-4',
     'relative',
     'rounded-lg',
-    'w-56',
   );
 
   function handleClick() {
@@ -152,16 +154,17 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   return (
     <div className={ wrapperClasses } onClick={ handleClick }>
       { props.active && <CheckCircle className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' /> }
-      { React.cloneElement(props.icon, { className: 'w-16 h-16' }) }
-      <div className='flex flex-col gap-2 items-center h-full mt-4'>
+      { React.cloneElement(props.icon, { className: 'w-10 h-10 md:w-16 md:h-16' }) }
+      <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
         <MSpan className='text-lg font-medium'>
           { props.name }
         </MSpan>
         <MSpan variant='light'>
           { props.description }
         </MSpan>
+        { !props.comingSoon && <MSpan>&nbsp;</MSpan>}
         { props.comingSoon &&
-          <MSpan className='mt-5 font-medium'>
+          <MSpan className='md:mt-5 font-medium'>
             Coming Soon
           </MSpan>
         }

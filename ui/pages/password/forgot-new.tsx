@@ -101,6 +101,7 @@ export default function ForgotPasswordNew(): JSX.Element {
             variant="solid"
             role="form"
             type="submit"
+            className='w-full'
           >
             Reset Password
           </MFormButton>

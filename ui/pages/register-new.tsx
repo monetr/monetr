@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React, { useState } from 'react';
 import { useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
@@ -65,6 +66,7 @@ function validator(values: RegisterValues): FormikErrors<RegisterValues> {
     errors['confirmPassword'] = 'Password confirmation must match.';
   }
 
+  // TODO No restriction on agree?
   return errors;
 }
 
@@ -153,11 +155,11 @@ export default function RegisterNew(): JSX.Element {
       validate={ validator }
       onSubmit={ submit }
     >
-      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5">
+      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5 overflow-y-auto py-4">
         <div className="max-w-[96px] w-full">
           <MLogo />
         </div>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center text-center">
           <MSpan className='text-5xl'>
             Get Started
           </MSpan>
@@ -236,7 +238,7 @@ export default function RegisterNew(): JSX.Element {
             Sign Up
           </MFormButton>
         </div>
-        <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1 flex justify-center gap-1">
+        <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1 flex justify-center gap-1 flex-col md:flex-row items-center">
           <MSpan variant="light" className='text-sm'>Already have an account?</MSpan>
           <MLink to="/login" size="sm">Sign in instead</MLink>
         </div>
