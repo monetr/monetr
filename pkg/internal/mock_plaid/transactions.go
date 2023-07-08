@@ -9,7 +9,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/require"
 )
 

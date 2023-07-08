@@ -2,7 +2,7 @@ package mock_plaid
 
 import (
 	"fmt"
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/require"
 	"testing"
 )

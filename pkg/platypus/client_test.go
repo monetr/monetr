@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/mock_plaid"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/assert"
 )
 

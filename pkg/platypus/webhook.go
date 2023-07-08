@@ -11,7 +11,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/sirupsen/logrus"
 )
 

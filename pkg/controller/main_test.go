@@ -25,7 +25,7 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/monetr/monetr/pkg/stripe_helper"
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

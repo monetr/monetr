@@ -16,7 +16,7 @@ import (
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v3/plaid"
+	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -89,7 +89,7 @@ func after(span *sentry.Span, response *http.Response, err error, message, error
 		span.Status = sentry.SpanStatusOK
 	case plaid.GenericOpenAPIError:
 		span.Status = sentry.SpanStatusInternalError
-		var plaidError plaid.Error
+		var plaidError plaid.PlaidError
 		if jsonErr := json.Unmarshal(e.Body(), &plaidError); jsonErr != nil {
 			return errors.Wrap(err, errorMessage)
 		}
@@ -177,11 +177,11 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 				ClientUserId:             options.ClientUserID,
 				LegalName:                &options.LegalName,
 				PhoneNumber:              options.PhoneNumber,
-				PhoneNumberVerifiedTime:  options.PhoneNumberVerifiedTime,
+				PhoneNumberVerifiedTime:  *plaid.NewNullableTime(options.PhoneNumberVerifiedTime),
 				EmailAddress:             &options.EmailAddress,
-				EmailAddressVerifiedTime: options.EmailAddressVerifiedTime,
+				EmailAddressVerifiedTime: *plaid.NewNullableTime(options.EmailAddressVerifiedTime),
 				Ssn:                      nil,
-				DateOfBirth:              nil,
+				DateOfBirth:              *plaid.NewNullableString(nil),
 			},
 			Products:              &consts.PlaidProducts,
 			Webhook:               webhooksUrl,
