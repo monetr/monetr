@@ -5,8 +5,8 @@ stages:
 
 Test Container:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger"
-      when: never
+    - if: $CI_PIPELINE_SOURCE != "trigger"
+      when: always
   stage: Test
   image: ghcr.io/monetr/build-containers/debian:11.6-108-ge477eee
   tags:
@@ -16,7 +16,7 @@ Test Container:
 
 Test Go:
   rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger"
+    - if: $CI_PIPELINE_SOURCE != "trigger"
       when: never
   stage: Test
   image: ghcr.io/monetr/build-containers/golang:1.19.4
