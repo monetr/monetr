@@ -17,7 +17,7 @@ Test Container:
 Test Go:
   rules:
     - if: $CI_PIPELINE_SOURCE != "trigger"
-      when: never
+      when: always
   stage: Test
   image: ghcr.io/monetr/build-containers/golang:1.19.4
   variables:

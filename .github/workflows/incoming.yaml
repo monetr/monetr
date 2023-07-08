@@ -6,6 +6,22 @@ on:
       - main
 
 jobs:
+  gitlab:
+    name: GitLab
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: action-pack/gitlab-sync@v3
+        with:
+          username: monetr
+          url: https://gitlab.com/monetr/monetr.git
+          # url: ${{ secrets.GITLAB_URL }}
+          # username: ${{ secrets.GITLAB_USERNAME }}
+          # Personal access token from gitlab.com
+          token: ${{ secrets.GITLAB_PUSH }}
+
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
