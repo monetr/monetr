@@ -71,7 +71,7 @@ func MockCreateLinkTokenFailure(t *testing.T) {
 				require.Empty(t, createLinkTokenRequest.Products, "products array must be empty when updating a link")
 			}
 
-			return plaid.Error{
+			return plaid.PlaidError{
 				ErrorType:      "API_ERROR",
 				ErrorCode:      "INTERNAL_SERVER_ERROR",
 				DisplayMessage: *plaid.NewNullableString(myownsanity.StringP("Something went wrong.")),

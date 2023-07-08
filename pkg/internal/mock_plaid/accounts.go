@@ -131,7 +131,7 @@ func MockGetAccounts(t *testing.T, accounts []plaid.AccountBase) {
 	)
 }
 
-func MockGetAccountsError(t *testing.T, plaidError plaid.Error) {
+func MockGetAccountsError(t *testing.T, plaidError plaid.PlaidError) {
 	mock_http_helper.NewHttpMockJsonResponder(
 		t,
 		"POST", Path(t, "/accounts/get"),

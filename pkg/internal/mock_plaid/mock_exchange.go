@@ -2,13 +2,14 @@ package mock_plaid
 
 import (
 	"encoding/json"
+	"net/http"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/pkg/internal/mock_http_helper"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"testing"
 )
 
 // MockExchangePublicToken will create an httpmock responder for the development environment of plaid. It returns the
@@ -29,13 +30,13 @@ func MockExchangePublicToken(t *testing.T) string {
 
 			requestId := gofakeit.UUID()
 			if exchangeRequest.PublicToken != publicToken {
-				return plaid.Error{
+				return plaid.PlaidError{
 					RequestId:      &requestId,
 					ErrorType:      "INVALID_REQUEST",
 					ErrorCode:      "1234",
 					ErrorMessage:   "public_token is not valid",
 					DisplayMessage: *plaid.NewNullableString(myownsanity.StringP("public_token is not valid")),
-					Status:         *plaid.NewNullableFloat32(myownsanity.Float32P(float32(http.StatusBadRequest))),
+					Status:         *plaid.NewNullableInt32(myownsanity.Int32P(http.StatusBadRequest)),
 				}, http.StatusBadRequest
 			}
 
