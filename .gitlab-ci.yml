@@ -13,8 +13,10 @@ Dry:
     kubernetes:
       namespace: monetr-staging
   only:
-    refs:
-      - main
+    variables:
+      - $CI_PIPELINE_SOURCE == "trigger"
+#    refs:
+#      - main
   tags:
     - env:staging
   variables:
@@ -32,8 +34,10 @@ Deploy:
     kubernetes:
       namespace: monetr-staging
   only:
-    refs:
-      - main
+    variables:
+      - $CI_PIPELINE_SOURCE == "trigger"
+#    refs:
+#      - main
   tags:
     - env:staging
   variables:

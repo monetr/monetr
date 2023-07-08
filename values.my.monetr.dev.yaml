@@ -5,7 +5,8 @@ image:
   pullPolicy: Always
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
-imagePullSecrets: [ ]
+imagePullSecrets:
+  - containers-monetr-dev
 
 podAnnotations:
   prometheus.io/scrape: 'true'
@@ -65,7 +66,7 @@ api:
   beta:
     enableBetaCodes: true
   postgreSql:
-    address: postgres.acceptance.monetr.in
+    address: postgres
     port: 5432
     database: monetr
   email:
