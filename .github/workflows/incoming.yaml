@@ -6,6 +6,19 @@ on:
       - main
 
 jobs:
+  gitlab:
+    name: GitLab
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: yesolutions/mirror-action@master
+        with:
+          REMOTE: 'https://gitlab.com/spyoungtech/mirror-action.git'
+          GIT_USERNAME: spyoungtech
+          GIT_PASSWORD: ${{ secrets.GITLAB_PUSH }}
+
   go_dependencies:
     name: Go Dependencies
     runs-on: ubuntu-latest
