@@ -44,8 +44,6 @@ Dry:
     action: prepare
     name: Staging
     url: https://my.monetr.dev
-    kubernetes:
-      namespace: monetr-staging
 #  only
 #    refs:
 #      - main
@@ -53,6 +51,7 @@ Dry:
     - env:staging
   variables:
     ENVIRONMENT: my.monetr.dev
+    DEPLOY_NAMESPACE: monetr-staging
   script:
     - make dry
 
@@ -66,8 +65,6 @@ Deploy:
     deployment_tier: staging
     name: Staging
     url: https://my.monetr.dev
-    kubernetes:
-      namespace: monetr-staging
 #  only:
 #    variables:
 #      - $CI_PIPELINE_SOURCE == "trigger"
@@ -77,5 +74,6 @@ Deploy:
     - env:staging
   variables:
     ENVIRONMENT: my.monetr.dev
+    DEPLOY_NAMESPACE: monetr-staging
   script:
     - make deploy
