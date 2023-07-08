@@ -4,6 +4,9 @@ stages:
   - Deploy
 
 Test Go:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: never
   stage: Test
   image: ghcr.io/monetr/build-containers/golang:1.19.4
   variables:
@@ -22,6 +25,9 @@ Test Go:
 Dry:
   stage: Dry
   image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: always
   environment:
     deployment_tier: staging
     action: prepare
@@ -29,9 +35,7 @@ Dry:
     url: https://my.monetr.dev
     kubernetes:
       namespace: monetr-staging
-  only:
-    variables:
-      - $CI_PIPELINE_SOURCE == "trigger"
+#  only
 #    refs:
 #      - main
   tags:
@@ -44,15 +48,18 @@ Dry:
 Deploy:
   stage: Deploy
   image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger"
+      when: always
   environment:
     deployment_tier: staging
     name: Staging
     url: https://my.monetr.dev
     kubernetes:
       namespace: monetr-staging
-  only:
-    variables:
-      - $CI_PIPELINE_SOURCE == "trigger"
+#  only:
+#    variables:
+#      - $CI_PIPELINE_SOURCE == "trigger"
 #    refs:
 #      - main
   tags:
