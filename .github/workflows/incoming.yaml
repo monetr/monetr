@@ -383,7 +383,6 @@ jobs:
           echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
       - name: Trigger Deployment
         run: |
-          echo "${{ github.head_ref || github.ref_name }}";
           curl -X POST \
             --fail \
             -F token=${{ secrets.GITLAB_CI_TOKEN }} \
