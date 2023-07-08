@@ -12,8 +12,6 @@ podAnnotations:
   prometheus.io/scrape: 'true'
   prometheus.io/port: '9000'
 
-serviceAccountName: monetr
-
 service:
   port: 4000
 

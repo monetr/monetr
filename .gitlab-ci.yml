@@ -1,39 +1,8 @@
 stages:
-  - Test
   - Dry
   - Deploy
 
-Test Container:
-  rules:
-    - if: $CI_PIPELINE_SOURCE != "trigger"
-      when: always
-  stage: Test
-  image: ghcr.io/monetr/build-containers/debian:11.6-108-ge477eee
-  tags:
-    - monetr:shared
-  script:
-    - make container ENGINE=buildah
-
-Test Go:
-  rules:
-    - if: $CI_PIPELINE_SOURCE != "trigger"
-      when: always
-  stage: Test
-  image: ghcr.io/monetr/build-containers/golang:1.19.4
-  variables:
-    POSTGRES_HOST: postgres
-    POSTGRES_PASSWORD: "password"
-    POSTGRES_USER: api-testing
-    POSTGRES_DB: test-db
-    POSTGRES_HOST_AUTH_METHOD: trust
-  tags:
-    - monetr:shared
-  services:
-    - postgres:13
-  script:
-    - make test-go
-
-Dry:
+Dry Staging:
   stage: Dry
   image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
   rules:
@@ -44,9 +13,6 @@ Dry:
     action: prepare
     name: Staging
     url: https://my.monetr.dev
-#  only
-#    refs:
-#      - main
   tags:
     - env:staging
   variables:
@@ -55,7 +21,7 @@ Dry:
   script:
     - make dry
 
-Deploy:
+Deploy Staging:
   stage: Deploy
   image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
   rules:
@@ -65,11 +31,6 @@ Deploy:
     deployment_tier: staging
     name: Staging
     url: https://my.monetr.dev
-#  only:
-#    variables:
-#      - $CI_PIPELINE_SOURCE == "trigger"
-#    refs:
-#      - main
   tags:
     - env:staging
   variables:
