@@ -1,0 +1,134 @@
+replicaCount: 3
+
+image:
+  repository: containers.monetr.dev/monetr/monetr
+  pullPolicy: Always
+  tag: "" # Will be overwritten with the SHA for the commit of this deploy
+
+imagePullSecrets: [ ]
+
+podAnnotations:
+  prometheus.io/scrape: 'true'
+  prometheus.io/port: '9000'
+
+serviceAccountName: monetr
+
+service:
+  port: 4000
+
+ingress:
+  enabled: true
+  ingressClass: "nginx"
+  annotations:
+    cert-manager.io/issuer: "cloudflare"
+    cert-manager.io/issuer-kind: OriginIssuer
+    cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
+  hosts:
+    - host: my.monetr.dev
+      paths:
+        - path: /
+  tls:
+    - secretName: my-monetr-dev-tls
+      hosts:
+        - my.monetr.dev
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector:
+  kubernetes.io/os: linux
+  kubernetes.io/arch: amd64
+
+disruption:
+  enabled: false
+  maxUnavailable: 1
+  minAvailable: 1
+
+customEnvFrom:
+  - secretRef:
+      name: monetr-config-secrets
+
+api:
+  name: monetr
+  customEnv:
+    - name: MONETR_ENVIRONMENT
+      value: "my.monetr.dev"
+  uiDomainName: my.monetr.dev
+  apiDomainName: my.monetr.dev
+  allowSignUp: true
+  enableWebhooks: true # Will be deprecated soon.
+  beta:
+    enableBetaCodes: true
+  postgreSql:
+    address: postgres.acceptance.monetr.in
+    port: 5432
+    database: monetr
+  email:
+    enabled: true
+    domain: monetr.dev
+    forgotPassword:
+      enabled: true
+      tokenLifetime: 10m
+    verification:
+      enabled: true
+      tokenLifetime: 30m
+    smtp:
+      username: apikey
+      host: smtp.sendgrid.net
+      port: 587
+  sendGrid:
+    enabled: false
+    apiKey: ""
+    templates:
+      verifyEmailTemplate: ""
+      forgotPasswordTemplate: ""
+  reCaptcha:
+    enabled: true
+    verifyLogin: true
+    verifyRegister: true
+    verifyForgotPassword: true
+  plaid:
+    environment: "https://development.plaid.com"
+    enableReturningUserExperience: true
+    webhooksEnabled: true
+    webhooksDomain: my.monetr.dev
+    oauthDomain: my.monetr.dev
+    maxNumberOfLinks: 3
+  jwt:
+    loginExpiration: 14
+  cors:
+    allowedOrigins:
+      - "https://my.monetr.dev"
+    debug: false
+  redis:
+    enabled: true
+    address: redis.redis.svc.cluster.local
+    port: 6379
+  logging:
+    level: debug
+    format: json
+    stackDriver:
+      enabled: true
+  sentry:
+    enabled: true
+    sampleRate: 1.0
+    traceSampleRate: 1.0
+  keyManagement:
+    enabled: false
+  stripe:
+    enabled: false
+    webhooksEnabled: true # Still working on this for now.
+    billingEnabled: true
+    taxesEnabled: true
+    initialPlan:
+      freeTrialDays: 30
+      stripePriceId: price_1JGYV0I4uGGnwpgw3kkur7ze
+      features:
+        - ManualBudgeting
+        - LinkedBudgeting
+

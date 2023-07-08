@@ -1,0 +1,42 @@
+stages:
+  - Dry
+  - Deploy
+
+Dry:
+  stage: Dry
+  image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  environment:
+    deployment_tier: staging
+    action: prepare
+    name: Staging
+    url: https://my.monetr.dev
+    kubernetes:
+      namespace: monetr-staging
+  only:
+    refs:
+      - main
+  tags:
+    - env:staging
+  variables:
+    ENVIRONMENT: my.monetr.dev
+  script:
+    - make dry
+
+Deploy:
+  stage: Deploy
+  image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  environment:
+    deployment_tier: staging
+    name: Staging
+    url: https://my.monetr.dev
+    kubernetes:
+      namespace: monetr-staging
+  only:
+    refs:
+      - main
+  tags:
+    - env:staging
+  variables:
+    ENVIRONMENT: my.monetr.dev
+  script:
+    - make deploy
