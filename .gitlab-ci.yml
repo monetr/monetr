@@ -1,6 +1,22 @@
 stages:
+  - Test
   - Dry
   - Deploy
+
+Test Go:
+  stage: Test
+  image: ghcr.io/monetr/build-containers/golang:1.19.4
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PASSWORD: ""
+    POSTGRES_USER: api-testing
+    POSTGRES_DB: test-db
+  tags:
+    - monetr:shared
+  services:
+    - postgres:13
+  script:
+    - make test-go
 
 Dry:
   stage: Dry
