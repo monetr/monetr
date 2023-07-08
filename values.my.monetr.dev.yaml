@@ -6,7 +6,7 @@ image:
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
 imagePullSecrets:
-  - containers-monetr-dev
+  - name: containers-monetr-dev
 
 podAnnotations:
   prometheus.io/scrape: 'true'
@@ -90,8 +90,8 @@ api:
       forgotPasswordTemplate: ""
   reCaptcha:
     enabled: true
-    verifyLogin: true
-    verifyRegister: true
+    verifyLogin: false
+    verifyRegister: false
     verifyForgotPassword: true
   plaid:
     environment: "https://development.plaid.com"
@@ -108,7 +108,7 @@ api:
     debug: false
   redis:
     enabled: true
-    address: redis.redis.svc.cluster.local
+    address: redis
     port: 6379
   logging:
     level: debug
