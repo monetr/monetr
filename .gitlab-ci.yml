@@ -8,9 +8,10 @@ Test Go:
   image: ghcr.io/monetr/build-containers/golang:1.19.4
   variables:
     POSTGRES_HOST: postgres
-    POSTGRES_PASSWORD: ""
+    POSTGRES_PASSWORD: "password"
     POSTGRES_USER: api-testing
     POSTGRES_DB: test-db
+    POSTGRES_HOST_AUTH_METHOD: trust
   tags:
     - monetr:shared
   services:
