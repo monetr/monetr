@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.11](https://github.com/monetr/monetr/compare/v0.15.10...v0.15.11) (2023-07-09)
+
+
+### Bug Fixes
+
+* **build:** Tweaking new gitlab deployment ([080fd50](https://github.com/monetr/monetr/commit/080fd5054b92ff9fa74afaa3fb77384911c82a3e))
+
 ## [0.15.10](https://github.com/monetr/monetr/compare/v0.15.9...v0.15.10) (2023-07-09)
 
 
