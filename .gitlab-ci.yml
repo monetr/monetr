@@ -4,6 +4,7 @@ stages:
 
 Dry Staging:
   stage: Dry
+  needs: []
   image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.dev"
@@ -23,6 +24,7 @@ Dry Staging:
 
 Dry Production:
   stage: Dry
+  needs: []
   image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.app"
@@ -38,12 +40,14 @@ Dry Production:
     - monetr:deploy
     - env:production
   variables:
-    DEPLOY_NAMESPACE: monetr-staging
+    DEPLOY_NAMESPACE: monetr
   script:
     - make dry
 
 Deploy Staging:
   stage: Deploy
+  needs:
+    - "Dry Staging"
   image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.dev"
@@ -57,5 +61,28 @@ Deploy Staging:
     - env:staging
   variables:
     DEPLOY_NAMESPACE: monetr-staging
+  script:
+    - make deploy
+
+Deploy Production:
+  stage: Deploy
+  needs:
+    - "Dry Production"
+  image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.app"
+      when: always
+    - if: $CI_COMMIT_TAG == null || $CI_COMMIT_TAG == ""
+      when: never
+  environment:
+    deployment_tier: production
+    action: prepare
+    name: Production
+    url: https://my.monetr.app
+  tags:
+    - monetr:deploy
+    - env:production
+  variables:
+    DEPLOY_NAMESPACE: monetr
   script:
     - make deploy
