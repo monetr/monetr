@@ -94,7 +94,8 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 
 func (c *Controller) getSentryUI(ctx echo.Context) error {
 	if !c.configuration.Sentry.ExternalSentryEnabled() {
-		return c.notFound(ctx, "public sentry key is not enabled")
+		// If the UI sentry key is not enabled, then return no conent.
+		return ctx.NoContent(http.StatusNoContent)
 	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
