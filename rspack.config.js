@@ -67,6 +67,7 @@ module.exports = (env, argv) => {
     target: 'web',
     entry: './ui/index.tsx',
     output: {
+      publicPath: '/',
       path: path.resolve(__dirname, 'pkg/ui/static'),
       filename: isDevelopment ? 'assets/scripts/[name]_[contenthash].js' : 'assets/scripts/[contenthash].js',
       cssFilename: 'assets/styles/[contenthash].css',

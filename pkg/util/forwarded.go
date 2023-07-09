@@ -9,6 +9,8 @@ import (
 // GetForwardedFor will return the IP address provided by the request header X-Forwarded-For or X-Real-Ip.
 func GetForwardedFor(ctx echo.Context) string {
 	values := []string{
+		ctx.Request().Header.Get("Cf-Connecting-Ip"),
+		ctx.Request().Header.Get("X-Original-Forwarded-For"),
 		ctx.Request().Header.Get("X-Forwarded-For"),
 		ctx.Request().Header.Get("X-Real-Ip"),
 	}

@@ -7,9 +7,9 @@ deploy:
 else
 
 ifeq ($(ENV_LOWER),local)
-DEPLOY_NAMESPACE=default
+DEPLOY_NAMESPACE ?= default
 else
-DEPLOY_NAMESPACE=monetr
+DEPLOY_NAMESPACE ?= monetr
 endif
 
 dry: $(KUBECTL) $(GENERATED_YAML)

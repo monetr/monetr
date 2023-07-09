@@ -331,6 +331,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Save Tag Variable
+        id: tag
+        run: |
+          echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
       - uses: actions/download-artifact@v3
         name: Download Compiled UI Artifacts
         with:
@@ -345,37 +349,32 @@ jobs:
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      - name: Login to containers.monetr.dev
+        uses: docker/login-action@v1
+        with:
+          registry: containers.monetr.dev
+          username: ${{ secrets.CONTAINERS_MONETR_DEV_USERNAME }}
+          password: ${{ secrets.CONTAINERS_MONETR_DEV_PASSWORD }}
       - name: Build
         run: |
-          make container CONTAINER_REPOS=gcr.io/acceptance-327322/monetr
-      - name: Save Tag Variable
-        id: tag
-        run: |
-          echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
-      - uses: RafikFarhad/push-to-gcr-github-action@v4.1
-        with:
-          gcloud_service_key: ${{ secrets.GCR_CREDENTIALS }}
-          registry: gcr.io
-          project_id: acceptance-327322
-          image_name: monetr
-          image_tag: ${{ steps.tag.outputs.POST_TAG }}
-          push_only: true
+          make container ENGINE=docker CONTAINER_REPOS=containers.monetr.dev/monetr/monetr RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
+          make container-push ENGINE=docker CONTAINER_REPOS=containers.monetr.dev/monetr/monetr RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
 
   deploy:
     needs:
       - "go_test"
       - "docker"
-    name: Deploy my.monetr.dog
+    name: Deploy my.monetr.dev
     runs-on: ubuntu-latest
     steps:
       - uses: chrnorm/deployment-action@releases/v1
-        name: Create my.monetr.dog Deployment
+        name: Create my.monetr.dev Deployment
         id: deployment
         with:
           initial_status: pending
           token: "${{ github.token }}"
-          target_url: https://my.monetr.dog
-          environment: my.monetr.dog
+          target_url: https://my.monetr.dev
+          environment: my.monetr.dev
           ref: ${{ github.sha }}
       - uses: actions/checkout@v3
         with:
@@ -396,7 +395,16 @@ jobs:
           SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT: monetr
         with:
-          environment: 'my.monetr.dog'
+          environment: 'my.monetr.dev'
           version: 'v${{ steps.tag.outputs.POST_TAG }}'
           sourcemaps: './build/source_maps'
-          url_prefix: 'https://my.monetr.dog'
+          url_prefix: 'https://my.monetr.dev'
+      - name: Trigger Deployment
+        run: |
+          curl -X POST \
+            --fail \
+            -F token=${{ secrets.GITLAB_CI_TOKEN }} \
+            -F "ref=${{ github.head_ref || github.ref_name }}" \
+            -F "variables[ENVIRONMENT]=my.monetr.dev" \
+            -F "variables[RELEASE_VERSION]=${{ steps.tag.outputs.POST_TAG }}" \
+            https://gitlab.com/api/v4/projects/46647440/trigger/pipeline

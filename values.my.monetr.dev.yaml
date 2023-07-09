@@ -1,17 +1,16 @@
 replicaCount: 3
 
 image:
-  repository: gcr.io/acceptance-327322/monetr
+  repository: containers.monetr.dev/monetr/monetr
   pullPolicy: Always
   tag: "" # Will be overwritten with the SHA for the commit of this deploy
 
-imagePullSecrets: [ ]
+imagePullSecrets:
+  - name: containers-monetr-dev
 
 podAnnotations:
   prometheus.io/scrape: 'true'
   prometheus.io/port: '9000'
-
-serviceAccountName: monetr
 
 service:
   port: 4000
@@ -20,20 +19,17 @@ ingress:
   enabled: true
   ingressClass: "nginx"
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "X-Frame-Options: DENY";
-      more_set_headers "X-Content-Type-Options: nosniff";
-      more_set_headers "Referrer-Policy: same-origin";
-      more_set_headers "Permissions-Policy: accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), camera=(), cross-origin-isolated=(), display-capture=(), document-domain=(), encrypted-media=(), execution-while-not-rendered=(), execution-while-out-of-viewport=(), fullscreen=(), geolocation=(), gyroscope=(), keyboard-map=(), magnetometer=(), microphone=(), midi=(), navigation-override=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), sync-xhr=(), usb=(), web-share=(), xr-spatial-tracking=(), clipboard-read=(), clipboard-write=(), gamepad=(), speaker-selection=()";
+    cert-manager.io/issuer: "cloudflare"
+    cert-manager.io/issuer-kind: OriginIssuer
+    cert-manager.io/issuer-group: cert-manager.k8s.cloudflare.com
   hosts:
-    - host: my.monetr.dog
+    - host: my.monetr.dev
       paths:
         - path: /
   tls:
-    - secretName: my-monetr-dog-tls
+    - secretName: my-monetr-dev-tls
       hosts:
-        - my.monetr.dog
+        - my.monetr.dev
 
 resources:
   limits:
@@ -60,15 +56,15 @@ api:
   name: monetr
   customEnv:
     - name: MONETR_ENVIRONMENT
-      value: "my.monetr.dog"
-  uiDomainName: my.monetr.dog
-  apiDomainName: my.monetr.dog
+      value: "my.monetr.dev"
+  uiDomainName: my.monetr.dev
+  apiDomainName: my.monetr.dev
   allowSignUp: true
   enableWebhooks: true # Will be deprecated soon.
   beta:
     enableBetaCodes: true
   postgreSql:
-    address: postgres.acceptance.monetr.in
+    address: postgres
     port: 5432
     database: monetr
   email:
@@ -92,25 +88,25 @@ api:
       forgotPasswordTemplate: ""
   reCaptcha:
     enabled: true
-    verifyLogin: true
-    verifyRegister: true
+    verifyLogin: false
+    verifyRegister: false
     verifyForgotPassword: true
   plaid:
     environment: "https://development.plaid.com"
     enableReturningUserExperience: true
     webhooksEnabled: true
-    webhooksDomain: my.monetr.dog
-    oauthDomain: my.monetr.dog
+    webhooksDomain: my.monetr.dev
+    oauthDomain: my.monetr.dev
     maxNumberOfLinks: 3
   jwt:
     loginExpiration: 14
   cors:
     allowedOrigins:
-      - "https://my.monetr.dog"
+      - "https://my.monetr.dev"
     debug: false
   redis:
     enabled: true
-    address: redis.redis.svc.cluster.local
+    address: redis
     port: 6379
   logging:
     level: debug
@@ -122,10 +118,7 @@ api:
     sampleRate: 1.0
     traceSampleRate: 1.0
   keyManagement:
-    enabled: true
-    provider: google
-    google:
-      resourceName: projects/acceptance-327322/locations/us/keyRings/monetr-acceptance-327322-monetr-in/cryptoKeys/monetr-secrets-monetr-acceptance-327322-monetr-in
+    enabled: false
   stripe:
     enabled: false
     webhooksEnabled: true # Still working on this for now.
