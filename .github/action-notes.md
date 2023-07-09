@@ -46,3 +46,22 @@ Caching built container image.
     path: '${{ github.workspace }}/rest-api.container.tar'
     retention-days: 7
 ```
+
+
+## Mirroring
+
+```yaml
+
+gitlab:
+  name: GitLab
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - uses: yesolutions/mirror-action@master
+      with:
+        REMOTE: 'https://gitlab.com/monetr/monetr.git'
+        GIT_USERNAME: monetr
+        GIT_PASSWORD: ${{ secrets.GITLAB_PUSH }}
+```
