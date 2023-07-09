@@ -33,11 +33,11 @@ ingress:
 
 resources:
   limits:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 200m
+    memory: 512Mi
   requests:
     cpu: 50m
-    memory: 64Mi
+    memory: 256Mi
 
 nodeSelector:
   kubernetes.io/os: linux
