@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.15.10](https://github.com/monetr/monetr/compare/v0.15.9...v0.15.10) (2023-07-09)
+
+
+### Features
+
+* **api:** Adding an endpoint to request a single spending object. ([4e18a82](https://github.com/monetr/monetr/commit/4e18a825d2adce4aafb340c4ed04857568a75944))
+* **deploy:** Switching to GitLab for deployments ([#1474](https://github.com/monetr/monetr/issues/1474)) ([66aef0b](https://github.com/monetr/monetr/commit/66aef0b94c780f76d4a0f190bf8cd0f315410aa7))
+
+
+### Bug Fixes
+
+* **api:** Fixed institution API bug, bumped plaid to v14 ([67d26b3](https://github.com/monetr/monetr/commit/67d26b357d04e1af0e3b1c6c1f993c233f01d748)), closes [#1472](https://github.com/monetr/monetr/issues/1472)
+* **test:** Fixed test failures from plaid upgrade. ([bce914e](https://github.com/monetr/monetr/commit/bce914ecd24a03a62cadb0f6b41e7127e6b0d0c0))
+
+
+### Miscellaneous
+
+* **deps:** bump tough-cookie from 4.1.2 to 4.1.3 ([#1473](https://github.com/monetr/monetr/issues/1473)) ([fcb8944](https://github.com/monetr/monetr/commit/fcb8944a5e647260c1f223bb91e5a53c5abb06df))
+
 ## [0.15.9](https://github.com/monetr/monetr/compare/v0.15.8...v0.15.9) (2023-07-06)
 
 
