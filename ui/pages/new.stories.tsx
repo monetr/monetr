@@ -22,6 +22,37 @@ const meta: Meta<typeof MonetrWrapper> = {
             iconsEnabled: true,
           }));
         }),
+        rest.get('/api/users/me', (_req, res, ctx) => {
+          return res(ctx.json({
+            'hasSubscription': true,
+            'isActive': true,
+            'isSetup': true,
+            'user': {
+              'account': {
+                'accountId': 1,
+                'subscriptionActiveUntil': '2023-07-26T00:31:38Z',
+                'subscriptionStatus': 'active',
+                'timezone': 'America/Chicago',
+              },
+              'accountId': 1,
+              'firstName': 'Elliot',
+              'lastName': 'Courant',
+              'login': {
+                'email': 'email@email.com',
+                'emailVerifiedAt': '2022-09-25T00:24:25.976514Z',
+                'firstName': 'Elliot',
+                'isEmailVerified': true,
+                'isPhoneVerified': false,
+                'lastName': 'Courant',
+                'loginId': 1,
+                'passwordResetAt': null,
+                'totpEnabledAt': null,
+              },
+              'loginId': 1,
+              'userId': 1,
+            },
+          }));
+        }),
         rest.get('/api/institutions/ins_15', (_req, res, ctx) => {
           return res(ctx.json({
             'institutionId': 'ins_15',

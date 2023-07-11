@@ -20,6 +20,37 @@ const meta: Meta<typeof ExpenseDetails> = {
             iconsEnabled: true,
           }));
         }),
+        rest.get('/api/users/me', (_req, res, ctx) => {
+          return res(ctx.json({
+            'hasSubscription': true,
+            'isActive': true,
+            'isSetup': true,
+            'user': {
+              'account': {
+                'accountId': 1,
+                'subscriptionActiveUntil': '2023-07-26T00:31:38Z',
+                'subscriptionStatus': 'active',
+                'timezone': 'America/Chicago',
+              },
+              'accountId': 1,
+              'firstName': 'Elliot',
+              'lastName': 'Courant',
+              'login': {
+                'email': 'email@email.com',
+                'emailVerifiedAt': '2022-09-25T00:24:25.976514Z',
+                'firstName': 'Elliot',
+                'isEmailVerified': true,
+                'isPhoneVerified': false,
+                'lastName': 'Courant',
+                'loginId': 1,
+                'passwordResetAt': null,
+                'totpEnabledAt': null,
+              },
+              'loginId': 1,
+              'userId': 1,
+            },
+          }));
+        }),
         rest.get('/api/institutions/ins_15', (_req, res, ctx) => {
           return res(ctx.json({
             'institutionId': 'ins_15',
@@ -1338,10 +1369,19 @@ export const ExpenseDetailCloudProduction: StoryObj<typeof ExpenseDetails> = {
   render: () => (
     <MonetrWrapper>
       <BankView>
-        <ExpenseDetails spendingId={ 191 } />
+        <ExpenseDetails />
       </BankView>
     </MonetrWrapper>
   ),
+  parameters: {
+    reactRouter: {
+      routePath: '/expenses/:spendingId/details',
+      browserPath: '/expenses/191/details',
+      routeParams: {
+        spendingId: 191,
+      }
+    },
+  },
 };;
 
 export const ExpenseDetailGitLab: StoryObj<typeof ExpenseDetails> = {
@@ -1349,8 +1389,17 @@ export const ExpenseDetailGitLab: StoryObj<typeof ExpenseDetails> = {
   render: () => (
     <MonetrWrapper>
       <BankView>
-        <ExpenseDetails spendingId={ 63 } />
+        <ExpenseDetails />
       </BankView>
     </MonetrWrapper>
   ),
+  parameters: {
+    reactRouter: {
+      routePath: '/expenses/:spendingId/details',
+      browserPath: '/expenses/63/details',
+      routeParams: {
+        spendingId: 63,
+      }
+    },
+  },
 };;

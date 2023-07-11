@@ -26,6 +26,7 @@ interface ExpenseValues {
 
 export default function ExpenseDetails(): JSX.Element {
   const { spendingId } = useParams();
+  console.log(spendingId);
 
   const spending = useSpending(spendingId && +spendingId);
   const { result: fundingSchedules } = useFundingSchedulesSink();
