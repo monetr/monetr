@@ -20,6 +20,7 @@ export const Default: StoryObj<typeof LoginPage> = {
           return res(ctx.json({
             allowForgotPassword: true,
             allowSignUp: true,
+            verifyLogin: false,
           }));
         }),
         rest.post('/api/authentication/login', (_req, res, ctx) => {

@@ -50,7 +50,7 @@ export default function LoginNew(): JSX.Element {
 
   function ForgotPasswordButton(): JSX.Element {
     // If the application is not configured to allow forgot password then don't show the button.
-    if (!config.allowForgotPassword) {
+    if (!config?.allowForgotPassword) {
       return null;
     }
 
@@ -62,7 +62,7 @@ export default function LoginNew(): JSX.Element {
   }
 
   function SignUpButton(): JSX.Element {
-    if (!config.allowSignUp) return null;
+    if (!config?.allowSignUp) return null;
 
     return (
       <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
@@ -116,7 +116,7 @@ export default function LoginNew(): JSX.Element {
         />
         <MCaptcha
           name="captcha"
-          show={ Boolean(config.verifyLogin) }
+          show={ Boolean(config?.verifyLogin) }
         />
         <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
           <MFormButton
