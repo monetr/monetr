@@ -10,7 +10,7 @@ import mergeTailwind from 'util/mergeTailwind';
 import { Link, useLocation, useParams } from 'react-router-dom';
 
 export default function BudgetingSidebar(): JSX.Element {
-  const { bankAccount, isLoading, isError } = useSelectedBankAccount();
+  const { result: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const balance = useCurrentBalance();
 
   if (isLoading)  {
@@ -35,10 +35,10 @@ export default function BudgetingSidebar(): JSX.Element {
           <span className='cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
             <AccountBalanceOutlined />
             <span className='text-ellipsis whitespace-nowrap overflow-hidden'>
-              { bankAccount.name }
+              { bankAccount?.name }
             </span>
             <span className='ml-auto text-xs dark:bg-dark-monetr-brand dark:text-dark-monetr-content-emphasis rounded-sm py-0.5 px-1'>
-              { bankAccount.mask }
+              { bankAccount?.mask }
             </span>
             <KeyboardArrowDown />
           </span>
@@ -84,11 +84,11 @@ export default function BudgetingSidebar(): JSX.Element {
             <HomeOutlined />
             Overview
           </NavigationItem>
-          <NavigationItem to='/transactions'>
+          <NavigationItem to='../transactions'>
             <ShoppingCartOutlined />
             Transactions
           </NavigationItem>
-          <NavigationItem to='/expenses'>
+          <NavigationItem to='../expenses'>
             <PriceCheckOutlined />
             Expenses
             <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
@@ -146,7 +146,7 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   ]);
 
   return (
-    <Link className={ className } to={ props.to }>
+    <Link className={ className } to={ props.to } relative='path'>
       {props.children}
     </Link>
   );

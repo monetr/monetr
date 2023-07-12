@@ -1,4 +1,12 @@
-import { InfiniteData, useInfiniteQuery, UseInfiniteQueryResult, useMutation, useQueryClient } from 'react-query';
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  UseInfiniteQueryResult,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from 'react-query';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import Balance from 'models/Balance';
@@ -19,7 +27,7 @@ export function useTransactionsSink(): TransactionsResult {
     `/bank_accounts/${ selectedBankAccountId }/transactions`,
     {
       getNextPageParam: (_, pages) => pages.length * 25,
-      keepPreviousData: true,
+      // keepPreviousData: true,
       enabled: !!selectedBankAccountId,
     },
   );
@@ -28,6 +36,26 @@ export function useTransactionsSink(): TransactionsResult {
     hasNextPage: !result?.data?.pages.some(page => page.length < 25),
     // Take all the pages and build an array. Make sure we actually return an array here even if it's empty.
     result: result?.data?.pages.flatMap(x => x).map(item => new Transaction(item)) || [],
+  };
+}
+
+export type TransactionResult =
+  { result: Transaction | null }
+  & UseQueryResult<Partial<Transaction>>;
+
+export function useTransaction(transactionId: number | null): TransactionResult {
+  const selectedBankAccountId = useSelectedBankAccountId();
+
+  const result = useQuery<Partial<Transaction>>(
+    `/bank_accounts/${ selectedBankAccountId }/transactions/${ transactionId }`,
+    {
+      enabled: !!selectedBankAccountId && !!transactionId,
+    },
+  );
+
+  return {
+    ...result,
+    result: result?.data && new Transaction(result.data),
   };
 }
 

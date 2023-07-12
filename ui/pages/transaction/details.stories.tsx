@@ -2,14 +2,15 @@
 import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 
-import ExpenseDetails from './details';
+import TransactionDetails from './details';
 
 import { rest } from 'msw';
 import MonetrWrapper, { BankView } from 'pages/new';
 
-const meta: Meta<typeof ExpenseDetails> = {
-  title: 'New UI/Expense',
-  component: ExpenseDetails,
+
+const meta: Meta<typeof TransactionDetails> = {
+  title: 'New UI/Transaction',
+  component: TransactionDetails,
   parameters: {
     msw: {
       handlers: [
@@ -1352,54 +1353,14 @@ const meta: Meta<typeof ExpenseDetails> = {
 
 export default meta;
 
-export const NoExpense: StoryObj<typeof ExpenseDetails> = {
-  name: 'No Expense',
 
+export const NoTransaction: StoryObj<typeof TransactionDetails> = {
+  name: 'No Transaction',
   render: () => (
     <MonetrWrapper>
       <BankView>
-        <ExpenseDetails />
+        <TransactionDetails />
       </BankView>
     </MonetrWrapper>
   ),
-};
-
-export const ExpenseDetailCloudProduction: StoryObj<typeof ExpenseDetails> = {
-  name: 'Expense Detail (Cloud Production)',
-  render: () => (
-    <MonetrWrapper>
-      <BankView>
-        <ExpenseDetails />
-      </BankView>
-    </MonetrWrapper>
-  ),
-  parameters: {
-    reactRouter: {
-      routePath: '/expenses/:spendingId/details',
-      browserPath: '/expenses/191/details',
-      routeParams: {
-        spendingId: 191,
-      },
-    },
-  },
-};
-
-export const ExpenseDetailGitLab: StoryObj<typeof ExpenseDetails> = {
-  name: 'Expense Detail (GitLab)',
-  render: () => (
-    <MonetrWrapper>
-      <BankView>
-        <ExpenseDetails />
-      </BankView>
-    </MonetrWrapper>
-  ),
-  parameters: {
-    reactRouter: {
-      routePath: '/expenses/:spendingId/details',
-      browserPath: '/expenses/63/details',
-      routeParams: {
-        spendingId: 63,
-      },
-    },
-  },
 };

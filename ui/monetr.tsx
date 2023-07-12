@@ -8,6 +8,7 @@ import Loading from 'loading';
 import SubscribePage from 'pages/account/subscribe';
 import AfterCheckoutPage from 'pages/account/subscribe/after';
 import ConfigError from 'pages/error/config';
+import ExpenseDetails from 'pages/expense/details';
 import LoginNew from 'pages/login-new';
 import LogoutPage from 'pages/logout';
 import BankSidebar from 'pages/new/BankSidebar';
@@ -18,7 +19,9 @@ import ForgotPasswordNew from 'pages/password/forgot-new';
 import RegisterNew from 'pages/register-new';
 import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
+import TransactionDetails from 'pages/transaction/details';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
+import { useSelectedBankAccount } from 'hooks/bankAccounts';
 
 export default function Monetr(): JSX.Element {
   const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
@@ -69,19 +72,22 @@ export default function Monetr(): JSX.Element {
     );
   }
 
+  // TODO Fix banksidebar issue by moving it into the godless react router routes
   return (
     <div className='w-full h-full dark:bg-dark-monetr-background flex'>
       <BankSidebar />
       <div className='w-full h-full flex min-w-0'>
         <Routes>
-          <Route element={ <BudgetingLayout /> }>
-            <Route path='/transactions' element={ <TransactionList /> } />
-            <Route path='/expenses' element={ <ExpenseList /> } />
+          <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
+            <Route path='transactions' element={ <TransactionList /> } />
+            <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
+            <Route path='expenses' element={ <ExpenseList /> } />
+            <Route path='expenses/:spendingId/details' element={ <ExpenseDetails /> } />
           </Route>
           <Route path='/settings' element={ <SettingsPage /> } />
           <Route path="/logout" element={ <LogoutPage /> } />
           <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
-          <Route path="/setup" element={ <Navigate replace to="/transactions" /> } />
+          <Route path="/setup" element={ <Navigate replace to="/" /> } />
           <Route index path="/" element={ <Navigate replace to="/transactions" /> } />
         </Routes>
       </div>
@@ -90,6 +96,8 @@ export default function Monetr(): JSX.Element {
 }
 
 function BudgetingLayout(): JSX.Element {
+  const { result: bankAccount } = useSelectedBankAccount();
+  console.log('alt', bankAccount);
   return (
     <Fragment>
       <BudgetingSidebar />

@@ -398,11 +398,13 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.GET("/institutions/:institutionId", c.getInstitutionDetails)
 	// Bank Accounts
 	billed.GET("/bank_accounts", c.getBankAccounts)
+	billed.GET("/bank_accounts/:bankAccountId", c.getBankAccount)
 	billed.PUT("/bank_accounts/:bankAccountId", c.putBankAccounts)
 	billed.GET("/bank_accounts/:bankAccountId/balances", c.getBalances)
 	billed.POST("/bank_accounts", c.postBankAccounts)
 	// Transactions
 	billed.GET("/bank_accounts/:bankAccountId/transactions", c.getTransactions)
+	billed.GET("/bank_accounts/:bankAccountId/transactions/:transactionId", c.getTransactionById)
 	billed.GET("/bank_accounts/:bankAccountId/transactions/spending/:spendingId", c.getTransactionsForSpending)
 	billed.POST("/bank_accounts/:bankAccountId/transactions", c.postTransactions)
 	billed.PUT("/bank_accounts/:bankAccountId/transactions/:transactionId", c.putTransactions)

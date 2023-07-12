@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
-import React, { Fragment } from 'react';
+import React from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, HeartBroken, MenuOutlined, PriceCheckOutlined, SaveOutlined } from '@mui/icons-material';
 import { Formik } from 'formik';
 
@@ -14,7 +15,6 @@ import MTextField from 'components/MTextField';
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 import { useSpending } from 'hooks/spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
-import { Link, useParams } from 'react-router-dom';
 
 interface ExpenseValues {
   name: string;
@@ -26,7 +26,6 @@ interface ExpenseValues {
 
 export default function ExpenseDetails(): JSX.Element {
   const { spendingId } = useParams();
-  console.log(spendingId);
 
   const spending = useSpending(spendingId && +spendingId);
   const { result: fundingSchedules } = useFundingSchedulesSink();

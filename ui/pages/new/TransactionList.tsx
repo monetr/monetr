@@ -53,22 +53,11 @@ export default function TransactionList(): JSX.Element {
     )(transactions);
   }
 
-  function TransactionListFooter(): JSX.Element {
-    const loaderRef = (loading || hasNextPage) ? sentryRef : undefined;
-    let message = 'No more transactions...';
-    if (loading) {
-      message = 'Loading...';
-    } else if (hasNextPage) {
-      message = 'Load more?';
-    }
-
-    return (
-      <li ref={ loaderRef }>
-        <div className="w-full flex justify-center p-5 opacity-70">
-          <h1>{ message }</h1>
-        </div>
-      </li>
-    );
+  let message = 'No more transactions...';
+  if (loading) {
+    message = 'Loading...';
+  } else if (hasNextPage) {
+    message = 'Load more?';
   }
 
   return (
@@ -83,7 +72,27 @@ export default function TransactionList(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0'>
         <ul className='w-full'>
           <TransactionItems />
-          <TransactionListFooter />
+          { loading && (
+            <li ref={ sentryRef }>
+              <div className="w-full flex justify-center p-5 opacity-70">
+                <h1>{ message }</h1>
+              </div>
+            </li>
+          ) }
+          { (!loading && hasNextPage) && (
+            <li ref={ sentryRef }>
+              <div className="w-full flex justify-center p-5 opacity-70">
+                <h1>{ message }</h1>
+              </div>
+            </li>
+          ) }
+          { (!loading && !hasNextPage) && (
+            <li>
+              <div className="w-full flex justify-center p-5 opacity-70">
+                <h1>{ message }</h1>
+              </div>
+            </li>
+          ) }
         </ul>
       </div>
     </Fragment>

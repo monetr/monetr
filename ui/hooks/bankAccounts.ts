@@ -4,6 +4,7 @@ import shallow from 'zustand/shallow';
 import { useLinks } from 'hooks/links';
 import useStore from 'hooks/store';
 import BankAccount from 'models/BankAccount';
+import { useLocation, useParams } from 'react-router-dom';
 
 export type BankAccountsResult =
   { result: Map<number, BankAccount> }
@@ -34,47 +35,37 @@ export interface SelectedBankAccountResult {
   bankAccount: BankAccount | null;
 }
 
-export function useSelectedBankAccount(): SelectedBankAccountResult {
-  const { selectedBankAccountId, setCurrentBankAccount } = useStore(state => ({
-    selectedBankAccountId: state.selectedBankAccountId,
-    setCurrentBankAccount: state.setCurrentBankAccount,
-  }), shallow);
-  const { isError, isLoading, result: bankAccounts } = useBankAccountsSink();
-  if (isLoading || isError) {
-    return {
-      isLoading,
-      isError,
-      bankAccount: null,
-    };
-  }
+export type CurrentBankAccountResult =
+  { result: BankAccount | null }
+  & UseQueryResult<Partial<BankAccount>>;
 
-  if (!bankAccounts.has(selectedBankAccountId)) {
-    if (bankAccounts.size === 0) {
-      return {
-        isLoading: false,
-        isError: true,
-        bankAccount: null,
-      };
+export function useSelectedBankAccount(): CurrentBankAccountResult {
+  const location = useLocation();
+  const { bankAccountId: id } = useParams();
+  const bankAccountId = +id || null;
+  // If we do not have a valid numeric bank account ID, but an ID was specified then something is wrong.
+  // if (!bankAccountId && id) {
+  //   throw Error(`invalid bank account ID specified: "${id}" is not a valid bank account ID`);
+  // }
+
+  const result = useQuery<Partial<BankAccount>>(
+    `/bank_accounts/${ bankAccountId }`,
+    {
+      enabled: !!bankAccountId && !!location, // Only request if we have a valid numeric bank account ID to work with.
     }
+  );
 
-    const id = Array.from(bankAccounts.keys())[0];
-    setCurrentBankAccount(id);
-    return {
-      isLoading: false,
-      isError: false,
-      bankAccount: bankAccounts.get(id),
-    };
-  }
-
-  return {
-    isLoading: false,
-    isError: false,
-    bankAccount: bankAccounts.get(selectedBankAccountId),
+  const thing = {
+    ...result,
+    result: !!result.data ? new BankAccount(result.data) : null,
   };
+
+  console.log('producer', thing, !!bankAccountId);
+  return thing;
 }
 
 export function useSelectedBankAccountId(): number | null {
-  const { bankAccount } = useSelectedBankAccount();
+  const { result: bankAccount } = useSelectedBankAccount();
 
   return bankAccount?.bankAccountId || null;
 }

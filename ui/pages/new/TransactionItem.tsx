@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
 import TransactionMerchantIcon from './TransactionMerchantIcon';
@@ -14,6 +15,7 @@ export interface TransactionItemProps {
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
   const spending = useSpending(transaction.spendingId);
+  const navigate = useNavigate();
 
   const amountClassnames = mergeTailwind(
     {
@@ -26,6 +28,10 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
 
   interface BudgetingInfoProps {
     className: string;
+  }
+
+  function openDetails() {
+    navigate(`/transactions/${transaction.transactionId}/details`);
   }
 
   function BudgetingInfo(props: BudgetingInfoProps): JSX.Element {
@@ -97,7 +103,10 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
           <span className={ amountClassnames }>
             { transaction.getAmountString() }
           </span>
-          <KeyboardArrowRight className='dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis flex-none md:cursor-pointer' />
+          <KeyboardArrowRight
+            className='dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis flex-none md:cursor-pointer'
+            onClick={ openDetails }
+          />
         </div>
       </div>
     </li>

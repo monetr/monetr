@@ -2,11 +2,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AccountBalance } from '@mui/icons-material';
-import shallow from 'zustand/shallow';
 
 import { useBankAccountsSink, useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useInstitution } from 'hooks/institutions';
-import useStore from 'hooks/store';
 import Link from 'models/Link';
 import mergeTailwind from 'util/mergeTailwind';
 
@@ -16,19 +14,20 @@ interface BankSidebarItemProps {
 
 export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Element {
   const { result: institution } = useInstitution(link.plaidInstitutionId);
-  const { bankAccount } = useSelectedBankAccount();
+  const floogawooga = useSelectedBankAccount();
   const { result: bankAccounts } = useBankAccountsSink();
   const navigate = useNavigate();
-  const { setCurrentBankAccount } = useStore(state => ({
-    setCurrentBankAccount: state.setCurrentBankAccount,
-  }), shallow);
-  const active = bankAccount?.linkId === link.linkId;
+  const active = floogawooga.result?.linkId === link.linkId;
+  console.log('consumer', {
+    floogawooga,
+    bankAccount: floogawooga.result,
+    link,
+  });
 
   function onClick() {
     const newSelectedBankAccount = Array.from(bankAccounts.values()).find(bankAccount => bankAccount.linkId === link.linkId);
     if (newSelectedBankAccount?.bankAccountId) {
-      setCurrentBankAccount(newSelectedBankAccount.bankAccountId);
-      navigate('/transactions');
+      navigate(`/bank/${ newSelectedBankAccount.bankAccountId}/transactions`);
       return;
     }
     console.warn('no bank account could be selected, something is wrong');
