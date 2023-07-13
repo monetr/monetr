@@ -1,10 +1,8 @@
 import { useQuery, UseQueryResult } from 'react-query';
-import shallow from 'zustand/shallow';
+import { useMatch } from 'react-router-dom';
 
 import { useLinks } from 'hooks/links';
-import useStore from 'hooks/store';
 import BankAccount from 'models/BankAccount';
-import { useLocation, useParams } from 'react-router-dom';
 
 export type BankAccountsResult =
   { result: Map<number, BankAccount> }
@@ -40,28 +38,25 @@ export type CurrentBankAccountResult =
   & UseQueryResult<Partial<BankAccount>>;
 
 export function useSelectedBankAccount(): CurrentBankAccountResult {
-  const location = useLocation();
-  const { bankAccountId: id } = useParams();
-  const bankAccountId = +id || null;
+  const match = useMatch('/bank/:bankId/*');
+  const bankAccountId = +match?.params?.bankId || null;
+
   // If we do not have a valid numeric bank account ID, but an ID was specified then something is wrong.
-  // if (!bankAccountId && id) {
-  //   throw Error(`invalid bank account ID specified: "${id}" is not a valid bank account ID`);
-  // }
+  if (!bankAccountId && match?.params?.bankId) {
+    throw Error(`invalid bank account ID specified: "${match?.params?.bankId}" is not a valid bank account ID`);
+  }
 
   const result = useQuery<Partial<BankAccount>>(
     `/bank_accounts/${ bankAccountId }`,
     {
-      enabled: !!bankAccountId && !!location, // Only request if we have a valid numeric bank account ID to work with.
+      enabled: !!bankAccountId, // Only request if we have a valid numeric bank account ID to work with.
     }
   );
 
-  const thing = {
+  return {
     ...result,
     result: !!result.data ? new BankAccount(result.data) : null,
   };
-
-  console.log('producer', thing, !!bankAccountId);
-  return thing;
 }
 
 export function useSelectedBankAccountId(): number | null {

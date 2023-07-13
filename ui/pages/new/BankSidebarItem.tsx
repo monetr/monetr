@@ -18,11 +18,11 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   const { result: bankAccounts } = useBankAccountsSink();
   const navigate = useNavigate();
   const active = floogawooga.result?.linkId === link.linkId;
-  console.log('consumer', {
-    floogawooga,
-    bankAccount: floogawooga.result,
-    link,
-  });
+  // console.log('consumer', {
+  //   floogawooga,
+  //   bankAccount: floogawooga.result,
+  //   link,
+  // });
 
   function onClick() {
     const newSelectedBankAccount = Array.from(bankAccounts.values()).find(bankAccount => bankAccount.linkId === link.linkId);
