@@ -1,16 +1,18 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { AccountBalanceOutlined, AccountBalanceWalletOutlined, HomeOutlined, KeyboardArrowDown, LocalAtmOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+import { Link, useLocation } from 'react-router-dom';
+import { AccountBalanceOutlined, AccountBalanceWalletOutlined, KeyboardArrowDown, LocalAtmOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
 
 import MDivider from 'components/MDivider';
 import { ReactElement } from 'components/types';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSelectedBankAccount } from 'hooks/bankAccounts';
+import { useLink } from 'hooks/links';
 import mergeTailwind from 'util/mergeTailwind';
-import { Link, useLocation, useParams } from 'react-router-dom';
 
 export default function BudgetingSidebar(): JSX.Element {
   const { result: bankAccount, isLoading, isError } = useSelectedBankAccount();
+  const link = useLink(bankAccount.linkId);
   const balance = useCurrentBalance();
 
   if (isLoading)  {
@@ -24,8 +26,8 @@ export default function BudgetingSidebar(): JSX.Element {
   return (
     <div className='hidden lg:w-72 h-full flex-none lg:flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center'>
       <div className='w-full dark:hover:bg-dark-monetr-background-emphasis dark:text-dark-monetr-content-emphasis h-12 flex items-center p-2'>
-        <span className='font-semibold text-ellipsis whitespace-nowrap overflow-hidden shadow-'>
-          Navy Federal Credit Union
+        <span className='font-semibold text-ellipsis whitespace-nowrap overflow-hidden text-lg'>
+          { link?.getName() }
         </span>
         <MoreVert className='ml-auto' />
       </div>
@@ -80,10 +82,6 @@ export default function BudgetingSidebar(): JSX.Element {
         <MDivider className='w-1/2' />
 
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
-          <NavigationItem to='#'>
-            <HomeOutlined />
-            Overview
-          </NavigationItem>
           <NavigationItem to='../transactions'>
             <ShoppingCartOutlined />
             Transactions

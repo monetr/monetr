@@ -31,7 +31,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
   }
 
   function openDetails() {
-    navigate(`/transactions/${transaction.transactionId}/details`);
+    navigate(`${transaction.transactionId}/details`);
   }
 
   function BudgetingInfo(props: BudgetingInfoProps): JSX.Element {
