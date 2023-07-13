@@ -12,7 +12,7 @@ import mergeTailwind from 'util/mergeTailwind';
 
 export default function BudgetingSidebar(): JSX.Element {
   const { result: bankAccount, isLoading, isError } = useSelectedBankAccount();
-  const link = useLink(bankAccount.linkId);
+  const link = useLink(bankAccount?.linkId);
   const balance = useCurrentBalance();
 
   if (isLoading)  {
@@ -82,11 +82,11 @@ export default function BudgetingSidebar(): JSX.Element {
         <MDivider className='w-1/2' />
 
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
-          <NavigationItem to='../transactions'>
+          <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/transactions` }>
             <ShoppingCartOutlined />
             Transactions
           </NavigationItem>
-          <NavigationItem to='../expenses'>
+          <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/expenses` }>
             <PriceCheckOutlined />
             Expenses
             <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
@@ -144,7 +144,7 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   ]);
 
   return (
-    <Link className={ className } to={ props.to } relative='path'>
+    <Link className={ className } to={ props.to }>
       {props.children}
     </Link>
   );
