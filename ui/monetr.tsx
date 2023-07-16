@@ -21,7 +21,6 @@ import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
 import TransactionDetails from 'pages/transaction/details';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
-import { useSelectedBankAccount } from 'hooks/bankAccounts';
 
 export default function Monetr(): JSX.Element {
   const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
@@ -75,7 +74,7 @@ export default function Monetr(): JSX.Element {
 
   // TODO Fix banksidebar issue by moving it into the godless react router routes
   return (
-    <div className='w-full h-full dark:bg-dark-monetr-background flex'>
+    <div className='max-w-screen max-h-screen h-full w-full dark:bg-dark-monetr-background flex'>
       <BankSidebar />
       <div className='w-full h-full flex min-w-0'>
         <Routes>

@@ -75,7 +75,7 @@ export default function ExpenseDetails(): JSX.Element {
         <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 md:justify-between'>
           <div className='flex items-center gap-2 mt-2 md:mt-0'>
             <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer mr-2' />
-            <span className='text-2xl dark:text-dark-monetr-content-subtle font-bold'>
+            <span className='flex items-center text-2xl dark:text-dark-monetr-content-subtle font-bold'>
               <PriceCheckOutlined />
             </span>
             <Link

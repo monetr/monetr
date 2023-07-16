@@ -1,9 +1,16 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { HeartBroken } from '@mui/icons-material';
+/* eslint-disable max-len */
+import React, { Fragment } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { ArrowBackOutlined, HeartBroken, MenuOutlined, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
 
 import MSpan from 'components/MSpan';
 import { useTransaction } from 'hooks/transactions';
+import { MBaseButton } from 'components/MButton';
+import MForm from 'components/MForm';
+import MerchantIcon from 'pages/new/MerchantIcon';
+import MTextField from 'components/MTextField';
+import MSelect from 'components/MSelect';
+import MDivider from 'components/MDivider';
 
 export default function TransactionDetails(): JSX.Element {
   const { transactionId: id } = useParams();
@@ -37,5 +44,75 @@ export default function TransactionDetails(): JSX.Element {
     );
   }
 
-  return null;
+  return (
+    <Fragment>
+      <MForm className='flex w-full h-full flex-col'>
+        <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 md:justify-between'>
+          <div className='flex grow items-center gap-2 mt-2 md:mt-0 min-w-0 overflow-none'>
+            <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer mr-2' />
+            <span className='flex items-center text-2xl dark:text-dark-monetr-content-subtle font-bold'>
+              <ShoppingCartOutlined />
+            </span>
+            <Link
+              className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis font-bold cursor-pointer'
+              to={ `/bank/${transaction?.bankAccountId}/transactions` }
+            >
+              Transactions
+            </Link>
+            <span className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle font-bold'>
+            /
+            </span>
+            <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold whitespace-nowrap text-ellipsis overflow-hidden min-w-0 flex-1'>
+              { transaction?.name }
+            </span>
+          </div>
+          <div className='md:min-w-0 fixed md:static bottom-2 right-2 h-10 md:h-16 items-center flex gap-2 justify-end'>
+            <MBaseButton color='cancel' className='gap-1 py-1 px-2'>
+              <ArrowBackOutlined />
+              Cancel
+            </MBaseButton>
+            <MBaseButton color='primary' className='gap-1 py-1 px-2'>
+              <SaveOutlined />
+              Save Changes
+            </MBaseButton>
+          </div>
+        </div>
+        <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
+          <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
+            <div className='w-full md:w-1/2 flex flex-col items-center'>
+              <div className='w-full flex justify-center mb-2'>
+                <MerchantIcon name={ transaction?.name } />
+              </div>
+              <MSelect
+                placeholder='Transaction Name..'
+                label='Name'
+                name='name'
+                options={ [{ value: transaction?.name, label: transaction?.name }, { value: transaction?.originalName, label: transaction?.originalName }] }
+                className='w-full'
+              />
+              <MTextField
+                label='Amount'
+                name='amount'
+                prefix='$'
+                type='number'
+                className='w-full'
+              />
+              <MTextField
+                label='Date'
+                name='date'
+                type='date'
+                className='w-full'
+              />
+              <MSelect
+                label='Spent From'
+                name='spendingId'
+                options={ [] }
+                className='w-full'
+              />
+            </div>
+          </div>
+        </div>
+      </MForm>
+    </Fragment>
+  );
 }

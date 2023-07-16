@@ -62,15 +62,24 @@ export default function TransactionList(): JSX.Element {
 
   return (
     <Fragment>
-      <div className='w-full h-12 flex items-center px-4 gap-4'>
+      <div className='w-full h-12 flex-none flex items-center px-4 gap-4'>
         <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer' />
         <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold flex gap-2 items-center'>
           <ShoppingCartOutlined />
           Transactions
         </span>
+        <span className='hidden md:block'>
+          md
+        </span>
+        <span className='hidden lg:block'>
+          lg
+        </span>
+        <span className='hidden xl:block'>
+          xl
+        </span>
       </div>
-      <div className='w-full h-full overflow-y-auto min-w-0'>
-        <ul className='w-full'>
+      <div className='flex flex-grow min-w-0 min-h-0'>
+        <ul className='w-full overflow-y-auto'>
           <TransactionItems />
           { loading && (
             <li ref={ sentryRef }>
