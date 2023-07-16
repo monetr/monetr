@@ -29,7 +29,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
   );
 
   function openDetails() {
-    navigate(`/expenses/${spending.spendingId}/details`);
+    navigate(`/bank/${spending.bankAccountId}/expenses/${spending.spendingId}/details`);
   }
 
   return (
