@@ -42,6 +42,7 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/login' element={ <LoginNew /> } />
+        <Route path="/logout" element={ <LogoutPage /> } />
         { config?.allowSignUp && <Route path='/register' element={ <RegisterNew /> } /> }
         { config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } /> }
         <Route path='/' element={ <Navigate replace to="/login" /> } />
@@ -96,8 +97,6 @@ export default function Monetr(): JSX.Element {
 }
 
 function BudgetingLayout(): JSX.Element {
-  const { result: bankAccount } = useSelectedBankAccount();
-  console.log('alt', bankAccount);
   return (
     <Fragment>
       <BudgetingSidebar />
