@@ -10,7 +10,11 @@ import { useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useLink } from 'hooks/links';
 import mergeTailwind from 'util/mergeTailwind';
 
-export default function BudgetingSidebar(): JSX.Element {
+export interface BudgetingSidebarProps {
+  className?: string;
+}
+
+export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Element {
   const { result: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const link = useLink(bankAccount?.linkId);
   const balance = useCurrentBalance();
@@ -23,10 +27,16 @@ export default function BudgetingSidebar(): JSX.Element {
     return null;
   }
 
+  const className = mergeTailwind(
+    // 'hidden lg:w-72 h-full flex-none lg:flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center',
+    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center',
+    props.className,
+  );
+
   return (
-    <div className='hidden lg:w-72 h-full flex-none lg:flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center'>
+    <div className={ className }>
       <div className='w-full dark:hover:bg-dark-monetr-background-emphasis dark:text-dark-monetr-content-emphasis h-12 flex items-center p-2'>
-        <span className='font-semibold text-ellipsis whitespace-nowrap overflow-hidden text-lg'>
+        <span className='font-semibold text-ellipsis whitespace-nowrap overflow-hidden text-xl'>
           { link?.getName() }
         </span>
         <MoreVert className='ml-auto' />

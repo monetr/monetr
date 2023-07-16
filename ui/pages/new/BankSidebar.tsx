@@ -8,8 +8,15 @@ import BankSidebarItem from './BankSidebarItem';
 import { Logo } from 'assets';
 import MDivider from 'components/MDivider';
 import { useLinksSink } from 'hooks/links';
+import { ReactElement } from 'components/types';
+import mergeTailwind from 'util/mergeTailwind';
+import MSidebarToggle from 'components/MSidebarToggle';
 
-export default function BankSidebar(): JSX.Element {
+export interface BankSidebarProps {
+  className?: string;
+}
+
+export default function BankSidebar(props: BankSidebarProps): JSX.Element {
   // Important things to note. The width is 16. The width of the icons is 12.
   // This leaves a padding of 2 on each side, which isn't even needed with items-center? Not sure which
   // would be better.
@@ -18,52 +25,66 @@ export default function BankSidebar(): JSX.Element {
   const { result: links, isLoading, isError } = useLinksSink();
   if (isLoading) {
     return (
-      <div className='hidden lg:visible w-16 h-full lg:flex items-center lg:py-4 gap-4 lg:flex-col dark:border-r-dark-monetr-border flex-none border border-transparent'>
-        <div className='h-10 w-10'>
-          <img src={ Logo } className="w-full" />
-        </div>
-        <MDivider className='w-1/2' />
-        <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
-        </div>
-        <SettingsButton />
-        <LogoutButton />
-      </div>
+      <SidebarWrapper className={ props.className } />
     );
   }
 
   if (isError) {
     return (
-      <div className='hidden lg:visible w-16 h-full lg:flex items-center lg:py-4 gap-4 lg:flex-col dark:border-r-dark-monetr-border flex-none border border-transparent'>
-        <div className='h-10 w-10'>
-          <img src={ Logo } className="w-full" />
-        </div>
-        <MDivider className='w-1/2' />
-        <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
-          <div className='w-full h-12 flex items-center justify-center relative group'>
-            <div className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
-              <ErrorOutline className='text-3xl' />
-            </div>
+      <SidebarWrapper className={ props.className }>
+        <div className='w-full h-12 flex items-center justify-center relative group'>
+          <div className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
+            <ErrorOutline className='text-3xl' />
           </div>
         </div>
-        <SettingsButton />
-        <LogoutButton />
-      </div>
+      </SidebarWrapper>
     );
   }
 
   return (
-    <div className='hidden lg:visible w-16 h-full lg:flex items-center lg:py-4 gap-4 lg:flex-col dark:border-r-dark-monetr-border flex-none border border-transparent'>
+    <SidebarWrapper className={ props.className }>
+      { Array.from(links.values()).map(link => (<BankSidebarItem key={ link.linkId } link={ link } />)) }
+      <div className='w-full h-12 flex items-center justify-center relative group'>
+        <div className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
+          <PlusOne className='text-3xl' />
+        </div>
+      </div>
+    </SidebarWrapper>
+  );
+}
+
+interface SidebarWrapperProps {
+  className?: string;
+  children?: ReactElement;
+}
+
+function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
+  const className = mergeTailwind(
+    'border',
+    'border-transparent',
+    'dark:border-r-dark-monetr-border',
+    'flex',
+    'flex-col',
+    'flex-none',
+    'gap-4',
+    'h-full',
+    'items-center',
+    'lg:py-4',
+    'pt-2',
+    'pb-4',
+    'w-16',
+    props.className,
+  );
+
+  return (
+    <div className={ className }>
+      <MSidebarToggle className='flex lg:hidden' />
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
       </div>
       <MDivider className='w-1/2' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
-        { Array.from(links.values()).map(link => (<BankSidebarItem key={ link.linkId } link={ link } />)) }
-        <div className='w-full h-12 flex items-center justify-center relative group'>
-          <div className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
-            <PlusOne className='text-3xl' />
-          </div>
-        </div>
+        { props?.children }
       </div>
       <SettingsButton />
       <LogoutButton />

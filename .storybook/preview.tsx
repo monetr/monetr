@@ -45,7 +45,6 @@ export const useTheme = (StoryFn: () => unknown) => {
 const preview: Preview = {
   decorators: [
     useTheme,
-    withRouter,
     (Story, _context) => {
       const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
         error: <ErrorIcon className="mr-2.5" />,
@@ -100,6 +99,7 @@ const preview: Preview = {
         </QueryClientProvider>
       );
     },
+    withRouter,
   ],
   args: {
 

@@ -9,6 +9,7 @@ import TransactionItem from './TransactionItem';
 
 import { useTransactionsSink } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
+import MSidebarToggle from 'components/MSidebarToggle';
 
 export default function TransactionList(): JSX.Element {
   const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactionsSink();
@@ -63,7 +64,7 @@ export default function TransactionList(): JSX.Element {
   return (
     <Fragment>
       <div className='w-full h-12 flex-none flex items-center px-4 gap-4'>
-        <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer' />
+        <MSidebarToggle />
         <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold flex gap-2 items-center'>
           <ShoppingCartOutlined />
           Transactions

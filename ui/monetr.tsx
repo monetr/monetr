@@ -21,6 +21,7 @@ import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
 import TransactionDetails from 'pages/transaction/details';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
+import MobileSidebar from 'pages/new/MobileSidebar';
 
 export default function Monetr(): JSX.Element {
   const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
@@ -75,10 +76,11 @@ export default function Monetr(): JSX.Element {
   // TODO Fix banksidebar issue by moving it into the godless react router routes
   return (
     <div className='max-w-screen max-h-screen h-full w-full dark:bg-dark-monetr-background flex'>
-      <BankSidebar />
+      <BankSidebar className='hidden lg:flex' />
+      <MobileSidebar />
       <div className='w-full h-full flex min-w-0'>
         <Routes>
-          <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
+          <Route path='/bank/:bankAccountId' element={ <BudgetingLayout className='hidden lg:flex' /> }>
             <Route path='transactions' element={ <TransactionList /> } />
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
             <Route path='expenses' element={ <ExpenseList /> } />
@@ -95,10 +97,14 @@ export default function Monetr(): JSX.Element {
   );
 }
 
-function BudgetingLayout(): JSX.Element {
+interface BudgetingLayoutProps {
+  className?: string;
+}
+
+function BudgetingLayout(props: BudgetingLayoutProps): JSX.Element {
   return (
     <Fragment>
-      <BudgetingSidebar />
+      <BudgetingSidebar className={ props.className } />
       <div className='w-full h-full min-w-0 flex flex-col'>
         <Outlet />
       </div>

@@ -61,8 +61,8 @@ export default function Root(): JSX.Element {
   return (
     <React.StrictMode>
       <Sentry.ErrorBoundary>
-        <QueryClientProvider client={ queryClient }>
-          <Router>
+        <Router>
+          <QueryClientProvider client={ queryClient }>
             <ThemeProvider theme={ newTheme }>
               <LocalizationProvider dateAdapter={ AdapterMoment }>
                 <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
@@ -73,8 +73,8 @@ export default function Root(): JSX.Element {
                 </SnackbarProvider>
               </LocalizationProvider>
             </ThemeProvider>
-          </Router>
-        </QueryClientProvider>
+          </QueryClientProvider>
+        </Router>
       </Sentry.ErrorBoundary>
     </React.StrictMode>
   );
