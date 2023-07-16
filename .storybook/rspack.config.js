@@ -25,6 +25,7 @@ export default ({ config, mode }) => {
     },
     devServer: {
       ...config?.devServer,
+      liveReload: true,
       client: {
         ...config?.devServer?.client,
         progress: true,

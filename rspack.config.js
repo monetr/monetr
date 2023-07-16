@@ -1,6 +1,6 @@
 const path = require('path');
 
-module.exports = (env, argv) => {
+export default (env, _argv) => {
   const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
 
   const isDevelopment = envName === 'development';
@@ -10,19 +10,26 @@ module.exports = (env, argv) => {
     env.PUBLIC_URL = '';
   }
 
-  let filename = `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js`;
-  if (!isDevelopment) {
-    filename = `[name].js`;
-  }
+  // HMR replacement gets **fucked** if we are using content hash. So use name when we are
+  // in development mode.
+  let filename = isDevelopment ? '[name]' : '[contenthash]';
 
-  let websocketUrl = 'wss://monetr.local/ws';
+  // Make it so that the websocket still works if we are running yarn start normally.
+  const wsProto = process.env.WS_PROTO || 'ws';
+  let websocketUrl = `${wsProto}://monetr.local/ws`;
 
   // This is used for GitPod and CodeSpaces editor environments. Allowing hot reloading when working in the cloud.
   if (process.env.CLOUD_MAGIC === 'magic' && process.env.MONETR_UI_DOMAIN_NAME) {
-    websocketUrl = `wss://${ process.env.MONETR_UI_DOMAIN_NAME }/ws`;
+    websocketUrl = `${wsProto}://${ process.env.MONETR_UI_DOMAIN_NAME }/ws`;
   }
+
   const config = {
     builtins: {
+      react: {
+        runtime: 'automatic',
+        development: isDevelopment,
+        refresh: isDevelopment,
+      },
       presetEnv: {
         coreJs: '3',
       },
@@ -68,13 +75,10 @@ module.exports = (env, argv) => {
     entry: './ui/index.tsx',
     output: {
       publicPath: '/',
-      path: path.resolve(__dirname, 'pkg/ui/static'),
-      filename: isDevelopment ? 'assets/scripts/[name]_[contenthash].js' : 'assets/scripts/[contenthash].js',
-      cssFilename: 'assets/styles/[contenthash].css',
-      cssChunkFilename: 'assets/styles/[contenthash].css',
-      // Source maps are automatically moved to $(PWD)/build/source_maps each time the UI is compiled. They will not be
-      // in the path above.
-      // sourceMapFilename: isDevelopment ? `[name].${ process.env.RELEASE_REVISION || '[chunkhash]' }.js.map` : '[name].[hash:8].js.map',
+      path: _resolve(__dirname, 'pkg/ui/static'),
+      filename: `assets/scripts/${filename}.js`,
+      cssFilename: `assets/styles/${filename}.css`,
+      cssChunkFilename: `assets/styles/${filename}.css`,
     },
     resolve: {
       extensions: [
@@ -84,13 +88,13 @@ module.exports = (env, argv) => {
         '.ts',
         '.svg',
       ],
-      modules: [path.resolve(__dirname, 'ui'), 'node_modules'],
+      modules: ['ui', 'node_modules'],
     },
     devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
     devServer: {
       allowedHosts: 'all',
       static: {
-        directory: path.resolve(__dirname, 'public'),
+        directory: _resolve(__dirname, 'public'),
       },
       historyApiFallback: true,
       host: '0.0.0.0',
@@ -196,11 +200,6 @@ module.exports = (env, argv) => {
       ],
     },
   };
-
-  if (argv.hot) {
-    // Cannot use 'contenthash' when hot reloading is enabled.
-    config.output.filename = '[name].[fullhash].js';
-  }
 
   return config;
 };

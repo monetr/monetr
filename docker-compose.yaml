@@ -93,6 +93,7 @@ services:
       retries: 12
       start_period: 60s
     environment:
+      WS_PROTO: 'wss'
       INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
       NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
       IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
