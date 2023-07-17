@@ -1,5 +1,3 @@
-const path = require('path');
-
 module.exports = (env, _argv) => {
   const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
 
@@ -75,7 +73,7 @@ module.exports = (env, _argv) => {
     entry: './ui/index.tsx',
     output: {
       publicPath: '/',
-      path: path.resolve(__dirname, 'pkg/ui/static'),
+      path: 'pkg/ui/static',
       filename: `assets/scripts/${filename}.js`,
       cssFilename: `assets/styles/${filename}.css`,
       cssChunkFilename: `assets/styles/${filename}.css`,
@@ -94,7 +92,7 @@ module.exports = (env, _argv) => {
     devServer: {
       allowedHosts: 'all',
       static: {
-        directory: path.resolve(__dirname, 'public'),
+        directory: 'public',
       },
       historyApiFallback: true,
       host: '0.0.0.0',
