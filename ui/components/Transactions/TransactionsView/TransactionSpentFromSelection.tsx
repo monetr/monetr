@@ -52,7 +52,7 @@ function TransactionSpentFromSelection(props: Props): JSX.Element {
     return updateSpentFrom(newValue.spending);
   }
 
-  const safeToSpend = {
+  const freeToUse = {
     label: 'Free-To-Use',
     value: null,
     spending: {
@@ -70,12 +70,12 @@ function TransactionSpentFromSelection(props: Props): JSX.Element {
     })]));
 
   const options = [
-    safeToSpend,
+    freeToUse,
     // Labels will be unique. So we only need 1 | -1
     ...(Array.from(items.values()).sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
   ];
 
-  const selectedItem = !transaction.spendingId ? safeToSpend : items.get(transaction.spendingId);
+  const selectedItem = !transaction.spendingId ? freeToUse : items.get(transaction.spendingId);
 
   function formatOptionsLabel(option: SpendingOption, meta: FormatOptionLabelMeta<SpendingOption>): React.ReactNode {
     if (meta.context === 'value') {

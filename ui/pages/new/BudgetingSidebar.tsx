@@ -9,6 +9,7 @@ import { useCurrentBalance } from 'hooks/balances';
 import { useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useLink } from 'hooks/links';
 import mergeTailwind from 'util/mergeTailwind';
+import MSelectAccount from 'components/MSelectAccount';
 
 export interface BudgetingSidebarProps {
   className?: string;
@@ -43,18 +44,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       </div>
       <MDivider className='w-1/2' />
       <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
-        <div className='w-full'>
-          <span className='cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle text-lg flex items-center font-semibold gap-2 p-1 align-middle rounded-md'>
-            <AccountBalanceOutlined />
-            <span className='text-ellipsis whitespace-nowrap overflow-hidden'>
-              { bankAccount?.name }
-            </span>
-            <span className='ml-auto text-xs dark:bg-dark-monetr-brand dark:text-dark-monetr-content-emphasis rounded-sm py-0.5 px-1'>
-              { bankAccount?.mask }
-            </span>
-            <KeyboardArrowDown />
-          </span>
-        </div>
+        <MSelectAccount />
         <MDivider className='w-1/2' />
 
         <div className='w-full flex items-center flex-col gap-2 px-2'>

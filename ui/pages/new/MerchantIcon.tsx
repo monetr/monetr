@@ -5,10 +5,12 @@ import { useIconSearch } from 'hooks/useIconSearch';
 
 export interface MerchantIconProps {
   name?: string;
+  size?: number; // TODO this doesn't really work.
 }
 
 export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
   const icon = useIconSearch(props?.name);
+  const size = props?.size || 30;
   if (icon?.svg) {
     // It is possible for colors to be missing for a given icon. When this happens just fall back to a black color.
     const colorStyles = icon?.colors?.length > 0 ?
@@ -18,8 +20,8 @@ export default function MerchantIcon(props: MerchantIconProps): JSX.Element {
     const styles = {
       WebkitMaskImage: `url(data:image/svg+xml;base64,${icon.svg})`,
       WebkitMaskRepeat: 'no-repeat',
-      height: '30px',
-      width: '30px',
+      height: `${size}px`,
+      width: `${size}px`,
       ...colorStyles,
     };
 

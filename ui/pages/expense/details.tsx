@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowBackOutlined, HeartBroken, MenuOutlined, PriceCheckOutlined, SaveOutlined } from '@mui/icons-material';
+import { ArrowBackOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined } from '@mui/icons-material';
 import { Formik } from 'formik';
 
 import ExpenseTimeline from './ExpenseTimeline';
@@ -15,6 +15,7 @@ import MTextField from 'components/MTextField';
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 import { useSpending } from 'hooks/spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
+import MSidebarToggle from 'components/MSidebarToggle';
 
 interface ExpenseValues {
   name: string;
@@ -74,7 +75,7 @@ export default function ExpenseDetails(): JSX.Element {
       <MForm className='flex w-full h-full flex-col'>
         <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 md:justify-between'>
           <div className='flex items-center gap-2 mt-2 md:mt-0'>
-            <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer mr-2' />
+            <MSidebarToggle />
             <span className='flex items-center text-2xl dark:text-dark-monetr-content-subtle font-bold'>
               <PriceCheckOutlined />
             </span>

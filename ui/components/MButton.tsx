@@ -6,7 +6,7 @@ import mergeTailwind from 'util/mergeTailwind';
 
 export interface MButtonProps extends ButtonBaseProps {
   color?: 'primary' | 'secondary' | 'cancel';
-  variant?: 'solid' | 'text';
+  variant?: 'solid' | 'text' | 'outlined';
   submitting?: boolean;
 }
 
@@ -66,6 +66,17 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
         'focus-visible:outline-purple-200': !disabled,
         'text-gray-400': disabled,
         'text-gray-900': !disabled,
+      },
+      'outlined': {
+        'dark:hover:ring-dark-monetr-brand': !disabled,
+        'dark:focus:ring-dark-monetr-brand': !disabled,
+        'dark:ring-dark-monetr-border-string': !disabled,
+        'dark:text-gray-400': !disabled,
+        'ring-1': !disabled,
+        'ring-inset': !disabled,
+        'focus:ring-2': !disabled,
+        'focus:ring-inset': !disabled,
+        'min-h-[38px]': true,
       },
     },
     'cancel': {

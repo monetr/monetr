@@ -1,7 +1,6 @@
 import React from 'react';
-import { useFormikContext } from 'formik';
-
 import clsx from 'clsx';
+import { useFormikContext } from 'formik';
 import moment from 'moment';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
@@ -140,7 +139,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
 
   return (
     <div className={ wrapperClassNames }>
-      <div className="flex items-center justify-between monetr-">
+      <div className="flex items-center justify-between">
         <div className='flex items-center gap-0.5'>
           <LabelText { ...props } />
           <LabelRequired { ...props } />

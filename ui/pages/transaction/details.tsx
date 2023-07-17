@@ -1,16 +1,27 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowBackOutlined, HeartBroken, MenuOutlined, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { ArrowBackOutlined, HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
 
-import MSpan from 'components/MSpan';
-import { useTransaction } from 'hooks/transactions';
 import { MBaseButton } from 'components/MButton';
 import MForm from 'components/MForm';
-import MerchantIcon from 'pages/new/MerchantIcon';
-import MTextField from 'components/MTextField';
 import MSelect from 'components/MSelect';
-import MDivider from 'components/MDivider';
+import MSidebarToggle from 'components/MSidebarToggle';
+import MSpan from 'components/MSpan';
+import MTextField from 'components/MTextField';
+import { useTransaction } from 'hooks/transactions';
+import MerchantIcon from 'pages/new/MerchantIcon';
+import moment from 'moment';
+import { Formik } from 'formik';
+import MSelectSpending from 'components/MSelectSpending';
+
+interface TransactionValues {
+  name: string;
+  originalName: string;
+  date: moment.Moment;
+  spendingId: number | null;
+  amount: number;
+}
 
 export default function TransactionDetails(): JSX.Element {
   const { transactionId: id } = useParams();
@@ -30,7 +41,7 @@ export default function TransactionDetails(): JSX.Element {
       </div>
     );
   }
-  if (isError) {
+  if (isError || !transaction) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
@@ -44,12 +55,27 @@ export default function TransactionDetails(): JSX.Element {
     );
   }
 
+  function submit() {
+
+  }
+
+  const initialValues: TransactionValues = {
+    name: transaction.name,
+    originalName: transaction.originalName,
+    date: transaction.date,
+    spendingId: transaction.spendingId,
+    amount: +(transaction.amount / 100).toFixed(2),
+  };
+
   return (
-    <Fragment>
+    <Formik
+      initialValues={ initialValues }
+      onSubmit={ submit }
+    >
       <MForm className='flex w-full h-full flex-col'>
         <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 md:justify-between'>
           <div className='flex grow items-center gap-2 mt-2 md:mt-0 min-w-0 overflow-none'>
-            <MenuOutlined className='visible lg:hidden dark:text-dark-monetr-content-emphasis cursor-pointer mr-2' />
+            <MSidebarToggle />
             <span className='flex items-center text-2xl dark:text-dark-monetr-content-subtle font-bold'>
               <ShoppingCartOutlined />
             </span>
@@ -83,12 +109,18 @@ export default function TransactionDetails(): JSX.Element {
               <div className='w-full flex justify-center mb-2'>
                 <MerchantIcon name={ transaction?.name } />
               </div>
-              <MSelect
-                placeholder='Transaction Name..'
+              <MTextField
                 label='Name'
+                placeholder='Transaction name...'
                 name='name'
-                options={ [{ value: transaction?.name, label: transaction?.name }, { value: transaction?.originalName, label: transaction?.originalName }] }
                 className='w-full'
+              />
+              <MTextField
+                label='Original Name'
+                placeholder='No original name...?'
+                name='originalName'
+                className='w-full'
+                disabled
               />
               <MTextField
                 label='Amount'
@@ -96,23 +128,20 @@ export default function TransactionDetails(): JSX.Element {
                 prefix='$'
                 type='number'
                 className='w-full'
+                disabled
               />
               <MTextField
                 label='Date'
                 name='date'
                 type='date'
                 className='w-full'
+                disabled
               />
-              <MSelect
-                label='Spent From'
-                name='spendingId'
-                options={ [] }
-                className='w-full'
-              />
+              <MSelectSpending className='w-full' />
             </div>
           </div>
         </div>
       </MForm>
-    </Fragment>
+    </Formik>
   );
 }

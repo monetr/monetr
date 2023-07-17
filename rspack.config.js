@@ -141,15 +141,6 @@ module.exports = (env, _argv) => {
           exclude: /node_modules/,
         },
         {
-          test: /\.css$/,
-          use: [
-            {
-              loader: 'postcss-loader',
-            },
-          ],
-          type: 'css',
-        },
-        {
           test: /\.scss$/,
           use: [
             {
@@ -159,6 +150,18 @@ module.exports = (env, _argv) => {
                   quietDeps: true,
                 },
               },
+            },
+            {
+              loader: 'postcss-loader',
+            },
+          ],
+          type: 'css',
+        },
+        {
+          test: /\.css$/,
+          use: [
+            {
+              loader: 'postcss-loader',
             },
           ],
           type: 'css',

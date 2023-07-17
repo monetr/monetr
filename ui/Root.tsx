@@ -40,7 +40,9 @@ export default function Root(): JSX.Element {
     })
       .catch(result => {
         switch (result.response.status) {
+          case 404:
           case 500: // Internal Server Error
+          case 502:
             throw result;
           default:
             return result.response;
