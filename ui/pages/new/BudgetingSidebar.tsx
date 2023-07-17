@@ -34,6 +34,48 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
     props.className,
   );
 
+  function FreeToUse(): JSX.Element {
+    switch (bankAccount?.accountSubType) {
+      case 'checking':
+      case 'savings':
+        return (
+          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
+            <span className='flex gap-2 items-center text-lg font-semibold'>
+              <AccountBalanceWalletOutlined />
+              Free-To-Use:
+            </span>
+            &nbsp;
+            <span className='text-lg font-semibold'>
+              { balance?.getFreeToUseString() }
+            </span>
+          </div>
+        );
+    }
+
+    return null;
+  }
+
+  function Available(): JSX.Element {
+    switch (bankAccount?.accountSubType) {
+      case 'checking':
+      case 'savings':
+        return (
+          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
+            <span className='flex gap-2 items-center text-lg font-semibold'>
+              <LocalAtmOutlined />
+              Available:
+            </span>
+            &nbsp;
+            <span className='text-lg font-semibold'>
+              { balance?.getAvailableString() }
+            </span>
+          </div>
+        );
+    }
+
+    return null;
+  }
+
   return (
     <div className={ className }>
       <div className='w-full dark:hover:bg-dark-monetr-background-emphasis dark:text-dark-monetr-content-emphasis h-12 flex items-center p-2'>
@@ -48,26 +90,8 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         <MDivider className='w-1/2' />
 
         <div className='w-full flex items-center flex-col gap-2 px-2'>
-          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
-            <span className='flex gap-2 items-center text-lg font-semibold'>
-              <AccountBalanceWalletOutlined />
-              Free-To-Use:
-            </span>
-            &nbsp;
-            <span className='text-lg font-semibold'>
-              { balance?.getFreeToUseString() }
-            </span>
-          </div>
-          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
-            <span className='flex gap-2 items-center text-lg font-semibold'>
-              <LocalAtmOutlined />
-              Available:
-            </span>
-            &nbsp;
-            <span className='text-lg font-semibold'>
-              { balance?.getAvailableString() }
-            </span>
-          </div>
+          <FreeToUse />
+          <Available />
           <div className='w-full flex justify-between dark:text-monetr-dark-content'>
             <span className='flex gap-2 items-center text-lg font-semibold'>
               <TollOutlined />

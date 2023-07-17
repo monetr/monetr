@@ -5,9 +5,11 @@ import { useBankAccountsSink, useSelectedBankAccount } from 'hooks/bankAccounts'
 import useTheme from 'hooks/useTheme';
 
 import './MSelectAccount.scss';
+import { useNavigate } from 'react-router-dom';
 
 export default function MSelectAccount(): JSX.Element {
   const theme = useTheme();
+  const navigate = useNavigate();
   const { result: allBankAccounts } = useBankAccountsSink();
   const { result: selectedBankAccount } = useSelectedBankAccount();
 
@@ -21,10 +23,10 @@ export default function MSelectAccount(): JSX.Element {
       ];
       for (let i = 0; i < 2; i++) {
         const item = items[i];
-        if (item.type === 'depository') {
+        if (item.accountType === 'depository') {
           values[i] += 2;
         }
-        switch (item.subType) {
+        switch (item.accountSubType) {
           case 'checking':
             values[i] += 2;
             break;
@@ -39,11 +41,15 @@ export default function MSelectAccount(): JSX.Element {
     .map(account => ({
       label: account.name,
       value: account.bankAccountId,
-      type: account.subType,
+      type: account.accountSubType,
       mask: account.mask,
     }));
 
   const current = accounts.find(account => account.value === selectedBankAccount?.bankAccountId);
+
+  function onChange({ value }: { value: number }) {
+    navigate(`/bank/${value}/transactions`);
+  }
 
   return (
     <Select
@@ -66,6 +72,7 @@ export default function MSelectAccount(): JSX.Element {
           primary: theme.tailwind.colors['dark-monetr']['brand']['DEFAULT'],
         },
       }) }
+      onChange={ onChange }
       isClearable={ false }
       options={ accounts }
       value={ current }

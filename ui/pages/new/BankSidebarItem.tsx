@@ -7,6 +7,7 @@ import { useBankAccountsSink, useSelectedBankAccount } from 'hooks/bankAccounts'
 import { useInstitution } from 'hooks/institutions';
 import Link from 'models/Link';
 import mergeTailwind from 'util/mergeTailwind';
+import { Tooltip } from '@mui/material';
 
 interface BankSidebarItemProps {
   link: Link;
@@ -14,15 +15,10 @@ interface BankSidebarItemProps {
 
 export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Element {
   const { result: institution } = useInstitution(link.plaidInstitutionId);
-  const floogawooga = useSelectedBankAccount();
+  const selectBankAccount = useSelectedBankAccount();
   const { result: bankAccounts } = useBankAccountsSink();
   const navigate = useNavigate();
-  const active = floogawooga.result?.linkId === link.linkId;
-  // console.log('consumer', {
-  //   floogawooga,
-  //   bankAccount: floogawooga.result,
-  //   link,
-  // });
+  const active = selectBankAccount.result?.linkId === link.linkId;
 
   function onClick() {
     const newSelectedBankAccount = Array.from(bankAccounts.values()).find(bankAccount => bankAccount.linkId === link.linkId);
@@ -64,14 +60,18 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   );
 
   return (
-    <div className='w-full h-12 flex items-center justify-center relative group'>
-      <div className={ classes } />
-      <div
-        className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
-        onClick={ onClick }
-      >
-        <InstitutionLogo />
+    <Tooltip title={ link.getName() } arrow placement='right' classes={ {
+      tooltip: 'text-base font-medium',
+    } }>
+      <div className='w-full h-12 flex items-center justify-center relative group'>
+        <div className={ classes } />
+        <div
+          className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
+          onClick={ onClick }
+        >
+          <InstitutionLogo />
+        </div>
       </div>
-    </div>
+    </Tooltip>
   );
 }
