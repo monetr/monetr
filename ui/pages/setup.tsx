@@ -152,7 +152,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   }
 
   return (
-    <div className={ wrapperClasses } onClick={ handleClick }>
+    <a className={ wrapperClasses } onClick={ handleClick }>
       { props.active && <CheckCircle className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' /> }
       { React.cloneElement(props.icon, { className: 'w-10 h-10 md:w-16 md:h-16' }) }
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
@@ -169,7 +169,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
           </MSpan>
         }
       </div>
-    </div>
+    </a>
   );
 }
 

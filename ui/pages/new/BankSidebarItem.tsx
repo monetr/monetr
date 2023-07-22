@@ -1,33 +1,26 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AccountBalance } from '@mui/icons-material';
+import { Tooltip } from '@mui/material';
 
 import { useBankAccountsSink, useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useInstitution } from 'hooks/institutions';
-import Link from 'models/Link';
+import MonetrLink from 'models/Link';
 import mergeTailwind from 'util/mergeTailwind';
-import { Tooltip } from '@mui/material';
 
 interface BankSidebarItemProps {
-  link: Link;
+  link: MonetrLink;
 }
 
 export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Element {
   const { result: institution } = useInstitution(link.plaidInstitutionId);
   const selectBankAccount = useSelectedBankAccount();
   const { result: bankAccounts } = useBankAccountsSink();
-  const navigate = useNavigate();
   const active = selectBankAccount.result?.linkId === link.linkId;
 
-  function onClick() {
-    const newSelectedBankAccount = Array.from(bankAccounts.values()).find(bankAccount => bankAccount.linkId === link.linkId);
-    if (newSelectedBankAccount?.bankAccountId) {
-      navigate(`/bank/${ newSelectedBankAccount.bankAccountId}/transactions`);
-      return;
-    }
-    console.warn('no bank account could be selected, something is wrong');
-  }
+  const destinationBankAccountId = Array.from(bankAccounts.values())
+    .find(bankAccount => bankAccount.linkId === link.linkId);
 
   const InstitutionLogo = () => {
     if (!institution?.logo) return <AccountBalance color='info' />;
@@ -65,12 +58,12 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     } }>
       <div className='w-full h-12 flex items-center justify-center relative group'>
         <div className={ classes } />
-        <div
+        <Link
           className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
-          onClick={ onClick }
+          to={ `/bank/${destinationBankAccountId?.bankAccountId}/transactions` }
         >
           <InstitutionLogo />
-        </div>
+        </Link>
       </div>
     </Tooltip>
   );

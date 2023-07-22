@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
+import { useBankAccountsSink } from 'hooks/bankAccounts';
 import { useLinksSink } from 'hooks/links';
 import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
 import { useAuthenticationSink } from 'hooks/useAuthentication';
@@ -14,6 +15,7 @@ import LogoutPage from 'pages/logout';
 import BankSidebar from 'pages/new/BankSidebar';
 import BudgetingSidebar from 'pages/new/BudgetingSidebar';
 import ExpenseList from 'pages/new/ExpenseList';
+import MobileSidebar from 'pages/new/MobileSidebar';
 import TransactionList from 'pages/new/TransactionList';
 import ForgotPasswordNew from 'pages/password/forgot-new';
 import RegisterNew from 'pages/register-new';
@@ -21,7 +23,6 @@ import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
 import TransactionDetails from 'pages/transaction/details';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
-import MobileSidebar from 'pages/new/MobileSidebar';
 
 export default function Monetr(): JSX.Element {
   const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
@@ -90,7 +91,7 @@ export default function Monetr(): JSX.Element {
           <Route path="/logout" element={ <LogoutPage /> } />
           <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
           <Route path="/setup" element={ <Navigate replace to="/" /> } />
-          <Route index path="/" element={ <Navigate replace to="/transactions" /> } />
+          <Route index path="/" element={ <RedirectToBank /> } />
         </Routes>
       </div>
     </div>
@@ -110,4 +111,51 @@ function BudgetingLayout(props: BudgetingLayoutProps): JSX.Element {
       </div>
     </Fragment>
   );
+}
+
+function RedirectToBank(): JSX.Element {
+  const { result: links, isLoading: linksIsLoading } = useLinksSink();
+  const { result: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccountsSink();
+  if (linksIsLoading || bankAccountsIsLoading) {
+    return null;
+  }
+  if (links.size === 0) {
+    return null;
+  }
+
+  const link = Array.from(links.values())[0];
+  const accounts = Array.from(bankAccounts.values())
+    .filter(account => account.linkId === link.linkId)
+    .sort((a, b) => {
+      const items = [a, b];
+      const values = [
+        0, // a
+        0, // b
+      ];
+      for (let i = 0; i < 2; i++) {
+        const item = items[i];
+        if (item.accountType === 'depository') {
+          values[i] += 2;
+        }
+        switch (item.accountSubType) {
+          case 'checking':
+            values[i] += 2;
+            break;
+          case 'savings':
+            values[i] += 1;
+            break;
+        }
+      }
+
+      return values[0];
+    });
+
+  if (accounts.length === 0) {
+    return null;
+  }
+
+  const account = accounts[0];
+
+  return <Navigate replace to={ `/bank/${account.bankAccountId}/transactions` } />;
+
 }
