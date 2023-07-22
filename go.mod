@@ -15,7 +15,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.14.0
 	github.com/getsentry/sentry-go v0.21.0
 	github.com/go-pg/migrations/v8 v8.1.0
-	github.com/go-pg/pg/v10 v10.11.0
+	github.com/go-pg/pg/v10 v10.11.1
 	github.com/gocraft/work v0.5.1
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/mock v1.6.0
