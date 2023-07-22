@@ -23,8 +23,8 @@ module.exports = (env, _argv) => {
 
   const config = {
     experiments: {
-      incrementalRebuild: false,
-      css: true,
+      incrementalRebuild: true,
+      css: false,
     },
     builtins: {
       react: {
