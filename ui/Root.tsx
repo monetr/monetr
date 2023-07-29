@@ -60,24 +60,23 @@ export default function Root(): JSX.Element {
     },
   });
 
+  // <Sentry.ErrorBoundary>
   return (
     <React.StrictMode>
-      <Sentry.ErrorBoundary>
-        <Router>
-          <QueryClientProvider client={ queryClient }>
-            <ThemeProvider theme={ newTheme }>
-              <LocalizationProvider dateAdapter={ AdapterMoment }>
-                <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-                  <NiceModal.Provider>
-                    <CssBaseline />
-                    <Monetr />
-                  </NiceModal.Provider>
-                </SnackbarProvider>
-              </LocalizationProvider>
-            </ThemeProvider>
-          </QueryClientProvider>
-        </Router>
-      </Sentry.ErrorBoundary>
+      <Router>
+        <QueryClientProvider client={ queryClient }>
+          <ThemeProvider theme={ newTheme }>
+            <LocalizationProvider dateAdapter={ AdapterMoment }>
+              <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+                <NiceModal.Provider>
+                  <CssBaseline />
+                  <Monetr />
+                </NiceModal.Provider>
+              </SnackbarProvider>
+            </LocalizationProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </Router>
     </React.StrictMode>
   );
 }

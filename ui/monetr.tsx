@@ -18,6 +18,7 @@ import ExpenseList from 'pages/new/ExpenseList';
 import MobileSidebar from 'pages/new/MobileSidebar';
 import TransactionList from 'pages/new/TransactionList';
 import ForgotPasswordNew from 'pages/password/forgot-new';
+import PasswordResetNew from 'pages/password/reset-new';
 import RegisterNew from 'pages/register-new';
 import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
@@ -46,6 +47,7 @@ export default function Monetr(): JSX.Element {
         <Route path="/logout" element={ <LogoutPage /> } />
         { config?.allowSignUp && <Route path='/register' element={ <RegisterNew /> } /> }
         { config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } /> }
+        <Route path="/password/reset" element={ <PasswordResetNew /> } />
         <Route path='/' element={ <Navigate replace to="/login" /> } />
       </Routes>
     );
