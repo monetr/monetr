@@ -184,12 +184,14 @@ SIMPLE_ICONS=$(PWD)/pkg/icons/sources/simple-icons/README.md
 $(SIMPLE_ICONS):
 	git submodule update --init pkg/icons/sources/simple-icons
 
+LICENSED_ARG=--build-arg USER_ID=$(shell id -u) --build-arg GROUP_ID=$(shell id -g)
+
 LICENSED_IMAGE=$(BUILD_DIR)/licensed-$(RELEASE_VERSION).image
 $(LICENSED_IMAGE): $(PWD)/scripts/Licensed.containerfile
 $(LICENSED_IMAGE) |: $(BUILD_DIR)
 $(LICENSED_IMAGE): IMAGE=licensed:$(RELEASE_VERSION)
 $(LICENSED_IMAGE):
-	$(DOCKER) build -f $< $(dir $<) -t $(IMAGE)
+	$(DOCKER) build -f $< $(dir $<) -t $(IMAGE) $(LICENSED_ARG)
 	echo $(IMAGE) > $@
 
 LICENSED_CONFIG=$(PWD)/.licensed.yaml
@@ -197,7 +199,7 @@ LICENSED_CACHE=$(PWD)/.licenses
 $(LICENSED_CACHE): $(LICENSED_IMAGE) $(GO_DEPS) $(NODE_MODULES) $(LICENSED_CONFIG) $(SIMPLE_ICONS)
 $(LICENSED_CACHE): IMAGE=$(shell cat $(LICENSED_IMAGE))
 $(LICENSED_CACHE):
-	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed cache --force"
+	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed cache --force" 
 ifndef CI
 	touch -a -m $(LICENSED_CACHE) # Dumb hack to make sure the licenses directory timestamp gets bumped for make.
 endif
