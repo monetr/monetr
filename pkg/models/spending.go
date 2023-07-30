@@ -39,6 +39,7 @@ type Spending struct {
 	CurrentAmount          int64            `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
 	UsedAmount             int64            `json:"usedAmount" pg:"used_amount,notnull,use_zero"`
 	RecurrenceRule         *Rule            `json:"recurrenceRule" pg:"recurrence_rule,type:'text'" swaggertype:"string"`
+	LastSpentFrom          *time.Time       `json:"lastSpentFrom" pg:"last_spent_from"`
 	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence"`
 	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull"`
 	NextContributionAmount int64            `json:"nextContributionAmount" pg:"next_contribution_amount,notnull,use_zero"`

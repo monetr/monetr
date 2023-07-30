@@ -3,9 +3,11 @@ package controller_test
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/pkg/internal/fixtures"
+	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -136,10 +138,10 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.transaction.transactionId").Number().Equal(transaction.TransactionId)
-		response.JSON().Path("$.transaction.name").String().Equal(transaction.Name)
+		response.JSON().Path("$.transaction.transactionId").Number().IsEqual(transaction.TransactionId)
+		response.JSON().Path("$.transaction.name").String().IsEqual(transaction.Name)
 		response.JSON().Path("$.transaction.name").String().NotEqual(originalTransaction.Name)
-		response.JSON().Path("$.transaction.originalName").String().Equal(originalTransaction.Name)
+		response.JSON().Path("$.transaction.originalName").String().IsEqual(originalTransaction.Name)
 		response.JSON().Object().NotContainsKey("spending") // Should not be present for non-balance updates.
 	})
 
@@ -158,7 +160,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("failed to retrieve existing transaction for update: record does not exist")
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing transaction for update: record does not exist")
 	})
 
 	t.Run("invalid bank account Id", func(t *testing.T) {
@@ -174,7 +176,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("must specify a valid bank account Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid bank account Id")
 	})
 
 	t.Run("invalid transaction Id numeric", func(t *testing.T) {
@@ -190,7 +192,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("must specify a valid transaction Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid transaction Id")
 	})
 
 	t.Run("invalid transaction Id word", func(t *testing.T) {
@@ -206,7 +208,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("must specify a valid transaction Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a valid transaction Id")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -219,7 +221,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("invalid JSON body")
+		response.JSON().Path("$.error").String().IsEqual("invalid JSON body")
 	})
 
 	t.Run("no authentication token", func(t *testing.T) {
@@ -233,7 +235,7 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("unauthorized")
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
 
 	t.Run("bad authentication token", func(t *testing.T) {
@@ -248,6 +250,77 @@ func TestPutTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("unauthorized")
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
+	})
+
+	t.Run("spend from an expense with more than the transaction amount", func(t *testing.T) {
+		e := NewTestApplication(t)
+		var token string
+		var bank models.BankAccount
+		var originalTransaction, transaction models.Transaction
+		now := time.Now()
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		originalTransaction = fixtures.GivenIHaveATransaction(t, bank)
+		transaction = originalTransaction
+		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
+			AccountId:        user.AccountId,
+			BankAccountId:    bank.BankAccountId,
+			Name:             "Payday",
+			Description:      "Whenever I get paid",
+			Rule:             fundingRule,
+			ExcludeWeekends:  true,
+			WaitForDeposit:   false,
+			EstimatedDeposit: nil,
+			LastOccurrence:   nil,
+			NextOccurrence:   fundingRule.After(now, false),
+			DateStarted:      now,
+		})
+
+		// Create the spending object we want to test spending from, specifically make it so that the spending object has
+		// more funds in it than the transaction. Also make the contribution amount the equivalent to the spending amount,
+		// this way we can assert easily that the contribution amount changes when the spending object is used. It will
+		// always be less than the the target amount because we are never spending the entire amount. It could be zero but
+		// it can never be equal to the spending amount.
+		spending := testutils.MustInsert(t, models.Spending{
+			Name:                   "Spending test",
+			SpendingType:           models.SpendingTypeExpense,
+			TargetAmount:           transaction.Amount * 2,
+			CurrentAmount:          transaction.Amount * 2,
+			NextContributionAmount: transaction.Amount * 2,
+			NextRecurrence:         spendingRuleOne.After(now, false),
+			RecurrenceRule:         spendingRuleOne,
+			AccountId:              user.AccountId,
+			BankAccountId:          bank.BankAccountId,
+			FundingScheduleId:      fundingSchedule.FundingScheduleId,
+			DateCreated:            now,
+		})
+
+		token = GivenILogin(t, e, user.Login.Email, password)
+
+		// Spend the transaction from the spending object we created.
+		transaction.SpendingId = &spending.SpendingId
+
+		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("transactionId", transaction.TransactionId).
+			WithCookie(TestCookieName, token).
+			WithJSON(transaction).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.transaction.transactionId").Number().IsEqual(transaction.TransactionId)
+		response.JSON().Path("$.transaction.spendingId").Number().IsEqual(*transaction.SpendingId)
+		response.JSON().Path("$.transaction.spendingAmount").Number().IsEqual(transaction.Amount)
+		// Make sure we spent from the right spending object.
+		response.JSON().Path("$.spending[0].spendingId").Number().IsEqual(spending.SpendingId)
+		// And make sure we spent the amount we wanted.
+		response.JSON().Path("$.spending[0].currentAmount").Number().IsEqual(spending.CurrentAmount - transaction.Amount)
+		// Make sure the next contribution gets recalculated.
+		response.JSON().Path("$.spending[0].nextContributionAmount").Number().Lt(spending.NextContributionAmount)
 	})
 }

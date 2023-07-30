@@ -17,7 +17,7 @@ type Transaction struct {
 	AccountId                 uint64       `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
 	Account                   *Account     `json:"-" pg:"rel:has-one"`
 	BankAccountId             uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,type:'bigint',unique:per_bank_account"`
-	BankAccount               *BankAccount `json:"bankAccount,omitempty" pg:"rel:has-one"`
+	BankAccount               *BankAccount `json:"-" pg:"rel:has-one"`
 	PlaidTransactionId        string       `json:"-" pg:"plaid_transaction_id,unique:per_bank_account"`
 	PendingPlaidTransactionId *string      `json:"-" pg:"pending_plaid_transaction_id"`
 	Amount                    int64        `json:"amount" pg:"amount,notnull,use_zero"`
