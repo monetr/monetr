@@ -66,6 +66,7 @@ jobs:
           retention-days: 1
 
   build_notice:
+    if: ${{ needs.release_please.outputs.release_created }}
     needs:
       - release_please
     name: Build Third Party Notice
