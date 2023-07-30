@@ -5,7 +5,7 @@ import moment from 'moment';
 
 import MFormButton from 'components/MButton';
 import MForm from 'components/MForm';
-import MModal from 'components/MModal';
+import MModal, { MModalRef } from 'components/MModal';
 import MSelect from 'components/MSelect';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
@@ -14,6 +14,7 @@ import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useFundingSchedules } from 'hooks/fundingSchedules';
 import { useCreateSpending } from 'hooks/spending';
 import useTheme from 'hooks/useTheme';
+import MSelectFrequency from 'components/MSelectFrequency';
 
 
 interface NewExpenseValues {
@@ -39,7 +40,7 @@ function NewExpenseModal(): JSX.Element {
   // const createSpending = useCreateSpending();
   const fundingSchedules = useFundingSchedules();
   //
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<MModalRef>(null);
   const theme = useTheme();
 
   async function submit(): Promise<void> {
@@ -57,7 +58,7 @@ function NewExpenseModal(): JSX.Element {
             Create A New Expense
           </h2>
           <MSpan>
-            For your Flagship Checking at Navy Federal Credit Union
+            For your Flagship Checking at place
           </MSpan>
           <div className='flex flex-col'>
             <MTextField
@@ -100,18 +101,13 @@ function NewExpenseModal(): JSX.Element {
               required
               name='fundingScheduleId'
             />
-            <MSelect
-              options={ [
-                {
-                  label: 'Test',
-                  value: 0,
-                },
-                {
-                  label: 'Test Other',
-                  value: 1,
-                },
-              ] }
-              menuPortalTarget={ document.body }
+            <MSelectFrequency
+              dateFrom="nextOccurrence"
+              // menuPosition='fixed'
+              // menuShouldScrollIntoView={ false }
+              // menuShouldBlockScroll={ true }
+              menuPortalTarget={ ref.current }
+              // menuIsOpen
               menuPlacement='auto'
               label='How frequently do you need this expense?'
               placeholder='Select a spending frequency...'

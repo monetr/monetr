@@ -4,7 +4,7 @@ import Select, { Theme } from 'react-select';
 import useTheme from 'hooks/useTheme';
 import mergeTailwind from 'util/mergeTailwind';
 
-interface MSelectProps<V> extends Omit<Parameters<Select>[0], 'theme'|'styles'|'isDisabled'> {
+export interface MSelectProps<V> extends Omit<Parameters<Select>[0], 'theme'|'styles'|'isDisabled'> {
   label?: string;
   error?: string;
   required?: boolean;

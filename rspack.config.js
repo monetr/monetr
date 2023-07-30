@@ -27,11 +27,11 @@ module.exports = (env, _argv) => {
       css: false,
     },
     builtins: {
-      react: {
-        runtime: 'automatic',
-        development: isDevelopment,
-        refresh: isDevelopment,
-      },
+      // react: {
+      //   runtime: 'automatic',
+      //   development: isDevelopment,
+      //   refresh: isDevelopment,
+      // },
       presetEnv: {
         coreJs: '3',
       },

@@ -4,6 +4,7 @@ import Recurrence from 'components/Recurrence/Recurrence';
 import { RRule, Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(date: moment.Moment): Array<Recurrence> {
+  date = moment(date);
   const input = date.clone().startOf('day');
   const endOfMonth = input.clone().endOf('month').startOf('day');
   const startOfMonth = input.clone().startOf('month').startOf('day');
