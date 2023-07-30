@@ -101,39 +101,78 @@ func (e *Spending) CalculateNextContribution(
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	span.SetTag("spendingId", strconv.FormatUint(e.SpendingId, 10))
-
-	if e.SpendingType == SpendingTypeOverflow {
-		crumbs.Debug(ctx, "No need to calculate contribution for overflow spending", nil)
-		return nil
-	}
-
 	timezone, err := time.LoadLocation(accountTimezone)
 	if err != nil {
 		return errors.Wrap(err, "failed to parse account's timezone")
 	}
+
+	result := CalculateNextContribution(span.Context(), *e, *fundingSchedule, timezone, now)
+	e.IsBehind = result.IsBehind
+	e.NextContributionAmount = result.NextContributionAmount
+	e.LastRecurrence = result.LastRecurrence
+	e.NextRecurrence = result.NextRecurrence
+
+	return nil
+}
+
+func (s *Spending) BeforeInsert(ctx context.Context) (context.Context, error) {
+	// Make sure when we are creating a funding schedule that we set the date started field for the first instance. This
+	// way subsequent rule evaluations can use this date started as a reference point.
+	if s.DateStarted.IsZero() {
+		s.DateStarted = s.NextRecurrence
+	}
+
+	return ctx, nil
+}
+
+// CalculateNextContribution takes a spending object and its funding schedule, a timezone and a point in time. It then
+// calculates what the next contribution to that spending object should be based on that data. It will then return an
+// updated spending object with whatever has changed. This can include:
+//   - IsBehind
+//   - ContributionAmount
+//   - LastRecurrence
+//   - NextRecurrence
+//
+// The provided objects are unmodified.
+func CalculateNextContribution(
+	ctx context.Context,
+	spending Spending,
+	fundingSchedule FundingSchedule,
+	timezone *time.Location,
+	now time.Time,
+) Spending {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.SetTag("spendingId", strconv.FormatUint(spending.SpendingId, 10))
+
+	if spending.SpendingType == SpendingTypeOverflow {
+		crumbs.Debug(ctx, "No need to calculate contribution for overflow spending", nil)
+		return spending
+	}
+
 	// Don't change the time by convert it to the account timezone. This will make debugging easier if there is a
 	// problem.
+	// It's possible that the time was already in the account's timezone, but this still is good to have because it makes
+	// this function consistent.
 	now = now.In(timezone)
 
-	// Get the timestamps for the next two funding events, this is so we can determine how many spending events will
-	// happen during these two funding windows.
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)
-	nextRecurrence := util.MidnightInLocal(e.NextRecurrence, timezone)
-	if e.RecurrenceRule != nil {
+	nextRecurrence := util.MidnightInLocal(spending.NextRecurrence, timezone)
+	if spending.RecurrenceRule != nil {
 		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
 		// rather than the current timestamp (which is what RRule defaults to).
-		if !e.DateStarted.IsZero() {
-			dateStarted := e.DateStarted
+		if !spending.DateStarted.IsZero() {
+			dateStarted := spending.DateStarted
 			corrected := dateStarted.In(timezone)
-			e.RecurrenceRule.DTStart(corrected)
+			spending.RecurrenceRule.DTStart(corrected)
 		} else {
-			e.RecurrenceRule.DTStart(nextRecurrence)
+			spending.RecurrenceRule.DTStart(nextRecurrence)
 		}
 
 		// If the next recurrence of the spending is in the past, then bump it as well.
 		if nextRecurrence.Before(now) {
-			nextRecurrence = e.RecurrenceRule.After(now, false)
+			nextRecurrence = spending.RecurrenceRule.After(now, false)
 		}
 	}
 
@@ -141,20 +180,20 @@ func (e *Spending) CalculateNextContribution(
 	// funding period. This is used to determine if the spending is currently behind. As the total amount that will be
 	// spent must be <= the amount currently allocated to this spending item. If it is not then there will not be enough
 	// funds to cover each spending event between now and the next funding event.
-	eventsBeforeFirst := int64(len(e.GetRecurrencesBefore(now, fundingFirst, timezone)))
+	eventsBeforeFirst := int64(len(spending.GetRecurrencesBefore(now, fundingFirst, timezone)))
 	// The number of times this item will be spent in the subsequent funding period. This is used to determine how much
 	// needs to be allocated at the beginning of the next funding period.
-	eventsBeforeSecond := int64(len(e.GetRecurrencesBefore(fundingFirst, fundingSecond, timezone)))
+	eventsBeforeSecond := int64(len(spending.GetRecurrencesBefore(fundingFirst, fundingSecond, timezone)))
 
 	// The amount of funds needed for each individual spending event.
-	perSpendingAmount := e.TargetAmount
+	perSpendingAmount := spending.TargetAmount
 	// The amount of funds currently allocated towards this spending item. This is not increased until the next funding
 	// event, or the user transfers funds to this spending item.
-	currentAmount := e.GetProgressAmount()
+	currentAmount := spending.GetProgressAmount()
 
 	// We are behind if we do not currently have enough funds for all the spending events between now and the next time
 	// this spending object will receive funding.
-	e.IsBehind = eventsBeforeFirst > 0 && (perSpendingAmount*eventsBeforeFirst) > currentAmount
+	spending.IsBehind = eventsBeforeFirst > 0 && (perSpendingAmount*eventsBeforeFirst) > currentAmount
 
 	// The total contribution amount is the amount of money that needs to be allocated to this spending item during the
 	// next funding event in order to cover all the spending events that will happen between then and the subsequent
@@ -185,24 +224,14 @@ func (e *Spending) CalculateNextContribution(
 	}
 
 	// Update the spending item with our calculated contribution amount.
-	e.NextContributionAmount = totalContributionAmount
+	spending.NextContributionAmount = totalContributionAmount
 
 	// If the current nextRecurrence on the object is in the past, then bump it to our new next recurrence.
-	if e.NextRecurrence.Before(now) {
-		lastRecurrence := e.NextRecurrence
-		e.LastRecurrence = &lastRecurrence
-		e.NextRecurrence = nextRecurrence
+	if spending.NextRecurrence.Before(now) {
+		lastRecurrence := spending.NextRecurrence
+		spending.LastRecurrence = &lastRecurrence
+		spending.NextRecurrence = nextRecurrence
 	}
 
-	return nil
-}
-
-func (s *Spending) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Make sure when we are creating a funding schedule that we set the date started field for the first instance. This
-	// way subsequent rule evaluations can use this date started as a reference point.
-	if s.DateStarted.IsZero() {
-		s.DateStarted = s.NextRecurrence
-	}
-
-	return ctx, nil
+	return spending
 }
