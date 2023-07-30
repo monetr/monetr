@@ -17,6 +17,8 @@ then
 else
   # Air gives us a hot reloader for golang. I'm doing this instead of using the container as this will support other
   # architectures a bit more gracefully at the moment.
+  mkdir -p /build/tmp
+  chown -R $UID:$GID /build/tmp
   air -c /build/air.toml
 fi
 
