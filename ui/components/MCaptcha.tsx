@@ -1,9 +1,9 @@
 import React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { CircularProgress } from '@mui/material';
+import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 
-import clsx from 'clsx';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 export interface MCaptchaProps {

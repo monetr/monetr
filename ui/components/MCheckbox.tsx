@@ -1,9 +1,11 @@
+/* eslint-disable max-len */
 import React from 'react';
 import styled from '@emotion/styled';
+import clsx from 'clsx';
+import { useFormikContext } from 'formik';
 
 import { ReactElement } from './types';
 
-import clsx from 'clsx';
 import useTheme from 'hooks/useTheme';
 
 export interface MCheckboxProps {
@@ -20,6 +22,7 @@ export interface MCheckboxProps {
 }
 
 export default function MCheckbox(props: MCheckboxProps): JSX.Element {
+  const formikContext = useFormikContext();
   const theme = useTheme();
 
   const borderColor = theme.mediaColorSchema === 'dark' ?
@@ -87,6 +90,13 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     );
   }
 
+  props = {
+    ...props,
+    disabled: props?.disabled || formikContext?.isSubmitting,
+    onChange: props?.onChange || formikContext?.handleChange,
+    checked: props?.checked || formikContext.values[props.name],
+  };
+
   return (
     <div className="flex gap-x-3">
       <div className="flex h-6 items-center">
@@ -97,6 +107,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
           disabled={ props.disabled }
           checked={ props.checked }
           onChange={ props.onChange }
+          onBlur={ formikContext?.handleBlur }
         />
       </div>
       <div className="text-sm leading-6">

@@ -107,6 +107,15 @@ export default function RegisterNew(): JSX.Element {
 
   async function submit(values: RegisterValues, helpers: FormikHelpers<RegisterValues>): Promise<void> {
     helpers.setSubmitting(true);
+    if (!values.agree) {
+      enqueueSnackbar('You must agree to the terms of use and privacy policy to continue', {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      });
+      helpers.setSubmitting(false);
+      return;
+    }
+
     return signUp({
       agree: values.agree,
       betaCode: values.betaCode,
