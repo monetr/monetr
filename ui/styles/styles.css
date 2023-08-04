@@ -37,6 +37,19 @@ button:focus {
     outline: none;
 }
 
+/* Make it so that number inputs don't have the stepper arrows */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+/* end of stepper arrow go away */
+
+
 .smooth-animation {
     backface-visibility: hidden;
 }

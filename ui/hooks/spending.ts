@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import shallow from 'zustand/shallow';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
@@ -14,7 +14,7 @@ export type SpendingResult =
 export function useSpendingSink(): SpendingResult {
   const selectedBankAccountId = useSelectedBankAccountId();
   const result = useQuery<Array<Partial<Spending>>>(
-    `/bank_accounts/${ selectedBankAccountId }/spending`,
+    [`/bank_accounts/${ selectedBankAccountId }/spending`],
     {
       enabled: !!selectedBankAccountId,
     },
@@ -77,10 +77,10 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
     {
       onSuccess: (removedSpendingId: number) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/spending`,
+          [`/bank_accounts/${ selectedBankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ selectedBankAccountId }/balances`),
+        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/balances`]),
         queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -105,11 +105,11 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
     {
       onSuccess: (updatedSpending: Spending) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ updatedSpending.bankAccountId }/spending`,
+          [`/bank_accounts/${ updatedSpending.bankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => item.spendingId === updatedSpending.spendingId ? updatedSpending : item),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ updatedSpending.bankAccountId }/balances`),
+        queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/balances`]),
         queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -134,10 +134,10 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
     {
       onSuccess: (createdSpending: Spending) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ createdSpending.bankAccountId }/spending`,
+          [`/bank_accounts/${ createdSpending.bankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) => (previous || []).concat(createdSpending),
         ),
-        queryClient.invalidateQueries(`/bank_accounts/${ createdSpending.bankAccountId }/balances`),
+        queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/balances`]),
         queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -179,12 +179,12 @@ export function useTransfer(): (
     {
       onSuccess: (result: BalanceTransferResponse) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/spending`,
+          [`/bank_accounts/${ selectedBankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) => previous
             .map(item => result.spending.find(updated => updated.spendingId === item.spendingId) || item),
         ),
         queryClient.setQueriesData(
-          `/bank_accounts/${ selectedBankAccountId }/balances`,
+          [`/bank_accounts/${ selectedBankAccountId }/balances`],
           (previous: Partial<Balance>) => new Balance({
             ...previous,
             ...result.balance,

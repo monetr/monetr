@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PlaidLinkOnEventMetadata, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import {
   Button,
@@ -61,7 +61,7 @@ function UpdatePlaidAccountDialog(props: UpdatePlaidAccountDialogProps): JSX.Ele
       publicToken: token,
       accountIds: metadata.accounts.map(account => account.id),
     })
-      .then(() => queryClient.invalidateQueries('/bank_accounts'))
+      .then(() => queryClient.invalidateQueries(['/bank_accounts']))
       .then(() => modal.remove())
       .catch(error => {
         // If sentry is configured I want to know when errors happen, mostly because the changes I'm making right now

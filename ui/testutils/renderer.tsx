@@ -1,22 +1,24 @@
 import React from 'react';
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
+import NiceModal from '@ebay/nice-modal-react';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
-import { LocalizationProvider } from '@mui/lab';
-import AdapterMoment from '@mui/lab/AdapterMoment';
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Queries, queries, render, RenderOptions, RenderResult } from '@testing-library/react';
-import { IconVariant, SnackbarProvider } from 'notistack';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import { SnackbarProvider, VariantType } from 'notistack';
 
-import theme from 'theme';
+import { newTheme } from 'theme';
+import Query from 'util/query';
 
 export interface Options<Q extends Queries = typeof queries,
   Container extends Element | DocumentFragment = HTMLElement,
   > extends RenderOptions<Q, Container> {
-  history?: MemoryHistory;
+    initialRoute: string;
 }
 
 function testRenderer<Q extends Queries = typeof queries,
@@ -26,26 +28,36 @@ function testRenderer<Q extends Queries = typeof queries,
   options?: Options<Q, Container>
 ): RenderResult<Q, Container> {
   const Wrapper = (props: React.PropsWithChildren<any>) => {
-    const history = options?.history || createMemoryHistory();
-
-    const snackbarIcons: Partial<IconVariant> = {
+    const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
       error: <ErrorIcon className="mr-2.5" />,
       success: <DoneIcon className="mr-2.5" />,
       warning: <WarningIcon className="mr-2.5" />,
       info: <InfoIcon className="mr-2.5" />,
     };
 
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          queryFn: Query,
+        },
+      },
+    });
+
     return (
-      <HistoryRouter history={ history }>
-        <ThemeProvider theme={ theme }>
-          <LocalizationProvider dateAdapter={ AdapterMoment }>
-            <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-              <CssBaseline />
-              { props.children }
-            </SnackbarProvider>
-          </LocalizationProvider>
-        </ThemeProvider>
-      </HistoryRouter>
+      <MemoryRouter initialEntries={ [options.initialRoute] }>
+        <QueryClientProvider client={ queryClient }>
+          <ThemeProvider theme={ newTheme }>
+            <LocalizationProvider dateAdapter={ AdapterMoment }>
+              <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+                <NiceModal.Provider>
+                  <CssBaseline />
+                  { props.children }
+                </NiceModal.Provider>
+              </SnackbarProvider>
+            </LocalizationProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </MemoryRouter>
     );
   };
 

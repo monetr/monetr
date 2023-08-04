@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import moment from 'moment';
 
 import { parseToMomentMaybe } from 'util/parseToMoment';
@@ -39,7 +39,7 @@ export type AppConfigurationResult =
   & UseQueryResult<Partial<AppConfiguration>, unknown>;
 
 export function useAppConfigurationSink(): AppConfigurationResult {
-  const result = useQuery<Partial<AppConfiguration>>('/config', {
+  const result = useQuery<Partial<AppConfiguration>>(['/config'], {
     staleTime: 60 * 1000, // One minute in milliseconds.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,

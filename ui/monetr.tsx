@@ -159,5 +159,4 @@ function RedirectToBank(): JSX.Element {
   const account = accounts[0];
 
   return <Navigate replace to={ `/bank/${account.bankAccountId}/transactions` } />;
-
 }

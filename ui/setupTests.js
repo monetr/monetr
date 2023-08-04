@@ -4,7 +4,9 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
-import mockAxios from 'jest-mock-axios';
+import axios from 'axios';
+
+import { server } from './testutils/server';
 
 module.export = global.CONFIG = {
   BOOTSTRAP_CONFIG_JSON: false,
@@ -16,5 +18,10 @@ module.export = global.CONFIG = {
   SENTRY_DSN: null,
 };
 
-// When we are testing, make sure that our API calls are routed through our mock interface.
-window.API = mockAxios;
+window.API = axios.create({
+  baseURL: '/api',
+});
+
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());

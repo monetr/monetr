@@ -1,8 +1,9 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import FundingSchedule from 'models/FundingSchedule';
 import request from 'util/request';
+import { useMemo } from 'react';
 
 export type FundingSchedulesResult =
   { result: Map<number, FundingSchedule> }
@@ -11,11 +12,21 @@ export type FundingSchedulesResult =
 export function useFundingSchedulesSink(): FundingSchedulesResult {
   const selectedBankAccountId = useSelectedBankAccountId();
   const result = useQuery<Array<Partial<FundingSchedule>>>(
-    `/bank_accounts/${ selectedBankAccountId }/funding_schedules`,
+    [`/bank_accounts/${ selectedBankAccountId }/funding_schedules`],
     {
       enabled: !!selectedBankAccountId,
     },
   );
+
+  // const items = useMemo(() => new Map(result?.data?.map(item => {
+  //   const fundingSchedule = new FundingSchedule(item);
+  //   return [fundingSchedule.fundingScheduleId, fundingSchedule];
+  // })), [result?.data]);
+  // return {
+  //   ...result,
+  //   result: items,
+  // };
+  // const items = useMemo(() => , [result?.data]);
   return {
     ...result,
     result: new Map(result?.data?.map(item => {
@@ -51,7 +62,7 @@ export function useCreateFundingSchedule(): (_spending: FundingSchedule) => Prom
     {
       onSuccess: (newFundingSchedule: FundingSchedule) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ newFundingSchedule.bankAccountId }/funding_schedules`,
+          [`/bank_accounts/${ newFundingSchedule.bankAccountId }/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => previous.concat(newFundingSchedule),
         ),
       ]),
@@ -80,7 +91,7 @@ export function useUpdateFundingSchedule(): (_fundingSchedule: FundingSchedule) 
     {
       onSuccess: (updatedFundingSchedule: FundingSchedule) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ updatedFundingSchedule.bankAccountId }/funding_schedules`,
+          [`/bank_accounts/${ updatedFundingSchedule.bankAccountId }/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => previous.map(item =>
             item.fundingScheduleId === updatedFundingSchedule.fundingScheduleId ? updatedFundingSchedule : item
           ),
@@ -108,7 +119,7 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
     {
       onSuccess: (removed: FundingSchedule) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ removed.bankAccountId }/funding_schedules`,
+          [`/bank_accounts/${ removed.bankAccountId }/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => previous
             .filter(item => item.fundingScheduleId !== removed.fundingScheduleId),
         ),

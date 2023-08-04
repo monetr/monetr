@@ -3,6 +3,7 @@ import Select, { Theme } from 'react-select';
 
 import useTheme from 'hooks/useTheme';
 import mergeTailwind from 'util/mergeTailwind';
+import MLabel from './MLabel';
 
 export interface MSelectProps<V> extends Omit<Parameters<Select>[0], 'theme'|'styles'|'isDisabled'> {
   label?: string;
@@ -10,41 +11,6 @@ export interface MSelectProps<V> extends Omit<Parameters<Select>[0], 'theme'|'st
   required?: boolean;
   disabled?: boolean;
   value?: V | undefined;
-}
-
-function LabelText(props: MSelectProps<unknown>): JSX.Element {
-  if (!props.label) return null;
-
-  const labelClassNames = mergeTailwind(
-    'mb-1',
-    'block',
-    'text-sm',
-    'font-medium',
-    'leading-6',
-    {
-      'text-gray-900': !props.disabled,
-      'text-gray-500': props.disabled,
-      'dark:text-dark-monetr-content-emphasis': !props.disabled,
-    },
-  );
-
-  return (
-    <label
-      htmlFor={ props.id }
-      className={ labelClassNames }
-    >
-      {props.label}
-    </label>
-  );
-}
-
-function LabelRequired(props: MSelectProps<unknown>): JSX.Element {
-  if (!props.required) return null;
-  return (
-    <span className='text-red-500'>
-      *
-    </span>
-  );
 }
 
 export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
@@ -67,12 +33,12 @@ export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
 
   return (
     <div className={ wrapperClassNames }>
-      <div className="flex items-center justify-between monetr-">
-        <div className='flex items-center gap-0.5'>
-          <LabelText { ...props } />
-          <LabelRequired { ...props } />
-        </div>
-      </div>
+      <MLabel
+        label={ props.label }
+        htmlFor={ props.id }
+        required={ props.required }
+        disabled={ props.disabled }
+      />
       <Select
         theme={ (baseTheme: Theme): Theme => ({
           ...baseTheme,

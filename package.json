@@ -42,7 +42,9 @@
       ".+/pkg/.+"
     ],
     "modulePaths": [
-      "<rootDir>/ui"
+      "<rootDir>",
+      "<rootDir>/ui",
+      "node_modules"
     ],
     "moduleNameMapper": {
       "^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|lottie.json|xlsx)$": "<rootDir>/ui/testutils/mocks/fileMock.js"
@@ -75,6 +77,7 @@
     "@sentry/browser": "6.19.7",
     "@sentry/react": "6.19.7",
     "@sentry/tracing": "6.19.7",
+    "@tanstack/react-query": "^4.32.1",
     "@tremor/react": "^3.4.1",
     "axios": "0.27.2",
     "camelcase": "6.3.0",
@@ -94,7 +97,6 @@
     "react-google-recaptcha": "2.1.0",
     "react-infinite-scroll-hook": "4.0.4",
     "react-plaid-link": "3.3.2",
-    "react-query": "3.39.3",
     "react-router-dom": "6.6.1",
     "react-select": "5.5.9",
     "resolve": "1.22.1",
@@ -107,13 +109,13 @@
   },
   "optionalDependencies": {
     "@storybook/addon-coverage": "0.0.8",
-    "@storybook/addon-essentials": "7.0.18",
-    "@storybook/addon-interactions": "7.0.18",
-    "@storybook/addon-links": "7.0.18",
+    "@storybook/addon-essentials": "7.2.1",
+    "@storybook/addon-interactions": "7.2.1",
+    "@storybook/addon-links": "7.2.1",
     "@storybook/addon-styling": "1.0.8",
-    "@storybook/addon-viewport": "7.0.18",
-    "@storybook/blocks": "7.0.18",
-    "@storybook/react": "7.0.18",
+    "@storybook/addon-viewport": "7.2.1",
+    "@storybook/blocks": "7.2.1",
+    "@storybook/react": "7.2.1",
     "@storybook/test-runner": "0.10.0",
     "@storybook/testing-library": "0.0.14-next.2",
     "storybook": "7.0.18",
@@ -121,8 +123,8 @@
     "storybook-react-rspack": "7.0.0-rc.24"
   },
   "devDependencies": {
-    "@rspack/binding-linux-x64-gnu": "0.2.0",
-    "@rspack/cli": "0.2.0",
+    "@rspack/binding-linux-x64-gnu": "0.2.10",
+    "@rspack/cli": "0.2.10",
     "@swc/core": "1.3.40",
     "@swc/jest": "0.2.26",
     "@testing-library/jest-dom": "5.16.5",

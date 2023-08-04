@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { SpendingType } from 'models/Spending';
@@ -130,7 +130,7 @@ export type ForecastResult =
 export function useForecast(): ForecastResult {
   const selectedBankAccountId = useSelectedBankAccountId();
   const result = useQuery<Partial<Forecast>>(
-    `/bank_accounts/${ selectedBankAccountId }/forecast`,
+    [`/bank_accounts/${ selectedBankAccountId }/forecast`],
     {
       // TODO long cache time for forecast endpoints.
       enabled: !!selectedBankAccountId,

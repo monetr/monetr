@@ -23,15 +23,15 @@ module.exports = (env, _argv) => {
 
   const config = {
     experiments: {
-      incrementalRebuild: false,
+      incrementalRebuild: true,
       css: false,
     },
     builtins: {
-      // react: {
-      //   runtime: 'automatic',
-      //   development: isDevelopment,
-      //   refresh: isDevelopment,
-      // },
+      react: {
+        runtime: 'automatic',
+        development: isDevelopment,
+        refresh: isDevelopment,
+      },
       presetEnv: {
         coreJs: '3',
       },

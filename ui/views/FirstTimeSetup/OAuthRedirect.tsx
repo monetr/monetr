@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import * as Sentry from '@sentry/react';
@@ -98,8 +98,8 @@ export default function OAuthRedirect(): JSX.Element {
 
         return longPollSetup()
           .then(() => Promise.all([
-            queryClient.invalidateQueries('/links'),
-            queryClient.invalidateQueries('/bank_accounts'),
+            queryClient.invalidateQueries(['/links']),
+            queryClient.invalidateQueries(['/bank_accounts']),
           ]));
       });
   }

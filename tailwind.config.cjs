@@ -57,6 +57,7 @@ module.exports = {
             subtle: '#27272a', // zinc-800
             DEFAULT: '#19161f',
             emphasis: '#3f3f46', // zinc-700
+            focused: '#131118',
           },
           border: {
             subtle: '#27272a', // zinc-800

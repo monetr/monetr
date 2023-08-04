@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { ActionMeta, OnChangeValue } from 'react-select';
 import { useFormikContext } from 'formik';
 
 import MSelect, { MSelectProps } from './MSelect';
 
 import getRecurrencesForDate from './Recurrence/getRecurrencesForDate';
 import Recurrence from './Recurrence/Recurrence';
-import { ActionMeta, OnChangeValue } from 'react-select';
 
 export interface MSelectFrequencyProps extends MSelectProps<Recurrence> {
   name: string;
@@ -29,6 +29,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     }
 
     formikContext?.setFieldValue(props.name, rules[selectedIndex]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   const options = rules.map((item, index) => ({

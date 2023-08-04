@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close } from '@mui/icons-material';
 import {
@@ -34,8 +34,8 @@ function RemoveLinkConfirmationDialog(props: RemoveLinkConfirmationDialogProps):
     setLoading(true);
     return removeLink(props.linkId)
       .then(() => void Promise.all([
-        queryClient.invalidateQueries('/links'),
-        queryClient.invalidateQueries('/bank_accounts'),
+        queryClient.invalidateQueries(['/links']),
+        queryClient.invalidateQueries(['/bank_accounts']),
       ]))
       .then(() => modal.remove())
       .catch((error: AxiosError<{ error: string; }>) => setError(error?.response?.data?.error))

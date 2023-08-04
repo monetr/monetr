@@ -1,12 +1,12 @@
 import React from 'react';
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export interface BankLogoProps {
   plaidInstitutionId?: string;
 }
 
 export default function BankLogo(props: BankLogoProps): JSX.Element {
-  const { data } = useQuery<{ logo: string }>(`/institutions/${ props.plaidInstitutionId }`, {
+  const { data } = useQuery<{ logo: string }>([`/institutions/${ props.plaidInstitutionId }`], {
     enabled: !!props.plaidInstitutionId,
     staleTime: 60 * 60 * 1000, // 60 minutes
   });

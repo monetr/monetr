@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import * as Sentry from '@sentry/react';
 
 import User from 'models/User';
@@ -16,7 +16,7 @@ export type AuthenticationResult =
   & UseQueryResult<Partial<AuthenticationWrapper>, unknown>;
 
 export function useAuthenticationSink(): AuthenticationResult {
-  const result = useQuery<Partial<AuthenticationWrapper>>('/users/me', {
+  const result = useQuery<Partial<AuthenticationWrapper>>(['/users/me'], {
     onSuccess: data => {
       if (data?.user?.accountId) {
         Sentry.setUser({
@@ -68,7 +68,7 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
     {
       onSuccess: (result: AfterCheckoutResult) => Promise.all([
         queryClient.setQueriesData(
-          '/users/me',
+          ['/users/me'],
           (previous: Partial<AuthenticationWrapper>) => ({
             ...previous,
             isActive: result.isActive,

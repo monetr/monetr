@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
 import { AxiosError } from 'axios';
@@ -127,7 +127,7 @@ export default function RegisterView(): JSX.Element {
         }
 
 
-        return queryClient.invalidateQueries('/users/me')
+        return queryClient.invalidateQueries(['/users/me'])
           .then(() => {
             if (result.nextUrl) {
               return navigate(result.nextUrl);

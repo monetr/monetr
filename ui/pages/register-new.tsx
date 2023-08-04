@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
@@ -133,7 +133,7 @@ export default function RegisterNew(): JSX.Element {
           return setSuccessful(true);
         }
 
-        return queryClient.invalidateQueries('/users/me')
+        return queryClient.invalidateQueries(['/users/me'])
           .then(() => {
             if (result.nextUrl) {
               return navigate(result.nextUrl);

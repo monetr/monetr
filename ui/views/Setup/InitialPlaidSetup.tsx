@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types/index';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Backdrop, Button, CircularProgress, Typography } from '@mui/material';
 import { Severity } from '@sentry/react';
 import * as Sentry from '@sentry/react';
@@ -132,8 +132,8 @@ export default function InitialPlaidSetup(): JSX.Element {
         await longPollSetup(0, linkId);
 
         setTimeout(() => {
-          queryClient.invalidateQueries('/links');
-          queryClient.invalidateQueries('/bank_accounts');
+          queryClient.invalidateQueries(['/links']);
+          queryClient.invalidateQueries(['/bank_accounts']);
         }, 5000);
       })
       .catch(error => {

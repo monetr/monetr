@@ -1,21 +1,21 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { Formik } from 'formik';
+import { AxiosError } from 'axios';
+import { Formik, FormikHelpers } from 'formik';
 import moment from 'moment';
+import { useSnackbar } from 'notistack';
 
 import MFormButton from 'components/MButton';
 import MForm from 'components/MForm';
 import MModal, { MModalRef } from 'components/MModal';
-import MSelect from 'components/MSelect';
+import MSelectFrequency from 'components/MSelectFrequency';
+import MSelectFunding from 'components/MSelectFunding';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import Recurrence from 'components/Recurrence/Recurrence';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import { useFundingSchedules } from 'hooks/fundingSchedules';
 import { useCreateSpending } from 'hooks/spending';
-import useTheme from 'hooks/useTheme';
-import MSelectFrequency from 'components/MSelectFrequency';
-
+import Spending, { SpendingType } from 'models/Spending';
 
 interface NewExpenseValues {
   name: string;
@@ -26,7 +26,6 @@ interface NewExpenseValues {
 }
 
 const initialValues: NewExpenseValues = {
-
   name: '',
   amount: 0.00,
   nextOccurrence: moment().add(1, 'day'),
@@ -36,35 +35,55 @@ const initialValues: NewExpenseValues = {
 
 function NewExpenseModal(): JSX.Element {
   const modal = useModal();
-  // const selectedBankAccountId = useSelectedBankAccountId();
-  // const createSpending = useCreateSpending();
-  const fundingSchedules = useFundingSchedules();
-  //
-  const ref = useRef<MModalRef>(null);
-  const theme = useTheme();
+  const { enqueueSnackbar } = useSnackbar();
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const createSpending = useCreateSpending();
 
-  async function submit(): Promise<void> {
-    return Promise.resolve();
+  const ref = useRef<MModalRef>(null);
+
+  async function submit(
+    values: NewExpenseValues,
+    helper: FormikHelpers<NewExpenseValues>,
+  ): Promise<void> {
+    const newSpending = new Spending({
+      bankAccountId: selectedBankAccountId,
+      name: values.name.trim(),
+      description: values.recurrenceRule.name.trim(),
+      nextRecurrence: moment(values.nextOccurrence).startOf('day'),
+      spendingType: SpendingType.Expense,
+      fundingScheduleId: values.fundingScheduleId,
+      targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
+      recurrenceRule: values.recurrenceRule.ruleString(),
+    });
+
+    helper.setSubmitting(true);
+    return createSpending(newSpending)
+      .then(created => modal.resolve(created))
+      .then(() => modal.remove())
+      .catch((error: AxiosError) => void enqueueSnackbar(error.response.data['error'], {
+        variant: 'error',
+        disableWindowBlurListener: true,
+      }))
+      .finally(() => helper.setSubmitting(false));
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref }>
+    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
       <Formik
         onSubmit={ submit }
         initialValues={ initialValues }
       >
-        <MForm className='flex flex-col gap-2 p-2'>
-          <h2 className='font-bold'>
-            Create A New Expense
-          </h2>
-          <MSpan>
-            For your Flagship Checking at place
-          </MSpan>
+        <MForm className='h-full flex flex-col gap-2 p-2 justify-between' data-testid='new-expense-modal'>
           <div className='flex flex-col'>
+            <MSpan className='font-bold text-xl mb-2'>
+              Create A New Expense
+            </MSpan>
             <MTextField
+              id='expense-name-search' // Keep's 1Pass from hijacking normal name fields.
               name='name'
               label='What are you budgeting for?'
               required
+              autoComplete="off"
               placeholder='Amazon, Netflix...'
             />
             <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
@@ -81,34 +100,22 @@ function NewExpenseModal(): JSX.Element {
                 required
                 type='date'
                 className='w-full md:w-1/2'
+                min={ moment().add(1, 'day').startOf('day').format('YYYY-MM-DD') }
               />
             </div>
-            <MSelect
-              options={ [
-                {
-                  label: 'Test',
-                  value: 0,
-                },
-                {
-                  label: 'Test Other',
-                  value: 1,
-                },
-              ] }
+            <MSelectFunding
               menuPortalTarget={ document.body }
-              menuPlacement='auto'
               label='When do you want to fund the expense?'
-              placeholder='Select a funding schedule...'
               required
               name='fundingScheduleId'
             />
             <MSelectFrequency
               dateFrom="nextOccurrence"
-              // menuPosition='fixed'
-              // menuShouldScrollIntoView={ false }
-              // menuShouldBlockScroll={ true }
-              menuPortalTarget={ ref.current }
-              // menuIsOpen
-              menuPlacement='auto'
+              menuPosition='fixed'
+              menuShouldScrollIntoView={ false }
+              menuShouldBlockScroll={ true }
+              menuPortalTarget={ document.body }
+              menuPlacement='bottom'
               label='How frequently do you need this expense?'
               placeholder='Select a spending frequency...'
               required
@@ -116,7 +123,7 @@ function NewExpenseModal(): JSX.Element {
             />
           </div>
           <div className='flex justify-end gap-2'>
-            <MFormButton color='cancel' onClick={ modal.remove }>
+            <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-expense-modal'>
               Cancel
             </MFormButton>
             <MFormButton color='primary' type='submit'>
@@ -133,6 +140,6 @@ const newExpenseModal = NiceModal.create(NewExpenseModal);
 
 export default newExpenseModal;
 
-export function showNewExpenseModal(): void {
-  NiceModal.show(newExpenseModal);
+export function showNewExpenseModal(): Promise<Spending | null> {
+  return NiceModal.show<Spending | null, {}>(newExpenseModal);
 }

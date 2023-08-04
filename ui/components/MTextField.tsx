@@ -3,6 +3,8 @@ import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 import moment from 'moment';
 
+import MLabel from './MLabel';
+
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
   label?: string;
@@ -17,41 +19,6 @@ const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
   disabled: false,
   uppercasetext: undefined,
 };
-
-function LabelText(props: MTextFieldProps): JSX.Element {
-  if (!props.label) return null;
-
-  const labelClassNames = clsx(
-    'mb-1',
-    'block',
-    'text-sm',
-    'font-medium',
-    'leading-6',
-    {
-      'text-gray-900': !props.disabled,
-      'text-gray-500': props.disabled,
-      'dark:text-dark-monetr-content-emphasis': !props.disabled,
-    },
-  );
-
-  return (
-    <label
-      htmlFor={ props.id }
-      className={ labelClassNames }
-    >
-      {props.label}
-    </label>
-  );
-}
-
-function LabelRequired(props: MTextFieldProps): JSX.Element {
-  if (!props.required) return null;
-  return (
-    <span className='text-red-500'>
-      *
-    </span>
-  );
-}
 
 export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefaults): JSX.Element {
   const formikContext = useFormikContext();
@@ -96,8 +63,6 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'focus:ring-red-400': props.error,
     },
     {
-    },
-    {
       'dark:bg-dark-monetr-background': !props.disabled,
       'dark:text-zinc-200': !props.disabled,
       'text-gray-900': !props.disabled,
@@ -139,13 +104,14 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
 
   return (
     <div className={ wrapperClassNames }>
-      <div className="flex items-center justify-between">
-        <div className='flex items-center gap-0.5'>
-          <LabelText { ...props } />
-          <LabelRequired { ...props } />
-        </div>
+      <MLabel
+        label={ props.label }
+        disabled={ props.disabled }
+        htmlFor={ props.id }
+        required={ props.required }
+      >
         <LabelDecorator />
-      </div>
+      </MLabel>
       <div>
         <input
           value={ value }

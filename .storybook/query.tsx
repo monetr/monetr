@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   QueryClient, QueryClientProvider, QueryFunctionContext, QueryKey,
-} from 'react-query';
+} from '@tanstack/react-query';
 
 export interface MockRequest {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',

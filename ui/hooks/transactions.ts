@@ -6,7 +6,7 @@ import {
   useQuery,
   useQueryClient,
   UseQueryResult,
-} from 'react-query';
+} from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import Balance from 'models/Balance';
@@ -24,7 +24,7 @@ export type TransactionsResult =
 export function useTransactionsSink(): TransactionsResult {
   const selectedBankAccountId = useSelectedBankAccountId();
   const result = useInfiniteQuery<Array<Partial<Transaction>>>(
-    `/bank_accounts/${ selectedBankAccountId }/transactions`,
+    [`/bank_accounts/${ selectedBankAccountId }/transactions`],
     {
       getNextPageParam: (_, pages) => pages.length * 25,
       // keepPreviousData: true,
@@ -47,7 +47,7 @@ export function useTransaction(transactionId: number | null): TransactionResult 
   const selectedBankAccountId = useSelectedBankAccountId();
 
   const result = useQuery<Partial<Transaction>>(
-    `/bank_accounts/${ selectedBankAccountId }/transactions/${ transactionId }`,
+    [`/bank_accounts/${ selectedBankAccountId }/transactions/${ transactionId }`],
     {
       enabled: !!selectedBankAccountId && !!transactionId,
     },
@@ -82,7 +82,7 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<v
     {
       onSuccess: (response: TransactionUpdateResponse) => Promise.all([
         queryClient.setQueriesData(
-          `/bank_accounts/${ response.transaction.bankAccountId }/transactions`,
+          [`/bank_accounts/${ response.transaction.bankAccountId }/transactions`],
           (previous: InfiniteData<Array<Transaction>>) => ({
             ...previous,
             pages: previous.pages.map(page =>
@@ -93,12 +93,12 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<v
           })
         ),
         queryClient.setQueriesData(
-          `/bank_accounts/${ response.transaction.bankAccountId }/spending`,
+          [`/bank_accounts/${ response.transaction.bankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) => previous
             .map(item => (response.spending || []).find(updated => updated.spendingId === item.spendingId) || item),
         ),
         queryClient.setQueriesData(
-          `/bank_accounts/${ response.transaction.bankAccountId }/balances`,
+          [`/bank_accounts/${ response.transaction.bankAccountId }/balances`],
           (previous: Partial<Balance>) => new Balance({
             ...previous,
             ...response.balance,

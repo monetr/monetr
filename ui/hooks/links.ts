@@ -1,5 +1,5 @@
 import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
-import { useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 
 import { useAuthenticationSink } from './useAuthentication';
@@ -15,7 +15,7 @@ export type LinksResult =
 export function useLinksSink(): LinksResult {
   const { result: { user } } = useAuthenticationSink();
   const result = useQuery<Array<Partial<Link>>>(
-    '/links', {
+    ['/links'], {
       // Only request links if there is an authenticated user.
       enabled: !!user,
     });
@@ -44,8 +44,8 @@ export function useRemoveLink(): (_linkId: number) => Promise<void> {
     return request()
       .delete(`/links/${linkId}`)
       .then(() => void Promise.all([
-        queryClient.invalidateQueries('/links'),
-        queryClient.invalidateQueries('/bank_accounts'),
+        queryClient.invalidateQueries(['/links']),
+        queryClient.invalidateQueries(['/bank_accounts']),
         // TODO Invalidate other endpoints for the removed bank accounts?
       ]));
   };
@@ -80,9 +80,12 @@ export function useTriggerManualSync(): (_linkId: number) => Promise<void> {
         disableWindowBlurListener: true,
 
       }))
-      .catch(error => void enqueueSnackbar(`Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`, {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }));
+      .catch(error => void enqueueSnackbar(
+        `Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`, 
+        {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        },
+      ));
   };
 }

@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata, PlaidLinkOptionsWithLinkToken, usePlaidLink } from 'react-plaid-link';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, EditOutlined, LinkOutlined } from '@mui/icons-material';
 import * as Sentry from '@sentry/react';
@@ -256,8 +256,8 @@ function Plaid(): JSX.Element {
         await longPollSetup(0, linkId);
 
         setTimeout(() => {
-          queryClient.invalidateQueries('/links');
-          queryClient.invalidateQueries('/bank_accounts');
+          queryClient.invalidateQueries(['/links']);
+          queryClient.invalidateQueries(['/bank_accounts']);
           navigate('/');
         }, 8000);
       })

@@ -1,5 +1,5 @@
-import { useQuery, UseQueryResult } from 'react-query';
 import { useMatch } from 'react-router-dom';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import { useLinks } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
@@ -10,7 +10,7 @@ export type BankAccountsResult =
 
 export function useBankAccountsSink(): BankAccountsResult {
   const links = useLinks();
-  const result = useQuery<Array<Partial<BankAccount>>>('/bank_accounts', {
+  const result = useQuery<Array<Partial<BankAccount>>>(['/bank_accounts'], {
     enabled: !!links && links.size > 0,
   });
   return {
@@ -47,7 +47,7 @@ export function useSelectedBankAccount(): CurrentBankAccountResult {
   }
 
   const result = useQuery<Partial<BankAccount>>(
-    `/bank_accounts/${ bankAccountId }`,
+    [`/bank_accounts/${ bankAccountId }`],
     {
       enabled: !!bankAccountId, // Only request if we have a valid numeric bank account ID to work with.
     }

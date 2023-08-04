@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Close } from '@mui/icons-material';
 import { Button, Dialog, DialogContent, DialogTitle, IconButton, Typography } from '@mui/material';
 
@@ -60,8 +60,8 @@ export function AddBankAccountDialog(): JSX.Element {
       .then(async result => {
         return longPollSetup(result.linkId)
           .then(() => Promise.all([
-            queryClient.invalidateQueries('/links'),
-            queryClient.invalidateQueries('/bank_accounts'),
+            queryClient.invalidateQueries(['/links']),
+            queryClient.invalidateQueries(['/bank_accounts']),
           ]));
       })
       .then(() => modal.remove())

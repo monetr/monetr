@@ -1,4 +1,4 @@
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import request from 'util/request';
 
@@ -7,6 +7,6 @@ export default function useLogout(): () => Promise<void> {
   return async () => {
     return request()
       .get('/authentication/logout')
-      .then(() => queryClient.invalidateQueries('/users/me'));
+      .then(() => queryClient.invalidateQueries(['/users/me']));
   };
 }
