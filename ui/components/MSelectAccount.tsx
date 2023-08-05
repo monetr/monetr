@@ -1,11 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Select, { Theme } from 'react-select';
 
 import { useBankAccountsSink, useSelectedBankAccount } from 'hooks/bankAccounts';
 import useTheme from 'hooks/useTheme';
 
 import './MSelectAccount.scss';
-import { useNavigate } from 'react-router-dom';
 
 export default function MSelectAccount(): JSX.Element {
   const theme = useTheme();

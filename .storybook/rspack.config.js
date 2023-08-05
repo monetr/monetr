@@ -47,14 +47,6 @@ export default ({ config, mode }) => {
       rules: [
         ...config?.module?.rules,
         {
-          test: /\.css$/,
-          use: [
-            {
-              loader: 'postcss-loader',
-            },
-          ],
-        },
-        {
           test: /\.scss$/,
           use: [
             {
@@ -64,6 +56,18 @@ export default ({ config, mode }) => {
                   quietDeps: true,
                 },
               },
+            },
+            {
+              loader: 'postcss-loader',
+            },
+          ],
+          type: 'css',
+        },
+        {
+          test: /\.css$/,
+          use: [
+            {
+              loader: 'postcss-loader',
             },
           ],
           type: 'css',
