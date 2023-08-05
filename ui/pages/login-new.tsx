@@ -55,7 +55,7 @@ export default function LoginNew(): JSX.Element {
     }
 
     return (
-      <MLink to="/password/forgot" size="sm">
+      <MLink to="/password/forgot" size="sm" data-testid='login-forgot'>
         Forgot password?
       </MLink>
     );
@@ -67,7 +67,7 @@ export default function LoginNew(): JSX.Element {
     return (
       <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
         <MSpan variant="light" className='text-sm'>Not a user?</MSpan>
-        <MLink to="/register" size="sm">Sign up now</MLink>
+        <MLink to="/register" size="sm" data-testid='login-signup'>Sign up now</MLink>
       </div>
     );
   }
@@ -99,6 +99,7 @@ export default function LoginNew(): JSX.Element {
         </div>
         <MSpan>Sign into your monetr account</MSpan>
         <MTextField
+          data-testid='login-email'
           autoFocus
           label="Email Address"
           name='email'
@@ -107,6 +108,7 @@ export default function LoginNew(): JSX.Element {
           className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
         />
         <MTextField
+          data-testid='login-password'
           label="Password"
           name='password'
           type='password'
@@ -120,6 +122,7 @@ export default function LoginNew(): JSX.Element {
         />
         <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
           <MFormButton
+            data-testid='login-submit'
             color="primary"
             variant="solid"
             role="form"
