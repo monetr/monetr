@@ -1,13 +1,13 @@
 import React, { Fragment } from 'react';
 import { act, waitFor } from '@testing-library/react';
 
-import { showNewExpenseModal } from '../NewExpenseModal';
+import { showNewFundingModal } from '../NewFundingModal';
 
 import { rest } from 'msw';
 import testRenderer from 'testutils/renderer';
 import { server } from 'testutils/server';
 
-describe('new expense modal', () => {
+describe('new funding schedule modal', () => {
   it('will render', async () => {
     server.use(
       rest.get('/api/bank_accounts/12', (_req, res, ctx) => {
@@ -26,20 +26,16 @@ describe('new expense modal', () => {
           'lastUpdated': '2023-07-02T04:22:52.48118Z',
         }));
       }),
-      rest.get('/api/bank_accounts/12/funding_schedules', (_req, res, ctx) => {
-        return res(ctx.json([]));
-      }),
     );
 
-    const world = testRenderer(<Fragment />, { initialRoute: '/bank/12/expenses' });
+    const world = testRenderer(<Fragment />, { initialRoute: '/bank/12/funding' });
     // Open the dialog
-    await act(() => void showNewExpenseModal());
+    await act(() => void showNewFundingModal());
     // Make sure it's visible.
-    await waitFor(() => expect(world.getByTestId('new-expense-modal')).toBeVisible());
+    await waitFor(() => expect(world.getByTestId('new-funding-modal')).toBeVisible());
     // Close the dialog.
-    act(() => world.getByTestId('close-new-expense-modal').click());
+    act(() => world.getByTestId('close-new-funding-modal').click());
     // Make sure it goes away.
-    await waitFor(() => expect(world.queryByTestId('new-expense-modal')).not.toBeInTheDocument());
+    await waitFor(() => expect(world.queryByTestId('new-funding-modal')).not.toBeInTheDocument());
   });
 });
-
