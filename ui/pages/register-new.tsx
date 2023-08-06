@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -178,6 +178,7 @@ export default function RegisterNew(): JSX.Element {
         </div>
         <div className="flex flex-col sm:flex-row gap-2.5 xl:w-2/5 lg:w-1/3 md:w-1/2 w-full">
           <MTextField
+            data-testid='register-first-name'
             autoFocus
             label="First Name"
             name="firstName"
@@ -186,6 +187,7 @@ export default function RegisterNew(): JSX.Element {
             className="w-full"
           />
           <MTextField
+            data-testid='register-last-name'
             label="Last Name"
             name="lastName"
             type="text"
@@ -194,6 +196,7 @@ export default function RegisterNew(): JSX.Element {
           />
         </div>
         <MTextField
+          data-testid='register-email'
           label="Email Address"
           name='email'
           type='email'
@@ -201,6 +204,7 @@ export default function RegisterNew(): JSX.Element {
           className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
         />
         <MTextField
+          data-testid='register-password'
           label="Password"
           name='password'
           type='password'
@@ -208,6 +212,7 @@ export default function RegisterNew(): JSX.Element {
           className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
         />
         <MTextField
+          data-testid='register-confirm-password'
           label="Confirm Password"
           name='confirmPassword'
           type='password'
@@ -221,6 +226,7 @@ export default function RegisterNew(): JSX.Element {
           show={ Boolean(config?.verifyRegister) }
         />
         <MCheckbox
+          data-testid='register-agree'
           id="terms"
           name="agree"
           label={
@@ -243,7 +249,14 @@ export default function RegisterNew(): JSX.Element {
           }
         />
         <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1">
-          <MFormButton color="primary" variant="solid" role="form" type="submit" className='w-full'>
+          <MFormButton
+            data-testid='register-submit'
+            className='w-full'
+            color="primary"
+            role="form"
+            type="submit"
+            variant="solid"
+          >
             Sign Up
           </MFormButton>
         </div>
