@@ -10,12 +10,12 @@ import { MBaseButton } from 'components/MButton';
 import MDivider from 'components/MDivider';
 import MForm from 'components/MForm';
 import MSelect from 'components/MSelect';
+import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 import { useSpending } from 'hooks/spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
-import MSidebarToggle from 'components/MSidebarToggle';
 
 interface ExpenseValues {
   name: string;
@@ -29,7 +29,7 @@ export default function ExpenseDetails(): JSX.Element {
   const { spendingId } = useParams();
 
   const spending = useSpending(spendingId && +spendingId);
-  const { result: fundingSchedules } = useFundingSchedulesSink();
+  const { data: funding } = useFundingSchedulesSink();
 
   if (!spendingId) {
     return (
@@ -61,7 +61,7 @@ export default function ExpenseDetails(): JSX.Element {
     recurrenceRule: spending.recurrenceRule,
   };
 
-  const options = Array.from(fundingSchedules.values())
+  const options = Array.from(funding.values())
     .map(fundingSchedule => ({
       label: fundingSchedule.name,
       value: fundingSchedule.fundingScheduleId,

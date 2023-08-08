@@ -10,7 +10,7 @@ import MSpan from 'components/MSpan';
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 
 export default function FundingNew(): JSX.Element {
-  const { isError: fundingIsError, isLoading: fundingIsLoading, result: funding } = useFundingSchedulesSink();
+  const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedulesSink();
 
   if (fundingIsLoading) {
     return <MSpan>Loading...</MSpan>;
@@ -27,7 +27,7 @@ export default function FundingNew(): JSX.Element {
           <MSidebarToggle />
           <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold flex gap-2 items-center'>
             <TodayOutlined />
-            Expenses
+            Funding Schedules
           </span>
         </div>
         <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showNewFundingModal }>
@@ -37,7 +37,7 @@ export default function FundingNew(): JSX.Element {
       </div>
       <div className='w-full h-full overflow-y-auto min-w-0'>
         <ul className='w-full flex flex-col gap-2 py-2'>
-          { Array.from(funding.values())
+          { funding
             ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
             .map(item => (<FundingItem funding={ item } key={ item.fundingScheduleId } />)) }
         </ul>

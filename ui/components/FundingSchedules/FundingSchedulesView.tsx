@@ -7,7 +7,7 @@ import FundingScheduleListItem from 'components/FundingSchedules/FundingSchedule
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 
 export default function FundingSchedulesView(): JSX.Element {
-  const { isLoading, result: fundingSchedules } = useFundingSchedulesSink();
+  const { isLoading, data: fundingSchedules } = useFundingSchedulesSink();
 
   if (isLoading) {
     return (
@@ -53,7 +53,7 @@ export default function FundingSchedulesView(): JSX.Element {
     );
   }
 
-  if (fundingSchedules.size === 0) {
+  if (fundingSchedules.length === 0) {
     return <EmptyState />;
   }
 

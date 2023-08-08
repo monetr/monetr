@@ -21,7 +21,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
   const formikContext = useFormikContext();
   const x = useFundingSchedulesSink();
   const {
-    result: funding,
+    data: funding,
     isLoading: fundingIsLoading,
     isError: fundingIsError,
   } = x;
@@ -56,7 +56,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
       .then(result => formikContext.setFieldValue(props.name, result.fundingScheduleId));
   }
 
-  if (funding.size === 0) {
+  if (funding.length === 0) {
     return (
       <div className="h-[84px] w-full">
         <MLabel

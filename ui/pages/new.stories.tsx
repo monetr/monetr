@@ -50,3 +50,19 @@ export const Expenses: StoryObj<typeof MonetrWrapper> = {
     },
   },
 };
+
+export const Funding: StoryObj<typeof MonetrWrapper> = {
+  name: 'Funding',
+  render: () => (
+    <Monetr />
+  ),
+  parameters: {
+    reactRouter: {
+      routePath: '/*',
+      browserPath: '/bank/12/funding',
+      routeParams: {
+        bankId: '12',
+      },
+    },
+  },
+};

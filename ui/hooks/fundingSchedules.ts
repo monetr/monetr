@@ -1,42 +1,34 @@
+/* eslint-disable max-len */
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import FundingSchedule from 'models/FundingSchedule';
 import request from 'util/request';
-import { useMemo } from 'react';
 
-export type FundingSchedulesResult =
-  { result: Map<number, FundingSchedule> }
-  & UseQueryResult<Array<Partial<FundingSchedule>>>;
+export type FundingSchedulesResult = UseQueryResult<Array<FundingSchedule>, unknown>;
 
 export function useFundingSchedulesSink(): FundingSchedulesResult {
   const selectedBankAccountId = useSelectedBankAccountId();
-  const result = useQuery<Array<Partial<FundingSchedule>>>(
+  return useQuery<Array<Partial<FundingSchedule>>, unknown, Array<FundingSchedule>>(
     [`/bank_accounts/${ selectedBankAccountId }/funding_schedules`],
     {
       enabled: !!selectedBankAccountId,
+      select: data => data?.map(item => new FundingSchedule(item)),
     },
   );
-
-  return {
-    ...result,
-    result: new Map(result?.data?.map(item => {
-      const fundingSchedule = new FundingSchedule(item);
-      return [fundingSchedule.fundingScheduleId, fundingSchedule];
-    })),
-  };
 }
 
-export function useFundingSchedules(): Map<number, FundingSchedule> {
-  const { result } = useFundingSchedulesSink();
-  return result;
-}
+export type FundingScheduleResult = UseQueryResult<FundingSchedule | undefined, unknown>;
 
-export function useFundingSchedule(fundingScheduleId: number | null): FundingSchedule | null {
-  const { result } = useFundingSchedulesSink();
-  if (!fundingScheduleId) return null;
-
-  return result.get(fundingScheduleId) || null;
+export function useFundingSchedule(fundingScheduleId: number | null): FundingScheduleResult {
+  const selectedBankAccountId = useSelectedBankAccountId();
+  return useQuery<Partial<FundingSchedule>, unknown, FundingSchedule | null>(
+    [`/bank_accounts/${ selectedBankAccountId }/funding_schedules/${ fundingScheduleId }`],
+    {
+      enabled: !!selectedBankAccountId && !!fundingScheduleId,
+      select: data => data?.fundingScheduleId ? new FundingSchedule(data) : null,
+    },
+  );
 }
 
 export function useCreateFundingSchedule(): (_spending: FundingSchedule) => Promise<void> {
@@ -55,6 +47,10 @@ export function useCreateFundingSchedule(): (_spending: FundingSchedule) => Prom
         queryClient.setQueriesData(
           [`/bank_accounts/${ newFundingSchedule.bankAccountId }/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => previous.concat(newFundingSchedule),
+        ),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${ newFundingSchedule.bankAccountId }/funding_schedules/${ newFundingSchedule.fundingScheduleId }`],
+          newFundingSchedule,
         ),
       ]),
     },
@@ -87,6 +83,10 @@ export function useUpdateFundingSchedule(): (_fundingSchedule: FundingSchedule) 
             item.fundingScheduleId === updatedFundingSchedule.fundingScheduleId ? updatedFundingSchedule : item
           ),
         ),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${ updatedFundingSchedule.bankAccountId }/funding_schedules/${ updatedFundingSchedule.fundingScheduleId}`],
+          updatedFundingSchedule,
+        ),
       ]),
     },
   );
@@ -113,6 +113,9 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
           [`/bank_accounts/${ removed.bankAccountId }/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => previous
             .filter(item => item.fundingScheduleId !== removed.fundingScheduleId),
+        ),
+        queryClient.removeQueries(
+          [`/bank_accounts/${ removed.bankAccountId }/funding_schedules/${ removed.fundingScheduleId }`]
         ),
       ]),
     },
