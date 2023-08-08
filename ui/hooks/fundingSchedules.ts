@@ -13,7 +13,7 @@ export function useFundingSchedulesSink(): FundingSchedulesResult {
     [`/bank_accounts/${ selectedBankAccountId }/funding_schedules`],
     {
       enabled: !!selectedBankAccountId,
-      select: data => data?.map(item => new FundingSchedule(item)),
+      select: data => data.map(item => new FundingSchedule(item)),
     },
   );
 }
@@ -31,7 +31,7 @@ export function useFundingSchedule(fundingScheduleId: number | null): FundingSch
   );
 }
 
-export function useCreateFundingSchedule(): (_spending: FundingSchedule) => Promise<void> {
+export function useCreateFundingSchedule(): (_funding: FundingSchedule) => Promise<FundingSchedule> {
   const queryClient = useQueryClient();
 
   async function createFundingSchedule(newItem: FundingSchedule): Promise<FundingSchedule> {
@@ -40,7 +40,7 @@ export function useCreateFundingSchedule(): (_spending: FundingSchedule) => Prom
       .then(result => new FundingSchedule(result?.data));
   }
 
-  const { mutate } = useMutation(
+  const mutate = useMutation(
     createFundingSchedule,
     {
       onSuccess: (newFundingSchedule: FundingSchedule) => Promise.all([
@@ -56,9 +56,7 @@ export function useCreateFundingSchedule(): (_spending: FundingSchedule) => Prom
     },
   );
 
-  return async (spending: FundingSchedule): Promise<void> => {
-    return mutate(spending);
-  };
+  return mutate.mutateAsync;
 }
 
 export function useUpdateFundingSchedule(): (_fundingSchedule: FundingSchedule) => Promise<FundingSchedule> {
