@@ -11,7 +11,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get update -y && \
     apt-get install -y \
     nodejs
-RUN npm install -g yarn
+RUN npm install -g pnpm
 
 # Install golang for licensed.
 RUN wget -c https://golang.org/dl/go1.19.4.linux-amd64.tar.gz

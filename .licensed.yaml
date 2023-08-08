@@ -1,12 +1,12 @@
 sources:
-  yarn: true
+  npm: true
   go: true
   git_submodule: true
 
 go:
   GOPATH: ~/go
 
-yarn:
+pnpm:
   production_only: true
 
 apps:
@@ -25,6 +25,7 @@ allowed:
   - isc
   - mit
   - mpl-2.0
+  - ofl-1.1
   - unlicense
 
 licensee:
@@ -47,7 +48,7 @@ reviewed:
     - google.golang.org/protobuf/**/*
     - gopkg.in/ini.v1 # Apache 2.0
     - github.com/googleapis/enterprise-certificate-proxy/**/* # Apache 2.0 https://github.com/googleapis/enterprise-certificate-proxy/blob/main/LICENSE
-  yarn:
+  npm:
     - "@mui/icons-material" # MIT + CC
     - caniuse-lite
     - color-convert # MIT
@@ -71,7 +72,9 @@ reviewed:
     - uri-js
 
 ignored:
-  yarn: # Silence warning about missing license. Its not missing.
-    - harmony-reflect # MPL/Apache2.0 https://github.com/tvcutsem/harmony-reflect/blob/214fe922b6d66b45e72ed0912861a14dc7e475a3/LICENSE
-    - fsevents # MIT License https://github.com/fsevents/fsevents/blob/master/LICENSE
+  npm: # Silence warning about missing license. Its not missing.
+    - "@swc/*"
+    - "@esbuild/*"
+    - "@rspack/*"
+    - "fsevents"  # MIT License https://github.com/fsevents/fsevents/blob/master/LICENSE
 
