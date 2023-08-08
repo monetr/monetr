@@ -24,7 +24,7 @@ interface TimelineItemData {
 
 export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Element {
   const spending = useSpending(props.spendingId);
-  const fundingSchedule = useFundingSchedule(spending?.fundingScheduleId);
+  const { data: fundingSchedule } = useFundingSchedule(spending?.fundingScheduleId);
   const { result: forecast, isLoading, isError } = useForecast();
 
   if (isLoading) {

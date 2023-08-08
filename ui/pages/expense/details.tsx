@@ -10,10 +10,10 @@ import { MBaseButton } from 'components/MButton';
 import MDivider from 'components/MDivider';
 import MForm from 'components/MForm';
 import MSelect from 'components/MSelect';
+import MSelectFunding from 'components/MSelectFunding';
 import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
-import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 import { useSpending } from 'hooks/spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
 
@@ -29,7 +29,6 @@ export default function ExpenseDetails(): JSX.Element {
   const { spendingId } = useParams();
 
   const spending = useSpending(spendingId && +spendingId);
-  const { data: funding } = useFundingSchedulesSink();
 
   if (!spendingId) {
     return (
@@ -61,12 +60,6 @@ export default function ExpenseDetails(): JSX.Element {
     recurrenceRule: spending.recurrenceRule,
   };
 
-  const options = Array.from(funding.values())
-    .map(fundingSchedule => ({
-      label: fundingSchedule.name,
-      value: fundingSchedule.fundingScheduleId,
-    }));
-
   return (
     <Formik
       initialValues={ initialValues }
@@ -81,7 +74,7 @@ export default function ExpenseDetails(): JSX.Element {
             </span>
             <Link
               className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis font-bold cursor-pointer'
-              to='/expenses'
+              to={ `/bank/${spending.bankAccountId}/expenses` }
             >
               Expenses
             </Link>
@@ -128,10 +121,10 @@ export default function ExpenseDetails(): JSX.Element {
                 type='date'
                 className='w-full'
               />
-              <MSelect
-                label='Funding Schedule'
+              <MSelectFunding
+                menuPortalTarget={ document.body }
+                label='When do you want to fund the expense?'
                 name='fundingScheduleId'
-                options={ options }
                 className='w-full'
               />
               <MSelect

@@ -15,7 +15,7 @@ export interface ExpenseItemProps {
 }
 
 export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element {
-  const fundingSchedule = useFundingSchedule(spending.fundingScheduleId);
+  const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
   const navigate = useNavigate();
   const rule = rrulestr(spending.recurrenceRule);
 

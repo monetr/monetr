@@ -29,10 +29,10 @@ import FundingNew from 'pages/funding-new';
 export default function Monetr(): JSX.Element {
   const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
   const { isLoading: authIsLoading, result: { user, isActive } } = useAuthenticationSink();
-  const { isLoading: linksIsLoading, result: links } = useLinksSink();
+  const { isLoading: linksIsLoading, isFetching: linksIsFetching, result: links } = useLinksSink();
   const isAuthenticated = !!user;
   // If the config or authentication is loading just show a loading page.
-  if (configIsLoading || authIsLoading || linksIsLoading) {
+  if (configIsLoading || authIsLoading || (linksIsLoading && linksIsFetching)) {
     return <Loading />;
   }
 

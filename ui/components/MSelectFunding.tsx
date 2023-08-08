@@ -98,6 +98,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
       placeholder='Select a funding schedule...'
       required={ props.required }
       value={ value }
+      className={ props.className }
     />
   );
 }
