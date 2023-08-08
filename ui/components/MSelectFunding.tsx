@@ -19,12 +19,11 @@ export interface MSelectFundingProps {
 
 export default function MSelectFunding(props: MSelectFundingProps): JSX.Element {
   const formikContext = useFormikContext();
-  const x = useFundingSchedulesSink();
   const {
     data: funding,
     isLoading: fundingIsLoading,
     isError: fundingIsError,
-  } = x;
+  } = useFundingSchedulesSink();
   const label = props.label ?? 'Select a funding schedule';
 
   if (fundingIsLoading) {
