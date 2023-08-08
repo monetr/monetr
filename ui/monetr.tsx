@@ -24,6 +24,7 @@ import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
 import TransactionDetails from 'pages/transaction/details';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
+import FundingNew from 'pages/funding-new';
 
 export default function Monetr(): JSX.Element {
   const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
@@ -88,6 +89,7 @@ export default function Monetr(): JSX.Element {
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
             <Route path='expenses' element={ <ExpenseList /> } />
             <Route path='expenses/:spendingId/details' element={ <ExpenseDetails /> } />
+            <Route path='funding' element={ <FundingNew /> } />
           </Route>
           <Route path='/settings' element={ <SettingsPage /> } />
           <Route path="/logout" element={ <LogoutPage /> } />

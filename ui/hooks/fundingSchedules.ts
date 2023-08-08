@@ -18,15 +18,6 @@ export function useFundingSchedulesSink(): FundingSchedulesResult {
     },
   );
 
-  // const items = useMemo(() => new Map(result?.data?.map(item => {
-  //   const fundingSchedule = new FundingSchedule(item);
-  //   return [fundingSchedule.fundingScheduleId, fundingSchedule];
-  // })), [result?.data]);
-  // return {
-  //   ...result,
-  //   result: items,
-  // };
-  // const items = useMemo(() => , [result?.data]);
   return {
     ...result,
     result: new Map(result?.data?.map(item => {

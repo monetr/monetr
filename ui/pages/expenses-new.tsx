@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react';
 import { Divider, List } from '@mui/material';
 
-import { showCreateExpenseDialog } from 'components/Expenses/CreateExpenseDialog';
+import { showNewExpenseModal } from './new/NewExpenseModal';
+
 import ExpenseItem from 'components/Expenses/ExpenseItem';
 import { MBaseButton } from 'components/MButton';
 import { useSpendingFiltered } from 'hooks/spending';
@@ -38,7 +39,7 @@ function EmptyState(): JSX.Element {
           You don't have any expenses yet...
         </p>
         <MBaseButton
-          onClick={ showCreateExpenseDialog }
+          onClick={ showNewExpenseModal }
           color="primary"
         >
           <p className='text-lg'>
