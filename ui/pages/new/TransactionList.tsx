@@ -1,15 +1,16 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { MenuOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { useBeforeUnload } from 'react-router-dom';
+import { ShoppingCartOutlined } from '@mui/icons-material';
 import moment from 'moment';
 import * as R from 'ramda';
 
 import TransactionDateItem from './TransactionDateItem';
 import TransactionItem from './TransactionItem';
 
+import MSidebarToggle from 'components/MSidebarToggle';
 import { useTransactionsSink } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
-import MSidebarToggle from 'components/MSidebarToggle';
 
 export default function TransactionList(): JSX.Element {
   const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactionsSink();
@@ -27,6 +28,20 @@ export default function TransactionList(): JSX.Element {
     // visible, instead of becoming fully visible on the screen.
     rootMargin: '0px 0px 0px 0px',
   });
+
+  useBeforeUnload(
+    React.useCallback(() => {
+      console.log('fuck you react router');
+    }, []),
+  );
+
+  // const unload = () => console.log('unload!');
+  // useEffect(() => {
+  //   window.addEventListener('unload', unload);
+  //   return () => {
+  //     window.removeEventListener('unload', unload);
+  //   };
+  // }, []);
 
   function TransactionItems() {
     interface TransactionGroup {
@@ -82,27 +97,27 @@ export default function TransactionList(): JSX.Element {
       <div className='flex flex-grow min-w-0 min-h-0'>
         <ul className='w-full overflow-y-auto'>
           <TransactionItems />
-          { loading && (
+          {loading && (
             <li ref={ sentryRef }>
               <div className="w-full flex justify-center p-5 opacity-70">
-                <h1>{ message }</h1>
+                <h1>{message}</h1>
               </div>
             </li>
-          ) }
-          { (!loading && hasNextPage) && (
+          )}
+          {(!loading && hasNextPage) && (
             <li ref={ sentryRef }>
               <div className="w-full flex justify-center p-5 opacity-70">
-                <h1>{ message }</h1>
+                <h1>{message}</h1>
               </div>
             </li>
-          ) }
-          { (!loading && !hasNextPage) && (
+          )}
+          {(!loading && !hasNextPage) && (
             <li>
               <div className="w-full flex justify-center p-5 opacity-70">
-                <h1>{ message }</h1>
+                <h1>{message}</h1>
               </div>
             </li>
-          ) }
+          )}
         </ul>
       </div>
     </Fragment>

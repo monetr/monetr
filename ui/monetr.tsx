@@ -10,6 +10,7 @@ import SubscribePage from 'pages/account/subscribe';
 import AfterCheckoutPage from 'pages/account/subscribe/after';
 import ConfigError from 'pages/error/config';
 import ExpenseDetails from 'pages/expense/details';
+import FundingNew from 'pages/funding-new';
 import LoginNew from 'pages/login-new';
 import LogoutPage from 'pages/logout';
 import BankSidebar from 'pages/new/BankSidebar';
@@ -24,7 +25,6 @@ import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
 import TransactionDetails from 'pages/transaction/details';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
-import FundingNew from 'pages/funding-new';
 
 export default function Monetr(): JSX.Element {
   const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
@@ -46,8 +46,8 @@ export default function Monetr(): JSX.Element {
       <Routes>
         <Route path='/login' element={ <LoginNew /> } />
         <Route path="/logout" element={ <LogoutPage /> } />
-        { config?.allowSignUp && <Route path='/register' element={ <RegisterNew /> } /> }
-        { config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } /> }
+        {config?.allowSignUp && <Route path='/register' element={ <RegisterNew /> } />}
+        {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
         <Route path="/password/reset" element={ <PasswordResetNew /> } />
         <Route path='/' element={ <Navigate replace to="/login" /> } />
       </Routes>

@@ -18,6 +18,18 @@ export function useFundingSchedulesSink(): FundingSchedulesResult {
   );
 }
 
+/**
+ *  useNextFundingDate will return a M/DD formatted string showing when the next funding schedule will recur. This is
+ *  just the earliest funding shedule among all the funding schedules for the current bank account.
+ */
+export function useNextFundingDate(): string | null {
+  const { data: funding } = useFundingSchedulesSink();
+  return funding
+    ?.sort((a, b) => a.nextOccurrence.unix() < b.nextOccurrence.unix() ? 1 : -1)
+    .pop()
+    ?.nextOccurrence?.format('M/DD');
+}
+
 export type FundingScheduleResult = UseQueryResult<FundingSchedule | undefined, unknown>;
 
 export function useFundingSchedule(fundingScheduleId: number | null): FundingScheduleResult {

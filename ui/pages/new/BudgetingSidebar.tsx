@@ -1,15 +1,16 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AccountBalanceOutlined, AccountBalanceWalletOutlined, KeyboardArrowDown, LocalAtmOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+import { AccountBalanceWalletOutlined, LocalAtmOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
 
 import MDivider from 'components/MDivider';
+import MSelectAccount from 'components/MSelectAccount';
 import { ReactElement } from 'components/types';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSelectedBankAccount } from 'hooks/bankAccounts';
+import { useNextFundingDate } from 'hooks/fundingSchedules';
 import { useLink } from 'hooks/links';
 import mergeTailwind from 'util/mergeTailwind';
-import MSelectAccount from 'components/MSelectAccount';
 
 export interface BudgetingSidebarProps {
   className?: string;
@@ -76,6 +77,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
     return null;
   }
 
+
   return (
     <div className={ className }>
       <div className='w-full dark:hover:bg-dark-monetr-background-emphasis dark:text-dark-monetr-content-emphasis h-12 flex items-center p-2'>
@@ -126,10 +128,10 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/funding` }>
             <TodayOutlined />
-            Funding Schedules
-            <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
-              7/15
+            <span className='text-ellipsis overflow-hidden whitespace-nowrap'>
+              Funding Schedules
             </span>
+            <NextFundingBadge />
           </NavigationItem>
         </div>
       </div>
@@ -171,5 +173,17 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
     <Link className={ className } to={ props.to }>
       {props.children}
     </Link>
+  );
+}
+
+
+function NextFundingBadge(): JSX.Element {
+  const next = useNextFundingDate();
+  if (!next) return null;
+
+  return (
+    <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
+      { next }
+    </span>
   );
 }
