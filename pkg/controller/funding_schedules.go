@@ -46,6 +46,27 @@ func (c *Controller) getFundingSchedules(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, fundingSchedules)
 }
 
+func (c *Controller) getFundingScheduleById(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	fundingScheduleId, err := strconv.ParseUint(ctx.Param("fundingScheduleId"), 10, 64)
+	if err != nil || fundingScheduleId == 0 {
+		return c.badRequest(ctx, "must specify a valid funding schedule Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	fundingSchedule, err := repo.GetFundingSchedule(c.getContext(ctx), bankAccountId, fundingScheduleId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve funding schedule")
+	}
+
+	return ctx.JSON(http.StatusOK, fundingSchedule)
+}
+
 // Get Funding Stats
 // @Summary Get Funding Stats
 // @id get-funding-status

@@ -411,6 +411,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.DELETE("/bank_accounts/:bankAccountId/transactions/:transactionId", c.deleteTransactions)
 	// Funding schedules
 	billed.GET("/bank_accounts/:bankAccountId/funding_schedules", c.getFundingSchedules)
+	billed.GET("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.getFundingScheduleById)
 	billed.GET("/bank_accounts/:bankAccountId/funding_schedules/stats", c.getFundingScheduleStats)
 	billed.POST("/bank_accounts/:bankAccountId/funding_schedules", c.postFundingSchedules)
 	billed.PUT("/bank_accounts/:bankAccountId/funding_schedules/:fundingScheduleId", c.putFundingSchedules)
