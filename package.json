@@ -5,7 +5,7 @@
   "scripts": {
     "build": "rspack build",
     "build:staging": "MONETR_ENV=staging rspack build --mode production",
-    "build:production": "yarn build --mode production",
+    "build:production": "pnpm build --mode production",
     "build-dev": "rspack --mode development",
     "build-prod": "rspack --mode production",
     "clean": "make clean",
