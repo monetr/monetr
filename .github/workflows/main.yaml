@@ -34,10 +34,9 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-ui-
+            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       - name: Dependencies
         run: make ui-dependencies
 
@@ -63,10 +62,9 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-ui-
+            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -74,6 +72,7 @@ jobs:
       - name: Setup local development environment
         timeout-minutes: 15
         run: |
+          npm install -g pnpm
           make develop || (make logs && exit 1)
           curl -k https://monetr.local
           make shutdown
@@ -92,10 +91,9 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-ui-
+            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       - name: Build
         run: make build-ui
       - uses: actions/upload-artifact@v3
@@ -131,16 +129,17 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-ui-
+            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Build Third Party Notice
-        run: make notice
+        run: |
+          npm install -g pnpm
+          make notice
       - uses: actions/upload-artifact@v3
         with:
           name: '${{ github.sha }}-notice'
@@ -257,10 +256,9 @@ jobs:
         with:
           path: |
             ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-ui-
+            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       - name: Test
         run: make test-ui
       - uses: actions/upload-artifact@v3

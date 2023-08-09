@@ -80,7 +80,7 @@ services:
         condition: service_started
   ui:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
-    # do `yarn install` before doing docker compose up.
+    # do `pnpm install` before doing docker compose up.
     tty: true # Color output.
     image: node:18.10.0-buster
     user: "${UID:-0}:${GID:-0}"
@@ -102,8 +102,9 @@ services:
     volumes:
       - ./:/build
     command:
-      - yarn
-      - start
+      - bash
+      - -c
+      - /build/compose/ui-entrypoint.sh
   mail:
     # Mailhog is used for testing email sending from the application. This is for things like forgot password or email
     # verification. It can be accessed by navigating to `http://localhost/mail`

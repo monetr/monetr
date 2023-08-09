@@ -132,7 +132,7 @@ COPIED_PUBLIC_FILES=$(filter-out $(PUBLIC_DIR)/index.html,$(PUBLIC_FILES))
 UI_CONFIG_FILES=$(PWD)/tsconfig.json $(wildcard $(PWD)/*.config.js) $(wildcard $(PWD)/*.config.cjs)
 
 GO_DEPS=$(PWD)/go.mod $(PWD)/go.sum
-UI_DEPS=$(PWD)/package.json $(PWD)/yarn.lock
+UI_DEPS=$(PWD)/package.json $(PWD)/pnpm-lock.yaml
 
 include $(PWD)/scripts/Dependencies.mk
 include $(PWD)/scripts/Deployment.mk
@@ -143,14 +143,14 @@ SOURCE_MAP_DIR=$(BUILD_DIR)/source_maps
 $(SOURCE_MAP_DIR):
 	mkdir -p $(SOURCE_MAP_DIR)
 
-YARN=$(shell which yarn)
+PNPM=$(shell which pnpm)
 
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
 ifneq ($(OS),linux)
-	$(YARN) install --ignore-platform
+	$(PNPM) install --ignore-platform
 else
-	$(YARN) install
+	$(PNPM) install
 endif
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
@@ -159,7 +159,7 @@ $(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES
 	$(call infoMsg,Building UI files)
 	rm -rf $(SOURCE_MAP_DIR)/*.js.map # Removing old map files
 	git clean -f -X $(STATIC_DIR)
-	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(YARN) build --mode production
+	RELEASE_VERSION=$(RELEASE_VERSION) RELEASE_REVISION=$(RELEASE_REVISION) $(PNPM) build --mode production
 	cp $(STATIC_DIR)/assets/scripts/*.js.map $(SOURCE_MAP_DIR)
 
 GOMODULES=$(GOPATH)/pkg/mod
@@ -216,6 +216,8 @@ NOTICES=$(LICENSED_CACHE)/monetr-API/NOTICE $(LICENSED_CACHE)/monetr-UI/NOTICE
 $(NOTICES): $(LICENSED_IMAGE) $(LICENSED_CACHE) $(LICENSED_CONFIG) $(NODE_MODULES) $(SIMPLE_ICONS)
 $(NOTICES): IMAGE=$(shell cat $(LICENSED_IMAGE))
 $(NOTICES):
+	mkdir -p $(LICENSED_CACHE)/monetr-API
+	mkdir -p $(LICENSED_CACHE)/monetr-UI
 	$(DOCKER) run -v "$(PWD):/workspace" $(IMAGE) "licensed notices"
 
 NOTICE=$(GO_SRC_DIR)/build/NOTICE.md
@@ -289,9 +291,14 @@ test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 		-covermode=atomic $(GO_SRC_DIR)/...
 	$(GO) tool cover -func=$(COVERAGE_TXT)
 
-test-ui: $(ALL_UI_FILES) $(NODE_MODULES)
-	$(call infoMsg,Running go tests for monetrs UI)
-	$(YARN) test --coverage
+ifdef CI
+EXTRA_JEST_TEST=--reporters='github-actions'
+endif
+
+test-ui |: $(NODE_MODULES)
+test-ui: $(ALL_UI_FILES)
+	$(call infoMsg,Running tests for monetrs UI)
+	$(PNPM) jest --coverage $(EXTRA_JEST_TEST)
 
 test: test-go test-ui
 
@@ -418,7 +425,7 @@ development-info:
 	$(call infoMsg,=====================================================================================================)
 
 storybook: $(NODE_MODULES)
-	$(YARN) storybook
+	$(PNPM) storybook
 
 up:
 ifndef CONTAINER
