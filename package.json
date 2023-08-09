@@ -2,6 +2,10 @@
   "name": "monetr",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
   "scripts": {
     "build": "rspack build",
     "build:staging": "MONETR_ENV=staging rspack build --mode production",
