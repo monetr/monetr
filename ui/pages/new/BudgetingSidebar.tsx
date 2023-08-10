@@ -119,7 +119,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               { balance?.getExpensesString() }
             </span>
           </NavigationItem>
-          <NavigationItem  to='#'>
+          <NavigationItem  to={ `/bank/${bankAccount?.bankAccountId}/goals` }>
             <SavingsOutlined />
             Goals
             <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>

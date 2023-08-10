@@ -11,6 +11,7 @@ import AfterCheckoutPage from 'pages/account/subscribe/after';
 import ConfigError from 'pages/error/config';
 import ExpenseDetails from 'pages/expense/details';
 import FundingNew from 'pages/funding-new';
+import GoalsNew from 'pages/goals-new';
 import LoginNew from 'pages/login-new';
 import LogoutPage from 'pages/logout';
 import BankSidebar from 'pages/new/BankSidebar';
@@ -94,6 +95,7 @@ export default function Monetr(): JSX.Element {
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
             <Route path='expenses' element={ <ExpenseList /> } />
             <Route path='expenses/:spendingId/details' element={ <ExpenseDetails /> } />
+            <Route path='goals' element={ <GoalsNew /> } />
             <Route path='funding' element={ <FundingNew /> } />
           </Route>
           <Route path='/settings' element={ <SettingsPage /> } />
