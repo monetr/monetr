@@ -89,7 +89,7 @@ export default function Monetr(): JSX.Element {
       <MobileSidebar />
       <div className='w-full h-full flex min-w-0'>
         <Routes>
-          <Route path='/bank/:bankAccountId' element={ <BudgetingLayout className='hidden lg:flex' /> }>
+          <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
             <Route path='transactions' element={ <TransactionList /> } />
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
             <Route path='expenses' element={ <ExpenseList /> } />
@@ -107,14 +107,10 @@ export default function Monetr(): JSX.Element {
   );
 }
 
-interface BudgetingLayoutProps {
-  className?: string;
-}
-
-function BudgetingLayout(props: BudgetingLayoutProps): JSX.Element {
+function BudgetingLayout(): JSX.Element {
   return (
     <Fragment>
-      <BudgetingSidebar className={ props.className } />
+      <BudgetingSidebar className='hidden lg:flex' />
       <div className='w-full h-full min-w-0 flex flex-col'>
         <Outlet />
       </div>

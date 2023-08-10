@@ -27,17 +27,9 @@ export function useSpendingForecast(): (spending: SpendingBareMinimum) => Promis
   };
 }
 
-interface NextFundingResponse {
-  nextContribution: number;
-}
-
-export type NextFundingResult =
-  { result: number | null }
-  & UseQueryResult<Partial<NextFundingResponse>>;
-
-export function useNextFundingForecast(fundingScheduleId: number): NextFundingResult {
+export function useNextFundingForecast(fundingScheduleId: number): UseQueryResult<number> {
   const selectedBankAccountId = useSelectedBankAccountId();
-  const result = useQuery<Partial<NextFundingResponse>>(
+  return useQuery<Partial<{ nextContribution: number }>, unknown, number>(
     [
       `/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`,
       {
@@ -46,13 +38,9 @@ export function useNextFundingForecast(fundingScheduleId: number): NextFundingRe
     ],
     {
       enabled: !!selectedBankAccountId,
+      select: data => data.nextContribution,
     }
   );
-
-  return {
-    ...result,
-    result: result?.data?.nextContribution,
-  };
 }
 
 export class Forecast {

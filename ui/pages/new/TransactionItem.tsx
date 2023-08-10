@@ -84,8 +84,12 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
   }
 
   return (
-    <li className='w-full px-1 md:px-2'>
-      <div className='flex rounded-lg hover:bg-zinc-600 gap-1 md:gap-4 group px-2 py-1 h-full cursor-pointer md:cursor-auto'>
+    <li className='w-full px-1 md:px-2 relative group'>
+      <div
+        className='absolute top-0 left-0 w-full h-full cursor-pointer md:cursor-auto flex md:hidden'
+        onClick={ openDetails }
+      />
+      <div className='flex rounded-lg group-hover:bg-zinc-600 gap-1 md:gap-4 group px-2 py-1 h-full'>
         <div className='w-full md:w-1/2 flex flex-row gap-4 items-center flex-1 min-w-0'>
           <TransactionMerchantIcon name={ transaction.getName() } pending={ transaction.isPending } />
           <div className='flex flex-col overflow-hidden min-w-0'>

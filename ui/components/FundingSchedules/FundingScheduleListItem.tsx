@@ -61,10 +61,10 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
       );
     }
 
-    if (contributionForecast.result) {
+    if (contributionForecast.data) {
       return (
         <Fragment>
-          {formatAmount(contributionForecast.result)}
+          {formatAmount(contributionForecast.data)}
         </Fragment>
       );
     }
@@ -87,7 +87,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
 
     let amount: string | null;
     if (!contributionForecast.isLoading && balance !== null) {
-      const est = (balance.free + schedule.estimatedDeposit) - contributionForecast.result;
+      const est = (balance.free + schedule.estimatedDeposit) - contributionForecast.data;
       amount = formatAmount(est);
       textColor = est > 0 ? 'text-green-500' : 'text-red-500';
     }
