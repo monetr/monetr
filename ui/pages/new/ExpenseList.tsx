@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
-import { AddOutlined, MenuOutlined, PriceCheckOutlined } from '@mui/icons-material';
+import { AddOutlined, PriceCheckOutlined } from '@mui/icons-material';
 
 import ExpenseItem from './ExpenseItem';
 import { showNewExpenseModal } from './NewExpenseModal';
 
 import { MBaseButton } from 'components/MButton';
+import MSidebarToggle from 'components/MSidebarToggle';
 import { useSpendingFiltered } from 'hooks/spending';
 import { SpendingType } from 'models/Spending';
-import MSidebarToggle from 'components/MSidebarToggle';
 
 export default function ExpenseList(): JSX.Element {
   const { result: expenses } = useSpendingFiltered(SpendingType.Expense);

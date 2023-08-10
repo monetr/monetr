@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
 import MerchantIcon from './MerchantIcon';
@@ -8,7 +9,6 @@ import { useFundingSchedule } from 'hooks/fundingSchedules';
 import Spending from 'models/Spending';
 import { rrulestr } from 'rrule';
 import mergeTailwind from 'util/mergeTailwind';
-import { useNavigate } from 'react-router-dom';
 
 export interface ExpenseItemProps {
   spending: Spending;

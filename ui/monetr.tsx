@@ -27,7 +27,11 @@ import TransactionDetails from 'pages/transaction/details';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 
 export default function Monetr(): JSX.Element {
-  const { result: config, isLoading: configIsLoading, isError: configIsError } = useAppConfigurationSink();
+  const {
+    result: config,
+    isLoading: configIsLoading,
+    isError: configIsError,
+  } = useAppConfigurationSink();
   const { isLoading: authIsLoading, result: { user, isActive } } = useAuthenticationSink();
   const { isLoading: linksIsLoading, isFetching: linksIsFetching, result: links } = useLinksSink();
   const isAuthenticated = !!user;
@@ -37,7 +41,7 @@ export default function Monetr(): JSX.Element {
   }
 
   // If the config fails to load or is simply not present, show the error page.
-  if (configIsError || !config) {
+  if (configIsError) {
     return <ConfigError />;
   }
 
@@ -50,6 +54,7 @@ export default function Monetr(): JSX.Element {
         {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
         <Route path="/password/reset" element={ <PasswordResetNew /> } />
         <Route path='/' element={ <Navigate replace to="/login" /> } />
+        <Route path='*' element={ <Navigate replace to="/login" /> } />
       </Routes>
     );
   }

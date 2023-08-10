@@ -1,19 +1,18 @@
 /* eslint-disable max-len */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { Formik } from 'formik';
+import moment from 'moment';
 
 import { MBaseButton } from 'components/MButton';
 import MForm from 'components/MForm';
-import MSelect from 'components/MSelect';
+import MSelectSpending from 'components/MSelectSpending';
 import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useTransaction } from 'hooks/transactions';
 import MerchantIcon from 'pages/new/MerchantIcon';
-import moment from 'moment';
-import { Formik } from 'formik';
-import MSelectSpending from 'components/MSelectSpending';
 
 interface TransactionValues {
   name: string;
@@ -28,7 +27,18 @@ export default function TransactionDetails(): JSX.Element {
   const transactionId = +id || null;
 
   const { result: transaction, isLoading, isError } = useTransaction(transactionId);
-  if (!transactionId) {
+
+  if (isLoading) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <MSpan className='text-5xl'>
+          One moment...
+        </MSpan>
+      </div>
+    );
+  }
+
+  if (!transactionId && !isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
@@ -41,7 +51,7 @@ export default function TransactionDetails(): JSX.Element {
       </div>
     );
   }
-  if (isError || !transaction) {
+  if ((isError || !transaction) && !isLoading) {
     return (
       <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
         <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
