@@ -22,6 +22,7 @@ const config: StorybookConfig = {
         postCss: true,
       },
     },
+    'storycap',
   ],
   framework: {
     name: 'storybook-react-rspack',

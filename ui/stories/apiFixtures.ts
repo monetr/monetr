@@ -746,6 +746,32 @@ export default function GetAPIFixtures(): Array<RestHandler<any>> {
         },
       ]));
     }),
+    rest.get('/api/bank_accounts/12/funding_schedules/3', (_req, res, ctx) => {
+      return res(ctx.json({
+        'bankAccountId': 12,
+        'dateStarted': '2023-02-28T06:00:00Z',
+        'description': '15th and last day of every month',
+        'estimatedDeposit': null,
+        'excludeWeekends': true,
+        'fundingScheduleId': 3,
+        'lastOccurrence': '2023-07-14T05:00:00Z',
+        'name': 'Elliot\'s Contribution',
+        'nextOccurrence': '2023-07-31T05:00:00Z',
+        'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+        'waitForDeposit': false,
+      }));
+    }),
+    rest.post('/api/bank_accounts/12/forecast/next_funding', async (req, res, ctx) => {
+      const body = await req.json();
+      switch (body.fundingScheduleId) {
+        case 3:
+          return res(ctx.json({
+            'nextContribution': 18083,
+          }));
+        default:
+          return res(ctx.status(404));
+      }
+    }),
     rest.get('/api/bank_accounts/12/transactions', (_req, res, ctx) => {
       return res(ctx.json([
         {

@@ -17,7 +17,8 @@
     "test": "jest",
     "coverage": "jest --coverage --coverageDirectory=./reports",
     "storybook": "storybook dev -p 6006 --disable-telemetry",
-    "build-storybook": "storybook build --disable-telemetry"
+    "build-storybook": "storybook build --disable-telemetry",
+    "story:shots": "pnpm storycap --serverCmd \"storybook dev -p 9001 --disable-telemetry --no-open\" -o tmp"
   },
   "eslintConfig": {
     "extends": [
@@ -122,7 +123,8 @@
     "@storybook/testing-library": "0.0.14-next.2",
     "storybook": "7.2.1",
     "storybook-addon-react-router-v6": "1.0.2",
-    "storybook-react-rspack": "7.0.0-rc.24"
+    "storybook-react-rspack": "7.0.0-rc.24",
+    "storycap": "4.2.0"
   },
   "devDependencies": {
     "@rspack/binding-linux-x64-gnu": "0.2.10",

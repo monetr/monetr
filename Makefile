@@ -438,6 +438,9 @@ development-info:
 storybook: $(NODE_MODULES)
 	$(PNPM) storybook
 
+screenshots: $(NODE_MODULES) $(LOCAL_TMP)
+	$(PNPM) story:shots
+
 up:
 ifndef CONTAINER
 	$(error Must provide a CONTAINER to up)

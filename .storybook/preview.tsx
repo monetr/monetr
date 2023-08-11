@@ -21,6 +21,7 @@ import Query from '../ui/util/query';
 
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import { withRouter } from 'storybook-addon-react-router-v6';
+import { ScreenshotOptions, withScreenshot } from 'storycap';
 
 import '../ui/styles/styles.css';
 import './preview.css';
@@ -45,6 +46,7 @@ export const useTheme = (StoryFn: () => unknown) => {
 
 const preview: Preview = {
   decorators: [
+    withScreenshot,
     useTheme,
     (Story, _context) => {
       const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
@@ -84,6 +86,15 @@ const preview: Preview = {
 
   },
   parameters: {
+    screenshot: {
+      viewport: {
+        width: 1280,
+        height: 720,
+        isMobile: false,
+        hasTouch: false,
+      },
+      delay: 3000,
+    } as ScreenshotOptions,
     viewport: {
       viewports: {
         desktop: {
