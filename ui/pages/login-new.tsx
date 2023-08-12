@@ -108,13 +108,14 @@ export default function LoginNew(): JSX.Element {
           className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
         />
         <MTextField
+          autoComplete='current-password'
+          className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
           data-testid='login-password'
           label="Password"
-          name='password'
-          type='password'
-          required
           labelDecorator={ ForgotPasswordButton }
-          className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
+          name='password'
+          required
+          type='password'
         />
         <MCaptcha
           name="captcha"

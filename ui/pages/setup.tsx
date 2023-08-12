@@ -173,19 +173,25 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   );
 }
 
-function Plaid(): JSX.Element {
+interface PlaidProps {
+  setStep: (_: Step) => unknown
+}
+
+function Plaid(props: PlaidProps): JSX.Element {
   interface State {
     token: string | null;
     loading: boolean;
     settingUp: boolean;
     error: string | null;
+    exited: boolean;
   }
 
-  const [{ token, loading, error, settingUp }, setState] = useState<Partial<State>>({
-    token: null,
+  const [{ token, loading, error, exited, settingUp }, setState] = useState<Partial<State>>({
+    error: null,
+    exited: false,
     loading: false,
     settingUp: false,
-    error: null,
+    token: null,
   });
 
   const queryClient = useQueryClient();
@@ -196,6 +202,7 @@ function Plaid(): JSX.Element {
       token,
       loading,
       error,
+      exited,
       settingUp: true,
     });
 
@@ -239,7 +246,14 @@ function Plaid(): JSX.Element {
       setState({
         token,
         loading,
+        exited,
         error: 'Plaid link exited with an error.',
+      });
+    } else {
+      setState({
+        token,
+        loading,
+        exited: true,
       });
     }
   }
@@ -359,6 +373,19 @@ function Plaid(): JSX.Element {
         </MSpan>
         <MSpan className='text-lg' variant='light'>
           If the problem continues, please contact support@monetr.app
+        </MSpan>
+      </div>
+    );
+  }
+
+  if (exited) {
+    inner = (
+      <div className='flex flex-col justify-center items-center'>
+        <MSpan className='text-2xl font-medium'>
+          Something isn't quite right
+        </MSpan>
+        <MSpan className='text-lg' variant='light'>
+          Plaid exited, did you want to set it up later?
         </MSpan>
       </div>
     );

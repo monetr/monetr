@@ -204,20 +204,22 @@ export default function RegisterNew(): JSX.Element {
           className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
         />
         <MTextField
+          autoComplete='new-password'
+          className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
           data-testid='register-password'
           label="Password"
           name='password'
-          type='password'
           required
-          className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
+          type='password'
         />
         <MTextField
+          autoComplete='new-password'
+          className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
           data-testid='register-confirm-password'
           label="Confirm Password"
           name='confirmPassword'
-          type='password'
           required
-          className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
+          type='password'
         />
         <BetaCodeInput />
         <MCaptcha
