@@ -8,7 +8,7 @@ export interface MSpanProps {
   ellipsis?: boolean;
   className?: string;
   size?: 'inherit' | 'sm' | 'md' | 'lg' | 'xl';
-  weight?: 'normal' | 'semibold' | 'bold';
+  weight?: 'normal' | 'medium' | 'semibold' | 'bold';
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
@@ -49,6 +49,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
     }[props.size],
     {
       'normal': 'font-normal',
+      'medium': 'font-medium',
       'semibold': 'font-semibold',
       'bold': 'font-bold',
     }[props.weight],
