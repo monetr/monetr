@@ -1,6 +1,5 @@
-import React, { Fragment, useCallback, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { useBeforeUnload } from 'react-router-dom';
 import { ShoppingCartOutlined } from '@mui/icons-material';
 import moment from 'moment';
 import * as R from 'ramda';
@@ -28,20 +27,6 @@ export default function TransactionList(): JSX.Element {
     // visible, instead of becoming fully visible on the screen.
     rootMargin: '0px 0px 0px 0px',
   });
-
-  useBeforeUnload(
-    React.useCallback(() => {
-      console.log('fuck you react router');
-    }, []),
-  );
-
-  // const unload = () => console.log('unload!');
-  // useEffect(() => {
-  //   window.addEventListener('unload', unload);
-  //   return () => {
-  //     window.removeEventListener('unload', unload);
-  //   };
-  // }, []);
 
   function TransactionItems() {
     interface TransactionGroup {

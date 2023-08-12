@@ -19,8 +19,8 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
 
   const amountClassnames = mergeTailwind(
     {
-      'text-green-500': transaction.getIsAddition(),
-      'text-red-500': !transaction.getIsAddition(),
+      'dark:text-dark-monetr-green': transaction.getIsAddition(),
+      'dark:text-dark-monetr-red': !transaction.getIsAddition(),
     },
     'text-end',
     'font-semibold',
@@ -52,12 +52,12 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         'font-medium': !transaction.spendingId,
         'dark:text-dark-monetr-content': !transaction.spendingId,
       },
-      'text-sm',
       'md:text-base',
-      'text-ellipsis',
-      'whitespace-nowrap',
-      'overflow-hidden',
       'min-w-0',
+      'overflow-hidden',
+      'text-ellipsis',
+      'text-sm',
+      'whitespace-nowrap',
     );
 
     if (transaction.getIsAddition()) {
@@ -93,7 +93,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         <div className='w-full md:w-1/2 flex flex-row gap-4 items-center flex-1 min-w-0'>
           <TransactionMerchantIcon name={ transaction.getName() } pending={ transaction.isPending } />
           <div className='flex flex-col overflow-hidden min-w-0'>
-            <span className='text-zinc-50 font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
+            <span className='dark:text-dark-monetr-content-emphasis font-semibold text-base w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
               {transaction.getName()}
             </span>
             <span className='hidden md:block dark:text-dark-monetr-content font-medium text-sm w-full overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>

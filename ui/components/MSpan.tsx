@@ -3,13 +3,17 @@ import React from 'react';
 import mergeTailwind from 'util/mergeTailwind';
 
 export interface MSpanProps {
-  variant?: 'normal' | 'light';
+  variant?: 'normal' | 'light' | 'inherit';
   children: string | React.ReactNode | JSX.Element;
+  ellipsis?: boolean;
   className?: string;
+  size?: 'inherit' | 'sm' | 'md' | 'lg' | 'xl';
+  weight?: 'normal' | 'semibold' | 'bold';
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
   variant: 'normal',
+  size: 'inherit',
 };
 
 export default function MSpan(props: MSpanProps): JSX.Element {
@@ -19,13 +23,35 @@ export default function MSpan(props: MSpanProps): JSX.Element {
   };
 
   const classNames = mergeTailwind(
+    'flex gap-2 items-center',
     {
-      'dark:text-dark-monetr-content': props.variant === 'normal',
-      'dark:text-dark-monetr-content-subtle': props.variant === 'light',
-      'text-gray-900': props.variant === 'normal',
-      'text-gray-500': props.variant === 'light',
+      'light': [
+        'dark:text-dark-monetr-content-subtle',
+        'text-monetr-content-subtle',
+      ],
+      'normal': [
+        'dark:text-dark-monetr-content',
+        'text-monetr-content',
+      ],
+      'inherit': [
+        'text-inherit',
+      ],
+    }[props.variant],
+    {
+      'text-ellipsis overflow-hidden whitespace-nowrap min-w-0': props.ellipsis,
     },
-    'text-md',
+    {
+      'inherit': 'text-size-inherit',
+      'sm': 'text-sm',
+      'md': 'text-base',
+      'lg': 'text-lg',
+      'xl': 'text-xl',
+    }[props.size],
+    {
+      'normal': 'font-normal',
+      'semibold': 'font-semibold',
+      'bold': 'font-bold',
+    }[props.weight],
     props.className,
   );
 

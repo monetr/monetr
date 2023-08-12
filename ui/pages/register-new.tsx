@@ -234,13 +234,13 @@ export default function RegisterNew(): JSX.Element {
               I agree to monetr's&nbsp;
               <a
                 target="_blank"
-                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
                 href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
                 Terms of Use
               </a> and&nbsp;
               <a
                 target="_blank"
-                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
                 href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
               >
                 Privacy Policy

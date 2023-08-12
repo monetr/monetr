@@ -10,20 +10,6 @@ module.exports = {
     './ui/**/*.js',
     './node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
   ],
-  // safelist: [
-  //   'cursor-pointer',
-  //   {
-  //     pattern: /(bg|text)-(\w+)-(\d+)/,
-  //     variants: ['hover'],
-  //   },
-  //   {
-  //     pattern: /text-(\w+)/,
-  //     variants: ['hover'],
-  //   },
-  //   {
-  //     pattern: /(w|h)-(\w+)/,
-  //   },
-  // ],
   theme: {
     extend: {
       colors: {
@@ -40,12 +26,21 @@ module.exports = {
             DEFAULT: '', // zinc-700
           },
           content: {
-            subtle: '', // zinc-400
-            DEFAULT: '', // zinc-200
+            subtle: '#6b7280', // gray-500
+            DEFAULT: '#111827', // gray-900
             emphasis: '', // zinc-50
           },
         },
         'dark-monetr': {
+          red: {
+            DEFAULT: '#ef4444',
+          },
+          green: {
+            DEFAULT: '#22c55e',
+          },
+          blue: {
+            DEFAULT: '#3b82f6',
+          },
           brand: {
             bright: '#CFB9F4',
             faint: '#AC84EB',
@@ -58,6 +53,7 @@ module.exports = {
             DEFAULT: '#19161f',
             emphasis: '#3f3f46', // zinc-700
             focused: '#131118',
+            bright: '#fafafa', // zinc-50
           },
           border: {
             subtle: '#27272a', // zinc-800

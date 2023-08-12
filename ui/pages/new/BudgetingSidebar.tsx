@@ -11,6 +11,8 @@ import { useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useNextFundingDate } from 'hooks/fundingSchedules';
 import { useLink } from 'hooks/links';
 import mergeTailwind from 'util/mergeTailwind';
+import MBadge from 'components/MBadge';
+import MSpan from 'components/MSpan';
 
 export interface BudgetingSidebarProps {
   className?: string;
@@ -94,15 +96,15 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         <div className='w-full flex items-center flex-col gap-2 px-2'>
           <FreeToUse />
           <Available />
-          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
-            <span className='flex gap-2 items-center text-lg font-semibold'>
+          <div className='w-full flex justify-between br-red-100'>
+            <MSpan size='lg' weight='semibold'>
               <TollOutlined />
               Current:
-            </span>
+            </MSpan>
             &nbsp;
-            <span className='text-lg font-semibold'>
+            <MSpan size='lg' weight='semibold'>
               { balance?.getCurrentString() }
-            </span>
+            </MSpan>
           </div>
         </div>
         <MDivider className='w-1/2' />
@@ -110,27 +112,33 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/transactions` }>
             <ShoppingCartOutlined />
-            Transactions
+            <MSpan ellipsis variant='inherit'>
+              Transactions
+            </MSpan>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/expenses` }>
             <PriceCheckOutlined />
-            Expenses
-            <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
+            <MSpan ellipsis variant='inherit'>
+              Expenses
+            </MSpan>
+            <MBadge className='ml-auto'>
               { balance?.getExpensesString() }
-            </span>
+            </MBadge>
           </NavigationItem>
           <NavigationItem  to={ `/bank/${bankAccount?.bankAccountId}/goals` }>
             <SavingsOutlined />
-            Goals
-            <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
+            <MSpan ellipsis variant='inherit'>
+              Goals
+            </MSpan>
+            <MBadge className='ml-auto'>
               { balance?.getGoalsString() }
-            </span>
+            </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/funding` }>
             <TodayOutlined />
-            <span className='text-ellipsis overflow-hidden whitespace-nowrap'>
+            <MSpan ellipsis variant='inherit'>
               Funding Schedules
-            </span>
+            </MSpan>
             <NextFundingBadge />
           </NavigationItem>
         </div>
@@ -149,7 +157,7 @@ function NavigationItem(props: NavigationItemProps): JSX.Element {
   const active = location.pathname.endsWith(props.to.replaceAll('.', ''));
 
   const className = mergeTailwind({
-    'bg-zinc-700': active,
+    'dark:bg-dark-monetr-background-emphasis': active,
     'dark:text-dark-monetr-content-emphasis': active,
     'dark:text-dark-monetr-content-subtle': !active,
     'font-semibold': active,
@@ -182,8 +190,8 @@ function NextFundingBadge(): JSX.Element {
   if (!next) return null;
 
   return (
-    <span className='ml-auto text-sm bg-monetr-brand dark:text-dark-monetr-content-emphasis rounded-md py-0.5 px-1.5'>
+    <MBadge className='ml-auto'>
       { next }
-    </span>
+    </MBadge>
   );
 }

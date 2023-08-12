@@ -83,14 +83,14 @@ export function MBaseButton(props: MButtonProps = MButtonPropsDefaults): JSX.Ele
       'solid': {
         'dark:bg-red-600': !disabled,
         'dark:hover:bg-red-500': !disabled,
-        'bg-red-500': !disabled,
+        'bg-dark-monetr-red': !disabled,
         'bg-red-200': disabled,
         'hover:bg-red-600': !disabled,
         'focus-visible:outline-red-600': !disabled,
         'text-white': true,
       },
       'text': {
-        'text-red-500': !disabled,
+        'text-dark-monetr-red': !disabled,
         'text-red-200': disabled,
         'focus-visible:outline-red-600': !disabled,
       },
