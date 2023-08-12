@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
 import { Formik } from 'formik';
 import moment from 'moment';
@@ -23,6 +23,7 @@ interface TransactionValues {
 }
 
 export default function TransactionDetails(): JSX.Element {
+  const navigate = useNavigate();
   const { transactionId: id } = useParams();
   const transactionId = +id || null;
 
@@ -103,7 +104,11 @@ export default function TransactionDetails(): JSX.Element {
             </span>
           </div>
           <div className='md:min-w-0 fixed md:static bottom-2 right-2 h-10 md:h-16 items-center flex gap-2 justify-end'>
-            <MBaseButton color='cancel' className='gap-1 py-1 px-2'>
+            <MBaseButton
+              color='cancel'
+              className='gap-1 py-1 px-2'
+              onClick={ () => navigate(`/bank/${transaction.bankAccountId}/transactions`) }
+            >
               <ArrowBackOutlined />
               Cancel
             </MBaseButton>
@@ -120,6 +125,7 @@ export default function TransactionDetails(): JSX.Element {
                 <MerchantIcon name={ transaction?.name } />
               </div>
               <MTextField
+                id='transaction-name-search'
                 label='Name'
                 placeholder='Transaction name...'
                 name='name'
@@ -147,7 +153,9 @@ export default function TransactionDetails(): JSX.Element {
                 className='w-full'
                 disabled
               />
-              <MSelectSpending className='w-full' />
+              <MSelectSpending
+                className='w-full'
+              />
             </div>
           </div>
         </div>

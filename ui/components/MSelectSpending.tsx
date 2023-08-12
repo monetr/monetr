@@ -10,6 +10,7 @@ import Spending from 'models/Spending';
 
 export interface MSelectSpendingProps {
   className?: string;
+  value?: number;
 }
 
 export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
@@ -37,7 +38,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
 
   const freeToUse = {
     label: 'Free-To-Use',
-    value: null,
+    value: -1,
     spending: {
       // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
       // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
@@ -59,12 +60,15 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
     ...(Array.from(items.values()).sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
   ];
 
+  const current = options.find(item => item.value === (props.value ?? -1));
+
   return (
     <MSelect
       className={ props?.className }
       label="Spent From"
       placeholder='Select a spending item...'
       options={ options }
+      value={ current }
       name="spendingId"
       components={ {
         Option: MSelectSpendingOption,
