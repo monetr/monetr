@@ -147,11 +147,7 @@ PNPM=$(shell which pnpm)
 
 NODE_MODULES=$(PWD)/node_modules
 $(NODE_MODULES): $(UI_DEPS)
-ifneq ($(OS),linux)
-	$(PNPM) install --ignore-platform
-else
 	$(PNPM) install
-endif
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
