@@ -39,6 +39,8 @@ const initialValues: RegisterValues = {
   confirmPassword: '',
 };
 
+const breakpoints = 'w-full md:w-1/2 lg:w-1/3 xl:w-1/4';
+
 function validator(values: RegisterValues): FormikErrors<RegisterValues> {
   const errors = {};
 
@@ -100,7 +102,7 @@ export default function RegisterNew(): JSX.Element {
         type="text"
         required
         uppercasetext
-        className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
+        className={ breakpoints }
       />
     );
   }
@@ -158,6 +160,7 @@ export default function RegisterNew(): JSX.Element {
     );
   }
 
+
   return (
     <Formik
       initialValues={ initialValues }
@@ -176,7 +179,7 @@ export default function RegisterNew(): JSX.Element {
             Create your monetr account now
           </MSpan>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2.5 xl:w-2/5 lg:w-1/3 md:w-1/2 w-full">
+        <div className={ `flex flex-col sm:flex-row gap-2.5 ${breakpoints}` }>
           <MTextField
             data-testid='register-first-name'
             autoFocus
@@ -201,11 +204,11 @@ export default function RegisterNew(): JSX.Element {
           name='email'
           type='email'
           required
-          className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
+          className={ breakpoints }
         />
         <MTextField
           autoComplete='new-password'
-          className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
+          className={ breakpoints }
           data-testid='register-password'
           label="Password"
           name='password'
@@ -214,7 +217,7 @@ export default function RegisterNew(): JSX.Element {
         />
         <MTextField
           autoComplete='new-password'
-          className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full"
+          className={ breakpoints }
           data-testid='register-confirm-password'
           label="Confirm Password"
           name='confirmPassword'
@@ -232,14 +235,14 @@ export default function RegisterNew(): JSX.Element {
           id="terms"
           name="agree"
           label={
-            <MSpan>
-              I agree to monetr's&nbsp;
+            <MSpan className='gap-1'>
+              I agree to monetr's
               <a
                 target="_blank"
                 className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
                 href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
                 Terms of Use
-              </a> and&nbsp;
+              </a> and
               <a
                 target="_blank"
                 className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
@@ -250,7 +253,7 @@ export default function RegisterNew(): JSX.Element {
             </MSpan>
           }
         />
-        <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1">
+        <div className={ `${breakpoints} mt-1` }>
           <MFormButton
             data-testid='register-submit'
             className='w-full'
@@ -262,7 +265,7 @@ export default function RegisterNew(): JSX.Element {
             Sign Up
           </MFormButton>
         </div>
-        <div className="xl:w-2/5 lg:w-1/3 md:w-1/2 w-full mt-1 flex justify-center gap-1 flex-col md:flex-row items-center">
+        <div className={ `${breakpoints} mt-1 flex justify-center gap-1 flex-col md:flex-row items-center` }>
           <MSpan variant="light" className='text-sm'>Already have an account?</MSpan>
           <MLink to="/login" size="sm">Sign in instead</MLink>
         </div>
