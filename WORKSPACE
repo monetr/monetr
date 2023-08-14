@@ -117,27 +117,27 @@ rules_jest_dependencies()
 
 ## Ruby stuff for licensed.
 
-# git_repository(
-#     name = "coinbase_rules_ruby",
-#     remote = "https://github.com/coinbase/rules_ruby.git",
-#     branch = "master",
-# )
-#
-# load(
-#     "@coinbase_rules_ruby//ruby:deps.bzl",
-#     "ruby_register_toolchains",
-#     "rules_ruby_dependencies",
-# )
-#
-# rules_ruby_dependencies()
-#
-# ruby_register_toolchains(version = "3.1.2")
-#
-# load("@coinbase_rules_ruby//ruby:defs.bzl", "rb_bundle")
-#
-# rb_bundle(
-#     name = "gems",
-#     bundler_version = '2.3.26',
-#     gemfile = "//:scripts/Gemfile",
-#     gemfile_lock = "//:scripts/Gemfile.lock",
-# )
+git_repository(
+    name = "coinbase_rules_ruby",
+    remote = "https://github.com/coinbase/rules_ruby.git",
+    branch = "master",
+)
+
+load(
+    "@coinbase_rules_ruby//ruby:deps.bzl",
+    "ruby_register_toolchains",
+    "rules_ruby_dependencies",
+)
+
+rules_ruby_dependencies()
+
+ruby_register_toolchains(version = "host")
+
+load("@coinbase_rules_ruby//ruby:defs.bzl", "rb_bundle")
+
+rb_bundle(
+    name = "gems",
+    bundler_version = '2.3.26',
+    gemfile = "//:scripts/Gemfile",
+    gemfile_lock = "//:scripts/Gemfile.lock",
+)

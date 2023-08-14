@@ -5,6 +5,8 @@ sources:
 go:
   GOPATH: ~/go
 
+npm:
+  production_only: true
 pnpm:
   production_only: true
 

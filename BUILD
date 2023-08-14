@@ -46,20 +46,20 @@ go_binary(
 #     deps = ["@gems//:licensed"],
 # )
 
-# genrule(
-#   name = "licensed",
-#   srcs = [
-#     ".licensed.yaml",
-#     "go.mod",
-#     "go.sum",
-#     "package.json",
-#     "pnpm-lock.yaml",
-#     "//:node_modules",
-#     "@gems//:bin/licensed"
-#   ],
-#   outs = [".licenses"],
-#   cmd = """$(location @gems//:bin/licensed) cache --force""",
-# )
+genrule(
+  name = "licensed",
+  srcs = [
+    ".licensed.yaml",
+    "go.mod",
+    "go.sum",
+    "package.json",
+    "pnpm-lock.yaml",
+    "//:node_modules",
+    "@gems//:bin/licensed"
+  ],
+  outs = [".licenses"],
+  cmd = """$(location @gems//:bin/licensed) cache --force""",
+)
 
 ## UI STUFF ##
 
