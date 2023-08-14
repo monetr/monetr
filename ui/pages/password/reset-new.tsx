@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import MFormButton from 'components/MButton';
@@ -76,51 +76,50 @@ export default function PasswordResetNew(): JSX.Element {
   }
 
   return (
-    <Formik
+    <MForm
       onSubmit={ submit }
       initialValues={ initialValues }
       validate={ validate }
+      className="w-full h-full flex flex-col pt-10 md:pt-0 mb:pb-10 md:justify-center items-center px-5 gap-1"
     >
-      <MForm className="w-full h-full flex flex-col pt-10 md:pt-0 mb:pb-10 md:justify-center items-center px-5 gap-1">
-        <div className='flex items-center flex-col gap-1 w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'>
-          <div className="max-w-[128px] w-full">
-            <MLogo />
-          </div>
-          <MSpan className='flex items-center text-center'>
-            { message }
-          </MSpan>
-          <MTextField
-            autoFocus
-            autoComplete='current-password'
-            label="Password"
-            name='password'
-            type='password'
-            required
-            className="w-full"
-          />
-          <MTextField
-            autoComplete='current-password'
-            label="Verify Password"
-            name='verifyPassword'
-            type='password'
-            required
-            className="w-full"
-          />
-          <MFormButton
-            color="primary"
-            variant="solid"
-            role="form"
-            type="submit"
-            className='w-full'
-          >
-            Reset Password
-          </MFormButton>
+      <div className='flex items-center flex-col gap-1 w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'>
+        <div className="max-w-[128px] w-full">
+          <MLogo />
         </div>
-        <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-          <MSpan variant="light" className='text-sm'>Remembered your password?</MSpan>
-          <MLink to="/login" size="sm">Sign in</MLink>
-        </div>
-      </MForm>
-    </Formik>
+        <MSpan className='flex items-center text-center'>
+          { message }
+        </MSpan>
+        <MTextField
+          autoFocus
+          autoComplete='current-password'
+          label="Password"
+          name='password'
+          type='password'
+          required
+          className="w-full"
+        />
+        <MTextField
+          autoComplete='current-password'
+          label="Verify Password"
+          name='verifyPassword'
+          type='password'
+          required
+          className="w-full"
+        />
+        <MFormButton
+          color="primary"
+          variant="solid"
+          role="form"
+          type="submit"
+          className='w-full'
+        >
+          Reset Password
+        </MFormButton>
+      </div>
+      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
+        <MSpan variant="light" className='text-sm'>Remembered your password?</MSpan>
+        <MLink to="/login" size="sm">Sign in</MLink>
+      </div>
+    </MForm>
   );
 }

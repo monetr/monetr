@@ -10,6 +10,7 @@ import SubscribePage from 'pages/account/subscribe';
 import AfterCheckoutPage from 'pages/account/subscribe/after';
 import ConfigError from 'pages/error/config';
 import ExpenseDetails from 'pages/expense/details';
+import FundingDetails from 'pages/funding/details';
 import FundingNew from 'pages/funding-new';
 import GoalsNew from 'pages/goals-new';
 import LoginNew from 'pages/login-new';
@@ -97,6 +98,7 @@ export default function Monetr(): JSX.Element {
             <Route path='expenses/:spendingId/details' element={ <ExpenseDetails /> } />
             <Route path='goals' element={ <GoalsNew /> } />
             <Route path='funding' element={ <FundingNew /> } />
+            <Route path='funding/:fundingId/details' element={ <FundingDetails /> } />
           </Route>
           <Route path='/settings' element={ <SettingsPage /> } />
           <Route path="/logout" element={ <LogoutPage /> } />

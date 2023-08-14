@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import MFormButton from 'components/MButton';
@@ -162,114 +162,113 @@ export default function RegisterNew(): JSX.Element {
 
 
   return (
-    <Formik
+    <MForm
       initialValues={ initialValues }
       validate={ validator }
       onSubmit={ submit }
+      className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5 overflow-y-auto py-4"
     >
-      <MForm className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5 overflow-y-auto py-4">
-        <div className="max-w-[96px] w-full">
-          <MLogo />
-        </div>
-        <div className="flex flex-col items-center text-center">
-          <MSpan className='text-5xl'>
+      <div className="max-w-[96px] w-full">
+        <MLogo />
+      </div>
+      <div className="flex flex-col items-center text-center">
+        <MSpan className='text-5xl'>
             Get Started
-          </MSpan>
-          <MSpan variant="light" className='text-lg'>
+        </MSpan>
+        <MSpan variant="light" className='text-lg'>
             Create your monetr account now
-          </MSpan>
-        </div>
-        <div className={ `flex flex-col sm:flex-row gap-2.5 ${breakpoints}` }>
-          <MTextField
-            data-testid='register-first-name'
-            autoFocus
-            label="First Name"
-            name="firstName"
-            type="text"
-            required
-            className="w-full"
-          />
-          <MTextField
-            data-testid='register-last-name'
-            label="Last Name"
-            name="lastName"
-            type="text"
-            required
-            className="w-full"
-          />
-        </div>
+        </MSpan>
+      </div>
+      <div className={ `flex flex-col sm:flex-row gap-2.5 ${breakpoints}` }>
         <MTextField
-          data-testid='register-email'
-          label="Email Address"
-          name='email'
-          type='email'
+          data-testid='register-first-name'
+          autoFocus
+          label="First Name"
+          name="firstName"
+          type="text"
           required
-          className={ breakpoints }
+          className="w-full"
         />
         <MTextField
-          autoComplete='new-password'
-          className={ breakpoints }
-          data-testid='register-password'
-          label="Password"
-          name='password'
+          data-testid='register-last-name'
+          label="Last Name"
+          name="lastName"
+          type="text"
           required
-          type='password'
+          className="w-full"
         />
-        <MTextField
-          autoComplete='new-password'
-          className={ breakpoints }
-          data-testid='register-confirm-password'
-          label="Confirm Password"
-          name='confirmPassword'
-          required
-          type='password'
-        />
-        <BetaCodeInput />
-        <MCaptcha
-          className='mb-1'
-          name="captcha"
-          show={ Boolean(config?.verifyRegister) }
-        />
-        <MCheckbox
-          data-testid='register-agree'
-          id="terms"
-          name="agree"
-          label={
-            <MSpan className='gap-1'>
+      </div>
+      <MTextField
+        data-testid='register-email'
+        label="Email Address"
+        name='email'
+        type='email'
+        required
+        className={ breakpoints }
+      />
+      <MTextField
+        autoComplete='new-password'
+        className={ breakpoints }
+        data-testid='register-password'
+        label="Password"
+        name='password'
+        required
+        type='password'
+      />
+      <MTextField
+        autoComplete='new-password'
+        className={ breakpoints }
+        data-testid='register-confirm-password'
+        label="Confirm Password"
+        name='confirmPassword'
+        required
+        type='password'
+      />
+      <BetaCodeInput />
+      <MCaptcha
+        className='mb-1'
+        name="captcha"
+        show={ Boolean(config?.verifyRegister) }
+      />
+      <MCheckbox
+        data-testid='register-agree'
+        id="terms"
+        name="agree"
+        label={
+          <MSpan className='gap-1'>
               I agree to monetr's
-              <a
-                target="_blank"
-                className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
-                href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
+            <a
+              target="_blank"
+              className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
+              href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
                 Terms of Use
-              </a> and
-              <a
-                target="_blank"
-                className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
-                href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
-              >
+            </a> and
+            <a
+              target="_blank"
+              className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
+              href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
+            >
                 Privacy Policy
-              </a>
-            </MSpan>
-          }
-        />
-        <div className={ `${breakpoints} mt-1` }>
-          <MFormButton
-            data-testid='register-submit'
-            className='w-full'
-            color="primary"
-            role="form"
-            type="submit"
-            variant="solid"
-          >
+            </a>
+          </MSpan>
+        }
+      />
+      <div className={ `${breakpoints} mt-1` }>
+        <MFormButton
+          data-testid='register-submit'
+          className='w-full'
+          color="primary"
+          role="form"
+          type="submit"
+          variant="solid"
+        >
             Sign Up
-          </MFormButton>
-        </div>
-        <div className={ `${breakpoints} mt-1 flex justify-center gap-1 flex-col md:flex-row items-center` }>
-          <MSpan variant="light" className='text-sm'>Already have an account?</MSpan>
-          <MLink to="/login" size="sm">Sign in instead</MLink>
-        </div>
-      </MForm>
-    </Formik>
+        </MFormButton>
+      </div>
+      <div className={ `${breakpoints} mt-1 flex justify-center gap-1 flex-col md:flex-row items-center` }>
+        <MSpan variant="light" className='text-sm'>Already have an account?</MSpan>
+        <MLink to="/login" size="sm">Sign in instead</MLink>
+      </div>
+    </MForm>
   );
 }

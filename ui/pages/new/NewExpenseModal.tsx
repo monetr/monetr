@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
-import { Formik, FormikHelpers } from 'formik';
+import { FormikHelpers } from 'formik';
 import moment from 'moment';
 import { useSnackbar } from 'notistack';
 
@@ -69,69 +69,68 @@ function NewExpenseModal(): JSX.Element {
 
   return (
     <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
-      <Formik
+      <MForm
         onSubmit={ submit }
         initialValues={ initialValues }
+        className='h-full flex flex-col gap-2 p-2 justify-between' data-testid='new-expense-modal'
       >
-        <MForm className='h-full flex flex-col gap-2 p-2 justify-between' data-testid='new-expense-modal'>
-          <div className='flex flex-col'>
-            <MSpan className='font-bold text-xl mb-2'>
-              Create A New Expense
-            </MSpan>
+        <div className='flex flex-col'>
+          <MSpan className='font-bold text-xl mb-2'>
+            Create A New Expense
+          </MSpan>
+          <MTextField
+            id='expense-name-search' // Keep's 1Pass from hijacking normal name fields.
+            name='name'
+            label='What are you budgeting for?'
+            required
+            autoComplete="off"
+            placeholder='Amazon, Netflix...'
+          />
+          <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
             <MTextField
-              id='expense-name-search' // Keep's 1Pass from hijacking normal name fields.
-              name='name'
-              label='What are you budgeting for?'
+              name='amount'
+              label='How much do you need?'
               required
-              autoComplete="off"
-              placeholder='Amazon, Netflix...'
+              type='number'
+              className='w-full md:w-1/2'
             />
-            <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
-              <MTextField
-                name='amount'
-                label='How much do you need?'
-                required
-                type='number'
-                className='w-full md:w-1/2'
-              />
-              <MTextField
-                name='nextOccurrence'
-                label='When do you need it next?'
-                required
-                type='date'
-                className='w-full md:w-1/2'
-                min={ moment().add(1, 'day').startOf('day').format('YYYY-MM-DD') }
-              />
-            </div>
-            <MSelectFunding
-              menuPortalTarget={ document.body }
-              label='When do you want to fund the expense?'
+            <MTextField
+              name='nextOccurrence'
+              label='When do you need it next?'
               required
-              name='fundingScheduleId'
-            />
-            <MSelectFrequency
-              dateFrom="nextOccurrence"
-              menuPosition='fixed'
-              menuShouldScrollIntoView={ false }
-              menuShouldBlockScroll={ true }
-              menuPortalTarget={ document.body }
-              menuPlacement='bottom'
-              label='How frequently do you need this expense?'
-              placeholder='Select a spending frequency...'
-              required
-              name='recurrenceRule'
+              type='date'
+              className='w-full md:w-1/2'
+              min={ moment().add(1, 'day').startOf('day').format('YYYY-MM-DD') }
             />
           </div>
-          <div className='flex justify-end gap-2'>
-            <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-expense-modal'>
-              Cancel
-            </MFormButton>
-            <MFormButton color='primary' type='submit'>
-              Create
-            </MFormButton>
-          </div>
-        </MForm>
-      </Formik>
+          <MSelectFunding
+            menuPortalTarget={ document.body }
+            label='When do you want to fund the expense?'
+            required
+            name='fundingScheduleId'
+          />
+          <MSelectFrequency
+            dateFrom="nextOccurrence"
+            menuPosition='fixed'
+            menuShouldScrollIntoView={ false }
+            menuShouldBlockScroll={ true }
+            menuPortalTarget={ document.body }
+            menuPlacement='bottom'
+            label='How frequently do you need this expense?'
+            placeholder='Select a spending frequency...'
+            required
+            name='recurrenceRule'
+          />
+        </div>
+        <div className='flex justify-end gap-2'>
+          <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-expense-modal'>
+            Cancel
+          </MFormButton>
+          <MFormButton color='primary' type='submit'>
+            Create
+          </MFormButton>
+        </div>
+      </MForm>
     </MModal>
   );
 }

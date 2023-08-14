@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
-import { Formik, FormikHelpers } from 'formik';
+import { FormikHelpers } from 'formik';
 import moment from 'moment';
 import { useSnackbar } from 'notistack';
 
@@ -62,53 +62,52 @@ function NewFundingModal(): JSX.Element {
 
   return (
     <MModal open={ modal.visible } ref={ ref } className='py-4'>
-      <Formik
+      <MForm
         initialValues={ initialValues }
         onSubmit={ submit }
+        className='h-full flex flex-col gap-2 p-2 justify-between' data-testid='new-funding-modal'
       >
-        <MForm className='h-full flex flex-col gap-2 p-2 justify-between' data-testid='new-funding-modal'>
-          <div className='flex flex-col'>
-            <MSpan className='font-bold text-xl mb-2'>
-              Create A New Funding Schedule
-            </MSpan>
-            <MTextField
-              id='funding-name-search' // Keep's 1Pass from hijacking normal name fields.
-              name='name'
-              label='What do you want to call your funding schedule?'
-              required
-              autoComplete="off"
-              placeholder="Example: Payday..."
-            />
-            <MTextField
-              name='nextOccurrence'
-              label='When do you get paid next?'
-              required
-              type='date'
-              min={ initialValues.nextOccurrence.format('YYYY-MM-DD') }
-            />
-            <MSelectFrequency
-              dateFrom="nextOccurrence"
-              menuPosition='fixed'
-              menuShouldScrollIntoView={ false }
-              menuShouldBlockScroll={ true }
-              menuPortalTarget={ document.body }
-              menuPlacement='bottom'
-              label='How often do you get paid?'
-              placeholder='Select a funding frequency...'
-              required
-              name='recurrenceRule'
-            />
-            <div className='flex justify-end gap-2'>
-              <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-funding-modal'>
-                Cancel
-              </MFormButton>
-              <MFormButton color='primary' type='submit'>
-                Create
-              </MFormButton>
-            </div>
+        <div className='flex flex-col'>
+          <MSpan className='font-bold text-xl mb-2'>
+            Create A New Funding Schedule
+          </MSpan>
+          <MTextField
+            id='funding-name-search' // Keep's 1Pass from hijacking normal name fields.
+            name='name'
+            label='What do you want to call your funding schedule?'
+            required
+            autoComplete="off"
+            placeholder="Example: Payday..."
+          />
+          <MTextField
+            name='nextOccurrence'
+            label='When do you get paid next?'
+            required
+            type='date'
+            min={ initialValues.nextOccurrence.format('YYYY-MM-DD') }
+          />
+          <MSelectFrequency
+            dateFrom="nextOccurrence"
+            menuPosition='fixed'
+            menuShouldScrollIntoView={ false }
+            menuShouldBlockScroll={ true }
+            menuPortalTarget={ document.body }
+            menuPlacement='bottom'
+            label='How often do you get paid?'
+            placeholder='Select a funding frequency...'
+            required
+            name='recurrenceRule'
+          />
+          <div className='flex justify-end gap-2'>
+            <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-funding-modal'>
+              Cancel
+            </MFormButton>
+            <MFormButton color='primary' type='submit'>
+              Create
+            </MFormButton>
           </div>
-        </MForm>
-      </Formik>
+        </div>
+      </MForm>
     </MModal>
   );
 }
