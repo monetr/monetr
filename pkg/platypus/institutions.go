@@ -20,14 +20,25 @@ var (
 )
 
 type PlaidInstitution struct {
-	InstitutionId string                  `json:"institutionId"`
-	Name          string                  `json:"name"`
-	Products      []plaid.Products        `json:"products"`
-	CountryCodes  []plaid.CountryCode     `json:"countryCodes"`
-	URL           string                  `json:"url,omitempty"`
-	PrimaryColor  string                  `json:"primaryColor,omitempty"`
-	Logo          string                  `json:"logo,omitempty"`
-	Status        plaid.InstitutionStatus `json:"status"`
+	InstitutionId string              `json:"institutionId"`
+	Name          string              `json:"name"`
+	Products      []plaid.Products    `json:"products"`
+	CountryCodes  []plaid.CountryCode `json:"countryCodes"`
+	URL           string              `json:"url,omitempty"`
+	PrimaryColor  string              `json:"primaryColor,omitempty"`
+	Logo          string              `json:"logo,omitempty"`
+	Status        Status              `json:"status"`
+}
+
+type Status struct {
+	ItemLogins          plaid.ProductStatus `json:"item_logins,omitempty"`
+	TransactionsUpdates plaid.ProductStatus `json:"transactions_updates,omitempty"`
+	Auth                plaid.ProductStatus `json:"auth,omitempty"`
+	Identity            plaid.ProductStatus `json:"identity,omitempty"`
+	InvestmentsUpdates  plaid.ProductStatus `json:"investments_updates,omitempty"`
+	LiabilitiesUpdates  plaid.ProductStatus `json:"liabilities_updates,omitempty"`
+	Liabilities         plaid.ProductStatus `json:"liabilities,omitempty"`
+	Investments         plaid.ProductStatus `json:"investments,omitempty"`
 }
 
 func NewPlaidInstitution(input plaid.Institution) PlaidInstitution {
@@ -39,7 +50,16 @@ func NewPlaidInstitution(input plaid.Institution) PlaidInstitution {
 		URL:           input.GetUrl(),
 		PrimaryColor:  input.GetPrimaryColor(),
 		Logo:          input.GetLogo(),
-		Status:        input.GetStatus(),
+		Status: Status{
+			ItemLogins:          input.Status.Get().GetItemLogins(),
+			TransactionsUpdates: input.Status.Get().GetTransactionsUpdates(),
+			Auth:                input.Status.Get().GetAuth(),
+			Identity:            input.Status.Get().GetIdentity(),
+			InvestmentsUpdates:  input.Status.Get().GetInvestmentsUpdates(),
+			LiabilitiesUpdates:  input.Status.Get().GetLiabilitiesUpdates(),
+			Liabilities:         input.Status.Get().GetLiabilities(),
+			Investments:         input.Status.Get().GetInvestments(),
+		},
 	}
 }
 
