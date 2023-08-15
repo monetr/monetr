@@ -77,7 +77,7 @@ export function RegisterSuccessful(): JSX.Element {
   return (
     <div className='w-full h-full flex justify-center items-center flex-col'>
       <MLogo className='h-24 w-24' />
-      <MSpan className='text-xl font-medium max-w-md text-center'>
+      <MSpan size='xl' weight='medium' className='max-w-md text-center'>
         A verification message has been sent to your email address, please verify your email.
       </MSpan>
     </div>
@@ -173,10 +173,10 @@ export default function RegisterNew(): JSX.Element {
       </div>
       <div className="flex flex-col items-center text-center">
         <MSpan className='text-5xl'>
-            Get Started
+          Get Started
         </MSpan>
         <MSpan variant="light" className='text-lg'>
-            Create your monetr account now
+          Create your monetr account now
         </MSpan>
       </div>
       <div className={ `flex flex-col sm:flex-row gap-2.5 ${breakpoints}` }>
@@ -236,19 +236,19 @@ export default function RegisterNew(): JSX.Element {
         name="agree"
         label={
           <MSpan className='gap-1'>
-              I agree to monetr's
+            I agree to monetr's
             <a
               target="_blank"
               className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
               href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
-                Terms of Use
+              Terms of Use
             </a> and
             <a
               target="_blank"
               className="text-dark-monetr-blue hover:underline focus:ring-2 focus:ring-dark-monetr-blue focus:underline"
               href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
             >
-                Privacy Policy
+              Privacy Policy
             </a>
           </MSpan>
         }
@@ -262,7 +262,7 @@ export default function RegisterNew(): JSX.Element {
           type="submit"
           variant="solid"
         >
-            Sign Up
+          Sign Up
         </MFormButton>
       </div>
       <div className={ `${breakpoints} mt-1 flex justify-center gap-1 flex-col md:flex-row items-center` }>

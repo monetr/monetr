@@ -7,7 +7,7 @@ export interface MSpanProps {
   children: string | React.ReactNode | JSX.Element;
   ellipsis?: boolean;
   className?: string;
-  size?: 'inherit' | 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'inherit' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
 }
 
@@ -46,6 +46,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
       'md': 'text-base',
       'lg': 'text-lg',
       'xl': 'text-xl',
+      '2xl': 'text-2xl',
     }[props.size],
     {
       'normal': 'font-normal',
@@ -58,7 +59,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
 
   return (
     <span className={ classNames }>
-      { props.children }
+      {props.children}
     </span>
   );
 }
