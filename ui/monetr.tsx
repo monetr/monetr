@@ -55,6 +55,8 @@ export default function Monetr(): JSX.Element {
         {config?.allowSignUp && <Route path='/register' element={ <RegisterNew /> } />}
         {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
         <Route path="/password/reset" element={ <PasswordResetNew /> } />
+        <Route path="/verify/email" element={ null } />
+        <Route path="/verify/email/resend" element={ null } />
         <Route path='/' element={ <Navigate replace to="/login" /> } />
         <Route path='*' element={ <Navigate replace to="/login" /> } />
       </Routes>
