@@ -314,7 +314,7 @@ CLOUD_MAGIC=false
 endif
 endif
 
-clean: shutdown $(HOSTESS)
+clean: shutdown
 	-rm -rf $(NOTICE)
 	-rm -rf $(LOCAL_BIN)
 	-rm -rf $(COVERAGE_TXT)
