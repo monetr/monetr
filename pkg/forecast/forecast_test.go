@@ -28,7 +28,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				Rule:            fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
+				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		}
 		spending := []models.Spending{
@@ -127,6 +127,105 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		})
 	})
 
+	t.Run("midnight goofiness", func(t *testing.T) {
+		// This test proves that something is wrong. The now is before the next contribution would happen, but the forecast
+		// code skips that contribution entirely and instead calculates as if the next contribution would be the last day
+		// of the month.
+		// This test passes at the moment, but proves that behavior is incorrect.
+		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		// Monday August 14th, 2023. Payday is Tuesday August 15th.
+		now := time.Date(2023, 8, 14, 19, 30, 1, 0, timezone).UTC()
+		// Project 1 month into the future exactly.
+		end := time.Date(2023, 9, 14, 19, 30, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+
+		fundingSchedules := []models.FundingSchedule{
+			{
+				Rule:              fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2023, 8, 15, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+				DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
+			},
+		}
+		spending := []models.Spending{
+			{
+				FundingScheduleId: 1,
+				SpendingType:      models.SpendingTypeExpense,
+				TargetAmount:      2000,
+				CurrentAmount:     0,
+				NextRecurrence:    time.Date(2023, 9, 1, 0, 0, 0, 0, timezone),
+				RecurrenceRule:    spendingRule,
+				SpendingId:        1,
+			},
+		}
+
+		forecaster := NewForecaster(log, spending, fundingSchedules)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		result := forecaster.GetForecast(ctx, now, end, timezone)
+		assert.EqualValues(t, Forecast{
+			StartingTime:    now,
+			EndingTime:      end,
+			StartingBalance: 0,
+			EndingBalance:   0,
+			Events: []Event{
+				{
+					Date:         time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
+					Delta:        2000,
+					Contribution: 2000,
+					Transaction:  0,
+					Balance:      2000,
+					Spending: []SpendingEvent{
+						{
+							Date:               time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
+							TransactionAmount:  0,
+							ContributionAmount: 2000,
+							RollingAllocation:  2000,
+							Funding: []FundingEvent{
+								{
+									Date:              time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
+									OriginalDate:      time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
+									WeekendAvoided:    false,
+									FundingScheduleId: 1,
+								},
+							},
+							SpendingId: 1,
+						},
+					},
+					Funding: []FundingEvent{
+						{
+							Date:              time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
+							OriginalDate:      time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
+							WeekendAvoided:    false,
+							FundingScheduleId: 1,
+						},
+					},
+				},
+				{
+					Date:         time.Date(2023, 9, 1, 5, 0, 0, 0, time.UTC),
+					Delta:        -2000,
+					Contribution: 0,
+					Transaction:  2000,
+					Balance:      0,
+					Spending: []SpendingEvent{
+						{
+							Date:               time.Date(2023, 9, 1, 5, 0, 0, 0, time.UTC),
+							TransactionAmount:  2000,
+							ContributionAmount: 0,
+							RollingAllocation:  0,
+							Funding:            []FundingEvent{},
+							SpendingId:         1,
+						},
+					},
+					Funding: []FundingEvent{},
+				},
+			},
+		}, result, "expected forecast")
+	})
+
 	t.Run("with elliot fixtures 20230705", func(t *testing.T) {
 		funding := make([]models.FundingSchedule, 0)
 		spending := make([]models.Spending, 0)
@@ -149,7 +248,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		assert.Greater(t, end, now, "make sure that our end is actually in the future")
 
 		forecaster := NewForecaster(log, spending, funding)
-		ctx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 		result := forecaster.GetForecast(ctx, now, end, timezone)
 		assert.NotNil(t, result, "just make sure something is returned, this is to make sure we dont timeout")
