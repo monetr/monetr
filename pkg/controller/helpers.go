@@ -33,5 +33,5 @@ func (c *Controller) midnightInLocal(ctx echo.Context, input time.Time) (time.Ti
 		return input, errors.Wrap(err, "failed to parse account's timezone")
 	}
 
-	return util.MidnightInLocal(input, timezone), nil
+	return util.Midnight(input, timezone), nil
 }

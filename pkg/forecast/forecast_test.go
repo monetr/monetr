@@ -78,7 +78,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				SpendingType:   models.SpendingTypeGoal,
 				TargetAmount:   1000000,
 				CurrentAmount:  0,
-				NextRecurrence: util.MidnightInLocal(now.AddDate(1, 0, 0), timezone),
+				NextRecurrence: util.Midnight(now.AddDate(1, 0, 0), timezone),
 			}), fundingSchedules)
 			forecast := forecaster.GetForecast(context.Background(), now, now.AddDate(0, 1, 4), timezone)
 			assert.Greater(t, forecast.StartingBalance, int64(0))
@@ -128,10 +128,12 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 	})
 
 	t.Run("midnight goofiness", func(t *testing.T) {
-		// This test proves that something is wrong. The now is before the next contribution would happen, but the forecast
-		// code skips that contribution entirely and instead calculates as if the next contribution would be the last day
-		// of the month.
-		// This test passes at the moment, but proves that behavior is incorrect.
+		// This test was part of a bugfix. Previously there was an issue where when we would adjust times to midnight of
+		// that day. We would sometimes return a timestamp that was actually the next day. This happened when the timezone
+		// we were working in was behind UTC, but the timestamp itself was such that UTC was the next day. This caused the
+		// forecaster to miss a funding schedule that was in just a few hours because it believed it had already happened.
+		// This test proves that the bug is resolved and if it fails again in the future, that means the timezone bug has
+		// been reintroduced somehow.
 		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
@@ -173,16 +175,48 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 			EndingBalance:   0,
 			Events: []Event{
 				{
+					Date:         time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
+					Delta:        1000,
+					Contribution: 1000,
+					Transaction:  0,
+					Balance:      1000,
+					Spending: []SpendingEvent{
+						{
+							Date:               time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
+							TransactionAmount:  0,
+							ContributionAmount: 1000,
+							RollingAllocation:  1000,
+							Funding: []FundingEvent{
+								{
+									Date:              time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
+									OriginalDate:      time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
+									WeekendAvoided:    false,
+									FundingScheduleId: 1,
+								},
+							},
+							SpendingId: 1,
+						},
+					},
+					Funding: []FundingEvent{
+						{
+							Date:              time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
+							OriginalDate:      time.Date(2023, 8, 15, 5, 0, 0, 0, time.UTC),
+							WeekendAvoided:    false,
+							FundingScheduleId: 1,
+						},
+					},
+				},
+				{
 					Date:         time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
-					Delta:        2000,
-					Contribution: 2000,
+					Delta:        1000,
+					Contribution: 1000,
 					Transaction:  0,
 					Balance:      2000,
 					Spending: []SpendingEvent{
 						{
 							Date:               time.Date(2023, 8, 31, 5, 0, 0, 0, time.UTC),
 							TransactionAmount:  0,
-							ContributionAmount: 2000,
+							ContributionAmount: 1000,
 							RollingAllocation:  2000,
 							Funding: []FundingEvent{
 								{

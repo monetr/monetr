@@ -6,32 +6,36 @@ import (
 	"github.com/pkg/errors"
 )
 
-// MidnightInLocal will take the provided timestamp and return the midnight of that timestamp in the provided timezone.
-// This can sometimes result in returning the day prior when the function is evaluated at such a time that the current
-// input time is far enough ahead that the timezone is still the previous day.
-func MidnightInLocal(input time.Time, timezone *time.Location) time.Time {
+// Midnight will take the provider timestamp and a desired timezone. It does not assume that the provided timestamp is
+// in the desired timezone, or that it is in UTC. It calculates the difference in timezone offsets and adjusts the
+// timestamp accordingly. Then truncates the timestamp to produce a midnight or "start of day" timestamp which it
+// returns.
+// As a result, this function should **NEVER** return a timestamp that comes after the provided input. The output may be
+// a later date, but will still be before the provided input once timezone offsets have been accounted for.
+func Midnight(input time.Time, timezone *time.Location) time.Time {
 	if input.IsZero() {
 		panic("cannot calculate the midnight in local of an empty time")
 	}
-	clone := time.Date(
-		input.Year(),
-		input.Month(),
-		input.Day(),
-		input.Hour(),
-		input.Minute(),
-		input.Second(),
-		input.Nanosecond(),
-		time.UTC,
-	)
-	// We need to do this because we need to know the offset for a given timezone at the provided input's timestamp. This
-	// way we can adjust the input to be in that timezone then truncate the time.
-	_, offset := clone.Zone()
-	inputTwo := input.Add(time.Second * time.Duration(offset))
+	// Get the timezone offsets from the input and from the timezone specified.
+	_, inputZoneOffset := input.Zone()
+	_, tzOffset := input.In(timezone).Zone()
 
+	// Calculate the difference betwen them.
+	// TODO: This might need to be math.Abs instead. If the timezone is _ahead_ of the input location I think there would
+	// be a bug here. Not quite sure yet.
+	delta := inputZoneOffset - tzOffset
+
+	// Subtract the delta from the input time, this accounts for the timezone difference potential between the input
+	// timezone and the provided timezone.
+	// The input time should be treated as the absolute time of the moment. But might be in ANY timezone. It could already
+	// be in the specified timezone, or it could be in UTC or some other timezone for example. But we must make sure that
+	// our adjustment takes that into account. So this delta will do just that.
+	adjusted := input.Add(time.Duration(-delta) * time.Second)
+	// Create a timestamp in the specified timezone that is midnight.
 	midnight := time.Date(
-		inputTwo.Year(),  // Year
-		inputTwo.Month(), // Month
-		inputTwo.Day(),   // Day
+		adjusted.Year(),  // Year
+		adjusted.Month(), // Month
+		adjusted.Day(),   // Day
 		0,                // Hours
 		0,                // Minutes
 		0,                // Seconds

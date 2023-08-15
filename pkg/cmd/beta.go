@@ -86,7 +86,7 @@ var (
 
 			betaCode := fmt.Sprintf("%X-%X", random[:4], random[4:])
 
-			expires := util.MidnightInLocal(time.Now().Add(14*24*time.Hour), time.Local)
+			expires := util.Midnight(time.Now().Add(14*24*time.Hour), time.Local)
 			beta := models.Beta{
 				CodeHash:  hash.HashPassword(strings.ToLower(betaCode), betaCode),
 				ExpiresAt: expires,

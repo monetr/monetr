@@ -42,7 +42,7 @@ func NewFundingScheduleFundingInstructions(log *logrus.Entry, fundingSchedule mo
 }
 
 func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
-	input = util.MidnightInLocal(input, timezone)
+	input = util.Midnight(input, timezone)
 	rule := f.fundingSchedule.Rule.RRule
 	var nextContributionDate time.Time
 	if f.fundingSchedule.NextOccurrence.IsZero() {
@@ -54,7 +54,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 			corrected := dateStarted.In(timezone)
 			rule.DTStart(corrected)
 		}
-		nextContributionDate = util.MidnightInLocal(rule.Before(input, false), timezone)
+		nextContributionDate = util.Midnight(rule.Before(input, false), timezone)
 	} else {
 		// If we have the date started defined on the funding schedule. Then use that so we can see the past and the future.
 		if f.fundingSchedule.DateStarted.IsZero() {
@@ -64,7 +64,7 @@ func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, inpu
 			corrected := dateStarted.In(timezone)
 			rule.DTStart(corrected)
 		}
-		nextContributionDate = util.MidnightInLocal(f.fundingSchedule.NextOccurrence, timezone)
+		nextContributionDate = util.Midnight(f.fundingSchedule.NextOccurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.
@@ -124,7 +124,7 @@ AfterLoop:
 			}
 		}
 
-		nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
+		nextContributionDate = util.Midnight(nextContributionDate, timezone)
 	}
 
 	return FundingEvent{
@@ -182,7 +182,7 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
 	if f.fundingSchedule.DateStarted.IsZero() {
-		dtStart := util.MidnightInLocal(start, timezone)
+		dtStart := util.Midnight(start, timezone)
 		rule.DTStart(dtStart)
 	} else {
 		dateStarted := f.fundingSchedule.DateStarted

@@ -59,9 +59,9 @@ func GiveMeAFundingSchedule(nextContributionDate time.Time, rule *Rule) *Funding
 
 func TestSpending_CalculateNextContribution(t *testing.T) {
 	t.Run("next funding in the past updated", func(t *testing.T) {
-		today := util.MidnightInLocal(time.Now(), time.UTC)
-		dayAfterTomorrow := util.MidnightInLocal(today.Add(48*time.Hour), time.UTC)
-		dayAfterDayAfterTomorrow := util.MidnightInLocal(time.Now().Add(72*time.Hour), time.UTC)
+		today := util.Midnight(time.Now(), time.UTC)
+		dayAfterTomorrow := util.Midnight(today.Add(48*time.Hour), time.UTC)
+		dayAfterDayAfterTomorrow := util.Midnight(time.Now().Add(72*time.Hour), time.UTC)
 		assert.True(t, dayAfterDayAfterTomorrow.After(today), "dayAfterDayAfterTomorrow timestamp must come after today's")
 		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
 		assert.NoError(t, err, "must be able to parse the rrule")
@@ -86,8 +86,8 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 
 	// This might eventually become obsolete, but it covers a bug scenario I discovered while working on institutions.
 	t.Run("next funding in the past is behind", func(t *testing.T) {
-		today := util.MidnightInLocal(time.Now(), time.UTC)
-		dayAfterTomorrow := util.MidnightInLocal(time.Now().Add(48*time.Hour), time.UTC)
+		today := util.Midnight(time.Now(), time.UTC)
+		dayAfterTomorrow := util.Midnight(time.Now().Add(48*time.Hour), time.UTC)
 		assert.True(t, dayAfterTomorrow.After(today), "dayAfterTomorrow timestamp must come after today's")
 		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
 		assert.NoError(t, err, "must be able to parse the rrule")

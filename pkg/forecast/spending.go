@@ -163,7 +163,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 	case models.SpendingTypeExpense:
 		rule := s.spending.RecurrenceRule.RRule
 		if s.spending.DateStarted.IsZero() {
-			dtMidnight := util.MidnightInLocal(start, timezone)
+			dtMidnight := util.Midnight(start, timezone)
 			rule.DTStart(dtMidnight)
 		} else {
 			dateStarted := s.spending.DateStarted
@@ -175,7 +175,7 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 		// because this function is **INTENDED** to be called with the start being now or the next funding event, and
 		// end being the next funding event immediately after that. We can't control what happens after the later
 		// funding event, so we need to know how much will be spent before then, so we know how much to allocate.
-		items := rule.Between(start, end.Add(-1 * time.Second), true)
+		items := rule.Between(start, end.Add(-1*time.Second), true)
 		return items
 	case models.SpendingTypeGoal:
 		if s.spending.NextRecurrence.After(start) && s.spending.NextRecurrence.Before(end) {
@@ -193,7 +193,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		return nil
 	}
 
-	input = util.MidnightInLocal(input, timezone)
+	input = util.Midnight(input, timezone)
 
 	var rule *rrule.RRule
 	if s.spending.RecurrenceRule != nil {
@@ -201,7 +201,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		rule = &(*s.spending.RecurrenceRule).RRule
 	}
 
-	nextRecurrence := util.MidnightInLocal(s.spending.NextRecurrence, timezone)
+	nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)
 	switch s.spending.SpendingType {
 	case models.SpendingTypeOverflow:
 		return nil

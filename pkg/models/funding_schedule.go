@@ -36,7 +36,7 @@ func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, 
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
-	dtStart := util.MidnightInLocal(start, timezone)
+	dtStart := util.Midnight(start, timezone)
 	rule.DTStart(dtStart)
 	items := rule.Between(start, end, true)
 	return int64(len(items))
@@ -56,11 +56,11 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	now = now.In(timezone)
 	var nextContributionDate time.Time
 	if !f.NextOccurrence.IsZero() {
-		nextContributionDate = util.MidnightInLocal(f.NextOccurrence, timezone)
+		nextContributionDate = util.Midnight(f.NextOccurrence, timezone)
 	} else {
 		// Hack to determine the previous contribution date before we figure out the next one.
 		f.Rule.RRule.DTStart(now.AddDate(-1, 0, 0))
-		nextContributionDate = util.MidnightInLocal(f.Rule.Before(now, false), timezone)
+		nextContributionDate = util.Midnight(f.Rule.Before(now, false), timezone)
 	}
 	if now.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.
@@ -98,7 +98,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 			}
 		}
 
-		nextContributionDate = util.MidnightInLocal(nextContributionDate, timezone)
+		nextContributionDate = util.Midnight(nextContributionDate, timezone)
 	}
 
 	return nextContributionDate

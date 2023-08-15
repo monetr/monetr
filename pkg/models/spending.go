@@ -75,7 +75,7 @@ func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Lo
 	switch e.SpendingType {
 	case SpendingTypeExpense:
 		if e.DateStarted.IsZero() {
-			dtMidnight := util.MidnightInLocal(now, timezone)
+			dtMidnight := util.Midnight(now, timezone)
 			e.RecurrenceRule.DTStart(dtMidnight)
 		} else {
 			dateStarted := e.DateStarted
@@ -159,7 +159,7 @@ func CalculateNextContribution(
 	now = now.In(timezone)
 
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)
-	nextRecurrence := util.MidnightInLocal(spending.NextRecurrence, timezone)
+	nextRecurrence := util.Midnight(spending.NextRecurrence, timezone)
 	if spending.RecurrenceRule != nil {
 		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
 		// rather than the current timestamp (which is what RRule defaults to).

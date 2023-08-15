@@ -36,7 +36,7 @@ func GivenIHaveNTransactions(t *testing.T, bankAccount models.BankAccount, n int
 	transactions := make([]models.Transaction, n)
 
 	for i := 0; i < n; i++ {
-		date := util.MidnightInLocal(time.Now(), timezone)
+		date := util.Midnight(time.Now(), timezone)
 
 		prefix := gofakeit.RandomString([]string{
 			fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX%s %s", gofakeit.Generate("####"), date.Format("01/02/06")),
@@ -60,7 +60,7 @@ func GivenIHaveNTransactions(t *testing.T, bankAccount models.BankAccount, n int
 			SpendingAmount:            nil,
 			Categories:                nil,
 			OriginalCategories:        nil,
-			Date:                      util.MidnightInLocal(time.Now(), timezone),
+			Date:                      util.Midnight(time.Now(), timezone),
 			AuthorizedDate:            nil,
 			Name:                      name,
 			CustomName:                nil,

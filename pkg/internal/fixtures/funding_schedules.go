@@ -24,19 +24,19 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 	rule := testutils.Must(t, models.NewRule, ruleString)
 	tz := testutils.MustEz(t, bankAccount.Account.GetTimezone)
 	rule.DTStart(time.Now().In(tz).Add(-30 * 24 * time.Hour))
-	nextOccurrence := util.MidnightInLocal(rule.Before(time.Now(), false), tz)
+	nextOccurrence := util.Midnight(rule.Before(time.Now(), false), tz)
 
 	fundingSchedule := models.FundingSchedule{
-		AccountId:         bankAccount.AccountId,
-		Account:           bankAccount.Account,
-		BankAccountId:     bankAccount.BankAccountId,
-		BankAccount:       bankAccount,
-		Name:              gofakeit.Generate("Payday {uuid}"),
-		Description:       gofakeit.Generate("{sentence:5}"),
-		Rule:              rule,
-		ExcludeWeekends:   excludeWeekends,
-		LastOccurrence:    nil,
-		NextOccurrence:    nextOccurrence,
+		AccountId:       bankAccount.AccountId,
+		Account:         bankAccount.Account,
+		BankAccountId:   bankAccount.BankAccountId,
+		BankAccount:     bankAccount,
+		Name:            gofakeit.Generate("Payday {uuid}"),
+		Description:     gofakeit.Generate("{sentence:5}"),
+		Rule:            rule,
+		ExcludeWeekends: excludeWeekends,
+		LastOccurrence:  nil,
+		NextOccurrence:  nextOccurrence,
 	}
 
 	require.NoError(t, repo.CreateFundingSchedule(context.Background(), &fundingSchedule), "must be able to create funding schedule")

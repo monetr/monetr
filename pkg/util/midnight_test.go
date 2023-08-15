@@ -29,22 +29,13 @@ func TestInLocal(t *testing.T) {
 	})
 }
 
-func TestMidnightInLocal(t *testing.T) {
-	t.Run("weird timezone", func(t *testing.T) {
-		sanLuis, err := time.LoadLocation("America/Argentina/San_Luis")
-		assert.NoError(t, err, "must be able to load the sanLuis time location")
-		start := time.Date(2022, 06, 15, 2, 24, 38, 0, time.UTC)
-
-		midnight := MidnightInLocal(start, sanLuis)
-		assert.Equal(t, time.Date(2022, 06, 15, 0, 0, 0, 0, sanLuis), midnight, "midnight in a different timezone is a different day")
-	})
-
+func TestMidnight(t *testing.T) {
 	t.Run("panics for an empty time", func(t *testing.T) {
 		sanLuis, err := time.LoadLocation("America/Argentina/San_Luis")
 		assert.NoError(t, err, "must be able to load the sanLuis time location")
 
 		assert.Panics(t, func() {
-			_ = MidnightInLocal(time.Time{}, sanLuis)
+			_ = Midnight(time.Time{}, sanLuis)
 		})
 	})
 
@@ -55,7 +46,21 @@ func TestMidnightInLocal(t *testing.T) {
 		input := time.Date(2022, 9, 15, 0, 0, 12, 0, timezone)
 		expected := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
 
-		midnight := MidnightInLocal(input, timezone)
+		midnight := Midnight(input, timezone)
 		assert.Equal(t, expected, midnight, "should have truncated the time, but not the timezone")
+	})
+
+	t.Run("central but next day utc", func(t *testing.T) {
+		timezone, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must load central timezone")
+		now := time.Date(2023, 8, 14, 19, 30, 1, 0, timezone)
+		nowUTC := now.UTC()
+		expected := time.Date(2023, 8, 14, 0, 0, 0, 0, timezone)
+
+		midnightNow := Midnight(now, timezone)
+		assert.Equal(t, expected, midnightNow, "should not be in the future")
+
+		midnightUTC := Midnight(nowUTC, timezone)
+		assert.Equal(t, expected, midnightUTC, "should not be in the future")
 	})
 }

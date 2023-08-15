@@ -91,7 +91,7 @@ func TestCountPendingTransactions(t *testing.T) {
 		timezone, err := bankAccount.Account.GetTimezone()
 		require.NoError(t, err, "must be able to get the timezone from the account")
 
-		date := util.MidnightInLocal(time.Now(), timezone)
+		date := util.Midnight(time.Now(), timezone)
 
 		prefix := gofakeit.RandomString([]string{
 			fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX%s %s", gofakeit.Generate("####"), date.Format("01/02/06")),
@@ -109,7 +109,7 @@ func TestCountPendingTransactions(t *testing.T) {
 			BankAccount:          &bankAccount,
 			PlaidTransactionId:   gofakeit.UUID(),
 			Amount:               int64(gofakeit.Number(100, 10000)),
-			Date:                 util.MidnightInLocal(time.Now(), timezone),
+			Date:                 util.Midnight(time.Now(), timezone),
 			Name:                 name,
 			OriginalName:         name,
 			MerchantName:         company,
