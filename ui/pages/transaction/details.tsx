@@ -2,15 +2,17 @@
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { FormikHelpers } from 'formik';
 import moment from 'moment';
 
-import { MBaseButton } from 'components/MButton';
+import MFormButton, { MBaseButton } from 'components/MButton';
 import MForm from 'components/MForm';
 import MSelectSpending from 'components/MSelectSpending';
 import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
-import { useTransaction } from 'hooks/transactions';
+import { useTransaction, useUpdateTransaction } from 'hooks/transactions';
+import Transaction from 'models/Transaction';
 import MerchantIcon from 'pages/new/MerchantIcon';
 
 interface TransactionValues {
@@ -24,9 +26,11 @@ interface TransactionValues {
 export default function TransactionDetails(): JSX.Element {
   const navigate = useNavigate();
   const { transactionId: id } = useParams();
+  const updateTransaction = useUpdateTransaction();
   const transactionId = +id || null;
 
   const { result: transaction, isLoading, isError } = useTransaction(transactionId);
+  console.log('rerender', transaction);
 
   if (isLoading) {
     return (
@@ -65,8 +69,16 @@ export default function TransactionDetails(): JSX.Element {
     );
   }
 
-  function submit() {
+  async function submit(values: TransactionValues, helpers: FormikHelpers<TransactionValues>) {
+    const updatedTransaction = new Transaction({
+      ...transaction,
+      name: values.name,
+      spendingId: values.spendingId,
+    });
 
+    helpers.setSubmitting(true);
+    return updateTransaction(updatedTransaction)
+      .finally(() => helpers.setSubmitting(false));
   }
 
   const initialValues: TransactionValues = {
@@ -111,10 +123,10 @@ export default function TransactionDetails(): JSX.Element {
             <ArrowBackOutlined />
             Cancel
           </MBaseButton>
-          <MBaseButton color='primary' className='gap-1 py-1 px-2'>
+          <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit'>
             <SaveOutlined />
             Save Changes
-          </MBaseButton>
+          </MFormButton>
         </div>
       </div>
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
@@ -154,6 +166,7 @@ export default function TransactionDetails(): JSX.Element {
             />
             <MSelectSpending
               className='w-full'
+              name='spendingId'
             />
           </div>
         </div>

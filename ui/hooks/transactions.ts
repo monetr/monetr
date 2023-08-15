@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -59,14 +60,14 @@ export function useTransaction(transactionId: number | null): TransactionResult 
   };
 }
 
-export function useUpdateTransaction(): (_transaction: Transaction) => Promise<void> {
-  const queryClient = useQueryClient();
+export interface TransactionUpdateResponse {
+  transaction: Partial<Transaction>;
+  spending: Array<Partial<Spending>>;
+  balance: Partial<Balance>;
+}
 
-  interface TransactionUpdateResponse {
-    transaction: Partial<Transaction>;
-    spending: Array<Partial<Spending>>;
-    balance: Partial<Balance>;
-  }
+export function useUpdateTransaction(): (_transaction: Transaction) => Promise<TransactionUpdateResponse> {
+  const queryClient = useQueryClient();
 
   async function updateTransaction(transaction: Transaction): Promise<TransactionUpdateResponse> {
     return request()
@@ -77,12 +78,12 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<v
       .then(result => result.data);
   }
 
-  const { mutate } = useMutation(
+  const { mutateAsync } = useMutation(
     updateTransaction,
     {
       onSuccess: (response: TransactionUpdateResponse) => Promise.all([
         queryClient.setQueriesData(
-          [`/bank_accounts/${ response.transaction.bankAccountId }/transactions`],
+          [`/bank_accounts/${response.transaction.bankAccountId}/transactions`],
           (previous: InfiniteData<Array<Transaction>>) => ({
             ...previous,
             pages: previous.pages.map(page =>
@@ -93,12 +94,21 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<v
           })
         ),
         queryClient.setQueriesData(
-          [`/bank_accounts/${ response.transaction.bankAccountId }/spending`],
+          [`/bank_accounts/${response.transaction.bankAccountId}/transactions/${response.transaction.transactionId}`],
+          response.transaction,
+        ),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${response.transaction.bankAccountId}/spending`],
           (previous: Array<Partial<Spending>>) => previous
             .map(item => (response.spending || []).find(updated => updated.spendingId === item.spendingId) || item),
         ),
+        (response.spending || []).map(spending =>
+          queryClient.setQueriesData(
+            [`/bank_accounts/${response.transaction.bankAccountId}/spending/${spending.spendingId}`],
+            spending,
+          )),
         queryClient.setQueriesData(
-          [`/bank_accounts/${ response.transaction.bankAccountId }/balances`],
+          [`/bank_accounts/${response.transaction.bankAccountId}/balances`],
           (previous: Partial<Balance>) => new Balance({
             ...previous,
             ...response.balance,
@@ -108,7 +118,5 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<v
     }
   );
 
-  return async (transaction: Transaction): Promise<void> => {
-    return mutate(transaction);
-  };
+  return mutateAsync;
 }

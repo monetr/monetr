@@ -7,13 +7,15 @@ import MSpan from './MSpan';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink } from 'hooks/spending';
 import Spending from 'models/Spending';
+import { useFormikContext } from 'formik';
 
 export interface MSelectSpendingProps {
+  name: string;
   className?: string;
-  value?: number;
 }
 
 export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
+  const formikContext = useFormikContext();
   const { result: spending, isLoading, isError } = useSpendingSink();
   const balances = useCurrentBalance();
 
@@ -60,7 +62,16 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
     ...(Array.from(items.values()).sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
   ];
 
-  const current = options.find(item => item.value === (props.value ?? -1));
+  const value = formikContext.values[props.name];
+  const current = options.find(item => item.value === (value ?? -1));
+
+  function onSelect(newValue: { label: string, value: number }) {
+    if (newValue.value === -1) {
+      return formikContext.setFieldValue(props.name, null);
+    }
+
+    return formikContext.setFieldValue(props.name, newValue.value);
+  }
 
   return (
     <MSelect
@@ -70,6 +81,7 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
       options={ options }
       value={ current }
       name="spendingId"
+      onChange={ onSelect }
       components={ {
         Option: MSelectSpendingOption,
       } }
