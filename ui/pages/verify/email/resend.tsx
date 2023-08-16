@@ -1,38 +1,40 @@
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Button, CircularProgress, TextField } from '@mui/material';
-import classnames from 'classnames';
-import { Formik, FormikHelpers } from 'formik';
+import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
-import BackToLoginButton from 'components/Authentication/BackToLoginButton';
-import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
-import CenteredLogo from 'components/Logo/CenteredLogo';
+import MFormButton from 'components/MButton';
+import MCaptcha from 'components/MCaptcha';
+import MForm from 'components/MForm';
+import MLink from 'components/MLink';
+import MLogo from 'components/MLogo';
+import MSpan from 'components/MSpan';
+import MTextField from 'components/MTextField';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import request from 'util/request';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface ResendValues {
   email: string | null;
+  captcha: string | null;
 }
 
 export default function ResendVerificationPage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();
-  const { ReCAPTCHAKey } = useAppConfiguration();
-  const requireCaptcha = !!ReCAPTCHAKey;
+  const config = useAppConfiguration();
   const { state: routeState } = useLocation();
   const initialValues: ResendValues = {
     email: (routeState && routeState['emailAddress']) || null,
+    captcha: null,
   };
 
-  const [verification, setVerification] = useState<string | null>();
   const [done, setDone] = useState(false);
 
-  function resendVerification(emailAddress: string): Promise<void> {
+  async function resendVerification(values: ResendValues): Promise<void> {
     return request().post('/authentication/verify/resend', {
-      email: emailAddress,
-      captcha: verification,
+      email: values.captcha,
+      captcha: values.captcha,
     })
       .then(() => setDone(true))
       .catch(error => void enqueueSnackbar(error?.response?.data?.error || 'Failed to resend verification link', {
@@ -53,9 +55,9 @@ export default function ResendVerificationPage(): JSX.Element {
     return errors;
   }
 
-  function submit(values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> {
+  async function submit(values: ResendValues, helpers: FormikHelpers<ResendValues>): Promise<void> {
     helpers.setSubmitting(true);
-    return resendVerification(values.email)
+    return resendVerification(values)
       .finally(() => helpers.setSubmitting(false));
   }
 
@@ -63,91 +65,53 @@ export default function ResendVerificationPage(): JSX.Element {
     return <AfterEmailVerificationSent />;
   }
 
-  return (
-    <Fragment>
-      <BackToLoginButton />
-      <Formik
-        initialValues={ initialValues }
-        validate={ validateInput }
-        onSubmit={ submit }
-      >
-        { ({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          isSubmitting,
-          submitForm,
-        }) => (
-          <form onSubmit={ handleSubmit } className="h-full overflow-y-auto">
-            <div className="flex items-center justify-center w-full h-full max-h-full">
-              <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo />
-                <div className="w-full">
-                  <div className="w-full pb-2.5">
-                    { routeState &&
-                      <p className="text-center">
-                        It looks like your email address has not been verified. Do you want to resend the email
-                        verification link?
-                      </p>
-                    }
+  function RouteStateMessage(): JSX.Element {
+    if (routeState) {
+      return (
+        <MSpan className='text-center' size='sm'>
+          It looks like your email address has not been verified. Do you want to resend the email verification link?
+        </MSpan>
+      );
+    }
 
-                    { !routeState &&
-                      <p className="text-center">
-                        If your email verification link has expired, or you never got one. You can enter your email
-                        address below and another verification link will be sent to you.
-                      </p>
-                    }
-                  </div>
-                  <div className="w-full pb-2.5">
-                    <TextField
-                      autoComplete="username"
-                      autoFocus
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.email && !!errors.email }
-                      helperText={ (touched.email && errors.email) ? errors.email : null }
-                      id="login-email"
-                      label="Email"
-                      name="email"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      value={ values.email }
-                      variant="outlined"
-                    />
-                  </div>
-                </div>
-                <CaptchaMaybe
-                  show
-                  loading={ isSubmitting }
-                  onVerify={ setVerification }
-                />
-                <div className="w-full pt-2.5 mb-10">
-                  <Button
-                    className="w-full"
-                    color="primary"
-                    disabled={ isSubmitting || !values.email || (requireCaptcha && !verification) }
-                    onClick={ submitForm }
-                    type="submit"
-                    variant="contained"
-                  >
-                    { isSubmitting && <CircularProgress
-                      className={ classnames('mr-2', {
-                        'opacity-50': isSubmitting,
-                      }) }
-                      size="1em"
-                      thickness={ 5 }
-                    /> }
-                    { isSubmitting ? 'Sending Verification Link...' : 'Resend Verification Link' }
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </form>
-        ) }
-      </Formik>
-    </Fragment>
+    return (
+      <MSpan className='text-center' size='sm'>
+        If your email verification link has expired, or you never got one. You can enter your email address below and
+        another verification link will be sent to you.
+      </MSpan>
+    );
+  }
+
+  return (
+    <MForm
+      initialValues={ initialValues }
+      onSubmit={ submit }
+      validate={ validateInput }
+      className='w-full h-full flex flex-col justify-center items-center gap-2 p-4'
+    >
+      <div className='max-w-xs flex flex-col items-center gap-2'>
+        <MLogo className='h-24 w-24' />
+        <RouteStateMessage />
+        <MTextField
+          name="email"
+          autoComplete="username"
+          autoFocus
+          label="Email"
+          className='w-full'
+        />
+        <MCaptcha
+          name="captcha"
+          // Show the captcha if there is a captcha key specified in the config.
+          show={ Boolean(config?.ReCAPTCHAKey) }
+        />
+        <MFormButton type='submit' color='primary' className='w-full'>
+          Resend Verification
+        </MFormButton>
+        <div className="mt-1 flex justify-center gap-1">
+          <MSpan variant="light" className='text-sm'>Don't need to resend?</MSpan>
+          <MLink to="/login" size="sm" data-testid='login-signup'>Return to login</MLink>
+        </div>
+      </div>
+    </MForm>
   );
 };

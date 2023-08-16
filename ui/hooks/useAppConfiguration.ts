@@ -51,7 +51,7 @@ export function useAppConfigurationSink(): AppConfigurationResult {
   };
 }
 
-export function useAppConfiguration(): AppConfiguration {
+export function useAppConfiguration(): AppConfiguration | null {
   const { result } = useAppConfigurationSink();
   return result;
 }

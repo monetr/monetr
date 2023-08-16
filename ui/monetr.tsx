@@ -27,6 +27,7 @@ import SettingsPage from 'pages/settings';
 import SetupPage from 'pages/setup';
 import TransactionDetails from 'pages/transaction/details';
 import VerifyEmail from 'pages/verify/email';
+import ResendVerificationPage from 'pages/verify/email/resend';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 
 export default function Monetr(): JSX.Element {
@@ -57,7 +58,7 @@ export default function Monetr(): JSX.Element {
         {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
         <Route path="/password/reset" element={ <PasswordResetNew /> } />
         <Route path="/verify/email" element={ <VerifyEmail /> } />
-        <Route path="/verify/email/resend" element={ null } />
+        <Route path="/verify/email/resend" element={ <ResendVerificationPage /> } />
         <Route path='/' element={ <Navigate replace to="/login" /> } />
         <Route path='*' element={ <Navigate replace to="/login" /> } />
       </Routes>
