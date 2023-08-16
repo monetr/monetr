@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { Location, MemoryRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -10,15 +10,16 @@ import MQueryClient from 'components/MQueryClient';
 import MSnackbarProvider from 'components/MSnackbarProvider';
 import { newTheme } from 'theme';
 
-export interface Options<Q extends Queries = typeof queries,
+export interface Options<
+  Q extends Queries = typeof queries,
   Container extends Element | DocumentFragment = HTMLElement,
-  > extends RenderOptions<Q, Container> {
-    initialRoute: string;
+> extends RenderOptions<Q, Container> {
+  initialRoute: string | Partial<Location>;
 }
 
 function testRenderer<Q extends Queries = typeof queries,
   Container extends Element | DocumentFragment = HTMLElement,
-  >(
+>(
   ui: React.ReactElement,
   options?: Options<Q, Container>
 ): RenderResult<Q, Container> {
@@ -31,7 +32,7 @@ function testRenderer<Q extends Queries = typeof queries,
               <MSnackbarProvider>
                 <NiceModal.Provider>
                   <CssBaseline />
-                  { props.children }
+                  {props.children}
                 </NiceModal.Provider>
               </MSnackbarProvider>
             </LocalizationProvider>

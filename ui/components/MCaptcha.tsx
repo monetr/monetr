@@ -10,6 +10,7 @@ export interface MCaptchaProps {
   name?: string;
   show?: boolean;
   className?: string;
+  ['data-testid']?: string;
 }
 
 export default function MCaptcha(props: MCaptchaProps): JSX.Element {
@@ -42,10 +43,11 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   return (
     <div className={ classes }>
       {!loading && <ReCAPTCHA
+        data-testid={ props['data-testid'] }
         sitekey={ config.ReCAPTCHAKey }
         onChange={ onVerify }
       />}
-      { loading && <CircularProgress /> }
+      {loading && <CircularProgress />}
     </div>
   );
 

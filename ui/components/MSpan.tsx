@@ -9,6 +9,7 @@ export interface MSpanProps {
   className?: string;
   size?: 'inherit' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  ['data-testid']?: string;
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
@@ -58,7 +59,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
   );
 
   return (
-    <span className={ classNames }>
+    <span className={ classNames } data-testid={ props['data-testid'] }>
       {props.children}
     </span>
   );

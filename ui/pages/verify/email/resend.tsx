@@ -68,14 +68,14 @@ export default function ResendVerificationPage(): JSX.Element {
   function RouteStateMessage(): JSX.Element {
     if (routeState) {
       return (
-        <MSpan className='text-center' size='sm'>
+        <MSpan className='text-center' size='sm' data-testid='resend-email-included'>
           It looks like your email address has not been verified. Do you want to resend the email verification link?
         </MSpan>
       );
     }
 
     return (
-      <MSpan className='text-center' size='sm'>
+      <MSpan className='text-center' size='sm' data-testid='resend-email-excluded'>
         If your email verification link has expired, or you never got one. You can enter your email address below and
         another verification link will be sent to you.
       </MSpan>
@@ -98,11 +98,13 @@ export default function ResendVerificationPage(): JSX.Element {
           autoFocus
           label="Email"
           className='w-full'
+          data-testid='resend-email'
         />
         <MCaptcha
           name="captcha"
           // Show the captcha if there is a captcha key specified in the config.
           show={ Boolean(config?.ReCAPTCHAKey) }
+          data-testid='resend-captcha'
         />
         <MFormButton type='submit' color='primary' className='w-full'>
           Resend Verification
