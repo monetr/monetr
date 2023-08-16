@@ -25,7 +25,7 @@ export default function ResendVerificationPage(): JSX.Element {
   const config = useAppConfiguration();
   const { state: routeState } = useLocation();
   const initialValues: ResendValues = {
-    email: (routeState && routeState['emailAddress']) || null,
+    email: (routeState && routeState['emailAddress']) || undefined,
     captcha: null,
   };
 
