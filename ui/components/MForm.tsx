@@ -6,6 +6,7 @@ import { ReactElement } from './types';
 interface MFormProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   className?: string;
   children: ReactElement;
+  'data-testid'?: string;
 }
 
 export default function MForm<Values extends FormikValues = FormikValues>(props: MFormProps<Values>): JSX.Element {
@@ -13,9 +14,9 @@ export default function MForm<Values extends FormikValues = FormikValues>(props:
 
   return (
     <Formik { ...formikConfig }>
-      { (formik: FormikProps<Values>) => (
-        <form onSubmit={ formik.handleSubmit } className={ className }>
-          { children }
+      {(formik: FormikProps<Values>) => (
+        <form onSubmit={ formik.handleSubmit } className={ className } data-testid={ props['data-testid'] }>
+          {children}
         </form>
       )}
     </Formik>
