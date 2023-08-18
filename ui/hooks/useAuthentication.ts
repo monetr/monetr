@@ -1,5 +1,5 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import * as Sentry from '@sentry/react';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import User from 'models/User';
 import request from 'util/request';
@@ -59,7 +59,7 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
 
   async function queryCheckoutSession(checkoutSessionId: string): Promise<AfterCheckoutResult> {
     return request()
-      .get<AfterCheckoutResult>(`/billing/checkout/${ checkoutSessionId }`)
+      .get<AfterCheckoutResult>(`/billing/checkout/${checkoutSessionId}`)
       .then(result => result.data);
   }
 
