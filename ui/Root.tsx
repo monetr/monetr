@@ -13,7 +13,6 @@ import { newTheme } from 'theme';
 export default function Root(): JSX.Element {
 
   // <Sentry.ErrorBoundary>
-  // <React.StrictMode>
   return (
     <Router>
       <MQueryClient>
