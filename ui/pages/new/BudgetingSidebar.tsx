@@ -3,16 +3,16 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AccountBalanceWalletOutlined, LocalAtmOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
 
+import MBadge from 'components/MBadge';
 import MDivider from 'components/MDivider';
 import MSelectAccount from 'components/MSelectAccount';
+import MSpan from 'components/MSpan';
 import { ReactElement } from 'components/types';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useNextFundingDate } from 'hooks/fundingSchedules';
 import { useLink } from 'hooks/links';
 import mergeTailwind from 'util/mergeTailwind';
-import MBadge from 'components/MBadge';
-import MSpan from 'components/MSpan';
 
 export interface BudgetingSidebarProps {
   className?: string;
@@ -23,7 +23,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   const link = useLink(bankAccount?.linkId);
   const balance = useCurrentBalance();
 
-  if (isLoading)  {
+  if (isLoading) {
     return null;
   }
 
@@ -42,15 +42,15 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       case 'checking':
       case 'savings':
         return (
-          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
-            <span className='flex gap-2 items-center text-lg font-semibold'>
+          <div className='w-full flex justify-between'>
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               <AccountBalanceWalletOutlined />
               Free-To-Use:
-            </span>
+            </MSpan>
             &nbsp;
-            <span className='text-lg font-semibold'>
-              { balance?.getFreeToUseString() }
-            </span>
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+              {balance?.getFreeToUseString()}
+            </MSpan>
           </div>
         );
     }
@@ -63,15 +63,15 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       case 'checking':
       case 'savings':
         return (
-          <div className='w-full flex justify-between dark:text-monetr-dark-content'>
-            <span className='flex gap-2 items-center text-lg font-semibold'>
+          <div className='w-full flex justify-between'>
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               <LocalAtmOutlined />
               Available:
-            </span>
+            </MSpan>
             &nbsp;
-            <span className='text-lg font-semibold'>
-              { balance?.getAvailableString() }
-            </span>
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+              {balance?.getAvailableString()}
+            </MSpan>
           </div>
         );
     }
@@ -84,7 +84,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
     <div className={ className }>
       <div className='w-full dark:hover:bg-dark-monetr-background-emphasis dark:text-dark-monetr-content-emphasis h-12 flex items-center p-2'>
         <span className='font-semibold text-ellipsis whitespace-nowrap overflow-hidden text-xl'>
-          { link?.getName() }
+          {link?.getName()}
         </span>
         <MoreVert className='ml-auto' />
       </div>
@@ -96,14 +96,14 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         <div className='w-full flex items-center flex-col gap-2 px-2'>
           <FreeToUse />
           <Available />
-          <div className='w-full flex justify-between br-red-100'>
-            <MSpan size='lg' weight='semibold'>
+          <div className='w-full flex justify-between'>
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               <TollOutlined />
               Current:
             </MSpan>
             &nbsp;
-            <MSpan size='lg' weight='semibold'>
-              { balance?.getCurrentString() }
+            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+              {balance?.getCurrentString()}
             </MSpan>
           </div>
         </div>
@@ -122,16 +122,16 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               Expenses
             </MSpan>
             <MBadge className='ml-auto'>
-              { balance?.getExpensesString() }
+              {balance?.getExpensesString()}
             </MBadge>
           </NavigationItem>
-          <NavigationItem  to={ `/bank/${bankAccount?.bankAccountId}/goals` }>
+          <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/goals` }>
             <SavingsOutlined />
             <MSpan ellipsis variant='inherit'>
               Goals
             </MSpan>
             <MBadge className='ml-auto'>
-              { balance?.getGoalsString() }
+              {balance?.getGoalsString()}
             </MBadge>
           </NavigationItem>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/funding` }>
@@ -191,7 +191,7 @@ function NextFundingBadge(): JSX.Element {
 
   return (
     <MBadge className='ml-auto'>
-      { next }
+      {next}
     </MBadge>
   );
 }
