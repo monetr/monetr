@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import AfterEmailVerificationSent from 'components/Authentication/AfterEmailVerificationSent';
 import MFormButton from 'components/MButton';
 import MCaptcha from 'components/MCaptcha';
 import MForm from 'components/MForm';
@@ -33,7 +32,7 @@ export default function ResendVerificationPage(): JSX.Element {
 
   async function resendVerification(values: ResendValues): Promise<void> {
     return request().post('/authentication/verify/resend', {
-      email: values.captcha,
+      email: values.email,
       captcha: values.captcha,
     })
       .then(() => setDone(true))
@@ -117,3 +116,19 @@ export default function ResendVerificationPage(): JSX.Element {
     </MForm>
   );
 };
+
+export function AfterEmailVerificationSent(): JSX.Element {
+  return (
+    <div className='h-full w-full flex flex-col items-center justify-center'>
+      <div className='flex flex-col gap-2 max-w-xs items-center'>
+        <MLogo className='h-24 w-24' />
+        <MSpan className='text-center' size='lg'>
+          A new verification link was sent to your email address...
+        </MSpan>
+        <div className="mt-1 flex justify-center gap-1">
+          <MLink to="/login" size="sm" data-testid='login-signup'>Return to login</MLink>
+        </div>
+      </div>
+    </div>
+  );
+}
