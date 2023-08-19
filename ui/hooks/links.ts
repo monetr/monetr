@@ -16,7 +16,7 @@ export function useLinksSink(): LinksResult {
   const { result: { user } } = useAuthenticationSink();
   const result = useQuery<Array<Partial<Link>>>(
     ['/links'], {
-      // Only request links if there is an authenticated user.
+    // Only request links if there is an authenticated user.
       enabled: !!user,
     });
   return {
@@ -81,7 +81,7 @@ export function useTriggerManualSync(): (_linkId: number) => Promise<void> {
 
       }))
       .catch(error => void enqueueSnackbar(
-        `Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`, 
+        `Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`,
         {
           variant: 'error',
           disableWindowBlurListener: true,
