@@ -32,7 +32,6 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   }
 
   const className = mergeTailwind(
-    // 'hidden lg:w-72 h-full flex-none lg:flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center',
     'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center',
     props.className,
   );
@@ -42,7 +41,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       case 'checking':
       case 'savings':
         return (
-          <div className='w-full flex justify-between'>
+          <div className='flex w-full justify-between'>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               <AccountBalanceWalletOutlined />
               Free-To-Use:
@@ -63,7 +62,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
       case 'checking':
       case 'savings':
         return (
-          <div className='w-full flex justify-between'>
+          <div className='flex w-full justify-between'>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               <LocalAtmOutlined />
               Available:
@@ -80,23 +79,24 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   }
 
 
+
   return (
     <div className={ className }>
-      <div className='w-full dark:hover:bg-dark-monetr-background-emphasis dark:text-dark-monetr-content-emphasis h-12 flex items-center p-2'>
-        <span className='font-semibold text-ellipsis whitespace-nowrap overflow-hidden text-xl'>
+      <div className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis dark:hover:bg-dark-monetr-background-emphasis'>
+        <span className='truncate text-xl font-semibold'>
           {link?.getName()}
         </span>
         <MoreVert className='ml-auto' />
       </div>
       <MDivider className='w-1/2' />
-      <div className='h-full flex flex-col gap-4 px-2 py-4 w-full items-center'>
+      <div className='flex h-full w-full flex-col items-center gap-4 px-2 py-4'>
         <MSelectAccount />
         <MDivider className='w-1/2' />
 
-        <div className='w-full flex items-center flex-col gap-2 px-2'>
+        <div className='flex w-full flex-col items-center gap-2 px-2'>
           <FreeToUse />
           <Available />
-          <div className='w-full flex justify-between'>
+          <div className='flex w-full justify-between'>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               <TollOutlined />
               Current:
@@ -109,7 +109,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         </div>
         <MDivider className='w-1/2' />
 
-        <div className='h-full w-full flex flex-col gap-2 overflow-y-auto'>
+        <div className='flex h-full w-full flex-col gap-2 overflow-y-auto'>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/transactions` }>
             <ShoppingCartOutlined />
             <MSpan ellipsis variant='inherit'>
