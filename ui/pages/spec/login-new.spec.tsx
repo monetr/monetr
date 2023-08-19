@@ -6,7 +6,7 @@ import LoginNew from 'pages/login-new';
 import testRenderer from 'testutils/renderer';
 import { server } from 'testutils/server';
 
-const mockUseNavigate = jest.fn((_url: string) => {});
+const mockUseNavigate = jest.fn((_url: string) => { });
 jest.mock('react-router-dom', () => ({
   __esModule: true,
   ...jest.requireActual('react-router-dom'),
@@ -109,5 +109,41 @@ describe('login page', () => {
 
     // When we login we should be redirected to this route.
     await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/'));
+  });
+
+  it('will submit login and require subscription', async () => {
+    server.use(
+      rest.get('/api/config', (_req, res, ctx) => {
+        return res(ctx.json({
+          allowForgotPassword: false,
+          allowSignUp: false,
+          verifyLogin: false,
+        }));
+      }),
+      rest.post('/api/authentication/login', (_req, res, ctx) => {
+        return res(ctx.json({
+          isActive: false,
+          nextUrl: '/account/subscribe',
+        }));
+      }),
+    );
+
+    const world = testRenderer(<LoginNew />, { initialRoute: '/login' });
+
+    await waitFor(() => expect(world.getByTestId('login-email')).toBeVisible());
+    await waitFor(() => expect(world.getByTestId('login-password')).toBeVisible());
+    await waitFor(() => expect(world.getByTestId('login-submit')).toBeVisible());
+
+    await waitFor(() => expect(world.queryByTestId('login-forgot')).not.toBeInTheDocument());
+    await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
+
+    act(() => {
+      fireEvent.change(world.getByTestId('login-email'), { target: { value: 'test@test.com' } });
+      fireEvent.change(world.getByTestId('login-password'), { target: { value: 'password' } });
+      world.getByTestId('login-submit').click();
+    });
+
+    // When we login we should be redirected to the subscribe page
+    await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/account/subscribe'));
   });
 });

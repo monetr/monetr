@@ -11,7 +11,7 @@ export default function MSelectAccount(): JSX.Element {
   const theme = useTheme();
   const navigate = useNavigate();
   const { result: allBankAccounts } = useBankAccountsSink();
-  const { result: selectedBankAccount } = useSelectedBankAccount();
+  const { data: selectedBankAccount } = useSelectedBankAccount();
 
   const accounts = Array.from(allBankAccounts.values())
     .filter(account => account.linkId === selectedBankAccount?.linkId)

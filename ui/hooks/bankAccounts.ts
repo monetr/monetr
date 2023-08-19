@@ -33,11 +33,7 @@ export interface SelectedBankAccountResult {
   bankAccount: BankAccount | null;
 }
 
-export type CurrentBankAccountResult =
-  { result: BankAccount | null }
-  & UseQueryResult<Partial<BankAccount>>;
-
-export function useSelectedBankAccount(): CurrentBankAccountResult {
+export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined> {
   const match = useMatch('/bank/:bankId/*');
   const bankAccountId = +match?.params?.bankId || null;
 
@@ -46,22 +42,17 @@ export function useSelectedBankAccount(): CurrentBankAccountResult {
     throw Error(`invalid bank account ID specified: "${match?.params?.bankId}" is not a valid bank account ID`);
   }
 
-  const result = useQuery<Partial<BankAccount>>(
-    [`/bank_accounts/${ bankAccountId }`],
+  return useQuery<Partial<BankAccount>, unknown, BankAccount | undefined>(
+    [`/bank_accounts/${bankAccountId}`],
     {
       enabled: !!bankAccountId, // Only request if we have a valid numeric bank account ID to work with.
+      select: data => !!data && new BankAccount(data),
     }
   );
-
-  return {
-    ...result,
-    result: !!result.data ? new BankAccount(result.data) : null,
-  };
 }
 
-export function useSelectedBankAccountId(): number | null {
-  const { result: bankAccount } = useSelectedBankAccount();
-
-  return bankAccount?.bankAccountId || null;
+export function useSelectedBankAccountId(): number | undefined {
+  const { data: bankAccount } = useSelectedBankAccount();
+  return bankAccount?.bankAccountId;
 }
 

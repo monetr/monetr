@@ -83,7 +83,7 @@
         "vars": "all",
         "varsIgnorePattern": "^(React|_+)$",
         "args": "after-used",
-        "argsIgnorePattern": "^(state|_+)$"
+        "argsIgnorePattern": "^(state|_+|_.+|_)$"
       }
     ],
     "space-before-blocks": 2,
