@@ -8,34 +8,28 @@ import { useBankAccounts } from 'hooks/bankAccounts';
 import Link from 'models/Link';
 import request from 'util/request';
 
-export type LinksResult =
-  { result: Map<number, Link> }
-  & UseQueryResult<Array<Partial<Link>>>;
-
-export function useLinksSink(): LinksResult {
-  const { result: { user } } = useAuthenticationSink();
-  const result = useQuery<Array<Partial<Link>>>(
+export function useLinksSink(): UseQueryResult<Array<Link>> {
+  const { result: { user, isActive } } = useAuthenticationSink();
+  return useQuery<Array<Partial<Link>>, unknown, Array<Link>>(
     ['/links'], {
     // Only request links if there is an authenticated user.
-      enabled: !!user,
+      enabled: !!user && isActive,
+      placeholderData: [],
+      select: data => {
+        if (Array.isArray(data)) {
+          return data.map(item => new Link(item));
+        }
+
+        return [];
+      },
     });
-  return {
-    ...result,
-    result: new Map((result?.data || []).map(item => {
-      const link = new Link(item);
-      return [link.linkId, link];
-    })),
-  };
 }
 
-export function useLinks(): Map<number, Link> {
-  const { result } = useLinksSink();
-  return result;
-}
-
+/**
+ * @deprecated 
+ */
 export function useLink(linkId: number): Link | null {
-  const links = useLinks();
-  return links.get(linkId) || null;
+  return null;
 }
 
 export function useRemoveLink(): (_linkId: number) => Promise<void> {

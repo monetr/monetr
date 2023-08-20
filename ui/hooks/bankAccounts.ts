@@ -1,7 +1,7 @@
 import { useMatch } from 'react-router-dom';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
-import { useLinks } from 'hooks/links';
+import { useLinksSink } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
 
 export type BankAccountsResult =
@@ -9,9 +9,9 @@ export type BankAccountsResult =
   & UseQueryResult<Array<Partial<BankAccount>>>;
 
 export function useBankAccountsSink(): BankAccountsResult {
-  const links = useLinks();
+  const { data: links } = useLinksSink();
   const result = useQuery<Array<Partial<BankAccount>>>(['/bank_accounts'], {
-    enabled: !!links && links.size > 0,
+    enabled: !!links && links.length > 0,
   });
   return {
     ...result,

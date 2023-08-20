@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography } from '@mui/material';
 
 import { Logo } from 'assets';
 import { useAfterCheckout } from 'hooks/useAuthentication';
-import useMountEffect from 'hooks/useMountEffect';
 
 export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();
@@ -30,7 +29,22 @@ export default function AfterCheckoutPage(): JSX.Element {
   }
 
   // As soon as the component mounts, call setup from checkout to get the subscription sorted out.
-  useMountEffect(() => void setupFromCheckout());
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    const checkoutSessionId = params.get('session');
+    afterCheckout(checkoutSessionId)
+      .then(result => {
+        // If the user's subscription is now active then redirect them to the main view of the authenticated
+        // application.
+        if (result.isActive) {
+          return navigate('/');
+        }
+
+        // Otherwise, dispaly the message from the result of the afterCheckout call.
+        alert(result?.message || 'Subscription is not active');
+      })
+      .catch(() => alert('Unable to determine your subscription state, please contact support@monetr.app'));
+  }, [search, afterCheckout, navigate]);
 
   return (
     <div className="flex items-center justify-center w-full h-full max-h-full">

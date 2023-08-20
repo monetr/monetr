@@ -37,7 +37,7 @@ export default function Monetr(): JSX.Element {
     isError: configIsError,
   } = useAppConfigurationSink();
   const { isLoading: authIsLoading, result: { user, isActive } } = useAuthenticationSink();
-  const { isLoading: linksIsLoading, isFetching: linksIsFetching, result: links } = useLinksSink();
+  const { isLoading: linksIsLoading, isFetching: linksIsFetching, data: links } = useLinksSink();
   const isAuthenticated = !!user;
   // If the config or authentication is loading just show a loading page.
   if (configIsLoading || authIsLoading || (linksIsLoading && linksIsFetching)) {
@@ -76,13 +76,14 @@ export default function Monetr(): JSX.Element {
     );
   }
 
-  const hasAnyLinks = links.size > 0;
+  const hasAnyLinks = links.length > 0;
   if (!hasAnyLinks) {
     return (
       <Routes>
         <Route path="/logout" element={ <LogoutPage /> } />
         <Route path="/setup" element={ <SetupPage /> } />
         <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
+        <Route path="/account/subscribe/after" element={ <Navigate replace to="/setup" /> } />
         <Route index path="/" element={ <Navigate replace to="/setup" /> } />
       </Routes>
     );
@@ -127,16 +128,16 @@ function BudgetingLayout(): JSX.Element {
 }
 
 function RedirectToBank(): JSX.Element {
-  const { result: links, isLoading: linksIsLoading } = useLinksSink();
+  const { data: links, isLoading: linksIsLoading } = useLinksSink();
   const { result: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccountsSink();
   if (linksIsLoading || bankAccountsIsLoading) {
     return null;
   }
-  if (links.size === 0) {
+  if (links.length === 0) {
     return null;
   }
 
-  const link = Array.from(links.values())[0];
+  const link = links[0];
   const accounts = Array.from(bankAccounts.values())
     .filter(account => account.linkId === link.linkId)
     .sort((a, b) => {
