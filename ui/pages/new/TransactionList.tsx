@@ -28,6 +28,11 @@ export default function TransactionList(): JSX.Element {
     rootMargin: '0px 0px 0px 0px',
   });
 
+  // Uncomment this to make it so that transaction data is removed from memory upon navigating away.
+  // useEffect(() => {
+  //   return remove;
+  // }, [remove]);
+
   function TransactionItems() {
     interface TransactionGroup {
       transactions: Array<Transaction>;

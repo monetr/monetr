@@ -21,7 +21,7 @@ const MModal = React.forwardRef<MModalRef, MModalProps>((props, ref) => {
 
   const classNames = mergeTailwind(
     'dark:bg-dark-monetr-background',
-    'overflow-hidden',
+    'overflow-auto',
     'p-2',
     'relative',
     'rounded-none',

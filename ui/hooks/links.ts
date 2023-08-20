@@ -14,7 +14,6 @@ export function useLinks(): UseQueryResult<Array<Link>> {
     ['/links'], {
     // Only request links if there is an authenticated user.
       enabled: !!user && isActive,
-      placeholderData: [],
       select: data => {
         if (Array.isArray(data)) {
           return data.map(item => new Link(item));
@@ -25,11 +24,12 @@ export function useLinks(): UseQueryResult<Array<Link>> {
     });
 }
 
-export function useLink(linkId: number): UseQueryResult<Link> {
+export function useLink(linkId: number | null): UseQueryResult<Link> {
   const queryClient = useQueryClient();
   return useQuery<Partial<Link>, unknown, Link>(
     [`/links/${linkId}`],
     {
+      enabled: !!linkId,
       select: data => new Link(data),
       initialData: () => queryClient
         .getQueryData<Array<Link>>(['/links'])

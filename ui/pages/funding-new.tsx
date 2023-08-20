@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { AddOutlined, TodayOutlined } from '@mui/icons-material';
+import { AccountBalance, AddOutlined, ArrowForward, Today, TodayOutlined } from '@mui/icons-material';
 
 import FundingItem from './new/FundingItem';
 import { showNewFundingModal } from './new/NewFundingModal';
@@ -20,6 +20,40 @@ export default function FundingNew(): JSX.Element {
     return <MSpan>Error...</MSpan>;
   }
 
+  function EmptyState(): JSX.Element {
+    return (
+      <div className='w-full h-full flex justify-center items-center'>
+        <div className='flex flex-col gap-2 items-center max-w-md'>
+          <div className='w-full flex justify-center space-x-4'>
+            <Today className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+            <ArrowForward className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+            <AccountBalance className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+          </div>
+          <MSpan size='xl' variant='light' className='text-center'>
+            You don't have any funding schedules yet...
+          </MSpan>
+          <MSpan size='lg' variant='light' className='text-center'>
+            Funding schedules tell monetr when to allocate funds towards your expenses and goals.
+          </MSpan>
+        </div>
+      </div>
+    );
+  }
+
+  function ListContent(): JSX.Element {
+    if (funding.length === 0) {
+      return <EmptyState />;
+    }
+
+    return (
+      <ul className='w-full flex flex-col gap-2 py-2'>
+        { funding
+          ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+          .map(item => (<FundingItem funding={ item } key={ item.fundingScheduleId } />)) }
+      </ul>
+    );
+  }
+
   return (
     <Fragment>
       <div className='w-full h-12 flex items-center px-4 gap-4 justify-between'>
@@ -36,11 +70,7 @@ export default function FundingNew(): JSX.Element {
         </MBaseButton>
       </div>
       <div className='w-full h-full overflow-y-auto min-w-0'>
-        <ul className='w-full flex flex-col gap-2 py-2'>
-          { funding
-            ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-            .map(item => (<FundingItem funding={ item } key={ item.fundingScheduleId } />)) }
-        </ul>
+        <ListContent />
       </div>
     </Fragment>
   );

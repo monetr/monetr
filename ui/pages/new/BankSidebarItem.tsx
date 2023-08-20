@@ -19,8 +19,8 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;
 
-  const destinationBankAccountId = Array.from(bankAccounts.values())
-    .find(bankAccount => bankAccount.linkId === link.linkId);
+  const destinationBankAccountId = bankAccounts
+    ?.find(bankAccount => bankAccount.linkId === link.linkId);
 
   const InstitutionLogo = () => {
     if (!institution?.logo) return <AccountBalance color='info' />;

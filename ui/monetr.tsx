@@ -37,10 +37,10 @@ export default function Monetr(): JSX.Element {
     isError: configIsError,
   } = useAppConfigurationSink();
   const { isLoading: authIsLoading, result: { user, isActive } } = useAuthenticationSink();
-  const { isLoading: linksIsLoading, isFetching: linksIsFetching, data: links } = useLinks();
+  const { isLoading: linksIsLoading, data: links } = useLinks();
   const isAuthenticated = !!user;
   // If the config or authentication is loading just show a loading page.
-  if (configIsLoading || authIsLoading || (linksIsLoading && linksIsFetching)) {
+  if (configIsLoading || authIsLoading || linksIsLoading) {
     return <Loading />;
   }
 
