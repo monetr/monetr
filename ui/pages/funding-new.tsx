@@ -29,10 +29,10 @@ export default function FundingNew(): JSX.Element {
             <ArrowForward className='h-full text-5xl dark:text-dark-monetr-content-muted' />
             <AccountBalance className='h-full text-5xl dark:text-dark-monetr-content-muted' />
           </div>
-          <MSpan size='xl' variant='light' className='text-center'>
+          <MSpan size='xl' color='subtle' className='text-center'>
             You don't have any funding schedules yet...
           </MSpan>
-          <MSpan size='lg' variant='light' className='text-center'>
+          <MSpan size='lg' color='subtle' className='text-center'>
             Funding schedules tell monetr when to allocate funds towards your expenses and goals.
           </MSpan>
         </div>

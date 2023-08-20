@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined } from '@mui/icons-material';
 
 import ExpenseTimeline from './ExpenseTimeline';
@@ -25,6 +25,7 @@ interface ExpenseValues {
 }
 
 export default function ExpenseDetails(): JSX.Element {
+  const navigate = useNavigate();
   const { spendingId } = useParams();
 
   const spending = useSpending(spendingId && +spendingId);
@@ -81,9 +82,13 @@ export default function ExpenseDetails(): JSX.Element {
           </span>
         </div>
         <div className='flex gap-2'>
-          <MBaseButton color='cancel' className='gap-1 py-1 px-2'>
+          <MBaseButton
+            color='cancel'
+            className='gap-1 py-1 px-2'
+            onClick={ () => navigate(`/bank/${spending.bankAccountId}/expenses`) }
+          >
             <ArrowBackOutlined />
-          Cancel
+            Cancel
           </MBaseButton>
           <MBaseButton color='primary' className='gap-1 py-1 px-2'>
             <SaveOutlined />

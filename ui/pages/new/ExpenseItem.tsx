@@ -33,8 +33,12 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
   }
 
   return (
-    <li className='w-full px-2'>
-      <div className='w-full flex rounded-lg hover:bg-zinc-600 group gap-2 items-center px-2 py-1 cursor-pointer md:cursor-auto'>
+    <li className='group relative w-full px-1 md:px-2'>
+      <div
+        className='absolute left-0 top-0 flex h-full w-full cursor-pointer md:hidden md:cursor-auto'
+        onClick={ openDetails }
+      />
+      <div className='w-full flex rounded-lg group-hover:bg-zinc-600 gap-2 items-center px-2 py-1 cursor-pointer md:cursor-auto'>
         <div className='flex items-center flex-1 w-full md:w-1/2 gap-4 min-w-0 pr-1'>
           <MerchantIcon name={ spending.name } />
           <div className='flex flex-col overflow-hidden min-w-0'>
@@ -82,7 +86,10 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
               </span>
             </div>
           </div>
-          <KeyboardArrowRight className='text-zinc-600 group-hover:text-zinc-50 flex-none md:cursor-pointer' onClick={ openDetails } />
+          <KeyboardArrowRight
+            className='flex-none dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis md:cursor-pointer'
+            onClick={ openDetails }
+          />
         </div>
       </div>
     </li>

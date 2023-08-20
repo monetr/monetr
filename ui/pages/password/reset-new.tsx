@@ -117,7 +117,7 @@ export default function PasswordResetNew(): JSX.Element {
         </MFormButton>
       </div>
       <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-        <MSpan variant="light" className='text-sm'>Remembered your password?</MSpan>
+        <MSpan color="subtle" className='text-sm'>Remembered your password?</MSpan>
         <MLink to="/login" size="sm">Sign in</MLink>
       </div>
     </MForm>

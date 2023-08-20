@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata, PlaidLinkOptionsWithLinkToken, usePlaidLink } from 'react-plaid-link';
-import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, EditOutlined, LinkOutlined } from '@mui/icons-material';
 import * as Sentry from '@sentry/react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { MBaseButton } from 'components/MButton';
 import MLink from 'components/MLink';
@@ -53,7 +53,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         <MSpan className='text-2xl font-medium'>
           Welcome to monetr!
         </MSpan>
-        <MSpan className='text-lg' variant='light'>
+        <MSpan className='text-lg' color='subtle'>
           Before we get started, please select how you would like to continue.
         </MSpan>
       </div>
@@ -82,7 +82,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         Continue
       </MBaseButton>
       <div className='flex justify-center gap-1'>
-        <MSpan variant="light" className='text-sm'>Not ready to continue?</MSpan>
+        <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
         <MLink to="/logout" size="sm">Logout for now</MLink>
       </div>
     </div>
@@ -159,7 +159,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
         <MSpan className='text-lg font-medium'>
           { props.name }
         </MSpan>
-        <MSpan variant='light'>
+        <MSpan color='subtle'>
           { props.description }
         </MSpan>
         { !props.comingSoon && <MSpan>&nbsp;</MSpan>}
@@ -335,7 +335,7 @@ function Plaid(props: PlaidProps): JSX.Element {
       <MSpan className='text-2xl font-medium'>
         Getting Plaid Ready!
       </MSpan>
-      <MSpan className='text-lg' variant='light'>
+      <MSpan className='text-lg' color='subtle'>
         One moment while we prepare your connection with Plaid.
       </MSpan>
     </div>
@@ -347,7 +347,7 @@ function Plaid(props: PlaidProps): JSX.Element {
         <MSpan className='text-2xl font-medium'>
           Successfully connected with Plaid!
         </MSpan>
-        <MSpan className='text-lg' variant='light'>
+        <MSpan className='text-lg' color='subtle'>
           Hold on a moment while we pull the initial data from Plaid into monetr.
         </MSpan>
       </div>
@@ -368,10 +368,10 @@ function Plaid(props: PlaidProps): JSX.Element {
         <MSpan className='text-2xl font-medium'>
           Something isn't quite right
         </MSpan>
-        <MSpan className='text-lg' variant='light'>
+        <MSpan className='text-lg' color='subtle'>
           We were not able to get Plaid ready for you at this time, please try again shortly.
         </MSpan>
-        <MSpan className='text-lg' variant='light'>
+        <MSpan className='text-lg' color='subtle'>
           If the problem continues, please contact support@monetr.app
         </MSpan>
       </div>
@@ -384,7 +384,7 @@ function Plaid(props: PlaidProps): JSX.Element {
         <MSpan className='text-2xl font-medium'>
           Something isn't quite right
         </MSpan>
-        <MSpan className='text-lg' variant='light'>
+        <MSpan className='text-lg' color='subtle'>
           Plaid exited, did you want to set it up later?
         </MSpan>
       </div>
@@ -396,7 +396,7 @@ function Plaid(props: PlaidProps): JSX.Element {
       <MLogo className='w-24 h-24' />
       { inner }
       <div className='flex justify-center gap-1'>
-        <MSpan variant="light" className='text-sm'>Not ready to continue?</MSpan>
+        <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
         <MLink to="/logout" size="sm">Logout for now</MLink>
       </div>
     </div>

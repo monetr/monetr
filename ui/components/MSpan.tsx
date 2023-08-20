@@ -3,7 +3,7 @@ import React from 'react';
 import mergeTailwind from 'util/mergeTailwind';
 
 export interface MSpanProps {
-  variant?: 'normal' | 'light' | 'inherit';
+  color?: 'default' | 'muted' | 'subtle' | 'emphasis' | 'inherit';
   children: string | React.ReactNode | JSX.Element;
   ellipsis?: boolean;
   className?: string;
@@ -13,7 +13,7 @@ export interface MSpanProps {
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
-  variant: 'normal',
+  color: 'default',
   size: 'inherit',
 };
 
@@ -26,20 +26,28 @@ export default function MSpan(props: MSpanProps): JSX.Element {
   const classNames = mergeTailwind(
     'flex gap-2 items-center',
     {
-      'light': [
+      'default': [
+        'dark:text-dark-monetr-content',
+        'text-monetr-content',
+      ],
+      'muted': [
+        'dark:text-dark-monetr-content-muted',
+        'text-monetr-content-muted',
+      ],
+      'subtle': [
         'dark:text-dark-monetr-content-subtle',
         'text-monetr-content-subtle',
       ],
-      'normal': [
-        'dark:text-dark-monetr-content',
-        'text-monetr-content',
+      'emphasis': [
+        'dark:text-dark-monetr-content-emphasis',
+        'text-monetr-content-emphasis',
       ],
       'inherit': [
         'text-inherit',
       ],
-    }[props.variant],
+    }[props.color],
     {
-      'text-ellipsis overflow-hidden whitespace-nowrap min-w-0': props.ellipsis,
+      'block text-ellipsis min-w-0 truncate w-full': props.ellipsis,
     },
     {
       'inherit': 'text-size-inherit',

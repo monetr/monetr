@@ -109,7 +109,7 @@ export default function ResendVerificationPage(): JSX.Element {
           Resend Verification
         </MFormButton>
         <div className="mt-1 flex justify-center gap-1">
-          <MSpan variant="light" className='text-sm'>Don't need to resend?</MSpan>
+          <MSpan color="subtle" className='text-sm'>Don't need to resend?</MSpan>
           <MLink to="/login" size="sm" data-testid='login-signup'>Return to login</MLink>
         </div>
       </div>

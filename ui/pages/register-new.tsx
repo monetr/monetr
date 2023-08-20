@@ -175,7 +175,7 @@ export default function RegisterNew(): JSX.Element {
         <MSpan className='text-5xl'>
           Get Started
         </MSpan>
-        <MSpan variant="light" className='text-lg'>
+        <MSpan color="subtle" className='text-lg'>
           Create your monetr account now
         </MSpan>
       </div>
@@ -266,7 +266,7 @@ export default function RegisterNew(): JSX.Element {
         </MFormButton>
       </div>
       <div className={ `${breakpoints} mt-1 flex justify-center gap-1 flex-col md:flex-row items-center` }>
-        <MSpan variant="light" className='text-sm'>Already have an account?</MSpan>
+        <MSpan color="subtle" className='text-sm'>Already have an account?</MSpan>
         <MLink to="/login" size="sm">Sign in instead</MLink>
       </div>
     </MForm>
