@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowBackOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined } from '@mui/icons-material';
+import { ArrowBackOutlined, DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined } from '@mui/icons-material';
 
 import ExpenseTimeline from './ExpenseTimeline';
 
@@ -13,7 +13,8 @@ import MSelectFunding from 'components/MSelectFunding';
 import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
-import { useSpending } from 'hooks/spending';
+import { useRemoveSpending, useSpending } from 'hooks/spending';
+import { SpendingType } from 'models/Spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
 
 interface ExpenseValues {
@@ -25,10 +26,11 @@ interface ExpenseValues {
 }
 
 export default function ExpenseDetails(): JSX.Element {
+  const removeSpending = useRemoveSpending();
   const navigate = useNavigate();
   const { spendingId } = useParams();
 
-  const spending = useSpending(spendingId && +spendingId);
+  const { data: spending, isLoading, isError } = useSpending(spendingId && +spendingId);
 
   if (!spendingId) {
     return (
@@ -44,8 +46,63 @@ export default function ExpenseDetails(): JSX.Element {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <MSpan className='text-5xl'>
+          One moment...
+        </MSpan>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <MSpan className='text-5xl'>
+          Something isn't right...
+        </MSpan>
+        <MSpan className='text-2xl'>
+          Couldn't find the expense you specified...
+        </MSpan>
+      </div>
+    );
+  }
+
   if (!spending) {
     return null;
+  }
+
+  if (spending.spendingType !== SpendingType.Expense) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <MSpan className='text-5xl'>
+          Something isn't right...
+        </MSpan>
+        <MSpan className='text-2xl'>
+          This spending object is not an expense...
+        </MSpan>
+      </div>
+    );
+  }
+
+  function backToExpenses() {
+    navigate(`/bank/${spending.bankAccountId}/expenses`);
+  }
+
+  async function deleteExpense(): Promise<void> {
+    if (!spending) {
+      return Promise.resolve();
+    }
+
+    if (window.confirm(`Are you sure you want to delete expense: ${ spending.name }`)) {
+      return removeSpending(spending.spendingId)
+        .then(() => backToExpenses());
+    }
+
+    return Promise.resolve();
   }
 
   function submit() {
@@ -83,12 +140,20 @@ export default function ExpenseDetails(): JSX.Element {
         </div>
         <div className='flex gap-2'>
           <MBaseButton
-            color='cancel'
+            color='secondary'
             className='gap-1 py-1 px-2'
-            onClick={ () => navigate(`/bank/${spending.bankAccountId}/expenses`) }
+            onClick={ backToExpenses }
           >
             <ArrowBackOutlined />
             Cancel
+          </MBaseButton>
+          <MBaseButton
+            color='cancel'
+            className='gap-1 py-1 px-2'
+            onClick={ deleteExpense }
+          >
+            <DeleteOutlined />
+            Remove
           </MBaseButton>
           <MBaseButton color='primary' className='gap-1 py-1 px-2'>
             <SaveOutlined />

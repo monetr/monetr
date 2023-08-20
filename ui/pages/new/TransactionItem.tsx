@@ -5,7 +5,7 @@ import { KeyboardArrowRight } from '@mui/icons-material';
 
 import TransactionMerchantIcon from './TransactionMerchantIcon';
 
-import { useSpending } from 'hooks/spending';
+import { useSpendingOld } from 'hooks/spending';
 import Transaction from 'models/Transaction';
 import mergeTailwind from 'util/mergeTailwind';
 
@@ -14,7 +14,7 @@ export interface TransactionItemProps {
 }
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
-  const spending = useSpending(transaction.spendingId);
+  const spending = useSpendingOld(transaction.spendingId);
   const navigate = useNavigate();
 
   const amountClassnames = mergeTailwind(

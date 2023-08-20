@@ -6,7 +6,7 @@ import classnames from 'classnames';
 import { showEditTransactionMobileDialog } from './EditTransactionDialog.mobile';
 
 import TransactionIcon from 'components/Transactions/components/TransactionIcon';
-import { useSpending } from 'hooks/spending';
+import { useSpendingOld } from 'hooks/spending';
 import Transaction from 'models/Transaction';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export default function TransactionItemMobile(props: Props): JSX.Element {
-  const spending = useSpending(props.transaction.spendingId);
+  const spending = useSpendingOld(props.transaction.spendingId);
 
   function SpentFromLine(): JSX.Element {
     if (props.transaction.getIsAddition()) {

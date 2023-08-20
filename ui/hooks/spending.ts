@@ -25,11 +25,22 @@ export function useSpendingSink(): SpendingResult {
   };
 }
 
+export function useSpending(spendingId: number | null): UseQueryResult<Spending> {
+  const selectedBankAccountId = useSelectedBankAccountId();
+  return useQuery<Partial<Spending>, unknown, Spending>(
+    [`/bank_accounts/${ selectedBankAccountId }/spending/${spendingId}`],
+    {
+      enabled: !!selectedBankAccountId,
+      select: data => new Spending(data),
+    },
+  );
+}
+
 /**
  * useSpending retrieves a single spending item that would have been returned from the index endpoint for the currently
  * selected bank account.
  */
-export function useSpending(spendingId?: number): Spending | null {
+export function useSpendingOld(spendingId?: number): Spending | null {
   const { result } = useSpendingSink();
   if (!spendingId) {
     return null;
