@@ -10,11 +10,11 @@ import './MSelectAccount.scss';
 export default function MSelectAccount(): JSX.Element {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data: allBankAccounts } = useBankAccounts();
-  const { data: selectedBankAccount } = useSelectedBankAccount();
+  const { data: allBankAccounts, isLoading: allIsLoading } = useBankAccounts();
+  const { data: selectedBankAccount, isLoading: selectedIsLoading } = useSelectedBankAccount();
 
-  const accounts = Array.from(allBankAccounts.values())
-    .filter(account => account.linkId === selectedBankAccount?.linkId)
+  const accounts = allBankAccounts
+    ?.filter(account => account.linkId === selectedBankAccount?.linkId)
     .sort((a, b) => {
       const items = [a, b];
       const values = [
@@ -45,7 +45,7 @@ export default function MSelectAccount(): JSX.Element {
       mask: account.mask,
     }));
 
-  const current = accounts.find(account => account.value === selectedBankAccount?.bankAccountId);
+  const current = accounts?.find(account => account.value === selectedBankAccount?.bankAccountId);
 
   function onChange({ value }: { value: number }) {
     navigate(`/bank/${value}/transactions`);
@@ -78,6 +78,7 @@ export default function MSelectAccount(): JSX.Element {
       value={ current }
       className="w-full font-medium"
       classNamePrefix='m-select-account'
+      isLoading={ allIsLoading || selectedIsLoading }
       styles={ {
         option: (base: object) => ({
           ...base,

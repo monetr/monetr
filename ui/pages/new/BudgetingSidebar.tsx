@@ -23,18 +23,19 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   const { data: link } = useLink(bankAccount?.linkId);
   const balance = useCurrentBalance();
 
-  if (isLoading) {
-    return null;
-  }
-
-  if (isError) {
-    return null;
-  }
 
   const className = mergeTailwind(
     'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center',
     props.className,
   );
+
+  // if (isLoading) {
+  //   return null;
+  // }
+
+  if (isError) {
+    return null;
+  }
 
   function FreeToUse(): JSX.Element {
     switch (bankAccount?.accountSubType) {
