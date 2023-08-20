@@ -131,27 +131,25 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 
 	spending.LastRecurrence = nil
 
-	var next time.Time
+	// Once we know that the next recurrence is not in the past we can just store it here;
+	// itll be sanitized and converted to midnight below.
+	next := spending.NextRecurrence
+	if next.Before(time.Now()) {
+		requestSpan.Status = sentry.SpanStatusInvalidArgument
+		return c.badRequest(ctx, "next due date cannot be in the past")
+	}
 
 	switch spending.SpendingType {
 	case models.SpendingTypeExpense:
-		next = spending.NextRecurrence
-		// Once we know that the next recurrence is not in the past we can just store it here;
-		// itll be sanitized and converted to midnight below.
-		if next.Before(time.Now()) {
+		if spending.RecurrenceRule == nil {
 			requestSpan.Status = sentry.SpanStatusInvalidArgument
-			return c.badRequest(ctx, "next due date cannot be inthe past")
+			return c.badRequest(ctx, "recurrence rule must be specified for expenses")
 		}
 	case models.SpendingTypeGoal:
-		// If the spending is a goal, then we don't need the rule at all.
-		next = spending.NextRecurrence
-		if next.Before(time.Now()) {
+		if spending.RecurrenceRule != nil {
 			requestSpan.Status = sentry.SpanStatusInvalidArgument
-			return c.badRequest(ctx, "due date cannot be in the past")
+			return c.badRequest(ctx, "recurrence rule cannot be specified for goals")
 		}
-
-		// Goals do not recur.
-		spending.RecurrenceRule = nil
 	}
 
 	// Make sure that the next recurrence date is properly in the user's timezone.

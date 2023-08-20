@@ -276,16 +276,24 @@ release-asset:
 	$(GH) release upload $(RELEASE_VERSION) $(BINARY_TAR) --clobber
 endif
 
+
 TEST_FLAGS=-race -v -parallel 8
-test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
+$(COVERAGE_TXT): $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(call infoMsg,Running go tests for monetr REST API)
 	$(GO) run $(MONETR_CLI_PACKAGE) database migrate -d $(POSTGRES_DB) -U $(POSTGRES_USER) -H $(POSTGRES_HOST)
 	$(GOTESTSUM) --junitfile $(PWD)/rest-api-junit.xml \
 		--jsonfile $(PWD)/rest-api-tests.json \
 		--format testname -- $(TEST_FLAGS) \
-		-coverprofile=$(COVERAGE_TXT) \
+		-coverpkg=./... \
+		-coverprofile=$(COVERAGE_TXT).tmp \
 		-covermode=atomic $(GO_SRC_DIR)/...
+	cat $(COVERAGE_TXT).tmp | grep -v "mockgen" > $(COVERAGE_TXT) && rm $(COVERAGE_TXT).tmp
 	$(GO) tool cover -func=$(COVERAGE_TXT)
+
+test-go: $(COVERAGE_TXT)
+
+coverage-go: $(COVERAGE_TXT)
+	$(GO) tool cover -html=$(COVERAGE_TXT)
 
 ifdef CI
 EXTRA_JEST_TEST=--reporters='github-actions'
