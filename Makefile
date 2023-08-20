@@ -283,6 +283,7 @@ test-go: $(GO) $(GOMODULES) $(ALL_GO_FILES) $(GOTESTSUM)
 	$(GOTESTSUM) --junitfile $(PWD)/rest-api-junit.xml \
 		--jsonfile $(PWD)/rest-api-tests.json \
 		--format testname -- $(TEST_FLAGS) \
+		-coverpkg=./... \
 		-coverprofile=$(COVERAGE_TXT) \
 		-covermode=atomic $(GO_SRC_DIR)/...
 	$(GO) tool cover -func=$(COVERAGE_TXT)

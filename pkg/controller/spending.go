@@ -140,7 +140,12 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		// itll be sanitized and converted to midnight below.
 		if next.Before(time.Now()) {
 			requestSpan.Status = sentry.SpanStatusInvalidArgument
-			return c.badRequest(ctx, "next due date cannot be inthe past")
+			return c.badRequest(ctx, "next due date cannot be in the past")
+		}
+
+		if spending.RecurrenceRule == nil {
+			requestSpan.Status = sentry.SpanStatusInvalidArgument
+			return c.badRequest(ctx, "recurrence rule must be specified for expenses")
 		}
 	case models.SpendingTypeGoal:
 		// If the spending is a goal, then we don't need the rule at all.
@@ -150,8 +155,10 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 			return c.badRequest(ctx, "due date cannot be in the past")
 		}
 
-		// Goals do not recur.
-		spending.RecurrenceRule = nil
+		if spending.RecurrenceRule != nil {
+			requestSpan.Status = sentry.SpanStatusInvalidArgument
+			return c.badRequest(ctx, "recurrence rule cannot be specified for goals")
+		}
 	}
 
 	// Make sure that the next recurrence date is properly in the user's timezone.
