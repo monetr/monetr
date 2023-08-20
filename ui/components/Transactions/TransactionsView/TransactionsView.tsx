@@ -1,15 +1,15 @@
 import React, { Fragment } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { Divider, List, ListSubheader, Typography } from '@mui/material';
+import { Divider, List, ListSubheader } from '@mui/material';
 import moment, { Moment } from 'moment';
 import * as R from 'ramda';
 
 import TransactionItem from 'components/Transactions/TransactionsView/TransactionItem';
-import { useTransactionsSink } from 'hooks/transactions';
+import { useTransactions } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 
 function TransactionsView(): JSX.Element {
-  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactionsSink();
+  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactions();
   const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({

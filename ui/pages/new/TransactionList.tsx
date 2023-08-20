@@ -8,11 +8,11 @@ import TransactionDateItem from './TransactionDateItem';
 import TransactionItem from './TransactionItem';
 
 import MSidebarToggle from 'components/MSidebarToggle';
-import { useTransactionsSink } from 'hooks/transactions';
+import { useTransactions } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 
 export default function TransactionList(): JSX.Element {
-  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactionsSink();
+  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactions();
   const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({

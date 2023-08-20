@@ -2,20 +2,20 @@ import React, { Fragment } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { AccessTime } from '@mui/icons-material';
 import { Chip, Divider, List, ListItem, ListSubheader } from '@mui/material';
+import clsx from 'clsx';
 import moment, { Moment } from 'moment';
 import * as R from 'ramda';
 
-import clsx from 'clsx';
 import TransactionIcon from 'components/Transactions/components/TransactionIcon';
 import TransactionItemMobile from 'components/Transactions/TransactionsView/TransactionItem.mobile';
 import TransactionNameEditor from 'components/Transactions/TransactionsView/TransactionNameEditor';
 import TransactionSpentFromSelection from 'components/Transactions/TransactionsView/TransactionSpentFromSelection';
-import { useTransactionsSink } from 'hooks/transactions';
+import { useTransactions } from 'hooks/transactions';
 import useIsMobile from 'hooks/useIsMobile';
 import Transaction from 'models/Transaction';
 
 export default function TransactionsNew(): JSX.Element {
-  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactionsSink();
+  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactions();
   const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({

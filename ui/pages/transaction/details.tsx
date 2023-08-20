@@ -29,8 +29,7 @@ export default function TransactionDetails(): JSX.Element {
   const updateTransaction = useUpdateTransaction();
   const transactionId = +id || null;
 
-  const { result: transaction, isLoading, isError } = useTransaction(transactionId);
-  console.log('rerender', transaction);
+  const { data: transaction, isLoading, isError } = useTransaction(transactionId);
 
   if (isLoading) {
     return (

@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import {
   InfiniteData,
   useInfiniteQuery,
@@ -15,20 +14,17 @@ import Spending from 'models/Spending';
 import Transaction from 'models/Transaction';
 import request from 'util/request';
 
-export type TransactionsResult =
-  {
-    result: Array<Transaction>;
-    hasNextPage: boolean;
-  }
-  & UseInfiniteQueryResult<Array<Partial<Transaction>>>;
+export type TransactionsResult = {
+  result: Array<Transaction>;
+  hasNextPage: boolean;
+} & UseInfiniteQueryResult<Array<Partial<Transaction>>>;
 
-export function useTransactionsSink(): TransactionsResult {
+export function useTransactions(): TransactionsResult {
   const selectedBankAccountId = useSelectedBankAccountId();
   const result = useInfiniteQuery<Array<Partial<Transaction>>>(
     [`/bank_accounts/${ selectedBankAccountId }/transactions`],
     {
       getNextPageParam: (_, pages) => pages.length * 25,
-      // keepPreviousData: true,
       enabled: !!selectedBankAccountId,
     },
   );
@@ -40,24 +36,15 @@ export function useTransactionsSink(): TransactionsResult {
   };
 }
 
-export type TransactionResult =
-  { result: Transaction | null }
-  & UseQueryResult<Partial<Transaction>>;
-
-export function useTransaction(transactionId: number | null): TransactionResult {
+export function useTransaction(transactionId: number | null): UseQueryResult<Transaction> {
   const selectedBankAccountId = useSelectedBankAccountId();
-
-  const result = useQuery<Partial<Transaction>>(
+  return useQuery<Partial<Transaction>, unknown, Transaction>(
     [`/bank_accounts/${ selectedBankAccountId }/transactions/${ transactionId }`],
     {
       enabled: !!selectedBankAccountId && !!transactionId,
+      select: data => new Transaction(data),
     },
   );
-
-  return {
-    ...result,
-    result: result?.data && new Transaction(result.data),
-  };
 }
 
 export interface TransactionUpdateResponse {
