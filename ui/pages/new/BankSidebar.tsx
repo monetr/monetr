@@ -41,13 +41,17 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
     );
   }
 
+  // TODO Make it so that when we are in the "add link" page, we have the add link +1 button as active.
   return (
     <SidebarWrapper className={ props.className }>
       { Array.from(links.values()).map(link => (<BankSidebarItem key={ link.linkId } link={ link } />)) }
       <div className='w-full h-12 flex items-center justify-center relative group'>
-        <div className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'>
+        <Link
+          to="/link/create"
+          className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'
+        >
           <PlusOne className='text-3xl' />
-        </div>
+        </Link>
       </div>
     </SidebarWrapper>
   );

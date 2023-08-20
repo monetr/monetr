@@ -13,6 +13,7 @@ import ExpenseDetails from 'pages/expense/details';
 import FundingDetails from 'pages/funding/details';
 import FundingNew from 'pages/funding-new';
 import GoalsNew from 'pages/goals-new';
+import LinkCreatePage from 'pages/link/create';
 import LoginNew from 'pages/login-new';
 import LogoutPage from 'pages/logout';
 import BankSidebar from 'pages/new/BankSidebar';
@@ -40,7 +41,9 @@ export default function Monetr(): JSX.Element {
   const { isLoading: linksIsLoading, data: links } = useLinks();
   const isAuthenticated = !!user;
   // If the config or authentication is loading just show a loading page.
-  if (configIsLoading || authIsLoading || linksIsLoading) {
+  // Links is loading is weird becuase the loading state will be true until we actually request links. But links won't
+  // be requested until we are authenticated with an active subscription.
+  if (configIsLoading || authIsLoading || (linksIsLoading && isActive)) {
     return <Loading />;
   }
 
@@ -105,6 +108,7 @@ export default function Monetr(): JSX.Element {
             <Route path='funding' element={ <FundingNew /> } />
             <Route path='funding/:fundingId/details' element={ <FundingDetails /> } />
           </Route>
+          <Route path='/link/create' element={ <LinkCreatePage /> } />
           <Route path='/settings' element={ <SettingsPage /> } />
           <Route path="/logout" element={ <LogoutPage /> } />
           <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />

@@ -16,6 +16,7 @@ import mergeTailwind from 'util/mergeTailwind';
 import request from 'util/request';
 
 export interface SetupPageProps {
+  alreadyOnboarded?: boolean;
   manualEnabled?: boolean;
 }
 
@@ -26,9 +27,9 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
 
   switch (step) {
     case 'greeting':
-      return <Greeting onContinue={ setStep } manualEnabled={ props.manualEnabled } />;
+      return <Greeting onContinue={ setStep } manualEnabled={ props.manualEnabled } alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'plaid':
-      return <Plaid />;
+      return <Plaid alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'manual':
       // Not implemented yet.
       return null;
@@ -40,23 +41,55 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
 }
 
 interface GreetingProps {
+  alreadyOnboarded?: boolean;
   manualEnabled: boolean;
   onContinue: (_: Step) => unknown;
 }
 
 function Greeting(props: GreetingProps): JSX.Element {
   const [active, setActive] = useState<'plaid'|'manual'|null>(null);
+
+  function Banner(): JSX.Element {
+    if (!props.alreadyOnboarded) {
+      return (
+        <div className='flex flex-col justify-center items-center text-center'>
+          <MSpan className='text-2xl font-medium'>
+            Welcome to monetr!
+          </MSpan>
+          <MSpan className='text-lg' color='subtle'>
+            Before we get started, please select how you would like to continue.
+          </MSpan>
+        </div>
+      );
+    }
+
+    return (
+      <div className='flex flex-col justify-center items-center text-center'>
+        <MSpan className='text-2xl font-medium'>
+          Adding another bank?
+        </MSpan>
+        <MSpan className='text-lg' color='subtle'>
+          Please select what type of bank you want to setup below.
+        </MSpan>
+      </div>
+    );
+  }
+
+  function Footer(): JSX.Element {
+    if (props.alreadyOnboarded) return null;
+
+    return (
+      <div className='flex justify-center gap-1'>
+        <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
+        <MLink to="/logout" size="sm">Logout for now</MLink>
+      </div>
+    );
+  }
+
   return (
     <div className='w-full h-full flex lg:justify-center items-center gap-4 md:gap-8 flex-col overflow-y-auto py-4'>
       <MLogo className='w-16 h-16 md:w-24 md:h-24' />
-      <div className='flex flex-col justify-center items-center text-center'>
-        <MSpan className='text-2xl font-medium'>
-          Welcome to monetr!
-        </MSpan>
-        <MSpan className='text-lg' color='subtle'>
-          Before we get started, please select how you would like to continue.
-        </MSpan>
-      </div>
+      <Banner />
       <div className='flex gap-4 flex-col md:flex-row p-2'>
         <OnboardingTile
           icon={ <LinkOutlined /> }
@@ -81,10 +114,7 @@ function Greeting(props: GreetingProps): JSX.Element {
       >
         Continue
       </MBaseButton>
-      <div className='flex justify-center gap-1'>
-        <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
-        <MLink to="/logout" size="sm">Logout for now</MLink>
-      </div>
+      <Footer />
     </div>
   );
 }
@@ -174,7 +204,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
 }
 
 interface PlaidProps {
-  setStep: (_: Step) => unknown
+  alreadyOnboarded?: boolean;
 }
 
 function Plaid(props: PlaidProps): JSX.Element {
@@ -391,14 +421,22 @@ function Plaid(props: PlaidProps): JSX.Element {
     );
   }
 
-  return (
-    <div className='w-full h-full flex justify-center items-center gap-8 flex-col overflow-hidden text-center p-2'>
-      <MLogo className='w-24 h-24' />
-      { inner }
+  function Footer(): JSX.Element {
+    if (props.alreadyOnboarded) return null;
+
+    return (
       <div className='flex justify-center gap-1'>
         <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
         <MLink to="/logout" size="sm">Logout for now</MLink>
       </div>
+    );
+  }
+
+  return (
+    <div className='w-full h-full flex justify-center items-center gap-8 flex-col overflow-hidden text-center p-2'>
+      <MLogo className='w-24 h-24' />
+      { inner }
+      <Footer />
     </div>
   );
 }
