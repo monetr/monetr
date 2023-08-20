@@ -20,7 +20,7 @@ export interface BudgetingSidebarProps {
 
 export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Element {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
-  const link = useLink(bankAccount?.linkId);
+  const { data: link } = useLink(bankAccount?.linkId);
   const balance = useCurrentBalance();
 
   if (isLoading) {

@@ -1,30 +1,15 @@
 import { useMatch } from 'react-router-dom';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
-import { useLinksSink } from 'hooks/links';
+import { useLinks } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
 
-export type BankAccountsResult =
-  { result: Map<number, BankAccount> }
-  & UseQueryResult<Array<Partial<BankAccount>>>;
-
-export function useBankAccountsSink(): BankAccountsResult {
-  const { data: links } = useLinksSink();
-  const result = useQuery<Array<Partial<BankAccount>>>(['/bank_accounts'], {
+export function useBankAccounts(): UseQueryResult<Array<Partial<BankAccount>>> {
+  const { data: links } = useLinks();
+  return useQuery<Array<Partial<BankAccount>>>(['/bank_accounts'], {
     enabled: !!links && links.length > 0,
+    select: data => data.map(item => new BankAccount(item)),
   });
-  return {
-    ...result,
-    result: new Map((result?.data || []).map(item => {
-      const bankAccount = new BankAccount(item);
-      return [bankAccount.bankAccountId, bankAccount];
-    })),
-  };
-}
-
-export function useBankAccounts(): Map<number, BankAccount> {
-  const { result: bankAccounts } = useBankAccountsSink();
-  return bankAccounts;
 }
 
 export interface SelectedBankAccountResult {

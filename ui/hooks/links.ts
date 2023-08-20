@@ -2,13 +2,13 @@ import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
 import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 
+import { useBankAccounts } from './bankAccounts';
 import { useAuthenticationSink } from './useAuthentication';
 
-import { useBankAccounts } from 'hooks/bankAccounts';
 import Link from 'models/Link';
 import request from 'util/request';
 
-export function useLinksSink(): UseQueryResult<Array<Link>> {
+export function useLinks(): UseQueryResult<Array<Link>> {
   const { result: { user, isActive } } = useAuthenticationSink();
   return useQuery<Array<Partial<Link>>, unknown, Array<Link>>(
     ['/links'], {
@@ -25,11 +25,19 @@ export function useLinksSink(): UseQueryResult<Array<Link>> {
     });
 }
 
-/**
- * @deprecated 
- */
-export function useLink(linkId: number): Link | null {
-  return null;
+export function useLink(linkId: number): UseQueryResult<Link> {
+  const queryClient = useQueryClient();
+  return useQuery<Partial<Link>, unknown, Link>(
+    [`/links/${linkId}`],
+    {
+      select: data => new Link(data),
+      initialData: () => queryClient
+        .getQueryData<Array<Link>>(['/links'])
+        ?.find(item => item.linkId === linkId),
+      initialDataUpdatedAt: () => queryClient
+        .getQueryState(['/links'])?.dataUpdatedAt,
+    }
+  );
 }
 
 export function useRemoveLink(): (_linkId: number) => Promise<void> {
@@ -46,11 +54,11 @@ export function useRemoveLink(): (_linkId: number) => Promise<void> {
 }
 
 export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata) => boolean {
-  const links = useLinks();
-  const bankAccounts = useBankAccounts();
+  const { data: links } = useLinks();
+  const { data: bankAccounts } = useBankAccounts();
 
   return function (metadata: PlaidLinkOnSuccessMetadata): boolean {
-    const linksForInstitution = new Map(Array.from(links.values())
+    const linksForInstitution = new Map(links
       .filter(item => item.getIsPlaid())
       .filter(item => item.plaidInstitutionId === metadata.institution.institution_id)
       .map(item => [item.linkId, item]));

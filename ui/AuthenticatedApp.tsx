@@ -4,7 +4,7 @@ import { Backdrop, CircularProgress } from '@mui/material';
 
 import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
 import Sidebar from 'components/Layout/Sidebar/Sidebar';
-import { useLinksSink } from 'hooks/links';
+import { useLinks } from 'hooks/links';
 import AccountsPage from 'pages/accounts';
 import ExpensesPage from 'pages/expenses';
 import FundingPage from 'pages/funding';
@@ -20,8 +20,8 @@ const AuthenticatedApp = (): JSX.Element => {
 
   const [sidebarClosed, setSidebarClosed] = useState(true);
 
-  const { isLoading, result: links } = useLinksSink();
-  const hasAnyLinks = links.size > 0;
+  const { isLoading, data: links } = useLinks();
+  const hasAnyLinks = links.length > 0;
 
   // We need to wait until the links are loaded. Otherwise we will mount the routes and it will mess up the initial load
   // of the application by potentially redirecting to `/setup`.

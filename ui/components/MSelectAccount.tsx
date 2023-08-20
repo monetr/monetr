@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select, { Theme } from 'react-select';
 
-import { useBankAccountsSink, useSelectedBankAccount } from 'hooks/bankAccounts';
+import { useBankAccounts, useSelectedBankAccount } from 'hooks/bankAccounts';
 import useTheme from 'hooks/useTheme';
 
 import './MSelectAccount.scss';
@@ -10,7 +10,7 @@ import './MSelectAccount.scss';
 export default function MSelectAccount(): JSX.Element {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { result: allBankAccounts } = useBankAccountsSink();
+  const { data: allBankAccounts } = useBankAccounts();
   const { data: selectedBankAccount } = useSelectedBankAccount();
 
   const accounts = Array.from(allBankAccounts.values())

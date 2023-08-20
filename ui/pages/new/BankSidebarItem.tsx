@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { AccountBalance } from '@mui/icons-material';
 import { Tooltip } from '@mui/material';
 
-import { useBankAccountsSink, useSelectedBankAccount } from 'hooks/bankAccounts';
+import { useBankAccounts, useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useInstitution } from 'hooks/institutions';
 import MonetrLink from 'models/Link';
 import mergeTailwind from 'util/mergeTailwind';
@@ -16,8 +16,8 @@ interface BankSidebarItemProps {
 export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Element {
   const { result: institution } = useInstitution(link.plaidInstitutionId);
   const selectBankAccount = useSelectedBankAccount();
-  const { result: bankAccounts } = useBankAccountsSink();
-  const active = selectBankAccount.result?.linkId === link.linkId;
+  const { data: bankAccounts } = useBankAccounts();
+  const active = selectBankAccount.data?.linkId === link.linkId;
 
   const destinationBankAccountId = Array.from(bankAccounts.values())
     .find(bankAccount => bankAccount.linkId === link.linkId);

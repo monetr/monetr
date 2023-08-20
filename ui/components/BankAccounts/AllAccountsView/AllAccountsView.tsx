@@ -3,16 +3,17 @@ import { AccountBalance, Add } from '@mui/icons-material';
 import { Button, Fab, List, Typography } from '@mui/material';
 import * as R from 'ramda';
 
+import { showAddBankAccountDialog } from './AddBankAccountDialog';
+
 import LinkedAccountItem from 'components/BankAccounts/AllAccountsView/LinkedAccountItem';
 import { useBankAccounts } from 'hooks/bankAccounts';
 import { useLinks } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
 import Link from 'models/Link';
-import { showAddBankAccountDialog } from './AddBankAccountDialog';
 
 export default function AllAccountsView(): JSX.Element {
-  const bankAccounts = useBankAccounts();
-  const links = useLinks();
+  const { data: bankAccounts } = useBankAccounts();
+  const { data: links } = useLinks();
 
   function Empty(): JSX.Element {
     return (
@@ -46,7 +47,7 @@ export default function AllAccountsView(): JSX.Element {
   }
 
   function Content(): JSX.Element {
-    if (bankAccounts.size === 0) {
+    if (bankAccounts.length === 0) {
       return <Empty />;
     }
 
@@ -59,7 +60,7 @@ export default function AllAccountsView(): JSX.Element {
       R.groupBy((item: BankAccount) => item.linkId.toString(10)),
       R.mapObjIndexed((bankAccounts, linkId) => ({
         bankAccounts: bankAccounts,
-        link: links.get(parseInt(linkId)),
+        link: links.find(link => link.linkId === +linkId),
       })),
       R.values,
       R.sortBy((item: TransformItem) => item.link.getName()),
@@ -69,7 +70,7 @@ export default function AllAccountsView(): JSX.Element {
           link={ item.link }
           bankAccounts={ item.bankAccounts } />
       )),
-    )(Array.from(bankAccounts.values()));
+    )(bankAccounts as Array<Readonly<BankAccount>>);
 
     return (
       <List disablePadding>

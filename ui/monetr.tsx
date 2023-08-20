@@ -1,8 +1,8 @@
 import React, { Fragment } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
-import { useBankAccountsSink } from 'hooks/bankAccounts';
-import { useLinksSink } from 'hooks/links';
+import { useBankAccounts } from 'hooks/bankAccounts';
+import { useLinks } from 'hooks/links';
 import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
 import { useAuthenticationSink } from 'hooks/useAuthentication';
 import Loading from 'loading';
@@ -37,7 +37,7 @@ export default function Monetr(): JSX.Element {
     isError: configIsError,
   } = useAppConfigurationSink();
   const { isLoading: authIsLoading, result: { user, isActive } } = useAuthenticationSink();
-  const { isLoading: linksIsLoading, isFetching: linksIsFetching, data: links } = useLinksSink();
+  const { isLoading: linksIsLoading, isFetching: linksIsFetching, data: links } = useLinks();
   const isAuthenticated = !!user;
   // If the config or authentication is loading just show a loading page.
   if (configIsLoading || authIsLoading || (linksIsLoading && linksIsFetching)) {
@@ -128,8 +128,8 @@ function BudgetingLayout(): JSX.Element {
 }
 
 function RedirectToBank(): JSX.Element {
-  const { data: links, isLoading: linksIsLoading } = useLinksSink();
-  const { result: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccountsSink();
+  const { data: links, isLoading: linksIsLoading } = useLinks();
+  const { data: bankAccounts, isLoading: bankAccountsIsLoading } = useBankAccounts();
   if (linksIsLoading || bankAccountsIsLoading) {
     return null;
   }

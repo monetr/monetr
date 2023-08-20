@@ -7,10 +7,10 @@ import BankSidebarItem from './BankSidebarItem';
 
 import { Logo } from 'assets';
 import MDivider from 'components/MDivider';
-import { useLinksSink } from 'hooks/links';
-import { ReactElement } from 'components/types';
-import mergeTailwind from 'util/mergeTailwind';
 import MSidebarToggle from 'components/MSidebarToggle';
+import { ReactElement } from 'components/types';
+import { useLinks } from 'hooks/links';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface BankSidebarProps {
   className?: string;
@@ -22,7 +22,7 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
   // would be better.
   // py-2 pushes the icons down the same distance they are from the side.
   // gap-2 makes sure they are evenly spaced.
-  const { result: links, isLoading, isError } = useLinksSink();
+  const { data: links, isLoading, isError } = useLinks();
   if (isLoading) {
     return (
       <SidebarWrapper className={ props.className } />

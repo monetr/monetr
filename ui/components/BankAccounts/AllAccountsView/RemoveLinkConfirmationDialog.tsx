@@ -1,5 +1,4 @@
 import React, { Fragment, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close } from '@mui/icons-material';
 import {
@@ -13,6 +12,7 @@ import {
   Snackbar,
   Typography,
 } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import classnames from 'classnames';
 
@@ -25,7 +25,7 @@ interface RemoveLinkConfirmationDialogProps {
 function RemoveLinkConfirmationDialog(props: RemoveLinkConfirmationDialogProps): JSX.Element {
   const modal = useModal();
   const queryClient = useQueryClient();
-  const link = useLink(props.linkId);
+  const { data: link } = useLink(props.linkId);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>(null);
   const removeLink = useRemoveLink();
@@ -35,6 +35,7 @@ function RemoveLinkConfirmationDialog(props: RemoveLinkConfirmationDialogProps):
     return removeLink(props.linkId)
       .then(() => void Promise.all([
         queryClient.invalidateQueries(['/links']),
+        queryClient.removeQueries([`/links/${props.linkId}`]),
         queryClient.invalidateQueries(['/bank_accounts']),
       ]))
       .then(() => modal.remove())
