@@ -1,5 +1,5 @@
 import { useMatch } from 'react-router-dom';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { useLinks } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
@@ -12,13 +12,8 @@ export function useBankAccounts(): UseQueryResult<Array<Partial<BankAccount>>> {
   });
 }
 
-export interface SelectedBankAccountResult {
-  isLoading: boolean;
-  isError: boolean;
-  bankAccount: BankAccount | null;
-}
-
 export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined> {
+  const queryClient = useQueryClient();
   const match = useMatch('/bank/:bankId/*');
   const bankAccountId = +match?.params?.bankId || null;
 
@@ -32,6 +27,11 @@ export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined
     {
       enabled: !!bankAccountId, // Only request if we have a valid numeric bank account ID to work with.
       select: data => !!data && new BankAccount(data),
+      initialData: () => queryClient
+        .getQueryData<Array<BankAccount>>(['/bank_accounts'])
+        ?.find(item => item.bankAccountId === bankAccountId),
+      initialDataUpdatedAt: () => queryClient
+        .getQueryState(['/bank_accounts'])?.dataUpdatedAt,
     }
   );
 }
