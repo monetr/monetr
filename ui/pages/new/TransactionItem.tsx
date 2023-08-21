@@ -5,6 +5,7 @@ import { KeyboardArrowRight } from '@mui/icons-material';
 
 import TransactionMerchantIcon from './TransactionMerchantIcon';
 
+import MSelectSpendingTransaction from 'components/MSelectSpendingTransaction';
 import { useSpendingOld } from 'hooks/spending';
 import Transaction from 'models/Transaction';
 import mergeTailwind from 'util/mergeTailwind';
@@ -102,7 +103,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
             <BudgetingInfo className='flex w-full text-sm md:hidden' />
           </div>
         </div>
-        <BudgetingInfo className='hidden w-1/2 flex-1 items-center md:flex' />
+        <MSelectSpendingTransaction transaction={ transaction } />
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
           <span className={ amountClassnames }>
             {transaction.getAmountString()}
