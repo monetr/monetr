@@ -1,6 +1,5 @@
 import React, { Fragment, useState } from 'react';
 import { Button, CircularProgress, TextField } from '@mui/material';
-import classnames from 'classnames';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 
 import BackToLoginButton from 'components/Authentication/BackToLoginButton';
@@ -8,6 +7,7 @@ import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useSendForgotPassword from 'hooks/useSendForgotPassword';
+import mergeTailwind from 'util/mergeTailwind';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface ForgotPasswordValues {
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage(): JSX.Element {
                       variant="contained"
                     >
                       { isSubmitting && <CircularProgress
-                        className={ classnames('mr-2', {
+                        className={ mergeTailwind('mr-2', {
                           'opacity-50': isSubmitting,
                         }) }
                         size="1em"

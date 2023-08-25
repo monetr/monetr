@@ -1,7 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
-import classnames from 'classnames';
 import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
@@ -11,6 +10,7 @@ import CenteredLogo from 'components/Logo/CenteredLogo';
 import TextWithLine from 'components/TextWithLine';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useLogin from 'hooks/useLogin';
+import mergeTailwind from 'util/mergeTailwind';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface LoginValues {
@@ -78,7 +78,7 @@ export default function LoginView(): JSX.Element {
             variant="contained"
           >
             { isSubmitting && <CircularProgress
-              className={ classnames('mr-2', {
+              className={ mergeTailwind('mr-2', {
                 'opacity-50': isSubmitting,
               }) }
               size="1em"

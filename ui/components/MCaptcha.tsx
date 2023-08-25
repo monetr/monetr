@@ -1,10 +1,10 @@
 import React from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { CircularProgress } from '@mui/material';
-import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MCaptchaProps {
   name?: string;
@@ -33,7 +33,7 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   const loading = Boolean(formikContext?.isSubmitting);
 
-  const classes = clsx([
+  const classes = mergeTailwind([
     'flex',
     'items-center',
     'justify-center',

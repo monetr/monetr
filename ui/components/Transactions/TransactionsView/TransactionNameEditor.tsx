@@ -4,10 +4,10 @@ import { FormatOptionLabelMeta } from 'react-select/base';
 import CreatableSelect from 'react-select/creatable';
 import { lighten } from '@mui/material';
 
-import clsx from 'clsx';
 import { useUpdateTransaction } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 import theme from 'theme';
+import mergeTailwind from 'util/mergeTailwind';
 
 interface Props {
   transaction: Transaction;
@@ -130,8 +130,8 @@ export interface NameOption {
 }
 
 export function NameSelectionOption({ children, ...props }: OptionProps<Option>): JSX.Element {
-  const optionClassNames = clsx(props.className);
-  const labelClassNames = clsx(
+  const optionClassNames = mergeTailwind(props.className);
+  const labelClassNames = mergeTailwind(
     'font-medium',
   );
 

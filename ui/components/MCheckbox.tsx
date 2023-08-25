@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import React from 'react';
 import styled from '@emotion/styled';
-import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 
 import { ReactElement } from './types';
 
 import useTheme from 'hooks/useTheme';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MCheckboxProps {
   id?: string;
@@ -63,7 +63,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   function Label(): JSX.Element {
     if (!props.label) return null;
 
-    const labelClasses = clsx(
+    const labelClasses = mergeTailwind(
       'font-medium',
       {
         'dark:text-dark-monetr-content-emphasis': !props.disabled,

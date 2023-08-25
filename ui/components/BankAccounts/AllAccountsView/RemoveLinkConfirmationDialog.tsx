@@ -14,9 +14,9 @@ import {
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import classnames from 'classnames';
 
 import { useLink, useRemoveLink } from 'hooks/links';
+import mergeTailwind from 'util/mergeTailwind';
 
 interface RemoveLinkConfirmationDialogProps {
   linkId: number;
@@ -96,7 +96,7 @@ function RemoveLinkConfirmationDialog(props: RemoveLinkConfirmationDialogProps):
           <Button
             disabled={ loading }
             onClick={ doRemoveLink }
-            className={ classnames({
+            className={ mergeTailwind({
               'text-red-500': !loading,
             }) }
           >

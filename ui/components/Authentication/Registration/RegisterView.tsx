@@ -1,9 +1,8 @@
 import React, { Fragment, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Button, Checkbox, CircularProgress, FormControl, FormControlLabel, FormGroup, TextField } from '@mui/material';
+import { useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
-import classnames from 'classnames';
 import { Formik, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
@@ -13,8 +12,9 @@ import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useSignUp, { SignUpResponse } from 'hooks/useSignUp';
-import verifyEmailAddress from 'util/verifyEmailAddress';
+import mergeTailwind from 'util/mergeTailwind';
 import { APIError } from 'util/request';
+import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface SignUpValues {
   agree: boolean;
@@ -326,7 +326,7 @@ export default function RegisterView(): JSX.Element {
                     variant="contained"
                   >
                     { isSubmitting && <CircularProgress
-                      className={ classnames('mr-2', {
+                      className={ mergeTailwind('mr-2', {
                         'opacity-50': isSubmitting,
                       }) }
                       size="1em"

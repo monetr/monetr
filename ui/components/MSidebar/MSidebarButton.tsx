@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-import clsx from 'clsx';
 import { ReactElement } from 'components/types';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MSidebarButton {
   children: ReactElement;
@@ -13,7 +13,7 @@ export default function MSidebarButton(props: MSidebarButton): JSX.Element {
   const location = useLocation();
   const active = location.pathname === props.to;
 
-  const className = clsx(
+  const className = mergeTailwind(
     'flex',
     'gap-x-3',
     'rounded-lg',

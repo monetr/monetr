@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import Select, { ActionMeta, OnChangeValue, Theme } from 'react-select';
 import { FormatOptionLabelMeta } from 'react-select/base';
 import { lighten } from '@mui/material';
-import classnames from 'classnames';
 
 import { SpendingOption, SpendingSelectOption } from 'components/Transactions/components/SpendingSelectOption';
 import { useCurrentBalance } from 'hooks/balances';
@@ -11,6 +10,7 @@ import { useUpdateTransaction } from 'hooks/transactions';
 import Spending from 'models/Spending';
 import Transaction from 'models/Transaction';
 import theme from 'theme';
+import mergeTailwind from 'util/mergeTailwind';
 
 interface Props {
   transaction: Transaction;
@@ -81,7 +81,7 @@ function TransactionSpentFromSelection(props: Props): JSX.Element {
     if (meta.context === 'value') {
       return (
         <Fragment>
-          Spent From <span className={ classnames({ 'font-bold': !!option.value }) }>
+          Spent From <span className={ mergeTailwind({ 'font-bold': !!option.value }) }>
             {option.label}
           </span>
         </Fragment>

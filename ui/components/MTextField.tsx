@@ -1,9 +1,10 @@
 import React from 'react';
-import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 import moment from 'moment';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
+
+import mergeTailwind from 'util/mergeTailwind';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
@@ -48,7 +49,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     );
   }
 
-  const classNames = clsx(
+  const classNames = mergeTailwind(
     {
       'dark:focus:ring-dark-monetr-brand': !props.disabled && !props.error,
       'dark:hover:ring-zinc-400': !props.disabled && !props.error,
@@ -91,7 +92,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'min-h-[38px]',
   );
 
-  const wrapperClassNames = clsx({
+  const wrapperClassNames = mergeTailwind({
     // This will make it so the space below the input is the same when there is and isn't an error.
     'pb-[18px]': !props.error,
   }, props.className);

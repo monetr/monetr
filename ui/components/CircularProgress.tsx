@@ -3,7 +3,8 @@ import { CircularProgress as MaterialCircularProgress } from '@mui/material';
 import {
   CircularProgressProps as MaterialCircularProgressProps,
 } from '@mui/material/CircularProgress/CircularProgress';
-import classNames from 'classnames';
+
+import mergeTailwind from 'util/mergeTailwind';
 
 interface CircularProgressExtendedProps {
   visible?: boolean;
@@ -18,7 +19,7 @@ export default function CircularProgress(props: CircularProgressProps): JSX.Elem
     return null;
   }
 
-  materialProps.className += classNames({
+  materialProps.className += mergeTailwind({
     'opacity-50': submitting,
   });
   return (

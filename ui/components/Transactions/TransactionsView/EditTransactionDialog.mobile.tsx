@@ -8,11 +8,11 @@ import TransactionSpentFromSelectionMobile from './TransactionSpentFromSelection
 
 import TransactionIcon from '../components/TransactionIcon';
 
-import clsx from 'clsx';
 import VerticalPuller from 'components/VerticalPuller';
 import { useSpendingSink } from 'hooks/spending';
 import { useUpdateTransaction } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
+import mergeTailwind from 'util/mergeTailwind';
 
 
 export interface EditTransactionDialogMobileProps {
@@ -159,7 +159,7 @@ function EditTransactionDialogMobile(props: EditTransactionDialogMobileProps): J
                     </span>
                   </EditItem>
                   <EditItem name="Date">
-                    <span className={ clsx('flex-1 text-end text-xl opacity-60', {
+                    <span className={ mergeTailwind('flex-1 text-end text-xl opacity-60', {
                       'text-green-600': props.transaction.getIsAddition(),
                       'text-red-600': !props.transaction.getIsAddition(),
                     }) }>

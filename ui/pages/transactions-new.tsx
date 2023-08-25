@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { AccessTime } from '@mui/icons-material';
 import { Chip, Divider, List, ListItem, ListSubheader } from '@mui/material';
-import clsx from 'clsx';
 import moment, { Moment } from 'moment';
 import * as R from 'ramda';
 
@@ -13,6 +12,7 @@ import TransactionSpentFromSelection from 'components/Transactions/TransactionsV
 import { useTransactions } from 'hooks/transactions';
 import useIsMobile from 'hooks/useIsMobile';
 import Transaction from 'models/Transaction';
+import mergeTailwind from 'util/mergeTailwind';
 
 export default function TransactionsNew(): JSX.Element {
   const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactions();
@@ -125,7 +125,7 @@ function TransactionItem(props: Props): JSX.Element {
           </div>
           <div className="basis-3/12 md:basis-2/12 flex justify-end w-full items-center">
             { props.transaction.isPending && <Chip icon={ <AccessTime /> } label="Pending" className="mr-auto" /> }
-            <span className={ clsx('h-full amount align-middle self-center place-self-center', {
+            <span className={ mergeTailwind('h-full amount align-middle self-center place-self-center', {
               'text-green-600': props.transaction.getIsAddition(),
               'text-red-600': !props.transaction.getIsAddition(),
             }) }>

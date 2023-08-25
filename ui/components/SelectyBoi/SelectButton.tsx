@@ -1,7 +1,8 @@
 import React from 'react';
 import { ArrowDropDown } from '@mui/icons-material';
 import { Button } from '@mui/material';
-import classnames from 'classnames';
+
+import mergeTailwind from 'util/mergeTailwind';
 
 import './styles/SelectButton.scss';
 
@@ -15,7 +16,7 @@ interface PropTypes {
 const SelectButton = (props: PropTypes): JSX.Element => {
   const { children, onClick, disabled, open } = props;
   return (
-    <Button className={ classnames('w-full monetr-select-button overflow-hidden', {
+    <Button className={ mergeTailwind('w-full monetr-select-button overflow-hidden', {
       'selected': open,
     }) } onClick={ onClick }
     disabled={ disabled }>
@@ -25,7 +26,7 @@ const SelectButton = (props: PropTypes): JSX.Element => {
         </div>
         <div className="flex-none select-dropdown-icon">
           <ArrowDropDown
-            className={ classnames('transform transition transition-transform duration-200', {
+            className={ mergeTailwind('transform transition transition-transform duration-200', {
               'rotate-180': open,
             }) }
           />

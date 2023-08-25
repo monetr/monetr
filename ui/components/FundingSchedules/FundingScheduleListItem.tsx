@@ -5,13 +5,13 @@ import moment from 'moment';
 
 import { showRemoveFundingScheduleDialog } from './RemoveFundingScheduleDialog';
 
-import clsx from 'clsx';
 import { useCurrentBalance } from 'hooks/balances';
 import { useNextFundingForecast } from 'hooks/forecast';
 import { useFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 import formatAmount from 'util/formatAmount';
 import getColor from 'util/getColor';
+import mergeTailwind from 'util/mergeTailwind';
 
 interface Props {
   fundingScheduleId: number;
@@ -97,7 +97,7 @@ export default function FundingScheduleListItem(props: Props): JSX.Element {
         <span className="font-normal text-gray-500 text-lg">
           Estimated Free-To-Use
         </span>
-        <span className={ clsx('text-md font-normal', textColor) }>
+        <span className={ mergeTailwind('text-md font-normal', textColor) }>
           {amount || loader}
         </span>
       </div>

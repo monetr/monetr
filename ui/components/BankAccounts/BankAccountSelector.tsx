@@ -2,7 +2,6 @@ import React, { Fragment, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AccountBalanceWallet, ArrowDropDown, CheckCircle } from '@mui/icons-material';
 import { Button, Divider, Menu, MenuItem, Typography } from '@mui/material';
-import classnames from 'classnames';
 import * as R from 'ramda';
 import shallow from 'zustand/shallow';
 
@@ -10,6 +9,7 @@ import { useBankAccounts, useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useLinks } from 'hooks/links';
 import useStore from 'hooks/store';
 import BankAccount from 'models/BankAccount';
+import mergeTailwind from 'util/mergeTailwind';
 
 const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element => {
   const navigate = useNavigate();
@@ -56,7 +56,7 @@ const BankAccountSelectorMenu = (props: { closeMenu: () => void }): JSX.Element 
           key={ bankAccount.bankAccountId }
           onClick={ changeBankAccount(bankAccount.bankAccountId) }
         >
-          <CheckCircle color="primary" className={ classnames('mr-1', {
+          <CheckCircle color="primary" className={ mergeTailwind('mr-1', {
             'opacity-0': bankAccount.bankAccountId !== selectedBankAccountId,
           }) } />
           { /* make it so its the link name - bank name */ }

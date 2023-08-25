@@ -1,13 +1,13 @@
 import React, { Fragment } from 'react';
 import { AccessTime, ChevronRight } from '@mui/icons-material';
 import { Divider, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material';
-import classnames from 'classnames';
 
 import { showEditTransactionMobileDialog } from './EditTransactionDialog.mobile';
 
 import TransactionIcon from 'components/Transactions/components/TransactionIcon';
 import { useSpendingOld } from 'hooks/spending';
 import Transaction from 'models/Transaction';
+import mergeTailwind from 'util/mergeTailwind';
 
 interface Props {
   transaction: Transaction;
@@ -70,7 +70,7 @@ export default function TransactionItemMobile(props: Props): JSX.Element {
           {props.transaction.isPending && <AccessTime />
           }
         </div>
-        <span className={ classnames('h-full flex-none amount align-middle self-center justify-end place-self-center text-sm pr-1', {
+        <span className={ mergeTailwind('h-full flex-none amount align-middle self-center justify-end place-self-center text-sm pr-1', {
           'text-green-600': props.transaction.getIsAddition(),
           'text-red-600': !props.transaction.getIsAddition(),
         }) }>

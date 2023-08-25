@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button, CircularProgress, TextField } from '@mui/material';
-import classnames from 'classnames';
 import { Formik, FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
 import BackToLoginButton from 'components/Authentication/BackToLoginButton';
 import CenteredLogo from 'components/Logo/CenteredLogo';
 import useResetPassword from 'hooks/useResetPassword';
+import mergeTailwind from 'util/mergeTailwind';
 
 interface ResetPasswordValues {
   password: string;
@@ -148,7 +148,7 @@ export default function ResetPasswordPage(): JSX.Element {
                       variant="contained"
                     >
                       { isSubmitting && <CircularProgress
-                        className={ classnames('mr-2', {
+                        className={ mergeTailwind('mr-2', {
                           'opacity-50': isSubmitting,
                         }) }
                         size="1em"

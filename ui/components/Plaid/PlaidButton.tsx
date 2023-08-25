@@ -7,9 +7,9 @@ import {
   usePlaidLink } from 'react-plaid-link';
 import { Button, ButtonProps, CircularProgress } from '@mui/material';
 import * as Sentry from '@sentry/react';
-import classnames from 'classnames';
 import { useSnackbar } from 'notistack';
 
+import mergeTailwind from 'util/mergeTailwind';
 import request from 'util/request';
 
 interface BasePropTypes {
@@ -68,7 +68,7 @@ const PlaidButton = (props: PropTypes): JSX.Element => {
       disabled: disabled,
       children: (
         <Fragment>
-          { state.loading && <CircularProgress size="1em" thickness={ 5 } className={ classnames('mr-2', {
+          { state.loading && <CircularProgress size="1em" thickness={ 5 } className={ mergeTailwind('mr-2', {
             'opacity-50': disabled,
           }) } /> }
           { props.children }

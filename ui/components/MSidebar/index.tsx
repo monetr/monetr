@@ -3,9 +3,9 @@ import { AccountBalanceOutlined, CreditCardOutlined, ExitToAppOutlined, HelpOutl
 
 import MSidebarButton from './MSidebarButton';
 
-import clsx from 'clsx';
 import MLogo from 'components/MLogo';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MSidebarProps {
   open?: boolean;
@@ -83,7 +83,7 @@ export default function MSidebar(props: MSidebarProps): JSX.Element {
   return (
     <Fragment>
       <div className="lg:hidden">
-        <div className={ clsx({ 'hidden': !props.open }) }>
+        <div className={ mergeTailwind({ 'hidden': !props.open }) }>
           <Fragment>
             <div
               className="absolute z-40 w-screen h-screen left-0 top-0 bottom-0 right-0 bg-purple-800 opacity-50"

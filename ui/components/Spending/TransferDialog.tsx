@@ -17,13 +17,13 @@ import {
   Typography,
 } from '@mui/material';
 import AccordionSummary from '@mui/material/AccordionSummary';
-import classNames from 'classnames';
 import { Formik, FormikHelpers } from 'formik';
 
 import SpendingSelectionList from 'components/Spending/SpendingSelectionList';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink, useTransfer } from 'hooks/spending';
 import Spending from 'models/Spending';
+import mergeTailwind from 'util/mergeTailwind';
 
 import './styles/TransferDialog.scss';
 
@@ -211,7 +211,7 @@ export default function TransferDialog(props: Props): JSX.Element {
                 onClick={ reverse }
                 color="primary"
                 size="medium"
-                className={ classNames('reverse-button transition-opacity', {
+                className={ mergeTailwind('reverse-button transition-opacity', {
                   'opacity-0': selectionDialog !== null,
                   'opacity-100': selectionDialog === null,
                 }) }

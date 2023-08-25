@@ -2,21 +2,21 @@ import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   AccountBalance,
-  Today,
   CreditCard,
-  ExitToApp, Menu,
+  ExitToApp,   Help,
+  Menu,
   PriceCheck,
   Savings,
   Settings,
   ShoppingCart,
-  Help,
+  Today,
 } from '@mui/icons-material';
 import { Button, IconButton, Link } from '@mui/material';
-import classnames from 'classnames';
 
 import BankAccountSelector from 'components/BankAccounts/BankAccountSelector';
 import SidebarButton from 'components/Layout/Sidebar/SidebarButton';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import mergeTailwind from 'util/mergeTailwind';
 
 import 'components/Layout/Sidebar/styles/Sidebar.scss';
 
@@ -32,7 +32,7 @@ export default function Sidebar(props: SidebarProps): JSX.Element {
   } = useAppConfiguration();
 
   return (
-    <div className={ classnames('sidebar fixed top-0 bottom-0 left-0 lg:flex lg:flex-shrink-0 lg:w-64 w-full z-50', {
+    <div className={ mergeTailwind('sidebar fixed top-0 bottom-0 left-0 lg:flex lg:flex-shrink-0 lg:w-64 w-full z-50', {
       'block': !!!props.closed,
       'hidden': !!props.closed,
     }) }>
