@@ -24,6 +24,7 @@ import TransactionList from 'pages/new/TransactionList';
 import ForgotPasswordNew from 'pages/password/forgot-new';
 import PasswordResetNew from 'pages/password/reset-new';
 import RegisterNew from 'pages/register-new';
+import SettingsAbout from 'pages/settings/about';
 import SettingsOverview from 'pages/settings/overview';
 import SettingsSecurity from 'pages/settings/security';
 import SettingsLayout from 'pages/settings/SettingsLayout';
@@ -99,7 +100,7 @@ export default function Monetr(): JSX.Element {
     <div className='max-w-screen max-h-screen h-full w-full dark:bg-dark-monetr-background flex'>
       <BankSidebar className='hidden lg:flex' />
       <MobileSidebar />
-      <div className='w-full h-full flex min-w-0'>
+      <div className='w-full h-full flex min-w-0 overflow-y-auto'>
         <Routes>
           <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
             <Route path='transactions' element={ <TransactionList /> } />
@@ -114,7 +115,7 @@ export default function Monetr(): JSX.Element {
             <Route path='' element={ <Navigate replace to="/settings/overview" /> } />
             <Route path='overview' element={ <SettingsOverview /> } />
             <Route path='security' element={ <SettingsSecurity /> } />
-            <Route path='about' element={ null } />
+            <Route path='about' element={ <SettingsAbout /> } />
           </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />
           <Route path="/logout" element={ <LogoutPage /> } />

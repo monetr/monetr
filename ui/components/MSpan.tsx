@@ -8,13 +8,13 @@ export interface MSpanStyleProps {
   className?: string;
   size?: 'inherit' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+  component?: React.ElementType;
 }
 
 export interface MSpanProps extends MSpanStyleProps {
   children: string | React.ReactNode | JSX.Element;
   ['data-testid']?: string;
   onClick?: () => void;
-  component?: React.ElementType;
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
@@ -89,6 +89,9 @@ export function MSpanDeriveClasses(props: MSpanStyleProps): string {
       'semibold': 'font-semibold',
       'bold': 'font-bold',
     }[props.weight],
+    {
+      'code': 'dark:bg-dark-monetr-background-subtle px-1.5 rounded-lg',
+    }[props.component?.toString()],
     props.className,
   );
 }
