@@ -3,19 +3,19 @@ import clsx from 'clsx';
 import { useFormikContext } from 'formik';
 import moment from 'moment';
 
-import MLabel from './MLabel';
+import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
 
 type InputProps = React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 export interface MTextFieldProps extends InputProps {
   label?: string;
   error?: string;
   uppercasetext?: boolean;
-  labelDecorator?: () => JSX.Element;
+  labelDecorator?: MLabelDecorator;
 }
 
 const MTextFieldPropsDefaults: Omit<MTextFieldProps, 'InputProps'> = {
   label: null,
-  labelDecorator: () => null,
+  labelDecorator: ((_: MLabelDecoratorProps) => null),
   disabled: false,
   uppercasetext: undefined,
 };
@@ -98,8 +98,16 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
   let value = formikContext?.values[props.name];
-  if (props?.type === 'date') {
-    value = moment(value).format('YYYY-MM-DD');
+  switch (props?.type) {
+    case 'date':
+      value = moment(value).format('YYYY-MM-DD');
+      break;
+    case 'number':
+      // TODO I would love to have support for formatting numbers as they are typed and such.
+      // if (typeof value === 'number') {
+      //   value = (value as number).toFixed(2);
+      // }
+      break;
   }
 
   return (
@@ -110,7 +118,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
         htmlFor={ props.id }
         required={ props.required }
       >
-        <LabelDecorator />
+        <LabelDecorator name={ props.name } disabled={ props.disabled } />
       </MLabel>
       <div>
         <input

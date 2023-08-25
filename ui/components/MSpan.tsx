@@ -7,9 +7,10 @@ export interface MSpanProps {
   children: string | React.ReactNode | JSX.Element;
   ellipsis?: boolean;
   className?: string;
-  size?: 'inherit' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: 'inherit' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
   ['data-testid']?: string;
+  onClick?: () => void;
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
@@ -51,6 +52,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
     },
     {
       'inherit': 'text-size-inherit',
+      'xs': 'text-xs',
       'sm': 'text-sm',
       'md': 'text-base',
       'lg': 'text-lg',
@@ -67,7 +69,7 @@ export default function MSpan(props: MSpanProps): JSX.Element {
   );
 
   return (
-    <span className={ classNames } data-testid={ props['data-testid'] }>
+    <span className={ classNames } data-testid={ props['data-testid'] } onClick={ props.onClick }>
       {props.children}
     </span>
   );

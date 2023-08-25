@@ -1,28 +1,42 @@
 import React from 'react';
 import { components, OptionProps } from 'react-select';
+import { useFormikContext } from 'formik';
 
-import MSelect from './MSelect';
+import MBadge from './MBadge';
+import MSelect, { MSelectProps } from './MSelect';
 import MSpan from './MSpan';
 
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink } from 'hooks/spending';
 import Spending from 'models/Spending';
-import { useFormikContext } from 'formik';
 
-export interface MSelectSpendingProps {
-  name: string;
-  className?: string;
+// Remove the props that we do not want to allow the caller to pass in.
+type MSelecteSpendingBaseProps = Omit<
+  MSelectProps<SpendingOption>,
+  'options' | 'current' | 'value' | 'onChange' | 'components'
+>;
+
+export interface MSelectSpendingProps extends MSelecteSpendingBaseProps {
+  // excludeFrom will take the name of another item in the form. The value of that item in the form will be excluded
+  // from the list of options presented as part of this select. This is used in the transfer dialog to make sure that
+  // both the to and the from selects cannot be the same value.
+  excludeFrom?: string;
 }
 
 export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
+  props = {
+    label: 'Spent From',
+    placeholder: 'Select a spending item...',
+    ...props,
+  };
+
   const formikContext = useFormikContext();
   const { result: spending, isLoading, isError } = useSpendingSink();
   const balances = useCurrentBalance();
 
   if (isLoading) {
     return <MSelect
-      className={ props?.className }
-      label="Spent From"
+      { ...props }
       isLoading
       disabled
       placeholder='Loading...'
@@ -30,37 +44,55 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
   }
   if (isError) {
     return <MSelect
-      className={ props?.className }
-      label="Spent From"
+      { ...props }
       isLoading
       disabled
       placeholder='Failed to load spending...'
     />;
   }
 
-  const freeToUse = {
+  const freeToUse: SpendingOption = {
     label: 'Free-To-Use',
     value: -1,
-    spending: {
+    spending: new Spending({
+      spendingId: -1,
       // It is possible for the "safe" balance to not be present when switching bank accounts. This is a pseudo race
       // condition. Instead we want to gracefully handle the value not being present initially, and print a nicer string
       // until the balance is loaded.
       currentAmount: balances?.free,
-    },
+    }),
   };
 
-  const items: Map<number, SpendingOption> = new Map(spending
-    .map(item => [item.spendingId, ({
-      label: item.name,
-      value: item.spendingId,
-      spending: item,
-    })]));
+  const items: Array<SpendingOption> = spending.map(item => ({
+    label: item.name,
+    value: item.spendingId,
+    spending: item,
+  }));
 
-  const options = [
+  const excludedFrom = formikContext.values[props.excludeFrom];
+
+  const options: Array<SpendingOption> = [
     freeToUse,
     // Labels will be unique. So we only need 1 | -1
-    ...(Array.from(items.values()).sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1)),
-  ];
+    ...items
+      .sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1),
+  ]
+    .filter(item => {
+      // If we are excluding some items and the excluded from has a value from formik.
+      // Then make sure our option list omits that item with that value.
+      if (props.excludeFrom && excludedFrom) {
+        return item.value !== excludedFrom;
+      }
+
+      // If we are exclluding some items and the excluded item is null(ish) then that means
+      // some other select has already picked the safe to spend option. We need to omit that
+      // from our result set.
+      if (props.excludeFrom && !excludedFrom) {
+        return item.value !== -1;
+      }
+
+      return true;
+    });
 
   const value = formikContext.values[props.name];
   const current = options.find(item => item.value === (value ?? -1));
@@ -75,12 +107,9 @@ export default function MSelectSpending(props: MSelectSpendingProps): JSX.Elemen
 
   return (
     <MSelect
-      className={ props?.className }
-      label="Spent From"
-      placeholder='Select a spending item...'
+      { ...props }
       options={ options }
       value={ current }
-      name="spendingId"
       onChange={ onSelect }
       components={ {
         Option: MSelectSpendingOption,
@@ -101,10 +130,13 @@ function MSelectSpendingOption({ children: _, ...props }: OptionProps<SpendingOp
   // const amount = notLoaded ? 'N/A' : formatAmount(props.data.spending.currentAmount);
   return (
     <components.Option { ...props }>
-      <div>
-        <MSpan>
+      <div className='flex justify-between'>
+        <MSpan size='sm' color='emphasis'>
           { props.label }
         </MSpan>
+        <MBadge size='xs'>
+          { props.data.spending.getCurrentAmountString() }
+        </MBadge>
       </div>
     </components.Option>
   );

@@ -185,7 +185,7 @@ export function useTransfer(): (
       .then(result => result.data);
   }
 
-  const { mutate } = useMutation(
+  const { mutateAsync } = useMutation(
     transfer,
     {
       onSuccess: (result: BalanceTransferResponse) => Promise.all([
@@ -211,7 +211,7 @@ export function useTransfer(): (
     toSpendingId: number | null,
     amount: number,
   ): Promise<void> => {
-    return mutate({
+    return void mutateAsync({
       fromSpendingId,
       toSpendingId,
       amount,

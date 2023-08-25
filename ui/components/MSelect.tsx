@@ -1,12 +1,14 @@
 import React from 'react';
 import Select, { Theme } from 'react-select';
 
+import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
+
 import useTheme from 'hooks/useTheme';
 import mergeTailwind from 'util/mergeTailwind';
-import MLabel from './MLabel';
 
 export interface MSelectProps<V> extends Omit<Parameters<Select>[0], 'theme'|'styles'|'isDisabled'> {
   label?: string;
+  labelDecorator?: MLabelDecorator;
   error?: string;
   required?: boolean;
   disabled?: boolean;
@@ -31,6 +33,9 @@ export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
     'pb-[18px]': !props.error,
   }, props.className);
 
+  const { labelDecorator, ...otherProps } = props;
+  const LabelDecorator = labelDecorator ?? ((_: MLabelDecoratorProps) => null);
+
   return (
     <div className={ wrapperClassNames }>
       <MLabel
@@ -38,7 +43,9 @@ export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
         htmlFor={ props.id }
         required={ props.required }
         disabled={ props.disabled }
-      />
+      >
+        <LabelDecorator name={ props.name } disabled={ props.disabled } />
+      </MLabel>
       <Select
         theme={ (baseTheme: Theme): Theme => ({
           ...baseTheme,
@@ -59,7 +66,7 @@ export default function MSelect<V>(props: MSelectProps<V>): JSX.Element {
             primary: theme.tailwind.colors['dark-monetr']['brand']['DEFAULT'],
           },
         }) }
-        { ...props }
+        { ...otherProps }
         isDisabled={ props.disabled }
         styles={ {
           placeholder: (base: object) => ({

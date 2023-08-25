@@ -4,6 +4,13 @@ import { ReactElement } from './types';
 
 import mergeTailwind from 'util/mergeTailwind';
 
+export interface MLabelDecoratorProps {
+  name?: string;
+  disabled?: boolean;
+}
+
+export type MLabelDecorator = React.FC<MLabelDecoratorProps>;
+
 export interface MLabelProps {
   htmlFor?: string;
   label?: string;

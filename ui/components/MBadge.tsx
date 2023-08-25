@@ -1,14 +1,11 @@
 import React from 'react';
 
-import MSpan from './MSpan';
-import { ReactElement } from './types';
+import MSpan, { MSpanProps } from './MSpan';
 
 import mergeTailwind from 'util/mergeTailwind';
 
 
-export interface MBadgeProps {
-  className?: string;
-  children: ReactElement;
+export interface MBadgeProps extends Omit<MSpanProps, 'color'>{
 }
 
 export default function MBadge(props: MBadgeProps): JSX.Element {
@@ -19,13 +16,10 @@ export default function MBadge(props: MBadgeProps): JSX.Element {
     'px-1.5',
     'py-0.5',
     'rounded-md',
-    'text-sm',
     props.className,
   );
 
   return (
-    <MSpan className={ classes }>
-      { props.children }
-    </MSpan>
+    <MSpan { ...props } className={ classes } />
   );
 }
