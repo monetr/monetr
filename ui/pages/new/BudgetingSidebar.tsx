@@ -122,7 +122,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             <MSpan ellipsis color='inherit'>
               Expenses
             </MSpan>
-            <MBadge className='ml-auto'>
+            <MBadge className='ml-auto' size='sm'>
               {balance?.getExpensesString()}
             </MBadge>
           </NavigationItem>
@@ -131,7 +131,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             <MSpan ellipsis color='inherit'>
               Goals
             </MSpan>
-            <MBadge className='ml-auto'>
+            <MBadge className='ml-auto' size='sm'>
               {balance?.getGoalsString()}
             </MBadge>
           </NavigationItem>
@@ -191,7 +191,7 @@ function NextFundingBadge(): JSX.Element {
   if (!next) return null;
 
   return (
-    <MBadge className='ml-auto'>
+    <MBadge className='ml-auto' size='sm'>
       {next}
     </MBadge>
   );

@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowBackOutlined, DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined } from '@mui/icons-material';
+import { ArrowBackOutlined, DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined, SwapVertOutlined } from '@mui/icons-material';
 
 import ExpenseTimeline from './ExpenseTimeline';
 
@@ -14,6 +14,7 @@ import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import { useRemoveSpending, useSpending } from 'hooks/spending';
+import { showTransferModal } from 'modals/TransferModal';
 import { SpendingType } from 'models/Spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
 
@@ -148,6 +149,14 @@ export default function ExpenseDetails(): JSX.Element {
             Cancel
           </MBaseButton>
           <MBaseButton
+            color='secondary'
+            className='gap-1 py-1 px-2'
+            onClick={ () => showTransferModal({ initialToSpendingId: spending?.spendingId }) }
+          >
+            <SwapVertOutlined />
+            Transfer
+          </MBaseButton>
+          <MBaseButton
             color='cancel'
             className='gap-1 py-1 px-2'
             onClick={ deleteExpense }
@@ -199,15 +208,6 @@ export default function ExpenseDetails(): JSX.Element {
               options={ [] }
               className='w-full'
             />
-            <MDivider className='w-1/2' />
-            <MSpan className='text-xl my-2'>
-            Stats
-            </MSpan>
-            <div className='w-full'>
-              <MSpan>Estimated Regular Contribution Amount:</MSpan>
-              &nbsp;
-              <MSpan>$140.00</MSpan>
-            </div>
           </div>
           <MDivider className='block md:hidden w-1/2' />
           <div className='w-full md:w-1/2 flex flex-col gap-2'>

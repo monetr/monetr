@@ -61,7 +61,7 @@ function NewFundingModal(): JSX.Element {
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='py-4'>
+    <MModal open={ modal.visible } ref={ ref } className='py-4 md:max-w-sm'>
       <MForm
         initialValues={ initialValues }
         onSubmit={ submit }

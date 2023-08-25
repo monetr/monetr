@@ -191,7 +191,7 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
   const { result: spending } = useSpendingSink();
   const balances = useCurrentBalance();
 
-  const amount = value === null || value === -1 ?
+  const amount = !value || value === -1 ?
     balances?.free :
     spending?.find(item => item.spendingId === value)?.currentAmount;
 
@@ -208,7 +208,7 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
       className='cursor-pointer hover:dark:text-dark-monetr-content-emphasis'
       onClick={ onClick }
     >
-      { amount && formatAmount(amount) }
+      { typeof amount === 'number' && formatAmount(amount) }
     </MSpan>
   );
 }

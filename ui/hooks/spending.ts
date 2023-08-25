@@ -201,6 +201,7 @@ export function useTransfer(): (
             ...result.balance,
           }),
         ),
+        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast`]),
         queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
       ]),
     },
