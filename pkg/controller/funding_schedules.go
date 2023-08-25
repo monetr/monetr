@@ -176,10 +176,12 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to verify funding schedule exists")
 	}
 
-	request.FundingScheduleId = fundingScheduleId
-	request.BankAccountId = bankAccountId
 	request.Name = strings.TrimSpace(request.Name)
 	request.Description = strings.TrimSpace(request.Description)
+
+	// Don't allow these fields to be overwritten by an update API call.
+	request.FundingScheduleId = fundingScheduleId
+	request.BankAccountId = bankAccountId
 	request.AccountId = existingFundingSchedule.AccountId
 	request.LastOccurrence = existingFundingSchedule.LastOccurrence
 
@@ -212,6 +214,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		recalculateSpending = true
 	}
 
+	updatedSpending := make([]models.Spending, 0)
 	if recalculateSpending {
 		crumbs.Debug(c.getContext(ctx), "Spending will be recalculated as part of this funding schedule update", map[string]interface{}{
 			"bankAccountId":     bankAccountId,
@@ -238,6 +241,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 			if err = repo.UpdateSpending(c.getContext(ctx), bankAccountId, spending); err != nil {
 				return c.wrapPgError(ctx, err, "failed to update spending objects for updated funding schedule")
 			}
+			updatedSpending = spending
 		}
 	}
 
@@ -245,7 +249,10 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to update funding schedule")
 	}
 
-	return ctx.JSON(http.StatusOK, request)
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"fundingSchedule": request,
+		"spending":        updatedSpending,
+	})
 }
 
 func (c *Controller) deleteFundingSchedules(ctx echo.Context) error {

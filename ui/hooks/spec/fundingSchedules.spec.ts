@@ -1,7 +1,7 @@
 import { act } from '@testing-library/react-hooks';
 import moment from 'moment';
 
-import { useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
+import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 import { rest } from 'msw';
 import testRenderHook from 'testutils/hooks';
@@ -218,23 +218,26 @@ describe('funding schedule hooks', () => {
         }),
         rest.put('/api/bank_accounts/12/funding_schedules/3', (_req, res, ctx) => {
           return res(ctx.json({
-            'bankAccountId': 12,
-            'dateStarted': '2023-02-28T06:00:00Z',
-            'description': '15th and last day of every month',
-            'estimatedDeposit': null,
-            'excludeWeekends': true,
-            'fundingScheduleId': 3,
-            'lastOccurrence': '2023-07-14T05:00:00Z',
-            'name': 'Elliot\'s Contribution',
-            'nextOccurrence': '2023-07-31T05:00:00Z',
-            'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
-            'waitForDeposit': false,
+            'fundingSchedule': {
+              'bankAccountId': 12,
+              'dateStarted': '2023-02-28T06:00:00Z',
+              'description': '15th and last day of every month',
+              'estimatedDeposit': null,
+              'excludeWeekends': true,
+              'fundingScheduleId': 3,
+              'lastOccurrence': '2023-07-14T05:00:00Z',
+              'name': 'Elliot\'s Contribution',
+              'nextOccurrence': '2023-07-31T05:00:00Z',
+              'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+              'waitForDeposit': false,
+            },
+            'spending': [],
           }));
         }),
       );
 
       const world = testRenderHook(useUpdateFundingSchedule, { initialRoute: '/bank/12/funding' });
-      let result: FundingSchedule;
+      let result: FundingScheduleUpdateResponse;
       await act(async () => {
         result = await world.result.current(new FundingSchedule({
           fundingScheduleId: 3,
@@ -248,7 +251,8 @@ describe('funding schedule hooks', () => {
         }));
       });
       expect(result).toBeDefined();
-      expect(result.fundingScheduleId).toBe(3);
+      expect(result.fundingSchedule.fundingScheduleId).toBe(3);
+      expect(result.spending.length).toBe(0);
     });
 
     it('it will fail to update a funding schedule', async () => {
