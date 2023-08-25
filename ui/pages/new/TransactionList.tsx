@@ -7,7 +7,7 @@ import * as R from 'ramda';
 import TransactionDateItem from './TransactionDateItem';
 import TransactionItem from './TransactionItem';
 
-import MSidebarToggle from 'components/MSidebarToggle';
+import MTopNavigation from 'components/MTopNavigation';
 import { useTransactions } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 
@@ -68,22 +68,10 @@ export default function TransactionList(): JSX.Element {
 
   return (
     <Fragment>
-      <div className='w-full h-12 flex-none flex items-center px-4 gap-4'>
-        <MSidebarToggle />
-        <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold flex gap-2 items-center'>
-          <ShoppingCartOutlined />
-          Transactions
-        </span>
-        <span className='hidden md:block'>
-          md
-        </span>
-        <span className='hidden lg:block'>
-          lg
-        </span>
-        <span className='hidden xl:block'>
-          xl
-        </span>
-      </div>
+      <MTopNavigation
+        icon={ ShoppingCartOutlined }
+        title='Transactions'
+      />
       <div className='flex flex-grow min-w-0 min-h-0'>
         <ul className='w-full overflow-y-auto'>
           <TransactionItems />

@@ -1,18 +1,9 @@
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Backdrop, CircularProgress } from '@mui/material';
 
-import NavigationBar from 'components/Layout/NavigationBar/NavigationBar';
-import Sidebar from 'components/Layout/Sidebar/Sidebar';
 import { useLinks } from 'hooks/links';
-import AccountsPage from 'pages/accounts';
-import ExpensesPage from 'pages/expenses';
-import FundingPage from 'pages/funding';
-import GoalsPage from 'pages/goals';
 import LogoutPage from 'pages/logout';
-import SettingsPage from 'pages/settings';
-import SubscriptionPage from 'pages/subscription';
-import TransactionsPage from 'pages/transactions';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
 import InitialPlaidSetup from 'views/Setup/InitialPlaidSetup';
 
@@ -49,34 +40,35 @@ const AuthenticatedApp = (): JSX.Element => {
     setSidebarClosed(!sidebarClosed);
   }
 
-  return (
-    <Fragment>
-      <div className="flex h-full min-w-0 min-h-full">
-        <Sidebar
-          closed={ sidebarClosed }
-          onToggleSidebar={ toggleSidebar }
-          closeSidebar={ () => setSidebarClosed(true) }
-        />
-        <div className="relative flex flex-col flex-1 w-0 min-w-0 mb-0 lg:ml-64">
-          <NavigationBar onToggleSidebar={ toggleSidebar } />
-          <Routes>
-            <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
-            <Route path="/register" element={ <Navigate replace to="/" /> } />
-            <Route path="/login" element={ <Navigate replace to="/" /> } />
-            <Route path="/logout" element={ <LogoutPage /> } />
-            <Route path="/transactions" element={ <TransactionsPage /> } />
-            <Route path="/expenses" element={ <ExpensesPage /> } />
-            <Route path="/goals" element={ <GoalsPage /> } />
-            <Route path="/funding" element={ <FundingPage /> } />
-            <Route path="/accounts" element={ <AccountsPage /> } />
-            <Route path="/settings" element={ <SettingsPage /> } />
-            <Route path="/subscription" element={ <SubscriptionPage /> } />
-            <Route path="*" element={ <Navigate replace to="/transactions" /> } />
-          </Routes>
-        </div>
-      </div>
-    </Fragment>
-  );
+  return null;
+  // return (
+  //   <Fragment>
+  //     <div className="flex h-full min-w-0 min-h-full">
+  //       <Sidebar
+  //         closed={ sidebarClosed }
+  //         onToggleSidebar={ toggleSidebar }
+  //         closeSidebar={ () => setSidebarClosed(true) }
+  //       />
+  //       <div className="relative flex flex-col flex-1 w-0 min-w-0 mb-0 lg:ml-64">
+  //         <NavigationBar onToggleSidebar={ toggleSidebar } />
+  //         <Routes>
+  //           <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
+  //           <Route path="/register" element={ <Navigate replace to="/" /> } />
+  //           <Route path="/login" element={ <Navigate replace to="/" /> } />
+  //           <Route path="/logout" element={ <LogoutPage /> } />
+  //           <Route path="/transactions" element={ <TransactionsPage /> } />
+  //           <Route path="/expenses" element={ <ExpensesPage /> } />
+  //           <Route path="/goals" element={ <GoalsPage /> } />
+  //           <Route path="/funding" element={ <FundingPage /> } />
+  //           <Route path="/accounts" element={ <AccountsPage /> } />
+  //           <Route path="/settings" element={ <SettingsPage /> } />
+  //           <Route path="/subscription" element={ <SubscriptionPage /> } />
+  //           <Route path="*" element={ <Navigate replace to="/transactions" /> } />
+  //         </Routes>
+  //       </div>
+  //     </div>
+  //   </Fragment>
+  // );
 };
 
 export default AuthenticatedApp;

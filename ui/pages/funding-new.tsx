@@ -5,8 +5,8 @@ import FundingItem from './new/FundingItem';
 import { showNewFundingModal } from './new/NewFundingModal';
 
 import { MBaseButton } from 'components/MButton';
-import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
+import MTopNavigation from 'components/MTopNavigation';
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
 
 export default function FundingNew(): JSX.Element {
@@ -56,19 +56,15 @@ export default function FundingNew(): JSX.Element {
 
   return (
     <Fragment>
-      <div className='w-full h-12 flex items-center px-4 gap-4 justify-between'>
-        <div className='flex items-center gap-4'>
-          <MSidebarToggle />
-          <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold flex gap-2 items-center'>
-            <TodayOutlined />
-            Funding Schedules
-          </span>
-        </div>
+      <MTopNavigation
+        icon={ TodayOutlined }
+        title='Funding Schedules'
+      >
         <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showNewFundingModal }>
           <AddOutlined />
           New Funding Schedule
         </MBaseButton>
-      </div>
+      </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0'>
         <ListContent />
       </div>

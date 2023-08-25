@@ -2,15 +2,19 @@ import React from 'react';
 
 import mergeTailwind from 'util/mergeTailwind';
 
-export interface MSpanProps {
+export interface MSpanStyleProps {
   color?: 'default' | 'muted' | 'subtle' | 'emphasis' | 'inherit';
-  children: string | React.ReactNode | JSX.Element;
   ellipsis?: boolean;
   className?: string;
   size?: 'inherit' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
+}
+
+export interface MSpanProps extends MSpanStyleProps {
+  children: string | React.ReactNode | JSX.Element;
   ['data-testid']?: string;
   onClick?: () => void;
+  component?: React.ElementType;
 }
 
 const MSpanPropsDefaults: Omit<MSpanProps, 'children'> = {
@@ -24,7 +28,27 @@ export default function MSpan(props: MSpanProps): JSX.Element {
     ...props,
   };
 
-  const classNames = mergeTailwind(
+  const classNames = MSpanDeriveClasses(props);
+  const Element = props.component ?? 'span';
+
+  return (
+    <Element className={ classNames } data-testid={ props['data-testid'] } onClick={ props.onClick }>
+      {props.children}
+    </Element>
+  );
+}
+
+/**
+ * Generates a list of class names based on the props provided. This is used to style the MSpan component but can be
+ * called anywhere if you want to have another component have consistent styling to that of the MSpan.
+ */
+export function MSpanDeriveClasses(props: MSpanStyleProps): string {
+  props = {
+    ...MSpanPropsDefaults,
+    ...props,
+  };
+
+  return mergeTailwind(
     'flex gap-2 items-center',
     {
       'default': [
@@ -66,11 +90,5 @@ export default function MSpan(props: MSpanProps): JSX.Element {
       'bold': 'font-bold',
     }[props.weight],
     props.className,
-  );
-
-  return (
-    <span className={ classNames } data-testid={ props['data-testid'] } onClick={ props.onClick }>
-      {props.children}
-    </span>
   );
 }

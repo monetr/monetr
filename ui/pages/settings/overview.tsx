@@ -14,7 +14,7 @@ export default function SettingsOverview(): JSX.Element {
   };
 
   return (
-    <div className='w-full h-full flex flex-col justify-between'>
+    <div className='w-full h-full flex flex-col justify-between pb-4'>
       <div className='w-full flex p-4 flex-col'>
         <MTextField
           label='First Name'
@@ -47,7 +47,7 @@ export default function SettingsOverview(): JSX.Element {
         />
       </div>
       <div className='w-full flex justify-end px-4'>
-        <MBaseButton color='primary'>
+        <MBaseButton color='primary' disabled>
           Save Settings
         </MBaseButton>
       </div>

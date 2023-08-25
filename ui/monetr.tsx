@@ -24,7 +24,9 @@ import TransactionList from 'pages/new/TransactionList';
 import ForgotPasswordNew from 'pages/password/forgot-new';
 import PasswordResetNew from 'pages/password/reset-new';
 import RegisterNew from 'pages/register-new';
-import SettingsPage from 'pages/settings';
+import SettingsOverview from 'pages/settings/overview';
+import SettingsSecurity from 'pages/settings/security';
+import SettingsLayout from 'pages/settings/SettingsLayout';
 import SetupPage from 'pages/setup';
 import TransactionDetails from 'pages/transaction/details';
 import VerifyEmail from 'pages/verify/email';
@@ -108,8 +110,13 @@ export default function Monetr(): JSX.Element {
             <Route path='funding' element={ <FundingNew /> } />
             <Route path='funding/:fundingId/details' element={ <FundingDetails /> } />
           </Route>
+          <Route path='/settings' element={ <SettingsLayout /> }>
+            <Route path='' element={ <Navigate replace to="/settings/overview" /> } />
+            <Route path='overview' element={ <SettingsOverview /> } />
+            <Route path='security' element={ <SettingsSecurity /> } />
+            <Route path='about' element={ null } />
+          </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />
-          <Route path='/settings' element={ <SettingsPage /> } />
           <Route path="/logout" element={ <LogoutPage /> } />
           <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
           <Route path="/setup" element={ <Navigate replace to="/" /> } />
