@@ -78,7 +78,7 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
                 item.transactionId === response.transaction.transactionId ? response.transaction : item
               )
             ),
-          })
+          }),
         ),
         queryClient.setQueriesData(
           [`/bank_accounts/${response.transaction.bankAccountId}/transactions/${response.transaction.transactionId}`],
@@ -101,6 +101,8 @@ export function useUpdateTransaction(): (_transaction: Transaction) => Promise<T
             ...response.balance,
           }),
         ),
+        queryClient.invalidateQueries([`/bank_accounts/${ response.transaction.bankAccountId }/forecast`]),
+        queryClient.invalidateQueries([`/bank_accounts/${ response.transaction.bankAccountId }/forecast/next_funding`]),
       ]),
     }
   );
