@@ -5,6 +5,7 @@ import { FormikHelpers } from 'formik';
 import moment from 'moment';
 import { useSnackbar } from 'notistack';
 
+import MAmountField from 'components/MAmountField';
 import MFormButton from 'components/MButton';
 import MForm from 'components/MForm';
 import MModal, { MModalRef } from 'components/MModal';
@@ -87,12 +88,12 @@ function NewExpenseModal(): JSX.Element {
             placeholder='Amazon, Netflix...'
           />
           <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
-            <MTextField
+            <MAmountField
               name='amount'
               label='How much do you need?'
               required
-              type='number'
               className='w-full md:w-1/2'
+              allowNegative={ false }
             />
             <MTextField
               name='nextOccurrence'

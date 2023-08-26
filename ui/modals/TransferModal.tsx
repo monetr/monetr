@@ -5,13 +5,13 @@ import { AxiosError } from 'axios';
 import { FormikErrors, FormikHelpers, useFormikContext } from 'formik';
 import { useSnackbar } from 'notistack';
 
+import MAmountField from 'components/MAmountField';
 import MFormButton from 'components/MButton';
 import MForm from 'components/MForm';
 import { MLabelDecoratorProps } from 'components/MLabel';
 import MModal, { MModalRef } from 'components/MModal';
 import MSelectSpending from 'components/MSelectSpending';
 import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink, useTransfer } from 'hooks/spending';
 import formatAmount from 'util/formatAmount';
@@ -124,12 +124,12 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             menuPortalTarget={ document.body }
             name="toSpendingId"
           />
-          <MTextField
+          <MAmountField
             name='amount'
-            type='number'
             label='Amount'
             placeholder='Amount to move...'
             step='0.01'
+            allowNegative={ false }
           />
         </div>
         <div className='flex justify-end gap-2'>
