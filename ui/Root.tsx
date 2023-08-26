@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -11,10 +11,9 @@ import Monetr from 'monetr';
 import { newTheme } from 'theme';
 
 export default function Root(): JSX.Element {
-
   // <Sentry.ErrorBoundary>
   return (
-    <Router>
+    <BrowserRouter>
       <MQueryClient>
         <ThemeProvider theme={ newTheme }>
           <LocalizationProvider dateAdapter={ AdapterMoment }>
@@ -27,6 +26,6 @@ export default function Root(): JSX.Element {
           </LocalizationProvider>
         </ThemeProvider>
       </MQueryClient>
-    </Router>
+    </BrowserRouter>
   );
 }
