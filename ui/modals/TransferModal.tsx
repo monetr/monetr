@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { SwapVertOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
@@ -60,7 +60,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
       const from = spending?.find(item => item.spendingId === values.fromSpendingId);
       // And make sure that we are not moving more than that budget has.
       if (amount > from?.currentAmount) {
-        errors['amount'] = `Cannot move more than is available from ${ from?.name }`;
+        errors['amount'] = `Cannot move more than is available from ${from?.name}`;
       }
     }
 
@@ -83,7 +83,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
     helper.setSubmitting(true);
     return transfer(values.fromSpendingId, values.toSpendingId, amount)
       .then(() => modal.remove())
-      .catch ((error: AxiosError) => void enqueueSnackbar(
+      .catch((error: AxiosError) => void enqueueSnackbar(
         error.response.data['error'], {
           variant: 'error',
           disableWindowBlurListener: true,
@@ -191,15 +191,58 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
   const { result: spending } = useSpendingSink();
   const balances = useCurrentBalance();
 
-  const amount = !value || value === -1 ?
-    balances?.free :
-    spending?.find(item => item.spendingId === value)?.currentAmount;
+  // If we are working with the free to use amount.
+  if (!value || value === -1) {
+    const amount = balances?.free;
 
-  function onClick() {
-    if (+amount) {
-      formik.setFieldValue('amount', amount / 100);
-    }
+    return (
+      <AmountButton amount={ amount } />
+    );
   }
+
+  // If we aren't dealing with the free to use, then we are working with a spending item. Find it and find out what its
+  // amounts are.
+  const spendingSubject = spending?.find(item => item.spendingId === value);
+  if (!spendingSubject) {
+    return null;
+  }
+
+  const current = spendingSubject.currentAmount;
+  const target = spendingSubject.targetAmount;
+  const remaining = Math.max(spendingSubject.targetAmount - spendingSubject.currentAmount, 0);
+
+  if (remaining > 0 && remaining != target) {
+    return (
+      <MSpan className='gap-1'>
+        <AmountButton amount={ current } />
+        of
+        <AmountButton amount={ target } />
+        &nbsp;
+        (<AmountButton amount={ remaining } />)
+      </MSpan>
+    );
+  }
+
+  return (
+    <MSpan className='gap-1' color='subtle'>
+      <AmountButton amount={ current } />
+      of
+      <AmountButton amount={ target } />
+    </MSpan>
+  );
+}
+
+interface AmountButtonProps {
+  amount: number | null | undefined;
+}
+
+function AmountButton({ amount }: AmountButtonProps): JSX.Element {
+  const formik = useFormikContext<TransferValues>();
+  const onClick = useCallback(() => {
+    if (typeof amount === 'number') {
+      formik?.setFieldValue('amount', amount / 100);
+    }
+  }, [formik, amount]);
 
   return (
     <MSpan
@@ -208,7 +251,7 @@ function TransferSelectDecorator(props: MLabelDecoratorProps): JSX.Element {
       className='cursor-pointer hover:dark:text-dark-monetr-content-emphasis'
       onClick={ onClick }
     >
-      { typeof amount === 'number' && formatAmount(amount) }
+      {typeof amount === 'number' && formatAmount(amount)}
     </MSpan>
   );
 }

@@ -90,8 +90,11 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
       icon = <NorthEast />;
       body = `${formatAmount(props.contributedAmount)} will be allocated towards ${spending.name} from ${fundingSchedule.name}, resulting in a total allocation of ${formatAmount(props.endingAllocation)}.`;
       if (props.totalContributedAmount > props.contributedAmount) {
-        secondaryBody = `A total of ${formatAmount(props.totalContributedAmount)} will be contributed to all budgets on this day.` ;
+        secondaryBody = `A total of ${formatAmount(props.totalContributedAmount)} will be contributed to all budgets on this day.`;
       }
+    } else {
+      // Nothing is happening with this expense on this item.
+      return null;
     }
     const rowClassNames = mergeTailwind(
       {
@@ -102,10 +105,10 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
     return (
       <li className={ rowClassNames }>
         <div className="absolute w-3 h-3 bg-zinc-200 rounded-full mt-1.5 -left-1.5 border border-white dark:border-zinc-900 dark:bg-zinc-700" />
-        <time className="mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500">{ props.date.format('MMMM Do') }</time>
-        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{ header } { icon }</h3>
-        <p className="text-base font-normal text-zinc-500 dark:text-zinc-400">{ body }</p>
-        { secondaryBody && <p className="text-base font-normal text-zinc-500 dark:text-zinc-400">{ secondaryBody }</p> }
+        <time className="mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500">{props.date.format('MMMM Do')}</time>
+        <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{header} {icon}</h3>
+        <p className="text-base font-normal text-zinc-500 dark:text-zinc-400">{body}</p>
+        {secondaryBody && <p className="text-base font-normal text-zinc-500 dark:text-zinc-400">{secondaryBody}</p>}
       </li>
     );
   }
@@ -115,19 +118,19 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
     <ol className="relative border-l border-zinc-200 dark:border-zinc-700">
       <li className="mb-5 ml-4">
         <div className="absolute w-3 h-3 bg-zinc-200 rounded-full mt-1.5 -left-1.5 border border-white dark:border-zinc-900 dark:bg-zinc-700"></div>
-        <time className="mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500">{ forecast.startingTime.format('MMMM Do') }</time>
+        <time className="mb-1 text-sm font-normal leading-none text-zinc-400 dark:text-zinc-500">{forecast.startingTime.format('MMMM Do')}</time>
         <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-          { spending.name }
+          {spending.name}
           <span className="bg-blue-100 text-blue-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300 ml-3">Today</span>
         </h3>
         <p className="text-base font-normal text-zinc-500 dark:text-zinc-400">
-          { spending.name } currently has { spending.getCurrentAmountString() } allocated towards it.
+          {spending.name} currently has {spending.getCurrentAmountString()} allocated towards it.
         </p>
         <p className="mb-4 text-base font-normal text-zinc-500 dark:text-zinc-400">
           Below is the timeline for this expense over the next month.
         </p>
       </li>
-      { timelineItems.map((item, index) => (<TimelineItem key={ item.date.unix() } { ...item } last={ timelineItems.length - 1 === index } />)) }
+      {timelineItems.map((item, index) => (<TimelineItem key={ item.date.unix() } { ...item } last={ timelineItems.length - 1 === index } />))}
     </ol>
   );
 }
