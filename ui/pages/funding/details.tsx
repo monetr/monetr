@@ -1,23 +1,37 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { HeartBroken, TodayOutlined } from '@mui/icons-material';
+import { HeartBroken, SaveOutlined, TodayOutlined } from '@mui/icons-material';
+import { AxiosError } from 'axios';
+import { FormikErrors, FormikHelpers } from 'formik';
+import moment, { Moment } from 'moment';
+import { useSnackbar } from 'notistack';
 
+import MAmountField from 'components/MAmountField';
+import MFormButton from 'components/MButton';
+import MCheckbox from 'components/MCheckbox';
 import MForm from 'components/MForm';
+import MSelectFrequency from 'components/MSelectFrequency';
 import MSpan from 'components/MSpan';
+import MTextField from 'components/MTextField';
 import MTopNavigation from 'components/MTopNavigation';
-import { useFundingSchedule } from 'hooks/fundingSchedules';
+import { useFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
+import FundingSchedule from 'models/FundingSchedule';
+import { APIError } from 'util/request';
 
 interface FundingValues {
   name: string;
+  nextOccurrence: Moment;
+  rule: string;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
 }
 
 export default function FundingDetails(): JSX.Element {
   const { fundingId } = useParams();
-
   const { data: funding } = useFundingSchedule(fundingId && +fundingId);
+  const updateFundingSchedule = useUpdateFundingSchedule();
+  const { enqueueSnackbar } = useSnackbar();
 
   if (!fundingId) {
     return (
@@ -37,24 +51,99 @@ export default function FundingDetails(): JSX.Element {
     return null;
   }
 
-  function submit() {
+  function validate(values: FundingValues): FormikErrors<FundingValues> {
+    const errors: FormikErrors<FundingValues> = {};
 
+    if (values.rule === '' || !values.rule) {
+      errors['rule'] = 'Frequency is required for funding schedules.';
+    }
+
+    return errors;
+  }
+
+  async function submit(values: FundingValues, helpers: FormikHelpers<FundingValues>) {
+    helpers.setSubmitting(true);
+    const updatedFunding = new FundingSchedule({
+      ...funding,
+      name: values.name,
+      nextOccurrence: moment(values.nextOccurrence).startOf('day'),
+      rule: values.rule,
+      excludeWeekends: values.excludeWeekends,
+      estimatedDeposit: values.estimatedDeposit,
+    });
+
+    return updateFundingSchedule(updatedFunding)
+      .catch((error: AxiosError<APIError>) => {
+        const message = error.response.data.error || 'Failed to update funding schedule.';
+        enqueueSnackbar(message, {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
+      })
+      .finally(() => helpers.setSubmitting(false));
   }
 
   const initialValues: FundingValues = {
     name: funding.name,
+    nextOccurrence: funding.nextOccurrence,
+    rule: funding.rule,
     excludeWeekends: funding.excludeWeekends,
     estimatedDeposit: funding.estimatedDeposit,
   };
 
   return (
-    <MForm onSubmit={ submit } initialValues={ initialValues } className='flex w-full h-full flex-col'>
+    <MForm
+      className='flex w-full h-full flex-col'
+      initialValues={ initialValues }
+      onSubmit={ submit }
+      validate={ validate }
+    >
       <MTopNavigation
         title='Funding Schedules'
         icon={ TodayOutlined }
         breadcrumb={ funding.name }
         base={ `/bank/${funding.bankAccountId}/funding` }
-      />
+      >
+        <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
+          <SaveOutlined />
+          Save
+        </MFormButton>
+      </MTopNavigation>
+      <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
+        <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
+          <div className='w-full md:w-1/2 flex flex-col'>
+            <MTextField className='w-full' label='Name' name='name' id="funding-name-search" required />
+            <MTextField
+              className='w-full'
+              label='Next Occurrence'
+              name='nextOccurrence'
+              type='date'
+              required
+            />
+            <MSelectFrequency
+              className='w-full'
+              dateFrom='nextOccurrence'
+              label='How often does this funding happen?'
+              name='rule'
+              placeholder='Select a funding frequency...'
+              required
+            />
+            <MCheckbox
+              id='funding-details-exclude-weekends'
+              data-testid='funding-details-exclude-weekends'
+              name="excludeWeekends"
+              label="Exclude weekends"
+              description="If it were to land on a weekend, it is adjusted to the previous weekday instead."
+            />
+            <MAmountField
+              allowNegative={ false }
+              label='Estimated Deposit'
+              name='estimatedDeposit'
+              placeholder='Example: $ 1,000.00'
+            />
+          </div>
+        </div>
+      </div>
     </MForm>
   );
 }

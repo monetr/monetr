@@ -41,9 +41,11 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   useEffect(() => {
     if (selectedIndex === null) return;
 
-    if (selectedIndex === rules.length) {
+    if (selectedIndex >= rules.length) {
+      console.log('[MSelectFrequency]', 'date selection has changed and is no longer present in the rules');
       setSelectedIndex(null);
       formikContext?.setFieldValue(props.name, null);
+      formikContext?.validateField(props.name);
       return;
     }
 
@@ -69,11 +71,12 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   return (
     <MSelect
       { ...props }
-      onChange={ onChange }
+      error={ formikContext?.errors[props.name] }
+      isClearable={ false }
       label={ props.label }
       name={ props.name }
+      onChange={ onChange }
       options={ options }
-      isClearable={ false }
       value={ value }
     />
   );

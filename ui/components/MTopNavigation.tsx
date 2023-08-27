@@ -26,7 +26,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
   }, [props.base, navigate]);
 
   const className = mergeTailwind({
-    'dark:text-dark-monetr-content-emphasis': Boolean(props.breadcrumb),
+    'dark:text-dark-monetr-content-emphasis': !Boolean(props.breadcrumb),
     'dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis': Boolean(props.breadcrumb),
     'cursor-pointer': Boolean(props.base),
   }, 'w-auto order-1');
@@ -35,10 +35,15 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
     'hidden md:inline': Boolean(props.breadcrumb),
   }, 'w-auto text-center order-1');
 
+  const iconClassName = mergeTailwind({
+    'mr-0 md:mr-2': Boolean(props.breadcrumb),
+    'mr-2': !Boolean(props.breadcrumb),
+  }, 'mb-1');
+
   function InitialCrumb(): JSX.Element {
     return (
       <MSpan weight='bold' size='2xl' className={ className } onClick={ onInitialClick } ellipsis>
-        <Icon className='mr-0 md:mr-2 mb-1' />
+        <Icon className={ iconClassName } />
         <span className={ titleClassName }>
           { props.title }
         </span>

@@ -98,7 +98,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   };
 
   return (
-    <div className="flex gap-x-3">
+    <div className="flex gap-x-3 pb-3">
       <div className="flex h-6 items-center">
         <Checkbox
           id={ props.id }
