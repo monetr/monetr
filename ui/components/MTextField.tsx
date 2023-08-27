@@ -86,7 +86,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     'rounded-lg',
     'shadow-sm',
     'sm:leading-6',
-    'sm:text-sm',
+    'text-sm',
     'w-full',
     'dark:caret-zinc-50',
     'min-h-[38px]',

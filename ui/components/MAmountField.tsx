@@ -87,7 +87,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
     'rounded-lg',
     'shadow-sm',
     'sm:leading-6',
-    'sm:text-sm',
+    'text-sm',
     'w-full',
     'dark:caret-zinc-50',
     'min-h-[38px]',
