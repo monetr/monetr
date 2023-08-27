@@ -133,14 +133,14 @@ export function useRemoveFundingSchedule(): (_fundingSchedule: FundingSchedule) 
   const mutation = useMutation(
     removeFundingSchedule,
     {
-      onSuccess: (removed: FundingSchedule) => Promise.all([
+      onSuccess: ({ bankAccountId, fundingScheduleId }: FundingSchedule) => Promise.all([
         queryClient.setQueriesData(
-          [`/bank_accounts/${removed.bankAccountId}/funding_schedules`],
+          [`/bank_accounts/${bankAccountId}/funding_schedules`],
           (previous: Array<Partial<FundingSchedule>>) => previous
-            .filter(item => item.fundingScheduleId !== removed.fundingScheduleId),
+            .filter(item => item.fundingScheduleId !== fundingScheduleId),
         ),
         queryClient.removeQueries(
-          [`/bank_accounts/${removed.bankAccountId}/funding_schedules/${removed.fundingScheduleId}`]
+          [`/bank_accounts/${bankAccountId}/funding_schedules/${fundingScheduleId}`]
         ),
       ]),
     },

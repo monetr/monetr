@@ -1,21 +1,21 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { HeartBroken, SaveOutlined, TodayOutlined } from '@mui/icons-material';
+import { useNavigate, useParams } from 'react-router-dom';
+import { DeleteOutlined, HeartBroken, SaveOutlined, TodayOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikErrors, FormikHelpers } from 'formik';
 import moment, { Moment } from 'moment';
 import { useSnackbar } from 'notistack';
 
 import MAmountField from 'components/MAmountField';
-import MFormButton from 'components/MButton';
+import MFormButton, { MBaseButton } from 'components/MButton';
 import MCheckbox from 'components/MCheckbox';
 import MForm from 'components/MForm';
 import MSelectFrequency from 'components/MSelectFrequency';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import MTopNavigation from 'components/MTopNavigation';
-import { useFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
+import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 import { APIError } from 'util/request';
 
@@ -30,7 +30,9 @@ interface FundingValues {
 export default function FundingDetails(): JSX.Element {
   const { fundingId } = useParams();
   const { data: funding } = useFundingSchedule(fundingId && +fundingId);
+  const navigate = useNavigate();
   const updateFundingSchedule = useUpdateFundingSchedule();
+  const removeFundingSchedule = useRemoveFundingSchedule();
   const { enqueueSnackbar } = useSnackbar();
 
   if (!fundingId) {
@@ -83,6 +85,23 @@ export default function FundingDetails(): JSX.Element {
       .finally(() => helpers.setSubmitting(false));
   }
 
+  function backToFunding() {
+    navigate(`/bank/${funding.bankAccountId}/funding`);
+  }
+
+  async function removeFunding() {
+    if (!funding) {
+      return Promise.resolve();
+    }
+
+    if (window.confirm(`Are you sure you want to delete funding schedule: ${ funding.name }`)) {
+      return removeFundingSchedule(funding)
+        .then(() => backToFunding());
+    }
+
+    return Promise.resolve();
+  }
+
   const initialValues: FundingValues = {
     name: funding.name,
     nextOccurrence: funding.nextOccurrence,
@@ -104,6 +123,10 @@ export default function FundingDetails(): JSX.Element {
         breadcrumb={ funding.name }
         base={ `/bank/${funding.bankAccountId}/funding` }
       >
+        <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ removeFunding } >
+          <DeleteOutlined />
+          Remove
+        </MBaseButton>
         <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
           <SaveOutlined />
           Save
