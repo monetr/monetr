@@ -2,8 +2,15 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { HeartBroken } from '@mui/icons-material';
 
+import MForm from 'components/MForm';
 import MSpan from 'components/MSpan';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
+
+interface FundingValues {
+  name: string;
+  excludeWeekends: boolean;
+  estimatedDeposit: number | null;
+}
 
 export default function FundingDetails(): JSX.Element {
   const { fundingId } = useParams();
@@ -24,8 +31,23 @@ export default function FundingDetails(): JSX.Element {
     );
   }
 
-  if (!funding) {
+  if (!funding.data) {
     return null;
   }
-  return null;
+
+  function submit() {
+
+  }
+
+  const initialValues: FundingValues = {
+    name: funding.data.name,
+    excludeWeekends: funding.data.excludeWeekends,
+    estimatedDeposit: funding.data.estimatedDeposit,
+  };
+
+  return (
+    <MForm onSubmit={ submit } initialValues={ initialValues }>
+
+    </MForm>
+  );
 }

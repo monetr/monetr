@@ -91,7 +91,9 @@ export function useRemoveSpending(): (_spendingId: number) => Promise<void> {
           [`/bank_accounts/${ selectedBankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) => previous.filter(item => item.spendingId !== removedSpendingId),
         ),
+        queryClient.removeQueries([`/bank_accounts/${ selectedBankAccountId }/spending/${ removedSpendingId }`]),
         queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/balances`]),
+        queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast`]),
         queryClient.invalidateQueries([`/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -120,7 +122,13 @@ export function useUpdateSpending(): (_spending: Spending) => Promise<void> {
           (previous: Array<Partial<Spending>>) =>
             previous.map(item => item.spendingId === updatedSpending.spendingId ? updatedSpending : item),
         ),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${ updatedSpending.bankAccountId}/spending/${ updatedSpending.spendingId}`],
+          updatedSpending,
+        ),
+        // TODO Under what circumstances do we need to invalidate balances for a spending update?
         queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/balances`]),
+        queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast`]),
         queryClient.invalidateQueries([`/bank_accounts/${ updatedSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },
@@ -148,7 +156,12 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
           [`/bank_accounts/${ createdSpending.bankAccountId }/spending`],
           (previous: Array<Partial<Spending>>) => (previous || []).concat(createdSpending),
         ),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${ createdSpending.bankAccountId}/spending/${ createdSpending.spendingId}`],
+          createdSpending,
+        ),
         queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/balances`]),
+        queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/forecast`]),
         queryClient.invalidateQueries([`/bank_accounts/${ createdSpending.bankAccountId }/forecast/next_funding`]),
       ]),
     },

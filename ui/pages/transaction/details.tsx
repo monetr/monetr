@@ -5,6 +5,7 @@ import { ArrowBackOutlined, HeartBroken, SaveOutlined, ShoppingCartOutlined } fr
 import { FormikHelpers } from 'formik';
 import moment from 'moment';
 
+import MAmountField from 'components/MAmountField';
 import MFormButton, { MBaseButton } from 'components/MButton';
 import MForm from 'components/MForm';
 import MSelectSpending from 'components/MSelectSpending';
@@ -148,13 +149,11 @@ export default function TransactionDetails(): JSX.Element {
               className='w-full'
               disabled
             />
-            <MTextField
-              label='Amount'
-              name='amount'
-              prefix='$'
-              type='number'
+            <MAmountField
               className='w-full'
               disabled
+              label='Amount'
+              name='amount'
             />
             <MTextField
               label='Date'

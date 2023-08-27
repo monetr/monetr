@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { NorthEast, SouthEast } from '@mui/icons-material';
+import { AirlineStopsOutlined, NorthEast, SouthEast } from '@mui/icons-material';
 
 import MSpan from 'components/MSpan';
 import { Event, useForecast } from 'hooks/forecast';
@@ -79,6 +79,15 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
     if (props.contributedAmount > 0 && props.spentAmount > 0) {
       // Spent and contributed
       header = 'Contribution & Spending';
+      icon = <AirlineStopsOutlined />;
+      // NOTE To repro this, have your funding schedule land on the same day the item is being spent. For example
+      // a funding schedule that is 15th and the last day of the month, landing on september 15th (friday) funding
+      // an expense that is spent every friday.
+      if (props.endingAllocation > 0) {
+        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, ${formatAmount(props.contributedAmount)} was contributed to this budget at the same time. ${formatAmount(props.endingAllocation)} is left over to use from this budget until the next contribution.`;
+      } else {
+        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, included the ${formatAmount(props.contributedAmount)} that was contributed to this budget at the same time to account for the spending.`;
+      }
     } else if (props.contributedAmount === 0 && props.spentAmount > 0) {
       // Only spent
       header = 'Spending';

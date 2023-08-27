@@ -21,15 +21,35 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
 
   const rules = getRecurrencesForDate(date);
 
+  // When we initially mount, we want to find the frequency that is currently selected.
   useEffect(() => {
+    const currentValue: string = formikContext?.values[props.name];
+    const found = rules.findIndex(item => item.ruleString() === currentValue);
+    if (found >= 0) {
+      // eslint-disable-next-line no-console
+      console.log('[MSelectFrequency]', 'found existing recurrence with the specified value');
+      setSelectedIndex(found);
+      return;
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('[MSelectFrequency]', 'could not find a recurrence rule:', currentValue);
+    // I only want to run this hook when the component mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (selectedIndex === null) return;
+
     if (selectedIndex === rules.length) {
       setSelectedIndex(null);
       formikContext?.setFieldValue(props.name, null);
       return;
     }
 
-    formikContext?.setFieldValue(props.name, rules[selectedIndex]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    formikContext?.setFieldValue(props.name, rules[selectedIndex].ruleString());
+    // I only want to run this hook when the date prop changes. Selected index should not cause this to re-evaluate.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   const options = rules.map((item, index) => ({
@@ -43,7 +63,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
 
   function onChange(newValue: OnChangeValue<SelectOption, false>, _: ActionMeta<SelectOption>) {
     setSelectedIndex(newValue.value);
-    formikContext?.setFieldValue(props.name, rules[newValue.value]);
+    formikContext?.setFieldValue(props.name, rules[newValue.value].ruleString());
   }
 
   return (

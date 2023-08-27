@@ -11,7 +11,6 @@ import MModal, { MModalRef } from 'components/MModal';
 import MSelectFrequency from 'components/MSelectFrequency';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
-import Recurrence from 'components/Recurrence/Recurrence';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
@@ -19,7 +18,7 @@ import FundingSchedule from 'models/FundingSchedule';
 interface NewFundingValues {
   name: string;
   nextOccurrence: moment.Moment;
-  recurrenceRule: Recurrence;
+  recurrenceRule: string;
   excludeWeekends: boolean;
   estimatedDeposit?: number | null;
 }
@@ -27,7 +26,7 @@ interface NewFundingValues {
 const initialValues: NewFundingValues = {
   name: '',
   nextOccurrence: moment().add(1, 'day').startOf('day'),
-  recurrenceRule: new Recurrence(),
+  recurrenceRule: '',
   excludeWeekends: false,
   estimatedDeposit: undefined,
 };
@@ -45,7 +44,7 @@ function NewFundingModal(): JSX.Element {
       bankAccountId: selectedBankAccountId,
       name: values.name,
       nextOccurrence: moment(values.nextOccurrence).startOf('day'),
-      rule: values.recurrenceRule.ruleString(),
+      rule: values.recurrenceRule,
       estimatedDeposit: null,
       excludeWeekends: false,
     });

@@ -13,7 +13,6 @@ import MSelectFrequency from 'components/MSelectFrequency';
 import MSelectFunding from 'components/MSelectFunding';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
-import Recurrence from 'components/Recurrence/Recurrence';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
@@ -22,7 +21,7 @@ interface NewExpenseValues {
   name: string;
   amount: number;
   nextOccurrence: moment.Moment;
-  recurrenceRule: Recurrence;
+  recurrenceRule: string;
   fundingScheduleId: number;
 }
 
@@ -30,7 +29,7 @@ const initialValues: NewExpenseValues = {
   name: '',
   amount: 0.00,
   nextOccurrence: moment().add(1, 'day'),
-  recurrenceRule: new Recurrence(),
+  recurrenceRule: '',
   fundingScheduleId: 0,
 };
 
@@ -49,12 +48,11 @@ function NewExpenseModal(): JSX.Element {
     const newSpending = new Spending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
-      description: values.recurrenceRule.name.trim(),
       nextRecurrence: moment(values.nextOccurrence).startOf('day'),
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
-      recurrenceRule: values.recurrenceRule.ruleString(),
+      recurrenceRule: values.recurrenceRule,
     });
 
     helper.setSubmitting(true);

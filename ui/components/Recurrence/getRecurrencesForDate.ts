@@ -21,6 +21,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
   const rules = [
     new Recurrence({
       name: `Every ${ weekdayString }`,
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.WEEKLY,
         interval: 1,
@@ -29,6 +30,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every other ${ weekdayString }`,
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.WEEKLY,
         interval: 2,
@@ -37,6 +39,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every month on the ${ dayStr }`,
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
@@ -45,6 +48,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every other month on the ${ dayStr }`,
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 2,
@@ -53,6 +57,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every 3 months (quarter) on the ${ dayStr }`,
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 3,
@@ -61,6 +66,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every 6 months on the ${ dayStr }`,
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 6,
@@ -69,6 +75,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every year on the ${ ordinalSuffixOf(input.date()) } of ${ input.format('MMMM') }`,
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.YEARLY,
         interval: 1,
@@ -81,6 +88,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
   if (isStartOfMonth || input.date() === 15) {
     rules.push(new Recurrence({
       name: '1st and 15th of every month',
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
@@ -92,6 +100,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
   if (isEndOfMonth || input.date() === 15) {
     rules.push(new Recurrence({
       name: '15th and last day of every month',
+      dtstart: date.toDate(),
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
