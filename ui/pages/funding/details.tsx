@@ -1,9 +1,11 @@
+/* eslint-disable max-len */
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { HeartBroken } from '@mui/icons-material';
+import { HeartBroken, TodayOutlined } from '@mui/icons-material';
 
 import MForm from 'components/MForm';
 import MSpan from 'components/MSpan';
+import MTopNavigation from 'components/MTopNavigation';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
 
 interface FundingValues {
@@ -15,7 +17,7 @@ interface FundingValues {
 export default function FundingDetails(): JSX.Element {
   const { fundingId } = useParams();
 
-  const funding = useFundingSchedule(fundingId && +fundingId);
+  const { data: funding } = useFundingSchedule(fundingId && +fundingId);
 
   if (!fundingId) {
     return (
@@ -31,7 +33,7 @@ export default function FundingDetails(): JSX.Element {
     );
   }
 
-  if (!funding.data) {
+  if (!funding) {
     return null;
   }
 
@@ -40,14 +42,19 @@ export default function FundingDetails(): JSX.Element {
   }
 
   const initialValues: FundingValues = {
-    name: funding.data.name,
-    excludeWeekends: funding.data.excludeWeekends,
-    estimatedDeposit: funding.data.estimatedDeposit,
+    name: funding.name,
+    excludeWeekends: funding.excludeWeekends,
+    estimatedDeposit: funding.estimatedDeposit,
   };
 
   return (
-    <MForm onSubmit={ submit } initialValues={ initialValues }>
-
+    <MForm onSubmit={ submit } initialValues={ initialValues } className='flex w-full h-full flex-col'>
+      <MTopNavigation
+        title='Funding Schedules'
+        icon={ TodayOutlined }
+        breadcrumb={ funding.name }
+        base={ `/bank/${funding.bankAccountId}/funding` }
+      />
     </MForm>
   );
 }

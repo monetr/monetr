@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
 import { FormikHelpers } from 'formik';
 import moment from 'moment';
@@ -9,9 +9,9 @@ import MAmountField from 'components/MAmountField';
 import MFormButton, { MBaseButton } from 'components/MButton';
 import MForm from 'components/MForm';
 import MSelectSpending from 'components/MSelectSpending';
-import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
+import MTopNavigation from 'components/MTopNavigation';
 import { useTransaction, useUpdateTransaction } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 import MerchantIcon from 'pages/new/MerchantIcon';
@@ -89,46 +89,35 @@ export default function TransactionDetails(): JSX.Element {
     amount: +(transaction.amount / 100).toFixed(2),
   };
 
+  function backToTransactions() {
+    navigate(`/bank/${transaction.bankAccountId}/transactions`);
+  }
+
   return (
     <MForm
       initialValues={ initialValues }
       onSubmit={ submit }
       className='flex w-full h-full flex-col'
     >
-      <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 md:justify-between'>
-        <div className='flex grow items-center gap-2 mt-2 md:mt-0 min-w-0 overflow-none'>
-          <MSidebarToggle />
-          <span className='flex items-center text-2xl dark:text-dark-monetr-content-subtle font-bold'>
-            <ShoppingCartOutlined />
-          </span>
-          <Link
-            className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis font-bold cursor-pointer'
-            to={ `/bank/${transaction?.bankAccountId}/transactions` }
-          >
-            Transactions
-          </Link>
-          <span className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle font-bold'>
-          /
-          </span>
-          <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold whitespace-nowrap text-ellipsis overflow-hidden min-w-0 flex-1'>
-            { transaction?.name }
-          </span>
-        </div>
-        <div className='md:min-w-0 fixed md:static bottom-2 right-2 h-10 md:h-16 items-center flex gap-2 justify-end'>
-          <MBaseButton
-            color='secondary'
-            className='gap-1 py-1 px-2'
-            onClick={ () => navigate(`/bank/${transaction.bankAccountId}/transactions`) }
-          >
-            <ArrowBackOutlined />
+      <MTopNavigation
+        icon={ ShoppingCartOutlined }
+        title='Transactions'
+        base={ `/bank/${transaction.bankAccountId}/transactions` }
+        breadcrumb={ transaction?.name }
+      >
+        <MBaseButton
+          color='secondary'
+          className='gap-1 py-1 px-2'
+          onClick={ backToTransactions }
+        >
+          <ArrowBackOutlined />
             Cancel
-          </MBaseButton>
-          <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit'>
-            <SaveOutlined />
+        </MBaseButton>
+        <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit'>
+          <SaveOutlined />
             Save Changes
-          </MFormButton>
-        </div>
-      </div>
+        </MFormButton>
+      </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>

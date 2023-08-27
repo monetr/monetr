@@ -72,7 +72,7 @@ export function MSpanDeriveClasses(props: MSpanStyleProps): string {
       ],
     }[props.color],
     {
-      'block text-ellipsis min-w-0 truncate w-full': props.ellipsis,
+      'block text-ellipsis min-w-0 truncate': props.ellipsis,
     },
     {
       'inherit': 'text-size-inherit',

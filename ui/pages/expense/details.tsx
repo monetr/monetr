@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import React from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined, SwapVertOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
@@ -15,9 +15,9 @@ import MDivider from 'components/MDivider';
 import MForm from 'components/MForm';
 import MSelectFrequency from 'components/MSelectFrequency';
 import MSelectFunding from 'components/MSelectFunding';
-import MSidebarToggle from 'components/MSidebarToggle';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
+import MTopNavigation from 'components/MTopNavigation';
 import { useRemoveSpending, useSpending, useUpdateSpending } from 'hooks/spending';
 import { showTransferModal } from 'modals/TransferModal';
 import Spending, { SpendingType } from 'models/Spending';
@@ -148,48 +148,33 @@ export default function ExpenseDetails(): JSX.Element {
 
   return (
     <MForm initialValues={ initialValues } onSubmit={ submit } className='flex w-full h-full flex-col'>
-      <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 md:justify-between'>
-        <div className='flex items-center gap-2 mt-2 md:mt-0'>
-          <MSidebarToggle />
-          <span className='flex items-center text-2xl dark:text-dark-monetr-content-subtle font-bold'>
-            <PriceCheckOutlined />
-          </span>
-          <Link
-            className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle dark:hover:text-dark-monetr-content-emphasis font-bold cursor-pointer'
-            to={ `/bank/${spending.bankAccountId}/expenses` }
-          >
-            Expenses
-          </Link>
-          <span className='text-2xl hidden md:block dark:text-dark-monetr-content-subtle font-bold'>
-          /
-          </span>
-          <span className='text-2xl dark:text-dark-monetr-content-emphasis font-bold'>
-            { spending?.name }
-          </span>
-        </div>
-        <div className='flex gap-2'>
-          <MBaseButton color='secondary' className='gap-1 py-1 px-2' onClick={ backToExpenses } >
-            <ArrowBackOutlined />
+      <MTopNavigation
+        icon={ PriceCheckOutlined }
+        title='Expenses'
+        base={ `/bank/${spending.bankAccountId}/expenses` }
+        breadcrumb={ spending?.name }
+      >
+        <MBaseButton color='secondary' className='gap-1 py-1 px-2' onClick={ backToExpenses } >
+          <ArrowBackOutlined />
             Cancel
-          </MBaseButton>
-          <MBaseButton
-            color='secondary'
-            className='gap-1 py-1 px-2'
-            onClick={ () => showTransferModal({ initialToSpendingId: spending?.spendingId }) }
-          >
-            <SwapVertOutlined />
+        </MBaseButton>
+        <MBaseButton
+          color='secondary'
+          className='gap-1 py-1 px-2'
+          onClick={ () => showTransferModal({ initialToSpendingId: spending?.spendingId }) }
+        >
+          <SwapVertOutlined />
             Transfer
-          </MBaseButton>
-          <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ deleteExpense } >
-            <DeleteOutlined />
+        </MBaseButton>
+        <MBaseButton color='cancel' className='gap-1 py-1 px-2' onClick={ deleteExpense } >
+          <DeleteOutlined />
             Remove
-          </MBaseButton>
-          <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
-            <SaveOutlined />
-            Save Changes
-          </MFormButton>
-        </div>
-      </div>
+        </MBaseButton>
+        <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit' role='form'>
+          <SaveOutlined />
+            Save
+        </MFormButton>
+      </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col items-center'>
