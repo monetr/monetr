@@ -120,6 +120,7 @@ export default function ExpenseDetails(): JSX.Element {
     const updatedSpending = new Spending({
       ...spending,
       name: values.name,
+      description: null,
       nextRecurrence: moment(values.nextRecurrence).startOf('day'),
       fundingScheduleId: values.fundingScheduleId,
       recurrenceRule: values.recurrenceRule,
@@ -195,7 +196,7 @@ export default function ExpenseDetails(): JSX.Element {
             <div className='w-full flex justify-center mb-2'>
               <MerchantIcon name={ spending?.name } />
             </div>
-            <MTextField className='w-full' label='Expense' name='name' value={ spending?.name } />
+            <MTextField className='w-full' label='Expense' name='name' />
             <MAmountField allowNegative={ false } className='w-full' label='Amount' name='amount' />
             <MTextField
               className='w-full'
