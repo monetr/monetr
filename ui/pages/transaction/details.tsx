@@ -115,7 +115,7 @@ export default function TransactionDetails(): JSX.Element {
         </div>
         <div className='md:min-w-0 fixed md:static bottom-2 right-2 h-10 md:h-16 items-center flex gap-2 justify-end'>
           <MBaseButton
-            color='cancel'
+            color='secondary'
             className='gap-1 py-1 px-2'
             onClick={ () => navigate(`/bank/${transaction.bankAccountId}/transactions`) }
           >

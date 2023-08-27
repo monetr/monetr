@@ -103,7 +103,12 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
             <BudgetingInfo className='flex w-full text-sm md:hidden' />
           </div>
         </div>
-        <MSelectSpendingTransaction transaction={ transaction } />
+        {!transaction.getIsAddition() && (
+          <MSelectSpendingTransaction transaction={ transaction } />
+        )}
+        {transaction.getIsAddition() && (
+          <BudgetingInfo className='hidden md:flex w-1/2 flex-1 items-center pl-6' />
+        )}
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
           <span className={ amountClassnames }>
             {transaction.getAmountString()}
