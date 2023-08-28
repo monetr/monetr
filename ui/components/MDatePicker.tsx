@@ -134,7 +134,6 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     'text-sm',
     'w-full',
     'relative',
-    className,
   );
 
   const LabelDecorator = props.labelDecorator || (() => null);
@@ -151,12 +150,10 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const wrapperClassNames = mergeTailwind({
     // This will make it so the space below the input is the same when there is and isn't an error.
     'pb-[18px]': !props.error,
-  }, 'relative', props.className);
+  }, 'relative', className);
 
   return (
-    <div
-      className={ wrapperClassNames }
-    >
+    <div className={ wrapperClassNames }>
       <MLabel
         label={ props.label }
         disabled={ props.disabled }

@@ -2,17 +2,18 @@ import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
-import moment from 'moment';
 import { useSnackbar } from 'notistack';
 
 import MAmountField from 'components/MAmountField';
 import MFormButton from 'components/MButton';
+import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MModal, { MModalRef } from 'components/MModal';
 import MSelectFrequency from 'components/MSelectFrequency';
 import MSelectFunding from 'components/MSelectFunding';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
+import { startOfDay, startOfTomorrow } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
@@ -20,7 +21,7 @@ import Spending, { SpendingType } from 'models/Spending';
 interface NewExpenseValues {
   name: string;
   amount: number;
-  nextOccurrence: moment.Moment;
+  nextOccurrence: Date;
   recurrenceRule: string;
   fundingScheduleId: number;
 }
@@ -28,7 +29,7 @@ interface NewExpenseValues {
 const initialValues: NewExpenseValues = {
   name: '',
   amount: 0.00,
-  nextOccurrence: moment().add(1, 'day'),
+  nextOccurrence: startOfTomorrow(),
   recurrenceRule: '',
   fundingScheduleId: 0,
 };
@@ -48,7 +49,7 @@ function NewExpenseModal(): JSX.Element {
     const newSpending = new Spending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
-      nextRecurrence: moment(values.nextOccurrence).startOf('day'),
+      nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
@@ -93,13 +94,12 @@ function NewExpenseModal(): JSX.Element {
               className='w-full md:w-1/2'
               allowNegative={ false }
             />
-            <MTextField
-              name='nextOccurrence'
-              label='When do you need it next?'
-              required
-              type='date'
+            <MDatePicker
               className='w-full md:w-1/2'
-              min={ moment().add(1, 'day').startOf('day').format('YYYY-MM-DD') }
+              label='When do you need it next?'
+              min={ startOfTomorrow() }
+              name='nextOccurrence'
+              required
             />
           </div>
           <MSelectFunding

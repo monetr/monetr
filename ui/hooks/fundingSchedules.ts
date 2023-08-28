@@ -2,6 +2,7 @@
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
 
+import { format, isBefore } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import FundingSchedule from 'models/FundingSchedule';
 import Spending from 'models/Spending';
@@ -24,10 +25,15 @@ export function useFundingSchedulesSink(): UseQueryResult<Array<FundingSchedule>
  */
 export function useNextFundingDate(): string | null {
   const { data: funding } = useFundingSchedulesSink();
-  return funding
-    ?.sort((a, b) => a.nextOccurrence.unix() < b.nextOccurrence.unix() ? 1 : -1)
-    .pop()
-    ?.nextOccurrence?.format('M/DD');
+  const date = funding
+    ?.sort((a, b) => isBefore(a.nextOccurrence, b.nextOccurrence) ? 1 : -1)
+    .pop();
+
+  if (date) {
+    return format(date.nextOccurrence, 'M/dd');
+  }
+
+  return null;
 }
 
 export function useFundingSchedule(fundingScheduleId: number | null): UseQueryResult<FundingSchedule | undefined, unknown> {

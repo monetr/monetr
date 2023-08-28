@@ -1,8 +1,8 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
+import { parseJSON } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { SpendingType } from 'models/Spending';
-import { mustParseToMoment } from 'util/parseToMoment';
 import request from 'util/request';
 
 interface SpendingBareMinimum {
@@ -44,8 +44,8 @@ export function useNextFundingForecast(fundingScheduleId: number): UseQueryResul
 }
 
 export class Forecast {
-  startingTime: moment.Moment;
-  endingTime: moment.Moment;
+  startingTime: Date;
+  endingTime: Date;
   startingBalance: number;
   endingBalance: number;
   events: Array<Event>;
@@ -53,8 +53,8 @@ export class Forecast {
   constructor(data?: Partial<Forecast>) {
     if (data) Object.assign(this, {
       ...data,
-      startingTime: mustParseToMoment(data.startingTime),
-      endingTime: mustParseToMoment(data.endingTime),
+      startingTime: parseJSON(data.startingTime),
+      endingTime: parseJSON(data.endingTime),
       events: (data?.events || []).map(item => new Event(item)),
     });
   }
@@ -63,7 +63,7 @@ export class Forecast {
 export class Event {
   balance: number;
   contribution: number;
-  date: moment.Moment;
+  date: Date;
   delta: number;
   funding: Array<FundingEvent>;
   spending: Array<SpendingEvent>;
@@ -72,7 +72,7 @@ export class Event {
   constructor(data?: Partial<Event>) {
     if (data) Object.assign(this, {
       ...data,
-      date: mustParseToMoment(data.date),
+      date: parseJSON(data.date),
       funding: (data?.funding || []).map(item => new FundingEvent(item)),
       spending: (data?.spending || []).map(item => new SpendingEvent(item)),
     });
@@ -81,7 +81,7 @@ export class Event {
 
 export class SpendingEvent {
   contributionAmount: number;
-  date: moment.Moment;
+  date: Date;
   funding: Array<FundingEvent>;
   rollingAllocation: number;
   spendingId: number;
@@ -90,23 +90,23 @@ export class SpendingEvent {
   constructor(data?: Partial<SpendingEvent>) {
     if (data) Object.assign(this, {
       ...data,
-      date: mustParseToMoment(data.date),
+      date: parseJSON(data.date),
       funding: (data?.funding || []).map(item => new FundingEvent(item)),
     });
   }
 }
 
 export class FundingEvent {
-  date: moment.Moment;
+  date: Date;
   fundingScheduleId: number;
-  originalDate: moment.Moment;
+  originalDate: Date;
   weekendAvoided: boolean;
 
   constructor(data?: Partial<FundingEvent>) {
     if (data) Object.assign(this, {
       ...data,
-      date: mustParseToMoment(data.date),
-      originalDate: mustParseToMoment(data.originalDate),
+      date: parseJSON(data.date),
+      originalDate: parseJSON(data.originalDate),
     });
   }
 }
