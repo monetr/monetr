@@ -20,9 +20,6 @@ dependencies:
   '@fontsource-variable/inter':
     specifier: 5.0.4
     version: 5.0.4
-  '@headlessui/react':
-    specifier: ^1.7.17
-    version: 1.7.17(react-dom@18.2.0)(react@18.2.0)
   '@mui/icons-material':
     specifier: 5.11.0
     version: 5.11.0(@mui/material@5.11.3)(@types/react@18.2.12)(react@18.2.0)

@@ -83,7 +83,6 @@ function NewFundingModal(): JSX.Element {
             name='nextOccurrence'
             label='When do you get paid next?'
             required
-            ref={ ref }
             min={ startOfTomorrow() }
           />
           <MSelectFrequency

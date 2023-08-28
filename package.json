@@ -70,7 +70,6 @@
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",
     "@fontsource-variable/inter": "5.0.4",
-    "@headlessui/react": "^1.7.17",
     "@mui/icons-material": "5.11.0",
     "@mui/lab": "5.0.0-alpha.114",
     "@mui/material": "5.11.3",

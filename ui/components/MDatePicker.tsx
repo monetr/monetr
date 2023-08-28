@@ -2,8 +2,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { DayPickerSingleProps } from 'react-day-picker';
-import { Popover } from '@headlessui/react';
 import { CloseOutlined, TodayOutlined } from '@mui/icons-material';
+import { Popover } from '@mui/material';
 import { useFormikContext } from 'formik';
 
 import MCalendar from './MCalendar';
@@ -32,7 +32,7 @@ export interface MDatePickerProps extends
   required?: boolean;
 }
 
-const MDatePicker = React.forwardRef<HTMLDivElement, MDatePickerProps>((props, ref) => {
+export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const today = startOfToday();
   const formikContext = useFormikContext();
 
@@ -45,10 +45,16 @@ const MDatePicker = React.forwardRef<HTMLDivElement, MDatePickerProps>((props, r
     enableClear = false,
     className,
     enableYearNavigation = false,
-    ...other
   } = props;
 
   const [selectedValue, setSelectedValue] = useState<Date | null>(value);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  }, [setAnchorEl]);
+  const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
 
   const disabledDays = useMemo(() => {
     const disabledDays = [];
@@ -148,11 +154,8 @@ const MDatePicker = React.forwardRef<HTMLDivElement, MDatePickerProps>((props, r
   }, 'relative', props.className);
 
   return (
-    <Popover
-      ref={ ref }
-      as="div"
+    <div
       className={ wrapperClassNames }
-      { ...other }
     >
       <MLabel
         label={ props.label }
@@ -162,9 +165,12 @@ const MDatePicker = React.forwardRef<HTMLDivElement, MDatePickerProps>((props, r
       >
         <LabelDecorator name={ props.name } disabled={ props.disabled } />
       </MLabel>
-      <Popover.Button
+      <button
+        type='button'
         disabled={ disabled }
         className={ classNames }
+        onClick={ handleClick }
+        role='none'
       >
         <TodayOutlined className='text-lg mr-2' />
         <span className="truncate">{formattedSelection}</span>
@@ -182,37 +188,37 @@ const MDatePicker = React.forwardRef<HTMLDivElement, MDatePickerProps>((props, r
             <CloseOutlined />
           </button>
         ) : null }
-      </Popover.Button>
-      <Popover.Panel
-        className={ mergeTailwind(
-          // common
-          'absolute z-50 divide-y overflow-y-auto min-w-min outline-none rounded-lg p-3 border',
-          // dark
-          'dark:bg-dark-monetr-background dark:border-dark-monetr-border-subtle dark:shadow-2xl',
-        ) }
+      </button>
+      <Popover
+        open={ open }
+        anchorEl={ anchorEl }
+        onClose={ handleClose }
+        transitionDuration={ 200 }
       >
-        {({ close }) => (
-          <MCalendar<DayPickerSingleProps>
-            showOutsideDays={ true }
-            mode="single"
-            defaultMonth={ defaultMonth }
-            selected={ selectedValue }
-            onSelect={ (value: Date) => {
-              handleSelect(value);
-              close();
-            } }
-            locale={ enUS }
-            disabled={ disabledDays }
-            enableYearNavigation={ enableYearNavigation }
-          />
-        )}
-      </Popover.Panel>
+        <MCalendar<DayPickerSingleProps>
+          showOutsideDays={ true }
+          mode="single"
+          defaultMonth={ defaultMonth }
+          selected={ selectedValue }
+          onSelect={ (value: Date) => {
+            handleSelect(value);
+            handleClose();
+          } }
+          locale={ enUS }
+          disabled={ disabledDays }
+          enableYearNavigation={ enableYearNavigation }
+          className={ mergeTailwind(
+            // common
+            'z-50 overflow-y-auto outline-none rounded-lg p-3 border',
+            // dark
+            'dark:bg-dark-monetr-background dark:border-dark-monetr-border-subtle dark:shadow-2xl',
+          ) }
+        />
+      </Popover>
       <Error />
-    </Popover>
+    </div>
   );
-});
-
-export default MDatePicker;
+}
 
 export function formatSelectedDates(
   startDate: Date | null,

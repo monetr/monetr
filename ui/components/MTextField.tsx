@@ -1,6 +1,5 @@
 import React from 'react';
 import { useFormikContext } from 'formik';
-import moment from 'moment';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
 
@@ -98,18 +97,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
   }, props.className);
 
   // If we are working with a date picker, then take the current value and transform it for the actual input.
-  let value = formikContext?.values[props.name];
-  switch (props?.type) {
-    case 'date':
-      value = moment(value).format('YYYY-MM-DD');
-      break;
-    case 'number':
-      // TODO I would love to have support for formatting numbers as they are typed and such.
-      // if (typeof value === 'number') {
-      //   value = (value as number).toFixed(2);
-      // }
-      break;
-  }
+  const value = formikContext?.values[props.name];
 
   return (
     <div className={ wrapperClassNames }>
