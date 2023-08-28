@@ -4,7 +4,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { DeleteOutlined, HeartBroken, SaveOutlined, TodayOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikErrors, FormikHelpers } from 'formik';
-import moment, { Moment } from 'moment';
 import { useSnackbar } from 'notistack';
 
 import MAmountField from 'components/MAmountField';
@@ -15,13 +14,14 @@ import MSelectFrequency from 'components/MSelectFrequency';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import MTopNavigation from 'components/MTopNavigation';
+import { startOfDay } from 'date-fns';
 import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 import { APIError } from 'util/request';
 
 interface FundingValues {
   name: string;
-  nextOccurrence: Moment;
+  nextOccurrence: Date;
   rule: string;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
@@ -68,7 +68,7 @@ export default function FundingDetails(): JSX.Element {
     const updatedFunding = new FundingSchedule({
       ...funding,
       name: values.name,
-      nextOccurrence: moment(values.nextOccurrence).startOf('day'),
+      nextOccurrence: startOfDay(values.nextOccurrence),
       rule: values.rule,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: values.estimatedDeposit,

@@ -16,7 +16,7 @@ export default class FundingSchedule {
     if (data) {
       Object.assign(this, {
         ...data,
-        lastOccurrence: data.lastOccurrence ?? parseJSON(data.lastOccurrence),
+        lastOccurrence: data.lastOccurrence && parseJSON(data.lastOccurrence),
         nextOccurrence: parseJSON(data.nextOccurrence),
       });
     }

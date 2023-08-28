@@ -3,9 +3,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
-import moment from 'moment';
 
 import MSpan from 'components/MSpan';
+import { format, isThisYear } from 'date-fns';
 import { useNextFundingForecast } from 'hooks/forecast';
 import FundingSchedule from 'models/FundingSchedule';
 import { rrulestr } from 'rrule';
@@ -26,8 +26,9 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
   const ruleDescription = capitalize(rule.toText());
 
   const next = funding.nextOccurrence;
-  const dateFormatString = next.year() !== moment().year() ? 'dddd MMMM Do, yyyy' : 'dddd MMMM Do';
-  const nextOccurrenceString = `${next.format(dateFormatString)} (${next.fromNow()})`;
+  const dateFormatString = isThisYear(next) ? 'EEEE LLLL do' : 'EEEE LLLL do, yyyy';
+  // TODO look into format distance.
+  const nextOccurrenceString = `${format(next, dateFormatString)}`;
 
   function openDetails() {
     navigate(`/bank/${funding.bankAccountId}/funding/${funding.fundingScheduleId}/details`);
