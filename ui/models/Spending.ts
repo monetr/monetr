@@ -29,9 +29,9 @@ export default class Spending {
     if (data) {
       Object.assign(this, {
         ...data,
-        lastRecurrence: data.lastRecurrence ?? parseJSON(data.lastRecurrence),
-        nextRecurrence: data.nextRecurrence ?? parseJSON(data.nextRecurrence),
-        dateCreated: data.dateCreated ?? parseJSON(data.dateCreated),
+        lastRecurrence: data.lastRecurrence && parseJSON(data.lastRecurrence),
+        nextRecurrence: data.nextRecurrence && parseJSON(data.nextRecurrence),
+        dateCreated: data.dateCreated && parseJSON(data.dateCreated),
       });
     }
   }
@@ -41,8 +41,8 @@ export default class Spending {
   // appended to the end of the date string.
   getNextOccurrenceString(): string {
     return isThisYear(this.nextRecurrence) ?
-      format(this.nextRecurrence, 'MMM Do') :
-      format(this.nextRecurrence, 'MMM Do, YYYY');
+      format(this.nextRecurrence, 'MMM do') :
+      format(this.nextRecurrence, 'MMM do, YYYY');
   }
 
   getTargetAmountString(): string {

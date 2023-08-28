@@ -4,13 +4,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowBackOutlined, DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined, SwapVertOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
-import moment from 'moment';
 import { useSnackbar } from 'notistack';
 
 import ExpenseTimeline from './ExpenseTimeline';
 
 import MAmountField from 'components/MAmountField';
 import MFormButton, { MBaseButton } from 'components/MButton';
+import MDatePicker from 'components/MDatePicker';
 import MDivider from 'components/MDivider';
 import MForm from 'components/MForm';
 import MSelectFrequency from 'components/MSelectFrequency';
@@ -18,6 +18,7 @@ import MSelectFunding from 'components/MSelectFunding';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import MTopNavigation from 'components/MTopNavigation';
+import { startOfDay, startOfToday } from 'date-fns';
 import { useRemoveSpending, useSpending, useUpdateSpending } from 'hooks/spending';
 import { showTransferModal } from 'modals/TransferModal';
 import Spending, { SpendingType } from 'models/Spending';
@@ -27,7 +28,7 @@ import { APIError } from 'util/request';
 interface ExpenseValues {
   name: string;
   amount: number;
-  nextRecurrence: moment.Moment;
+  nextRecurrence: Date;
   fundingScheduleId: number;
   recurrenceRule: string;
 }
@@ -121,7 +122,7 @@ export default function ExpenseDetails(): JSX.Element {
       ...spending,
       name: values.name,
       description: null,
-      nextRecurrence: moment(values.nextRecurrence).startOf('day'),
+      nextRecurrence: startOfDay(values.nextRecurrence),
       fundingScheduleId: values.fundingScheduleId,
       recurrenceRule: values.recurrenceRule,
       targetAmount: Math.ceil(values.amount * 100),
@@ -181,19 +182,21 @@ export default function ExpenseDetails(): JSX.Element {
             <div className='w-full flex justify-center mb-2'>
               <MerchantIcon name={ spending?.name } />
             </div>
-            <MTextField className='w-full' label='Expense' name='name' />
-            <MAmountField allowNegative={ false } className='w-full' label='Amount' name='amount' />
-            <MTextField
-              className='w-full'
+            <MTextField className='w-full' label='Expense' name='name' required />
+            <MAmountField allowNegative={ false } className='w-full' label='Amount' name='amount' required />
+            <MDatePicker
               label='Next Occurrence'
               name='nextRecurrence'
-              type='date'
+              className='w-full'
+              required
+              min={ startOfToday() }
             />
             <MSelectFunding
               className='w-full'
               label='When do you want to fund the expense?'
               menuPortalTarget={ document.body }
               name='fundingScheduleId'
+              required
             />
             <MSelectFrequency
               className='w-full'
@@ -201,6 +204,7 @@ export default function ExpenseDetails(): JSX.Element {
               label='How often do you need this expense?'
               name='recurrenceRule'
               placeholder='Select a spending frequency...'
+              required
             />
           </div>
           <MDivider className='block md:hidden w-1/2' />
