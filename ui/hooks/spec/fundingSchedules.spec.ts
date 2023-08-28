@@ -1,6 +1,6 @@
 import { act } from '@testing-library/react-hooks';
-import moment from 'moment';
 
+import { parseJSON } from 'date-fns';
 import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 import { rest } from 'msw';
@@ -143,7 +143,7 @@ describe('funding schedule hooks', () => {
           bankAccountId: 12,
           description: 'something',
           name: 'Elliot\'s Contribution',
-          nextOccurrence: moment('2023-07-31T05:00:00Z'),
+          nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
           rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
@@ -185,7 +185,7 @@ describe('funding schedule hooks', () => {
             bankAccountId: 12,
             description: 'something',
             name: 'Elliot\'s Contribution',
-            nextOccurrence: moment('2023-07-31T05:00:00Z'),
+            nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
             rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
             estimatedDeposit: null,
             excludeWeekends: true,
@@ -244,7 +244,7 @@ describe('funding schedule hooks', () => {
           bankAccountId: 12,
           description: 'something',
           name: 'Elliot\'s Contribution',
-          nextOccurrence: moment('2023-07-31T05:00:00Z'),
+          nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
           rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
@@ -288,7 +288,7 @@ describe('funding schedule hooks', () => {
             bankAccountId: 12,
             description: 'something',
             name: 'Elliot\'s Contribution',
-            nextOccurrence: moment('2023-07-31T05:00:00Z'),
+            nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
             rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
             estimatedDeposit: null,
             excludeWeekends: true,

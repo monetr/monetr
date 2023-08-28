@@ -11,10 +11,16 @@ export default ({ config, mode }) => {
     ...config,
     experiments: {
       ...config?.experiments,
-      incrementalRebuild: false,
+      incrementalRebuild: true,
     },
     builtins: {
       ...config?.builtins,
+      react: {
+        ...config?.builtins?.react,
+        runtime: 'automatic',
+        development: true,
+        refresh: true,
+      },
       copy: {
         ...config?.builtins?.copy,
         patterns: [

@@ -2,22 +2,23 @@ import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
-import moment from 'moment';
 import { useSnackbar } from 'notistack';
 
 import MFormButton from 'components/MButton';
+import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MModal, { MModalRef } from 'components/MModal';
 import MSelectFrequency from 'components/MSelectFrequency';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
+import { startOfDay, startOfTomorrow } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 
 interface NewFundingValues {
   name: string;
-  nextOccurrence: moment.Moment;
+  nextOccurrence: Date;
   recurrenceRule: string;
   excludeWeekends: boolean;
   estimatedDeposit?: number | null;
@@ -25,7 +26,7 @@ interface NewFundingValues {
 
 const initialValues: NewFundingValues = {
   name: '',
-  nextOccurrence: moment().add(1, 'day').startOf('day'),
+  nextOccurrence: startOfTomorrow(),
   recurrenceRule: '',
   excludeWeekends: false,
   estimatedDeposit: undefined,
@@ -43,7 +44,7 @@ function NewFundingModal(): JSX.Element {
     const newFundingSchedule = new FundingSchedule({
       bankAccountId: selectedBankAccountId,
       name: values.name,
-      nextOccurrence: moment(values.nextOccurrence).startOf('day'),
+      nextOccurrence: startOfDay(new Date(values.nextOccurrence)),
       rule: values.recurrenceRule,
       estimatedDeposit: null,
       excludeWeekends: false,
@@ -78,12 +79,12 @@ function NewFundingModal(): JSX.Element {
             autoComplete="off"
             placeholder="Example: Payday..."
           />
-          <MTextField
+          <MDatePicker
             name='nextOccurrence'
             label='When do you get paid next?'
             required
-            type='date'
-            min={ initialValues.nextOccurrence.format('YYYY-MM-DD') }
+            ref={ ref }
+            min={ startOfTomorrow() }
           />
           <MSelectFrequency
             dateFrom="nextOccurrence"
