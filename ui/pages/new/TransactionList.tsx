@@ -1,13 +1,13 @@
 import React, { Fragment } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { ShoppingCartOutlined } from '@mui/icons-material';
-import moment from 'moment';
 import * as R from 'ramda';
 
 import TransactionDateItem from './TransactionDateItem';
 import TransactionItem from './TransactionItem';
 
 import MTopNavigation from 'components/MTopNavigation';
+import { format, getUnixTime, parse } from 'date-fns';
 import { useTransactions } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 
@@ -36,17 +36,17 @@ export default function TransactionList(): JSX.Element {
   function TransactionItems() {
     interface TransactionGroup {
       transactions: Array<Transaction>;
-      group: moment.Moment;
+      group: Date;
     }
     return R.pipe(
-      R.groupBy((item: Transaction) => item.date.toString()),
+      R.groupBy((item: Transaction) => format(item.date, 'yyyy-MM-dd')),
       R.mapObjIndexed((transactions, date) => ({
         transactions: transactions,
-        group: moment(date),
+        group: parse(date, 'yyyy-MM-dd', new Date()),
       })),
       R.values,
       R.map(({ transactions, group }: TransactionGroup): JSX.Element => (
-        <li key={ group.unix() }>
+        <li key={ getUnixTime(group) }>
           <ul className='flex gap-2 flex-col'>
             <TransactionDateItem date={ group } />
             {

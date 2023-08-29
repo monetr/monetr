@@ -1,7 +1,5 @@
-import moment from 'moment';
-
+import { parseJSON } from 'date-fns';
 import formatAmount from 'util/formatAmount';
-import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export default class Transaction {
   transactionId: number;
@@ -11,22 +9,22 @@ export default class Transaction {
   spendingAmount?: number;
   categories: string[];
   originalCategories: string[];
-  date: moment.Moment;
-  authorizedDate?: moment.Moment;
+  date: Date;
+  authorizedDate?: Date;
   name?: string;
   originalName: string;
   merchantName?: string;
   originalMerchantName?: string;
   isPending: boolean;
-  createdAt: moment.Moment;
+  createdAt: Date;
 
   constructor(data?: Partial<Transaction>) {
     if (data) {
       Object.assign(this, {
         ...data,
-        date: mustParseToMoment(data.date),
-        authorizedDate: parseToMomentMaybe(data.authorizedDate),
-        createdAt: mustParseToMoment(data.createdAt),
+        date: parseJSON(data.date),
+        authorizedDate: data.authorizedDate ?? parseJSON(data.authorizedDate),
+        createdAt: parseJSON(data.createdAt),
       });
     }
   }
