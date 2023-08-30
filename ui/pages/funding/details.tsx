@@ -97,7 +97,11 @@ export default function FundingDetails(): JSX.Element {
 
     if (window.confirm(`Are you sure you want to delete funding schedule: ${ funding.name }`)) {
       return removeFundingSchedule(funding)
-        .then(() => backToFunding());
+        .then(() => backToFunding())
+        .catch((error: AxiosError<APIError>) => void enqueueSnackbar(error.response.data['error'], {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        }));
     }
 
     return Promise.resolve();
