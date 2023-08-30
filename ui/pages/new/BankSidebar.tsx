@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
+import { CreditCard, ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
 
 import BankSidebarItem from './BankSidebarItem';
 
@@ -10,6 +10,7 @@ import MDivider from 'components/MDivider';
 import MSidebarToggle from 'components/MSidebarToggle';
 import { ReactElement } from 'components/types';
 import { useLinks } from 'hooks/links';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import mergeTailwind from 'util/mergeTailwind';
 
 export interface BankSidebarProps {
@@ -90,10 +91,26 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>
         { props?.children }
       </div>
+      <SubscriptionButton />
       <SettingsButton />
       <LogoutButton />
     </div>
   );
+}
+
+function SubscriptionButton(): JSX.Element {
+  const {
+    billingEnabled,
+  } = useAppConfiguration();
+  if (billingEnabled) {
+    return (
+      <Link to='/subscription'>
+        <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+      </Link>
+    );
+  }
+
+  return null;
 }
 
 function SettingsButton(): JSX.Element {

@@ -27,7 +27,9 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   function updateSpentFrom(selection: Spending | null) {
     const spendingId = selection ? selection.spendingId : null;
 
-    if (spendingId === transaction.spendingId) {
+    // Not strict equal because undefined vs null stuff.
+    // If the selected spending is the same as what we have now, do nothing.
+    if (spendingId == transaction.spendingId) {
       return Promise.resolve();
     }
 
