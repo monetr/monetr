@@ -71,6 +71,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   return (
     <MSelect
       { ...props }
+      disabled={ formikContext?.isSubmitting }
       error={ formikContext?.errors[props.name] }
       isClearable={ false }
       label={ props.label }

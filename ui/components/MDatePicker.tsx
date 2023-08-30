@@ -35,14 +35,18 @@ export interface MDatePickerProps extends
 export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const today = startOfToday();
   const formikContext = useFormikContext();
+  props = {
+    disabled: formikContext?.isSubmitting,
+    ...props,
+  };
 
   const {
     value = formikContext?.values[props.name],
     min: minDate,
     max: maxDate,
     placeholder = 'Select date',
-    disabled = false,
     enableClear = false,
+    disabled,
     className,
     enableYearNavigation = false,
   } = props;
@@ -164,7 +168,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
       </MLabel>
       <button
         type='button'
-        disabled={ disabled }
+        disabled={ formikContext?.isSubmitting || disabled }
         className={ classNames }
         onClick={ handleClick }
         role='none'

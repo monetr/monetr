@@ -7,6 +7,7 @@ import moment from 'moment';
 
 import MAmountField from 'components/MAmountField';
 import MFormButton, { MBaseButton } from 'components/MButton';
+import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MSelectSpending from 'components/MSelectSpending';
 import MSpan from 'components/MSpan';
@@ -144,10 +145,9 @@ export default function TransactionDetails(): JSX.Element {
               label='Amount'
               name='amount'
             />
-            <MTextField
+            <MDatePicker
               label='Date'
               name='date'
-              type='date'
               className='w-full'
               disabled
             />

@@ -9,6 +9,7 @@ import { useSnackbar } from 'notistack';
 import MAmountField from 'components/MAmountField';
 import MFormButton, { MBaseButton } from 'components/MButton';
 import MCheckbox from 'components/MCheckbox';
+import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MSelectFrequency from 'components/MSelectFrequency';
 import MSpan from 'components/MSpan';
@@ -136,11 +137,10 @@ export default function FundingDetails(): JSX.Element {
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
             <MTextField className='w-full' label='Name' name='name' id="funding-name-search" required />
-            <MTextField
+            <MDatePicker
               className='w-full'
               label='Next Occurrence'
               name='nextOccurrence'
-              type='date'
               required
             />
             <MSelectFrequency
