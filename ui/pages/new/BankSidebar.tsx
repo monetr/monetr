@@ -82,7 +82,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
   );
 
   return (
-    <div className={ className }>
+    <div className={ className } data-testid='bank-sidebar'>
       <MSidebarToggle className='flex lg:hidden' />
       <div className='h-10 w-10'>
         <img src={ Logo } className="w-full" />
@@ -99,12 +99,10 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
 }
 
 function SubscriptionButton(): JSX.Element {
-  const {
-    billingEnabled,
-  } = useAppConfiguration();
-  if (billingEnabled) {
+  const config = useAppConfiguration();
+  if (config?.billingEnabled) {
     return (
-      <Link to='/subscription'>
+      <Link to='/subscription' data-testid='bank-sidebar-subscription'>
         <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
       </Link>
     );
@@ -115,7 +113,7 @@ function SubscriptionButton(): JSX.Element {
 
 function SettingsButton(): JSX.Element {
   return (
-    <Link to='/settings'>
+    <Link to='/settings' data-testid='bank-sidebar-settings'>
       <Settings className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
     </Link>
   );
@@ -125,7 +123,7 @@ function LogoutButton(): JSX.Element {
   // By doing reloadDocument, we are forcing the @tanstack/react-query cache to be emptied. This will naturally just make it
   // easier to prevent the current user's data from leaking into another session.
   return (
-    <Link to='/logout' reloadDocument>
+    <Link to='/logout' reloadDocument data-testid='bank-sidebar-logout'>
       <Logout className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
     </Link>
   );

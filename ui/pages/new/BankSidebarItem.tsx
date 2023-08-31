@@ -23,10 +23,18 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     ?.find(bankAccount => bankAccount.linkId === link.linkId);
 
   const InstitutionLogo = () => {
-    if (!institution?.logo) return <AccountBalance color='info' />;
+    if (!institution?.logo) {
+      return (
+        <AccountBalance
+          data-testid={ `bank-sidebar-item-${link.linkId}-logo-missing` }
+          color='info'
+        />
+      );
+    }
 
     return (
       <img
+        data-testid={ `bank-sidebar-item-${link.linkId}-logo` }
         src={ `data:image/png;base64,${institution.logo}` }
       />
     );
@@ -56,7 +64,10 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     <Tooltip title={ link.getName() } arrow placement='right' classes={ {
       tooltip: 'text-base font-medium',
     } }>
-      <div className='w-full h-12 flex items-center justify-center relative group'>
+      <div
+        className='w-full h-12 flex items-center justify-center relative group'
+        data-testid={ `bank-sidebar-item-${link.linkId}` }
+      >
         <div className={ classes } />
         <Link
           className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
