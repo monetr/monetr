@@ -2,7 +2,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import BankSidebar from '../BankSidebar';
+import BankSidebar from 'components/Layout/BankSidebar';
 
 import { rest } from 'msw';
 import testRenderer from 'testutils/renderer';

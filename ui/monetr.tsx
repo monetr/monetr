@@ -11,24 +11,25 @@ import AfterCheckoutPage from 'pages/account/subscribe/after';
 import ConfigError from 'pages/error/config';
 import ExpenseDetails from 'pages/expense/details';
 import FundingDetails from 'pages/funding/details';
-import FundingNew from 'pages/funding-new';
-import GoalsNew from 'pages/goals-new';
+import Funding from 'pages/funding';
+import Goals from 'pages/goals';
 import LinkCreatePage from 'pages/link/create';
-import LoginNew from 'pages/login-new';
+import Login from 'pages/login';
 import LogoutPage from 'pages/logout';
-import BankSidebar from 'pages/new/BankSidebar';
-import BudgetingSidebar from 'pages/new/BudgetingSidebar';
-import ExpenseList from 'pages/new/ExpenseList';
-import MobileSidebar from 'pages/new/MobileSidebar';
-import TransactionList from 'pages/new/TransactionList';
-import ForgotPasswordNew from 'pages/password/forgot-new';
-import PasswordResetNew from 'pages/password/reset-new';
-import RegisterNew from 'pages/register-new';
+import BankSidebar from 'components/Layout/BankSidebar';
+import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
+import Expenses from 'pages/expenses';
+import MobileSidebar from 'components/Layout/MobileSidebar';
+import Transactions from 'pages/transactions';
+import ForgotPasswordNew from 'pages/password/forgot';
+import PasswordResetNew from 'pages/password/reset';
+import Register from 'pages/register';
 import SettingsAbout from 'pages/settings/about';
 import SettingsOverview from 'pages/settings/overview';
 import SettingsSecurity from 'pages/settings/security';
-import SettingsLayout from 'pages/settings/SettingsLayout';
+import SettingsLayout from 'components/Layout/SettingsLayout';
 import SetupPage from 'pages/setup';
+import SubscriptionPage from 'pages/subscription';
 import TransactionDetails from 'pages/transaction/details';
 import VerifyEmail from 'pages/verify/email';
 import ResendVerificationPage from 'pages/verify/email/resend';
@@ -58,9 +59,9 @@ export default function Monetr(): JSX.Element {
   if (!isAuthenticated) {
     return (
       <Routes>
-        <Route path='/login' element={ <LoginNew /> } />
+        <Route path='/login' element={ <Login /> } />
         <Route path="/logout" element={ <LogoutPage /> } />
-        {config?.allowSignUp && <Route path='/register' element={ <RegisterNew /> } />}
+        {config?.allowSignUp && <Route path='/register' element={ <Register /> } />}
         {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
         <Route path="/password/reset" element={ <PasswordResetNew /> } />
         <Route path="/verify/email" element={ <VerifyEmail /> } />
@@ -95,7 +96,6 @@ export default function Monetr(): JSX.Element {
     );
   }
 
-  // TODO Fix banksidebar issue by moving it into the godless react router routes
   return (
     <div className='max-w-screen max-h-screen h-full w-full dark:bg-dark-monetr-background flex'>
       <BankSidebar className='hidden lg:flex' />
@@ -103,12 +103,13 @@ export default function Monetr(): JSX.Element {
       <div className='w-full h-full flex min-w-0 overflow-y-auto'>
         <Routes>
           <Route path='/bank/:bankAccountId' element={ <BudgetingLayout /> }>
-            <Route path='transactions' element={ <TransactionList /> } />
+            <Route path='transactions' element={ <Transactions /> } />
             <Route path='transactions/:transactionId/details' element={ <TransactionDetails /> } />
-            <Route path='expenses' element={ <ExpenseList /> } />
+            <Route path='expenses' element={ <Expenses /> } />
             <Route path='expenses/:spendingId/details' element={ <ExpenseDetails /> } />
-            <Route path='goals' element={ <GoalsNew /> } />
-            <Route path='funding' element={ <FundingNew /> } />
+            <Route path='goals' element={ <Goals /> } />
+            <Route path='goals/:spendingId/details' element={ null } />
+            <Route path='funding' element={ <Funding /> } />
             <Route path='funding/:fundingId/details' element={ <FundingDetails /> } />
           </Route>
           <Route path='/settings' element={ <SettingsLayout /> }>
@@ -120,6 +121,8 @@ export default function Monetr(): JSX.Element {
           <Route path='/link/create' element={ <LinkCreatePage /> } />
           <Route path="/logout" element={ <LogoutPage /> } />
           <Route path="/plaid/oauth-return" element={ <OAuthRedirect /> } />
+          <Route path='/subscription' element={ <SubscriptionPage /> } />
+          <Route path='/account/subscribe/after' element={ <Navigate replace to="/" /> } />
           <Route path="/setup" element={ <Navigate replace to="/" /> } />
           <Route index path="/" element={ <RedirectToBank /> } />
         </Routes>

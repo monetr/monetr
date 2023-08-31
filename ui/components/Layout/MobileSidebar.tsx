@@ -2,8 +2,8 @@
 import React, { useEffect } from 'react';
 import { useLocation, useMatch } from 'react-router-dom';
 
-import BankSidebar from './BankSidebar';
-import BudgetingSidebar from './BudgetingSidebar';
+import BankSidebar from 'components/Layout/BankSidebar';
+import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
 
 import useStore from 'hooks/store';
 

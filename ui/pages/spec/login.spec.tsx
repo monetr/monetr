@@ -2,7 +2,7 @@ import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { rest } from 'msw';
-import LoginNew from 'pages/login-new';
+import Login from 'pages/login';
 import testRenderer from 'testutils/renderer';
 import { server } from 'testutils/server';
 
@@ -25,7 +25,7 @@ describe('login page', () => {
       }),
     );
 
-    const world = testRenderer(<LoginNew />, { initialRoute: '/login' });
+    const world = testRenderer(<Login />, { initialRoute: '/login' });
 
     await waitFor(() => expect(world.getByTestId('login-email')).toBeVisible());
     await waitFor(() => expect(world.getByTestId('login-password')).toBeVisible());
@@ -45,7 +45,7 @@ describe('login page', () => {
       }),
     );
 
-    const world = testRenderer(<LoginNew />, { initialRoute: '/login' });
+    const world = testRenderer(<Login />, { initialRoute: '/login' });
 
     await waitFor(() => expect(world.getByTestId('login-email')).toBeVisible());
     await waitFor(() => expect(world.getByTestId('login-password')).toBeVisible());
@@ -66,7 +66,7 @@ describe('login page', () => {
       }),
     );
 
-    const world = testRenderer(<LoginNew />, { initialRoute: '/login' });
+    const world = testRenderer(<Login />, { initialRoute: '/login' });
 
     await waitFor(() => expect(world.getByTestId('login-email')).toBeVisible());
     await waitFor(() => expect(world.getByTestId('login-password')).toBeVisible());
@@ -92,7 +92,7 @@ describe('login page', () => {
       }),
     );
 
-    const world = testRenderer(<LoginNew />, { initialRoute: '/login' });
+    const world = testRenderer(<Login />, { initialRoute: '/login' });
 
     await waitFor(() => expect(world.getByTestId('login-email')).toBeVisible());
     await waitFor(() => expect(world.getByTestId('login-password')).toBeVisible());
@@ -128,7 +128,7 @@ describe('login page', () => {
       }),
     );
 
-    const world = testRenderer(<LoginNew />, { initialRoute: '/login' });
+    const world = testRenderer(<Login />, { initialRoute: '/login' });
 
     await waitFor(() => expect(world.getByTestId('login-email')).toBeVisible());
     await waitFor(() => expect(world.getByTestId('login-password')).toBeVisible());

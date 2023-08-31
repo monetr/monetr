@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import RegisterPage, { RegisterSuccessful } from './register-new';
+import RegisterPage, { RegisterSuccessful } from 'pages/register';
 
 import { rest } from 'msw';
 import React from 'react';

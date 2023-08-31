@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CreditCard, ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
 
-import BankSidebarItem from './BankSidebarItem';
+import BankSidebarItem from 'components/Layout/BankSidebarItem';
 
 import { Logo } from 'assets';
 import MDivider from 'components/MDivider';

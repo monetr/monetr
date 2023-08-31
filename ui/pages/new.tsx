@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
 
-import BankSidebar from './new/BankSidebar';
-import BudgetingSidebar from './new/BudgetingSidebar';
-import ExpenseList from './new/ExpenseList';
-import TransactionList from './new/TransactionList';
+import BankSidebar from 'components/Layout/BankSidebar';
+import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
+import Expenses from 'pages/expenses';
+import Transactions from 'pages/transactions';
 
 import { ReactElement } from 'components/types';
 
@@ -40,13 +40,13 @@ export function BankView(props: BankViewProps): JSX.Element {
 
 export function TransactionsView(): JSX.Element {
   return (
-    <TransactionList />
+    <Transactions />
   );
 }
 
 export function ExpensesView(): JSX.Element {
   return (
-    <ExpenseList />
+    <Expenses />
   );
 }
 

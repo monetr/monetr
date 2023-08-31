@@ -1,7 +1,7 @@
 import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 
-import ForgotPasswordPage, { ForgotPasswordComplete } from './forgot-new';
+import ForgotPasswordPage, { ForgotPasswordComplete } from 'pages/password/forgot';
 
 const meta: Meta<typeof ForgotPasswordPage> = {
   title: 'Pages/Authentication/Forgot Password',

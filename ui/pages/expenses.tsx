@@ -1,7 +1,36 @@
-import React from 'react';
+/* eslint-disable max-len */
+import React, { Fragment } from 'react';
+import { AddOutlined, PriceCheckOutlined } from '@mui/icons-material';
 
-import ExpensesView from 'components/Expenses/ExpensesView/ExpensesView';
+import ExpenseItem from 'pages/new/ExpenseItem';
+import { showNewExpenseModal } from 'pages/new/NewExpenseModal';
 
-export default function ExpensesPage(): JSX.Element {
-  return <ExpensesView />;
+import { MBaseButton } from 'components/MButton';
+import MTopNavigation from 'components/MTopNavigation';
+import { useSpendingFiltered } from 'hooks/spending';
+import { SpendingType } from 'models/Spending';
+
+export default function Expenses(): JSX.Element {
+  const { result: expenses } = useSpendingFiltered(SpendingType.Expense);
+
+  return (
+    <Fragment>
+      <MTopNavigation
+        icon={ PriceCheckOutlined }
+        title='Expenses'
+      >
+        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showNewExpenseModal }>
+          <AddOutlined />
+          New Expense
+        </MBaseButton>
+      </MTopNavigation>
+      <div className='w-full h-full overflow-y-auto min-w-0'>
+        <ul className='w-full flex flex-col gap-2 py-2'>
+          { expenses
+            ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+            .map(item => (<ExpenseItem spending={ item } key={ item.spendingId } />)) }
+        </ul>
+      </div>
+    </Fragment>
+  );
 }

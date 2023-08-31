@@ -2,7 +2,7 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 
 import { rest } from 'msw';
-import RegisterNew from 'pages/register-new';
+import Register from 'pages/register';
 import testRenderer from 'testutils/renderer';
 import { server } from 'testutils/server';
 
@@ -16,7 +16,7 @@ describe('register page', () => {
       }),
     );
 
-    const world = testRenderer(<RegisterNew />, { initialRoute: '/register' });
+    const world = testRenderer(<Register />, { initialRoute: '/register' });
 
     await waitFor(() => expect(world.getByTestId('register-first-name')).toBeVisible());
     await waitFor(() => expect(world.getByTestId('register-last-name')).toBeVisible());

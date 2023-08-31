@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import LoginPage from './login-new';
+import LoginPage from 'pages/login';
 
 import { rest } from 'msw';
 
