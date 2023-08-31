@@ -75,9 +75,11 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
           <BreadcrumbMaybe />
         </span>
       </div>
-      <div className='flex gap-2 pb-4 md:p-0'>
-        { props.children ?? <div /> }
-      </div>
+      { props.children && (
+        <div className='flex gap-2 pb-4 md:p-0'>
+          { props.children }
+        </div>
+      )}
     </div>
   );
 }
