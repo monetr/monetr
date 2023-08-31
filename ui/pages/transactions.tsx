@@ -1,18 +1,24 @@
 import React, { Fragment } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
-import { ShoppingCartOutlined } from '@mui/icons-material';
+import { HeartBroken, ShoppingCartOutlined } from '@mui/icons-material';
 import * as R from 'ramda';
 
-import TransactionDateItem from 'pages/new/TransactionDateItem';
-import TransactionItem from 'pages/new/TransactionItem';
-
+import MSpan from 'components/MSpan';
 import MTopNavigation from 'components/MTopNavigation';
 import { format, getUnixTime, parse } from 'date-fns';
 import { useTransactions } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
+import TransactionDateItem from 'pages/new/TransactionDateItem';
+import TransactionItem from 'pages/new/TransactionItem';
 
 export default function Transactions(): JSX.Element {
-  const { isLoading, isFetching, fetchNextPage, error, result: transactions, hasNextPage } = useTransactions();
+  const {
+    isLoading,
+    isError,
+    isFetching,
+    fetchNextPage,
+    result: transactions, hasNextPage,
+  } = useTransactions();
   const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({
@@ -21,7 +27,7 @@ export default function Transactions(): JSX.Element {
     onLoadMore: fetchNextPage,
     // When there is an error, we stop infinite loading.
     // It can be reactivated by setting "error" state as undefined.
-    disabled: !!error,
+    disabled: isError,
     // `rootMargin` is passed to `IntersectionObserver`.
     // We can use it to trigger 'onLoadMore' when the sentry comes near to become
     // visible, instead of becoming fully visible on the screen.
@@ -32,6 +38,30 @@ export default function Transactions(): JSX.Element {
   // useEffect(() => {
   //   return remove;
   // }, [remove]);
+
+  if (isLoading) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <MSpan className='text-5xl'>
+          One moment...
+        </MSpan>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <MSpan className='text-5xl'>
+          Something isn't right...
+        </MSpan>
+        <MSpan className='text-2xl'>
+          We weren't able to retrieve transactions at this time...
+        </MSpan>
+      </div>
+    );
+  }
 
   function TransactionItems() {
     interface TransactionGroup {
@@ -50,8 +80,8 @@ export default function Transactions(): JSX.Element {
           <ul className='flex gap-2 flex-col'>
             <TransactionDateItem date={ group } />
             {
-              transactions.map(transaction =>
-                (<TransactionItem key={ transaction.transactionId } transaction={ transaction } />))
+              transactions
+                .map(transaction => (<TransactionItem key={ transaction.transactionId } transaction={ transaction } />))
             }
           </ul>
         </li>

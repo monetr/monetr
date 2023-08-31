@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { AddOutlined, SavingsOutlined } from '@mui/icons-material';
+import { AddOutlined, HeartBroken, SavingsOutlined } from '@mui/icons-material';
 
 import { MBaseButton } from 'components/MButton';
 import MSpan from 'components/MSpan';
@@ -10,16 +10,32 @@ import { SpendingType } from 'models/Spending';
 export default function Goals(): JSX.Element {
   const {
     result: goals,
-    isError: goalsIsError,
-    isLoading: goalsIsLoading,
+    isError,
+    isLoading,
   } = useSpendingFiltered(SpendingType.Goal);
 
-  if (goalsIsLoading) {
-    return <MSpan>Loading...</MSpan>;
+  if (isLoading) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <MSpan className='text-5xl'>
+          One moment...
+        </MSpan>
+      </div>
+    );
   }
 
-  if (goalsIsError) {
-    return <MSpan>Error...</MSpan>;
+  if (isError) {
+    return (
+      <div className='w-full h-full flex items-center justify-center flex-col gap-2'>
+        <HeartBroken className='dark:text-dark-monetr-content h-24 w-24' />
+        <MSpan className='text-5xl'>
+          Something isn't right...
+        </MSpan>
+        <MSpan className='text-2xl'>
+          We weren't able to retrieve goals at this time...
+        </MSpan>
+      </div>
+    );
   }
 
   function ListContent(): JSX.Element {
@@ -63,7 +79,7 @@ function EmptyState(): JSX.Element {
           <SavingsOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
         </div>
         <MSpan size='xl' color='subtle' className='text-center'>
-            You don't have any goals yet...
+          You don't have any goals yet...
         </MSpan>
         <MSpan size='lg' color='subtle' className='text-center'>
           Goals are longer budgets that don't recur. They are meant to be used to put money aside for something like
