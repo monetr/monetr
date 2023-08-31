@@ -4,16 +4,6 @@ services:
     restart: always # If something goes wrong just restart the container, this is for development only.
     volumes:
       - ./compose/kms.yaml:/init/seed.yaml
-  documentation:
-    image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:8.5.7}
-    user: "${UID:-0}:${GID:-0}"
-    restart: always # If something goes wrong just restart the container, this is for development only.
-    working_dir: /build
-    entrypoint: sh
-    command:
-      - /build/compose/docs-entrypoint.sh
-    volumes:
-      - ./:/build
   monetr:
     tty: true # Makes color output work nicely.
     image: golang:1.19.4
