@@ -2,12 +2,40 @@ import React, { Fragment } from 'react';
 import { AddOutlined, SavingsOutlined } from '@mui/icons-material';
 
 import { MBaseButton } from 'components/MButton';
+import MSpan from 'components/MSpan';
 import MTopNavigation from 'components/MTopNavigation';
 import { useSpendingFiltered } from 'hooks/spending';
 import { SpendingType } from 'models/Spending';
 
 export default function Goals(): JSX.Element {
-  const { result: goals } = useSpendingFiltered(SpendingType.Goal);
+  const {
+    result: goals,
+    isError: goalsIsError,
+    isLoading: goalsIsLoading,
+  } = useSpendingFiltered(SpendingType.Goal);
+
+  if (goalsIsLoading) {
+    return <MSpan>Loading...</MSpan>;
+  }
+
+  if (goalsIsError) {
+    return <MSpan>Error...</MSpan>;
+  }
+
+  function ListContent(): JSX.Element {
+    if (goals.length === 0) {
+      return <EmptyState />;
+    }
+
+    return null;
+    // return (
+    //   <ul className='w-full flex flex-col gap-2 py-2'>
+    //     { goals
+    //       ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+    //       .map(item => (<FundingItem funding={ item } key={ item.fundingScheduleId } />)) }
+    //   </ul>
+    // );
+  }
 
   return (
     <Fragment>
@@ -21,9 +49,27 @@ export default function Goals(): JSX.Element {
         </MBaseButton>
       </MTopNavigation>
       <div className='w-full h-full overflow-y-auto min-w-0'>
-        <ul className='w-full flex flex-col gap-2 py-2'>
-        </ul>
+        <ListContent />
       </div>
     </Fragment>
+  );
+}
+
+function EmptyState(): JSX.Element {
+  return (
+    <div className='w-full h-full flex justify-center items-center'>
+      <div className='flex flex-col gap-2 items-center max-w-md'>
+        <div className='w-full flex justify-center space-x-4'>
+          <SavingsOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+        </div>
+        <MSpan size='xl' color='subtle' className='text-center'>
+            You don't have any goals yet...
+        </MSpan>
+        <MSpan size='lg' color='subtle' className='text-center'>
+          Goals are longer budgets that don't recur. They are meant to be used to put money aside for something like
+          saving up for a vaction, or paying off a loan.
+        </MSpan>
+      </div>
+    </div>
   );
 }

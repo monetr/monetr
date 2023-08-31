@@ -25,7 +25,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 
 
   const className = mergeTailwind(
-    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center',
+    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-4',
     props.className,
   );
 
@@ -110,7 +110,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
         </div>
         <MDivider className='w-1/2' />
 
-        <div className='flex h-full w-full flex-col gap-2 overflow-y-auto'>
+        <div className='flex h-full w-full flex-col gap-2 pb-4'>
           <NavigationItem to={ `/bank/${bankAccount?.bankAccountId}/transactions` }>
             <ShoppingCartOutlined />
             <MSpan ellipsis color='inherit'>
