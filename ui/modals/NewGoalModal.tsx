@@ -9,7 +9,6 @@ import MFormButton from 'components/MButton';
 import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MModal, { MModalRef } from 'components/MModal';
-import MSelectFrequency from 'components/MSelectFrequency';
 import MSelectFunding from 'components/MSelectFunding';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
@@ -18,42 +17,39 @@ import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
 
-interface NewExpenseValues {
+interface NewGoalValues {
   name: string;
   amount: number;
   nextOccurrence: Date;
-  recurrenceRule: string;
   fundingScheduleId: number;
 }
 
-const initialValues: NewExpenseValues = {
+const initialValues: NewGoalValues = {
   name: '',
   amount: 0.00,
   nextOccurrence: startOfTomorrow(),
-  recurrenceRule: '',
   fundingScheduleId: 0,
 };
 
-function NewExpenseModal(): JSX.Element {
+function NewGoalModal(): JSX.Element {
   const modal = useModal();
   const { enqueueSnackbar } = useSnackbar();
   const selectedBankAccountId = useSelectedBankAccountId();
   const createSpending = useCreateSpending();
-
   const ref = useRef<MModalRef>(null);
 
   async function submit(
-    values: NewExpenseValues,
-    helper: FormikHelpers<NewExpenseValues>,
+    values: NewGoalValues,
+    helper: FormikHelpers<NewGoalValues>,
   ): Promise<void> {
     const newSpending = new Spending({
       bankAccountId: selectedBankAccountId,
       name: values.name.trim(),
       nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
-      spendingType: SpendingType.Expense,
+      spendingType: SpendingType.Goal,
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
-      recurrenceRule: values.recurrenceRule,
+      recurrenceRule: null,
     });
 
     helper.setSubmitting(true);
@@ -73,19 +69,19 @@ function NewExpenseModal(): JSX.Element {
         onSubmit={ submit }
         initialValues={ initialValues }
         className='h-full flex flex-col gap-2 p-2 justify-between'
-        data-testid='new-expense-modal'
+        data-testid='new-goal-modal'
       >
         <div className='flex flex-col'>
           <MSpan className='font-bold text-xl mb-2'>
-            Create A New Expense
+            Create A New Goal
           </MSpan>
           <MTextField
-            id='expense-name-search' // Keep's 1Pass from hijacking normal name fields.
+            id='goal-name-search' // Keep's 1Pass from hijacking normal name fields.
             name='name'
             label='What are you budgeting for?'
             required
             autoComplete="off"
-            placeholder='Amazon, Netflix...'
+            placeholder='Vacation, Furniture, Car...'
           />
           <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
             <MAmountField
@@ -97,7 +93,7 @@ function NewExpenseModal(): JSX.Element {
             />
             <MDatePicker
               className='w-full md:w-1/2'
-              label='When do you need it next?'
+              label='How soon will you need it?'
               min={ startOfTomorrow() }
               name='nextOccurrence'
               required
@@ -105,25 +101,13 @@ function NewExpenseModal(): JSX.Element {
           </div>
           <MSelectFunding
             menuPortalTarget={ document.body }
-            label='When do you want to fund the expense?'
+            label='When do you want to fund the goal?'
             required
             name='fundingScheduleId'
           />
-          <MSelectFrequency
-            dateFrom="nextOccurrence"
-            menuPosition='fixed'
-            menuShouldScrollIntoView={ false }
-            menuShouldBlockScroll={ true }
-            menuPortalTarget={ document.body }
-            menuPlacement='bottom'
-            label='How frequently do you need this expense?'
-            placeholder='Select a spending frequency...'
-            required
-            name='recurrenceRule'
-          />
         </div>
         <div className='flex justify-end gap-2'>
-          <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-expense-modal'>
+          <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-goal-modal'>
             Cancel
           </MFormButton>
           <MFormButton color='primary' type='submit'>
@@ -135,10 +119,10 @@ function NewExpenseModal(): JSX.Element {
   );
 }
 
-const newExpenseModal = NiceModal.create(NewExpenseModal);
+const newGoalModal = NiceModal.create(NewGoalModal);
 
-export default newExpenseModal;
+export default newGoalModal;
 
-export function showNewExpenseModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, {}>(newExpenseModal);
+export function showNewGoalModal(): Promise<Spending | null> {
+  return NiceModal.show<Spending | null, {}>(newGoalModal);
 }

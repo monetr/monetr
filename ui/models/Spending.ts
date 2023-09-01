@@ -42,7 +42,7 @@ export default class Spending {
   getNextOccurrenceString(): string {
     return isThisYear(this.nextRecurrence) ?
       format(this.nextRecurrence, 'MMM do') :
-      format(this.nextRecurrence, 'MMM do, YYYY');
+      format(this.nextRecurrence, 'MMM do, yyyy');
   }
 
   getTargetAmountString(): string {

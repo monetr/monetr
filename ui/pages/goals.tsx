@@ -1,10 +1,13 @@
 import React, { Fragment } from 'react';
 import { AddOutlined, HeartBroken, SavingsOutlined } from '@mui/icons-material';
 
+import GoalItem from './new/GoalItem';
+
 import { MBaseButton } from 'components/MButton';
 import MSpan from 'components/MSpan';
 import MTopNavigation from 'components/MTopNavigation';
 import { useSpendingFiltered } from 'hooks/spending';
+import { showNewGoalModal } from 'modals/NewGoalModal';
 import { SpendingType } from 'models/Spending';
 
 export default function Goals(): JSX.Element {
@@ -43,23 +46,19 @@ export default function Goals(): JSX.Element {
       return <EmptyState />;
     }
 
-    return null;
-    // return (
-    //   <ul className='w-full flex flex-col gap-2 py-2'>
-    //     { goals
-    //       ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
-    //       .map(item => (<FundingItem funding={ item } key={ item.fundingScheduleId } />)) }
-    //   </ul>
-    // );
+    return (
+      <ul className='w-full flex flex-col gap-2 py-2'>
+        { goals
+          ?.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1)
+          .map(item => (<GoalItem spending={ item } key={ item.spendingId } />)) }
+      </ul>
+    );
   }
 
   return (
     <Fragment>
-      <MTopNavigation
-        icon={ SavingsOutlined }
-        title='Goals'
-      >
-        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ null }>
+      <MTopNavigation icon={ SavingsOutlined } title='Goals' >
+        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showNewGoalModal }>
           <AddOutlined />
           New Goal
         </MBaseButton>

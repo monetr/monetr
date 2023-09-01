@@ -21,7 +21,7 @@ export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element
 
   const amountClass = mergeTailwind(
     {
-      'text-green-500': spending.targetAmount === spending.currentAmount,
+      'text-green-500': spending.targetAmount <= spending.currentAmount,
       'text-blue-500': spending.targetAmount !== spending.currentAmount,
     },
     'text-end',
