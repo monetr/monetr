@@ -1,6 +1,10 @@
 import React, { Fragment } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 
+import BankSidebar from 'components/Layout/BankSidebar';
+import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
+import MobileSidebar from 'components/Layout/MobileSidebar';
+import SettingsLayout from 'components/Layout/SettingsLayout';
 import { useBankAccounts } from 'hooks/bankAccounts';
 import { useLinks } from 'hooks/links';
 import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
@@ -10,27 +14,24 @@ import SubscribePage from 'pages/account/subscribe';
 import AfterCheckoutPage from 'pages/account/subscribe/after';
 import ConfigError from 'pages/error/config';
 import ExpenseDetails from 'pages/expense/details';
-import FundingDetails from 'pages/funding/details';
+import Expenses from 'pages/expenses';
 import Funding from 'pages/funding';
+import FundingDetails from 'pages/funding/details';
 import Goals from 'pages/goals';
+import GoalDetails from 'pages/goals/details';
 import LinkCreatePage from 'pages/link/create';
 import Login from 'pages/login';
 import LogoutPage from 'pages/logout';
-import BankSidebar from 'components/Layout/BankSidebar';
-import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
-import Expenses from 'pages/expenses';
-import MobileSidebar from 'components/Layout/MobileSidebar';
-import Transactions from 'pages/transactions';
 import ForgotPasswordNew from 'pages/password/forgot';
 import PasswordResetNew from 'pages/password/reset';
 import Register from 'pages/register';
 import SettingsAbout from 'pages/settings/about';
 import SettingsOverview from 'pages/settings/overview';
 import SettingsSecurity from 'pages/settings/security';
-import SettingsLayout from 'components/Layout/SettingsLayout';
 import SetupPage from 'pages/setup';
 import SubscriptionPage from 'pages/subscription';
 import TransactionDetails from 'pages/transaction/details';
+import Transactions from 'pages/transactions';
 import VerifyEmail from 'pages/verify/email';
 import ResendVerificationPage from 'pages/verify/email/resend';
 import OAuthRedirect from 'views/FirstTimeSetup/OAuthRedirect';
@@ -108,7 +109,7 @@ export default function Monetr(): JSX.Element {
             <Route path='expenses' element={ <Expenses /> } />
             <Route path='expenses/:spendingId/details' element={ <ExpenseDetails /> } />
             <Route path='goals' element={ <Goals /> } />
-            <Route path='goals/:spendingId/details' element={ null } />
+            <Route path='goals/:spendingId/details' element={ <GoalDetails /> } />
             <Route path='funding' element={ <Funding /> } />
             <Route path='funding/:fundingId/details' element={ <FundingDetails /> } />
           </Route>
