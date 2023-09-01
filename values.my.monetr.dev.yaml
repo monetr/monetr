@@ -97,7 +97,7 @@ api:
     webhooksEnabled: true
     webhooksDomain: my.monetr.dev
     oauthDomain: my.monetr.dev
-    maxNumberOfLinks: 3
+    maxNumberOfLinks: 8
   jwt:
     loginExpiration: 14
   cors:
