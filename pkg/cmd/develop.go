@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -31,10 +32,63 @@ func newDevelopCommand(parent *cobra.Command) {
 	}
 	parent.AddCommand(developCommand)
 
+	cleanStripe := &cobra.Command{
+		Use:   "clean:stripe",
+		Short: "Delete all Stripe customers and subscriptions in the development environment.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			configuration := config.LoadConfiguration()
+
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
+				log.WithField("config", configFileName).Info("config file loaded")
+			}
+
+			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				log.WithError(err).Fatal("failed to setup database")
+				return err
+			}
+
+			log.Info("retrieving accounts with stripe details from the database")
+			var stripeItems []models.Account
+			db.Model(&stripeItems).
+				WhereOr(`"account"."stripe_customer_id" IS NOT NULL`).
+				WhereOr(`"account"."stripe_subscription_id" IS NOT NULL`).
+				Select(&stripeItems)
+
+			if len(stripeItems) == 0 {
+				log.Info("no Stripe customers or subscriptions to clean up")
+				return nil
+			}
+
+			log.WithField("count", len(stripeItems)).Info("found Stripe item(s)")
+
+			// TODO Remove the items from stripe!
+
+			for _, item := range stripeItems {
+				itemLog := log.WithFields(logrus.Fields{
+					"stripeCustomerId": item.StripeCustomerId,
+				})
+				if item.StripeSubscriptionId != nil {
+					itemLog = itemLog.WithField("stripeSubscriptionId", item.StripeSubscriptionId)
+					itemLog.Info("removing subscription")
+
+					// TODO remove subscription
+				}
+
+				itemLog.Info("removing customer")
+
+				// TODO Remove customer.
+			}
+
+			return nil
+		},
+	}
+
 	cleanPlaid := &cobra.Command{
 		Use:   "clean:plaid",
 		Short: "Remove all Plaid links currently configured in the development environment.",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			configuration := config.LoadConfiguration()
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
@@ -98,5 +152,6 @@ func newDevelopCommand(parent *cobra.Command) {
 		},
 	}
 
+	developCommand.AddCommand(cleanStripe)
 	developCommand.AddCommand(cleanPlaid)
 }
