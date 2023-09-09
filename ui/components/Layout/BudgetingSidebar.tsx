@@ -47,7 +47,6 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               <AccountBalanceWalletOutlined />
               Free-To-Use:
             </MSpan>
-            &nbsp;
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               {balance?.getFreeToUseString()}
             </MSpan>
@@ -68,7 +67,6 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               <LocalAtmOutlined />
               Available:
             </MSpan>
-            &nbsp;
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               {balance?.getAvailableString()}
             </MSpan>
@@ -78,8 +76,6 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 
     return null;
   }
-
-
 
   return (
     <div className={ className }>
@@ -102,7 +98,6 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
               <TollOutlined />
               Current:
             </MSpan>
-            &nbsp;
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               {balance?.getCurrentString()}
             </MSpan>

@@ -96,6 +96,31 @@ export default function Transactions(): JSX.Element {
     message = 'Load more?';
   }
 
+  if (!isLoading && transactions.length === 0) {
+    return (
+      <Fragment>
+        <MTopNavigation
+          icon={ ShoppingCartOutlined }
+          title='Transactions'
+        />
+        <div className='w-full h-full flex justify-center items-center'>
+          <div className='flex flex-col gap-2 items-center max-w-md'>
+            <div className='w-full flex justify-center space-x-4'>
+              <ShoppingCartOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
+            </div>
+            <MSpan size='xl' color='subtle' className='text-center'>
+            You don't have any transactions yet...
+            </MSpan>
+            <MSpan size='lg' color='subtle' className='text-center'>
+            Transactions will show up here once we receive them from Plaid. Or the current account might not support
+            transaction data from Plaid.
+            </MSpan>
+          </div>
+        </div>
+      </Fragment>
+    );
+  }
+
   return (
     <Fragment>
       <MTopNavigation
