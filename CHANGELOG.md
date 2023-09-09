@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.15.12](https://github.com/monetr/monetr/compare/v0.15.11...v0.15.12) (2023-09-09)
+
+
+### Features
+
+* **api:** Improving spending, adding tests ([ce5721f](https://github.com/monetr/monetr/commit/ce5721f1e37111dbc7cabad7634ed5fcbb5cd783))
+* **ui:** Switching to pnpm over yarn. ([#1484](https://github.com/monetr/monetr/issues/1484)) ([f3480f9](https://github.com/monetr/monetr/commit/f3480f9d12e0c6dc771261373626f343960f200f))
+
+
+### Dependencies
+
+* **api:** update module github.com/go-pg/pg/v10 to v10.11.1 ([#1481](https://github.com/monetr/monetr/issues/1481)) ([198ce2c](https://github.com/monetr/monetr/commit/198ce2cdfc5178c13439f64b1ed27a2ddf65a2dc))
+* **ui:** update dependency prettier to v2.8.8 ([#1421](https://github.com/monetr/monetr/issues/1421)) ([059c673](https://github.com/monetr/monetr/commit/059c6735e6caf7ec30ade85f1de204c5e783991b))
+
+
+### Bug Fixes
+
+* **api:** Fix institution status caching. ([5b958e3](https://github.com/monetr/monetr/commit/5b958e38f8ff67b0bbb2643df71e90276f78b142)), closes [#1485](https://github.com/monetr/monetr/issues/1485)
+* **build:** Don't need to install hostess, just to remove it on clean. ([e792ad0](https://github.com/monetr/monetr/commit/e792ad02ebae029d3ee7bad8e7bfe6f4a56b7421))
+* **build:** Fixed build command on non-linux hosts. ([ceee6e4](https://github.com/monetr/monetr/commit/ceee6e48a36b7b80df66f452a50789b729f7ea61))
+* **build:** Fixed licensed permissions ([d665a42](https://github.com/monetr/monetr/commit/d665a42ce823141b40fae3715ab167784fcbd9b5))
+* **build:** Fixed permission issue with build on linux. ([5f3854a](https://github.com/monetr/monetr/commit/5f3854a0eaff7f0a4c62c8d8d5e47151a47fc3d4))
+* **cache:** Fixed caching for institutions. ([e9ecb6b](https://github.com/monetr/monetr/commit/e9ecb6b5cdfc348b0cb69fa5750408acc2d20f49))
+* **ci:** Fixed container versioning. ([81ed465](https://github.com/monetr/monetr/commit/81ed46545b8830bcc7bfc83123aea02d477bd706))
+* **ci:** Fixed release pipeline running unneeded step. ([5948746](https://github.com/monetr/monetr/commit/5948746ab983fdf528d7deba277819960855cf54))
+* **ci:** Fixing UI build in CI. ([#1482](https://github.com/monetr/monetr/issues/1482)) ([3877588](https://github.com/monetr/monetr/commit/387758887b0c596306790ede0bfaa38949a7c614))
+* **dev:** Fixed permission issues on linux for local dev. ([d199d24](https://github.com/monetr/monetr/commit/d199d24954ccc9dc58c911384c489d796788a86a))
+* **docs:** Updated to reference pnpm ([#1494](https://github.com/monetr/monetr/issues/1494)) ([61755be](https://github.com/monetr/monetr/commit/61755be4bca298e3669b5f55cfd4ccda0d3475c8)), closes [#1493](https://github.com/monetr/monetr/issues/1493)
+* **forecast:** Fixed forecast timing bug. ([057cab9](https://github.com/monetr/monetr/commit/057cab972c85f27c62a68517c79bcdc5040a7429)), closes [#1486](https://github.com/monetr/monetr/issues/1486)
+* **makefile:** Add check for pnpm ([#1492](https://github.com/monetr/monetr/issues/1492)) ([434b143](https://github.com/monetr/monetr/commit/434b1431bee629155a8e49fe7fedfa5c6e4c0f08))
+* **ui:** Fixed 404 errors from disabled Sentry UI. ([0afef5e](https://github.com/monetr/monetr/commit/0afef5ec0d00f9ad9b86c8502a179a662697818c))
+* **ui:** Fixed hot module replacement woes for css and rspack. ([a70e50f](https://github.com/monetr/monetr/commit/a70e50ff7bc9318bb51b039ca8d0a5fba39335b4))
+* **ui:** Fixed RSPack config blunder. ([7907a80](https://github.com/monetr/monetr/commit/7907a8088b60d874f20f47e991e3f334c53ac08c))
+
+
+### Miscellaneous
+
+* **deps:** bump word-wrap from 1.2.3 to 1.2.4 ([#1483](https://github.com/monetr/monetr/issues/1483)) ([63d60de](https://github.com/monetr/monetr/commit/63d60de295425e342b39f7cfc0005ef56beb78bc))
+* **docs:** Fixed terminology on landing page. ([dd8c587](https://github.com/monetr/monetr/commit/dd8c587d2111572c436ed55dae8ec97dccfb4a43))
+* **docs:** Updated readme with information on development status. ([387a4f5](https://github.com/monetr/monetr/commit/387a4f5a4ba1aec52ced242620ef6968f549ec92))
+* **forecast:** Adding test to prove forecasting bug. ([faa9777](https://github.com/monetr/monetr/commit/faa9777f94f989ebf4a30266a7a612f105b989b2))
+* Increase resource requests for deployment. ([61c4ee5](https://github.com/monetr/monetr/commit/61c4ee5ea11b09c2a3c978500fc1ba513a8e1279))
+* **staging:** Increase max plaid links in staging. ([8771869](https://github.com/monetr/monetr/commit/87718690bd7b05774acd80651499e254c6b9c963))
+* **test:** Writing some more tests. ([#1488](https://github.com/monetr/monetr/issues/1488)) ([a2a574d](https://github.com/monetr/monetr/commit/a2a574de41964fa9ccd506b40193bd4cd68ca9d4))
+* Tweak ([6e1e1f9](https://github.com/monetr/monetr/commit/6e1e1f9beb2280e26997d7db4184f63c12e77410))
+* **ui:** Removing yarn.lock ([43b9c47](https://github.com/monetr/monetr/commit/43b9c4719b1c864f6afa397b477ede86693cecba))
+* Updating LICENSE. ([531f829](https://github.com/monetr/monetr/commit/531f8293228f6efd61f63b663bdf5119eec29a54))
+* Working on better code for spending ([4bc9c2c](https://github.com/monetr/monetr/commit/4bc9c2ccab0ce2e5678a86b3c3f4c3e7ee573d34))
+
 ## [0.15.11](https://github.com/monetr/monetr/compare/v0.15.10...v0.15.11) (2023-07-09)
 
 
