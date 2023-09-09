@@ -49,7 +49,7 @@ make -v
 The following tools are required in order to work on monetr locally.
 
 - Docker
-- Node (with `yarn` installed)
+- Node (with `pnpm` installed)
 - GNUMake
 
 These tools can be installed by running the following command.
