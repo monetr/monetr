@@ -15,10 +15,7 @@ All of our documentation is in the form of Markdown files in the `docs` director
 simply edit the existing files to make changes to the documentation. The documentation site is automatically generated
 in our GitHub Actions workflows.
 
-??? note
-
-    To properly work on documentation locally, it is recommended that you run the local development stack. Documentation
-    for that can be found in [Developer / Local](local.md)
+### Building Locally
 
 You can build our documentation site locally using the following command, but it does require a Docker runtime to be
 available.
@@ -34,6 +31,36 @@ container image, you can specify that image when you run the make command like t
 ```shell title="Shell"
 make mkdocs MKDOCS_IMAGE=ghcr.io/yourusername/mkdocs-material-insiders:yourTag
 ```
+
+### Editing Locally
+
+If you want to work on the documentation in real time locally you can run the following command:
+
+=== "Linux/macOS"
+
+    ```shell title="Shell"
+    # Will start a local documentation server without the insiders build.
+    make develop-docs
+    
+    # If needed you can also specify a custom MKDOCS_IMAGE here too.
+    make develop-docs MKDOCS_IMAGE=ghcr.io/yourusername/mkdocs-material-insiders:yourTag
+    ```
+
+=== "Windows"
+
+    ```shell title="Shell"
+    # Will start a local documentation server without the insiders build.
+    docker compose -f docker-compose.documentation.yaml up
+
+    # If you want to use a custom MKDOCS_IMAGE you can create a .env file and specify the path.
+    docker compose -f docker-compose.documentation.yaml up --env-file %PATH_TO_ENV_FILE%
+    ```
+
+This will use Docker Compose to start a container locally that has everything needed for the documentation to run. You
+can now edit any of the documentation files in the `docs/` directory and see changes refresh in your browser.
+
+When you exit the process it will also automatically stop the container. Running the typical `make clean` command will
+remove any stopped containers spawned by the documentation process.
 
 ## Style
 
