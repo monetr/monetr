@@ -487,6 +487,7 @@ endif
 
 shutdown:
 	-$(COMPOSE) exec monetr monetr development clean:plaid
+	-$(COMPOSE) exec monetr monetr development clean:stripe
 	-$(COMPOSE) down --remove-orphans -v
 
 MKDOCS_IMAGE ?= squidfunk/mkdocs-material:8.2.8

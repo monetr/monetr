@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/monetr/monetr/pkg/secrets"
+	"github.com/monetr/monetr/pkg/stripe_helper"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -65,6 +66,11 @@ func newDevelopCommand(parent *cobra.Command) {
 
 			// TODO Remove the items from stripe!
 
+			stripe := stripe_helper.NewStripeHelper(
+				log,
+				configuration.Stripe.APIKey,
+			)
+
 			for _, item := range stripeItems {
 				itemLog := log.WithFields(logrus.Fields{
 					"stripeCustomerId": item.StripeCustomerId,
@@ -73,12 +79,18 @@ func newDevelopCommand(parent *cobra.Command) {
 					itemLog = itemLog.WithField("stripeSubscriptionId", item.StripeSubscriptionId)
 					itemLog.Info("removing subscription")
 
-					// TODO remove subscription
+					if err := stripe.CancelSubscription(context.Background(), *item.StripeSubscriptionId); err != nil {
+						itemLog.WithError(err).Warn("failed to cancel subscription")
+					}
 				}
 
-				itemLog.Info("removing customer")
+				if item.StripeCustomerId != nil {
+					itemLog.Info("removing customer")
 
-				// TODO Remove customer.
+					if err := stripe.RemoveCustomer(context.Background(), *item.StripeCustomerId); err != nil {
+						itemLog.WithError(err).Warn("failed to remove stripe customer")
+					}
+				}
 			}
 
 			return nil

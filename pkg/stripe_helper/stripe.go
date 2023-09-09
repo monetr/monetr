@@ -26,6 +26,9 @@ type Stripe interface {
 	NewCheckoutSession(ctx context.Context, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error)
 	GetCheckoutSession(ctx context.Context, checkoutSessionId string) (*stripe.CheckoutSession, error)
 	NewPortalSession(ctx context.Context, params *stripe.BillingPortalSessionParams) (*stripe.BillingPortalSession, error)
+
+	CancelSubscription(ctx context.Context, id string) error
+	RemoveCustomer(ctx context.Context, id string) error
 }
 
 var (
@@ -313,4 +316,48 @@ func (s *stripeBase) GetCheckoutSession(ctx context.Context, checkoutSessionId s
 	}
 
 	return result, err
+}
+
+func (s *stripeBase) CancelSubscription(ctx context.Context, id string) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"subscriptionId": id,
+	}
+
+	span.Status = sentry.SpanStatusOK
+	_, err := s.client.Subscriptions.Cancel(id, &stripe.SubscriptionCancelParams{
+		InvoiceNow: stripe.Bool(true),
+		Prorate:    stripe.Bool(false),
+		Params: stripe.Params{
+			Context: span.Context(),
+		},
+	})
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to remove subscription")
+	}
+	return nil
+}
+
+func (s *stripeBase) RemoveCustomer(ctx context.Context, id string) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"customerId": id,
+	}
+
+	span.Status = sentry.SpanStatusOK
+	_, err := s.client.Customers.Del(id, &stripe.CustomerParams{
+		Params: stripe.Params{
+			Context: span.Context(),
+		},
+	})
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to remove customer")
+	}
+	return nil
 }
