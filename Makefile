@@ -144,9 +144,14 @@ $(SOURCE_MAP_DIR):
 	mkdir -p $(SOURCE_MAP_DIR)
 
 PNPM=$(shell which pnpm)
+check-pnpm:
+	@if [ -z "$(PNPM)" ]; then \
+		echo "Error: pnpm not found."; \
+		exit 1; \
+	fi
 
 NODE_MODULES=$(PWD)/node_modules
-$(NODE_MODULES): $(UI_DEPS)
+$(NODE_MODULES): $(UI_DEPS) check-pnpm
 	$(PNPM) install
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
