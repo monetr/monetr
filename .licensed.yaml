@@ -1,3 +1,5 @@
+cache_path: ./build/license.cache
+
 sources:
   npm: true
   go: true

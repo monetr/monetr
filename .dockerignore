@@ -7,3 +7,4 @@ pkg/ui/static
 pkg/icons/sources
 !pkg/icons/sources/README.md
 !.git
+build

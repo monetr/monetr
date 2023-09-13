@@ -43,7 +43,7 @@ COPY --from=node_modules /build/node_modules /build/node_modules
 RUN go mod download
 RUN licensed cache
 RUN licensed notices
-RUN mkdir -p ./pkg/build && cat ./.licenses/monetr-API/NOTICE ./.licenses/monetr-UI/NOTICE > ./pkg/build/NOTICE.md
+RUN mkdir -p ./pkg/build && cat ./build/license.cache/monetr-API/NOTICE ./build/license.cache/monetr-UI/NOTICE > ./pkg/build/NOTICE.md
 
 
 FROM node_modules AS ui_builder

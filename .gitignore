@@ -36,3 +36,4 @@ Brewfile.lock.json
 .vscode
 docs/developing/api/swagger.*
 .licenses
+.pnpm-store

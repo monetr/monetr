@@ -5,7 +5,7 @@ repo_url: https://github.com/monetr/monetr
 repo_name: GitHub
 edit_uri: edit/main/docs/
 copyright: © monetr LLC 2023
-site_dir: build/site
+site_dir: build/documentation
 watch:
   - docs
 theme:
@@ -85,6 +85,7 @@ nav:
       - Documentation: developing/documentation.md
       - Developing:
           - Local Development: developing/local.md
+          - Building: developing/build.md
           - Credentials: developing/credentials.md
           - GitHub Actions: developing/github_actions.md
       - API:
@@ -104,7 +105,6 @@ nav:
 plugins:
   - search
   #  - section-index
-  - render_swagger
 
 markdown_extensions:
   - footnotes
@@ -117,7 +117,7 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.details
   - pymdownx.tabbed:
-      alternate_style: true 
+      alternate_style: true
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
