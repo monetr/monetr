@@ -427,7 +427,8 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 
 		if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
 			Login: *login,
-			VerifyURL: fmt.Sprintf("%s/verify/email?token=%s",
+			VerifyURL: fmt.Sprintf(
+				"%s/verify/email?token=%s",
 				c.configuration.GetUIURL(),
 				url.QueryEscape(verificationToken),
 			),

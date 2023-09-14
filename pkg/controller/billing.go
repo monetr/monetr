@@ -150,10 +150,26 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		log.Info("successfully created stripe customer for account")
 	}
 
-	successUrl := fmt.Sprintf("%s://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
-	cancelUrl := fmt.Sprintf("%s://%s/account/subscribe", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
+	successUrl := fmt.Sprintf(
+		"%s://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}",
+		c.configuration.ExternalURLProtocol,
+		c.configuration.UIDomainName,
+	)
+	cancelUrl := fmt.Sprintf(
+		"%s://%s/account/subscribe",
+		c.configuration.ExternalURLProtocol,
+		c.configuration.UIDomainName,
+	)
+	// If a custom cancel path was specified by the requester then use that path. Note: it can only be a path, not a
+	// completely custom URL.
+	// TODO This still has a code smell to it. If this isn't necessary I think we should just remove it outright.
 	if request.CancelPath != nil {
-		cancelUrl = fmt.Sprintf("%s://%s%s", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName, *request.CancelPath)
+		cancelUrl = fmt.Sprintf(
+			"%s://%s%s",
+			c.configuration.ExternalURLProtocol,
+			c.configuration.UIDomainName,
+			*request.CancelPath,
+		)
 	}
 
 	crumbs.Debug(c.getContext(ctx), "Creating Stripe Checkout Session", map[string]interface{}{
@@ -169,9 +185,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 	if c.configuration.Stripe.TaxesEnabled {
 		params.Extra = &stripe.ExtraValues{
 			Values: url.Values{
-				"customer_update[address]": []string{
-					"auto",
-				},
+				"customer_update[address]": []string{"auto"},
 			},
 		}
 	}
