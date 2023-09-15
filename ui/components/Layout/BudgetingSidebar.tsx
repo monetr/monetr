@@ -1,7 +1,9 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AccountBalanceWalletOutlined, LocalAtmOutlined, MoreVert, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+import { AccountBalanceWalletOutlined, LocalAtmOutlined, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
+
+import BudgetingSidebarTitle from './BudgetingSidebarTitle';
 
 import MBadge from 'components/MBadge';
 import MDivider from 'components/MDivider';
@@ -79,13 +81,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 
   return (
     <div className={ className }>
-      <div className='flex h-12 w-full items-center p-2 dark:text-dark-monetr-content-emphasis dark:hover:bg-dark-monetr-background-emphasis'>
-        <span className='truncate text-xl font-semibold'>
-          {link?.getName()}
-        </span>
-        <MoreVert className='ml-auto' />
-      </div>
-      <MDivider className='w-1/2' />
+      <BudgetingSidebarTitle />
       <div className='flex h-full w-full flex-col items-center gap-4 px-2 py-4'>
         <MSelectAccount />
         <MDivider className='w-1/2' />
