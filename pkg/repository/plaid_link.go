@@ -35,6 +35,8 @@ func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64
 	defer span.Finish()
 	span.Description = "DeletePlaidLink"
 
+	// Update the link record to indicate that it is no longer a Plaid link but instead a manual one. This way some data
+	// is still preserved.
 	_, err := r.txn.ModelContext(span.Context(), &models.Link{}).
 		Set(`"plaid_link_id" = NULL`).
 		Set(`"link_type" = ?`, models.ManualLinkType).
@@ -46,6 +48,15 @@ func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64
 		return errors.Wrap(err, "failed to clean Plaid link prior to removal")
 	}
 
+	// Remove the sync records related to the Plaid link.
+	_, err = r.txn.ModelContext(span.Context(), &models.PlaidSync{}).
+		Where(`"plaid_sync"."plaid_link_id" = ?`, plaidLinkId).
+		ForceDelete()
+	if err != nil {
+		return errors.Wrap(err, "failed to clean up sync data for Plaid link removal")
+	}
+
+	// Then delete the Plaid link itself.
 	_, err = r.txn.ModelContext(span.Context(), &models.PlaidLink{}).
 		Where(`"plaid_link"."plaid_link_id" = ?`, plaidLinkId).
 		ForceDelete()
