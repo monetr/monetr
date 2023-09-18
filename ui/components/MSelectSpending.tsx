@@ -131,10 +131,10 @@ function MSelectSpendingOption({ children: _, ...props }: OptionProps<SpendingOp
   return (
     <components.Option { ...props }>
       <div className='flex justify-between'>
-        <MSpan size='sm' color='emphasis'>
+        <MSpan size='md' color='emphasis'>
           { props.label }
         </MSpan>
-        <MBadge size='xs'>
+        <MBadge size='sm'>
           { props.data.spending.getCurrentAmountString() }
         </MBadge>
       </div>

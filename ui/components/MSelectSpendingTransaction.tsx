@@ -1,6 +1,8 @@
 import React, { Fragment } from 'react';
 import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
-import { Chip } from '@mui/material';
+
+import MBadge from './MBadge';
+import MSpan from './MSpan';
 
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink } from 'hooks/spending';
@@ -91,6 +93,11 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
         theme={ (baseTheme: Theme): Theme => ({
           ...baseTheme,
           borderRadius: 8,
+          spacing: {
+            controlHeight: 32,
+            baseUnit: 3,
+            menuGutter: 15,
+          },
           colors: {
             ...baseTheme.colors,
             neutral0: theme.tailwind.colors['dark-monetr']['background']['DEFAULT'],
@@ -121,6 +128,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
             ...base,
             fontSize: '0.875rem', // Equivalent to text-sm and leading-6
             lineHeight: '1.5rem',
+            padding: '0px 5px',
           }),
           option: (base: object) => ({
             ...base,
@@ -155,13 +163,13 @@ export function SpendingSelectOption({ children, ...props }: OptionProps<Spendin
   const amount = notLoaded ? 'N/A' : formatAmount(props.data.spending.currentAmount);
   return (
     <components.Option { ...props }>
-      <div className="w-full flex items-center">
-        <span className="font-semibold">{ props.label }</span>
-        <Chip
-          className="ml-auto font-semibold"
-          label={ amount }
-          color="secondary"
-        />
+      <div className="flex justify-between">
+        <MSpan size='md' color='emphasis'>
+          { props.label }
+        </MSpan>
+        <MBadge size='sm'>
+          { amount }
+        </MBadge>
       </div>
     </components.Option>
   );
