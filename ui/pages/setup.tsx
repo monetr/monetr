@@ -404,6 +404,9 @@ function Plaid(props: PlaidProps): JSX.Element {
         <MSpan className='text-lg' color='subtle'>
           If the problem continues, please contact support@monetr.app
         </MSpan>
+        <MSpan className='text-md' color='muted'>
+          Error Message: { error }
+        </MSpan>
       </div>
     );
   }

@@ -6,7 +6,7 @@
       }
     }
 
-    .m-select-spending-transaction__value-container, 
+    .m-select-spending-transaction__value-container,
     .m-select-spending-transaction__input-container,
     .m-select-spending-transaction__single-value {
       @apply text-base font-medium dark:text-dark-monetr-content-emphasis;
@@ -28,14 +28,17 @@
         @apply border-transparent;
 
         .m-select-spending-transaction__indicators {
-          @apply opacity-0;
+          .m-select-spending-transaction__indicator-separator,
+          .m-select-spending-transaction__dropdown-indicator {
+            @apply opacity-0;
+          }
         }
       }
     }
 
     /* Make the value text displayed a bit bigger because this is a significant */
     /* component in the sidebar */
-    .m-select-spending-transaction__value-container, 
+    .m-select-spending-transaction__value-container,
     .m-select-spending-transaction__input-container,
     .m-select-spending-transaction__single-value {
       @apply text-base font-medium dark:text-dark-monetr-content-subtle;
@@ -43,5 +46,3 @@
   }
 }
 
-.group {
-}

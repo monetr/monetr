@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
 
 import MBadge from './MBadge';
@@ -21,12 +21,13 @@ export interface MSelectSpendingTransactionProps {
 
 export default function MSelectSpendingTransaction(props: MSelectSpendingTransactionProps): JSX.Element {
   const { transaction } = props;
-  const { result: allSpending } = useSpendingSink();
+  const { result: allSpending, isLoading: spendingIsLoading } = useSpendingSink();
   const balances = useCurrentBalance();
   const updateTransaction = useUpdateTransaction();
   const theme = useTheme();
+  const [isLoading, setIsLoading] = useState(false);
 
-  function updateSpentFrom(selection: Spending | null) {
+  async function updateSpentFrom(selection: Spending | null) {
     const spendingId = selection ? selection.spendingId : null;
 
     // Not strict equal because undefined vs null stuff.
@@ -34,13 +35,14 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
     if (spendingId == transaction.spendingId) {
       return Promise.resolve();
     }
+    setIsLoading(true);
 
     const updatedTransaction = new Transaction({
       ...transaction,
       spendingId: spendingId,
     });
 
-    return updateTransaction(updatedTransaction);
+    return updateTransaction(updatedTransaction).finally(() => setIsLoading(false));
   }
 
   function handleSpentFromChange(newValue: OnChangeValue<SpendingOption, false>, _: ActionMeta<SpendingOption>) {
@@ -140,6 +142,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           }),
         } }
         classNamePrefix='m-select-spending-transaction'
+        isLoading={ isLoading || spendingIsLoading }
         onChange={ handleSpentFromChange }
         formatOptionLabel={ formatOptionsLabel }
         options={ options }
