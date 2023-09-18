@@ -148,6 +148,7 @@ export interface SpendingOption {
   readonly spending: Spending | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
 export function SpendingSelectOption({ children, ...props }: OptionProps<SpendingOption>): JSX.Element {
   // If the current amount is specified then format the amount, if it is not then use N/A.
   const notLoaded = props.data.spending?.currentAmount === undefined;

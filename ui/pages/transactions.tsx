@@ -79,10 +79,9 @@ export default function Transactions(): JSX.Element {
         <li key={ getUnixTime(group) }>
           <ul className='flex gap-2 flex-col'>
             <TransactionDateItem date={ group } />
-            {
-              transactions
-                .map(transaction => (<TransactionItem key={ transaction.transactionId } transaction={ transaction } />))
-            }
+            { transactions .map(transaction => (
+              <TransactionItem key={ transaction.transactionId } transaction={ transaction } />
+            )) }
           </ul>
         </li>
       )),
@@ -109,11 +108,11 @@ export default function Transactions(): JSX.Element {
               <ShoppingCartOutlined className='h-full text-5xl dark:text-dark-monetr-content-muted' />
             </div>
             <MSpan size='xl' color='subtle' className='text-center'>
-            You don't have any transactions yet...
+              You don't have any transactions yet...
             </MSpan>
             <MSpan size='lg' color='subtle' className='text-center'>
-            Transactions will show up here once we receive them from Plaid. Or the current account might not support
-            transaction data from Plaid.
+              Transactions will show up here once we receive them from Plaid. Or the current account might not support
+              transaction data from Plaid.
             </MSpan>
           </div>
         </div>

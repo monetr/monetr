@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React, { Fragment } from 'react';
 import { AccountBalance, AddOutlined, AutoModeOutlined, HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
 
