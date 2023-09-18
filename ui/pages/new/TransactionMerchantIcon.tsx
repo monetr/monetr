@@ -24,12 +24,12 @@ export default function TransactionMerchantIcon(props: TransactionMerchantIconPr
         width: '100%',
         height: '100%',
         borderRadius: '50%',
-        animation: 'ripple 1.2s infinite ease-in-out',
+        animation: 'ripple-pending-txn 1.2s infinite ease-in-out',
         border: '1px solid currentColor',
         content: '""',
       },
     },
-    '@keyframes ripple': {
+    '@keyframes ripple-pending-txn': {
       '0%': {
         transform: 'scale(.8)',
         opacity: 1,

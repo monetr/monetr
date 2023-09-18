@@ -1,16 +1,20 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
+import styled from '@emotion/styled';
 import { CreditCard, ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
-
-import BankSidebarItem from 'components/Layout/BankSidebarItem';
+import { Badge, Tooltip } from '@mui/material';
 
 import { Logo } from 'assets';
+import BankSidebarItem from 'components/Layout/BankSidebarItem';
 import MDivider from 'components/MDivider';
 import MSidebarToggle from 'components/MSidebarToggle';
 import { ReactElement } from 'components/types';
+import { differenceInDays } from 'date-fns';
 import { useLinks } from 'hooks/links';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import { useAuthenticationSink } from 'hooks/useAuthentication';
+import useTheme from 'hooks/useTheme';
 import mergeTailwind from 'util/mergeTailwind';
 
 export interface BankSidebarProps {
@@ -100,15 +104,74 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
 
 function SubscriptionButton(): JSX.Element {
   const config = useAppConfiguration();
-  if (config?.billingEnabled) {
+  const theme = useTheme();
+  const { result } = useAuthenticationSink();
+
+  if (!config?.billingEnabled) {
+    return null;
+  }
+
+  const StyledBadge = styled(Badge)(() => ({
+    '& .MuiBadge-badge': {
+      backgroundColor: theme.tailwind.colors['blue']['500'],
+      color:  theme.tailwind.colors['blue']['500'],
+      boxShadow: `0 0 0 2px ${theme.tailwind.colors['dark-monetr']['background']['DEFAULT']}`,
+      '&::after': {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        borderRadius: '50%',
+        animation: 'ripple-trial 3s infinite ease-in-out',
+        border: '1px solid currentColor',
+        content: '""',
+      },
+    },
+    '@keyframes ripple-trial': {
+      '0%': {
+        transform: 'scale(.8)',
+        opacity: 1,
+      },
+      '70%': {
+        transform: 'scale(.9)',
+        opacity: 1,
+      },
+      '100%': {
+        transform: 'scale(2.4)',
+        opacity: 0,
+      },
+    },
+  }));
+
+  if (result?.isTrialing) {
     return (
       <Link to='/subscription' data-testid='bank-sidebar-subscription'>
-        <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+        <Tooltip
+          title={ `Your trial ends in ${ differenceInDays(result.activeUntil, new Date())} day(s).` }
+          arrow
+          placement='right'
+          classes={ {
+            tooltip: 'text-base font-medium',
+          } }
+        >
+          <StyledBadge
+            overlap='circular'
+            anchorOrigin={ { vertical: 'bottom', horizontal: 'right' } }
+            variant='dot'
+          >
+            <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+          </StyledBadge>
+        </Tooltip>
       </Link>
     );
   }
 
-  return null;
+  return (
+    <Link to='/subscription' data-testid='bank-sidebar-subscription'>
+      <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+    </Link>
+  );
 }
 
 function SettingsButton(): JSX.Element {
