@@ -1,7 +1,6 @@
-/* eslint-disable max-len */
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowBackOutlined, DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined, SwapVertOutlined } from '@mui/icons-material';
+import { DeleteOutlined, HeartBroken, PriceCheckOutlined, SaveOutlined, SwapVertOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
@@ -155,10 +154,6 @@ export default function ExpenseDetails(): JSX.Element {
         base={ `/bank/${spending.bankAccountId}/expenses` }
         breadcrumb={ spending?.name }
       >
-        <MBaseButton color='secondary' className='gap-1 py-1 px-2' onClick={ backToExpenses } >
-          <ArrowBackOutlined />
-            Cancel
-        </MBaseButton>
         <MBaseButton
           color='secondary'
           className='gap-1 py-1 px-2'

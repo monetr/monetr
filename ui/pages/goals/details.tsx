@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowBackOutlined,
   DeleteOutlined,
   HeartBroken,
   SaveOutlined,
@@ -158,10 +157,6 @@ export default function GoalDetails(): JSX.Element {
         base={ `/bank/${spending.bankAccountId}/goals` }
         breadcrumb={ spending?.name }
       >
-        <MBaseButton color='secondary' className='gap-1 py-1 px-2' onClick={ backToGoals } >
-          <ArrowBackOutlined />
-          Cancel
-        </MBaseButton>
         <MBaseButton
           color='secondary'
           className='gap-1 py-1 px-2'

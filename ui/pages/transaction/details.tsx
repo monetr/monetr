@@ -1,12 +1,10 @@
-/* eslint-disable max-len */
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowBackOutlined, HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
+import { useParams } from 'react-router-dom';
+import { HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
 import { FormikHelpers } from 'formik';
-import moment from 'moment';
 
 import MAmountField from 'components/MAmountField';
-import MFormButton, { MBaseButton } from 'components/MButton';
+import MFormButton from 'components/MButton';
 import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MSelectSpending from 'components/MSelectSpending';
@@ -20,13 +18,12 @@ import MerchantIcon from 'pages/new/MerchantIcon';
 interface TransactionValues {
   name: string;
   originalName: string;
-  date: moment.Moment;
+  date: Date;
   spendingId: number | null;
   amount: number;
 }
 
 export default function TransactionDetails(): JSX.Element {
-  const navigate = useNavigate();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
   const transactionId = +id || null;
@@ -90,10 +87,6 @@ export default function TransactionDetails(): JSX.Element {
     amount: +(transaction.amount / 100).toFixed(2),
   };
 
-  function backToTransactions() {
-    navigate(`/bank/${transaction.bankAccountId}/transactions`);
-  }
-
   return (
     <MForm
       initialValues={ initialValues }
@@ -106,14 +99,6 @@ export default function TransactionDetails(): JSX.Element {
         base={ `/bank/${transaction.bankAccountId}/transactions` }
         breadcrumb={ transaction?.name }
       >
-        <MBaseButton
-          color='secondary'
-          className='gap-1 py-1 px-2'
-          onClick={ backToTransactions }
-        >
-          <ArrowBackOutlined />
-            Cancel
-        </MBaseButton>
         <MFormButton color='primary' className='gap-1 py-1 px-2' type='submit'>
           <SaveOutlined />
             Save Changes
