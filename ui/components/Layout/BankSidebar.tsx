@@ -114,10 +114,10 @@ function SubscriptionButton(): JSX.Element {
   const StyledBadge = styled(Badge)(() => ({
     '& .MuiBadge-badge': {
       opacity: '90%',
-      backgroundColor: theme.tailwind.colors['yellow']['500'],
+      backgroundColor: theme.tailwind.colors['yellow']['600'],
       boxShadow: `0 0 0 2px ${theme.tailwind.colors['dark-monetr']['background']['DEFAULT']}`,
       '&::after': {
-        color:  theme.tailwind.colors['yellow']['500'],
+        color:  theme.tailwind.colors['yellow']['600'],
         position: 'absolute',
         top: 0,
         left: 0,
