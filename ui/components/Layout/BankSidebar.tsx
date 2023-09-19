@@ -113,16 +113,17 @@ function SubscriptionButton(): JSX.Element {
 
   const StyledBadge = styled(Badge)(() => ({
     '& .MuiBadge-badge': {
-      backgroundColor: theme.tailwind.colors['blue']['500'],
-      color:  theme.tailwind.colors['blue']['500'],
+      opacity: '90%',
+      backgroundColor: theme.tailwind.colors['yellow']['500'],
       boxShadow: `0 0 0 2px ${theme.tailwind.colors['dark-monetr']['background']['DEFAULT']}`,
       '&::after': {
+        color:  theme.tailwind.colors['yellow']['500'],
         position: 'absolute',
         top: 0,
         left: 0,
         width: '100%',
         height: '100%',
-        borderRadius: '50%',
+        borderRadius: '100%',
         animation: 'ripple-trial 3s infinite ease-in-out',
         border: '1px solid currentColor',
         content: '""',
@@ -157,10 +158,11 @@ function SubscriptionButton(): JSX.Element {
         >
           <StyledBadge
             overlap='circular'
-            anchorOrigin={ { vertical: 'bottom', horizontal: 'right' } }
-            variant='dot'
+            anchorOrigin={ { vertical: 'top', horizontal: 'right' } }
+            badgeContent={ differenceInDays(result.activeUntil, new Date()) }
+            classes={ { badge: 'left-1 top-1 text-[11px]' } }
           >
-            <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
+            <CreditCard className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer mt-1.5' />
           </StyledBadge>
         </Tooltip>
       </Link>

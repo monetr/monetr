@@ -22,6 +22,7 @@ type Stripe interface {
 	CreateCustomer(ctx context.Context, customer stripe.CustomerParams) (*stripe.Customer, error)
 	UpdateCustomer(ctx context.Context, id string, customer stripe.CustomerParams) (*stripe.Customer, error)
 	GetCustomer(ctx context.Context, id string) (*stripe.Customer, error)
+	CreateSubscription(ctx context.Context, subscription stripe.SubscriptionParams) (*stripe.Subscription, error)
 	GetSubscription(ctx context.Context, stripeSubscriptionId string) (*stripe.Subscription, error)
 	NewCheckoutSession(ctx context.Context, params *stripe.CheckoutSessionParams) (*stripe.CheckoutSession, error)
 	GetCheckoutSession(ctx context.Context, checkoutSessionId string) (*stripe.CheckoutSession, error)
@@ -219,6 +220,22 @@ func (s *stripeBase) CreateCustomer(ctx context.Context, customer stripe.Custome
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to create customer")
+	}
+
+	return result, err
+}
+
+func (s *stripeBase) CreateSubscription(ctx context.Context, subscription stripe.SubscriptionParams) (*stripe.Subscription, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Status = sentry.SpanStatusOK
+
+	subscription.Context = span.Context()
+
+	result, err := s.client.Subscriptions.New(&subscription)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to create subscription")
 	}
 
 	return result, err
