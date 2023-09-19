@@ -7,6 +7,7 @@ import MDivider from 'components/MDivider';
 import MSpan from 'components/MSpan';
 import { useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useLink } from 'hooks/links';
+import { showRemoveLinkModal } from 'modals/RemoveLinkModal';
 
 
 export default function BudgetingSidebarTitle(): JSX.Element {
@@ -20,6 +21,11 @@ export default function BudgetingSidebarTitle(): JSX.Element {
     setAnchorEl(event.currentTarget);
   }, [setAnchorEl]);
   const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
+
+  const handleRemoveLink = useCallback(() => {
+    setAnchorEl(null);
+    showRemoveLinkModal({ link: link });
+  }, [setAnchorEl, link]);
 
   return (
     <Fragment>
@@ -72,6 +78,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
             className='p-2 cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis'
             component='a'
             ellipsis
+            onClick={ handleRemoveLink }
           >
             <DeleteOutline className='mr-1 mb-0.5 dark:text-dark-monetr-red' />
             Remove { link?.getName() }
