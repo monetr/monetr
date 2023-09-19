@@ -379,8 +379,9 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 				// AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
 				// 	Enabled: stripe.Bool(c.configuration.Stripe.TaxesEnabled),
 				// },
-				Customer:    stripeCustomerId,
-				Description: stripe.String("monetr onboarding trial"),
+				CollectionMethod: stripe.String("charge_automatically"),
+				Customer:         stripeCustomerId,
+				Description:      stripe.String("monetr onboarding trial"),
 				Items: []*stripe.SubscriptionItemsParams{
 					{
 						Price:    stripe.String(plan.StripePriceId),
@@ -393,10 +394,7 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 					}),
 					SaveDefaultPaymentMethod: stripe.String("on_subscription"),
 				},
-				PromotionCode: nil,
-				// TrialEnd:        new(int64),
-				// TrialEndNow:     new(bool),
-				// TrialFromPlan:   new(bool),
+				PromotionCode:   nil,
 				TrialPeriodDays: stripe.Int64(int64(plan.FreeTrialDays)),
 			})
 			if err != nil {
