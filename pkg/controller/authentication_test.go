@@ -447,10 +447,7 @@ func TestRegister(t *testing.T) {
 		AssertSetTokenCookie(t, response)
 
 		response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
-		response.JSON().Path("$.isActive").Boolean().IsTrue()
-		response.JSON().Path("$.user").Object().NotEmpty()
-		response.JSON().Path("$.user.login").Object().NotEmpty()
-		response.JSON().Path("$.user.account").Object().NotEmpty()
+		response.JSON().Path("$.requireVerification").Boolean().IsFalse()
 	})
 
 	t.Run("beta code not provided", func(t *testing.T) {
@@ -591,10 +588,7 @@ func TestRegister(t *testing.T) {
 		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
 		response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
-		response.JSON().Path("$.isActive").Boolean().IsTrue()
-		response.JSON().Path("$.user").Object().NotEmpty()
-		response.JSON().Path("$.user.login").Object().NotEmpty()
-		response.JSON().Path("$.user.account").Object().NotEmpty()
+		response.JSON().Path("$.requireVerification").Boolean().IsFalse()
 	})
 
 	t.Run("invalid captcha", func(t *testing.T) {
@@ -659,9 +653,6 @@ func TestRegister(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			AssertSetTokenCookie(t, response)
-			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.login").Object().NotEmpty()
-			response.JSON().Path("$.user.account").Object().NotEmpty()
 		}
 
 		{ // Send the same register request again, this time it should result in an error.
