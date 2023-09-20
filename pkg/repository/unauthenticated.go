@@ -6,14 +6,13 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/consts"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/hash"
-	"golang.org/x/crypto/bcrypt"
-
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -72,12 +71,14 @@ func (u *unauthenticatedRepo) CreateLogin(
 }
 
 func (u *unauthenticatedRepo) CreateAccountV2(ctx context.Context, account *models.Account) error {
-	span := sentry.StartSpan(ctx, "CreateAccount")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	// Make sure that the Id is not being specified by the caller of this method. Will ensure that the caller cannot
 	// specify the accountId and overwrite something.
 	account.AccountId = 0
+	// TODO Should this be in the timezone of the account? Time is time right, now should be the same no matter what?
+	account.CreatedAt = time.Now()
 
 	_, err := u.txn.ModelContext(span.Context(), account).Insert(account)
 	return errors.Wrap(err, "failed to create account")

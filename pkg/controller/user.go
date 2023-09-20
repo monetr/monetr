@@ -29,6 +29,8 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	}
 
 	if !c.configuration.Stripe.IsBillingEnabled() {
+		// When billing is not enabled we will always return the user state such that they are seen as active forever and
+		// not trialing.
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"user":            user,
 			"isSetup":         isSetup,
@@ -39,6 +41,11 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		})
 	}
 
+	// But when billing is enabled we need to handle what is basically three states.
+	// - They have an active subscription (active until is in the future, or trial ends at is in the future)
+	// - They have no subscription at all, or their trial has expired and they need to start one.
+	// - They have a subscription but it has lapsed or has been cancelled.
+	hasSubscrption := user.Account.HasSubscription()
 	subscriptionIsActive := user.Account.IsSubscriptionActive()
 	subscriptionIsTrial := user.Account.IsTrialing()
 
@@ -49,7 +56,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 			"isActive":        subscriptionIsActive,
 			"isTrialing":      subscriptionIsTrial,
 			"activeUntil":     user.Account.SubscriptionActiveUntil,
-			"hasSubscription": user.Account.HasSubscription(),
+			"hasSubscription": hasSubscrption,
 			"nextUrl":         "/account/subscribe",
 		})
 	}
@@ -60,7 +67,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		"isActive":        subscriptionIsActive,
 		"isTrialing":      subscriptionIsTrial,
 		"activeUntil":     user.Account.SubscriptionActiveUntil,
-		"hasSubscription": user.Account.HasSubscription(),
+		"hasSubscription": hasSubscrption,
 	})
 }
 

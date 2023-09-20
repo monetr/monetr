@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -62,7 +63,7 @@ func (b *baseBasicPaywall) GetHasSubscription(ctx context.Context, accountId uin
 // account is updated -> its cache is invalidated. There is likely a very small window where an invalid state could be
 // evaluated, but it should be fine.
 func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountId uint64) (active bool, err error) {
-	span := sentry.StartSpan(ctx, "Billing - GetSubscriptionIsActive")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	defer func() {

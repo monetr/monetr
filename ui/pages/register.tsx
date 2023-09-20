@@ -108,7 +108,6 @@ export default function Register(): JSX.Element {
     helpers.setSubmitting(true);
 
     return signUp({
-      agree: true, // No longer a checkbox.
       betaCode: values.betaCode,
       captcha: values.captcha,
       email: values.email,
@@ -126,10 +125,12 @@ export default function Register(): JSX.Element {
 
         return queryClient.invalidateQueries(['/users/me'])
           .then(() => {
+            // If the register endpoint has told us to navigate to a specific url afterwards, then do that now.
             if (result.nextUrl) {
               return navigate(result.nextUrl);
             }
 
+            // Otherwise just go to the index-ish route for the authenticated app.
             return navigate('/');
           });
       })

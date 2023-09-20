@@ -116,8 +116,8 @@ api:
     webhooksEnabled: true # Still working on this for now.
     billingEnabled: true
     taxesEnabled: true
+    freeTrialDays: 30
     initialPlan:
-      freeTrialDays: 30
       stripePriceId: price_1LkF9dI4uGGnwpgwvGIFcfZm
       features:
         - ManualBudgeting

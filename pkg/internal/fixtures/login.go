@@ -64,6 +64,7 @@ func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
 		StripeWebhookLatestTimestamp: myownsanity.TimeP(time.Now().Add(-4 * time.Minute)),
 		SubscriptionActiveUntil:      myownsanity.TimeP(time.Now().Add(10 * time.Minute)),
 		SubscriptionStatus:           &subStatus,
+		TrialEndsAt:                  nil,
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")

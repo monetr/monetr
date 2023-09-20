@@ -282,7 +282,6 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(
 	}
 
 	// Check to see if the subscription status of the account has changed with this update to be.
-	// TODO This might not be the best representation of "active" at this point since past due can technically be active?
 	if account.IsSubscriptionActive() != currentlyActive {
 		// If it has check to see if it was previously active.
 		updatedChannelName := fmt.Sprintf("account:%d:subscription:updated", account.AccountId)

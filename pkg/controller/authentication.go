@@ -13,15 +13,12 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/crumbs"
-	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/stripe/stripe-go/v72"
 )
 
 type MonetrClaims struct {
@@ -264,7 +261,6 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 		Timezone  string  `json:"timezone"`
 		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
-		Agree     bool    `json:"agree"`
 	}
 	if err := ctx.Bind(&registerRequest); err != nil {
 		return c.invalidJson(ctx)
@@ -342,85 +338,22 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 			)
 		}
 	}
+	log = log.WithField("loginId", login.LoginId)
 
-	var stripeCustomerId, stripeSubscriptionId *string
-	var activeUntil *time.Time
-	var subscriptionStatus *stripe.SubscriptionStatus
+	var trialEndsAt *time.Time
 	if c.configuration.Stripe.IsBillingEnabled() {
-		log.Debug("creating stripe customer for new user")
-		name := registerRequest.FirstName + " " + registerRequest.LastName
-		{ // Create the customer in stripe.
-			result, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
-				Email: &registerRequest.Email,
-				Name:  &name,
-				Params: stripe.Params{
-					Metadata: map[string]string{
-						"environment": c.configuration.Environment,
-						"revision":    build.Revision,
-						"release":     build.Release,
-					},
-				},
-			})
-			if err != nil {
-				return c.wrapAndReturnError(
-					ctx,
-					err,
-					http.StatusInternalServerError,
-					"failed to create stripe customer",
-				)
-			}
-			stripeCustomerId = &result.ID
-		}
+		expiration := time.Now().AddDate(0, 0, c.configuration.Stripe.FreeTrialDays)
+		log.WithFields(logrus.Fields{
+			"trialDays":   c.configuration.Stripe.FreeTrialDays,
+			"trialEndsAt": expiration,
+		}).Debug("billing is enabled, new account for login will be on a trial")
 
-		log.Debug("initial plan is specified, setting up new user with that subscription")
-		if c.configuration.Stripe.InitialPlan != nil { // Create the subscription.
-			plan := *c.configuration.Stripe.InitialPlan
-			result, err := c.stripe.CreateSubscription(c.getContext(ctx), stripe.SubscriptionParams{
-				// AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
-				// 	Enabled: stripe.Bool(c.configuration.Stripe.TaxesEnabled),
-				// },
-				CollectionMethod: stripe.String("charge_automatically"),
-				Customer:         stripeCustomerId,
-				Description:      stripe.String("monetr onboarding trial"),
-				Items: []*stripe.SubscriptionItemsParams{
-					{
-						Price:    stripe.String(plan.StripePriceId),
-						Quantity: stripe.Int64(1),
-					},
-				},
-				PaymentSettings: &stripe.SubscriptionPaymentSettingsParams{
-					PaymentMethodTypes: stripe.StringSlice([]string{
-						"card",
-					}),
-					SaveDefaultPaymentMethod: stripe.String("on_subscription"),
-				},
-				PromotionCode:   nil,
-				TrialPeriodDays: stripe.Int64(int64(plan.FreeTrialDays)),
-			})
-			if err != nil {
-				return c.wrapAndReturnError(
-					ctx,
-					err,
-					http.StatusInternalServerError,
-					"failed to create stripe customer",
-				)
-			}
-			stripeSubscriptionId = &result.ID
-			activeUntil = myownsanity.TimeP(time.Unix(result.CurrentPeriodEnd, 0))
-			subscriptionStatus = &result.Status
-			log.WithFields(logrus.Fields{
-				"stripeSubscriptionId": stripeSubscriptionId,
-				"stripeCustomerId":     stripeCustomerId,
-			}).Debug("successfully created stripe customer and subscription")
-		}
+		trialEndsAt = &expiration
 	}
 
 	account := models.Account{
-		Timezone:                timezone.String(),
-		StripeCustomerId:        stripeCustomerId,
-		StripeSubscriptionId:    stripeSubscriptionId,
-		SubscriptionActiveUntil: activeUntil,
-		SubscriptionStatus:      subscriptionStatus,
+		Timezone:    timezone.String(),
+		TrialEndsAt: trialEndsAt,
 	}
 	// Now that the login exists we can create the account, at the time of
 	// writing this we are only using the local time zone of the server, but in
@@ -434,11 +367,10 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 	crumbs.IncludeUserInScope(c.getContext(ctx), account.AccountId)
 
 	user := models.User{
-		LoginId:          login.LoginId,
-		AccountId:        account.AccountId,
-		FirstName:        registerRequest.FirstName,
-		LastName:         registerRequest.LastName,
-		StripeCustomerId: stripeCustomerId,
+		LoginId:   login.LoginId,
+		AccountId: account.AccountId,
+		FirstName: registerRequest.FirstName,
+		LastName:  registerRequest.LastName,
 	}
 
 	// Now that we have an accountId we can create the user object which will
@@ -514,20 +446,8 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"nextUrl":             "/setup",
-		"user":                user,
-		"isActive":            true,
 		"requireVerification": false,
 	})
-
-	// if !c.configuration.Stripe.IsBillingEnabled() {
-	// }
-	//
-	// return ctx.JSON(http.StatusOK, map[string]interface{}{
-	// 	"nextUrl":             "/account/subscribe",
-	// 	"user":                user,
-	// 	"isActive":            false,
-	// 	"requireVerification": false,
-	// })
 }
 
 // Verify Email

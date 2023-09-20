@@ -47,9 +47,9 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusPreconditionRequired)
-		response.JSON().Path("$.error").String().Equal("login requires MFA")
-		response.JSON().Path("$.code").String().Equal("MFA_REQUIRED")
-		response.Cookies().Empty()
+		response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+		response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
+		response.Cookies().IsEmpty()
 	})
 
 	t.Run("login true path with TOTP", func(t *testing.T) {
@@ -67,8 +67,8 @@ func TestLogin(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusPreconditionRequired)
-			response.JSON().Path("$.error").String().Equal("login requires MFA")
-			response.JSON().Path("$.code").String().Equal("MFA_REQUIRED")
+			response.JSON().Path("$.error").String().IsEqual("login requires MFA")
+			response.JSON().Path("$.code").String().IsEqual("MFA_REQUIRED")
 		}
 
 		{ // Then try to authenticate using the code.
@@ -136,8 +136,8 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().Equal("An internal error occurred.")
-		response.Cookies().Empty()
+		response.JSON().Path("$.error").String().IsEqual("An internal error occurred.")
+		response.Cookies().IsEmpty()
 	})
 
 	t.Run("no users", func(t *testing.T) {
@@ -153,7 +153,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().Equal("user has no accounts")
+		response.JSON().Path("$.error").String().IsEqual("user has no accounts")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -176,9 +176,8 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
-		response.JSON().Path("$.users").Array().Length().Equal(2) // Should have 2 accounts.
-		response.JSON().Path("$.users..accountId").Array().Contains(user1.AccountId)
-		response.JSON().Path("$.users..accountId").Array().Contains(user2.AccountId)
+		response.JSON().Path("$.users").Array().Length().IsEqual(2) // Should have 2 accounts.
+		response.JSON().Path("$.users..accountId").Array().ContainsAll(user1.AccountId, user1.AccountId)
 	})
 
 	t.Run("invalid email", func(t *testing.T) {
@@ -192,7 +191,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("Email address provided is not valid")
+		response.JSON().Path("$.error").String().IsEqual("Email address provided is not valid")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -207,7 +206,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("Email address provided is not valid")
+		response.JSON().Path("$.error").String().IsEqual("Email address provided is not valid")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -222,7 +221,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("Password must be at least 8 characters")
+		response.JSON().Path("$.error").String().IsEqual("Password must be at least 8 characters")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -250,7 +249,7 @@ func TestLogin(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
-		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe")
+		response.JSON().Path("$.nextUrl").String().IsEqual("/account/subscribe")
 
 		stripeMock.AssertNCustomersCreated(t, 1)
 	})
@@ -266,7 +265,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").Equal("invalid email and password")
+		response.JSON().Path("$.error").IsEqual("invalid email and password")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -325,7 +324,7 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("valid ReCAPTCHA is required")
+		response.JSON().Path("$.error").IsEqual("valid ReCAPTCHA is required")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -339,7 +338,7 @@ func TestLogin(t *testing.T) {
 		response.Status(http.StatusBadRequest)
 		response.JSON().
 			Path("$.error").
-			Equal("malformed json")
+			IsEqual("malformed json")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -362,8 +361,8 @@ func TestLogin(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusPreconditionRequired)
-		response.JSON().Path("$.error").String().Equal("email address is not verified")
-		response.JSON().Path("$.code").String().Equal("EMAIL_NOT_VERIFIED")
+		response.JSON().Path("$.error").String().IsEqual("email address is not verified")
+		response.JSON().Path("$.code").String().IsEqual("EMAIL_NOT_VERIFIED")
 		response.JSON().Object().NotContainsKey("token")
 	})
 }
@@ -407,7 +406,7 @@ func TestLogout(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.Body().Empty()
+		response.Body().IsEmpty()
 	})
 }
 
@@ -432,8 +431,8 @@ func TestRegister(t *testing.T) {
 		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
 
-		response.JSON().Path("$.nextUrl").String().Equal("/setup")
-		response.JSON().Path("$.isActive").Boolean().True()
+		response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
+		response.JSON().Path("$.isActive").Boolean().IsTrue()
 		response.JSON().Path("$.user").Object().NotEmpty()
 		response.JSON().Path("$.user.login").Object().NotEmpty()
 		response.JSON().Path("$.user.account").Object().NotEmpty()
@@ -460,7 +459,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("beta code required for registration")
+		response.JSON().Path("$.error").String().IsEqual("beta code required for registration")
 	})
 
 	t.Run("invalid beta code", func(t *testing.T) {
@@ -486,7 +485,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("could not verify beta code: record does not exist")
+		response.JSON().Path("$.error").String().IsEqual("could not verify beta code: record does not exist")
 	})
 
 	t.Run("bad password", func(t *testing.T) {
@@ -507,7 +506,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("Password must be at least 8 characters")
+		response.JSON().Path("$.error").IsEqual("Password must be at least 8 characters")
 	})
 
 	t.Run("bad timezone", func(t *testing.T) {
@@ -530,7 +529,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("failed to parse timezone")
+		response.JSON().Path("$.error").IsEqual("failed to parse timezone")
 	})
 
 	t.Run("valid captcha", func(t *testing.T) {
@@ -576,8 +575,8 @@ func TestRegister(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
-		response.JSON().Path("$.nextUrl").String().Equal("/setup")
-		response.JSON().Path("$.isActive").Boolean().True()
+		response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
+		response.JSON().Path("$.isActive").Boolean().IsTrue()
 		response.JSON().Path("$.user").Object().NotEmpty()
 		response.JSON().Path("$.user.login").Object().NotEmpty()
 		response.JSON().Path("$.user.account").Object().NotEmpty()
@@ -612,7 +611,7 @@ func TestRegister(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("valid ReCAPTCHA is required")
+			IsEqual("valid ReCAPTCHA is required")
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -622,7 +621,7 @@ func TestRegister(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("invalid JSON body")
+		response.JSON().Path("$.error").IsEqual("invalid JSON body")
 	})
 
 	t.Run("email already exists", func(t *testing.T) {
@@ -656,12 +655,14 @@ func TestRegister(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.code").Equal("EMAIL_IN_USE")
-			response.JSON().Path("$.error").Equal("email already in use")
+			response.JSON().Path("$.code").IsEqual("EMAIL_IN_USE")
+			response.JSON().Path("$.error").IsEqual("email already in use")
 		}
 	})
 
 	t.Run("with billing", func(t *testing.T) {
+		// When we register and billing is enabled, the user should be put on a trial state. But should not need things like
+		// stripe customer or subscription setup at this time.
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
@@ -672,8 +673,8 @@ func TestRegister(t *testing.T) {
 		conf.Stripe.Enabled = true
 		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
+		conf.Stripe.FreeTrialDays = 30
 		conf.Stripe.InitialPlan = &config.Plan{
-			FreeTrialDays: 0,
 			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
 			Default:       true,
@@ -687,24 +688,37 @@ func TestRegister(t *testing.T) {
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
 		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
+		{ // Register for a new account
+			registerRequest.Email = testutils.GetUniqueEmail(t)
+			registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
+			registerRequest.FirstName = gofakeit.FirstName()
+			registerRequest.LastName = gofakeit.LastName()
 
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(registerRequest).
+				Expect()
 
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
-		response.JSON().Path("$.isActive").Boolean().False()
-		response.JSON().Path("$.nextUrl").String().Equal("/account/subscribe")
-		response.JSON().Path("$.user").Object().NotEmpty()
-		response.JSON().Path("$.user.login").Object().NotEmpty()
-		response.JSON().Path("$.user.account").Object().NotEmpty()
+			response.Status(http.StatusOK)
+			AssertSetTokenCookie(t, response)
+			response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
+			response.JSON().Path("$.requireVerification").Boolean().IsFalse()
+		}
 
-		stripeMock.AssertNCustomersCreated(t, 1)
+		token := GivenILogin(t, e, registerRequest.Email, registerRequest.Password)
+		{ // Get the current user to see what the state of the account is.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsTrue()
+			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
+		}
+
+		stripeMock.AssertNCustomersCreated(t, 0)
 	})
 
 	t.Run("requires email verification", func(t *testing.T) {
@@ -735,7 +749,7 @@ func TestRegister(t *testing.T) {
 		response.JSON().
 			Path("$.message").
 			String().
-			Equal("A verification email has been sent to your email address, please verify your email.")
+			IsEqual("A verification email has been sent to your email address, please verify your email.")
 		response.JSON().Object().NotContainsKey("token")
 	})
 
@@ -767,7 +781,7 @@ func TestRegister(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("could not generate email verification token")
+			IsEqual("could not generate email verification token")
 		response.JSON().Object().NotContainsKey("token")
 	})
 }
@@ -807,7 +821,7 @@ func TestVerifyEmail(t *testing.T) {
 			response.JSON().
 				Path("$.message").
 				String().
-				Equal("A verification email has been sent to your email address, please verify your email.")
+				IsEqual("A verification email has been sent to your email address, please verify your email.")
 			response.JSON().Object().NotContainsKey("token")
 		}
 
@@ -826,7 +840,7 @@ func TestVerifyEmail(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusPreconditionRequired)
-			response.JSON().Path("$.error").String().Equal("email address is not verified")
+			response.JSON().Path("$.error").String().IsEqual("email address is not verified")
 		}
 
 		{ // Then generate a verification token and try to use it.
@@ -841,8 +855,8 @@ func TestVerifyEmail(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.nextUrl").String().Equal("/login")
-			response.JSON().Path("$.message").String().Equal("Your email is now verified. Please login.")
+			response.JSON().Path("$.nextUrl").String().IsEqual("/login")
+			response.JSON().Path("$.message").String().IsEqual("Your email is now verified. Please login.")
 		}
 
 		{ // Now try to login AFTER we have verified the email address.
@@ -884,7 +898,7 @@ func TestVerifyEmail(t *testing.T) {
 			response.JSON().
 				Path("$.message").
 				String().
-				Equal("A verification email has been sent to your email address, please verify your email.")
+				IsEqual("A verification email has been sent to your email address, please verify your email.")
 			response.JSON().Object().NotContainsKey("token")
 		}
 
@@ -903,7 +917,7 @@ func TestVerifyEmail(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("Invalid email verification")
+				IsEqual("Invalid email verification")
 		}
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
@@ -915,7 +929,7 @@ func TestVerifyEmail(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusPreconditionRequired)
-			response.JSON().Path("$.error").String().Equal("email address is not verified")
+			response.JSON().Path("$.error").String().IsEqual("email address is not verified")
 		}
 	})
 
@@ -944,7 +958,7 @@ func TestVerifyEmail(t *testing.T) {
 			response.JSON().
 				Path("$.message").
 				String().
-				Equal("A verification email has been sent to your email address, please verify your email.")
+				IsEqual("A verification email has been sent to your email address, please verify your email.")
 			response.JSON().Object().NotContainsKey("token")
 		}
 
@@ -965,7 +979,7 @@ func TestVerifyEmail(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("Invalid email verification")
+				IsEqual("Invalid email verification")
 		}
 
 		{ // Make sure that even when the verify endpoint fails, that our login is still not verified.
@@ -977,7 +991,7 @@ func TestVerifyEmail(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusPreconditionRequired)
-			response.JSON().Path("$.error").String().Equal("email address is not verified")
+			response.JSON().Path("$.error").String().IsEqual("email address is not verified")
 		}
 	})
 
@@ -991,7 +1005,7 @@ func TestVerifyEmail(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("Token cannot be blank")
+		response.JSON().Path("$.error").String().IsEqual("Token cannot be blank")
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
@@ -1005,7 +1019,7 @@ func TestVerifyEmail(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("invalid JSON body")
+			IsEqual("invalid JSON body")
 	})
 }
 
@@ -1042,7 +1056,7 @@ func TestResendVerificationEmail(t *testing.T) {
 			response.JSON().
 				Path("$.message").
 				String().
-				Equal("A verification email has been sent to your email address, please verify your email.")
+				IsEqual("A verification email has been sent to your email address, please verify your email.")
 			response.JSON().Object().NotContainsKey("token")
 		}
 
@@ -1060,7 +1074,7 @@ func TestResendVerificationEmail(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty() // This endpoint should not return anything if it succeeds.
+			response.Body().IsEmpty() // This endpoint should not return anything if it succeeds.
 		}
 
 		{ // Now make sure that we have actually sent another email.
@@ -1080,7 +1094,7 @@ func TestResendVerificationEmail(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.Body().Empty() // Even if the email provided does not exist, don't indicate anything to the client.
+		response.Body().IsEmpty() // Even if the email provided does not exist, don't indicate anything to the client.
 
 		assert.Empty(t, app.Mail.Sent, "no emails should have been sent, address is not associated with a login")
 	})
@@ -1095,7 +1109,7 @@ func TestResendVerificationEmail(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("email must be provided to resend verification link")
+		response.JSON().Path("$.error").String().IsEqual("email must be provided to resend verification link")
 	})
 }
 
@@ -1126,7 +1140,7 @@ func TestSendForgotPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty()
+			response.Body().IsEmpty()
 		}
 
 		assert.Len(t, app.Mail.Sent, 1, "should have sent a single email to reset password")
@@ -1149,7 +1163,7 @@ func TestSendForgotPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty()
+			response.Body().IsEmpty()
 		}
 
 		// Make sure that even though the request succeeded, no emails were sent since the email address was not real.
@@ -1182,7 +1196,7 @@ func TestSendForgotPassword(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("You must verify your email before you can send forgot password requests.")
+				IsEqual("You must verify your email before you can send forgot password requests.")
 		}
 
 		assert.Len(t, app.Mail.Sent, 1, "should not have sent another email")
@@ -1218,8 +1232,8 @@ func TestSendForgotPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.nextUrl").String().Equal("/login")
-			response.JSON().Path("$.message").String().Equal("Your email is now verified. Please login.")
+			response.JSON().Path("$.nextUrl").String().IsEqual("/login")
+			response.JSON().Path("$.message").String().IsEqual("Your email is now verified. Please login.")
 		}
 
 		{
@@ -1228,7 +1242,7 @@ func TestSendForgotPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty()
+			response.Body().IsEmpty()
 		}
 
 		assert.Len(t, app.Mail.Sent, 2, "should now have sent 2 emails")
@@ -1246,7 +1260,7 @@ func TestSendForgotPassword(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("invalid JSON body")
+				IsEqual("invalid JSON body")
 		}
 	})
 
@@ -1261,7 +1275,7 @@ func TestSendForgotPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().Equal("Must provide an email address.")
+			response.JSON().Path("$.error").String().IsEqual("Must provide an email address.")
 		}
 	})
 
@@ -1282,7 +1296,7 @@ func TestSendForgotPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().Equal("Must provide a valid ReCAPTCHA.")
+			response.JSON().Path("$.error").String().IsEqual("Must provide a valid ReCAPTCHA.")
 		}
 	})
 }
@@ -1329,7 +1343,7 @@ func TestResetPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty()
+			response.Body().IsEmpty()
 		}
 
 		{ // Try to log in with the old password.
@@ -1341,8 +1355,8 @@ func TestResetPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusUnauthorized)
-			response.JSON().Path("$.error").String().Equal("invalid email and password")
-			response.Cookies().Empty()
+			response.JSON().Path("$.error").String().IsEqual("invalid email and password")
+			response.Cookies().IsEmpty()
 		}
 
 		{ // Try to log in with the new password.
@@ -1383,7 +1397,7 @@ func TestResetPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty()
+			response.Body().IsEmpty()
 		}
 
 		{ // Try to reset the password with the second token, it should fail.
@@ -1398,7 +1412,7 @@ func TestResetPassword(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("Password has already been reset, you must request another password reset link.")
+				IsEqual("Password has already been reset, you must request another password reset link.")
 		}
 	})
 
@@ -1421,7 +1435,7 @@ func TestResetPassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty()
+			response.Body().IsEmpty()
 		}
 
 		{ // Try to reset the password with the second token, it should fail.
@@ -1436,7 +1450,7 @@ func TestResetPassword(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("Password has already been reset, you must request another password reset link.")
+				IsEqual("Password has already been reset, you must request another password reset link.")
 		}
 	})
 
@@ -1465,7 +1479,7 @@ func TestResetPassword(t *testing.T) {
 			response.JSON().
 				Path("$.error").
 				String().
-				Equal("Failed to validate password reset token")
+				IsEqual("Failed to validate password reset token")
 		}
 	})
 
@@ -1484,7 +1498,7 @@ func TestResetPassword(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("Failed to verify login for email address: record does not exist")
+		response.JSON().Path("$.error").String().IsEqual("Failed to verify login for email address: record does not exist")
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -1498,7 +1512,7 @@ func TestResetPassword(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("invalid JSON body")
+			IsEqual("invalid JSON body")
 	})
 
 	t.Run("token is empty", func(t *testing.T) {
@@ -1512,7 +1526,7 @@ func TestResetPassword(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("Token must be provided to reset password.")
+		response.JSON().Path("$.error").String().IsEqual("Token must be provided to reset password.")
 	})
 
 	t.Run("password too short", func(t *testing.T) {
@@ -1530,7 +1544,7 @@ func TestResetPassword(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("Password must be at least 8 characters long.")
+		response.JSON().Path("$.error").String().IsEqual("Password must be at least 8 characters long.")
 	})
 
 	t.Run("invalid token", func(t *testing.T) {
@@ -1547,6 +1561,6 @@ func TestResetPassword(t *testing.T) {
 		response.JSON().
 			Path("$.error").
 			String().
-			Equal("Failed to validate password reset token")
+			IsEqual("Failed to validate password reset token")
 	})
 }

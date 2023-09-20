@@ -102,8 +102,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 	}
 
 	crumbs.Debug(c.getContext(ctx), "Creating checkout session for price", map[string]interface{}{
-		"priceId":       plan.StripePriceId,
-		"freeTrialDays": plan.FreeTrialDays,
+		"priceId": plan.StripePriceId,
 	})
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -227,15 +226,8 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 				"release":     build.Release,
 				"accountId":   strconv.FormatUint(me.AccountId, 10),
 			},
-			TransferData:    nil,
-			TrialEnd:        nil,
-			TrialFromPlan:   nil,
-			TrialPeriodDays: nil,
+			TransferData: nil,
 		},
-	}
-
-	if plan.FreeTrialDays > 0 && account.StripeSubscriptionId == nil {
-		checkoutParams.SubscriptionData.TrialPeriodDays = stripe.Int64(int64(plan.FreeTrialDays))
 	}
 
 	result, err := c.stripe.NewCheckoutSession(c.getContext(ctx), checkoutParams)

@@ -27,7 +27,6 @@ func TestGetAfterCheckout(t *testing.T) {
 		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
 		conf.Stripe.InitialPlan = &config.Plan{
-			FreeTrialDays: 0,
 			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
 			Default:       true,
@@ -86,7 +85,6 @@ func TestGetAfterCheckout(t *testing.T) {
 		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
 		conf.Stripe.InitialPlan = &config.Plan{
-			FreeTrialDays: 0,
 			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
 			Default:       true,
