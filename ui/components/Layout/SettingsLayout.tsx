@@ -25,7 +25,7 @@ export default function SettingsLayout(): JSX.Element {
           About
         </SettingTab>
       </div>
-      <MDivider className='mt-3' />
+      <MDivider />
       <Outlet />
     </div>
   );
@@ -40,7 +40,7 @@ function SettingTab(props: SettingTabProps): JSX.Element {
   const location = useLocation();
   const active = location.pathname === props.to;
   const className = MSpanDeriveClasses({
-    className: 'cursor-pointer',
+    className: 'cursor-pointer pb-3',
     weight: active ? 'bold' : 'normal',
   });
 
