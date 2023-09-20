@@ -55,7 +55,7 @@ export default function Login(): JSX.Element {
     }
 
     return (
-      <MLink to="/password/forgot" size="sm" data-testid='login-forgot'>
+      <MLink to="/password/forgot" size="sm" data-testid='login-forgot' tabIndex={ 5 }>
         Forgot password?
       </MLink>
     );
@@ -67,7 +67,7 @@ export default function Login(): JSX.Element {
     return (
       <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
         <MSpan color="subtle" className='text-sm'>Not a user?</MSpan>
-        <MLink to="/register" size="sm" data-testid='login-signup'>Sign up now</MLink>
+        <MLink to="/register" size="sm" data-testid='login-signup' tabIndex={ 4 }>Sign up now</MLink>
       </div>
     );
   }
@@ -106,6 +106,7 @@ export default function Login(): JSX.Element {
         type='email'
         required
         className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
+        tabIndex={ 1 }
       />
       <MTextField
         autoComplete='current-password'
@@ -116,6 +117,7 @@ export default function Login(): JSX.Element {
         name='password'
         required
         type='password'
+        tabIndex={ 2 }
       />
       <MCaptcha
         name="captcha"
@@ -129,6 +131,7 @@ export default function Login(): JSX.Element {
           role="form"
           type="submit"
           className='w-full'
+          tabIndex={ 3 }
         >
           Sign In
         </MFormButton>
