@@ -26,6 +26,7 @@ import ForgotPasswordNew from 'pages/password/forgot';
 import PasswordResetNew from 'pages/password/reset';
 import Register from 'pages/register';
 import SettingsAbout from 'pages/settings/about';
+import SettingsBilling from 'pages/settings/billing';
 import SettingsOverview from 'pages/settings/overview';
 import SettingsSecurity from 'pages/settings/security';
 import SetupPage from 'pages/setup';
@@ -117,6 +118,7 @@ export default function Monetr(): JSX.Element {
             <Route path='' element={ <Navigate replace to="/settings/overview" /> } />
             <Route path='overview' element={ <SettingsOverview /> } />
             <Route path='security' element={ <SettingsSecurity /> } />
+            <Route path='billing' element={ <SettingsBilling /> } />
             <Route path='about' element={ <SettingsAbout /> } />
           </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />

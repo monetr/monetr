@@ -21,6 +21,9 @@ export default function SettingsLayout(): JSX.Element {
         <SettingTab to="/settings/security">
           Security
         </SettingTab>
+        <SettingTab to="/settings/billing">
+          Billing
+        </SettingTab>
         <SettingTab to="/settings/about">
           About
         </SettingTab>

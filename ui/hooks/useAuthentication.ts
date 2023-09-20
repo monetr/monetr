@@ -11,6 +11,7 @@ export interface AuthenticationWrapper {
   isActive: boolean;
   isTrialing: boolean;
   activeUntil: Date | null;
+  trialingUntil: Date | null;
   hasSubscription: boolean;
 }
 
@@ -38,6 +39,7 @@ export function useAuthenticationSink(): AuthenticationResult {
       isActive: !!result?.data?.isActive,
       isTrialing: Boolean(result?.data?.isTrialing),
       activeUntil: result?.data?.activeUntil && parseJSON(result.data.activeUntil),
+      trialingUntil: result?.data?.trialingUntil && parseJSON(result.data.trialingUntil),
       hasSubscription: !!result?.data?.hasSubscription,
     },
   };

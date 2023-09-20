@@ -37,6 +37,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 			"isActive":        true,
 			"isTrialing":      false,
 			"activeUntil":     nil,
+			"trialingUntil":   nil,
 			"hasSubscription": true,
 		})
 	}
@@ -56,6 +57,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 			"isActive":        subscriptionIsActive,
 			"isTrialing":      subscriptionIsTrial,
 			"activeUntil":     user.Account.SubscriptionActiveUntil,
+			"trialingUntil":   user.Account.TrialEndsAt,
 			"hasSubscription": hasSubscrption,
 			"nextUrl":         "/account/subscribe",
 		})
@@ -67,6 +69,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		"isActive":        subscriptionIsActive,
 		"isTrialing":      subscriptionIsTrial,
 		"activeUntil":     user.Account.SubscriptionActiveUntil,
+		"trialingUntil":   user.Account.TrialEndsAt,
 		"hasSubscription": hasSubscrption,
 	})
 }

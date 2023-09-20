@@ -17,7 +17,7 @@ export default function SettingsAbout(): JSX.Element {
     <div className='w-full flex flex-col p-4 gap-8'>
       <div className='w-full flex flex-col max-w-2xl'>
         <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
-        About monetr
+          About monetr
         </MSpan>
         <MDivider />
         <div className='flex p-4'>
