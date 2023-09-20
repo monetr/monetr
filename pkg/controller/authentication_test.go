@@ -225,18 +225,35 @@ func TestLogin(t *testing.T) {
 		response.JSON().Object().NotContainsKey("token")
 	})
 
-	t.Run("inactive subscription", func(t *testing.T) {
-		httpmock.Activate()
-		defer httpmock.DeactivateAndReset()
-
+	t.Run("trialing login", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Stripe.Enabled = true
 		config.Stripe.BillingEnabled = true
+		// Force the trial to be expired immediately.
+		config.Stripe.FreeTrialDays = 4
 		e := NewTestApplicationWithConfig(t, config)
 
-		stripeMock := mock_stripe.NewMockStripeHelper(t)
+		email, password := GivenIHaveLogin(t, e)
 
-		stripeMock.MockStripeCreateCustomerSuccess(t)
+		response := e.POST("/api/authentication/login").
+			WithJSON(map[string]interface{}{
+				"email":    email,
+				"password": password,
+			}).
+			Expect()
+
+		response.Status(http.StatusOK)
+		AssertSetTokenCookie(t, response)
+		response.JSON().Object().NotContainsKey("nextUrl")
+	})
+
+	t.Run("inactive subscription", func(t *testing.T) {
+		config := NewTestApplicationConfig(t)
+		config.Stripe.Enabled = true
+		config.Stripe.BillingEnabled = true
+		// Force the trial to be expired immediately.
+		config.Stripe.FreeTrialDays = -1
+		e := NewTestApplicationWithConfig(t, config)
 
 		email, password := GivenIHaveLogin(t, e)
 
@@ -250,8 +267,6 @@ func TestLogin(t *testing.T) {
 		response.Status(http.StatusOK)
 		AssertSetTokenCookie(t, response)
 		response.JSON().Path("$.nextUrl").String().IsEqual("/account/subscribe")
-
-		stripeMock.AssertNCustomersCreated(t, 1)
 	})
 
 	t.Run("bad password", func(t *testing.T) {

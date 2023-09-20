@@ -26,6 +26,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		conf.Stripe.Enabled = true
 		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
+		conf.Stripe.FreeTrialDays = -1
 		conf.Stripe.InitialPlan = &config.Plan{
 			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
@@ -36,8 +37,8 @@ func TestGetAfterCheckout(t *testing.T) {
 
 		token := GivenIHaveToken(t, e)
 
-		// Make sure that our customer has been created.
-		stripeMock.AssertNCustomersCreated(t, 1)
+		// Customers are no longer created on registration, instead created at checkout.
+		stripeMock.AssertNCustomersCreated(t, 0)
 
 		var checkoutSessionId string
 		{ // Create a checkout session
@@ -53,6 +54,7 @@ func TestGetAfterCheckout(t *testing.T) {
 			result.JSON().Path("$.sessionId").String().NotEmpty()
 			checkoutSessionId = result.JSON().Path("$.sessionId").String().Raw()
 		}
+		stripeMock.AssertNCustomersCreated(t, 1)
 
 		// Mark the checkout session as complete.
 		stripeMock.CompleteCheckoutSession(t, checkoutSessionId)
@@ -64,8 +66,8 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusOK)
-			result.JSON().Path("$.isActive").Boolean().True()
-			result.JSON().Path("$.nextUrl").String().Equal("/")
+			result.JSON().Path("$.isActive").Boolean().IsTrue()
+			result.JSON().Path("$.nextUrl").String().IsEqual("/")
 		}
 	})
 
@@ -84,6 +86,7 @@ func TestGetAfterCheckout(t *testing.T) {
 		conf.Stripe.Enabled = true
 		conf.Stripe.BillingEnabled = true
 		conf.Stripe.APIKey = gofakeit.UUID()
+		conf.Stripe.FreeTrialDays = -1
 		conf.Stripe.InitialPlan = &config.Plan{
 			Visible:       true,
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
@@ -94,8 +97,7 @@ func TestGetAfterCheckout(t *testing.T) {
 
 		token := GivenIHaveToken(t, e)
 
-		// Make sure that our customer has been created.
-		stripeMock.AssertNCustomersCreated(t, 1)
+		stripeMock.AssertNCustomersCreated(t, 0)
 
 		{ // Make sure that initially the customer's subscription is not present or active.
 			result := e.GET("/api/users/me").
@@ -103,8 +105,8 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusOK)
-			result.JSON().Path("$.isActive").Boolean().False()
-			result.JSON().Path("$.hasSubscription").Boolean().False()
+			result.JSON().Path("$.isActive").Boolean().IsFalse()
+			result.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 		}
 
 		var checkoutSessionId string
@@ -122,6 +124,8 @@ func TestGetAfterCheckout(t *testing.T) {
 			checkoutSessionId = result.JSON().Path("$.sessionId").String().Raw()
 		}
 
+		stripeMock.AssertNCustomersCreated(t, 1)
+
 		// Mark the checkout session as complete.
 		stripeMock.CompleteCheckoutSession(t, checkoutSessionId)
 
@@ -132,8 +136,8 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusOK)
-			result.JSON().Path("$.isActive").Boolean().True()
-			result.JSON().Path("$.nextUrl").String().Equal("/")
+			result.JSON().Path("$.isActive").Boolean().IsTrue()
+			result.JSON().Path("$.nextUrl").String().IsEqual("/")
 		}
 
 		{ // Then once it's all said and done, make sure the customer's subscription shows as present and active.
@@ -142,8 +146,8 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusOK)
-			result.JSON().Path("$.isActive").Boolean().True()
-			result.JSON().Path("$.hasSubscription").Boolean().True()
+			result.JSON().Path("$.isActive").Boolean().IsTrue()
+			result.JSON().Path("$.hasSubscription").Boolean().IsTrue()
 		}
 
 		// Make sure that if the customer attempts to create a checkout session when they already have a subscription
@@ -158,7 +162,7 @@ func TestGetAfterCheckout(t *testing.T) {
 				Expect()
 
 			result.Status(http.StatusBadRequest)
-			result.JSON().Path("$.error").String().Equal("there is already an active subscription for your account")
+			result.JSON().Path("$.error").String().IsEqual("there is already an active subscription for your account")
 		}
 	})
 }
