@@ -235,7 +235,7 @@ jobs:
         if: always()
         uses: guyarb/golang-test-annotations@v0.7.0
         with:
-          test-results: '${{ github.workspace }}/rest-api-tests.json'
+          test-results: 'rest-api-tests.json'
       - uses: actions/upload-artifact@v3
         name: Upload Go Test Coverage Artifacts
         if: always()
