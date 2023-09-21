@@ -1,5 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import Select, { ActionMeta, components, FormatOptionLabelMeta, OnChangeValue, OptionProps, Theme } from 'react-select';
+import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 
 import MBadge from './MBadge';
 import MSpan from './MSpan';
@@ -8,7 +9,7 @@ import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink } from 'hooks/spending';
 import { useUpdateTransaction } from 'hooks/transactions';
 import useTheme from 'hooks/useTheme';
-import Spending from 'models/Spending';
+import Spending, { SpendingType } from 'models/Spending';
 import Transaction from 'models/Transaction';
 import formatAmount from 'util/formatAmount';
 import mergeTailwind from 'util/mergeTailwind';
@@ -170,9 +171,21 @@ export function SpendingSelectOption({ children, ...props }: OptionProps<Spendin
         <MSpan size='md' color='emphasis'>
           { props.label }
         </MSpan>
-        <MBadge size='sm'>
-          { amount }
-        </MBadge>
+        <div className='flex gap-2'>
+          { props.data.spending?.spendingType === SpendingType.Goal &&
+            <MBadge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
+              <SavingsOutlined />
+            </MBadge>
+          }
+          { props.data.spending?.spendingType === SpendingType.Expense &&
+            <MBadge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
+              <PriceCheckOutlined />
+            </MBadge>
+          }
+          <MBadge size='sm'>
+            {amount}
+          </MBadge>
+        </div>
       </div>
     </components.Option>
   );
