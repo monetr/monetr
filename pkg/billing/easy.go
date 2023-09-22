@@ -267,7 +267,13 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(
 	}
 
 	account.StripeCustomerId = &customerId
-	account.StripeSubscriptionId = &subscriptionId
+	if status == stripe.SubscriptionStatusCanceled {
+		// If we are canceling the subscription, then set this to nil.
+		account.StripeSubscriptionId = nil
+	} else {
+		// Otherwise do this. If its adding a value great, otherwise itll update the existing value and overwrite it.
+		account.StripeSubscriptionId = &subscriptionId
+	}
 	// Add 24 hours to the subscription window. This way Stripe has time to process the subscription payment and update
 	// the status for us even if things are running a bit slow. This resolves an issue where the active until date can
 	// pass before Stripe has processed the renewal. Causing (usually) around an hour or more of time where monetr
