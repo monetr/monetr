@@ -1,5 +1,6 @@
 import React from 'react';
 import { components, OptionProps } from 'react-select';
+import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 import { useFormikContext } from 'formik';
 
 import MBadge from './MBadge';
@@ -8,7 +9,8 @@ import MSpan from './MSpan';
 
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink } from 'hooks/spending';
-import Spending from 'models/Spending';
+import Spending, { SpendingType } from 'models/Spending';
+import formatAmount from 'util/formatAmount';
 
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelecteSpendingBaseProps = Omit<
@@ -126,17 +128,29 @@ interface SpendingOption {
 }
 
 function MSelectSpendingOption({ children: _, ...props }: OptionProps<SpendingOption>): JSX.Element {
-  // const notLoaded = props.data.spending?.currentAmount === undefined;
-  // const amount = notLoaded ? 'N/A' : formatAmount(props.data.spending.currentAmount);
+  const notLoaded = props.data.spending?.currentAmount === undefined;
+  const amount = notLoaded ? 'N/A' : formatAmount(props.data.spending.currentAmount);
   return (
     <components.Option { ...props }>
-      <div className='flex justify-between'>
+      <div className="flex justify-between">
         <MSpan size='md' color='emphasis'>
           { props.label }
         </MSpan>
-        <MBadge size='sm'>
-          { props.data.spending.getCurrentAmountString() }
-        </MBadge>
+        <div className='flex gap-2'>
+          { props.data.spending?.spendingType === SpendingType.Goal &&
+            <MBadge size='sm' className='dark:bg-dark-monetr-blue  max-h-[24px]'>
+              <SavingsOutlined />
+            </MBadge>
+          }
+          { props.data.spending?.spendingType === SpendingType.Expense &&
+            <MBadge size='sm' className='dark:bg-dark-monetr-green max-h-[24px]'>
+              <PriceCheckOutlined />
+            </MBadge>
+          }
+          <MBadge size='sm'>
+            {amount}
+          </MBadge>
+        </div>
       </div>
     </components.Option>
   );

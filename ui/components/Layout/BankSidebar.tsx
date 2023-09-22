@@ -110,7 +110,7 @@ function LogoutButton(): JSX.Element {
   // By doing reloadDocument, we are forcing the @tanstack/react-query cache to be emptied. This will naturally just make it
   // easier to prevent the current user's data from leaking into another session.
   return (
-    <Link to='/logout' reloadDocument data-testid='bank-sidebar-logout'>
+    <Link to='/logout' data-testid='bank-sidebar-logout'>
       <Logout className='dark:hover:text-dark-monetr-content-emphasis dark:text-dark-monetr-content-subtle cursor-pointer' />
     </Link>
   );
