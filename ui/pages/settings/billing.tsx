@@ -1,16 +1,17 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import { AccessTimeOutlined } from '@mui/icons-material';
+import { useSnackbar } from 'notistack';
 
 import MBadge from 'components/MBadge';
 import { MBaseButton } from 'components/MButton';
 import MDivider from 'components/MDivider';
 import MSpan from 'components/MSpan';
-import { format, isThisYear } from 'date-fns';
+import { format, isPast, isThisYear } from 'date-fns';
 import { useAuthenticationSink } from 'hooks/useAuthentication';
+import request from 'util/request';
 
 export default function SettingsBilling(): JSX.Element {
-  const { result } = useAuthenticationSink();
-
+  const { result: { trialingUntil } } = useAuthenticationSink();
 
   return (
     <div className="w-full flex flex-col p-4 max-w-xl">
@@ -19,12 +20,56 @@ export default function SettingsBilling(): JSX.Element {
       </MSpan>
       <MDivider />
 
-      <TrialingRow trialingUntil={ result?.trialingUntil } />
-
-      <MBaseButton className='ml-auto mt-4 max-w-xs' color='primary'>
-        Upgrade To A Paid Subscription
-      </MBaseButton>
+      <TrialingRow trialingUntil={ trialingUntil } />
+      <ActiveSubscriptionRow />
     </div>
+  );
+}
+
+function ActiveSubscriptionRow(): JSX.Element {
+  const { enqueueSnackbar } = useSnackbar();
+  const [loading, setLoading] = useState(false);
+  const { result: { hasSubscription } } = useAuthenticationSink();
+  const handleManageSubscription = useCallback(() => {
+    setLoading(true);
+    // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
+    // subscription for a card that has failed payment or something similar.
+    request().get('/billing/portal')
+      .then(result => window.location.assign(result.data.url))
+      .catch(error => {
+        setLoading(false);
+        enqueueSnackbar(error?.response?.data?.error || 'Failed to prepare Stripe billing session.', {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
+      });
+  }, [enqueueSnackbar]);
+
+  if (!hasSubscription) {
+    return null;
+  }
+
+  return (
+    <Fragment>
+      <div className='flex justify-between py-4'>
+        <MSpan>
+          Subscription Status
+        </MSpan>
+        <MBadge className='bg-green-600'>
+          Active
+        </MBadge>
+      </div>
+      <MDivider />
+
+      <MBaseButton
+        className='ml-auto mt-4 max-w-xs'
+        color='primary'
+        disabled={ loading }
+        onClick={ handleManageSubscription }
+      >
+        Manage Your Subscription
+      </MBaseButton>
+    </Fragment>
   );
 }
 
@@ -33,16 +78,13 @@ interface TrialingRowProps {
 }
 
 function TrialingRow(props: TrialingRowProps): JSX.Element {
-  let trialEndDate: string | null;
-  if (props.trialingUntil) {
-    trialEndDate = isThisYear(props.trialingUntil) ?
-      format(props.trialingUntil, 'MMMM do') :
-      format(props.trialingUntil, 'MMMM do, yyyy');
-  }
-
-  if (!props.trialingUntil) {
+  if (!props.trialingUntil || isPast(props.trialingUntil)) {
     return null;
   }
+
+  const trialEndDate = isThisYear(props.trialingUntil) ?
+    format(props.trialingUntil, 'MMMM do') :
+    format(props.trialingUntil, 'MMMM do, yyyy');
 
   return (
     <Fragment>
@@ -54,6 +96,12 @@ function TrialingRow(props: TrialingRowProps): JSX.Element {
           <AccessTimeOutlined />
           Trialing Until { trialEndDate }
         </MBadge>
+      </div>
+      <MDivider />
+      <div className='flex justify-between py-4'>
+        <MSpan>
+          You can upgrade to a paid subscription at the end of your trial.
+        </MSpan>
       </div>
       <MDivider />
     </Fragment>
