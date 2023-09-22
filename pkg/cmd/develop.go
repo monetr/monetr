@@ -5,6 +5,7 @@ package main
 import (
 	"context"
 
+	"github.com/monetr/monetr/pkg/cache"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/logging"
 	"github.com/monetr/monetr/pkg/models"
@@ -97,6 +98,40 @@ func newDevelopCommand(parent *cobra.Command) {
 		},
 	}
 
+	cacheFlush := &cobra.Command{
+		Use:   "cache:flush",
+		Short: "Flush all data from the Redis cache server.",
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			configuration := config.LoadConfiguration()
+
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
+				log.WithField("config", configFileName).Info("config file loaded")
+			}
+
+			redisController, err := cache.NewRedisCache(log, configuration.Redis)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
+				return err
+			}
+			defer redisController.Close()
+
+			conn, err := redisController.Pool().Dial()
+			if err != nil {
+				log.WithError(err).Fatalf("failed to retrieve connection from redis pool: %+v", err)
+				return err
+			}
+
+			if err := conn.Send("FLUSHALL"); err != nil {
+				log.WithError(err).Fatalf("failed to flush redis cache: %+v", err)
+				return err
+			}
+
+			log.Info("done!")
+			return nil
+		},
+	}
+
 	cleanPlaid := &cobra.Command{
 		Use:   "clean:plaid",
 		Short: "Remove all Plaid links currently configured in the development environment.",
@@ -164,6 +199,7 @@ func newDevelopCommand(parent *cobra.Command) {
 		},
 	}
 
+	developCommand.AddCommand(cacheFlush)
 	developCommand.AddCommand(cleanStripe)
 	developCommand.AddCommand(cleanPlaid)
 }

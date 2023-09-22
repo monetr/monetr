@@ -67,20 +67,22 @@ func (a *Account) IsSubscriptionActive() bool {
 // The subscription could be past due, which would put the application in a "not usable" state; but the subscription
 // would still be "active" because we would not want to create a new subscription.
 func (a *Account) HasSubscription() bool {
-	activeUntil := myownsanity.MaxNonNilTime(
-		a.SubscriptionActiveUntil,
-		a.TrialEndsAt,
-	)
+	// activeUntil := myownsanity.MaxNonNilTime(
+	// 	a.SubscriptionActiveUntil,
+	// 	a.TrialEndsAt,
+	// )
 
-	consideredActive := activeUntil != nil && activeUntil.After(time.Now())
+	// consideredActive := activeUntil != nil && activeUntil.After(time.Now())
 	if a.SubscriptionStatus == nil {
-		return consideredActive
+		return false
+		// return consideredActive
 	}
 
 	switch *a.SubscriptionStatus {
 	case // If they are currently under a trialing status.
 		stripe.SubscriptionStatusTrialing:
 		// If they are in a trial state, then only consider our own trial marker. Not stripe's.
+		return false
 		return a.TrialEndsAt != nil && a.TrialEndsAt.After(time.Now())
 	case
 		stripe.SubscriptionStatusActive,
