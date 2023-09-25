@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/pkg/internal/fixtures"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
@@ -68,5 +69,66 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 		assert.NoError(t, err, "must not return an error")
 		assert.NotEmpty(t, result, "should return at least one expense")
 		assert.Equal(t, spending.BankAccountId, result[0].BankAccountId)
+	})
+}
+
+func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
+	t.Run("subscribed account", func(t *testing.T) {
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db)
+		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAPlaidLink(t, user)
+
+		{ // Before updating the subscription
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Empty(t, result, "there should not be any expired links at the moment")
+		}
+
+		// Then update the account to have a subscription that has expired more than 90 days ago.
+		account := user.Account
+		account.SubscriptionActiveUntil = myownsanity.TimeP(time.Now().AddDate(0, 0, -100))
+		testutils.MustDBUpdate(t, account)
+
+		{ // After updating the subscription
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Len(t, result, 1, "should have one link that is expired")
+			assert.EqualValues(t, link.LinkId, result[0].LinkId, "expired link should be the one created for this test")
+		}
+	})
+
+	t.Run("trial account", func(t *testing.T) {
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db)
+		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAPlaidLink(t, user)
+
+		// Update the account to be the same as it would be in a trial state.
+		account := user.Account
+		account.SubscriptionActiveUntil = nil
+		account.SubscriptionStatus = nil
+		account.StripeCustomerId = nil
+		account.StripeSubscriptionId = nil
+		account.TrialEndsAt = myownsanity.TimeP(time.Now().AddDate(0, 0, 30))
+		testutils.MustDBUpdate(t, account)
+
+		{ // Then check to make sure that we don't consider this an expired account.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Empty(t, result, "there should not be any expired links at the moment")
+		}
+
+		account.TrialEndsAt = myownsanity.TimeP(time.Now().AddDate(0, 0, -100))
+		testutils.MustDBUpdate(t, account)
+
+		{ // After updating the trial end date we should see it as expired.
+			result, err := jobRepo.GetLinksForExpiredAccounts(context.Background())
+			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
+			assert.Len(t, result, 1, "should have one link that is expired")
+			assert.EqualValues(t, link.LinkId, result[0].LinkId, "expired link should be the one created for this test")
+		}
 	})
 }

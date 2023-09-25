@@ -7,6 +7,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/pkg/errors"
 )
@@ -149,8 +150,12 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]model
 		Join(`INNER JOIN "accounts" AS "account"`).
 		JoinOn(`"account"."account_id" = "link"."account_id"`).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-		Where(`"account"."subscription_active_until" IS NOT NULL`).
-		Where(`"account"."subscription_active_until" < ?`, expirationCutoff).
+		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
+			q = q.
+				Where(`"account"."subscription_active_until" IS NOT NULL AND "account"."subscription_active_until" < ?`, expirationCutoff).
+				WhereOr(`"account"."trial_ends_at" IS NOT NULL AND "account"."trial_ends_at" < ?`, expirationCutoff)
+			return q, nil
+		}).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve Plaid links for expired accounts")
