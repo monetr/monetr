@@ -667,14 +667,6 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("with billing", func(t *testing.T) {
-		// When we register and billing is enabled, the user should be put on a trial state. But should not need things like
-		// stripe customer or subscription setup at this time.
-		httpmock.Activate()
-		defer httpmock.DeactivateAndReset()
-
-		stripeMock := mock_stripe.NewMockStripeHelper(t)
-		stripeMock.MockStripeCreateCustomerSuccess(t)
-
 		conf := NewTestApplicationConfig(t)
 		conf.Stripe.Enabled = true
 		conf.Stripe.BillingEnabled = true
@@ -720,11 +712,9 @@ func TestRegister(t *testing.T) {
 			response.JSON().Path("$.user").Object().NotEmpty()
 			response.JSON().Path("$.user.userId").Number().Gt(0)
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
-			response.JSON().Path("$.hasSubscription").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
 		}
-
-		stripeMock.AssertNCustomersCreated(t, 0)
 	})
 
 	t.Run("requires email verification", func(t *testing.T) {

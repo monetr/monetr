@@ -43,7 +43,7 @@ func NewBasicPaywall(log *logrus.Entry, repo AccountRepository) BasicPayWall {
 }
 
 func (b *baseBasicPaywall) GetHasSubscription(ctx context.Context, accountId uint64) (bool, error) {
-	span := sentry.StartSpan(ctx, "Billing - GetHasSubscription")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	log := b.log.WithContext(span.Context()).WithField("accountId", accountId)
