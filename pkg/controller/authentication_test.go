@@ -428,6 +428,7 @@ func TestLogout(t *testing.T) {
 func TestRegister(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		e := NewTestApplication(t)
+
 		var registerRequest struct {
 			Email     string `json:"email"`
 			Password  string `json:"password"`
@@ -439,15 +440,32 @@ func TestRegister(t *testing.T) {
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
 
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
+		{ // Register a new user.
+			response := e.POST(`/api/authentication/register`).
+				WithJSON(registerRequest).
+				Expect()
 
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
+			response.Status(http.StatusOK)
+			AssertSetTokenCookie(t, response)
 
-		response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
-		response.JSON().Path("$.requireVerification").Boolean().IsFalse()
+			response.JSON().Path("$.nextUrl").String().IsEqual("/setup")
+			response.JSON().Path("$.requireVerification").Boolean().IsFalse()
+		}
+
+		token := GivenILogin(t, e, registerRequest.Email, registerRequest.Password)
+		{ // Get the current user to see what the state of the account is.
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
+		}
 	})
 
 	t.Run("beta code not provided", func(t *testing.T) {
@@ -714,6 +732,9 @@ func TestRegister(t *testing.T) {
 			response.JSON().Path("$.isActive").Boolean().IsTrue()
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
+			response.JSON().Path("$.trialingUntil").String().AsDateTime().
+				Gt(time.Now().AddDate(0, 0, 29)).
+				Lt(time.Now().AddDate(0, 0, 31))
 		}
 	})
 

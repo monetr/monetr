@@ -38,7 +38,7 @@ func (c *Controller) getMe(ctx echo.Context) error {
 			"isTrialing":      false,
 			"activeUntil":     nil,
 			"trialingUntil":   nil,
-			"hasSubscription": true,
+			"hasSubscription": false,
 		})
 	}
 
