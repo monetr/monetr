@@ -8,7 +8,7 @@ import MSpan from 'components/MSpan';
 import { useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useLink } from 'hooks/links';
 import { showRemoveLinkModal } from 'modals/RemoveLinkModal';
-
+import Link from 'models/Link';
 
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
@@ -21,11 +21,6 @@ export default function BudgetingSidebarTitle(): JSX.Element {
     setAnchorEl(event.currentTarget);
   }, [setAnchorEl]);
   const handleClose = useCallback(() => setAnchorEl(null), [setAnchorEl]);
-
-  const handleRemoveLink = useCallback(() => {
-    setAnchorEl(null);
-    showRemoveLinkModal({ link: link });
-  }, [setAnchorEl, link]);
 
   return (
     <Fragment>
@@ -52,7 +47,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
       >
         <div className='flex flex-col dark:bg-dark-monetr-background rounded-lg border dark:border-dark-monetr-border-subtle dark:shadow-2xl' style={ { width: `${anchorEl?.offsetWidth - 10}px` } }>
           <MSpan
-            size='lg'
+            size='md'
             weight='medium'
             className='p-2 cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis'
             component='a'
@@ -62,7 +57,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
             Update Account Selection
           </MSpan>
           <MSpan
-            size='lg'
+            size='md'
             weight='medium'
             className='p-2 cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis'
             component='a'
@@ -72,19 +67,35 @@ export default function BudgetingSidebarTitle(): JSX.Element {
             Manually Resync
           </MSpan>
           <MDivider />
-          <MSpan
-            size='lg'
-            weight='medium'
-            className='p-2 cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis'
-            component='a'
-            ellipsis
-            onClick={ handleRemoveLink }
-          >
-            <DeleteOutline className='mr-1 mb-0.5 dark:text-dark-monetr-red' />
-            Remove { link?.getName() }
-          </MSpan>
+          <RemoveLinkMenuItem link={ link } closeMenu={ handleClose } />
         </div>
       </Popover>
     </Fragment>
+  );
+}
+
+interface RemoveLinkMenuItemProps {
+  link: Link;
+  closeMenu: () => void;
+}
+
+function RemoveLinkMenuItem({ link, closeMenu }: RemoveLinkMenuItemProps): JSX.Element {
+  const handleRemoveLink = useCallback(() => {
+    closeMenu();
+    showRemoveLinkModal({ link: link });
+  }, [closeMenu, link]);
+
+  return (
+    <MSpan
+      size='md'
+      weight='medium'
+      className='p-2 cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis'
+      component='a'
+      ellipsis
+      onClick={ handleRemoveLink }
+    >
+      <DeleteOutline className='mr-1 mb-0.5 dark:text-dark-monetr-red' />
+      Remove {link?.getName()}
+    </MSpan>
   );
 }
