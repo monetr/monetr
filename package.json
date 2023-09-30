@@ -182,7 +182,7 @@
     "react-test-renderer": "18.2.0",
     "sass": "1.55.0",
     "sass-loader": "13.0.2",
-    "semver": "7.5.2",
+    "semver": "7.5.4",
     "style-loader": "3.3.2",
     "swc-loader": "0.2.3",
     "ts-loader": "9.4.3",
