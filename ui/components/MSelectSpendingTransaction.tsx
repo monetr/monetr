@@ -11,7 +11,7 @@ import { useUpdateTransaction } from 'hooks/transactions';
 import useTheme from 'hooks/useTheme';
 import Spending, { SpendingType } from 'models/Spending';
 import Transaction from 'models/Transaction';
-import formatAmount from 'util/formatAmount';
+import { formatAmount } from 'util/amounts';
 import mergeTailwind from 'util/mergeTailwind';
 
 import './MSelectSpendingTransaction.scss';

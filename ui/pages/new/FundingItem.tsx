@@ -9,8 +9,8 @@ import { format, isThisYear } from 'date-fns';
 import { useNextFundingForecast } from 'hooks/forecast';
 import FundingSchedule from 'models/FundingSchedule';
 import { rrulestr } from 'rrule';
+import { formatAmount } from 'util/amounts';
 import capitalize from 'util/capitalize';
-import formatAmount from 'util/formatAmount';
 
 export interface FundingItemProps {
   funding: FundingSchedule;

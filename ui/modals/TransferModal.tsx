@@ -14,7 +14,7 @@ import MSelectSpending from 'components/MSelectSpending';
 import MSpan from 'components/MSpan';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink, useTransfer } from 'hooks/spending';
-import formatAmount from 'util/formatAmount';
+import { amountToFriendly, formatAmount, friendlyToAmount } from 'util/amounts';
 
 export interface TransferModalProps {
   initialFromSpendingId?: number;
@@ -43,7 +43,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
 
   function validate(values: TransferValues): FormikErrors<TransferValues> {
     const errors: FormikErrors<TransferValues> = {};
-    const amount = Math.ceil(values.amount * 100);
+    const amount = friendlyToAmount(values.amount);
 
     if (amount <= 0) {
       errors['amount'] = 'Amount must be greater than zero';
@@ -240,7 +240,7 @@ function AmountButton({ amount }: AmountButtonProps): JSX.Element {
   const formik = useFormikContext<TransferValues>();
   const onClick = useCallback(() => {
     if (typeof amount === 'number') {
-      formik?.setFieldValue('amount', amount / 100);
+      formik?.setFieldValue('amount', amountToFriendly(amount));
     }
   }, [formik, amount]);
 

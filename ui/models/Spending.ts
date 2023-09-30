@@ -1,6 +1,6 @@
 
 import { format, isThisYear, parseJSON } from 'date-fns';
-import formatAmount from 'util/formatAmount';
+import { formatAmount } from 'util/amounts';
 
 export enum SpendingType {
   Expense = 0,

@@ -14,6 +14,7 @@ import MTopNavigation from 'components/MTopNavigation';
 import { useTransaction, useUpdateTransaction } from 'hooks/transactions';
 import Transaction from 'models/Transaction';
 import MerchantIcon from 'pages/new/MerchantIcon';
+import { amountToFriendly } from 'util/amounts';
 
 interface TransactionValues {
   name: string;
@@ -84,7 +85,7 @@ export default function TransactionDetails(): JSX.Element {
     originalName: transaction.originalName,
     date: transaction.date,
     spendingId: transaction.spendingId,
-    amount: +(transaction.amount / 100).toFixed(2),
+    amount: amountToFriendly(transaction.amount),
   };
 
   return (
