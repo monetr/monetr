@@ -143,6 +143,7 @@
     "@types/react-google-recaptcha": "2.1.5",
     "@typescript-eslint/eslint-plugin": "5.42.0",
     "@typescript-eslint/parser": "5.42.0",
+    "autoprefixer": "10.4.16",
     "css-loader": "6.7.3",
     "dotenv": "16.0.3",
     "dotenv-expand": "8.0.3",
