@@ -19,6 +19,10 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 	require.NotZero(t, bankAccount.AccountId, "bank account must have a valid account Id")
 	require.NotZero(t, bankAccount.Link.CreatedByUserId, "bank account must have a valid created by user Id")
 
+	if excludeWeekends {
+		panic("sorry I haven't implemented this yet")
+	}
+
 	db := testutils.GetPgDatabase(t)
 	repo := repository.NewRepositoryFromSession(bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
 	rule := testutils.Must(t, models.NewRule, ruleString)
@@ -27,16 +31,17 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 	nextOccurrence := util.Midnight(rule.Before(time.Now(), false), tz)
 
 	fundingSchedule := models.FundingSchedule{
-		AccountId:       bankAccount.AccountId,
-		Account:         bankAccount.Account,
-		BankAccountId:   bankAccount.BankAccountId,
-		BankAccount:     bankAccount,
-		Name:            gofakeit.Generate("Payday {uuid}"),
-		Description:     gofakeit.Generate("{sentence:5}"),
-		Rule:            rule,
-		ExcludeWeekends: excludeWeekends,
-		LastOccurrence:  nil,
-		NextOccurrence:  nextOccurrence,
+		AccountId:              bankAccount.AccountId,
+		Account:                bankAccount.Account,
+		BankAccountId:          bankAccount.BankAccountId,
+		BankAccount:            bankAccount,
+		Name:                   gofakeit.Generate("Payday {uuid}"),
+		Description:            gofakeit.Generate("{sentence:5}"),
+		Rule:                   rule,
+		ExcludeWeekends:        excludeWeekends,
+		LastOccurrence:         nil,
+		NextOccurrence:         nextOccurrence,
+		NextOccurrenceOriginal: nextOccurrence,
 	}
 
 	require.NoError(t, repo.CreateFundingSchedule(context.Background(), &fundingSchedule), "must be able to create funding schedule")
