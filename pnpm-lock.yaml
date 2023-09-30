@@ -108,8 +108,8 @@ dependencies:
     specifier: 4.0.4
     version: 4.0.4(react@18.2.0)
   react-number-format:
-    specifier: 5.3.0
-    version: 5.3.0(react-dom@18.2.0)(react@18.2.0)
+    specifier: 5.3.1
+    version: 5.3.1(react-dom@18.2.0)(react@18.2.0)
   react-plaid-link:
     specifier: 3.3.2
     version: 3.3.2(react-dom@18.2.0)(react@18.2.0)
@@ -8706,6 +8706,7 @@ packages:
   /array-union@2.1.0:
     resolution: {integrity: sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==}
     engines: {node: '>=8'}
+    requiresBuild: true
 
   /array-unique@0.3.2:
     resolution: {integrity: sha512-SleRWjh9JUud2wH1hPs9rZBZ33H6T9HOiL0uwGnGx9FpE6wKGyfWugmbkEOIs6qWrZhg0LWeLziLrEwQJhs5mQ==}
@@ -12169,6 +12170,7 @@ packages:
   /find-up@4.1.0:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
     engines: {node: '>=8'}
+    requiresBuild: true
     dependencies:
       locate-path: 5.0.0
       path-exists: 4.0.0
@@ -12199,6 +12201,7 @@ packages:
 
   /flatted@3.2.7:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
+    requiresBuild: true
 
   /flow-parser@0.213.1:
     resolution: {integrity: sha512-l+vyZO6hrWG60DredryA8mq62fK9vxL6/RR13HA/aVLBNh9No/wEJsKI+CJqPRkF4CIRUfcJQBeaMXSKcncxUQ==}
@@ -12970,6 +12973,7 @@ packages:
 
   /html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
+    requiresBuild: true
 
   /html-minifier-terser@7.0.0:
     resolution: {integrity: sha512-Adqk0b/pWKIQiGvEAuzPKpBKNHiwblr3QSGS7TTr6v+xXKV9AI2k4vWW+6Oytt6Z5SeBnfvYypKOnz8r75pz3Q==}
@@ -15898,6 +15902,7 @@ packages:
   /make-dir@4.0.0:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
+    requiresBuild: true
     dependencies:
       semver: 7.5.4
 
@@ -18146,8 +18151,8 @@ packages:
     resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
     dev: false
 
-  /react-number-format@5.3.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-3h5kuO5x9HpifEgCzvw6kDljzjsI3OhgnT/BRzZbzdbHVb755eVzJuNnRUZr3h/ATu3Sct9O+XrYc9HrAj/6bQ==}
+  /react-number-format@5.3.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-qpYcQLauIeEhCZUZY9jXZnnroOtdy3jYaS1zQ3M1Sr6r/KMOBEIGNIb7eKT19g2N1wbYgFgvDzs19hw5TrB8XQ==}
     peerDependencies:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
