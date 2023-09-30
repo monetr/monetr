@@ -40,6 +40,17 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     );
   };
 
+  const LinkWarningIndicator = () => {
+    if (!link.getIsError()) return null;
+
+    return (
+      <span className="absolute flex h-3 w-3 right-0 bottom-0">
+        <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-yellow-400"></span>
+        <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+      </span>
+    );
+  };
+
   const classes = mergeTailwind(
     'absolute',
     'dark:bg-dark-monetr-border',
@@ -60,8 +71,13 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
     },
   );
 
+  let tooltip: string = link.getName();
+  if (link.getIsError()) {
+    tooltip = `${tooltip} (Error)`;
+  }
+
   return (
-    <Tooltip title={ link.getName() } arrow placement='right' classes={ {
+    <Tooltip title={ tooltip } arrow placement='right' classes={ {
       tooltip: 'text-base font-medium',
     } }>
       <div
@@ -70,10 +86,11 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
       >
         <div className={ classes } />
         <Link
-          className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
+          className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
           to={ `/bank/${destinationBankAccountId?.bankAccountId}/transactions` }
         >
           <InstitutionLogo />
+          <LinkWarningIndicator />
         </Link>
       </div>
     </Tooltip>
