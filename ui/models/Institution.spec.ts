@@ -1,11 +1,10 @@
-import { instanceOf } from 'prop-types';
-import moment from 'moment';
 
+import { addDays, startOfDay } from 'date-fns';
 import Institution, { InstitutionPlaidIncident, InstitutionStatus } from 'models/Institution';
 
 describe('InstitutionPlaidIncident', () => {
   it('will construct with no end', () => {
-    const start = moment().startOf('day');
+    const start = startOfDay(new Date());
     const incident = new InstitutionPlaidIncident({
       start: start,
       end: null,
@@ -18,8 +17,8 @@ describe('InstitutionPlaidIncident', () => {
   });
 
   it('will construct with an end', () => {
-    const start = moment().startOf('day');
-    const end = start.add(1, 'day');
+    const start = startOfDay(new Date());
+    const end = addDays(start, 1);
     const incident = new InstitutionPlaidIncident({
       start: start,
       end: end,
@@ -32,8 +31,8 @@ describe('InstitutionPlaidIncident', () => {
   });
 
   it('will properly parse a generic object', () => {
-    const start = moment().startOf('day');
-    const end = start.add(1, 'day');
+    const start = startOfDay(new Date());
+    const end = addDays(start, 1);
     const input = {
       start,
       end,
@@ -46,51 +45,44 @@ describe('InstitutionPlaidIncident', () => {
     expect(result.end.toISOString()).toBe(end.toISOString());
     expect(result.title).toBe('This institution was experiencing problems.');
   });
-
-  it('what happens with no start', () => {
-    expect(() => new InstitutionPlaidIncident({
-      title: 'This institution was experiencing problems.',
-    })).toThrow('input to mustParseToMoment was not a valid date time');
-  });
 });
 
 describe('InstitutionStatus', () => {
   it('will create without any incidents', () => {
     const result = new InstitutionStatus({
-      login: true,
-      transactions: false,
-      balance: true,
+      transactions_updates: {
+        status: 'HEALTHY',
+        last_status_change: new Date(),
+        breakdown: {
+          success: 0.9,
+          error_institution: 0.0,
+          error_plaid: 0.0,
+          refresh_interval: null,
+        },
+      },
       plaidIncidents: [],
     });
 
-    expect(result.login).toBeTruthy();
-    expect(result.transactions).toBeFalsy();
-    expect(result.balance).toBeTruthy();
+    expect(result.transactions_updates.status).toEqual('HEALTHY');
     expect(result.plaidIncidents).toHaveLength(0);
   });
 
   it('will create with some incidents', () => {
     const result = new InstitutionStatus({
-      login: true,
-      transactions: false,
-      balance: true,
       plaidIncidents: [
         {
-          start: moment().add(-2, 'day'),
-          end: moment().startOf('day'),
+          start: addDays(new Date(), -2),
+          end: startOfDay(new Date()),
           title: 'There was a problem.',
         },
         {
-          start: moment().startOf('day'),
+          start: startOfDay(new Date()),
           end: null,
           title: 'There is an ongoing problem.',
         },
       ],
     });
 
-    expect(result.login).toBeTruthy();
-    expect(result.transactions).toBeFalsy();
-    expect(result.balance).toBeTruthy();
     expect(result.plaidIncidents).toHaveLength(2);
     expect(result.plaidIncidents[0] instanceof InstitutionPlaidIncident).toBeTruthy();
     expect(result.plaidIncidents[1] instanceof InstitutionPlaidIncident).toBeTruthy();
