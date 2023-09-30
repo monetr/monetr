@@ -1,3 +1,5 @@
+import { formatAmount } from 'util/amounts';
+
 export default class BankAccount {
   bankAccountId: number;
   linkId: number;
@@ -17,10 +19,10 @@ export default class BankAccount {
   }
 
   getAvailableBalanceString() {
-    return `$${ (this.availableBalance / 100).toFixed(2) }`;
+    return formatAmount(this.availableBalance);
   }
 
   getCurrentBalanceString() {
-    return `$${ (this.currentBalance / 100).toFixed(2) }`;
+    return formatAmount(this.currentBalance);
   }
 }
