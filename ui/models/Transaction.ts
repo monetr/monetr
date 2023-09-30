@@ -1,5 +1,5 @@
 import { parseJSON } from 'date-fns';
-import formatAmount from 'util/formatAmount';
+import { formatAmount } from 'util/amounts';
 
 export default class Transaction {
   transactionId: number;

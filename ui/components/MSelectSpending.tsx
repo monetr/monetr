@@ -10,7 +10,7 @@ import MSpan from './MSpan';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
-import formatAmount from 'util/formatAmount';
+import { formatAmount } from 'util/amounts';
 
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelecteSpendingBaseProps = Omit<

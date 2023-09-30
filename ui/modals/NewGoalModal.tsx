@@ -16,6 +16,7 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
+import { friendlyToAmount } from 'util/amounts';
 
 interface NewGoalValues {
   name: string;
@@ -48,7 +49,7 @@ function NewGoalModal(): JSX.Element {
       nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
       spendingType: SpendingType.Goal,
       fundingScheduleId: values.fundingScheduleId,
-      targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
+      targetAmount: friendlyToAmount(values.amount),
       recurrenceRule: null,
     });
 

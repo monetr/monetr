@@ -25,6 +25,7 @@ import { useRemoveSpending, useSpending, useUpdateSpending } from 'hooks/spendin
 import { showTransferModal } from 'modals/TransferModal';
 import Spending, { SpendingType } from 'models/Spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
+import { amountToFriendly, friendlyToAmount } from 'util/amounts';
 import { APIError } from 'util/request';
 
 interface GoalValues {
@@ -126,7 +127,7 @@ export default function GoalDetails(): JSX.Element {
       nextRecurrence: startOfDay(values.nextRecurrence),
       fundingScheduleId: values.fundingScheduleId,
       recurrenceRule: null,
-      targetAmount: Math.ceil(values.amount * 100),
+      targetAmount: friendlyToAmount(values.amount),
       isPaused: values.isPaused,
     });
 
@@ -143,7 +144,7 @@ export default function GoalDetails(): JSX.Element {
 
   const initialValues: GoalValues = {
     name: spending.name,
-    amount: +(spending.targetAmount / 100).toFixed(2),
+    amount: amountToFriendly(spending.targetAmount),
     nextRecurrence: spending.nextRecurrence,
     fundingScheduleId: spending.fundingScheduleId,
     isPaused: spending.isPaused,

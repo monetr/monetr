@@ -1,4 +1,4 @@
-import formatAmount from 'util/formatAmount';
+import { formatAmount } from 'util/amounts';
 
 export default class Balance {
   bankAccountId: number;

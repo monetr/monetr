@@ -18,6 +18,7 @@ import MTopNavigation from 'components/MTopNavigation';
 import { startOfDay } from 'date-fns';
 import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
+import { amountToFriendly, friendlyToAmount } from 'util/amounts';
 import { APIError } from 'util/request';
 
 interface FundingValues {
@@ -72,7 +73,7 @@ export default function FundingDetails(): JSX.Element {
       nextOccurrence: startOfDay(values.nextOccurrence),
       rule: values.rule,
       excludeWeekends: values.excludeWeekends,
-      estimatedDeposit: values.estimatedDeposit,
+      estimatedDeposit: friendlyToAmount(values.estimatedDeposit),
     });
 
     return updateFundingSchedule(updatedFunding)
@@ -112,7 +113,8 @@ export default function FundingDetails(): JSX.Element {
     nextOccurrence: funding.nextOccurrence,
     rule: funding.rule,
     excludeWeekends: funding.excludeWeekends,
-    estimatedDeposit: funding.estimatedDeposit,
+    // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
+    estimatedDeposit: amountToFriendly(funding.estimatedDeposit),
   };
 
   return (

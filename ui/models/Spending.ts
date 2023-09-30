@@ -1,6 +1,6 @@
 
 import { format, isThisYear, parseJSON } from 'date-fns';
-import formatAmount from 'util/formatAmount';
+import { amountToFriendly, formatAmount } from 'util/amounts';
 
 export enum SpendingType {
   Expense = 0,
@@ -50,7 +50,7 @@ export default class Spending {
   }
 
   getTargetAmountDollars(): number {
-    return this.targetAmount / 100;
+    return amountToFriendly(this.targetAmount);
   }
 
   getCurrentAmountString(): string {

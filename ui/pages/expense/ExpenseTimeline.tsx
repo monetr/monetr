@@ -7,7 +7,7 @@ import { format, getUnixTime } from 'date-fns';
 import { Event, useForecast } from 'hooks/forecast';
 import { useFundingSchedule } from 'hooks/fundingSchedules';
 import { useSpending } from 'hooks/spending';
-import formatAmount from 'util/formatAmount';
+import { formatAmount } from 'util/amounts';
 import mergeTailwind from 'util/mergeTailwind';
 
 export interface ExpenseTimelineProps {
