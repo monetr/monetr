@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import { act, waitFor } from '@testing-library/react';
 
-import { showNewExpenseModal } from '../NewExpenseModal';
+import { showNewExpenseModal } from 'modals/NewExpenseModal';
 
 import { rest } from 'msw';
 import testRenderer from 'testutils/renderer';

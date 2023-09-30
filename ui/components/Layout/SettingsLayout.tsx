@@ -6,8 +6,11 @@ import MDivider from 'components/MDivider';
 import { MSpanDeriveClasses } from 'components/MSpan';
 import MTopNavigation from 'components/MTopNavigation';
 import { ReactElement } from 'components/types';
+import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
 
 export default function SettingsLayout(): JSX.Element {
+  const config = useAppConfigurationSink();
+
   return (
     <div className='w-full h-full min-w-0 flex flex-col'>
       <MTopNavigation
@@ -21,9 +24,11 @@ export default function SettingsLayout(): JSX.Element {
         <SettingTab to="/settings/security">
           Security
         </SettingTab>
-        <SettingTab to="/settings/billing">
+        { config?.data?.billingEnabled && (
+          <SettingTab to="/settings/billing">
           Billing
-        </SettingTab>
+          </SettingTab>
+        ) }
         <SettingTab to="/settings/about">
           About
         </SettingTab>

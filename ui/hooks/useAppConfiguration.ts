@@ -1,7 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import moment from 'moment';
-
-import { parseToMomentMaybe } from 'util/parseToMoment';
+import { parseJSON } from 'date-fns';
 
 export class AppConfiguration {
   requireLegalName: boolean;
@@ -24,12 +22,12 @@ export class AppConfiguration {
   release: string | null;
   revision: string;
   buildType: string;
-  buildTime: moment.Moment | null;
+  buildTime: Date | null;
 
   constructor(data?: Partial<AppConfiguration>) {
     if (data) Object.assign(this, {
       ...data,
-      buildTime: parseToMomentMaybe(data.buildTime),
+      buildTime: data.buildTime && parseJSON(data.buildTime),
     });
   }
 }

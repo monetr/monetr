@@ -7,7 +7,7 @@ import MTopNavigation from 'components/MTopNavigation';
 import { useSpendingFiltered } from 'hooks/spending';
 import { SpendingType } from 'models/Spending';
 import ExpenseItem from 'pages/new/ExpenseItem';
-import { showNewExpenseModal } from 'pages/new/NewExpenseModal';
+import { showNewExpenseModal } from 'modals/NewExpenseModal';
 
 export default function Expenses(): JSX.Element {
   const {

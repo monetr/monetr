@@ -1,6 +1,4 @@
-import moment, { Moment } from 'moment';
-
-import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
+import { parseJSON } from 'date-fns';
 
 export default class Institution {
   name: string;
@@ -8,14 +6,14 @@ export default class Institution {
   primaryColor: string | null;
   logo: string | null;
   status: InstitutionStatus;
-  readonly timestamp: Moment;
+  readonly timestamp: Date;
 
   constructor(data?: Partial<Institution>) {
     if (data) {
       Object.assign(this, {
         ...data,
         status: new InstitutionStatus(data.status),
-        timestamp: moment(),
+        timestamp: new Date(),
       });
     }
   }
@@ -40,7 +38,7 @@ export type RefreshInterval = 'DELAYED' | 'STOPPED';
 
 export class PlaidProductStatus {
   status: PlaidStatus;
-  last_status_change: moment.Moment;
+  last_status_change: Date;
   breakdown: {
     success: number;
     error_plaid: number;
@@ -50,16 +48,16 @@ export class PlaidProductStatus {
 }
 
 export class InstitutionPlaidIncident {
-  start: Moment;
-  end: Moment | null;
+  start: Date;
+  end: Date | null;
   title: string;
 
   constructor(data?: Partial<InstitutionPlaidIncident>) {
     if (data) {
       Object.assign(this, {
         ...data,
-        start: mustParseToMoment(data.start),
-        end: parseToMomentMaybe(data.end),
+        start: parseJSON(data.start),
+        end: data.end && parseJSON(data.end),
       });
     }
   }

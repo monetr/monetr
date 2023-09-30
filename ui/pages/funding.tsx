@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { AccountBalance, AddOutlined, ArrowForward, Today, TodayOutlined } from '@mui/icons-material';
 
 import FundingItem from './new/FundingItem';
-import { showNewFundingModal } from './new/NewFundingModal';
+import { showNewFundingModal } from 'modals/NewFundingModal';
 
 import { MBaseButton } from 'components/MButton';
 import MSpan from 'components/MSpan';

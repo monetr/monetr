@@ -7,7 +7,7 @@ import MLabel from './MLabel';
 import MSelect from './MSelect';
 
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
-import { showNewFundingModal } from 'pages/new/NewFundingModal';
+import { showNewFundingModal } from 'modals/NewFundingModal';
 
 export interface MSelectFundingProps {
   label?: string;

@@ -3,6 +3,7 @@ import React from 'react';
 import MDivider from 'components/MDivider';
 import MSpan, { MSpanDeriveClasses } from 'components/MSpan';
 import { ReactElement } from 'components/types';
+import { format } from 'date-fns';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 
 export default function SettingsAbout(): JSX.Element {
@@ -55,7 +56,7 @@ export default function SettingsAbout(): JSX.Element {
             Build Time
           </MSpan>
           <MSpan component='code' size='lg'>
-            { buildTime?.format('MMMM Do YYYY, h:mma Z') || 'Unknown' }
+            { format(buildTime, 'LLLL do yyyy, h:mmaaa OOOO') }
           </MSpan>
         </div>
         <MDivider />

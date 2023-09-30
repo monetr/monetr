@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata } from 'react-plaid-link/src/types';
-import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import * as Sentry from '@sentry/react';
 import { Severity } from '@sentry/react';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { OAuthRedirectPlaidLink } from 'components/Plaid/OAuthRedirectPlaidLink';
 import request from 'util/request';
@@ -17,7 +17,7 @@ interface State {
   longPollAttempts: number;
 }
 
-export default function OAuthRedirect(): JSX.Element {
+export default function OauthReturn(): JSX.Element {
   const queryClient = useQueryClient();
   const [state, setState] = useState<Partial<State>>({
     loading: true,

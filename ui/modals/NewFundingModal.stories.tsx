@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import NewFundingModal, { showNewFundingModal } from './NewFundingModal';
+import NewFundingModal, { showNewFundingModal } from 'modals/NewFundingModal';
 
 import { rest } from 'msw';
 
