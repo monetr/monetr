@@ -36,6 +36,7 @@ import TransactionDetails from 'pages/transaction/details';
 import Transactions from 'pages/transactions';
 import VerifyEmail from 'pages/verify/email';
 import ResendVerificationPage from 'pages/verify/email/resend';
+import sortAccounts from 'util/sortAccounts';
 
 export default function Monetr(): JSX.Element {
   const {
@@ -158,31 +159,7 @@ function RedirectToBank(): JSX.Element {
   }
 
   const link = links[0];
-  const accounts = Array.from(bankAccounts.values())
-    .filter(account => account.linkId === link.linkId)
-    .sort((a, b) => {
-      const items = [a, b];
-      const values = [
-        0, // a
-        0, // b
-      ];
-      for (let i = 0; i < 2; i++) {
-        const item = items[i];
-        if (item.accountType === 'depository') {
-          values[i] += 2;
-        }
-        switch (item.accountSubType) {
-          case 'checking':
-            values[i] += 2;
-            break;
-          case 'savings':
-            values[i] += 1;
-            break;
-        }
-      }
-
-      return values[0];
-    });
+  const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
 
   if (accounts.length === 0) {
     return null;
