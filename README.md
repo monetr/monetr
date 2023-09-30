@@ -18,7 +18,7 @@ monetr is currently still in heavy development, but working towards a v1.0.0 rel
 outstanding before a v1.0.0 release for monetr will be published here: [v1.0.0
 Milestone](https://github.com/monetr/monetr/milestone/3)
 
-![image](https://github.com/monetr/monetr/assets/37967690/14e82b3d-9f02-4d38-9d81-5d89e3d7dbe7)
+![image](https://github.com/monetr/monetr/assets/37967690/1780b0a9-525e-4e68-a4cc-a96aeae33f12)
 
 ## Contributing
 
