@@ -4,9 +4,9 @@ import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query'
 import { useLinks } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
 
-export function useBankAccounts(): UseQueryResult<Array<Partial<BankAccount>>> {
+export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
   const { data: links } = useLinks();
-  return useQuery<Array<Partial<BankAccount>>>(['/bank_accounts'], {
+  return useQuery<Array<Partial<BankAccount>>, unknown, Array<BankAccount>>(['/bank_accounts'], {
     enabled: !!links && links.length > 0,
     select: data => data.map(item => new BankAccount(item)),
   });
