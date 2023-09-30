@@ -416,7 +416,6 @@ development-info:
 	$(call infoMsg,)
 	$(call infoMsg,Other services are run alongside monetr locally; you can access them at the following URLs:)
 	$(call infoMsg,    Email:                                    $(LOCAL_PROTOCOL)://$(LOCAL_DOMAIN)/mail)
-	$(call infoMsg,    Documentation:                            $(LOCAL_PROTOCOL)://$(LOCAL_DOMAIN)/documentation)
 	$(call infoMsg,)
 	$(call infoMsg,If you want you can see the logs for all the containers using:)
 	$(call infoMsg,  $$ make logs)
@@ -500,6 +499,9 @@ $(DOCS_SITE): $(MKDOCS_YAML) $(DOCS_FILES)
 mkdocs: $(DOCS_SITE)
 
 docs: mkdocs
+
+develop-docs:
+	docker compose -f docker-compose.documentation.yaml up
 
 ifdef GITHUB_TOKEN
 license-old: $(LICENSE) $(BINARY)

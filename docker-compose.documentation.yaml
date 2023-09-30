@@ -1,0 +1,13 @@
+services:
+  documentation:
+    image: ${MKDOCS_IMAGE:-squidfunk/mkdocs-material:9.2.8}
+    user: "${UID:-0}:${GID:-0}"
+    restart: always # If something goes wrong just restart the container, this is for development only.
+    working_dir: /build
+    entrypoint: sh
+    command:
+      - /build/compose/docs-entrypoint.sh
+    volumes:
+      - ./:/build
+    ports:
+      - 8000:8000
