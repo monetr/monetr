@@ -8,6 +8,9 @@ describe('amounts', () => {
 
       const bar = amountToFriendly(1999, 'en-US', 'USD');
       expect(bar).toBe(19.99);
+
+      const neg = amountToFriendly(-1999, 'en-US', 'USD');
+      expect(neg).toBe(-19.99);
     });
 
     it('it will not clobber JPY', () => {
@@ -60,6 +63,12 @@ describe('amounts', () => {
 
       const bar = formatAmount(1001234);
       expect(bar).toBe('$10,012.34');
+
+      const a = formatAmount(-1234);
+      expect(a).toBe('-$12.34');
+
+      const b = formatAmount(-1001234);
+      expect(b).toBe('-$10,012.34');
     });
 
     it('will format dollar amount with specified args', () => {
@@ -75,6 +84,9 @@ describe('amounts', () => {
     it('will format JPY properly', () => {
       const foo = formatAmount(1234, AmountType.Stored, 'ja-JP', 'JPY');
       expect(foo).toBe('￥1,234');
+
+      const bar = formatAmount(-1234, AmountType.Stored, 'ja-JP', 'JPY');
+      expect(bar).toBe('-￥1,234');
     });
 
     it('will format EUR properly', () => {
@@ -91,6 +103,9 @@ describe('amounts', () => {
 
       const bar = formatAmount(12.34, AmountType.Friendly, 'ru-RU', 'RUB');
       expect(bar).toBe('12,34 ₽');
+
+      const a = formatAmount(-1234, AmountType.Stored, 'ru-RU', 'RUB');
+      expect(a).toBe('-12,34 ₽');
     });
   });
 });
