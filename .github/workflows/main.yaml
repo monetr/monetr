@@ -314,7 +314,7 @@ jobs:
       - name: Build
         run: make mkdocs
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.4.2
+        uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
           branch: monetr.app
           folder: build/site
