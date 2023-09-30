@@ -136,10 +136,12 @@ export default function TransactionDetails(): JSX.Element {
               className='w-full'
               disabled
             />
-            <MSelectSpending
-              className='w-full'
-              name='spendingId'
-            />
+            { !transaction.getIsAddition() && (
+              <MSelectSpending
+                className='w-full'
+                name='spendingId'
+              />
+            ) }
           </div>
         </div>
       </div>
