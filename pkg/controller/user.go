@@ -9,20 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Get Current User Information
-// @id get-current-user
-// @tags User
-// @Summary Get Current User
-// @description Retrieve details about the currently authenticated user. If the user is not authenticated then an error
-// @description will be returned to the client. This is used by the UI to determine if the user is actually
-// @description authenticated. This is because cookies are stored as HTTP only, and are not visible by the JS code in
-// @description the UI.
-// @Security ApiKeyAuth
-// @Produce json
-// @Router /users/me [get]
-// @Success 200 {object} swag.MeResponse
-// @Failure 401 {object} ApiError There is no authenticated user.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) getMe(ctx echo.Context) error {
 	repo, err := c.getAuthenticatedRepository(ctx)
 	if err != nil {
@@ -43,22 +29,36 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	}
 
 	if !c.configuration.Stripe.IsBillingEnabled() {
+		// When billing is not enabled we will always return the user state such that they are seen as active forever and
+		// not trialing.
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"user":            user,
 			"isSetup":         isSetup,
 			"isActive":        true,
-			"hasSubscription": true,
+			"isTrialing":      false,
+			"activeUntil":     nil,
+			"trialingUntil":   nil,
+			"hasSubscription": false,
 		})
 	}
 
+	// But when billing is enabled we need to handle what is basically three states.
+	// - They have an active subscription (active until is in the future, or trial ends at is in the future)
+	// - They have no subscription at all, or their trial has expired and they need to start one.
+	// - They have a subscription but it has lapsed or has been cancelled.
+	hasSubscrption := user.Account.HasSubscription()
 	subscriptionIsActive := user.Account.IsSubscriptionActive()
+	subscriptionIsTrial := user.Account.IsTrialing()
 
 	if !subscriptionIsActive {
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"user":            user,
 			"isSetup":         isSetup,
 			"isActive":        subscriptionIsActive,
-			"hasSubscription": user.Account.HasSubscription(),
+			"isTrialing":      subscriptionIsTrial,
+			"activeUntil":     user.Account.SubscriptionActiveUntil,
+			"trialingUntil":   user.Account.TrialEndsAt,
+			"hasSubscription": hasSubscrption,
 			"nextUrl":         "/account/subscribe",
 		})
 	}
@@ -67,26 +67,13 @@ func (c *Controller) getMe(ctx echo.Context) error {
 		"user":            user,
 		"isSetup":         isSetup,
 		"isActive":        subscriptionIsActive,
-		"hasSubscription": user.Account.HasSubscription(),
+		"isTrialing":      subscriptionIsTrial,
+		"activeUntil":     user.Account.SubscriptionActiveUntil,
+		"trialingUntil":   user.Account.TrialEndsAt,
+		"hasSubscription": hasSubscrption,
 	})
 }
 
-// Change Password
-// @Summary Change Password
-// @id change-password
-// @tags User
-// @description Change the currently authenticated user's password. This requires that the current password be provided
-// @description by the client to make sure that some actor other than the current user is not performing the action. If
-// @description the request succeeds and the password is changed, no JSON will be returned; just a 200 status code.
-// @Security ApiKeyAuth
-// @Produce json
-// @Accept json
-// @Param Token body swag.ChangePasswordRequest true "Forgot Password Request"
-// @Router /users/security/password [put]
-// @Success 200
-// @Failure 400 {object} ApiError
-// @Failure 401 {object} ApiError
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) changePassword(ctx echo.Context) error {
 	var changePasswordRequest struct {
 		CurrentPassword string `json:"currentPassword"`

@@ -9,8 +9,18 @@ export default ({ config, mode }) => {
   // rspack and storybook actually need.
   config = {
     ...config,
+    experiments: {
+      ...config?.experiments,
+      incrementalRebuild: true,
+    },
     builtins: {
       ...config?.builtins,
+      react: {
+        ...config?.builtins?.react,
+        runtime: 'automatic',
+        development: true,
+        refresh: true,
+      },
       copy: {
         ...config?.builtins?.copy,
         patterns: [
@@ -43,14 +53,6 @@ export default ({ config, mode }) => {
       rules: [
         ...config?.module?.rules,
         {
-          test: /\.css$/,
-          use: [
-            {
-              loader: 'postcss-loader',
-            },
-          ],
-        },
-        {
           test: /\.scss$/,
           use: [
             {
@@ -60,6 +62,18 @@ export default ({ config, mode }) => {
                   quietDeps: true,
                 },
               },
+            },
+            {
+              loader: 'postcss-loader',
+            },
+          ],
+          type: 'css',
+        },
+        {
+          test: /\.css$/,
+          use: [
+            {
+              loader: 'postcss-loader',
             },
           ],
           type: 'css',

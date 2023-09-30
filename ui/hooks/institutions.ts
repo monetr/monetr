@@ -1,4 +1,4 @@
-import { useQuery, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import Institution from 'models/Institution';
 
@@ -7,7 +7,7 @@ export type InstitutionResult =
   & UseQueryResult<Partial<Institution>>;
 
 export function useInstitution(institutionId: string): InstitutionResult {
-  const result = useQuery<{ logo: string }>(`/institutions/${ institutionId }`, {
+  const result = useQuery<{ logo: string }>([`/institutions/${ institutionId }`], {
     staleTime: 30 * 60 * 1000, // 30 minutes
   });
   return {

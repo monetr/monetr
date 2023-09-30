@@ -1,7 +1,6 @@
-import moment, { Moment } from 'moment';
 
+import { format, isThisYear, parseJSON } from 'date-fns';
 import formatAmount from 'util/formatAmount';
-import { parseToMomentMaybe } from 'util/parseToMoment';
 
 export enum SpendingType {
   Expense = 0,
@@ -19,20 +18,20 @@ export default class Spending {
   currentAmount: number;
   usedAmount: number;
   recurrenceRule: string;
-  lastRecurrence: Moment | null;
-  nextRecurrence: Moment | null;
+  lastRecurrence: Date | null;
+  nextRecurrence: Date | null;
   nextContributionAmount: number;
   isBehind: boolean;
   isPaused: boolean;
-  dateCreated: Moment | null;
+  dateCreated: Date | null;
 
   constructor(data?: Partial<Spending>) {
     if (data) {
       Object.assign(this, {
         ...data,
-        lastRecurrence: parseToMomentMaybe(data.lastRecurrence),
-        nextRecurrence: parseToMomentMaybe(data.nextRecurrence),
-        dateCreated: parseToMomentMaybe(data.dateCreated),
+        lastRecurrence: data.lastRecurrence && parseJSON(data.lastRecurrence),
+        nextRecurrence: data.nextRecurrence && parseJSON(data.nextRecurrence),
+        dateCreated: data.dateCreated && parseJSON(data.dateCreated),
       });
     }
   }
@@ -41,9 +40,9 @@ export default class Spending {
   // If the next time the spending object is due is a different year than the current one; then the year will be
   // appended to the end of the date string.
   getNextOccurrenceString(): string {
-    return this.nextRecurrence.year() === moment().year() ?
-      this.nextRecurrence.format('MMM Do') :
-      this.nextRecurrence.format('MMM Do, YYYY');
+    return isThisYear(this.nextRecurrence) ?
+      format(this.nextRecurrence, 'MMM do') :
+      format(this.nextRecurrence, 'MMM do, yyyy');
   }
 
   getTargetAmountString(): string {

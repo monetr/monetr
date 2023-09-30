@@ -10,7 +10,8 @@
     "react",
     "react-hooks",
     "import",
-    "simple-import-sort"
+    "simple-import-sort",
+    "unused-imports"
   ],
   "rules": {
     "indent": [
@@ -73,6 +74,16 @@
         "args": "after-used",
         "argsIgnorePattern": "^(state|_+|_.+|_)$",
         "varsIgnorePattern": "^(React|_+|_.+|_)$"
+      }
+    ],
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^(React|_+)$",
+        "args": "after-used",
+        "argsIgnorePattern": "^(state|_+|_.+|_)$"
       }
     ],
     "space-before-blocks": 2,
@@ -227,6 +238,7 @@
                 "^@.+",
                 "^axios",
                 "^classnames",
+                "^clsx",
                 "^formik",
                 "^moment",
                 "^notistack",

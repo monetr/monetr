@@ -3,20 +3,21 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { CircularProgress } from '@mui/material';
 import { useFormikContext } from 'formik';
 
-import clsx from 'clsx';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MCaptchaProps {
   name?: string;
   show?: boolean;
   className?: string;
+  ['data-testid']?: string;
 }
 
 export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   const formikContext = useFormikContext();
-  const { ReCAPTCHAKey } = useAppConfiguration();
+  const config = useAppConfiguration();
 
-  if (!props.show || !ReCAPTCHAKey) {
+  if (!props.show || !config?.ReCAPTCHAKey) {
     return null;
   }
 
@@ -32,7 +33,7 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
 
   const loading = Boolean(formikContext?.isSubmitting);
 
-  const classes = clsx([
+  const classes = mergeTailwind([
     'flex',
     'items-center',
     'justify-center',
@@ -42,10 +43,11 @@ export default function MCaptcha(props: MCaptchaProps): JSX.Element {
   return (
     <div className={ classes }>
       {!loading && <ReCAPTCHA
-        sitekey={ ReCAPTCHAKey }
+        data-testid={ props['data-testid'] }
+        sitekey={ config.ReCAPTCHAKey }
         onChange={ onVerify }
       />}
-      { loading && <CircularProgress /> }
+      {loading && <CircularProgress />}
     </div>
   );
 

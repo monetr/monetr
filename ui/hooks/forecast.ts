@@ -1,5 +1,6 @@
-import { useQuery, UseQueryResult } from 'react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
+import { parseJSON } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { SpendingType } from 'models/Spending';
 import request from 'util/request';
@@ -26,17 +27,9 @@ export function useSpendingForecast(): (spending: SpendingBareMinimum) => Promis
   };
 }
 
-interface NextFundingResponse {
-  nextContribution: number;
-}
-
-export type NextFundingResult =
-  { result: number | null }
-  & UseQueryResult<Partial<NextFundingResponse>>;
-
-export function useNextFundingForecast(fundingScheduleId: number): NextFundingResult {
+export function useNextFundingForecast(fundingScheduleId: number): UseQueryResult<number> {
   const selectedBankAccountId = useSelectedBankAccountId();
-  const result = useQuery<Partial<NextFundingResponse>>(
+  return useQuery<Partial<{ nextContribution: number }>, unknown, number>(
     [
       `/bank_accounts/${ selectedBankAccountId }/forecast/next_funding`,
       {
@@ -45,11 +38,95 @@ export function useNextFundingForecast(fundingScheduleId: number): NextFundingRe
     ],
     {
       enabled: !!selectedBankAccountId,
+      select: data => data.nextContribution,
+    }
+  );
+}
+
+export class Forecast {
+  startingTime: Date;
+  endingTime: Date;
+  startingBalance: number;
+  endingBalance: number;
+  events: Array<Event>;
+
+  constructor(data?: Partial<Forecast>) {
+    if (data) Object.assign(this, {
+      ...data,
+      startingTime: parseJSON(data.startingTime),
+      endingTime: parseJSON(data.endingTime),
+      events: (data?.events || []).map(item => new Event(item)),
+    });
+  }
+}
+
+export class Event {
+  balance: number;
+  contribution: number;
+  date: Date;
+  delta: number;
+  funding: Array<FundingEvent>;
+  spending: Array<SpendingEvent>;
+  transaction: number;
+
+  constructor(data?: Partial<Event>) {
+    if (data) Object.assign(this, {
+      ...data,
+      date: parseJSON(data.date),
+      funding: (data?.funding || []).map(item => new FundingEvent(item)),
+      spending: (data?.spending || []).map(item => new SpendingEvent(item)),
+    });
+  }
+}
+
+export class SpendingEvent {
+  contributionAmount: number;
+  date: Date;
+  funding: Array<FundingEvent>;
+  rollingAllocation: number;
+  spendingId: number;
+  transactionAmount: number;
+
+  constructor(data?: Partial<SpendingEvent>) {
+    if (data) Object.assign(this, {
+      ...data,
+      date: parseJSON(data.date),
+      funding: (data?.funding || []).map(item => new FundingEvent(item)),
+    });
+  }
+}
+
+export class FundingEvent {
+  date: Date;
+  fundingScheduleId: number;
+  originalDate: Date;
+  weekendAvoided: boolean;
+
+  constructor(data?: Partial<FundingEvent>) {
+    if (data) Object.assign(this, {
+      ...data,
+      date: parseJSON(data.date),
+      originalDate: parseJSON(data.originalDate),
+    });
+  }
+}
+
+export type ForecastResult =
+  { result: Forecast | null }
+  & UseQueryResult<Partial<Forecast>>;
+
+export function useForecast(): ForecastResult {
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const result = useQuery<Partial<Forecast>>(
+    [`/bank_accounts/${ selectedBankAccountId }/forecast`],
+    {
+      // TODO long cache time for forecast endpoints.
+      enabled: !!selectedBankAccountId,
     }
   );
 
   return {
     ...result,
-    result: result?.data?.nextContribution,
+    result: !!result?.data ? new Forecast(result.data) : null,
   };
 }

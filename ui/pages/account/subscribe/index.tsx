@@ -1,11 +1,12 @@
-import React from 'react';
-import { CircularProgress, Typography } from '@mui/material';
+import React, { useCallback, useState } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { Logo } from 'assets';
+import { MBaseButton } from 'components/MButton';
+import MLink from 'components/MLink';
+import MLogo from 'components/MLogo';
+import MSpan from 'components/MSpan';
 import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import { useAuthenticationSink } from 'hooks/useAuthentication';
-import useMountEffect from 'hooks/useMountEffect';
 import request from 'util/request';
 
 export default function SubscribePage(): JSX.Element {
@@ -13,48 +14,84 @@ export default function SubscribePage(): JSX.Element {
   const {
     initialPlan,
   } = useAppConfiguration();
-  const { result: { hasSubscription } } = useAuthenticationSink();
+  const { result: { hasSubscription, activeUntil } } = useAuthenticationSink();
 
-  useMountEffect(() => {
+  const [loading, setLoading] = useState(false);
+  const handleContinue = useCallback(() => {
+    setLoading(true);
+    let promise: Promise<any>;
     if (initialPlan && !hasSubscription) {
-      request().post('/billing/create_checkout', {
+      promise = request().post('/billing/create_checkout', {
         priceId: '',
         cancelPath: '/logout',
-      })
-        .then(result => window.location.assign(result.data.url))
-        .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to create checkout session.', {
-          variant: 'error',
-          disableWindowBlurListener: true,
-        }));
+      });
     } else if (hasSubscription) {
       // If the customer has a subscription then we want to just manage it. This will allow a customer to fix a
       // subscription for a card that has failed payment or something similar.
-      request().get('/billing/portal')
-        .then(result => window.location.assign(result.data.url))
-        .catch(error => enqueueSnackbar(error?.response?.data?.error || 'Failed to load billing portal.', {
+      promise = request().get('/billing/portal');
+    }
+
+    promise
+      .then(result => window.location.assign(result.data.url))
+      .catch(error => {
+        setLoading(false);
+        enqueueSnackbar(error?.response?.data?.error || 'Failed to prepare Stripe billing session.', {
           variant: 'error',
           disableWindowBlurListener: true,
-        }));
-    }
-  });
+        });
+      });
+  }, [enqueueSnackbar, hasSubscription, initialPlan]);
+
+  if (activeUntil) {
+    return (
+      <div className="flex items-center justify-center w-full h-full max-h-full p-4">
+        <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
+          <div className='h-full flex flex-col justify-center items-center gap-4'>
+            <MLogo className='max-h-24' />
+            <MSpan size='2xl' weight='semibold' className='text-center'>
+              Your subscription is no longer active
+            </MSpan>
+            <MSpan size='lg' className='text-center'>
+              Thank you for having subscribed to monetr before! If you'd like to continue using monetr you will have to
+              resubscribe below. Click continue to proceed to our billing portal.
+            </MSpan>
+            <MBaseButton color='primary' disabled={ loading } onClick={ handleContinue }>
+              Continue
+            </MBaseButton>
+          </div>
+          { !loading &&
+          <div className='flex justify-center gap-1'>
+            <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
+            <MLink to="/logout" size="sm">Logout for now</MLink>
+          </div>
+          }
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex items-center justify-center w-full h-full max-h-full">
-      <div className="w-full p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-        <div className="flex justify-center w-full mb-5">
-          <img src={ Logo } className="w-1/3" />
+    <div className="flex items-center justify-center w-full h-full max-h-full p-4">
+      <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
+        <div className='h-full flex flex-col justify-center items-center gap-4'>
+          <MLogo className='max-h-24' />
+          <MSpan size='2xl' weight='semibold' className='text-center'>
+            Your free trial has ended
+          </MSpan>
+          <MSpan size='lg' className='text-center'>
+            Thank you for trying out monetr! We hope that you found our budgeting tools useful during your trial. If
+            you'd like to continue using monetr you can easily subscribe below.
+          </MSpan>
+          <MBaseButton color='primary' disabled={ loading } onClick={ handleContinue }>
+            Continue
+          </MBaseButton>
         </div>
-        <div className="w-full pt-2.5 pb-2.5">
-          <Typography
-            variant="h5"
-            className="w-full text-center"
-          >
-            Getting Stripe ready...
-          </Typography>
-        </div>
-        <div className="w-full pt-2.5 pb-2.5 flex justify-center">
-          <CircularProgress />
-        </div>
+        { !loading &&
+          <div className='flex justify-center gap-1'>
+            <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
+            <MLink to="/logout" size="sm">Logout for now</MLink>
+          </div>
+        }
       </div>
     </div>
   );

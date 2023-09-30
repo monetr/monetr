@@ -20,6 +20,10 @@ export default class Balance {
     return formatAmount(this.available);
   }
 
+  getCurrentString(): string {
+    return formatAmount(this.current);
+  }
+
   getExpensesString(): string {
     return formatAmount(this.expenses);
   }

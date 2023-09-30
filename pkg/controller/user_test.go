@@ -4,9 +4,12 @@ import (
 	"math"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/internal/fixtures"
+	"github.com/monetr/monetr/pkg/internal/mock_stripe"
 )
 
 func TestMe(t *testing.T) {
@@ -35,9 +38,11 @@ func TestMe(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.user").Object().NotEmpty()
-			response.JSON().Path("$.user.userId").Number().Equal(user.UserId)
-			response.JSON().Path("$.isActive").Boolean().True()
-			response.JSON().Path("$.hasSubscription").Boolean().True()
+			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").IsNull()
 			// Should not have the nextUrl key when billing is not enabled.
 			response.JSON().Object().NotContainsKey("nextUrl")
 		}
@@ -60,6 +65,72 @@ func TestMe(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
+	})
+
+	t.Run("billing enabled - on trial", func(t *testing.T) {
+		conf := NewTestApplicationConfig(t)
+		conf.Stripe.Enabled = true
+		conf.Stripe.BillingEnabled = true
+		conf.Stripe.APIKey = gofakeit.UUID()
+		conf.Stripe.FreeTrialDays = 15
+		conf.Stripe.InitialPlan = &config.Plan{
+			Visible:       true,
+			StripePriceId: mock_stripe.FakeStripePriceId(t),
+			Default:       true,
+		}
+		e := NewTestApplicationWithConfig(t, conf)
+
+		token := GivenIHaveToken(t, e)
+		{ // Then retrieve "me".
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.isActive").Boolean().IsTrue()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
+			response.JSON().Path("$.trialingUntil").String().AsDateTime().
+				Gt(time.Now().AddDate(0, 0, 14)).
+				Lt(time.Now().AddDate(0, 0, 16))
+			// Should not have the nextUrl key when billing is not enabled.
+			response.JSON().Object().NotContainsKey("nextUrl")
+		}
+	})
+
+	t.Run("billing enabled - trial expired", func(t *testing.T) {
+		conf := NewTestApplicationConfig(t)
+		conf.Stripe.Enabled = true
+		conf.Stripe.BillingEnabled = true
+		conf.Stripe.APIKey = gofakeit.UUID()
+		// Can force a trial to be expired immediately by setting a negative free trial days.
+		conf.Stripe.FreeTrialDays = -1
+		conf.Stripe.InitialPlan = &config.Plan{
+			Visible:       true,
+			StripePriceId: mock_stripe.FakeStripePriceId(t),
+			Default:       true,
+		}
+		e := NewTestApplicationWithConfig(t, conf)
+
+		token := GivenIHaveToken(t, e)
+		{ // Then retrieve "me".
+			response := e.GET(`/api/users/me`).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.user").Object().NotEmpty()
+			response.JSON().Path("$.user.userId").Number().Gt(0)
+			response.JSON().Path("$.isActive").Boolean().IsFalse()
+			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
+			response.JSON().Path("$.isTrialing").Boolean().IsFalse()
+			response.JSON().Path("$.trialingUntil").String().AsDateTime().
+				Lt(time.Now())
+			// The me endpoint should return a next url when billing is expired.
+			response.JSON().Path("$.nextUrl").String().IsEqual("/account/subscribe")
+		}
 	})
 }
 

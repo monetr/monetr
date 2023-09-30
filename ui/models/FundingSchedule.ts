@@ -1,6 +1,5 @@
-import { Moment } from 'moment';
+import { parseJSON } from 'date-fns';
 
-import { mustParseToMoment, parseToMomentMaybe } from 'util/parseToMoment';
 
 export default class FundingSchedule {
   fundingScheduleId: number;
@@ -8,8 +7,8 @@ export default class FundingSchedule {
   name: string;
   description?: string;
   rule: string;
-  lastOccurrence?: Moment;
-  nextOccurrence: Moment;
+  lastOccurrence?: Date;
+  nextOccurrence: Date;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
 
@@ -17,8 +16,8 @@ export default class FundingSchedule {
     if (data) {
       Object.assign(this, {
         ...data,
-        lastOccurrence: parseToMomentMaybe(data.lastOccurrence),
-        nextOccurrence: mustParseToMoment(data.nextOccurrence),
+        lastOccurrence: data.lastOccurrence && parseJSON(data.lastOccurrence),
+        nextOccurrence: parseJSON(data.nextOccurrence),
       });
     }
   }

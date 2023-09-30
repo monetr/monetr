@@ -4,10 +4,16 @@ const config: StorybookConfig = {
   stories: ['../ui/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: [
     '@storybook/addon-links',
-    '@storybook/addon-essentials',
+    {
+      name: '@storybook/addon-essentials',
+      options: {
+        backgrounds: false,
+      },
+    },
     '@storybook/addon-interactions',
     '@storybook/addon-viewport',
     '@storybook/addon-coverage',
+    'storybook-addon-react-router-v6',
     {
       name: '@storybook/addon-styling',
       options: {
@@ -16,6 +22,7 @@ const config: StorybookConfig = {
         postCss: true,
       },
     },
+    'storycap',
   ],
   framework: {
     name: 'storybook-react-rspack',

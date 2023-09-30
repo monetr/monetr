@@ -92,6 +92,7 @@ data:
 
     {{- if .Values.api.stripe.initialPlan }}
     stripe:
+      freeTrialDays: {{ .Values.api.stripe.freeTrialDays }}
       initialPlan:
     {{- toYaml .Values.api.stripe.initialPlan | nindent 8 }}
     {{- end }}

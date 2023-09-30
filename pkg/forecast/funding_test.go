@@ -78,7 +78,7 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 	// the saturday before its "real" funding date, we would normally get the wrong day. In a failure path we would get
 	// the 15th, which is the next day. But we actually need the 31st because the 15th funding schedule was processed
 	// early.
-	t.Run("odd early/after calculation", func(t *testing.T) {
+	t.Run("odd early-after calculation", func(t *testing.T) {
 		log := testutils.GetLog(t)
 		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 

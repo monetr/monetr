@@ -322,6 +322,7 @@ type Stripe struct {
 	Plans          []Plan `yaml:"plans"`
 	BillingEnabled bool   `yaml:"billingEnabled"`
 	TaxesEnabled   bool   `yaml:"taxesEnabled"`
+	FreeTrialDays  int    `yaml:"freeTrialDays"`
 }
 
 // IsBillingEnabled will return true if both Stripe and Billing are enabled. It will return false any other time.
@@ -510,7 +511,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.ListenPort", 4000)
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 12)
-	v.SetDefault("Stripe.InitialPlan.FreeTrialDays", 30)
+	v.SetDefault("Stripe.FreeTrialDays", 30)
 	v.SetDefault("UIDomainName", "localhost:4000")
 }
 
@@ -585,6 +586,5 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.WebhookSecret", "MONETR_STRIPE_WEBHOOK_SECRET")
 	_ = v.BindEnv("Stripe.BillingEnabled", "MONETR_STRIPE_BILLING_ENABLED")
 	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
-	_ = v.BindEnv("Stripe.InitialPlan.FreeTrialDays", "MONETR_STRIPE_DEFAULT_TRIAL_DAYS")
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
 }

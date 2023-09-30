@@ -19,7 +19,7 @@ func (r *repositoryBase) GetSpending(ctx context.Context, bankAccountId uint64) 
 		"bankAccountId": bankAccountId,
 	}
 
-	var result []models.Spending
+	result := make([]models.Spending, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"spending"."account_id" = ?`, r.AccountId()).
 		Where(`"spending"."bank_account_id" = ?`, bankAccountId).

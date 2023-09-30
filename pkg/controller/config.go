@@ -10,8 +10,7 @@ import (
 
 func (c *Controller) configEndpoint(ctx echo.Context) error {
 	type InitialPlan struct {
-		Price         int64 `json:"price"`
-		FreeTrialDays int32 `json:"freeTrialDays"`
+		Price int64 `json:"price"`
 	}
 	var configuration struct {
 		RequireLegalName     bool         `json:"requireLegalName"`
@@ -73,8 +72,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 				c.getLog(ctx).Warn("failed to retrieve stripe price for initial plan")
 			} else {
 				configuration.InitialPlan = &InitialPlan{
-					Price:         price.UnitAmount,
-					FreeTrialDays: c.configuration.Stripe.InitialPlan.FreeTrialDays,
+					Price: price.UnitAmount,
 				}
 			}
 		}

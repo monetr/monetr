@@ -18,15 +18,15 @@ export interface MonetrTheme {
 }
 
 export default function useTheme(): MonetrTheme {
-  const [mode, setMode] = useState<ColorScheme>();
+  const [mode, setMode] = useState<ColorScheme>('dark');
 
-  useEffect(() => {
-    window.matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', event => {
-        const colorScheme = event.matches ? 'dark' : 'light';
-        setMode(colorScheme);
-      });
-  }, []);
+  // useEffect(() => {
+  //   window.matchMedia('(prefers-color-scheme: dark)')
+  //     .addEventListener('change', event => {
+  //       const colorScheme = event.matches ? 'dark' : 'light';
+  //       setMode(colorScheme);
+  //     });
+  // }, []);
 
   return {
     tailwind: realTailwindConfig.theme,

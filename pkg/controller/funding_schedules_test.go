@@ -33,9 +33,9 @@ func TestPostFundingSchedules(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
-		response.JSON().Path("$.bankAccountId").Number().Equal(bank.BankAccountId)
-		response.JSON().Path("$.nextOccurrence").String().DateTime(time.RFC3339).Gt(time.Now())
-		response.JSON().Path("$.excludeWeekends").Boolean().False()
+		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(time.Now())
+		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 	})
 
 	t.Run("create a funding schedule with excluded weekends", func(t *testing.T) {
@@ -210,7 +210,99 @@ func TestPutFundingSchedules(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.name").IsEqual(fundingSchedule.Name)
+		response.JSON().Path("$.fundingSchedule.name").String().IsEqual(fundingSchedule.Name)
+		response.JSON().Path("$.spending").IsArray()
+		response.JSON().Path("$.spending").Array().IsEmpty()
+	})
+
+	t.Run("updates a spending object", func(t *testing.T) {
+		e := NewTestApplication(t)
+		now := time.Now()
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAManualLink(t, user)
+		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+
+		var fundingScheduleId uint64
+		{ // Create the funding schedule
+			fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+			fundingRule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":            "Payday",
+					"description":     "15th and the Last day of every month",
+					"rule":            fundingRule,
+					"excludeWeekends": true,
+					"nextOccurrence":  fundingRule.After(now, false),
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
+			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+			assert.NotZero(t, fundingScheduleId, "must be able to extract the funding schedule ID")
+		}
+
+		var spendingId uint64
+		{ // Create an expense
+			timezone := testutils.MustEz(t, user.Account.GetTimezone)
+			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
+			nextRecurrence := rule.After(now, false)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
+			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+
+			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":              "Some Monthly Expense",
+					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"fundingScheduleId": fundingScheduleId,
+					"targetAmount":      1000,
+					"spendingType":      models.SpendingTypeExpense,
+					"nextRecurrence":    nextRecurrence,
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.spendingId").Number().Gt(0)
+			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+			response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
+			response.JSON().Path("$.nextRecurrence").String().AsDateTime(time.RFC3339).IsEqual(nextRecurrence)
+			spendingId = uint64(response.JSON().Path("$.spendingId").Number().Raw())
+			assert.NotZero(t, spendingId, "must be able to extract the spending ID")
+		}
+
+		{ // Now update the rule on the funding schedule and the next occurrence
+			newFundingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
+			newFundingRule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
+
+			next := newFundingRule.After(now, false)
+			response := e.PUT("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithPath("fundingScheduleId", fundingScheduleId).
+				WithJSON(map[string]interface{}{
+					"name":            "Payday",
+					"description":     "Every friday",
+					"rule":            newFundingRule,
+					"excludeWeekends": false,
+					"nextOccurrence":  next,
+				}).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingSchedule.name").String().IsEqual("Payday")
+			response.JSON().Path("$.fundingSchedule.nextOccurrence").String().AsDateTime(time.RFC3339).IsEqual(next)
+			response.JSON().Path("$.spending").IsArray()
+			response.JSON().Path("$.spending").Array().Length().IsEqual(1)
+			response.JSON().Path("$.spending[0].spendingId").Number().IsEqual(spendingId)
+		}
 	})
 }
 
@@ -315,5 +407,104 @@ func TestDeleteFundingSchedules(t *testing.T) {
 
 		response.Status(http.StatusNotFound)
 		response.JSON().Path("$.error").String().IsEqual("cannot remove funding schedule, it does not exist")
+	})
+}
+
+func TestGetFundingSchedulesByID(t *testing.T) {
+	t.Run("should be able to retrieve an owned schedule by ID", func(t *testing.T) {
+		e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t)
+		link := fixtures.GivenIHaveAManualLink(t, user)
+		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		token := GivenILogin(t, e, user.Login.Email, password)
+
+		var fundingScheduleId uint64
+		{ // Create the funding schedule.
+			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+				WithPath("bankAccountId", bank.BankAccountId).
+				WithCookie(TestCookieName, token).
+				WithJSON(map[string]interface{}{
+					"name":        "Payday",
+					"description": "15th and the Last day of every month",
+					"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+				}).
+				Expect()
+
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
+			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+
+			// Save the ID of the created funding schedule so we can use it below.
+			fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+		}
+
+		response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+			WithPath("bankAccountId", bank.BankAccountId).
+			WithPath("fundingScheduleId", fundingScheduleId).
+			WithCookie(TestCookieName, token).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
+		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+	})
+
+	t.Run("cannot read someone else's funding schedule", func(t *testing.T) {
+		e := NewTestApplication(t)
+
+		var bankAccountId, fundingScheduleId uint64
+
+		{ // Create the funding schedule under the first account.
+			user, password := fixtures.GivenIHaveABasicAccount(t)
+			link := fixtures.GivenIHaveAManualLink(t, user)
+			bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			token := GivenILogin(t, e, user.Login.Email, password)
+
+			{ // Create the funding schedule.
+				response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
+					WithPath("bankAccountId", bank.BankAccountId).
+					WithCookie(TestCookieName, token).
+					WithJSON(map[string]interface{}{
+						"name":        "Payday",
+						"description": "15th and the Last day of every month",
+						"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					}).
+					Expect()
+
+				response.Status(http.StatusOK)
+				response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
+				response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+
+				// Save the ID of the created funding schedule so we can use it below.
+				fundingScheduleId = uint64(response.JSON().Path("$.fundingScheduleId").Number().Raw())
+				bankAccountId = bank.BankAccountId
+			}
+
+			{ // Try to read it as the owning user, just to make sure it does work.
+				response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+					WithPath("bankAccountId", bankAccountId).
+					WithPath("fundingScheduleId", fundingScheduleId).
+					WithCookie(TestCookieName, token).
+					Expect()
+
+				response.Status(http.StatusOK)
+				response.JSON().Path("$.fundingScheduleId").Number().IsEqual(fundingScheduleId)
+				response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
+			}
+		}
+
+		{ // Then try to read the funding schedule under another account.
+			user, password := fixtures.GivenIHaveABasicAccount(t)
+			token := GivenILogin(t, e, user.Login.Email, password)
+
+			response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
+				WithPath("bankAccountId", bankAccountId).
+				WithPath("fundingScheduleId", fundingScheduleId).
+				WithCookie(TestCookieName, token).
+				Expect()
+
+			response.Status(http.StatusNotFound)
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve funding schedule: record does not exist")
+		}
 	})
 }

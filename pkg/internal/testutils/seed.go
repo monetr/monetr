@@ -56,7 +56,8 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 		require.NoError(t, err, "must insert new login")
 
 		account := models.Account{
-			Timezone: "UTC",
+			Timezone:  "UTC",
+			CreatedAt: time.Now(),
 		}
 
 		_, err = txn.Model(&account).Insert(&account)

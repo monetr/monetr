@@ -1,58 +1,58 @@
 import React from 'react';
 import { Meta, StoryFn } from '@storybook/react';
 
-import MButton from './MButton';
+import MFormButton from './MButton';
 
 export default {
   title: 'Components/Button',
-  component: MButton,
-} as Meta<typeof MButton>;
+  component: MFormButton,
+} as Meta<typeof MFormButton>;
 
-export const Default: StoryFn<typeof MButton> = () => (
+export const Default: StoryFn<typeof MFormButton> = () => (
   <div className='w-full flex p-4'>
     <div className='max-w-5xl grid grid-cols-4 grid-flow-row gap-6'>
       <span className='w-full text-center'>Enabled</span>
       <span className='w-full text-center'>No Fill</span>
       <span className='w-full text-center'>Disabled</span>
       <span className='w-full text-center'>Disabled No Fill</span>
-      <MButton color='primary'>
+      <MFormButton color='primary'>
         Login
-      </MButton>
-      <MButton color='primary' variant='text'>
+      </MFormButton>
+      <MFormButton color='primary' variant='text'>
         Login
-      </MButton>
-      <MButton color='primary' disabled>
+      </MFormButton>
+      <MFormButton color='primary' disabled>
         Login
-      </MButton>
-      <MButton color='primary' disabled variant='text'>
+      </MFormButton>
+      <MFormButton color='primary' disabled variant='text'>
         Login
-      </MButton>
+      </MFormButton>
 
-      <MButton color='secondary'>
+      <MFormButton color='secondary'>
         Sign up
-      </MButton>
-      <MButton color='secondary' variant='text'>
+      </MFormButton>
+      <MFormButton color='secondary' variant='text'>
         Sign up
-      </MButton>
-      <MButton color='secondary' disabled>
+      </MFormButton>
+      <MFormButton color='secondary' disabled>
         Sign up
-      </MButton>
-      <MButton color='secondary' disabled variant='text'>
+      </MFormButton>
+      <MFormButton color='secondary' disabled variant='text'>
         Sign up
-      </MButton>
+      </MFormButton>
 
-      <MButton color='cancel'>
+      <MFormButton color='cancel'>
         Cancel
-      </MButton>
-      <MButton color='cancel' variant='text'>
+      </MFormButton>
+      <MFormButton color='cancel' variant='text'>
         Cancel
-      </MButton>
-      <MButton color='cancel' disabled>
+      </MFormButton>
+      <MFormButton color='cancel' disabled>
         Cancel
-      </MButton>
-      <MButton color='cancel' disabled variant='text'>
+      </MFormButton>
+      <MFormButton color='cancel' disabled variant='text'>
         Cancel
-      </MButton>
+      </MFormButton>
     </div>
   </div>
 );

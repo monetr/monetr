@@ -1,53 +1,43 @@
-import { useQuery, UseQueryResult } from 'react-query';
-import shallow from 'zustand/shallow';
+import { useMatch } from 'react-router-dom';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { useLinks } from 'hooks/links';
-import useStore from 'hooks/store';
 import BankAccount from 'models/BankAccount';
 
-export type BankAccountsResult =
-  { result: Map<number, BankAccount> }
-  & UseQueryResult<Array<Partial<BankAccount>>>;
-
-export function useBankAccountsSink(): BankAccountsResult {
-  const links = useLinks();
-  const result = useQuery<Array<Partial<BankAccount>>>('/bank_accounts', {
-    enabled: !!links && links.size > 0,
+export function useBankAccounts(): UseQueryResult<Array<Partial<BankAccount>>> {
+  const { data: links } = useLinks();
+  return useQuery<Array<Partial<BankAccount>>>(['/bank_accounts'], {
+    enabled: !!links && links.length > 0,
+    select: data => data.map(item => new BankAccount(item)),
   });
-  return {
-    ...result,
-    result: new Map((result?.data || []).map(item => {
-      const bankAccount = new BankAccount(item);
-      return [bankAccount.bankAccountId, bankAccount];
-    })),
-  };
 }
 
-export function useBankAccounts(): Map<number, BankAccount> {
-  const { result: bankAccounts } = useBankAccountsSink();
-  return bankAccounts;
-}
+export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined> {
+  const queryClient = useQueryClient();
+  const match = useMatch('/bank/:bankId/*');
+  const bankAccountId = +match?.params?.bankId || null;
 
-export function useSelectedBankAccountId(): number | null {
-  const { selectedBankAccountId, setCurrentBankAccount } = useStore(state => ({
-    selectedBankAccountId: state.selectedBankAccountId,
-    setCurrentBankAccount: state.setCurrentBankAccount,
-  }), shallow);
-  const { isLoading, result: bankAccounts } = useBankAccountsSink();
-
-  if (isLoading) {
-    return selectedBankAccountId;
+  // If we do not have a valid numeric bank account ID, but an ID was specified then something is wrong.
+  if (!bankAccountId && match?.params?.bankId) {
+    throw Error(`invalid bank account ID specified: "${match?.params?.bankId}" is not a valid bank account ID`);
   }
 
-  if (!isLoading && !bankAccounts.has(selectedBankAccountId)) {
-    if (bankAccounts.size === 0) {
-      return null;
+  return useQuery<Partial<BankAccount>, unknown, BankAccount | undefined>(
+    [`/bank_accounts/${bankAccountId}`],
+    {
+      enabled: !!bankAccountId, // Only request if we have a valid numeric bank account ID to work with.
+      select: data => !!data && new BankAccount(data),
+      initialData: () => queryClient
+        .getQueryData<Array<BankAccount>>(['/bank_accounts'])
+        ?.find(item => item.bankAccountId === bankAccountId),
+      initialDataUpdatedAt: () => queryClient
+        .getQueryState(['/bank_accounts'])?.dataUpdatedAt,
     }
-
-    const id = Array.from(bankAccounts.keys())[0];
-    setCurrentBankAccount(id);
-    return id;
-  }
-
-  return selectedBankAccountId;
+  );
 }
+
+export function useSelectedBankAccountId(): number | undefined {
+  const { data: bankAccount } = useSelectedBankAccount();
+  return bankAccount?.bankAccountId;
+}
+

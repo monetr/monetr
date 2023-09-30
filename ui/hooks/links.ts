@@ -1,34 +1,43 @@
 import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
-import { useQuery, useQueryClient, UseQueryResult } from 'react-query';
+import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 
-import { useBankAccounts } from 'hooks/bankAccounts';
+import { useBankAccounts } from './bankAccounts';
+import { useAuthenticationSink } from './useAuthentication';
+
 import Link from 'models/Link';
 import request from 'util/request';
 
-export type LinksResult =
-  { result: Map<number, Link> }
-  & UseQueryResult<Array<Partial<Link>>>;
+export function useLinks(): UseQueryResult<Array<Link>> {
+  const { result: { user, isActive } } = useAuthenticationSink();
+  return useQuery<Array<Partial<Link>>, unknown, Array<Link>>(
+    ['/links'], {
+    // Only request links if there is an authenticated user.
+      enabled: !!user && isActive,
+      select: data => {
+        if (Array.isArray(data)) {
+          return data.map(item => new Link(item));
+        }
 
-export function useLinksSink(): LinksResult {
-  const result = useQuery<Array<Partial<Link>>>('/links');
-  return {
-    ...result,
-    result: new Map((result?.data || []).map(item => {
-      const link = new Link(item);
-      return [link.linkId, link];
-    })),
-  };
+        return [];
+      },
+    });
 }
 
-export function useLinks(): Map<number, Link> {
-  const { result } = useLinksSink();
-  return result;
-}
-
-export function useLink(linkId: number): Link | null {
-  const links = useLinks();
-  return links.get(linkId) || null;
+export function useLink(linkId: number | null): UseQueryResult<Link> {
+  const queryClient = useQueryClient();
+  return useQuery<Partial<Link>, unknown, Link>(
+    [`/links/${linkId}`],
+    {
+      enabled: !!linkId,
+      select: data => new Link(data),
+      initialData: () => queryClient
+        .getQueryData<Array<Link>>(['/links'])
+        ?.find(item => item.linkId === linkId),
+      initialDataUpdatedAt: () => queryClient
+        .getQueryState(['/links'])?.dataUpdatedAt,
+    }
+  );
 }
 
 export function useRemoveLink(): (_linkId: number) => Promise<void> {
@@ -37,19 +46,19 @@ export function useRemoveLink(): (_linkId: number) => Promise<void> {
     return request()
       .delete(`/links/${linkId}`)
       .then(() => void Promise.all([
-        queryClient.invalidateQueries('/links'),
-        queryClient.invalidateQueries('/bank_accounts'),
+        queryClient.invalidateQueries(['/links']),
+        queryClient.invalidateQueries(['/bank_accounts']),
         // TODO Invalidate other endpoints for the removed bank accounts?
       ]));
   };
 }
 
 export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata) => boolean {
-  const links = useLinks();
-  const bankAccounts = useBankAccounts();
+  const { data: links } = useLinks();
+  const { data: bankAccounts } = useBankAccounts();
 
   return function (metadata: PlaidLinkOnSuccessMetadata): boolean {
-    const linksForInstitution = new Map(Array.from(links.values())
+    const linksForInstitution = new Map(links
       .filter(item => item.getIsPlaid())
       .filter(item => item.plaidInstitutionId === metadata.institution.institution_id)
       .map(item => [item.linkId, item]));
@@ -73,9 +82,12 @@ export function useTriggerManualSync(): (_linkId: number) => Promise<void> {
         disableWindowBlurListener: true,
 
       }))
-      .catch(error => void enqueueSnackbar(`Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`, {
-        variant: 'error',
-        disableWindowBlurListener: true,
-      }));
+      .catch(error => void enqueueSnackbar(
+        `Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`,
+        {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        },
+      ));
   };
 }

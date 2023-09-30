@@ -1,0 +1,27 @@
+div.m-select-account__control {
+  /* Because this is in the sidebar, it might have the blurred background */
+  /* beneath the actual select component, make sure that part renders */
+  /* correctly. But this way the dropdown itself still has a solid background */
+  @apply bg-transparent;
+
+  /* Only show the border and indicator separator when the react-select */
+  /* is hovered or focuses. */
+  &:not(:hover) {
+    &:not(:focus-within) {
+      @apply border-transparent;
+
+      .m-select-account__indicators {
+        .m-select-account__indicator-separator {
+          @apply opacity-0;
+        }
+      }
+    }
+  }
+
+  /* Make the value text displayed a bit bigger because this is a significant */
+  /* component in the sidebar */
+  .m-select-account__value-container {
+    @apply text-lg font-medium;
+  }
+}
+

@@ -69,6 +69,29 @@ func (c *Controller) getTransactions(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, transactions)
 }
 
+// getTransactionById will simply return a single transaction for the given bank and transaction specified.
+// If the transaction does not exist then a 404 not found will be returned via the wrapPgError.
+func (c *Controller) getTransactionById(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
+	if err != nil || transactionId == 0 {
+		return c.badRequest(ctx, "must specify a valid transaction Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	transaction, err := repo.GetTransaction(c.getContext(ctx), bankAccountId, transactionId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve transaction")
+	}
+
+	return ctx.JSON(http.StatusOK, transaction)
+}
+
 // List Transactions For Spending
 // @Summary List Transactions For Spending
 // @ID list-transactions-for-spending

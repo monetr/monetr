@@ -1,6 +1,7 @@
-import { useMutation, useQuery, useQueryClient, UseQueryResult } from 'react-query';
 import * as Sentry from '@sentry/react';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
+import { parseJSON } from 'date-fns';
 import User from 'models/User';
 import request from 'util/request';
 
@@ -8,6 +9,9 @@ export interface AuthenticationWrapper {
   user: User;
   isSetup: boolean;
   isActive: boolean;
+  isTrialing: boolean;
+  activeUntil: Date | null;
+  trialingUntil: Date | null;
   hasSubscription: boolean;
 }
 
@@ -16,7 +20,7 @@ export type AuthenticationResult =
   & UseQueryResult<Partial<AuthenticationWrapper>, unknown>;
 
 export function useAuthenticationSink(): AuthenticationResult {
-  const result = useQuery<Partial<AuthenticationWrapper>>('/users/me', {
+  const result = useQuery<Partial<AuthenticationWrapper>>(['/users/me'], {
     onSuccess: data => {
       if (data?.user?.accountId) {
         Sentry.setUser({
@@ -33,6 +37,9 @@ export function useAuthenticationSink(): AuthenticationResult {
       user: result?.data?.user && new User(result?.data?.user),
       isSetup: !!result?.data?.isSetup,
       isActive: !!result?.data?.isActive,
+      isTrialing: Boolean(result?.data?.isTrialing),
+      activeUntil: result?.data?.activeUntil && parseJSON(result.data.activeUntil),
+      trialingUntil: result?.data?.trialingUntil && parseJSON(result.data.trialingUntil),
       hasSubscription: !!result?.data?.hasSubscription,
     },
   };
@@ -59,7 +66,7 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
 
   async function queryCheckoutSession(checkoutSessionId: string): Promise<AfterCheckoutResult> {
     return request()
-      .get<AfterCheckoutResult>(`/billing/checkout/${ checkoutSessionId }`)
+      .get<AfterCheckoutResult>(`/billing/checkout/${checkoutSessionId}`)
       .then(result => result.data);
   }
 
@@ -68,7 +75,7 @@ export function useAfterCheckout(): (_checkoutSessionId: string) => Promise<Afte
     {
       onSuccess: (result: AfterCheckoutResult) => Promise.all([
         queryClient.setQueriesData(
-          '/users/me',
+          ['/users/me'],
           (previous: Partial<AuthenticationWrapper>) => ({
             ...previous,
             isActive: result.isActive,

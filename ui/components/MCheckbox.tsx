@@ -1,10 +1,12 @@
+/* eslint-disable max-len */
 import React from 'react';
 import styled from '@emotion/styled';
+import { useFormikContext } from 'formik';
 
 import { ReactElement } from './types';
 
-import clsx from 'clsx';
 import useTheme from 'hooks/useTheme';
+import mergeTailwind from 'util/mergeTailwind';
 
 export interface MCheckboxProps {
   id?: string;
@@ -20,7 +22,12 @@ export interface MCheckboxProps {
 }
 
 export default function MCheckbox(props: MCheckboxProps): JSX.Element {
+  const formikContext = useFormikContext();
   const theme = useTheme();
+
+  const borderColor = theme.mediaColorSchema === 'dark' ?
+    theme.tailwind.colors['dark-monetr']['border']['subtle'] :
+    theme.tailwind.colors['gray']['300'];
 
   const Checkbox = styled('input')(() => ({
     MozAppearance: 'none',
@@ -39,7 +46,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     height: '1rem',
     width: '1rem',
     backgroundColor: props.disabled ? theme.tailwind.colors['gray']['100'] : ['white'],
-    borderColor: theme.tailwind.colors['gray']['300'],
+    borderColor: borderColor,
     borderWidth: '1px',
     backgroundSize: '100% 100%',
     cursor: props.disabled ? 'default' : 'pointer',
@@ -56,9 +63,10 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
   function Label(): JSX.Element {
     if (!props.label) return null;
 
-    const labelClasses = clsx(
+    const labelClasses = mergeTailwind(
       'font-medium',
       {
+        'dark:text-dark-monetr-content-emphasis': !props.disabled,
         'text-gray-900': !props.disabled,
         'text-gray-500': props.disabled,
         'cursor-pointer': !props.disabled,
@@ -76,14 +84,21 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     if (!props.description) return null;
 
     return (
-      <p className="text-gray-500">
+      <p className="text-gray-500 dark:text-dark-monetr-content">
         { props.description }
       </p>
     );
   }
 
+  props = {
+    ...props,
+    disabled: props?.disabled || formikContext?.isSubmitting,
+    onChange: props?.onChange || formikContext?.handleChange,
+    checked: props?.checked || formikContext.values[props.name],
+  };
+
   return (
-    <div className="flex gap-x-3">
+    <div className="flex gap-x-3 pb-3">
       <div className="flex h-6 items-center">
         <Checkbox
           id={ props.id }
@@ -92,6 +107,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
           disabled={ props.disabled }
           checked={ props.checked }
           onChange={ props.onChange }
+          onBlur={ formikContext?.handleBlur }
         />
       </div>
       <div className="text-sm leading-6">

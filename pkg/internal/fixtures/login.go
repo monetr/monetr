@@ -64,6 +64,37 @@ func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
 		StripeWebhookLatestTimestamp: myownsanity.TimeP(time.Now().Add(-4 * time.Minute)),
 		SubscriptionActiveUntil:      myownsanity.TimeP(time.Now().Add(10 * time.Minute)),
 		SubscriptionStatus:           &subStatus,
+		TrialEndsAt:                  nil,
+	}
+	err := repo.CreateAccountV2(context.Background(), &account)
+	require.NoError(t, err, "must be able to seed basic account")
+
+	user := models.User{
+		LoginId:          login.LoginId,
+		Login:            &login,
+		AccountId:        account.AccountId,
+		Account:          &account,
+		FirstName:        login.FirstName,
+		LastName:         login.LastName,
+		StripeCustomerId: account.StripeCustomerId,
+	}
+	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
+	require.NoError(t, err, "must be able to see user for basic account")
+
+	return user
+}
+
+func GivenIHaveATrialingAccount(t *testing.T, login models.Login) models.User {
+	db := testutils.GetPgDatabase(t)
+	repo := repository.NewUnauthenticatedRepository(db)
+	account := models.Account{
+		Timezone:                     gofakeit.TimeZoneRegion(),
+		StripeCustomerId:             nil,
+		StripeSubscriptionId:         nil,
+		StripeWebhookLatestTimestamp: nil,
+		SubscriptionActiveUntil:      nil,
+		SubscriptionStatus:           nil,
+		TrialEndsAt:                  myownsanity.TimeP(time.Now().AddDate(0, 0, 1)),
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")

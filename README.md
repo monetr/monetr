@@ -14,11 +14,9 @@
 monetr is a budgeting application that aims to allow people to more easily plan their recurring expenses. It is
 completely free to self-host (documentation to come), but requires a Plaid account in order to communicate with banks.
 
-monetr is currently still in heavy development, but working towards a v1.0.0 release. To that end the current focus has
-been primarily on rebuilding the user interface [here](https://github.com/monetr/monetr/pull/1465) in order to provide a
-more pleasant and intuitive experience, as well as aiming to support mobile browsers as much as desktop browsers. A
-first class mobile app is not in the near future for monetr at this time, so prioritizing a mobile browsing experience
-is a priority for an initial stable release.
+monetr is currently still in heavy development, but working towards a v1.0.0 release. You can see what items are still
+outstanding before a v1.0.0 release for monetr will be published here: [v1.0.0
+Milestone](https://github.com/monetr/monetr/milestone/3)
 
 ![image](https://github.com/monetr/monetr/assets/37967690/14e82b3d-9f02-4d38-9d81-5d89e3d7dbe7)
 

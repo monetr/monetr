@@ -6,12 +6,12 @@
 
 html, body {
     height: 100%;
-    background-color: #F8F8F8;
+    @apply dark:bg-dark-monetr-background;
 }
 
 /* custom scrollbar */
 ::-webkit-scrollbar {
-    width: 20px;
+    width: 16px;
 }
 
 ::-webkit-scrollbar-track {
@@ -19,14 +19,14 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #dedede;
+    @apply bg-zinc-700;
     border-radius: 20px;
     border: 6px solid transparent;
     background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #b1b1b1;
+    @apply bg-zinc-500;
 }
 
 *:focus {
@@ -36,6 +36,19 @@ html, body {
 button:focus {
     outline: none;
 }
+
+/* Make it so that number inputs don't have the stepper arrows */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+/* end of stepper arrow go away */
+
 
 .smooth-animation {
     backface-visibility: hidden;

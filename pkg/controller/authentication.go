@@ -13,13 +13,12 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/monetr/monetr/pkg/repository"
 	"github.com/pkg/errors"
-	"github.com/stripe/stripe-go/v72"
+	"github.com/sirupsen/logrus"
 )
 
 type MonetrClaims struct {
@@ -262,7 +261,6 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 		Timezone  string  `json:"timezone"`
 		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
-		Agree     bool    `json:"agree"`
 	}
 	if err := ctx.Bind(&registerRequest); err != nil {
 		return c.invalidJson(ctx)
@@ -274,6 +272,8 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 	if err := c.validateRegistrationCaptcha(c.getContext(ctx), registerRequest.Captcha); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "valid ReCAPTCHA is required")
 	}
+
+	log := c.getLog(ctx)
 
 	registerRequest.Email = strings.TrimSpace(registerRequest.Email)
 	registerRequest.Password = strings.TrimSpace(registerRequest.Password)
@@ -338,38 +338,22 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 			)
 		}
 	}
+	log = log.WithField("loginId", login.LoginId)
 
-	var stripeCustomerId *string
-	if c.configuration.Stripe.Enabled {
-		c.log.Debug("creating stripe customer for new user")
-		name := registerRequest.FirstName + " " + registerRequest.LastName
-		result, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
-			Email: &registerRequest.Email,
-			Name:  &name,
-			Params: stripe.Params{
-				Metadata: map[string]string{
-					"environment": c.configuration.Environment,
-					"revision":    build.Revision,
-					"release":     build.Release,
-				},
-			},
-		})
-		if err != nil {
-			return c.wrapAndReturnError(
-				ctx,
-				err,
-				http.StatusInternalServerError,
-				"failed to create stripe customer",
-			)
-		}
+	var trialEndsAt *time.Time
+	if c.configuration.Stripe.IsBillingEnabled() {
+		expiration := time.Now().AddDate(0, 0, c.configuration.Stripe.FreeTrialDays)
+		log.WithFields(logrus.Fields{
+			"trialDays":   c.configuration.Stripe.FreeTrialDays,
+			"trialEndsAt": expiration,
+		}).Debug("billing is enabled, new account for login will be on a trial")
 
-		stripeCustomerId = &result.ID
+		trialEndsAt = &expiration
 	}
 
 	account := models.Account{
-		Timezone:             timezone.String(),
-		StripeCustomerId:     stripeCustomerId,
-		StripeSubscriptionId: nil,
+		Timezone:    timezone.String(),
+		TrialEndsAt: trialEndsAt,
 	}
 	// Now that the login exists we can create the account, at the time of
 	// writing this we are only using the local time zone of the server, but in
@@ -383,11 +367,10 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 	crumbs.IncludeUserInScope(c.getContext(ctx), account.AccountId)
 
 	user := models.User{
-		LoginId:          login.LoginId,
-		AccountId:        account.AccountId,
-		FirstName:        registerRequest.FirstName,
-		LastName:         registerRequest.LastName,
-		StripeCustomerId: stripeCustomerId,
+		LoginId:   login.LoginId,
+		AccountId: account.AccountId,
+		FirstName: registerRequest.FirstName,
+		LastName:  registerRequest.LastName,
 	}
 
 	// Now that we have an accountId we can create the user object which will
@@ -427,7 +410,8 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 
 		if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
 			Login: *login,
-			VerifyURL: fmt.Sprintf("%s/verify/email?token=%s",
+			VerifyURL: fmt.Sprintf(
+				"%s/verify/email?token=%s",
 				c.configuration.GetUIURL(),
 				url.QueryEscape(verificationToken),
 			),
@@ -460,19 +444,8 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 
 	c.updateAuthenticationCookie(ctx, token)
 
-	if !c.configuration.Stripe.IsBillingEnabled() {
-		return ctx.JSON(http.StatusOK, map[string]interface{}{
-			"nextUrl":             "/setup",
-			"user":                user,
-			"isActive":            true,
-			"requireVerification": false,
-		})
-	}
-
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"nextUrl":             "/account/subscribe",
-		"user":                user,
-		"isActive":            false,
+		"nextUrl":             "/setup",
 		"requireVerification": false,
 	})
 }

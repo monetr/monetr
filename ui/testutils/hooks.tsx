@@ -1,47 +1,39 @@
 import React from 'react';
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
-import DoneIcon from '@mui/icons-material/Done';
-import ErrorIcon from '@mui/icons-material/Error';
-import InfoIcon from '@mui/icons-material/Info';
-import WarningIcon from '@mui/icons-material/Warning';
-import { LocalizationProvider } from '@mui/lab';
-import AdapterMoment from '@mui/lab/AdapterMoment';
+import { MemoryRouter } from 'react-router-dom';
+import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { renderHook, RenderHookResult, WrapperComponent } from '@testing-library/react-hooks';
-import { IconVariant, SnackbarProvider } from 'notistack';
-import { createMemoryHistory, MemoryHistory } from 'history';
 
-import theme from 'theme';
+import MQueryClient from 'components/MQueryClient';
+import MSnackbarProvider from 'components/MSnackbarProvider';
+import { newTheme } from 'theme';
 
 export interface HooksOptions {
-  history?: MemoryHistory;
+  initialRoute: string;
 }
 
 function testRenderHook<TProps, TResult>(
   callback: (props: TProps) => TResult,
   options?: HooksOptions,
 ): RenderHookResult<TProps, TResult> {
-  const history = options?.history || createMemoryHistory();
-
   const Wrapper: WrapperComponent<TProps> = (props: React.PropsWithChildren<any>) => {
-    const snackbarIcons: Partial<IconVariant> = {
-      error: <ErrorIcon className="mr-2.5" />,
-      success: <DoneIcon className="mr-2.5" />,
-      warning: <WarningIcon className="mr-2.5" />,
-      info: <InfoIcon className="mr-2.5" />,
-    };
-
     return (
-      <HistoryRouter history={ history }>
-        <ThemeProvider theme={ theme }>
-          <LocalizationProvider dateAdapter={ AdapterMoment }>
-            <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-              <CssBaseline />
-              { props.children }
-            </SnackbarProvider>
-          </LocalizationProvider>
-        </ThemeProvider>
-      </HistoryRouter>
+      <MemoryRouter initialEntries={ [options.initialRoute] }>
+        <MQueryClient>
+          <ThemeProvider theme={ newTheme }>
+            <LocalizationProvider dateAdapter={ AdapterMoment }>
+              <MSnackbarProvider>
+                <NiceModal.Provider>
+                  <CssBaseline />
+                  { props.children }
+                </NiceModal.Provider>
+              </MSnackbarProvider>
+            </LocalizationProvider>
+          </ThemeProvider>
+        </MQueryClient>
+      </MemoryRouter>
     );
   };
 

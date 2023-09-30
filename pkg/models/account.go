@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/pkg/feature"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
 )
@@ -18,6 +19,8 @@ type Account struct {
 	StripeWebhookLatestTimestamp *time.Time                 `json:"-" pg:"stripe_webhook_latest_timestamp"`
 	SubscriptionActiveUntil      *time.Time                 `json:"subscriptionActiveUntil" pg:"subscription_active_until"`
 	SubscriptionStatus           *stripe.SubscriptionStatus `json:"subscriptionStatus" pg:"subscription_status"`
+	TrialEndsAt                  *time.Time                 `json:"trialEndsAt" pg:"trial_ends_at"`
+	CreatedAt                    time.Time                  `json:"createdAt" pg:"created_at,notnull"`
 }
 
 func (a *Account) GetTimezone() (*time.Location, error) {
@@ -37,14 +40,23 @@ func (a *Account) HasFeature(feature feature.Feature) bool {
 // IsSubscriptionActive will return true if the SubscriptionActiveUntil date is not nill and is in the future. Even if
 // the StripeSubscriptionId or StripeCustomerId is nil.
 func (a *Account) IsSubscriptionActive() bool {
-	endsInTheFuture := a.SubscriptionActiveUntil != nil && a.SubscriptionActiveUntil.After(time.Now())
+	activeUntil := myownsanity.MaxNonNilTime(
+		a.SubscriptionActiveUntil,
+		a.TrialEndsAt,
+	)
+
+	consideredActive := activeUntil != nil && activeUntil.After(time.Now())
+
+	// If for some reason the account does not have a subscription status, then only consider the timestamps.
 	if a.SubscriptionStatus == nil {
-		return endsInTheFuture
+		return consideredActive
 	}
 
+	// If they do have a subscription status then only consider these two statuses as active. All other statuses should be
+	// considered an inactive subscription.
 	switch *a.SubscriptionStatus {
 	case stripe.SubscriptionStatusActive, stripe.SubscriptionStatusTrialing:
-		return endsInTheFuture
+		return consideredActive
 	default:
 		return false
 	}
@@ -56,21 +68,21 @@ func (a *Account) IsSubscriptionActive() bool {
 // would still be "active" because we would not want to create a new subscription.
 func (a *Account) HasSubscription() bool {
 	if a.SubscriptionStatus == nil {
-		return a.SubscriptionActiveUntil != nil &&
-			a.SubscriptionActiveUntil.After(time.Now()) &&
-			a.StripeSubscriptionId != nil
+		return false
 	}
 
 	switch *a.SubscriptionStatus {
-	case stripe.SubscriptionStatusActive,
-		stripe.SubscriptionStatusTrialing,
+	case
+		stripe.SubscriptionStatusActive,
 		stripe.SubscriptionStatusPastDue,
 		stripe.SubscriptionStatusIncomplete,
 		stripe.SubscriptionStatusUnpaid:
 		// When the subscription is one of these statuses, then the current subscription object should be used in stripe
 		// and a new object should not be created.
 		return a.StripeSubscriptionId != nil
-	case stripe.SubscriptionStatusCanceled:
+	case
+		stripe.SubscriptionStatusCanceled,
+		stripe.SubscriptionStatusTrialing:
 		// When the customer's subscription is canceled, it will not be re-used. A new subscription should be created.
 		return false
 	default:
@@ -79,9 +91,5 @@ func (a *Account) HasSubscription() bool {
 }
 
 func (a *Account) IsTrialing() bool {
-	if a.SubscriptionStatus != nil {
-		return *a.SubscriptionStatus == stripe.SubscriptionStatusTrialing && a.IsSubscriptionActive()
-	}
-
-	return false
+	return a.TrialEndsAt != nil && a.TrialEndsAt.After(time.Now())
 }

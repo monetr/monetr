@@ -5,7 +5,6 @@ import (
 )
 
 type Plan struct {
-	FreeTrialDays int32
 	Visible       bool
 	StripePriceId string
 	Features      []feature.Feature

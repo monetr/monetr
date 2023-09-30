@@ -111,7 +111,7 @@ func TestBaseBasicPaywall_GetHasSubscription(t *testing.T) {
 
 		hasSubscription, err = paywall.GetHasSubscription(context.Background(), user.AccountId)
 		assert.NoError(t, err, "must not return an error checking for subscription")
-		assert.True(t, hasSubscription, "the subscription should be present for past due")
+		assert.False(t, hasSubscription, "the subscription is not present when there is no status")
 	})
 
 	t.Run("account not found", func(t *testing.T) {

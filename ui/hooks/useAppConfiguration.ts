@@ -1,7 +1,5 @@
-import { useQuery, UseQueryResult } from 'react-query';
-import moment from 'moment';
-
-import { parseToMomentMaybe } from 'util/parseToMoment';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { parseJSON } from 'date-fns';
 
 export class AppConfiguration {
   requireLegalName: boolean;
@@ -24,36 +22,34 @@ export class AppConfiguration {
   release: string | null;
   revision: string;
   buildType: string;
-  buildTime: moment.Moment | null;
+  buildTime: Date | null;
 
   constructor(data?: Partial<AppConfiguration>) {
     if (data) Object.assign(this, {
       ...data,
-      buildTime: parseToMomentMaybe(data.buildTime),
+      buildTime: data.buildTime && parseJSON(data.buildTime),
     });
   }
 }
 
-export interface AppConfigurationWrapper {
-  result: AppConfiguration;
-}
-
-export type AppConfigurationResult = AppConfigurationWrapper & UseQueryResult<Partial<AppConfiguration>, unknown>;
+export type AppConfigurationResult =
+  { result: AppConfiguration | null }
+  & UseQueryResult<Partial<AppConfiguration>, unknown>;
 
 export function useAppConfigurationSink(): AppConfigurationResult {
-  const result = useQuery<Partial<AppConfiguration>>('/config', {
+  const result = useQuery<Partial<AppConfiguration>>(['/config'], {
     staleTime: 60 * 1000, // One minute in milliseconds.
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     refetchOnMount: false,
   });
   return {
-    result: new AppConfiguration(result.data),
+    result: (result?.data && new AppConfiguration(result.data)) || null,
     ...result,
   };
 }
 
-export function useAppConfiguration(): AppConfiguration {
+export function useAppConfiguration(): AppConfiguration | null {
   const { result } = useAppConfigurationSink();
   return result;
 }

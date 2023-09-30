@@ -102,8 +102,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 	}
 
 	crumbs.Debug(c.getContext(ctx), "Creating checkout session for price", map[string]interface{}{
-		"priceId":       plan.StripePriceId,
-		"freeTrialDays": plan.FreeTrialDays,
+		"priceId": plan.StripePriceId,
 	})
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -150,10 +149,26 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 		log.Info("successfully created stripe customer for account")
 	}
 
-	successUrl := fmt.Sprintf("%s://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
-	cancelUrl := fmt.Sprintf("%s://%s/account/subscribe", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName)
+	successUrl := fmt.Sprintf(
+		"%s://%s/account/subscribe/after?session={CHECKOUT_SESSION_ID}",
+		c.configuration.ExternalURLProtocol,
+		c.configuration.UIDomainName,
+	)
+	cancelUrl := fmt.Sprintf(
+		"%s://%s/account/subscribe",
+		c.configuration.ExternalURLProtocol,
+		c.configuration.UIDomainName,
+	)
+	// If a custom cancel path was specified by the requester then use that path. Note: it can only be a path, not a
+	// completely custom URL.
+	// TODO This still has a code smell to it. If this isn't necessary I think we should just remove it outright.
 	if request.CancelPath != nil {
-		cancelUrl = fmt.Sprintf("%s://%s%s", c.configuration.ExternalURLProtocol, c.configuration.UIDomainName, *request.CancelPath)
+		cancelUrl = fmt.Sprintf(
+			"%s://%s%s",
+			c.configuration.ExternalURLProtocol,
+			c.configuration.UIDomainName,
+			*request.CancelPath,
+		)
 	}
 
 	crumbs.Debug(c.getContext(ctx), "Creating Stripe Checkout Session", map[string]interface{}{
@@ -169,9 +184,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 	if c.configuration.Stripe.TaxesEnabled {
 		params.Extra = &stripe.ExtraValues{
 			Values: url.Values{
-				"customer_update[address]": []string{
-					"auto",
-				},
+				"customer_update[address]": []string{"auto"},
 			},
 		}
 	}
@@ -213,15 +226,8 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 				"release":     build.Release,
 				"accountId":   strconv.FormatUint(me.AccountId, 10),
 			},
-			TransferData:    nil,
-			TrialEnd:        nil,
-			TrialFromPlan:   nil,
-			TrialPeriodDays: nil,
+			TransferData: nil,
 		},
-	}
-
-	if plan.FreeTrialDays > 0 && account.StripeSubscriptionId == nil {
-		checkoutParams.SubscriptionData.TrialPeriodDays = stripe.Int64(int64(plan.FreeTrialDays))
 	}
 
 	result, err := c.stripe.NewCheckoutSession(c.getContext(ctx), checkoutParams)

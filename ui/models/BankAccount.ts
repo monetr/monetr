@@ -7,8 +7,8 @@ export default class BankAccount {
   name: string;
   plaidName?: string;
   plaidOfficialName?: string;
-  type: string;
-  subType: string;
+  accountType: string;
+  accountSubType: string;
 
   constructor(data?: Partial<BankAccount>) {
     if (data) {

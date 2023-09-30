@@ -156,7 +156,8 @@ $(NODE_MODULES): $(UI_DEPS) check-pnpm
 	touch -a -m $(NODE_MODULES) # Dumb hack to make sure the node modules directory timestamp gets bumpbed for make.
 
 STATIC_DIR=$(GO_SRC_DIR)/ui/static
-$(STATIC_DIR): $(APP_UI_FILES) $(NODE_MODULES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(SOURCE_MAP_DIR)
+$(STATIC_DIR) |: $(NODE_MODULES)
+$(STATIC_DIR): $(APP_UI_FILES) $(PUBLIC_FILES) $(UI_CONFIG_FILES) $(SOURCE_MAP_DIR)
 	$(call infoMsg,Building UI files)
 	rm -rf $(SOURCE_MAP_DIR)/*.js.map # Removing old map files
 	git clean -f -X $(STATIC_DIR)
@@ -173,9 +174,10 @@ endif
 
 go-dependencies: $(GOMODULES)
 
-ui-dependencies: $(NODE_MODULES)
+ui-dependencies |: $(NODE_MODULES)
 
-dependencies: $(GOMODULES) $(NODE_MODULES)
+dependencies |: $(NODE_MODULES)
+dependencies: $(GOMODULES)
 
 deps: dependencies
 
@@ -436,6 +438,9 @@ development-info:
 storybook: $(NODE_MODULES)
 	$(PNPM) storybook
 
+screenshots: $(NODE_MODULES) $(LOCAL_TMP)
+	$(PNPM) story:shots
+
 up:
 ifndef CONTAINER
 	$(error Must provide a CONTAINER to up)
@@ -482,6 +487,7 @@ endif
 
 shutdown:
 	-$(COMPOSE) exec monetr monetr development clean:plaid
+	-$(COMPOSE) exec monetr monetr development clean:stripe
 	-$(COMPOSE) down --remove-orphans -v
 
 MKDOCS_IMAGE ?= squidfunk/mkdocs-material:8.2.8

@@ -31,6 +31,21 @@ func (c *Controller) getBankAccounts(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, bankAccounts)
 }
 
+func (c *Controller) getBankAccount(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	bankAccount, err := repo.GetBankAccount(c.getContext(ctx), bankAccountId)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "failed to retrieve bank account")
+	}
+
+	return ctx.JSON(http.StatusOK, bankAccount)
+}
+
 // Get Bank Account Balances
 // @Summary Get Bank Account Balances
 // @id get-bank-account-balances

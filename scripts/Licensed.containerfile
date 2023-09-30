@@ -15,7 +15,7 @@ RUN npm install -g pnpm
 
 # Install golang for licensed.
 RUN wget -c https://golang.org/dl/go1.19.4.linux-amd64.tar.gz
-RUN tar -C /usr/local -xvzf go1.19.4.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.19.4.linux-amd64.tar.gz
 ENV GOPATH /home/go
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH:

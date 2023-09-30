@@ -1,129 +1,119 @@
-import React, { Fragment, useState } from 'react';
-import { Button, CircularProgress, TextField } from '@mui/material';
-import classnames from 'classnames';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import React, { useState } from 'react';
+import { FormikErrors, FormikHelpers } from 'formik';
 
-import BackToLoginButton from 'components/Authentication/BackToLoginButton';
-import CaptchaMaybe from 'components/Captcha/CaptchaMaybe';
-import CenteredLogo from 'components/Logo/CenteredLogo';
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import MFormButton from 'components/MButton';
+import MForm from 'components/MForm';
+import MLink from 'components/MLink';
+import MLogo from 'components/MLogo';
+import MSpan from 'components/MSpan';
+import MTextField from 'components/MTextField';
 import useSendForgotPassword from 'hooks/useSendForgotPassword';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
-interface ForgotPasswordValues {
+interface Values {
   email: string;
 }
 
-const initialValues: ForgotPasswordValues = {
+const initialValues: Values = {
   email: '',
 };
 
-export default function ForgotPasswordPage(): JSX.Element {
-  const {
-    verifyForgotPassword,
-  } = useAppConfiguration();
-  const [verification, setVerification] = useState<string | null>(null);
+export function ForgotPasswordComplete(): JSX.Element {
+  return (
+    <div className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5">
+      <div className="max-w-[128px] w-full">
+        <MLogo />
+      </div>
+      <div className="flex flex-col items-center">
+        <MSpan>
+          Check your email
+        </MSpan>
+        <MSpan color="subtle" className="max-w-[248px] text-center text-sm">
+          If a user was found with the email provided, then you should receive an email with instructions on how to
+          reset your password.
+        </MSpan>
+      </div>
+      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
+        <MSpan color="subtle" className='text-sm'>Return to</MSpan>
+        <MLink to="/login" size="sm">Sign in</MLink>
+      </div>
+    </div>
+  );
+}
+
+export default function ForgotPasswordNew(): JSX.Element {
   const sendForgotPassword = useSendForgotPassword();
+  const [isComplete, setIsComplete] = useState<boolean>(false);
 
-  function validateInput(values: ForgotPasswordValues): FormikErrors<ForgotPasswordValues> {
-    const errors: FormikErrors<ForgotPasswordValues> = {};
+  function validate(values: Values): FormikErrors<Values> {
+    const errors: FormikErrors<Values> = {};
 
-    if (values.email) {
-      if (!verifyEmailAddress(values.email)) {
-        errors['email'] = 'Please provide a valid email address.';
-      }
+    if (values.email && !verifyEmailAddress(values.email)) {
+      errors['email'] = 'Please provide a valid email address.';
     }
 
     return errors;
   }
 
-  function submitForgotPassword(values: ForgotPasswordValues, helpers: FormikHelpers<ForgotPasswordValues>): Promise<void> {
+  async function submit(values: Values, helpers: FormikHelpers<Values>): Promise<void> {
     helpers.setSubmitting(true);
 
     // sendForgotPassword pretty much does all the work, the only thing we need to do is make sure that once we are done
     // we set submitting back to false.
-    return sendForgotPassword(values.email, verification)
+    // NOTE: The verification passed here is always null at the moment.
+    return sendForgotPassword(values.email, null)
+      .then(() => setIsComplete(true))
       .finally(() => helpers.setSubmitting(false));
   }
 
+  if (isComplete) {
+    return (
+      <ForgotPasswordComplete />
+    );
+  }
+
   return (
-    <Fragment>
-      <BackToLoginButton />
-      <Formik
-        initialValues={ initialValues }
-        validate={ validateInput }
-        onSubmit={ submitForgotPassword }
-      >
-        { ({
-          values,
-          errors,
-          touched,
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          isSubmitting,
-          submitForm,
-        }) => (
-          <form onSubmit={ handleSubmit } className="h-full overflow-y-auto pb-20">
-            <div className="flex items-center justify-center w-full h-full max-h-full">
-              <div className="w-full p-2.5 md:p-10 xl:w-3/12 lg:w-5/12 md:w-2/3 sm:w-10/12 max-w-screen-sm sm:p-0">
-                <CenteredLogo />
-                <div className="w-full">
-                  <div className="w-full pb-2.5">
-                    <p className="text-center">
-                      In order to reset your forgotten password, we will send you an email with a link.
-                    </p>
-                    <p className="text-center">
-                      Please enter the email address for your login below.
-                    </p>
-                  </div>
-                  <div className="w-full pb-2.5">
-                    <TextField
-                      autoComplete="username"
-                      autoFocus
-                      className="w-full"
-                      disabled={ isSubmitting }
-                      error={ touched.email && !!errors.email }
-                      helperText={ (touched.email && errors.email) ? errors.email : null }
-                      id="forgot-email"
-                      label="Email"
-                      name="email"
-                      onBlur={ handleBlur }
-                      onChange={ handleChange }
-                      value={ values.email }
-                      variant="outlined"
-                    />
-                  </div>
-                  <CaptchaMaybe
-                    show={ verifyForgotPassword }
-                    loading={ isSubmitting }
-                    onVerify={ setVerification }
-                  />
-                  <div className="w-full pt-2.5 mb-10">
-                    <Button
-                      className="w-full"
-                      color="primary"
-                      disabled={ isSubmitting || !values.email || (verifyForgotPassword && !verification) }
-                      onClick={ submitForm }
-                      type="submit"
-                      variant="contained"
-                    >
-                      { isSubmitting && <CircularProgress
-                        className={ classnames('mr-2', {
-                          'opacity-50': isSubmitting,
-                        }) }
-                        size="1em"
-                        thickness={ 5 }
-                      /> }
-                      { isSubmitting ? 'Sending Password Reset Link...' : 'Send Password Reset Link' }
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </form>
-        ) }
-      </Formik>
-    </Fragment>
+    <MForm
+      initialValues={ initialValues }
+      validate={ validate }
+      onSubmit={ submit }
+      className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5"
+    >
+      <div className="max-w-[128px] w-full">
+        <MLogo />
+      </div>
+      <div className="flex flex-col items-center">
+        <MSpan>
+          Forgot your password?
+        </MSpan>
+        <MSpan color="subtle" className='text-sm'>
+          We can email you a link to reset it.
+        </MSpan>
+      </div>
+      <MTextField
+        autoFocus
+        autoComplete='username'
+        label="Email Address"
+        name='email'
+        type='email'
+        required
+        className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
+      />
+      <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
+        <MFormButton
+          color="primary"
+          variant="solid"
+          role="form"
+          type="submit"
+          className='w-full'
+        >
+          Reset Password
+        </MFormButton>
+      </div>
+      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
+        <MSpan color="subtle" className='text-sm'>Remembered your password?</MSpan>
+        <MLink to="/login" size="sm">Sign in</MLink>
+      </div>
+    </MForm>
   );
 }

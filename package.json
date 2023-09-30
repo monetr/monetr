@@ -17,7 +17,8 @@
     "test": "jest",
     "coverage": "jest --coverage --coverageDirectory=./reports",
     "storybook": "storybook dev -p 6006 --disable-telemetry",
-    "build-storybook": "storybook build --disable-telemetry"
+    "build-storybook": "storybook build --disable-telemetry",
+    "story:shots": "pnpm storycap --serverCmd \"storybook dev -p 9001 --disable-telemetry --no-open\" -o tmp"
   },
   "eslintConfig": {
     "extends": [
@@ -42,7 +43,9 @@
       ".+/pkg/.+"
     ],
     "modulePaths": [
-      "<rootDir>/ui"
+      "<rootDir>",
+      "<rootDir>/ui",
+      "node_modules"
     ],
     "moduleNameMapper": {
       "^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|lottie.json|xlsx)$": "<rootDir>/ui/testutils/mocks/fileMock.js"
@@ -66,18 +69,22 @@
     "@ebay/nice-modal-react": "1.2.10",
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",
+    "@fontsource-variable/inter": "5.0.4",
     "@mui/icons-material": "5.11.0",
     "@mui/lab": "5.0.0-alpha.114",
     "@mui/material": "5.11.3",
     "@mui/styles": "5.11.2",
     "@mui/x-date-pickers": "5.0.20",
     "@sentry/browser": "6.19.7",
+    "@sentry/core": "6.19.7",
     "@sentry/react": "6.19.7",
     "@sentry/tracing": "6.19.7",
+    "@sentry/utils": "6.19.7",
+    "@tanstack/react-query": "4.32.1",
+    "@tremor/react": "3.4.1",
     "axios": "0.27.2",
     "camelcase": "6.3.0",
-    "classnames": "2.3.2",
-    "clsx": "1.2.1",
+    "date-fns": "^2.30.0",
     "formik": "2.2.9",
     "fs-extra": "10.1.0",
     "lodash": "4.17.21",
@@ -88,16 +95,18 @@
     "ramda": "0.28.0",
     "react": "18.2.0",
     "react-app-polyfill": "3.0.0",
+    "react-day-picker": "8.8.1",
     "react-dom": "18.2.0",
     "react-google-recaptcha": "2.1.0",
     "react-infinite-scroll-hook": "4.0.4",
+    "react-number-format": "5.3.0",
     "react-plaid-link": "3.3.2",
-    "react-query": "3.39.3",
     "react-router-dom": "6.6.1",
     "react-select": "5.5.9",
     "resolve": "1.22.1",
     "resolve-url-loader": "5.0.0",
     "rrule": "2.7.2",
+    "tailwind-merge": "1.13.2",
     "tailwindcss": "3.3.3",
     "web-vitals": "2.1.4",
     "zustand": "4.1.4"
@@ -113,12 +122,14 @@
     "@storybook/react": "7.0.18",
     "@storybook/test-runner": "0.10.0",
     "@storybook/testing-library": "0.0.14-next.2",
-    "storybook": "7.0.18",
-    "storybook-react-rspack": "7.0.0-rc.24"
+    "storybook": "7.2.1",
+    "storybook-addon-react-router-v6": "1.0.2",
+    "storybook-react-rspack": "7.0.0-rc.24",
+    "storycap": "4.2.0"
   },
   "devDependencies": {
-    "@rspack/binding-linux-x64-gnu": "0.2.0",
-    "@rspack/cli": "0.2.0",
+    "@rspack/binding-linux-x64-gnu": "0.3.0",
+    "@rspack/cli": "0.3.0",
     "@swc/core": "1.3.40",
     "@swc/jest": "0.2.26",
     "@testing-library/jest-dom": "5.16.5",
@@ -147,6 +158,7 @@
     "eslint-plugin-simple-import-sort": "10.0.0",
     "eslint-plugin-storybook": "0.6.12",
     "eslint-plugin-testing-library": "5.10.2",
+    "eslint-plugin-unused-imports": "3.0.0",
     "file-loader": "6.2.0",
     "http-status-codes": "2.2.0",
     "jest": "29.3.1",

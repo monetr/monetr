@@ -4,6 +4,12 @@ export default class User {
   userId: number;
   loginId: number;
   accountId: number;
+  account: {
+    accountId: number;
+    subscriptionActiveUntil: string;
+    subscriptionStatus: string;
+    timezone: string;
+  };
   login: Login;
   firstName: string;
   lastName: string;

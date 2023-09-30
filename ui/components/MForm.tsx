@@ -1,19 +1,24 @@
-import { useFormikContext } from "formik";
-import React from "react";
+import React from 'react';
+import { Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 
-type FormProps = React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
+import { ReactElement } from './types';
 
-interface MFormProps extends FormProps {
-
+interface MFormProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
+  className?: string;
+  children: ReactElement;
+  'data-testid'?: string;
 }
 
-export default function MForm(props: MFormProps): JSX.Element {
-  const formikContext = useFormikContext();
+export default function MForm<Values extends FormikValues = FormikValues>(props: MFormProps<Values>): JSX.Element {
+  const { className, children, ...formikConfig } = props;
 
   return (
-    <form
-      onSubmit={ formikContext?.handleSubmit }
-      { ...props }
-    />
+    <Formik { ...formikConfig }>
+      {(formik: FormikProps<Values>) => (
+        <form onSubmit={ formik.handleSubmit } className={ className } data-testid={ props['data-testid'] }>
+          {children}
+        </form>
+      )}
+    </Formik>
   );
 }

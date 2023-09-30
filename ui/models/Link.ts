@@ -1,6 +1,4 @@
-import { Moment } from 'moment';
-
-import { parseToMomentMaybe } from 'util/parseToMoment';
+import { parseJSON } from 'date-fns';
 
 export enum LinkType {
   Unknown = 0,
@@ -38,12 +36,12 @@ export default class Link {
   institutionName: string;
   customInstitutionName?: string;
   createdByUserId: number;
-  lastSuccessfulUpdate: Moment | null;
+  lastSuccessfulUpdate: Date | null;
 
   constructor(data?: Partial<Link>) {
     if (data) Object.assign(this, {
       ...data,
-      lastSuccessfulUpdate: parseToMomentMaybe(data.lastSuccessfulUpdate),
+      lastSuccessfulUpdate: data.lastSuccessfulUpdate && parseJSON(data.lastSuccessfulUpdate),
     });
   }
 

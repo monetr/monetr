@@ -39,7 +39,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       - name: Dependencies
-        run: make ui-dependencies
+        run: |
+          make clean
+          make ui-dependencies
 
   local_dev:
     name: Local Development
@@ -94,7 +96,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
       - name: Build
-        run: make build-ui
+        run: |
+          make build-ui
       - uses: actions/upload-artifact@v3
         with:
           name: '${{ github.sha }}-ui'
@@ -232,7 +235,7 @@ jobs:
         if: always()
         uses: guyarb/golang-test-annotations@v0.7.0
         with:
-          test-results: '${{ github.workspace }}/rest-api-tests.json'
+          test-results: 'rest-api-tests.json'
       - uses: actions/upload-artifact@v3
         name: Upload Go Test Coverage Artifacts
         if: always()
