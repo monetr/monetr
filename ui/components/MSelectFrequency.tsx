@@ -42,6 +42,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     if (selectedIndex === null) return;
 
     if (selectedIndex >= rules.length) {
+      // eslint-disable-next-line no-console
       console.log('[MSelectFrequency]', 'date selection has changed and is no longer present in the rules');
       setSelectedIndex(null);
       formikContext?.setFieldValue(props.name, null);
