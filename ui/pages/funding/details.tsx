@@ -1,6 +1,5 @@
-/* eslint-disable max-len */
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 import { DeleteOutlined, HeartBroken, SaveOutlined, TodayOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
 import { FormikErrors, FormikHelpers } from 'formik';
@@ -15,7 +14,7 @@ import MSelectFrequency from 'components/MSelectFrequency';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
 import MTopNavigation from 'components/MTopNavigation';
-import { startOfDay } from 'date-fns';
+import { format, isEqual, startOfDay } from 'date-fns';
 import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
 import { amountToFriendly, friendlyToAmount } from 'util/amounts';
@@ -30,7 +29,10 @@ interface FundingValues {
 }
 
 export default function FundingDetails(): JSX.Element {
-  const { fundingId } = useParams();
+  // I don't want to do it this way, but it seems like it's the only way to do it for tests without having the entire
+  // router also present in the test?
+  const match = useMatch('/bank/:bankId/funding/:fundingId/details');
+  const fundingId = +match?.params?.fundingId || null;
   const { data: funding } = useFundingSchedule(fundingId && +fundingId);
   const navigate = useNavigate();
   const updateFundingSchedule = useUpdateFundingSchedule();
@@ -45,7 +47,7 @@ export default function FundingDetails(): JSX.Element {
           Something isn't right...
         </MSpan>
         <MSpan className='text-2xl'>
-          There wasn't an expense specified...
+          There wasn't a funding schedule specified...
         </MSpan>
       </div>
     );
@@ -110,11 +112,21 @@ export default function FundingDetails(): JSX.Element {
 
   const initialValues: FundingValues = {
     name: funding.name,
-    nextOccurrence: funding.nextOccurrence,
+    nextOccurrence: funding.nextOccurrenceOriginal,
     rule: funding.rule,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
     estimatedDeposit: amountToFriendly(funding.estimatedDeposit),
+  };
+
+  const NextOccurrenceDecorator = () => {
+    if (isEqual(funding.nextOccurrence, funding.nextOccurrenceOriginal)) return null;
+
+    return (
+      <MSpan data-testid='funding-schedule-weekend-notice' size='sm' weight='medium'>
+        Actual occurrence avoids weekend ({ format(funding.nextOccurrence, 'M/dd') })
+      </MSpan>
+    );
   };
 
   return (
@@ -147,7 +159,9 @@ export default function FundingDetails(): JSX.Element {
               className='w-full'
               label='Next Occurrence'
               name='nextOccurrence'
+              labelDecorator={ NextOccurrenceDecorator }
               required
+              data-testid='funding-details-date-picker'
             />
             <MSelectFrequency
               className='w-full'

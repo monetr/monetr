@@ -13,7 +13,6 @@ export interface MSpanStyleProps {
 
 export interface MSpanProps extends MSpanStyleProps {
   children: string | React.ReactNode | JSX.Element;
-  ['data-testid']?: string;
   onClick?: () => void;
 }
 

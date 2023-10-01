@@ -9,6 +9,7 @@ export default class FundingSchedule {
   rule: string;
   lastOccurrence?: Date;
   nextOccurrence: Date;
+  nextOccurrenceOriginal: Date;
   excludeWeekends: boolean;
   estimatedDeposit: number | null;
 
@@ -18,6 +19,7 @@ export default class FundingSchedule {
         ...data,
         lastOccurrence: data.lastOccurrence && parseJSON(data.lastOccurrence),
         nextOccurrence: parseJSON(data.nextOccurrence),
+        nextOccurrenceOriginal: parseJSON(data.nextOccurrenceOriginal),
       });
     }
   }
