@@ -4,6 +4,7 @@ import Select, { Theme } from 'react-select';
 
 import { useBankAccounts, useSelectedBankAccount } from 'hooks/bankAccounts';
 import useTheme from 'hooks/useTheme';
+import sortAccounts from 'util/sortAccounts';
 
 import './MSelectAccount.scss';
 
@@ -13,31 +14,8 @@ export default function MSelectAccount(): JSX.Element {
   const { data: allBankAccounts, isLoading: allIsLoading } = useBankAccounts();
   const { data: selectedBankAccount, isLoading: selectedIsLoading } = useSelectedBankAccount();
 
-  const accounts = allBankAccounts
-    ?.filter(account => account.linkId === selectedBankAccount?.linkId)
-    .sort((a, b) => {
-      const items = [a, b];
-      const values = [
-        0, // a
-        0, // b
-      ];
-      for (let i = 0; i < 2; i++) {
-        const item = items[i];
-        if (item.accountType === 'depository') {
-          values[i] += 2;
-        }
-        switch (item.accountSubType) {
-          case 'checking':
-            values[i] += 2;
-            break;
-          case 'savings':
-            values[i] += 1;
-            break;
-        }
-      }
-
-      return values[0];
-    })
+  const accounts = sortAccounts(allBankAccounts
+    ?.filter(account => account.linkId === selectedBankAccount?.linkId))
     .map(account => ({
       label: account.name,
       value: account.bankAccountId,

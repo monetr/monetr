@@ -8,6 +8,7 @@ import { useBankAccounts, useSelectedBankAccount } from 'hooks/bankAccounts';
 import { useInstitution } from 'hooks/institutions';
 import MonetrLink from 'models/Link';
 import mergeTailwind from 'util/mergeTailwind';
+import sortAccounts from 'util/sortAccounts';
 
 interface BankSidebarItemProps {
   link: MonetrLink;
@@ -19,8 +20,10 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;
 
-  const destinationBankAccountId = bankAccounts
-    ?.find(bankAccount => bankAccount.linkId === link.linkId);
+  const destinationBankAccounts = sortAccounts(bankAccounts
+    ?.filter(bankAccount => bankAccount.linkId === link.linkId));
+
+  const destinationBankAccount = destinationBankAccounts.length > 0 ? destinationBankAccounts[0] : null;
 
   const InstitutionLogo = () => {
     if (!institution?.logo) {
@@ -87,7 +90,7 @@ export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Ele
         <div className={ classes } />
         <Link
           className='absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle drop-shadow-md flex justify-center items-center'
-          to={ `/bank/${destinationBankAccountId?.bankAccountId}/transactions` }
+          to={ `/bank/${destinationBankAccount?.bankAccountId}/transactions` }
         >
           <InstitutionLogo />
           <LinkWarningIndicator />
