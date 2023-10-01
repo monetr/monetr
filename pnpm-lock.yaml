@@ -18,8 +18,8 @@ dependencies:
     specifier: 11.10.6
     version: 11.10.6(@emotion/react@11.10.6)(@types/react@18.2.12)(react@18.2.0)
   '@fontsource-variable/inter':
-    specifier: 5.0.4
-    version: 5.0.4
+    specifier: 5.0.8
+    version: 5.0.8
   '@mui/icons-material':
     specifier: 5.11.0
     version: 5.11.0(@mui/material@5.11.3)(@types/react@18.2.12)(react@18.2.0)
@@ -588,6 +588,7 @@ packages:
   /@babel/helper-member-expression-to-functions@7.22.5:
     resolution: {integrity: sha512-aBiH1NKMG0H2cGZqspNvsaBe6wNGjbJjuLy29aU+eDZjSbbN53BaxlpB02xm9v34pLTZ1nIQPFYn2qMZoa5BQQ==}
     engines: {node: '>=6.9.0'}
+    requiresBuild: true
     dependencies:
       '@babel/types': 7.22.5
 
@@ -628,6 +629,7 @@ packages:
   /@babel/helper-optimise-call-expression@7.22.5:
     resolution: {integrity: sha512-HBwaojN0xFRx4yIvpwGqxiV2tUfl7401jlok564NgB9EHS1y6QT17FmKWm4ztqjeVdXLuC4fSvHc5ePpQjoTbw==}
     engines: {node: '>=6.9.0'}
+    requiresBuild: true
     dependencies:
       '@babel/types': 7.22.5
 
@@ -2816,8 +2818,8 @@ packages:
     resolution: {integrity: sha512-m0G6wlnhm/AX0H12IOWtK8gASEMffnX08RtKkCgTdHb9JpHKGloI7icFfLg9ZmQeavcvR0PKmzxClyuFPSjKWw==}
     dev: false
 
-  /@fontsource-variable/inter@5.0.4:
-    resolution: {integrity: sha512-MYomT1JVwFAPhinw3N4mQbtwNCXSQ2n+W2JFCgXNyhzDL7hgAXzI89/yZRyNz5kYfyyG7pgsOj9YZ0aujlHbEw==}
+  /@fontsource-variable/inter@5.0.8:
+    resolution: {integrity: sha512-WkYfFNccmEIeL2fNg0mYeLWqOoB7xD8MFxFRc4IwbSP2o8ZaBt36v5aW4by4MyrgGRMNk7uNi5LbvYKq6clPjw==}
     dev: false
 
   /@hapi/hoek@9.3.0:
@@ -8706,6 +8708,7 @@ packages:
   /array-union@2.1.0:
     resolution: {integrity: sha512-HGyxoOTYUyCM6stUe6EJgnd4EoewAI7zMdfqO+kGjnlZmBDz/cR5pf8r/cR4Wq60sL/p0IkcjUEEPwS3GFrIyw==}
     engines: {node: '>=8'}
+    requiresBuild: true
 
   /array-unique@0.3.2:
     resolution: {integrity: sha512-SleRWjh9JUud2wH1hPs9rZBZ33H6T9HOiL0uwGnGx9FpE6wKGyfWugmbkEOIs6qWrZhg0LWeLziLrEwQJhs5mQ==}
