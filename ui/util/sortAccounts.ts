@@ -3,7 +3,11 @@ import BankAccount from 'models/BankAccount';
 /**
  * sortAccounts will take an array of accounts and sort them by the account type and sub type priorities.
  */
-export default function sortAccounts(bankAccounts: Array<BankAccount>): Array<BankAccount> {
+export default function sortAccounts(bankAccounts: Array<BankAccount> | undefined): Array<BankAccount> {
+  if (!bankAccounts) {
+    return [];
+  }
+
   // Depository accounts should be the highest value. Account types that are not listed here will
   // have a value of -1.
   const accountTypeOrder = [

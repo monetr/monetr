@@ -3,6 +3,14 @@ import sortAccounts from './sortAccounts';
 import BankAccount from 'models/BankAccount';
 
 describe('sort accounts', () => {
+  it('will handle a null or undefined input', () => {
+    const foo = sortAccounts(null);
+    expect(foo).toEqual([]);
+
+    const bar = sortAccounts(undefined);
+    expect(bar).toEqual([]);
+  });
+
   it('will make sure that checking is the highest priority', () => {
     const checkingAccount = new BankAccount({
       'bankAccountId': 2,
