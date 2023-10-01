@@ -23,6 +23,7 @@ type FundingSchedule struct {
 	Name                   string       `json:"name" pg:"name,notnull,unique:per_bank"`
 	Description            string       `json:"description,omitempty" pg:"description"`
 	Rule                   *Rule        `json:"rule" pg:"rule,notnull,type:'text'"`
+	RuleSet                *Rule        `json:"ruleSet" pg:"ruleset,notnull,type:'text'"`
 	ExcludeWeekends        bool         `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
 	WaitForDeposit         bool         `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
 	EstimatedDeposit       *int64       `json:"estimatedDeposit" pg:"estimated_deposit"`
