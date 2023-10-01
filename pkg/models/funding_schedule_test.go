@@ -89,7 +89,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 
 		now := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
 		expected := time.Date(2022, 5, 15, 0, 0, 0, 0, time.UTC)
-		next := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
+		next, _ := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
 		assert.Equal(t, expected, next, "should contribute next on sunday the 15th of may")
 	})
 
@@ -106,7 +106,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 
 		now := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
 		expected := time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC)
-		next := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
+		next, _ := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
 		assert.Equal(t, expected, next, "should contribute next on the 13th, which is a friday")
 	})
 
@@ -125,12 +125,12 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 		// 12:23:10 AM on September 31st 2022.
 		now := time.Date(2022, 9, 31, 0, 23, 10, 0, timezone)
 		expected := time.Date(2022, 10, 14, 0, 0, 0, 0, timezone)
-		next := fundingSchedule.GetNextContributionDateAfter(now, timezone)
+		next, _ := fundingSchedule.GetNextContributionDateAfter(now, timezone)
 		assert.Equal(t, expected, next, "should contribute next on the 14th, which is a friday")
 
 		fundingSchedule.ExcludeWeekends = false
 		expected = time.Date(2022, 10, 15, 0, 0, 0, 0, timezone)
-		next = fundingSchedule.GetNextContributionDateAfter(now, timezone)
+		next, _ = fundingSchedule.GetNextContributionDateAfter(now, timezone)
 		assert.Equal(t, expected, next, "should contribute next on the 15th when we are not excluding weekends")
 	})
 
@@ -152,7 +152,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 
 		now := time.Date(2022, 5, 14, 0, 0, 0, 0, time.UTC)
 		expected := time.Date(2022, 5, 31, 0, 0, 0, 0, time.UTC)
-		next := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
+		next, _ := fundingSchedule.GetNextContributionDateAfter(now, time.UTC)
 		assert.Equal(t, expected, next, "should not show the 15th, instead should show the 31st")
 	})
 
@@ -170,7 +170,7 @@ func TestFundingSchedule_GetNextContributionDateAfter(t *testing.T) {
 			LastOccurrence:  nil,
 			NextOccurrence:  next,
 		}
-		nextFundingOccurrence := fundingSchedule.GetNextContributionDateAfter(now, timezone)
+		nextFundingOccurrence, _ := fundingSchedule.GetNextContributionDateAfter(now, timezone)
 		assert.Equal(t, expected, nextFundingOccurrence, "should be on friday the 30th of september next")
 	})
 }

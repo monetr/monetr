@@ -157,7 +157,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   }, 'relative', className);
 
   return (
-    <div className={ wrapperClassNames }>
+    <div className={ wrapperClassNames } data-testid={ props['data-testid'] }>
       <MLabel
         label={ props.label }
         disabled={ props.disabled }

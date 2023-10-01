@@ -15,20 +15,21 @@ var _ pg.BeforeInsertHook = (*FundingSchedule)(nil)
 type FundingSchedule struct {
 	tableName string `pg:"funding_schedules"`
 
-	FundingScheduleId uint64       `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,pk,type:'bigserial'"`
-	AccountId         uint64       `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
-	Account           *Account     `json:"-" pg:"rel:has-one"`
-	BankAccountId     uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,unique:per_bank,type:'bigint'"`
-	BankAccount       *BankAccount `json:"bankAccount,omitempty" pg:"rel:has-one"`
-	Name              string       `json:"name" pg:"name,notnull,unique:per_bank"`
-	Description       string       `json:"description,omitempty" pg:"description"`
-	Rule              *Rule        `json:"rule" pg:"rule,notnull,type:'text'"`
-	ExcludeWeekends   bool         `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
-	WaitForDeposit    bool         `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
-	EstimatedDeposit  *int64       `json:"estimatedDeposit" pg:"estimated_deposit"`
-	LastOccurrence    *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
-	NextOccurrence    time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
-	DateStarted       time.Time    `json:"dateStarted" pg:"date_started,notnull"`
+	FundingScheduleId      uint64       `json:"fundingScheduleId" pg:"funding_schedule_id,notnull,pk,type:'bigserial'"`
+	AccountId              uint64       `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
+	Account                *Account     `json:"-" pg:"rel:has-one"`
+	BankAccountId          uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,unique:per_bank,type:'bigint'"`
+	BankAccount            *BankAccount `json:"bankAccount,omitempty" pg:"rel:has-one"`
+	Name                   string       `json:"name" pg:"name,notnull,unique:per_bank"`
+	Description            string       `json:"description,omitempty" pg:"description"`
+	Rule                   *Rule        `json:"rule" pg:"rule,notnull,type:'text'"`
+	ExcludeWeekends        bool         `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
+	WaitForDeposit         bool         `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
+	EstimatedDeposit       *int64       `json:"estimatedDeposit" pg:"estimated_deposit"`
+	LastOccurrence         *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
+	NextOccurrence         time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
+	NextOccurrenceOriginal time.Time    `json:"nextOccurrenceOriginal" pg:"next_occurrence_original,notnull"`
+	DateStarted            time.Time    `json:"dateStarted" pg:"date_started,notnull"`
 }
 
 func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
@@ -45,13 +46,13 @@ func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, 
 // GetNextTwoContributionDatesAfter returns the next two contribution dates relative to the timestamp provided. This is
 // used to better calculate contributions to funds that recur more frequently than they can be funded.
 func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
-	nextOne := f.GetNextContributionDateAfter(now, timezone)
-	subsequent := f.GetNextContributionDateAfter(nextOne, timezone)
+	nextOne, _ := f.GetNextContributionDateAfter(now, timezone)
+	subsequent, _ := f.GetNextContributionDateAfter(nextOne, timezone)
 
 	return nextOne, subsequent
 }
 
-func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) time.Time {
+func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
 	var nextContributionDate time.Time
@@ -65,7 +66,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	if now.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.
 		// This might be goofy if we want to test stuff in the distant past?
-		return nextContributionDate
+		return nextContributionDate, nextContributionDate
 	}
 
 	nextContributionRule := f.Rule.RRule
@@ -101,7 +102,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 		nextContributionDate = util.Midnight(nextContributionDate, timezone)
 	}
 
-	return nextContributionDate
+	return nextContributionDate, actualNextContributionDate
 }
 
 func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone *time.Location) bool {
@@ -124,11 +125,12 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone 
 		return false
 	}
 
-	nextFundingOccurrence := f.GetNextContributionDateAfter(now, timezone)
+	nextFundingOccurrence, originalNextFundingOccurrence := f.GetNextContributionDateAfter(now, timezone)
 
 	current := f.NextOccurrence
 	f.LastOccurrence = &current
 	f.NextOccurrence = nextFundingOccurrence
+	f.NextOccurrenceOriginal = originalNextFundingOccurrence
 
 	return true
 }

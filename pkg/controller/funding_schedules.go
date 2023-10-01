@@ -141,6 +141,8 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	// adjusted for midnight that day, which will always be in the past for the user.
 	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) || time.Now().After(fundingSchedule.NextOccurrence) {
 		fundingSchedule.CalculateNextOccurrence(c.getContext(ctx), c.mustGetTimezone(ctx))
+	} else {
+		fundingSchedule.NextOccurrenceOriginal = fundingSchedule.NextOccurrence
 	}
 
 	// It has never occurred so this needs to be nil.
@@ -205,6 +207,9 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		// next occurrence.
 		if request.NextOccurrence.Before(time.Now()) {
 			request.NextOccurrence = existingFundingSchedule.NextOccurrence
+			request.NextOccurrenceOriginal = existingFundingSchedule.NextOccurrenceOriginal
+		} else {
+			request.NextOccurrenceOriginal = request.NextOccurrence
 		}
 		recalculateSpending = true
 	}

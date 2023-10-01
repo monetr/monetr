@@ -268,17 +268,18 @@ func TestPutTransactions(t *testing.T) {
 		originalTransaction = fixtures.GivenIHaveATransaction(t, bank)
 		transaction = originalTransaction
 		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
-			AccountId:        user.AccountId,
-			BankAccountId:    bank.BankAccountId,
-			Name:             "Payday",
-			Description:      "Whenever I get paid",
-			Rule:             fundingRule,
-			ExcludeWeekends:  true,
-			WaitForDeposit:   false,
-			EstimatedDeposit: nil,
-			LastOccurrence:   nil,
-			NextOccurrence:   fundingRule.After(now, false),
-			DateStarted:      now,
+			AccountId:              user.AccountId,
+			BankAccountId:          bank.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Whenever I get paid",
+			Rule:                   fundingRule,
+			ExcludeWeekends:        true,
+			WaitForDeposit:         false,
+			EstimatedDeposit:       nil,
+			LastOccurrence:         nil,
+			NextOccurrence:         fundingRule.After(now, false),
+			NextOccurrenceOriginal: fundingRule.After(now, false),
+			DateStarted:            now,
 		})
 
 		// Create the spending object we want to test spending from, specifically make it so that the spending object has

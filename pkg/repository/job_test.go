@@ -41,12 +41,13 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 
 		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
-			AccountId:      bankAccount.AccountId,
-			BankAccountId:  bankAccount.BankAccountId,
-			Name:           "Payday",
-			Description:    "Payday",
-			Rule:           fundingRule,
-			NextOccurrence: fundingRule.After(time.Now(), false),
+			AccountId:              bankAccount.AccountId,
+			BankAccountId:          bankAccount.BankAccountId,
+			Name:                   "Payday",
+			Description:            "Payday",
+			Rule:                   fundingRule,
+			NextOccurrence:         fundingRule.After(time.Now(), false),
+			NextOccurrenceOriginal: fundingRule.After(time.Now(), false),
 		})
 
 		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
