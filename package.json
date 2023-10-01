@@ -170,7 +170,7 @@
     "js-yaml": "4.1.0",
     "msw": "1.2.2",
     "msw-storybook-addon": "1.8.0",
-    "postcss": "8.4.24",
+    "postcss": "8.4.31",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-loader": "7.0.2",
     "postcss-normalize": "10.0.1",
