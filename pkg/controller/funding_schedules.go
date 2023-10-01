@@ -207,6 +207,9 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		// next occurrence.
 		if request.NextOccurrence.Before(time.Now()) {
 			request.NextOccurrence = existingFundingSchedule.NextOccurrence
+			request.NextOccurrenceOriginal = existingFundingSchedule.NextOccurrenceOriginal
+		} else {
+			request.NextOccurrenceOriginal = request.NextOccurrence
 		}
 		recalculateSpending = true
 	}
