@@ -1,6 +1,9 @@
 # Ignore everything
-**
-
-!pkg
-!go.mod
-!go.sum
+node_modules
+tmp
+.licenses
+pkg/ui/static
+!pkg/ui/static/README.md
+pkg/icons/sources
+!pkg/icons/sources/README.md
+!.git
