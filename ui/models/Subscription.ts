@@ -1,4 +1,3 @@
-import { Moment } from 'moment';
 
 export enum Feature {
   ManualBudgeting = 'ManualBudgeting',
@@ -14,8 +13,8 @@ export default class Subscription {
   ownedByUserId: number;
   features: Feature[];
   status: SubscriptionStatus;
-  trialStart: Moment | null;
-  trialEnd: Moment | null;
+  trialStart: Date | null;
+  trialEnd: Date | null;
 
   constructor(data: Partial<Subscription>) {
     if (data) {

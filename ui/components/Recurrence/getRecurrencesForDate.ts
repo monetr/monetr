@@ -1,27 +1,32 @@
 /* eslint-disable id-length */
-import moment from 'moment';
-
 import Recurrence from 'components/Recurrence/Recurrence';
+import { endOfMonth, format, getDate, getMonth, isEqual, parseJSON, startOfDay, startOfMonth } from 'date-fns';
 import { RRule, Weekday } from 'rrule';
 
-export default function getRecurrencesForDate(date: moment.Moment): Array<Recurrence> {
-  date = moment(date);
-  const input = date.clone().startOf('day');
-  const endOfMonth = input.clone().endOf('month').startOf('day');
-  const startOfMonth = input.clone().startOf('month').startOf('day');
-  const isStartOfMonth = input.unix() === startOfMonth.unix();
-  const isEndOfMonth = input.unix() === endOfMonth.unix();
+export default function getRecurrencesForDate(inputDate: Date | string): Array<Recurrence> {
+  let date: Date;
+  if (typeof inputDate === 'string') {
+    date = parseJSON(inputDate);
+  } else {
+    date = inputDate;
+  }
 
-  const weekdayString = input.format('dddd');
+  const input = startOfDay(date);
+  const endOfMonthDate = endOfMonth(input);
+  const startOfMonthDate = startOfMonth(input);
+  const isStartOfMonth = isEqual(input, startOfMonthDate);
+  const isEndOfMonth = isEqual(input, endOfMonthDate);
+
+  const weekdayString = format(input, 'EEEE');
 
   const ruleWeekday = getRuleDayOfWeek(input);
 
-  const dayStr = isEndOfMonth ? ' last day of the month' : ordinalSuffixOf(input.date());
+  const dayStr = isEndOfMonth ? ' last day of the month' : ordinalSuffixOf(getDate(input));
 
   const rules = [
     new Recurrence({
       name: `Every ${ weekdayString }`,
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.WEEKLY,
         interval: 1,
@@ -30,7 +35,7 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every other ${ weekdayString }`,
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.WEEKLY,
         interval: 2,
@@ -39,56 +44,56 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }),
     new Recurrence({
       name: `Every month on the ${ dayStr }`,
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
-        bymonthday: input.date(),
+        bymonthday: getDate(input),
       }),
     }),
     new Recurrence({
       name: `Every other month on the ${ dayStr }`,
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 2,
-        bymonthday: input.date(),
+        bymonthday: getDate(input),
       }),
     }),
     new Recurrence({
       name: `Every 3 months (quarter) on the ${ dayStr }`,
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 3,
-        bymonthday: input.date(),
+        bymonthday: getDate(input),
       }),
     }),
     new Recurrence({
       name: `Every 6 months on the ${ dayStr }`,
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 6,
-        bymonthday: input.date(),
+        bymonthday: getDate(input),
       }),
     }),
     new Recurrence({
-      name: `Every year on the ${ ordinalSuffixOf(input.date()) } of ${ input.format('MMMM') }`,
-      dtstart: date.toDate(),
+      name: `Every year on the ${ ordinalSuffixOf(getDate(input)) } of ${ format(input, 'MMMM') }`,
+      dtstart: input,
       rule: new RRule({
         freq: RRule.YEARLY,
         interval: 1,
-        bymonth: input.month() + 1,
-        bymonthday: input.date(),
+        bymonth: getMonth(input) + 1,
+        bymonthday: getDate(input),
       }),
     }),
   ];
 
-  if (isStartOfMonth || input.date() === 15) {
+  if (isStartOfMonth || getDate(input) === 15) {
     rules.push(new Recurrence({
       name: '1st and 15th of every month',
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
@@ -97,10 +102,10 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
     }));
   }
 
-  if (isEndOfMonth || input.date() === 15) {
+  if (isEndOfMonth || getDate(input) === 15) {
     rules.push(new Recurrence({
       name: '15th and last day of every month',
-      dtstart: date.toDate(),
+      dtstart: input,
       rule: new RRule({
         freq: RRule.MONTHLY,
         interval: 1,
@@ -112,8 +117,8 @@ export default function getRecurrencesForDate(date: moment.Moment): Array<Recurr
   return rules;
 }
 
-function getRuleDayOfWeek(date: moment.Moment): Weekday {
-  switch (date.format('dddd')) {
+function getRuleDayOfWeek(date: Date): Weekday {
+  switch (format(date, 'EEEE')) {
     case 'Monday':
       return RRule.MO;
     case 'Tuesday':

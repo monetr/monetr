@@ -7,7 +7,7 @@ import request from 'util/request';
 
 interface SpendingBareMinimum {
   bankAccountId: number;
-  nextRecurrence: moment.Moment;
+  nextRecurrence: Date;
   spendingType: SpendingType;
   fundingScheduleId: number;
   targetAmount: number;

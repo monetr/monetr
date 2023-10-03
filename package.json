@@ -65,7 +65,6 @@
     }
   },
   "dependencies": {
-    "@date-io/moment": "2.16.1",
     "@ebay/nice-modal-react": "1.2.10",
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",
@@ -74,7 +73,6 @@
     "@mui/lab": "5.0.0-alpha.114",
     "@mui/material": "5.11.3",
     "@mui/styles": "5.11.2",
-    "@mui/x-date-pickers": "5.0.20",
     "@sentry/browser": "6.19.7",
     "@sentry/core": "6.19.7",
     "@sentry/react": "6.19.7",
@@ -88,7 +86,6 @@
     "formik": "2.2.9",
     "fs-extra": "10.1.0",
     "lodash": "4.17.21",
-    "moment": "2.29.4",
     "notistack": "3.0.1",
     "path-to-regexp": "6.2.1",
     "prompts": "2.4.2",

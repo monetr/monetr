@@ -7,8 +7,6 @@ import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningIcon from '@mui/icons-material/Warning';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { INITIAL_VIEWPORTS } from '@storybook/addon-viewport';
 import { useEffect, useGlobals } from '@storybook/addons';
 import type { Preview } from '@storybook/react';
@@ -16,7 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import axios from 'axios';
 import { SnackbarProvider, VariantType } from 'notistack';
 
-import theme, { newTheme } from '../ui/theme';
+import { newTheme } from '../ui/theme';
 import Query from '../ui/util/query';
 
 import { initialize, mswLoader } from 'msw-storybook-addon';
@@ -68,14 +66,12 @@ const preview: Preview = {
       return (
         <QueryClientProvider client={ queryClient }>
           <ThemeProvider theme={ newTheme }>
-            <LocalizationProvider dateAdapter={ AdapterMoment }>
-              <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
-                <NiceModal.Provider>
-                  <CssBaseline />
-                  <Story />
-                </NiceModal.Provider>
-              </SnackbarProvider>
-            </LocalizationProvider>
+            <SnackbarProvider maxSnack={ 5 } iconVariant={ snackbarIcons }>
+              <NiceModal.Provider>
+                <CssBaseline />
+                <Story />
+              </NiceModal.Provider>
+            </SnackbarProvider>
           </ThemeProvider>
         </QueryClientProvider>
       );

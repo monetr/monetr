@@ -2,8 +2,6 @@ import React from 'react';
 import { Location, MemoryRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { Queries, queries, render, RenderOptions, RenderResult } from '@testing-library/react';
 
 import MQueryClient from 'components/MQueryClient';
@@ -28,14 +26,12 @@ function testRenderer<Q extends Queries = typeof queries,
       <MemoryRouter initialEntries={ [options.initialRoute] }>
         <MQueryClient>
           <ThemeProvider theme={ newTheme }>
-            <LocalizationProvider dateAdapter={ AdapterMoment }>
-              <MSnackbarProvider>
-                <NiceModal.Provider>
-                  <CssBaseline />
-                  {props.children}
-                </NiceModal.Provider>
-              </MSnackbarProvider>
-            </LocalizationProvider>
+            <MSnackbarProvider>
+              <NiceModal.Provider>
+                <CssBaseline />
+                {props.children}
+              </NiceModal.Provider>
+            </MSnackbarProvider>
           </ThemeProvider>
         </MQueryClient>
       </MemoryRouter>

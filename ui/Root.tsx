@@ -2,8 +2,6 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 
 import MQueryClient from 'components/MQueryClient';
 import MSnackbarProvider from 'components/MSnackbarProvider';
@@ -16,14 +14,12 @@ export default function Root(): JSX.Element {
     <BrowserRouter>
       <MQueryClient>
         <ThemeProvider theme={ newTheme }>
-          <LocalizationProvider dateAdapter={ AdapterMoment }>
-            <MSnackbarProvider>
-              <NiceModal.Provider>
-                <CssBaseline />
-                <Monetr />
-              </NiceModal.Provider>
-            </MSnackbarProvider>
-          </LocalizationProvider>
+          <MSnackbarProvider>
+            <NiceModal.Provider>
+              <CssBaseline />
+              <Monetr />
+            </NiceModal.Provider>
+          </MSnackbarProvider>
         </ThemeProvider>
       </MQueryClient>
     </BrowserRouter>
