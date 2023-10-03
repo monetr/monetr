@@ -89,13 +89,13 @@ func TestLogin(t *testing.T) {
 		e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t)
 		// Then configure the login fixture with TOTP.
-		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, user.Login)
+		totpCode := fixtures.GivenIHaveTOTPCodeForLogin(t, user.Login)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
 				"email":    user.Login.Email,
 				"password": password,
-				"totp":     loginTotp.Now(),
+				"totp":     totpCode,
 			}).
 			Expect()
 

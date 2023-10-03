@@ -47,6 +47,18 @@ func GivenIHaveTOTPForLogin(t *testing.T, login *models.Login) *gotp.TOTP {
 	return loginTotp
 }
 
+func GivenIHaveTOTPCodeForLogin(t *testing.T, login *models.Login) string {
+	loginTotp := GivenIHaveTOTPForLogin(t, login)
+	code := loginTotp.Now()
+	// If the code would change very soon, then use the next code instead.
+	futureTimestamp := int(time.Now().Add(1 * time.Second).Unix())
+	if loginTotp.At(futureTimestamp) != code {
+		code = loginTotp.At(futureTimestamp)
+	}
+
+	return code
+}
+
 func GivenIHaveABasicAccount(t *testing.T) (_ models.User, password string) {
 	login, password := GivenIHaveLogin(t)
 	user := GivenIHaveAnAccount(t, login)
