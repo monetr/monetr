@@ -45,15 +45,15 @@ module.exports = (env, _argv) => {
         patterns: [
           {
             from: 'public/logo192.png',
-            to: 'public/logo192.png',
+            to: 'logo192.png',
           },
           {
             from: 'public/manifest.json',
-            to: 'public/manifest.json',
+            to: 'manifest.json',
           },
           {
             from: 'public/logo512.png',
-            to: 'public/logo512.png',
+            to: 'logo512.png',
           },
           {
             from: 'public/robots.txt',
