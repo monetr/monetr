@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@ebay/nice-modal-react':
-    specifier: 1.2.10
-    version: 1.2.10(react-dom@18.2.0)(react@18.2.0)
+    specifier: 1.2.13
+    version: 1.2.13(react-dom@18.2.0)(react@18.2.0)
   '@emotion/react':
     specifier: 11.10.6
     version: 11.10.6(@types/react@18.2.12)(react@18.2.0)
@@ -2134,8 +2134,8 @@ packages:
     resolution: {integrity: sha512-dBVuXR082gk3jsFp7Rd/JI4kytwGHecnCoTtXFb7DB6CNHp4rg5k1bhg0nWdLGLnOV71lmDzGQaLMy8iPLY0pw==}
     engines: {node: '>=10.0.0'}
 
-  /@ebay/nice-modal-react@1.2.10(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-qNp8vQo5kPRwB9bHlkh8lcwH/0KFWpp58X/b9KaLB/gNlJ3W24nCT2l/qBBSnWgV7NEIq25uLowaPS2mbfpZiw==}
+  /@ebay/nice-modal-react@1.2.13(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-jx8xIWe/Up4tpNuM02M+rbnLoxdngTGk3Y8LjJsLGXXcSoKd/+eZStZcAlIO/jwxyz/bhPZnpqPJZWAmhOofuA==}
     peerDependencies:
       react: '>16.8.0'
       react-dom: '>16.8.0'
