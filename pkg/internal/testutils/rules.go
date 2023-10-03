@@ -11,9 +11,8 @@ import (
 
 func NewRuleSet(t *testing.T, year, month, day int, timezone *time.Location, rule string) *models.RuleSet {
 	ruleString := fmt.Sprintf(
-		"DTSTART:%s%sRRULE:%s",
+		"DTSTART:%s\nRRULE:%s",
 		time.Date(year, time.Month(month), day, 0, 0, 0, 0, timezone).UTC().Format("20060102T150405Z"),
-		`\n`,
 		rule,
 	)
 

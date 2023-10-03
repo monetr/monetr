@@ -44,6 +44,9 @@ func NewFundingScheduleFundingInstructions(log *logrus.Entry, fundingSchedule mo
 func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
 	input = util.Midnight(input, timezone)
 	rule := f.fundingSchedule.RuleSet.Set
+	// This does not change the timezone or the date start of the ruleset. It just corrects it. The date start is
+	// normally stored in UTC so this just adjusts it to be the user's current timezone.
+	rule.DTStart(rule.GetDTStart().In(timezone))
 	var nextContributionDate time.Time
 	if f.fundingSchedule.NextOccurrence.IsZero() {
 		// Hack to determine the previous contribution date before we figure out the next one.
@@ -181,14 +184,7 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
-	// if f.fundingSchedule.DateStarted.IsZero() {
-	// 	dtStart := util.Midnight(start, timezone)
-	// 	rule.DTStart(dtStart)
-	// } else {
-	// 	dateStarted := f.fundingSchedule.DateStarted
-	// 	corrected := dateStarted.In(timezone)
-	// 	rule.DTStart(corrected)
-	// }
+	rule.DTStart(rule.GetDTStart().In(timezone))
 	items := rule.Between(start, end, true)
 	events := make([]FundingEvent, len(items))
 	for i, item := range items {
