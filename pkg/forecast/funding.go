@@ -43,27 +43,27 @@ func NewFundingScheduleFundingInstructions(log *logrus.Entry, fundingSchedule mo
 
 func (f *fundingScheduleBase) GetNextFundingEventAfter(ctx context.Context, input time.Time, timezone *time.Location) FundingEvent {
 	input = util.Midnight(input, timezone)
-	rule := f.fundingSchedule.Rule.RRule
+	rule := f.fundingSchedule.RuleSet.Set
 	var nextContributionDate time.Time
 	if f.fundingSchedule.NextOccurrence.IsZero() {
 		// Hack to determine the previous contribution date before we figure out the next one.
-		if f.fundingSchedule.DateStarted.IsZero() {
-			rule.DTStart(input.AddDate(-1, 0, 0))
-		} else {
-			dateStarted := f.fundingSchedule.DateStarted
-			corrected := dateStarted.In(timezone)
-			rule.DTStart(corrected)
-		}
+		// if f.fundingSchedule.DateStarted.IsZero() {
+		// 	rule.DTStart(input.AddDate(-1, 0, 0))
+		// } else {
+		// 	dateStarted := f.fundingSchedule.DateStarted
+		// 	corrected := dateStarted.In(timezone)
+		// 	rule.DTStart(corrected)
+		// }
 		nextContributionDate = util.Midnight(rule.Before(input, false), timezone)
 	} else {
 		// If we have the date started defined on the funding schedule. Then use that so we can see the past and the future.
-		if f.fundingSchedule.DateStarted.IsZero() {
-			rule.DTStart(f.fundingSchedule.NextOccurrence)
-		} else {
-			dateStarted := f.fundingSchedule.DateStarted
-			corrected := dateStarted.In(timezone)
-			rule.DTStart(corrected)
-		}
+		// if f.fundingSchedule.DateStarted.IsZero() {
+		// 	rule.DTStart(f.fundingSchedule.NextOccurrence)
+		// } else {
+		// 	dateStarted := f.fundingSchedule.DateStarted
+		// 	corrected := dateStarted.In(timezone)
+		// 	rule.DTStart(corrected)
+		// }
 		nextContributionDate = util.Midnight(f.fundingSchedule.NextOccurrence, timezone)
 	}
 	if input.Before(nextContributionDate) {
@@ -177,18 +177,18 @@ func (f *fundingScheduleBase) GetNFundingEventsAfter(ctx context.Context, n int,
 }
 
 func (f *fundingScheduleBase) GetFundingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []FundingEvent {
-	rule := f.fundingSchedule.Rule.RRule
+	rule := f.fundingSchedule.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
-	if f.fundingSchedule.DateStarted.IsZero() {
-		dtStart := util.Midnight(start, timezone)
-		rule.DTStart(dtStart)
-	} else {
-		dateStarted := f.fundingSchedule.DateStarted
-		corrected := dateStarted.In(timezone)
-		rule.DTStart(corrected)
-	}
+	// if f.fundingSchedule.DateStarted.IsZero() {
+	// 	dtStart := util.Midnight(start, timezone)
+	// 	rule.DTStart(dtStart)
+	// } else {
+	// 	dateStarted := f.fundingSchedule.DateStarted
+	// 	corrected := dateStarted.In(timezone)
+	// 	rule.DTStart(corrected)
+	// }
 	items := rule.Between(start, end, true)
 	events := make([]FundingEvent, len(items))
 	for i, item := range items {

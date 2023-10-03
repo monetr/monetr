@@ -141,12 +141,12 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 
 	switch spending.SpendingType {
 	case models.SpendingTypeExpense:
-		if spending.RecurrenceRule == nil {
+		if spending.RuleSet == nil {
 			requestSpan.Status = sentry.SpanStatusInvalidArgument
 			return c.badRequest(ctx, "recurrence rule must be specified for expenses")
 		}
 	case models.SpendingTypeGoal:
-		if spending.RecurrenceRule != nil {
+		if spending.RuleSet != nil {
 			requestSpan.Status = sentry.SpanStatusInvalidArgument
 			return c.badRequest(ctx, "recurrence rule cannot be specified for goals")
 		}
@@ -160,7 +160,6 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	}
 
 	spending.NextRecurrence = nextRecurrence
-	spending.DateStarted = nextRecurrence
 
 	// Once we have all that data we can calculate the new expenses next contribution amount.
 	if err = spending.CalculateNextContribution(
@@ -373,7 +372,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 	updatedSpending.NextContributionAmount = existingSpending.NextContributionAmount
 
 	if updatedSpending.SpendingType == models.SpendingTypeGoal {
-		updatedSpending.RecurrenceRule = nil
+		updatedSpending.RuleSet = nil
 	}
 
 	recalculateSpending := false
@@ -393,8 +392,8 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 		recalculateSpending = true
 	} else if updatedSpending.FundingScheduleId != existingSpending.FundingScheduleId {
 		recalculateSpending = true
-	} else if !recalculateSpending && updatedSpending.RecurrenceRule != nil {
-		recalculateSpending = updatedSpending.RecurrenceRule.String() == existingSpending.RecurrenceRule.String()
+	} else if !recalculateSpending && updatedSpending.RuleSet != nil {
+		recalculateSpending = updatedSpending.RuleSet.String() == existingSpending.RuleSet.String()
 	}
 
 	// If the paused status of a spending object changes, recalculate the contributions.

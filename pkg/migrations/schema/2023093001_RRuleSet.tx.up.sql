@@ -31,5 +31,3 @@ UPDATE "spending"
 SET "ruleset"="migrated_rules"."ruleset"
 FROM "migrated_rules"
 WHERE "spending"."spending_id"="migrated_rules"."spending_id";
-
-ALTER TABLE "spending" ALTER COLUMN "ruleset" SET NOT NULL;

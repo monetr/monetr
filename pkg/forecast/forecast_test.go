@@ -15,20 +15,21 @@ import (
 
 func TestForecasterBase_GetForecast(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+
+		fundingRule := testutils.NewRuleSet(t, 2022, 9, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
+		spendingRuleOne := testutils.NewRuleSet(t, 2022, 10, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
 		spendingRuleTwo := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=26")
 		spendingRuleThree := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		log := testutils.GetLog(t)
 
 		fundingSchedules := []models.FundingSchedule{
 			{
-				Rule:            fundingRule,
+				RuleSet:         fundingRule,
 				ExcludeWeekends: true,
 				NextOccurrence:  time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
-				DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 			},
 		}
 		spending := []models.Spending{
@@ -37,7 +38,7 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 				TargetAmount:   5000,
 				CurrentAmount:  0,
 				NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
-				RecurrenceRule: spendingRuleOne,
+				RuleSet:        spendingRuleOne,
 				SpendingId:     1,
 			},
 			{
