@@ -344,6 +344,7 @@ jobs:
   deploy:
     needs:
       - "go_test"
+      - "ui_test"
       - "docker"
     name: Deploy my.monetr.dev
     runs-on: ubuntu-latest
