@@ -5,6 +5,7 @@ import { FormikHelpers } from 'formik';
 
 import MAmountField from 'components/MAmountField';
 import MFormButton from 'components/MButton';
+import MCheckbox from 'components/MCheckbox';
 import MDatePicker from 'components/MDatePicker';
 import MForm from 'components/MForm';
 import MSelectSpending from 'components/MSelectSpending';
@@ -21,6 +22,7 @@ interface TransactionValues {
   originalName: string;
   date: Date;
   spendingId: number | null;
+  isPending: boolean;
   amount: number;
 }
 
@@ -85,6 +87,7 @@ export default function TransactionDetails(): JSX.Element {
     originalName: transaction.originalName,
     date: transaction.date,
     spendingId: transaction.spendingId,
+    isPending: transaction.isPending,
     amount: amountToFriendly(transaction.amount),
   };
 
@@ -134,6 +137,15 @@ export default function TransactionDetails(): JSX.Element {
             <MDatePicker
               label='Date'
               name='date'
+              className='w-full'
+              disabled
+            />
+            <MCheckbox
+              id='transaction-details-pending'
+              data-testid='transaction-details-pending'
+              name="isPending"
+              label="Is Pending"
+              description="Transaction has not yet cleared, the name or amount may change."
               className='w-full'
               disabled
             />

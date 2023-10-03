@@ -19,6 +19,7 @@ export interface MCheckboxProps {
     /** Classic React change handler, keyed by input name */
     (e: React.ChangeEvent<any>): void;
   }
+  className?: string;
 }
 
 export default function MCheckbox(props: MCheckboxProps): JSX.Element {
@@ -45,7 +46,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     flexShrink: '0',
     height: '1rem',
     width: '1rem',
-    backgroundColor: props.disabled ? theme.tailwind.colors['gray']['100'] : ['white'],
+    backgroundColor: props.disabled ? theme.tailwind.colors['gray']['500'] : ['white'],
     borderColor: borderColor,
     borderWidth: '1px',
     backgroundSize: '100% 100%',
@@ -97,8 +98,15 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     checked: props?.checked || formikContext.values[props.name],
   };
 
+  const className = mergeTailwind(
+    'flex',
+    'gap-x-3',
+    'pb-3',
+    props.className,
+  );
+
   return (
-    <div className="flex gap-x-3 pb-3">
+    <div className={ className }>
       <div className="flex h-6 items-center">
         <Checkbox
           id={ props.id }
