@@ -49,10 +49,7 @@ else
 CONTAINER_EXTRA_ARGS=$(CONTAINER_TAG_ARGS)
 endif
 
-container: $(BUILD_DIR) $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
-ifneq (,$(findstring simple_icons,$(TAGS))) # If our icon packs include simple_icons then make sure the dir exists.
-container: $(SIMPLE_ICONS)
-endif
+container: $(DOCKERFILE) $(DOCKER_IGNORE) $(APP_GO_FILES)
 ifdef CI # When we are in CI we don't want to run the static dir targets, these files are provided via artifacts.
 ifeq ($(ENGINE),docker)
 container:
@@ -77,12 +74,12 @@ endif
 else
 ifeq ($(ENGINE),docker)
 container: DOCKER=$(shell which docker)
-container: $(STATIC_DIR) $(NOTICE)
+container:
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	$(DOCKER) build -f $(DOCKERFILE) $(CONTAINER_VAR_ARGS) $(CONTAINER_TAG_ARGS) $(PWD)
 else
-container: $(PODMAN) $(STATIC_DIR) $(NOTICE)
+container: $(PODMAN)
 	$(call infoMsg,Building monetr container for; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_PLATFORMS)))
 	$(call infoMsg,Tagging container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	$(PODMAN) build $(CONTAINER_VAR_ARGS) --ignorefile=$(DOCKER_IGNORE) $(CONTAINER_PLATFORM_ARGS) \
@@ -105,7 +102,7 @@ endif
 else
 ifeq ($(ENGINE),docker)
 container-push: DOCKER=$(shell which docker)
-container-push: $(STATIC_DIR)
+container-push:
 	$(call infoMsg,Pushing container with versions; $(subst $(SPACE),$(COMMA)$(SPACE),$(CONTAINER_VERSIONS)))
 	($(foreach TAG,$(CONTAINER_TAGS),$(DOCKER) push $(TAG) &&) true)
 else
