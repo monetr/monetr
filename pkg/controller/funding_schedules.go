@@ -147,7 +147,6 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 
 	// It has never occurred so this needs to be nil.
 	fundingSchedule.LastOccurrence = nil
-	fundingSchedule.DateStarted = fundingSchedule.NextOccurrence
 
 	if err = repo.CreateFundingSchedule(c.getContext(ctx), &fundingSchedule); err != nil {
 		return c.wrapPgError(ctx, err, "failed to create funding schedule")
@@ -191,8 +190,8 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		return c.badRequest(ctx, "funding schedule must have a name")
 	}
 
-	if request.Rule == nil {
-		return c.badRequest(ctx, "funding schedule must include a rule")
+	if request.RuleSet == nil {
+		return c.badRequest(ctx, "funding schedule must include a rule set")
 	}
 
 	if request.EstimatedDeposit != nil && *request.EstimatedDeposit < 0 {
@@ -215,7 +214,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 	}
 
 	// If the recurrence rule has changed then we need to recalculate spending too.
-	if request.Rule.String() != existingFundingSchedule.Rule.String() {
+	if request.RuleSet.String() != existingFundingSchedule.RuleSet.String() {
 		recalculateSpending = true
 	}
 

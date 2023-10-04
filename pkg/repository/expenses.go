@@ -96,7 +96,6 @@ func (r *repositoryBase) CreateSpending(ctx context.Context, spending *models.Sp
 
 	spending.AccountId = r.AccountId()
 	spending.DateCreated = time.Now().UTC()
-	spending.DateStarted = spending.NextRecurrence
 
 	if _, err := r.txn.ModelContext(span.Context(), spending).Insert(spending); err != nil {
 		span.Status = sentry.SpanStatusInternalError

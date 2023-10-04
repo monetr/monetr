@@ -2,12 +2,14 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/monetr/monetr/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/teambition/rrule-go"
 )
 
 func TestSpending_GetProgressAmount(t *testing.T) {
@@ -47,12 +49,42 @@ func TestSpending_GetProgressAmount(t *testing.T) {
 	})
 }
 
-func GiveMeAFundingSchedule(nextContributionDate time.Time, rule *Rule) *FundingSchedule {
+// Same as testutils.NewRuleSet because of cyclical imports.
+func RuleToSet(t *testing.T, timezone *time.Location, ruleString string, potentialNow ...time.Time) *RuleSet {
+	rule, err := rrule.StrToRRule(ruleString)
+	require.NoError(t, err, "must be able to parse rule string")
+
+	var now time.Time
+	if len(potentialNow) == 1 {
+		now = potentialNow[0]
+	} else if len(potentialNow) > 1 {
+		panic("can only provide a single now")
+	} else {
+		now = time.Now()
+	}
+	rule.DTStart(now)
+
+	after := rule.After(now, false)
+	dtstart := util.Midnight(after, timezone)
+
+	ruleSetString := fmt.Sprintf(
+		"DTSTART:%s\nRRULE:%s",
+		dtstart.UTC().Format("20060102T150405Z"),
+		ruleString,
+	)
+
+	set, err := NewRuleSet(ruleSetString)
+	require.NoError(t, err, "must be able to parse rule and start into ruleset: %s", ruleSetString)
+
+	return set
+}
+
+func GiveMeAFundingSchedule(nextContributionDate time.Time, ruleset *RuleSet) *FundingSchedule {
 	return &FundingSchedule{
 		FundingScheduleId: 12345,
 		Name:              "Bogus Funding Schedule",
 		Description:       "Bogus",
-		Rule:              rule,
+		RuleSet:           ruleset,
 		NextOccurrence:    nextContributionDate,
 	}
 }
@@ -63,9 +95,8 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		dayAfterTomorrow := util.Midnight(today.Add(48*time.Hour), time.UTC)
 		dayAfterDayAfterTomorrow := util.Midnight(time.Now().Add(72*time.Hour), time.UTC)
 		assert.True(t, dayAfterDayAfterTomorrow.After(today), "dayAfterDayAfterTomorrow timestamp must come after today's")
-		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
-		assert.NoError(t, err, "must be able to parse the rrule")
 
+		ruleset := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR", today)
 		spending := Spending{
 			SpendingType:   SpendingTypeGoal,
 			TargetAmount:   100,
@@ -73,10 +104,10 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: dayAfterDayAfterTomorrow,
 		}
 
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(dayAfterTomorrow, rule),
+			GiveMeAFundingSchedule(dayAfterTomorrow, ruleset),
 			time.Now(),
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -85,12 +116,12 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 	})
 
 	// This might eventually become obsolete, but it covers a bug scenario I discovered while working on institutions.
+
 	t.Run("next funding in the past is behind", func(t *testing.T) {
 		today := util.Midnight(time.Now(), time.UTC)
 		dayAfterTomorrow := util.Midnight(time.Now().Add(48*time.Hour), time.UTC)
 		assert.True(t, dayAfterTomorrow.After(today), "dayAfterTomorrow timestamp must come after today's")
-		rule, err := NewRule("FREQ=WEEKLY;INTERVAL=2;BYDAY=FR") // Every other friday
-		assert.NoError(t, err, "must be able to parse the rrule")
+		ruleset := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR", today)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeGoal,
@@ -99,10 +130,10 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			NextRecurrence: dayAfterTomorrow,
 		}
 
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(dayAfterTomorrow.Add(25*time.Hour), rule),
+			GiveMeAFundingSchedule(dayAfterTomorrow.Add(25*time.Hour), ruleset),
 			time.Now(),
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -121,17 +152,14 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		nextFunding := time.Date(2022, 06, 15, 0, 0, 0, 0, central)
 		nextRecurrence := time.Date(2022, 7, 8, 0, 0, 0, 0, central)
 
-		fundingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1") // Every other friday
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		fundingRule := RuleToSet(t, central, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
+		spendingRule := RuleToSet(t, central, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   25000,
 			CurrentAmount:  6960,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 			NextRecurrence: nextRecurrence.UTC(),
 		}
 
@@ -155,25 +183,23 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		nextDueDate := time.Date(2022, 4, 10, 0, 0, 0, 0, time.UTC)
 
 		// This is spent every month on the 10th.
-		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10", now)
 
 		// Contribute to the spending object on the 15th and last day of every month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   1500,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -189,25 +215,23 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		subsequentDueDate := time.Date(2022, 5, 10, 0, 0, 0, 0, time.UTC)
 
 		// This is spent every month on the 10th.
-		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=10", now)
 
 		// Contribute to the spending object on the 15th and last day of every month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   1500,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -221,25 +245,23 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		nextDueDate := time.Date(2022, 4, 15, 0, 0, 0, 0, time.UTC)
 
 		// We need to spend this expense every Friday.
-		spendingRule, err := NewRule("FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", now)
 
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		// Contribute to the spending object on the 15th and last day of every month.
+		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   1500,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -251,25 +273,23 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now := time.Date(2022, 4, 9, 12, 0, 0, 0, time.UTC)
 		nextDueDate := time.Date(2022, 4, 11, 0, 0, 0, 0, time.UTC)
 
-		// We need to spend this every monday.
-		spendingRule, err := NewRule("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		// We need to spend this expense every Friday.
+		spendingRule := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", now)
 
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		// Contribute to the spending object on the 15th and last day of every month.
+		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   5000,
 			CurrentAmount:  5000, // We have enough to cover the 11th, but not subsequent ones.
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -283,7 +303,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		err = spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -297,25 +317,23 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now := time.Date(2022, 4, 9, 12, 0, 0, 0, time.UTC)
 		nextDueDate := time.Date(2022, 4, 11, 0, 0, 0, 0, time.UTC)
 
-		// We need to spend this every monday.
-		spendingRule, err := NewRule("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		// We need to spend this expense every Friday.
+		spendingRule := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", now)
 
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		// Contribute to the spending object on the 15th and last day of every month.
+		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   5000,
 			CurrentAmount:  16000, // Allocate enough for this funding period and the next one.
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -328,8 +346,7 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		nextDueDate := time.Date(2022, 4, 11, 0, 0, 0, 0, time.UTC)
 
 		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		fundingRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeGoal,
@@ -337,10 +354,10 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 			CurrentAmount:  16000, // Allocate enough for this funding period and the next one.
 			NextRecurrence: nextDueDate,
 		}
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
-			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
+			GiveMeAFundingSchedule(fundingRule.After(now, false), fundingRule),
 			now,
 		)
 		assert.NoError(t, err, "must be able to calculate the next contribution even with a past funding date")
@@ -354,23 +371,18 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now := time.Date(2022, 4, 9, 12, 0, 0, 0, time.UTC)
 		nextDueDate := time.Date(2022, 4, 11, 0, 0, 0, 0, time.UTC)
 
-		// We need to spend this every monday.
-		spendingRule, err := NewRule("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, time.UTC, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", now)
+		contributionRule := RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   5000,
 			CurrentAmount:  5000, // We have enough to cover the 11th, but not subsequent ones.
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
-		err = spending.CalculateNextContribution(
+		err := spending.CalculateNextContribution(
 			context.Background(),
 			time.UTC.String(),
 			GiveMeAFundingSchedule(contributionRule.After(now, false), contributionRule),
@@ -405,20 +417,15 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now := time.Date(2022, 4, 9, 12, 0, 0, 0, location)
 		nextDueDate := time.Date(2022, 5, 2, 0, 0, 0, 0, location)
 
-		// We want to spend this next on the 2nd of next month.
-		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2")
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2", now)
+		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   5000,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
 		err = spending.CalculateNextContribution(
@@ -439,20 +446,15 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now := time.Date(2022, 4, 9, 12, 0, 0, 0, location)
 		nextDueDate := time.Date(2022, 4, 2, 0, 0, 0, 0, location)
 
-		// We want to spend this next on the 2nd of next month.
-		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2")
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=2", now)
+		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   5000,
 			CurrentAmount:  100, // We have enough to cover the 11th, but not subsequent ones.
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
 		err = spending.CalculateNextContribution(
@@ -473,20 +475,15 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		now := time.Date(2022, 4, 9, 12, 0, 0, 0, location)
 		nextDueDate := time.Date(2023, 1, 1, 0, 0, 0, 0, location)
 
-		// We want to spend this next on the 2nd of next month.
-		spendingRule, err := NewRule("FREQ=YEARLY;INTERVAL=1;BYMONTH=2;BYMONTHDAY=1")
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, location, "FREQ=YEARLY;INTERVAL=1;BYMONTH=2;BYMONTHDAY=1", now)
+		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   20000,
 			CurrentAmount:  1454,
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
 		err = spending.CalculateNextContribution(
@@ -508,20 +505,15 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		fundingDate := time.Date(2022, 4, 1, 0, 0, 0, 0, location)
 		nextDueDate := time.Date(2023, 1, 1, 0, 0, 0, 0, location)
 
-		// We want to spend this next on the 2nd of next month.
-		spendingRule, err := NewRule("FREQ=YEARLY;INTERVAL=1;BYMONTH=2;BYMONTHDAY=1")
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, location, "FREQ=YEARLY;INTERVAL=1;BYMONTH=2;BYMONTHDAY=1", now)
+		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   20000,
 			CurrentAmount:  1454,
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
 		err = spending.CalculateNextContribution(
@@ -542,19 +534,15 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		nextFundingDate := time.Date(2022, 9, 30, 0, 0, 0, 0, location)
 		nextDueDate := time.Date(2022, 10, 15, 0, 0, 0, 0, location)
 
-		spendingRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15")
-		assert.NoError(t, err, "must be able to parse the rrule")
-
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		spendingRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15", now)
+		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeExpense,
 			TargetAmount:   25000,
 			CurrentAmount:  0,
 			NextRecurrence: nextDueDate,
-			RecurrenceRule: spendingRule,
+			RuleSet:        spendingRule,
 		}
 
 		err = spending.CalculateNextContribution(
@@ -573,9 +561,8 @@ func TestSpending_CalculateNextContribution(t *testing.T) {
 		nextFundingDate := time.Date(2022, 1, 15, 0, 0, 0, 0, location)
 		nextDueDate := time.Date(2022, 12, 31, 0, 0, 0, 0, location)
 
-		// But we can only contribute to the expense twice a month.
-		contributionRule, err := NewRule("FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		assert.NoError(t, err, "must be able to parse the rrule")
+		// But we can only contribute to the goal twice a month.
+		contributionRule := RuleToSet(t, location, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", now)
 
 		spending := Spending{
 			SpendingType:   SpendingTypeGoal,

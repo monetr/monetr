@@ -5,12 +5,9 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/util"
 )
-
-var _ pg.BeforeInsertHook = (*FundingSchedule)(nil)
 
 type FundingSchedule struct {
 	tableName string `pg:"funding_schedules"`
@@ -22,29 +19,28 @@ type FundingSchedule struct {
 	BankAccount            *BankAccount `json:"bankAccount,omitempty" pg:"rel:has-one"`
 	Name                   string       `json:"name" pg:"name,notnull,unique:per_bank"`
 	Description            string       `json:"description,omitempty" pg:"description"`
-	Rule                   *Rule        `json:"rule" pg:"rule,notnull,type:'text'"`
+	RuleSet                *RuleSet     `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
 	ExcludeWeekends        bool         `json:"excludeWeekends" pg:"exclude_weekends,notnull,use_zero"`
 	WaitForDeposit         bool         `json:"waitForDeposit" pg:"wait_for_deposit,notnull,use_zero"`
 	EstimatedDeposit       *int64       `json:"estimatedDeposit" pg:"estimated_deposit"`
 	LastOccurrence         *time.Time   `json:"lastOccurrence" pg:"last_occurrence"`
 	NextOccurrence         time.Time    `json:"nextOccurrence" pg:"next_occurrence,notnull"`
 	NextOccurrenceOriginal time.Time    `json:"nextOccurrenceOriginal" pg:"next_occurrence_original,notnull"`
-	DateStarted            time.Time    `json:"dateStarted" pg:"date_started,notnull"`
 }
 
+// Deprecated: Use the forecasting package funding instructions interface instead.
 func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
-	rule := f.Rule.RRule
+	rule := f.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
 	// We also need to truncate the hours on the start time. To make sure that we are operating relative to
 	// midnight.
-	dtStart := util.Midnight(start, timezone)
-	rule.DTStart(dtStart)
 	items := rule.Between(start, end, true)
 	return int64(len(items))
 }
 
 // GetNextTwoContributionDatesAfter returns the next two contribution dates relative to the timestamp provided. This is
 // used to better calculate contributions to funds that recur more frequently than they can be funded.
+// Deprecated: Use the forecasting package funding instructions interface instead.
 func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
 	nextOne, _ := f.GetNextContributionDateAfter(now, timezone)
 	subsequent, _ := f.GetNextContributionDateAfter(nextOne, timezone)
@@ -52,6 +48,7 @@ func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezo
 	return nextOne, subsequent
 }
 
+// Deprecated: Use the forecasting package funding instructions interface instead.
 func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
@@ -59,9 +56,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	if !f.NextOccurrence.IsZero() {
 		nextContributionDate = util.Midnight(f.NextOccurrence, timezone)
 	} else {
-		// Hack to determine the previous contribution date before we figure out the next one.
-		f.Rule.RRule.DTStart(now.AddDate(-1, 0, 0))
-		nextContributionDate = util.Midnight(f.Rule.Before(now, false), timezone)
+		nextContributionDate = util.Midnight(f.RuleSet.Before(now, false), timezone)
 	}
 	if now.Before(nextContributionDate) {
 		// If now is before the already established next occurrence, then just return that.
@@ -69,7 +64,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 		return nextContributionDate, nextContributionDate
 	}
 
-	nextContributionRule := f.Rule.RRule
+	nextContributionRule := f.RuleSet.Set
 
 	// Force the start of the rule to be the next contribution date. This fixes a bug where the rule would increment
 	// properly, but would include the current timestamp in that increment causing incorrect comparisons below. This
@@ -105,6 +100,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	return nextContributionDate, actualNextContributionDate
 }
 
+// Deprecated: This function should no longer be used, use the forecasting code instead.
 func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone *time.Location) bool {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
@@ -133,14 +129,4 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone 
 	f.NextOccurrenceOriginal = originalNextFundingOccurrence
 
 	return true
-}
-
-func (f *FundingSchedule) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Make sure when we are creating a funding schedule that we set the date started field for the first instance. This
-	// way subsequent rule evaluations can use this date started as a reference point.
-	if f.DateStarted.IsZero() {
-		f.DateStarted = f.NextOccurrence
-	}
-
-	return ctx, nil
 }

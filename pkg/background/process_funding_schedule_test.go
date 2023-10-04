@@ -21,13 +21,15 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t)
 		link := fixtures.GivenIHaveAPlaidLink(t, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bankAccount, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", false)
+		fundingSchedule.NextOccurrence = fundingSchedule.NextOccurrence.AddDate(0, 0, -7)
 		testutils.MustDBUpdate(t, fundingSchedule)
 		assert.Greater(t, time.Now(), fundingSchedule.NextOccurrence, "next occurrence must be in the past")
 
-		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
-		spendingRule.DTStart(time.Now().Add(14 * 24 * time.Hour))
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
+		// spendingRule.DTStart(time.Now().Add(14 * 24 * time.Hour))
 		nextDue := spendingRule.After(time.Now(), false)
 
 		timezone, err := user.Account.GetTimezone()
@@ -49,7 +51,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 			TargetAmount:           1395,
 			CurrentAmount:          697,
 			UsedAmount:             0,
-			RecurrenceRule:         spendingRule,
+			RuleSet:                spendingRule,
 			LastRecurrence:         nil,
 			NextRecurrence:         nextDue,
 			NextContributionAmount: 100,

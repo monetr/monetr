@@ -161,15 +161,9 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context
 func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []time.Time {
 	switch s.spending.SpendingType {
 	case models.SpendingTypeExpense:
-		rule := s.spending.RecurrenceRule.RRule
-		if s.spending.DateStarted.IsZero() {
-			dtMidnight := util.Midnight(start, timezone)
-			rule.DTStart(dtMidnight)
-		} else {
-			dateStarted := s.spending.DateStarted
-			corrected := dateStarted.In(timezone)
-			rule.DTStart(corrected)
-		}
+		rule := s.spending.RuleSet.Set
+		rule.DTStart(rule.GetDTStart().In(timezone))
+
 		// This little bit is really confusing. Basically we want to know how many times this spending boi happens
 		// before the specified end date. This can include the start date, but we want to exclude the end date. This is
 		// because this function is **INTENDED** to be called with the start being now or the next funding event, and
@@ -195,10 +189,10 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 
 	input = util.Midnight(input, timezone)
 
-	var rule *rrule.RRule
-	if s.spending.RecurrenceRule != nil {
+	var rule *rrule.Set
+	if s.spending.RuleSet != nil {
 		// This is terrible and I hate it :tada:
-		rule = &(*s.spending.RecurrenceRule).RRule
+		rule = &(*s.spending.RuleSet).Set
 	}
 
 	nextRecurrence := util.Midnight(s.spending.NextRecurrence, timezone)
@@ -216,15 +210,7 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 			panic("expense spending type must have a recurrence rule!")
 		}
 
-		// If we are working with a spending object, but the next recurrence is before our start time. Then figure out
-		// what the next recurrence would be after the start time.
-		if s.spending.DateStarted.IsZero() {
-			rule.DTStart(nextRecurrence)
-		} else {
-			dateStarted := s.spending.DateStarted
-			corrected := dateStarted.In(timezone)
-			rule.DTStart(corrected)
-		}
+		rule.DTStart(rule.GetDTStart().In(timezone))
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			nextRecurrence = rule.After(input, false)
 		}

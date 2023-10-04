@@ -38,7 +38,7 @@ describe('funding schedule details view', () => {
           'name': 'Elliot\'s Contribution',
           'nextOccurrence': '2023-10-13T05:00:00Z',
           'nextOccurrenceOriginal': '2023-10-15T05:00:00Z',
-          'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           'waitForDeposit': false,
         }));
       }),
@@ -80,7 +80,7 @@ describe('funding schedule details view', () => {
           'name': 'Elliot\'s Contribution',
           'nextOccurrence': '2023-10-15T05:00:00Z',
           'nextOccurrenceOriginal': '2023-10-15T05:00:00Z',
-          'rule': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          'ruleset': 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           'waitForDeposit': false,
         }));
       }),

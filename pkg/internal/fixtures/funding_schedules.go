@@ -25,10 +25,10 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 
 	db := testutils.GetPgDatabase(t)
 	repo := repository.NewRepositoryFromSession(bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
-	rule := testutils.Must(t, models.NewRule, ruleString)
-	tz := testutils.MustEz(t, bankAccount.Account.GetTimezone)
-	rule.DTStart(time.Now().In(tz).Add(-30 * 24 * time.Hour))
-	nextOccurrence := util.Midnight(rule.Before(time.Now(), false), tz)
+
+	timezone := testutils.MustEz(t, bankAccount.Account.GetTimezone)
+	rule := testutils.RuleToSet(t, timezone, ruleString)
+	nextOccurrence := util.Midnight(rule.After(time.Now(), false), timezone)
 
 	fundingSchedule := models.FundingSchedule{
 		AccountId:              bankAccount.AccountId,
@@ -37,7 +37,7 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 		BankAccount:            bankAccount,
 		Name:                   gofakeit.Generate("Payday {uuid}"),
 		Description:            gofakeit.Generate("{sentence:5}"),
-		Rule:                   rule,
+		RuleSet:                rule,
 		ExcludeWeekends:        excludeWeekends,
 		LastOccurrence:         nil,
 		NextOccurrence:         nextOccurrence,

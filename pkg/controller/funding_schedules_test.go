@@ -27,7 +27,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			WithJSON(map[string]interface{}{
 				"name":        "Payday",
 				"description": "15th and the Last day of every month",
-				"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+				"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 			}).
 			Expect()
 
@@ -51,7 +51,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			WithJSON(map[string]interface{}{
 				"name":            "Payday",
 				"description":     "15th and the Last day of every month",
-				"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+				"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 				"excludeWeekends": true,
 			}).
 			Expect()
@@ -76,13 +76,16 @@ func TestPostFundingSchedules(t *testing.T) {
 		nextFriday := rule.After(time.Now(), false)
 		assert.Greater(t, nextFriday, time.Now(), "next friday should be in the future relative to now")
 		nextFriday = util.Midnight(nextFriday, timezone)
+
+		ruleset := testutils.NewRuleSet(t, nextFriday.Year(), int(nextFriday.Month()), nextFriday.Day(), timezone, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
+
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]interface{}{
 				"name":           "Payday",
 				"description":    "Every other friday",
-				"rule":           "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+				"ruleset":        ruleset,
 				"nextOccurrence": nextFriday,
 			}).
 			Expect()
@@ -109,7 +112,7 @@ func TestPostFundingSchedules(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":        "Payday",
 					"description": "15th and the Last day of every month",
-					"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 				}).
 				Expect()
 
@@ -126,8 +129,8 @@ func TestPostFundingSchedules(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":        "Payday",
-					"description": "Every other friday",
-					"rule":        "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR",
+					"description": "First Day Of Every Month",
+					"ruleset":     FirstDayOfEveryMonth,
 				}).
 				Expect()
 
@@ -147,7 +150,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			WithPath("bankAccountId", bank.BankAccountId).
 			WithCookie(TestCookieName, token).
 			WithJSON(map[string]interface{}{
-				"rule": "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+				"ruleset": FifthteenthAndLastDayOfEveryMonth,
 			}).
 			Expect()
 
@@ -165,7 +168,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			WithJSON(map[string]interface{}{
 				"name":        "Payday",
 				"description": "15th and the Last day of every month",
-				"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+				"rule":        FifthteenthAndLastDayOfEveryMonth,
 			}).
 			Expect()
 
@@ -226,15 +229,15 @@ func TestPutFundingSchedules(t *testing.T) {
 
 		var fundingScheduleId uint64
 		{ // Create the funding schedule
-			fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-			fundingRule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
+			fundingRule := testutils.Must(t, models.NewRuleSet, FifthteenthAndLastDayOfEveryMonth)
+			fundingRule.DTStart(util.Midnight(fundingRule.GetDTStart(), timezone)) // Force the Rule to be in the correct TZ.
 			response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            fundingRule,
+					"ruleset":         fundingRule,
 					"excludeWeekends": true,
 					"nextOccurrence":  fundingRule.After(now, false),
 				}).
@@ -250,9 +253,8 @@ func TestPutFundingSchedules(t *testing.T) {
 		var spendingId uint64
 		{ // Create an expense
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -261,7 +263,7 @@ func TestPutFundingSchedules(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -279,8 +281,7 @@ func TestPutFundingSchedules(t *testing.T) {
 		}
 
 		{ // Now update the rule on the funding schedule and the next occurrence
-			newFundingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
-			newFundingRule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
+			newFundingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
 
 			next := newFundingRule.After(now, false)
 			response := e.PUT("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
@@ -289,7 +290,7 @@ func TestPutFundingSchedules(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "Every friday",
-					"rule":            newFundingRule,
+					"ruleset":         newFundingRule,
 					"excludeWeekends": false,
 					"nextOccurrence":  next,
 				}).
@@ -329,7 +330,11 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t)
 		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		bank := fixtures.GivenIHaveABankAccount(t,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -340,7 +345,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -355,9 +360,8 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -366,7 +370,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -426,7 +430,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":        "Payday",
 					"description": "15th and the Last day of every month",
-					"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 				}).
 				Expect()
 
@@ -453,7 +457,6 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 		e := NewTestApplication(t)
 
 		var bankAccountId, fundingScheduleId uint64
-
 		{ // Create the funding schedule under the first account.
 			user, password := fixtures.GivenIHaveABasicAccount(t)
 			link := fixtures.GivenIHaveAManualLink(t, user)
@@ -467,7 +470,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 					WithJSON(map[string]interface{}{
 						"name":        "Payday",
 						"description": "15th and the Last day of every month",
-						"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+						"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 					}).
 					Expect()
 

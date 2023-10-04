@@ -17,12 +17,13 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
+import { friendlyToAmount } from 'util/amounts';
 
 interface NewExpenseValues {
   name: string;
   amount: number;
   nextOccurrence: Date;
-  recurrenceRule: string;
+  ruleset: string;
   fundingScheduleId: number;
 }
 
@@ -30,7 +31,7 @@ const initialValues: NewExpenseValues = {
   name: '',
   amount: 0.00,
   nextOccurrence: startOfTomorrow(),
-  recurrenceRule: '',
+  ruleset: '',
   fundingScheduleId: 0,
 };
 
@@ -52,8 +53,8 @@ function NewExpenseModal(): JSX.Element {
       nextRecurrence: startOfDay(new Date(values.nextOccurrence)),
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
-      targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
-      recurrenceRule: values.recurrenceRule,
+      targetAmount: friendlyToAmount(values.amount),
+      ruleset: values.ruleset,
     });
 
     helper.setSubmitting(true);
@@ -119,7 +120,7 @@ function NewExpenseModal(): JSX.Element {
             label='How frequently do you need this expense?'
             placeholder='Select a spending frequency...'
             required
-            name='recurrenceRule'
+            name='ruleset'
           />
         </div>
         <div className='flex justify-end gap-2'>

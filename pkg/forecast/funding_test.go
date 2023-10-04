@@ -13,31 +13,31 @@ import (
 func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 	t.Run("dont skip weekends", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
-			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
 		}
 
-		now := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
-		expected := time.Date(2022, 5, 15, 0, 0, 0, 0, time.UTC)
+		now := time.Date(2022, 5, 1, 0, 0, 0, 0, timezone)
+		expected := time.Date(2022, 5, 15, 0, 0, 0, 0, timezone)
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
-		next := instructions.GetNextFundingEventAfter(context.Background(), now, time.UTC)
+		next := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, expected, next.Date, "should contribute next on sunday the 15th of may")
 	})
 
 	t.Run("dont fall on a weekend #1", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, time.UTC),
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			NextOccurrence:  time.Date(2022, 4, 30, 0, 0, 0, 0, timezone),
 		}
 
 		now := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
@@ -49,14 +49,13 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 
 	t.Run("dont fall on a weekend #2", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
 			NextOccurrence:  time.Date(2022, 9, 31, 0, 0, 0, 0, timezone),
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 
 		// 12:23:10 AM on September 31st 2022.
@@ -80,35 +79,35 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 	// early.
 	t.Run("odd early-after calculation", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
-			NextOccurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, time.UTC),
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
+			NextOccurrence:  time.Date(2022, 5, 13, 0, 0, 0, 0, timezone),
 		}
 
-		now := time.Date(2022, 5, 14, 0, 0, 0, 0, time.UTC)
-		expected := time.Date(2022, 5, 31, 0, 0, 0, 0, time.UTC)
+		now := time.Date(2022, 5, 14, 0, 0, 0, 0, timezone)
+		expected := time.Date(2022, 5, 31, 0, 0, 0, 0, timezone)
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
-		next := instructions.GetNextFundingEventAfter(context.Background(), now, time.UTC)
+		next := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
 		assert.Equal(t, expected, next.Date, "should not show the 15th, instead should show the 31st")
 	})
 
 	t.Run("prevent regression calculating midnight", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
 		next := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
 		expected := time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)
 		// 1 Second after midnight in timezone on last funding day. But in UTC because that's the server timezone.
 		now := time.Date(2022, 9, 15, 0, 0, 1, 0, timezone).UTC()
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  next,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
@@ -117,16 +116,15 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 
 	t.Run("next funding is empty", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		expected := time.Date(2022, 9, 30, 0, 0, 0, 0, timezone)
 		// 1 Second after midnight in timezone on last funding day. But in UTC because that's the server timezone.
 		now := time.Date(2022, 9, 15, 0, 0, 1, 0, timezone).UTC()
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  time.Time{},
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
@@ -135,16 +133,15 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 
 	t.Run("we are before the next funding", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		next := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
 		// 1 Second after midnight in timezone on last funding day. But in UTC because that's the server timezone.
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  next,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextFundingOccurrence := instructions.GetNextFundingEventAfter(context.Background(), now, timezone)
@@ -155,8 +152,8 @@ func TestFundingScheduleBase_GetNextContributionDateAfter(t *testing.T) {
 func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 	t.Run("get next 2 funding dates", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		expected := []FundingEvent{
 			{
@@ -171,10 +168,9 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			},
 		}
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  expected[0].Date,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextN := instructions.GetNFundingEventsAfter(context.Background(), 2, now, timezone)
@@ -183,8 +179,8 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 
 	t.Run("get next 4 funding dates", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		expected := []FundingEvent{
 			{
@@ -209,10 +205,9 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			},
 		}
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  expected[0].Date,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextN := instructions.GetNFundingEventsAfter(context.Background(), 4, now, timezone)
@@ -221,8 +216,8 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 
 	t.Run("get next 4 funding dates excluding weekends", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		expected := []FundingEvent{
 			{
@@ -247,10 +242,9 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 			},
 		}
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: true,
 			NextOccurrence:  expected[0].Date,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
 		nextN := instructions.GetNFundingEventsAfter(context.Background(), 4, now, timezone)
@@ -261,17 +255,16 @@ func TestFundingScheduleBase_GetNContributionDatesAfter(t *testing.T) {
 func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 	t.Run("september to christmas", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		// Between September 13th, and December 25th
 		now := time.Date(2022, 9, 13, 0, 0, 1, 0, timezone).UTC()
 		end := time.Date(2022, 12, 25, 0, 0, 1, 0, timezone).UTC()
 		next := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  next,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
@@ -281,17 +274,16 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 
 	t.Run("one year twice a month", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		// Between September 13th, and December 25th
 		now := time.Date(2022, 1, 2, 0, 0, 1, 0, timezone).UTC()
 		end := time.Date(2023, 1, 1, 0, 0, 0, 0, timezone).UTC()
 		next := time.Date(2022, 1, 15, 0, 0, 0, 0, timezone)
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  next,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)
@@ -299,19 +291,18 @@ func TestFundingScheduleBase_GetNumberOfContributionsBetween(t *testing.T) {
 		assert.EqualValues(t, 24, count, "should have 24 contributions")
 	})
 
-	t.Run("one year twice a month", func(t *testing.T) {
+	t.Run("one year once a month", func(t *testing.T) {
 		log := testutils.GetLog(t)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 		// Between September 13th, and December 25th
 		now := time.Date(2022, 1, 2, 0, 0, 1, 0, timezone).UTC()
 		end := time.Date(2023, 1, 1, 0, 0, 0, 0, timezone).UTC()
 		next := time.Date(2022, 1, 15, 0, 0, 0, 0, timezone)
 		fundingSchedule := models.FundingSchedule{
-			Rule:            rule,
+			RuleSet:         fundingRule,
 			ExcludeWeekends: false,
 			NextOccurrence:  next,
-			DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
 		}
 
 		instructions := NewFundingScheduleFundingInstructions(log, fundingSchedule)

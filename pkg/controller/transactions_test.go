@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetTransactions(t *testing.T) {
@@ -259,10 +260,13 @@ func TestPutTransactions(t *testing.T) {
 		var bank models.BankAccount
 		var originalTransaction, transaction models.Transaction
 		now := time.Now()
-		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-		spendingRuleOne := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
 
 		user, password := fixtures.GivenIHaveABasicAccount(t)
+		timezone, err := user.Account.GetTimezone()
+		require.NoError(t, err, "must be able to read the account's timezone")
+		fundingRule := testutils.NewRuleSet(t, 2021, 12, 31, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRuleOne := testutils.NewRuleSet(t, 2022, 1, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+
 		link := fixtures.GivenIHaveAPlaidLink(t, user)
 		bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		originalTransaction = fixtures.GivenIHaveATransaction(t, bank)
@@ -272,14 +276,13 @@ func TestPutTransactions(t *testing.T) {
 			BankAccountId:          bank.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Whenever I get paid",
-			Rule:                   fundingRule,
+			RuleSet:                fundingRule,
 			ExcludeWeekends:        true,
 			WaitForDeposit:         false,
 			EstimatedDeposit:       nil,
 			LastOccurrence:         nil,
 			NextOccurrence:         fundingRule.After(now, false),
 			NextOccurrenceOriginal: fundingRule.After(now, false),
-			DateStarted:            now,
 		})
 
 		// Create the spending object we want to test spending from, specifically make it so that the spending object has
@@ -294,7 +297,7 @@ func TestPutTransactions(t *testing.T) {
 			CurrentAmount:          transaction.Amount * 2,
 			NextContributionAmount: transaction.Amount * 2,
 			NextRecurrence:         spendingRuleOne.After(now, false),
-			RecurrenceRule:         spendingRuleOne,
+			RuleSet:                spendingRuleOne,
 			AccountId:              user.AccountId,
 			BankAccountId:          bank.BankAccountId,
 			FundingScheduleId:      fundingSchedule.FundingScheduleId,

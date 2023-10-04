@@ -19,7 +19,7 @@ import FundingSchedule from 'models/FundingSchedule';
 interface NewFundingValues {
   name: string;
   nextOccurrence: Date;
-  recurrenceRule: string;
+  ruleset: string;
   excludeWeekends: boolean;
   estimatedDeposit?: number | null;
 }
@@ -27,7 +27,7 @@ interface NewFundingValues {
 const initialValues: NewFundingValues = {
   name: '',
   nextOccurrence: startOfTomorrow(),
-  recurrenceRule: '',
+  ruleset: '',
   excludeWeekends: false,
   estimatedDeposit: undefined,
 };
@@ -45,7 +45,7 @@ function NewFundingModal(): JSX.Element {
       bankAccountId: selectedBankAccountId,
       name: values.name,
       nextOccurrence: startOfDay(new Date(values.nextOccurrence)),
-      rule: values.recurrenceRule,
+      ruleset: values.ruleset,
       estimatedDeposit: null,
       excludeWeekends: false,
     });
@@ -95,7 +95,7 @@ function NewFundingModal(): JSX.Element {
             label='How often do you get paid?'
             placeholder='Select a funding frequency...'
             required
-            name='recurrenceRule'
+            name='ruleset'
           />
           <div className='flex justify-end gap-2'>
             <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-funding-modal'>

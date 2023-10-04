@@ -124,7 +124,7 @@ export default function ExpenseDetails(): JSX.Element {
       description: null,
       nextRecurrence: startOfDay(values.nextRecurrence),
       fundingScheduleId: values.fundingScheduleId,
-      recurrenceRule: values.recurrenceRule,
+      ruleset: values.recurrenceRule,
       targetAmount: friendlyToAmount(values.amount),
     });
 
@@ -144,7 +144,7 @@ export default function ExpenseDetails(): JSX.Element {
     amount: amountToFriendly(spending.targetAmount),
     nextRecurrence: spending.nextRecurrence,
     fundingScheduleId: spending.fundingScheduleId,
-    recurrenceRule: spending.recurrenceRule,
+    recurrenceRule: spending.ruleset,
   };
 
   return (

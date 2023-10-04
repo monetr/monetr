@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/pkg/crumbs"
 	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/util"
@@ -19,8 +18,6 @@ const (
 	SpendingTypeGoal
 	SpendingTypeOverflow
 )
-
-var _ pg.BeforeInsertHook = (*Spending)(nil)
 
 type Spending struct {
 	tableName string `pg:"spending"`
@@ -38,7 +35,7 @@ type Spending struct {
 	TargetAmount           int64            `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
 	CurrentAmount          int64            `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
 	UsedAmount             int64            `json:"usedAmount" pg:"used_amount,notnull,use_zero"`
-	RecurrenceRule         *Rule            `json:"recurrenceRule" pg:"recurrence_rule,type:'text'" swaggertype:"string"`
+	RuleSet                *RuleSet         `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
 	LastSpentFrom          *time.Time       `json:"lastSpentFrom" pg:"last_spent_from"`
 	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence"`
 	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull"`
@@ -46,7 +43,6 @@ type Spending struct {
 	IsBehind               bool             `json:"isBehind" pg:"is_behind,notnull,use_zero"`
 	IsPaused               bool             `json:"isPaused" pg:"is_paused,notnull,use_zero"`
 	DateCreated            time.Time        `json:"dateCreated" pg:"date_created,notnull"`
-	DateStarted            time.Time        `json:"dateStarted" pg:"date_started,notnull"`
 }
 
 func (e Spending) GetIsStale(now time.Time) bool {
@@ -74,15 +70,7 @@ func (e Spending) GetProgressAmount() int64 {
 func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Location) []time.Time {
 	switch e.SpendingType {
 	case SpendingTypeExpense:
-		if e.DateStarted.IsZero() {
-			dtMidnight := util.Midnight(now, timezone)
-			e.RecurrenceRule.DTStart(dtMidnight)
-		} else {
-			dateStarted := e.DateStarted
-			corrected := dateStarted.In(timezone)
-			e.RecurrenceRule.DTStart(corrected)
-		}
-		return e.RecurrenceRule.Between(now, before, false)
+		return e.RuleSet.Between(now, before, false)
 	case SpendingTypeGoal:
 		if e.NextRecurrence.After(now) && e.NextRecurrence.Before(before) {
 			return []time.Time{e.NextRecurrence}
@@ -114,16 +102,6 @@ func (e *Spending) CalculateNextContribution(
 	e.NextRecurrence = result.NextRecurrence
 
 	return nil
-}
-
-func (s *Spending) BeforeInsert(ctx context.Context) (context.Context, error) {
-	// Make sure when we are creating a funding schedule that we set the date started field for the first instance. This
-	// way subsequent rule evaluations can use this date started as a reference point.
-	if s.DateStarted.IsZero() {
-		s.DateStarted = s.NextRecurrence
-	}
-
-	return ctx, nil
 }
 
 // CalculateNextContribution takes a spending object and its funding schedule, a timezone and a point in time. It then
@@ -160,20 +138,10 @@ func CalculateNextContribution(
 
 	fundingFirst, fundingSecond := fundingSchedule.GetNextTwoContributionDatesAfter(now, timezone)
 	nextRecurrence := util.Midnight(spending.NextRecurrence, timezone)
-	if spending.RecurrenceRule != nil {
-		// Same thing as the contribution rule, make sure that we are incrementing with the existing dates as the base
-		// rather than the current timestamp (which is what RRule defaults to).
-		if !spending.DateStarted.IsZero() {
-			dateStarted := spending.DateStarted
-			corrected := dateStarted.In(timezone)
-			spending.RecurrenceRule.DTStart(corrected)
-		} else {
-			spending.RecurrenceRule.DTStart(nextRecurrence)
-		}
-
+	if spending.RuleSet != nil {
 		// If the next recurrence of the spending is in the past, then bump it as well.
 		if nextRecurrence.Before(now) {
-			nextRecurrence = spending.RecurrenceRule.After(now, false)
+			nextRecurrence = spending.RuleSet.After(now, false)
 		}
 	}
 

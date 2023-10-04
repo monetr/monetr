@@ -73,7 +73,7 @@ export default function FundingDetails(): JSX.Element {
       ...funding,
       name: values.name,
       nextOccurrence: startOfDay(values.nextOccurrence),
-      rule: values.rule,
+      ruleset: values.rule,
       excludeWeekends: values.excludeWeekends,
       estimatedDeposit: friendlyToAmount(values.estimatedDeposit),
     });
@@ -113,7 +113,7 @@ export default function FundingDetails(): JSX.Element {
   const initialValues: FundingValues = {
     name: funding.name,
     nextOccurrence: funding.nextOccurrenceOriginal,
-    rule: funding.rule,
+    rule: funding.ruleset,
     excludeWeekends: funding.excludeWeekends,
     // Because we store all amounts in cents, in order to use them in the UI we need to convert them back to dollars.
     estimatedDeposit: amountToFriendly(funding.estimatedDeposit),

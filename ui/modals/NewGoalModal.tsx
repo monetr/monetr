@@ -50,7 +50,7 @@ function NewGoalModal(): JSX.Element {
       spendingType: SpendingType.Goal,
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: friendlyToAmount(values.amount),
-      recurrenceRule: null,
+      ruleset: null,
     });
 
     helper.setSubmitting(true);

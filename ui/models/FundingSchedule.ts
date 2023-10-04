@@ -6,7 +6,7 @@ export default class FundingSchedule {
   bankAccountId: number;
   name: string;
   description?: string;
-  rule: string;
+  ruleset: string;
   lastOccurrence?: Date;
   nextOccurrence: Date;
   nextOccurrenceOriginal: Date;

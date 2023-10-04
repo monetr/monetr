@@ -147,7 +147,7 @@ describe('funding schedule hooks', () => {
           description: 'something',
           name: 'Elliot\'s Contribution',
           nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
-          rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
         }));
@@ -189,7 +189,7 @@ describe('funding schedule hooks', () => {
             description: 'something',
             name: 'Elliot\'s Contribution',
             nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
-            rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+            ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
             estimatedDeposit: null,
             excludeWeekends: true,
           }));
@@ -249,7 +249,7 @@ describe('funding schedule hooks', () => {
           description: 'something',
           name: 'Elliot\'s Contribution',
           nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
-          rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+          ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
           estimatedDeposit: null,
           excludeWeekends: true,
         }));
@@ -293,7 +293,7 @@ describe('funding schedule hooks', () => {
             description: 'something',
             name: 'Elliot\'s Contribution',
             nextOccurrence: parseJSON('2023-07-31T05:00:00Z'),
-            rule: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
+            ruleset: 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1',
             estimatedDeposit: null,
             excludeWeekends: true,
           }));

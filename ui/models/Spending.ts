@@ -17,7 +17,7 @@ export default class Spending {
   targetAmount: number;
   currentAmount: number;
   usedAmount: number;
-  recurrenceRule: string;
+  ruleset: string | null;
   lastRecurrence: Date | null;
   nextRecurrence: Date | null;
   nextContributionAmount: number;
