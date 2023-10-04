@@ -28,6 +28,7 @@ type FundingSchedule struct {
 	NextOccurrenceOriginal time.Time    `json:"nextOccurrenceOriginal" pg:"next_occurrence_original,notnull"`
 }
 
+// Deprecated: Use the forecasting package funding instructions interface instead.
 func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, timezone *time.Location) int64 {
 	rule := f.RuleSet.Set
 	// Make sure that the rule is using the timezone of the dates provided. This is an easy way to force that.
@@ -39,6 +40,7 @@ func (f *FundingSchedule) GetNumberOfContributionsBetween(start, end time.Time, 
 
 // GetNextTwoContributionDatesAfter returns the next two contribution dates relative to the timestamp provided. This is
 // used to better calculate contributions to funds that recur more frequently than they can be funded.
+// Deprecated: Use the forecasting package funding instructions interface instead.
 func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezone *time.Location) (time.Time, time.Time) {
 	nextOne, _ := f.GetNextContributionDateAfter(now, timezone)
 	subsequent, _ := f.GetNextContributionDateAfter(nextOne, timezone)
@@ -46,6 +48,7 @@ func (f *FundingSchedule) GetNextTwoContributionDatesAfter(now time.Time, timezo
 	return nextOne, subsequent
 }
 
+// Deprecated: Use the forecasting package funding instructions interface instead.
 func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *time.Location) (actual, original time.Time) {
 	// Make debugging easier.
 	now = now.In(timezone)
@@ -97,6 +100,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 	return nextContributionDate, actualNextContributionDate
 }
 
+// Deprecated: This function should no longer be used, use the forecasting code instead.
 func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone *time.Location) bool {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()

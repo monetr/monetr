@@ -69,6 +69,7 @@ type BaseRepository interface {
 	// been manually synced in the last 30 minutes then it will bump the last manual sync timestamp on that link and
 	// return `true`. If the link has been manually synced in the last 30 minutes, then it will return `false`.
 	UpdateLinkManualSyncTimestampMaybe(ctx context.Context, linkId uint64) (ok bool, err error)
+	// Deprecated: Use UpdateFundingSchedule instead and maintain the field state yourselves.
 	UpdateNextFundingScheduleDate(ctx context.Context, fundingScheduleId uint64, nextOccurrence time.Time) error
 	UpdateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error
 	UpdatePlaidLink(ctx context.Context, plaidLink *models.PlaidLink) error
