@@ -99,8 +99,8 @@ dependencies:
     specifier: 4.0.4
     version: 4.0.4(react@18.2.0)
   react-number-format:
-    specifier: 5.3.0
-    version: 5.3.0(react-dom@18.2.0)(react@18.2.0)
+    specifier: 5.3.1
+    version: 5.3.1(react-dom@18.2.0)(react@18.2.0)
   react-plaid-link:
     specifier: 3.3.2
     version: 3.3.2(react-dom@18.2.0)(react@18.2.0)
@@ -12053,6 +12053,7 @@ packages:
   /find-up@4.1.0:
     resolution: {integrity: sha512-PpOwAdQ/YlXQ2vj8a3h8IipDuYRi3wceVQQGYWxNINccq40Anw7BlsEXCMbt1Zt+OLA6Fq9suIpIWD0OsnISlw==}
     engines: {node: '>=8'}
+    requiresBuild: true
     dependencies:
       locate-path: 5.0.0
       path-exists: 4.0.0
@@ -12083,6 +12084,7 @@ packages:
 
   /flatted@3.2.7:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
+    requiresBuild: true
 
   /flow-parser@0.213.1:
     resolution: {integrity: sha512-l+vyZO6hrWG60DredryA8mq62fK9vxL6/RR13HA/aVLBNh9No/wEJsKI+CJqPRkF4CIRUfcJQBeaMXSKcncxUQ==}
@@ -17961,8 +17963,8 @@ packages:
     resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
     dev: false
 
-  /react-number-format@5.3.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-3h5kuO5x9HpifEgCzvw6kDljzjsI3OhgnT/BRzZbzdbHVb755eVzJuNnRUZr3h/ATu3Sct9O+XrYc9HrAj/6bQ==}
+  /react-number-format@5.3.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-qpYcQLauIeEhCZUZY9jXZnnroOtdy3jYaS1zQ3M1Sr6r/KMOBEIGNIb7eKT19g2N1wbYgFgvDzs19hw5TrB8XQ==}
     peerDependencies:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
