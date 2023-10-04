@@ -399,72 +399,68 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		}
 	})
 
-	//		t.Run("no spending events for paused spending objects", func(t *testing.T) {
-	//			fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-	//			timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
-	//			now := time.Date(2022, 1, 2, 13, 0, 1, 0, timezone).UTC()
-	//			log := testutils.GetLog(t)
-	//			fundingInstructions := NewFundingScheduleFundingInstructions(
-	//				log,
-	//				models.FundingSchedule{
-	//					Rule:            fundingRule,
-	//					ExcludeWeekends: true,
-	//					NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
-	//					DateStarted:     time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
-	//				},
-	//			)
-	//			spendingInstructions := NewSpendingInstructions(
-	//				log,
-	//				models.Spending{
-	//					SpendingType:   models.SpendingTypeGoal,
-	//					TargetAmount:   10000,
-	//					CurrentAmount:  0,
-	//					NextRecurrence: time.Date(2023, 1, 3, 0, 0, 0, 0, timezone),
-	//					IsPaused:       true,
-	//				},
-	//				fundingInstructions,
-	//			)
-	//
-	//			events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
-	//			assert.Empty(t, events, "there should be no spending events for paused spending")
-	//		})
-	//
-	//		t.Run("spending events infinite loop bug", func(t *testing.T) {
-	//			// This is part of: https://github.com/monetr/monetr/issues/1243
-	//			// Make sure we don't timeout when a goal lands on the funding day.
-	//			fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-	//			timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
-	//			// now := time.Date(2022, 11, 29, 14, 30, 1, 0, timezone).UTC()
-	//			start := time.Date(2022, 12, 1, 0, 0, 0, 0, timezone)
-	//			// end := time.Date(2022, 12, 2, 0, 0, 0, 0, timezone).UTC()
-	//			log := testutils.GetLog(t)
-	//
-	//			fundingInstructions := NewFundingScheduleFundingInstructions(
-	//				log,
-	//				models.FundingSchedule{
-	//					Rule:              fundingRule,
-	//					ExcludeWeekends:   true,
-	//					NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
-	//					FundingScheduleId: 1,
-	//					DateStarted:       time.Date(2022, 1, 1, 0, 0, 0, 0, timezone),
-	//				},
-	//			)
-	//
-	//			spendingInstructions := NewSpendingInstructions(
-	//				log,
-	//				models.Spending{
-	//					FundingScheduleId: 1,
-	//					SpendingType:      models.SpendingTypeGoal,
-	//					TargetAmount:      1000,
-	//					CurrentAmount:     0,
-	//					NextRecurrence:    start,
-	//					RecurrenceRule:    nil,
-	//					SpendingId:        1,
-	//				},
-	//				fundingInstructions,
-	//			).(*spendingInstructionBase)
-	//
-	//			result := spendingInstructions.getNextSpendingEventAfter(context.Background(), start, timezone, 0)
-	//			assert.Nil(t, result, "result should be nil because the goal is completed as of the start timestamp")
-	//		})
+	t.Run("no spending events for paused spending objects", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2021, 12, 31, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		now := time.Date(2022, 1, 2, 13, 0, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: true,
+				NextOccurrence:  time.Date(2022, 1, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeGoal,
+				TargetAmount:   10000,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2023, 1, 3, 0, 0, 0, 0, timezone),
+				IsPaused:       true,
+			},
+			fundingInstructions,
+		)
+
+		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		assert.Empty(t, events, "there should be no spending events for paused spending")
+	})
+
+	t.Run("spending events infinite loop bug", func(t *testing.T) {
+		// This is part of: https://github.com/monetr/monetr/issues/1243
+		// Make sure we don't timeout when a goal lands on the funding day.
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2021, 12, 31, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		start := time.Date(2022, 12, 1, 0, 0, 0, 0, timezone)
+		log := testutils.GetLog(t)
+
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:           fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2022, 11, 30, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		)
+
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				FundingScheduleId: 1,
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      1000,
+				CurrentAmount:     0,
+				NextRecurrence:    start,
+				RuleSet:           nil,
+				SpendingId:        1,
+			},
+			fundingInstructions,
+		).(*spendingInstructionBase)
+
+		result := spendingInstructions.getNextSpendingEventAfter(context.Background(), start, timezone, 0)
+		assert.Nil(t, result, "result should be nil because the goal is completed as of the start timestamp")
+	})
 }
