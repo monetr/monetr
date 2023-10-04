@@ -68,7 +68,7 @@
     "@ebay/nice-modal-react": "1.2.10",
     "@emotion/react": "11.10.6",
     "@emotion/styled": "11.10.6",
-    "@fontsource-variable/inter": "5.0.8",
+    "@fontsource-variable/inter": "5.0.12",
     "@mui/icons-material": "5.11.0",
     "@mui/lab": "5.0.0-alpha.114",
     "@mui/material": "5.11.3",
