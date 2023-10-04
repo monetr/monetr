@@ -357,11 +357,11 @@ $(LOCAL_CERTIFICATE) &: $(LOCAL_CERTIFICATE_DIR) $(MKCERT)
 
 DOCKER=$(shell which docker || echo 'docker')
 DEVELOPMENT_ENV_FILE=$(MONETR_ENV)
-COMPOSE_FILE=$(PWD)/docker-compose.yaml
+COMPOSE_FILE=$(PWD)/compose/docker-compose.monetr.yaml
 ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")
-	COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(COMPOSE_FILE)
+	COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(COMPOSE_FILE) --project-directory $(PWD)
 else
-	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE)
+	COMPOSE=$(DOCKER) compose -f $(COMPOSE_FILE) --project-directory $(PWD)
 endif
 .EXPORT_ALL_VARIABLES: develop
 develop: $(NODE_MODULES) $(SIMPLE_ICONS)
@@ -500,8 +500,15 @@ mkdocs: $(DOCS_SITE)
 
 docs: mkdocs
 
+DEVELOPMENT_ENV_FILE=$(MONETR_ENV)
+DOCS_COMPOSE_FILE=$(PWD)/compose/docker-compose.documentation.yaml
+ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")
+	DOCS_COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(DOCS_COMPOSE_FILE) --project-directory $(PWD)
+else
+	DOCS_COMPOSE=$(DOCKER) compose -f $(DOCS_COMPOSE_FILE) --project-directory $(PWD)
+endif
 develop-docs:
-	docker compose -f docker-compose.documentation.yaml up
+	$(DOCS_COMPOSE) up
 
 ifdef GITHUB_TOKEN
 license-old: $(LICENSE) $(BINARY)

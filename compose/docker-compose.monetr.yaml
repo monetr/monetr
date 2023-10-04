@@ -1,0 +1,167 @@
+services:
+  kms:
+    image: nsmithuk/local-kms
+    restart: always # If something goes wrong just restart the container, this is for development only.
+    volumes:
+      - ./compose/kms.yaml:/init/seed.yaml
+  monetr:
+    tty: true # Makes color output work nicely.
+    image: golang:1.19.4
+    user: "${UID:-0}:${GID:-0}"
+    restart: always # If something goes wrong just restart the container, this is for development only.
+    working_dir: /build
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4000/api/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 30s
+    environment:
+      air_wd: /build
+      DISABLE_GO_RELOAD: ${DISABLE_GO_RELOAD:-false}
+      CLOUD_MAGIC: ${CLOUD_MAGIC:-false}
+      MONETR_EXTERNAL_PROTOCOL: ${LOCAL_PROTOCOL:-http}
+      MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
+      MONETR_API_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
+      # By default we want to use the AWS KMS provider as that is what we have built into the local env. But iuf the
+      # developer specifies a different KMS provider we want to use that instead.
+      MONETR_KMS_PROVIDER: ${MONETR_KMS_PROVIDER:-aws}
+      # If they are developing using Google's KMS then they'll need to provide a resource name.
+      MONETR_KMS_RESOURCE_NAME: ${MONETR_KMS_RESOURCE_NAME:-}
+      # If you want to do development against Plaid you will need to provide your own secrets. Please do not modify this
+      # file, instead define these as environment variables in your own shell when you execute the compose.
+      MONETR_PLAID_CLIENT_ID: $PLAID_CLIENT_ID
+      MONETR_PLAID_CLIENT_SECRET: $PLAID_CLIENT_SECRET
+      MONETR_STRIPE_API_KEY: $MONETR_STRIPE_API_KEY
+      MONETR_STRIPE_WEBHOOK_SECRET: $MONETR_STRIPE_WEBHOOK_SECRET
+      MONETR_STRIPE_DEFAULT_PRICE_ID: $MONETR_STRIPE_DEFAULT_PRICE_ID
+      MONETR_STRIPE_TAXES_ENABLED: ${MONETR_STRIPE_TAXES_ENABLED:-false}
+      MONETR_CAPTCHA_PUBLIC_KEY: $MONETR_CAPTCHA_PUBLIC_KEY
+      MONETR_CAPTCHA_PRIVATE_KEY: $MONETR_CAPTCHA_PRIVATE_KEY
+      MONETR_SENTRY_DSN: $MONETR_SENTRY_DSN
+      MONETR_SENTRY_EXTERNAL_DSN: ${MONETR_SENTRY_EXTERNAL_DSN:-${MONETR_SENTRY_DSN}}
+      MONETR_EMAIL_VERIFICATION_ENABLED: ${MONETR_EMAIL_VERIFICATION_ENABLED:-true}
+      MONETR_EMAIL_VERIFICATION_TOKEN_SECRET: "abc123"
+      MONETR_EMAIL_FORGOT_PASSWORD_TOKEN_SECRET: "123abc"
+      MONETR_JWT_LOGIN_SECRET: "qwertyuiop1234567890"
+    command:
+      - bash
+      - -c
+      - /build/compose/api-entrypoint.sh
+    links:
+      - redis
+      - postgres
+    ports:
+      # This port is used for editors to connect to dlv remotely to do step debugging.
+      - 2345:2345
+    volumes:
+      - goData:/go/pkg/mod
+      - tmpData:/etc/monetr
+      - ./:/build
+      - ./compose/monetr.yaml:/etc/monetr/config.yaml
+    depends_on:
+      mail:
+        condition: service_started
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_started
+      kms:
+        condition: service_started
+  ui:
+    # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
+    # do `pnpm install` before doing docker compose up.
+    tty: true # Color output.
+    image: node:18.10.0-buster
+    user: "${UID:-0}:${GID:-0}"
+    working_dir: /build
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:30000" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    environment:
+      WS_PROTO: 'wss'
+      INSECURE_WS: "false" # Makes it so that we are not trying to use TLS for the hot-reload websocket.
+      NODE_OPTIONS: --openssl-legacy-provider # Fixes a weird issue when trying to include SVGs.
+      IS_COMPOSE: "true" # Makes it so that the WebPack progress bar is disabled.
+      MONETR_UI_DOMAIN_NAME: ${MONETR_UI_DOMAIN_NAME:-${LOCAL_DOMAIN:-monetr.local}}
+      CLOUD_MAGIC: ${CLOUD_MAGIC:-false}
+    volumes:
+      - ./:/build
+    command:
+      - bash
+      - -c
+      - /build/compose/ui-entrypoint.sh
+  mail:
+    # Mailhog is used for testing email sending from the application. This is for things like forgot password or email
+    # verification. It can be accessed by navigating to `http://localhost/mail`
+    build:
+      dockerfile: ./compose/Dockerfile.mailhog
+      context: .
+    healthcheck:
+      test: [ "CMD", "wget", "http://localhost:8025", "-q", "-O", "-" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    environment:
+      MH_CORES_ORIGIN: ${LOCAL_DOMAIN:-monetr.local}
+      MH_HOSTNAME: ${LOCAL_DOMAIN:-monetr.local}
+  redis:
+    image: redis:6.2.7-alpine
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  ngrok:
+    image: wernight/ngrok
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4040" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    ports:
+      - 4040:4040
+    environment:
+      NGROK_PORT: monetr:4000
+      NGROK_DEBUG: "true"
+      NGROK_AUTH: $NGROK_AUTH
+      NGROK_HOSTNAME: $NGROK_HOSTNAME
+    profiles:
+      - donotstart
+  postgres:
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    image: postgres:13
+    environment:
+      # Make it so that monetr doesn't need any credentials to connect to PostgreSQL.
+      POSTGRES_PASSWORD: ""
+      POSTGRES_HOST_AUTH_METHOD: trust
+  nginx:
+    tty: true
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - ${NGINX_PORT:-443}:${NGINX_PORT:-443}
+    volumes:
+      - ./compose/${NGINX_CONFIG_NAME:-nginx.conf}:/etc/nginx/nginx.conf
+      - ${LOCAL_CERTIFICATE_DIRECTORY:-./}:/etc/nginx/tls
+    depends_on:
+      - monetr
+      - ui
+      - mail
+
+volumes:
+  kmsData:
+  tmpData:
+  goData:
