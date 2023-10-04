@@ -1717,6 +1717,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker Compose
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1735,6 +1754,20 @@
 
 
 <h1 id="self-hosted-monetr">Self-Hosted monetr</h1>
+<p>monetr can be self hosted by running the distributed binaries directly (these can be found on the GitHub Releases page),
+or by running the container that is distributed via <a href="https://hub.docker.com/r/monetr/monetr">Docker Hub</a> or <a href="https://github.com/monetr/monetr/pkgs/container/monetr">GitHub
+Container Registry</a>.</p>
+<h2 id="docker-compose">Docker Compose</h2>
+<p>monetr includes a docker compose yaml file that is an okay starting point for running monetr yourself. If you have
+monetr cloned locally, from the project root you can run the following commands to get something simple started up.</p>
+<div class="highlight"><span class="filename">Shell</span><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker<span class="w"> </span>compose<span class="w"> </span>up
+</code></pre></div>
+<p>This will build the current version of monetr you have cloned locally and start a PostgreSQL and Redis container
+alongside it. You'll notice that it will output some warnings about missing Plaid credential variables. At the time of
+writing this, monetr only supports Plaid for budgeting; though work is being done to support manual budgeting which will
+not require a link at all. If you want to give Plaid a try, please follow the directions in <a href="../../developing/credentials/#Plaid">Third-Party-Credentials -
+Plaid</a>. Once you have credentials, you can pass those as environment variables to
+the docker compose up command.</p>
 
 
 
