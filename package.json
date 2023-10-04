@@ -109,7 +109,7 @@
     "zustand": "4.1.4"
   },
   "optionalDependencies": {
-    "@storybook/addon-coverage": "0.0.8",
+    "@storybook/addon-coverage": "0.0.9",
     "@storybook/addon-essentials": "7.0.18",
     "@storybook/addon-interactions": "7.0.18",
     "@storybook/addon-links": "7.0.18",

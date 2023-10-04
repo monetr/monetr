@@ -134,8 +134,8 @@ dependencies:
 
 optionalDependencies:
   '@storybook/addon-coverage':
-    specifier: 0.0.8
-    version: 0.0.8
+    specifier: 0.0.9
+    version: 0.0.9
   '@storybook/addon-essentials':
     specifier: 7.0.18
     version: 7.0.18(react-dom@18.2.0)(react@18.2.0)
@@ -5221,8 +5221,8 @@ packages:
     dev: false
     optional: true
 
-  /@storybook/addon-coverage@0.0.8:
-    resolution: {integrity: sha512-SVcDZhBybHDxFYjMzPqHPypboRJjSn2xJKxIOTIFONfb//Jg2/3uATyyamBPjvoxWRkNIqBpANGm+BpJlWZtog==}
+  /@storybook/addon-coverage@0.0.9:
+    resolution: {integrity: sha512-+GrNBVRsdc80L9BvKEbMr5HZsK2U/qB4+YfaWfDIpLP7Xa5volBuPdpVh72Ox2ouz2ptyimTIDkJxYXPSgq98A==}
     requiresBuild: true
     dependencies:
       '@types/babel__core': 7.20.1
@@ -19791,6 +19791,7 @@ packages:
   /supports-hyperlinks@2.3.0:
     resolution: {integrity: sha512-RpsAZlpWcDwOPQA22aCH4J0t7L8JmAvsCxfOSEwm7cQs3LshN36QaTkwd70DnBOXDWGssw2eUoc8CaRWT0XunA==}
     engines: {node: '>=8'}
+    requiresBuild: true
     dependencies:
       has-flag: 4.0.0
       supports-color: 7.2.0
