@@ -18,6 +18,7 @@ import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateSpending } from 'hooks/spending';
 import Spending, { SpendingType } from 'models/Spending';
 import { friendlyToAmount } from 'util/amounts';
+import { ExtractProps } from 'util/typescriptEvils';
 
 interface NewExpenseValues {
   name: string;
@@ -141,5 +142,5 @@ const newExpenseModal = NiceModal.create(NewExpenseModal);
 export default newExpenseModal;
 
 export function showNewExpenseModal(): Promise<Spending | null> {
-  return NiceModal.show<Spending | null, {}>(newExpenseModal);
+  return NiceModal.show<Spending | null, ExtractProps<typeof newExpenseModal>, {}>(newExpenseModal);
 }

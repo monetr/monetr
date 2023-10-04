@@ -15,6 +15,7 @@ import MSpan from 'components/MSpan';
 import { useCurrentBalance } from 'hooks/balances';
 import { useSpendingSink, useTransfer } from 'hooks/spending';
 import { amountToFriendly, formatAmount, friendlyToAmount } from 'util/amounts';
+import { ExtractProps } from 'util/typescriptEvils';
 
 export interface TransferModalProps {
   initialFromSpendingId?: number;
@@ -157,7 +158,7 @@ const transferModal = NiceModal.create<TransferModalProps>(TransferModal);
 export default transferModal;
 
 export function showTransferModal(props: TransferModalProps): Promise<void> {
-  return NiceModal.show<void, TransferModalProps>(transferModal, props);
+  return NiceModal.show<void, ExtractProps<typeof transferModal>, {}>(transferModal, props);
 }
 
 function ReverseTargetsButton(): JSX.Element {

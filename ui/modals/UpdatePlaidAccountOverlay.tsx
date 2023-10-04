@@ -7,6 +7,7 @@ import MModal from 'components/MModal';
 import MSpan from 'components/MSpan';
 import Link from 'models/Link';
 import request from 'util/request';
+import { ExtractProps } from 'util/typescriptEvils';
 
 export interface UpdatePlaidAccountOverlayProps {
   link: Link;
@@ -134,5 +135,5 @@ const updatePlaidAccountOverlay = NiceModal.create<UpdatePlaidAccountOverlayProp
 export default updatePlaidAccountOverlay;
 
 export function showUpdatePlaidAccountOverlay(props: UpdatePlaidAccountOverlayProps): Promise<void> {
-  return NiceModal.show<void, UpdatePlaidAccountOverlayProps>(updatePlaidAccountOverlay, props);
+  return NiceModal.show<void, ExtractProps<typeof updatePlaidAccountOverlay>, {}>(updatePlaidAccountOverlay, props);
 }

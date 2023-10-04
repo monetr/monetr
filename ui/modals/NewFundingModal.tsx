@@ -15,6 +15,7 @@ import { startOfDay, startOfTomorrow } from 'date-fns';
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
 import { useCreateFundingSchedule } from 'hooks/fundingSchedules';
 import FundingSchedule from 'models/FundingSchedule';
+import { ExtractProps } from 'util/typescriptEvils';
 
 interface NewFundingValues {
   name: string;
@@ -116,5 +117,5 @@ const newFundingModal = NiceModal.create(NewFundingModal);
 export default newFundingModal;
 
 export function showNewFundingModal(): Promise<FundingSchedule | null> {
-  return NiceModal.show<FundingSchedule | null, {}>(newFundingModal);
+  return NiceModal.show<FundingSchedule | null, ExtractProps<typeof newFundingModal>, {}>(newFundingModal);
 }

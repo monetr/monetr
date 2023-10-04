@@ -9,6 +9,7 @@ import MModal, { MModalRef } from 'components/MModal';
 import MSpan from 'components/MSpan';
 import { useRemoveLink } from 'hooks/links';
 import Link from 'models/Link';
+import { ExtractProps } from 'util/typescriptEvils';
 
 export interface RemoveLinkModalProps {
   link: Link;
@@ -71,5 +72,5 @@ const removeLinkModal = NiceModal.create<RemoveLinkModalProps>(RemoveLinkModal);
 export default removeLinkModal;
 
 export function showRemoveLinkModal(props: RemoveLinkModalProps): Promise<void> {
-  return NiceModal.show<void, RemoveLinkModalProps>(removeLinkModal, props);
+  return NiceModal.show<void, ExtractProps<typeof removeLinkModal>, {}>(removeLinkModal, props);
 }
