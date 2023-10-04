@@ -500,8 +500,15 @@ mkdocs: $(DOCS_SITE)
 
 docs: mkdocs
 
+DEVELOPMENT_ENV_FILE=$(MONETR_ENV)
+DOCS_COMPOSE_FILE=$(PWD)/compose/docker-compose.documentation.yaml
+ifneq ("$(wildcard $(DEVELOPMENT_ENV_FILE))","")
+	DOCS_COMPOSE=$(DOCKER) compose --env-file=$(DEVELOPMENT_ENV_FILE) -f $(DOCS_COMPOSE_FILE) --project-directory $(PWD)
+else
+	DOCS_COMPOSE=$(DOCKER) compose -f $(DOCS_COMPOSE_FILE) --project-directory $(PWD)
+endif
 develop-docs:
-	docker compose -f $(PWD)/compose/docker-compose.documentation.yaml --project-directory $(PWD) up
+	$(DOCS_COMPOSE) up
 
 ifdef GITHUB_TOKEN
 license-old: $(LICENSE) $(BINARY)
