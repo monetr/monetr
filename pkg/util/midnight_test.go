@@ -50,6 +50,17 @@ func TestMidnight(t *testing.T) {
 		assert.Equal(t, expected, midnight, "should have truncated the time, but not the timezone")
 	})
 
+	t.Run("weird hours", func(t *testing.T) {
+		timezone, err := time.LoadLocation("America/Chicago")
+		require.NoError(t, err, "must load central timezone")
+		// Some random time after midnight in UTC
+		input := time.Date(2022, 9, 15, 15, 5, 12, 0, time.UTC)
+		expected := time.Date(2022, 9, 15, 0, 0, 0, 0, timezone)
+
+		midnight := Midnight(input, timezone)
+		assert.Equal(t, expected, midnight, "should have truncated the time, but not the timezone")
+	})
+
 	t.Run("central but next day utc", func(t *testing.T) {
 		timezone, err := time.LoadLocation("America/Chicago")
 		require.NoError(t, err, "must load central timezone")

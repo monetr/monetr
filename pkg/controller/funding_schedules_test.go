@@ -430,7 +430,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":        "Payday",
 					"description": "15th and the Last day of every month",
-					"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 				}).
 				Expect()
 
@@ -457,7 +457,6 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 		e := NewTestApplication(t)
 
 		var bankAccountId, fundingScheduleId uint64
-
 		{ // Create the funding schedule under the first account.
 			user, password := fixtures.GivenIHaveABasicAccount(t)
 			link := fixtures.GivenIHaveAManualLink(t, user)
@@ -471,7 +470,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 					WithJSON(map[string]interface{}{
 						"name":        "Payday",
 						"description": "15th and the Last day of every month",
-						"rule":        "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+						"ruleset":     FifthteenthAndLastDayOfEveryMonth,
 					}).
 					Expect()
 

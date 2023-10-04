@@ -39,18 +39,20 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, user)
 		bankAccount := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
-		fundingRule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		timezone := testutils.MustEz(t, user.Account.GetTimezone)
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+
 		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
 			AccountId:              bankAccount.AccountId,
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
-			Rule:                   fundingRule,
+			RuleSet:                fundingRule,
 			NextOccurrence:         fundingRule.After(time.Now(), false),
 			NextOccurrenceOriginal: fundingRule.After(time.Now(), false),
 		})
 
-		spendingRule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
 		spendingRule.DTStart(time.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
 		spending := testutils.MustInsert(t, models.Spending{
 			AccountId:         bankAccount.AccountId,
@@ -61,7 +63,7 @@ func TestJobRepository_GetBankAccountsWithStaleSpending(t *testing.T) {
 			Description:       "Description or something",
 			TargetAmount:      5000,
 			CurrentAmount:     5000,
-			RecurrenceRule:    spendingRule,
+			RuleSet:           spendingRule,
 			NextRecurrence:    spendingRule.Before(time.Now(), true), // Make it so it recurs next in the past. (STALE)
 			DateCreated:       time.Now(),
 		})

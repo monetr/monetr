@@ -28,7 +28,7 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 
 	timezone := testutils.MustEz(t, bankAccount.Account.GetTimezone)
 	rule := testutils.RuleToSet(t, timezone, ruleString)
-	nextOccurrence := util.Midnight(rule.Before(time.Now(), false), timezone)
+	nextOccurrence := util.Midnight(rule.After(time.Now(), false), timezone)
 
 	fundingSchedule := models.FundingSchedule{
 		AccountId:              bankAccount.AccountId,
