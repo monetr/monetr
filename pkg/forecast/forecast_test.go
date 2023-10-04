@@ -16,9 +16,7 @@ import (
 func TestForecasterBase_GetForecast(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
-
 		fundingRule := testutils.NewRuleSet(t, 2022, 9, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
-
 		spendingRuleOne := testutils.NewRuleSet(t, 2022, 10, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
 		spendingRuleTwo := testutils.NewRuleSet(t, 2022, 9, 26, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=26")
 		spendingRuleThree := testutils.NewRuleSet(t, 2022, 10, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
