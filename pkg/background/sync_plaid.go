@@ -417,6 +417,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 					OriginalName:              plaidTransaction.GetName(),
 					MerchantName:              plaidTransaction.GetMerchantName(),
 					OriginalMerchantName:      plaidTransaction.GetMerchantName(),
+					Currency:                  plaidTransaction.GetISOCurrencyCode(),
 					IsPending:                 plaidTransaction.GetIsPending(),
 					CreatedAt:                 now,
 					PendingPlaidTransactionId: plaidTransaction.GetPendingTransactionId(),
