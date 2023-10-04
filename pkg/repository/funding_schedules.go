@@ -74,9 +74,6 @@ func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSched
 	}
 
 	fundingSchedule.AccountId = r.AccountId()
-	if fundingSchedule.DateStarted.IsZero() {
-		fundingSchedule.DateStarted = fundingSchedule.NextOccurrence
-	}
 
 	if _, err := r.txn.ModelContext(span.Context(), fundingSchedule).Insert(fundingSchedule); err != nil {
 		span.Status = sentry.SpanStatusInternalError

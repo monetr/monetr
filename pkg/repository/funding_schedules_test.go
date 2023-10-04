@@ -44,8 +44,7 @@ func TestRepositoryBase_UpdateNextFundingScheduleDate(t *testing.T) {
 
 		bankAccount := bankAccounts[0]
 
-		rule, err := models.NewRule("FREQ=DAILY")
-		require.NoError(t, err, "must be able to create a rule")
+		rule := testutils.NewRuleSet(t, 2022, 9, 15, timezone, "FREQ=DAILY")
 
 		originalOccurrence := time.Now().Add(-1 * time.Minute)
 
@@ -54,7 +53,7 @@ func TestRepositoryBase_UpdateNextFundingScheduleDate(t *testing.T) {
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Test Funding Schedule For Update",
 			Description:            t.Name(),
-			Rule:                   rule,
+			RuleSet:                rule,
 			LastOccurrence:         nil,
 			NextOccurrence:         originalOccurrence,
 			NextOccurrenceOriginal: originalOccurrence,

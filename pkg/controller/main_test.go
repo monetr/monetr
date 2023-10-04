@@ -31,6 +31,11 @@ import (
 )
 
 const (
+	FifthteenthAndLastDayOfEveryMonth = "DTSTART:20211231T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1"
+	FirstDayOfEveryMonth              = "DTSTART:20220101T060000Z\nRRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1"
+)
+
+const (
 	TestEmailDomain   = "monetr.mini"
 	TestUIDomainName  = "app.monetr.mini"
 	TestAPIDomainName = "api.monetr.mini"

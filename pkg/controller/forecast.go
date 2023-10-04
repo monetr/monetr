@@ -94,7 +94,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 		TargetAmount      int64               `json:"targetAmount"`
 		CurrentAmount     int64               `json:"currentAmount"`
 		NextRecurrence    time.Time           `json:"nextRecurrence"`
-		RecurrenceRule    *models.Rule        `json:"recurrenceRule"`
+		RuleSet           *models.RuleSet     `json:"recurrenceRule"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
@@ -109,10 +109,10 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 	if request.FundingScheduleId == 0 {
 		return c.badRequest(ctx, "Funding schedule must be specified")
 	}
-	if request.SpendingType == models.SpendingTypeExpense && request.RecurrenceRule == nil {
+	if request.SpendingType == models.SpendingTypeExpense && request.RuleSet == nil {
 		return c.badRequest(ctx, "Expense spending must have a recurrence rule")
 	}
-	if request.SpendingType == models.SpendingTypeGoal && request.RecurrenceRule != nil {
+	if request.SpendingType == models.SpendingTypeGoal && request.RuleSet != nil {
 		return c.badRequest(ctx, "Goal spending must not have a recurrence rule")
 	}
 
@@ -138,7 +138,7 @@ func (c *Controller) postForecastNewSpending(ctx echo.Context) error {
 				TargetAmount:      request.TargetAmount,
 				CurrentAmount:     request.CurrentAmount,
 				NextRecurrence:    request.NextRecurrence,
-				RecurrenceRule:    request.RecurrenceRule,
+				RuleSet:           request.RuleSet,
 				SpendingId:        0, // Make sure this ID does not overlap with any real spending objects.
 			},
 		},

@@ -29,7 +29,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -44,9 +44,8 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -55,7 +54,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -83,7 +82,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": math.MaxInt32,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -128,7 +127,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -153,7 +152,7 @@ func TestPostSpending(t *testing.T) {
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           FirstDayOfEveryMonth,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -181,7 +180,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -196,9 +195,8 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -207,7 +205,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"spendingType":      models.SpendingTypeExpense,
 					"nextRecurrence":    nextRecurrence,
@@ -234,7 +232,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -249,9 +247,8 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -260,7 +257,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      -1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -283,9 +280,8 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -294,7 +290,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": math.MaxInt32,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -322,7 +318,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -336,7 +332,6 @@ func TestPostSpending(t *testing.T) {
 
 		{ // Create an expense
 			now := time.Now()
-
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
@@ -369,7 +364,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -384,9 +379,8 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -422,7 +416,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -437,9 +431,8 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -448,7 +441,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some goal",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeGoal,
@@ -476,7 +469,7 @@ func TestPostSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -490,9 +483,8 @@ func TestPostSpending(t *testing.T) {
 
 		now := time.Now()
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
-		rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-		rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-		nextRecurrence := rule.After(now, false)
+		ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+		nextRecurrence := ruleset.After(now, false)
 		assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 		nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -502,7 +494,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -523,7 +515,7 @@ func TestPostSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -553,7 +545,7 @@ func TestGetSpending(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -569,9 +561,8 @@ func TestGetSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -580,7 +571,7 @@ func TestGetSpending(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,
@@ -644,7 +635,7 @@ func TestGetSpendingByID(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"name":            "Payday",
 					"description":     "15th and the Last day of every month",
-					"rule":            "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+					"ruleset":         FifthteenthAndLastDayOfEveryMonth,
 					"excludeWeekends": true,
 				}).
 				Expect()
@@ -660,9 +651,8 @@ func TestGetSpendingByID(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
-			nextRecurrence := rule.After(now, false)
+			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
+			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
 
@@ -671,7 +661,7 @@ func TestGetSpendingByID(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				WithJSON(map[string]interface{}{
 					"name":              "Some Monthly Expense",
-					"recurrenceRule":    "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1",
+					"ruleset":           ruleset,
 					"fundingScheduleId": fundingScheduleId,
 					"targetAmount":      1000,
 					"spendingType":      models.SpendingTypeExpense,

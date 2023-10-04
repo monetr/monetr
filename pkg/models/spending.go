@@ -35,7 +35,7 @@ type Spending struct {
 	TargetAmount           int64            `json:"targetAmount" pg:"target_amount,notnull,use_zero"`
 	CurrentAmount          int64            `json:"currentAmount" pg:"current_amount,notnull,use_zero"`
 	UsedAmount             int64            `json:"usedAmount" pg:"used_amount,notnull,use_zero"`
-	RuleSet                *RuleSet         `json:"ruleSet" pg:"ruleset,notnull,type:'text'"`
+	RuleSet                *RuleSet         `json:"ruleset" pg:"ruleset,notnull,type:'text'"`
 	LastSpentFrom          *time.Time       `json:"lastSpentFrom" pg:"last_spent_from"`
 	LastRecurrence         *time.Time       `json:"lastRecurrence" pg:"last_recurrence"`
 	NextRecurrence         time.Time        `json:"nextRecurrence" pg:"next_recurrence,notnull"`

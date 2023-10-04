@@ -15,6 +15,8 @@ FROM "migrated_rules"
 WHERE "funding_schedules"."funding_schedule_id"="migrated_rules"."funding_schedule_id";
 
 ALTER TABLE "funding_schedules" ALTER COLUMN "ruleset" SET NOT NULL;
+ALTER TABLE "funding_schedules" DROP COLUMN "rule";
+ALTER TABLE "funding_schedules" DROP COLUMN "date_started";
 
 --- Spending
 ALTER TABLE "spending" ADD COLUMN "ruleset" TEXT;
@@ -31,3 +33,5 @@ UPDATE "spending"
 SET "ruleset"="migrated_rules"."ruleset"
 FROM "migrated_rules"
 WHERE "spending"."spending_id"="migrated_rules"."spending_id";
+ALTER TABLE "spending" DROP COLUMN "recurrence_rule";
+ALTER TABLE "spending" DROP COLUMN "date_started";
