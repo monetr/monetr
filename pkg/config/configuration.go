@@ -269,6 +269,10 @@ type Plaid struct {
 	MaxNumberOfLinks int `yaml:"maxNumberOfLinks"`
 }
 
+func (p Plaid) GetEnabled() bool {
+	return p.Enabled && p.ClientID != "" && p.ClientSecret != ""
+}
+
 func (p Plaid) GetWebhooksURL() string {
 	return fmt.Sprintf("https://%s/api/plaid/webhook", p.WebhooksDomain)
 }
