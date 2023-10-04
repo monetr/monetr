@@ -21,36 +21,26 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
 
   const rules = getRecurrencesForDate(date);
 
-  // When we initially mount, we want to find the frequency that is currently selected.
+  // Every time the date input changes we need to rebuild the list of recurrences. When this happens we should also try
+  // to find a recurrence that matches our current rule. This happens when we have a rule like the 15,-1 and the current
+  // date is the 15th, and the user changes it to -1. The rule is still valid even though the date has changed. But in
+  // any other scenario where the rule is no longer valid. We want to remove the selection and make sure they provide a
+  // new frequency.
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.debug('[MSelectFrequency]', 'date selection has changed and is no longer present in the rules');
     const currentValue: string = formikContext?.values[props.name];
-    const found = rules.findIndex(item => item.ruleString() === currentValue);
+    const found = rules.findIndex(item => item.equalRule(currentValue));
     if (found >= 0) {
       // eslint-disable-next-line no-console
-      console.log('[MSelectFrequency]', 'found existing recurrence with the specified value');
+      console.debug('[MSelectFrequency]', 'found existing recurrence with the specified value');
       setSelectedIndex(found);
       return;
     }
 
-    // eslint-disable-next-line no-console
-    console.log('[MSelectFrequency]', 'could not find a recurrence rule:', currentValue);
-    // I only want to run this hook when the component mounts.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (selectedIndex === null) return;
-
-    if (selectedIndex >= rules.length) {
-      // eslint-disable-next-line no-console
-      console.log('[MSelectFrequency]', 'date selection has changed and is no longer present in the rules');
-      setSelectedIndex(null);
-      formikContext?.setFieldValue(props.name, null);
-      formikContext?.validateField(props.name);
-      return;
-    }
-
-    formikContext?.setFieldValue(props.name, rules[selectedIndex].ruleString());
+    setSelectedIndex(null);
+    formikContext?.setFieldValue(props.name, null);
+    formikContext?.validateField(props.name);
     // I only want to run this hook when the date prop changes. Selected index should not cause this to re-evaluate.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);

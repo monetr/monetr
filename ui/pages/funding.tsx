@@ -2,12 +2,12 @@ import React, { Fragment } from 'react';
 import { AccountBalance, AddOutlined, ArrowForward, Today, TodayOutlined } from '@mui/icons-material';
 
 import FundingItem from './new/FundingItem';
-import { showNewFundingModal } from 'modals/NewFundingModal';
 
 import { MBaseButton } from 'components/MButton';
 import MSpan from 'components/MSpan';
 import MTopNavigation from 'components/MTopNavigation';
 import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
+import { showNewFundingModal } from 'modals/NewFundingModal';
 
 export default function Funding(): JSX.Element {
   const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedulesSink();

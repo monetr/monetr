@@ -53,7 +53,7 @@ function NewExpenseModal(): JSX.Element {
       spendingType: SpendingType.Expense,
       fundingScheduleId: values.fundingScheduleId,
       targetAmount: Math.ceil(values.amount * 100), // Convert to an integer.
-      recurrenceRule: values.recurrenceRule,
+      ruleset: values.recurrenceRule,
     });
 
     helper.setSubmitting(true);

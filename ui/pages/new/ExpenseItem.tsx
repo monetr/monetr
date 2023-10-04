@@ -17,7 +17,7 @@ export interface ExpenseItemProps {
 export default function ExpenseItem({ spending }: ExpenseItemProps): JSX.Element {
   const { data: fundingSchedule } = useFundingSchedule(spending.fundingScheduleId);
   const navigate = useNavigate();
-  const rule = rrulestr(spending.recurrenceRule);
+  const rule = rrulestr(spending.ruleset);
 
   const amountClass = mergeTailwind(
     {

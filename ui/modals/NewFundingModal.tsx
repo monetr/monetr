@@ -45,7 +45,7 @@ function NewFundingModal(): JSX.Element {
       bankAccountId: selectedBankAccountId,
       name: values.name,
       nextOccurrence: startOfDay(new Date(values.nextOccurrence)),
-      rule: values.recurrenceRule,
+      ruleset: values.recurrenceRule,
       estimatedDeposit: null,
       excludeWeekends: false,
     });

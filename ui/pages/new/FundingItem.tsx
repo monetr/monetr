@@ -20,7 +20,7 @@ export default function FundingItem(props: FundingItemProps): JSX.Element {
   const navigate = useNavigate();
   const { funding } = props;
   const contributionForecast = useNextFundingForecast(funding.fundingScheduleId);
-  const rule = rrulestr(funding.rule);
+  const rule = rrulestr(funding.ruleset);
   const letter = funding.name.toUpperCase().charAt(0) || '?';
 
   const ruleDescription = capitalize(rule.toText());

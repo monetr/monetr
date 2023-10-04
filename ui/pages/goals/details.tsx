@@ -126,7 +126,7 @@ export default function GoalDetails(): JSX.Element {
       description: null,
       nextRecurrence: startOfDay(values.nextRecurrence),
       fundingScheduleId: values.fundingScheduleId,
-      recurrenceRule: null,
+      ruleset: null,
       targetAmount: friendlyToAmount(values.amount),
       isPaused: values.isPaused,
     });
