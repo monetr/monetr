@@ -67,8 +67,8 @@ export default function SetupManual(): JSX.Element {
         name: values.accountName,
         availableBalance: friendlyToAmount(values.startingBalance),
         currentBalance: friendlyToAmount(values.startingBalance),
-        type: 'depository',
-        subType: 'checking',
+        accountType: 'depository',
+        accountSubType: 'checking',
       }))
       .then(bankAccount => createFundingSchedule(new FundingSchedule({
         bankAccountId: bankAccount.bankAccountId,

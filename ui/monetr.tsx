@@ -96,7 +96,7 @@ export default function Monetr(): JSX.Element {
         <Route path="/setup/manual" element={ <SetupManual /> } />
         <Route path="/plaid/oauth-return" element={ <OauthReturn /> } />
         <Route path="/account/subscribe/after" element={ <Navigate replace to="/setup" /> } />
-        <Route index path="/" element={ <Navigate replace to="/setup" /> } />
+        <Route index path="*" element={ <Navigate replace to="/setup" /> } />
       </Routes>
     );
   }

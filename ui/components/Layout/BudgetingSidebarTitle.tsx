@@ -81,18 +81,12 @@ export default function BudgetingSidebarTitle(): JSX.Element {
             <PriceChangeOutlined className='mr-1 mb-0.5' />
             Update Account Selection
           </MenuItem>
-          <MSpan
-            size='md'
-            weight='medium'
-            className='p-2 cursor-pointer dark:hover:bg-dark-monetr-background-emphasis dark:hover:text-dark-monetr-content-emphasis'
-            component='a'
-            ellipsis
-          >
+          <MenuItem visible={ link.getIsPlaid() } onClick={ () => {} }>
             <AutorenewOutlined className='mr-1 mb-0.5' />
             Manually Resync
-          </MSpan>
+          </MenuItem>
           <MDivider />
-          <MenuItem visible={ link.getIsPlaid() } onClick={ handleRemoveLink }>
+          <MenuItem visible onClick={ handleRemoveLink }>
             <DeleteOutline className='mr-1 mb-0.5 dark:text-dark-monetr-red' />
             Remove {link?.getName()}
           </MenuItem>
