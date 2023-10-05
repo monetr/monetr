@@ -1,6 +1,6 @@
 import React, { Fragment, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormikHelpers } from 'formik';
+import { FormikErrors, FormikHelpers } from 'formik';
 
 import MAmountField from 'components/MAmountField';
 import MFormButton from 'components/MButton';
@@ -51,6 +51,25 @@ export default function SetupManual(): JSX.Element {
   const previousStep = useCallback(() => {
     setStep(step => Math.max(step - 1, 0));
   }, [setStep]);
+
+  const validate = useCallback((values: SetupManualValues): FormikErrors<SetupManualValues> => {
+    const errors: FormikErrors<SetupManualValues> = {};
+    if (values.budgetName.trim() === '') {
+      errors['budgetName'] = 'You must provide a name for your budget.';
+    }
+
+    if (values.accountName.trim() === '') {
+      errors['accountName'] = 'You must provide a name for your account.';
+    }
+
+    if (!values.nextPayday) {
+      errors['nextPayday'] = 'You must provide a date.';
+    }
+
+
+
+    return errors;
+  }, []);
 
   const submit = useCallback(async (values: SetupManualValues, helper: FormikHelpers<SetupManualValues>) => {
     if (step < 3) {
@@ -135,13 +154,14 @@ export default function SetupManual(): JSX.Element {
 
   return (
     <div
-      className='w-full h-full flex justify-between items-center gap-8 flex-col text-center p-4 md:p-2 overflow-auto'
+      className='w-full h-full flex justify-between items-center gap-8 flex-col p-4 md:p-2 overflow-auto'
     >
       <div className='p-0 md:p-8 w-full'>
         <MStepper steps={ ['Intro', 'Account', 'Balances', 'Income'] } activeIndex={ step } />
       </div>
       <MForm
         initialValues={ initialValues }
+        validate={ validate }
         onSubmit={ submit }
         className='flex flex-col md:justify-center items-center max-w-sm h-full'
       >
@@ -163,7 +183,7 @@ function IntroAndName(): JSX.Element {
       <MSpan size='2xl' weight='medium'>
         Welcome to monetr!
       </MSpan>
-      <MSpan size='lg' color='subtle'>
+      <MSpan size='lg' color='subtle' className='text-center'>
         Let's create a new budget to get started. What do you want to call this budget?
       </MSpan>
       <MTextField
@@ -180,7 +200,7 @@ function IntroAndName(): JSX.Element {
 function AccountSetup(): JSX.Element {
   return (
     <Fragment>
-      <MSpan size='lg' color='subtle'>
+      <MSpan size='lg' color='subtle' className='text-center'>
         What do you want to call the primary account you want to use for budgeting? For example; your checking account?
       </MSpan>
       <MTextField
@@ -197,7 +217,7 @@ function AccountSetup(): JSX.Element {
 function BalancesSetup(): JSX.Element {
   return (
     <Fragment>
-      <MSpan size='lg' color='subtle'>
+      <MSpan size='lg' color='subtle' className='text-center'>
         What is your current available balance? monetr will use this as a starting point, you can modify this at any
         time later on.
       </MSpan>
@@ -215,7 +235,7 @@ function BalancesSetup(): JSX.Element {
 function IncomeSetup(): JSX.Element {
   return (
     <Fragment>
-      <MSpan size='lg' color='subtle'>
+      <MSpan size='lg' color='subtle' className='text-center'>
         How often do you get paid and how much do you get paid typically? monetr uses this to forecast balances based on
         the budgets you create.
       </MSpan>

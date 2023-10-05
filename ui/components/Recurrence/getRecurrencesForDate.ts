@@ -3,10 +3,12 @@ import Recurrence from 'components/Recurrence/Recurrence';
 import { endOfMonth, format, getDate, getMonth, isEqual, parseJSON, startOfDay, startOfMonth } from 'date-fns';
 import { RRule, Weekday } from 'rrule';
 
-export default function getRecurrencesForDate(inputDate: Date | string): Array<Recurrence> {
+export default function getRecurrencesForDate(inputDate: Date | string | null): Array<Recurrence> {
   let date: Date;
   if (typeof inputDate === 'string') {
     date = parseJSON(inputDate);
+  } else if (!inputDate) {
+    return [];
   } else {
     date = inputDate;
   }

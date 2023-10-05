@@ -30,7 +30,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
     // eslint-disable-next-line no-console
     console.debug('[MSelectFrequency]', 'date selection has changed and is no longer present in the rules');
     const currentValue: string = formikContext?.values[props.name];
-    const found = rules.findIndex(item => item.equalRule(currentValue));
+    const found = currentValue ? rules.findIndex(item => item.equalRule(currentValue)) : -1;
     if (found >= 0) {
       // eslint-disable-next-line no-console
       console.debug('[MSelectFrequency]', 'found existing recurrence with the specified value');
@@ -57,6 +57,8 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   function onChange(newValue: OnChangeValue<SelectOption, false>, _: ActionMeta<SelectOption>) {
     setSelectedIndex(newValue.value);
     formikContext?.setFieldValue(props.name, rules[newValue.value].ruleString());
+    formikContext?.setFieldTouched(props.name, true);
+    formikContext?.validateField(props.name);
   }
 
   return (
