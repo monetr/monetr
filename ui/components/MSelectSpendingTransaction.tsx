@@ -143,7 +143,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           }),
         } }
         classNamePrefix='m-select-spending-transaction'
-        isLoading={ isLoading || spendingIsLoading }
+        isLoading={ isLoading || (spendingIsLoading && Boolean(transaction.spendingId)) }
         onChange={ handleSpentFromChange }
         formatOptionLabel={ formatOptionsLabel }
         options={ options }
