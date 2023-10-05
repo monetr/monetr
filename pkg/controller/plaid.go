@@ -341,9 +341,9 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		}
 
 		now := time.Now()
-		accounts := make([]models.BankAccount, len(plaidAccounts))
+		accounts := make([]*models.BankAccount, len(plaidAccounts))
 		for i, plaidAccount := range plaidAccounts {
-			accounts[i] = models.BankAccount{
+			accounts[i] = &models.BankAccount{
 				AccountId:         repo.AccountId(),
 				LinkId:            link.LinkId,
 				PlaidAccountId:    plaidAccount.GetAccountId(),
@@ -497,9 +497,9 @@ func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 	}
 
 	now := time.Now().UTC()
-	accounts := make([]models.BankAccount, len(plaidAccounts))
+	accounts := make([]*models.BankAccount, len(plaidAccounts))
 	for i, plaidAccount := range plaidAccounts {
-		accounts[i] = models.BankAccount{
+		accounts[i] = &models.BankAccount{
 			AccountId:         repo.AccountId(),
 			LinkId:            link.LinkId,
 			PlaidAccountId:    plaidAccount.GetAccountId(),

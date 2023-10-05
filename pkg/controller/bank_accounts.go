@@ -120,7 +120,7 @@ func (c *Controller) postBankAccounts(ctx echo.Context) error {
 		return c.badRequest(ctx, "cannot create a bank account for a non-manual link")
 	}
 
-	if err := repo.CreateBankAccounts(c.getContext(ctx), bankAccount); err != nil {
+	if err := repo.CreateBankAccounts(c.getContext(ctx), &bankAccount); err != nil {
 		return c.wrapPgError(ctx, err, "could not create bank account")
 	}
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ForwardedRef } from 'react';
 import { Formik, FormikConfig, FormikProps, FormikValues } from 'formik';
 
 import { ReactElement } from './types';
@@ -6,19 +6,31 @@ import { ReactElement } from './types';
 interface MFormProps<Values extends FormikValues = FormikValues> extends FormikConfig<Values> {
   className?: string;
   children: ReactElement;
-  'data-testid'?: string;
 }
 
-export default function MForm<Values extends FormikValues = FormikValues>(props: MFormProps<Values>): JSX.Element {
-  const { className, children, ...formikConfig } = props;
+export type MFormRef = HTMLFormElement;
 
-  return (
-    <Formik { ...formikConfig }>
-      {(formik: FormikProps<Values>) => (
-        <form onSubmit={ formik.handleSubmit } className={ className } data-testid={ props['data-testid'] }>
-          {children}
-        </form>
-      )}
-    </Formik>
-  );
-}
+export default React.forwardRef<MFormRef, MFormProps<FormikValues>>(
+  function MForm<Values extends FormikValues = FormikValues>(
+    props: MFormProps<Values>,
+    ref: ForwardedRef<MFormRef>,
+  ): JSX.Element {
+    const { className, children, ...formikConfig } = props;
+
+    return (
+      <Formik { ...formikConfig }>
+        {(formik: FormikProps<Values>) => (
+          <form
+            onSubmit={ formik.handleSubmit }
+            className={ className }
+            data-testid={ props['data-testid'] }
+            ref={ ref }
+          >
+            {children}
+          </form>
+        )}
+      </Formik>
+    );
+  }
+);
+

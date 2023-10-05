@@ -28,7 +28,7 @@ func GivenIHaveABankAccount(t *testing.T, link *models.Link, accountType models.
 	available := current - int64(gofakeit.Number(100, 2000))
 
 	// By doing this as an array, its actually a pointer. And can be updated by reference.
-	banks := []models.BankAccount{
+	banks := []*models.BankAccount{
 		{
 			AccountId:         link.AccountId,
 			Account:           link.Account,
@@ -51,8 +51,10 @@ func GivenIHaveABankAccount(t *testing.T, link *models.Link, accountType models.
 	require.NoError(t, err, "must seed bank account")
 	require.NotZero(t, banks[0].BankAccountId, "bank account Id must have been set")
 
-	link.BankAccounts = append(link.BankAccounts, banks...)
+	for i := range banks {
+		link.BankAccounts = append(link.BankAccounts, *banks[i])
+	}
 
-	return banks[0]
+	return *banks[0]
 
 }

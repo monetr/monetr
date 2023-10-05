@@ -24,7 +24,7 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAcco
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
 }
 
-func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ...models.BankAccount) error {
+func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ...*models.BankAccount) error {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
 	span.Description = "CreateBankAccounts"

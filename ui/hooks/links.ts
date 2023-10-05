@@ -1,5 +1,5 @@
 import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
-import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 
 import { useBankAccounts } from './bankAccounts';
@@ -38,6 +38,40 @@ export function useLink(linkId: number | null): UseQueryResult<Link> {
         .getQueryState(['/links'])?.dataUpdatedAt,
     }
   );
+}
+
+export interface CreateLinkRequest {
+  institutionName: string;
+  customInstitutionName: string;
+  description?: string | null;
+}
+
+export function useCreateLink(): (_link: CreateLinkRequest) => Promise<Link> {
+  const queryClient = useQueryClient();
+
+  async function createLink(newLink: CreateLinkRequest): Promise<Link> {
+    return request()
+      .post<Partial<Link>>('/links', newLink)
+      .then(result => new Link(result?.data));
+  }
+
+  const mutate = useMutation(
+    createLink,
+    {
+      onSuccess: (newLink: Link) => Promise.all([
+        queryClient.setQueriesData(
+          ['/links'],
+          (previous: Array<Partial<Link>> | null) => (previous ?? []).concat(newLink),
+        ),
+        queryClient.setQueriesData(
+          [`/links/${newLink.linkId}`],
+          newLink,
+        ),
+      ]),
+    }
+  );
+
+  return mutate.mutateAsync;
 }
 
 export function useRemoveLink(): (_linkId: number) => Promise<void> {
