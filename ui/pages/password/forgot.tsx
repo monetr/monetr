@@ -2,20 +2,24 @@ import React, { useState } from 'react';
 import { FormikErrors, FormikHelpers } from 'formik';
 
 import MFormButton from 'components/MButton';
+import MCaptcha from 'components/MCaptcha';
 import MForm from 'components/MForm';
 import MLink from 'components/MLink';
 import MLogo from 'components/MLogo';
 import MSpan from 'components/MSpan';
 import MTextField from 'components/MTextField';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import useSendForgotPassword from 'hooks/useSendForgotPassword';
 import verifyEmailAddress from 'util/verifyEmailAddress';
 
 interface Values {
   email: string;
+  captcha: string | null;
 }
 
 const initialValues: Values = {
   email: '',
+  captcha: null,
 };
 
 export function ForgotPasswordComplete(): JSX.Element {
@@ -42,6 +46,7 @@ export function ForgotPasswordComplete(): JSX.Element {
 }
 
 export default function ForgotPasswordNew(): JSX.Element {
+  const config = useAppConfiguration();
   const sendForgotPassword = useSendForgotPassword();
   const [isComplete, setIsComplete] = useState<boolean>(false);
 
@@ -60,8 +65,7 @@ export default function ForgotPasswordNew(): JSX.Element {
 
     // sendForgotPassword pretty much does all the work, the only thing we need to do is make sure that once we are done
     // we set submitting back to false.
-    // NOTE: The verification passed here is always null at the moment.
-    return sendForgotPassword(values.email, null)
+    return sendForgotPassword(values.email, values.captcha)
       .then(() => setIsComplete(true))
       .finally(() => helpers.setSubmitting(false));
   }
@@ -98,6 +102,11 @@ export default function ForgotPasswordNew(): JSX.Element {
         type='email'
         required
         className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
+      />
+      <MCaptcha
+        className='mb-1'
+        name="captcha"
+        show={ Boolean(config?.verifyForgotPassword) }
       />
       <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
         <MFormButton
