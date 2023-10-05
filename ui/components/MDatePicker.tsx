@@ -35,8 +35,15 @@ export interface MDatePickerProps extends
 export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const today = startOfToday();
   const formikContext = useFormikContext();
+
+  const getFormikError = () => {
+    if (!formikContext?.touched[props?.name]) return null;
+
+    return formikContext?.errors[props?.name];
+  };
   props = {
     disabled: formikContext?.isSubmitting,
+    error: props?.error || getFormikError(),
     ...props,
   };
 
@@ -78,15 +85,17 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
   const handleReset = useCallback(() => {
     if (formikContext) {
       formikContext.setFieldValue(props.name, null);
+      formikContext.setFieldTouched(props.name, true);
       formikContext.validateField(props.name);
     }
 
     setSelectedValue(undefined);
   }, [setSelectedValue, formikContext, props.name]);
 
-  const handleSelect = useCallback((value: Date) => {
+  const handleSelect = useCallback((value: Date | null) => {
     if (formikContext) {
       formikContext.setFieldValue(props.name, value);
+      formikContext.setFieldTouched(props.name, true);
       formikContext.validateField(props.name);
     }
 

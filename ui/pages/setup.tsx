@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React, { useEffect, useState } from 'react';
 import { PlaidLinkError, PlaidLinkOnExitMetadata, PlaidLinkOnSuccessMetadata, PlaidLinkOptionsWithLinkToken, usePlaidLink } from 'react-plaid-link';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { CheckCircle, EditOutlined, LinkOutlined } from '@mui/icons-material';
 import * as Sentry from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ import MLogo from 'components/MLogo';
 import MSpan from 'components/MSpan';
 import MSpinner from 'components/MSpinner';
 import { ReactElement } from 'components/types';
+import { useAppConfiguration } from 'hooks/useAppConfiguration';
 import mergeTailwind from 'util/mergeTailwind';
 import request from 'util/request';
 
@@ -32,7 +33,7 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
       return <Plaid alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'manual':
       // Not implemented yet.
-      return null;
+      return <Navigate to="/setup/manual" />;
     case 'loading':
 
     default:
@@ -47,16 +48,17 @@ interface GreetingProps {
 }
 
 function Greeting(props: GreetingProps): JSX.Element {
+  const config = useAppConfiguration();
   const [active, setActive] = useState<'plaid'|'manual'|null>(null);
 
   function Banner(): JSX.Element {
     if (!props.alreadyOnboarded) {
       return (
         <div className='flex flex-col justify-center items-center text-center'>
-          <MSpan className='text-2xl font-medium'>
+          <MSpan size='2xl' weight='medium'>
             Welcome to monetr!
           </MSpan>
-          <MSpan className='text-lg' color='subtle'>
+          <MSpan size='lg' color='subtle'>
             Before we get started, please select how you would like to continue.
           </MSpan>
         </div>
@@ -94,9 +96,10 @@ function Greeting(props: GreetingProps): JSX.Element {
         <OnboardingTile
           icon={ <LinkOutlined /> }
           name='Connected'
-          description='Connect your bank account using Plaid.'
+          description='Connect to your bank account automatically using Plaid.'
           active={ active === 'plaid' }
           onClick={ () => setActive('plaid') }
+          disabled={ !config?.plaidEnabled }
         />
         <OnboardingTile
           icon={ <EditOutlined /> }
@@ -126,6 +129,7 @@ interface OnboardingTileProps {
   name: ReactElement;
   description: ReactElement;
   comingSoon?: boolean;
+  disabled?: boolean;
 }
 
 function OnboardingTile(props: OnboardingTileProps): JSX.Element {
@@ -156,9 +160,10 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
     'opacity-50',
   );
 
+  const disabledState = props.comingSoon || props.disabled;
   const wrapperClasses = mergeTailwind(
-    { [nonDisabled]: !props.comingSoon },
-    { [disabled]: props.comingSoon },
+    { [nonDisabled]: !disabledState },
+    { [disabled]: disabledState },
     'text-center',
     'flex',
     'flex-row',
@@ -184,7 +189,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   return (
     <a className={ wrapperClasses } onClick={ handleClick }>
       { props.active && <CheckCircle className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' /> }
-      { React.cloneElement(props.icon, { className: 'w-10 h-10 md:w-16 md:h-16' }) }
+      { React.cloneElement(props.icon, { className: 'w-10 h-10 md:w-16 md:h-16 ml-4 md:ml-0 md:mt-2' }) }
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
         <MSpan className='text-lg font-medium'>
           { props.name }
@@ -196,6 +201,11 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
         { props.comingSoon &&
           <MSpan className='md:mt-5 font-medium'>
             Coming Soon
+          </MSpan>
+        }
+        { props.disabled &&
+          <MSpan className='md:mt-5 font-medium'>
+            Unavailable
           </MSpan>
         }
       </div>
@@ -428,10 +438,7 @@ function Plaid(props: PlaidProps): JSX.Element {
     if (props.alreadyOnboarded) return null;
 
     return (
-      <div className='flex justify-center gap-1'>
-        <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
-        <MLink to="/logout" size="sm">Logout for now</MLink>
-      </div>
+      <LogoutFooter />
     );
   }
 
@@ -440,6 +447,15 @@ function Plaid(props: PlaidProps): JSX.Element {
       <MLogo className='w-24 h-24' />
       { inner }
       <Footer />
+    </div>
+  );
+}
+
+function LogoutFooter(): JSX.Element {
+  return (
+    <div className='flex justify-center gap-1'>
+      <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
+      <MLink to="/logout" size="sm">Logout for now</MLink>
     </div>
   );
 }

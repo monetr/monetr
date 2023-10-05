@@ -1,8 +1,6 @@
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-import shallow from 'zustand/shallow';
 
 import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import useStore from 'hooks/store';
 import Balance from 'models/Balance';
 import Spending, { SpendingType } from 'models/Spending';
 import request from 'util/request';
@@ -55,22 +53,6 @@ export function useSpendingFiltered(kind: SpendingType): SpendingResult {
     ...base,
     result: base.result.filter(item => item.spendingType === kind),
   };
-}
-
-export function useSelectedExpense(): Spending | null {
-  const selectedExpenseId: number | null = useStore(state => state.selectedExpenseId, shallow);
-  const { isLoading, result } = useSpendingFiltered(SpendingType.Expense);
-  if (isLoading) return null;
-
-  return result.find(item => item.spendingId === selectedExpenseId) || null;
-}
-
-export function useSelectedGoal(): Spending | null {
-  const selectedGoalId: number | null = useStore(state => state.selectedGoalId, shallow);
-  const { isLoading, result } = useSpendingFiltered(SpendingType.Goal);
-  if (isLoading) return null;
-
-  return result.find(item => item.spendingId === selectedGoalId) || null;
 }
 
 export function useRemoveSpending(): (_spendingId: number) => Promise<void> {

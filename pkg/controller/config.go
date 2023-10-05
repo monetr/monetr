@@ -27,6 +27,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		InitialPlan          *InitialPlan `json:"initialPlan"`
 		BillingEnabled       bool         `json:"billingEnabled"`
 		IconsEnabled         bool         `json:"iconsEnabled"`
+		PlaidEnabled         bool         `json:"plaidEnabled"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
 		BuildType            string       `json:"buildType"`
@@ -86,6 +87,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 	configuration.LongPollPlaidSetup = true
 
 	configuration.IconsEnabled = icons.GetIconsEnabled()
+	configuration.PlaidEnabled = c.configuration.Plaid.GetEnabled()
 
 	return ctx.JSON(http.StatusOK, configuration)
 }

@@ -31,6 +31,7 @@ import SettingsBilling from 'pages/settings/billing';
 import SettingsOverview from 'pages/settings/overview';
 import SettingsSecurity from 'pages/settings/security';
 import SetupPage from 'pages/setup';
+import SetupManual from 'pages/setup/manual';
 import SubscriptionPage from 'pages/subscription';
 import TransactionDetails from 'pages/transaction/details';
 import Transactions from 'pages/transactions';
@@ -91,10 +92,11 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path="/logout" element={ <LogoutPage /> } />
-        <Route path="/setup" element={ <SetupPage /> } />
+        <Route path="/setup" element={ <SetupPage manualEnabled /> } />
+        <Route path="/setup/manual" element={ <SetupManual /> } />
         <Route path="/plaid/oauth-return" element={ <OauthReturn /> } />
         <Route path="/account/subscribe/after" element={ <Navigate replace to="/setup" /> } />
-        <Route index path="/" element={ <Navigate replace to="/setup" /> } />
+        <Route index path="*" element={ <Navigate replace to="/setup" /> } />
       </Routes>
     );
   }

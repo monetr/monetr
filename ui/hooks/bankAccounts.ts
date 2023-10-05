@@ -1,8 +1,9 @@
 import { useMatch } from 'react-router-dom';
-import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
 import { useLinks } from 'hooks/links';
 import BankAccount from 'models/BankAccount';
+import request from 'util/request';
 
 export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
   const { data: links } = useLinks();
@@ -10,6 +11,44 @@ export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
     enabled: !!links && links.length > 0,
     select: data => data.map(item => new BankAccount(item)),
   });
+}
+
+export interface CreateBankAccountRequest {
+  linkId: number;
+  name: string;
+  mask?: string;
+  availableBalance: number;
+  currentBalance: number;
+  accountType: string;
+  accountSubType: string;
+}
+
+export function useCreateBankAccount(): (_bankAccount: CreateBankAccountRequest) => Promise<BankAccount> {
+  const queryClient = useQueryClient();
+
+  async function createBankAccount(newBankAccount: CreateBankAccountRequest): Promise<BankAccount> {
+    return request()
+      .post<Partial<BankAccount>>('/bank_accounts', newBankAccount)
+      .then(result => new BankAccount(result?.data));
+  }
+
+  const mutate = useMutation(
+    createBankAccount,
+    {
+      onSuccess: (newBankAccount: BankAccount) => Promise.all([
+        queryClient.setQueriesData(
+          ['/bank_accounts'],
+          (previous: Array<Partial<BankAccount>>) => (previous ?? []).concat(newBankAccount),
+        ),
+        queryClient.setQueriesData(
+          [`/bank_accounts/${newBankAccount.bankAccountId}`],
+          newBankAccount,
+        ),
+      ]),
+    }
+  );
+
+  return mutate.mutateAsync;
 }
 
 export function useSelectedBankAccount(): UseQueryResult<BankAccount | undefined> {

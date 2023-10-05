@@ -35,12 +35,12 @@ export function useAuthenticationSink(): AuthenticationResult {
     ...result,
     result: {
       user: result?.data?.user && new User(result?.data?.user),
-      isSetup: !!result?.data?.isSetup,
-      isActive: !!result?.data?.isActive,
+      isSetup: Boolean(result?.data?.isSetup),
+      isActive: Boolean(result?.data?.isActive),
       isTrialing: Boolean(result?.data?.isTrialing),
       activeUntil: result?.data?.activeUntil && parseJSON(result.data.activeUntil),
       trialingUntil: result?.data?.trialingUntil && parseJSON(result.data.trialingUntil),
-      hasSubscription: !!result?.data?.hasSubscription,
+      hasSubscription: Boolean(result?.data?.hasSubscription),
     },
   };
 }

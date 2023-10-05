@@ -1,4 +1,5 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
+
 import { parseJSON } from 'date-fns';
 
 export class AppConfiguration {
@@ -19,6 +20,7 @@ export class AppConfiguration {
   } | null;
   billingEnabled: boolean;
   iconsEnabled: boolean;
+  plaidEnabled: boolean;
   release: string | null;
   revision: string;
   buildType: string;

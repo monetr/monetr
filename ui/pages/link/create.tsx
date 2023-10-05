@@ -11,7 +11,7 @@ export default function LinkCreatePage(): JSX.Element {
         icon={ PowerOutlined }
         title='Add another connection'
       />
-      <SetupPage alreadyOnboarded />
+      <SetupPage alreadyOnboarded manualEnabled />
     </div>
   );
 }
