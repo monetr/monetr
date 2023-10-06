@@ -1,11 +1,14 @@
 package logging
 
 import (
+	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/acaloiaro/neoq/logging"
 	"github.com/monetr/monetr/server/config"
 	"github.com/sirupsen/logrus"
 )
@@ -104,4 +107,57 @@ func NewLoggerWithLevel(levelString string) *logrus.Entry {
 	return NewLoggerWithConfig(config.Logging{
 		Level: levelString,
 	})
+}
+
+var (
+	_ logging.Logger = &logrusWrapper{}
+)
+
+type logrusWrapper struct {
+	log *logrus.Entry
+}
+
+func NewLogrusWrapper(log *logrus.Entry) logging.Logger {
+	return &logrusWrapper{
+		log: log,
+	}
+}
+
+// Debug implements logging.Logger.
+func (l *logrusWrapper) Debug(msg string, args ...any) {
+	l.write(logrus.DebugLevel, msg, args...)
+}
+
+// Error implements logging.Logger.
+func (l *logrusWrapper) Error(msg string, args ...any) {
+	l.write(logrus.ErrorLevel, msg, args...)
+}
+
+// Info implements logging.Logger.
+func (l *logrusWrapper) Info(msg string, args ...any) {
+	l.write(logrus.InfoLevel, msg, args...)
+}
+
+func (l *logrusWrapper) write(level logrus.Level, msg string, args ...any) {
+	fields := logrus.Fields{}
+	for i, arg := range args {
+		if i == 0 && len(args)%2 == 0 {
+			// If this is the first arg and there are an even number of fields, assume its key value pairs and skip to the
+			// next one.
+			continue
+		} else if len(args)%2 == 0 && i%2 == 0 {
+			// If this is not the first one, and there are an even number of fields, and we are on an even arg. Then assume
+			// the previous item was a key and this is the value.
+			fields[fmt.Sprint(args[i-1])] = arg
+		} else if len(args)%2 == 0 && i%2 != 0 {
+			// If there are an even number of fields but this is not the even field. Then keep moving this is a key not a
+			// value.
+			continue
+		} else {
+			// If there arent an even number of fields then log based on the index instead.
+			fields[strconv.FormatInt(int64(i), 10)] = arg
+		}
+	}
+
+	l.log.WithFields(fields).Log(level, msg)
 }

@@ -2,6 +2,7 @@ package background
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
@@ -54,6 +55,7 @@ func NewBackgroundJobs(
 	var enqueuer JobEnqueuer
 	var processor JobProcessor
 
+	var err error
 	switch configuration.BackgroundJobs.Engine {
 	case config.BackgroundJobEngineInMemory:
 		panic("in-memory job engine not implemented")
@@ -64,7 +66,24 @@ func NewBackgroundJobs(
 	case config.BackgroundJobEngineRabbitMQ:
 		panic("RabbitMQ job engine not implemented")
 	case config.BackgroundJobEnginePostgreSQL:
-		panic("PostgreSQL job engine not implemented")
+		pqConnectionString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+			configuration.PostgreSQL.Username,
+			configuration.PostgreSQL.Password,
+			configuration.PostgreSQL.Address,
+			configuration.PostgreSQL.Port,
+			configuration.PostgreSQL.Database,
+			// TODO Need to actually implement this. TSL is used in production.
+			"disable",
+		)
+		enqueuer, err = NewNeoqJobEnqueuerPostgres(log, pqConnectionString)
+		if err != nil {
+			return nil, err
+		}
+		neoqProcessor, err := NewNeoqJobProcessorPostgres(log, configuration.BackgroundJobs, pqConnectionString, enqueuer)
+		if err != nil {
+			return nil, err
+		}
+		processor = neoqProcessor
 	default:
 		return nil, errors.New("invalid background job engine specified")
 	}
