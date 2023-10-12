@@ -1,5 +1,6 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
+import { useNavigationType } from 'react-router-dom';
 import { HeartBroken, ShoppingCartOutlined } from '@mui/icons-material';
 import * as R from 'ramda';
 
@@ -11,6 +12,8 @@ import Transaction from 'models/Transaction';
 import TransactionDateItem from 'pages/new/TransactionDateItem';
 import TransactionItem from 'pages/new/TransactionItem';
 
+let evilScrollPosition: number = 0;
+
 export default function Transactions(): JSX.Element {
   const {
     isLoading,
@@ -19,6 +22,28 @@ export default function Transactions(): JSX.Element {
     fetchNextPage,
     result: transactions, hasNextPage,
   } = useTransactions();
+
+  // Scroll restoration code.
+  const ref = useRef<HTMLUListElement>(null);
+  const navigationType = useNavigationType();
+  const onScroll = useCallback(() => {
+    evilScrollPosition = ref.current.scrollTop;
+  }, [ref]);
+  useEffect(() => {
+    if (!ref.current) {
+      return undefined;
+    }
+
+    if (navigationType === 'POP') {
+      ref.current.scrollTop = evilScrollPosition;
+    }
+    const current = ref.current;
+    ref.current.addEventListener('scroll', onScroll);
+    return () => {
+      current.removeEventListener('scroll', onScroll);
+    };
+  }, [ref, navigationType, onScroll]);
+
   const loading = isLoading || isFetching;
 
   const [sentryRef] = useInfiniteScroll({
@@ -127,7 +152,7 @@ export default function Transactions(): JSX.Element {
         title='Transactions'
       />
       <div className='flex flex-grow min-w-0 min-h-0'>
-        <ul className='w-full overflow-y-auto'>
+        <ul className='w-full overflow-y-auto' ref={ ref }>
           <TransactionItems />
           {loading && (
             <li ref={ sentryRef }>

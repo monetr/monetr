@@ -1,4 +1,5 @@
 *.log
+.pnpm-store
 bin
 coverage
 libexec
