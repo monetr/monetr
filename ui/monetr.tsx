@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { createBrowserRouter, Navigate, Outlet, Route, RouterProvider, Routes } from 'react-router-dom';
 
 import BankSidebar from 'components/Layout/BankSidebar';
 import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
@@ -9,6 +9,7 @@ import { useBankAccounts } from 'hooks/bankAccounts';
 import { useLinks } from 'hooks/links';
 import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
 import { useAuthenticationSink } from 'hooks/useAuthentication';
+import { indexLoader, requiresAuthentication, requiresNotAuthenticated } from 'loaders';
 import Loading from 'loading';
 import SubscribePage from 'pages/account/subscribe';
 import AfterCheckoutPage from 'pages/account/subscribe/after';
@@ -22,8 +23,8 @@ import GoalDetails from 'pages/goals/details';
 import LinkCreatePage from 'pages/link/create';
 import Login from 'pages/login';
 import LogoutPage from 'pages/logout';
-import ForgotPasswordNew from 'pages/password/forgot';
-import PasswordResetNew from 'pages/password/reset';
+import ForgotPassword from 'pages/password/forgot';
+import PasswordReset from 'pages/password/reset';
 import OauthReturn from 'pages/plaid/oauth-return';
 import Register from 'pages/register';
 import SettingsAbout from 'pages/settings/about';
@@ -39,7 +40,133 @@ import VerifyEmail from 'pages/verify/email';
 import ResendVerificationPage from 'pages/verify/email/resend';
 import sortAccounts from 'util/sortAccounts';
 
+const routes = createBrowserRouter([
+  {
+    path: '/',
+    loader: indexLoader,
+    element: null, // Should redirect to login, setup, or transactions
+  },
+  {
+    path: '/logout',
+    element: <LogoutPage />,
+  },
+  {
+    loader: requiresNotAuthenticated, // Redirect if they are authenticated
+    children: [
+      {
+        path: '/login',
+        element: <Login />,
+      },
+      { // Will require checking configuration.
+        path: '/register',
+        element: <Register />,
+      },
+      { // Will require checking configuration.
+        path: '/password/forgot',
+        element: <ForgotPassword />,
+      },
+      {
+        path: '/password/reset',
+        element: <PasswordReset />,
+      },
+      {
+        path: '/verify/email',
+        element: <VerifyEmail />,
+      },
+      {
+        path: '/verify/email/resend',
+        element: <ResendVerificationPage />,
+      },
+    ],
+  },
+  {
+    loader: requiresAuthentication,
+    children: [
+      { // If billing is enabled but their subscription is not active.
+        loader: null,
+        children: [
+          {
+            path: '/account/subscribe',
+            element: <SubscribePage />,
+          },
+          {
+            path: '/account/subscribe/after',
+            element: <AfterCheckoutPage />,
+          },
+        ],
+      },
+      { // Their subscription is active but they are not setup with any links.
+        loader: null,
+        children: [
+          {
+            path: '/setup',
+            element: <SetupPage manualEnabled />,
+          },
+          {
+            path: '/setup/manual',
+            element: <SetupManual />,
+          },
+        ],
+      },
+      {
+        loader: null,
+        element: <AuthenticatedLayout />,
+        children: [
+          {
+            path: '/bank/:bankAccountId',
+            element: <BudgetingLayout />,
+            children: [
+              {
+                path: 'transactions',
+                element: <Transactions />,
+              },
+              {
+                path: 'transactions/:transactionId/details',
+                element: <TransactionDetails />,
+              },
+              {
+                path: 'expenses',
+                element: <Expenses />,
+                children: [
+                  {
+                    path: ':spendingId/details',
+                    element: <ExpenseDetails />,
+                  },
+                ],
+              },
+              {
+                path: 'goals',
+                element: <Goals />,
+                children: [
+                  {
+                    path: ':spendingId/details',
+                    element: <GoalDetails />,
+                  },
+                ],
+              },
+              {
+                path: 'funding',
+                element: <Funding />,
+                children: [
+                  {
+                    path: ':fundingId/details',
+                    element: <FundingDetails />,
+                  },
+                ],
+              },
+
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]);
+
 export default function Monetr(): JSX.Element {
+  return (
+    <RouterProvider router={ routes } />
+  );
   const {
     result: config,
     isLoading: configIsLoading,
@@ -66,8 +193,8 @@ export default function Monetr(): JSX.Element {
         <Route path='/login' element={ <Login /> } />
         <Route path="/logout" element={ <LogoutPage /> } />
         {config?.allowSignUp && <Route path='/register' element={ <Register /> } />}
-        {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
-        <Route path="/password/reset" element={ <PasswordResetNew /> } />
+        {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPassword /> } />}
+        <Route path="/password/reset" element={ <PasswordReset /> } />
         <Route path="/verify/email" element={ <VerifyEmail /> } />
         <Route path="/verify/email/resend" element={ <ResendVerificationPage /> } />
         <Route path='/' element={ <Navigate replace to="/login" /> } />
@@ -134,6 +261,18 @@ export default function Monetr(): JSX.Element {
           <Route path="/setup" element={ <Navigate replace to="/" /> } />
           <Route index path="/" element={ <RedirectToBank /> } />
         </Routes>
+      </div>
+    </div>
+  );
+}
+
+function AuthenticatedLayout(): JSX.Element {
+  return (
+    <div className='max-w-screen max-h-screen h-full w-full dark:bg-dark-monetr-background flex'>
+      <BankSidebar className='hidden lg:flex' />
+      <MobileSidebar />
+      <div className='w-full h-full flex min-w-0 overflow-y-auto'>
+        <Outlet />
       </div>
     </div>
   );

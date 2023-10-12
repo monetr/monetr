@@ -21,7 +21,9 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
 
   const onInitialClick = useCallback(() => {
     if (props.base) {
-      navigate(props.base);
+      navigate(props.base, {
+        preventScrollReset: true,
+      });
     }
   }, [props.base, navigate]);
 

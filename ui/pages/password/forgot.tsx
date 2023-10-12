@@ -45,7 +45,7 @@ export function ForgotPasswordComplete(): JSX.Element {
   );
 }
 
-export default function ForgotPasswordNew(): JSX.Element {
+export default function ForgotPassword(): JSX.Element {
   const config = useAppConfiguration();
   const sendForgotPassword = useSendForgotPassword();
   const [isComplete, setIsComplete] = useState<boolean>(false);

@@ -1,5 +1,4 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 
@@ -11,17 +10,15 @@ import { newTheme } from 'theme';
 export default function Root(): JSX.Element {
   // <Sentry.ErrorBoundary>
   return (
-    <BrowserRouter>
-      <MQueryClient>
-        <ThemeProvider theme={ newTheme }>
-          <MSnackbarProvider>
-            <NiceModal.Provider>
-              <CssBaseline />
-              <Monetr />
-            </NiceModal.Provider>
-          </MSnackbarProvider>
-        </ThemeProvider>
-      </MQueryClient>
-    </BrowserRouter>
+    <MQueryClient>
+      <ThemeProvider theme={ newTheme }>
+        <MSnackbarProvider>
+          <NiceModal.Provider>
+            <CssBaseline />
+            <Monetr />
+          </NiceModal.Provider>
+        </MSnackbarProvider>
+      </ThemeProvider>
+    </MQueryClient>
   );
 }
