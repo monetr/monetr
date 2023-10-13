@@ -42,7 +42,9 @@ export default function Transactions(): JSX.Element {
     return () => {
       current.removeEventListener('scroll', onScroll);
     };
-  }, [ref, navigationType, onScroll]);
+  // Fix bug with current impl.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref.current, navigationType, onScroll]);
 
   const loading = isLoading || isFetching;
 
