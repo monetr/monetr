@@ -1,4 +1,5 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef } from 'react';
+import { useNavigationType } from 'react-router-dom';
 import { AddOutlined, HeartBroken, SavingsOutlined } from '@mui/icons-material';
 
 import GoalItem from './new/GoalItem';
@@ -10,12 +11,37 @@ import { useSpendingFiltered } from 'hooks/spending';
 import { showNewGoalModal } from 'modals/NewGoalModal';
 import { SpendingType } from 'models/Spending';
 
+let evilScrollPosition: number = 0;
+
 export default function Goals(): JSX.Element {
   const {
     result: goals,
     isError,
     isLoading,
   } = useSpendingFiltered(SpendingType.Goal);
+
+  // Scroll restoration code.
+  const ref = useRef<HTMLDivElement>(null);
+  const navigationType = useNavigationType();
+  const onScroll = useCallback(() => {
+    evilScrollPosition = ref.current.scrollTop;
+  }, [ref]);
+  useEffect(() => {
+    if (!ref.current) {
+      return undefined;
+    }
+
+    if (navigationType === 'POP') {
+      ref.current.scrollTop = evilScrollPosition;
+    }
+    const current = ref.current;
+    ref.current.addEventListener('scroll', onScroll);
+    return () => {
+      current.removeEventListener('scroll', onScroll);
+    };
+  // Fix bug with current impl.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref.current, navigationType, onScroll]);
 
   if (isLoading) {
     return (
@@ -63,7 +89,7 @@ export default function Goals(): JSX.Element {
           New Goal
         </MBaseButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0'>
+      <div className='w-full h-full overflow-y-auto min-w-0' ref={ ref }>
         <ListContent />
       </div>
     </Fragment>

@@ -1,13 +1,16 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef } from 'react';
+import { useNavigationType } from 'react-router-dom';
 import { AccountBalance, AddOutlined, AutoModeOutlined, HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
 
 import { MBaseButton } from 'components/MButton';
 import MSpan from 'components/MSpan';
 import MTopNavigation from 'components/MTopNavigation';
 import { useSpendingFiltered } from 'hooks/spending';
+import { showNewExpenseModal } from 'modals/NewExpenseModal';
 import { SpendingType } from 'models/Spending';
 import ExpenseItem from 'pages/new/ExpenseItem';
-import { showNewExpenseModal } from 'modals/NewExpenseModal';
+
+let evilScrollPosition: number = 0;
 
 export default function Expenses(): JSX.Element {
   const {
@@ -15,6 +18,29 @@ export default function Expenses(): JSX.Element {
     isError,
     isLoading,
   } = useSpendingFiltered(SpendingType.Expense);
+
+  // Scroll restoration code.
+  const ref = useRef<HTMLDivElement>(null);
+  const navigationType = useNavigationType();
+  const onScroll = useCallback(() => {
+    evilScrollPosition = ref.current.scrollTop;
+  }, [ref]);
+  useEffect(() => {
+    if (!ref.current) {
+      return undefined;
+    }
+
+    if (navigationType === 'POP') {
+      ref.current.scrollTop = evilScrollPosition;
+    }
+    const current = ref.current;
+    ref.current.addEventListener('scroll', onScroll);
+    return () => {
+      current.removeEventListener('scroll', onScroll);
+    };
+  // Fix bug with current impl.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref.current, navigationType, onScroll]);
 
   if (isLoading) {
     return (
@@ -65,7 +91,7 @@ export default function Expenses(): JSX.Element {
           New Expense
         </MBaseButton>
       </MTopNavigation>
-      <div className='w-full h-full overflow-y-auto min-w-0'>
+      <div className='w-full h-full overflow-y-auto min-w-0' ref={ ref }>
         <ListContent />
       </div>
     </Fragment>
