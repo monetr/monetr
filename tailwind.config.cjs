@@ -4,6 +4,9 @@
 module.exports = {
   important: true,
   darkMode: 'class',
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   content: [
     './ui/**/*.tsx',
     './ui/**/*.jsx',
