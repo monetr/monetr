@@ -24,7 +24,9 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
 		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bankAccount, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", false)
-		fundingSchedule.NextOccurrence = fundingSchedule.NextOccurrence.AddDate(0, 0, -7)
+		for fundingSchedule.NextOccurrence.After(time.Now()) {
+			fundingSchedule.NextOccurrence = fundingSchedule.NextOccurrence.AddDate(0, 0, -7)
+		}
 		testutils.MustDBUpdate(t, fundingSchedule)
 		assert.Greater(t, time.Now(), fundingSchedule.NextOccurrence, "next occurrence must be in the past")
 
