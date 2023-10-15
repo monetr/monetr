@@ -1,17 +1,14 @@
 stages:
-  - Dry
   - Deploy
 
-Dry Staging:
-  stage: Dry
-  needs: []
+Deploy Staging:
+  stage: Deploy
   image: ghcr.io/monetr/build-containers/debian:12.1
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.dev"
       when: always
   environment:
     deployment_tier: staging
-    action: prepare
     name: Staging
     url: https://my.monetr.dev
   tags:
@@ -21,50 +18,10 @@ Dry Staging:
     DEPLOY_NAMESPACE: monetr-staging
   script:
     - make dry
-
-Dry Production:
-  stage: Dry
-  needs: []
-  image: ghcr.io/monetr/build-containers/debian:12.1
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.app"
-      when: always
-    - if: $CI_COMMIT_TAG == null || $CI_COMMIT_TAG == ""
-      when: never
-  environment:
-    deployment_tier: production
-    action: prepare
-    name: Production
-    url: https://my.monetr.app
-  tags:
-    - monetr:deploy
-    - env:production
-  variables:
-    DEPLOY_NAMESPACE: monetr
-  script:
-    - make dry
-
-Deploy Staging:
-  stage: Deploy
-  needs:
-    - "Dry Staging"
-  image: ghcr.io/monetr/build-containers/debian:12.1
-  environment:
-    deployment_tier: staging
-    name: Staging
-    url: https://my.monetr.dev
-  tags:
-    - monetr:deploy
-    - env:staging
-  variables:
-    DEPLOY_NAMESPACE: monetr-staging
-  script:
     - make deploy
 
 Deploy Production:
   stage: Deploy
-  needs:
-    - "Dry Production"
   image: ghcr.io/monetr/build-containers/debian:12.1
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.app"
@@ -82,4 +39,5 @@ Deploy Production:
   variables:
     DEPLOY_NAMESPACE: monetr
   script:
+    - make dry
     - make deploy
