@@ -236,7 +236,7 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
 
-          make container-push CONTAINER_REGISTRY=containers.monetr.dev/monetr/monetr CMAKE_OPTIONS=-DBUILD_CONTAINER_TAG_LATEST=OFF RELEASE_VERSION RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
+          make container-push CONTAINER_REGISTRY=containers.monetr.dev/monetr/monetr CMAKE_OPTIONS=-DBUILD_CONTAINER_TAG_LATEST=OFF RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
 
   deploy:
     needs:

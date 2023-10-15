@@ -231,7 +231,7 @@ jobs:
       - name: Build
         run: |
           git config --global --add safe.directory ${PWD}
-          make container-push RELEASE_VERSION RELEASE_VERSION=${{ needs.release_please.outputs.version }}
+          make container-push RELEASE_VERSION=${{ needs.release_please.outputs.version }}
 
   deploy:
     if: ${{ needs.release_please.outputs.release_created }}
