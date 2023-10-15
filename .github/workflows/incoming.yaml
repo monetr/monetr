@@ -24,7 +24,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    # container: ghcr.io/monetr/build-containers/debian:12.1
+    container: ghcr.io/monetr/build-containers/debian:12.1
     env:
       MONETR_PG_ADDRESS: postgres
       MONETR_PG_PASSWORD: ""
