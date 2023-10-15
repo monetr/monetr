@@ -63,6 +63,7 @@ monetr: | $(CMAKE_CONFIGURATION_DIRECTORY)
 monetr-release:
 	$(MAKE) monetr CMAKE_OPTIONS=-DCMAKE_BUILD_TYPE=Release
 
+.PHONY: docs
 docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.docs $(BUILD_ARGS)
 
