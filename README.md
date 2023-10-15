@@ -26,14 +26,6 @@ In order to run monetr locally you will need sandbox credentials for Plaid, you 
 [Plaid Sign Up](https://dashboard.plaid.com/signup). Once you have a Client ID and a Client Secret you can run the
 following command in the monetr project directory to start a local environment.
 
-If you run into any missing commands you can run
-
-```shell
-brew bundle
-```
-
-To install all of the tools needed to develop monetr.
-
 To start working on monetr, you can follow the [Local Development](https://monetr.app/developing/local/) documentation.
 Or if you want to just dive in you can run the following command in the project directory:
 
