@@ -180,8 +180,11 @@ add_custom_target(
   DEPENDS ${MONETR_EXECUTABLE}
 )
 
-
-
+add_custom_target(
+  development.migrate
+  COMMAND ${CMAKE_Go_COMPILER} run ${MONETR_CLI_PKG} database migrate
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
 
 ################################################################################
 #                                     TESTING                                  #
@@ -208,7 +211,7 @@ if(BUILD_TESTING)
 
     add_test(
       NAME migrate.db
-      COMMAND ${CMAKE_Go_COMPILER} run ${MONETR_CLI_PKG} database migrate
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t development.migrate
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
     set_tests_properties(migrate.db PROPERTIES FIXTURES_REQUIRED go.mod FIXTURES_SETUP DB)
@@ -218,7 +221,7 @@ if(BUILD_TESTING)
 
   add_test(
     NAME ui.dependencies
-    COMMAND ${PNPM_EXECUTABLE} install
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t node_modules
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   )
   set_tests_properties(ui.dependencies PROPERTIES FIXTURES_SETUP node_modules DEPENDS ${PNPM_EXECUTABLE})

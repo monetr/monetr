@@ -63,13 +63,15 @@ monetr: | $(CMAKE_CONFIGURATION_DIRECTORY)
 monetr-release:
 	$(MAKE) monetr CMAKE_OPTIONS=-DCMAKE_BUILD_TYPE=Release
 
-docs: build
+docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.docs $(BUILD_ARGS)
+
+migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.migrate $(BUILD_ARGS)
 
 test:
 	cmake -S . -B $(CMAKE_CONFIGURATION_DIRECTORY) -G $(GENERATOR) -DBUILD_TESTING=ON $(CMAKE_ARGS)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t node_modules $(BUILD_ARGS)
-	cd $(CMAKE_CONFIGURATION_DIRECTORY) && ctest --no-tests=error --output-on-failure -j $(CONCURRENCY)
+	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure -j $(CONCURRENCY)
 
 develop: build
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.up $(BUILD_ARGS)
