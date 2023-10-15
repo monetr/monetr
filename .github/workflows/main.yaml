@@ -198,6 +198,8 @@ jobs:
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
+      - name: Use Docker in rootless mode.
+        uses: ScribeMD/rootless-docker@0.2.2
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
@@ -205,8 +207,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }} # Read only token.
       - name: Build
-        # This sucks but container permissions are hard.
-        run: sudo make docs MKDOCS_IMAGE=ghcr.io/monetr/mkdocs-material-insiders:09092023
+        run: make docs MKDOCS_IMAGE=ghcr.io/monetr/mkdocs-material-insiders:09092023
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
