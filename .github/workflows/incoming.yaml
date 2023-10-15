@@ -51,15 +51,19 @@ jobs:
 
   test:
     name: Test
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/debian:12.1
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     env:
-      MONETR_PG_ADDRESS: postgres
+      MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
       MONETR_PG_USERNAME: api-testing
       MONETR_PG_DATABASE: test-db
     services:
       postgres:
+        ports:
+          - 5432:5432
         image: postgres:14
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
