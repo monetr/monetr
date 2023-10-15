@@ -5,7 +5,7 @@ if(DOCKER_EXECUTABLE)
 
   file(GLOB DOCUMENTATION_SRC "${CMAKE_SOURCE_DIR}/docs/*")
 
-  if(DEFINED ENV{MKDOCS_IMAGE})
+  if(NOT "$ENV{MKDOCS_IMAGE}" STREQUAL "")
     set(MKDOCS_IMAGE "$ENV{MKDOCS_IMAGE}")
   else()
     set(MKDOCS_IMAGE squidfunk/mkdocs-material:9.4.4)
