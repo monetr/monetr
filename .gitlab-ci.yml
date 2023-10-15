@@ -49,9 +49,6 @@ Deploy Staging:
   needs:
     - "Dry Staging"
   image: ghcr.io/monetr/build-containers/debian:12.1
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.dev"
-      when: always
   environment:
     deployment_tier: staging
     name: Staging
