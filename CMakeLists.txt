@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 option(BUILD_THIRD_PARTY_NOTICE "Generate a third party notice as part of the build stage, requires Ruby." OFF)
 option(BUILD_SIMPLE_ICONS "Embed simple-icons into the final binary, used for providing icons for transactions." ON)
 option(BUILD_DEPLOYMENT_TARGETS "Include targets for deploying monetr using helm and kubectl" OFF)
+option(BUILD_CONTAINER_TAG_LATEST "Tag containers with latest when building them." ON)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   message(STATUS "Mode: Release - Build must include third party notice")
@@ -52,6 +53,23 @@ if(DOCKER_EXECUTABLE)
   message(STATUS "  Container build targets will be enabled!")
   include("${CMAKE_SOURCE_DIR}/cmake/development.cmake")
 
+  if(DEFINED ENV{CONTAINER_REGISTRY})
+    set(CONTAINER_REGISTRY "$ENV{CONTAINER_REGISTRY}")
+  else()
+    set(CONTAINER_REGISTRY "ghcr.io/monetr/monetr" "docker.io/monetr/monetr")
+  endif()
+  set(CONTAINER_TAGS "$(CONTAINER_VERSION)")
+  if(BUILD_CONTAINER_TAG_LATEST)
+    list(APPEND CONTAINER_TAGS "latest")
+  endif()
+
+  set(CONTAINER_ARGS)
+  foreach(REGISTRY ${CONTAINER_REGISTRY})
+    foreach(TAG ${CONTAINER_TAGS})
+      list(APPEND CONTAINER_ARGS "-t" "${REGISTRY}:${TAG}")
+    endforeach()
+  endforeach()
+
   set(DOCKER_CONTAINER ${CMAKE_BINARY_DIR}/docker-container-marker.txt)
   add_custom_command(
     OUTPUT ${DOCKER_CONTAINER}
@@ -66,24 +84,44 @@ if(DOCKER_EXECUTABLE)
       ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
       ${PUBLIC_FILES}
       ${UI_CONFIG_FILES}
+    COMMAND ${CMAKE_COMMAND} -E echo "-- Building monetr container: ${CONTAINER_REGISTRY} - ${CONTAINER_TAGS}"
     COMMAND ${DOCKER_EXECUTABLE} build
         --iidfile ${DOCKER_CONTAINER}
         -f ${CMAKE_SOURCE_DIR}/Dockerfile
-        --build-arg GOFLAGS="-tags=icons,simple_icons"
+        --build-arg GOFLAGS=-tags=icons,simple_icons
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)
         --build-arg BUILD_HOST=$(BUILD_HOST)
-        -t ghcr.io/monetr/monetr:latest
-        -t docker.io/monetr/monetr:latest
-        -t ghcr.io/monetr/monetr:$(CONTAINER_VERSION)
-        -t docker.io/monetr/monetr:$(CONTAINER_VERSION)
+        ${CONTAINER_ARGS}
         ${CMAKE_SOURCE_DIR}
+    VERBATIM
   )
   add_custom_target(
     build.container.docker
     DEPENDS
       ${DOCKER_CONTAINER}
   )
+
+  add_custom_target(
+    build.container.docker.push
+    DEPENDS
+      build.container.docker
+  )
+
+  foreach(REGISTRY ${CONTAINER_REGISTRY})
+    foreach(TAG ${CONTAINER_TAGS})
+      # Create a target for each tag and make it a dependency of the overall push target.
+      # TODO Move the configuration of tags into the cmakepresets.
+      string(SHA256 PUSH_TARGET_NAME "${REGISTRY}:${TAG}")
+      add_custom_target(
+        push.${PUSH_TARGET_NAME}
+        COMMAND ${DOCKER_EXECUTABLE} push ${REGISTRY}:${TAG}
+        DEPENDS
+          build.container.docker
+      )
+      add_dependencies(build.container.docker.push push.${PUSH_TARGET_NAME})
+    endforeach()
+  endforeach()
 endif()
 
 # Documentation targets require docker at the moment

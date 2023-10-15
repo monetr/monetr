@@ -175,57 +175,6 @@ jobs:
           curl -k https://monetr.local
           make shutdown
 
-  # build_binary:
-  #   needs:
-  #     - build_notice
-  #     - build_ui
-  #     - go_dependencies
-  #   name: Build Binary
-  #   runs-on: ubuntu-latest
-  #   container: ghcr.io/monetr/build-containers/golang:1.19.4
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - linux
-  #         - darwin
-  #         - windows
-  #       architecture:
-  #         - amd64
-  #         - arm64
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           ~/.cache/go-build
-  #           ~/go/pkg/mod
-  #           ${{ github.workspace }}/vendor
-  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #           ${{ runner.os }}-go-
-  #     - uses: actions/download-artifact@v3
-  #       name: Download Compiled UI Artifacts
-  #       with:
-  #         name: '${{ github.sha }}-ui'
-  #         ```path: '${{ github.workspace }}/pkg/ui/static/'
-  #     - uses: actions/download-artifact@v3
-  #       name: Download Third Party Notice Artifacts
-  #       with:
-  #         name: '${{ github.sha }}-notice'
-  #         path: '${{ github.workspace }}/pkg/build/'
-  #     - name: Build
-  #       run: |
-  #         GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: '${{ github.sha }}-binary-${{ matrix.os }}-${{ matrix.architecture }}'
-  #         path: |
-  #           ${{ github.workspace }}/build/monetr
-  #           ${{ github.workspace }}/build/monetr.exe
-  #         if-no-files-found: ignore
-  #         retention-days: 7
-
   # codecov:
   #   name: CodeCov
   #   needs:

@@ -74,18 +74,20 @@ test:
 	cmake -S . -B $(CMAKE_CONFIGURATION_DIRECTORY) -G $(GENERATOR) -DBUILD_TESTING=ON $(CMAKE_ARGS)
 	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure -j $(CONCURRENCY)
 
-develop: build
+develop: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.up $(BUILD_ARGS)
 
-logs: build
+logs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.logs $(BUILD_ARGS)
 
-shutdown: build
+shutdown: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.monetr.down $(BUILD_ARGS)
 
-container: build
+container: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.container.docker $(BUILD_ARGS)
 
+container-push: $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.container.docker.push $(BUILD_ARGS)
 
 ###################################
 
