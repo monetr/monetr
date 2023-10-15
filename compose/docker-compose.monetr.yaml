@@ -155,7 +155,7 @@ services:
       - ${NGINX_PORT:-443}:${NGINX_PORT:-443}
     volumes:
       - ./compose/${NGINX_CONFIG_NAME:-nginx.conf}:/etc/nginx/nginx.conf
-      - ${LOCAL_CERTIFICATE_DIRECTORY:-./}:/etc/nginx/tls
+      - ./build/certificates/${LOCAL_DOMAIN:-monetr.local}:/etc/nginx/tls
     depends_on:
       - monetr
       - ui

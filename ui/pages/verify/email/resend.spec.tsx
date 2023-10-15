@@ -1,7 +1,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import ResendVerificationPage from '../resend';
+import ResendVerificationPage from './resend';
 
 import { rest } from 'msw';
 import testRenderer from 'testutils/renderer';

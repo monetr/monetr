@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
+	"github.com/monetr/monetr/pkg/internal/myownsanity"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/monetr/monetr/pkg/migrations"
 	"github.com/pkg/errors"
@@ -97,22 +98,23 @@ func init() {
 }
 
 func GetPgOptions(t *testing.T) *pg.Options {
-	portString := os.Getenv("POSTGRES_PORT")
+	portString := myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PORG"), os.Getenv("POSTGRES_PORT"))
 	if portString == "" {
 		portString = "5432"
 	}
-
 	port, err := strconv.ParseInt(portString, 10, 64)
 	require.NoError(t, err, "must be able to parse the Postgres port as a number")
 
-	address := fmt.Sprintf("%s:%d", os.Getenv("POSTGRES_HOST"), port)
+	host := myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_ADDRESS"), os.Getenv("POSTGRES_HOST"))
+
+	address := fmt.Sprintf("%s:%d", host, port)
 
 	options := &pg.Options{
 		Network:         "tcp",
 		Addr:            address,
-		User:            os.Getenv("POSTGRES_USER"),
-		Password:        os.Getenv("POSTGRES_PASSWORD"),
-		Database:        os.Getenv("POSTGRES_DB"),
+		User:            myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_USERNAME"), os.Getenv("POSTGRES_USER")),
+		Password:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_PASSWORD"), os.Getenv("POSTGRES_PASSWORD")),
+		Database:        myownsanity.CoalesceStrings(os.Getenv("MONETR_PG_DATABASE"), os.Getenv("POSTGRES_DB")),
 		ApplicationName: "monetr - api - tests",
 	}
 

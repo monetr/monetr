@@ -6,209 +6,61 @@ on:
       - main
 
 jobs:
-  go_dependencies:
-    name: Go Dependencies
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.19.4
+    container: ghcr.io/monetr/build-containers/debian:12.1
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - name: Dependencies
-        run: make go-dependencies
-
-  ui_dependencies:
-    name: UI Dependencies
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-      - name: Dependencies
-        run: make ui-dependencies
-
-  local_dev:
-    name: Local Development
-    needs:
-      - go_dependencies
-      - ui_dependencies
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            ${{ github.workspace }}/vendor
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Setup local development environment
-        timeout-minutes: 15
+      # Get values for cache paths to be used in later steps
+      - id: go-cache-paths
         run: |
-          npm install -g pnpm
-          make develop || (make logs && exit 1)
-          curl -k https://monetr.local
-          make shutdown
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-  build_ui:
-    needs:
-      - ui_dependencies
-    name: Build UI
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
-    steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-      - name: Build
-        run: make build-ui
-      - uses: actions/upload-artifact@v3
-        with:
-          name: '${{ github.sha }}-ui'
-          path: '${{ github.workspace }}/pkg/ui/static/'
-          retention-days: 7
-      - uses: actions/upload-artifact@v3
-        with:
-          name: '${{ github.sha }}-source-maps'
-          path: '${{ github.workspace }}/build/source_maps'
-          retention-days: 1
-
-  build_notice:
-    needs:
-      - go_dependencies
-      - ui_dependencies
-    name: Build Third Party Notice
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            ${{ github.workspace }}/vendor
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Build Third Party Notice
+      - name: Fix dumb git issue
         run: |
-          npm install -g pnpm
-          make notice
-      - uses: actions/upload-artifact@v3
-        with:
-          name: '${{ github.sha }}-notice'
-          path: '${{ github.workspace }}/pkg/build/NOTICE.md'
-          retention-days: 7
+          git config --global --add safe.directory ${PWD}
 
-  build_binary:
-    needs:
-      - build_notice
-      - build_ui
-      - go_dependencies
-    name: Build Binary
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.19.4
-    strategy:
-      matrix:
-        os:
-          - linux
-          - darwin
-          - windows
-        architecture:
-          - amd64
-          - arm64
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+      # Cache go build cache, used to speedup go test
+      - name: Go Build Cache
+        uses: actions/cache@v3
         with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - uses: actions/download-artifact@v3
-        name: Download Compiled UI Artifacts
+          path: ${{ env.GOCACHE }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      # Cache go mod cache, used to speedup builds
+      - name: Go Mod Cache
+        uses: actions/cache@v3
         with:
-          name: '${{ github.sha }}-ui'
-          path: '${{ github.workspace }}/pkg/ui/static/'
-      - uses: actions/download-artifact@v3
-        name: Download Third Party Notice Artifacts
+          path: ${{ env.GOMODCACHE }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+
+      - name: pnpm Cache
+        uses: actions/cache@v3
         with:
-          name: '${{ github.sha }}-notice'
-          path: '${{ github.workspace }}/pkg/build/'
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Build
-        run: GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make build
-      - uses: actions/upload-artifact@v3
-        with:
-          name: '${{ github.sha }}-binary-${{ matrix.os }}-${{ matrix.architecture }}'
-          path: |
-            ${{ github.workspace }}/build/monetr
-            ${{ github.workspace }}/build/monetr.exe
-          if-no-files-found: ignore
-          retention-days: 7
+        run: |
+          make monetr
 
-  go_test:
-    needs:
-      - go_dependencies
-    name: Test Go
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.19.4
+    container: ghcr.io/monetr/build-containers/debian:12.1
     env:
-      POSTGRES_HOST: postgres
-      POSTGRES_PASSWORD: ""
-      POSTGRES_USER: api-testing
-      POSTGRES_DB: test-db
+      MONETR_PG_ADDRESS: postgres
+      MONETR_PG_PASSWORD: ""
+      MONETR_PG_USERNAME: api-testing
+      MONETR_PG_DATABASE: test-db
     services:
       postgres:
-        image: postgres:13
+        image: postgres:14
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_USER: api-testing
@@ -219,80 +71,122 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - name: Test
-        run: make test-go
-      - name: Annotate tests
-        if: always()
-        uses: guyarb/golang-test-annotations@v0.7.0
-        with:
-          test-results: '${{ github.workspace }}/rest-api-tests.json'
-      - uses: actions/upload-artifact@v3
-        name: Upload Go Test Coverage Artifacts
-        if: always()
-        with:
-          name: '${{ github.sha }}-go-coverage'
-          path: '${{ github.workspace }}/coverage.txt'
-          retention-days: 1
+      # Get values for cache paths to be used in later steps
+      - id: go-cache-paths
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
-  ui_test:
-    needs:
-      - ui_dependencies
-    name: Test UI
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-      - name: Test
-        run: make test-ui
-      - uses: actions/upload-artifact@v3
-        name: Upload UI Test Coverage Artifacts
-        if: always()
-        with:
-          name: '${{ github.sha }}-ui-coverage'
-          path: '${{ github.workspace }}/coverage/clover.xml'
-          retention-days: 1
+      - uses: actions/checkout@v4
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
 
-  codecov:
-    name: CodeCov
-    needs:
-      - go_test
-      - ui_test
+      # Cache go build cache, used to speedup go test
+      - name: Go Build Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.GOCACHE }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+      # Cache go mod cache, used to speedup builds
+      - name: Go Mod Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.GOMODCACHE }}
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+
+      - name: pnpm Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Test
+        run: |
+          make test
+
+  # codecov:
+  #   name: CodeCov
+  #   needs:
+  #     - go_test
+  #     - ui_test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/download-artifact@v3
+  #       name: Download Go Coverage Artifacts
+  #       with:
+  #         name: '${{ github.sha }}-go-coverage'
+  #         path: '${{ github.workspace }}/coverage'
+  #     - uses: actions/download-artifact@v3
+  #       name: Download UI Coverage Artifacts
+  #       with:
+  #         name: '${{ github.sha }}-ui-coverage'
+  #         path: '${{ github.workspace }}/coverage'
+  #     - name: CodeCov
+  #       if: always()
+  #       uses: codecov/codecov-action@v3
+  #       with:
+  #         files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
+  #         name: monetr
+
+  yaml:
+    name: Kubernetes YAMLs
+    runs-on: ubuntu-latest
+    container: ghcr.io/monetr/build-containers/debian:12.1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate kubernetes yamls
+        run: |
+          git config --global --add safe.directory ${PWD}
+          ENVIRONMENT=my.monetr.dev DEPLOY_VERSION=latest DEPLOY_NAMESPACE=default make generate
+
+  local_dev:
+    name: Local Development
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        name: Download Go Coverage Artifacts
+      # Get values for cache paths to be used in later steps
+      - id: go-cache-paths
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
         with:
-          name: '${{ github.sha }}-go-coverage'
-          path: '${{ github.workspace }}/coverage'
-      - uses: actions/download-artifact@v3
-        name: Download UI Coverage Artifacts
+          fetch-depth: 0
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
+      # Cache go build cache, used to speedup go test
+      - name: Go Build Cache
+        uses: actions/cache@v3
         with:
-          name: '${{ github.sha }}-ui-coverage'
-          path: '${{ github.workspace }}/coverage'
-      - name: CodeCov
-        if: always()
-        uses: codecov/codecov-action@v3
+          path: ${{ env.GOCACHE }}
+          key: ${{ runner.os }}-localdev-go-build-${{ hashFiles('**/go.sum') }}
+
+      # Cache go mod cache, used to speedup builds
+      - name: Go Mod Cache
+        uses: actions/cache@v3
         with:
-          files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
-          name: monetr
+          path: ${{ env.GOMODCACHE }}
+          key: ${{ runner.os }}-localdev-go-mod-${{ hashFiles('**/go.sum') }}
+
+      - name: pnpm Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Setup local development environment
+        timeout-minutes: 15
+        run: |
+          make develop || (make logs && exit 1)
+          curl -k https://monetr.local
+          make shutdown
 
   mkdocs:
     name: MkDocs
@@ -300,11 +194,12 @@ jobs:
     env:
       MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:09092023
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
@@ -312,12 +207,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GHCR_TOKEN }} # Read only token.
       - name: Build
-        run: make mkdocs
+        # This sucks but container permissions are hard.
+        run: sudo make docs
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
           branch: monetr.app
-          folder: build/site
+          folder: build/documentation
 
   docker:
     name: Container (Docker)
@@ -338,13 +234,13 @@ jobs:
           password: ${{ secrets.CONTAINERS_MONETR_DEV_PASSWORD }}
       - name: Build
         run: |
-          make container ENGINE=docker CONTAINER_REPOS=containers.monetr.dev/monetr/monetr RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
-          make container-push ENGINE=docker CONTAINER_REPOS=containers.monetr.dev/monetr/monetr RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
+          git config --global --add safe.directory ${PWD}
+
+          make container-push CONTAINER_REGISTRY=containers.monetr.dev/monetr/monetr CMAKE_OPTIONS=-DBUILD_CONTAINER_TAG_LATEST=OFF RELEASE_VERSION RELEASE_VERSION=${{ steps.tag.outputs.POST_TAG }}
 
   deploy:
     needs:
-      - "go_test"
-      - "ui_test"
+      - "test"
       - "docker"
     name: Deploy my.monetr.dev
     runs-on: ubuntu-latest
@@ -358,14 +254,14 @@ jobs:
           target_url: https://my.monetr.dev
           environment: my.monetr.dev
           ref: ${{ github.sha }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/download-artifact@v3
-        name: Download Compiled UI Artifacts
-        with:
-          name: '${{ github.sha }}-source-maps'
-          path: '${{ github.workspace }}/build/source_maps'
+      # - uses: actions/download-artifact@v3
+      #   name: Download Compiled UI Artifacts
+      #   with:
+      #     name: '${{ github.sha }}-source-maps'
+      #     path: '${{ github.workspace }}/build/source_maps'
       - name: Save Tag Variable
         id: tag
         run: |
@@ -379,7 +275,7 @@ jobs:
         with:
           environment: 'my.monetr.dev'
           version: 'v${{ steps.tag.outputs.POST_TAG }}'
-          sourcemaps: './build/source_maps'
+          # sourcemaps: './build/source_maps'
           url_prefix: 'https://my.monetr.dev'
       - name: Trigger Deployment
         run: |
@@ -388,5 +284,5 @@ jobs:
             -F token=${{ secrets.GITLAB_CI_TOKEN }} \
             -F "ref=${{ github.head_ref || github.ref_name }}" \
             -F "variables[ENVIRONMENT]=my.monetr.dev" \
-            -F "variables[RELEASE_VERSION]=${{ steps.tag.outputs.POST_TAG }}" \
+            -F "variables[DEPLOY_VERSION]=${{ steps.tag.outputs.POST_TAG }}" \
             https://gitlab.com/api/v4/projects/46647440/trigger/pipeline

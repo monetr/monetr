@@ -164,10 +164,10 @@ export default function Register(): JSX.Element {
         </div>
         <div className="flex flex-col items-center text-center">
           <MSpan className='text-5xl'>
-          Get Started
+            Get Started
           </MSpan>
           <MSpan color="subtle" className='text-lg'>
-          Create your monetr account now
+            Create your monetr account now
           </MSpan>
         </div>
         <div className="flex flex-col sm:flex-row gap-2.5 w-full">

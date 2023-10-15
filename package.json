@@ -7,15 +7,13 @@
     "pnpm": ">=8"
   },
   "scripts": {
+    "configure": "cmake -S . -B build ${CMAKE_OPTIONS}",
+    "monetr": "cmake --build build -t build.monetr -j ${CONCURRENCY:-8}",
     "build": "rspack build",
-    "build:staging": "MONETR_ENV=staging rspack build --mode production",
-    "build:production": "pnpm build --mode production",
-    "build-dev": "rspack --mode development",
-    "build-prod": "rspack --mode production",
     "clean": "make clean",
     "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
-    "test": "jest",
-    "coverage": "jest --coverage --coverageDirectory=./reports",
+    "test": "jest --config=jest.config.ts",
+    "coverage": "jest --config=jest.config.ts --coverage --coverageDirectory=./reports",
     "storybook": "storybook dev -p 6006 --disable-telemetry",
     "build-storybook": "storybook build --disable-telemetry",
     "story:shots": "pnpm storycap --serverCmd \"storybook dev -p 9001 --disable-telemetry --no-open\" -o tmp"
@@ -37,32 +35,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "jest": {
-    "testPathIgnorePatterns": [
-      ".+/pkg/.+"
-    ],
-    "modulePaths": [
-      "<rootDir>",
-      "<rootDir>/ui",
-      "node_modules"
-    ],
-    "moduleNameMapper": {
-      "^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|lottie.json|xlsx)$": "<rootDir>/ui/testutils/mocks/fileMock.js"
-    },
-    "resetMocks": false,
-    "collectCoverageFrom": [
-      "ui/**/*.{js,jsx,ts,tsx}",
-      "!ui/**/*.d.ts",
-      "!ui/**/*.stories.{js,jsx,ts,tsx}"
-    ],
-    "testEnvironment": "jest-environment-jsdom",
-    "setupFilesAfterEnv": [
-      "<rootDir>/ui/setupTests.js"
-    ],
-    "transform": {
-      "^.+\\.(t|j)sx?$": "@swc/jest"
-    }
   },
   "dependencies": {
     "@ebay/nice-modal-react": "1.2.13",

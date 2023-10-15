@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"runtime/debug"
 
 	"github.com/monetr/monetr/pkg/build"
 )
@@ -15,6 +16,17 @@ var (
 )
 
 func main() {
+	info, ok := debug.ReadBuildInfo()
+	if ok {
+		for _, item := range info.Settings {
+			switch item.Key {
+			case "vcs.revision":
+				if item.Value != "" {
+					buildRevision = item.Value
+				}
+			}
+		}
+	}
 	build.Revision = buildRevision
 	build.BuildTime = buildTime
 	build.BuildHost = buildHost

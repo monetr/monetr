@@ -32,180 +32,180 @@ jobs:
           version-file: version.txt
           bump-patch-for-minor-pre-major: true
 
-  build_ui:
-    if: ${{ needs.release_please.outputs.release_created }}
-    needs:
-      - release_please
-    name: Build UI
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/node:18.10.0-buster
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-      - name: Build
-        run: |
-          echo "${{ needs.release_please.outputs.version }}"
-          make ui-dependencies
-          RELEASE_VERSION=v${{ needs.release_please.outputs.version }} make build-ui
-      - uses: actions/upload-artifact@v3
-        with:
-          name: '${{ needs.release_please.outputs.version }}-ui'
-          path: '${{ github.workspace }}/pkg/ui/static/'
-          retention-days: 1
-      - uses: actions/upload-artifact@v3
-        with:
-          name: '${{ needs.release_please.outputs.version }}-source-maps'
-          path: '${{ github.workspace }}/build/source_maps'
-          retention-days: 1
+  # build_ui:
+  #   if: ${{ needs.release_please.outputs.release_created }}
+  #   needs:
+  #     - release_please
+  #   name: Build UI
+  #   runs-on: ubuntu-latest
+  #   container: ghcr.io/monetr/build-containers/node:18.10.0-buster
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           ${{ github.workspace }}/node_modules
+  #         key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+  #     - name: Build
+  #       run: |
+  #         echo "${{ needs.release_please.outputs.version }}"
+  #         make ui-dependencies
+  #         RELEASE_VERSION=v${{ needs.release_please.outputs.version }} make build-ui
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: '${{ needs.release_please.outputs.version }}-ui'
+  #         path: '${{ github.workspace }}/pkg/ui/static/'
+  #         retention-days: 1
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: '${{ needs.release_please.outputs.version }}-source-maps'
+  #         path: '${{ github.workspace }}/build/source_maps'
+  #         retention-days: 1
+  #
+  # build_notice:
+  #   if: ${{ needs.release_please.outputs.release_created }}
+  #   needs:
+  #     - release_please
+  #   name: Build Third Party Notice
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           ~/.cache/go-build
+  #           ~/go/pkg/mod
+  #           ${{ github.workspace }}/vendor
+  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+  #           ${{ runner.os }}-go-
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           ${{ github.workspace }}/node_modules
+  #         key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v1
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v1
+  #     - name: Build Third Party Notice
+  #       run: |
+  #         npm install -g pnpm
+  #         make notice
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: '${{ needs.release_please.outputs.version }}-notice'
+  #         path: '${{ github.workspace }}/pkg/build/NOTICE.md'
+  #         retention-days: 7
+  #
+  # build_binary:
+  #   if: ${{ needs.release_please.outputs.release_created }}
+  #   needs:
+  #     - release_please
+  #     - build_ui
+  #     - build_notice
+  #   name: Build Binary
+  #   runs-on: ubuntu-latest
+  #   container: ghcr.io/monetr/build-containers/golang:1.19.4
+  #   continue-on-error: true
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os:
+  #         - linux
+  #         - darwin
+  #         - windows
+  #       architecture:
+  #         - amd64
+  #         - arm64
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           ~/.cache/go-build
+  #           ~/go/pkg/mod
+  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+  #           ${{ runner.os }}-go-
+  #     - uses: actions/download-artifact@v3
+  #       name: Download Compiled UI Artifacts
+  #       with:
+  #         name: '${{ needs.release_please.outputs.version }}-ui'
+  #         path: '${{ github.workspace }}/pkg/ui/static/'
+  #     - uses: actions/download-artifact@v3
+  #       name: Download Third Party Notice Artifacts
+  #       with:
+  #         name: '${{ needs.release_please.outputs.version }}-notice'
+  #         path: '${{ github.workspace }}/pkg/build/'
+  #     - name: Build # I hate so much that I have to do this, but GitHub actions are awful at network connections.
+  #       uses: nick-invision/retry@v2
+  #       with:
+  #         timeout_minutes: 10
+  #         max_attempts: 3
+  #         command: |
+  #           RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make tar
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
+  #         path: '${{ github.workspace }}/build/monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
+  #         retention-days: 7
 
-  build_notice:
-    if: ${{ needs.release_please.outputs.release_created }}
-    needs:
-      - release_please
-    name: Build Third Party Notice
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            ${{ github.workspace }}/vendor
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Build Third Party Notice
-        run: |
-          npm install -g pnpm
-          make notice
-      - uses: actions/upload-artifact@v3
-        with:
-          name: '${{ needs.release_please.outputs.version }}-notice'
-          path: '${{ github.workspace }}/pkg/build/NOTICE.md'
-          retention-days: 7
-
-  build_binary:
-    if: ${{ needs.release_please.outputs.release_created }}
-    needs:
-      - release_please
-      - build_ui
-      - build_notice
-    name: Build Binary
-    runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/golang:1.19.4
-    continue-on-error: true
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - linux
-          - darwin
-          - windows
-        architecture:
-          - amd64
-          - arm64
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-            ${{ runner.os }}-go-
-      - uses: actions/download-artifact@v3
-        name: Download Compiled UI Artifacts
-        with:
-          name: '${{ needs.release_please.outputs.version }}-ui'
-          path: '${{ github.workspace }}/pkg/ui/static/'
-      - uses: actions/download-artifact@v3
-        name: Download Third Party Notice Artifacts
-        with:
-          name: '${{ needs.release_please.outputs.version }}-notice'
-          path: '${{ github.workspace }}/pkg/build/'
-      - name: Build # I hate so much that I have to do this, but GitHub actions are awful at network connections.
-        uses: nick-invision/retry@v2
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: |
-            RELEASE_VERSION=v${{ needs.release_please.outputs.version }} GOOS=${{ matrix.os }} GOARCH=${{ matrix.architecture }} make tar
-      - uses: actions/upload-artifact@v3
-        with:
-          name: 'monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
-          path: '${{ github.workspace }}/build/monetr-v${{ needs.release_please.outputs.version }}-${{ matrix.os }}-${{ matrix.architecture }}.tar.gz'
-          retention-days: 7
-
-  upload-artifacts:
-    needs:
-      - release_please
-      - build_ui
-      - build_binary
-    name: Upload Artifacts
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        name: Download linux/amd64
-        with:
-          name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
-          path: '/tmp'
-      - uses: actions/download-artifact@v3
-        name: Download linux/arm64
-        with:
-          name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
-          path: '/tmp'
-      - uses: actions/download-artifact@v3
-        name: Download darwin/amd64
-        with:
-          name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
-          path: '/tmp'
-      - uses: actions/download-artifact@v3
-        name: Download darwin/arm64
-        with:
-          name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
-          path: '/tmp'
-      - uses: actions/download-artifact@v3
-        name: Download windows/amd64
-        with:
-          name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
-          path: '/tmp'
-      - uses: actions/download-artifact@v3
-        name: Download windows/arm64
-        with:
-          name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz'
-          path: '/tmp'
-      - name: Upload Artifacts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz --clobber
-          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz --clobber
-          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz --clobber
-          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz --clobber
-          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
-          gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz --clobber
+  # upload-artifacts:
+  #   needs:
+  #     - release_please
+  #     - build_ui
+  #     - build_binary
+  #   name: Upload Artifacts
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/download-artifact@v3
+  #       name: Download linux/amd64
+  #       with:
+  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz'
+  #         path: '/tmp'
+  #     - uses: actions/download-artifact@v3
+  #       name: Download linux/arm64
+  #       with:
+  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz'
+  #         path: '/tmp'
+  #     - uses: actions/download-artifact@v3
+  #       name: Download darwin/amd64
+  #       with:
+  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz'
+  #         path: '/tmp'
+  #     - uses: actions/download-artifact@v3
+  #       name: Download darwin/arm64
+  #       with:
+  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz'
+  #         path: '/tmp'
+  #     - uses: actions/download-artifact@v3
+  #       name: Download windows/amd64
+  #       with:
+  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz'
+  #         path: '/tmp'
+  #     - uses: actions/download-artifact@v3
+  #       name: Download windows/arm64
+  #       with:
+  #         name: 'monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz'
+  #         path: '/tmp'
+  #     - name: Upload Artifacts
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: |
+  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-amd64.tar.gz --clobber
+  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-linux-arm64.tar.gz --clobber
+  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-amd64.tar.gz --clobber
+  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-darwin-arm64.tar.gz --clobber
+  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-amd64.tar.gz --clobber
+  #         gh release upload v${{ needs.release_please.outputs.version }} /tmp/monetr-v${{ needs.release_please.outputs.version }}-windows-arm64.tar.gz --clobber
 
   docker:
     if: ${{ needs.release_please.outputs.release_created }}
@@ -214,7 +214,7 @@ jobs:
     name: Container (Docker)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Login to DockerHub
@@ -230,8 +230,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: |
-          make container ENGINE=docker RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
-          make container-push ENGINE=docker RELEASE_VERSION=v${{ needs.release_please.outputs.version }} LATEST_CONTAINER=true
+          git config --global --add safe.directory ${PWD}
+          make container-push RELEASE_VERSION RELEASE_VERSION=${{ needs.release_please.outputs.version }}
 
   deploy:
     if: ${{ needs.release_please.outputs.release_created }}
@@ -251,11 +251,11 @@ jobs:
           environment: my.monetr.app
           ref: "v${{ needs.release_please.outputs.version }}"
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        name: Download Compiled UI Artifacts
-        with:
-          name: '${{ needs.release_please.outputs.version }}-source-maps'
-          path: '${{ github.workspace }}/build/source_maps'
+      # - uses: actions/download-artifact@v3
+      #   name: Download Compiled UI Artifacts
+      #   with:
+      #     name: '${{ needs.release_please.outputs.version }}-source-maps'
+      #     path: '${{ github.workspace }}/build/source_maps'
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
         env:
@@ -265,7 +265,7 @@ jobs:
         with:
           environment: 'my.monetr.app'
           version: 'v${{ needs.release_please.outputs.version }}'
-          sourcemaps: './build/source_maps'
+          # sourcemaps: './build/source_maps'
           url_prefix: 'https://my.monetr.app'
       - name: Trigger Deployment
         run: |
@@ -274,5 +274,5 @@ jobs:
             -F token=${{ secrets.GITLAB_CI_TOKEN }} \
             -F "ref=v${{ needs.release_please.outputs.version }}" \
             -F "variables[ENVIRONMENT]=my.monetr.app" \
-            -F "variables[RELEASE_VERSION]=v${{ needs.release_please.outputs.version }}" \
+            -F "variables[DEPLOY_VERSION]=v${{ needs.release_please.outputs.version }}" \
             https://gitlab.com/api/v4/projects/46647440/trigger/pipeline

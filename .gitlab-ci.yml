@@ -5,7 +5,7 @@ stages:
 Dry Staging:
   stage: Dry
   needs: []
-  image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  image: ghcr.io/monetr/build-containers/debian:12.1
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.dev"
       when: always
@@ -25,7 +25,7 @@ Dry Staging:
 Dry Production:
   stage: Dry
   needs: []
-  image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  image: ghcr.io/monetr/build-containers/debian:12.1
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.app"
       when: always
@@ -48,7 +48,7 @@ Deploy Staging:
   stage: Deploy
   needs:
     - "Dry Staging"
-  image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  image: ghcr.io/monetr/build-containers/debian:12.1
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.dev"
       when: always
@@ -68,7 +68,7 @@ Deploy Production:
   stage: Deploy
   needs:
     - "Dry Production"
-  image: ghcr.io/monetr/build-containers/ubuntu:20.04-106-g51b5b23
+  image: ghcr.io/monetr/build-containers/debian:12.1
   rules:
     - if: $CI_PIPELINE_SOURCE == "trigger" && $ENVIRONMENT == "my.monetr.app"
       when: always
