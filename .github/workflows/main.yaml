@@ -191,8 +191,6 @@ jobs:
   mkdocs:
     name: MkDocs
     runs-on: ubuntu-latest
-    env:
-      MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:09092023
     steps:
       - uses: actions/checkout@v4
         with:
@@ -208,7 +206,7 @@ jobs:
           password: ${{ secrets.GHCR_TOKEN }} # Read only token.
       - name: Build
         # This sucks but container permissions are hard.
-        run: sudo make docs
+        run: sudo make docs=ghcr.io/monetr/mkdocs-material-insiders:09092023
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
