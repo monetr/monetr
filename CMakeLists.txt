@@ -53,7 +53,7 @@ if(DOCKER_EXECUTABLE)
   message(STATUS "  Container build targets will be enabled!")
   include("${CMAKE_SOURCE_DIR}/cmake/development.cmake")
 
-  if(DEFINED ENV{CONTAINER_REGISTRY})
+  if(NOT "$ENV{CONTAINER_REGISTRY}" STREQUAL "")
     set(CONTAINER_REGISTRY "$ENV{CONTAINER_REGISTRY}")
   else()
     set(CONTAINER_REGISTRY "ghcr.io/monetr/monetr" "docker.io/monetr/monetr")
