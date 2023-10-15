@@ -79,15 +79,21 @@ add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LO
 add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
 
 set(LOCAL_COMPOSE_FILE ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml)
+set(DOCUMENTATION_COMPOSE_FILE ${CMAKE_SOURCE_DIR}/compose/docker-compose.documentation.yaml)
+
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
-set(DEVELOPMENT_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" "--project-directory" "${CMAKE_SOURCE_DIR}")
+set(BASE_ARGS "--project-directory" "${CMAKE_SOURCE_DIR}")
 
 # Check to see if the current user has local settings configured for development.
 if(EXISTS ${HOME}/.monetr/development.env)
   message(STATUS "Detected development.env file at: ${HOME}/.monetr/development.env")
   message(STATUS "  It will be used if you start the local development environment.")
-  list(APPEND DEVELOPMENT_COMPOSE_ARGS "--env-file=${HOME}/.monetr/development.env")
+  list(APPEND BASE_ARGS "--env-file=${HOME}/.monetr/development.env")
 endif()
+
+set(DEVELOPMENT_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" ${BASE_ARGS})
+set(DOCUMENTATION_COMPOSE_ARGS "-f" "${DOCUMENTATION_COMPOSE_FILE}" ${BASE_ARGS})
+set(ALL_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" "-f" "${DOCUMENTATION_COMPOSE_FILE}" ${BASE_ARGS})
 
 add_custom_target(
   development.monetr.up
@@ -95,8 +101,8 @@ add_custom_target(
   COMMAND ${DOCKER_EXECUTABLE} compose ${DEVELOPMENT_COMPOSE_ARGS} up --wait --remove-orphans
   COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
   COMMAND ${CMAKE_COMMAND} -E echo "--"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- monetr is now running locally.${ColorReset}"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${BoldWhite}${LOCAL_PROTOCOL}://${LOCAL_DOMAIN}"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- monetr is now running locally."
+  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${LOCAL_PROTOCOL}://${LOCAL_DOMAIN}"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- When you are done you can shutdown the local development environment using:"
   COMMAND ${CMAKE_COMMAND} -E echo "--   make shutdown"
@@ -129,18 +135,64 @@ else()
 endif()
 
 add_custom_target(
-  development.monetr.logs
-  COMMENT "Tailing logs from monetr's local development environment"
-  COMMAND ${DOCKER_EXECUTABLE} compose ${DEVELOPMENT_COMPOSE_ARGS} logs -f
+  development.documentation.up
+  COMMENT "Starting documentation using Docker compose locally..."
+  COMMAND ${DOCKER_EXECUTABLE} compose ${DOCUMENTATION_COMPOSE_ARGS} up --wait --remove-orphans
+  COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
+  COMMAND ${CMAKE_COMMAND} -E echo "--"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- Documentation is now running locally."
+  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via http://localhost:8000/documentation"
+  COMMAND ${CMAKE_COMMAND} -E echo "--"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- Changes you make to the documentation will automatically hot reload in"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- your browser."
+  COMMAND ${CMAKE_COMMAND} -E echo "--"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- When you are done you can shutdown the local development environment using:"
+  COMMAND ${CMAKE_COMMAND} -E echo "--   make shutdown"
+  COMMAND ${CMAKE_COMMAND} -E echo "--     or:"
+  COMMAND ${CMAKE_COMMAND} -E echo "--   make clean"
+  COMMAND ${CMAKE_COMMAND} -E echo "--"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
   COMMAND_EXPAND_LISTS
   USES_TERMINAL
 )
 
 add_custom_target(
-  development.monetr.down
+  development.logs
+  COMMENT "Tailing logs from monetr's local development environment"
+  COMMAND ${DOCKER_EXECUTABLE} compose ${ALL_COMPOSE_ARGS} logs -f
+  COMMAND_EXPAND_LISTS
+  USES_TERMINAL
+)
+
+add_custom_target(
+  development.down
   COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:plaid || exit 0
   COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:stripe || exit 0
-  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} down --remove-orphans -v || exit 0
+  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || exit 0
+  COMMAND_EXPAND_LISTS
+  USES_TERMINAL
+)
+
+add_custom_target(
+  development.shell
+  COMMENT "Spawning a shell in the specified CONTAINER."
+  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} exec $(CONTAINER) /bin/sh
+  COMMAND_EXPAND_LISTS
+  USES_TERMINAL
+)
+
+add_custom_target(
+  development.shell.sql
+  COMMENT "Spawning a SQL shell inside of PostgreSQL."
+  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} exec postgres psql -U postgres
+  COMMAND_EXPAND_LISTS
+  USES_TERMINAL
+)
+
+add_custom_target(
+  development.shell.redis
+  COMMENT "Spawning a Redis shell."
+  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} exec redis redis-cli
   COMMAND_EXPAND_LISTS
   USES_TERMINAL
 )

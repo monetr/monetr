@@ -21,10 +21,28 @@ The rest of the commands in this guide are issued from this directory.
 
 ## Dependencies
 
-monetr's local development tries to not require anything to be installed on the developer's actual computer. Some tools
-must be installed though in order to prevent other tools being required. For the most part this is covered by Docker or
-another container engine. In the future we plan to fully support Podman as a local container engine as well as Docker,
-but at the moment Docker is recommended.
+monetr does require a few tools to be installed locally in order to develop or build it. These tools are outlines below:
+
+### Required
+
+- Node (`>= 16.0.0`)
+- npm (`>= 8.0.0`)
+- git (`>= 2.0.0`)
+- Go (`>= 1.19.0`)
+- CMake (`>= 3.23.0`)
+- GNUMake (`>= 4.0`)
+
+The tools above are the minimum tools required in order to build and work on monetr locally. But if you intend to run
+the complete development environment locally or if you plan on creating release builds of monetr you will also need:
+
+### Optional
+
+- Docker (`>= 20.0.0`): Docker (and Docker Compose) are used to run the local development environment for monetr,
+  allowing you to have the entire application and all of it's features with hot-reloading.
+- Ruby (`>= 2.7`): Ruby is required to run `licensed` which is used to generate third-party-notice files, these show all
+  of the dependencies of monetr and their licenses. This is embeded at build time for releases.
+- Kubectl (`>= 1.23.0`): Kubectl is used to deploy monetr to a Kubernetes cluster. At the moment this is _only_ used in
+  CI/CD pipelines for deployying monetr to the Staging and Production clusters.
 
 ### Mac Specific
 
@@ -44,23 +62,6 @@ make -v
 # There is NO WARRANTY, to the extent permitted by law.
 ```
 
-### Required
-
-The following tools are required in order to work on monetr locally.
-
-- Docker
-- Node (with `pnpm` installed)
-- GNUMake
-
-These tools can be installed by running the following command.
-
-```shell title="Shell"
-brew bundle --verbose
-```
-
-But they can also be installed manually through your own preferred methods. As long as `docker`, `make` and `yarn` are
-all available in your `PATH` variable, the rest of this guide should work just fine.
-
 ## Configuration & Credentials
 
 At the moment monetr requires at least Plaid credentials in order to run properly, even for development. You can read
@@ -72,16 +73,7 @@ The makefile will look for these development credentials and some configuration 
 $HOME/.monetr/development.env
 ```
 
-You can create this file using the following commands:
-
-```shell title="Creating with the helper"
-make settings
-```
-
-This will create the directory for you and seed the development environment file with a template for you to start with.
-It will also open the file created in your `$EDITOR`.
-
-You can also create the file manually like this:
+You can create the file manually like this:
 
 ```shell title="Manually creating the development env file"
 mkdir $HOME/.monetr
@@ -177,28 +169,11 @@ This will kick off the storybook server and build process. Once it is ready it w
 browser. You can then make changes to the components in the stories and see the changes in real time without needing to
 run the entire application stack locally.
 
+**NOTE** At the moment storybook does not work with the CMake development tooling.
+
 ## Cleaning Up
 
 Once you have finished your work and you want to take the local development environment down you have a few options.
-
-### Stopping
-
-Stopping allows you to keep the data you have in your development environment for later and come back to it. This can be
-helpful if you are working on a larger feature or bug. But overall it is recommended to completely wipe and re-provision
-your development environment each time you start working on something. This keeps the development environment tidy, but
-does have the downside of not introducing edge cases that might otherwise be harder to find. You can pause your
-development environment by running:
-
-```shell title="Shell"
-make stop
-```
-
-This will stop all of the Docker containers that were started, but will not remove any of their data. When you are ready
-you can start the containers again with the following command.
-
-```shell title="Shell"
-make start
-```
 
 ### Shutting Down Development Environment
 
