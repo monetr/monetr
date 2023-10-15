@@ -9,7 +9,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/debian:12.1
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       # Get values for cache paths to be used in later steps
       - id: go-cache-paths
@@ -51,10 +54,8 @@ jobs:
 
   test:
     name: Test
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    # container: ghcr.io/monetr/build-containers/debian:12.1
     env:
       MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
