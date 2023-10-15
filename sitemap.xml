@@ -21,6 +21,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://monetr.app/developing/build/</loc>
+         <lastmod>2023-10-15</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://monetr.app/developing/credentials/</loc>
          <lastmod>2023-10-15</lastmod>
          <changefreq>daily</changefreq>
