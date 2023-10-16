@@ -88,20 +88,20 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum') }}
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
 
       - name: pnpm Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Test
         run: |
