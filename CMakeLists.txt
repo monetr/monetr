@@ -91,7 +91,7 @@ if(DOCKER_EXECUTABLE)
         --build-arg GOFLAGS=-tags=icons,simple_icons
         --build-arg RELEASE=$(RELEASE_VERSION)
         --build-arg REVISION=$(RELEASE_REVISION)
-        --build-arg BUILD_HOST=$(BUILD_HOST)
+        --build-arg BUILD_HOST=${HOSTNAME}
         ${CONTAINER_ARGS}
         ${CMAKE_SOURCE_DIR}
     VERBATIM
