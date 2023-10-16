@@ -55,7 +55,10 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
       # TODO Should we do a fixture cleanup to delete this binary afterwards?
       set_tests_properties(
         precompile/${PACKAGE}
-        PROPERTIES FIXTURES_REQUIRED go.mod FIXTURES_SETUP ${PACKAGE}
+        PROPERTIES
+        FIXTURES_REQUIRED go.mod
+        FIXTURES_SETUP ${PACKAGE}
+        RESOURCE_LOCK GO_BUILD_LOCK
       )
 
       string(REPLACE "\n" ";" RAW_TEST_LIST "${RAW_TEST_LIST}")
@@ -126,7 +129,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         set_tests_properties(
           ${PACKAGE}/${FRIENDLY_TEST_NAME}
           PROPERTIES
-          FIXTURES_REQUIRED "DB;${PACKAGE};go.coverage"
+          FIXTURES_REQUIRED "DB;${PACKAGE}"
           ENVIRONMENT "GOCOVERDIR=${PACKAGE_COVERAGE_DIRECTORY}"
         )
       endforeach()

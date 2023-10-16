@@ -241,18 +241,11 @@ include(GolangTestUtils)
 if(BUILD_TESTING)
   if(CMAKE_Go_COMPILER)
     add_test(
-      NAME go.dependencies
-      COMMAND ${CMAKE_Go_COMPILER} get ./...
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    )
-    set_tests_properties(go.dependencies PROPERTIES FIXTURES_SETUP go.mod)
-
-    add_test(
       NAME migrate.db
       COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t development.migrate
       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     )
-    set_tests_properties(migrate.db PROPERTIES FIXTURES_REQUIRED go.mod FIXTURES_SETUP DB)
+    set_tests_properties(migrate.db PROPERTIES FIXTURES_SETUP DB)
   else()
     message(STATUS "Go tests will not be run since Go installation could not be found.")
   endif()
