@@ -38,8 +38,8 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
 	golang.org/x/crypto v0.14.0
-	google.golang.org/api v0.143.0
-	google.golang.org/genproto v0.0.0-20230913181813-007df8e322eb
+	google.golang.org/api v0.147.0
+	google.golang.org/genproto v0.0.0-20231002182017-d307bd883b97
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
@@ -47,7 +47,7 @@ require (
 require (
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/iam v1.1.1 // indirect
+	cloud.google.com/go/iam v1.1.2 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
@@ -116,14 +116,14 @@ require (
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/oauth2 v0.12.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/oauth2 v0.13.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20230913181813-007df8e322eb // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230920204549-e6e6cdab5c13 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20231002182017-d307bd883b97 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231009173412-8bfb1ae86b6c // indirect
 	google.golang.org/grpc v1.58.2 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
