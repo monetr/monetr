@@ -86,7 +86,7 @@ extraVolumeMounts: [ ]
 
 cloudSqlProxy:
   enabled: false
-  image: gcr.io/cloudsql-docker/gce-proxy:1.17
+  image: gcr.io/cloudsql-docker/gce-proxy:1.33
   command:
     - "/cloud_sql_proxy"
     # If connecting from a VPC-native GKE cluster, you can use the
