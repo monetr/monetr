@@ -30,7 +30,10 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum', '**/*.go') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum', '**/*.go') }}
+            ${{ runner.os }}-go-build
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
@@ -38,12 +41,18 @@ jobs:
         with:
           path: ${{ env.GOMODCACHE }}
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-go-mod
 
       - name: pnpm Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-pnpm-store
 
       - name: Build
         run: |
@@ -88,20 +97,32 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-build-test-${{ hashFiles('**/go.sum', '**/*.go') }}
+          restore-keys: |
+            ${{ runner.os }}-go-build-test-${{ hashFiles('**/go.sum', '**/*.go') }}
+            ${{ runner.os }}-go-build-test
+            ${{ runner.os }}-go-build
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-mod-test-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mod-test-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-go-mod-test
+            ${{ runner.os }}-go-mod
 
       - name: pnpm Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-store-test-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-test-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-pnpm-store-test
+            ${{ runner.os }}-pnpm-store
 
       - name: Test
         run: |
@@ -148,11 +169,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Get values for cache paths to be used in later steps
-      - id: go-cache-paths
+      - id: cache-paths
         run: |
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
-          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
       - uses: actions/checkout@v4
         with:
@@ -160,20 +179,6 @@ jobs:
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
-
-      # Cache go build cache, used to speedup go test
-      - name: Go Build Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-localdev-go-build-${{ hashFiles('**/go.sum') }}
-
-      # Cache go mod cache, used to speedup builds
-      - name: Go Mod Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.GOMODCACHE }}
-          key: ${{ runner.os }}-localdev-go-mod-${{ hashFiles('**/go.sum') }}
 
       - name: pnpm Cache
         uses: actions/cache@v3
