@@ -61,7 +61,7 @@ monetr: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.monetr -j $(CONCURRENCY) $(BUILD_ARGS)
 
 monetr-release:
-	$(MAKE) monetr CMAKE_OPTIONS=-DCMAKE_BUILD_TYPE=Release
+	$(MAKE) monetr -B CMAKE_OPTIONS=-DCMAKE_BUILD_TYPE=Release
 
 .PHONY: docs
 docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
