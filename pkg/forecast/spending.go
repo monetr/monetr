@@ -237,7 +237,17 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	eventsBeforeSecond := int64(len(s.GetRecurrencesBetween(ctx, fundingFirst.Date, fundingSecond.Date, timezone)))
 
 	// The amount of funds needed for each individual spending event.
-	perSpendingAmount := s.spending.TargetAmount
+	var perSpendingAmount int64
+	switch s.spending.SpendingType {
+	case models.SpendingTypeExpense:
+		perSpendingAmount = s.spending.TargetAmount
+	case models.SpendingTypeGoal:
+		// If we are working with a goal then we need to subtract the amount we have already used from the goal. This is
+		// because a goal could have its funds spent from it throughout the life of the goal. But we don't want to change
+		// the target. We assume that spending from a goal is progress towards that goal.
+		// Basically for a completed goal we don't need to make any contributions to it.
+		perSpendingAmount = myownsanity.Max(s.spending.TargetAmount-s.spending.UsedAmount, 0)
+	}
 	// The amount of funds currently allocated towards this spending item. This is not increased until the next funding
 	// event, or the user transfers funds to this spending item.
 

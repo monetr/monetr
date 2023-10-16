@@ -295,4 +295,83 @@ func TestForecasterBase_GetForecast(t *testing.T) {
 		expectedJson := strings.TrimSpace(string(testutils.Must(t, forecastingFixtureData.ReadFile, "fixtures/elliots-result-20230705.json")))
 		assert.Equal(t, expectedJson, resultingJson, "the result should match the saved fixture")
 	})
+
+	t.Run("with a completed goal", func(t *testing.T) {
+		// This test is part of a bug report: https://github.com/monetr/monetr/issues/1561
+		// It proves that when a goal is completed more contributions will not be made to it. The bug showed that if the
+		// goal's target date was in the future and the balance of the goal was less than the target (not taking into
+		// account the used amount) it would still try to contribute to the goal. This test shows that is no longer the case
+		// and that we are doing the correct thing going forward.
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		now := time.Date(2023, 10, 16, 4, 30, 1, 0, timezone).UTC()
+		end := time.Date(2023, 11, 1, 5, 30, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+
+		fundingSchedules := []models.FundingSchedule{
+			{
+				RuleSet:           fundingRule,
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2023, 10, 31, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		}
+		spending := []models.Spending{
+			{
+				FundingScheduleId: 1,
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      2000,
+				UsedAmount:        2001,
+				CurrentAmount:     0,
+				NextRecurrence:    time.Date(2023, 11, 17, 0, 0, 0, 0, timezone),
+				SpendingId:        1,
+			},
+		}
+
+		forecaster := NewForecaster(log, spending, fundingSchedules)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		result := forecaster.GetForecast(ctx, now, end, timezone)
+		expected := Forecast{
+			StartingTime:    now,
+			EndingTime:      end,
+			StartingBalance: 0,
+			EndingBalance:   0,
+			Events: []Event{
+				{
+					Date:         time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
+					Delta:        0,
+					Contribution: 0,
+					Transaction:  0,
+					Balance:      0,
+					Spending: []SpendingEvent{
+						{
+							Date:               time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
+							TransactionAmount:  0,
+							ContributionAmount: 0,
+							RollingAllocation:  0,
+							Funding: []FundingEvent{
+								{
+									Date:              time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
+									OriginalDate:      time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
+									WeekendAvoided:    false,
+									FundingScheduleId: 1,
+								},
+							},
+							SpendingId: 1,
+						},
+					},
+					Funding: []FundingEvent{
+						{
+							Date:              time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
+							OriginalDate:      time.Date(2023, 10, 31, 0, 0, 0, 0, timezone).UTC(),
+							WeekendAvoided:    false,
+							FundingScheduleId: 1,
+						},
+					},
+				},
+			},
+		}
+		assert.Equal(t, expected, result, "forecast should not have any contributions to the goal")
+	})
 }
