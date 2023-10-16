@@ -111,7 +111,7 @@ func (g *GoCraftWorkJobProcessor) Close() error {
 	}
 
 	doneChannel := make(chan struct{})
-	timeout := time.NewTimer(30 * time.Second)
+	timeout := time.NewTimer(5 * time.Second)
 
 	// queue.Drain can technically run forever. So run it in a go-routine and defer the done signal for when it finishes
 	// if it ever finishes. If it does not then it will be killed if we timeout anyway.

@@ -187,10 +187,7 @@ func TestGoCraftWorkJobProcessor_Close(t *testing.T) {
 		ranJob := make(chan struct{}, 1)
 		testHandler := NewTestJobHandler(t, func(t *testing.T, ctx context.Context, data []byte) error {
 			log.Info("running test job!")
-
-			// Close() has a 30-second timeout, so make sure our job takes just slightly longer than that to trigger the
-			// failure case.
-			time.Sleep(10 * time.Second)
+			time.Sleep(1 * time.Second)
 
 			ranJob <- struct{}{}
 			log.Info("finished running test job!")
@@ -212,7 +209,7 @@ func TestGoCraftWorkJobProcessor_Close(t *testing.T) {
 
 		// Same as before, set up a timer to be a "timeout" for our job. This is so we can wait for the job to finish
 		// even after the processor has been closed (note: a processor can be closed without being completely drained).
-		timeout := time.NewTimer(30 * time.Second)
+		timeout := time.NewTimer(10 * time.Second)
 		defer timeout.Stop()
 		select {
 		case <-timeout.C:
@@ -243,7 +240,7 @@ func TestGoCraftWorkJobProcessor_Close(t *testing.T) {
 
 			// Close() has a 30-second timeout, so make sure our job takes just slightly longer than that to trigger the
 			// failure case.
-			time.Sleep(40 * time.Second)
+			time.Sleep(10 * time.Second)
 
 			ranJob <- struct{}{}
 			log.Info("finished running test job!")
@@ -266,7 +263,7 @@ func TestGoCraftWorkJobProcessor_Close(t *testing.T) {
 
 		// Same as before, set up a timer to be a "timeout" for our job. This is so we can wait for the job to finish
 		// even after the processor has been closed (note: a processor can be closed without being completely drained).
-		timeout := time.NewTimer(40 * time.Second)
+		timeout := time.NewTimer(10 * time.Second)
 		defer timeout.Stop()
 		select {
 		case <-timeout.C:
