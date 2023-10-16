@@ -101,7 +101,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-build-test-${{ hashFiles('**/go.sum', '**/*.go') }}
             ${{ runner.os }}-go-build-test
-            ${{ runner.os }}-go-build
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
