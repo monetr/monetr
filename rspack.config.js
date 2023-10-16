@@ -114,11 +114,9 @@ module.exports = (env, _argv) => {
       splitChunks: {
         chunks: 'all',
         minSize: 1000,
-        minRemainingSize: 0,
         minChunks: 1,
         maxAsyncRequests: 30,
         maxInitialRequests: 30,
-        enforceSizeThreshold: 50000,
         cacheGroups: {
           defaultVendors: {
             test: /[\\/]node_modules[\\/]/,
