@@ -44,10 +44,16 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         list(PREPEND TEST_BINARY_BUILD_ARGS "-cover" "-coverpkg=github.com/monetr/monetr/pkg/...")
       endif()
 
+      set(TAGS_FLAG)
+      if(TEST_GO_TAGS)
+        set(TAGS_FLAG "-tags=${TEST_GO_TAGS}")
+      endif()
+
+
       # Then we create a test that compiles the current package into a test binary we can use later.
       add_test(
         NAME precompile/${PACKAGE}
-        COMMAND ${CMAKE_Go_COMPILER} test ${TEST_BINARY_BUILD_ARGS}
+        COMMAND ${CMAKE_Go_COMPILER} test ${TEST_BINARY_BUILD_ARGS} ${TAGS_FLAG}
         WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
       )
       # We make sure that we have our go.mod (basically our dependencies) setup before we do this. We also denote this
@@ -129,8 +135,9 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         set_tests_properties(
           ${PACKAGE}/${FRIENDLY_TEST_NAME}
           PROPERTIES
-          FIXTURES_REQUIRED "DB;${PACKAGE}"
+          FIXTURES_REQUIRED "DB;${PACKAGE};go.mocks"
           ENVIRONMENT "GOCOVERDIR=${PACKAGE_COVERAGE_DIRECTORY}"
+          SKIP_REGULAR_EXPRESSION " SKIP: "
         )
       endforeach()
     endif()

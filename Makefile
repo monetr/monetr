@@ -67,6 +67,9 @@ monetr-release:
 docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.docs $(BUILD_ARGS)
 
+email: | $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.email $(BUILD_ARGS)
+
 migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.migrate $(BUILD_ARGS)
 
@@ -79,6 +82,9 @@ develop: | $(CMAKE_CONFIGURATION_DIRECTORY)
 
 develop-docs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.documentation.up $(BUILD_ARGS)
+
+develop-email: | $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.email $(BUILD_ARGS)
 
 logs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.logs $(BUILD_ARGS)

@@ -16,7 +16,6 @@ import (
 	"github.com/monetr/monetr/pkg/captcha"
 	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/config"
-	"github.com/monetr/monetr/pkg/mail"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/pubsub"
@@ -47,7 +46,7 @@ type Controller struct {
 	paywall                  billing.BasicPayWall
 	billing                  billing.BasicBilling
 	stripeWebhooks           billing.StripeWebhookHandler
-	communication            communication.UserCommunication
+	email                    communication.EmailCommunication
 	emailVerification        verification.Verification
 	passwordResetTokens      verification.TokenGenerator
 }
@@ -63,7 +62,7 @@ func NewController(
 	cachePool *redis.Pool,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	basicPaywall billing.BasicPayWall,
-	smtpCommunication mail.Communication,
+	email communication.EmailCommunication,
 ) *Controller {
 	var recaptcha captcha.Verification
 	var err error
@@ -99,15 +98,6 @@ func NewController(
 		passwordResetTokenGenerator = verification.NewTokenGenerator(configuration.Email.ForgotPassword.TokenSecret)
 	}
 
-	var userCommunication communication.UserCommunication
-	if configuration.Email.Enabled {
-		userCommunication = communication.NewUserCommunication(
-			log,
-			configuration,
-			smtpCommunication,
-		)
-	}
-
 	return &Controller{
 		captcha:                  recaptcha,
 		configuration:            configuration,
@@ -126,7 +116,7 @@ func NewController(
 		paywall:                  basicPaywall,
 		billing:                  basicBilling,
 		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
-		communication:            userCommunication,
+		email:                    email,
 		emailVerification:        emailVerification,
 		passwordResetTokens:      passwordResetTokenGenerator,
 	}

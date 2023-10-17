@@ -34,9 +34,10 @@ set(NODE_MODULES ${CMAKE_SOURCE_DIR}/node_modules)
 set(NODE_MODULES_MARKER ${CMAKE_BINARY_DIR}/node-modules-marker.txt)
 set(JEST_EXECUTABLE ${NODE_MODULES}/.bin/jest)
 set(RSPACK_EXECUTABLE ${NODE_MODULES}/.bin/rspack)
+set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES}/.bin/email)
 add_custom_command(
-  OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE}
-  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE}
+  OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE}
+  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE}
   COMMAND ${PNPM_EXECUTABLE} install
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
   # doing install again if we didn't finish the first time.
@@ -76,6 +77,6 @@ add_custom_command(
 )
 
 add_custom_target(
-  node_modules
+  dependencies.node_modules
   DEPENDS ${NODE_MODULES}
 )

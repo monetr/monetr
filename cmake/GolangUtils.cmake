@@ -37,3 +37,12 @@ function(go_install)
     COMMENT "Setting up ${PACKAGE}@${VERSION} for local development"
   )
 endfunction()
+
+# mockgen for local development
+set(MOCKGEN_EXECUTABLE ${GO_BIN_DIR}/mockgen)
+set(MOCKGEN_VERSION "v1.6.0")
+go_install(
+  OUTPUT ${MOCKGEN_EXECUTABLE}
+  PACKAGE "github.com/golang/mock/mockgen"
+  VERSION ${MOCKGEN_VERSION}
+)

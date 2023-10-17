@@ -4,6 +4,7 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
+import { configure } from '@testing-library/react';
 import axios from 'axios';
 
 import { server } from './testutils/server';
@@ -20,6 +21,10 @@ module.export = global.CONFIG = {
 
 window.API = axios.create({
   baseURL: '/api',
+});
+
+configure({
+  asyncUtilTimeout: 10000,
 });
 
 beforeAll(() => server.listen());

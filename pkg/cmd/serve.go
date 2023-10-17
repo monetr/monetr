@@ -14,9 +14,9 @@ import (
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/build"
 	"github.com/monetr/monetr/pkg/cache"
+	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/logging"
-	"github.com/monetr/monetr/pkg/mail"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/pubsub"
@@ -176,9 +176,12 @@ func RunServer() error {
 	plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
 	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
 
-	var smtpClient mail.Communication
+	var email communication.EmailCommunication
 	if configuration.Email.Enabled {
-		smtpClient = mail.NewSMTPCommunication(log, configuration.Email.SMTP)
+		email = communication.NewEmailCommunication(
+			log,
+			configuration,
+		)
 	}
 
 	backgroundJobs, err := background.NewBackgroundJobs(
@@ -217,7 +220,7 @@ func RunServer() error {
 		redisController.Pool(),
 		plaidSecrets,
 		basicPaywall,
-		smtpClient,
+		email,
 	)...)
 
 	listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)

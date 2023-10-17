@@ -66,6 +66,8 @@ add_custom_command(
     ${GO_MODULES}
     ${APP_GO_FILES}
     ${UI_DIST}
+    ${HTML_EMAIL_TEMPLATES}
+    ${TEXT_EMAIL_TEMPLATES}
 )
 
 set(SIMPLE_ICONS ${CMAKE_SOURCE_DIR}/pkg/icons/sources/simple-icons/icons)

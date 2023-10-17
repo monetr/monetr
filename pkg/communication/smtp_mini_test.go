@@ -1,6 +1,6 @@
 //go:build mini
 
-package mail
+package communication
 
 import (
 	"context"
@@ -13,6 +13,7 @@ import (
 )
 
 func TestSmtpCommunication_Send(t *testing.T) {
+	t.Skip("not working at the moment, haven't used this since minikube was used for local dev")
 	t.Run("simple", func(t *testing.T) {
 		mail := NewSMTPCommunication(testutils.GetLog(t), config.SMTPClient{
 			Username: "restapi",
