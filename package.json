@@ -74,7 +74,7 @@
     "react-plaid-link": "3.3.2",
     "react-router-dom": "6.6.1",
     "react-select": "5.5.9",
-    "resolve": "1.22.1",
+    "resolve": "1.22.8",
     "resolve-url-loader": "5.0.0",
     "rrule": "2.7.2",
     "tailwind-merge": "1.13.2",
