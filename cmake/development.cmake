@@ -185,6 +185,14 @@ add_custom_target(
 )
 
 add_custom_target(
+  development.restart
+  COMMENT "Restarting the specified CONTAINER"
+  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} restart $(CONTAINER)
+  COMMAND_EXPAND_LISTS
+  USES_TERMINAL
+)
+
+add_custom_target(
   development.shell.sql
   COMMENT "Spawning a SQL shell inside of PostgreSQL."
   COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} exec postgres psql -U postgres

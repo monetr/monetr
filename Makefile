@@ -89,6 +89,9 @@ develop-email: | $(CMAKE_CONFIGURATION_DIRECTORY)
 logs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.logs $(BUILD_ARGS)
 
+restart: | $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.restart $(BUILD_ARGS)
+
 shell: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.shell $(BUILD_ARGS)
 
