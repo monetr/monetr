@@ -408,13 +408,13 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 			)
 		}
 
-		if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
-			Login: *login,
-			VerifyURL: fmt.Sprintf(
-				"%s/verify/email?token=%s",
-				c.configuration.GetUIURL(),
-				url.QueryEscape(verificationToken),
-			),
+		if err = c.email.SendVerification(c.getContext(ctx), communication.VerifyEmailParams{
+			BaseURL:      c.configuration.GetUIURL(),
+			Email:        login.Email,
+			FirstName:    login.FirstName,
+			LastName:     login.LastName,
+			SupportEmail: "support@monetr.app",
+			VerifyURL:    fmt.Sprintf("%s/verify/email?token=%s", c.configuration.GetUIURL(), url.QueryEscape(verificationToken)),
 		}); err != nil {
 			return c.wrapAndReturnError(
 				ctx,
@@ -541,12 +541,13 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		return ctx.NoContent(http.StatusOK)
 	}
 
-	if err = c.communication.SendVerificationEmail(c.getContext(ctx), communication.VerifyEmailParams{
-		Login: *login,
-		VerifyURL: fmt.Sprintf("%s/verify/email?token=%s",
-			c.configuration.GetUIURL(),
-			url.QueryEscape(verificationToken),
-		),
+	if err = c.email.SendVerification(c.getContext(ctx), communication.VerifyEmailParams{
+		BaseURL:      c.configuration.GetUIURL(),
+		Email:        login.Email,
+		FirstName:    login.FirstName,
+		LastName:     login.LastName,
+		SupportEmail: "support@monetr.app",
+		VerifyURL:    fmt.Sprintf("%s/verify/email?token=%s", c.configuration.GetUIURL(), url.QueryEscape(verificationToken)),
 	}); err != nil {
 		c.reportWrappedError(ctx, err, "failed to send (re-send) verification email")
 		return ctx.NoContent(http.StatusOK)
@@ -643,12 +644,13 @@ func (c *Controller) sendForgotPassword(ctx echo.Context) error {
 		)
 	}
 
-	if err = c.communication.SendPasswordResetEmail(c.getContext(ctx), communication.ForgotPasswordParams{
-		Login: *login,
-		ResetURL: fmt.Sprintf("%s/password/reset?token=%s",
-			c.configuration.GetUIURL(),
-			url.QueryEscape(passwordResetToken),
-		),
+	if err = c.email.SendPasswordReset(c.getContext(ctx), communication.PasswordResetParams{
+		BaseURL:      c.configuration.GetUIURL(),
+		Email:        login.Email,
+		FirstName:    login.FirstName,
+		LastName:     login.LastName,
+		SupportEmail: "support@monetr.app",
+		ResetURL:     fmt.Sprintf("%s/password/reset?token=%s", c.configuration.GetUIURL(), url.QueryEscape(passwordResetToken)),
 	}); err != nil {
 		return c.wrapAndReturnError(
 			ctx,

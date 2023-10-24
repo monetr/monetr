@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,15 +12,17 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/gavv/httpexpect/v2"
+	"github.com/golang/mock/gomock"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/pkg/application"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/billing"
 	"github.com/monetr/monetr/pkg/cache"
+	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/controller"
-	"github.com/monetr/monetr/pkg/internal/mock_mail"
 	"github.com/monetr/monetr/pkg/internal/mock_secrets"
+	"github.com/monetr/monetr/pkg/internal/mockgen"
 	"github.com/monetr/monetr/pkg/internal/testutils"
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/repository"
@@ -44,9 +47,10 @@ const (
 
 func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	return config.Configuration{
-		UIDomainName:  TestUIDomainName,
-		APIDomainName: TestAPIDomainName,
-		AllowSignUp:   true,
+		UIDomainName:        TestUIDomainName,
+		APIDomainName:       TestAPIDomainName,
+		AllowSignUp:         true,
+		ExternalURLProtocol: "https",
 		Server: config.Server{
 			Cookies: config.Cookies{
 				SameSiteStrict: true,
@@ -92,7 +96,7 @@ func NewTestApplication(t *testing.T) *httpexpect.Expect {
 }
 
 type TestApp struct {
-	Mail *mock_mail.MockMailCommunication
+	Email *mockgen.MockEmailCommunication
 }
 
 type TestAppInterfaces struct {
@@ -131,7 +135,11 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		jobRunner = background.NewSynchronousJobRunner(t, plaidClient, plaidSecrets)
 	}
 
-	mockMail := mock_mail.NewMockMail()
+	emailMockController := gomock.NewController(t)
+	t.Cleanup(func() {
+		defer emailMockController.Finish()
+	})
+	email := mockgen.NewMockEmailCommunication(emailMockController)
 
 	c := controller.NewController(
 		log,
@@ -144,7 +152,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		redisPool,
 		plaidSecrets,
 		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
-		mockMail,
+		email,
 	)
 	app := application.NewApp(configuration, c)
 
@@ -164,7 +172,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	})
 
 	return &TestApp{
-		Mail: mockMail,
+		Email: email,
 	}, expect
 }
 
@@ -240,8 +248,8 @@ func GivenILogin(t *testing.T, e *httpexpect.Expect, email, password string) (to
 }
 
 func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
-	response.Cookie(TestCookieName).Path().Equal("/")
-	response.Cookie(TestCookieName).Domain().Equal(TestAPIDomainName)
+	response.Cookie(TestCookieName).Path().IsEqual("/")
+	response.Cookie(TestCookieName).Domain().IsEqual(TestAPIDomainName)
 	assert.True(t, response.Cookie(TestCookieName).Raw().Secure, "cookie must be secure")
 	assert.True(t, response.Cookie(TestCookieName).Raw().HttpOnly, "cookie must be secure")
 
@@ -275,4 +283,57 @@ func GenerateToken(t *testing.T, conf config.Configuration, loginId, userId, acc
 	require.NoError(t, err, "must be able to sign generated token")
 
 	return signedToken
+}
+
+func MustSendVerificationEmail(t *testing.T, app *TestApp, n int) {
+	app.Email.
+		EXPECT().
+		SendVerification(
+			gomock.Any(),
+			gomock.Any(),
+		).
+		Return(nil).
+		Times(n).
+		Do(func(ctx context.Context, params communication.VerifyEmailParams) error {
+			require.NotNil(t, ctx, "email context cannot be nil")
+			require.NotEmpty(t, params.Email, "verification email address cannot be empty")
+			require.NotEmpty(t, params.FirstName, "verification email first name cannot be empty")
+			require.NotEmpty(t, params.LastName, "verification email last name cannot be empty")
+			require.NotEmpty(t, params.BaseURL, "verification email base url must be defined")
+			require.NotEmpty(t, params.VerifyURL, "verification email verify url must be defined")
+			return nil
+		})
+}
+
+func MustSendPasswordResetEmail(t *testing.T, app *TestApp, n int, emails ...string) {
+	app.Email.
+		EXPECT().
+		SendPasswordReset(
+			gomock.Any(),
+			gomock.Any(),
+		).
+		Return(nil).
+		Times(n).
+		Do(func(ctx context.Context, params communication.PasswordResetParams) error {
+			require.NotNil(t, ctx, "email context cannot be nil")
+			require.NotEmpty(t, params.Email, "password reset email address cannot be empty")
+			require.NotEmpty(t, params.FirstName, "password reset email first name cannot be empty")
+			require.NotEmpty(t, params.LastName, "password reset email last name cannot be empty")
+			require.NotEmpty(t, params.BaseURL, "password reset email base url must be defined")
+			require.NotEmpty(t, params.ResetURL, "password reset email url must be defined")
+			if len(emails) > 0 {
+				for _, email := range emails {
+					if strings.EqualFold(email, params.Email) {
+						return nil
+					}
+				}
+				// If none of the emails match then something is wrong.
+				t.Fatalf(
+					"email specified for reset password <%s> was not expected, expected address(es): %s",
+					params.Email,
+					strings.Join(emails, ", "),
+				)
+			}
+			return nil
+		})
 }

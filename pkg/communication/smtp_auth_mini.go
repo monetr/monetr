@@ -1,6 +1,6 @@
 //go:build mini
 
-package mail
+package communication
 
 import (
 	"errors"

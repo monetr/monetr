@@ -1,5 +1,6 @@
 *.log
 .pnpm-store
+.react-email
 bin
 coverage
 libexec
@@ -11,6 +12,8 @@ node_modules
 generated
 values.mayview.yaml
 redoc-static.html
+pkg/communication/email_templates/*
+!pkg/communication/email_templates/README.md
 pkg/ui/static/*
 !pkg/ui/static/README.md
 !pkg/ui/static/NOTICE

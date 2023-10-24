@@ -37,6 +37,7 @@ find_package(Docker QUIET)
 # Import this _after_ we have found all the packages above.
 include(GolangUtils)
 include("${CMAKE_SOURCE_DIR}/cmake/frontend.cmake")
+include(EmailTemplates)
 include("${CMAKE_SOURCE_DIR}/cmake/backend.cmake")
 
 if(BUILD_DEPLOYMENT_TARGETS)
@@ -252,7 +253,7 @@ if(BUILD_TESTING)
 
   add_test(
     NAME ui.dependencies
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t node_modules
+    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} -t dependencies.node_modules
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   )
   set_tests_properties(ui.dependencies PROPERTIES FIXTURES_SETUP node_modules DEPENDS ${PNPM_EXECUTABLE})

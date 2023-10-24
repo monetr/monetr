@@ -45,6 +45,7 @@
     "@mui/lab": "5.0.0-alpha.114",
     "@mui/material": "5.11.3",
     "@mui/styles": "5.11.2",
+    "@react-email/components": "0.0.7",
     "@sentry/browser": "6.19.7",
     "@sentry/core": "6.19.7",
     "@sentry/react": "6.19.7",
@@ -66,6 +67,7 @@
     "react-app-polyfill": "3.0.0",
     "react-day-picker": "8.8.2",
     "react-dom": "18.2.0",
+    "react-email": "1.9.5",
     "react-google-recaptcha": "2.1.0",
     "react-infinite-scroll-hook": "4.0.4",
     "react-number-format": "5.3.1",
@@ -162,5 +164,9 @@
   },
   "msw": {
     "workerDirectory": "public"
+  },
+  "overrides": {
+    "postcss": "8.4.31",
+    "react": "18.2.0"
   }
 }

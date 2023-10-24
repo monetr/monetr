@@ -6,9 +6,9 @@ import (
 	"github.com/monetr/monetr/pkg/application"
 	"github.com/monetr/monetr/pkg/background"
 	"github.com/monetr/monetr/pkg/billing"
+	"github.com/monetr/monetr/pkg/communication"
 	"github.com/monetr/monetr/pkg/config"
 	"github.com/monetr/monetr/pkg/controller"
-	"github.com/monetr/monetr/pkg/mail"
 	"github.com/monetr/monetr/pkg/metrics"
 	"github.com/monetr/monetr/pkg/platypus"
 	"github.com/monetr/monetr/pkg/secrets"
@@ -28,7 +28,7 @@ func getControllers(
 	cache *redis.Pool,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	basicPaywall billing.BasicPayWall,
-	smtpCommunication mail.Communication,
+	email communication.EmailCommunication,
 ) []application.Controller {
 	return []application.Controller{
 		controller.NewController(
@@ -42,7 +42,7 @@ func getControllers(
 			cache,
 			plaidSecrets,
 			basicPaywall,
-			smtpCommunication,
+			email,
 		),
 		ui.NewUIController(log, configuration),
 	}

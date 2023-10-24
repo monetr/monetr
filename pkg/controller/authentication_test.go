@@ -364,8 +364,9 @@ func TestLogin(t *testing.T) {
 		config.Email.Verification.TokenLifetime = 5 * time.Second
 		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????/")
 		config.Email.Domain = "monetr.mini"
-		e := NewTestApplicationWithConfig(t, config)
+		app, e := NewTestApplicationExWithConfig(t, config)
 
+		MustSendVerificationEmail(t, app, 1)
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
@@ -745,7 +746,7 @@ func TestRegister(t *testing.T) {
 		config.Email.Verification.TokenLifetime = 5 * time.Second
 		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
 		config.Email.Domain = "monetr.mini"
-		e := NewTestApplicationWithConfig(t, config)
+		app, e := NewTestApplicationExWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -757,6 +758,8 @@ func TestRegister(t *testing.T) {
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+
+		MustSendVerificationEmail(t, app, 1)
 
 		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
@@ -827,7 +830,7 @@ func TestVerifyEmail(t *testing.T) {
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
 
-		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
+		MustSendVerificationEmail(t, app, 1)
 
 		{
 			response := e.POST(`/api/authentication/register`).
@@ -840,12 +843,6 @@ func TestVerifyEmail(t *testing.T) {
 				String().
 				IsEqual("A verification email has been sent to your email address, please verify your email.")
 			response.JSON().Object().NotContainsKey("token")
-		}
-
-		{ // Make sure that an email was sent with the token.
-			assert.Len(t, app.Mail.Sent, 1, "there should have been one email sent now")
-			email := app.Mail.Sent[0]
-			assert.Equal(t, registerRequest.Email, email.To, "email should have been sent to the provided address")
 		}
 
 		{ // Now that we have registered using this email. Try to login without verifying.
@@ -890,7 +887,7 @@ func TestVerifyEmail(t *testing.T) {
 	})
 
 	t.Run("bad verification token", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, config)
+		app, e := NewTestApplicationExWithConfig(t, config)
 
 		// Create a token generator with a different secret so it will always generate invalid tokens.
 		tokenGenerator := verification.NewTokenGenerator(gofakeit.UUID())
@@ -905,6 +902,8 @@ func TestVerifyEmail(t *testing.T) {
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+
+		MustSendVerificationEmail(t, app, 1)
 
 		{
 			response := e.POST(`/api/authentication/register`).
@@ -951,7 +950,7 @@ func TestVerifyEmail(t *testing.T) {
 	})
 
 	t.Run("expired verification code", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, config)
+		app, e := NewTestApplicationExWithConfig(t, config)
 
 		tokenGenerator := verification.NewTokenGenerator(config.Email.Verification.TokenSecret)
 
@@ -965,6 +964,8 @@ func TestVerifyEmail(t *testing.T) {
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+
+		MustSendVerificationEmail(t, app, 1)
 
 		{
 			response := e.POST(`/api/authentication/register`).
@@ -1046,7 +1047,7 @@ func TestResendVerificationEmail(t *testing.T) {
 	config.Email.Verification.Enabled = true
 	config.Email.Verification.TokenLifetime = 2 * time.Second
 	config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
-	config.Email.Domain = "monetr.mini"
+	config.Email.Domain = "monetr.local"
 
 	t.Run("happy path", func(t *testing.T) {
 		app, e := NewTestApplicationExWithConfig(t, config)
@@ -1062,9 +1063,9 @@ func TestResendVerificationEmail(t *testing.T) {
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
 
-		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
+		MustSendVerificationEmail(t, app, 2)
 
-		{
+		{ // Sign up for monetr, should send 1 verification email
 			response := e.POST(`/api/authentication/register`).
 				WithJSON(registerRequest).
 				Expect()
@@ -1077,12 +1078,6 @@ func TestResendVerificationEmail(t *testing.T) {
 			response.JSON().Object().NotContainsKey("token")
 		}
 
-		{ // Make sure that an email was sent with the token.
-			assert.Len(t, app.Mail.Sent, 1, "there should have been one emails sent now")
-			email := app.Mail.Sent[0]
-			assert.Equal(t, registerRequest.Email, email.To, "email should have been sent to the provided address")
-		}
-
 		{ // Now try to resend the verification email.
 			response := e.POST("/api/authentication/verify/resend").
 				WithJSON(map[string]interface{}{
@@ -1093,16 +1088,13 @@ func TestResendVerificationEmail(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.Body().IsEmpty() // This endpoint should not return anything if it succeeds.
 		}
-
-		{ // Now make sure that we have actually sent another email.
-			assert.Len(t, app.Mail.Sent, 2, "there should have been two emails sent now")
-			email := app.Mail.Sent[1]
-			assert.Equal(t, registerRequest.Email, email.To, "email should have been sent to the provided address")
-		}
 	})
 
 	t.Run("non-existent email", func(t *testing.T) {
 		app, e := NewTestApplicationExWithConfig(t, config)
+
+		// Set n to 0, there should not be any emails sent.
+		MustSendVerificationEmail(t, app, 0)
 
 		response := e.POST("/api/authentication/verify/resend").
 			WithJSON(map[string]interface{}{
@@ -1112,12 +1104,13 @@ func TestResendVerificationEmail(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.Body().IsEmpty() // Even if the email provided does not exist, don't indicate anything to the client.
-
-		assert.Empty(t, app.Mail.Sent, "no emails should have been sent, address is not associated with a login")
 	})
 
 	t.Run("blank email", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, config)
+		app, e := NewTestApplicationExWithConfig(t, config)
+
+		// Set n to 0, there should not be any emails sent.
+		MustSendVerificationEmail(t, app, 0)
 
 		response := e.POST("/api/authentication/verify/resend").
 			WithJSON(map[string]interface{}{
@@ -1148,10 +1141,9 @@ func TestSendForgotPassword(t *testing.T) {
 		}
 		resetPasswordRequest.Email = email
 
-		// Make sure we are starting with a clean slate.
-		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
+		MustSendPasswordResetEmail(t, app, 1, email)
 
-		{
+		{ // Initiate the password reset email
 			response := e.POST(`/api/authentication/forgot`).
 				WithJSON(resetPasswordRequest).
 				Expect()
@@ -1159,8 +1151,6 @@ func TestSendForgotPassword(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.Body().IsEmpty()
 		}
-
-		assert.Len(t, app.Mail.Sent, 1, "should have sent a single email to reset password")
 	})
 
 	t.Run("success for non-existent email", func(t *testing.T) {
@@ -1171,8 +1161,8 @@ func TestSendForgotPassword(t *testing.T) {
 		}
 		resetPasswordRequest.Email = testutils.GetUniqueEmail(t)
 
-		// Make sure we are starting with a clean slate.
-		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
+		// Because the email does not exist, there should not be any email sent.
+		MustSendPasswordResetEmail(t, app, 0)
 
 		{
 			response := e.POST(`/api/authentication/forgot`).
@@ -1182,9 +1172,6 @@ func TestSendForgotPassword(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.Body().IsEmpty()
 		}
-
-		// Make sure that even though the request succeeded, no emails were sent since the email address was not real.
-		assert.Empty(t, app.Mail.Sent, "no emails should have been sent yet")
 	})
 
 	t.Run("with unverified email", func(t *testing.T) {
@@ -1194,6 +1181,9 @@ func TestSendForgotPassword(t *testing.T) {
 		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
 		app, e := NewTestApplicationExWithConfig(t, verificationConf)
 
+		// There should be one email sent for verification
+		MustSendVerificationEmail(t, app, 1)
+
 		email, _ := GivenIHaveLogin(t, e)
 
 		var resetPasswordRequest struct {
@@ -1201,8 +1191,9 @@ func TestSendForgotPassword(t *testing.T) {
 		}
 		resetPasswordRequest.Email = email
 
-		assert.Len(t, app.Mail.Sent, 1, "should contain the verification email")
-		assert.Equal(t, "Verify Your Email Address", app.Mail.Sent[0].Subject)
+		// Because they have not verified their email, they should not be able to send a forgot password request. There
+		// should be no password reset emails.
+		MustSendPasswordResetEmail(t, app, 0)
 
 		{
 			response := e.POST(`/api/authentication/forgot`).
@@ -1215,8 +1206,6 @@ func TestSendForgotPassword(t *testing.T) {
 				String().
 				IsEqual("You must verify your email before you can send forgot password requests.")
 		}
-
-		assert.Len(t, app.Mail.Sent, 1, "should not have sent another email")
 	})
 
 	t.Run("with verified email", func(t *testing.T) {
@@ -1227,15 +1216,14 @@ func TestSendForgotPassword(t *testing.T) {
 		tokenGenerator := verification.NewTokenGenerator(verificationConf.Email.Verification.TokenSecret)
 		app, e := NewTestApplicationExWithConfig(t, verificationConf)
 
+		MustSendVerificationEmail(t, app, 1)
+
 		email, _ := GivenIHaveLogin(t, e)
 
 		var resetPasswordRequest struct {
 			Email string `json:"email"`
 		}
 		resetPasswordRequest.Email = email
-
-		assert.Len(t, app.Mail.Sent, 1, "should contain the verification email")
-		assert.Equal(t, "Verify Your Email Address", app.Mail.Sent[0].Subject)
 
 		{ // Then generate a verification token and try to use it.
 			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), email, 10*time.Second)
@@ -1253,6 +1241,9 @@ func TestSendForgotPassword(t *testing.T) {
 			response.JSON().Path("$.message").String().IsEqual("Your email is now verified. Please login.")
 		}
 
+		// This time since their email is verified, they should receive a forgot password email.
+		MustSendPasswordResetEmail(t, app, 1, email)
+
 		{
 			response := e.POST(`/api/authentication/forgot`).
 				WithJSON(resetPasswordRequest).
@@ -1261,12 +1252,13 @@ func TestSendForgotPassword(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.Body().IsEmpty()
 		}
-
-		assert.Len(t, app.Mail.Sent, 2, "should now have sent 2 emails")
 	})
 
 	t.Run("with bad json body", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationExWithConfig(t, conf)
+
+		// Since it's not a valid request, we should never send an email.
+		MustSendPasswordResetEmail(t, app, 0)
 
 		{ // Send a request with invalid json body.
 			response := e.POST(`/api/authentication/forgot`).
@@ -1282,7 +1274,10 @@ func TestSendForgotPassword(t *testing.T) {
 	})
 
 	t.Run("with blank email", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationExWithConfig(t, conf)
+
+		// Since it's not a valid request, we should never send an email.
+		MustSendPasswordResetEmail(t, app, 0)
 
 		{ // Send a request with invalid json body.
 			response := e.POST(`/api/authentication/forgot`).
@@ -1302,7 +1297,10 @@ func TestSendForgotPassword(t *testing.T) {
 		captchaConf.ReCAPTCHA.PublicKey = gofakeit.UUID()
 		captchaConf.ReCAPTCHA.PrivateKey = gofakeit.UUID()
 		captchaConf.ReCAPTCHA.VerifyForgotPassword = true
-		e := NewTestApplicationWithConfig(t, captchaConf)
+		app, e := NewTestApplicationExWithConfig(t, captchaConf)
+
+		// Since it's not a valid request, we should never send an email.
+		MustSendPasswordResetEmail(t, app, 0)
 
 		{ // Send a request with invalid json body.
 			response := e.POST(`/api/authentication/forgot`).
