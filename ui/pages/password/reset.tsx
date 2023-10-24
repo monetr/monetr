@@ -36,7 +36,6 @@ export default function PasswordResetNew(): JSX.Element {
 
   useEffect(() => {
     if (!token) {
-      // TODO This ends up enqueuing two snackbars for some reason?
       navigate('/login');
       enqueueSnackbar('You must get a password reset link to change your password.', {
         variant: 'warning',
