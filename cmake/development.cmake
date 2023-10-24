@@ -103,6 +103,7 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- monetr is now running locally."
   COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${LOCAL_PROTOCOL}://${LOCAL_DOMAIN}"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- Emails sent during development can be seen at ${LOCAL_PROTOCOL}://${LOCAL_DOMAIN}/mail"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- When you are done you can shutdown the local development environment using:"
   COMMAND ${CMAKE_COMMAND} -E echo "--   make shutdown"

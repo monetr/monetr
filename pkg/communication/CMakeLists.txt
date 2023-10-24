@@ -10,7 +10,7 @@ add_custom_target(
     ${MOCKGEN_EXECUTABLE}
 )
 
-set(TEST_GO_TAGS "mini")
+set(TEST_GO_TAGS "local")
 provision_golang_tests(${CMAKE_CURRENT_SOURCE_DIR})
 
 # if (BUILD_TESTING)

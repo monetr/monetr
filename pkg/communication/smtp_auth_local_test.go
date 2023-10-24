@@ -1,4 +1,4 @@
-//go:build mini
+//go:build local
 
 package communication
 
