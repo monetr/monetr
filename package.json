@@ -1,3 +1,23 @@
 {
-  "name": "monetr"
+  "name": "monetr",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "dependencies": {
+    "@react-email/components": "0.0.7",
+    "react-email": "1.9.5"
+  },
+  "overrides": {
+    "postcss": "8.4.31",
+    "react": "18.2.0"
+  }
 }

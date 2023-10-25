@@ -15,7 +15,7 @@ import {
   Text,
 } from '@react-email/components';
 
-import tailwindConfig from '../tailwind.config.cjs';
+import tailwindConfig from '../interface/tailwind.config.cjs';
 
 interface VerifyEmailProps {
   baseUrl?: string;

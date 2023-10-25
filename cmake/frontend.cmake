@@ -7,8 +7,8 @@ find_package(Npm REQUIRED)
 find_package(Pnpm REQUIRED)
 
 # Define the directories
-set(PUBLIC_DIR "${CMAKE_SOURCE_DIR}/public")
-set(UI_SRC_DIR "${CMAKE_SOURCE_DIR}/ui")
+set(UI_SRC_DIR "${CMAKE_SOURCE_DIR}/interface")
+set(PUBLIC_DIR "${UI_SRC_DIR}/public")
 
 # Get all UI files recursively
 file(GLOB_RECURSE ALL_UI_FILES "${UI_SRC_DIR}/*")
@@ -25,19 +25,20 @@ file(GLOB PUBLIC_FILES "${PUBLIC_DIR}/*")
 
 # Get the list of UI_CONFIG_FILES
 file(GLOB UI_CONFIG_FILES
-  "${CMAKE_SOURCE_DIR}/tsconfig.json"
-  "${CMAKE_SOURCE_DIR}/*.config.js"
-  "${CMAKE_SOURCE_DIR}/*.config.cjs"
+  "${UI_SRC_DIR}/tsconfig.json"
+  "${UI_SRC_DIR}/*.config.js"
+  "${UI_SRC_DIR}/*.config.cjs"
 )
 
 set(NODE_MODULES ${CMAKE_SOURCE_DIR}/node_modules)
 set(NODE_MODULES_MARKER ${CMAKE_BINARY_DIR}/node-modules-marker.txt)
 set(JEST_EXECUTABLE ${NODE_MODULES}/.bin/jest)
 set(RSPACK_EXECUTABLE ${NODE_MODULES}/.bin/rspack)
+# TODO Move react-email out of the interface package.
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES}/.bin/email)
 add_custom_command(
   OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE}
-  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE}
+  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${UI_SRC_DIR}/node_modules
   COMMAND ${PNPM_EXECUTABLE} install
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
   # doing install again if we didn't finish the first time.
@@ -45,6 +46,8 @@ add_custom_command(
   COMMENT "Installing node/ui dependencies"
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS
+    ${UI_SRC_DIR}/package.json
+    ${UI_SRC_DIR}/pnpm-lock.yaml
     ${CMAKE_SOURCE_DIR}/package.json
     ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
     ${PNPM_EXECUTABLE}
@@ -65,8 +68,10 @@ add_custom_command(
   COMMAND ${GIT_EXECUTABLE} clean -f -X ${CMAKE_SOURCE_DIR}/pkg/ui/static
   COMMAND ${RSPACK_EXECUTABLE} build --mode production
   COMMENT "Building monetr's user interface"
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  WORKING_DIRECTORY ${UI_SRC_DIR}
   DEPENDS
+    ${UI_SRC_DIR}/package.json
+    ${UI_SRC_DIR}/pnpm-lock.yaml
     ${CMAKE_SOURCE_DIR}/package.json
     ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
     ${NODE_MODULES}
