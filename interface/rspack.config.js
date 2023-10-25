@@ -74,10 +74,10 @@ module.exports = (env, _argv) => {
     },
     mode: isDevelopment ? 'development' : 'production',
     target: 'web',
-    entry: './ui/index.tsx',
+    entry: './src/index.tsx',
     output: {
       publicPath: '/',
-      path: 'pkg/ui/static',
+      path: '../pkg/ui/static',
       filename: `assets/scripts/${filename}.js`,
       cssFilename: `assets/styles/${filename}.css`,
       cssChunkFilename: `assets/styles/${filename}.css`,
@@ -90,7 +90,7 @@ module.exports = (env, _argv) => {
         '.ts',
         '.svg',
       ],
-      modules: ['ui', 'node_modules'],
+      modules: ['src', 'node_modules'],
     },
     devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
     devServer: {

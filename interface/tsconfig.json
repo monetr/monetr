@@ -1,25 +1,21 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "baseUrl": "ui",
+    "baseUrl": "src",
     "esModuleInterop": true,
     "jsx": "react",
     "module": "ESNEXT",
     "moduleResolution": "node",
     "noImplicitAny": false,
     "noImplicitReturns": true,
-    "outDir": "pkg/ui/static",
+    "outDir": "../pkg/ui/static",
     "sourceMap": true,
     "strict": false,
     "target": "ES2022"
   },
   "include": [
-    "../make.ts",
-    "ui/**/*",
+    "src/**/*",
     "../tailwind.config.cjs"
-  ],
-  "exclude": [
-    "pkg/ui/static"
   ],
   "ts-node": {
     "esm": true,

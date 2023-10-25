@@ -8,9 +8,9 @@ module.exports = {
     hoverOnlyWhenSupported: true,
   },
   content: [
-    './ui/**/*.tsx',
-    './ui/**/*.jsx',
-    './ui/**/*.js',
+    './src/**/*.tsx',
+    './src/**/*.jsx',
+    './src/**/*.js',
     './node_modules/@tremor/**/*.{js,ts,jsx,tsx}', // Tremor module
   ],
   theme: {
