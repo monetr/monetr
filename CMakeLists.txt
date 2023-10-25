@@ -266,7 +266,7 @@ foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   add_subdirectory(${DIR})
 endforeach()
 
-file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/ui/*CMakeLists.txt")
+file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/interface/*CMakeLists.txt")
 # # Loop through the files and get their directories
 foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)

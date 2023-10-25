@@ -1,6 +1,6 @@
 macro(provision_node_tests CURRENT_SOURCE_DIR)
   if (BUILD_TESTING)
-    string(REPLACE "${CMAKE_SOURCE_DIR}/" "" PACKAGE "${CURRENT_SOURCE_DIR}")
+    string(REPLACE "${UI_SRC_DIR}/" "" PACKAGE "${CURRENT_SOURCE_DIR}")
     message(STATUS "Preparing tests for: ${PACKAGE}")
 
     set(PACKAGE_TEST_DIRECTORY ${CMAKE_BINARY_DIR}/tests/${PACKAGE})
@@ -14,7 +14,7 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
     foreach(SPEC_FILE IN LISTS SPEC_FILES)
       string(REGEX REPLACE "([a-zA-Z0-9_]+)\\.spec.+" "\\1" SPEC_NAME "${SPEC_FILE}")
 
-      set(TEST_ARGS "--config" "${CMAKE_SOURCE_DIR}/jest.config.ts")
+      set(TEST_ARGS "--config" "${UI_SRC_DIR}/jest.config.ts")
       if(TEST_COVERAGE)
         # If we are collecting code coverage then we want to add these flags to jest. Because we are running tests one
         # file at a time we need to pass --watchAll=false in order for jest to properly collect coverage.
