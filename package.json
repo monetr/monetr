@@ -12,10 +12,6 @@
       "react-app/jest"
     ]
   },
-  "dependencies": {
-    "@react-email/components": "0.0.7",
-    "react-email": "1.9.5"
-  },
   "overrides": {
     "postcss": "8.4.31",
     "react": "18.2.0"

@@ -47,7 +47,6 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS
     ${UI_SRC_DIR}/package.json
-    ${UI_SRC_DIR}/pnpm-lock.yaml
     ${CMAKE_SOURCE_DIR}/package.json
     ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
     ${PNPM_EXECUTABLE}
@@ -71,7 +70,6 @@ add_custom_command(
   WORKING_DIRECTORY ${UI_SRC_DIR}
   DEPENDS
     ${UI_SRC_DIR}/package.json
-    ${UI_SRC_DIR}/pnpm-lock.yaml
     ${CMAKE_SOURCE_DIR}/package.json
     ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
     ${NODE_MODULES}

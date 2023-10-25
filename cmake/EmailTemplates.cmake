@@ -48,7 +48,7 @@ add_custom_command(
   OUTPUT ${EMAIL_DEV_DIRECTORY}/package.json ${EMAIL_DEV_DIRECTORY}/pnpm-lock.yaml
   BYPRODUCTS ${EMAIL_DEV_DIRECTORY}/package.json ${EMAIL_DEV_DIRECTORY}/pnpm-lock.yaml
   COMMENT "Setting up required filed for react-email development"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/package.json ${EMAIL_DEV_DIRECTORY}/package.json
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${EMAIL_TEMPLATE_INPUT_DIRECTORY}/package.json ${EMAIL_DEV_DIRECTORY}/package.json
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml ${EMAIL_DEV_DIRECTORY}/pnpm-lock.yaml
 )
 

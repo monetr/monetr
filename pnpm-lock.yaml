@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  emails:
     dependencies:
       '@react-email/components':
         specifier: 0.0.7
