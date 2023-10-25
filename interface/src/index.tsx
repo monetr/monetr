@@ -7,10 +7,10 @@ import { Integrations } from '@sentry/tracing';
 import axios from 'axios';
 
 import reportWebVitals from './reportWebVitals';
+import Root from './Root';
 
-import { NewClient } from 'api/api';
-import RelayTransport from 'relay/transport';
-import Root from 'Root';
+import { NewClient } from './api/api';
+import RelayTransport from './relay/transport';
 
 import './styles/styles.css';
 import './styles/index.scss';

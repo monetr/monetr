@@ -3,10 +3,11 @@ import { BrowserRouter } from 'react-router-dom';
 import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 
-import MQueryClient from 'components/MQueryClient';
-import MSnackbarProvider from 'components/MSnackbarProvider';
-import Monetr from 'monetr';
-import { newTheme } from 'theme';
+import Monetr from './monetr';
+import { newTheme } from './theme';
+
+import MQueryClient from './components/MQueryClient';
+import MSnackbarProvider from './components/MSnackbarProvider';
 
 export default function Root(): JSX.Element {
   // <Sentry.ErrorBoundary>

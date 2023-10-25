@@ -1,8 +1,9 @@
 import React from 'react';
 
+import MLogo from './components/MLogo';
+import MSpan from './components/MSpan';
+
 import './loading.css';
-import MSpan from 'components/MSpan';
-import MLogo from 'components/MLogo';
 
 export default function Loading(): JSX.Element {
 

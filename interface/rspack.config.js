@@ -1,3 +1,5 @@
+const path = require('path');
+
 module.exports = (env, _argv) => {
   const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
 
@@ -24,7 +26,6 @@ module.exports = (env, _argv) => {
   const config = {
     experiments: {
       incrementalRebuild: true,
-      // css: true,
     },
     builtins: {
       react: {
@@ -83,6 +84,7 @@ module.exports = (env, _argv) => {
       cssChunkFilename: `assets/styles/${filename}.css`,
     },
     resolve: {
+      preferRelative: false,
       extensions: [
         '.js',
         '.jsx',
@@ -90,7 +92,11 @@ module.exports = (env, _argv) => {
         '.ts',
         '.svg',
       ],
-      modules: ['src', 'node_modules'],
+      modules: [
+        // This makes the absolute imports work properly.
+        path.resolve(__dirname, 'src'),
+        'node_modules',
+      ],
     },
     devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
     devServer: {
