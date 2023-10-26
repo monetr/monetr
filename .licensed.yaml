@@ -8,12 +8,15 @@ sources:
 go:
   GOPATH: ~/go
 
+npm:
+  production_only: false
+
 pnpm:
-  production_only: true
+  production_only: false
 
 apps:
   - name: monetr-API
-    source_path: pkg/cmd
+    source_path: server/cmd
   - name: monetr-UI
     source_path: .
 
