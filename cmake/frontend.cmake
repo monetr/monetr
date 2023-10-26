@@ -53,18 +53,18 @@ add_custom_command(
 )
 
 set(UI_DIST
-  ${CMAKE_SOURCE_DIR}/pkg/ui/static/assets
-  ${CMAKE_SOURCE_DIR}/pkg/ui/static/index.html
-  ${CMAKE_SOURCE_DIR}/pkg/ui/static/public
-  ${CMAKE_SOURCE_DIR}/pkg/ui/static/logo192.png
-  ${CMAKE_SOURCE_DIR}/pkg/ui/static/logo512.png
-  ${CMAKE_SOURCE_DIR}/pkg/ui/static/manifest.json
-  ${CMAKE_SOURCE_DIR}/pkg/ui/static/robots.txt
+  ${CMAKE_SOURCE_DIR}/server/ui/static/assets
+  ${CMAKE_SOURCE_DIR}/server/ui/static/index.html
+  ${CMAKE_SOURCE_DIR}/server/ui/static/public
+  ${CMAKE_SOURCE_DIR}/server/ui/static/logo192.png
+  ${CMAKE_SOURCE_DIR}/server/ui/static/logo512.png
+  ${CMAKE_SOURCE_DIR}/server/ui/static/manifest.json
+  ${CMAKE_SOURCE_DIR}/server/ui/static/robots.txt
 )
 add_custom_command(
   OUTPUT ${UI_DIST}
   BYPRODUCTS ${UI_DIST}
-  COMMAND ${GIT_EXECUTABLE} clean -f -X ${CMAKE_SOURCE_DIR}/pkg/ui/static
+  COMMAND ${GIT_EXECUTABLE} clean -f -X ${CMAKE_SOURCE_DIR}/server/ui/static
   COMMAND ${RSPACK_EXECUTABLE} build --mode production
   COMMENT "Building monetr's user interface"
   WORKING_DIRECTORY ${UI_SRC_DIR}

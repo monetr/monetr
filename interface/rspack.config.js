@@ -78,7 +78,7 @@ module.exports = (env, _argv) => {
     entry: './src/index.tsx',
     output: {
       publicPath: '/',
-      path: '../pkg/ui/static',
+      path: '../server/ui/static',
       filename: `assets/scripts/${filename}.js`,
       cssFilename: `assets/styles/${filename}.css`,
       cssChunkFilename: `assets/styles/${filename}.css`,

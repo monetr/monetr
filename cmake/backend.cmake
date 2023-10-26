@@ -5,7 +5,7 @@ set(GO_MODULES ${CMAKE_BINARY_DIR}/go-dependencies-marker.txt)
 add_custom_command(
   OUTPUT ${GO_MODULES}
   BYPRODUCTS ${GO_MODULES}
-  COMMAND ${CMAKE_Go_COMPILER} get -t ${CMAKE_SOURCE_DIR}/pkg/...
+  COMMAND ${CMAKE_Go_COMPILER} get -t ${CMAKE_SOURCE_DIR}/server/...
   COMMAND ${CMAKE_COMMAND} -E touch ${GO_MODULES}
   COMMENT "Installing go dependencies"
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -14,9 +14,9 @@ add_custom_command(
     ${CMAKE_SOURCE_DIR}/go.sum
 )
 
-set(MONETR_CLI_PKG github.com/monetr/monetr/pkg/cmd)
+set(MONETR_CLI_PKG github.com/monetr/monetr/server/cmd)
 
-set(GO_SRC_DIR "${CMAKE_SOURCE_DIR}/pkg")
+set(GO_SRC_DIR "${CMAKE_SOURCE_DIR}/server")
 file(GLOB_RECURSE ALL_GO_FILES
   "${GO_SRC_DIR}/*.go"
   "${GO_SRC_DIR}/*.sql"
@@ -70,10 +70,10 @@ add_custom_command(
     ${TEXT_EMAIL_TEMPLATES}
 )
 
-set(SIMPLE_ICONS ${CMAKE_SOURCE_DIR}/pkg/icons/sources/simple-icons/icons)
+set(SIMPLE_ICONS ${CMAKE_SOURCE_DIR}/server/icons/sources/simple-icons/icons)
 add_custom_command(
   OUTPUT ${SIMPLE_ICONS}
-  COMMAND ${GIT_EXECUTABLE} submodule update --init pkg/icons/sources/simple-icons
+  COMMAND ${GIT_EXECUTABLE} submodule update --init server/icons/sources/simple-icons
   COMMENT "Retrieving simple-icons"
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )

@@ -49,8 +49,8 @@ clean:
 	-@$(MAKE) shutdown CMAKE_OPTIONS="$(CMAKE_OPTIONS) -DBUILD_TESTING=OFF"
 	-cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t clean $(BUILD_ARGS)
 	-cmake -E remove_directory $(CMAKE_CONFIGURATION_DIRECTORY) $(BUILD_ARGS)
-	-git clean -f -X pkg/ui/static
-	-git submodule deinit -f pkg/icons/sources/simple-icons
+	-git clean -f -X server/ui/static
+	-git submodule deinit -f server/icons/sources/simple-icons
 
 dependencies: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t fetch.dependencies -j $(CONCURRENCY) $(BUILD_ARGS)

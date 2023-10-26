@@ -1,6 +1,6 @@
 
 set(EMAIL_TEMPLATE_INPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/emails")
-set(EMAIL_TEMPLATE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/pkg/communication/email_templates")
+set(EMAIL_TEMPLATE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/server/communication/email_templates")
 
 # WARNING: This does not exclude any spec or story files.
 file(GLOB_RECURSE EMAIL_TEMPLATE_INPUTS "${EMAIL_TEMPLATE_INPUT_DIRECTORY}/*.tsx")

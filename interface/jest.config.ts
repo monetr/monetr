@@ -1,9 +1,6 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-  testPathIgnorePatterns: [
-    '.+/pkg/.+',
-  ],
   modulePaths: [
     '<rootDir>/src',
   ],
