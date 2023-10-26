@@ -18,6 +18,11 @@ add_custom_command(
   COMMENT "Setting up a local version of pnpm, this will not affect the host system"
 )
 
+add_custom_target(
+  tools.pnpm
+  DEPENDS ${PNPM_EXECUTABLE}
+)
+
 # Try to find pnpm on the host machine.
 # find_program(HOST_PNPM_EXECUTABLE NAMES pnpm PATHS ENV PATH NO_DEFAULT_PATH)
 #

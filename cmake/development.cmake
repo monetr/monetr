@@ -115,9 +115,8 @@ add_custom_target(
   USES_TERMINAL
   DEPENDS
     ${SIMPLE_ICONS}
-    ${NODE_MODULES}
-    ${HTML_EMAIL_TEMPLATES}
-    ${TEXT_EMAIL_TEMPLATES}
+    dependencies.node_modules
+    build.email
 )
 
 if(NOT CLOUD_MAGIC)

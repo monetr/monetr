@@ -53,7 +53,7 @@ clean:
 	-git submodule deinit -f server/icons/sources/simple-icons
 
 dependencies: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t fetch.dependencies -j $(CONCURRENCY) $(BUILD_ARGS)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t dependencies -j $(CONCURRENCY) $(BUILD_ARGS)
 
 deps: dependencies
 

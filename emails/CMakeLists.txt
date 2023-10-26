@@ -1,5 +1,4 @@
-
-set(EMAIL_TEMPLATE_INPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/emails")
+set(EMAIL_TEMPLATE_INPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(EMAIL_TEMPLATE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/server/communication/email_templates")
 
 # WARNING: This does not exclude any spec or story files.
@@ -19,7 +18,7 @@ add_custom_command(
   COMMAND ${REACT_EMAIL_EXECUTABLE} export --dir ${EMAIL_TEMPLATE_INPUT_DIRECTORY} --outDir ${EMAIL_TEMPLATE_OUTPUT_DIRECTORY}
   COMMENT "Building html email templates from React"
   DEPENDS
-    ${REACT_EMAIL_EXECUTABLE}
+    tools.react-email
     ${EMAIL_TEMPLATE_INPUTS}
 )
 
@@ -29,7 +28,7 @@ add_custom_command(
   COMMAND ${REACT_EMAIL_EXECUTABLE} export --plainText --dir ${EMAIL_TEMPLATE_INPUT_DIRECTORY} --outDir ${EMAIL_TEMPLATE_OUTPUT_DIRECTORY}
   COMMENT "Building plain text email templates from React"
   DEPENDS
-    ${REACT_EMAIL_EXECUTABLE}
+    tools.react-email
     ${EMAIL_TEMPLATE_INPUTS}
 )
 
@@ -48,7 +47,7 @@ add_custom_command(
   OUTPUT ${EMAIL_DEV_DIRECTORY}/package.json
   BYPRODUCTS ${EMAIL_DEV_DIRECTORY}/package.json
   COMMENT "Setting up required filed for react-email development"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${EMAIL_TEMPLATE_INPUT_DIRECTORY}/package.json ${EMAIL_DEV_DIRECTORY}/package.json
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/package.json ${EMAIL_DEV_DIRECTORY}/package.json
 )
 
 add_custom_target(
@@ -57,6 +56,6 @@ add_custom_target(
   COMMAND ${REACT_EMAIL_EXECUTABLE} dev --dir ${EMAIL_TEMPLATE_INPUT_DIRECTORY}
   WORKING_DIRECTORY ${EMAIL_DEV_DIRECTORY}
   DEPENDS
-    ${REACT_EMAIL_EXECUTABLE}
+    tools.react-email
     ${EMAIL_DEV_DIRECTORY}/package.json
 )

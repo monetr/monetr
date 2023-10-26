@@ -35,9 +35,10 @@ find_package(Docker QUIET)
 
 # The UI tasks are split out into their own file.
 # Import this _after_ we have found all the packages above.
+include(NodeModules)
 include(GolangUtils)
-include("${CMAKE_SOURCE_DIR}/cmake/frontend.cmake")
-include(EmailTemplates)
+add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
+add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
 include("${CMAKE_SOURCE_DIR}/cmake/backend.cmake")
 
 if(BUILD_DEPLOYMENT_TARGETS)
@@ -45,8 +46,8 @@ if(BUILD_DEPLOYMENT_TARGETS)
 endif()
 
 add_custom_target(
-  fetch.dependencies
-  DEPENDS ${NODE_MODULES} ${GO_MODULES}
+  dependencies
+  DEPENDS dependencies.node_modules ${GO_MODULES}
 )
 
 if(DOCKER_EXECUTABLE)
@@ -152,7 +153,7 @@ if(BUILD_THIRD_PARTY_NOTICE)
     COMMENT "Caching dependency licenses"
     DEPENDS
       ${LICENSED_EXECUTABLE}
-      ${NODE_MODULES}
+      dependencies.node_modules
       ${CMAKE_SOURCE_DIR}/package.json
       ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
       ${CMAKE_SOURCE_DIR}/go.mod
@@ -210,11 +211,6 @@ else()
 endif()
 
 add_custom_target(
-  build.ui
-  DEPENDS ${UI_DIST}
-)
-
-add_custom_target(
   build.monetr
   DEPENDS ${MONETR_EXECUTABLE}
 )
@@ -266,9 +262,3 @@ foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   add_subdirectory(${DIR})
 endforeach()
 
-file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/interface/*CMakeLists.txt")
-# # Loop through the files and get their directories
-foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
-  get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
-  add_subdirectory(${DIR})
-endforeach()

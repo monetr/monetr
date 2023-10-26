@@ -65,9 +65,8 @@ add_custom_command(
   DEPENDS
     ${GO_MODULES}
     ${APP_GO_FILES}
-    ${UI_DIST}
-    ${HTML_EMAIL_TEMPLATES}
-    ${TEXT_EMAIL_TEMPLATES}
+    build.interface
+    build.email
 )
 
 set(SIMPLE_ICONS ${CMAKE_SOURCE_DIR}/server/icons/sources/simple-icons/icons)

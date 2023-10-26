@@ -1,13 +1,5 @@
-set(NODE_BIN ${CMAKE_BINARY_DIR}/node/bin)
-set(NODE_MIN_VERSION "16.0.0")
-set(NPM_MIN_VERSION "8.0.0")
-
-find_package(Node REQUIRED)
-find_package(Npm REQUIRED)
-find_package(Pnpm REQUIRED)
-
 # Define the directories
-set(UI_SRC_DIR "${CMAKE_SOURCE_DIR}/interface")
+set(UI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(PUBLIC_DIR "${UI_SRC_DIR}/public")
 
 # Get all UI files recursively
@@ -30,28 +22,6 @@ file(GLOB UI_CONFIG_FILES
   "${UI_SRC_DIR}/*.config.cjs"
 )
 
-set(NODE_MODULES ${CMAKE_SOURCE_DIR}/node_modules)
-set(NODE_MODULES_MARKER ${CMAKE_BINARY_DIR}/node-modules-marker.txt)
-set(JEST_EXECUTABLE ${NODE_MODULES}/.bin/jest)
-set(RSPACK_EXECUTABLE ${NODE_MODULES}/.bin/rspack)
-# TODO Move react-email out of the interface package.
-set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES}/.bin/email)
-add_custom_command(
-  OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE}
-  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${UI_SRC_DIR}/node_modules
-  COMMAND ${PNPM_EXECUTABLE} install
-  # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
-  # doing install again if we didn't finish the first time.
-  COMMAND ${CMAKE_COMMAND} -E touch ${NODE_MODULES_MARKER}
-  COMMENT "Installing node/ui dependencies"
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-  DEPENDS
-    ${UI_SRC_DIR}/package.json
-    ${CMAKE_SOURCE_DIR}/package.json
-    ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
-    ${PNPM_EXECUTABLE}
-)
-
 set(UI_DIST
   ${CMAKE_SOURCE_DIR}/server/ui/static/assets
   ${CMAKE_SOURCE_DIR}/server/ui/static/index.html
@@ -60,6 +30,7 @@ set(UI_DIST
   ${CMAKE_SOURCE_DIR}/server/ui/static/logo512.png
   ${CMAKE_SOURCE_DIR}/server/ui/static/manifest.json
   ${CMAKE_SOURCE_DIR}/server/ui/static/robots.txt
+  CACHE INTERNAL ""
 )
 add_custom_command(
   OUTPUT ${UI_DIST}
@@ -70,16 +41,22 @@ add_custom_command(
   WORKING_DIRECTORY ${UI_SRC_DIR}
   DEPENDS
     ${UI_SRC_DIR}/package.json
-    ${CMAKE_SOURCE_DIR}/package.json
     ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml
-    ${NODE_MODULES}
-    ${RSPACK_EXECUTABLE}
+    dependencies.node_modules
+    tools.rspack
     ${APP_UI_FILES}
     ${PUBLIC_FILES}
     ${UI_CONFIG_FILES}
 )
 
 add_custom_target(
-  dependencies.node_modules
-  DEPENDS ${NODE_MODULES}
+  build.interface ALL
+  DEPENDS ${UI_DIST}
 )
+
+file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/src/*CMakeLists.txt")
+# # Loop through the files and get their directories
+foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
+  get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
+  add_subdirectory(${DIR})
+endforeach()
