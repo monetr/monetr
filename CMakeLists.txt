@@ -178,7 +178,7 @@ if(BUILD_THIRD_PARTY_NOTICE)
       ${CMAKE_SOURCE_DIR}/go.sum
   )
 
-  set(THIRD_PARTY_NOTICE ${CMAKE_SOURCE_DIR}/pkg/build/NOTICE.md)
+  set(THIRD_PARTY_NOTICE ${CMAKE_SOURCE_DIR}/server/build/NOTICE.md)
   add_custom_command(
     OUTPUT ${THIRD_PARTY_NOTICE}
     BYPRODUCTS ${THIRD_PARTY_NOTICE}
@@ -259,14 +259,14 @@ if(BUILD_TESTING)
   set_tests_properties(ui.dependencies PROPERTIES FIXTURES_SETUP node_modules DEPENDS ${PNPM_EXECUTABLE})
 endif()
 
-file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/pkg/*CMakeLists.txt")
+file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/server/*CMakeLists.txt")
 # # Loop through the files and get their directories
 foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
   add_subdirectory(${DIR})
 endforeach()
 
-file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/ui/*CMakeLists.txt")
+file(GLOB_RECURSE SUB_PACKAGES RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/interface/*CMakeLists.txt")
 # # Loop through the files and get their directories
 foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)

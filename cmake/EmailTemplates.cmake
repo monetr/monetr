@@ -1,6 +1,6 @@
 
 set(EMAIL_TEMPLATE_INPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/emails")
-set(EMAIL_TEMPLATE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/pkg/communication/email_templates")
+set(EMAIL_TEMPLATE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/server/communication/email_templates")
 
 # WARNING: This does not exclude any spec or story files.
 file(GLOB_RECURSE EMAIL_TEMPLATE_INPUTS "${EMAIL_TEMPLATE_INPUT_DIRECTORY}/*.tsx")
@@ -45,11 +45,10 @@ set(EMAIL_DEV_DIRECTORY ${CMAKE_BINARY_DIR}/development.email)
 file(MAKE_DIRECTORY ${EMAIL_DEV_DIRECTORY})
 
 add_custom_command(
-  OUTPUT ${EMAIL_DEV_DIRECTORY}/package.json ${EMAIL_DEV_DIRECTORY}/pnpm-lock.yaml
-  BYPRODUCTS ${EMAIL_DEV_DIRECTORY}/package.json ${EMAIL_DEV_DIRECTORY}/pnpm-lock.yaml
+  OUTPUT ${EMAIL_DEV_DIRECTORY}/package.json
+  BYPRODUCTS ${EMAIL_DEV_DIRECTORY}/package.json
   COMMENT "Setting up required filed for react-email development"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/package.json ${EMAIL_DEV_DIRECTORY}/package.json
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_SOURCE_DIR}/pnpm-lock.yaml ${EMAIL_DEV_DIRECTORY}/pnpm-lock.yaml
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${EMAIL_TEMPLATE_INPUT_DIRECTORY}/package.json ${EMAIL_DEV_DIRECTORY}/package.json
 )
 
 add_custom_target(
@@ -60,5 +59,4 @@ add_custom_target(
   DEPENDS
     ${REACT_EMAIL_EXECUTABLE}
     ${EMAIL_DEV_DIRECTORY}/package.json
-    ${EMAIL_DEV_DIRECTORY}/pnpm-lock.yaml
 )

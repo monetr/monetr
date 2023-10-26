@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "baseUrl": "src",
+    "esModuleInterop": true,
+    "jsx": "react",
+    "module": "ESNEXT",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "outDir": "../server/ui/static",
+    "sourceMap": true,
+    "strict": false,
+    "target": "ES2022"
+  },
+  "include": [
+    "src/**/*",
+    "../tailwind.config.cjs"
+  ],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
+}

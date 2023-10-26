@@ -41,7 +41,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         # If we want to have code coverage in our tests then we should add the cover flags to the test binary we are
         # creating. We also want to make sure to have the coverpkg set because we are collecting coverage from ALL of
         # monetr. Not just from the package we are currently testing.
-        list(PREPEND TEST_BINARY_BUILD_ARGS "-cover" "-coverpkg=github.com/monetr/monetr/pkg/...")
+        list(PREPEND TEST_BINARY_BUILD_ARGS "-cover" "-coverpkg=github.com/monetr/monetr/server/...")
       endif()
 
       set(TAGS_FLAG)

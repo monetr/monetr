@@ -94,9 +94,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.GOCACHE }}
-          key: ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
           restore-keys: |
-            ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum') }}
+            ${{ runner.os }}-test-go-build-${{ hashFiles('**/go.sum', '**/**.go') }}
             ${{ runner.os }}-test-go-build
 
       # Cache go mod cache, used to speedup builds

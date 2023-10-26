@@ -8,4 +8,4 @@ else
     echo "[ui] pnpm is already installed, skipping..."
 fi
 
-pnpm start
+cd /build/interface && pnpm start
