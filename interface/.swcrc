@@ -1,10 +1,5 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
-  "env": {
-    "targets": "> 0.25%, not dead",
-    "mode": "entry",
-    "coreJs": "3.22"
-  },
   "jsc": {
     "parser": {
       "syntax": "typescript",
@@ -30,5 +25,5 @@
     "loose": false,
     "externalHelpers": false
   },
-  "minify": true
+  "minify": false
 }

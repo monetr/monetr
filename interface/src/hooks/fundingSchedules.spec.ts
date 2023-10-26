@@ -286,7 +286,7 @@ describe('funding schedule hooks', () => {
 
       const world = testRenderHook(useUpdateFundingSchedule, { initialRoute: '/bank/12/funding' });
       await act(async () => {
-        expect(async () => {
+        await expect(async () => {
           return world.result.current(new FundingSchedule({
             fundingScheduleId: 3,
             bankAccountId: 12,

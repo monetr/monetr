@@ -11,11 +11,5 @@
       "react-app",
       "react-app/jest"
     ]
-  },
-  "pnpm": {
-    "overrides": {
-      "postcss": "8.4.31",
-      "react": "18.2.0"
-    }
   }
 }

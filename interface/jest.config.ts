@@ -5,9 +5,7 @@ const config: Config = {
     '.+/pkg/.+',
   ],
   modulePaths: [
-    '<rootDir>',
     '<rootDir>/src',
-    'node_modules',
   ],
   moduleNameMapper: {
     // eslint-disable-next-line max-len
@@ -21,7 +19,8 @@ const config: Config = {
   ],
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: [
-    '<rootDir>/src/setupTests.js',
+    '<rootDir>/src/setupTests.ts',
+    '@testing-library/jest-dom/extend-expect',
   ],
   transform: {
     '^.+\\.(t|j)sx?$': '@swc/jest',

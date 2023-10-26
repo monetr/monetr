@@ -7,7 +7,7 @@ import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
 import axios from 'axios';
 
-import { server } from './testutils/server';
+import { server } from 'testutils/server';
 
 module.export = global.CONFIG = {
   BOOTSTRAP_CONFIG_JSON: false,
@@ -26,7 +26,8 @@ window.API = axios.create({
 configure({
   asyncUtilTimeout: 10000,
 });
-
-beforeAll(() => server.listen());
+beforeAll(() => server.listen({
+  onUnhandledRequest: 'error',
+}));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
