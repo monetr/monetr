@@ -1,6 +1,6 @@
 macro(provision_node_tests CURRENT_SOURCE_DIR)
   if (BUILD_TESTING)
-    string(REPLACE "${UI_SRC_DIR}/" "" PACKAGE "${CURRENT_SOURCE_DIR}")
+    string(REPLACE "${CMAKE_SOURCE_DIR}/" "" PACKAGE "${CURRENT_SOURCE_DIR}")
     message(STATUS "Preparing tests for: ${PACKAGE}")
 
     set(PACKAGE_TEST_DIRECTORY ${CMAKE_BINARY_DIR}/tests/${PACKAGE})
