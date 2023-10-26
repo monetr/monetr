@@ -8,7 +8,7 @@
 [![Discord](https://discordapp.com/api/guilds/1006270466123636836/widget.png)](https://discord.gg/68wTCXrhuq)
 
 <p align="center">
-  <img width="460" height="300" src="https://raw.githubusercontent.com/monetr/monetr/main/ui/assets/logo.svg">
+  <img width="460" height="300" src="https://raw.githubusercontent.com/monetr/monetr/main/interface/src/assets/logo.svg">
 </p>
 
 monetr is a budgeting application that aims to allow people to more easily plan their recurring expenses. It is
