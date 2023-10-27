@@ -1,0 +1,236 @@
+# Funding Schedules
+
+Funding schedules are used to tell monetr when to allocate funds to spending objects. They represent the frequency that
+you are paid; or the frequency that you would like to allocate funds to things you are budgeting for. Funding schedules
+are specific to a single bank account and must have a unique name within a bank account.
+
+## List Funding Schedules
+
+This endpoint does not support any pagination, it simply returns all of the funding schedules for the provided bank
+account Id.
+
+```http filename="HTTP"
+GET /api/bank_accounts/{bankAccountId}/funding_schedules
+```
+
+### Request Path
+
+| Attribute         | Type     | Required   | Description                                                              |
+| ----------------- | -------- | ---------- | ------------------------------------------------------------------------ |
+| `bankAccountId`   | number   | yes        | The ID of the bank account the funding schedules belong to.              |
+
+### Response Body
+
+| Attribute             | Type       | Required   | Description                                                                                                                                                                                            |
+| --------------------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------                         |
+| `fundingScheduleId`   | number     | yes        | The globally unique identifier for a funding schedule.                                                                                                                                                 |
+| `bankAccountId`       | number     | yes        | The bank account that this funding schedule belongs to, this will be the same as the `bankAccountId` provided in the URL path.                                                                         |
+| `name`                | string     | yes        | The name of the funding schedule; this is unique per bank account.                                                                                                                                     |
+| `description`         | string     | no         | If the funding schedule was created by the UI, then this will be a summary of the `rule` field in english.                                                                                             |
+| `rule`                | string     | yes        | The RRule provided when the funding schedule was created; representing how frequently this funding schedule will occur.                                                                                |
+| `excludeWeekends`     | bool       | yes        | :fontawesome-solid-flask: If this is true, then the `nextOccurrence` will never fall on a weekend. If the `rule` would have it fall on a weekend, then the date is adjusted to be the previous Friday. |
+| `estimatedDeposit`    | number     | no         | :fontawesome-solid-flask: Estimated Deposit is going to be used to help calculate a free-to-use ahead of when someone would actually get paid.                                                       |
+| `nextOccurrence`      | datetime   | yes        | The next time this funding schedule will allocate funds to it's spending objects.                                                                                                                      |
+
+### List Funding Schedules Examples
+
+```shell filename="Example List Funding Schedules Request"
+curl --request GET \
+  --url "https://my.monetr.app/api/bank_accounts/123/funding_schedules"
+```
+
+#### Successful
+
+```json filename="200 Ok"
+[
+    {
+      "fundingScheduleId": 44,
+      "bankAccountId": 123,
+      "name": "Payday",
+      "description": "The 15th and the Last day of every month",
+      "rule": "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+      "excludeWeekends": false,
+      "nextOccurrence": "2022-05-31T00:00:00-06:00"
+    }
+]
+```
+
+## Create Funding Schedule
+
+Create a funding schedule by providing some basic information about when the funding schedule will occur next as well as
+how frequently it occurs.
+
+```http filename="HTTP"
+POST /api/bank_accounts/{bankAccountId}/funding_schedules
+```
+
+### Request Path
+
+| Attribute       | Type   | Required | Description                                                            |
+|-----------------|--------|----------|------------------------------------------------------------------------|
+| `bankAccountId` | number | yes      | The ID of the bank account this new funding schedule should belong to. |
+
+### Request Body
+
+| Attribute           | Type       | Required   | Description                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`              | string     | yes        | The name of the new funding schedule. For a given `bankAccountId` this value must be unique.                                                                                                                                                                                                                                                                                                                           |
+| `rule`              | string     | yes        | The RRule representing how the funding schedule should occur. See [RFC5545](https://datatracker.ietf.org/doc/html/rfc5545).<br /> **Examples**: <br /> - The 15th and last day of every month: `FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1` <br /> - Every other friday: `FREQ=WEEKLY;INTERVAL=2;BYDAY=FR` <br /> - Every friday: `FREQ=WEEKLY;INTERVAL=1;BYDAY=FR`                                                              |
+| `description`       | string     | no         | The description of the funding schedule, this can be anything you want; but in the UI this is auto filled to be a string of the RRule. For example; `The 15th and Last day of every month`                                                                                                                                                                                                                             |
+| `excludeWeekends`   | bool       | no         | :fontawesome-solid-flask: Exclude weekends will adjust the occurrence dates if they were to fall on a weekend. It will set the date to be the closest previous business day. This will not impact the frequency of the funding schedule.                                                                                                                                                                               |
+| `estimatedDeposit`  | number     | no         | :fontawesome-solid-flask: Estimated Deposit is going to be used to help calculate a free-to-use ahead of when someone would actually get paid.                                                                                                                                                                                                                                                                       |
+| `nextOccurrence`    | datetime   | no         | You can provide the next occurrence date in the create request, this date will be used on subsequence recurrences to determine the following contribution dates. For rules that have static dates defined like the 15th and last day of the month, this will not affect subsequent recurrences. But for rules that can be more loose, like every other friday; this will determine which "every other" friday it is.   |
+
+### Response Body
+
+| Attribute             | Type       | Required   | Description                                                                                                                                                                                                           |
+| --------------------- | ---------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fundingScheduleId`   | number     | yes        | The unique identifier for the funding schedule you created. This is globally unique within monetr.                                                                                                                    |
+| `bankAccountId`       | number     | yes        | This will be the value of the `bankAccountId` parameter you provided in the API path, and is included on `GET` requests as well.                                                                                      |
+| `name`                | string     | yes        | The name of the funding schedule provided by you, if there were leading or trailing spaces they will have been trimmed.                                                                                               |
+| `description`         | string     | no         | If a description was provided then it will be present here.                                                                                                                                                           |
+| `rule`                | string     | yes        | The RRule provided when the funding schedule was created.                                                                                                                                                             |
+| `excludeWeekends`     | bool       | yes        | If a value was provided in the create request, it will be present here; otherwise this will be `false`.                                                                                                               |
+| `estimatedDeposit`    | number     | no         | :fontawesome-solid-flask: Estimated Deposit is going to be used to help calculate a safe-to-spend ahead of when someone would actually get paid.                                                                                                |
+| `nextOccurrence`      | datetime   | yes        | If you provided a date time and it was in the future, that will be <br/>used for the next occurrence. If one was not provided, then this value will be calculated using the `rule` field and the current timestamp.   |
+
+### Create Funding Schedule Examples
+
+```shell filename="Example Create Funding Schedule Request"
+curl --request POST \
+  --url "https://my.monetr.app/api/bank_accounts/123/funding_schedules" \
+  --header "content-type: application/json" \
+  --data '{
+    "name": "Payday",
+    "description": "The 15th and Last day of every month",
+    "rule": "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+    "excludeWeekends": false,
+    "nextOccurrence": "2022-05-31T00:00:00-06:00"
+}'
+```
+
+#### Successful
+
+If the funding schedule was created successfully, then you'll receive the created object back.
+
+```json filename="200 Ok"
+{
+  "fundingScheduleId": 44,
+  "bankAccountId": 123,
+  "name": "Payday",
+  "description": "The 15th and the Last day of every month",
+  "rule": "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+  "excludeWeekends": false,
+  "nextOccurrence": "2022-05-31T00:00:00-06:00"
+}
+```
+
+## Update Funding Schedule
+
+A funding schedule can be updated after it has been created, this will allow people to change when they get paid or when
+they want to allocate funds to budgets. When updating a funding schedule it is recommended that you provide the entire
+funding schedule object. Some fields can be omitted but may result in those fields being unset. To avoid this it is best
+to retrieve the entire funding schedule via an API call, and then update the fields needed and send the updated object
+back using this API endpoint.
+
+```http filename="HTTP"
+PUT /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}
+```
+
+### Request Path
+
+| Attribute           | Type   | Required | Description                                                                   |
+|---------------------|--------|----------|-------------------------------------------------------------------------------|
+| `bankAccountId`     | number | yes      | The ID of the bank account this funding schedule you are updating belongs to. |
+| `fundingScheduleId` | number | yes      | The ID of the funding schedule that you are updating.                         |
+
+### Request Body
+
+| Attribute           | Type       | Required   | Description                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`              | string     | yes        | The name of the new funding schedule. For a given `bankAccountId` this value must be unique.                                                                                                                                                                                                                                                                |
+| `rule`              | string     | yes        | The RRule representing how the funding schedule should occur. See [RFC5545](https://datatracker.ietf.org/doc/html/rfc5545).<br /> **Examples**: <br /> - The 15th and last day of every month: `FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1` <br /> - Every other friday: `FREQ=WEEKLY;INTERVAL=2;BYDAY=FR` <br /> - Every friday: `FREQ=WEEKLY;INTERVAL=1;BYDAY=FR`   |
+| `description`       | string     | yes        | The description of the funding schedule, this can be anything you want; but in the UI this is auto filled to be a string of the RRule. For example; `The 15th and Last day of every month`                                                                                                                                                                  |
+| `excludeWeekends`   | bool       | yes        | :fontawesome-solid-flask: Exclude weekends will adjust the occurrence dates if they were to fall on a weekend. It will set the date to be the closest previous business day. This will not impact the frequency of the funding schedule.                                                                                                                    |
+| `estimatedDeposit`  | number     | no         | :fontawesome-solid-flask: Estimated Deposit is going to be used to help calculate a free-to-use ahead of when someone would actually get paid.                                                                                                                                                                                                            |
+| `nextOccurrence`    | datetime   | yes        | You can override the next time this funding schedule will be processed, if you do then the funding schedule will recur relative to this date going forward. This can be useful for adjusting a bi-weekly funding schedule to recur based on an alternate day of each week.                                                                                  |
+
+### Response Body
+
+| Attribute             | Type       | Required   | Description                                                                                                                                      |
+| --------------------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------               |
+| `fundingScheduleId`   | number     | yes        | The unique identifier for the funding schedule you updated. This is globally unique within monetr.                                               |
+| `bankAccountId`       | number     | yes        | This will be the value of the `bankAccountId` parameter you provided in the API path, and is included on `GET` requests as well.                 |
+| `name`                | string     | yes        | The name of the funding schedule provided by you, if there were leading or trailing spaces they will have been trimmed.                          |
+| `description`         | string     | no         | If a description was provided then it will be present here.                                                                                      |
+| `rule`                | string     | yes        | The RRule used to calculate recurrences.                                                                                                         |
+| `excludeWeekends`     | bool       | yes        | Whether or not this funding schedule will exclude weekends from its recurrence.                                                                  |
+| `estimatedDeposit`    | number     | no         | :fontawesome-solid-flask: Estimated Deposit is going to be used to help calculate a free-to-use ahead of when someone would actually get paid. |
+| `nextOccurrence`      | datetime   | yes        | The next time this funding schedule will be processed.                                                                                           |
+
+### Update Funding Schedule Examples
+
+```shell filename="Example Update Funding Schedule Request"
+curl --request PUT \
+  --url "https://my.monetr.app/api/bank_accounts/123/funding_schedules/456" \
+  --header "content-type: application/json" \
+  --data '{
+    "name": "Payday (Old)",
+    "description": "The 15th and Last day of every month",
+    "rule": "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+    "excludeWeekends": false,
+    "nextOccurrence": "2022-05-31T00:00:00-06:00"
+}'
+```
+
+#### Successful
+
+If the funding schedule was updated successfully, then you'll receive the updated object back. Even if you only provided
+a few fields in the request you will receive the entire object in the response.
+
+```json filename="200 Ok"
+{
+  "fundingScheduleId": 456,
+  "bankAccountId": 123,
+  "name": "Payday (Old)",
+  "description": "The 15th and the Last day of every month",
+  "rule": "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1",
+  "excludeWeekends": false,
+  "nextOccurrence": "2022-05-31T00:00:00-06:00"
+}
+```
+
+## Delete Funding Schedule
+
+Delete a funding schedule for a given bank account. This can only be done if there are no spending objects associated
+with the funding schedule you want to remove. This will simply return a `200 Ok` status code if it succeeds, there is
+no response body.
+
+```http filename="HTTP"
+DELETE /api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}
+```
+
+### Request Path
+
+| Attribute           | Type   | Required | Description                                                 |
+|---------------------|--------|----------|-------------------------------------------------------------|
+| `bankAccountId`     | number | yes      | The ID of the bank account the funding schedule belongs to. |
+| `fundingScheduleId` | number | yes      | The ID of the funding schedule you want to remove.          |
+
+
+### Delete Funding Schedule Example
+
+```shell filename="Example Delete Funding Schedule Request"
+curl --request DELETE \
+  --url "https://my.monetr.app/api/bank_accounts/123/funding_schedules/123"
+```
+
+#### Funding Schedule Does Not Exist
+
+If you try to delete a funding schedule that does not exist, then you will receive the following error.
+
+```json filename="404 Not Found"
+{
+  "error": "cannot remove funding schedule, it does not exist"
+}
+```

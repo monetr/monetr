@@ -9,12 +9,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/debian:12.1
     steps:
       # Get values for cache paths to be used in later steps
       - id: go-cache-paths
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
@@ -41,15 +39,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-mod
-
-      - name: pnpm Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-pnpm-store
 
       - name: Build
         run: |
@@ -215,11 +204,9 @@ jobs:
   #         files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
   #         name: monetr
 
-  mkdocs:
-    name: MkDocs
+  docs:
+    name: Documentation
     runs-on: ubuntu-latest
-    env:
-      MKDOCS_IMAGE: ghcr.io/monetr/mkdocs-material-insiders:10072023
     steps:
       - uses: actions/checkout@v4
         with:
@@ -227,19 +214,11 @@ jobs:
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
-      - name: Use Docker in rootless mode.
-        uses: ScribeMD/rootless-docker@0.2.2
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_TOKEN }} # Read only token.
       - name: Build
         run: make docs
       - uses: actions/upload-artifact@v3
         name: Upload Documentation As Artifact
         with:
-          name: '${{ github.sha }}-mkdocs'
-          path: '${{ github.workspace }}/build/documentation'
+          name: '${{ github.sha }}-docs'
+          path: '${{ github.workspace }}/docs/out'
           retention-days: 7

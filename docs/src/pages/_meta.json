@@ -1,0 +1,14 @@
+{
+  "index": {
+    "type": "page",
+    "title": "monetr",
+    "display": "hidden",
+    "theme": {
+      "layout": "raw"
+    }
+  },
+  "documentation": {
+    "type": "page",
+    "title": "Documentation"
+  }
+}

@@ -1,5 +1,5 @@
 # Define the directories
-set(UI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+set(UI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
 set(PUBLIC_DIR "${UI_SRC_DIR}/public")
 
 # Get all UI files recursively
@@ -57,13 +57,3 @@ add_custom_target(
   DEPENDS ${UI_DIST}
 )
 
-# Recursively add all of the directories in the interface package that have CMakeLists of their own.
-file(
-  GLOB_RECURSE SUB_PACKAGES
-  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/src/*CMakeLists.txt"
-)
-# # Loop through the files and get their directories
-foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
-  get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
-  add_subdirectory(${DIR})
-endforeach()

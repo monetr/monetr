@@ -78,8 +78,10 @@ reviewed:
 
 ignored:
   npm: # Silence warning about missing license. Its not missing.
-    - "@swc/*"
     - "@esbuild/*"
+    - "@napi-rs/simple-git-*" # MIT License https://github.com/Brooooooklyn/simple-git/blob/main/LICENSE
+    - "@next/swc-*"
     - "@rspack/*"
+    - "@swc/*"
     - "fsevents"  # MIT License https://github.com/fsevents/fsevents/blob/master/LICENSE
 

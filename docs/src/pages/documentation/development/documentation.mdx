@@ -1,0 +1,94 @@
+import { Tabs } from 'nextra/components'
+
+# Documentation
+
+This is an overview of ways to contribute to monetr's documentation. To get started:
+
+- You can find outstanding issues for documentation
+  here: [![GitHub issues by-label](https://img.shields.io/github/issues/monetr/monetr/documentation)](https://github.com/monetr/monetr/issues?q=is%3Aopen+is%3Aissue+label%3Adocumentation)
+- If you don't find an issue that you'd be interested in working on, you can still create a pull request with your
+  desired changes.
+- If you have found a gap in our documentation that you aren't able to, or do not wish to fill yourself; please create
+  an issue so that others are aware of this gap, and it can be addressed.
+
+## Editing documentation
+
+All of our documentation is in the form of Markdown files in the `docs` directory of the monetr repository. You can
+simply edit the existing files to make changes to the documentation. The documentation site is automatically generated
+in our GitHub Actions workflows.
+
+### Building Locally
+
+You can build our documentation site locally using the following command, it requires Node.js and will create a static
+site in the `$PWD/docs/out` directory.
+
+```shell filename="Shell"
+make docs
+```
+
+### Editing Locally
+
+If you want to work on the documentation in real time locally you can run the following command:
+
+<Tabs items={["GNUMake", "pnpm"]}>
+    <Tabs.Tab>
+        ```shell filename="Shell"
+        # Will install any dependencies and prepare the local development environment for docs
+        make develop-docs
+        ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+        ```shell filename="Shell"
+        # Install dependencies manually
+        pnpm install
+
+        # Start the documentation server
+        pnpm -r -filter docs run dev
+        ```
+    </Tabs.Tab>
+</Tabs>
+
+This will start a Next.js server locally serving docs. As you edit files in the `docs/` directory you will be able to
+see those changes automatically refresh in your browser.
+
+## Style
+
+We would like our documentation to follow a general guide, this creates some consistency in how our documentation is
+both written, presented, and maintained over time.
+
+### Language
+
+All documentation should be written in "American" English as much as possible. The exception to that rule are
+quotations, trademarks or terms that are better known by their own language's equivalent.
+
+### Reader / Author
+
+The documentation prefers "we" to address the author and "you" to address the reader. The gender of the reader shall be
+neutral if possible. Attempt to use "they" as a pronoun for the reader.
+
+### Code Blocks
+
+Code blocks should always be accompanied by a preceding text to give context as to what that code block is, or
+represents. Adjacent code blocks without a paragraph of text between them should be avoided.
+
+### Screenshots
+
+Screenshots, if at all possible, should be no larger than `1280x720`. This is not a strict requirement, but if a
+screenshot can reasonably capture all the necessary details in that resolution or less; that is greatly preferred.
+
+### Issue Tracking
+
+If documentation is missing and is planned to be added later. Please add a placeholder badge for that documentation
+using [shields.io](https://shields.io/category/issue-tracking), with the `GitHub issue/pull request detail` shield.
+
+The "override label" should use the following format.
+
+```text filename="Label Format"
+#{GitHub Issue Number} - {GitHub Issue Title}
+```
+
+Please make the badge link back to the original issue as well.
+
+### Inclusivity
+
+Language that has been identified as hurtful or insensitive should be avoided.
