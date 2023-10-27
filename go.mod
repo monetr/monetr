@@ -9,7 +9,7 @@ require (
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.31.0
 	github.com/aws/aws-sdk-go v1.44.174
-	github.com/brianvoe/gofakeit/v6 v6.23.2
+	github.com/brianvoe/gofakeit/v6 v6.24.0
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.16.0
