@@ -3,10 +3,10 @@ set(UI_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 set(PUBLIC_DIR "${UI_SRC_DIR}/public")
 
 # Get all UI files recursively
-file(GLOB_RECURSE ALL_UI_FILES "${UI_SRC_DIR}/*")
+file(GLOB_RECURSE ALL_UI_FILES "${UI_SRC_DIR}/src/*")
 
 # Get all test UI files (those matching the pattern '*.spec.*')
-file(GLOB_RECURSE TEST_UI_FILES "${UI_SRC_DIR}/*.spec.*")
+file(GLOB_RECURSE TEST_UI_FILES "${UI_SRC_DIR}/src/*.spec.*")
 
 # Get the list of APP_UI_FILES by removing TEST_UI_FILES from ALL_UI_FILES
 list(FILTER ALL_UI_FILES EXCLUDE REGEX ".*\\.spec\\..*")

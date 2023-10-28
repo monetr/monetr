@@ -14,8 +14,8 @@ set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack)
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email)
 
 add_custom_command(
-  OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE}
-  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${UI_SRC_DIR}/node_modules
+  OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${CMAKE_SOURCE_DIR}/emails/node_modules ${CMAKE_SOURCE_DIR}/interface/node_modules
+  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${CMAKE_SOURCE_DIR}/emails/node_modules ${CMAKE_SOURCE_DIR}/interface/node_modules
   COMMAND ${PNPM_EXECUTABLE} install
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
   # doing install again if we didn't finish the first time.
