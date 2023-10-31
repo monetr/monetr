@@ -22,6 +22,7 @@ const config: DocsThemeConfig = {
       <meta property="og:description" content="Transparent financial planning" />
     </React.Fragment>
   ),
+  darkMode: false,
   logo: (<Image src={ Logo } alt="monetr logo" height={ 40 } width={ 40 } />),
   docsRepositoryBase: `https://github.com/monetr/monetr/blob/${branch}/docs`,
   project: {
