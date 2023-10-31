@@ -15,6 +15,13 @@ const config: DocsThemeConfig = {
       titleTemplate: 'monetr',
     };
   },
+  head: (
+    <React.Fragment>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta property="og:title" content="monetr" />
+      <meta property="og:description" content="Transparent financial planning" />
+    </React.Fragment>
+  ),
   logo: (<Image src={ Logo } alt="monetr logo" height={ 40 } width={ 40 } />),
   docsRepositoryBase: `https://github.com/monetr/monetr/blob/${branch}/docs`,
   project: {
