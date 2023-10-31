@@ -10,5 +10,9 @@
   "documentation": {
     "type": "page",
     "title": "Documentation"
+  },
+  "contact": {
+    "type": "page",
+    "title": "Contact"
   }
 }
