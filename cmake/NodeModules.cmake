@@ -12,10 +12,11 @@ set(NODE_MODULES_MARKER ${CMAKE_BINARY_DIR}/node-modules-marker.txt)
 set(JEST_EXECUTABLE ${NODE_MODULES_BIN}/jest)
 set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack)
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email)
+set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next)
 
 add_custom_command(
-  OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${CMAKE_SOURCE_DIR}/emails/node_modules ${CMAKE_SOURCE_DIR}/interface/node_modules
-  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${CMAKE_SOURCE_DIR}/emails/node_modules ${CMAKE_SOURCE_DIR}/interface/node_modules
+  OUTPUT ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${NEXT_EXECUTABLE} ${CMAKE_SOURCE_DIR}/emails/node_modules ${CMAKE_SOURCE_DIR}/interface/node_modules ${CMAKE_SOURCE_DIR}/docs/node_modules
+  BYPRODUCTS ${NODE_MODULES} ${NODE_MODULES_MARKER} ${JEST_EXECUTABLE} ${RSPACK_EXECUTABLE} ${REACT_EMAIL_EXECUTABLE} ${NEXT_EXECUTABLE} ${CMAKE_SOURCE_DIR}/emails/node_modules ${CMAKE_SOURCE_DIR}/interface/node_modules ${CMAKE_SOURCE_DIR}/docs/node_modules
   COMMAND ${PNPM_EXECUTABLE} install
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
   # doing install again if we didn't finish the first time.
@@ -23,6 +24,7 @@ add_custom_command(
   COMMENT "Installing node/ui dependencies"
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   DEPENDS
+    ${CMAKE_SOURCE_DIR}/docs/package.json
     ${CMAKE_SOURCE_DIR}/interface/package.json
     ${CMAKE_SOURCE_DIR}/emails/package.json
     ${CMAKE_SOURCE_DIR}/package.json
@@ -47,6 +49,11 @@ add_custom_target(
 
 add_custom_target(
   tools.react-email
+  DEPENDS dependencies.node_modules
+)
+
+add_custom_target(
+  tools.next
   DEPENDS dependencies.node_modules
 )
 

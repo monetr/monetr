@@ -38,6 +38,7 @@ find_package(Docker QUIET)
 include(NodeModules)
 include(GolangUtils)
 add_subdirectory("${CMAKE_SOURCE_DIR}/interface")
+add_subdirectory("${CMAKE_SOURCE_DIR}/docs")
 add_subdirectory("${CMAKE_SOURCE_DIR}/emails")
 include("${CMAKE_SOURCE_DIR}/cmake/backend.cmake")
 
@@ -125,9 +126,6 @@ if(DOCKER_EXECUTABLE)
     endforeach()
   endforeach()
 endif()
-
-# Documentation targets require docker at the moment
-include("${CMAKE_SOURCE_DIR}/cmake/documentation.cmake")
 
 set(LICENSED_VERSION "4.4.0")
 if(BUILD_THIRD_PARTY_NOTICE)
@@ -262,3 +260,13 @@ foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   add_subdirectory(${DIR})
 endforeach()
 
+# Recursively add all of the directories in the interface package that have CMakeLists of their own.
+file(
+  GLOB_RECURSE SUB_PACKAGES
+  RELATIVE ${CMAKE_SOURCE_DIR} "${CMAKE_SOURCE_DIR}/interface/src/*CMakeLists.txt"
+)
+# # Loop through the files and get their directories
+foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
+  get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
+  add_subdirectory(${DIR})
+endforeach()

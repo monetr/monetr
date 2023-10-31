@@ -203,8 +203,8 @@ jobs:
           curl -k https://monetr.local
           make shutdown
 
-  mkdocs:
-    name: MkDocs
+  docs:
+    name: Documentation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -213,21 +213,13 @@ jobs:
       - name: Fix dumb git issue
         run: |
           git config --global --add safe.directory ${PWD}
-      - name: Use Docker in rootless mode.
-        uses: ScribeMD/rootless-docker@0.2.2
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_TOKEN }} # Read only token.
       - name: Build
-        run: make docs MKDOCS_IMAGE=ghcr.io/monetr/mkdocs-material-insiders:09092023
+        run: make docs
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.4.3
         with:
           branch: monetr.app
-          folder: build/documentation
+          folder: docs/out
 
   docker:
     name: Container (Docker)

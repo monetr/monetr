@@ -137,28 +137,6 @@ else()
 endif()
 
 add_custom_target(
-  development.documentation.up
-  COMMENT "Starting documentation using Docker compose locally..."
-  COMMAND ${DOCKER_EXECUTABLE} compose ${DOCUMENTATION_COMPOSE_ARGS} up --wait --remove-orphans
-  COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
-  COMMAND ${CMAKE_COMMAND} -E echo "--"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- Documentation is now running locally."
-  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via http://localhost:8000/documentation"
-  COMMAND ${CMAKE_COMMAND} -E echo "--"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- Changes you make to the documentation will automatically hot reload in"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- your browser."
-  COMMAND ${CMAKE_COMMAND} -E echo "--"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- When you are done you can shutdown the local development environment using:"
-  COMMAND ${CMAKE_COMMAND} -E echo "--   make shutdown"
-  COMMAND ${CMAKE_COMMAND} -E echo "--     or:"
-  COMMAND ${CMAKE_COMMAND} -E echo "--   make clean"
-  COMMAND ${CMAKE_COMMAND} -E echo "--"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
-  COMMAND_EXPAND_LISTS
-  USES_TERMINAL
-)
-
-add_custom_target(
   development.logs
   COMMENT "Tailing logs from monetr's local development environment"
   COMMAND ${DOCKER_EXECUTABLE} compose ${ALL_COMPOSE_ARGS} logs -f
