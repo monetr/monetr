@@ -127,9 +127,6 @@ if(DOCKER_EXECUTABLE)
   endforeach()
 endif()
 
-# Documentation targets require docker at the moment
-include("${CMAKE_SOURCE_DIR}/cmake/documentation.cmake")
-
 set(LICENSED_VERSION "4.4.0")
 if(BUILD_THIRD_PARTY_NOTICE)
   find_package(Ruby REQUIRED)
