@@ -79,7 +79,6 @@ add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LO
 add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
 
 set(LOCAL_COMPOSE_FILE ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml)
-set(DOCUMENTATION_COMPOSE_FILE ${CMAKE_SOURCE_DIR}/compose/docker-compose.documentation.yaml)
 
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
 set(BASE_ARGS "--project-directory" "${CMAKE_SOURCE_DIR}")
@@ -92,8 +91,7 @@ if(EXISTS ${HOME}/.monetr/development.env)
 endif()
 
 set(DEVELOPMENT_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" ${BASE_ARGS})
-set(DOCUMENTATION_COMPOSE_ARGS "-f" "${DOCUMENTATION_COMPOSE_FILE}" ${BASE_ARGS})
-set(ALL_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" "-f" "${DOCUMENTATION_COMPOSE_FILE}" ${BASE_ARGS})
+set(ALL_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" ${BASE_ARGS})
 
 add_custom_target(
   development.monetr.up
