@@ -12,10 +12,10 @@ services:
     working_dir: /build
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4000/api/health" ]
-      interval: 5s
+      interval: 3s
       timeout: 5s
-      retries: 24
-      start_period: 30s
+      retries: 35
+      start_period: 60s
     environment:
       air_wd: /build
       DISABLE_GO_RELOAD: ${DISABLE_GO_RELOAD:-false}
