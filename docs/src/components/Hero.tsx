@@ -1,3 +1,5 @@
+import Particles from './Particles';
+
 import Image from 'next/image';
 
 import Logo from '../assets/logo.svg';
@@ -21,6 +23,7 @@ export default function Hero(): JSX.Element {
           <path fill="url(#bs5-a)" fillRule="evenodd" d="m661 736 461 369-284 58z" transform="matrix(1 0 0 -1 -661 1163)" />
         </svg>
       </div>
+      <Particles className="absolute inset-0 -z-10" />
       <div className="m-view-height m-view-width flex flex-col py-8 mx-auto items-center justify-center">
         <div className="max-w-3xl flex flex-col">
           <Image src={ Logo } alt="monetr logo" width={ 75 } height={ 75 } />
