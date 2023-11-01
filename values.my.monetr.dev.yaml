@@ -112,7 +112,7 @@ api:
     level: debug
     format: json
     stackDriver:
-      enabled: true
+      enabled: false
   sentry:
     enabled: true
     sampleRate: 1.0
