@@ -23,7 +23,7 @@
     "autoprefixer": "10.4.16",
     "cheerio": "1.0.0-rc.12",
     "postcss": "8.4.31",
-    "tailwindcss": "3.3.3",
+    "tailwindcss": "3.3.5",
     "typescript": "5.1.3"
   }
 }
