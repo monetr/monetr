@@ -41,7 +41,6 @@ execute_process(
 
 add_custom_command(
   OUTPUT ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
-  OUTPUT ${}
   BYPRODUCTS ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
   # Since output files are hashed, make sure that there aren't any files that might be left over from the previous build
   # in the output directory.
@@ -49,6 +48,7 @@ add_custom_command(
   # Once the output directory is clean, then actually build the user interface.
   COMMAND ${CMAKE_COMMAND} -E env GIT_BRANCH=${GIT_BRANCH} ${NEXT_EXECUTABLE} build ${DOCS_SRC_DIR}
   COMMAND ${SITEMAP_EXECUTABLE} --config ${DOCS_SRC_DIR}/next-sitemap.config.js
+  COMMAND ${NODE_EXECUTABLE} ${DOCS_SRC_DIR}/intl-temp.js ${CMAKE_CURRENT_SOURCE_DIR}/out
   # This fixes an issue with github pages not liking underscore prefixed directories.
   COMMAND ${CMAKE_COMMAND} -E touch ${DOCUMENTATION_OUT_DIR}/.nojekyll
   COMMENT "Building monetr.app documentation and website"
