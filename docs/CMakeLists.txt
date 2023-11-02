@@ -17,11 +17,18 @@ file(GLOB DOCS_CONFIG_FILES
 # NOTE: This cannot be outside this directory otherwise next complains.
 set(DOCUMENTATION_OUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/out")
 set(DOCUMENTATION_DIST
+  "${DOCUMENTATION_OUT_DIR}/404"
   "${DOCUMENTATION_OUT_DIR}/_next"
-  "${DOCUMENTATION_OUT_DIR}/404.html"
+  "${DOCUMENTATION_OUT_DIR}/contact"
+  "${DOCUMENTATION_OUT_DIR}/documentation"
   "${DOCUMENTATION_OUT_DIR}/favicon.ico"
-  "${DOCUMENTATION_OUT_DIR}/index.html"
+  "${DOCUMENTATION_OUT_DIR}/logo192.png"
   "${DOCUMENTATION_OUT_DIR}/.nojekyll"
+  "${DOCUMENTATION_OUT_DIR}/404.html"
+  "${DOCUMENTATION_OUT_DIR}/index.html"
+  "${DOCUMENTATION_OUT_DIR}/robots.txt"
+  "${DOCUMENTATION_OUT_DIR}/sitemap-0.xml"
+  "${DOCUMENTATION_OUT_DIR}/sitemap.xml"
 )
 
 execute_process(
@@ -41,6 +48,7 @@ add_custom_command(
   COMMAND ${GIT_EXECUTABLE} clean -f -X ${DOCUMENTATION_OUT_DIR}
   # Once the output directory is clean, then actually build the user interface.
   COMMAND ${CMAKE_COMMAND} -E env GIT_BRANCH=${GIT_BRANCH} ${NEXT_EXECUTABLE} build ${DOCS_SRC_DIR}
+  COMMAND ${SITEMAP_EXECUTABLE} --config ${DOCS_SRC_DIR}/next-sitemap.config.js
   # This fixes an issue with github pages not liking underscore prefixed directories.
   COMMAND ${CMAKE_COMMAND} -E touch ${DOCUMENTATION_OUT_DIR}/.nojekyll
   COMMENT "Building monetr.app documentation and website"
