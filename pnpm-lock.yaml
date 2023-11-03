@@ -187,8 +187,8 @@ importers:
         specifier: 5.3.1
         version: 5.3.1(react-dom@18.2.0)(react@18.2.0)
       react-plaid-link:
-        specifier: 3.3.2
-        version: 3.3.2(react-dom@18.2.0)(react@18.2.0)
+        specifier: 3.5.1
+        version: 3.5.1(react-dom@18.2.0)(react@18.2.0)
       react-router-dom:
         specifier: 6.6.1
         version: 6.6.1(react-dom@18.2.0)(react@18.2.0)
@@ -12088,8 +12088,8 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /react-plaid-link@3.3.2(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-W2L9C4RCE/KFFia2SUFFTi8SYRQ1UMUXh4iLE/oo4EQ8UYAT6msKzWvauj8bJirlrkzeiUtY6wgkmWil/okaNg==}
+  /react-plaid-link@3.5.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-OSbPVEIQY3RDroDGyimRh9vUpZfSVzKVCwrbGOSIjcmluHnPKTkvJ1BnYbvE7kH+v8urJXMHloV43uMTNY3SLg==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
