@@ -1,7 +1,7 @@
 import { Meta, StoryObj } from '@storybook/react';
+import { rest } from 'msw';
 
 import SetupPage from './setup';
-import { rest } from 'msw';
 
 const meta: Meta<typeof SetupPage> = {
   title: 'Pages/Setup',

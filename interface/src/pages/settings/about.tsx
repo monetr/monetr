@@ -1,9 +1,9 @@
 import React from 'react';
+import { format } from 'date-fns';
 
 import MDivider from '@monetr/interface/components/MDivider';
 import MSpan, { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
-import { format } from 'date-fns';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
 export default function SettingsAbout(): JSX.Element {

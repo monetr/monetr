@@ -8,6 +8,7 @@ import {
   SwapVertOutlined,
 } from '@mui/icons-material';
 import { AxiosError } from 'axios';
+import { startOfDay, startOfToday } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
@@ -20,13 +21,13 @@ import MSelectFunding from '@monetr/interface/components/MSelectFunding';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
-import { startOfDay, startOfToday } from 'date-fns';
 import { useRemoveSpending, useSpending, useUpdateSpending } from '@monetr/interface/hooks/spending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
-import MerchantIcon from 'pages/new/MerchantIcon';
 import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import { APIError } from '@monetr/interface/util/request';
+
+import MerchantIcon from 'pages/new/MerchantIcon';
 
 interface GoalValues {
   name: string;

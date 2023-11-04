@@ -2,6 +2,7 @@ import React from 'react';
 import { PowerOutlined } from '@mui/icons-material';
 
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+
 import SetupPage from 'pages/setup';
 
 export default function LinkCreatePage(): JSX.Element {

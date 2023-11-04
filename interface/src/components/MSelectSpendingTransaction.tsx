@@ -4,7 +4,6 @@ import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 
 import MBadge from './MBadge';
 import MSpan from './MSpan';
-
 import { useCurrentBalance } from '@monetr/interface/hooks/balances';
 import { useSpendingSink } from '@monetr/interface/hooks/spending';
 import { useUpdateTransaction } from '@monetr/interface/hooks/transactions';

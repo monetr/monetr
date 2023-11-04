@@ -1,9 +1,8 @@
+import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
+import { rest } from 'msw';
 
 import RegisterPage, { RegisterSuccessful } from 'pages/register';
-
-import { rest } from 'msw';
-import React from 'react';
 
 const meta: Meta<typeof RegisterPage> = {
   title: 'Pages/Authentication/Register',

@@ -1,5 +1,4 @@
 import sortAccounts from './sortAccounts';
-
 import BankAccount from '@monetr/interface/models/BankAccount';
 
 describe('sort accounts', () => {

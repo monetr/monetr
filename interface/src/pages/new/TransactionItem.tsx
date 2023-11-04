@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
 import TransactionMerchantIcon from './TransactionMerchantIcon';
-
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import { useSpendingOld } from '@monetr/interface/hooks/spending';
 import Transaction from '@monetr/interface/models/Transaction';

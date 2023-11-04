@@ -1,8 +1,7 @@
 import { Meta, StoryObj } from '@storybook/react';
+import { rest } from 'msw';
 
 import ResendVerificationPage from './resend';
-
-import { rest } from 'msw';
 
 const meta: Meta<typeof ResendVerificationPage> = {
   title: 'Resend Verification Email',

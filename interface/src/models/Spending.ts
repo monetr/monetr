@@ -1,5 +1,6 @@
 
 import { format, isThisYear, parseJSON } from 'date-fns';
+
 import { amountToFriendly, formatAmount } from '@monetr/interface/util/amounts';
 
 export enum SpendingType {

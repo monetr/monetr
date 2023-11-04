@@ -4,7 +4,6 @@ import { useSnackbar } from 'notistack';
 
 import { useBankAccounts } from './bankAccounts';
 import { useAuthenticationSink } from './useAuthentication';
-
 import Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
 

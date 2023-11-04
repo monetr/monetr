@@ -3,14 +3,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
+import { format, isThisYear } from 'date-fns';
 
 import MSpan from '@monetr/interface/components/MSpan';
-import { format, isThisYear } from 'date-fns';
 import { useNextFundingForecast } from '@monetr/interface/hooks/forecast';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
-import { rrulestr } from 'rrule';
 import { formatAmount } from '@monetr/interface/util/amounts';
 import capitalize from '@monetr/interface/util/capitalize';
+
+import { rrulestr } from 'rrule';
 
 export interface FundingItemProps {
   funding: FundingSchedule;

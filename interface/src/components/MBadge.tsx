@@ -1,7 +1,6 @@
 import React from 'react';
 
 import MSpan, { MSpanProps } from './MSpan';
-
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 

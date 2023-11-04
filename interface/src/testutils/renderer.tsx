@@ -6,6 +6,7 @@ import { Queries, queries, render, RenderOptions, RenderResult } from '@testing-
 
 import MQueryClient from '@monetr/interface/components/MQueryClient';
 import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
+
 import { newTheme } from 'theme';
 
 export interface Options<

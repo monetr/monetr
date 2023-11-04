@@ -1,6 +1,7 @@
+import { startOfMonth } from 'date-fns';
+
 import Recurrence from './Recurrence';
 
-import { startOfMonth } from 'date-fns';
 import { RRule } from 'rrule';
 
 describe('recurrence rules', () => {

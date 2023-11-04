@@ -241,6 +241,7 @@
                 "^@emotion",
                 "^@sentry",
                 "^@storybook",
+                "^@tanstack",
                 "^@testing-library",
                 "^axios",
                 "^date-fns",

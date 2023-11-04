@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-
 import { parseJSON } from 'date-fns';
+
 import User from '@monetr/interface/models/User';
 import request from '@monetr/interface/util/request';
 

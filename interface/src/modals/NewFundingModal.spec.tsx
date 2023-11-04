@@ -1,9 +1,8 @@
 import React, { Fragment } from 'react';
 import { act, waitFor } from '@testing-library/react';
+import { rest } from 'msw';
 
 import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
-
-import { rest } from 'msw';
 import testRenderer from '@monetr/interface/testutils/renderer';
 import { server } from '@monetr/interface/testutils/server';
 

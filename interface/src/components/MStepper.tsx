@@ -2,7 +2,6 @@ import React, { Fragment } from 'react';
 
 import MDivider from './MDivider';
 import MSpan from './MSpan';
-
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MStepperProps {

@@ -1,8 +1,8 @@
 import { Meta, StoryObj } from '@storybook/react';
+import { rest } from 'msw';
 
 import NewExpenseModal, { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 
-import { rest } from 'msw';
 import GetAPIFixtures from 'stories/apiFixtures';
 
 const meta: Meta<typeof NewExpenseModal> = {

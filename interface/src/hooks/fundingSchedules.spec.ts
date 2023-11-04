@@ -1,9 +1,9 @@
 import { act } from '@testing-library/react-hooks';
-
 import { parseJSON } from 'date-fns';
+import { rest } from 'msw';
+
 import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
-import { rest } from 'msw';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 import { server } from '@monetr/interface/testutils/server';
 

@@ -3,10 +3,10 @@ import React, { Fragment } from 'react';
 
 import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
 import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
+import { ReactElement } from '@monetr/interface/components/types';
+
 import Expenses from 'pages/expenses';
 import Transactions from 'pages/transactions';
-
-import { ReactElement } from '@monetr/interface/components/types';
 
 interface MonetrWrapperProps {
   children: ReactElement;

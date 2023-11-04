@@ -14,8 +14,9 @@ import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import Transaction from '@monetr/interface/models/Transaction';
-import MerchantIcon from 'pages/new/MerchantIcon';
 import { amountToFriendly } from '@monetr/interface/util/amounts';
+
+import MerchantIcon from 'pages/new/MerchantIcon';
 
 interface TransactionValues {
   name: string;

@@ -1,5 +1,6 @@
-import { useSelectedBankAccount, useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import { rest } from 'msw';
+
+import { useSelectedBankAccount, useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 import { server } from '@monetr/interface/testutils/server';
 

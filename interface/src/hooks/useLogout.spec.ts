@@ -1,7 +1,7 @@
 import { act } from '@testing-library/react-hooks';
+import { rest } from 'msw';
 
 import useLogout from '@monetr/interface/hooks/useLogout';
-import { rest } from 'msw';
 import testRenderHook from '@monetr/interface/testutils/hooks';
 import { server } from '@monetr/interface/testutils/server';
 

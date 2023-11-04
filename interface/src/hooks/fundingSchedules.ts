@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
-
 import { format, isBefore } from 'date-fns';
+
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import Spending from '@monetr/interface/models/Spending';
