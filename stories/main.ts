@@ -3,8 +3,14 @@ import type { StorybookConfig } from '@storybook/types';
 const envName = process.env.NODE_ENV;
 const isDevelopment = envName !== 'production';
 
+const marketingStoryOnly = process.env.MARKETING_STORY_ONLY === 'true';
+let stories = ['../interface/src/**/*.stories.@(js|jsx|ts|tsx)'];
+if (marketingStoryOnly) {
+  stories = ['../interface/src/pages/new.stories.tsx'];
+}
+
 const config: StorybookConfig = {
-  stories: ['../interface/src/**/*.stories.@(js|jsx|ts|tsx)'],
+  stories: stories,
   addons: [
     '@storybook/addon-links',
     {

@@ -40,7 +40,8 @@ execute_process(
 )
 
 set(STORYBOOK_DOCS "${DOCUMENTATION_OUT_DIR}/_storybook")
-set(STORY_OUTPUT ${CMAKE_BINARY_DIR}/stories/dist)
+set(STORY_OUTPUT ${CMAKE_BINARY_DIR}/stories/marketing)
+file(GLOB STORY_FILES "${CMAKE_SOURCE_DIR}/stories/*.*")
 add_custom_command(
   OUTPUT ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
   BYPRODUCTS ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
@@ -64,7 +65,8 @@ add_custom_command(
     ${ALL_DOCS_FILES}
     ${PUBLIC_FILES}
     ${DOCS_CONFIG_FILES}
-    build.stories
+    ${STORY_FILES}
+    build.stories.marketing
 )
 
 add_custom_target(

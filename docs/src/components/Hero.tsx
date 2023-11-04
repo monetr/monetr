@@ -1,3 +1,4 @@
+import InterfaceExample from './InterfaceExample';
 import Particles from './Particles';
 
 import Image from 'next/image';
@@ -33,12 +34,7 @@ export default function Hero(): JSX.Element {
             focused on helping you plan and budget for recurring expenses, or future goals.
           </h2>
         </div>
-        <iframe
-          title='monetr interface'
-          loading="lazy"
-          className='w-full h-full rounded-2xl mt-8 shadow-2xl z-10 backdrop-blur-md bg-black/90 opacity-90 pointer-events-none select-none max-w-[1280px] max-h-[720px] aspect-video-vertical md:aspect-video'
-          src="/_storybook/iframe.html?viewMode=story&id=new-ui--transactions&shortcuts=false&singleStory=true&args="
-        />
+        <InterfaceExample />
       </div>
     </div>
   );

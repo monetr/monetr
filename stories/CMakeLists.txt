@@ -37,6 +37,28 @@ add_custom_target(
   DEPENDS ${STORY_OUTPUT}
 )
 
+set(MARKETING_STORY_OUTPUT ${CMAKE_BINARY_DIR}/stories/marketing)
+add_custom_command(
+  OUTPUT ${MARKETING_STORY_OUTPUT}
+  BYPRODUCTS ${MARKETING_STORY_OUTPUT}
+  COMMENT "Building storybook marketing output"
+  COMMAND ${CMAKE_COMMAND} -E remove_directory "${MARKETING_STORY_OUTPUT}"
+  COMMAND ${CMAKE_COMMAND} -E env NODE_ENV=production MARKETING_STORY_ONLY=true ${STORYBOOK_EXECUTABLE} build --disable-telemetry -c ${CMAKE_CURRENT_SOURCE_DIR} -o ${MARKETING_STORY_OUTPUT}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  DEPENDS
+    dependencies.node_modules
+    tools.storybook
+    ${ALL_UI_FILES}
+    ${PUBLIC_FILES}
+    ${STORY_FILES}
+)
+
+add_custom_target(
+  build.stories.marketing
+  COMMAND true
+  DEPENDS ${MARKETING_STORY_OUTPUT}
+)
+
 add_custom_target(
   development.stories.up
   COMMAND ${STORYBOOK_EXECUTABLE} dev -p 6006 --disable-telemetry -c ${CMAKE_CURRENT_SOURCE_DIR}
