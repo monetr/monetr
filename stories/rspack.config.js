@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import path, { resolve } from 'path';
 
 const root = resolve(__dirname, '../');
 const uiDir = resolve(root, 'interface/src');
@@ -50,6 +50,10 @@ export default ({ config, mode }) => {
         uiDir,
         'node_modules',
       ],
+      alias: {
+        ...config?.resolve?.alias,
+        '@monetr/interface': uiDir,
+      }
     },
     module: {
       ...config?.module,
