@@ -2,7 +2,6 @@ const path = require('path');
 
 module.exports = (env, _argv) => {
   const envName = Object.keys(env).pop() ?? process.env.NODE_ENV;
-
   const isDevelopment = envName === 'development';
   console.log(`environment: ${envName}`);
 

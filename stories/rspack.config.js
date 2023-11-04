@@ -1,8 +1,10 @@
 import { resolve } from 'path';
 
 const root = resolve(__dirname, '../');
-const uiDir = resolve(root, 'ui');
-const mockServiceWorkerJS = resolve(root, 'public/mockServiceWorker.js');
+const uiDir = resolve(root, 'interface/src');
+const mockServiceWorkerJS = resolve(root, 'interface/public/mockServiceWorker.js');
+const envName = process.env.NODE_ENV;
+const isDevelopment = envName !== 'production';
 
 export default ({ config, mode }) => {
   // This is so ugly, but basically this is doing a "deep" merge of what config values I need and the config values that
@@ -18,8 +20,8 @@ export default ({ config, mode }) => {
       react: {
         ...config?.builtins?.react,
         runtime: 'automatic',
-        development: true,
-        refresh: true,
+        development: isDevelopment,
+        refresh: isDevelopment,
       },
       copy: {
         ...config?.builtins?.copy,
@@ -33,19 +35,20 @@ export default ({ config, mode }) => {
         ],
       }
     },
-    devServer: {
+    devServer: isDevelopment ? {
       ...config?.devServer,
       liveReload: true,
       client: {
         ...config?.devServer?.client,
         progress: true,
       },
-    },
+    } : config?.devServer,
     resolve: {
       ...config?.resolve,
       modules: [
         ...config?.resolve?.modules,
         uiDir,
+        'node_modules',
       ],
     },
     module: {

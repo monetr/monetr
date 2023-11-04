@@ -1,5 +1,5 @@
 {
-  "name": "interface",
+  "name": "@monetr/interface",
   "version": "0.1.0",
   "private": true,
   "scripts": {

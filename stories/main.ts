@@ -1,7 +1,10 @@
 import type { StorybookConfig } from '@storybook/types';
 
+const envName = process.env.NODE_ENV;
+const isDevelopment = envName !== 'production';
+
 const config: StorybookConfig = {
-  stories: ['../ui/**/*.stories.@(js|jsx|ts|tsx)'],
+  stories: ['../interface/src/**/*.stories.@(js|jsx|ts|tsx)'],
   addons: [
     '@storybook/addon-links',
     {
@@ -27,7 +30,7 @@ const config: StorybookConfig = {
   framework: {
     name: 'storybook-react-rspack',
     options: {
-      fastRefresh: true,
+      fastRefresh: isDevelopment,
     },
   },
   docs: {
