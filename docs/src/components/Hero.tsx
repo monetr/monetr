@@ -9,7 +9,7 @@ export default function Hero(): JSX.Element {
     <div className="w-full">
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden="true">
         <div className="absolute flex items-center justify-center top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 w-1/3 aspect-square">
-          <div className="absolute inset-0 translate-z-0 bg-purple-500 rounded-full blur-[120px] opacity-50" />
+          <div className="absolute inset-0 translate-z-0 bg-purple-500 rounded-full blur-[120px] opacity-50 min-h-[10vh]" />
         </div>
       </div>
       <div className="max-md:hidden absolute bottom-0 -mb-20 left-2/3 -translate-x-1/2 blur-2xl opacity-70 pointer-events-none" aria-hidden="true">
@@ -33,6 +33,12 @@ export default function Hero(): JSX.Element {
             focused on helping you plan and budget for recurring expenses, or future goals.
           </h2>
         </div>
+        <iframe
+          title='monetr interface'
+          loading="lazy"
+          className='w-full h-full rounded-2xl mt-8 shadow-2xl z-10 backdrop-blur-md bg-black/90 opacity-90 pointer-events-none select-none max-w-[1280px] max-h-[720px] aspect-video-vertical md:aspect-video'
+          src="/_storybook/iframe.html?viewMode=story&id=new-ui--transactions&shortcuts=false&singleStory=true&args="
+        />
       </div>
     </div>
   );

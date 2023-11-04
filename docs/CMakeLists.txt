@@ -39,6 +39,8 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+set(STORYBOOK_DOCS "${DOCUMENTATION_OUT_DIR}/_storybook")
+set(STORY_OUTPUT ${CMAKE_BINARY_DIR}/stories/dist)
 add_custom_command(
   OUTPUT ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
   BYPRODUCTS ${DOCUMENTATION_DIST} ${CMAKE_CURRENT_SOURCE_DIR}/.next ${CMAKE_CURRENT_SOURCE_DIR}/out
@@ -51,6 +53,9 @@ add_custom_command(
   COMMAND ${NODE_EXECUTABLE} ${DOCS_SRC_DIR}/intl-temp.js ${CMAKE_CURRENT_SOURCE_DIR}/out
   # This fixes an issue with github pages not liking underscore prefixed directories.
   COMMAND ${CMAKE_COMMAND} -E touch ${DOCUMENTATION_OUT_DIR}/.nojekyll
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${STORYBOOK_DOCS}
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${STORY_OUTPUT}/ ${STORYBOOK_DOCS}
+  COMMAND ${CMAKE_COMMAND} -E copy ${STORY_OUTPUT}/mockServiceWorker.js ${CMAKE_SOURCE_DIR}/docs/out/mockServiceWorker.js
   COMMENT "Building monetr.app documentation and website"
   WORKING_DIRECTORY ${DOCS_SRC_DIR}
   DEPENDS
@@ -59,6 +64,7 @@ add_custom_command(
     ${ALL_DOCS_FILES}
     ${PUBLIC_FILES}
     ${DOCS_CONFIG_FILES}
+    build.stories
 )
 
 add_custom_target(

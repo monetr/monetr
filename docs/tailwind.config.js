@@ -14,6 +14,9 @@ module.exports = {
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
     },
+    aspectRatio: {
+      'video-vertical': '9/16',
+    },
     colors: {
       inherit: 'inherit',
       current: 'currentColor',
