@@ -7,6 +7,7 @@ const config: Config = {
   moduleNameMapper: {
     // eslint-disable-next-line max-len
     '^.+\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|lottie.json|xlsx)$': '<rootDir>/src/testutils/mocks/fileMock.js',
+    '^@monetr/interface/(.*)$': '<rootDir>/src/$1',
   },
   resetMocks: false,
   collectCoverageFrom: [
