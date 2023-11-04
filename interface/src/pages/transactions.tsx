@@ -9,9 +9,8 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useTransactions } from '@monetr/interface/hooks/transactions';
 import Transaction from '@monetr/interface/models/Transaction';
-
-import TransactionDateItem from 'pages/new/TransactionDateItem';
-import TransactionItem from 'pages/new/TransactionItem';
+import TransactionDateItem from '@monetr/interface/pages/new/TransactionDateItem';
+import TransactionItem from '@monetr/interface/pages/new/TransactionItem';
 
 let evilScrollPosition: number = 0;
 

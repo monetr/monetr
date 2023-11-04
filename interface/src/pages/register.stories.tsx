@@ -2,7 +2,7 @@ import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 import { rest } from 'msw';
 
-import RegisterPage, { RegisterSuccessful } from 'pages/register';
+import RegisterPage, { RegisterSuccessful } from '@monetr/interface/pages/register';
 
 const meta: Meta<typeof RegisterPage> = {
   title: 'Pages/Authentication/Register',

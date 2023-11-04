@@ -20,10 +20,9 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useRemoveSpending, useSpending, useUpdateSpending } from '@monetr/interface/hooks/spending';
 import { showTransferModal } from '@monetr/interface/modals/TransferModal';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import MerchantIcon from '@monetr/interface/pages/new/MerchantIcon';
 import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
 import { APIError } from '@monetr/interface/util/request';
-
-import MerchantIcon from 'pages/new/MerchantIcon';
 
 interface ExpenseValues {
   name: string;

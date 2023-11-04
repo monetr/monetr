@@ -8,8 +8,7 @@ import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useSpendingFiltered } from '@monetr/interface/hooks/spending';
 import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 import { SpendingType } from '@monetr/interface/models/Spending';
-
-import ExpenseItem from 'pages/new/ExpenseItem';
+import ExpenseItem from '@monetr/interface/pages/new/ExpenseItem';
 
 let evilScrollPosition: number = 0;
 

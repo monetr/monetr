@@ -2,10 +2,9 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { rest } from 'msw';
 
+import Register from '@monetr/interface/pages/register';
 import testRenderer from '@monetr/interface/testutils/renderer';
 import { server } from '@monetr/interface/testutils/server';
-
-import Register from 'pages/register';
 
 describe('register page', () => {
   it('will render with default options', async () => {
