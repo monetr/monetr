@@ -2,9 +2,9 @@
 import React, { useEffect } from 'react';
 import { useLocation, useMatch } from 'react-router-dom';
 
-import BankSidebar from 'components/Layout/BankSidebar';
-import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
-import useStore from 'hooks/store';
+import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
+import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
+import useStore from '@monetr/interface/hooks/store';
 
 export default function MobileSidebar(): JSX.Element {
   const match = useMatch('/bank/:bankId/*');

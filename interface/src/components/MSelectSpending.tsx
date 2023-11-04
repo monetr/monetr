@@ -7,10 +7,10 @@ import MBadge from './MBadge';
 import MSelect, { MSelectProps } from './MSelect';
 import MSpan from './MSpan';
 
-import { useCurrentBalance } from 'hooks/balances';
-import { useSpendingSink } from 'hooks/spending';
-import Spending, { SpendingType } from 'models/Spending';
-import { formatAmount } from 'util/amounts';
+import { useCurrentBalance } from '@monetr/interface/hooks/balances';
+import { useSpendingSink } from '@monetr/interface/hooks/spending';
+import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import { formatAmount } from '@monetr/interface/util/amounts';
 
 // Remove the props that we do not want to allow the caller to pass in.
 type MSelecteSpendingBaseProps = Omit<

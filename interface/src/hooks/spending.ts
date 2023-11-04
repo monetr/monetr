@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
-import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import Balance from 'models/Balance';
-import Spending, { SpendingType } from 'models/Spending';
-import request from 'util/request';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import Balance from '@monetr/interface/models/Balance';
+import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import request from '@monetr/interface/util/request';
 
 export type SpendingResult =
   { result: Array<Spending> }

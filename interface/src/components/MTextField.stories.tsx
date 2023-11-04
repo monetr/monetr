@@ -6,7 +6,7 @@ import MTextField from './MTextField';
 
 
 export default {
-  title: 'Components/Text Field',
+  title: '@monetr/interface/components/Text Field',
   component: MTextField,
 } as Meta<typeof MTextField>;
 

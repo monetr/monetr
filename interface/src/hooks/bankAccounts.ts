@@ -1,9 +1,9 @@
 import { useMatch } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 
-import { useLinks } from 'hooks/links';
-import BankAccount from 'models/BankAccount';
-import request from 'util/request';
+import { useLinks } from '@monetr/interface/hooks/links';
+import BankAccount from '@monetr/interface/models/BankAccount';
+import request from '@monetr/interface/util/request';
 
 export function useBankAccounts(): UseQueryResult<Array<BankAccount>> {
   const { data: links } = useLinks();

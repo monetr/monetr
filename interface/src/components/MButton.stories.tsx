@@ -4,7 +4,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import MFormButton from './MButton';
 
 export default {
-  title: 'Components/Button',
+  title: '@monetr/interface/components/Button',
   component: MFormButton,
 } as Meta<typeof MFormButton>;
 

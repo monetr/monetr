@@ -96,6 +96,9 @@ module.exports = (env, _argv) => {
         path.resolve(__dirname, 'src'),
         'node_modules',
       ],
+      alias: {
+        '@monetr/interface': path.resolve(__dirname, 'src'),
+      },
     },
     devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
     devServer: {

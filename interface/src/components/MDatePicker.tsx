@@ -12,7 +12,7 @@ import { ReactElement } from './types';
 
 import { isEqual, startOfMonth, startOfToday } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MDatePickerProps extends
   Omit<React.HTMLAttributes<HTMLDivElement>, 'value' | 'defaultValue'>

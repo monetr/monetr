@@ -1,4 +1,4 @@
-import request from 'util/request';
+import request from '@monetr/interface/util/request';
 
 export interface SignUpArguments {
   betaCode: string | null;

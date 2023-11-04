@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styled from '@emotion/styled';
 import { CreditCard } from '@mui/icons-material';
 import { Badge, Tooltip } from '@mui/material';
-
+import styled from '@emotion/styled';
 import { differenceInDays } from 'date-fns';
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { useAuthenticationSink } from 'hooks/useAuthentication';
-import useTheme from 'hooks/useTheme';
+
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import useTheme from '@monetr/interface/hooks/useTheme';
 
 export default function BankSidebarSubscriptionItem(): JSX.Element {
   const config = useAppConfiguration();

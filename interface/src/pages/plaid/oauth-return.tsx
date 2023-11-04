@@ -6,8 +6,8 @@ import * as Sentry from '@sentry/react';
 import { Severity } from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { OAuthRedirectPlaidLink } from 'components/Plaid/OAuthRedirectPlaidLink';
-import request from 'util/request';
+import { OAuthRedirectPlaidLink } from '@monetr/interface/components/Plaid/OAuthRedirectPlaidLink';
+import request from '@monetr/interface/util/request';
 
 interface State {
   loading: boolean;

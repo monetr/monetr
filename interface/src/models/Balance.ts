@@ -1,4 +1,4 @@
-import { formatAmount } from 'util/amounts';
+import { formatAmount } from '@monetr/interface/util/amounts';
 
 export default class Balance {
   bankAccountId: number;

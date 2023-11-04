@@ -4,10 +4,11 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
-import { configure } from '@testing-library/react';
 import axios from 'axios';
 
-import { server } from 'testutils/server';
+import { server } from '@monetr/interface/testutils/server';
+
+import { configure } from '@testing-library/react';
 
 module.export = global.CONFIG = {
   BOOTSTRAP_CONFIG_JSON: false,

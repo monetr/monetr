@@ -4,7 +4,7 @@ import { useFormikContext } from 'formik';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
 
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 type NumericField =  Omit<
   NumericFormatProps<InputAttributes>,

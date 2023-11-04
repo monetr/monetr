@@ -1,4 +1,4 @@
-import Link, { LinkType } from 'models/Link';
+import Link, { LinkType } from '@monetr/interface/models/Link';
 
 
 describe('links', () => {

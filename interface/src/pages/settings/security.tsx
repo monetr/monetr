@@ -3,10 +3,10 @@ import { PasswordOutlined } from '@mui/icons-material';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from 'components/MButton';
-import MForm from 'components/MForm';
-import MTextField from 'components/MTextField';
-import request from 'util/request';
+import MFormButton from '@monetr/interface/components/MButton';
+import MForm from '@monetr/interface/components/MForm';
+import MTextField from '@monetr/interface/components/MTextField';
+import request from '@monetr/interface/util/request';
 
 interface ChangePasswordValues {
   currentPassword: string;

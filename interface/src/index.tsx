@@ -6,14 +6,13 @@ import * as Sentry from '@sentry/react';
 import { Integrations } from '@sentry/tracing';
 import axios from 'axios';
 
-import reportWebVitals from './reportWebVitals';
-import Root from './Root';
+import { NewClient } from '@monetr/interface/api/api';
+import RelayTransport from '@monetr/interface/relay/transport';
+import reportWebVitals from '@monetr/interface/reportWebVitals';
+import Root from '@monetr/interface/Root';
 
-import { NewClient } from './api/api';
-import RelayTransport from './relay/transport';
-
-import './styles/styles.css';
-import './styles/index.scss';
+import '@monetr/interface/styles/styles.css';
+import '@monetr/interface/styles/index.scss';
 
 const container = document.getElementById('root');
 const root = createRoot(container);

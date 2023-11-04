@@ -1,4 +1,4 @@
-import { AxiosInterface } from 'api/api';
+import { AxiosInterface } from '@monetr/interface/api/api';
 
 export interface APIError {
   error: string;

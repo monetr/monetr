@@ -1,7 +1,7 @@
-import { useSelectedBankAccount, useSelectedBankAccountId } from 'hooks/bankAccounts';
+import { useSelectedBankAccount, useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import { rest } from 'msw';
-import testRenderHook from 'testutils/hooks';
-import { server } from 'testutils/server';
+import testRenderHook from '@monetr/interface/testutils/hooks';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('bank account hooks', () => {
   describe('useSelectedBankAccount', () => {

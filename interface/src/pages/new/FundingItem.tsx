@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { Avatar } from '@mui/material';
 
-import MSpan from 'components/MSpan';
+import MSpan from '@monetr/interface/components/MSpan';
 import { format, isThisYear } from 'date-fns';
-import { useNextFundingForecast } from 'hooks/forecast';
-import FundingSchedule from 'models/FundingSchedule';
+import { useNextFundingForecast } from '@monetr/interface/hooks/forecast';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
 import { rrulestr } from 'rrule';
-import { formatAmount } from 'util/amounts';
-import capitalize from 'util/capitalize';
+import { formatAmount } from '@monetr/interface/util/amounts';
+import capitalize from '@monetr/interface/util/capitalize';
 
 export interface FundingItemProps {
   funding: FundingSchedule;

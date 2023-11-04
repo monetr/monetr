@@ -1,6 +1,6 @@
 import React from 'react';
 
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MSpanStyleProps {
   color?: 'default' | 'muted' | 'subtle' | 'emphasis' | 'inherit';

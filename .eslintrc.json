@@ -234,19 +234,23 @@
               // Packages. `react` related packages come first
               [
                 "^react$",
-                "^prop-types",
                 "^react",
                 "^redux$",
-                "^@.+",
+                "^@ebay",
+                "^@mui",
+                "^@emotion",
+                "^@sentry",
+                "^@storybook",
+                "^@testing-library",
                 "^axios",
-                "^classnames",
-                "^clsx",
+                "^date-fns",
                 "^formik",
+                "^history",
                 "^moment",
+                "^msw",
                 "^notistack",
                 "^ramda",
-                "^zustand",
-                "^history"
+                "^zustand"
               ],
               // Internal packages
               [

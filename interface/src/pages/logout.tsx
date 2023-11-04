@@ -1,8 +1,8 @@
 import React from 'react';
 import { Backdrop, CircularProgress } from '@mui/material';
 
-import useLogout from 'hooks/useLogout';
-import useMountEffect from 'hooks/useMountEffect';
+import useLogout from '@monetr/interface/hooks/useLogout';
+import useMountEffect from '@monetr/interface/hooks/useMountEffect';
 
 export default function LogoutPage(): JSX.Element {
   const logout = useLogout();

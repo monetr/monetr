@@ -1,7 +1,7 @@
 import React from 'react';
 import { HeartBrokenOutlined } from '@mui/icons-material';
 
-import MSpan from 'components/MSpan';
+import MSpan from '@monetr/interface/components/MSpan';
 
 export default function ConfigError(): JSX.Element {
   return (

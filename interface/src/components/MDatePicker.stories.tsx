@@ -9,7 +9,7 @@ import { startOfTomorrow } from 'date-fns';
 
 
 const meta: Meta<typeof MDatePicker> = {
-  title: 'Components/Date Picker',
+  title: '@monetr/interface/components/Date Picker',
   component: MDatePicker,
 };
 

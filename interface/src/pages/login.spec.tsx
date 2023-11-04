@@ -3,8 +3,8 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { rest } from 'msw';
 import Login from 'pages/login';
-import testRenderer from 'testutils/renderer';
-import { server } from 'testutils/server';
+import testRenderer from '@monetr/interface/testutils/renderer';
+import { server } from '@monetr/interface/testutils/server';
 
 const mockUseNavigate = jest.fn((_url: string) => { });
 jest.mock('react-router-dom', () => ({

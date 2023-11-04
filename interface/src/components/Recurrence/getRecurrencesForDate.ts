@@ -1,5 +1,5 @@
 /* eslint-disable id-length */
-import Recurrence from 'components/Recurrence/Recurrence';
+import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
 import { endOfMonth, format, getDate, getMonth, isEqual, parseJSON, startOfDay, startOfMonth } from 'date-fns';
 import { RRule, Weekday } from 'rrule';
 

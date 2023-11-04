@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography } from '@mui/material';
 
 import { Logo } from 'assets';
-import { useAfterCheckout } from 'hooks/useAuthentication';
+import { useAfterCheckout } from '@monetr/interface/hooks/useAuthentication';
 
 export default function AfterCheckoutPage(): JSX.Element {
   const { search } = useLocation();

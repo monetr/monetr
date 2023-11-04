@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { useSnackbar, VariantType } from 'notistack';
 
-import request, { APIError } from 'util/request';
+import request, { APIError } from '@monetr/interface/util/request';
 
 export default function useSendForgotPassword(): (email: string, ReCAPTCHA: string | null) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();

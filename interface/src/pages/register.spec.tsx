@@ -3,8 +3,8 @@ import { waitFor } from '@testing-library/react';
 
 import { rest } from 'msw';
 import Register from 'pages/register';
-import testRenderer from 'testutils/renderer';
-import { server } from 'testutils/server';
+import testRenderer from '@monetr/interface/testutils/renderer';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('register page', () => {
   it('will render with default options', async () => {

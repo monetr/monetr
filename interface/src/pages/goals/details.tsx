@@ -11,22 +11,22 @@ import { AxiosError } from 'axios';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MAmountField from 'components/MAmountField';
-import MFormButton, { MBaseButton } from 'components/MButton';
-import MCheckbox from 'components/MCheckbox';
-import MDatePicker from 'components/MDatePicker';
-import MForm from 'components/MForm';
-import MSelectFunding from 'components/MSelectFunding';
-import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
-import MTopNavigation from 'components/MTopNavigation';
+import MAmountField from '@monetr/interface/components/MAmountField';
+import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
+import MCheckbox from '@monetr/interface/components/MCheckbox';
+import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MForm from '@monetr/interface/components/MForm';
+import MSelectFunding from '@monetr/interface/components/MSelectFunding';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { startOfDay, startOfToday } from 'date-fns';
-import { useRemoveSpending, useSpending, useUpdateSpending } from 'hooks/spending';
-import { showTransferModal } from 'modals/TransferModal';
-import Spending, { SpendingType } from 'models/Spending';
+import { useRemoveSpending, useSpending, useUpdateSpending } from '@monetr/interface/hooks/spending';
+import { showTransferModal } from '@monetr/interface/modals/TransferModal';
+import Spending, { SpendingType } from '@monetr/interface/models/Spending';
 import MerchantIcon from 'pages/new/MerchantIcon';
-import { amountToFriendly, friendlyToAmount } from 'util/amounts';
-import { APIError } from 'util/request';
+import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
+import { APIError } from '@monetr/interface/util/request';
 
 interface GoalValues {
   name: string;

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
 export interface Icon {
   svg: string;

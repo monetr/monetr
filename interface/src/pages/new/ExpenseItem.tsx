@@ -5,10 +5,10 @@ import { KeyboardArrowRight } from '@mui/icons-material';
 
 import MerchantIcon from './MerchantIcon';
 
-import { useFundingSchedule } from 'hooks/fundingSchedules';
-import Spending from 'models/Spending';
+import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import Spending from '@monetr/interface/models/Spending';
 import { rrulestr } from 'rrule';
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface ExpenseItemProps {
   spending: Spending;

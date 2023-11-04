@@ -4,12 +4,12 @@ import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { DeleteOutlined } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
-import { MBaseButton } from 'components/MButton';
-import MModal, { MModalRef } from 'components/MModal';
-import MSpan from 'components/MSpan';
-import { useRemoveLink } from 'hooks/links';
-import Link from 'models/Link';
-import { ExtractProps } from 'util/typescriptEvils';
+import { MBaseButton } from '@monetr/interface/components/MButton';
+import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MSpan from '@monetr/interface/components/MSpan';
+import { useRemoveLink } from '@monetr/interface/hooks/links';
+import Link from '@monetr/interface/models/Link';
+import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface RemoveLinkModalProps {
   link: Link;

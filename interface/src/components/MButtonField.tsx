@@ -1,7 +1,7 @@
 import React from 'react';
 import { ButtonBase, ButtonBaseProps } from '@mui/material';
 
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 
 export interface MButtonProps extends ButtonBaseProps {

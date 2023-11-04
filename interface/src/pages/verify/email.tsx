@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import MLogo from 'components/MLogo';
-import MSpan from 'components/MSpan';
-import request from 'util/request';
+import MLogo from '@monetr/interface/components/MLogo';
+import MSpan from '@monetr/interface/components/MSpan';
+import request from '@monetr/interface/util/request';
 
 
 export default function VerifyEmail(): JSX.Element {

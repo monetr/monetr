@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import Balance from 'models/Balance';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import Balance from '@monetr/interface/models/Balance';
 
 export function useBalance(bankAccountId: number): Balance | null {
   const result = useQuery<Partial<Balance>>([`/bank_accounts/${ bankAccountId }/balances`]);

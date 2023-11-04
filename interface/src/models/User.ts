@@ -1,4 +1,4 @@
-import Login from 'models/Login';
+import Login from '@monetr/interface/models/Login';
 
 export default class User {
   userId: number;

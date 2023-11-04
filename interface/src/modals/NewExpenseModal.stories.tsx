@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import NewExpenseModal, { showNewExpenseModal } from 'modals/NewExpenseModal';
+import NewExpenseModal, { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
 
 import { rest } from 'msw';
 import GetAPIFixtures from 'stories/apiFixtures';

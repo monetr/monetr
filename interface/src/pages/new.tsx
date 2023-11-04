@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import React, { Fragment } from 'react';
 
-import BankSidebar from 'components/Layout/BankSidebar';
-import BudgetingSidebar from 'components/Layout/BudgetingSidebar';
+import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
+import BudgetingSidebar from '@monetr/interface/components/Layout/BudgetingSidebar';
 import Expenses from 'pages/expenses';
 import Transactions from 'pages/transactions';
 
-import { ReactElement } from 'components/types';
+import { ReactElement } from '@monetr/interface/components/types';
 
 interface MonetrWrapperProps {
   children: ReactElement;
