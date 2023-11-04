@@ -1,9 +1,8 @@
-import InterfaceExample from './InterfaceExample';
-import Particles from './Particles';
-
 import Image from 'next/image';
 
-import Logo from '../assets/logo.svg';
+import InterfaceExample from './InterfaceExample';
+import Particles from './Particles';
+import Logo from '@monetr/docs/assets/logo.svg';
 
 export default function Hero(): JSX.Element {
   return (

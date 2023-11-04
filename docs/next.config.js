@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
@@ -6,6 +8,21 @@ const nextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true,
+  },
+webpack: (
+    config,
+    nextShit,
+  ) => {
+    // Important: return the modified config
+    config.resolve = {
+      ...config?.resolve,
+      alias: {
+        ...config?.resolve?.alias,
+        '@monetr/docs': path.resolve(__dirname, 'src'),
+        '@monetr/interface': path.resolve(__dirname, '../interface/src'),
+      }
+    }
+    return config
   },
 }
 

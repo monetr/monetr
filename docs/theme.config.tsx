@@ -1,10 +1,9 @@
 import React from 'react';
-
-import SignUp from 'components/SignUp';
 import Image from 'next/image';
 import type { DocsThemeConfig } from 'nextra-theme-docs';
 
-import Logo from './src/assets/logo.svg';
+import Logo from '@monetr/docs/assets/logo.svg';
+import SignUp from '@monetr/docs/components/SignUp';
 
 const branch = process.env.GIT_BRANCH ?? 'main';
 
