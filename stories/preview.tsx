@@ -2,6 +2,8 @@ import '@fontsource-variable/inter';
 
 import React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
+import { newTheme } from '@monetr/interface/src/theme';
+import Query from '@monetr/interface/src/util/query';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
@@ -14,20 +16,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import axios from 'axios';
 import { SnackbarProvider, VariantType } from 'notistack';
 
-import { newTheme } from '../ui/theme';
-import Query from '../ui/util/query';
-
 import { initialize, mswLoader } from 'msw-storybook-addon';
 import { withRouter } from 'storybook-addon-react-router-v6';
 import { ScreenshotOptions, withScreenshot } from 'storycap';
 
-import '../ui/styles/styles.css';
+import '@monetr/interface/src/styles/styles.css';
 import './preview.css';
 
 initialize({
   onUnhandledRequest: 'bypass',
 });
 
+// @ts-ignore
 window.API = axios.create({
   baseURL: '/api',
 });

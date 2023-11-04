@@ -250,7 +250,8 @@
               ],
               // Internal packages
               [
-                "^\\."
+                "^\\.",
+                "^@monetr\/.+$"
               ],
               // Parent imports. Put `..` last.
               [

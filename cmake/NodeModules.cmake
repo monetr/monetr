@@ -14,6 +14,7 @@ set(RSPACK_EXECUTABLE ${NODE_MODULES_BIN}/rspack)
 set(REACT_EMAIL_EXECUTABLE ${NODE_MODULES_BIN}/email)
 set(NEXT_EXECUTABLE ${NODE_MODULES_BIN}/next)
 set(SITEMAP_EXECUTABLE ${NODE_MODULES_BIN}/next-sitemap)
+set(STORYBOOK_EXECUTABLE ${NODE_MODULES_BIN}/storybook)
 
 add_custom_command(
   OUTPUT ${NODE_MODULES}
@@ -23,9 +24,10 @@ add_custom_command(
          ${REACT_EMAIL_EXECUTABLE}
          ${NEXT_EXECUTABLE}
          ${SITEMAP_EXECUTABLE}
+         ${CMAKE_SOURCE_DIR}/docs/node_modules
          ${CMAKE_SOURCE_DIR}/emails/node_modules
          ${CMAKE_SOURCE_DIR}/interface/node_modules
-         ${CMAKE_SOURCE_DIR}/docs/node_modules
+         ${CMAKE_SOURCE_DIR}/stories/node_modules
   BYPRODUCTS ${NODE_MODULES}
              ${NODE_MODULES_MARKER}
              ${JEST_EXECUTABLE}
@@ -33,9 +35,10 @@ add_custom_command(
              ${REACT_EMAIL_EXECUTABLE}
              ${NEXT_EXECUTABLE}
              ${SITEMAP_EXECUTABLE}
+             ${CMAKE_SOURCE_DIR}/docs/node_modules
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules
-             ${CMAKE_SOURCE_DIR}/docs/node_modules
+             ${CMAKE_SOURCE_DIR}/stories/node_modules
   COMMAND ${PNPM_EXECUTABLE} install
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
   # doing install again if we didn't finish the first time.
@@ -78,6 +81,11 @@ add_custom_target(
 
 add_custom_target(
   tools.next-sitemap
+  DEPENDS dependencies.node_modules
+)
+
+add_custom_target(
+  tools.storybook
   DEPENDS dependencies.node_modules
 )
 
