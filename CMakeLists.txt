@@ -271,3 +271,6 @@ foreach(SUB_PACKAGE IN LISTS SUB_PACKAGES)
   get_filename_component(DIR ${SUB_PACKAGE} DIRECTORY)
   add_subdirectory(${DIR})
 endforeach()
+
+# Prevent caching of this value
+unset(BUILD_TESTING)
