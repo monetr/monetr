@@ -154,11 +154,13 @@ export function useCreateSpending(): (_spending: Spending) => Promise<Spending> 
   };
 }
 
-export function useTransfer(): (
-  _fromSpendingId: number | null,
-  _toSpendingId: number | null,
+export type TransferParameters = {
+  fromSpendingId: number | null,
+  toSpendingId: number | null,
   amount: number,
-) => Promise<void> {
+}
+
+export function useTransfer(): (transferParameters: TransferParameters) => Promise<any> {
   const queryClient = useQueryClient();
 
   interface BalanceTransferResponse {
@@ -202,15 +204,5 @@ export function useTransfer(): (
     },
   );
 
-  return async (
-    fromSpendingId: number | null,
-    toSpendingId: number | null,
-    amount: number,
-  ): Promise<void> => {
-    return void mutateAsync({
-      fromSpendingId,
-      toSpendingId,
-      amount,
-    });
-  };
+  return mutateAsync;
 }

@@ -74,7 +74,6 @@ function TransferModal(props: TransferModalProps): JSX.Element {
       return Promise.resolve();
     }
 
-    const amount = Math.ceil(values.amount * 100);
     const check = validate(values);
     if (Object.keys(check).length > 0) {
       helper.setErrors(check);
@@ -82,7 +81,11 @@ function TransferModal(props: TransferModalProps): JSX.Element {
     }
 
     helper.setSubmitting(true);
-    return transfer(values.fromSpendingId, values.toSpendingId, amount)
+    return transfer({
+      fromSpendingId: values.fromSpendingId,
+      toSpendingId: values.toSpendingId,
+      amount: friendlyToAmount(values.amount),
+    })
       .then(() => modal.remove())
       .catch((error: AxiosError) => void enqueueSnackbar(
         error.response.data['error'], {

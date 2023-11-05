@@ -25,15 +25,16 @@ export interface MSelectSpendingProps extends MSelecteSpendingBaseProps {
 }
 
 export default function MSelectSpending(props: MSelectSpendingProps): JSX.Element {
-  props = {
-    label: 'Spent From',
-    placeholder: 'Select a spending item...',
-    ...props,
-  };
-
   const formikContext = useFormikContext();
   const { result: spending, isLoading, isError } = useSpendingSink();
   const balances = useCurrentBalance();
+
+  props = {
+    label: 'Spent From',
+    placeholder: 'Select a spending item...',
+    disabled: formikContext?.isSubmitting,
+    ...props,
+  };
 
   if (isLoading) {
     return <MSelect
