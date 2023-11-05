@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/models"
@@ -78,31 +77,6 @@ func (r *repositoryBase) CreateFundingSchedule(ctx context.Context, fundingSched
 	if _, err := r.txn.ModelContext(span.Context(), fundingSchedule).Insert(fundingSchedule); err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return errors.Wrap(err, "failed to create funding schedule")
-	}
-
-	span.Status = sentry.SpanStatusOK
-
-	return nil
-}
-
-func (r *repositoryBase) UpdateNextFundingScheduleDate(ctx context.Context, fundingScheduleId uint64, nextOccurrence time.Time) error {
-	span := sentry.StartSpan(ctx, "UpdateNextFundingScheduleDate")
-	defer span.Finish()
-
-	span.Data = map[string]interface{}{
-		"accountId":         r.AccountId(),
-		"fundingScheduleId": fundingScheduleId,
-	}
-
-	_, err := r.txn.ModelContext(span.Context(), &models.FundingSchedule{}).
-		Set(`"last_occurrence" = "next_occurrence"`).
-		Set(`"next_occurrence" = ?`, nextOccurrence).
-		Where(`"funding_schedule"."account_id" = ?`, r.AccountId()).
-		Where(`"funding_schedule"."funding_schedule_id" = ?`, fundingScheduleId).
-		Update()
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return errors.Wrap(err, "failed to set next occurrence")
 	}
 
 	span.Status = sentry.SpanStatusOK

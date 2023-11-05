@@ -200,17 +200,16 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 		}
 
 		if !fundingSchedule.CalculateNextOccurrence(span.Context(), timezone) {
-			crumbs.Error(span.Context(), "bug: funding schedule for processing occurs in the future", "bug", map[string]interface{}{
+			crumbs.IndicateBug(span.Context(), "bug: funding schedule for processing occurs in the future", map[string]interface{}{
 				"nextOccurrence": fundingSchedule.NextOccurrence,
 			})
-			crumbs.AddTag(span.Context(), "bug", "true")
 			span.Status = sentry.SpanStatusInvalidArgument
 			fundingLog.Warn("skipping processing funding schedule, it does not occur yet")
 			continue
 		}
 
-		if err = p.repo.UpdateNextFundingScheduleDate(span.Context(), fundingScheduleId, fundingSchedule.NextOccurrence); err != nil {
-			fundingLog.WithError(err).Error("failed to set the next occurrence for funding schedule")
+		if err = p.repo.UpdateFundingSchedule(span.Context(), fundingSchedule); err != nil {
+			fundingLog.WithError(err).Error("failed to update the funding schedule with the updated next recurrence")
 			return err
 		}
 
