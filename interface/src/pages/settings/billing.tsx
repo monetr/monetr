@@ -1,14 +1,14 @@
 import React, { Fragment, useCallback, useState } from 'react';
 import { AccessTimeOutlined } from '@mui/icons-material';
+import { format, isPast, isThisYear } from 'date-fns';
 import { useSnackbar } from 'notistack';
 
-import MBadge from 'components/MBadge';
-import { MBaseButton } from 'components/MButton';
-import MDivider from 'components/MDivider';
-import MSpan from 'components/MSpan';
-import { format, isPast, isThisYear } from 'date-fns';
-import { useAuthenticationSink } from 'hooks/useAuthentication';
-import request from 'util/request';
+import MBadge from '@monetr/interface/components/MBadge';
+import { MBaseButton } from '@monetr/interface/components/MButton';
+import MDivider from '@monetr/interface/components/MDivider';
+import MSpan from '@monetr/interface/components/MSpan';
+import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import request from '@monetr/interface/util/request';
 
 export default function SettingsBilling(): JSX.Element {
   const { result: { trialingUntil } } = useAuthenticationSink();

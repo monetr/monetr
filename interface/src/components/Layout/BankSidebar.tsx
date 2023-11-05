@@ -4,14 +4,13 @@ import { Link } from 'react-router-dom';
 import { ErrorOutline, Logout, PlusOne, Settings } from '@mui/icons-material';
 
 import BankSidebarSubscriptionItem from './BankSidebarSubscriptionItem';
-
-import { Logo } from 'assets';
-import BankSidebarItem from 'components/Layout/BankSidebarItem';
-import MDivider from 'components/MDivider';
-import MSidebarToggle from 'components/MSidebarToggle';
-import { ReactElement } from 'components/types';
-import { useLinks } from 'hooks/links';
-import mergeTailwind from 'util/mergeTailwind';
+import { Logo } from '@monetr/interface/assets';
+import BankSidebarItem from '@monetr/interface/components/Layout/BankSidebarItem';
+import MDivider from '@monetr/interface/components/MDivider';
+import MSidebarToggle from '@monetr/interface/components/MSidebarToggle';
+import { ReactElement } from '@monetr/interface/components/types';
+import { useLinks } from '@monetr/interface/hooks/links';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface BankSidebarProps {
   className?: string;

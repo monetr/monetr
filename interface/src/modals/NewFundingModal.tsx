@@ -1,21 +1,21 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
+import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from 'components/MButton';
-import MDatePicker from 'components/MDatePicker';
-import MForm from 'components/MForm';
-import MModal, { MModalRef } from 'components/MModal';
-import MSelectFrequency from 'components/MSelectFrequency';
-import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
-import { startOfDay, startOfTomorrow } from 'date-fns';
-import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import { useCreateFundingSchedule } from 'hooks/fundingSchedules';
-import FundingSchedule from 'models/FundingSchedule';
-import { ExtractProps } from 'util/typescriptEvils';
+import MFormButton from '@monetr/interface/components/MButton';
+import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MForm from '@monetr/interface/components/MForm';
+import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewFundingValues {
   name: string;

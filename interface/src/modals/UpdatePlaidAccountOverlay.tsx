@@ -3,11 +3,11 @@ import { PlaidLinkError, PlaidLinkOnEventMetadata, PlaidLinkOnExitMetadata, Plai
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import MModal from 'components/MModal';
-import MSpan from 'components/MSpan';
-import Link from 'models/Link';
-import request from 'util/request';
-import { ExtractProps } from 'util/typescriptEvils';
+import MModal from '@monetr/interface/components/MModal';
+import MSpan from '@monetr/interface/components/MSpan';
+import Link from '@monetr/interface/models/Link';
+import request from '@monetr/interface/util/request';
+import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface UpdatePlaidAccountOverlayProps {
   link: Link;

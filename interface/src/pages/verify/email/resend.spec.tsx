@@ -1,11 +1,10 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
+import { rest } from 'msw';
 
 import ResendVerificationPage from './resend';
-
-import { rest } from 'msw';
-import testRenderer from 'testutils/renderer';
-import { server } from 'testutils/server';
+import testRenderer from '@monetr/interface/testutils/renderer';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('resend verification email', () => {
   it('will render without ReCAPTCHA', () => {

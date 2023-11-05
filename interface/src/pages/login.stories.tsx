@@ -1,8 +1,7 @@
 import { Meta, StoryObj } from '@storybook/react';
-
-import LoginPage from 'pages/login';
-
 import { rest } from 'msw';
+
+import LoginPage from '@monetr/interface/pages/login';
 
 const meta: Meta<typeof LoginPage> = {
   title: 'Pages/Authentication/Login',

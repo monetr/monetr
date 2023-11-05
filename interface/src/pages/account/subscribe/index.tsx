@@ -1,13 +1,13 @@
 import React, { useCallback, useState } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { MBaseButton } from 'components/MButton';
-import MLink from 'components/MLink';
-import MLogo from 'components/MLogo';
-import MSpan from 'components/MSpan';
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import { useAuthenticationSink } from 'hooks/useAuthentication';
-import request from 'util/request';
+import { MBaseButton } from '@monetr/interface/components/MButton';
+import MLink from '@monetr/interface/components/MLink';
+import MLogo from '@monetr/interface/components/MLogo';
+import MSpan from '@monetr/interface/components/MSpan';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import { useAuthenticationSink } from '@monetr/interface/hooks/useAuthentication';
+import request from '@monetr/interface/util/request';
 
 export default function SubscribePage(): JSX.Element {
   const { enqueueSnackbar } = useSnackbar();

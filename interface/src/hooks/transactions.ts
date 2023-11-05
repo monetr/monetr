@@ -8,11 +8,11 @@ import {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import Balance from 'models/Balance';
-import Spending from 'models/Spending';
-import Transaction from 'models/Transaction';
-import request from 'util/request';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import Balance from '@monetr/interface/models/Balance';
+import Spending from '@monetr/interface/models/Spending';
+import Transaction from '@monetr/interface/models/Transaction';
+import request from '@monetr/interface/util/request';
 
 export type TransactionsResult = {
   result: Array<Transaction>;

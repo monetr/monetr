@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import { AccountBalance } from '@mui/icons-material';
 import { Tooltip } from '@mui/material';
 
-import { useBankAccounts, useSelectedBankAccount } from 'hooks/bankAccounts';
-import { useInstitution } from 'hooks/institutions';
-import MonetrLink from 'models/Link';
-import mergeTailwind from 'util/mergeTailwind';
-import sortAccounts from 'util/sortAccounts';
+import { useBankAccounts, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useInstitution } from '@monetr/interface/hooks/institutions';
+import MonetrLink from '@monetr/interface/models/Link';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 interface BankSidebarItemProps {
   link: MonetrLink;

@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 
-import request from 'util/request';
+import request from '@monetr/interface/util/request';
 
 export default function useLogout(): () => Promise<void> {
   const queryClient = useQueryClient();

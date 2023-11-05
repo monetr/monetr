@@ -3,8 +3,8 @@ import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 
 import TransactionDetails from './details';
+import MonetrWrapper, { BankView } from '@monetr/interface/pages/new';
 
-import MonetrWrapper, { BankView } from 'pages/new';
 import GetAPIFixtures from 'stories/apiFixtures';
 
 const meta: Meta<typeof TransactionDetails> = {

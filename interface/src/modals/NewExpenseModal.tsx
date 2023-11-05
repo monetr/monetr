@@ -1,24 +1,24 @@
 import React, { useRef } from 'react';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { AxiosError } from 'axios';
+import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MAmountField from 'components/MAmountField';
-import MFormButton from 'components/MButton';
-import MDatePicker from 'components/MDatePicker';
-import MForm from 'components/MForm';
-import MModal, { MModalRef } from 'components/MModal';
-import MSelectFrequency from 'components/MSelectFrequency';
-import MSelectFunding from 'components/MSelectFunding';
-import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
-import { startOfDay, startOfTomorrow } from 'date-fns';
-import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import { useCreateSpending } from 'hooks/spending';
-import Spending, { SpendingType } from 'models/Spending';
-import { friendlyToAmount } from 'util/amounts';
-import { ExtractProps } from 'util/typescriptEvils';
+import MAmountField from '@monetr/interface/components/MAmountField';
+import MFormButton from '@monetr/interface/components/MButton';
+import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MForm from '@monetr/interface/components/MForm';
+import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
+import MSelectFunding from '@monetr/interface/components/MSelectFunding';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import { useCreateSpending } from '@monetr/interface/hooks/spending';
+import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import { friendlyToAmount } from '@monetr/interface/util/amounts';
+import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 interface NewExpenseValues {
   name: string;

@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MSidebarToggle from './MSidebarToggle';
 import MSpan from './MSpan';
 import { ReactElement } from './types';
-
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MTopNavigationProps {
   icon: React.FC<{ className?: string }>;

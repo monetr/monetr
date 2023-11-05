@@ -4,8 +4,9 @@ import NiceModal from '@ebay/nice-modal-react';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { renderHook, RenderHookResult, WrapperComponent } from '@testing-library/react-hooks';
 
-import MQueryClient from 'components/MQueryClient';
-import MSnackbarProvider from 'components/MSnackbarProvider';
+import MQueryClient from '@monetr/interface/components/MQueryClient';
+import MSnackbarProvider from '@monetr/interface/components/MSnackbarProvider';
+
 import { newTheme } from 'theme';
 
 export interface HooksOptions {

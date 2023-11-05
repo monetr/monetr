@@ -1,5 +1,6 @@
 import { parseJSON } from 'date-fns';
-import { formatAmount } from 'util/amounts';
+
+import { formatAmount } from '@monetr/interface/util/amounts';
 
 export default class Transaction {
   transactionId: number;

@@ -1,6 +1,6 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
-import Institution from 'models/Institution';
+import Institution from '@monetr/interface/models/Institution';
 
 export type InstitutionResult =
   { result: Institution }

@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select, { Theme } from 'react-select';
 
-import { useBankAccounts, useSelectedBankAccount } from 'hooks/bankAccounts';
-import useTheme from 'hooks/useTheme';
-import sortAccounts from 'util/sortAccounts';
+import { useBankAccounts, useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import useTheme from '@monetr/interface/hooks/useTheme';
+import sortAccounts from '@monetr/interface/util/sortAccounts';
 
 import './MSelectAccount.scss';
 

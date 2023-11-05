@@ -4,15 +4,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { DayPickerSingleProps } from 'react-day-picker';
 import { CloseOutlined, TodayOutlined } from '@mui/icons-material';
 import { Popover } from '@mui/material';
+import { isEqual, startOfMonth, startOfToday } from 'date-fns';
+import enUS from 'date-fns/locale/en-US';
 import { useFormikContext } from 'formik';
 
 import MCalendar from './MCalendar';
 import MLabel, { MLabelDecorator } from './MLabel';
 import { ReactElement } from './types';
-
-import { isEqual, startOfMonth, startOfToday } from 'date-fns';
-import enUS from 'date-fns/locale/en-US';
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MDatePickerProps extends
   Omit<React.HTMLAttributes<HTMLDivElement>, 'value' | 'defaultValue'>

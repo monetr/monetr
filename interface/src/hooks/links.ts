@@ -4,9 +4,8 @@ import { useSnackbar } from 'notistack';
 
 import { useBankAccounts } from './bankAccounts';
 import { useAuthenticationSink } from './useAuthentication';
-
-import Link from 'models/Link';
-import request from 'util/request';
+import Link from '@monetr/interface/models/Link';
+import request from '@monetr/interface/util/request';
 
 export function useLinks(): UseQueryResult<Array<Link>> {
   const { result: { user, isActive } } = useAuthenticationSink();

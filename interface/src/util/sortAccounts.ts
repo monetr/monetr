@@ -1,4 +1,4 @@
-import BankAccount from 'models/BankAccount';
+import BankAccount from '@monetr/interface/models/BankAccount';
 
 /**
  * sortAccounts will take an array of accounts and sort them by the account type and sub type priorities.

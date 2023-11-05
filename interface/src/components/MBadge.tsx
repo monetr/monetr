@@ -1,8 +1,7 @@
 import React from 'react';
 
 import MSpan, { MSpanProps } from './MSpan';
-
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 
 export interface MBadgeProps extends Omit<MSpanProps, 'color'>{

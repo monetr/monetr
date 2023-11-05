@@ -1,9 +1,9 @@
 import React from 'react';
 
-import MLogo from './components/MLogo';
-import MSpan from './components/MSpan';
+import MLogo from '@monetr/interface/components/MLogo';
+import MSpan from '@monetr/interface/components/MSpan';
 
-import './loading.css';
+import '@monetr/interface/loading.css';
 
 export default function Loading(): JSX.Element {
 

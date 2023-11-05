@@ -1,6 +1,7 @@
 
 import { addDays, startOfDay } from 'date-fns';
-import Institution, { InstitutionPlaidIncident, InstitutionStatus } from 'models/Institution';
+
+import Institution, { InstitutionPlaidIncident, InstitutionStatus } from '@monetr/interface/models/Institution';
 
 describe('InstitutionPlaidIncident', () => {
   it('will construct with no end', () => {

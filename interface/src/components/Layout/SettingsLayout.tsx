@@ -2,11 +2,11 @@ import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { SettingsOutlined } from '@mui/icons-material';
 
-import MDivider from 'components/MDivider';
-import { MSpanDeriveClasses } from 'components/MSpan';
-import MTopNavigation from 'components/MTopNavigation';
-import { ReactElement } from 'components/types';
-import { useAppConfigurationSink } from 'hooks/useAppConfiguration';
+import MDivider from '@monetr/interface/components/MDivider';
+import { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { ReactElement } from '@monetr/interface/components/types';
+import { useAppConfigurationSink } from '@monetr/interface/hooks/useAppConfiguration';
 
 export default function SettingsLayout(): JSX.Element {
   const config = useAppConfigurationSink();

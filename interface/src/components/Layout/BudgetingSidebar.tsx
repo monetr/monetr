@@ -4,17 +4,16 @@ import { Link, useLocation } from 'react-router-dom';
 import { AccountBalanceWalletOutlined, LocalAtmOutlined, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
-
-import MBadge from 'components/MBadge';
-import MDivider from 'components/MDivider';
-import MSelectAccount from 'components/MSelectAccount';
-import MSpan from 'components/MSpan';
-import { ReactElement } from 'components/types';
-import { useCurrentBalance } from 'hooks/balances';
-import { useSelectedBankAccount } from 'hooks/bankAccounts';
-import { useNextFundingDate } from 'hooks/fundingSchedules';
-import { useLink } from 'hooks/links';
-import mergeTailwind from 'util/mergeTailwind';
+import MBadge from '@monetr/interface/components/MBadge';
+import MDivider from '@monetr/interface/components/MDivider';
+import MSelectAccount from '@monetr/interface/components/MSelectAccount';
+import MSpan from '@monetr/interface/components/MSpan';
+import { ReactElement } from '@monetr/interface/components/types';
+import { useCurrentBalance } from '@monetr/interface/hooks/balances';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useNextFundingDate } from '@monetr/interface/hooks/fundingSchedules';
+import { useLink } from '@monetr/interface/hooks/links';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface BudgetingSidebarProps {
   className?: string;

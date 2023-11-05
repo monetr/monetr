@@ -1,6 +1,5 @@
 import sortAccounts from './sortAccounts';
-
-import BankAccount from 'models/BankAccount';
+import BankAccount from '@monetr/interface/models/BankAccount';
 
 describe('sort accounts', () => {
   it('will handle a null or undefined input', () => {

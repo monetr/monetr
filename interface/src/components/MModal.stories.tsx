@@ -5,7 +5,7 @@ import { MBaseButton } from './MButton';
 import MModal from './MModal';
 
 export default {
-  title: 'Components/Modal',
+  title: '@monetr/interface/components/Modal',
   component: MModal,
 } as Meta<typeof MModal>;
 

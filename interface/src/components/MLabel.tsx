@@ -1,8 +1,7 @@
 import React from 'react';
 
 import { ReactElement } from './types';
-
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MLabelDecoratorProps {
   name?: string;

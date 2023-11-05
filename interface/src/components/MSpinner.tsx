@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MSpinnerProps {
   className?: string;

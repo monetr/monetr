@@ -2,8 +2,7 @@ import React from 'react';
 import { Badge, styled } from '@mui/material';
 
 import MerchantIcon, { MerchantIconProps } from './MerchantIcon';
-
-import useTheme from 'hooks/useTheme';
+import useTheme from '@monetr/interface/hooks/useTheme';
 
 export interface TransactionMerchantIconProps extends MerchantIconProps {
   pending?: boolean;

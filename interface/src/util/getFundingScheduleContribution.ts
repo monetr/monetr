@@ -1,4 +1,4 @@
-import Spending from 'models/Spending';
+import Spending from '@monetr/interface/models/Spending';
 
 export default function getFundingScheduleContribution(
   fundingScheduleId: number,

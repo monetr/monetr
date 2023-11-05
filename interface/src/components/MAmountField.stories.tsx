@@ -5,7 +5,7 @@ import MAmountField from './MAmountField';
 
 
 export default {
-  title: 'Components/Amount Field',
+  title: '@monetr/interface/components/Amount Field',
   component: MAmountField,
 } as Meta<typeof MAmountField>;
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Theme } from '@mui/material';
 
 import tailwindConfig from '../../tailwind.config.cjs';

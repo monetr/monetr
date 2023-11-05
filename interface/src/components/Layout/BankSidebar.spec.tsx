@@ -1,12 +1,10 @@
-
 import React from 'react';
 import { waitFor } from '@testing-library/react';
-
-import BankSidebar from 'components/Layout/BankSidebar';
-
 import { rest } from 'msw';
-import testRenderer from 'testutils/renderer';
-import { server } from 'testutils/server';
+
+import BankSidebar from '@monetr/interface/components/Layout/BankSidebar';
+import testRenderer from '@monetr/interface/testutils/renderer';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('bank sidebar', () => {
   it('will render', async () => {

@@ -1,14 +1,14 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { AirlineStopsOutlined, NorthEast, SouthEast } from '@mui/icons-material';
-
-import MSpan from 'components/MSpan';
 import { format, getUnixTime } from 'date-fns';
-import { Event, useForecast } from 'hooks/forecast';
-import { useFundingSchedule } from 'hooks/fundingSchedules';
-import { useSpending } from 'hooks/spending';
-import { formatAmount } from 'util/amounts';
-import mergeTailwind from 'util/mergeTailwind';
+
+import MSpan from '@monetr/interface/components/MSpan';
+import { Event, useForecast } from '@monetr/interface/hooks/forecast';
+import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useSpending } from '@monetr/interface/hooks/spending';
+import { formatAmount } from '@monetr/interface/util/amounts';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface ExpenseTimelineProps {
   spendingId: number;

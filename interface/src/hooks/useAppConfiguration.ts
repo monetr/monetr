@@ -1,5 +1,4 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
-
 import { parseJSON } from 'date-fns';
 
 export class AppConfiguration {

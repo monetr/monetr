@@ -1,6 +1,8 @@
 /* eslint-disable id-length */
-import Recurrence from 'components/Recurrence/Recurrence';
 import { endOfMonth, format, getDate, getMonth, isEqual, parseJSON, startOfDay, startOfMonth } from 'date-fns';
+
+import Recurrence from '@monetr/interface/components/Recurrence/Recurrence';
+
 import { RRule, Weekday } from 'rrule';
 
 export default function getRecurrencesForDate(inputDate: Date | string | null): Array<Recurrence> {

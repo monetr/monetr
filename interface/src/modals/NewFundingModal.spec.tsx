@@ -1,11 +1,10 @@
 import React, { Fragment } from 'react';
 import { act, waitFor } from '@testing-library/react';
-
-import { showNewFundingModal } from 'modals/NewFundingModal';
-
 import { rest } from 'msw';
-import testRenderer from 'testutils/renderer';
-import { server } from 'testutils/server';
+
+import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
+import testRenderer from '@monetr/interface/testutils/renderer';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('new funding schedule modal', () => {
   it('will render', async () => {

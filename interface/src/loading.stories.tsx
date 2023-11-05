@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react';
 
-import Loading from './loading';
+import Loading from '@monetr/interface/loading';
 
 const meta: Meta<typeof Loading> = {
   title: 'States',

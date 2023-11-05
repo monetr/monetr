@@ -1,9 +1,9 @@
 import * as Sentry from '@sentry/react';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
-
 import { parseJSON } from 'date-fns';
-import User from 'models/User';
-import request from 'util/request';
+
+import User from '@monetr/interface/models/User';
+import request from '@monetr/interface/util/request';
 
 export interface AuthenticationWrapper {
   user: User;

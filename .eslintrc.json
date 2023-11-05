@@ -11,7 +11,8 @@
     "react-hooks",
     "import",
     "simple-import-sort",
-    "unused-imports"
+    "unused-imports",
+    "no-relative-import-paths"
   ],
   "rules": {
     "indent": [
@@ -65,6 +66,10 @@
           }
         }
       }
+    ],
+    "no-relative-import-paths/no-relative-import-paths": [
+      "warn",
+      { "allowSameFolder": true }
     ],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
@@ -234,19 +239,25 @@
               // Packages. `react` related packages come first
               [
                 "^react$",
-                "^prop-types",
                 "^react",
                 "^redux$",
-                "^@.+",
+                "^@ebay",
+                "^@mui",
+                "^@emotion",
+                "^@sentry",
+                "^@storybook",
+                "^@tanstack",
+                "^@testing-library",
                 "^axios",
-                "^classnames",
-                "^clsx",
+                "^date-fns",
                 "^formik",
+                "^history",
                 "^moment",
+                "^msw",
+                "^next",
                 "^notistack",
                 "^ramda",
-                "^zustand",
-                "^history"
+                "^zustand"
               ],
               // Internal packages
               [

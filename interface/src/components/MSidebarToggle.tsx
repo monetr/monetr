@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowBackOutlined, MenuOpenOutlined, MenuOutlined } from '@mui/icons-material';
 
-import useStore from 'hooks/store';
-import mergeTailwind from 'util/mergeTailwind';
+import useStore from '@monetr/interface/hooks/store';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MSidebarToggleProps {
   backButton?: string;

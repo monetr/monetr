@@ -1,23 +1,23 @@
 import React, { Fragment, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { startOfDay, startOfTomorrow } from 'date-fns';
 import { FormikErrors, FormikHelpers } from 'formik';
 
-import MAmountField from 'components/MAmountField';
-import MFormButton from 'components/MButton';
-import MDatePicker from 'components/MDatePicker';
-import MForm from 'components/MForm';
-import MLink from 'components/MLink';
-import MLogo from 'components/MLogo';
-import MSelectFrequency from 'components/MSelectFrequency';
-import MSpan from 'components/MSpan';
-import MStepper from 'components/MStepper';
-import MTextField from 'components/MTextField';
-import { startOfDay, startOfTomorrow } from 'date-fns';
-import { useCreateBankAccount } from 'hooks/bankAccounts';
-import { useCreateFundingSchedule } from 'hooks/fundingSchedules';
-import { useCreateLink } from 'hooks/links';
-import FundingSchedule from 'models/FundingSchedule';
-import { friendlyToAmount } from 'util/amounts';
+import MAmountField from '@monetr/interface/components/MAmountField';
+import MFormButton from '@monetr/interface/components/MButton';
+import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MForm from '@monetr/interface/components/MForm';
+import MLink from '@monetr/interface/components/MLink';
+import MLogo from '@monetr/interface/components/MLogo';
+import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
+import MSpan from '@monetr/interface/components/MSpan';
+import MStepper from '@monetr/interface/components/MStepper';
+import MTextField from '@monetr/interface/components/MTextField';
+import { useCreateBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useCreateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import { useCreateLink } from '@monetr/interface/hooks/links';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { friendlyToAmount } from '@monetr/interface/util/amounts';
 
 interface SetupManualValues {
   budgetName: string;

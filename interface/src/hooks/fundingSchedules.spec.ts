@@ -1,11 +1,11 @@
 import { act } from '@testing-library/react-hooks';
-
 import { parseJSON } from 'date-fns';
-import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
-import FundingSchedule from 'models/FundingSchedule';
 import { rest } from 'msw';
-import testRenderHook from 'testutils/hooks';
-import { server } from 'testutils/server';
+
+import { FundingScheduleUpdateResponse, useCreateFundingSchedule, useFundingSchedule, useFundingSchedulesSink, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import testRenderHook from '@monetr/interface/testutils/hooks';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('funding schedule hooks', () => {
   describe('read funding schedules', () => {

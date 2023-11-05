@@ -6,15 +6,15 @@ import { CheckCircle, EditOutlined, LinkOutlined } from '@mui/icons-material';
 import * as Sentry from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { MBaseButton } from 'components/MButton';
-import MLink from 'components/MLink';
-import MLogo from 'components/MLogo';
-import MSpan from 'components/MSpan';
-import MSpinner from 'components/MSpinner';
-import { ReactElement } from 'components/types';
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import mergeTailwind from 'util/mergeTailwind';
-import request from 'util/request';
+import { MBaseButton } from '@monetr/interface/components/MButton';
+import MLink from '@monetr/interface/components/MLink';
+import MLogo from '@monetr/interface/components/MLogo';
+import MSpan from '@monetr/interface/components/MSpan';
+import MSpinner from '@monetr/interface/components/MSpinner';
+import { ReactElement } from '@monetr/interface/components/types';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import request from '@monetr/interface/util/request';
 
 export interface SetupPageProps {
   alreadyOnboarded?: boolean;

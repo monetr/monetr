@@ -1,9 +1,9 @@
 import { act } from '@testing-library/react-hooks';
-
-import useLogin from 'hooks/useLogin';
 import { rest } from 'msw';
-import testRenderHook from 'testutils/hooks';
-import { server } from 'testutils/server';
+
+import useLogin from '@monetr/interface/hooks/useLogin';
+import testRenderHook from '@monetr/interface/testutils/hooks';
+import { server } from '@monetr/interface/testutils/server';
 
 const mockUseNavigate = jest.fn((_url: string) => {});
 jest.mock('react-router-dom', () => ({

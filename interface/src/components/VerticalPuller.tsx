@@ -1,5 +1,5 @@
-import { Box, styled } from "@mui/material";
 import React from 'react';
+import { Box, styled } from '@mui/material';
 
 export default function VerticalPuller(): JSX.Element {
   const Thing = styled(Box)(({ theme }) => ({
@@ -12,6 +12,6 @@ export default function VerticalPuller(): JSX.Element {
     left: 9,
   }));
 
-  return <Thing />
+  return <Thing />;
 }
 

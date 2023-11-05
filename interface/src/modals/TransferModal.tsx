@@ -5,17 +5,17 @@ import { AxiosError } from 'axios';
 import { FormikErrors, FormikHelpers, useFormikContext } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MAmountField from 'components/MAmountField';
-import MFormButton from 'components/MButton';
-import MForm from 'components/MForm';
-import { MLabelDecoratorProps } from 'components/MLabel';
-import MModal, { MModalRef } from 'components/MModal';
-import MSelectSpending from 'components/MSelectSpending';
-import MSpan from 'components/MSpan';
-import { useCurrentBalance } from 'hooks/balances';
-import { useSpendingSink, useTransfer } from 'hooks/spending';
-import { amountToFriendly, formatAmount, friendlyToAmount } from 'util/amounts';
-import { ExtractProps } from 'util/typescriptEvils';
+import MAmountField from '@monetr/interface/components/MAmountField';
+import MFormButton from '@monetr/interface/components/MButton';
+import MForm from '@monetr/interface/components/MForm';
+import { MLabelDecoratorProps } from '@monetr/interface/components/MLabel';
+import MModal, { MModalRef } from '@monetr/interface/components/MModal';
+import MSelectSpending from '@monetr/interface/components/MSelectSpending';
+import MSpan from '@monetr/interface/components/MSpan';
+import { useCurrentBalance } from '@monetr/interface/hooks/balances';
+import { useSpendingSink, useTransfer } from '@monetr/interface/hooks/spending';
+import { amountToFriendly, formatAmount, friendlyToAmount } from '@monetr/interface/util/amounts';
+import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface TransferModalProps {
   initialFromSpendingId?: number;

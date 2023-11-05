@@ -2,8 +2,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ReactElement } from './types';
-
-import Query from 'util/query';
+import Query from '@monetr/interface/util/query';
 
 export interface MQueryClientProps {
   children: ReactElement;

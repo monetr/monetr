@@ -1,12 +1,12 @@
 /* eslint-disable max-len */
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
-
 import { format, isBefore } from 'date-fns';
-import { useSelectedBankAccountId } from 'hooks/bankAccounts';
-import FundingSchedule from 'models/FundingSchedule';
-import Spending from 'models/Spending';
-import request from 'util/request';
+
+import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import Spending from '@monetr/interface/models/Spending';
+import request from '@monetr/interface/util/request';
 
 export function useFundingSchedulesSink(): UseQueryResult<Array<FundingSchedule>, unknown> {
   const selectedBankAccountId = useSelectedBankAccountId();

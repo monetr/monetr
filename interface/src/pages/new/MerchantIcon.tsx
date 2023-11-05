@@ -1,8 +1,8 @@
 import React from 'react';
 import { Avatar } from '@mui/material';
 
-import { useIconSearch } from 'hooks/useIconSearch';
-import mergeTailwind from 'util/mergeTailwind';
+import { useIconSearch } from '@monetr/interface/hooks/useIconSearch';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MerchantIconProps {
   name?: string;

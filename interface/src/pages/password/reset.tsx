@@ -3,13 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from 'components/MButton';
-import MForm from 'components/MForm';
-import MLink from 'components/MLink';
-import MLogo from 'components/MLogo';
-import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
-import useResetPassword from 'hooks/useResetPassword';
+import MFormButton from '@monetr/interface/components/MButton';
+import MForm from '@monetr/interface/components/MForm';
+import MLink from '@monetr/interface/components/MLink';
+import MLogo from '@monetr/interface/components/MLogo';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import useResetPassword from '@monetr/interface/hooks/useResetPassword';
 
 interface ResetPasswordValues {
   password: string;

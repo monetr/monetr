@@ -3,19 +3,19 @@ import { useParams } from 'react-router-dom';
 import { HeartBroken, SaveOutlined, ShoppingCartOutlined } from '@mui/icons-material';
 import { FormikHelpers } from 'formik';
 
-import MAmountField from 'components/MAmountField';
-import MFormButton from 'components/MButton';
-import MCheckbox from 'components/MCheckbox';
-import MDatePicker from 'components/MDatePicker';
-import MForm from 'components/MForm';
-import MSelectSpending from 'components/MSelectSpending';
-import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
-import MTopNavigation from 'components/MTopNavigation';
-import { useTransaction, useUpdateTransaction } from 'hooks/transactions';
-import Transaction from 'models/Transaction';
-import MerchantIcon from 'pages/new/MerchantIcon';
-import { amountToFriendly } from 'util/amounts';
+import MAmountField from '@monetr/interface/components/MAmountField';
+import MFormButton from '@monetr/interface/components/MButton';
+import MCheckbox from '@monetr/interface/components/MCheckbox';
+import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MForm from '@monetr/interface/components/MForm';
+import MSelectSpending from '@monetr/interface/components/MSelectSpending';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
+import Transaction from '@monetr/interface/models/Transaction';
+import MerchantIcon from '@monetr/interface/pages/new/MerchantIcon';
+import { amountToFriendly } from '@monetr/interface/util/amounts';
 
 interface TransactionValues {
   name: string;

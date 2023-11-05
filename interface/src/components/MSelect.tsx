@@ -6,10 +6,9 @@ import { SwipeableDrawer } from '@mui/material';
 
 import MLabel, { MLabelDecorator, MLabelDecoratorProps } from './MLabel';
 import MSpan from './MSpan';
-
-import useTheme from 'hooks/useTheme';
-import mergeTailwind from 'util/mergeTailwind';
-import { ExtractProps } from 'util/typescriptEvils';
+import useTheme from '@monetr/interface/hooks/useTheme';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
+import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
 export interface Value<T> {
   label: string;

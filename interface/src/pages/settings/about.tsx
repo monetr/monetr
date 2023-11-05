@@ -1,10 +1,10 @@
 import React from 'react';
-
-import MDivider from 'components/MDivider';
-import MSpan, { MSpanDeriveClasses } from 'components/MSpan';
-import { ReactElement } from 'components/types';
 import { format } from 'date-fns';
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
+
+import MDivider from '@monetr/interface/components/MDivider';
+import MSpan, { MSpanDeriveClasses } from '@monetr/interface/components/MSpan';
+import { ReactElement } from '@monetr/interface/components/types';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 
 export default function SettingsAbout(): JSX.Element {
   const {

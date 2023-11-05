@@ -3,8 +3,8 @@ import ReCAPTCHA from 'react-google-recaptcha';
 import { CircularProgress } from '@mui/material';
 import { useFormikContext } from 'formik';
 
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import mergeTailwind from 'util/mergeTailwind';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MCaptchaProps {
   name?: string;

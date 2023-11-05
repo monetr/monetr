@@ -5,9 +5,8 @@ import { useFormikContext } from 'formik';
 import { MBaseButton } from './MButton';
 import MLabel from './MLabel';
 import MSelect from './MSelect';
-
-import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
-import { showNewFundingModal } from 'modals/NewFundingModal';
+import { useFundingSchedulesSink } from '@monetr/interface/hooks/fundingSchedules';
+import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
 export interface MSelectFundingProps {
   label?: string;

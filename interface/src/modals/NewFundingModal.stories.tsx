@@ -1,8 +1,7 @@
 import { Meta, StoryObj } from '@storybook/react';
-
-import NewFundingModal, { showNewFundingModal } from 'modals/NewFundingModal';
-
 import { rest } from 'msw';
+
+import NewFundingModal, { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
 const meta: Meta<typeof NewFundingModal> = {
   title: 'New UI/Modals/Funding/Create',

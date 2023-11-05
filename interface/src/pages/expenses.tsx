@@ -2,13 +2,13 @@ import React, { Fragment, useCallback, useEffect, useRef } from 'react';
 import { useNavigationType } from 'react-router-dom';
 import { AccountBalance, AddOutlined, AutoModeOutlined, HeartBroken, PriceCheckOutlined } from '@mui/icons-material';
 
-import { MBaseButton } from 'components/MButton';
-import MSpan from 'components/MSpan';
-import MTopNavigation from 'components/MTopNavigation';
-import { useSpendingFiltered } from 'hooks/spending';
-import { showNewExpenseModal } from 'modals/NewExpenseModal';
-import { SpendingType } from 'models/Spending';
-import ExpenseItem from 'pages/new/ExpenseItem';
+import { MBaseButton } from '@monetr/interface/components/MButton';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { useSpendingFiltered } from '@monetr/interface/hooks/spending';
+import { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
+import { SpendingType } from '@monetr/interface/models/Spending';
+import ExpenseItem from '@monetr/interface/pages/new/ExpenseItem';
 
 let evilScrollPosition: number = 0;
 

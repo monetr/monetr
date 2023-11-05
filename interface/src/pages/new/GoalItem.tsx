@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { KeyboardArrowRight } from '@mui/icons-material';
 
 import MerchantIcon from './MerchantIcon';
-
-import MBadge from 'components/MBadge';
-import { useFundingSchedule } from 'hooks/fundingSchedules';
-import Spending from 'models/Spending';
-import mergeTailwind from 'util/mergeTailwind';
+import MBadge from '@monetr/interface/components/MBadge';
+import { useFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import Spending from '@monetr/interface/models/Spending';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface GoalItemProps {
   spending: Spending;

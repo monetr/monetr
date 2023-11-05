@@ -2,11 +2,10 @@
 import React from 'react';
 import { DayPicker, DayPickerRangeProps, DayPickerSingleProps, useNavigation } from 'react-day-picker';
 import { ArrowLeftOutlined, ArrowRightOutlined, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { addYears, format } from 'date-fns';
 
 import { MBaseButton } from './MButton';
 import MSpan from './MSpan';
-
-import { addYears, format } from 'date-fns';
 
 export type MCalendarProps<T extends DayPickerSingleProps | DayPickerRangeProps> = T & {
   enableYearNavigation: boolean;

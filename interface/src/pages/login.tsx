@@ -2,16 +2,16 @@ import React from 'react';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MFormButton from 'components/MButton';
-import MCaptcha from 'components/MCaptcha';
-import MForm from 'components/MForm';
-import MLink from 'components/MLink';
-import MLogo from 'components/MLogo';
-import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
-import { useAppConfiguration } from 'hooks/useAppConfiguration';
-import useLogin from 'hooks/useLogin';
-import verifyEmailAddress from 'util/verifyEmailAddress';
+import MFormButton from '@monetr/interface/components/MButton';
+import MCaptcha from '@monetr/interface/components/MCaptcha';
+import MForm from '@monetr/interface/components/MForm';
+import MLink from '@monetr/interface/components/MLink';
+import MLogo from '@monetr/interface/components/MLogo';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
+import useLogin from '@monetr/interface/hooks/useLogin';
+import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
 interface LoginValues {
   email: string;

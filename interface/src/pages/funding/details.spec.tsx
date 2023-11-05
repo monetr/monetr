@@ -1,11 +1,10 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
+import { rest } from 'msw';
 
 import FundingDetails from './details';
-
-import { rest } from 'msw';
-import testRenderer from 'testutils/renderer';
-import { server } from 'testutils/server';
+import testRenderer from '@monetr/interface/testutils/renderer';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('funding schedule details view', () => {
   it('will render with adjusted weekend', async () => {

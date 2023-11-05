@@ -4,7 +4,7 @@ import {
   CircularProgressProps as MaterialCircularProgressProps,
 } from '@mui/material/CircularProgress/CircularProgress';
 
-import mergeTailwind from 'util/mergeTailwind';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 interface CircularProgressExtendedProps {
   visible?: boolean;

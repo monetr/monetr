@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
-import request from 'util/request';
+import request from '@monetr/interface/util/request';
 
 export interface LoginArguments {
   email: string;

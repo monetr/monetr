@@ -1,13 +1,13 @@
 import React, { Fragment } from 'react';
 import { AccountBalance, AddOutlined, ArrowForward, Today, TodayOutlined } from '@mui/icons-material';
 
-import FundingItem from './new/FundingItem';
+import { MBaseButton } from '@monetr/interface/components/MButton';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { useFundingSchedulesSink } from '@monetr/interface/hooks/fundingSchedules';
+import { showNewFundingModal } from '@monetr/interface/modals/NewFundingModal';
 
-import { MBaseButton } from 'components/MButton';
-import MSpan from 'components/MSpan';
-import MTopNavigation from 'components/MTopNavigation';
-import { useFundingSchedulesSink } from 'hooks/fundingSchedules';
-import { showNewFundingModal } from 'modals/NewFundingModal';
+import FundingItem from './new/FundingItem';
 
 export default function Funding(): JSX.Element {
   const { isError: fundingIsError, isLoading: fundingIsLoading, data: funding } = useFundingSchedulesSink();

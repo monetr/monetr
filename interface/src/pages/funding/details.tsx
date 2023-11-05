@@ -2,23 +2,23 @@ import React from 'react';
 import { useMatch, useNavigate } from 'react-router-dom';
 import { DeleteOutlined, HeartBroken, SaveOutlined, TodayOutlined } from '@mui/icons-material';
 import { AxiosError } from 'axios';
+import { format, isEqual, startOfDay } from 'date-fns';
 import { FormikErrors, FormikHelpers } from 'formik';
 import { useSnackbar } from 'notistack';
 
-import MAmountField from 'components/MAmountField';
-import MFormButton, { MBaseButton } from 'components/MButton';
-import MCheckbox from 'components/MCheckbox';
-import MDatePicker from 'components/MDatePicker';
-import MForm from 'components/MForm';
-import MSelectFrequency from 'components/MSelectFrequency';
-import MSpan from 'components/MSpan';
-import MTextField from 'components/MTextField';
-import MTopNavigation from 'components/MTopNavigation';
-import { format, isEqual, startOfDay } from 'date-fns';
-import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from 'hooks/fundingSchedules';
-import FundingSchedule from 'models/FundingSchedule';
-import { amountToFriendly, friendlyToAmount } from 'util/amounts';
-import { APIError } from 'util/request';
+import MAmountField from '@monetr/interface/components/MAmountField';
+import MFormButton, { MBaseButton } from '@monetr/interface/components/MButton';
+import MCheckbox from '@monetr/interface/components/MCheckbox';
+import MDatePicker from '@monetr/interface/components/MDatePicker';
+import MForm from '@monetr/interface/components/MForm';
+import MSelectFrequency from '@monetr/interface/components/MSelectFrequency';
+import MSpan from '@monetr/interface/components/MSpan';
+import MTextField from '@monetr/interface/components/MTextField';
+import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { useFundingSchedule, useRemoveFundingSchedule, useUpdateFundingSchedule } from '@monetr/interface/hooks/fundingSchedules';
+import FundingSchedule from '@monetr/interface/models/FundingSchedule';
+import { amountToFriendly, friendlyToAmount } from '@monetr/interface/util/amounts';
+import { APIError } from '@monetr/interface/util/request';
 
 interface FundingValues {
   name: string;

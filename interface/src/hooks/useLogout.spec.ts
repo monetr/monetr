@@ -1,9 +1,9 @@
 import { act } from '@testing-library/react-hooks';
-
-import useLogout from 'hooks/useLogout';
 import { rest } from 'msw';
-import testRenderHook from 'testutils/hooks';
-import { server } from 'testutils/server';
+
+import useLogout from '@monetr/interface/hooks/useLogout';
+import testRenderHook from '@monetr/interface/testutils/hooks';
+import { server } from '@monetr/interface/testutils/server';
 
 describe('logout', () => {
   it('will logout successfully', async () => {

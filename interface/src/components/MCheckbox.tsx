@@ -4,9 +4,8 @@ import styled from '@emotion/styled';
 import { useFormikContext } from 'formik';
 
 import { ReactElement } from './types';
-
-import useTheme from 'hooks/useTheme';
-import mergeTailwind from 'util/mergeTailwind';
+import useTheme from '@monetr/interface/hooks/useTheme';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 export interface MCheckboxProps {
   id?: string;

@@ -4,15 +4,14 @@ import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 
 import MBadge from './MBadge';
 import MSpan from './MSpan';
-
-import { useCurrentBalance } from 'hooks/balances';
-import { useSpendingSink } from 'hooks/spending';
-import { useUpdateTransaction } from 'hooks/transactions';
-import useTheme from 'hooks/useTheme';
-import Spending, { SpendingType } from 'models/Spending';
-import Transaction from 'models/Transaction';
-import { formatAmount } from 'util/amounts';
-import mergeTailwind from 'util/mergeTailwind';
+import { useCurrentBalance } from '@monetr/interface/hooks/balances';
+import { useSpendingSink } from '@monetr/interface/hooks/spending';
+import { useUpdateTransaction } from '@monetr/interface/hooks/transactions';
+import useTheme from '@monetr/interface/hooks/useTheme';
+import Spending, { SpendingType } from '@monetr/interface/models/Spending';
+import Transaction from '@monetr/interface/models/Transaction';
+import { formatAmount } from '@monetr/interface/util/amounts';
+import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
 import './MSelectSpendingTransaction.scss';
 

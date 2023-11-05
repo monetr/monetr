@@ -3,13 +3,13 @@ import React, { Fragment, useCallback, useState } from 'react';
 import { Autorenew, AutorenewOutlined, DeleteOutline, MoreVert, PriceChangeOutlined } from '@mui/icons-material';
 import { Popover } from '@mui/material';
 
-import MDivider from 'components/MDivider';
-import MSpan from 'components/MSpan';
-import { ReactElement } from 'components/types';
-import { useSelectedBankAccount } from 'hooks/bankAccounts';
-import { useLink } from 'hooks/links';
-import { showRemoveLinkModal } from 'modals/RemoveLinkModal';
-import { showUpdatePlaidAccountOverlay } from 'modals/UpdatePlaidAccountOverlay';
+import MDivider from '@monetr/interface/components/MDivider';
+import MSpan from '@monetr/interface/components/MSpan';
+import { ReactElement } from '@monetr/interface/components/types';
+import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
+import { useLink } from '@monetr/interface/hooks/links';
+import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
+import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
