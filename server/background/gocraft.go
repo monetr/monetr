@@ -41,8 +41,6 @@ func NewGoCraftWorkJobEnqueuer(log *logrus.Entry, redisPool *redis.Pool) *GoCraf
 func (g *GoCraftWorkJobEnqueuer) EnqueueJob(ctx context.Context, queue string, arguments interface{}) error {
 	span := sentry.StartSpan(ctx, "topic.send")
 	defer span.Finish()
-	span.Description = queue
-
 	span.Description = "gocraft Enqueue"
 	span.SetTag("queue", queue)
 	span.Data = map[string]interface{}{
