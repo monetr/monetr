@@ -371,7 +371,7 @@ const (
 	// This job engine will be built out in the future, but has some downsides as it will create a not-insignificant
 	// amount of churn in the PostgreSQL database. Things like vacuuming should be done far more frequently if this job
 	// engine is used.
-	// **NOT YET IMPLEMENTED**
+	// This is currently implemented via neoq!
 	BackgroundJobEnginePostgreSQL BackgroundJobEngine = "postgres"
 )
 
