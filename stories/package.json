@@ -8,7 +8,7 @@
     "story:shots": "storycap --serverCmd \"storybook dev -p 9001 --disable-telemetry -c . --no-open\" -o tmp"
   },
   "dependencies": {
-    "@fontsource-variable/inter": "5.0.13",
+    "@fontsource-variable/inter": "5.0.15",
     "@monetr/interface": "workspace:*",
     "@rspack/binding-linux-x64-gnu": "0.3.6",
     "@rspack/cli": "0.3.6",
