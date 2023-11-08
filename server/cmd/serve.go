@@ -23,6 +23,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/stripe_helper"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -184,6 +185,10 @@ func RunServer() error {
 		)
 	}
 
+	log.WithFields(logrus.Fields{
+		"engine":    configuration.BackgroundJobs.Engine,
+		"scheduler": configuration.BackgroundJobs.Scheduler,
+	}).Trace("setting up background job processing")
 	backgroundJobs, err := background.NewBackgroundJobs(
 		context.Background(),
 		log,
@@ -223,7 +228,7 @@ func RunServer() error {
 		email,
 	)...)
 
-	listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)
+	listenAddress := fmt.Sprintf("0.0.0.0:%d", configuration.Server.ListenPort)
 	go func() {
 		if err := app.Start(listenAddress); err != nil && err != http.ErrServerClosed {
 			log.WithError(err).Fatal("failed to start the server")

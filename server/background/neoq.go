@@ -160,8 +160,6 @@ func (n *NeoqJobProcessor) RegisterJob(ctx context.Context, jobHandler JobHandle
 	}
 
 	log := n.log.WithContext(ctx).WithField("job", jobHandler.QueueName())
-	log.Trace("registering job handler")
-
 	if n.configuration.Scheduler == config.BackgroundJobSchedulerInternal {
 		if scheduledJob, ok := jobHandler.(ScheduledJobHandler); ok {
 			schedule := scheduledJob.DefaultSchedule()
@@ -185,20 +183,20 @@ func (n *NeoqJobProcessor) RegisterJob(ctx context.Context, jobHandler JobHandle
 				handler.Concurrency(1),
 			)
 
-			// TODO This is broken, it strips the queue name and replaces it with the cron schedule descriptor. Meaning that
-			// it will only allow one cron job handler per cron spec. If you have multiple jobs that both are hourly, it will
-			// only do one of those.
 			if err := n.nq.StartCron(context.Background(), schedule, cronHandler); err != nil {
 				return errors.Wrap(err, "failed to register cron job")
 			}
+			log.WithField("schedule", schedule).Trace("sucessfully registered job to run on a schedule")
 		}
 	}
 
+	log.Trace("registering non-scheduled job handler")
 	neoqJobHandler := createNeoqJobHandler(log, jobHandler)
 	err := n.nq.Start(ctx, neoqJobHandler)
 	if err != nil {
 		return errors.Wrap(err, "failed to register job with neoq")
 	}
+	log.Trace("successfully registered non-scheduled job handler")
 
 	return nil
 }
