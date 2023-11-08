@@ -173,7 +173,7 @@ jobs:
           key: ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Setup local development environment
-        timeout-minutes: 6
+        timeout-minutes: 5
         run: |
           make develop || (make logs && exit 1)
           curl -k https://monetr.local

@@ -186,6 +186,7 @@ func (n *NeoqJobProcessor) RegisterJob(ctx context.Context, jobHandler JobHandle
 			if err := n.nq.StartCron(context.Background(), schedule, cronHandler); err != nil {
 				return errors.Wrap(err, "failed to register cron job")
 			}
+			time.Sleep(50 * time.Millisecond)
 			log.WithField("schedule", schedule).Trace("sucessfully registered job to run on a schedule")
 		}
 	}

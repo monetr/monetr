@@ -92,7 +92,6 @@ func NewBackgroundJobs(
 		NewDeactivateLinksHandler(log, db, configuration, plaidSecrets, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db),
 		NewProcessSpendingHandler(log, db),
-		NewPullTransactionsHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
 		NewRemoveLinkHandler(log, db, publisher),
 		NewRemoveTransactionsHandler(log, db),
 		NewSyncPlaidHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
