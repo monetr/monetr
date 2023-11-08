@@ -163,7 +163,7 @@ func getDatabase(log *logrus.Entry, configuration config.Configuration, stats *m
 	}
 
 	if MigrateDatabaseFlag {
-		migrations.RunMigrations(log, db)
+		migrations.RunMigrations(log, db.WithTimeout(30*time.Second))
 	} else {
 		log.Info("automatic migrations are disabled")
 	}
