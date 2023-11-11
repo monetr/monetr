@@ -25,7 +25,7 @@ export default function sortAccounts(bankAccounts: Array<BankAccount> | undefine
     'checking',
   ];
 
-  return bankAccounts
+  const result =  bankAccounts
     .sort((a, b) => {
       const items = [a, b];
       const values = [
@@ -43,4 +43,7 @@ export default function sortAccounts(bankAccounts: Array<BankAccount> | undefine
       return values[0] < values[1] ? 1 :
         values[0] > values[1] ? -1 : 0;
     });
+  // eslint-disable-next-line no-console
+  console.trace('sortAccounts', result);
+  return result;
 }
