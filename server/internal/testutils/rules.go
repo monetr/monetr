@@ -24,18 +24,9 @@ func NewRuleSet(t *testing.T, year, month, day int, timezone *time.Location, rul
 	return set
 }
 
-func RuleToSet(t *testing.T, timezone *time.Location, ruleString string, potentialNow ...time.Time) *models.RuleSet {
+func RuleToSet(t *testing.T, timezone *time.Location, ruleString string, now time.Time) *models.RuleSet {
 	rule, err := rrule.StrToRRule(ruleString)
 	require.NoError(t, err, "must be able to parse rule string")
-
-	var now time.Time
-	if len(potentialNow) == 1 {
-		now = potentialNow[0]
-	} else if len(potentialNow) > 1 {
-		panic("can only provide a single now")
-	} else {
-		now = time.Now()
-	}
 	rule.DTStart(now)
 
 	after := rule.After(now, false)

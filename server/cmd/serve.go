@@ -23,6 +23,7 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/spf13/cobra"
 )
@@ -57,6 +58,18 @@ func RunServer() error {
 	log := logging.NewLoggerWithConfig(configuration.Logging)
 	if configFileName := configuration.GetConfigFileName(); configFileName != "" {
 		log.WithField("config", configFileName).Info("config file loaded")
+	}
+
+	publicKey, privateKey, err := loadCertificates(configuration)
+	if err != nil {
+		log.WithError(err).Fatal("failed to load ed25519 public and private key")
+		return err
+	}
+
+	clientTokens, err := security.NewPasetoClientTokens(log, clock, configuration.APIDomainName, publicKey, privateKey)
+	if err != nil {
+		log.WithError(err).Fatal("failed to init paseto client tokens interface")
+		return err
 	}
 
 	if configuration.Plaid.WebhooksEnabled {
@@ -224,6 +237,7 @@ func RunServer() error {
 		plaidSecrets,
 		basicPaywall,
 		email,
+		clientTokens,
 		clock,
 	)...)
 

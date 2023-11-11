@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -12,9 +13,10 @@ import (
 
 func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		rule := testutils.RuleToSet(t, time.UTC, "FREQ=DAILY")
+		clock := clock.NewMock()
+		rule := testutils.RuleToSet(t, time.UTC, "FREQ=DAILY", clock.Now())
 
-		originalOccurrence := time.Now().Add(-1 * time.Minute)
+		originalOccurrence := clock.Now().Add(-1 * time.Minute)
 
 		fundingSchedule := models.FundingSchedule{
 			AccountId:      1234,
@@ -28,7 +30,7 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 
 		assert.Nil(t, fundingSchedule.LastOccurrence, "last occurrence should still be nil")
 
-		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), time.Local)
+		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.Local)
 		assert.True(t, ok, "should calculate next occurrence")
 		assert.NotNil(t, fundingSchedule.LastOccurrence, "last occurrence should no longer be nil")
 		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.LastOccurrence.Unix(), "last occurrence should match original")
@@ -36,9 +38,10 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 	})
 
 	t.Run("would skip", func(t *testing.T) {
-		rule := testutils.RuleToSet(t, time.UTC, "FREQ=DAILY")
+		clock := clock.NewMock()
+		rule := testutils.RuleToSet(t, time.UTC, "FREQ=DAILY", clock.Now())
 
-		originalOccurrence := time.Now().Add(1 * time.Minute)
+		originalOccurrence := clock.Now().Add(1 * time.Minute)
 
 		fundingSchedule := models.FundingSchedule{
 			AccountId:      1234,
@@ -52,13 +55,14 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 
 		assert.Nil(t, fundingSchedule.LastOccurrence, "last occurrence should still be nil")
 
-		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), time.Local)
+		ok := fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.Local)
 		assert.False(t, ok, "next occurrence should not be calculated")
 		assert.Equal(t, originalOccurrence.Unix(), fundingSchedule.NextOccurrence.Unix(), "next occurrence should not have changed")
 	})
 
 	t.Run("calculate on blank next", func(t *testing.T) {
-		rule := testutils.RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		clock := clock.NewMock()
+		rule := testutils.RuleToSet(t, time.UTC, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
 		rule.DTStart(rule.GetDTStart().AddDate(0, -1, 0))
 
 		fundingSchedule := models.FundingSchedule{
@@ -68,8 +72,8 @@ func TestFundingSchedule_CalculateNextOccurrence(t *testing.T) {
 			LastOccurrence:  nil,
 			NextOccurrence:  time.Time{},
 		}
-		fundingSchedule.CalculateNextOccurrence(context.Background(), time.UTC)
-		assert.Greater(t, fundingSchedule.NextOccurrence, time.Now())
+		fundingSchedule.CalculateNextOccurrence(context.Background(), clock.Now(), time.UTC)
+		assert.Greater(t, fundingSchedule.NextOccurrence, clock.Now())
 	})
 }
 
