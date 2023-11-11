@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/models"
@@ -96,15 +97,16 @@ type UnauthenticatedRepository interface {
 	UseBetaCode(ctx context.Context, betaId, usedBy uint64) error
 }
 
-func NewRepositoryFromSession(userId, accountId uint64, database pg.DBI) Repository {
+func NewRepositoryFromSession(clock clock.Clock, userId, accountId uint64, database pg.DBI) Repository {
 	return &repositoryBase{
 		userId:    userId,
 		accountId: accountId,
 		txn:       database,
+		clock:     clock,
 	}
 }
 
-func NewUnauthenticatedRepository(txn pg.DBI) UnauthenticatedRepository {
+func NewUnauthenticatedRepository(clock clock.Clock, txn pg.DBI) UnauthenticatedRepository {
 	return &unauthenticatedRepo{
 		txn: txn,
 	}

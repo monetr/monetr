@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
@@ -31,6 +32,7 @@ type SynchronousJobRunner struct {
 // database connection from the test context.
 func NewSynchronousJobRunner(
 	t *testing.T,
+	clock clock.Clock,
 	plaidPlatypus platypus.Platypus,
 	plaidSecrets secrets.PlaidSecretsProvider,
 ) *SynchronousJobRunner {
@@ -49,10 +51,10 @@ func NewSynchronousJobRunner(
 	publisher := pubsub.NewPostgresPubSub(log, db)
 
 	jobs := []JobHandler{
-		NewProcessFundingScheduleHandler(log, db),
-		NewPullTransactionsHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
-		NewRemoveLinkHandler(log, db, publisher),
-		NewRemoveTransactionsHandler(log, db),
+		NewProcessFundingScheduleHandler(log, db, clock),
+		NewPullTransactionsHandler(log, db, clock, plaidSecrets, plaidPlatypus, publisher),
+		NewRemoveLinkHandler(log, db, clock, publisher),
+		NewRemoveTransactionsHandler(log, db, clock),
 	}
 	for i := range jobs {
 		runner.jobs[jobs[i].QueueName()] = jobs[i]

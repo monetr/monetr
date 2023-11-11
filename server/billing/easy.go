@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/cache"
@@ -163,13 +164,15 @@ var (
 
 type baseBasicBilling struct {
 	log    *logrus.Entry
+	clock  clock.Clock
 	repo   AccountRepository
 	notify pubsub.Publisher
 }
 
-func NewBasicBilling(log *logrus.Entry, repo AccountRepository, notifications pubsub.Publisher) BasicBilling {
+func NewBasicBilling(log *logrus.Entry, clock clock.Clock, repo AccountRepository, notifications pubsub.Publisher) BasicBilling {
 	return &baseBasicBilling{
 		log:    log,
+		clock:  clock,
 		repo:   repo,
 		notify: notifications,
 	}
@@ -229,7 +232,7 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(
 	// application.
 	crumbs.IncludeUserInScope(span.Context(), account.AccountId)
 
-	currentlyActive := account.IsSubscriptionActive()
+	currentlyActive := account.IsSubscriptionActive(b.clock.Now())
 
 	// If the timestamp for the last webhook is not nil, and the provided timestamp is not after (<= basically) then
 	// perform the update. This is to solve potential race conditions in the order we receive webhooks from Stripe.
@@ -288,7 +291,7 @@ func (b *baseBasicBilling) UpdateCustomerSubscription(
 	}
 
 	// Check to see if the subscription status of the account has changed with this update to be.
-	if account.IsSubscriptionActive() != currentlyActive {
+	if account.IsSubscriptionActive(b.clock.Now()) != currentlyActive {
 		// If it has check to see if it was previously active.
 		updatedChannelName := fmt.Sprintf("account:%d:subscription:updated", account.AccountId)
 		activatedChannelName := fmt.Sprintf("account:%d:subscription:activated", account.AccountId)

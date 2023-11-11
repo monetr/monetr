@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/background"
@@ -46,6 +47,7 @@ var (
 )
 
 func RunServer() error {
+	clock := clock.New()
 	configuration := config.LoadConfiguration()
 
 	if PortFlag > 0 {
@@ -187,6 +189,7 @@ func RunServer() error {
 	backgroundJobs, err := background.NewBackgroundJobs(
 		context.Background(),
 		log,
+		clock,
 		configuration,
 		db,
 		redisController.Pool(),
@@ -221,6 +224,7 @@ func RunServer() error {
 		plaidSecrets,
 		basicPaywall,
 		email,
+		clock,
 	)...)
 
 	listenAddress := fmt.Sprintf("%s:%d", configuration.Server.ListenAddress, configuration.Server.ListenPort)

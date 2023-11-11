@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -15,20 +15,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GivenIHaveATransaction(t *testing.T, bankAccount models.BankAccount) models.Transaction {
-	transactions := GivenIHaveNTransactions(t, bankAccount, 1)
+func GivenIHaveATransaction(t *testing.T, clock clock.Clock, bankAccount models.BankAccount) models.Transaction {
+	transactions := GivenIHaveNTransactions(t, clock, bankAccount, 1)
 	require.Len(t, transactions, 1, "must have one transaction")
 
 	return transactions[0]
 }
 
-func GivenIHaveNTransactions(t *testing.T, bankAccount models.BankAccount, n int) []models.Transaction {
+func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount models.BankAccount, n int) []models.Transaction {
 	require.NotZero(t, bankAccount.BankAccountId, "bank account Id must be included")
 	require.NotZero(t, bankAccount.AccountId, "bank account Id must be included")
 	require.NotNil(t, bankAccount.Account, "bank account must include account object")
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
 
 	timezone, err := bankAccount.Account.GetTimezone()
 	require.NoError(t, err, "must be able to get the timezone from the account")
@@ -36,7 +36,7 @@ func GivenIHaveNTransactions(t *testing.T, bankAccount models.BankAccount, n int
 	transactions := make([]models.Transaction, n)
 
 	for i := 0; i < n; i++ {
-		date := util.Midnight(time.Now(), timezone)
+		date := util.Midnight(clock.Now(), timezone)
 
 		prefix := gofakeit.RandomString([]string{
 			fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX%s %s", gofakeit.Generate("####"), date.Format("01/02/06")),
@@ -60,7 +60,7 @@ func GivenIHaveNTransactions(t *testing.T, bankAccount models.BankAccount, n int
 			SpendingAmount:            nil,
 			Categories:                nil,
 			OriginalCategories:        nil,
-			Date:                      util.Midnight(time.Now(), timezone),
+			Date:                      util.Midnight(clock.Now(), timezone),
 			AuthorizedDate:            nil,
 			Name:                      name,
 			CustomName:                nil,
@@ -68,7 +68,7 @@ func GivenIHaveNTransactions(t *testing.T, bankAccount models.BankAccount, n int
 			MerchantName:              company,
 			OriginalMerchantName:      company,
 			IsPending:                 false,
-			CreatedAt:                 time.Now(),
+			CreatedAt:                 clock.Now(),
 		}
 
 		err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)

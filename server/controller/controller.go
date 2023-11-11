@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-pg/pg/v10"
@@ -49,6 +50,7 @@ type Controller struct {
 	email                    communication.EmailCommunication
 	emailVerification        verification.Verification
 	passwordResetTokens      verification.TokenGenerator
+	clock                    clock.Clock
 }
 
 func NewController(
@@ -63,6 +65,7 @@ func NewController(
 	plaidSecrets secrets.PlaidSecretsProvider,
 	basicPaywall billing.BasicPayWall,
 	email communication.EmailCommunication,
+	clock clock.Clock,
 ) *Controller {
 	var recaptcha captcha.Verification
 	var err error
@@ -119,6 +122,7 @@ func NewController(
 		email:                    email,
 		emailVerification:        emailVerification,
 		passwordResetTokens:      passwordResetTokenGenerator,
+		clock:                    clock,
 	}
 }
 

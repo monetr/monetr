@@ -454,13 +454,19 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 	})
 
 	t.Run("cannot read someone else's funding schedule", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 
 		var bankAccountId, fundingScheduleId uint64
 		{ // Create the funding schedule under the first account.
 			user, password := fixtures.GivenIHaveABasicAccount(t)
 			link := fixtures.GivenIHaveAManualLink(t, user)
-			bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			bank := fixtures.GivenIHaveABankAccount(
+				t,
+				app.Clock,
+				&link,
+				models.DepositoryBankAccountType,
+				models.CheckingBankAccountSubType,
+			)
 			token := GivenILogin(t, e, user.Login.Email, password)
 
 			{ // Create the funding schedule.

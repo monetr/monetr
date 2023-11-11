@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/gavv/httpexpect/v2"
@@ -90,13 +91,14 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	}
 }
 
-func NewTestApplication(t *testing.T) *httpexpect.Expect {
+func NewTestApplication(t *testing.T) (*TestApp, *httpexpect.Expect) {
 	configuration := NewTestApplicationConfig(t)
-	return NewTestApplicationWithConfig(t, configuration)
+	return NewTestApplicationExWithConfig(t, configuration)
 }
 
 type TestApp struct {
 	Email *mockgen.MockEmailCommunication
+	Clock *clock.Mock
 }
 
 type TestAppInterfaces struct {
@@ -108,6 +110,7 @@ func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configura
 }
 
 func NewTestApplicationPatched(t *testing.T, configuration config.Configuration, patched TestAppInterfaces) (*TestApp, *httpexpect.Expect) {
+	clock := clock.NewMock()
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
@@ -132,7 +135,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	if patched.JobController != nil {
 		jobRunner = *patched.JobController
 	} else {
-		jobRunner = background.NewSynchronousJobRunner(t, plaidClient, plaidSecrets)
+		jobRunner = background.NewSynchronousJobRunner(t, clock, plaidClient, plaidSecrets)
 	}
 
 	emailMockController := gomock.NewController(t)
@@ -153,6 +156,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		plaidSecrets,
 		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
 		email,
+		clock,
 	)
 	app := application.NewApp(configuration, c)
 
@@ -173,6 +177,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 
 	return &TestApp{
 		Email: email,
+		Clock: clock,
 	}, expect
 }
 

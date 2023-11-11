@@ -2,8 +2,8 @@ package background
 
 import (
 	"context"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
@@ -27,6 +27,7 @@ type (
 		log          *logrus.Entry
 		db           *pg.DB
 		unmarshaller JobUnmarshaller
+		clock        clock.Clock
 	}
 
 	RemoveTransactionsArguments struct {
@@ -36,9 +37,10 @@ type (
 	}
 
 	RemoveTransactionsJob struct {
-		args RemoveTransactionsArguments
-		log  *logrus.Entry
-		repo repository.BaseRepository
+		args  RemoveTransactionsArguments
+		log   *logrus.Entry
+		repo  repository.BaseRepository
+		clock clock.Clock
 	}
 )
 
@@ -49,11 +51,13 @@ func TriggerRemoveTransactions(ctx context.Context, backgroundJobs JobController
 func NewRemoveTransactionsHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	clock clock.Clock,
 ) *RemoveTransactionsHandler {
 	return &RemoveTransactionsHandler{
 		log:          log,
 		db:           db,
 		unmarshaller: DefaultJobUnmarshaller,
+		clock:        clock,
 	}
 }
 
@@ -80,8 +84,8 @@ func (r *RemoveTransactionsHandler) HandleConsumeJob(ctx context.Context, data [
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(0, args.AccountId, txn)
-		job, err := NewRemoveTransactionsJob(r.log.WithContext(ctx), repo, args)
+		repo := repository.NewRepositoryFromSession(r.clock, 0, args.AccountId, txn)
+		job, err := NewRemoveTransactionsJob(r.log.WithContext(ctx), repo, r.clock, args)
 		if err != nil {
 			return err
 		}
@@ -92,12 +96,14 @@ func (r *RemoveTransactionsHandler) HandleConsumeJob(ctx context.Context, data [
 func NewRemoveTransactionsJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
+	clock clock.Clock,
 	args RemoveTransactionsArguments,
 ) (*RemoveTransactionsJob, error) {
 	return &RemoveTransactionsJob{
-		args: args,
-		log:  log,
-		repo: repo,
+		args:  args,
+		log:   log,
+		repo:  repo,
+		clock: clock,
 	}, nil
 }
 
@@ -183,6 +189,6 @@ func (r *RemoveTransactionsJob) Run(ctx context.Context) error {
 
 	log.Debugf("successfully removed %d transaction(s)", len(transactions))
 
-	link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
+	link.LastSuccessfulUpdate = myownsanity.TimeP(r.clock.Now().UTC())
 	return r.repo.UpdateLink(span.Context(), link)
 }

@@ -39,13 +39,13 @@ func (a *Account) HasFeature(feature feature.Feature) bool {
 
 // IsSubscriptionActive will return true if the SubscriptionActiveUntil date is not nill and is in the future. Even if
 // the StripeSubscriptionId or StripeCustomerId is nil.
-func (a *Account) IsSubscriptionActive() bool {
+func (a *Account) IsSubscriptionActive(now time.Time) bool {
 	activeUntil := myownsanity.MaxNonNilTime(
 		a.SubscriptionActiveUntil,
 		a.TrialEndsAt,
 	)
 
-	consideredActive := activeUntil != nil && activeUntil.After(time.Now())
+	consideredActive := activeUntil != nil && activeUntil.After(now)
 
 	// If for some reason the account does not have a subscription status, then only consider the timestamps.
 	if a.SubscriptionStatus == nil {
@@ -90,6 +90,6 @@ func (a *Account) HasSubscription() bool {
 	}
 }
 
-func (a *Account) IsTrialing() bool {
-	return a.TrialEndsAt != nil && a.TrialEndsAt.After(time.Now())
+func (a *Account) IsTrialing(now time.Time) bool {
+	return a.TrialEndsAt != nil && a.TrialEndsAt.After(now)
 }

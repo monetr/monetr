@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/myownsanity"
@@ -15,10 +15,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
+func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) models.Link {
 	db := testutils.GetPgDatabase(t)
 
-	repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
 	plaidLink := models.PlaidLink{
 		ItemId:          gofakeit.Generate("???????????????????????????????????"),
@@ -40,11 +40,11 @@ func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
 		InstitutionName:       plaidLink.InstitutionName,
 		PlaidInstitutionId:    myownsanity.StringP(gofakeit.Generate("ins_####")),
 		CustomInstitutionName: "",
-		CreatedAt:             time.Now(),
+		CreatedAt:             clock.Now(),
 		CreatedByUserId:       user.UserId,
 		CreatedByUser:         &user,
-		UpdatedAt:             time.Now(),
-		LastSuccessfulUpdate:  myownsanity.TimeP(time.Now()),
+		UpdatedAt:             clock.Now(),
+		LastSuccessfulUpdate:  myownsanity.TimeP(clock.Now()),
 		BankAccounts:          nil,
 	}
 
@@ -54,10 +54,10 @@ func GivenIHaveAPlaidLink(t *testing.T, user models.User) models.Link {
 	return link
 }
 
-func GivenIHaveAManualLink(t *testing.T, user models.User) models.Link {
+func GivenIHaveAManualLink(t *testing.T, clock clock.Clock, user models.User) models.Link {
 	db := testutils.GetPgDatabase(t)
 
-	repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
 	link := models.Link{
 		AccountId:             user.AccountId,
@@ -66,11 +66,11 @@ func GivenIHaveAManualLink(t *testing.T, user models.User) models.Link {
 		LinkStatus:            models.LinkStatusSetup,
 		InstitutionName:       "Manual Link",
 		CustomInstitutionName: "",
-		CreatedAt:             time.Now(),
+		CreatedAt:             clock.Now(),
 		CreatedByUserId:       user.UserId,
 		CreatedByUser:         &user,
-		UpdatedAt:             time.Now(),
-		LastSuccessfulUpdate:  myownsanity.TimeP(time.Now()),
+		UpdatedAt:             clock.Now(),
+		LastSuccessfulUpdate:  myownsanity.TimeP(clock.Now()),
 		BankAccounts:          nil,
 	}
 

@@ -3,8 +3,8 @@ package fixtures
 import (
 	"context"
 	"testing"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GivenIHaveABankAccount(t *testing.T, link *models.Link, accountType models.BankAccountType, subType models.BankAccountSubType) models.BankAccount {
+func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, accountType models.BankAccountType, subType models.BankAccountSubType) models.BankAccount {
 	require.NotNil(t, link, "link must actually be provided")
 	require.NotZero(t, link.LinkId, "link id must be included")
 	require.NotZero(t, link.AccountId, "link id must be included")
@@ -22,7 +22,7 @@ func GivenIHaveABankAccount(t *testing.T, link *models.Link, accountType models.
 	}
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(link.CreatedByUserId, link.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
 
 	current := int64(gofakeit.Number(2000, 100000))
 	available := current - int64(gofakeit.Number(100, 2000))
@@ -43,7 +43,7 @@ func GivenIHaveABankAccount(t *testing.T, link *models.Link, accountType models.
 			PlaidOfficialName: "EACCOUNT",
 			Type:              accountType,
 			SubType:           subType,
-			LastUpdated:       time.Now(),
+			LastUpdated:       clock.Now(),
 		},
 	}
 

@@ -252,7 +252,7 @@ func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.
 		return nil, errors.Errorf("no transaction for request")
 	}
 
-	return repository.NewUnauthenticatedRepository(txn), nil
+	return repository.NewUnauthenticatedRepository(c.clock, txn), nil
 }
 
 func (c *Controller) mustGetUnauthenticatedRepository(ctx echo.Context) repository.UnauthenticatedRepository {
@@ -303,7 +303,7 @@ func (c *Controller) getAuthenticatedRepository(ctx echo.Context) (repository.Re
 		return nil, errors.Errorf("no transaction for request")
 	}
 
-	return repository.NewRepositoryFromSession(userId, accountId, txn), nil
+	return repository.NewRepositoryFromSession(c.clock, userId, accountId, txn), nil
 }
 
 func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository.Repository {

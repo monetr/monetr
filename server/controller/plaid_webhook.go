@@ -205,6 +205,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 	log.Trace("processing webhook")
 
 	authenticatedRepo := repository.NewRepositoryFromSession(
+		c.clock,
 		link.CreatedByUserId,
 		link.AccountId,
 		c.mustGetDatabase(ctx),

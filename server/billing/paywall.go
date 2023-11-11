@@ -2,8 +2,8 @@ package billing
 
 import (
 	"context"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
@@ -32,13 +32,15 @@ var (
 
 type baseBasicPaywall struct {
 	log      *logrus.Entry
+	clock    clock.Clock
 	accounts AccountRepository
 }
 
-func NewBasicPaywall(log *logrus.Entry, repo AccountRepository) BasicPayWall {
+func NewBasicPaywall(log *logrus.Entry, clock clock.Clock, repo AccountRepository) BasicPayWall {
 	return &baseBasicPaywall{
 		log:      log,
 		accounts: repo,
+		clock:    clock,
 	}
 }
 
@@ -89,7 +91,7 @@ func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountI
 				Category:  "subscription",
 				Message:   message,
 				Level:     level,
-				Timestamp: time.Now(),
+				Timestamp: b.clock.Now(),
 			}, nil)
 		}
 	}()
@@ -106,7 +108,7 @@ func (b *baseBasicPaywall) GetSubscriptionIsActive(ctx context.Context, accountI
 
 	span.Status = sentry.SpanStatusOK
 
-	return account.IsSubscriptionActive(), nil
+	return account.IsSubscriptionActive(b.clock.Now()), nil
 }
 
 func (b *baseBasicPaywall) GetSubscriptionIsTrialing(ctx context.Context, accountId uint64) (trialing bool, err error) {
@@ -125,5 +127,5 @@ func (b *baseBasicPaywall) GetSubscriptionIsTrialing(ctx context.Context, accoun
 
 	span.Status = sentry.SpanStatusOK
 
-	return account.IsTrialing(), nil
+	return account.IsTrialing(b.clock.Now()), nil
 }
