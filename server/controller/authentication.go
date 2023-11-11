@@ -42,7 +42,7 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 
 	expiration := c.configuration.JWT.GetLoginExpirationTimestamp()
 	if token == "" {
-		expiration = time.Now().Add(-1 * time.Second)
+		expiration = c.clock.Now().Add(-1 * time.Second)
 	}
 
 	if c.configuration.Server.Cookies.Name == "" {
@@ -342,7 +342,7 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 
 	var trialEndsAt *time.Time
 	if c.configuration.Stripe.IsBillingEnabled() {
-		expiration := time.Now().AddDate(0, 0, c.configuration.Stripe.FreeTrialDays)
+		expiration := c.clock.Now().AddDate(0, 0, c.configuration.Stripe.FreeTrialDays)
 		log.WithFields(logrus.Fields{
 			"trialDays":   c.configuration.Stripe.FreeTrialDays,
 			"trialEndsAt": expiration,
@@ -808,7 +808,7 @@ func (c *Controller) validateLogin(ctx echo.Context, email, password string) err
 }
 
 func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {
-	now := time.Now()
+	now := c.clock.Now()
 
 	expiration := c.configuration.JWT.GetLoginExpirationTimestamp()
 

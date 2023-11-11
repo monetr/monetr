@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/pkg/errors"
@@ -35,11 +36,13 @@ var (
 
 type jwtEmailVerificationTokenGenerator struct {
 	secret string
+	clock  clock.Clock
 }
 
-func NewTokenGenerator(secret string) TokenGenerator {
+func NewTokenGenerator(secret string, clock clock.Clock) TokenGenerator {
 	return jwtEmailVerificationTokenGenerator{
 		secret: secret,
+		clock:  clock,
 	}
 }
 
@@ -59,7 +62,7 @@ func (j jwtEmailVerificationTokenGenerator) GenerateToken(ctx context.Context, e
 	checksum := md5.Sum([]byte(emailAddress))
 	id := fmt.Sprintf("%X", string(checksum[:]))
 
-	now := time.Now()
+	now := j.clock.Now()
 	claims := jwt.StandardClaims{
 		Audience: []string{
 			emailAddress,

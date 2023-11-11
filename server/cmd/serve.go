@@ -158,7 +158,7 @@ func RunServer() error {
 			db,
 		)
 
-		basicPaywall = billing.NewBasicPaywall(log, accountRepo)
+		basicPaywall = billing.NewBasicPaywall(log, clock, accountRepo)
 	}
 
 	if configuration.Plaid.WebhooksEnabled {

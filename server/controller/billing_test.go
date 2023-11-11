@@ -33,7 +33,7 @@ func TestGetAfterCheckout(t *testing.T) {
 			Default:       true,
 		}
 
-		e := NewTestApplicationWithConfig(t, conf)
+		_, e := NewTestApplicationWithConfig(t, conf)
 
 		token := GivenIHaveToken(t, e)
 
@@ -93,7 +93,7 @@ func TestGetAfterCheckout(t *testing.T) {
 			Default:       true,
 		}
 
-		e := NewTestApplicationWithConfig(t, conf)
+		_, e := NewTestApplicationWithConfig(t, conf)
 
 		token := GivenIHaveToken(t, e)
 

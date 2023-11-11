@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
@@ -16,6 +17,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 		Use:   "cleanup-jobs",
 		Short: "Cleanup old job records in the job table.",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			clock := clock.New()
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
 
@@ -55,6 +57,7 @@ func newCleanupJobsCommand(parent *cobra.Command) {
 			backgroundJobs, err := background.NewBackgroundJobs(
 				cmd.Context(),
 				log,
+				clock,
 				configuration,
 				db,
 				redisController.Pool(),

@@ -14,8 +14,8 @@ import (
 
 func TestMe(t *testing.T) {
 	t.Run("authenticated", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, currentPassword := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		var token string
 		{ // Login to the user with their current password.
@@ -49,7 +49,7 @@ func TestMe(t *testing.T) {
 	})
 
 	t.Run("bad token", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.GET(`/api/users/me`).
 			WithCookie(TestCookieName, gofakeit.UUID()).
@@ -59,7 +59,7 @@ func TestMe(t *testing.T) {
 	})
 
 	t.Run("no token", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.GET(`/api/users/me`).
 			Expect()
@@ -78,7 +78,7 @@ func TestMe(t *testing.T) {
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
 			Default:       true,
 		}
-		e := NewTestApplicationWithConfig(t, conf)
+		_, e := NewTestApplicationWithConfig(t, conf)
 
 		token := GivenIHaveToken(t, e)
 		{ // Then retrieve "me".
@@ -112,7 +112,7 @@ func TestMe(t *testing.T) {
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
 			Default:       true,
 		}
-		e := NewTestApplicationWithConfig(t, conf)
+		_, e := NewTestApplicationWithConfig(t, conf)
 
 		token := GivenIHaveToken(t, e)
 		{ // Then retrieve "me".
@@ -136,8 +136,8 @@ func TestMe(t *testing.T) {
 
 func TestChangePassword(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, currentPassword := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		newPassword := gofakeit.Generate("????????")
 
 		var token string
@@ -204,8 +204,8 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("wrong password", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, currentPassword := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		wrongCurrentPassword := gofakeit.Generate("????????")
 		newPassword := gofakeit.Generate("????????")
 
@@ -262,8 +262,8 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("bad new password", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, currentPassword := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		newPassword := gofakeit.Generate("????")
 
 		var token string
@@ -295,8 +295,8 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("current and new passwords match", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, currentPassword := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		var token string
 		{ // Login to the user with their current password.
@@ -327,8 +327,8 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("bad json body", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, currentPassword := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, currentPassword := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		var token string
 		{ // Login to the user with their current password.
@@ -357,8 +357,8 @@ func TestChangePassword(t *testing.T) {
 
 	t.Run("token for a non-existent user", func(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
-		e := NewTestApplicationWithConfig(t, conf)
-		token := GenerateToken(t, conf, math.MaxUint64, math.MaxUint64, math.MaxUint64)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		token := GenerateToken(t, app, math.MaxUint64, math.MaxUint64, math.MaxUint64)
 
 		bogusCurrentPassword := gofakeit.Generate("????????")
 		bogusNewPassword := gofakeit.Generate("????????")
@@ -378,7 +378,7 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("bad token", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.PUT(`/api/users/security/password`).
 			WithCookie(TestCookieName, gofakeit.UUID()).
@@ -392,7 +392,7 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("no token", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.PUT(`/api/users/security/password`).
 			WithJSON(map[string]interface{}{

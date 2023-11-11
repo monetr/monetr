@@ -15,10 +15,10 @@ import (
 
 func TestPostSpending(t *testing.T) {
 	t.Run("create an expense", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -42,7 +42,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
@@ -71,12 +71,12 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("invalid bank account ID", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", "bogus_bank_id").
 				WithCookie(TestCookieName, token).
@@ -96,8 +96,8 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("invalid json body", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create an expense
@@ -113,10 +113,10 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("missing name", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -166,10 +166,10 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("missing target amount", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -193,7 +193,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
@@ -218,10 +218,10 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("negative target amount", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -245,7 +245,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
@@ -271,14 +271,14 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("invalid funding schedule", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
@@ -304,10 +304,10 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("due date in the past", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -331,7 +331,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithCookie(TestCookieName, token).
@@ -350,10 +350,10 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("missing rule for expense", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -377,7 +377,7 @@ func TestPostSpending(t *testing.T) {
 		}
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
@@ -402,10 +402,10 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("included rule for goal", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -455,10 +455,10 @@ func TestPostSpending(t *testing.T) {
 	})
 
 	t.Run("duplicate name", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -531,10 +531,10 @@ func TestPostSpending(t *testing.T) {
 
 func TestGetSpending(t *testing.T) {
 	t.Run("list spending objects", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -559,7 +559,7 @@ func TestGetSpending(t *testing.T) {
 
 		var spendingId uint64
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
@@ -603,8 +603,8 @@ func TestGetSpending(t *testing.T) {
 	})
 
 	t.Run("invalid bank account ID", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create an expense
@@ -621,10 +621,10 @@ func TestGetSpending(t *testing.T) {
 
 func TestGetSpendingByID(t *testing.T) {
 	t.Run("retrieve single spending", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -649,7 +649,7 @@ func TestGetSpendingByID(t *testing.T) {
 
 		var spendingId uint64
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
@@ -693,8 +693,8 @@ func TestGetSpendingByID(t *testing.T) {
 	})
 
 	t.Run("invalid bank account ID", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create an expense
@@ -710,8 +710,8 @@ func TestGetSpendingByID(t *testing.T) {
 	})
 
 	t.Run("invalid spending ID", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create an expense
@@ -727,10 +727,10 @@ func TestGetSpendingByID(t *testing.T) {
 	})
 
 	t.Run("non-existant spending", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create an expense

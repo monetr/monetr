@@ -93,24 +93,26 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 
 func NewTestApplication(t *testing.T) (*TestApp, *httpexpect.Expect) {
 	configuration := NewTestApplicationConfig(t)
-	return NewTestApplicationExWithConfig(t, configuration)
+	return NewTestApplicationWithConfig(t, configuration)
 }
 
 type TestApp struct {
-	Email *mockgen.MockEmailCommunication
-	Clock *clock.Mock
+	Configuration config.Configuration
+	Email         *mockgen.MockEmailCommunication
+	Clock         *clock.Mock
 }
 
 type TestAppInterfaces struct {
 	JobController *background.JobController
 }
 
-func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
+func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
 	return NewTestApplicationPatched(t, configuration, TestAppInterfaces{})
 }
 
 func NewTestApplicationPatched(t *testing.T, configuration config.Configuration, patched TestAppInterfaces) (*TestApp, *httpexpect.Expect) {
 	clock := clock.NewMock()
+	clock.Set(time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC))
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
@@ -154,7 +156,11 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		stripe_helper.NewStripeHelper(log, gofakeit.UUID()),
 		redisPool,
 		plaidSecrets,
-		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
+		billing.NewBasicPaywall(
+			log,
+			clock,
+			billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db),
+		),
 		email,
 		clock,
 	)
@@ -176,14 +182,10 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	})
 
 	return &TestApp{
-		Email: email,
-		Clock: clock,
+		Configuration: configuration,
+		Email:         email,
+		Clock:         clock,
 	}, expect
-}
-
-func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httpexpect.Expect {
-	_, e := NewTestApplicationExWithConfig(t, configuration)
-	return e
 }
 
 func GivenIHaveToken(t *testing.T, e *httpexpect.Expect) string {
@@ -264,27 +266,27 @@ func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
 	return response.Cookie(TestCookieName).Value().Raw()
 }
 
-func GenerateToken(t *testing.T, conf config.Configuration, loginId, userId, accountId uint64) string {
-	now := time.Now()
+func GenerateToken(t *testing.T, app *TestApp, loginId, userId, accountId uint64) string {
+	now := app.Clock.Now()
 	claims := &controller.MonetrClaims{
 		LoginId:   loginId,
 		UserId:    userId,
 		AccountId: accountId,
 		StandardClaims: jwt.StandardClaims{
 			Audience: []string{
-				conf.APIDomainName,
+				app.Configuration.APIDomainName,
 			},
 			ExpiresAt: now.Add(10 * time.Second).Unix(),
 			Id:        "",
 			IssuedAt:  now.Unix(),
-			Issuer:    conf.APIDomainName,
+			Issuer:    app.Configuration.APIDomainName,
 			NotBefore: now.Unix(),
 			Subject:   "monetr",
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(conf.JWT.LoginJwtSecret))
+	signedToken, err := token.SignedString([]byte(app.Configuration.JWT.LoginJwtSecret))
 	require.NoError(t, err, "must be able to sign generated token")
 
 	return signedToken

@@ -10,8 +10,8 @@ import (
 
 func TestGetAccountSettings(t *testing.T) {
 	t.Run("retrieve account settings", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.GET("/api/account/settings").
@@ -24,7 +24,7 @@ func TestGetAccountSettings(t *testing.T) {
 	})
 
 	t.Run("unauthorized", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.GET("/api/account/settings").
 			WithCookie(TestCookieName, gofakeit.UUID()).

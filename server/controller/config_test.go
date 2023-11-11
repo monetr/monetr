@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetConfig(t *testing.T) {
-	e := NewTestApplication(t)
+	_, e := NewTestApplication(t)
 	response := e.GET("/api/config").Expect()
 
 	response.Status(http.StatusOK)

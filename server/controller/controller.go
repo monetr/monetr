@@ -82,7 +82,7 @@ func NewController(
 
 	accountsRepo := billing.NewAccountRepository(log, caching, db)
 	pubSub := pubsub.NewPostgresPubSub(log, db)
-	basicBilling := billing.NewBasicBilling(log, accountsRepo, pubSub)
+	basicBilling := billing.NewBasicBilling(log, clock, accountsRepo, pubSub)
 
 	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(log, plaidClient, 5*time.Minute)
 
@@ -92,13 +92,13 @@ func NewController(
 			log,
 			configuration.Email.Verification.TokenLifetime,
 			repository.NewEmailRepository(log, db),
-			verification.NewTokenGenerator(configuration.Email.Verification.TokenSecret),
+			verification.NewTokenGenerator(configuration.Email.Verification.TokenSecret, clock),
 		)
 	}
 
 	var passwordResetTokenGenerator verification.TokenGenerator
 	if configuration.Email.AllowPasswordReset() {
-		passwordResetTokenGenerator = verification.NewTokenGenerator(configuration.Email.ForgotPassword.TokenSecret)
+		passwordResetTokenGenerator = verification.NewTokenGenerator(configuration.Email.ForgotPassword.TokenSecret, clock)
 	}
 
 	return &Controller{
