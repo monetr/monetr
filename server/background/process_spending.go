@@ -47,7 +47,7 @@ func NewProcessSpendingHandler(
 	return &ProcessSpendingHandler{
 		log:          log,
 		db:           db,
-		repo:         repository.NewJobRepository(db),
+		repo:         repository.NewJobRepository(db, clock),
 		unmarshaller: DefaultJobUnmarshaller,
 		clock:        clock,
 	}

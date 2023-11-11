@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
 	"github.com/go-pg/pg/v10"
@@ -16,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/ctxkeys"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 )
@@ -141,26 +141,13 @@ func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
 		return errors.New("token must be provided")
 	}
 
-	var claims MonetrClaims
-	result, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
-		// Don't forget to validate the alg is what you expect:
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(c.configuration.JWT.LoginJwtSecret), nil
-	})
+	claims, err := c.clientTokens.Parse(security.AuthenticatedAudience, token)
 	if err != nil {
 		c.updateAuthenticationCookie(ctx, ClearAuthentication)
 		// Don't return the JWT error to the client, but throw it in Sentry so it can still be used for debugging.
 		crumbs.Error(c.getContext(ctx), "failed to validate token", "authentication", map[string]interface{}{
 			"error": err,
 		})
-		return errors.New("token is not valid")
-	}
-
-	if !result.Valid {
-		c.removeCookieIfPresent(ctx)
 		return errors.New("token is not valid")
 	}
 
@@ -243,7 +230,7 @@ func (c *Controller) mustGetSecurityRepository(ctx echo.Context) repository.Secu
 		panic("failed to retrieve database object from controller context")
 	}
 
-	return repository.NewSecurityRepository(db)
+	return repository.NewSecurityRepository(db, c.clock)
 }
 
 func (c *Controller) getUnauthenticatedRepository(ctx echo.Context) (repository.UnauthenticatedRepository, error) {

@@ -41,17 +41,19 @@ type Configuration struct {
 	Beta                Beta           `yaml:"beta"`
 	CORS                CORS           `yaml:"cors"`
 	Email               Email          `yaml:"email"`
-	JWT                 JWT            `yaml:"jwt"`
-	Logging             Logging        `yaml:"logging"`
-	KeyManagement       KeyManagement  `yaml:"keyManagement"`
-	Plaid               Plaid          `yaml:"plaid"`
-	PostgreSQL          PostgreSQL     `yaml:"postgreSql"`
-	RabbitMQ            RabbitMQ       `yaml:"rabbitMQ"`
-	ReCAPTCHA           ReCAPTCHA      `yaml:"reCAPTCHA"`
-	Redis               Redis          `yaml:"redis"`
-	Sentry              Sentry         `yaml:"sentry"`
-	Server              Server         `yaml:"server"`
-	Stripe              Stripe         `yaml:"stripe"`
+	// Deprecated: JWT is no longer supported.
+	JWT           JWT           `yaml:"jwt"`
+	Logging       Logging       `yaml:"logging"`
+	KeyManagement KeyManagement `yaml:"keyManagement"`
+	Plaid         Plaid         `yaml:"plaid"`
+	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
+	RabbitMQ      RabbitMQ      `yaml:"rabbitMQ"`
+	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
+	Redis         Redis         `yaml:"redis"`
+	Sentry        Sentry        `yaml:"sentry"`
+	Server        Server        `yaml:"server"`
+	Stripe        Stripe        `yaml:"stripe"`
+	Security      Security      `yaml:"security"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -131,8 +133,7 @@ type Beta struct {
 }
 
 type JWT struct {
-	LoginJwtSecret        string `yaml:"loginJwtSecret"`
-	RegistrationJwtSecret string `yaml:"registrationJwtSecret"`
+	LoginJwtSecret string `yaml:"loginJwtSecret"`
 	// LoginExpiration is the number of days that the issued login JWT token should be considered valid.
 	LoginExpiration int `yaml:"loginExpiration"`
 }
@@ -141,6 +142,13 @@ type JWT struct {
 // timestamp used for issued JWT tokens for authentication.
 func (j JWT) GetLoginExpirationTimestamp() time.Time {
 	return time.Now().Add(time.Duration(j.LoginExpiration * 24 * int(time.Hour)))
+}
+
+type Security struct {
+	// PublicKey is a path to the file containing the ED22519 public key in pem format.
+	PublicKey string `yaml:"publicKey"`
+	// PrivateKey is the path to the file containing the ED22519 private key in pem format.
+	PrivateKey string `yaml:"privateKey"`
 }
 
 type PostgreSQL struct {
@@ -539,7 +547,6 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Email.SMTP.Host", "MONETR_EMAIL_SMTP_HOST")
 	_ = v.BindEnv("Email.SMTP.Port", "MONETR_EMAIL_SMTP_PORT")
 	_ = v.BindEnv("JWT.LoginJwtSecret", "MONETR_JWT_LOGIN_SECRET")
-	_ = v.BindEnv("JWT.RegistrationJwtSecret", "MONETR_JWT_REGISTRATION_SECRET")
 	_ = v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	_ = v.BindEnv("Logging.Format", "MONETR_LOG_FORMAT")
 	_ = v.BindEnv("Logging.StackDriver.Enabled", "MONETR_LOG_STACKDRIVER_ENABLED")

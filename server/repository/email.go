@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -41,7 +41,7 @@ func NewEmailRepository(log *logrus.Entry, db pg.DBI) EmailRepository {
 }
 
 func getLoginForEmail(ctx context.Context, db pg.DBI, emailAddress string) (*models.Login, error) {
-	span := sentry.StartSpan(ctx, "GetLoginForEmail")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	var login models.Login
@@ -61,7 +61,7 @@ func (e *emailRepositoryBase) GetLoginForEmail(ctx context.Context, emailAddress
 }
 
 func (e *emailRepositoryBase) SetEmailVerified(ctx context.Context, emailAddress string) error {
-	span := sentry.StartSpan(ctx, "SetEmailVerified")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	var login models.Login

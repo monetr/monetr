@@ -10,6 +10,8 @@ import (
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
+	"github.com/monetr/monetr/server/security"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMe(t *testing.T) {
@@ -358,7 +360,13 @@ func TestChangePassword(t *testing.T) {
 	t.Run("token for a non-existent user", func(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
 		app, e := NewTestApplicationWithConfig(t, conf)
-		token := GenerateToken(t, app, math.MaxUint64, math.MaxUint64, math.MaxUint64)
+		token, err := app.Tokens.Create(security.AuthenticatedAudience, 10*time.Minute, security.Claims{
+			EmailAddress: gofakeit.Email(),
+			UserId:       math.MaxUint64,
+			AccountId:    math.MaxUint64,
+			LoginId:      math.MaxUint64,
+		})
+		assert.NoError(t, err, "should not have an error generating a bogus token")
 
 		bogusCurrentPassword := gofakeit.Generate("????????")
 		bogusNewPassword := gofakeit.Generate("????????")
@@ -373,7 +381,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusInternalServerError)
-			response.JSON().Path("$.error").String().Equal("failed to retrieve current user details")
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve current user details")
 		}
 	})
 

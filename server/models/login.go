@@ -32,7 +32,7 @@ type Login struct {
 
 // VerifyTOTP will validate that the provided TOTP string is correct for this login. It will return ErrTOTPNotValid if
 // the provided input is not valid, or if TOTP is not configured for the login.
-func (l Login) VerifyTOTP(input string) error {
+func (l Login) VerifyTOTP(input string, now time.Time) error {
 	// If the login does not have TOTP configured, do not return a special error. To the client it should appear as if
 	// the TOTP provided is not valid. I don't know if this really makes a difference at all, but it seems like the
 	// intuitive thing to do.
@@ -41,7 +41,7 @@ func (l Login) VerifyTOTP(input string) error {
 	}
 
 	loginTotp := gotp.NewDefaultTOTP(l.TOTP)
-	if loginTotp.Verify(input, int(time.Now().Unix())) {
+	if loginTotp.Verify(input, int(now.Unix())) {
 		return nil
 	}
 

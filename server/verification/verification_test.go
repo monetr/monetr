@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/repository"
@@ -13,11 +14,12 @@ import (
 
 func TestVerificationBase_CreateEmailVerificationToken(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 
 		emailRepo := repository.NewEmailRepository(log, db)
-		tokens := NewTokenGenerator(gofakeit.Generate("????????"))
+		tokens := NewTokenGenerator(gofakeit.Generate("????????"), clock)
 
 		verification := NewEmailVerification(log, time.Second, emailRepo, tokens)
 

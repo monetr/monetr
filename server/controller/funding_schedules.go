@@ -139,8 +139,8 @@ func (c *Controller) postFundingSchedules(ctx echo.Context) error {
 	// We also calculate the next occurrence if the provided occurrence is in the past. This technically should not
 	// happen via the UI. But it is currently possible for someone to select the current day in the UI. Which then gets
 	// adjusted for midnight that day, which will always be in the past for the user.
-	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) || time.Now().After(fundingSchedule.NextOccurrence) {
-		fundingSchedule.CalculateNextOccurrence(c.getContext(ctx), c.mustGetTimezone(ctx))
+	if (time.Time{}).Equal(fundingSchedule.NextOccurrence) || c.clock.Now().After(fundingSchedule.NextOccurrence) {
+		fundingSchedule.CalculateNextOccurrence(c.getContext(ctx), c.clock.Now(), c.mustGetTimezone(ctx))
 	} else {
 		fundingSchedule.NextOccurrenceOriginal = fundingSchedule.NextOccurrence
 	}

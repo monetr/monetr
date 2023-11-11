@@ -58,7 +58,7 @@ func NewDeactivateLinksHandler(
 		log:           log,
 		db:            db,
 		configuration: configuration,
-		repo:          repository.NewJobRepository(db),
+		repo:          repository.NewJobRepository(db, clock),
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
 		unmarshaller:  DefaultJobUnmarshaller,

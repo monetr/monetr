@@ -41,7 +41,7 @@ func NewProcessFundingScheduleHandler(
 	return &ProcessFundingScheduleHandler{
 		log:          log,
 		db:           db,
-		repo:         repository.NewJobRepository(db),
+		repo:         repository.NewJobRepository(db, clock),
 		unmarshaller: DefaultJobUnmarshaller,
 		clock:        clock,
 	}
@@ -205,7 +205,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 			}
 		}
 
-		if !fundingSchedule.CalculateNextOccurrence(span.Context(), timezone) {
+		if !fundingSchedule.CalculateNextOccurrence(span.Context(), p.clock.Now(), timezone) {
 			crumbs.IndicateBug(span.Context(), "bug: funding schedule for processing occurs in the future", map[string]interface{}{
 				"nextOccurrence": fundingSchedule.NextOccurrence,
 			})

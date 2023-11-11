@@ -101,7 +101,7 @@ func (f *FundingSchedule) GetNextContributionDateAfter(now time.Time, timezone *
 }
 
 // Deprecated: This function should no longer be used, use the forecasting code instead.
-func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone *time.Location) bool {
+func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, now time.Time, timezone *time.Location) bool {
 	span := sentry.StartSpan(ctx, "function")
 	defer span.Finish()
 	span.Description = "CalculateNextOccurrence"
@@ -110,8 +110,6 @@ func (f *FundingSchedule) CalculateNextOccurrence(ctx context.Context, timezone 
 		"fundingScheduleId": f.FundingScheduleId,
 		"timezone":          timezone.String(),
 	}
-
-	now := time.Now()
 
 	if now.Before(f.NextOccurrence) {
 		crumbs.Debug(span.Context(), "Skipping processing funding schedule, it does not occur yet", map[string]interface{}{

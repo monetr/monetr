@@ -20,11 +20,10 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/util"
-	"github.com/monetr/monetr/server/verification"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -48,8 +47,7 @@ type Controller struct {
 	billing                  billing.BasicBilling
 	stripeWebhooks           billing.StripeWebhookHandler
 	email                    communication.EmailCommunication
-	emailVerification        verification.Verification
-	passwordResetTokens      verification.TokenGenerator
+	clientTokens             security.ClientTokens
 	clock                    clock.Clock
 }
 
@@ -65,6 +63,7 @@ func NewController(
 	plaidSecrets secrets.PlaidSecretsProvider,
 	basicPaywall billing.BasicPayWall,
 	email communication.EmailCommunication,
+	clientTokens security.ClientTokens,
 	clock clock.Clock,
 ) *Controller {
 	var recaptcha captcha.Verification
@@ -86,21 +85,6 @@ func NewController(
 
 	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(log, plaidClient, 5*time.Minute)
 
-	var emailVerification verification.Verification
-	if configuration.Email.ShouldVerifyEmails() {
-		emailVerification = verification.NewEmailVerification(
-			log,
-			configuration.Email.Verification.TokenLifetime,
-			repository.NewEmailRepository(log, db),
-			verification.NewTokenGenerator(configuration.Email.Verification.TokenSecret, clock),
-		)
-	}
-
-	var passwordResetTokenGenerator verification.TokenGenerator
-	if configuration.Email.AllowPasswordReset() {
-		passwordResetTokenGenerator = verification.NewTokenGenerator(configuration.Email.ForgotPassword.TokenSecret, clock)
-	}
-
 	return &Controller{
 		captcha:                  recaptcha,
 		configuration:            configuration,
@@ -120,8 +104,7 @@ func NewController(
 		billing:                  basicBilling,
 		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
 		email:                    email,
-		emailVerification:        emailVerification,
-		passwordResetTokens:      passwordResetTokenGenerator,
+		clientTokens:             clientTokens,
 		clock:                    clock,
 	}
 }

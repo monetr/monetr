@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
@@ -47,12 +48,14 @@ var (
 )
 
 type baseSecurityRepository struct {
-	db pg.DBI
+	db    pg.DBI
+	clock clock.Clock
 }
 
-func NewSecurityRepository(db pg.DBI) SecurityRepository {
+func NewSecurityRepository(db pg.DBI, clock clock.Clock) SecurityRepository {
 	return &baseSecurityRepository{
-		db: db,
+		db:    db,
+		clock: clock,
 	}
 }
 

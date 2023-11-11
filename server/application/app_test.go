@@ -27,9 +27,8 @@ func TestNewApp(t *testing.T) {
 			},
 		},
 		JWT: config.JWT{
-			LoginJwtSecret:        gofakeit.UUID(),
-			RegistrationJwtSecret: gofakeit.UUID(),
-			LoginExpiration:       1,
+			LoginJwtSecret:  gofakeit.UUID(),
+			LoginExpiration: 1,
 		},
 		PostgreSQL: config.PostgreSQL{},
 		Email: config.Email{

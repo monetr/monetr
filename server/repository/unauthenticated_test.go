@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/hash"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -15,13 +16,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func GetTestUnauthenticatedRepository(t *testing.T) repository.UnauthenticatedRepository {
+func GetTestUnauthenticatedRepository(t *testing.T, clock clock.Clock) repository.UnauthenticatedRepository {
 	txn := testutils.GetPgDatabaseTxn(t)
-	return repository.NewUnauthenticatedRepository(txn)
+	return repository.NewUnauthenticatedRepository(clock, txn)
 }
 
 func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
-	repo := GetTestUnauthenticatedRepository(t)
+	clock := clock.NewMock()
+	repo := GetTestUnauthenticatedRepository(t, clock)
 	account := models.Account{
 		Timezone:                time.UTC.String(),
 		StripeCustomerId:        nil,
@@ -36,7 +38,8 @@ func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
 
 func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
 		assert.NoError(t, err, "should successfully create login")
@@ -45,7 +48,8 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 	})
 
 	t.Run("duplicate email", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
 		email := gofakeit.Email()
 
 		passwordOne := gofakeit.Password(true, true, true, true, false, 32)
@@ -68,7 +72,8 @@ func TestUnauthenticatedRepo_CreateLogin(t *testing.T) {
 
 func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 
 		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
@@ -102,7 +107,8 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 	})
 
 	t.Run("unique login per account", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
 		email, password := gofakeit.Email(), gofakeit.Password(true, true, true, true, false, 32)
 
 		login, err := repo.CreateLogin(context.Background(), email, password, gofakeit.FirstName(), gofakeit.LastName())
@@ -145,15 +151,17 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 
 func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
-		login, _ := fixtures.GivenIHaveLogin(t)
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
+		login, _ := fixtures.GivenIHaveLogin(t, clock)
 
 		err := repo.ResetPassword(context.Background(), login.LoginId, hash.HashPassword(login.Email, "new Password"))
 		assert.NoError(t, err, "must reset password without an error")
 	})
 
 	t.Run("bad login", func(t *testing.T) {
-		repo := GetTestUnauthenticatedRepository(t)
+		clock := clock.NewMock()
+		repo := GetTestUnauthenticatedRepository(t, clock)
 
 		err := repo.ResetPassword(context.Background(), math.MaxUint64, hash.HashPassword(testutils.GetUniqueEmail(t), "new Password"))
 		assert.EqualError(t, err, "no logins were updated", "should return an error for invalid login")

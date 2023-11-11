@@ -3,13 +3,15 @@ package fixtures
 import (
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGivenIHaveAPlaidLink(t *testing.T) {
-	user, _ := GivenIHaveABasicAccount(t)
+	clock := clock.NewMock()
+	user, _ := GivenIHaveABasicAccount(t, clock)
 
-	link := GivenIHaveAPlaidLink(t, user)
+	link := GivenIHaveAPlaidLink(t, clock, user)
 	assert.NotZero(t, link.LinkId, "link must have been created")
 	assert.Equal(t, user.UserId, link.CreatedByUserId, "link must have been created by the provided user")
 	assert.NotNil(t, link.CreatedByUser, "user object should be included for created by")
@@ -18,9 +20,10 @@ func TestGivenIHaveAPlaidLink(t *testing.T) {
 }
 
 func TestGivenIHaveAManualLink(t *testing.T) {
-	user, _ := GivenIHaveABasicAccount(t)
+	clock := clock.NewMock()
+	user, _ := GivenIHaveABasicAccount(t, clock)
 
-	link := GivenIHaveAManualLink(t, user)
+	link := GivenIHaveAManualLink(t, clock, user)
 	assert.NotZero(t, link.LinkId, "link must have been created")
 	assert.Equal(t, user.UserId, link.CreatedByUserId, "link must have been created by the provided user")
 	assert.NotNil(t, link.CreatedByUser, "user object should be included for created by")
