@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
-	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
@@ -26,12 +26,13 @@ import (
 
 func TestPullTransactionsJob_Run(t *testing.T) {
 	t.Run("invalid link", func(t *testing.T) {
+		clock := clock.NewMock()
 		log, hook := testutils.GetTestLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
 		plaidPlatypus := platypus.NewPlaid(log, nil, nil, config.Plaid{
 			ClientID:     gofakeit.UUID(),
@@ -39,13 +40,13 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			Environment:  plaid.Sandbox,
 		})
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		args := PullTransactionsArguments{
 			AccountId: user.AccountId,
 			LinkId:    math.MaxInt64,
-			Start:     time.Now(),
-			End:       time.Now().Add(-1 * 24 * time.Hour),
+			Start:     clock.Now(),
+			End:       clock.Now().Add(-1 * 24 * time.Hour),
 		}
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
@@ -56,13 +57,14 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("manual link", func(t *testing.T) {
+		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAManualLink(t, clock, user)
 
 		plaidPlatypus := platypus.NewPlaid(log, nil, nil, config.Plaid{
 			ClientID:     gofakeit.UUID(),
@@ -70,13 +72,13 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			Environment:  plaid.Sandbox,
 		})
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		args := PullTransactionsArguments{
 			AccountId: user.AccountId,
 			LinkId:    link.LinkId,
-			Start:     time.Now(),
-			End:       time.Now().Add(-1 * 24 * time.Hour),
+			Start:     clock.Now(),
+			End:       clock.Now().Add(-1 * 24 * time.Hour),
 		}
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
@@ -91,13 +93,14 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("no bank accounts", func(t *testing.T) {
+		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		plaidPlatypus := platypus.NewPlaid(log, nil, nil, config.Plaid{
 			ClientID:     gofakeit.UUID(),
@@ -105,13 +108,13 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			Environment:  plaid.Sandbox,
 		})
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		args := PullTransactionsArguments{
 			AccountId: user.AccountId,
 			LinkId:    plaidLink.LinkId,
-			Start:     time.Now(),
-			End:       time.Now().Add(-1 * 24 * time.Hour),
+			Start:     clock.Now(),
+			End:       clock.Now().Add(-1 * 24 * time.Hour),
 		}
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
@@ -121,15 +124,16 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("missing access token", func(t *testing.T) {
+		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 		// Need at least one bank account.
-		fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		plaidPlatypus := platypus.NewPlaid(log, nil, nil, config.Plaid{
 			ClientID:     gofakeit.UUID(),
@@ -137,13 +141,13 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			Environment:  plaid.Sandbox,
 		})
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		args := PullTransactionsArguments{
 			AccountId: user.AccountId,
 			LinkId:    plaidLink.LinkId,
-			Start:     time.Now(),
-			End:       time.Now().Add(-1 * 24 * time.Hour),
+			Start:     clock.Now(),
+			End:       clock.Now().Add(-1 * 24 * time.Hour),
 		}
 		argsEncoded, err := DefaultJobMarshaller(args)
 		assert.NoError(t, err, "must be able to marshal arguments")
@@ -153,6 +157,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("happy path, pull new transactions", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -161,13 +166,13 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
 		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, accessToken))
 
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
@@ -215,7 +220,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 					Amount:               1,
 					BankAccountId:        plaidBankAccount.PlaidAccountId,
 					Category:             []string{},
-					Date:                 time.Now(),
+					Date:                 clock.Now(),
 					ISOCurrencyCode:      "USD",
 					IsPending:            false,
 					MerchantName:         "Amazon",
@@ -227,7 +232,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			}, nil).
 			Times(1)
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		// Should not have any transactions before this job runs.
 		count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
@@ -237,8 +242,8 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			args := PullTransactionsArguments{
 				AccountId: user.AccountId,
 				LinkId:    plaidLink.LinkId,
-				Start:     time.Now().Add(-1 * 24 * time.Hour),
-				End:       time.Now(),
+				Start:     clock.Now().Add(-1 * 24 * time.Hour),
+				End:       clock.Now(),
 			}
 			argsEncoded, err := DefaultJobMarshaller(args)
 			assert.NoError(t, err, "must be able to marshal arguments")
@@ -256,6 +261,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("happy path, pull new transactions subsequent", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -264,13 +270,13 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
 		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, accessToken))
 
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
@@ -309,7 +315,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 				Amount:               1395,
 				BankAccountId:        plaidBankAccount.PlaidAccountId,
 				Category:             []string{},
-				Date:                 time.Now(),
+				Date:                 clock.Now(),
 				ISOCurrencyCode:      "USD",
 				IsPending:            false,
 				MerchantName:         "Hulu",
@@ -322,7 +328,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 				Amount:               1654,
 				BankAccountId:        plaidBankAccount.PlaidAccountId,
 				Category:             []string{},
-				Date:                 time.Now().Add(-1 * 24 * time.Hour),
+				Date:                 clock.Now().Add(-1 * 24 * time.Hour),
 				ISOCurrencyCode:      "USD",
 				IsPending:            false,
 				MerchantName:         "Amazon",
@@ -357,14 +363,14 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			).
 			Return(transactions, nil)
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		{ // Do our first pull of transactions.
 			args := PullTransactionsArguments{
 				AccountId: user.AccountId,
 				LinkId:    plaidLink.LinkId,
-				Start:     time.Now().Add(-1 * 24 * time.Hour),
-				End:       time.Now(),
+				Start:     clock.Now().Add(-1 * 24 * time.Hour),
+				End:       clock.Now(),
 			}
 			argsEncoded, err := DefaultJobMarshaller(args)
 			assert.NoError(t, err, "must be able to marshal arguments")
@@ -384,8 +390,8 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			args := PullTransactionsArguments{
 				AccountId: user.AccountId,
 				LinkId:    plaidLink.LinkId,
-				Start:     time.Now().Add(-1 * 24 * time.Hour),
-				End:       time.Now(),
+				Start:     clock.Now().Add(-1 * 24 * time.Hour),
+				End:       clock.Now(),
 			}
 			argsEncoded, err := DefaultJobMarshaller(args)
 			assert.NoError(t, err, "must be able to marshal arguments")
@@ -400,6 +406,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("clear pending status on existing transaction", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -408,13 +415,13 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
 		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, accessToken))
 
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
@@ -448,7 +455,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			}, nil).
 			Times(2)
 
-		end := time.Now()
+		end := clock.Now()
 		start := end.Add(-2 * 24 * time.Hour)
 		txn := mock_plaid.GenerateTransactions(t, start, end, 10, []string{
 			plaidBankAccount.PlaidAccountId,
@@ -476,14 +483,14 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			).
 			Return(transactions, nil)
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		{ // Do our first pull of transactions.
 			args := PullTransactionsArguments{
 				AccountId: user.AccountId,
 				LinkId:    plaidLink.LinkId,
-				Start:     time.Now().Add(-7 * 24 * time.Hour),
-				End:       time.Now(),
+				Start:     clock.Now().Add(-7 * 24 * time.Hour),
+				End:       clock.Now(),
 			}
 			argsEncoded, err := DefaultJobMarshaller(args)
 			assert.NoError(t, err, "must be able to marshal arguments")
@@ -521,8 +528,8 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			args := PullTransactionsArguments{
 				AccountId: user.AccountId,
 				LinkId:    plaidLink.LinkId,
-				Start:     time.Now().Add(-7 * 24 * time.Hour),
-				End:       time.Now(),
+				Start:     clock.Now().Add(-7 * 24 * time.Hour),
+				End:       clock.Now(),
 			}
 			argsEncoded, err := DefaultJobMarshaller(args)
 			assert.NoError(t, err, "must be able to marshal arguments")
@@ -539,6 +546,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 	})
 
 	t.Run("closed account", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -547,14 +555,14 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
 		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, accessToken))
 
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
@@ -602,7 +610,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 					Amount:               1,
 					BankAccountId:        plaidBankAccount.PlaidAccountId,
 					Category:             []string{},
-					Date:                 time.Now(),
+					Date:                 clock.Now(),
 					ISOCurrencyCode:      "USD",
 					IsPending:            false,
 					MerchantName:         "Amazon",
@@ -614,7 +622,7 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			}, nil).
 			Times(1)
 
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewPullTransactionsHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		// Should not have any transactions before this job runs.
 		count := fixtures.CountNonDeletedTransactions(t, user.AccountId)
@@ -624,8 +632,8 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 			args := PullTransactionsArguments{
 				AccountId: user.AccountId,
 				LinkId:    plaidLink.LinkId,
-				Start:     time.Now().Add(-1 * 24 * time.Hour),
-				End:       time.Now(),
+				Start:     clock.Now().Add(-1 * 24 * time.Hour),
+				End:       clock.Now(),
 			}
 			argsEncoded, err := DefaultJobMarshaller(args)
 			assert.NoError(t, err, "must be able to marshal arguments")
@@ -640,61 +648,5 @@ func TestPullTransactionsJob_Run(t *testing.T) {
 		// We should have a few transactions now.
 		count = fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.NotZero(t, count, "should have more than zero transactions now")
-	})
-
-	t.Run("no transactions", func(t *testing.T) {
-		t.Skip("not ready yet")
-		log := testutils.GetLog(t)
-		db := testutils.GetPgDatabase(t)
-		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
-
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
-
-		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, gofakeit.UUID()))
-
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-
-		httpmock.Activate()
-		defer httpmock.DeactivateAndReset()
-
-		end := time.Now()
-		start := end.Add(-2 * 24 * time.Hour)
-		transactions := mock_plaid.GenerateTransactions(t, start, end, 0, []string{
-			plaidBankAccount.PlaidAccountId,
-		})
-
-		mock_plaid.MockGetTransactions(t, transactions)
-
-		plaidPlatypus := platypus.NewPlaid(log, nil, nil, config.Plaid{
-			ClientID:     gofakeit.UUID(),
-			ClientSecret: gofakeit.UUID(),
-			Environment:  plaid.Sandbox,
-		})
-
-		handler := NewPullTransactionsHandler(log, db, provider, plaidPlatypus, publisher)
-
-		args := PullTransactionsArguments{
-			AccountId: user.AccountId,
-			LinkId:    plaidLink.LinkId,
-			Start:     time.Now().Add(-7 * 24 * time.Hour),
-			End:       time.Now(),
-		}
-		argsEncoded, err := DefaultJobMarshaller(args)
-		assert.NoError(t, err, "must be able to marshal arguments")
-
-		// Make sure that before we start there isn't anything in the database.
-		fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
-
-		err = handler.HandleConsumeJob(context.Background(), argsEncoded)
-		assert.NoError(t, err, "must process job successfully")
-
-		// No transactions should have been retrieved, so we should still be at zero.
-		fixtures.AssertThatIHaveZeroTransactions(t, user.AccountId)
-
-		assert.Equal(t, map[string]int{
-			"POST https://sandbox.plaid.com/transactions/get": 1,
-		}, httpmock.GetCallCountInfo())
 	})
 }

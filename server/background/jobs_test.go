@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
@@ -11,6 +12,7 @@ import (
 
 func TestNewBackgroundJobs(t *testing.T) {
 	t.Run("panics for rabbitmq", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctx := context.Background()
 		log := testutils.GetLog(t)
 		configuration := config.Configuration{
@@ -24,7 +26,7 @@ func TestNewBackgroundJobs(t *testing.T) {
 		var jobs *BackgroundJobs
 		var err error
 		assert.Panics(t, func() {
-			jobs, err = NewBackgroundJobs(ctx, log, configuration, nil, nil, nil, nil, nil)
+			jobs, err = NewBackgroundJobs(ctx, log, clock, configuration, nil, nil, nil, nil, nil)
 		}, "must panic if rabbitmq is specified")
 
 		assert.Nil(t, jobs, "object returned should be nil")
@@ -32,6 +34,7 @@ func TestNewBackgroundJobs(t *testing.T) {
 	})
 
 	t.Run("invalid background engine", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctx := context.Background()
 		log := testutils.GetLog(t)
 		configuration := config.Configuration{
@@ -42,7 +45,7 @@ func TestNewBackgroundJobs(t *testing.T) {
 			},
 		}
 
-		jobs, err := NewBackgroundJobs(ctx, log, configuration, nil, nil, nil, nil, nil)
+		jobs, err := NewBackgroundJobs(ctx, log, clock, configuration, nil, nil, nil, nil, nil)
 		assert.Nil(t, jobs, "object returned should be nil")
 		assert.EqualError(t, err, "invalid background job engine specified")
 	})

@@ -174,11 +174,31 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	})
 
 	expect := httpexpect.WithConfig(httpexpect.Config{
+		TestName: t.Name(),
 		Client:   server.Client(),
 		BaseURL:  server.URL,
-		Reporter: httpexpect.NewAssertReporter(t),
-		Printers: []httpexpect.Printer{},
-		Context:  context.WithValue(context.Background(), "test", t.Name()),
+		AssertionHandler: &httpexpect.DefaultAssertionHandler{
+			Formatter: &httpexpect.DefaultFormatter{
+				DisableNames:     false,
+				DisablePaths:     false,
+				DisableAliases:   false,
+				DisableDiffs:     false,
+				DisableRequests:  false,
+				DisableResponses: false,
+				DigitSeparator:   httpexpect.DigitSeparatorComma,
+				FloatFormat:      httpexpect.FloatFormatAuto,
+				StacktraceMode:   httpexpect.StacktraceModeStandard,
+				ColorMode:        httpexpect.ColorModeAuto,
+			},
+			Reporter: httpexpect.NewAssertReporter(t),
+		},
+
+		Printers: []httpexpect.Printer{
+			httpexpect.NewDebugPrinter(t, true),
+		},
+		// Reporter: httpexpect.NewAssertReporter(t),
+		// Formatter: ,
+		Context: context.WithValue(context.Background(), "test", t.Name()),
 	})
 
 	return &TestApp{
