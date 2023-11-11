@@ -223,7 +223,7 @@ func RunServer() error {
 		email,
 	)...)
 
-	listenAddress := fmt.Sprintf(":%d", configuration.Server.ListenPort)
+	listenAddress := fmt.Sprintf("%s:%d", configuration.Server.ListenAddress, configuration.Server.ListenPort)
 	go func() {
 		if err := app.Start(listenAddress); err != nil && err != http.ErrServerClosed {
 			log.WithError(err).Fatal("failed to start the server")
@@ -231,7 +231,7 @@ func RunServer() error {
 	}()
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
-	log.Infof("monetr is running, listening at %s", listenAddress)
+	log.Infof("monetr is running, listening at http://%s", listenAddress)
 	<-quit
 	log.Info("shutting down")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

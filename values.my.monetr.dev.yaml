@@ -109,7 +109,7 @@ api:
     address: redis
     port: 6379
   logging:
-    level: debug
+    level: trace
     format: json
     stackDriver:
       enabled: false

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/hash"
 	"github.com/monetr/monetr/server/logging"
@@ -14,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -25,6 +25,12 @@ func init() {
 	BetaCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "postgres", "PostgreSQL user.")
 	BetaCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
 	BetaCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "postgres", "PostgreSQL database.")
+	// TODO This doesn't account for TLS properties that would need to be set.
+	viper.BindPFlag("PostgreSQL.Address", BetaCommand.PersistentFlags().Lookup("host"))
+	viper.BindPFlag("PostgreSQL.Port", BetaCommand.PersistentFlags().Lookup("port"))
+	viper.BindPFlag("PostgreSQL.Username", BetaCommand.PersistentFlags().Lookup("username"))
+	viper.BindPFlag("PostgreSQL.Password", BetaCommand.PersistentFlags().Lookup("password"))
+	viper.BindPFlag("PostgreSQL.Database", BetaCommand.PersistentFlags().Lookup("database"))
 }
 
 var (
@@ -32,11 +38,16 @@ var (
 		Use:   "beta",
 		Short: "Manage beta things",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLoggerWithLevel(config.LogLevel)
-
-			options := getDatabaseCommandConfiguration()
-
-			db := pg.Connect(options)
+			configuration := config.LoadConfiguration()
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
+				log.WithField("config", configFileName).Info("config file loaded")
+			}
+			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to establish database connection")
+				return err
+			}
 			defer db.Close()
 
 			betas := make([]models.Beta, 0)
@@ -70,15 +81,20 @@ var (
 		Use:   "new-code",
 		Short: "Generates a beta code and returns the code, the code is encrypted then added to the database.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLogger()
-
-			options := getDatabaseCommandConfiguration()
-
-			db := pg.Connect(options)
+			configuration := config.LoadConfiguration()
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
+				log.WithField("config", configFileName).Info("config file loaded")
+			}
+			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to establish database connection")
+				return err
+			}
 			defer db.Close()
 
 			random := make([]byte, 8)
-			_, err := rand.Read(random)
+			_, err = rand.Read(random)
 			if err != nil {
 				log.WithError(err).Error("failed to read random data")
 				return errors.Wrap(err, "failed to read random data")

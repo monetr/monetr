@@ -25,13 +25,6 @@ const (
 	PlaidProduction  PlaidEnvironment = "production"
 )
 
-type SendGridTemplate string
-
-const (
-	VerifyEmailAddressTemplate SendGridTemplate = "verifyEmailTemplate"
-	ForgotPasswordTemplate     SendGridTemplate = "forgotPasswordTemplate"
-)
-
 type Configuration struct {
 	// configFile is not an actual configuration variable, but is used to let usages know what file was loaded for the
 	// configuration.
@@ -104,6 +97,8 @@ type Server struct {
 	// ListenPort defines the port that monetr will listen for HTTP requests on. This port should be forwarded such that
 	// it is accessible to the desired clients. Be that on a local network, or forwarded to the public internet.
 	ListenPort int `yaml:"listenPort"`
+	// ListenAddress defines the IP address that monetr should listen on for HTTP requests.
+	ListenAddress string `yaml:"listenAddress"`
 	// StatsPort is the port that our prometheus metrics are served on. This port should not be publicly accessible and
 	// should only be accessible by the prometheus server scraping for metrics. It is not an endpoint that needs to be
 	// secured as no sensitive client information will be served by it; but it should not be accessible publicly.
@@ -397,7 +392,7 @@ func getViper(configFilePath *string) *viper.Viper {
 	v := viper.GetViper()
 
 	if configFilePath != nil && *configFilePath != "" {
-		v.SetConfigName(*configFilePath)
+		v.SetConfigFile(*configFilePath)
 	} else {
 		v.SetConfigName("config")
 		v.SetConfigType("yaml")
@@ -513,6 +508,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.Cookies.Secure", true)
 	v.SetDefault("Server.Cookies.SameSiteStrict", true)
 	v.SetDefault("Server.ListenPort", 4000)
+	v.SetDefault("Server.ListenAddress", "0.0.0.0")
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.FreeTrialDays", 30)

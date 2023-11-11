@@ -9,6 +9,7 @@ import (
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/migrations"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -21,6 +22,12 @@ func init() {
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresUsername, "username", "U", "", "PostgreSQL user.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresPassword, "password", "W", "", "PostgreSQL password.")
 	DatabaseCommand.PersistentFlags().StringVarP(&postgresDatabase, "database", "d", "", "PostgreSQL database.")
+	// TODO This doesn't account for TLS properties that would need to be set.
+	viper.BindPFlag("PostgreSQL.Address", DataCommand.PersistentFlags().Lookup("host"))
+	viper.BindPFlag("PostgreSQL.Port", DataCommand.PersistentFlags().Lookup("port"))
+	viper.BindPFlag("PostgreSQL.Username", DataCommand.PersistentFlags().Lookup("username"))
+	viper.BindPFlag("PostgreSQL.Password", DataCommand.PersistentFlags().Lookup("password"))
+	viper.BindPFlag("PostgreSQL.Database", DataCommand.PersistentFlags().Lookup("database"))
 }
 
 var (
@@ -37,11 +44,17 @@ var (
 		Short: "Run database migrations against your PostgreSQL.",
 		Long:  "Updates your PostgreSQL database to the latest schema version for monetr.",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log := logging.NewLoggerWithLevel(config.LogLevel)
-
-			options := getDatabaseCommandConfiguration()
-
-			db := pg.Connect(options)
+			configuration := config.LoadConfiguration()
+			log := logging.NewLoggerWithConfig(configuration.Logging)
+			if configFileName := configuration.GetConfigFileName(); configFileName != "" {
+				log.WithField("config", configFileName).Info("config file loaded")
+			}
+			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				log.WithError(err).Fatalf("failed to establish database connection")
+				return err
+			}
+			defer db.Close()
 
 			migrator, err := migrations.NewMigrationsManager(log, db)
 			if err != nil {
