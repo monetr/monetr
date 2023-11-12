@@ -41,10 +41,24 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
     );
   }
 
+  const linksSorted = links.sort((a, b) => {
+    const nameA = a.getName().toUpperCase();
+    const nameB = b.getName().toUpperCase();
+    if (nameA < nameB) {
+      return 1;
+    }
+    if (nameA > nameB) {
+      return -1;
+    }
+
+    // names must be equal
+    return 0;
+  });
+
   // TODO Make it so that when we are in the "add link" page, we have the add link +1 button as active.
   return (
     <SidebarWrapper className={ props.className }>
-      { Array.from(links.values()).map(link => (<BankSidebarItem key={ link.linkId } link={ link } />)) }
+      { linksSorted.map(link => (<BankSidebarItem key={ link.linkId } link={ link } />)) }
       <div className='w-full h-12 flex items-center justify-center relative group'>
         <Link
           to="/link/create"
