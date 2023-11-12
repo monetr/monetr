@@ -3,7 +3,7 @@ set(NODE_MIN_VERSION "16.0.0")
 set(NPM_MIN_VERSION "8.0.0")
 
 find_package(Node REQUIRED)
-find_package(Npm REQUIRED)
+find_program(NPM_EXECUTABLE NAMES npm)
 find_package(Pnpm REQUIRED)
 
 set(NODE_MODULES ${CMAKE_SOURCE_DIR}/node_modules)
