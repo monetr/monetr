@@ -41,10 +41,10 @@ func loadCertificates(configuration config.Configuration, generateCertificates b
 	var privateKey ed25519.PrivateKey
 	var ok bool
 
-	{ // Parse the public key
-		keyBytes, err := os.ReadFile(configuration.Security.PublicKey)
+	{ // Parse the private key
+		keyBytes, err := ioutil.ReadFile(configuration.Security.PrivateKey)
 		if os.IsNotExist(err) {
-			directory, err := filepath.Abs(path.Dir(configuration.Security.PublicKey))
+			directory, err := filepath.Abs(path.Dir(configuration.Security.PrivateKey))
 			if err != nil {
 				return nil, nil, errors.Wrap(err, "public key directory is not valid")
 			}
@@ -67,21 +67,6 @@ func loadCertificates(configuration config.Configuration, generateCertificates b
 			}
 			privateKeyPem := pem.EncodeToMemory(privateKeyBlock)
 
-			publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
-			if err != nil {
-				return nil, nil, errors.Wrap(err, "failed to marshal public key")
-			}
-			// Encode the public key to PEM format
-			publicKeyBlock := &pem.Block{
-				Type:  "PUBLIC KEY",
-				Bytes: publicKeyBytes,
-			}
-			publicKeyPem := pem.EncodeToMemory(publicKeyBlock)
-
-			if err := os.WriteFile(configuration.Security.PublicKey, publicKeyPem, 0644); err != nil {
-				return nil, nil, errors.Wrap(err, "failed to write public key")
-			}
-
 			if err := os.WriteFile(configuration.Security.PrivateKey, privateKeyPem, 0644); err != nil {
 				return nil, nil, errors.Wrap(err, "failed to write private key")
 			}
@@ -89,28 +74,6 @@ func loadCertificates(configuration config.Configuration, generateCertificates b
 			return publicKey, privateKey, nil
 		} else if err != nil {
 			return nil, nil, errors.Wrap(err, "unable to read public key")
-		}
-
-		keyBlock, _ := pem.Decode(keyBytes)
-		if keyBlock == nil {
-			return nil, nil, errors.New("failed to decode PEM block containing public key")
-		}
-
-		key, err := x509.ParsePKIXPublicKey(keyBlock.Bytes)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "failed to parse public key")
-		}
-
-		publicKey, ok = key.(ed25519.PublicKey)
-		if !ok {
-			return nil, nil, errors.New("provided public key is not an ED25519 public key")
-		}
-	}
-
-	{ // Parse the private key
-		keyBytes, err := ioutil.ReadFile(configuration.Security.PrivateKey)
-		if err != nil {
-			return nil, nil, errors.Wrap(err, "unable to read private key")
 		}
 
 		keyBlock, _ := pem.Decode(keyBytes)
@@ -127,7 +90,12 @@ func loadCertificates(configuration config.Configuration, generateCertificates b
 		if !ok {
 			return nil, nil, errors.New("provided private key is not an ED25519 private key")
 		}
-	}
 
-	return publicKey, privateKey, nil
+		publicKey, ok = privateKey.Public().(ed25519.PublicKey)
+		if !ok {
+			return nil, nil, errors.New("provided public key is not an ED25519 public key")
+		}
+
+		return publicKey, privateKey, nil
+	}
 }

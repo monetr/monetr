@@ -26,10 +26,6 @@ func TestNewApp(t *testing.T) {
 				Name:           "M-Token",
 			},
 		},
-		JWT: config.JWT{
-			LoginJwtSecret:  gofakeit.UUID(),
-			LoginExpiration: 1,
-		},
 		PostgreSQL: config.PostgreSQL{},
 		Email: config.Email{
 			Enabled: false,

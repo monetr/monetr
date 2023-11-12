@@ -104,3 +104,8 @@ data:
     keyManagement:
     {{- toYaml .Values.api.keyManagement | nindent 6 }}
     {{- end }}
+
+    {{- if .Values.api.security }}
+    security:
+    {{- toYaml .Values.api.security | nindent 6 }}
+    {{- end }}

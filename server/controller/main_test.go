@@ -63,10 +63,6 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 				Name:           TestCookieName,
 			},
 		},
-		JWT: config.JWT{
-			LoginJwtSecret:  gofakeit.UUID(),
-			LoginExpiration: 1,
-		},
 		PostgreSQL: config.PostgreSQL{},
 		Email: config.Email{
 			Enabled: false,

@@ -64,7 +64,6 @@ func RunServer() error {
 	}
 
 	log.WithFields(logrus.Fields{
-		"publicKeyPath":        configuration.Security.PublicKey,
 		"privateKeyPath":       configuration.Security.PrivateKey,
 		"generateCertificates": GenerateCertificates,
 	}).Debug("loading certificates")

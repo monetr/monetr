@@ -84,19 +84,6 @@ affinity: { }
 extraVolumes: [ ]
 extraVolumeMounts: [ ]
 
-cloudSqlProxy:
-  enabled: false
-  image: gcr.io/cloudsql-docker/gce-proxy:1.17
-  command:
-    - "/cloud_sql_proxy"
-    # If connecting from a VPC-native GKE cluster, you can use the
-    # following flag to have the proxy connect over private IP
-    # - "-ip_address_types=PRIVATE"
-
-    # Replace DB_PORT with the port the proxy should listen on
-    # Defaults: MySQL: 3306, Postgres: 5432, SQLServer: 1433
-    - "-instances=<INSTANCE_CONNECTION_NAME>=tcp:<DB_PORT>"
-
 databaseMigrations:
   initContainer: true
 
@@ -105,16 +92,10 @@ customEnvFrom: [ ]
 api:
   customEnv: [ ]
   includeSecrets: false
-  # DEPRECATED. Use server.listenPort instead.
-  listenPort: 4000
-  # DEPRECATED. Use server.statsPort instead.
-  statsPort: 9000
   name: monetr
   uiDomainName: localhost:4000
   apiDomainName: localhost:4000
   allowSignUp: true
-  # DEPRECATED. This is no longer used.
-  enableWebhooks: false
   backgroundJobs:
     engine: gocraft
     scheduler: internal
@@ -128,11 +109,6 @@ api:
       name: M-Token
   beta:
     enableBetaCodes: false
-  jwt:
-    loginJwtSecret: ""
-    registrationJwtSecret: ""
-    # Number of days a login JWT token should be considered valid.
-    loginExpiration: 7
   postgreSql:
     address: localhost
     port: 5432
@@ -191,6 +167,8 @@ api:
     format: text
     stackDriver:
       enabled: false
+  security:
+    privateKey: /etc/monetr/ed25519.key
   sentry:
     enabled: false
     dsn: ''

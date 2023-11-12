@@ -42,19 +42,17 @@ type Configuration struct {
 	Beta                Beta           `yaml:"beta"`
 	CORS                CORS           `yaml:"cors"`
 	Email               Email          `yaml:"email"`
-	// Deprecated: JWT is no longer supported.
-	JWT           JWT           `yaml:"jwt"`
-	Logging       Logging       `yaml:"logging"`
-	KeyManagement KeyManagement `yaml:"keyManagement"`
-	Plaid         Plaid         `yaml:"plaid"`
-	PostgreSQL    PostgreSQL    `yaml:"postgreSql"`
-	RabbitMQ      RabbitMQ      `yaml:"rabbitMQ"`
-	ReCAPTCHA     ReCAPTCHA     `yaml:"reCAPTCHA"`
-	Redis         Redis         `yaml:"redis"`
-	Sentry        Sentry        `yaml:"sentry"`
-	Server        Server        `yaml:"server"`
-	Stripe        Stripe        `yaml:"stripe"`
-	Security      Security      `yaml:"security"`
+	Logging             Logging        `yaml:"logging"`
+	KeyManagement       KeyManagement  `yaml:"keyManagement"`
+	Plaid               Plaid          `yaml:"plaid"`
+	PostgreSQL          PostgreSQL     `yaml:"postgreSql"`
+	RabbitMQ            RabbitMQ       `yaml:"rabbitMQ"`
+	ReCAPTCHA           ReCAPTCHA      `yaml:"reCAPTCHA"`
+	Redis               Redis          `yaml:"redis"`
+	Sentry              Sentry         `yaml:"sentry"`
+	Server              Server         `yaml:"server"`
+	Stripe              Stripe         `yaml:"stripe"`
+	Security            Security       `yaml:"security"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -135,18 +133,6 @@ type Cookies struct {
 
 type Beta struct {
 	EnableBetaCodes bool `yaml:"enableBetaCodes"`
-}
-
-type JWT struct {
-	LoginJwtSecret string `yaml:"loginJwtSecret"`
-	// LoginExpiration is the number of days that the issued login JWT token should be considered valid.
-	LoginExpiration int `yaml:"loginExpiration"`
-}
-
-// GetLoginExpirationTimestamp will return a timestamp in the future relative to time.Now. This should be the expiration
-// timestamp used for issued JWT tokens for authentication.
-func (j JWT) GetLoginExpirationTimestamp() time.Time {
-	return time.Now().Add(time.Duration(j.LoginExpiration * 24 * int(time.Hour)))
 }
 
 type Security struct {
@@ -476,12 +462,6 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 		}
 	}
 
-	publicKey, err := util.ExpandHomePath(config.Security.PublicKey)
-	if err != nil {
-		panic(err)
-	}
-	config.Security.PublicKey = publicKey
-
 	privateKey, err := util.ExpandHomePath(config.Security.PrivateKey)
 	if err != nil {
 		panic(err)
@@ -521,7 +501,6 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
-	v.SetDefault("JWT.LoginExpiration", 7)
 	v.SetDefault("KeyManagement.Provider", nil)
 	v.SetDefault("KeyManagement.AWS", nil)
 	v.SetDefault("KeyManagement.Google", nil)
@@ -535,8 +514,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("ReCAPTCHA.VerifyLogin", true)
 	v.SetDefault("ReCAPTCHA.VerifyRegister", true)
 	v.SetDefault("ReCAPTCHA.VerifyForgotPassword", true)
-	v.SetDefault("Security.PublicKey", "/etc/monetr/public.pem")
-	v.SetDefault("Security.PrivateKey", "/etc/monetr/private.pem")
+	v.SetDefault("Security.PrivateKey", "/etc/monetr/ed25519.key")
 	v.SetDefault("Sentry.SampleRate", 1.0)
 	v.SetDefault("Sentry.TraceSampleRate", 1.0)
 	v.SetDefault("Server.Cookies.Name", "M-Token")
@@ -573,7 +551,6 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Email.SMTP.Password", "MONETR_EMAIL_SMTP_PASSWORD")
 	_ = v.BindEnv("Email.SMTP.Host", "MONETR_EMAIL_SMTP_HOST")
 	_ = v.BindEnv("Email.SMTP.Port", "MONETR_EMAIL_SMTP_PORT")
-	_ = v.BindEnv("JWT.LoginJwtSecret", "MONETR_JWT_LOGIN_SECRET")
 	_ = v.BindEnv("Logging.Level", "MONETR_LOG_LEVEL")
 	_ = v.BindEnv("Logging.Format", "MONETR_LOG_FORMAT")
 	_ = v.BindEnv("Logging.StackDriver.Enabled", "MONETR_LOG_STACKDRIVER_ENABLED")
