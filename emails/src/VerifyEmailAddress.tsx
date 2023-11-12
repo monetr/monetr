@@ -63,9 +63,7 @@ export const VerifyEmailAddress = ({
             </Text>
             <Section className='text-center mt-9 mb-9'>
               <Button
-                pX={ 20 }
-                pY={ 12 }
-                className='bg-purple-500 rounded-lg text-white text-xs font-semibold no-underline text-center'
+                className='bg-purple-500 rounded-lg text-white text-sm font-semibold no-underline text-center px-5 py-3'
                 href={ inviteLink }
               >
                 Verify email address
