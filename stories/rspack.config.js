@@ -2,6 +2,7 @@ import path, { resolve } from 'path';
 
 const root = resolve(__dirname, '../');
 const uiDir = resolve(root, 'interface/src');
+const emailDir = resolve(root, 'emails/src');
 const mockServiceWorkerJS = resolve(root, 'interface/public/mockServiceWorker.js');
 const envName = process.env.NODE_ENV;
 const isDevelopment = envName !== 'production';
@@ -48,6 +49,7 @@ export default ({ config, mode }) => {
       modules: [
         ...config?.resolve?.modules,
         uiDir,
+        emailDir,
         'node_modules',
       ],
       alias: {

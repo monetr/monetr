@@ -9,3 +9,7 @@
 .sb-wrapper {
   display: none;
 }
+
+#storybook-root > div.email-preview > table {
+  border-collapse: unset !important;
+}

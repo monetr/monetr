@@ -4,7 +4,10 @@ const envName = process.env.NODE_ENV;
 const isDevelopment = envName !== 'production';
 
 const marketingStoryOnly = process.env.MARKETING_STORY_ONLY === 'true';
-let stories = ['../interface/src/**/*.stories.@(js|jsx|ts|tsx)'];
+let stories = [
+  '../interface/src/**/*.stories.@(js|jsx|ts|tsx)',
+  '../emails/**/*.stories.tsx',
+];
 if (marketingStoryOnly) {
   stories = ['../interface/src/pages/new.stories.tsx'];
 }

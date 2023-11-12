@@ -15,7 +15,8 @@ import {
   Text,
 } from '@react-email/components';
 
-import tailwindConfig from '../../interface/tailwind.config.cjs';
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import tailwindConfig from '../tailwind.config.js';
 
 interface ForgotPasswordProps {
   baseUrl?: string;
@@ -63,7 +64,7 @@ export const ForgotPassword = ({
               <Button
                 pX={ 20 }
                 pY={ 12 }
-                className="bg-purple-500 rounded text-white text-xs font-semibold no-underline text-center"
+                className="bg-purple-500 rounded-lg text-white text-xs font-semibold no-underline text-center"
                 href={ resetUrl }
               >
                 Reset password

@@ -2,8 +2,6 @@ import '@fontsource-variable/inter';
 
 import React from 'react';
 import NiceModal from '@ebay/nice-modal-react';
-import { newTheme } from '@monetr/interface/src/theme';
-import Query from '@monetr/interface/src/util/query';
 import DoneIcon from '@mui/icons-material/Done';
 import ErrorIcon from '@mui/icons-material/Error';
 import InfoIcon from '@mui/icons-material/Info';
@@ -14,9 +12,12 @@ import { useEffect, useGlobals } from '@storybook/addons';
 import type { Preview } from '@storybook/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import axios from 'axios';
+import { initialize, mswLoader } from 'msw-storybook-addon';
 import { SnackbarProvider, VariantType } from 'notistack';
 
-import { initialize, mswLoader } from 'msw-storybook-addon';
+import { newTheme } from '@monetr/interface/src/theme';
+import Query from '@monetr/interface/src/util/query';
+
 import { withRouter } from 'storybook-addon-react-router-v6';
 import { ScreenshotOptions, withScreenshot } from 'storycap';
 
