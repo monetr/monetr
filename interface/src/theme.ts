@@ -1,6 +1,8 @@
 import { createTheme, darken } from '@mui/material';
 
-import tailwindConfig from 'interface/tailwind.config.cjs';
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import tailwindConfig from '../tailwind.config.cjs';
+
 import resolveConfig from 'tailwindcss/resolveConfig';
 
 const fullConfig = resolveConfig(tailwindConfig);

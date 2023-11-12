@@ -93,6 +93,9 @@ develop-email: | $(CMAKE_CONFIGURATION_DIRECTORY)
 develop-storybook: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.stories.up $(BUILD_ARGS)
 
+licenses: | $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t license.cache $(BUILD_ARGS)
+
 logs: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.logs $(BUILD_ARGS)
 

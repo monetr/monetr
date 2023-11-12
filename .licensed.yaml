@@ -38,43 +38,8 @@ licensee:
   confidence_threshold: 90
 
 reviewed:
-  go:
-    - github.com/alicebob/gopher-json # Unlicense
-    - github.com/google/go-cmp/**/*
-    - github.com/jmespath/go-jmespath # Apache 2.0
-    - github.com/klauspost/compress/**/* # BSD-3-Clause
-    - github.com/magiconair/properties # BSD-2-Clause
-    - github.com/microcosm-cc/bluemonday # BSD-3-Clause
-    - github.com/microcosm-cc/bluemonday/css # BSD-3-Clause
-    - github.com/oneofone/xxhash # Apache 2.0
-    - github.com/russross/blackfriday/v2 # BSD-2-Clause
-    - github.com/tmthrgd/go-hex # BSD-3-Clause + BSD-3-Clause + BSD-2-Clause
-    - golang.org/x/**/*
-    - google.golang.org/protobuf/**/*
-    - gopkg.in/ini.v1 # Apache 2.0
-    - github.com/googleapis/enterprise-certificate-proxy/**/* # Apache 2.0 https://github.com/googleapis/enterprise-certificate-proxy/blob/main/LICENSE
-  npm:
-    - "@mui/icons-material" # MIT + CC
-    - caniuse-lite
-    - color-convert # MIT
-    - dom-serializer # MIT
-    - electron-to-chromium
-    - fs.realpath # ISC + MIT
-    - glob # ISC
-    - harmony-reflect # MPL/Apache2.0 https://github.com/tvcutsem/harmony-reflect/blob/214fe922b6d66b45e72ed0912861a14dc7e475a3/LICENSE
-    - hoist-non-react-statics # BSD-3-Clause
-    - json-parse-even-better-errors # MIT
-    - json-schema # BSD-3-Clause
-    - lodash*
-    - notistack # MIT
-    - postcss-clamp # MIT
-    - react-recaptcha # BSD-3-Clause
-    - react-transition-group # BSD-3-Clause
-    - rrule
-    - sass
-    - serialize-javascript # BSD-3-Clause
-    - terser # BSD-2-Clause
-    - uri-js
+  go: []
+  npm: []
 
 ignored:
   npm: # Silence warning about missing license. Its not missing.

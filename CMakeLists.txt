@@ -175,6 +175,7 @@ if(BUILD_THIRD_PARTY_NOTICE)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Gathering license information from dependencies"
     DEPENDS
+      ${SIMPLE_ICONS}
       ${LICENSED_EXECUTABLE}
       ${LICENSED_CACHE}
       ${CMAKE_SOURCE_DIR}/package.json

@@ -266,6 +266,7 @@
                 "^next",
                 "^notistack",
                 "^ramda",
+                "^tailwindcss",
                 "^zustand"
               ],
               // Internal packages

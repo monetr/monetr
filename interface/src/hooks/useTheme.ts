@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Theme } from '@mui/material';
-
-import tailwindConfig from 'interface/tailwind.config.cjs';
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { ThemeConfig } from 'tailwindcss/types/config.js';
-import theme from 'theme';
+
+import theme from '@monetr/interface/theme';
+
+// eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+import tailwindConfig from '../../tailwind.config.cjs';
 
 const realTailwindConfig = resolveConfig(tailwindConfig);
 
