@@ -8,10 +8,10 @@ import { SnackbarProvider, VariantType } from 'notistack';
 import { ReactElement } from './types';
 
 const snackbarIcons: Partial<Record<VariantType, React.ReactNode>> = {
-  error: <ErrorIcon className="mr-2.5" />,
-  success: <DoneIcon className="mr-2.5" />,
-  warning: <WarningIcon className="mr-2.5" />,
-  info: <InfoIcon className="mr-2.5" />,
+  error: <ErrorIcon className='mr-2.5' />,
+  success: <DoneIcon className='mr-2.5' />,
+  warning: <WarningIcon className='mr-2.5' />,
+  info: <InfoIcon className='mr-2.5' />,
 };
 
 export interface MSnackbarProviderProps {

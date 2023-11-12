@@ -16,25 +16,25 @@ function NoticeDialog(): JSX.Element {
   }, [noticeString]);
 
   return (
-    <Dialog open={ modal.visible } maxWidth="md">
+    <Dialog open={ modal.visible } maxWidth='md'>
       <DialogTitle>
         Third Party Notices
       </DialogTitle>
       <DialogContent>
         { noticeString &&
-          <pre className="whitespace-pre-line max-w-4xl">
+          <pre className='whitespace-pre-line max-w-4xl'>
             { noticeString }
           </pre>
         }
         { !noticeString &&
-          <div className="w-full flex justify-center">
+          <div className='w-full flex justify-center'>
             <CircularProgress />
           </div>
         }
       </DialogContent>
       <DialogActions>
         <Button
-          color="secondary"
+          color='secondary'
           onClick={ modal.remove }
         >
           Close

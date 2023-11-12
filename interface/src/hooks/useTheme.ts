@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Theme } from '@mui/material';
 
-import tailwindConfig from '../../tailwind.config.cjs';
-
+import tailwindConfig from 'interface/tailwind.config.cjs';
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { ThemeConfig } from 'tailwindcss/types/config.js';
 import theme from 'theme';

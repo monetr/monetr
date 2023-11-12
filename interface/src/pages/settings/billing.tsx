@@ -14,7 +14,7 @@ export default function SettingsBilling(): JSX.Element {
   const { result: { trialingUntil } } = useAuthenticationSink();
 
   return (
-    <div className="w-full flex flex-col p-4 max-w-xl">
+    <div className='w-full flex flex-col p-4 max-w-xl'>
       <MSpan size='2xl' weight='bold' color='emphasis' className='mb-4'>
         Billing
       </MSpan>

@@ -40,46 +40,46 @@ export const VerifyEmailAddress = ({
       <Head />
       <Preview>{previewText}</Preview>
       <Tailwind config={ tailwindConfig as any }>
-        <Body className="bg-white my-auto mx-auto font-sans">
-          <Container className="border border-solid border-[#eaeaea] rounded my-10 mx-auto p-5 max-w-xl">
-            <Section className="mt-8">
+        <Body className='bg-white my-auto mx-auto font-sans'>
+          <Container className='border border-solid border-[#eaeaea] rounded my-10 mx-auto p-5 max-w-xl'>
+            <Section className='mt-8'>
               <Img
                 src={ `${baseUrl}/logo192.png` }
-                width="64"
-                height="64"
-                alt="monetr"
-                className="my-0 mx-auto"
+                width='64'
+                height='64'
+                alt='monetr'
+                className='my-0 mx-auto'
               />
             </Section>
-            <Heading className="text-black text-2xl font-normal text-center p-0 my-8 mx-0">
+            <Heading className='text-black text-2xl font-normal text-center p-0 my-8 mx-0'>
               Verify your email address for <strong>monetr</strong>
             </Heading>
-            <Text className="text-black text-sm leading-6">
+            <Text className='text-black text-sm leading-6'>
               Hello {firstName},
             </Text>
-            <Text className="text-black text-sm leading-6">
+            <Text className='text-black text-sm leading-6'>
               Thank you for signing up for monetr, in order to use your account we ask that you verify your email
               address.
             </Text>
-            <Section className="text-center mt-9 mb-9">
+            <Section className='text-center mt-9 mb-9'>
               <Button
                 pX={ 20 }
                 pY={ 12 }
-                className="bg-purple-500 rounded-lg text-white text-xs font-semibold no-underline text-center"
+                className='bg-purple-500 rounded-lg text-white text-xs font-semibold no-underline text-center'
                 href={ inviteLink }
               >
                 Verify email address
               </Button>
             </Section>
-            <Hr className="border border-solid border-[#eaeaea] my-6 mx-0 w-full" />
-            <Text className="text-[#666666] text-xs leading-6">
+            <Hr className='border border-solid border-[#eaeaea] my-6 mx-0 w-full' />
+            <Text className='text-[#666666] text-xs leading-6'>
               This message was intended for{' '}
-              <span className="text-black">{firstName} {lastName}</span>.
+              <span className='text-black'>{firstName} {lastName}</span>.
               If you did not sign up for <strong>monetr</strong>, you can ignore this email. If you are concerned about
               this communication please reach out to{' '}
               <Link
                 href={ `mailto:${ supportEmail }` }
-                className="text-blue-600 no-underline"
+                className='text-blue-600 no-underline'
               >
                 { supportEmail }
               </Link>.

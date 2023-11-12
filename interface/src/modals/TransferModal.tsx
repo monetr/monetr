@@ -118,7 +118,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             label='From'
             labelDecorator={ TransferSelectDecorator }
             menuPortalTarget={ document.body }
-            name="fromSpendingId"
+            name='fromSpendingId'
           />
           <ReverseTargetsButton />
           <MSelectSpending
@@ -126,7 +126,7 @@ function TransferModal(props: TransferModalProps): JSX.Element {
             label='To'
             labelDecorator={ TransferSelectDecorator }
             menuPortalTarget={ document.body }
-            name="toSpendingId"
+            name='toSpendingId'
           />
           <MAmountField
             name='amount'

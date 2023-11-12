@@ -158,21 +158,21 @@ export default function Transactions(): JSX.Element {
           <TransactionItems />
           {loading && (
             <li ref={ sentryRef }>
-              <div className="w-full flex justify-center p-5 opacity-70">
+              <div className='w-full flex justify-center p-5 opacity-70'>
                 <h1>{message}</h1>
               </div>
             </li>
           )}
           {(!loading && hasNextPage) && (
             <li ref={ sentryRef }>
-              <div className="w-full flex justify-center p-5 opacity-70">
+              <div className='w-full flex justify-center p-5 opacity-70'>
                 <h1>{message}</h1>
               </div>
             </li>
           )}
           {(!loading && !hasNextPage) && (
             <li>
-              <div className="w-full flex justify-center p-5 opacity-70">
+              <div className='w-full flex justify-center p-5 opacity-70'>
                 <h1>{message}</h1>
               </div>
             </li>

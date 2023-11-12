@@ -247,7 +247,7 @@ function IncomeSetup(): JSX.Element {
         min={ startOfTomorrow() }
       />
       <MSelectFrequency
-        dateFrom="nextPayday"
+        dateFrom='nextPayday'
         menuPosition='fixed'
         menuShouldScrollIntoView={ false }
         menuShouldBlockScroll={ true }
@@ -273,8 +273,8 @@ function IncomeSetup(): JSX.Element {
 function LogoutFooter(): JSX.Element {
   return (
     <div className='flex justify-center gap-1 mt-4'>
-      <MSpan color="subtle" size='sm'>Not ready to continue?</MSpan>
-      <MLink to="/logout" size="sm">Logout for now</MLink>
+      <MSpan color='subtle' size='sm'>Not ready to continue?</MSpan>
+      <MLink to='/logout' size='sm'>Logout for now</MLink>
     </div>
   );
 }

@@ -44,7 +44,7 @@ export default function SubscribePage(): JSX.Element {
 
   if (activeUntil) {
     return (
-      <div className="flex items-center justify-center w-full h-full max-h-full p-4">
+      <div className='flex items-center justify-center w-full h-full max-h-full p-4'>
         <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
           <div className='h-full flex flex-col justify-center items-center gap-4'>
             <MLogo className='max-h-24' />
@@ -61,8 +61,8 @@ export default function SubscribePage(): JSX.Element {
           </div>
           { !loading &&
           <div className='flex justify-center gap-1'>
-            <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
-            <MLink to="/logout" size="sm">Logout for now</MLink>
+            <MSpan color='subtle' className='text-sm'>Not ready to continue?</MSpan>
+            <MLink to='/logout' size='sm'>Logout for now</MLink>
           </div>
           }
         </div>
@@ -71,7 +71,7 @@ export default function SubscribePage(): JSX.Element {
   }
 
   return (
-    <div className="flex items-center justify-center w-full h-full max-h-full p-4">
+    <div className='flex items-center justify-center w-full h-full max-h-full p-4'>
       <div className='h-full flex flex-col max-w-md gap-4 items-center justify-between'>
         <div className='h-full flex flex-col justify-center items-center gap-4'>
           <MLogo className='max-h-24' />
@@ -88,8 +88,8 @@ export default function SubscribePage(): JSX.Element {
         </div>
         { !loading &&
           <div className='flex justify-center gap-1'>
-            <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
-            <MLink to="/logout" size="sm">Logout for now</MLink>
+            <MSpan color='subtle' className='text-sm'>Not ready to continue?</MSpan>
+            <MLink to='/logout' size='sm'>Logout for now</MLink>
           </div>
         }
       </div>

@@ -129,9 +129,9 @@ function GoalProgressBar({ spending }: GoalProps): JSX.Element {
   const usedProgress = ((Math.min(usedAmount, targetAmount) / targetAmount) * 100).toFixed(0);
   const allocatedProgress = ((Math.min(currentAmount + usedAmount, targetAmount) / targetAmount) * 100).toFixed(0);
   return (
-    <div className="w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative">
-      <div className="absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600" style={ { width: `${allocatedProgress}%` } }></div>
-      <div className="absolute top-0 bg-blue-600 h-1.5 rounded-full dark:bg-blue-600" style={ { width: `${usedProgress}%` } }></div>
+    <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
+      <div className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600' style={ { width: `${allocatedProgress}%` } }></div>
+      <div className='absolute top-0 bg-blue-600 h-1.5 rounded-full dark:bg-blue-600' style={ { width: `${usedProgress}%` } }></div>
     </div>
   );
 }

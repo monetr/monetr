@@ -154,7 +154,7 @@ export default function FundingDetails(): JSX.Element {
       <div className='w-full h-full overflow-y-auto min-w-0 p-4'>
         <div className='flex flex-col md:flex-row w-full gap-8 items-center md:items-stretch'>
           <div className='w-full md:w-1/2 flex flex-col'>
-            <MTextField className='w-full' label='Name' name='name' id="funding-name-search" required />
+            <MTextField className='w-full' label='Name' name='name' id='funding-name-search' required />
             <MDatePicker
               className='w-full'
               label='Next Occurrence'
@@ -174,9 +174,9 @@ export default function FundingDetails(): JSX.Element {
             <MCheckbox
               id='funding-details-exclude-weekends'
               data-testid='funding-details-exclude-weekends'
-              name="excludeWeekends"
-              label="Exclude weekends"
-              description="If it were to land on a weekend, it is adjusted to the previous weekday instead."
+              name='excludeWeekends'
+              label='Exclude weekends'
+              description='If it were to land on a weekend, it is adjusted to the previous weekday instead.'
             />
             <MAmountField
               allowNegative={ false }

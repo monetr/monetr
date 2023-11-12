@@ -153,7 +153,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     if (!props.error) return null;
 
     return (
-      <p className="text-xs font-medium text-red-500 mt-0.5">
+      <p className='text-xs font-medium text-red-500 mt-0.5'>
         {props.error}
       </p>
     );
@@ -182,10 +182,10 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
         role='none'
       >
         <TodayOutlined className='text-lg mr-2' />
-        <span className="truncate">{formattedSelection}</span>
+        <span className='truncate'>{formattedSelection}</span>
         { isClearEnabled && selectedValue ? (
           <button
-            type="button"
+            type='button'
             className={ mergeTailwind(
               'absolute outline-none inset-y-0 right-2 flex items-center transition duration-100 dark:text-dark-monetr-content-subtle',
             ) }
@@ -206,7 +206,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
       >
         <MCalendar<DayPickerSingleProps>
           showOutsideDays={ true }
-          mode="single"
+          mode='single'
           defaultMonth={ defaultMonth }
           selected={ selectedValue }
           onSelect={ (value: Date) => {

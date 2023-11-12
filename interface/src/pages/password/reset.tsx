@@ -79,10 +79,10 @@ export default function PasswordResetNew(): JSX.Element {
       onSubmit={ submit }
       initialValues={ initialValues }
       validate={ validate }
-      className="w-full h-full flex flex-col pt-10 md:pt-0 mb:pb-10 md:justify-center items-center px-5 gap-1"
+      className='w-full h-full flex flex-col pt-10 md:pt-0 mb:pb-10 md:justify-center items-center px-5 gap-1'
     >
       <div className='flex items-center flex-col gap-1 w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'>
-        <div className="max-w-[128px] w-full">
+        <div className='max-w-[128px] w-full'>
           <MLogo />
         </div>
         <MSpan className='flex items-center text-center'>
@@ -91,33 +91,33 @@ export default function PasswordResetNew(): JSX.Element {
         <MTextField
           autoFocus
           autoComplete='current-password'
-          label="Password"
+          label='Password'
           name='password'
           type='password'
           required
-          className="w-full"
+          className='w-full'
         />
         <MTextField
           autoComplete='current-password'
-          label="Verify Password"
+          label='Verify Password'
           name='verifyPassword'
           type='password'
           required
-          className="w-full"
+          className='w-full'
         />
         <MFormButton
-          color="primary"
-          variant="solid"
-          role="form"
-          type="submit"
+          color='primary'
+          variant='solid'
+          role='form'
+          type='submit'
           className='w-full'
         >
           Reset Password
         </MFormButton>
       </div>
-      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-        <MSpan color="subtle" className='text-sm'>Remembered your password?</MSpan>
-        <MLink to="/login" size="sm">Sign in</MLink>
+      <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
+        <MSpan color='subtle' className='text-sm'>Remembered your password?</MSpan>
+        <MLink to='/login' size='sm'>Sign in</MLink>
       </div>
     </MForm>
   );

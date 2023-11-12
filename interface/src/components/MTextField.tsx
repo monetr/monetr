@@ -41,7 +41,7 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
     if (!props.error) return null;
 
     return (
-      <p className="text-xs font-medium text-red-500 mt-0.5">
+      <p className='text-xs font-medium text-red-500 mt-0.5'>
         {props.error}
       </p>
     );

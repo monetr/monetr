@@ -51,7 +51,7 @@ export default function MButtonField(props: MButtonProps): JSX.Element {
     if (!error) return null;
 
     return (
-      <p className="text-xs font-medium text-red-500 mt-0.5">
+      <p className='text-xs font-medium text-red-500 mt-0.5'>
         { error }
       </p>
     );
@@ -84,8 +84,8 @@ export default function MButtonField(props: MButtonProps): JSX.Element {
   }
 
   return (
-    <div className="pb-[18px] w-full">
-      <div className="flex items-center justify-between">
+    <div className='pb-[18px] w-full'>
+      <div className='flex items-center justify-between'>
         <div className='flex items-center gap-0.5'>
           <LabelText />
         </div>

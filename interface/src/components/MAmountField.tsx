@@ -44,7 +44,7 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
     if (!props.error) return null;
 
     return (
-      <p className="text-xs font-medium text-red-500 mt-0.5">
+      <p className='text-xs font-medium text-red-500 mt-0.5'>
         {props.error}
       </p>
     );
@@ -123,8 +123,8 @@ export default function MAmountField(props: MAmountFieldProps = MAmountFieldProp
           /* These top properties might be overwritten by the ...otherProps below, this is intended. */
           disabled={ formikContext?.isSubmitting }
           onBlur={ formikContext?.handleBlur }
-          thousandSeparator=","
-          thousandsGroupStyle="thousand"
+          thousandSeparator=','
+          thousandsGroupStyle='thousand'
           value={ value }
           { ...otherProps }
           /* Properties below this point cannot be overwritten by the caller! */

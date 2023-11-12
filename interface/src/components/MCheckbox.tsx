@@ -84,7 +84,7 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
     if (!props.description) return null;
 
     return (
-      <p className="text-gray-500 dark:text-dark-monetr-content">
+      <p className='text-gray-500 dark:text-dark-monetr-content'>
         { props.description }
       </p>
     );
@@ -106,18 +106,18 @@ export default function MCheckbox(props: MCheckboxProps): JSX.Element {
 
   return (
     <div className={ className }>
-      <div className="flex h-6 items-center">
+      <div className='flex h-6 items-center'>
         <Checkbox
           id={ props.id }
           name={ props.name }
-          type="checkbox"
+          type='checkbox'
           disabled={ props.disabled }
           checked={ props.checked }
           onChange={ props.onChange }
           onBlur={ formikContext?.handleBlur }
         />
       </div>
-      <div className="text-sm leading-6">
+      <div className='text-sm leading-6'>
         <Label />
         <Description />
       </div>

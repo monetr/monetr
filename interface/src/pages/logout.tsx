@@ -12,7 +12,7 @@ export default function LogoutPage(): JSX.Element {
 
   return (
     <Backdrop open={ true }>
-      <CircularProgress color="inherit" />
+      <CircularProgress color='inherit' />
     </Backdrop>
   );
 }

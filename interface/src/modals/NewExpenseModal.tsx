@@ -86,7 +86,7 @@ function NewExpenseModal(): JSX.Element {
             name='name'
             label='What are you budgeting for?'
             required
-            autoComplete="off"
+            autoComplete='off'
             placeholder='Amazon, Netflix...'
           />
           <div className='flex gap-0 md:gap-4 flex-col md:flex-row'>
@@ -112,7 +112,7 @@ function NewExpenseModal(): JSX.Element {
             name='fundingScheduleId'
           />
           <MSelectFrequency
-            dateFrom="nextOccurrence"
+            dateFrom='nextOccurrence'
             menuPosition='fixed'
             menuShouldScrollIntoView={ false }
             menuShouldBlockScroll={ true }

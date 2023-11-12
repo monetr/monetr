@@ -57,7 +57,7 @@ export default function MLabel(props: MLabelProps): JSX.Element {
   }
 
   return (
-    <div className="flex items-center justify-between">
+    <div className='flex items-center justify-between'>
       <div className='flex items-center gap-0.5'>
         <MaybeLabel />
         <MaybeRequired />

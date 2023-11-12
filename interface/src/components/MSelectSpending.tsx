@@ -132,7 +132,7 @@ function MSelectSpendingOption({ children: _, ...props }: OptionProps<SpendingOp
   const amount = notLoaded ? 'N/A' : formatAmount(props.data.spending.currentAmount);
   return (
     <components.Option { ...props }>
-      <div className="flex justify-between">
+      <div className='flex justify-between'>
         <MSpan size='md' color='emphasis'>
           { props.label }
         </MSpan>

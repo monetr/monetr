@@ -64,14 +64,14 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/login' element={ <Login /> } />
-        <Route path="/logout" element={ <LogoutPage /> } />
+        <Route path='/logout' element={ <LogoutPage /> } />
         {config?.allowSignUp && <Route path='/register' element={ <Register /> } />}
         {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
-        <Route path="/password/reset" element={ <PasswordResetNew /> } />
-        <Route path="/verify/email" element={ <VerifyEmail /> } />
-        <Route path="/verify/email/resend" element={ <ResendVerificationPage /> } />
-        <Route path='/' element={ <Navigate replace to="/login" /> } />
-        <Route path='*' element={ <Navigate replace to="/login" /> } />
+        <Route path='/password/reset' element={ <PasswordResetNew /> } />
+        <Route path='/verify/email' element={ <VerifyEmail /> } />
+        <Route path='/verify/email/resend' element={ <ResendVerificationPage /> } />
+        <Route path='/' element={ <Navigate replace to='/login' /> } />
+        <Route path='*' element={ <Navigate replace to='/login' /> } />
       </Routes>
     );
   }
@@ -79,10 +79,10 @@ export default function Monetr(): JSX.Element {
   if (!isActive) {
     return (
       <Routes>
-        <Route path="/logout" element={ <LogoutPage /> } />
-        <Route path="/account/subscribe" element={ <SubscribePage /> } />
-        <Route path="/account/subscribe/after" element={ <AfterCheckoutPage /> } />
-        <Route path="*" element={ <Navigate replace to="/account/subscribe" /> } />
+        <Route path='/logout' element={ <LogoutPage /> } />
+        <Route path='/account/subscribe' element={ <SubscribePage /> } />
+        <Route path='/account/subscribe/after' element={ <AfterCheckoutPage /> } />
+        <Route path='*' element={ <Navigate replace to='/account/subscribe' /> } />
       </Routes>
     );
   }
@@ -91,12 +91,12 @@ export default function Monetr(): JSX.Element {
   if (!hasAnyLinks) {
     return (
       <Routes>
-        <Route path="/logout" element={ <LogoutPage /> } />
-        <Route path="/setup" element={ <SetupPage manualEnabled /> } />
-        <Route path="/setup/manual" element={ <SetupManual /> } />
-        <Route path="/plaid/oauth-return" element={ <OauthReturn /> } />
-        <Route path="/account/subscribe/after" element={ <Navigate replace to="/setup" /> } />
-        <Route index path="*" element={ <Navigate replace to="/setup" /> } />
+        <Route path='/logout' element={ <LogoutPage /> } />
+        <Route path='/setup' element={ <SetupPage manualEnabled /> } />
+        <Route path='/setup/manual' element={ <SetupManual /> } />
+        <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />
+        <Route path='/account/subscribe/after' element={ <Navigate replace to='/setup' /> } />
+        <Route index path='*' element={ <Navigate replace to='/setup' /> } />
       </Routes>
     );
   }
@@ -118,7 +118,7 @@ export default function Monetr(): JSX.Element {
             <Route path='funding/:fundingId/details' element={ <FundingDetails /> } />
           </Route>
           <Route path='/settings' element={ <SettingsLayout /> }>
-            <Route path='' element={ <Navigate replace to="/settings/overview" /> } />
+            <Route path='' element={ <Navigate replace to='/settings/overview' /> } />
             <Route path='overview' element={ <SettingsOverview /> } />
             <Route path='security' element={ <SettingsSecurity /> } />
             { config?.billingEnabled && (
@@ -127,12 +127,13 @@ export default function Monetr(): JSX.Element {
             <Route path='about' element={ <SettingsAbout /> } />
           </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />
-          <Route path="/logout" element={ <LogoutPage /> } />
-          <Route path="/plaid/oauth-return" element={ <OauthReturn /> } />
+          <Route path='/link/create/manual' element={ <SetupManual /> } />
+          <Route path='/logout' element={ <LogoutPage /> } />
+          <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />
           <Route path='/subscription' element={ <SubscriptionPage /> } />
-          <Route path='/account/subscribe/after' element={ <Navigate replace to="/" /> } />
-          <Route path="/setup" element={ <Navigate replace to="/" /> } />
-          <Route index path="/" element={ <RedirectToBank /> } />
+          <Route path='/account/subscribe/after' element={ <Navigate replace to='/' /> } />
+          <Route path='/setup' element={ <Navigate replace to='/' /> } />
+          <Route index path='/' element={ <RedirectToBank /> } />
         </Routes>
       </div>
     </div>

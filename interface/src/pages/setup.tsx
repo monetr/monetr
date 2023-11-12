@@ -25,6 +25,7 @@ type Step = 'greeting'|'plaid'|'manual'|'loading';
 
 export default function SetupPage(props: SetupPageProps): JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
+  const manualPath = props.alreadyOnboarded ? '/link/create/manual' : '/setup/manual';
 
   switch (step) {
     case 'greeting':
@@ -33,7 +34,7 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
       return <Plaid alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'manual':
       // Not implemented yet.
-      return <Navigate to="/setup/manual" />;
+      return <Navigate to={ manualPath } />;
     case 'loading':
 
     default:
@@ -82,8 +83,8 @@ function Greeting(props: GreetingProps): JSX.Element {
 
     return (
       <div className='flex justify-center gap-1'>
-        <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
-        <MLink to="/logout" size="sm">Logout for now</MLink>
+        <MSpan color='subtle' className='text-sm'>Not ready to continue?</MSpan>
+        <MLink to='/logout' size='sm'>Logout for now</MLink>
       </div>
     );
   }
@@ -454,8 +455,8 @@ function Plaid(props: PlaidProps): JSX.Element {
 function LogoutFooter(): JSX.Element {
   return (
     <div className='flex justify-center gap-1'>
-      <MSpan color="subtle" className='text-sm'>Not ready to continue?</MSpan>
-      <MLink to="/logout" size="sm">Logout for now</MLink>
+      <MSpan color='subtle' className='text-sm'>Not ready to continue?</MSpan>
+      <MLink to='/logout' size='sm'>Logout for now</MLink>
     </div>
   );
 }

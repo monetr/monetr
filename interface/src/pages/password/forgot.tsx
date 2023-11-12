@@ -24,22 +24,22 @@ const initialValues: Values = {
 
 export function ForgotPasswordComplete(): JSX.Element {
   return (
-    <div className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5">
-      <div className="max-w-[128px] w-full">
+    <div className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'>
+      <div className='max-w-[128px] w-full'>
         <MLogo />
       </div>
-      <div className="flex flex-col items-center">
+      <div className='flex flex-col items-center'>
         <MSpan>
           Check your email
         </MSpan>
-        <MSpan color="subtle" className="max-w-[248px] text-center text-sm">
+        <MSpan color='subtle' className='max-w-[248px] text-center text-sm'>
           If a user was found with the email provided, then you should receive an email with instructions on how to
           reset your password.
         </MSpan>
       </div>
-      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-        <MSpan color="subtle" className='text-sm'>Return to</MSpan>
-        <MLink to="/login" size="sm">Sign in</MLink>
+      <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
+        <MSpan color='subtle' className='text-sm'>Return to</MSpan>
+        <MLink to='/login' size='sm'>Sign in</MLink>
       </div>
     </div>
   );
@@ -81,47 +81,47 @@ export default function ForgotPasswordNew(): JSX.Element {
       initialValues={ initialValues }
       validate={ validate }
       onSubmit={ submit }
-      className="w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5"
+      className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5'
     >
-      <div className="max-w-[128px] w-full">
+      <div className='max-w-[128px] w-full'>
         <MLogo />
       </div>
-      <div className="flex flex-col items-center">
+      <div className='flex flex-col items-center'>
         <MSpan>
           Forgot your password?
         </MSpan>
-        <MSpan color="subtle" className='text-sm'>
+        <MSpan color='subtle' className='text-sm'>
           We can email you a link to reset it.
         </MSpan>
       </div>
       <MTextField
         autoFocus
         autoComplete='username'
-        label="Email Address"
+        label='Email Address'
         name='email'
         type='email'
         required
-        className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2"
+        className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2'
       />
       <MCaptcha
         className='mb-1'
-        name="captcha"
+        name='captcha'
         show={ Boolean(config?.verifyForgotPassword) }
       />
-      <div className="w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1">
+      <div className='w-full xl:w-1/5 lg:w-1/4 md:w-1/3 sm:w-1/2 mt-1'>
         <MFormButton
-          color="primary"
-          variant="solid"
-          role="form"
-          type="submit"
+          color='primary'
+          variant='solid'
+          role='form'
+          type='submit'
           className='w-full'
         >
           Reset Password
         </MFormButton>
       </div>
-      <div className="w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1">
-        <MSpan color="subtle" className='text-sm'>Remembered your password?</MSpan>
-        <MLink to="/login" size="sm">Sign in</MLink>
+      <div className='w-full lg:w-1/4 sm:w-1/3 mt-1 flex justify-center gap-1'>
+        <MSpan color='subtle' className='text-sm'>Remembered your password?</MSpan>
+        <MLink to='/login' size='sm'>Sign in</MLink>
       </div>
     </MForm>
   );

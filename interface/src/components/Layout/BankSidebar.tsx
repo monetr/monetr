@@ -61,7 +61,7 @@ export default function BankSidebar(props: BankSidebarProps): JSX.Element {
       { linksSorted.map(link => (<BankSidebarItem key={ link.linkId } link={ link } />)) }
       <div className='w-full h-12 flex items-center justify-center relative group'>
         <Link
-          to="/link/create"
+          to='/link/create'
           className='cursor-pointer absolute rounded-full w-10 h-10 dark:bg-dark-monetr-background-subtle dark:hover:bg-dark-monetr-background-emphasis drop-shadow-md flex justify-center items-center'
         >
           <PlusOne className='text-3xl' />
@@ -98,7 +98,7 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
     <div className={ className } data-testid='bank-sidebar'>
       <MSidebarToggle className='flex lg:hidden' />
       <div className='h-10 w-10'>
-        <img src={ Logo } className="w-full" />
+        <img src={ Logo } className='w-full' />
       </div>
       <MDivider className='w-1/2' />
       <div className='h-full w-full flex items-center flex-col overflow-y-auto'>

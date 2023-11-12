@@ -65,33 +65,33 @@ export default function SettingsSecurity(): JSX.Element {
       onSubmit={ updatePassword }
       initialValues={ initialValues }
       validate={ validate }
-      className="max-w-xl w-full flex flex-col p-4"
+      className='max-w-xl w-full flex flex-col p-4'
     >
       <MTextField
-        autoComplete="current-password"
-        className="w-full"
-        label="Current Password"
-        name="currentPassword"
-        type="password"
+        autoComplete='current-password'
+        className='w-full'
+        label='Current Password'
+        name='currentPassword'
+        type='password'
       />
       <MTextField
-        autoComplete="new-password"
-        className="w-full"
-        label="New Password"
-        name="newPassword"
-        type="password"
+        autoComplete='new-password'
+        className='w-full'
+        label='New Password'
+        name='newPassword'
+        type='password'
       />
       <MTextField
-        autoComplete="new-password"
-        className="w-full"
-        label="Repeat Password"
-        name="repeatPassword"
-        type="password"
+        autoComplete='new-password'
+        className='w-full'
+        label='Repeat Password'
+        name='repeatPassword'
+        type='password'
       />
       <MFormButton
-        type="submit"
-        color="primary"
-        className="gap-2"
+        type='submit'
+        color='primary'
+        className='gap-2'
       >
         <PasswordOutlined />
         Update Password

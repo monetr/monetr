@@ -77,8 +77,8 @@ function NewFundingModal(): JSX.Element {
             name='name'
             label='What do you want to call your funding schedule?'
             required
-            autoComplete="off"
-            placeholder="Example: Payday..."
+            autoComplete='off'
+            placeholder='Example: Payday...'
           />
           <MDatePicker
             name='nextOccurrence'
@@ -87,7 +87,7 @@ function NewFundingModal(): JSX.Element {
             min={ startOfTomorrow() }
           />
           <MSelectFrequency
-            dateFrom="nextOccurrence"
+            dateFrom='nextOccurrence'
             menuPosition='fixed'
             menuShouldScrollIntoView={ false }
             menuShouldBlockScroll={ true }

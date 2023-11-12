@@ -108,10 +108,10 @@ export default function OauthReturn(): JSX.Element {
     if (state.loading || !state.linkToken) {
       return (
         <div>
-          <Typography variant="h5">
+          <Typography variant='h5'>
             One moment...
           </Typography>
-          <div className="flex justify-center items-center p-5 m-5">
+          <div className='flex justify-center items-center p-5 m-5'>
             <CircularProgress />
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function OauthReturn(): JSX.Element {
   }
 
   return (
-    <div className="w-full h-full flex justify-center items-center p-10">
+    <div className='w-full h-full flex justify-center items-center p-10'>
       <div>
         <Card>
           <CardContent>

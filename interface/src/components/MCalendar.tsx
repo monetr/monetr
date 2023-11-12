@@ -54,14 +54,14 @@ export default function MCalendar<T extends DayPickerSingleProps | DayPickerRang
         ...classNames,
       } }
       components={ {
-        IconLeft: ({ ...props }) => <ArrowLeftOutlined className="h-4 w-4" { ...props } />,
-        IconRight: ({ ...props }) => <ArrowRightOutlined className="h-4 w-4" { ...props } />,
+        IconLeft: ({ ...props }) => <ArrowLeftOutlined className='h-4 w-4' { ...props } />,
+        IconRight: ({ ...props }) => <ArrowRightOutlined className='h-4 w-4' { ...props } />,
         Caption: ({ ...props }) => {
           const { goToMonth, nextMonth, previousMonth, currentMonth } = useNavigation();
 
           return (
-            <div className="flex justify-between items-center" { ...props }>
-              <div className="flex items-center space-x-1">
+            <div className='flex justify-between items-center' { ...props }>
+              <div className='flex items-center space-x-1'>
                 {enableYearNavigation && (
                   <MBaseButton
                     onClick={ () => currentMonth && goToMonth(addYears(currentMonth, -1)) }
@@ -81,7 +81,7 @@ export default function MCalendar<T extends DayPickerSingleProps | DayPickerRang
                 {format(props.displayMonth, 'LLLL yyy', { locale })}
               </MSpan>
 
-              <div className="flex items-center space-x-1">
+              <div className='flex items-center space-x-1'>
                 <MBaseButton
                   variant='text'
                   onClick={ () => nextMonth && goToMonth(nextMonth) }

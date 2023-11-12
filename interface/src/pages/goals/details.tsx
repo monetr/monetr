@@ -200,9 +200,9 @@ export default function GoalDetails(): JSX.Element {
             <MCheckbox
               id='goal-details-paused'
               data-testid='goal-details-paused'
-              name="isPaused"
-              label="Paused?"
-              description="Pause this goal to temporarily stop contributions to it."
+              name='isPaused'
+              label='Paused?'
+              description='Pause this goal to temporarily stop contributions to it.'
             />
           </div>
         </div>

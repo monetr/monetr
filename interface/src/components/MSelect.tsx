@@ -31,7 +31,7 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
     if (!props.error) return null;
 
     return (
-      <p className="text-xs font-medium text-red-500 mt-0.5">
+      <p className='text-xs font-medium text-red-500 mt-0.5'>
         {props.error}
       </p>
     );
@@ -95,12 +95,12 @@ export default function MSelect<V extends Value<any> = Value<any>>(props: MSelec
   function ValueContainer(): JSX.Element {
     if (props.value?.label) {
       return (
-        <span className="truncate">{ props?.value?.label }</span>
+        <span className='truncate'>{ props?.value?.label }</span>
       );
     }
 
     return (
-      <span className="truncate">{ props?.placeholder }</span>
+      <span className='truncate'>{ props?.placeholder }</span>
     );
   }
 
@@ -197,7 +197,7 @@ function SelectModal(
   return (
     <SwipeableDrawer
       disableBackdropTransition={ !iOS } disableDiscovery={ iOS }
-      anchor="bottom"
+      anchor='bottom'
       open={ modal.visible }
       onClose={ modal.hide }
       onOpen={ () => modal.show() }

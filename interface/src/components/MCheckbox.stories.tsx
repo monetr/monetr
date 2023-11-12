@@ -9,9 +9,9 @@ export default {
 } as Meta<typeof MCheckbox>;
 
 export const Default: StoryFn<typeof MCheckbox> = () => (
-  <div className="w-full flex p-4">
+  <div className='w-full flex p-4'>
     <fieldset>
-      <div className="max-w-5xl grid grid-cols-2 grid-flow-row gap-6">
+      <div className='max-w-5xl grid grid-cols-2 grid-flow-row gap-6'>
         <span className='w-full text-center'>Enabled</span>
         <span className='w-full text-center'>Disabled</span>
         <MCheckbox
@@ -37,23 +37,23 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
         <MCheckbox
           id='test3'
           label='Remember me for 30 days'
-          description="Keep yourself logged in for a while."
+          description='Keep yourself logged in for a while.'
         />
         <MCheckbox
           id='test4'
           label='Remember me for 30 days'
-          description="Keep yourself logged in for a while."
+          description='Keep yourself logged in for a while.'
           disabled
         />
         <MCheckbox
           id='test5'
           label='Remember me for 30 days'
-          description="I am a much longer description, I want to see how these will work when descriptions are just very long. What if the description has a lot to say."
+          description='I am a much longer description, I want to see how these will work when descriptions are just very long. What if the description has a lot to say.'
         />
         <MCheckbox
           id='test5'
           label='Remember me for 30 days'
-          description="I am a much longer description, I want to see how these will work when descriptions are just very long. What if the description has a lot to say."
+          description='I am a much longer description, I want to see how these will work when descriptions are just very long. What if the description has a lot to say.'
           disabled
         />
         <MCheckbox
@@ -62,14 +62,14 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
             <Fragment>
               I agree to monetr's&nbsp;
               <a
-                target="_blank"
-                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                target='_blank'
+                className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
                 href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
                 Terms of Use
               </a> and&nbsp;
               <a
-                target="_blank"
-                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                target='_blank'
+                className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
                 href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
               >
                 Privacy Policy
@@ -83,14 +83,14 @@ export const Default: StoryFn<typeof MCheckbox> = () => (
             <Fragment>
               I agree to monetr's&nbsp;
               <a
-                target="_blank"
-                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                target='_blank'
+                className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
                 href='https://github.com/monetr/legal/blob/main/TERMS_OF_USE.md'>
                 Terms of Use
               </a> and&nbsp;
               <a
-                target="_blank"
-                className="text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline"
+                target='_blank'
+                className='text-blue-500 hover:underline focus:ring-2 focus:ring-blue-500 focus:underline'
                 href='https://github.com/monetr/legal/blob/main/PRIVACY.md'
               >
                 Privacy Policy

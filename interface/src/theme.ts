@@ -1,7 +1,6 @@
 import { createTheme, darken } from '@mui/material';
 
-import tailwindConfig from '../tailwind.config.cjs';
-
+import tailwindConfig from 'interface/tailwind.config.cjs';
 import resolveConfig from 'tailwindcss/resolveConfig';
 
 const fullConfig = resolveConfig(tailwindConfig);

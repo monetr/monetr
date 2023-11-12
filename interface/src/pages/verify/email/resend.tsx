@@ -92,15 +92,15 @@ export default function ResendVerificationPage(): JSX.Element {
         <MLogo className='h-24 w-24' />
         <RouteStateMessage />
         <MTextField
-          name="email"
-          autoComplete="username"
+          name='email'
+          autoComplete='username'
           autoFocus
-          label="Email"
+          label='Email'
           className='w-full'
           data-testid='resend-email'
         />
         <MCaptcha
-          name="captcha"
+          name='captcha'
           // Show the captcha if there is a captcha key specified in the config.
           show={ Boolean(config?.ReCAPTCHAKey) }
           data-testid='resend-captcha'
@@ -108,9 +108,9 @@ export default function ResendVerificationPage(): JSX.Element {
         <MFormButton type='submit' color='primary' className='w-full'>
           Resend Verification
         </MFormButton>
-        <div className="mt-1 flex justify-center gap-1">
-          <MSpan color="subtle" className='text-sm'>Don't need to resend?</MSpan>
-          <MLink to="/login" size="sm" data-testid='login-signup'>Return to login</MLink>
+        <div className='mt-1 flex justify-center gap-1'>
+          <MSpan color='subtle' className='text-sm'>Don't need to resend?</MSpan>
+          <MLink to='/login' size='sm' data-testid='login-signup'>Return to login</MLink>
         </div>
       </div>
     </MForm>
@@ -125,8 +125,8 @@ export function AfterEmailVerificationSent(): JSX.Element {
         <MSpan className='text-center' size='lg'>
           A new verification link was sent to your email address...
         </MSpan>
-        <div className="mt-1 flex justify-center gap-1">
-          <MLink to="/login" size="sm" data-testid='login-signup'>Return to login</MLink>
+        <div className='mt-1 flex justify-center gap-1'>
+          <MLink to='/login' size='sm' data-testid='login-signup'>Return to login</MLink>
         </div>
       </div>
     </div>

@@ -56,15 +56,15 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
 
   if (funding.length === 0) {
     return (
-      <div className="h-[84px] w-full">
+      <div className='h-[84px] w-full'>
         <MLabel
           label={ props.label }
           required={ props.required }
         />
         <MBaseButton
-          color="primary"
-          variant="solid"
-          className="w-full h-[38px] font-normal text-start justify-start gap-2"
+          color='primary'
+          variant='solid'
+          className='w-full h-[38px] font-normal text-start justify-start gap-2'
           onClick={ createAndSetFunding }
         >
           <TodayOutlined />
@@ -90,7 +90,7 @@ export default function MSelectFunding(props: MSelectFundingProps): JSX.Element 
       label='When do you want to fund the expense?'
       menuPlacement='auto'
       menuPortalTarget={ props.menuPortalTarget }
-      menuPosition="fixed"
+      menuPosition='fixed'
       name='fundingScheduleId'
       onChange={ onSelect }
       options={ options }

@@ -54,7 +54,7 @@ export default function MSelectAccount(): JSX.Element {
       isClearable={ false }
       options={ accounts }
       value={ current }
-      className="w-full font-medium"
+      className='w-full font-medium'
       classNamePrefix='m-select-account'
       isLoading={ allIsLoading || selectedIsLoading }
       styles={ {

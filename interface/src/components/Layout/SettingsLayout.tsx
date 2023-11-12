@@ -18,18 +18,18 @@ export default function SettingsLayout(): JSX.Element {
         title='Settings'
       />
       <div className='w-full flex px-4 mt-4 gap-6'>
-        <SettingTab to="/settings/overview">
+        <SettingTab to='/settings/overview'>
           Overview
         </SettingTab>
-        <SettingTab to="/settings/security">
+        <SettingTab to='/settings/security'>
           Security
         </SettingTab>
         { config?.data?.billingEnabled && (
-          <SettingTab to="/settings/billing">
+          <SettingTab to='/settings/billing'>
           Billing
           </SettingTab>
         ) }
-        <SettingTab to="/settings/about">
+        <SettingTab to='/settings/about'>
           About
         </SettingTab>
       </div>

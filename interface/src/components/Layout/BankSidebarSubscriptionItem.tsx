@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { Link } from 'react-router-dom';
+import styled from '@emotion/styled';
 import { CreditCard } from '@mui/icons-material';
 import { Badge, Tooltip } from '@mui/material';
-import styled from '@emotion/styled';
 import { differenceInDays } from 'date-fns';
 
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';

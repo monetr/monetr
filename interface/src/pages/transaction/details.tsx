@@ -143,9 +143,9 @@ export default function TransactionDetails(): JSX.Element {
             <MCheckbox
               id='transaction-details-pending'
               data-testid='transaction-details-pending'
-              name="isPending"
-              label="Is Pending"
-              description="Transaction has not yet cleared, the name or amount may change."
+              name='isPending'
+              label='Is Pending'
+              description='Transaction has not yet cleared, the name or amount may change.'
               className='w-full'
               disabled
             />

@@ -29,6 +29,14 @@
       2,
       "single"
     ],
+    "jsx-quotes": [
+      2,
+      "prefer-single"
+    ],
+    "@typescript-eslint/quotes": [
+      2,
+      "single"
+    ],
     "linebreak-style": [
       2,
       "unix"
