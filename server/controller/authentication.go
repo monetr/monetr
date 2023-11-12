@@ -42,14 +42,20 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 		panic("authentication cookie name is blank")
 	}
 
+	hostname := c.configuration.APIDomainName
+	parts := strings.SplitN(c.configuration.APIDomainName, ":", 2)
+	if len(parts) > 1 {
+		hostname = parts[0]
+	}
+
 	ctx.SetCookie(&http.Cookie{
 		Name:     c.configuration.Server.Cookies.Name,
 		Value:    token,
 		Path:     "/",
-		Domain:   c.configuration.APIDomainName,
+		Domain:   hostname,
 		Expires:  expiration,
 		MaxAge:   0,
-		Secure:   c.configuration.Server.Cookies.Secure,
+		Secure:   c.configuration.GetHTTPSecureCookie(),
 		HttpOnly: true,
 		SameSite: sameSite,
 	})

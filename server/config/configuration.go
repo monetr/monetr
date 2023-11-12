@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/monetr/monetr/server/util"
 	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/spf13/viper"
 )
@@ -62,6 +63,10 @@ func (c Configuration) GetConfigFileName() string {
 
 func (c Configuration) GetUIDomainName() string {
 	return c.UIDomainName
+}
+
+func (c Configuration) GetHTTPSecureCookie() bool {
+	return c.ExternalURLProtocol == "https" && c.Server.Cookies.Secure
 }
 
 func (c Configuration) GetUIURL() string {
@@ -433,8 +438,10 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 	setupDefaults(v)
 	setupEnv(v)
 
+	writeConfig := false
 	if err := v.ReadInConfig(); err != nil {
 		fmt.Printf("failed to read in config from file: %+v\n", err)
+		writeConfig = true
 	}
 
 	if err := v.Unmarshal(&config); err != nil {
@@ -466,6 +473,24 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 			}
 		case BackgroundJobEngineRabbitMQ:
 			log.Fatal("RabbitMQ job scheduling is not yet implemented")
+		}
+	}
+
+	publicKey, err := util.ExpandHomePath(config.Security.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+	config.Security.PublicKey = publicKey
+
+	privateKey, err := util.ExpandHomePath(config.Security.PrivateKey)
+	if err != nil {
+		panic(err)
+	}
+	config.Security.PrivateKey = privateKey
+
+	if writeConfig {
+		if err := v.WriteConfigAs("/etc/monetr/config.yaml"); err != nil {
+			fmt.Printf("failed to write config to file: %+v\n", err)
 		}
 	}
 
@@ -510,6 +535,8 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("ReCAPTCHA.VerifyLogin", true)
 	v.SetDefault("ReCAPTCHA.VerifyRegister", true)
 	v.SetDefault("ReCAPTCHA.VerifyForgotPassword", true)
+	v.SetDefault("Security.PublicKey", "/etc/monetr/public.pem")
+	v.SetDefault("Security.PrivateKey", "/etc/monetr/private.pem")
 	v.SetDefault("Sentry.SampleRate", 1.0)
 	v.SetDefault("Sentry.TraceSampleRate", 1.0)
 	v.SetDefault("Server.Cookies.Name", "M-Token")

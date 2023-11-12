@@ -2,9 +2,13 @@ package main
 
 import (
 	"crypto/ed25519"
+	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
 	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/monetr/monetr/server/config"
 	"github.com/pkg/errors"
@@ -31,15 +35,59 @@ func init() {
 	newNoticesCommand(rootCommand)
 }
 
-func loadCertificates(configuration config.Configuration) (ed25519.PublicKey, ed25519.PrivateKey, error) {
+func loadCertificates(configuration config.Configuration, generateCertificates bool) (ed25519.PublicKey, ed25519.PrivateKey, error) {
 	// TODO Add support for both the public and private key being in the same file!
 	var publicKey ed25519.PublicKey
 	var privateKey ed25519.PrivateKey
 	var ok bool
 
 	{ // Parse the public key
-		keyBytes, err := ioutil.ReadFile(configuration.Security.PublicKey)
-		if err != nil {
+		keyBytes, err := os.ReadFile(configuration.Security.PublicKey)
+		if os.IsNotExist(err) {
+			directory, err := filepath.Abs(path.Dir(configuration.Security.PublicKey))
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "public key directory is not valid")
+			}
+			if err := os.MkdirAll(directory, 0755); err != nil {
+				return nil, nil, errors.Wrap(err, "failed to create directory for certificates")
+			}
+
+			publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to generate certificate")
+			}
+
+			privateKeyBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to marshal private key")
+			}
+			privateKeyBlock := &pem.Block{
+				Type:  "PRIVATE KEY",
+				Bytes: privateKeyBytes,
+			}
+			privateKeyPem := pem.EncodeToMemory(privateKeyBlock)
+
+			publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
+			if err != nil {
+				return nil, nil, errors.Wrap(err, "failed to marshal public key")
+			}
+			// Encode the public key to PEM format
+			publicKeyBlock := &pem.Block{
+				Type:  "PUBLIC KEY",
+				Bytes: publicKeyBytes,
+			}
+			publicKeyPem := pem.EncodeToMemory(publicKeyBlock)
+
+			if err := os.WriteFile(configuration.Security.PublicKey, publicKeyPem, 0644); err != nil {
+				return nil, nil, errors.Wrap(err, "failed to write public key")
+			}
+
+			if err := os.WriteFile(configuration.Security.PrivateKey, privateKeyPem, 0644); err != nil {
+				return nil, nil, errors.Wrap(err, "failed to write private key")
+			}
+
+			return publicKey, privateKey, nil
+		} else if err != nil {
 			return nil, nil, errors.Wrap(err, "unable to read public key")
 		}
 

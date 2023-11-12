@@ -33,6 +33,9 @@ postgresql:
   database: postgres
   port: 5432
   username: postgres
+security:
+  privateKey: /build/build/private.pem
+  publicKey: /build/build/public.pem
 recaptcha:
   enabled: false
 server:

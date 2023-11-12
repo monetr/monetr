@@ -25,18 +25,21 @@ import (
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	ServeCommand.PersistentFlags().BoolVarP(&MigrateDatabaseFlag, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
+	ServeCommand.PersistentFlags().BoolVarP(&GenerateCertificates, "generate-certificates", "g", false, "Generate certificates for authentication if they do not already exist. Defaults to: false")
 	ServeCommand.PersistentFlags().IntVarP(&PortFlag, "port", "p", 0, "Specify a port to serve HTTP traffic on for monetr.")
 	rootCommand.AddCommand(ServeCommand)
 }
 
 var (
-	PortFlag            int
-	MigrateDatabaseFlag = false
+	PortFlag             int
+	MigrateDatabaseFlag  = false
+	GenerateCertificates = false
 
 	ServeCommand = &cobra.Command{
 		Use:   "serve",
@@ -60,7 +63,12 @@ func RunServer() error {
 		log.WithField("config", configFileName).Info("config file loaded")
 	}
 
-	publicKey, privateKey, err := loadCertificates(configuration)
+	log.WithFields(logrus.Fields{
+		"publicKeyPath":        configuration.Security.PublicKey,
+		"privateKeyPath":       configuration.Security.PrivateKey,
+		"generateCertificates": GenerateCertificates,
+	}).Debug("loading certificates")
+	publicKey, privateKey, err := loadCertificates(configuration, GenerateCertificates)
 	if err != nil {
 		log.WithError(err).Fatal("failed to load ed25519 public and private key")
 		return err

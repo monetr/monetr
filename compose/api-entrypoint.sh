@@ -8,6 +8,10 @@ else
     echo "[executor] cosmtrek/air is already installed, skipping..."
 fi
 
+[ ! -f "/build/build/private.pem" ] && openssl genpkey -algorithm ED25519 -out /build/build/private.pem
+[ ! -f "/build/build/public.pem" ] && openssl pkey -in /build/build/private.pem -out /build/build/public.pem -pubout
+[ -f "/build/build/private.pem" ] && chown -R $UID:$GID /build/build/private.pem
+[ -f "/build/build/public.pem" ] && chown -R $UID:$GID /build/build/public.pem
 
 if [ "$DISABLE_GO_RELOAD" == "true" ]
 then

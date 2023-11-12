@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -rm -d /home/monetr -s /bin/bash -g root -G sudo -u 1000 monetr
+RUN mkdir -p /etc/monetr && chown -R 1000:1000 /etc/monetr
 USER monetr
 WORKDIR /home/monetr
 

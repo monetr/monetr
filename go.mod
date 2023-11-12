@@ -3,12 +3,14 @@ module github.com/monetr/monetr
 go 1.19
 
 require (
+	aidanwoods.dev/go-paseto v1.5.0
 	cloud.google.com/go/kms v1.15.5
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.31.0
 	github.com/aws/aws-sdk-go v1.44.174
+	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.24.0
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
@@ -46,7 +48,6 @@ require (
 )
 
 require (
-	aidanwoods.dev/go-paseto v1.5.0 // indirect
 	aidanwoods.dev/go-result v0.1.0 // indirect
 	cloud.google.com/go/compute v1.23.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
@@ -55,7 +56,6 @@ require (
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

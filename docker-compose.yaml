@@ -39,7 +39,10 @@ services:
     restart: unless-stopped
     command:
       - serve
-      - --migrate=true
+      # Setup the database and perform migrations.
+      - --migrate
+      # Since certificates will not have been created, make some.
+      - --generate-certificates
     ports:
       - "4000:4000"
     links:
@@ -50,6 +53,9 @@ services:
         condition: service_started
       postgres:
         condition: service_started
+    volumes:
+      # Contains certificates generated on startup as well as config
+      - monetrData:/etc/monetr
     environment:
       MONETR_PG_USERNAME: postgres
       MONETR_PG_PASSWORD: superSecretPasswordPleaseChangeMe
@@ -66,4 +72,5 @@ services:
       MONETR_JWT_LOGIN_SECRET: "pleaseAlsoChangeMe"
 
 volumes:
+  monetrData:
   postgresData:
