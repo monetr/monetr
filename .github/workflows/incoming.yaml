@@ -10,9 +10,11 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      # Get values for cache paths to be used in later steps
       - id: go-cache-paths
+        name: Install pnpm and configure cache
         run: |
+          npm install -g pnpm
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
@@ -23,14 +25,12 @@ jobs:
         run: |
           git config --global --add safe.directory ${PWD}
 
-      # Cache go build cache, used to speedup go test
       - name: Go Build Cache
         uses: actions/cache@v3
         with:
           path: ${{ env.GOCACHE }}
           key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
 
-      # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
         uses: actions/cache@v3
         with:
@@ -40,6 +40,15 @@ jobs:
             ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-go-mod
 
+      - name: pnpm Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-pnpm-store
+
       - name: Build
         run: |
           make monetr
@@ -47,9 +56,8 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/debian:12.1
     env:
-      MONETR_PG_ADDRESS: postgres
+      MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
       MONETR_PG_USERNAME: api-testing
       MONETR_PG_DATABASE: test-db
@@ -64,11 +72,14 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
+        ports:
+          - 5432:5432
     steps:
-      # Get values for cache paths to be used in later steps
       - id: go-cache-paths
+        name: Install pnpm and configure cache
         run: |
+          npm install -g pnpm
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
@@ -146,9 +157,10 @@ jobs:
     name: Local Development
     runs-on: ubuntu-latest
     steps:
-      # Get values for cache paths to be used in later steps
       - id: go-cache-paths
+        name: Install pnpm and configure cache
         run: |
+          npm install -g pnpm
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
@@ -179,6 +191,9 @@ jobs:
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-localdev-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-localdev-pnpm-store
 
       - name: Setup local development environment
         timeout-minutes: 10
