@@ -47,9 +47,8 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    container: ghcr.io/monetr/build-containers/debian:12.1
     env:
-      MONETR_PG_ADDRESS: postgres
+      MONETR_PG_ADDRESS: localhost
       MONETR_PG_PASSWORD: ""
       MONETR_PG_USERNAME: api-testing
       MONETR_PG_DATABASE: test-db
@@ -65,11 +64,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
     steps:
       # Get values for cache paths to be used in later steps
+      # echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
       - id: go-cache-paths
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
@@ -98,14 +100,14 @@ jobs:
             ${{ runner.os }}-test-go-mod-${{ hashFiles('**/go.sum') }}
             ${{ runner.os }}-test-go-mod
 
-      - name: pnpm Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-            ${{ runner.os }}-test-pnpm-store
+      # - name: pnpm Cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ env.STORE_PATH }}
+      #     key: ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-test-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      #       ${{ runner.os }}-test-pnpm-store
 
       - name: Test
         run: |
