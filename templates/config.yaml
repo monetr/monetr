@@ -85,11 +85,6 @@ data:
     server:
     {{- toYaml .Values.api.server | nindent 6 }}
 
-    {{- if .Values.api.jwt.loginExpiration }}
-    jwt:
-      loginExpiration: {{ .Values.api.jwt.loginExpiration }}
-    {{- end}}
-
     {{- if .Values.api.stripe.initialPlan }}
     stripe:
       freeTrialDays: {{ .Values.api.stripe.freeTrialDays }}
