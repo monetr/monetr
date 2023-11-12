@@ -160,7 +160,21 @@ function RedirectToBank(): JSX.Element {
     return null;
   }
 
-  const link = links[0];
+  const linksSorted = links.sort((a, b) => {
+    const nameA = a.getName().toUpperCase();
+    const nameB = b.getName().toUpperCase();
+    if (nameA < nameB) {
+      return -1;
+    }
+    if (nameA > nameB) {
+      return 1;
+    }
+
+    // names must be equal
+    return 0;
+  });
+
+  const link = linksSorted[0];
   const accounts = sortAccounts(Array.from(bankAccounts.values()).filter(account => account.linkId === link.linkId));
 
   if (accounts.length === 0) {
