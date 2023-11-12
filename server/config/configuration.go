@@ -490,7 +490,7 @@ func GenerateConfigFile(configFilePath *string, outputFilePath string) error {
 }
 
 func setupDefaults(v *viper.Viper) {
-	v.SetDefault("APIDomainName", "localhost:4000")
+	v.SetDefault("APIDomainName", "0.0.0.0:4000")
 	v.SetDefault("AllowSignUp", true)
 	v.SetDefault("ExternalURLProtocol", "https")
 	v.SetDefault("BackgroundJobs.Engine", BackgroundJobEngineGoCraftWork)
@@ -525,7 +525,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.FreeTrialDays", 30)
-	v.SetDefault("UIDomainName", "localhost:4000")
+	v.SetDefault("UIDomainName", "0.0.0.0:4000")
 }
 
 func setupEnv(v *viper.Viper) {
