@@ -121,7 +121,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         # cached. This could maybe be turned into an option though? And we _need_ v=true in order to have any usable
         # output for gotestsum or if a test fails in general.
         set(TEST_ARGS "-test.count=1" "-test.v" "-test.timeout=30s")
-        set(COVERAGE_FILE ${PACKAGE_COVERAGE_DIRECTORY}/${TEST_OUTPUT_FILE_NAME}.txt)
+        set(COVERAGE_FILE ${PACKAGE_COVERAGE_DIRECTORY}/${TEST_OUTPUT_FILE_NAME}.coverage.txt)
         if(TEST_COVERAGE)
           # Since we arent using the goofy binary format this might not be necessary?
           list(APPEND TEST_ARGS -test.coverprofile=${COVERAGE_FILE})

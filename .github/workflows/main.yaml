@@ -122,30 +122,13 @@ jobs:
         run: |
           make test
 
-  # codecov:
-  #   name: CodeCov
-  #   needs:
-  #     - go_test
-  #     - ui_test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/download-artifact@v3
-  #       name: Download Go Coverage Artifacts
-  #       with:
-  #         name: '${{ github.sha }}-go-coverage'
-  #         path: '${{ github.workspace }}/coverage'
-  #     - uses: actions/download-artifact@v3
-  #       name: Download UI Coverage Artifacts
-  #       with:
-  #         name: '${{ github.sha }}-ui-coverage'
-  #         path: '${{ github.workspace }}/coverage'
-  #     - name: CodeCov
-  #       if: always()
-  #       uses: codecov/codecov-action@v3
-  #       with:
-  #         files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
-  #         name: monetr
+      - name: CodeCov
+        if: always()
+        uses: codecov/codecov-action@v3
+        with:
+          name: monetr
+          directory: ${{ github.workspace }}/build/tests
+          root_dir: ${{ github.workspace }}
 
   yaml:
     name: Kubernetes YAMLs
