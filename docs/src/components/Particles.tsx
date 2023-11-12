@@ -203,7 +203,7 @@ export default function Particles({
   }, [initCanvas, refresh]);
 
   return (
-    <div className={ className } ref={ canvasContainerRef } aria-hidden="true">
+    <div className={ className } ref={ canvasContainerRef } aria-hidden='true'>
       <canvas ref={ canvasRef } />
     </div>
   );
