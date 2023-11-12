@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -13,20 +14,22 @@ import (
 
 func TestRepositoryBase_GetAccount(t *testing.T) {
 	t.Run("account does not exist", func(t *testing.T) {
+		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
-		repo := repository.NewRepositoryFromSession(123, 1234, db)
+		repo := repository.NewRepositoryFromSession(clock, 123, 1234, db)
 		account, err := repo.GetAccount(context.Background())
 		assert.EqualError(t, err, "failed to retrieve account: pg: no rows in result set")
 		assert.Nil(t, account, "should not return an account")
 	})
 
 	t.Run("account exists", func(t *testing.T) {
+		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 		account, err := repo.GetAccount(context.Background())
 		assert.NoError(t, err, "must not return an error if the account exists")
 		assert.NotNil(t, account, "should return a valid account")
@@ -34,11 +37,12 @@ func TestRepositoryBase_GetAccount(t *testing.T) {
 	})
 
 	t.Run("will cache the account", func(t *testing.T) {
+		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-		repo := repository.NewRepositoryFromSession(user.UserId, user.AccountId, db)
+		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 		account, err := repo.GetAccount(context.Background())
 		assert.NoError(t, err, "must not return an error if the account exists")
 		assert.NotNil(t, account, "should return a valid account")

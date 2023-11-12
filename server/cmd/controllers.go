@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/application"
@@ -12,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/ui"
 	"github.com/sirupsen/logrus"
@@ -29,6 +31,8 @@ func getControllers(
 	plaidSecrets secrets.PlaidSecretsProvider,
 	basicPaywall billing.BasicPayWall,
 	email communication.EmailCommunication,
+	clientTokens security.ClientTokens,
+	clock clock.Clock,
 ) []application.Controller {
 	return []application.Controller{
 		controller.NewController(
@@ -43,6 +47,8 @@ func getControllers(
 			plaidSecrets,
 			basicPaywall,
 			email,
+			clientTokens,
+			clock,
 		),
 		ui.NewUIController(log, configuration),
 	}

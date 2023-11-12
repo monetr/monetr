@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
@@ -27,6 +28,7 @@ type (
 		plaidSecrets  secrets.PlaidSecretsProvider
 		plaidPlatypus platypus.Platypus
 		unmarshaller  JobUnmarshaller
+		clock         clock.Clock
 	}
 
 	DeactivateLinksArguments struct {
@@ -40,12 +42,14 @@ type (
 		repo          repository.BaseRepository
 		plaidSecrets  secrets.PlaidSecretsProvider
 		plaidPlatypus platypus.Platypus
+		clock         clock.Clock
 	}
 )
 
 func NewDeactivateLinksHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	clock clock.Clock,
 	configuration config.Configuration,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
@@ -54,10 +58,11 @@ func NewDeactivateLinksHandler(
 		log:           log,
 		db:            db,
 		configuration: configuration,
-		repo:          repository.NewJobRepository(db),
+		repo:          repository.NewJobRepository(db, clock),
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
 		unmarshaller:  DefaultJobUnmarshaller,
+		clock:         clock,
 	}
 }
 
@@ -80,10 +85,11 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(ctx context.Context, data []by
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(0, args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(d.clock, 0, args.AccountId, txn)
 		job, err := NewDeactivateLinksJob(
 			d.log.WithContext(span.Context()),
 			repo,
+			d.clock,
 			d.plaidSecrets,
 			d.plaidPlatypus,
 			args,
@@ -153,6 +159,7 @@ func (d *DeactivateLinksHandler) EnqueueTriggeredJob(ctx context.Context, enqueu
 func NewDeactivateLinksJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
+	clock clock.Clock,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	args DeactivateLinksArguments,
@@ -163,6 +170,7 @@ func NewDeactivateLinksJob(
 		repo:          repo,
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
+		clock:         clock,
 	}, nil
 }
 

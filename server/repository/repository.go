@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/models"
@@ -86,27 +87,30 @@ type Repository interface {
 }
 
 type UnauthenticatedRepository interface {
-	CreateLogin(ctx context.Context, email, password string, firstName, lastName string) (*models.Login, error)
 	CreateAccountV2(ctx context.Context, account *models.Account) error
+	CreateLogin(ctx context.Context, email, password string, firstName, lastName string) (*models.Login, error)
 	CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error
+	GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error)
 	GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error)
 	ResetPassword(ctx context.Context, loginId uint64, hashedPassword string) error
-	GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error)
-	ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error)
+	SetEmailVerified(ctx context.Context, emailAddress string) error
 	UseBetaCode(ctx context.Context, betaId, usedBy uint64) error
+	ValidateBetaCode(ctx context.Context, betaCode string) (*models.Beta, error)
 }
 
-func NewRepositoryFromSession(userId, accountId uint64, database pg.DBI) Repository {
+func NewRepositoryFromSession(clock clock.Clock, userId, accountId uint64, database pg.DBI) Repository {
 	return &repositoryBase{
 		userId:    userId,
 		accountId: accountId,
 		txn:       database,
+		clock:     clock,
 	}
 }
 
-func NewUnauthenticatedRepository(txn pg.DBI) UnauthenticatedRepository {
+func NewUnauthenticatedRepository(clock clock.Clock, txn pg.DBI) UnauthenticatedRepository {
 	return &unauthenticatedRepo{
-		txn: txn,
+		txn:   txn,
+		clock: clock,
 	}
 }
 

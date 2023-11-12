@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
@@ -29,6 +30,7 @@ type (
 		db           *pg.DB
 		publisher    pubsub.Publisher
 		unmarshaller JobUnmarshaller
+		clock        clock.Clock
 	}
 
 	RemoveLinkArguments struct {
@@ -41,6 +43,7 @@ type (
 		log       *logrus.Entry
 		db        pg.DBI
 		publisher pubsub.Publisher
+		clock     clock.Clock
 	}
 )
 
@@ -54,11 +57,13 @@ func TriggerRemoveLink(ctx context.Context, backgroundJobs JobController, argume
 func NewRemoveLinkHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	clock clock.Clock,
 	publisher pubsub.Publisher,
 ) *RemoveLinkHandler {
 	return &RemoveLinkHandler{
 		log:          log,
 		db:           db,
+		clock:        clock,
 		publisher:    publisher,
 		unmarshaller: DefaultJobUnmarshaller,
 	}
@@ -83,7 +88,13 @@ func (r *RemoveLinkHandler) HandleConsumeJob(ctx context.Context, data []byte) e
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		job, err := NewRemoveLinkJob(r.log.WithContext(span.Context()), txn, r.publisher, args)
+		job, err := NewRemoveLinkJob(
+			r.log.WithContext(span.Context()),
+			txn,
+			r.clock,
+			r.publisher,
+			args,
+		)
 		if err != nil {
 			return err
 		}
@@ -95,6 +106,7 @@ func (r *RemoveLinkHandler) HandleConsumeJob(ctx context.Context, data []byte) e
 func NewRemoveLinkJob(
 	log *logrus.Entry,
 	db pg.DBI,
+	clock clock.Clock,
 	publisher pubsub.Publisher,
 	args RemoveLinkArguments,
 ) (*RemoveLinkJob, error) {
@@ -103,6 +115,7 @@ func NewRemoveLinkJob(
 		log:       log,
 		db:        db,
 		publisher: publisher,
+		clock:     clock,
 	}, nil
 }
 
@@ -113,7 +126,7 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 	accountId := r.args.AccountId
 	linkId := r.args.LinkId
 
-	repo := repository.NewRepositoryFromSession(0, accountId, r.db)
+	repo := repository.NewRepositoryFromSession(r.clock, 0, accountId, r.db)
 
 	log := r.log.WithContext(span.Context())
 

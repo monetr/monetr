@@ -15,10 +15,10 @@ import (
 
 func TestPostFundingSchedules(t *testing.T) {
 	t.Run("create a basic funding schedule", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
@@ -34,15 +34,15 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
 		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(time.Now())
+		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 	})
 
 	t.Run("create a funding schedule with excluded weekends", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
@@ -59,22 +59,22 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
 		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(time.Now())
+		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.excludeWeekends").Boolean().IsTrue()
 	})
 
 	t.Run("create a funding schedule that respects the provided next occurrence", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 		rule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;BYDAY=FR")
-		rule.DTStart(util.Midnight(time.Now().In(timezone).Add(-30*24*time.Hour), timezone)) // Force the Rule to be in the correct TZ.
-		nextFriday := rule.After(time.Now(), false)
-		assert.Greater(t, nextFriday, time.Now(), "next friday should be in the future relative to now")
+		rule.DTStart(util.Midnight(app.Clock.Now().In(timezone).Add(-30*24*time.Hour), timezone)) // Force the Rule to be in the correct TZ.
+		nextFriday := rule.After(app.Clock.Now(), false)
+		assert.Greater(t, nextFriday, app.Clock.Now(), "next friday should be in the future relative to now")
 		nextFriday = util.Midnight(nextFriday, timezone)
 
 		ruleset := testutils.NewRuleSet(t, nextFriday.Year(), int(nextFriday.Month()), nextFriday.Day(), timezone, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
@@ -93,16 +93,16 @@ func TestPostFundingSchedules(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
 		response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(time.Now())
+		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 		response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).IsEqual(nextFriday)
 		response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 	})
 
 	t.Run("cannot create a duplicate name", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		{ // Create the initial funding schedule.
@@ -119,7 +119,7 @@ func TestPostFundingSchedules(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.fundingScheduleId").Number().Gt(0)
 			response.JSON().Path("$.bankAccountId").Number().IsEqual(bank.BankAccountId)
-			response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(time.Now())
+			response.JSON().Path("$.nextOccurrence").String().AsDateTime(time.RFC3339).Gt(app.Clock.Now())
 			response.JSON().Path("$.excludeWeekends").Boolean().IsFalse()
 		}
 
@@ -140,10 +140,10 @@ func TestPostFundingSchedules(t *testing.T) {
 	})
 
 	t.Run("requires a name", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
@@ -159,8 +159,8 @@ func TestPostFundingSchedules(t *testing.T) {
 	})
 
 	t.Run("requires a valid bank account Id", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/bank_accounts/0/funding_schedules").
@@ -177,10 +177,10 @@ func TestPostFundingSchedules(t *testing.T) {
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/bank_accounts/{bankAccountId}/funding_schedules").
@@ -196,11 +196,11 @@ func TestPostFundingSchedules(t *testing.T) {
 
 func TestPutFundingSchedules(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		fundingSchedule.Name = "This is an updated name"
@@ -219,11 +219,11 @@ func TestPutFundingSchedules(t *testing.T) {
 	})
 
 	t.Run("updates a spending object", func(t *testing.T) {
-		e := NewTestApplication(t)
-		now := time.Now()
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		now := app.Clock.Now()
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
@@ -255,8 +255,8 @@ func TestPutFundingSchedules(t *testing.T) {
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
-			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -281,9 +281,9 @@ func TestPutFundingSchedules(t *testing.T) {
 		}
 
 		{ // Now update the rule on the funding schedule and the next occurrence
-			newFundingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
+			newFundingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", app.Clock.Now())
 
-			next := newFundingRule.After(now, false)
+			next := util.Midnight(newFundingRule.After(now, false), timezone)
 			response := e.PUT("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("fundingScheduleId", fundingScheduleId).
@@ -309,11 +309,11 @@ func TestPutFundingSchedules(t *testing.T) {
 
 func TestDeleteFundingSchedules(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		fundingSchedule := fixtures.GivenIHaveAFundingSchedule(t, app.Clock, &bank, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", false)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
@@ -327,10 +327,10 @@ func TestDeleteFundingSchedules(t *testing.T) {
 	})
 
 	t.Run("funding schedule is in use", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t,
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock,
 			&link,
 			models.DepositoryBankAccountType,
 			models.CheckingBankAccountSubType,
@@ -358,9 +358,9 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		}
 
 		{ // Create an expense
-			now := time.Now()
+			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+			ruleset := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1", app.Clock.Now())
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
@@ -397,10 +397,10 @@ func TestDeleteFundingSchedules(t *testing.T) {
 	})
 
 	t.Run("funding schedule does not exist", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.DELETE("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
@@ -416,10 +416,10 @@ func TestDeleteFundingSchedules(t *testing.T) {
 
 func TestGetFundingSchedulesByID(t *testing.T) {
 	t.Run("should be able to retrieve an owned schedule by ID", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
-		bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+		bank := fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		var fundingScheduleId uint64
@@ -454,13 +454,19 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 	})
 
 	t.Run("cannot read someone else's funding schedule", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 
 		var bankAccountId, fundingScheduleId uint64
 		{ // Create the funding schedule under the first account.
-			user, password := fixtures.GivenIHaveABasicAccount(t)
-			link := fixtures.GivenIHaveAManualLink(t, user)
-			bank := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
+			bank := fixtures.GivenIHaveABankAccount(
+				t,
+				app.Clock,
+				&link,
+				models.DepositoryBankAccountType,
+				models.CheckingBankAccountSubType,
+			)
 			token := GivenILogin(t, e, user.Login.Email, password)
 
 			{ // Create the funding schedule.
@@ -497,7 +503,7 @@ func TestGetFundingSchedulesByID(t *testing.T) {
 		}
 
 		{ // Then try to read the funding schedule under another account.
-			user, password := fixtures.GivenIHaveABasicAccount(t)
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 			token := GivenILogin(t, e, user.Login.Email, password)
 
 			response := e.GET("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").

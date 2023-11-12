@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -13,27 +14,28 @@ import (
 
 func TestProcessSpendingJob_Run(t *testing.T) {
 	t.Run("fix stale spending", func(t *testing.T) {
+		clock := clock.NewMock()
 		log, hook := testutils.GetTestLog(t)
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
-		bankAccount := fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
-		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
 		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
 			AccountId:              bankAccount.AccountId,
 			BankAccountId:          bankAccount.BankAccountId,
 			Name:                   "Payday",
 			Description:            "Payday",
 			RuleSet:                fundingRule,
-			NextOccurrence:         fundingRule.After(time.Now(), false),
-			NextOccurrenceOriginal: fundingRule.After(time.Now(), false),
+			NextOccurrence:         fundingRule.After(clock.Now(), false),
+			NextOccurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
 
-		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
-		spendingRule.DTStart(time.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
+		spendingRule.DTStart(clock.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
 		spending := testutils.MustInsert(t, models.Spending{
 			AccountId:         bankAccount.AccountId,
 			BankAccountId:     bankAccount.BankAccountId,
@@ -44,11 +46,11 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 			TargetAmount:      5000,
 			CurrentAmount:     5000,
 			RuleSet:           spendingRule,
-			NextRecurrence:    spendingRule.Before(time.Now(), true), // Make it so it recurs next in the past. (STALE)
-			DateCreated:       time.Now(),
+			NextRecurrence:    spendingRule.Before(clock.Now(), true), // Make it so it recurs next in the past. (STALE)
+			DateCreated:       clock.Now(),
 		})
 
-		handler := NewProcessSpendingHandler(log, db)
+		handler := NewProcessSpendingHandler(log, db, clock)
 
 		args := ProcessSpendingArguments{
 			AccountId:     spending.AccountId,

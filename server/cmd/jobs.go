@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
@@ -55,6 +56,7 @@ var (
 		Short: "Run a specific job.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
+			clock := clock.New()
 
 			configuration := config.LoadConfiguration()
 			log := logging.NewLoggerWithConfig(configuration.Logging)
@@ -71,6 +73,7 @@ var (
 			backgroundJobs, err := background.NewBackgroundJobs(
 				cmd.Context(),
 				log,
+				clock,
 				configuration,
 				db,
 				redisController.Pool(),
@@ -120,6 +123,7 @@ var (
 		Use:   "pull-latest-transactions",
 		Short: "Pull latest transactions for a specific link and account.",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			clock := clock.New()
 			if AccountIDFlag == 0 && !AllFlag {
 				return errors.New("--account must be specified if you are not running against --all")
 			}
@@ -147,8 +151,8 @@ var (
 			jobArgs := background.PullTransactionsArguments{
 				AccountId: AccountIDFlag,
 				LinkId:    LinkIDFlag,
-				Start:     time.Now().Add(-SinceFlag),
-				End:       time.Now(),
+				Start:     clock.Now().Add(-SinceFlag),
+				End:       clock.Now(),
 			}
 
 			if LocalFlag || DryRunFlag {
@@ -159,7 +163,7 @@ var (
 					return err
 				}
 
-				repo := repository.NewRepositoryFromSession(0, AccountIDFlag, txn)
+				repo := repository.NewRepositoryFromSession(clock, 0, AccountIDFlag, txn)
 
 				kms, err := getKMS(log, configuration)
 				if err != nil {
@@ -171,6 +175,7 @@ var (
 				job, err := background.NewPullTransactionsJob(
 					log,
 					repo,
+					clock,
 					plaidSecrets,
 					platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(txn), configuration.Plaid),
 					pubsub.NewPostgresPubSub(log, db),
@@ -201,6 +206,7 @@ var (
 			backgroundJobs, err := background.NewBackgroundJobs(
 				cmd.Context(),
 				log,
+				clock,
 				configuration,
 				db,
 				redisController.Pool(),

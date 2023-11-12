@@ -87,7 +87,7 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 			"apiHealthy": true,
 			"revision":   build.Revision,
 			"buildTime":  build.BuildTime,
-			"serverTime": time.Now().UTC(),
+			"serverTime": c.clock.Now().UTC(),
 		}
 
 		if build.Release != "" {

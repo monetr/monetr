@@ -3,8 +3,8 @@ package testutils
 import (
 	"context"
 	"testing"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
@@ -23,7 +23,7 @@ const (
 	WithPlaidAccount  SeedAccountOption = 2
 )
 
-func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.User, *MockPlaidData) {
+func SeedAccount(t *testing.T, db *pg.DB, clock clock.Clock, options SeedAccountOption) (*models.User, *MockPlaidData) {
 	require.NotNil(t, db, "db must not be nil")
 
 	plaidData := &MockPlaidData{
@@ -57,7 +57,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 
 		account := models.Account{
 			Timezone:  "UTC",
-			CreatedAt: time.Now(),
+			CreatedAt: clock.Now(),
 		}
 
 		_, err = txn.Model(&account).Insert(&account)
@@ -76,7 +76,7 @@ func SeedAccount(t *testing.T, db *pg.DB, options SeedAccountOption) (*models.Us
 		user.Login = &login.Login
 		user.Account = &account
 
-		now := time.Now().UTC()
+		now := clock.Now().UTC()
 		if options&WithManualAccount > 0 {
 			manualLink := models.Link{
 				AccountId:       account.AccountId,

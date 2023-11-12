@@ -2,8 +2,8 @@ package background
 
 import (
 	"context"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
@@ -23,6 +23,7 @@ type (
 		db           *pg.DB
 		repo         repository.JobRepository
 		unmarshaller JobUnmarshaller
+		clock        clock.Clock
 	}
 
 	ProcessSpendingArguments struct {
@@ -31,21 +32,24 @@ type (
 	}
 
 	ProcessSpendingJob struct {
-		args ProcessSpendingArguments
-		log  *logrus.Entry
-		repo repository.BaseRepository
+		args  ProcessSpendingArguments
+		log   *logrus.Entry
+		repo  repository.BaseRepository
+		clock clock.Clock
 	}
 )
 
 func NewProcessSpendingHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	clock clock.Clock,
 ) *ProcessSpendingHandler {
 	return &ProcessSpendingHandler{
 		log:          log,
 		db:           db,
-		repo:         repository.NewJobRepository(db),
+		repo:         repository.NewJobRepository(db, clock),
 		unmarshaller: DefaultJobUnmarshaller,
+		clock:        clock,
 	}
 }
 
@@ -68,11 +72,12 @@ func (p *ProcessSpendingHandler) HandleConsumeJob(ctx context.Context, data []by
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(0, args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(p.clock, 0, args.AccountId, txn)
 		job, err := NewProcessSpendingJob(
 			p.log.WithContext(span.Context()),
 			repo,
 			args,
+			p.clock,
 		)
 		if err != nil {
 			return err
@@ -137,11 +142,13 @@ func NewProcessSpendingJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
 	args ProcessSpendingArguments,
+	clock clock.Clock,
 ) (*ProcessSpendingJob, error) {
 	return &ProcessSpendingJob{
-		args: args,
-		log:  log,
-		repo: repo,
+		args:  args,
+		log:   log,
+		repo:  repo,
+		clock: clock,
 	}, nil
 }
 
@@ -157,7 +164,7 @@ func (p *ProcessSpendingJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	now := time.Now()
+	now := p.clock.Now()
 	allSpending, err := p.repo.GetSpending(span.Context(), p.args.BankAccountId)
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve spending for bank account")

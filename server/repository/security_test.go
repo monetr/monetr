@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -15,8 +16,9 @@ import (
 
 func TestBaseSecurityRepository_Login(t *testing.T) {
 	t.Run("valid credentials", func(t *testing.T) {
-		login, password := fixtures.GivenIHaveLogin(t)
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t))
+		clock := clock.NewMock()
+		login, password := fixtures.GivenIHaveLogin(t, clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
 		result, _, err := repo.Login(context.Background(), login.Email, password)
 		assert.NoError(t, err, "must not return an error for valid credentials")
@@ -25,8 +27,9 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 	})
 
 	t.Run("oddly cased email", func(t *testing.T) {
-		login, password := fixtures.GivenIHaveLogin(t)
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t))
+		clock := clock.NewMock()
+		login, password := fixtures.GivenIHaveLogin(t, clock)
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
 		email := strings.ToUpper(login.Email)
 
@@ -37,7 +40,8 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 	})
 
 	t.Run("invalid credentials", func(t *testing.T) {
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t))
+		clock := clock.NewMock()
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 		email := testutils.GetUniqueEmail(t)
 		password := gofakeit.Generate("????????")
 
@@ -48,8 +52,9 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 	})
 
 	t.Run("bad database connection", func(t *testing.T) {
-		login, password := fixtures.GivenIHaveLogin(t)
-		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t))
+		clock := clock.NewMock()
+		login, password := fixtures.GivenIHaveLogin(t, clock)
+		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock)
 
 		result, _, err := repo.Login(context.Background(), login.Email, password)
 		assert.EqualError(t, err, "failed to verify credentials: forcing a bad connection")
@@ -59,12 +64,13 @@ func TestBaseSecurityRepository_Login(t *testing.T) {
 
 func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
-		login, password := fixtures.GivenIHaveLogin(t)
+		clock := clock.NewMock()
+		login, password := fixtures.GivenIHaveLogin(t, clock)
 		newPassword := gofakeit.Generate("?????????????")
 
 		assert.NotEqual(t, password, newPassword, "passwords must be different")
 
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t))
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
 		{ // Make sure that we can authenticate with the initial hashed password.
 			result, _, err := repo.Login(context.Background(), login.Email, password)
@@ -94,13 +100,14 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 	})
 
 	t.Run("cannot change with bad old password", func(t *testing.T) {
-		login, password := fixtures.GivenIHaveLogin(t)
+		clock := clock.NewMock()
+		login, password := fixtures.GivenIHaveLogin(t, clock)
 		bogusPassword := gofakeit.Generate("?????????????")
 		assert.NotEqual(t, password, bogusPassword, "bogus password cannot match the real one")
 		newPassword := gofakeit.Generate("?????????????")
 		assert.NotEqual(t, password, newPassword, "new password cannot match the current password")
 
-		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t))
+		repo := repository.NewSecurityRepository(testutils.GetPgDatabase(t), clock)
 
 		{ // Make sure that we can authenticate with the initial hashed password.
 			result, _, err := repo.Login(context.Background(), login.Email, password)
@@ -131,7 +138,8 @@ func TestBaseSecurityRepository_ChangePassword(t *testing.T) {
 	})
 
 	t.Run("bad database connection", func(t *testing.T) {
-		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t))
+		clock := clock.NewMock()
+		repo := repository.NewSecurityRepository(testutils.GetBadPgDatabase(t), clock)
 		bogusPassword := gofakeit.Generate("?????????????")
 		newPassword := gofakeit.Generate("?????????????")
 

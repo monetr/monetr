@@ -3,8 +3,8 @@ package fixtures
 import (
 	"context"
 	"testing"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, ruleString string, excludeWeekends bool) *models.FundingSchedule {
+func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *models.BankAccount, ruleString string, excludeWeekends bool) *models.FundingSchedule {
 	require.NotNil(t, bankAccount, "must provide a valid bank account")
 	require.NotZero(t, bankAccount.BankAccountId, "bank account must have a valid Id")
 	require.NotZero(t, bankAccount.AccountId, "bank account must have a valid account Id")
@@ -24,11 +24,11 @@ func GivenIHaveAFundingSchedule(t *testing.T, bankAccount *models.BankAccount, r
 	}
 
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewRepositoryFromSession(bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
 
 	timezone := testutils.MustEz(t, bankAccount.Account.GetTimezone)
-	rule := testutils.RuleToSet(t, timezone, ruleString)
-	nextOccurrence := util.Midnight(rule.After(time.Now(), false), timezone)
+	rule := testutils.RuleToSet(t, timezone, ruleString, clock.Now())
+	nextOccurrence := util.Midnight(rule.After(clock.Now(), false), timezone)
 
 	fundingSchedule := models.FundingSchedule{
 		AccountId:              bankAccount.AccountId,

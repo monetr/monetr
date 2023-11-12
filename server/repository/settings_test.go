@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,8 @@ import (
 
 func TestRepositoryBase_GetSettings(t *testing.T) {
 	t.Run("will safe defaults if settings dont exist", func(t *testing.T) {
-		repo := GetTestAuthenticatedRepository(t)
+		clock := clock.NewMock()
+		repo := GetTestAuthenticatedRepository(t, clock)
 		// Make sure the test account does not already have settings.
 		testutils.MustDBNotExist(t, models.Settings{AccountId: repo.AccountId()})
 
@@ -23,7 +25,8 @@ func TestRepositoryBase_GetSettings(t *testing.T) {
 	})
 
 	t.Run("will read existing settings", func(t *testing.T) {
-		repo := GetTestAuthenticatedRepository(t)
+		clock := clock.NewMock()
+		repo := GetTestAuthenticatedRepository(t, clock)
 		// Make sure the test account does not already have settings.
 		testutils.MustDBNotExist(t, models.Settings{AccountId: repo.AccountId()})
 		testutils.MustDBInsert(t, &models.Settings{

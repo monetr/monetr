@@ -12,7 +12,7 @@ func TestPlaidWebhook(t *testing.T) {
 	t.Run("not found when not enabled", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Plaid.WebhooksEnabled = false
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST(`/api/plaid/webhook`).
 			WithJSON(controller.PlaidWebhook{
@@ -30,7 +30,7 @@ func TestPlaidWebhook(t *testing.T) {
 	t.Run("not authorized", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Plaid.WebhooksEnabled = true
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST(`/api/plaid/webhook`).
 			WithJSON(controller.PlaidWebhook{
@@ -48,7 +48,7 @@ func TestPlaidWebhook(t *testing.T) {
 	t.Run("bad authorization", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Plaid.WebhooksEnabled = true
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST(`/api/plaid/webhook`).
 			WithHeader("Plaid-Verification", "abc123").

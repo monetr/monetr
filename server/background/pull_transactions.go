@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
@@ -35,6 +36,7 @@ type (
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
 		unmarshaller  JobUnmarshaller
+		clock         clock.Clock
 	}
 
 	PullTransactionsArguments struct {
@@ -51,6 +53,7 @@ type (
 		plaidSecrets  secrets.PlaidSecretsProvider
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
+		clock         clock.Clock
 	}
 )
 
@@ -65,6 +68,7 @@ func TriggerPullTransactions(
 func NewPullTransactionsHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	clock clock.Clock,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
@@ -76,6 +80,7 @@ func NewPullTransactionsHandler(
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
 		unmarshaller:  DefaultJobUnmarshaller,
+		clock:         clock,
 	}
 }
 
@@ -98,10 +103,11 @@ func (p *PullTransactionsHandler) HandleConsumeJob(ctx context.Context, data []b
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(0, args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(p.clock, 0, args.AccountId, txn)
 		job, err := NewPullTransactionsJob(
 			p.log.WithContext(span.Context()),
 			repo,
+			p.clock,
 			p.plaidSecrets,
 			p.plaidPlatypus,
 			p.publisher,
@@ -117,6 +123,7 @@ func (p *PullTransactionsHandler) HandleConsumeJob(ctx context.Context, data []b
 func NewPullTransactionsJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
+	clock clock.Clock,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
@@ -129,6 +136,7 @@ func NewPullTransactionsJob(
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
+		clock:         clock,
 	}, nil
 }
 

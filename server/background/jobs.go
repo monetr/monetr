@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 
+	"github.com/benbjohnson/clock"
 	"github.com/go-pg/pg/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/monetr/monetr/server/config"
@@ -44,6 +45,7 @@ type (
 func NewBackgroundJobs(
 	ctx context.Context,
 	log *logrus.Entry,
+	clock clock.Clock,
 	configuration config.Configuration,
 	db *pg.DB,
 	redisPool *redis.Pool,
@@ -70,13 +72,13 @@ func NewBackgroundJobs(
 	}
 
 	jobs := []JobHandler{
-		NewDeactivateLinksHandler(log, db, configuration, plaidSecrets, plaidPlatypus),
-		NewProcessFundingScheduleHandler(log, db),
-		NewProcessSpendingHandler(log, db),
-		NewPullTransactionsHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
-		NewRemoveLinkHandler(log, db, publisher),
-		NewRemoveTransactionsHandler(log, db),
-		NewSyncPlaidHandler(log, db, plaidSecrets, plaidPlatypus, publisher),
+		NewDeactivateLinksHandler(log, db, clock, configuration, plaidSecrets, plaidPlatypus),
+		NewProcessFundingScheduleHandler(log, db, clock),
+		NewProcessSpendingHandler(log, db, clock),
+		NewPullTransactionsHandler(log, db, clock, plaidSecrets, plaidPlatypus, publisher),
+		NewRemoveLinkHandler(log, db, clock, publisher),
+		NewRemoveTransactionsHandler(log, db, clock),
+		NewSyncPlaidHandler(log, db, clock, plaidSecrets, plaidPlatypus, publisher),
 	}
 
 	// Setup jobs

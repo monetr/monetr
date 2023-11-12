@@ -86,10 +86,10 @@ spec:
           {{- end }}
           ports:
             - name: http
-              containerPort: {{ .Values.api.listenPort }}
+              containerPort: {{ .Values.api.server.listenPort }}
               protocol: TCP
             - name: metrics
-              containerPort: {{ .Values.api.statsPort }}
+              containerPort: {{ .Values.api.server.statsPort }}
               protocol: TCP
           livenessProbe:
             httpGet:

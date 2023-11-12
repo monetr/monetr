@@ -6,6 +6,7 @@ import (
 	"math"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -30,11 +31,12 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 	})
 
 	t.Run("first write", func(t *testing.T) {
+		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		ctx := context.Background()
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
@@ -48,6 +50,7 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 	})
 
 	t.Run("first write kms", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -55,7 +58,7 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		db := testutils.GetPgDatabase(t)
 		ctx := context.Background()
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
@@ -100,11 +103,12 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 	})
 
 	t.Run("handle changes", func(t *testing.T) {
+		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		ctx := context.Background()
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 

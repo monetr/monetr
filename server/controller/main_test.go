@@ -2,15 +2,18 @@ package controller_test
 
 import (
 	"context"
+	"crypto/ed25519"
+	"crypto/rand"
 	"net/http"
 	"net/http/httptest"
+	"net/http/httputil"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/form3tech-oss/jwt-go"
 	"github.com/gavv/httpexpect/v2"
 	"github.com/golang/mock/gomock"
 	"github.com/gomodule/redigo/redis"
@@ -27,8 +30,10 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -58,11 +63,6 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 				Name:           TestCookieName,
 			},
 		},
-		JWT: config.JWT{
-			LoginJwtSecret:        gofakeit.UUID(),
-			RegistrationJwtSecret: gofakeit.UUID(),
-			LoginExpiration:       1,
-		},
 		PostgreSQL: config.PostgreSQL{},
 		Email: config.Email{
 			Enabled: false,
@@ -90,29 +90,40 @@ func NewTestApplicationConfig(t *testing.T) config.Configuration {
 	}
 }
 
-func NewTestApplication(t *testing.T) *httpexpect.Expect {
+func NewTestApplication(t *testing.T) (*TestApp, *httpexpect.Expect) {
 	configuration := NewTestApplicationConfig(t)
 	return NewTestApplicationWithConfig(t, configuration)
 }
 
 type TestApp struct {
-	Email *mockgen.MockEmailCommunication
+	Configuration config.Configuration
+	Email         *mockgen.MockEmailCommunication
+	Clock         *clock.Mock
+	Tokens        security.ClientTokens
 }
 
 type TestAppInterfaces struct {
 	JobController *background.JobController
 }
 
-func NewTestApplicationExWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
+func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) (*TestApp, *httpexpect.Expect) {
 	return NewTestApplicationPatched(t, configuration, TestAppInterfaces{})
 }
 
 func NewTestApplicationPatched(t *testing.T, configuration config.Configuration, patched TestAppInterfaces) (*TestApp, *httpexpect.Expect) {
+	clock := clock.NewMock()
+	clock.Set(time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC))
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 	plaidRepo := repository.NewPlaidRepository(db)
 	plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, configuration.Plaid)
+
+	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err, "must be able to generate keys")
+
+	clientTokens, err := security.NewPasetoClientTokens(log, clock, configuration.APIDomainName, publicKey, privateKey)
+	require.NoError(t, err, "must be able to init the client tokens interface")
 
 	miniRedis := miniredis.NewMiniRedis()
 	require.NoError(t, miniRedis.Start())
@@ -132,7 +143,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	if patched.JobController != nil {
 		jobRunner = *patched.JobController
 	} else {
-		jobRunner = background.NewSynchronousJobRunner(t, plaidClient, plaidSecrets)
+		jobRunner = background.NewSynchronousJobRunner(t, clock, plaidClient, plaidSecrets)
 	}
 
 	emailMockController := gomock.NewController(t)
@@ -151,8 +162,14 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		stripe_helper.NewStripeHelper(log, gofakeit.UUID()),
 		redisPool,
 		plaidSecrets,
-		billing.NewBasicPaywall(log, billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db)),
+		billing.NewBasicPaywall(
+			log,
+			clock,
+			billing.NewAccountRepository(log, cache.NewCache(log, redisPool), db),
+		),
 		email,
+		clientTokens,
+		clock,
 	)
 	app := application.NewApp(configuration, c)
 
@@ -164,21 +181,80 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	})
 
 	expect := httpexpect.WithConfig(httpexpect.Config{
+		TestName: t.Name(),
 		Client:   server.Client(),
 		BaseURL:  server.URL,
-		Reporter: httpexpect.NewAssertReporter(t),
-		Printers: []httpexpect.Printer{},
-		Context:  context.WithValue(context.Background(), "test", t.Name()),
+		AssertionHandler: &httpexpect.DefaultAssertionHandler{
+			Formatter: &httpexpect.DefaultFormatter{
+				DisableNames:     false,
+				DisablePaths:     false,
+				DisableAliases:   false,
+				DisableDiffs:     false,
+				DisableRequests:  false,
+				DisableResponses: false,
+				DigitSeparator:   httpexpect.DigitSeparatorComma,
+				FloatFormat:      httpexpect.FloatFormatAuto,
+				StacktraceMode:   httpexpect.StacktraceModeStandard,
+				ColorMode:        httpexpect.ColorModeAuto,
+			},
+			Reporter: httpexpect.NewAssertReporter(t),
+		},
+
+		Printers: []httpexpect.Printer{
+			NewDebugPrinter(log, true),
+		},
+		// Reporter: httpexpect.NewAssertReporter(t),
+		// Formatter: ,
+		Context: context.WithValue(context.Background(), "test", t.Name()),
 	})
 
 	return &TestApp{
-		Email: email,
+		Configuration: configuration,
+		Email:         email,
+		Clock:         clock,
+		Tokens:        clientTokens,
 	}, expect
 }
 
-func NewTestApplicationWithConfig(t *testing.T, configuration config.Configuration) *httpexpect.Expect {
-	_, e := NewTestApplicationExWithConfig(t, configuration)
-	return e
+type DebugPrinter struct {
+	logger *logrus.Entry
+	body   bool
+}
+
+// NewDebugPrinter returns a new DebugPrinter given a logger and body
+// flag. If body is true, request and response body is also printed.
+func NewDebugPrinter(logger *logrus.Entry, body bool) DebugPrinter {
+	return DebugPrinter{logger, body}
+}
+
+// Request implements Printer.Request.
+func (p DebugPrinter) Request(req *http.Request) {
+	if req == nil {
+		return
+	}
+
+	dump, err := httputil.DumpRequest(req, p.body)
+	if err != nil {
+		panic(err)
+	}
+	p.logger.Debug("Logging Request\n" + string(dump) + "\n\t")
+}
+
+// Response implements Printer.Response.
+func (p DebugPrinter) Response(resp *http.Response, duration time.Duration) {
+	if resp == nil {
+		return
+	}
+
+	dump, err := httputil.DumpResponse(resp, p.body)
+	if err != nil {
+		panic(err)
+	}
+
+	text := strings.Replace(string(dump), "\r\n", "\n", -1)
+	lines := strings.SplitN(text, "\n", 2)
+
+	p.logger.Debugf("Logging Response\n%s %s\n%s\t", lines[0], duration, lines[1])
 }
 
 func GivenIHaveToken(t *testing.T, e *httpexpect.Expect) string {
@@ -248,41 +324,19 @@ func GivenILogin(t *testing.T, e *httpexpect.Expect, email, password string) (to
 }
 
 func AssertSetTokenCookie(t *testing.T, response *httpexpect.Response) string {
-	response.Cookie(TestCookieName).Path().IsEqual("/")
-	response.Cookie(TestCookieName).Domain().IsEqual(TestAPIDomainName)
-	assert.True(t, response.Cookie(TestCookieName).Raw().Secure, "cookie must be secure")
-	assert.True(t, response.Cookie(TestCookieName).Raw().HttpOnly, "cookie must be secure")
+	cookie := response.Cookie(TestCookieName)
+	require.NotNil(t, cookie, "auth cookie must not be nil if they were authenticated")
+	cookie.Path().IsEqual("/")
+	cookie.Domain().IsEqual(TestAPIDomainName)
+	raw := cookie.Raw()
+	require.NotNil(t, raw, "raw cookie must not be nil if authentication was successful, or you werent authenticated")
+	assert.True(t, raw.Secure, "cookie must be secure")
+	assert.True(t, raw.HttpOnly, "cookie must be secure")
 
 	// This assertion is here to prevent a regression. We want to make sure that requests that would previously
 	// return a token in the body, do not anymore.
 	response.JSON().Object().NotContainsKey("token")
-	return response.Cookie(TestCookieName).Value().Raw()
-}
-
-func GenerateToken(t *testing.T, conf config.Configuration, loginId, userId, accountId uint64) string {
-	now := time.Now()
-	claims := &controller.MonetrClaims{
-		LoginId:   loginId,
-		UserId:    userId,
-		AccountId: accountId,
-		StandardClaims: jwt.StandardClaims{
-			Audience: []string{
-				conf.APIDomainName,
-			},
-			ExpiresAt: now.Add(10 * time.Second).Unix(),
-			Id:        "",
-			IssuedAt:  now.Unix(),
-			Issuer:    conf.APIDomainName,
-			NotBefore: now.Unix(),
-			Subject:   "monetr",
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(conf.JWT.LoginJwtSecret))
-	require.NoError(t, err, "must be able to sign generated token")
-
-	return signedToken
+	return cookie.Value().Raw()
 }
 
 func MustSendVerificationEmail(t *testing.T, app *TestApp, n int) {

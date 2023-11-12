@@ -47,8 +47,8 @@ func (c *Controller) getMe(ctx echo.Context) error {
 	// - They have no subscription at all, or their trial has expired and they need to start one.
 	// - They have a subscription but it has lapsed or has been cancelled.
 	hasSubscrption := user.Account.HasSubscription()
-	subscriptionIsActive := user.Account.IsSubscriptionActive()
-	subscriptionIsTrial := user.Account.IsTrialing()
+	subscriptionIsActive := user.Account.IsSubscriptionActive(c.clock.Now())
+	subscriptionIsTrial := user.Account.IsTrialing(c.clock.Now())
 
 	if !subscriptionIsActive {
 		return ctx.JSON(http.StatusOK, map[string]interface{}{

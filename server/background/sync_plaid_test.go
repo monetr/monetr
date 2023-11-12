@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -20,6 +21,7 @@ import (
 
 func TestSyncPlaidJob_Run(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
+		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
@@ -28,13 +30,13 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		publisher := pubsub.NewPostgresPubSub(log, db)
 		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
 
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
-		plaidLink := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
 		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, accessToken))
 
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
@@ -98,7 +100,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				Deleted: []string{},
 			}, nil)
 
-		handler := NewSyncPlaidHandler(log, db, provider, plaidPlatypus, publisher)
+		handler := NewSyncPlaidHandler(log, db, clock, provider, plaidPlatypus, publisher)
 
 		{ // Do our first plaid sync.
 			args := SyncPlaidArguments{

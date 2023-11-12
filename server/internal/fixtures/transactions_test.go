@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
@@ -17,11 +17,12 @@ import (
 )
 
 func TestGivenIHaveATransaction(t *testing.T) {
-	user, _ := GivenIHaveABasicAccount(t)
-	link := GivenIHaveAPlaidLink(t, user)
-	bankAccount := GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+	clock := clock.NewMock()
+	user, _ := GivenIHaveABasicAccount(t, clock)
+	link := GivenIHaveAPlaidLink(t, clock, user)
+	bankAccount := GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
-	transaction := GivenIHaveATransaction(t, bankAccount)
+	transaction := GivenIHaveATransaction(t, clock, bankAccount)
 	assert.NotZero(t, transaction.TransactionId, "transaction must have been created")
 	assert.NotNil(t, transaction.Account, "account must be included on the transaction")
 	assert.NotNil(t, transaction.BankAccount, "bank account must be included on the transaction")
@@ -30,18 +31,20 @@ func TestGivenIHaveATransaction(t *testing.T) {
 
 func TestAssertThatIHaveZeroTransactions(t *testing.T) {
 	t.Run("no transactions", func(t *testing.T) {
-		user, _ := GivenIHaveABasicAccount(t)
-		link := GivenIHaveAPlaidLink(t, user)
-		GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		clock := clock.NewMock()
+		user, _ := GivenIHaveABasicAccount(t, clock)
+		link := GivenIHaveAPlaidLink(t, clock, user)
+		GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		AssertThatIHaveZeroTransactions(t, user.AccountId)
 	})
 
 	t.Run("with transactions", func(t *testing.T) {
-		user, _ := GivenIHaveABasicAccount(t)
-		link := GivenIHaveAPlaidLink(t, user)
-		bankAccount := GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		GivenIHaveATransaction(t, bankAccount)
+		clock := clock.NewMock()
+		user, _ := GivenIHaveABasicAccount(t, clock)
+		link := GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		GivenIHaveATransaction(t, clock, bankAccount)
 
 		assert.Panics(t, func() {
 			AssertThatIHaveZeroTransactions(t, user.AccountId)
@@ -51,18 +54,20 @@ func TestAssertThatIHaveZeroTransactions(t *testing.T) {
 
 func TestCountTransactions(t *testing.T) {
 	t.Run("no transactions", func(t *testing.T) {
-		user, _ := GivenIHaveABasicAccount(t)
-		link := GivenIHaveAPlaidLink(t, user)
-		GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		clock := clock.NewMock()
+		user, _ := GivenIHaveABasicAccount(t, clock)
+		link := GivenIHaveAPlaidLink(t, clock, user)
+		GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
 		assert.EqualValues(t, 0, CountNonDeletedTransactions(t, user.AccountId))
 	})
 
 	t.Run("with transactions", func(t *testing.T) {
-		user, _ := GivenIHaveABasicAccount(t)
-		link := GivenIHaveAPlaidLink(t, user)
-		bankAccount := GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		GivenIHaveATransaction(t, bankAccount)
+		clock := clock.NewMock()
+		user, _ := GivenIHaveABasicAccount(t, clock)
+		link := GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		GivenIHaveATransaction(t, clock, bankAccount)
 
 		assert.EqualValues(t, 1, CountNonDeletedTransactions(t, user.AccountId))
 	})
@@ -70,28 +75,30 @@ func TestCountTransactions(t *testing.T) {
 
 func TestCountPendingTransactions(t *testing.T) {
 	t.Run("no pending transactions", func(t *testing.T) {
-		user, _ := GivenIHaveABasicAccount(t)
-		link := GivenIHaveAPlaidLink(t, user)
-		bankAccount := GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		GivenIHaveATransaction(t, bankAccount)
+		clock := clock.NewMock()
+		user, _ := GivenIHaveABasicAccount(t, clock)
+		link := GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		GivenIHaveATransaction(t, clock, bankAccount)
 
 		assert.EqualValues(t, 0, CountPendingTransactions(t, user.AccountId))
 	})
 
 	t.Run("one pending transaction", func(t *testing.T) {
-		user, _ := GivenIHaveABasicAccount(t)
-		link := GivenIHaveAPlaidLink(t, user)
-		bankAccount := GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		clock := clock.NewMock()
+		user, _ := GivenIHaveABasicAccount(t, clock)
+		link := GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		// Create a non-pending transaction
-		GivenIHaveATransaction(t, bankAccount)
+		GivenIHaveATransaction(t, clock, bankAccount)
 
 		db := testutils.GetPgDatabase(t)
-		repo := repository.NewRepositoryFromSession(bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
+		repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
 
 		timezone, err := bankAccount.Account.GetTimezone()
 		require.NoError(t, err, "must be able to get the timezone from the account")
 
-		date := util.Midnight(time.Now(), timezone)
+		date := util.Midnight(clock.Now(), timezone)
 
 		prefix := gofakeit.RandomString([]string{
 			fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX%s %s", gofakeit.Generate("####"), date.Format("01/02/06")),
@@ -109,13 +116,13 @@ func TestCountPendingTransactions(t *testing.T) {
 			BankAccount:          &bankAccount,
 			PlaidTransactionId:   gofakeit.UUID(),
 			Amount:               int64(gofakeit.Number(100, 10000)),
-			Date:                 util.Midnight(time.Now(), timezone),
+			Date:                 util.Midnight(clock.Now(), timezone),
 			Name:                 name,
 			OriginalName:         name,
 			MerchantName:         company,
 			OriginalMerchantName: company,
 			IsPending:            true,
-			CreatedAt:            time.Now(),
+			CreatedAt:            clock.Now(),
 		}
 
 		err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)

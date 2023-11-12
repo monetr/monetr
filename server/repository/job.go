@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-	"strings"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
@@ -45,12 +45,14 @@ type BankAccountWithStaleSpendingItem struct {
 }
 
 type jobRepository struct {
-	txn pg.DBI
+	txn   pg.DBI
+	clock clock.Clock
 }
 
-func NewJobRepository(db pg.DBI) JobRepository {
+func NewJobRepository(db pg.DBI, clock clock.Clock) JobRepository {
 	return &jobRepository{
-		txn: db,
+		txn:   db,
+		clock: clock,
 	}
 }
 
@@ -82,23 +84,19 @@ func (j *jobRepository) GetBankAccountsToSync() ([]models.BankAccount, error) {
 
 func (j *jobRepository) GetFundingSchedulesToProcess() ([]ProcessFundingSchedulesItem, error) {
 	var items []ProcessFundingSchedulesItem
-	query := `
+	_, err := j.txn.Query(
+		&items,
+		`
 		SELECT
 			"funding_schedules"."account_id",
 			"funding_schedules"."bank_account_id",
 			array_agg("funding_schedules"."funding_schedule_id") AS "funding_schedule_ids"
 		FROM "funding_schedules"
-		WHERE "funding_schedules"."next_occurrence" < (now() AT TIME ZONE 'UTC')
+		WHERE "funding_schedules"."next_occurrence" < ?
 		GROUP BY "funding_schedules"."account_id", "funding_schedules"."bank_account_id"
-	`
-
-	query = strings.NewReplacer(
-		"\n", "",
-		"\t", "",
-		"  ", " ",
-	).Replace(query)
-
-	_, err := j.txn.Query(&items, query)
+		`,
+		j.clock.Now(),
+	)
 	if err != nil {
 		// TODO (elliotcourant) Can pg.NoRows return here? If it can this error is useless.
 		return nil, errors.Wrap(err, "failed to retrieve accounts and their funding schedules")
@@ -143,7 +141,7 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]model
 	defer span.Finish()
 
 	// Links should be seen as expired if the account subscription is not active for 90 days.
-	expirationCutoff := time.Now().UTC().Add(-90 * 24 * time.Hour)
+	expirationCutoff := j.clock.Now().UTC().Add(-90 * 24 * time.Hour)
 
 	var result []models.Link
 	err := j.txn.ModelContext(span.Context(), &result).
@@ -177,7 +175,7 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 		ColumnExpr(`"bank_account"."bank_account_id"`).
 		Join(`INNER JOIN "spending" AS "spending"`).
 		JoinOn(`"spending"."account_id" = "bank_account"."account_id" AND "spending"."bank_account_id" = "bank_account"."bank_account_id"`).
-		Where(`"spending"."next_recurrence" < ?`, time.Now()).
+		Where(`"spending"."next_recurrence" < ?`, j.clock.Now()).
 		Where(`"spending"."is_paused" = ?`, false).
 		GroupExpr(`"bank_account"."account_id"`).
 		GroupExpr(`"bank_account"."bank_account_id"`).

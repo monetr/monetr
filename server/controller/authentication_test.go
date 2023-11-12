@@ -1,7 +1,9 @@
 package controller_test
 
 import (
-	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -13,13 +15,13 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/verification"
+	"github.com/monetr/monetr/server/security"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLogin(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
@@ -34,10 +36,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("cannot login without TOTP when enabled", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		// Then configure the login fixture with TOTP.
-		fixtures.GivenIHaveTOTPForLogin(t, user.Login)
+		fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -53,10 +55,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("login true path with TOTP", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		// Then configure the login fixture with TOTP.
-		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, user.Login)
+		loginTotp := fixtures.GivenIHaveTOTPForLogin(t, app.Clock, user.Login)
 
 		{ // Send the initial request and make sure it responds with the error.
 			response := e.POST("/api/authentication/login").
@@ -76,7 +78,7 @@ func TestLogin(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"email":    user.Login.Email,
 					"password": password,
-					"totp":     loginTotp.Now(),
+					"totp":     loginTotp.At(int(app.Clock.Now().Unix())),
 				}).
 				Expect()
 
@@ -86,10 +88,10 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("can login when TOTP is provided", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		// Then configure the login fixture with TOTP.
-		totpCode := fixtures.GivenIHaveTOTPCodeForLogin(t, user.Login)
+		totpCode := fixtures.GivenIHaveTOTPCodeForLogin(t, app.Clock, user.Login)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -104,8 +106,8 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("can provide TOTP when it is not enabled", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -122,11 +124,11 @@ func TestLogin(t *testing.T) {
 	t.Run("bad cookie name", func(t *testing.T) {
 		conf := NewTestApplicationConfig(t)
 		conf.Server.Cookies.Name = ""
-		e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
 
 		// We need to provision the login directly, because the token should fail otherwise.
-		login, password := fixtures.GivenIHaveLogin(t)
-		fixtures.GivenIHaveAnAccount(t, login)
+		login, password := fixtures.GivenIHaveLogin(t, app.Clock)
+		fixtures.GivenIHaveAnAccount(t, app.Clock, login)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -141,9 +143,9 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("no users", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 		// Creating the login fixture directly prevents it from also creating a user and an account.
-		login, password := fixtures.GivenIHaveLogin(t)
+		login, password := fixtures.GivenIHaveLogin(t, app.Clock)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -157,14 +159,14 @@ func TestLogin(t *testing.T) {
 		response.JSON().Object().NotContainsKey("token")
 	})
 
-	t.Run("multiple users", func(t *testing.T) {
-		e := NewTestApplication(t)
+	t.Run("multiple users not implemented", func(t *testing.T) {
+		app, e := NewTestApplication(t)
 		// Creating the login fixture directly prevents it from also creating a user and an account.
-		login, password := fixtures.GivenIHaveLogin(t)
+		login, password := fixtures.GivenIHaveLogin(t, app.Clock)
 
-		user1 := fixtures.GivenIHaveAnAccount(t, login)
+		user1 := fixtures.GivenIHaveAnAccount(t, app.Clock, login)
 		assert.Equal(t, login.LoginId, user1.LoginId, "user should have the given login")
-		user2 := fixtures.GivenIHaveAnAccount(t, login)
+		user2 := fixtures.GivenIHaveAnAccount(t, app.Clock, login)
 		assert.Equal(t, login.LoginId, user2.LoginId, "user should have the given login")
 
 		response := e.POST("/api/authentication/login").
@@ -174,14 +176,11 @@ func TestLogin(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
-		response.JSON().Path("$.users").Array().Length().IsEqual(2) // Should have 2 accounts.
-		response.JSON().Path("$.users..accountId").Array().ContainsAll(user1.AccountId, user1.AccountId)
+		response.Status(http.StatusBadRequest)
 	})
 
 	t.Run("invalid email", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -196,7 +195,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("invalid email weird parser", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -211,7 +210,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("password to short", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -231,7 +230,7 @@ func TestLogin(t *testing.T) {
 		config.Stripe.BillingEnabled = true
 		// Force the trial to be expired immediately.
 		config.Stripe.FreeTrialDays = 4
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		email, password := GivenIHaveLogin(t, e)
 
@@ -253,7 +252,7 @@ func TestLogin(t *testing.T) {
 		config.Stripe.BillingEnabled = true
 		// Force the trial to be expired immediately.
 		config.Stripe.FreeTrialDays = -1
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		email, password := GivenIHaveLogin(t, e)
 
@@ -270,7 +269,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("bad password", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -288,26 +287,26 @@ func TestLogin(t *testing.T) {
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
+		config := NewTestApplicationConfig(t)
+		config.ReCAPTCHA.Enabled = true
+		config.ReCAPTCHA.VerifyLogin = true
+		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
+		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
+		app, e := NewTestApplicationWithConfig(t, config)
+		email, password := GivenIHaveLogin(t, e)
+
 		mock_http_helper.NewHttpMockJsonResponder(t,
 			"POST", "https://www.google.com/recaptcha/api/siteverify",
 			func(t *testing.T, request *http.Request) (interface{}, int) {
 				return map[string]interface{}{
 					"success":      true,
-					"challenge_ts": time.Now(),
+					"challenge_ts": app.Clock.Now(),
 					"hostname":     "monetr.mini",
 					"score":        1.0,
 				}, http.StatusOK
 			},
 			nil,
 		)
-
-		config := NewTestApplicationConfig(t)
-		config.ReCAPTCHA.Enabled = true
-		config.ReCAPTCHA.VerifyLogin = true
-		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
-		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		e := NewTestApplicationWithConfig(t, config)
-		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
 			WithJSON(map[string]interface{}{
@@ -328,7 +327,7 @@ func TestLogin(t *testing.T) {
 		config.ReCAPTCHA.VerifyRegister = false
 		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
 		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 		email, password := GivenIHaveLogin(t, e)
 
 		response := e.POST("/api/authentication/login").
@@ -344,7 +343,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.POST("/api/authentication/login").
 			WithBytes([]byte("{bad json}")).
@@ -364,7 +363,7 @@ func TestLogin(t *testing.T) {
 		config.Email.Verification.TokenLifetime = 5 * time.Second
 		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????/")
 		config.Email.Domain = "monetr.mini"
-		app, e := NewTestApplicationExWithConfig(t, config)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		MustSendVerificationEmail(t, app, 1)
 		email, password := GivenIHaveLogin(t, e)
@@ -385,7 +384,7 @@ func TestLogin(t *testing.T) {
 
 func TestLogout(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		email, password := GivenIHaveLogin(t, e)
 
 		var token string
@@ -416,7 +415,7 @@ func TestLogout(t *testing.T) {
 	})
 
 	t.Run("no cookie", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.GET("/api/authentication/logout").
 			Expect()
@@ -428,7 +427,7 @@ func TestLogout(t *testing.T) {
 
 func TestRegister(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -472,7 +471,7 @@ func TestRegister(t *testing.T) {
 	t.Run("beta code not provided", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Beta.EnableBetaCodes = true
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -496,7 +495,7 @@ func TestRegister(t *testing.T) {
 	t.Run("invalid beta code", func(t *testing.T) {
 		config := NewTestApplicationConfig(t)
 		config.Beta.EnableBetaCodes = true
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -520,7 +519,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("bad password", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		var registerRequest struct {
 			Email     string `json:"email"`
 			Password  string `json:"password"`
@@ -541,7 +540,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("bad timezone", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		var registerRequest struct {
 			Email     string `json:"email"`
 			Password  string `json:"password"`
@@ -585,7 +584,7 @@ func TestRegister(t *testing.T) {
 		config.ReCAPTCHA.VerifyRegister = true
 		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
 		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -616,7 +615,7 @@ func TestRegister(t *testing.T) {
 		config.ReCAPTCHA.VerifyRegister = true
 		config.ReCAPTCHA.PublicKey = gofakeit.UUID()
 		config.ReCAPTCHA.PrivateKey = gofakeit.UUID()
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -643,7 +642,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		response := e.POST(`/api/authentication/register`).
 			WithBytes([]byte("I am not a valid json body")).
 			Expect()
@@ -653,7 +652,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("email already exists", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		var registerRequest struct {
 			Email     string `json:"email"`
 			Password  string `json:"password"`
@@ -697,7 +696,7 @@ func TestRegister(t *testing.T) {
 			Default:       true,
 		}
 
-		e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -734,8 +733,8 @@ func TestRegister(t *testing.T) {
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
 			response.JSON().Path("$.trialingUntil").String().AsDateTime().
-				Gt(time.Now().AddDate(0, 0, 29)).
-				Lt(time.Now().AddDate(0, 0, 31))
+				Gt(app.Clock.Now().AddDate(0, 0, 29)).
+				Lt(app.Clock.Now().AddDate(0, 0, 31))
 		}
 	})
 
@@ -746,7 +745,7 @@ func TestRegister(t *testing.T) {
 		config.Email.Verification.TokenLifetime = 5 * time.Second
 		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
 		config.Email.Domain = "monetr.mini"
-		app, e := NewTestApplicationExWithConfig(t, config)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -772,38 +771,6 @@ func TestRegister(t *testing.T) {
 			IsEqual("A verification email has been sent to your email address, please verify your email.")
 		response.JSON().Object().NotContainsKey("token")
 	})
-
-	t.Run("verification token lifespan is too short", func(t *testing.T) {
-		config := NewTestApplicationConfig(t)
-		config.Email.Enabled = true
-		config.Email.Verification.Enabled = true
-		config.Email.Verification.TokenLifetime = 1 * time.Millisecond
-		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
-		config.Email.Domain = "monetr.mini"
-		e := NewTestApplicationWithConfig(t, config)
-
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
-
-		response.Status(http.StatusInternalServerError)
-		response.JSON().
-			Path("$.error").
-			String().
-			IsEqual("could not generate email verification token")
-		response.JSON().Object().NotContainsKey("token")
-	})
 }
 
 func TestVerifyEmail(t *testing.T) {
@@ -815,9 +782,7 @@ func TestVerifyEmail(t *testing.T) {
 	config.Email.Domain = "monetr.mini"
 
 	t.Run("happy path", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, config)
-
-		tokenGenerator := verification.NewTokenGenerator(config.Email.Verification.TokenSecret)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -858,7 +823,16 @@ func TestVerifyEmail(t *testing.T) {
 		}
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), registerRequest.Email, 10*time.Second)
+			verificationToken, err := app.Tokens.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: registerRequest.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
@@ -887,10 +861,15 @@ func TestVerifyEmail(t *testing.T) {
 	})
 
 	t.Run("bad verification token", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, config)
+		log := testutils.GetLog(t)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Create a token generator with a different secret so it will always generate invalid tokens.
-		tokenGenerator := verification.NewTokenGenerator(gofakeit.UUID())
+		publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+		assert.NoError(t, err, "must be able to generate keys")
+
+		tokenGenerator, err := security.NewPasetoClientTokens(log, app.Clock, "monetr.local", publicKey, privateKey)
+		assert.NoError(t, err, "must be able to init the client tokens interface")
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -919,7 +898,16 @@ func TestVerifyEmail(t *testing.T) {
 		}
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), registerRequest.Email, 10*time.Second)
+			verificationToken, err := tokenGenerator.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: registerRequest.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
@@ -950,9 +938,7 @@ func TestVerifyEmail(t *testing.T) {
 	})
 
 	t.Run("expired verification code", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, config)
-
-		tokenGenerator := verification.NewTokenGenerator(config.Email.Verification.TokenSecret)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -981,11 +967,20 @@ func TestVerifyEmail(t *testing.T) {
 		}
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), registerRequest.Email, 1*time.Second)
+			verificationToken, err := app.Tokens.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: registerRequest.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
-			time.Sleep(2 * time.Second) // Make the code expire
+			app.Clock.Add(10 * time.Minute) // Make the code expire
 
 			response := e.POST("/api/authentication/verify").
 				WithJSON(map[string]interface{}{
@@ -1014,7 +1009,7 @@ func TestVerifyEmail(t *testing.T) {
 	})
 
 	t.Run("blank verification code", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST("/api/authentication/verify").
 			WithJSON(map[string]interface{}{
@@ -1027,7 +1022,7 @@ func TestVerifyEmail(t *testing.T) {
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, config)
+		_, e := NewTestApplicationWithConfig(t, config)
 
 		response := e.POST("/api/authentication/verify").
 			WithBytes([]byte("{bad json}")).
@@ -1050,7 +1045,7 @@ func TestResendVerificationEmail(t *testing.T) {
 	config.Email.Domain = "monetr.local"
 
 	t.Run("happy path", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, config)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -1091,7 +1086,7 @@ func TestResendVerificationEmail(t *testing.T) {
 	})
 
 	t.Run("non-existent email", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, config)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Set n to 0, there should not be any emails sent.
 		MustSendVerificationEmail(t, app, 0)
@@ -1107,7 +1102,7 @@ func TestResendVerificationEmail(t *testing.T) {
 	})
 
 	t.Run("blank email", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, config)
+		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Set n to 0, there should not be any emails sent.
 		MustSendVerificationEmail(t, app, 0)
@@ -1132,7 +1127,7 @@ func TestSendForgotPassword(t *testing.T) {
 	conf.Email.Domain = "monetr.mini"
 
 	t.Run("sends email for real login", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
 
 		email, _ := GivenIHaveLogin(t, e)
 
@@ -1154,7 +1149,7 @@ func TestSendForgotPassword(t *testing.T) {
 	})
 
 	t.Run("success for non-existent email", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
 
 		var resetPasswordRequest struct {
 			Email string `json:"email"`
@@ -1179,7 +1174,7 @@ func TestSendForgotPassword(t *testing.T) {
 		verificationConf.Email.Verification.Enabled = true
 		verificationConf.Email.Verification.TokenLifetime = time.Second * 10
 		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
-		app, e := NewTestApplicationExWithConfig(t, verificationConf)
+		app, e := NewTestApplicationWithConfig(t, verificationConf)
 
 		// There should be one email sent for verification
 		MustSendVerificationEmail(t, app, 1)
@@ -1213,8 +1208,7 @@ func TestSendForgotPassword(t *testing.T) {
 		verificationConf.Email.Verification.Enabled = true
 		verificationConf.Email.Verification.TokenLifetime = time.Second * 10
 		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
-		tokenGenerator := verification.NewTokenGenerator(verificationConf.Email.Verification.TokenSecret)
-		app, e := NewTestApplicationExWithConfig(t, verificationConf)
+		app, e := NewTestApplicationWithConfig(t, verificationConf)
 
 		MustSendVerificationEmail(t, app, 1)
 
@@ -1226,7 +1220,17 @@ func TestSendForgotPassword(t *testing.T) {
 		resetPasswordRequest.Email = email
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), email, 10*time.Second)
+			verificationToken, err := app.Tokens.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: email,
+					UserId:       0,
+					AccountId:    0,
+					// TODO At some point this will break because the login Id will be required.
+					LoginId: 0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
@@ -1255,7 +1259,7 @@ func TestSendForgotPassword(t *testing.T) {
 	})
 
 	t.Run("with bad json body", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
 
 		// Since it's not a valid request, we should never send an email.
 		MustSendPasswordResetEmail(t, app, 0)
@@ -1274,7 +1278,7 @@ func TestSendForgotPassword(t *testing.T) {
 	})
 
 	t.Run("with blank email", func(t *testing.T) {
-		app, e := NewTestApplicationExWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
 
 		// Since it's not a valid request, we should never send an email.
 		MustSendPasswordResetEmail(t, app, 0)
@@ -1297,7 +1301,7 @@ func TestSendForgotPassword(t *testing.T) {
 		captchaConf.ReCAPTCHA.PublicKey = gofakeit.UUID()
 		captchaConf.ReCAPTCHA.PrivateKey = gofakeit.UUID()
 		captchaConf.ReCAPTCHA.VerifyForgotPassword = true
-		app, e := NewTestApplicationExWithConfig(t, captchaConf)
+		app, e := NewTestApplicationWithConfig(t, captchaConf)
 
 		// Since it's not a valid request, we should never send an email.
 		MustSendPasswordResetEmail(t, app, 0)
@@ -1324,11 +1328,9 @@ func TestResetPassword(t *testing.T) {
 	conf.Email.ForgotPassword.TokenSecret = gofakeit.Generate("????????????????????????")
 	conf.Email.Domain = "monetr.mini"
 
-	tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret)
-
 	t.Run("happy path", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		{ // Make sure we can log in with the current password.
 			response := e.POST(`/api/authentication/login`).
@@ -1347,7 +1349,16 @@ func TestResetPassword(t *testing.T) {
 		assert.NotEqual(t, password, newPassword, "make sure the new password does not match the old one")
 
 		{ // Reset the password.
-			token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+			token, err := app.Tokens.Create(
+				security.ResetPasswordAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: user.Login.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      user.LoginId,
+				},
+			)
 			assert.NoError(t, err, "must be able to generate a password reset token")
 
 			response := e.POST(`/api/authentication/reset`).
@@ -1388,17 +1399,37 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("invalidates multiple tokens after reset", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
-		firstToken, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		firstToken, err := app.Tokens.Create(
+			security.ResetPasswordAudience,
+			5*time.Minute,
+			security.Claims{
+				EmailAddress: user.Login.Email,
+				UserId:       0,
+				AccountId:    0,
+				LoginId:      user.LoginId,
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
-		secondToken, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		app.Clock.Add(1 * time.Second)
+
+		secondToken, err := app.Tokens.Create(
+			security.ResetPasswordAudience,
+			5*time.Minute,
+			security.Claims{
+				EmailAddress: user.Login.Email,
+				UserId:       0,
+				AccountId:    0,
+				LoginId:      user.LoginId,
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Make sure the issued_at on the tokens are definitely in the past.
-		time.Sleep(1 * time.Second)
+		app.Clock.Add(1 * time.Second)
 
 		// Generate a new password to reset to.
 		newPassword := gofakeit.Generate("????????")
@@ -1432,10 +1463,15 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("token cannot be used twice", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
-		token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: user.Login.Email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      user.LoginId,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Generate a new password to reset to.
@@ -1470,14 +1506,19 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("token must not be expired", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
-		user, _ := fixtures.GivenIHaveABasicAccount(t)
+		app, e := NewTestApplicationWithConfig(t, conf)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
-		token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*1)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: user.Login.Email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      user.LoginId,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Wait for the token to expire.
-		time.Sleep(2 * time.Second)
+		app.Clock.Add(30 * time.Second)
 
 		// Generate a new password to reset to.
 		newPassword := gofakeit.Generate("????????")
@@ -1499,10 +1540,14 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("reset password login does not exist", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
-
+		app, e := NewTestApplicationWithConfig(t, conf)
 		email := testutils.GetUniqueEmail(t)
-		token, err := tokenGenerator.GenerateToken(context.Background(), email, time.Second*5)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      math.MaxInt32,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		response := e.POST(`/api/authentication/reset`).
@@ -1517,7 +1562,7 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
+		_, e := NewTestApplicationWithConfig(t, conf)
 
 		response := e.POST(`/api/authentication/reset`).
 			WithBytes([]byte("I am not json")).
@@ -1531,7 +1576,7 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("token is empty", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
+		_, e := NewTestApplicationWithConfig(t, conf)
 
 		response := e.POST(`/api/authentication/reset`).
 			WithJSON(map[string]interface{}{
@@ -1545,10 +1590,14 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("password too short", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
-
+		app, e := NewTestApplicationWithConfig(t, conf)
 		email := testutils.GetUniqueEmail(t)
-		token, err := tokenGenerator.GenerateToken(context.Background(), email, time.Second*5)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      math.MaxInt32,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		response := e.POST(`/api/authentication/reset`).
@@ -1563,7 +1612,7 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("invalid token", func(t *testing.T) {
-		e := NewTestApplicationWithConfig(t, conf)
+		_, e := NewTestApplicationWithConfig(t, conf)
 
 		response := e.POST(`/api/authentication/reset`).
 			WithJSON(map[string]interface{}{

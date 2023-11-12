@@ -52,6 +52,16 @@ customEnvFrom:
   - secretRef:
       name: monetr-config-secrets
 
+extraVolumes:
+  - name: certificates
+    secret:
+      secretName: monetr-authentication-certificate
+
+extraVolumeMounts:
+  - name: certificates
+    mountPath: /etc/monetr/certs
+    readOnly: true
+
 api:
   name: monetr
   customEnv:
@@ -98,8 +108,6 @@ api:
     webhooksDomain: my.monetr.dev
     oauthDomain: my.monetr.dev
     maxNumberOfLinks: 8
-  jwt:
-    loginExpiration: 14
   cors:
     allowedOrigins:
       - "https://my.monetr.dev"
@@ -113,6 +121,8 @@ api:
     format: json
     stackDriver:
       enabled: false
+  security:
+    privateKey: /etc/monetr/certs/tls.key
   sentry:
     enabled: true
     sampleRate: 1.0

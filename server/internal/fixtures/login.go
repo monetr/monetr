@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/myownsanity"
@@ -17,10 +18,10 @@ import (
 	"github.com/xlzd/gotp"
 )
 
-func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
+func GivenIHaveLogin(t *testing.T, clock clock.Clock) (_ models.Login, password string) {
 	db := testutils.GetPgDatabase(t)
 
-	repo := repository.NewUnauthenticatedRepository(db)
+	repo := repository.NewUnauthenticatedRepository(clock, db)
 
 	password = gofakeit.Password(true, true, true, true, false, 64)
 	email := testutils.GetUniqueEmail(t)
@@ -33,13 +34,13 @@ func GivenIHaveLogin(t *testing.T) (_ models.Login, password string) {
 	return *login, password
 }
 
-func GivenIHaveTOTPForLogin(t *testing.T, login *models.Login) *gotp.TOTP {
+func GivenIHaveTOTPForLogin(t *testing.T, clock clock.Clock, login *models.Login) *gotp.TOTP {
 	db := testutils.GetPgDatabase(t)
 
 	secret := base32.StdEncoding.EncodeToString([]byte(gofakeit.UUID()))
 	loginTotp := gotp.NewDefaultTOTP(secret)
 	login.TOTP = secret
-	login.TOTPEnabledAt = myownsanity.TimeP(time.Now())
+	login.TOTPEnabledAt = myownsanity.TimeP(clock.Now())
 	result, err := db.Model(login).WherePK().Update(login)
 	require.NoError(t, err, "must be able to update login with TOTP")
 	require.Equal(t, 1, result.RowsAffected(), "must have only updated a single row")
@@ -47,11 +48,11 @@ func GivenIHaveTOTPForLogin(t *testing.T, login *models.Login) *gotp.TOTP {
 	return loginTotp
 }
 
-func GivenIHaveTOTPCodeForLogin(t *testing.T, login *models.Login) string {
-	loginTotp := GivenIHaveTOTPForLogin(t, login)
+func GivenIHaveTOTPCodeForLogin(t *testing.T, clock clock.Clock, login *models.Login) string {
+	loginTotp := GivenIHaveTOTPForLogin(t, clock, login)
 	code := loginTotp.Now()
 	// If the code would change very soon, then use the next code instead.
-	futureTimestamp := int(time.Now().Add(1 * time.Second).Unix())
+	futureTimestamp := int(clock.Now().Add(1 * time.Second).Unix())
 	if loginTotp.At(futureTimestamp) != code {
 		code = loginTotp.At(futureTimestamp)
 	}
@@ -59,22 +60,22 @@ func GivenIHaveTOTPCodeForLogin(t *testing.T, login *models.Login) string {
 	return code
 }
 
-func GivenIHaveABasicAccount(t *testing.T) (_ models.User, password string) {
-	login, password := GivenIHaveLogin(t)
-	user := GivenIHaveAnAccount(t, login)
+func GivenIHaveABasicAccount(t *testing.T, clock clock.Clock) (_ models.User, password string) {
+	login, password := GivenIHaveLogin(t, clock)
+	user := GivenIHaveAnAccount(t, clock, login)
 	return user, password
 }
 
-func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
+func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) models.User {
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewUnauthenticatedRepository(db)
+	repo := repository.NewUnauthenticatedRepository(clock, db)
 	subStatus := stripe.SubscriptionStatusActive
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
 		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
 		StripeSubscriptionId:         myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t)),
-		StripeWebhookLatestTimestamp: myownsanity.TimeP(time.Now().Add(-4 * time.Minute)),
-		SubscriptionActiveUntil:      myownsanity.TimeP(time.Now().Add(10 * time.Minute)),
+		StripeWebhookLatestTimestamp: myownsanity.TimeP(clock.Now().Add(-4 * time.Minute)),
+		SubscriptionActiveUntil:      myownsanity.TimeP(clock.Now().Add(10 * time.Minute)),
 		SubscriptionStatus:           &subStatus,
 		TrialEndsAt:                  nil,
 	}
@@ -96,9 +97,9 @@ func GivenIHaveAnAccount(t *testing.T, login models.Login) models.User {
 	return user
 }
 
-func GivenIHaveATrialingAccount(t *testing.T, login models.Login) models.User {
+func GivenIHaveATrialingAccount(t *testing.T, clock clock.Clock, login models.Login) models.User {
 	db := testutils.GetPgDatabase(t)
-	repo := repository.NewUnauthenticatedRepository(db)
+	repo := repository.NewUnauthenticatedRepository(clock, db)
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
 		StripeCustomerId:             nil,
@@ -106,7 +107,7 @@ func GivenIHaveATrialingAccount(t *testing.T, login models.Login) models.User {
 		StripeWebhookLatestTimestamp: nil,
 		SubscriptionActiveUntil:      nil,
 		SubscriptionStatus:           nil,
-		TrialEndsAt:                  myownsanity.TimeP(time.Now().AddDate(0, 0, 1)),
+		TrialEndsAt:                  myownsanity.TimeP(clock.Now().AddDate(0, 0, 1)),
 	}
 	err := repo.CreateAccountV2(context.Background(), &account)
 	require.NoError(t, err, "must be able to seed basic account")

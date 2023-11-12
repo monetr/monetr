@@ -10,23 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/form3tech-oss/jwt-go"
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/security"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
-
-type MonetrClaims struct {
-	LoginId   uint64 `json:"loginId"`
-	UserId    uint64 `json:"userId"`
-	AccountId uint64 `json:"accountId"`
-	jwt.StandardClaims
-}
 
 const ClearAuthentication = ""
 
@@ -40,23 +33,29 @@ func (c *Controller) updateAuthenticationCookie(ctx echo.Context, token string) 
 		sameSite = http.SameSiteStrictMode
 	}
 
-	expiration := c.configuration.JWT.GetLoginExpirationTimestamp()
+	expiration := c.clock.Now().AddDate(0, 0, 14)
 	if token == "" {
-		expiration = time.Now().Add(-1 * time.Second)
+		expiration = c.clock.Now().Add(-1 * time.Second)
 	}
 
 	if c.configuration.Server.Cookies.Name == "" {
 		panic("authentication cookie name is blank")
 	}
 
+	hostname := c.configuration.APIDomainName
+	parts := strings.SplitN(c.configuration.APIDomainName, ":", 2)
+	if len(parts) > 1 {
+		hostname = parts[0]
+	}
+
 	ctx.SetCookie(&http.Cookie{
 		Name:     c.configuration.Server.Cookies.Name,
 		Value:    token,
 		Path:     "/",
-		Domain:   c.configuration.APIDomainName,
+		Domain:   hostname,
 		Expires:  expiration,
 		MaxAge:   0,
-		Secure:   c.configuration.Server.Cookies.Secure,
+		Secure:   c.configuration.GetHTTPSecureCookie(),
 		HttpOnly: true,
 		SameSite: sameSite,
 	})
@@ -134,10 +133,15 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 			return c.returnError(ctx, http.StatusNotAcceptable, "login requires password reset, but password reset is not allowed")
 		}
 
-		passwordResetToken, err := c.passwordResetTokens.GenerateToken(
-			c.getContext(ctx),
-			loginRequest.Email,
+		passwordResetToken, err := c.clientTokens.Create(
+			security.ResetPasswordAudience,
 			5*time.Minute, // Use a much shorter lifetime than usually would be configured.
+			security.Claims{
+				EmailAddress: login.Email,
+				UserId:       0,
+				AccountId:    0,
+				LoginId:      login.LoginId,
+			},
 		)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to generate a password reset token")
@@ -158,7 +162,7 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 		// correct.
 		log.Trace("login requires TOTP MFA, and a code was provided; it will be verified")
 
-		if err := login.VerifyTOTP(loginRequest.TOTP); err != nil {
+		if err := login.VerifyTOTP(loginRequest.TOTP, c.clock.Now()); err != nil {
 			log.Trace("provided TOTP MFA code is not valid")
 			return c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
 		}
@@ -184,9 +188,14 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 			})
 		}
 
-		token, err := c.generateToken(login.LoginId, user.UserId, user.AccountId)
+		token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
+			EmailAddress: login.Email,
+			UserId:       user.UserId,
+			AccountId:    user.AccountId,
+			LoginId:      user.LoginId,
+		})
 		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
 		}
 
 		result := map[string]interface{}{
@@ -220,22 +229,7 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 		// If the login has more than one user then we want to generate a temp
 		// JWT that will only grant them access to API endpoints not specific to
 		// an account.
-		token, err := c.generateToken(login.LoginId, 0, 0)
-		if err != nil {
-			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate JWT")
-		}
-
-		result := map[string]interface{}{
-			"users": login.Users,
-		}
-
-		if !loginRequest.IsMobile {
-			c.updateAuthenticationCookie(ctx, token)
-		} else {
-			result["token"] = token
-		}
-
-		return ctx.JSON(http.StatusOK, result)
+		return c.badRequest(ctx, "multiple accounts not implemented, please contact support")
 	}
 }
 
@@ -342,7 +336,7 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 
 	var trialEndsAt *time.Time
 	if c.configuration.Stripe.IsBillingEnabled() {
-		expiration := time.Now().AddDate(0, 0, c.configuration.Stripe.FreeTrialDays)
+		expiration := c.clock.Now().AddDate(0, 0, c.configuration.Stripe.FreeTrialDays)
 		log.WithFields(logrus.Fields{
 			"trialDays":   c.configuration.Stripe.FreeTrialDays,
 			"trialEndsAt": expiration,
@@ -398,7 +392,16 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 	// If SMTP is enabled and we are verifying emails then we want to create a
 	// registration record and send the user a verification email.
 	if c.configuration.Email.ShouldVerifyEmails() {
-		verificationToken, err := c.emailVerification.CreateEmailVerificationToken(c.getContext(ctx), registerRequest.Email)
+		verificationToken, err := c.clientTokens.Create(
+			security.VerifyEmailAudience,
+			c.configuration.Email.Verification.TokenLifetime,
+			security.Claims{
+				EmailAddress: login.Email,
+				UserId:       0,
+				AccountId:    0,
+				LoginId:      login.LoginId,
+			},
+		)
 		if err != nil {
 			return c.wrapAndReturnError(
 				ctx,
@@ -432,10 +435,15 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 
 	// If we are not requiring email verification to activate an account we can
 	// simply return a token here for the user to be signed in.
-	token, err := c.generateToken(login.LoginId, user.UserId, account.AccountId)
+	token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
+		EmailAddress: login.Email,
+		UserId:       user.UserId,
+		AccountId:    user.AccountId,
+		LoginId:      user.LoginId,
+	})
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError,
-			"failed to create JWT",
+			"failed to create token",
 		)
 	}
 
@@ -480,7 +488,13 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 		return c.badRequest(ctx, "Token cannot be blank")
 	}
 
-	if err := c.emailVerification.UseEmailVerificationToken(c.getContext(ctx), verifyRequest.Token); err != nil {
+	claims, err := c.clientTokens.Parse(security.VerifyEmailAudience, verifyRequest.Token)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
+	}
+
+	repo := c.mustGetUnauthenticatedRepository(ctx)
+	if err := repo.SetEmailVerified(c.getContext(ctx), claims.EmailAddress); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
 	}
 
@@ -508,6 +522,7 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 // @Failure 400 {object} ApiError Cannot resend verification link.
 // @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) resendVerification(ctx echo.Context) error {
+	log := c.getLog(ctx)
 	if !c.configuration.Email.ShouldVerifyEmails() {
 		return c.notFound(ctx, "email verification is not enabled")
 	}
@@ -535,7 +550,23 @@ func (c *Controller) resendVerification(ctx echo.Context) error {
 		}
 	}
 
-	login, verificationToken, err := c.emailVerification.RegenerateEmailVerificationToken(c.getContext(ctx), request.Email)
+	unauthedRepo := c.mustGetUnauthenticatedRepository(ctx)
+	login, err := unauthedRepo.GetLoginForEmail(c.getContext(ctx), request.Email)
+	if err != nil {
+		log.WithError(err).Warn("failed to get login for email address to resend verification")
+		return ctx.NoContent(http.StatusOK)
+	}
+
+	verificationToken, err := c.clientTokens.Create(
+		security.VerifyEmailAudience,
+		c.configuration.Email.ForgotPassword.TokenLifetime,
+		security.Claims{
+			EmailAddress: login.Email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      login.LoginId,
+		},
+	)
 	if err != nil {
 		c.reportWrappedError(ctx, err, "failed to regenerate email verification token")
 		return ctx.NoContent(http.StatusOK)
@@ -630,10 +661,15 @@ func (c *Controller) sendForgotPassword(ctx echo.Context) error {
 	//  email of the login -> change the email of another login to the first email; then reset the password for a
 	//  different login. I don't think this is a security risk as the actor would need to have access to both logins to
 	//  begin with. But it might cause some goofy issues and is definitely not desired behavior.
-	passwordResetToken, err := c.passwordResetTokens.GenerateToken(
-		c.getContext(ctx),
-		sendForgotPasswordRequest.Email,
+	passwordResetToken, err := c.clientTokens.Create(
+		security.ResetPasswordAudience,
 		c.configuration.Email.ForgotPassword.TokenLifetime,
+		security.Claims{
+			EmailAddress: login.Email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      login.LoginId,
+		},
 	)
 	if err != nil {
 		return c.wrapAndReturnError(
@@ -703,7 +739,10 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.badRequest(ctx, "Password must be at least 8 characters long.")
 	}
 
-	validation, err := c.passwordResetTokens.ValidateTokenEx(c.getContext(ctx), resetPasswordRequest.Token)
+	resetClaims, err := c.clientTokens.Parse(
+		security.ResetPasswordAudience,
+		resetPasswordRequest.Token,
+	)
 	if err != nil {
 		return c.wrapAndReturnError(
 			ctx,
@@ -716,14 +755,14 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 	unauthenticatedRepo := c.mustGetUnauthenticatedRepository(ctx)
 
 	// Retrieve the login for the email address in the token.
-	login, err := unauthenticatedRepo.GetLoginForEmail(c.getContext(ctx), validation.Email)
+	login, err := unauthenticatedRepo.GetLoginForEmail(c.getContext(ctx), resetClaims.EmailAddress)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "Failed to verify login for email address")
 	}
 
 	// If the login's password has been changed since this token was issued, then this token is no longer valid. This
 	// will basically make sure that a token cannot be used twice.
-	if login.PasswordResetAt != nil && login.PasswordResetAt.After(validation.CreatedAt) {
+	if login.PasswordResetAt != nil && !login.PasswordResetAt.Before(resetClaims.CreatedAt) {
 		return c.badRequest(
 			ctx,
 			"Password has already been reset, you must request another password reset link.",
@@ -805,35 +844,4 @@ func (c *Controller) validateLogin(ctx echo.Context, email, password string) err
 	}
 
 	return nil
-}
-
-func (c *Controller) generateToken(loginId, userId, accountId uint64) (string, error) {
-	now := time.Now()
-
-	expiration := c.configuration.JWT.GetLoginExpirationTimestamp()
-
-	claims := &MonetrClaims{
-		LoginId:   loginId,
-		UserId:    userId,
-		AccountId: accountId,
-		StandardClaims: jwt.StandardClaims{
-			Audience: []string{
-				c.configuration.APIDomainName,
-			},
-			ExpiresAt: expiration.Unix(),
-			Id:        "",
-			IssuedAt:  now.Unix(),
-			Issuer:    c.configuration.APIDomainName,
-			NotBefore: now.Unix(),
-			Subject:   "monetr",
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(c.configuration.JWT.LoginJwtSecret))
-	if err != nil {
-		return "", errors.Wrap(err, "failed to sign JWT")
-	}
-
-	return signedToken, nil
 }

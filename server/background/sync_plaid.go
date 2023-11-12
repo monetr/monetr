@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
@@ -35,6 +36,7 @@ type (
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
 		unmarshaller  JobUnmarshaller
+		clock         clock.Clock
 	}
 
 	SyncPlaidArguments struct {
@@ -51,6 +53,7 @@ type (
 		plaidSecrets  secrets.PlaidSecretsProvider
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
+		clock         clock.Clock
 	}
 )
 
@@ -68,6 +71,7 @@ func TriggerSyncPlaid(
 func NewSyncPlaidHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	clock clock.Clock,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
@@ -79,6 +83,7 @@ func NewSyncPlaidHandler(
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
 		unmarshaller:  DefaultJobUnmarshaller,
+		clock:         clock,
 	}
 }
 
@@ -101,10 +106,11 @@ func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) er
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		repo := repository.NewRepositoryFromSession(0, args.AccountId, txn)
+		repo := repository.NewRepositoryFromSession(s.clock, 0, args.AccountId, txn)
 		job, err := NewSyncPlaidJob(
 			s.log.WithContext(span.Context()),
 			repo,
+			s.clock,
 			s.plaidSecrets,
 			s.plaidPlatypus,
 			s.publisher,
@@ -129,7 +135,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 	log.Info("retrieving links to sync with Plaid")
 
 	links := make([]models.Link, 0)
-	cutoff := time.Now().Add(-48 * time.Hour)
+	cutoff := s.clock.Now().Add(-48 * time.Hour)
 	err := s.db.ModelContext(ctx, &links).
 		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
@@ -177,6 +183,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 func NewSyncPlaidJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
+	clock clock.Clock,
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
@@ -189,6 +196,7 @@ func NewSyncPlaidJob(
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
+		clock:         clock,
 	}, nil
 }
 
@@ -250,7 +258,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	now := time.Now().UTC()
+	now := s.clock.Now().UTC()
 	plaidClient, err := s.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
 	if err != nil {
 		log.WithError(err).Error("failed to create plaid client for link")
@@ -635,7 +643,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		link.LinkStatus = models.LinkStatusSetup
 		linkWasSetup = true
 	}
-	link.LastSuccessfulUpdate = myownsanity.TimeP(time.Now().UTC())
+	link.LastSuccessfulUpdate = myownsanity.TimeP(s.clock.Now().UTC())
 	if err = s.repo.UpdateLink(span.Context(), link); err != nil {
 		log.WithError(err).Error("failed to update link after transaction sync")
 		return err

@@ -3,7 +3,6 @@ package controller_test
 import (
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/fixtures"
@@ -15,15 +14,15 @@ import (
 
 func TestGetTransactions(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 		var token string
 		var bank models.BankAccount
 
 		{ // Seed the data for the test.
-			user, password := fixtures.GivenIHaveABasicAccount(t)
-			link := fixtures.GivenIHaveAPlaidLink(t, user)
-			bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-			fixtures.GivenIHaveNTransactions(t, bank, 10)
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 10)
 
 			token = GivenILogin(t, e, user.Login.Email, password)
 		}
@@ -38,15 +37,15 @@ func TestGetTransactions(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 		var token string
 		var bank models.BankAccount
 
 		{ // Seed the data for the test.
-			user, password := fixtures.GivenIHaveABasicAccount(t)
-			link := fixtures.GivenIHaveAPlaidLink(t, user)
-			bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-			fixtures.GivenIHaveNTransactions(t, bank, 70)
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			fixtures.GivenIHaveNTransactions(t, app.Clock, bank, 70)
 
 			token = GivenILogin(t, e, user.Login.Email, password)
 		}
@@ -58,7 +57,7 @@ func TestGetTransactions(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Array().Length().Equal(25)
+			response.JSON().Array().Length().IsEqual(25)
 		}
 
 		{ // Second page
@@ -70,7 +69,7 @@ func TestGetTransactions(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Array().Length().Equal(25)
+			response.JSON().Array().Length().IsEqual(25)
 		}
 
 		{ // Third page
@@ -82,14 +81,14 @@ func TestGetTransactions(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Array().Length().Equal(20)
+			response.JSON().Array().Length().IsEqual(20)
 		}
 	})
 }
 
 func TestPostTransactions(t *testing.T) {
 	t.Run("bad request", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.POST("/api/bank_accounts/1234/transactions").
@@ -107,22 +106,22 @@ func TestPostTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").Equal("cannot create transactions for non-manual links")
+		response.JSON().Path("$.error").IsEqual("cannot create transactions for non-manual links")
 	})
 }
 
 func TestPutTransactions(t *testing.T) {
 	t.Run("update transaction name", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 		var token string
 		var bank models.BankAccount
 		var originalTransaction, transaction models.Transaction
 
 		{ // Seed the data for the test.
-			user, password := fixtures.GivenIHaveABasicAccount(t)
-			link := fixtures.GivenIHaveAPlaidLink(t, user)
-			bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-			originalTransaction = fixtures.GivenIHaveATransaction(t, bank)
+			user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+			link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+			bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+			originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
 			transaction = originalTransaction
 
 			token = GivenILogin(t, e, user.Login.Email, password)
@@ -147,7 +146,7 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("transaction does not exist", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT("/api/bank_accounts/{bankAccountId}/transactions/{transactionId}").
@@ -165,7 +164,7 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("invalid bank account Id", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/00000/transactions/1234`).
@@ -181,7 +180,7 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("invalid transaction Id numeric", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/0000`).
@@ -197,7 +196,7 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("invalid transaction Id word", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/foo`).
@@ -213,7 +212,7 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("malformed json", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
@@ -226,7 +225,7 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("no authentication token", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
 			WithJSON(models.Transaction{
@@ -240,7 +239,7 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("bad authentication token", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 
 		response := e.PUT(`/api/bank_accounts/1234/transactions/1234`).
 			WithCookie(TestCookieName, gofakeit.Generate("????????")).
@@ -255,21 +254,21 @@ func TestPutTransactions(t *testing.T) {
 	})
 
 	t.Run("spend from an expense with more than the transaction amount", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 		var token string
 		var bank models.BankAccount
 		var originalTransaction, transaction models.Transaction
-		now := time.Now()
+		now := app.Clock.Now()
 
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		timezone, err := user.Account.GetTimezone()
 		require.NoError(t, err, "must be able to read the account's timezone")
 		fundingRule := testutils.NewRuleSet(t, 2021, 12, 31, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 		spendingRuleOne := testutils.NewRuleSet(t, 2022, 1, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
 
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
-		bank = fixtures.GivenIHaveABankAccount(t, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
-		originalTransaction = fixtures.GivenIHaveATransaction(t, bank)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
+		bank = fixtures.GivenIHaveABankAccount(t, app.Clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		originalTransaction = fixtures.GivenIHaveATransaction(t, app.Clock, bank)
 		transaction = originalTransaction
 		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
 			AccountId:              user.AccountId,

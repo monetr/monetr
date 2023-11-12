@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/application"
 	"github.com/monetr/monetr/server/background"
@@ -22,19 +23,23 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/stripe_helper"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	ServeCommand.PersistentFlags().BoolVarP(&MigrateDatabaseFlag, "migrate", "m", false, "Automatically run database migrations on startup. Defaults to: false")
+	ServeCommand.PersistentFlags().BoolVarP(&GenerateCertificates, "generate-certificates", "g", false, "Generate certificates for authentication if they do not already exist. Defaults to: false")
 	ServeCommand.PersistentFlags().IntVarP(&PortFlag, "port", "p", 0, "Specify a port to serve HTTP traffic on for monetr.")
 	rootCommand.AddCommand(ServeCommand)
 }
 
 var (
-	PortFlag            int
-	MigrateDatabaseFlag = false
+	PortFlag             int
+	MigrateDatabaseFlag  = false
+	GenerateCertificates = false
 
 	ServeCommand = &cobra.Command{
 		Use:   "serve",
@@ -46,6 +51,7 @@ var (
 )
 
 func RunServer() error {
+	clock := clock.New()
 	configuration := config.LoadConfiguration()
 
 	if PortFlag > 0 {
@@ -55,6 +61,22 @@ func RunServer() error {
 	log := logging.NewLoggerWithConfig(configuration.Logging)
 	if configFileName := configuration.GetConfigFileName(); configFileName != "" {
 		log.WithField("config", configFileName).Info("config file loaded")
+	}
+
+	log.WithFields(logrus.Fields{
+		"privateKeyPath":       configuration.Security.PrivateKey,
+		"generateCertificates": GenerateCertificates,
+	}).Debug("loading certificates")
+	publicKey, privateKey, err := loadCertificates(configuration, GenerateCertificates)
+	if err != nil {
+		log.WithError(err).Fatal("failed to load ed25519 public and private key")
+		return err
+	}
+
+	clientTokens, err := security.NewPasetoClientTokens(log, clock, configuration.APIDomainName, publicKey, privateKey)
+	if err != nil {
+		log.WithError(err).Fatal("failed to init paseto client tokens interface")
+		return err
 	}
 
 	if configuration.Plaid.WebhooksEnabled {
@@ -156,7 +178,7 @@ func RunServer() error {
 			db,
 		)
 
-		basicPaywall = billing.NewBasicPaywall(log, accountRepo)
+		basicPaywall = billing.NewBasicPaywall(log, clock, accountRepo)
 	}
 
 	if configuration.Plaid.WebhooksEnabled {
@@ -187,6 +209,7 @@ func RunServer() error {
 	backgroundJobs, err := background.NewBackgroundJobs(
 		context.Background(),
 		log,
+		clock,
 		configuration,
 		db,
 		redisController.Pool(),
@@ -221,6 +244,8 @@ func RunServer() error {
 		plaidSecrets,
 		basicPaywall,
 		email,
+		clientTokens,
+		clock,
 	)...)
 
 	listenAddress := fmt.Sprintf("%s:%d", configuration.Server.ListenAddress, configuration.Server.ListenPort)

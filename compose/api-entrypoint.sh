@@ -8,6 +8,8 @@ else
     echo "[executor] cosmtrek/air is already installed, skipping..."
 fi
 
+[ ! -f "/build/build/ed25519.key" ] && openssl genpkey -algorithm ED25519 -out /build/build/ed25519.key
+[ -f "/build/build/ed25519.key" ] && chown -R $UID:$GID /build/build/ed25519.key
 
 if [ "$DISABLE_GO_RELOAD" == "true" ]
 then

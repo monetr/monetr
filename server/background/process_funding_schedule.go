@@ -2,8 +2,8 @@ package background
 
 import (
 	"context"
-	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
@@ -30,17 +30,20 @@ type ProcessFundingScheduleHandler struct {
 	db           *pg.DB
 	repo         repository.JobRepository
 	unmarshaller JobUnmarshaller
+	clock        clock.Clock
 }
 
 func NewProcessFundingScheduleHandler(
 	log *logrus.Entry,
 	db *pg.DB,
+	clock clock.Clock,
 ) *ProcessFundingScheduleHandler {
 	return &ProcessFundingScheduleHandler{
 		log:          log,
 		db:           db,
-		repo:         repository.NewJobRepository(db),
+		repo:         repository.NewJobRepository(db, clock),
 		unmarshaller: DefaultJobUnmarshaller,
+		clock:        clock,
 	}
 }
 
@@ -49,10 +52,12 @@ func (p ProcessFundingScheduleHandler) QueueName() string {
 }
 
 func (p *ProcessFundingScheduleHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
+	// TODO Move this into a constructor to make it consistent with the other job code.
 	job := &ProcessFundingScheduleJob{
-		args: ProcessFundingScheduleArguments{},
-		log:  p.log.WithContext(ctx),
-		repo: nil,
+		args:  ProcessFundingScheduleArguments{},
+		log:   p.log.WithContext(ctx),
+		repo:  nil,
+		clock: p.clock,
 	}
 
 	if err := errors.Wrap(p.unmarshaller(data, &job.args), "failed to unmarshal arguments"); err != nil {
@@ -68,7 +73,7 @@ func (p *ProcessFundingScheduleHandler) HandleConsumeJob(ctx context.Context, da
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
-		job.repo = repository.NewRepositoryFromSession(0, job.args.AccountId, txn)
+		job.repo = repository.NewRepositoryFromSession(p.clock, 0, job.args.AccountId, txn)
 		return job.Run(span.Context())
 	})
 }
@@ -134,9 +139,10 @@ type ProcessFundingScheduleArguments struct {
 }
 
 type ProcessFundingScheduleJob struct {
-	args ProcessFundingScheduleArguments
-	log  *logrus.Entry
-	repo repository.BaseRepository
+	args  ProcessFundingScheduleArguments
+	log   *logrus.Entry
+	repo  repository.BaseRepository
+	clock clock.Clock
 }
 
 func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
@@ -199,7 +205,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 			}
 		}
 
-		if !fundingSchedule.CalculateNextOccurrence(span.Context(), timezone) {
+		if !fundingSchedule.CalculateNextOccurrence(span.Context(), p.clock.Now(), timezone) {
 			crumbs.IndicateBug(span.Context(), "bug: funding schedule for processing occurs in the future", map[string]interface{}{
 				"nextOccurrence": fundingSchedule.NextOccurrence,
 			})
@@ -263,7 +269,7 @@ func (p *ProcessFundingScheduleJob) Run(ctx context.Context) error {
 					span.Context(),
 					account.Timezone,
 					fundingSchedule,
-					time.Now(),
+					p.clock.Now(),
 				); err != nil {
 					crumbs.Error(span.Context(), "Failed to calculate next contribution for spending", "spending", map[string]interface{}{
 						"fundingScheduleId": fundingScheduleId,

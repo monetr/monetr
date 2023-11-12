@@ -25,7 +25,7 @@ func TestPostTokenCallback(t *testing.T) {
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		publicToken := mock_plaid.MockExchangePublicToken(t)
@@ -53,9 +53,9 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
 		// We need to store a Plaid access token for this test.
 		secret := secrets.NewPostgresPlaidSecretsProvider(testutils.GetLog(t), testutils.GetPgDatabase(t), nil)
@@ -90,9 +90,9 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
 		// We need to store a Plaid access token for this test.
 		secret := secrets.NewPostgresPlaidSecretsProvider(testutils.GetLog(t), testutils.GetPgDatabase(t), nil)
@@ -123,9 +123,9 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 	})
 
 	t.Run("manual link", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.PUT("/api/plaid/link/update/{linkId}").
@@ -139,9 +139,9 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 	})
 
 	t.Run("no plaid access token", func(t *testing.T) {
-		e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		app, e := NewTestApplication(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		mock_plaid.MockCreateLinkToken(t)
@@ -157,7 +157,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 	})
 
 	t.Run("missing link ID", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT("/api/plaid/link/update/-1").
@@ -170,7 +170,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 	})
 
 	t.Run("bad link ID", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT("/api/plaid/link/update/0").
@@ -183,7 +183,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 	})
 
 	t.Run("missing link", func(t *testing.T) {
-		e := NewTestApplication(t)
+		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 
 		response := e.PUT("/api/plaid/link/update/123").
@@ -204,12 +204,12 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		var controller background.JobController = jobController
 
 		config := NewTestApplicationConfig(t)
-		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
+		app, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
 			JobController: &controller,
 		})
 
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		jobController.EXPECT().
@@ -243,12 +243,12 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		var controller background.JobController = jobController
 
 		config := NewTestApplicationConfig(t)
-		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
+		app, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
 			JobController: &controller,
 		})
 
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		jobController.EXPECT().
@@ -296,12 +296,12 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		var controller background.JobController = jobController
 
 		config := NewTestApplicationConfig(t)
-		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
+		app, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
 			JobController: &controller,
 		})
 
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAPlaidLink(t, user)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		jobController.EXPECT().
@@ -329,9 +329,9 @@ func TestPostSyncPlaidManually(t *testing.T) {
 	})
 
 	t.Run("invalid link ID", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 
-		user, password := fixtures.GivenIHaveABasicAccount(t)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/plaid/link/sync").
@@ -346,10 +346,10 @@ func TestPostSyncPlaidManually(t *testing.T) {
 	})
 
 	t.Run("manual link", func(t *testing.T) {
-		e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
 
-		user, password := fixtures.GivenIHaveABasicAccount(t)
-		link := fixtures.GivenIHaveAManualLink(t, user)
+		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
+		link := fixtures.GivenIHaveAManualLink(t, app.Clock, user)
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		response := e.POST("/api/plaid/link/sync").

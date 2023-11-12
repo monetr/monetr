@@ -120,7 +120,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
         # Now we need to actually build our test arguments. We want to have count=1 to make sure that tests are not
         # cached. This could maybe be turned into an option though? And we _need_ v=true in order to have any usable
         # output for gotestsum or if a test fails in general.
-        set(TEST_ARGS "-test.count=1" "-test.v")
+        set(TEST_ARGS "-test.count=1" "-test.v" "-test.timeout=30s")
         set(COVERAGE_FILE ${PACKAGE_COVERAGE_DIRECTORY}/${TEST_OUTPUT_FILE_NAME}.txt)
         if(TEST_COVERAGE)
           # Since we arent using the goofy binary format this might not be necessary?
@@ -138,6 +138,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
           FIXTURES_REQUIRED "DB;${PACKAGE};go.mocks"
           ENVIRONMENT "GOCOVERDIR=${PACKAGE_COVERAGE_DIRECTORY}"
           SKIP_REGULAR_EXPRESSION " SKIP: "
+          TIMEOUT 45
         )
       endforeach()
     endif()

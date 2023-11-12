@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
@@ -134,7 +133,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 	// Once we know that the next recurrence is not in the past we can just store it here;
 	// itll be sanitized and converted to midnight below.
 	next := spending.NextRecurrence
-	if next.Before(time.Now()) {
+	if next.Before(c.clock.Now()) {
 		requestSpan.Status = sentry.SpanStatusInvalidArgument
 		return c.badRequest(ctx, "next due date cannot be in the past")
 	}
@@ -166,7 +165,7 @@ func (c *Controller) postSpending(ctx echo.Context) error {
 		c.getContext(ctx),
 		account.Timezone,
 		fundingSchedule,
-		time.Now(),
+		c.clock.Now(),
 	); err != nil {
 		requestSpan.Status = sentry.SpanStatusInternalError
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate the next contribution for the new spending")
@@ -261,7 +260,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule,
-			time.Now(),
+			c.clock.Now(),
 		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 		}
@@ -292,7 +291,7 @@ func (c *Controller) postSpendingTransfer(ctx echo.Context) error {
 			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule,
-			time.Now(),
+			c.clock.Now(),
 		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution for source goal/expense")
 		}
@@ -420,7 +419,7 @@ func (c *Controller) putSpending(ctx echo.Context) error {
 			c.getContext(ctx),
 			account.Timezone,
 			fundingSchedule,
-			time.Now(),
+			c.clock.Now(),
 		); err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to calculate next contribution")
 		}
