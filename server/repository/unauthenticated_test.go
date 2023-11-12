@@ -8,17 +8,20 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/hash"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func GetTestUnauthenticatedRepository(t *testing.T, clock clock.Clock) repository.UnauthenticatedRepository {
-	txn := testutils.GetPgDatabaseTxn(t)
-	return repository.NewUnauthenticatedRepository(clock, txn)
+	db := testutils.GetPgDatabase(t)
+	return repository.NewUnauthenticatedRepository(clock, db)
 }
 
 func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
@@ -165,5 +168,146 @@ func TestUnauthenticatedRepo_ResetPassword(t *testing.T) {
 
 		err := repo.ResetPassword(context.Background(), math.MaxUint64, hash.HashPassword(testutils.GetUniqueEmail(t), "new Password"))
 		assert.EqualError(t, err, "no logins were updated", "should return an error for invalid login")
+	})
+}
+
+func seedLogin(t *testing.T, login *models.Login) {
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(gofakeit.Password(true, true, true, true, false, 16)),
+		consts.BcryptCost,
+	)
+	require.NoError(t, err, "must not have an error when generating the password")
+	loginWithPassword := models.LoginWithHash{
+		Login: *login,
+		Crypt: hashedPassword,
+	}
+
+	db := testutils.GetPgDatabase(t)
+	result, err := db.Model(&loginWithPassword).Insert(&loginWithPassword)
+	assert.NoError(t, err, "must insert login for test")
+	assert.Equal(t, 1, result.RowsAffected(), "must affect 1 row for the insert")
+
+	login.LoginId = loginWithPassword.LoginId
+}
+
+func TestEmailRepositoryBase_SetEmailVerified(t *testing.T) {
+	assertEmailVerified := func(t *testing.T, emailAddress string, verified bool) {
+		db := testutils.GetPgDatabase(t)
+		exists, err := db.Model(&models.Login{}).
+			Where(`"login"."email" = ?`, emailAddress).
+			Where(`"login"."is_email_verified" = ?`, verified).
+			Limit(1).
+			Exists()
+		assert.NoError(t, err, "must assert that the email is verified")
+		assert.True(t, exists, "login must be in the expected state")
+	}
+
+	t.Run("happy path", func(t *testing.T) {
+		clock := clock.NewMock()
+
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		seedLogin(t, &models.Login{
+			Email:           emailAddress,
+			FirstName:       gofakeit.FirstName(),
+			LastName:        gofakeit.LastName(),
+			IsEnabled:       true,
+			IsEmailVerified: false,
+		})
+
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		assertEmailVerified(t, emailAddress, repository.EmailNotVerified)
+
+		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		assert.NoError(t, err, "email must successfully be verified")
+
+		assertEmailVerified(t, emailAddress, repository.EmailVerified)
+	})
+
+	t.Run("login with email does not exist", func(t *testing.T) {
+		clock := clock.NewMock()
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		assert.EqualError(t, err, "email cannot be verified")
+	})
+
+	t.Run("email already verified", func(t *testing.T) {
+		clock := clock.NewMock()
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		seedLogin(t, &models.Login{
+			Email:           emailAddress,
+			FirstName:       gofakeit.FirstName(),
+			LastName:        gofakeit.LastName(),
+			IsEnabled:       true,
+			IsEmailVerified: true,
+		})
+
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		assertEmailVerified(t, emailAddress, repository.EmailVerified)
+
+		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		assert.EqualError(t, err, "email cannot be verified")
+
+		assertEmailVerified(t, emailAddress, repository.EmailVerified)
+	})
+
+	t.Run("login not enabled", func(t *testing.T) {
+		clock := clock.NewMock()
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		seedLogin(t, &models.Login{
+			Email:           emailAddress,
+			FirstName:       gofakeit.FirstName(),
+			LastName:        gofakeit.LastName(),
+			IsEnabled:       false,
+			IsEmailVerified: false,
+		})
+
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		assertEmailVerified(t, emailAddress, repository.EmailNotVerified)
+
+		err := repo.SetEmailVerified(context.Background(), emailAddress)
+		assert.EqualError(t, err, "email cannot be verified")
+
+		assertEmailVerified(t, emailAddress, repository.EmailNotVerified)
+	})
+}
+
+func TestEmailRepositoryBase_GetLoginForEmail(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		originalLogin := &models.Login{
+			Email:     emailAddress,
+			FirstName: gofakeit.FirstName(),
+			LastName:  gofakeit.LastName(),
+		}
+		seedLogin(t, originalLogin)
+
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		login, err := repo.GetLoginForEmail(context.Background(), emailAddress)
+		assert.NoError(t, err, "must retrieve login for email successfully")
+		assert.NotNil(t, login, "login result should not be nil")
+		assert.Equal(t, originalLogin.LoginId, login.LoginId, "login Id should match expected")
+	})
+
+	t.Run("email does not exist", func(t *testing.T) {
+		clock := clock.NewMock()
+		emailAddress := testutils.GetUniqueEmail(t)
+
+		repo := GetTestUnauthenticatedRepository(t, clock)
+
+		login, err := repo.GetLoginForEmail(context.Background(), emailAddress)
+		assert.EqualError(t, err, "failed to retrieve login by email: pg: no rows in result set")
+		assert.Nil(t, login, "login result should be nil")
 	})
 }

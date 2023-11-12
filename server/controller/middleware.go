@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/getsentry/sentry-go"
 	sentryecho "github.com/getsentry/sentry-go/echo"
@@ -93,9 +92,9 @@ func (c *Controller) removeCookieIfPresent(ctx echo.Context) {
 }
 
 func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
-	now := time.Now()
+	now := c.clock.Now()
+	log := c.getLog(ctx)
 	var token string
-
 	data := map[string]interface{}{
 		"source": "none",
 	}
@@ -148,6 +147,7 @@ func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
 		crumbs.Error(c.getContext(ctx), "failed to validate token", "authentication", map[string]interface{}{
 			"error": err,
 		})
+		log.WithError(err).Warn("invalid token provided")
 		return errors.New("token is not valid")
 	}
 

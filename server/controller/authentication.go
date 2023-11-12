@@ -482,10 +482,15 @@ func (c *Controller) verifyEndpoint(ctx echo.Context) error {
 		return c.badRequest(ctx, "Token cannot be blank")
 	}
 
-	panic("verify email address borken!")
-	// if err := c.emailVerification.UseEmailVerificationToken(c.getContext(ctx), verifyRequest.Token); err != nil {
-	// 	return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
-	// }
+	claims, err := c.clientTokens.Parse(security.VerifyEmailAudience, verifyRequest.Token)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
+	}
+
+	repo := c.mustGetUnauthenticatedRepository(ctx)
+	if err := repo.SetEmailVerified(c.getContext(ctx), claims.EmailAddress); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Invalid email verification")
+	}
 
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
 		"nextUrl": "/login",
@@ -751,7 +756,7 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 
 	// If the login's password has been changed since this token was issued, then this token is no longer valid. This
 	// will basically make sure that a token cannot be used twice.
-	if login.PasswordResetAt != nil && login.PasswordResetAt.After(resetClaims.CreatedAt()) {
+	if login.PasswordResetAt != nil && !login.PasswordResetAt.Before(resetClaims.CreatedAt) {
 		return c.badRequest(
 			ctx,
 			"Password has already been reset, you must request another password reset link.",

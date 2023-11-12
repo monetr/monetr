@@ -27,7 +27,7 @@ func GivenIHaveAFundingSchedule(t *testing.T, clock clock.Clock, bankAccount *mo
 	repo := repository.NewRepositoryFromSession(clock, bankAccount.Link.CreatedByUserId, bankAccount.AccountId, db)
 
 	timezone := testutils.MustEz(t, bankAccount.Account.GetTimezone)
-	rule := testutils.RuleToSet(t, timezone, ruleString)
+	rule := testutils.RuleToSet(t, timezone, ruleString, clock.Now())
 	nextOccurrence := util.Midnight(rule.After(clock.Now(), false), timezone)
 
 	fundingSchedule := models.FundingSchedule{

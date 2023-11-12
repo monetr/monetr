@@ -204,7 +204,7 @@ func (c *Controller) putFundingSchedules(ctx echo.Context) error {
 		// The user cannot override the next occurrence for a funding schedule and have it be in the past. If they set it to
 		// be in the future then that is okay. The next time the funding schedule is processed it will be relative to that
 		// next occurrence.
-		if request.NextOccurrence.Before(time.Now()) {
+		if request.NextOccurrence.Before(c.clock.Now()) {
 			request.NextOccurrence = existingFundingSchedule.NextOccurrence
 			request.NextOccurrenceOriginal = existingFundingSchedule.NextOccurrenceOriginal
 		} else {

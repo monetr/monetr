@@ -1,7 +1,9 @@
 package controller_test
 
 import (
-	"context"
+	"crypto/ed25519"
+	"crypto/rand"
+	"math"
 	"net/http"
 	"testing"
 	"time"
@@ -13,7 +15,7 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/mock_stripe"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/verification"
+	"github.com/monetr/monetr/server/security"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -76,7 +78,7 @@ func TestLogin(t *testing.T) {
 				WithJSON(map[string]interface{}{
 					"email":    user.Login.Email,
 					"password": password,
-					"totp":     loginTotp.Now(),
+					"totp":     loginTotp.At(int(app.Clock.Now().Unix())),
 				}).
 				Expect()
 
@@ -157,7 +159,7 @@ func TestLogin(t *testing.T) {
 		response.JSON().Object().NotContainsKey("token")
 	})
 
-	t.Run("multiple users", func(t *testing.T) {
+	t.Run("multiple users not implemented", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		// Creating the login fixture directly prevents it from also creating a user and an account.
 		login, password := fixtures.GivenIHaveLogin(t, app.Clock)
@@ -174,10 +176,7 @@ func TestLogin(t *testing.T) {
 			}).
 			Expect()
 
-		response.Status(http.StatusOK)
-		AssertSetTokenCookie(t, response)
-		response.JSON().Path("$.users").Array().Length().IsEqual(2) // Should have 2 accounts.
-		response.JSON().Path("$.users..accountId").Array().ContainsAll(user1.AccountId, user1.AccountId)
+		response.Status(http.StatusBadRequest)
 	})
 
 	t.Run("invalid email", func(t *testing.T) {
@@ -772,38 +771,6 @@ func TestRegister(t *testing.T) {
 			IsEqual("A verification email has been sent to your email address, please verify your email.")
 		response.JSON().Object().NotContainsKey("token")
 	})
-
-	t.Run("verification token lifespan is too short", func(t *testing.T) {
-		config := NewTestApplicationConfig(t)
-		config.Email.Enabled = true
-		config.Email.Verification.Enabled = true
-		config.Email.Verification.TokenLifetime = 1 * time.Millisecond
-		config.Email.Verification.TokenSecret = gofakeit.Generate("????????????????????????")
-		config.Email.Domain = "monetr.mini"
-		_, e := NewTestApplicationWithConfig(t, config)
-
-		var registerRequest struct {
-			Email     string `json:"email"`
-			Password  string `json:"password"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-		}
-		registerRequest.Email = testutils.GetUniqueEmail(t)
-		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
-		registerRequest.FirstName = gofakeit.FirstName()
-		registerRequest.LastName = gofakeit.LastName()
-
-		response := e.POST(`/api/authentication/register`).
-			WithJSON(registerRequest).
-			Expect()
-
-		response.Status(http.StatusInternalServerError)
-		response.JSON().
-			Path("$.error").
-			String().
-			IsEqual("could not generate email verification token")
-		response.JSON().Object().NotContainsKey("token")
-	})
 }
 
 func TestVerifyEmail(t *testing.T) {
@@ -816,8 +783,6 @@ func TestVerifyEmail(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
-
-		tokenGenerator := verification.NewTokenGenerator(config.Email.Verification.TokenSecret, app.Clock)
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -858,7 +823,16 @@ func TestVerifyEmail(t *testing.T) {
 		}
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), registerRequest.Email, 10*time.Second)
+			verificationToken, err := app.Tokens.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: registerRequest.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
@@ -887,10 +861,15 @@ func TestVerifyEmail(t *testing.T) {
 	})
 
 	t.Run("bad verification token", func(t *testing.T) {
+		log := testutils.GetLog(t)
 		app, e := NewTestApplicationWithConfig(t, config)
 
 		// Create a token generator with a different secret so it will always generate invalid tokens.
-		tokenGenerator := verification.NewTokenGenerator(gofakeit.UUID(), app.Clock)
+		publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
+		assert.NoError(t, err, "must be able to generate keys")
+
+		tokenGenerator, err := security.NewPasetoClientTokens(log, app.Clock, "monetr.local", publicKey, privateKey)
+		assert.NoError(t, err, "must be able to init the client tokens interface")
 
 		var registerRequest struct {
 			Email     string `json:"email"`
@@ -919,7 +898,16 @@ func TestVerifyEmail(t *testing.T) {
 		}
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), registerRequest.Email, 10*time.Second)
+			verificationToken, err := tokenGenerator.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: registerRequest.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
@@ -952,8 +940,6 @@ func TestVerifyEmail(t *testing.T) {
 	t.Run("expired verification code", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, config)
 
-		tokenGenerator := verification.NewTokenGenerator(config.Email.Verification.TokenSecret, app.Clock)
-
 		var registerRequest struct {
 			Email     string `json:"email"`
 			Password  string `json:"password"`
@@ -981,11 +967,20 @@ func TestVerifyEmail(t *testing.T) {
 		}
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), registerRequest.Email, 1*time.Second)
+			verificationToken, err := app.Tokens.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: registerRequest.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
-			app.Clock.Add(2 * time.Second) // Make the code expire
+			app.Clock.Add(10 * time.Minute) // Make the code expire
 
 			response := e.POST("/api/authentication/verify").
 				WithJSON(map[string]interface{}{
@@ -1214,7 +1209,6 @@ func TestSendForgotPassword(t *testing.T) {
 		verificationConf.Email.Verification.TokenLifetime = time.Second * 10
 		verificationConf.Email.Verification.TokenSecret = gofakeit.UUID()
 		app, e := NewTestApplicationWithConfig(t, verificationConf)
-		tokenGenerator := verification.NewTokenGenerator(verificationConf.Email.Verification.TokenSecret, app.Clock)
 
 		MustSendVerificationEmail(t, app, 1)
 
@@ -1226,7 +1220,17 @@ func TestSendForgotPassword(t *testing.T) {
 		resetPasswordRequest.Email = email
 
 		{ // Then generate a verification token and try to use it.
-			verificationToken, err := tokenGenerator.GenerateToken(context.Background(), email, 10*time.Second)
+			verificationToken, err := app.Tokens.Create(
+				security.VerifyEmailAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: email,
+					UserId:       0,
+					AccountId:    0,
+					// TODO At some point this will break because the login Id will be required.
+					LoginId: 0,
+				},
+			)
 			assert.NoError(t, err, "must generate verification token")
 			assert.NotEmpty(t, verificationToken, "verification token must not be empty")
 
@@ -1326,7 +1330,6 @@ func TestResetPassword(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
-		tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret, app.Clock)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 
 		{ // Make sure we can log in with the current password.
@@ -1346,7 +1349,16 @@ func TestResetPassword(t *testing.T) {
 		assert.NotEqual(t, password, newPassword, "make sure the new password does not match the old one")
 
 		{ // Reset the password.
-			token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+			token, err := app.Tokens.Create(
+				security.ResetPasswordAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: user.Login.Email,
+					UserId:       0,
+					AccountId:    0,
+					LoginId:      user.LoginId,
+				},
+			)
 			assert.NoError(t, err, "must be able to generate a password reset token")
 
 			response := e.POST(`/api/authentication/reset`).
@@ -1389,12 +1401,31 @@ func TestResetPassword(t *testing.T) {
 	t.Run("invalidates multiple tokens after reset", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret, app.Clock)
 
-		firstToken, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		firstToken, err := app.Tokens.Create(
+			security.ResetPasswordAudience,
+			5*time.Minute,
+			security.Claims{
+				EmailAddress: user.Login.Email,
+				UserId:       0,
+				AccountId:    0,
+				LoginId:      user.LoginId,
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
-		secondToken, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		app.Clock.Add(1 * time.Second)
+
+		secondToken, err := app.Tokens.Create(
+			security.ResetPasswordAudience,
+			5*time.Minute,
+			security.Claims{
+				EmailAddress: user.Login.Email,
+				UserId:       0,
+				AccountId:    0,
+				LoginId:      user.LoginId,
+			},
+		)
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Make sure the issued_at on the tokens are definitely in the past.
@@ -1434,9 +1465,13 @@ func TestResetPassword(t *testing.T) {
 	t.Run("token cannot be used twice", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret, app.Clock)
 
-		token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*5)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: user.Login.Email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      user.LoginId,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Generate a new password to reset to.
@@ -1473,13 +1508,17 @@ func TestResetPassword(t *testing.T) {
 	t.Run("token must not be expired", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
 		user, _ := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret, app.Clock)
 
-		token, err := tokenGenerator.GenerateToken(context.Background(), user.Login.Email, time.Second*1)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: user.Login.Email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      user.LoginId,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		// Wait for the token to expire.
-		app.Clock.Add(2 * time.Second)
+		app.Clock.Add(30 * time.Second)
 
 		// Generate a new password to reset to.
 		newPassword := gofakeit.Generate("????????")
@@ -1502,10 +1541,13 @@ func TestResetPassword(t *testing.T) {
 
 	t.Run("reset password login does not exist", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
-		tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret, app.Clock)
-
 		email := testutils.GetUniqueEmail(t)
-		token, err := tokenGenerator.GenerateToken(context.Background(), email, time.Second*5)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      math.MaxInt32,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		response := e.POST(`/api/authentication/reset`).
@@ -1549,10 +1591,13 @@ func TestResetPassword(t *testing.T) {
 
 	t.Run("password too short", func(t *testing.T) {
 		app, e := NewTestApplicationWithConfig(t, conf)
-		tokenGenerator := verification.NewTokenGenerator(conf.Email.ForgotPassword.TokenSecret, app.Clock)
-
 		email := testutils.GetUniqueEmail(t)
-		token, err := tokenGenerator.GenerateToken(context.Background(), email, time.Second*5)
+		token, err := app.Tokens.Create(security.ResetPasswordAudience, 5*time.Second, security.Claims{
+			EmailAddress: email,
+			UserId:       0,
+			AccountId:    0,
+			LoginId:      math.MaxInt32,
+		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
 		response := e.POST(`/api/authentication/reset`).

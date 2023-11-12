@@ -21,15 +21,13 @@ const (
 )
 
 type Claims struct {
+	// CreatedAt represents the timestamp the token was created, if this field is provided by a caller it will be
+	// overwritten.
+	CreatedAt    time.Time `json:"createdAt"`
 	EmailAddress string    `json:"string"`
-	UserId       uint64    `json:"userId"`
-	AccountId    uint64    `json:"accountId"`
-	LoginId      uint64    `json:"loginId"`
-	createdAt    time.Time `json:"createdAt"`
-}
-
-func (c Claims) CreatedAt() time.Time {
-	return c.createdAt
+	UserId       uint64    `json:"userId,string"`
+	AccountId    uint64    `json:"accountId,string"`
+	LoginId      uint64    `json:"loginId,string"`
 }
 
 type ClientTokens interface {
@@ -118,9 +116,13 @@ func (p *pasetoClientTokens) Create(audience Audience, lifetime time.Duration, c
 	token.SetIssuedAt(now)
 	token.SetNotBefore(now)
 	token.SetIssuer(p.issuer)
-	claims.createdAt = p.clock.Now()
-	token.Set("claims", claims)
-	token.SetSubject(claims.EmailAddress)
+	c := claims
+	c.CreatedAt = p.clock.Now()
+	err := token.Set("claims", c)
+	if err != nil {
+		panic(err)
+	}
+	token.SetSubject(c.EmailAddress)
 	token.SetFooter([]byte(fmt.Sprintf("monetr %s - %s", build.Release, build.Revision)))
 
 	result := token.V4Sign(p.pri, nil)

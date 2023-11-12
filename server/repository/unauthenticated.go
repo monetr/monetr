@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/consts"
@@ -23,8 +24,16 @@ var (
 	_ UnauthenticatedRepository = &unauthenticatedRepo{}
 )
 
+type EmailVerification = bool
+
+const (
+	EmailVerified    EmailVerification = true
+	EmailNotVerified EmailVerification = false
+)
+
 type unauthenticatedRepo struct {
 	txn pg.DBI
+	clock clock.Clock
 }
 
 func (u *unauthenticatedRepo) CreateLogin(
@@ -108,7 +117,43 @@ func (u *unauthenticatedRepo) CreateUser(ctx context.Context, loginId, accountId
 }
 
 func (u *unauthenticatedRepo) GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error) {
-	return getLoginForEmail(ctx, u.txn, emailAddress)
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var login models.Login
+	err := u.txn.ModelContext(span.Context(), &login).
+		Where(`"login"."email" = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
+		Limit(1).
+		Select(&login)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to retrieve login by email")
+	}
+
+	return &login, nil
+}
+
+func (u *unauthenticatedRepo) SetEmailVerified(ctx context.Context, emailAddress string) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var login models.Login
+	result, err := u.txn.ModelContext(span.Context(), &login).
+		Set(`"is_email_verified" = ?`, EmailVerified).               // Change the verification to true.
+		Set(`"email_verified_at" = ?`, u.clock.Now().UTC()).            // Set the verified at time to now.
+		Where(`"login"."email" = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
+		Where(`"login"."is_enabled" = ?`, true).                     // Only if the login is actually enabled.
+		Where(`"login"."is_email_verified" = ?`, EmailNotVerified).  // And only if the login is not already verified.
+		Limit(1).
+		Update()
+	if err != nil {
+		return errors.Wrap(err, "failed to verify email")
+	}
+
+	if result.RowsAffected() != 1 {
+		return errors.New("email cannot be verified")
+	}
+
+	return nil
 }
 
 func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error) {
@@ -198,7 +243,7 @@ func (u *unauthenticatedRepo) ResetPassword(ctx context.Context, loginId uint64,
 
 	result, err := u.txn.ModelContext(span.Context(), &models.LoginWithHash{}).
 		Set(`"crypt" = ?`, hashedPassword).
-		Set(`"password_reset_at" = ?`, time.Now()).
+		Set(`"password_reset_at" = ?`, u.clock.Now()).
 		Where(`"login_with_hash"."login_id" = ?`, loginId).
 		Update()
 	if err != nil {

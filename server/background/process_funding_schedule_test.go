@@ -32,7 +32,7 @@ func TestProcessFundingScheduleJob_Run(t *testing.T) {
 		testutils.MustDBUpdate(t, fundingSchedule)
 		assert.Greater(t, clock.Now(), fundingSchedule.NextOccurrence, "next occurrence must be in the past")
 
-		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR")
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=2;BYDAY=FR", clock.Now())
 		// spendingRule.DTStart(time.Now().Add(14 * 24 * time.Hour))
 		nextDue := spendingRule.After(clock.Now(), false)
 

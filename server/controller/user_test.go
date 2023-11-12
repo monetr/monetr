@@ -80,7 +80,7 @@ func TestMe(t *testing.T) {
 			StripePriceId: mock_stripe.FakeStripePriceId(t),
 			Default:       true,
 		}
-		_, e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
 
 		token := GivenIHaveToken(t, e)
 		{ // Then retrieve "me".
@@ -95,8 +95,8 @@ func TestMe(t *testing.T) {
 			response.JSON().Path("$.hasSubscription").Boolean().IsFalse()
 			response.JSON().Path("$.isTrialing").Boolean().IsTrue()
 			response.JSON().Path("$.trialingUntil").String().AsDateTime().
-				Gt(time.Now().AddDate(0, 0, 14)).
-				Lt(time.Now().AddDate(0, 0, 16))
+				Gt(app.Clock.Now().AddDate(0, 0, 14)).
+				Lt(app.Clock.Now().AddDate(0, 0, 16))
 			// Should not have the nextUrl key when billing is not enabled.
 			response.JSON().Object().NotContainsKey("nextUrl")
 		}

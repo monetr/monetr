@@ -255,8 +255,8 @@ func TestPutFundingSchedules(t *testing.T) {
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
 			ruleset := testutils.Must(t, models.NewRuleSet, FirstDayOfEveryMonth)
 			nextRecurrence := ruleset.After(now, false)
-			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
+			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 
 			response := e.POST("/api/bank_accounts/{bankAccountId}/spending").
 				WithPath("bankAccountId", bank.BankAccountId).
@@ -281,9 +281,9 @@ func TestPutFundingSchedules(t *testing.T) {
 		}
 
 		{ // Now update the rule on the funding schedule and the next occurrence
-			newFundingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR")
+			newFundingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR", app.Clock.Now())
 
-			next := newFundingRule.After(now, false)
+			next := util.Midnight(newFundingRule.After(now, false), timezone)
 			response := e.PUT("/api/bank_accounts/{bankAccountId}/funding_schedules/{fundingScheduleId}").
 				WithPath("bankAccountId", bank.BankAccountId).
 				WithPath("fundingScheduleId", fundingScheduleId).
@@ -360,7 +360,7 @@ func TestDeleteFundingSchedules(t *testing.T) {
 		{ // Create an expense
 			now := app.Clock.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			ruleset := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+			ruleset := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1", app.Clock.Now())
 			nextRecurrence := ruleset.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)

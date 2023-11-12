@@ -23,7 +23,7 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
 
-		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		fundingRule := testutils.RuleToSet(t, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1", clock.Now())
 		fundingSchedule := testutils.MustInsert(t, models.FundingSchedule{
 			AccountId:              bankAccount.AccountId,
 			BankAccountId:          bankAccount.BankAccountId,
@@ -34,7 +34,7 @@ func TestProcessSpendingJob_Run(t *testing.T) {
 			NextOccurrenceOriginal: fundingRule.After(clock.Now(), false),
 		})
 
-		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO")
+		spendingRule := testutils.RuleToSet(t, timezone, "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO", clock.Now())
 		spendingRule.DTStart(clock.Now().Add(-8 * 24 * time.Hour)) // Allow past times.
 		spending := testutils.MustInsert(t, models.Spending{
 			AccountId:         bankAccount.AccountId,
