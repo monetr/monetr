@@ -11,7 +11,7 @@ module.exports = (env, _argv) => {
 
   // HMR replacement gets **fucked** if we are using content hash. So use name when we are
   // in development mode.
-  let filename = '[name]'; // isDevelopment ? '[name]' : '[contenthash]';
+  let filename = isDevelopment ? '[name]' : '[contenthash]';
 
   // Make it so that the websocket still works if we are running yarn start normally.
   const wsProto = process.env.WS_PROTO || 'ws';
