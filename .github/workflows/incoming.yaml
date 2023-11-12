@@ -111,6 +111,14 @@ jobs:
         run: |
           make test
 
+      - name: CodeCov
+        if: always()
+        uses: codecov/codecov-action@v3
+        with:
+          name: monetr
+          directory: ${{ github.workspace }}/build/tests
+          root_dir: ${{ github.workspace }}
+
   container:
     name: Container
     runs-on: ubuntu-latest
@@ -178,31 +186,6 @@ jobs:
           make develop || (make logs && exit 1)
           curl -k https://monetr.local
           make shutdown
-
-  # codecov:
-  #   name: CodeCov
-  #   needs:
-  #     - go_test
-  #     - ui_test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/download-artifact@v3
-  #       name: Download Go Coverage Artifacts
-  #       with:
-  #         name: '${{ github.sha }}-go-coverage'
-  #         path: '${{ github.workspace }}/coverage'
-  #     - uses: actions/download-artifact@v3
-  #       name: Download UI Coverage Artifacts
-  #       with:
-  #         name: '${{ github.sha }}-ui-coverage'
-  #         path: '${{ github.workspace }}/coverage'
-  #     - name: CodeCov
-  #       if: always()
-  #       uses: codecov/codecov-action@v3
-  #       with:
-  #         files: '${{ github.workspace }}/coverage/clover.xml,${{ github.workspace }}/coverage/coverage.txt'
-  #         name: monetr
 
   docs:
     name: Documentation
