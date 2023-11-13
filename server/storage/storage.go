@@ -2,7 +2,10 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"io"
+
+	"github.com/google/uuid"
 )
 
 // Storage is the interface for reading and writing files presented to monetr by clients. These files might be images,
@@ -22,4 +25,11 @@ type Storage interface {
 	// the provided URI is an S3 protocol, then this would return an error for protocol mismatch. If a file can be read
 	// then an buffer will be returned for that file.
 	Read(ctx context.Context, uri string) (buf io.ReadCloser, err error)
+}
+
+func getStorePath() string {
+	chunk := uuid.NewString()
+	name := uuid.NewString()
+	key := fmt.Sprintf("%s/%s.[FILETYPE]", chunk, name)
+	return key
 }
