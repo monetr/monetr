@@ -16,7 +16,7 @@ type Storage interface {
 	// Depending on the implementation the file may still be present in whatever storage system even if the file was not
 	// successfully stored. This should be considered on a per-implementation basis as it will be unique to the
 	// implementation itself.
-	Store(ctx context.Context, buf io.ReadCloser) (uri string, err error)
+	Store(ctx context.Context, buf io.ReadSeekCloser) (uri string, err error)
 	// Read will take a file URI and will read it from the underlying storage system. If the URI provided is not for the
 	// storage interface under this then an error will be returned. For example; if this is backed by a file system but
 	// the provided URI is an S3 protocol, then this would return an error for protocol mismatch. If a file can be read
