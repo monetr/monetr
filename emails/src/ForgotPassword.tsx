@@ -62,10 +62,12 @@ export const ForgotPassword = ({
             </Text>
             <Section className='text-center mt-9 mb-9'>
               <Button
-                className='bg-purple-500 rounded-lg text-white text-sm font-semibold no-underline text-center px-5 py-3'
+                className='bg-purple-500 rounded-lg text-white text-sm font-semibold no-underline text-center'
                 href={ resetUrl }
               >
-                Reset password
+                <Text className='text-sm text-white m-2'>
+                  Reset password
+                </Text>
               </Button>
             </Section>
             <Hr className='border border-solid border-[#eaeaea] my-6 mx-0 w-full' />

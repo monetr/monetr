@@ -63,10 +63,12 @@ export const VerifyEmailAddress = ({
             </Text>
             <Section className='text-center mt-9 mb-9'>
               <Button
-                className='bg-purple-500 rounded-lg text-white text-sm font-semibold no-underline text-center px-5 py-3'
+                className='bg-purple-500 rounded-lg text-white text-sm font-semibold no-underline text-center'
                 href={ inviteLink }
               >
-                Verify email address
+                <Text className='text-sm text-white m-2'>
+                  Verify email address
+                </Text>
               </Button>
             </Section>
             <Hr className='border border-solid border-[#eaeaea] my-6 mx-0 w-full' />
