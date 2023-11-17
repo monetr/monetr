@@ -46,6 +46,26 @@ func TestCompare(t *testing.T) {
 				},
 			},
 		},
+		"SmithWatermanGotoh gap=-0.1 match=1 mismatch=-0.25": &transactionComparatorBase{
+			impl: &metrics.SmithWatermanGotoh{
+				CaseSensitive: false,
+				GapPenalty:    -0.1,
+				Substitution: metrics.MatchMismatch{
+					Match:    1,
+					Mismatch: -0.25,
+				},
+			},
+		},
+		"SmithWatermanGotoh gap=-0.25 match=1 mismatch=-0.25": &transactionComparatorBase{
+			impl: &metrics.SmithWatermanGotoh{
+				CaseSensitive: false,
+				GapPenalty:    -0.25,
+				Substitution: metrics.MatchMismatch{
+					Match:    1,
+					Mismatch: -0.25,
+				},
+			},
+		},
 		"SorensenDice ngram=0": &transactionComparatorBase{
 			impl: &metrics.SorensenDice{
 				CaseSensitive: false,
@@ -313,9 +333,8 @@ func TestCompare(t *testing.T) {
 		},
 		{
 			Name:       "Goofy Google Cloud",
-			BaselineId: 289,
+			BaselineId: 72,
 			Matches: []uint64{
-				72,
 				73,
 				61,
 				62,
@@ -334,6 +353,9 @@ func TestCompare(t *testing.T) {
 				745,
 				744,
 				766,
+
+				// Deposit
+				82,
 			},
 		},
 	}
@@ -409,6 +431,7 @@ func TestCompare(t *testing.T) {
 				}
 
 				fmt.Printf("\n=====================Comparison Results!=====================\n")
+				fmt.Printf("\tTest: %s\n\n", t.Name())
 				fmt.Printf("\tHighest Wrong Score!\n")
 				fmt.Printf("\tKind: %s\n", highestBad.Kind)
 				fmt.Printf("\tScore: %f\n", highestBad.Score)

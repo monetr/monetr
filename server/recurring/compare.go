@@ -24,6 +24,9 @@ func (t *transactionComparatorBase) CompareTransactionName(a, b Transaction) flo
 	nameA := a.OriginalName
 	nameB := b.OriginalName
 
+	nameA = strings.ReplaceAll(nameA, "Merchant name: ", "")
+	nameB = strings.ReplaceAll(nameB, "Merchant name: ", "")
+
 	pattern := regexp.MustCompile(`[a-zA-Z\d_-]+`)
 	nameAParts := pattern.FindAllString(nameA, len(nameA))
 	nameBParts := pattern.FindAllString(nameB, len(nameB))
