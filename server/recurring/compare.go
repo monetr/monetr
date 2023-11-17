@@ -19,13 +19,13 @@ type TransactionMerchantComparator interface {
 	CompareTransactionMerchant(a, b Transaction) float64
 }
 
-// sanitizeString takes an input string and removes all non alphanumeric characters except for underscore and dash.
+// sanitizeString takes an input string and removes all non-alphanumeric characters except for underscore and dash.
 func sanitizeString(input string) string {
 	parts := cleanStringRegex.FindAllString(input, len(input))
 	return strings.Join(parts, " ")
 }
 
-// equalizeLengths takes two input strings and determines which one is shorter. It then appends a non-sensical character
+// equalizeLengths takes two input strings and determines which one is shorter. It then appends a nonsensical character
 // to the end of the shorter string to make the two strings equal lengths. This can help make certain text comparison
 // algorithms more accurate.
 func equalizeLengths(a, b string) (string, string) {
