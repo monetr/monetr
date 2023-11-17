@@ -12,6 +12,7 @@ import (
 
 func TestCompare(t *testing.T) {
 	debug := false
+	verbose := false
 	individualFailures := false
 	data := GetFixtures(t, "monetr_sample_data_1.json")
 
@@ -21,6 +22,8 @@ func TestCompare(t *testing.T) {
 		CorrectMatches   int
 		IncorrectMatches int
 		TotalComparisons int
+		FalsePositives   int
+		FalseNegatives   int
 		LowestCorrect    float64
 		HighestIncorrect float64
 	}
@@ -30,6 +33,9 @@ func TestCompare(t *testing.T) {
 		CorrectMatches   int
 		IncorrectMatches int
 		TotalComparisons int
+		Threshold        float64
+		FalsePositives   int
+		FalseNegatives   int
 		DataSets         map[string]SubResult
 		Comparator       string
 	}
@@ -42,6 +48,12 @@ func TestCompare(t *testing.T) {
 				CaseSensitive: false,
 			},
 		},
+		"Hamming EqualLengths": &transactionComparatorBase{
+			impl: &metrics.Hamming{
+				CaseSensitive: false,
+			},
+			equalizeLengths: true,
+		},
 		"Levenshtein insert=1 replace=2 delete=1": &transactionComparatorBase{
 			impl: &metrics.Levenshtein{
 				CaseSensitive: false,
@@ -50,15 +62,36 @@ func TestCompare(t *testing.T) {
 				DeleteCost:    1,
 			},
 		},
+		"Levenshtein insert=1 replace=2 delete=1 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.Levenshtein{
+				CaseSensitive: false,
+				InsertCost:    1,
+				ReplaceCost:   2,
+				DeleteCost:    1,
+			},
+			equalizeLengths: true,
+		},
 		"Jaro": &transactionComparatorBase{
 			impl: &metrics.Jaro{
 				CaseSensitive: false,
 			},
 		},
+		"Jaro EqualLengths": &transactionComparatorBase{
+			impl: &metrics.Jaro{
+				CaseSensitive: false,
+			},
+			equalizeLengths: true,
+		},
 		"JaroWinkler": &transactionComparatorBase{
 			impl: &metrics.JaroWinkler{
 				CaseSensitive: false,
 			},
+		},
+		"JaroWinkler EqualLengths": &transactionComparatorBase{
+			impl: &metrics.JaroWinkler{
+				CaseSensitive: false,
+			},
+			equalizeLengths: true,
 		},
 		"SmithWatermanGotoh gap=-0.1 match=1 mismatch=-0.5": &transactionComparatorBase{
 			impl: &metrics.SmithWatermanGotoh{
@@ -90,11 +123,38 @@ func TestCompare(t *testing.T) {
 				},
 			},
 		},
-		"SorensenDice ngram=0": &transactionComparatorBase{
-			impl: &metrics.SorensenDice{
+		"SmithWatermanGotoh gap=-0.1 match=1 mismatch=-0.5 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.SmithWatermanGotoh{
 				CaseSensitive: false,
-				NgramSize:     0,
+				GapPenalty:    -0.1,
+				Substitution: metrics.MatchMismatch{
+					Match:    1,
+					Mismatch: -0.5,
+				},
 			},
+			equalizeLengths: true,
+		},
+		"SmithWatermanGotoh gap=-0.1 match=1 mismatch=-0.25 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.SmithWatermanGotoh{
+				CaseSensitive: false,
+				GapPenalty:    -0.1,
+				Substitution: metrics.MatchMismatch{
+					Match:    1,
+					Mismatch: -0.25,
+				},
+			},
+			equalizeLengths: true,
+		},
+		"SmithWatermanGotoh gap=-0.25 match=1 mismatch=-0.25 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.SmithWatermanGotoh{
+				CaseSensitive: false,
+				GapPenalty:    -0.25,
+				Substitution: metrics.MatchMismatch{
+					Match:    1,
+					Mismatch: -0.25,
+				},
+			},
+			equalizeLengths: true,
 		},
 		"SorensenDice ngram=1": &transactionComparatorBase{
 			impl: &metrics.SorensenDice{
@@ -120,11 +180,33 @@ func TestCompare(t *testing.T) {
 				NgramSize:     4,
 			},
 		},
-		"Jaccard ngram=0": &transactionComparatorBase{
-			impl: &metrics.Jaccard{
+		"SorensenDice ngram=1 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.SorensenDice{
 				CaseSensitive: false,
-				NgramSize:     0,
+				NgramSize:     1,
 			},
+			equalizeLengths: true,
+		},
+		"SorensenDice ngram=2 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.SorensenDice{
+				CaseSensitive: false,
+				NgramSize:     2,
+			},
+			equalizeLengths: true,
+		},
+		"SorensenDice ngram=3 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.SorensenDice{
+				CaseSensitive: false,
+				NgramSize:     3,
+			},
+			equalizeLengths: true,
+		},
+		"SorensenDice ngram=4 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.SorensenDice{
+				CaseSensitive: false,
+				NgramSize:     4,
+			},
+			equalizeLengths: true,
 		},
 		"Jaccard ngram=1": &transactionComparatorBase{
 			impl: &metrics.Jaccard{
@@ -150,11 +232,33 @@ func TestCompare(t *testing.T) {
 				NgramSize:     4,
 			},
 		},
-		"OverlapCoefficient ngram=0": &transactionComparatorBase{
-			impl: &metrics.OverlapCoefficient{
+		"Jaccard ngram=1 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.Jaccard{
 				CaseSensitive: false,
-				NgramSize:     0,
+				NgramSize:     1,
 			},
+			equalizeLengths: true,
+		},
+		"Jaccard ngram=2 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.Jaccard{
+				CaseSensitive: false,
+				NgramSize:     2,
+			},
+			equalizeLengths: true,
+		},
+		"Jaccard ngram=3 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.Jaccard{
+				CaseSensitive: false,
+				NgramSize:     3,
+			},
+			equalizeLengths: true,
+		},
+		"Jaccard ngram=4 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.Jaccard{
+				CaseSensitive: false,
+				NgramSize:     4,
+			},
+			equalizeLengths: true,
 		},
 		"OverlapCoefficient ngram=1": &transactionComparatorBase{
 			impl: &metrics.OverlapCoefficient{
@@ -173,6 +277,40 @@ func TestCompare(t *testing.T) {
 				CaseSensitive: false,
 				NgramSize:     3,
 			},
+		},
+		"OverlapCoefficient ngram=4": &transactionComparatorBase{
+			impl: &metrics.OverlapCoefficient{
+				CaseSensitive: false,
+				NgramSize:     4,
+			},
+		},
+		"OverlapCoefficient ngram=1 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.OverlapCoefficient{
+				CaseSensitive: false,
+				NgramSize:     1,
+			},
+			equalizeLengths: true,
+		},
+		"OverlapCoefficient ngram=2 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.OverlapCoefficient{
+				CaseSensitive: false,
+				NgramSize:     2,
+			},
+			equalizeLengths: true,
+		},
+		"OverlapCoefficient ngram=3 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.OverlapCoefficient{
+				CaseSensitive: false,
+				NgramSize:     3,
+			},
+			equalizeLengths: true,
+		},
+		"OverlapCoefficient ngram=4 EqualLengths": &transactionComparatorBase{
+			impl: &metrics.OverlapCoefficient{
+				CaseSensitive: false,
+				NgramSize:     4,
+			},
+			equalizeLengths: true,
 		},
 	}
 
@@ -443,120 +581,281 @@ func TestCompare(t *testing.T) {
 		Score float64
 	}
 
-	desiredMatch := 0.5
-
-	for name, compare := range comparors {
-		for _, input := range testInput {
-			t.Run(fmt.Sprintf("%s - %s", input.Name, name), func(t *testing.T) {
-				subResult := SubResult{
-					Dataset:          input.Name,
-					OverallAccuracy:  0,
-					CorrectMatches:   0,
-					IncorrectMatches: 0,
-					TotalComparisons: len(data),
-				}
-				baseline := getTransaction(input.BaselineId)
-				var highestBad, lowestGood Score
-				var correctMatches int
-				for _, other := range data {
-					if other.TransactionId == baseline.TransactionId {
-						assert.EqualValues(t, 1, compare.CompareTransactionName(baseline, other), "comparing the same transaction should equal 1")
-						correctMatches++
-						continue
-					}
-
-					score := compare.CompareTransactionName(baseline, other)
-					shouldMatch := slices.Contains(input.Matches, other.TransactionId)
-					if shouldMatch {
-						if individualFailures {
-							if !assert.Greater(t, score, desiredMatch, "SHOULD MATCH! similar transactions should be at least 50% similar") {
-								fmt.Printf("        	Kind: %s\n", name)
-								fmt.Printf("        	Baseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
-								fmt.Printf("        	Other    (%d): %s\n", other.TransactionId, other.OriginalName)
-							} else {
-								correctMatches++
-							}
-						} else if score > desiredMatch {
-							correctMatches++
-						}
-						if score < lowestGood.Score || lowestGood.Score == 0 {
-							lowestGood = Score{
-								A:     baseline,
-								B:     other,
-								Kind:  name,
-								Score: score,
-							}
-						}
-					} else {
-						if individualFailures {
-							if !assert.Less(t, score, desiredMatch, "SHOULD NOT MATCH! non similar transactions should be at most 50% similar") {
-								fmt.Printf("        	Kind: %s\n", name)
-								fmt.Printf("        	Baseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
-								fmt.Printf("        	Other    (%d): %s\n", other.TransactionId, other.OriginalName)
-							} else {
-								correctMatches++
-							}
-						} else if score < desiredMatch {
-							correctMatches++
-						}
-
-						if score > highestBad.Score || highestBad.Score == 0 {
-							highestBad = Score{
-								A:     baseline,
-								B:     other,
-								Kind:  name,
-								Score: score,
-							}
-						}
-					}
-
-					if debug {
-						fmt.Printf("\n\tKind: %s\n", name)
-						fmt.Printf("\tScore: %f\n", score)
-						fmt.Printf("\tBaseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
-						fmt.Printf("\tOther    (%d): %s\n", other.TransactionId, other.OriginalName)
-					}
-
-				}
-
-				subResult.CorrectMatches = correctMatches
-				subResult.IncorrectMatches = len(data) - correctMatches
-				subResult.OverallAccuracy = (float64(correctMatches) / float64(len(data))) * 100
-				subResult.LowestCorrect = lowestGood.Score
-				subResult.HighestIncorrect = highestBad.Score
-
-				result, _ := allResults[name]
-				result.Comparator = name
-				result.IncorrectMatches += subResult.IncorrectMatches
-				result.CorrectMatches += subResult.CorrectMatches
-				result.TotalComparisons += subResult.TotalComparisons
-				result.IncorrectMatches += subResult.IncorrectMatches
-				if result.DataSets == nil {
-					result.DataSets = map[string]SubResult{}
-				}
-				result.DataSets[input.Name] = subResult
-				allResults[name] = result
-
-				if individualFailures {
-					assert.Greater(t, lowestGood.Score, highestBad.Score, "The lowest correct score must be higher than the highest incorrect score!")
-				}
-
-				fmt.Printf("\n=====================Comparison Results!=====================\n")
-				fmt.Printf("\tTest: %s\n", t.Name())
-				fmt.Printf("\tAccuracy: %d%s Correct: %d Total: %d\n\n", int((float64(correctMatches)/float64(len(data)))*100), "%", correctMatches, len(data))
-				fmt.Printf("\tHighest Wrong Score!\n")
-				fmt.Printf("\tKind: %s\n", highestBad.Kind)
-				fmt.Printf("\tScore: %f\n", highestBad.Score)
-				fmt.Printf("\tBaseline (%d): %s\n", highestBad.A.TransactionId, highestBad.A.OriginalName)
-				fmt.Printf("\tOther    (%d): %s\n", highestBad.B.TransactionId, highestBad.B.OriginalName)
-				fmt.Printf("\n\tLowest Correct Score!\n")
-				fmt.Printf("\tKind: %s\n", lowestGood.Kind)
-				fmt.Printf("\tScore: %f\n", lowestGood.Score)
-				fmt.Printf("\tBaseline (%d): %s\n", lowestGood.A.TransactionId, lowestGood.A.OriginalName)
-				fmt.Printf("\tOther    (%d): %s\n\n", lowestGood.B.TransactionId, lowestGood.B.OriginalName)
-			})
-		}
+	desiredMatches := []float64{
+		0.10,
+		0.15,
+		0.20,
+		0.25,
+		0.30,
+		0.35,
+		0.40,
+		0.45,
+		0.50,
+		0.55,
+		0.60,
+		0.65,
+		0.75,
+		0.80,
+		0.85,
+		0.90,
+		0.95,
 	}
+
+	t.Run("base only", func(t *testing.T) {
+		for _, desiredMatch := range desiredMatches {
+			for name, compare := range comparors {
+				for _, input := range testInput {
+					t.Run(fmt.Sprintf("%s - %s desired=%f", input.Name, name, desiredMatch), func(t *testing.T) {
+						subResult := SubResult{
+							Dataset:          input.Name,
+							OverallAccuracy:  0,
+							CorrectMatches:   0,
+							IncorrectMatches: 0,
+							TotalComparisons: 0,
+						}
+						baseline := getTransaction(input.BaselineId)
+						var highestBad, lowestGood Score
+						var correctMatches int
+						for _, other := range data {
+							subResult.TotalComparisons++
+							if other.TransactionId == baseline.TransactionId {
+								assert.EqualValues(t, 1, compare.CompareTransactionName(baseline, other), "comparing the same transaction should equal 1")
+								correctMatches++
+								continue
+							}
+
+							score := compare.CompareTransactionName(baseline, other)
+							shouldMatch := slices.Contains(input.Matches, other.TransactionId)
+							if shouldMatch {
+								if individualFailures {
+									if !assert.Greater(t, score, desiredMatch, "SHOULD MATCH! similar transactions should be at least 50% similar") {
+										fmt.Printf("        	Kind: %s\n", name)
+										fmt.Printf("        	Baseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
+										fmt.Printf("        	Other    (%d): %s\n", other.TransactionId, other.OriginalName)
+									}
+								}
+								if score > desiredMatch {
+									correctMatches++
+								} else {
+									subResult.FalseNegatives++
+								}
+								if score < lowestGood.Score || lowestGood.Score == 0 {
+									lowestGood = Score{
+										A:     baseline,
+										B:     other,
+										Kind:  name,
+										Score: score,
+									}
+								}
+							} else {
+								if individualFailures {
+									if !assert.Less(t, score, desiredMatch, "SHOULD NOT MATCH! non similar transactions should be at most 50% similar") {
+										fmt.Printf("        	Kind: %s\n", name)
+										fmt.Printf("        	Baseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
+										fmt.Printf("        	Other    (%d): %s\n", other.TransactionId, other.OriginalName)
+									}
+								}
+
+								if score < desiredMatch {
+									correctMatches++
+								} else {
+									subResult.FalsePositives++
+								}
+
+								if score > highestBad.Score || highestBad.Score == 0 {
+									highestBad = Score{
+										A:     baseline,
+										B:     other,
+										Kind:  name,
+										Score: score,
+									}
+								}
+							}
+
+							if verbose {
+								fmt.Printf("\n\tKind: %s\n", name)
+								fmt.Printf("\tScore: %f\n", score)
+								fmt.Printf("\tBaseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
+								fmt.Printf("\tOther    (%d): %s\n", other.TransactionId, other.OriginalName)
+							}
+						}
+
+						subResult.CorrectMatches = correctMatches
+						subResult.IncorrectMatches = subResult.TotalComparisons - correctMatches
+						subResult.OverallAccuracy = (float64(correctMatches) / float64(subResult.TotalComparisons)) * 100
+						subResult.LowestCorrect = lowestGood.Score
+						subResult.HighestIncorrect = highestBad.Score
+
+						resultKey := fmt.Sprintf("%s desired=%f", name, desiredMatch)
+						result, _ := allResults[resultKey]
+						result.Comparator = name
+						result.IncorrectMatches += subResult.IncorrectMatches
+						result.CorrectMatches += subResult.CorrectMatches
+						result.TotalComparisons += subResult.TotalComparisons
+						result.IncorrectMatches += subResult.IncorrectMatches
+						result.FalsePositives += subResult.FalsePositives
+						result.FalseNegatives += subResult.FalseNegatives
+						result.Threshold = desiredMatch
+						if result.DataSets == nil {
+							result.DataSets = map[string]SubResult{}
+						}
+						result.DataSets[input.Name+" "+t.Name()] = subResult
+						allResults[resultKey] = result
+
+						if individualFailures {
+							assert.Greater(t, lowestGood.Score, highestBad.Score, "The lowest correct score must be higher than the highest incorrect score!")
+						}
+
+						if debug {
+							fmt.Printf("\n=====================Comparison Results!=====================\n")
+							fmt.Printf("\tTest: %s\n", t.Name())
+							fmt.Printf("\tAccuracy: %d%s Correct: %d Total: %d\n\n", int((float64(correctMatches)/float64(subResult.TotalComparisons))*100), "%", correctMatches, subResult.TotalComparisons)
+							fmt.Printf("\tHighest Wrong Score!\n")
+							fmt.Printf("\tKind: %s\n", highestBad.Kind)
+							fmt.Printf("\tScore: %f\n", highestBad.Score)
+							fmt.Printf("\tBaseline (%d): %s\n", highestBad.A.TransactionId, highestBad.A.OriginalName)
+							fmt.Printf("\tOther    (%d): %s\n", highestBad.B.TransactionId, highestBad.B.OriginalName)
+							fmt.Printf("\n\tLowest Correct Score!\n")
+							fmt.Printf("\tKind: %s\n", lowestGood.Kind)
+							fmt.Printf("\tScore: %f\n", lowestGood.Score)
+							fmt.Printf("\tBaseline (%d): %s\n", lowestGood.A.TransactionId, lowestGood.A.OriginalName)
+							fmt.Printf("\tOther    (%d): %s\n\n", lowestGood.B.TransactionId, lowestGood.B.OriginalName)
+						}
+					})
+				}
+			}
+		}
+	})
+
+	t.Run("all matches", func(t *testing.T) {
+		for _, desiredMatch := range desiredMatches {
+			for name, compare := range comparors {
+				for _, input := range testInput {
+					t.Run(fmt.Sprintf("%s - %s desired=%f", input.Name, name, desiredMatch), func(t *testing.T) {
+						subResult := SubResult{
+							Dataset:          input.Name,
+							OverallAccuracy:  0,
+							CorrectMatches:   0,
+							IncorrectMatches: 0,
+							TotalComparisons: 0,
+						}
+						matches := append(input.Matches, input.BaselineId)
+						var highestBad, lowestGood Score
+						var correctMatches int
+						for _, baseId := range matches {
+							baseline := getTransaction(baseId)
+							for _, other := range data {
+								subResult.TotalComparisons++
+								if other.TransactionId == baseline.TransactionId {
+									assert.EqualValues(t, 1, compare.CompareTransactionName(baseline, other), "comparing the same transaction should equal 1")
+									correctMatches++
+									continue
+								}
+
+								score := compare.CompareTransactionName(baseline, other)
+								shouldMatch := slices.Contains(matches, other.TransactionId)
+								if shouldMatch {
+									if individualFailures {
+										if !assert.Greater(t, score, desiredMatch, "SHOULD MATCH! similar transactions should be at least 50% similar") {
+											fmt.Printf("        	Kind: %s\n", name)
+											fmt.Printf("        	Baseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
+											fmt.Printf("        	Other    (%d): %s\n", other.TransactionId, other.OriginalName)
+										}
+									}
+									if score > desiredMatch {
+										correctMatches++
+									} else {
+										subResult.FalseNegatives++
+									}
+
+									if score < lowestGood.Score || lowestGood.Score == 0 {
+										lowestGood = Score{
+											A:     baseline,
+											B:     other,
+											Kind:  name,
+											Score: score,
+										}
+									}
+								} else {
+									if individualFailures {
+										if !assert.Less(t, score, desiredMatch, "SHOULD NOT MATCH! non similar transactions should be at most 50% similar") {
+											fmt.Printf("        	Kind: %s\n", name)
+											fmt.Printf("        	Baseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
+											fmt.Printf("        	Other    (%d): %s\n", other.TransactionId, other.OriginalName)
+										}
+									}
+
+									if score < desiredMatch {
+										correctMatches++
+									} else {
+										subResult.FalsePositives++
+									}
+
+									if score > highestBad.Score || highestBad.Score == 0 {
+										highestBad = Score{
+											A:     baseline,
+											B:     other,
+											Kind:  name,
+											Score: score,
+										}
+									}
+								}
+
+								if verbose {
+									fmt.Printf("\n\tKind: %s\n", name)
+									fmt.Printf("\tScore: %f\n", score)
+									fmt.Printf("\tBaseline (%d): %s\n", baseline.TransactionId, baseline.OriginalName)
+									fmt.Printf("\tOther    (%d): %s\n", other.TransactionId, other.OriginalName)
+								}
+							}
+						}
+
+						subResult.CorrectMatches = correctMatches
+						subResult.IncorrectMatches = subResult.TotalComparisons - correctMatches
+						subResult.OverallAccuracy = (float64(correctMatches) / float64(subResult.TotalComparisons)) * 100
+						subResult.LowestCorrect = lowestGood.Score
+						subResult.HighestIncorrect = highestBad.Score
+
+						resultKey := fmt.Sprintf("%s desired=%f", name, desiredMatch)
+						result, _ := allResults[resultKey]
+						result.Comparator = name
+						result.IncorrectMatches += subResult.IncorrectMatches
+						result.CorrectMatches += subResult.CorrectMatches
+						result.TotalComparisons += subResult.TotalComparisons
+						result.IncorrectMatches += subResult.IncorrectMatches
+						result.FalsePositives += subResult.FalsePositives
+						result.FalseNegatives += subResult.FalseNegatives
+						result.Threshold = desiredMatch
+						if result.DataSets == nil {
+							result.DataSets = map[string]SubResult{}
+						}
+						result.DataSets[input.Name+" "+t.Name()] = subResult
+						allResults[resultKey] = result
+
+						if individualFailures {
+							assert.Greater(t, lowestGood.Score, highestBad.Score, "The lowest correct score must be higher than the highest incorrect score!")
+						}
+
+						if debug {
+							fmt.Printf("\n=====================Comparison Results!=====================\n")
+							fmt.Printf("\tTest: %s\n", t.Name())
+							fmt.Printf("\tAccuracy: %d%s Correct: %d Total: %d\n\n", int((float64(correctMatches)/float64(subResult.TotalComparisons))*100), "%", correctMatches, subResult.TotalComparisons)
+							fmt.Printf("\tHighest Wrong Score!\n")
+							fmt.Printf("\tKind: %s\n", highestBad.Kind)
+							fmt.Printf("\tScore: %f\n", highestBad.Score)
+							fmt.Printf("\tBaseline (%d): %s\n", highestBad.A.TransactionId, highestBad.A.OriginalName)
+							fmt.Printf("\tOther    (%d): %s\n", highestBad.B.TransactionId, highestBad.B.OriginalName)
+							fmt.Printf("\n\tLowest Correct Score!\n")
+							fmt.Printf("\tKind: %s\n", lowestGood.Kind)
+							fmt.Printf("\tScore: %f\n", lowestGood.Score)
+							fmt.Printf("\tBaseline (%d): %s\n", lowestGood.A.TransactionId, lowestGood.A.OriginalName)
+							fmt.Printf("\tOther    (%d): %s\n\n", lowestGood.B.TransactionId, lowestGood.B.OriginalName)
+						}
+					})
+				}
+			}
+		}
+	})
 
 	finalResults := make([]MatrixResult, 0, len(allResults))
 	for key := range allResults {
@@ -565,25 +864,28 @@ func TestCompare(t *testing.T) {
 		finalResults = append(finalResults, result)
 	}
 	sort.Slice(finalResults, func(i, j int) bool {
-		return finalResults[i].OverallAccuracy > finalResults[j].OverallAccuracy
+		return finalResults[i].OverallAccuracy < finalResults[j].OverallAccuracy
 	})
 	for i := range finalResults {
 		result := finalResults[i]
-
-		fmt.Printf("\n=========================================================================================\n")
-		fmt.Printf("Comparator: %s\n", result.Comparator)
-		fmt.Printf("Accuracy: %f%s\n", result.OverallAccuracy, "%")
-		falsePositivesObserved := false
+		var lowestCorrect, highestIncorrect float64
 		for _, sub := range result.DataSets {
-			if sub.HighestIncorrect > sub.LowestCorrect {
-				falsePositivesObserved = true
-				break
+			if sub.LowestCorrect < lowestCorrect || lowestCorrect == 0 {
+				lowestCorrect = sub.LowestCorrect
+			}
+			if sub.HighestIncorrect > highestIncorrect || highestIncorrect == 0 {
+				highestIncorrect = sub.HighestIncorrect
 			}
 		}
-		if falsePositivesObserved {
-			fmt.Printf("False Positives Observed: YES!\n")
-		} else {
-			fmt.Printf("False Positives Observed: NO!\n")
-		}
+
+		fmt.Printf("\n=========================================================================================\n")
+		fmt.Printf("Comparator:          %s\n", result.Comparator)
+		fmt.Printf("Accuracy:            %f%s Total Comparisons Made:   %d\n", result.OverallAccuracy, "%", result.TotalComparisons)
+		fmt.Printf("Threshold:           %f\n", result.Threshold)
+		fmt.Printf("False Positives:     %d %f%s\n", result.FalsePositives, (float64(result.FalsePositives)/float64(result.TotalComparisons))*100, "%")
+		fmt.Printf("False Negatives:     %d %f%s\n", result.FalseNegatives, (float64(result.FalseNegatives)/float64(result.TotalComparisons))*100, "%")
+		fmt.Printf("Lowest Correct:      %f\n", lowestCorrect)
+		fmt.Printf("Highest Incorrect:   %f\n", highestIncorrect)
 	}
+	fmt.Println()
 }
