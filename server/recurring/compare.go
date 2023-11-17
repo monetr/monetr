@@ -2,7 +2,6 @@ package recurring
 
 import (
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/adrg/strutil"
@@ -24,18 +23,9 @@ func (t *transactionComparatorBase) CompareTransactionName(a, b Transaction) flo
 	nameA := a.OriginalName
 	nameB := b.OriginalName
 
-	nameA = strings.ReplaceAll(nameA, "Merchant name: ", "")
-	nameB = strings.ReplaceAll(nameB, "Merchant name: ", "")
-
 	pattern := regexp.MustCompile(`[a-zA-Z\d_-]+`)
 	nameAParts := pattern.FindAllString(nameA, len(nameA))
 	nameBParts := pattern.FindAllString(nameB, len(nameB))
-	sort.Slice(nameAParts, func(i, j int) bool {
-		return strings.Compare(strings.ToLower(nameAParts[i]), strings.ToLower(nameAParts[j])) == -1
-	})
-	sort.Slice(nameBParts, func(i, j int) bool {
-		return strings.Compare(strings.ToLower(nameBParts[i]), strings.ToLower(nameBParts[j])) == -1
-	})
 
 	nameA = strings.Join(nameAParts, " ")
 	nameB = strings.Join(nameBParts, " ")
