@@ -11,6 +11,10 @@ import (
 )
 
 func TestCompare(t *testing.T) {
+	if testing.Short() {
+		t.Skipf("not running comparison ranking tests in short mode!")
+		return
+	}
 	debug := false
 	verbose := false
 	individualFailures := false
