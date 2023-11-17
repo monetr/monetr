@@ -7,6 +7,10 @@ import (
 	"github.com/adrg/strutil"
 )
 
+var (
+	cleanStringRegex = regexp.MustCompile(`[a-zA-Z\d_-]+`)
+)
+
 type TransactionNameComparator interface {
 	CompareTransactionName(a, b Transaction) float64
 }
@@ -23,17 +27,16 @@ func (t *transactionComparatorBase) CompareTransactionName(a, b Transaction) flo
 	nameA := a.OriginalName
 	nameB := b.OriginalName
 
-	pattern := regexp.MustCompile(`[a-zA-Z\d_-]+`)
-	nameAParts := pattern.FindAllString(nameA, len(nameA))
-	nameBParts := pattern.FindAllString(nameB, len(nameB))
+	nameAParts := cleanStringRegex.FindAllString(nameA, len(nameA))
+	nameBParts := cleanStringRegex.FindAllString(nameB, len(nameB))
 
 	nameA = strings.Join(nameAParts, " ")
 	nameB = strings.Join(nameBParts, " ")
 
 	if len(nameA) > len(nameB) {
-		nameB += strings.Repeat("💩", len(nameA)-len(nameB))
+		nameB += strings.Repeat("☐", len(nameA)-len(nameB))
 	} else if len(nameA) < len(nameB) {
-		nameB += strings.Repeat("💩", len(nameB)-len(nameA))
+		nameB += strings.Repeat("☐", len(nameB)-len(nameA))
 	}
 
 	return t.impl.Compare(nameA, nameB)
