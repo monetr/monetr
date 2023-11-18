@@ -595,14 +595,9 @@ func TestCompare(t *testing.T) {
 		0.40,
 		0.45,
 		0.50,
-		0.55,
-		0.60,
-		0.65,
-		0.75,
-		0.80,
-		0.85,
-		0.90,
-		0.95,
+	}
+	for i := 0.51; i < 0.96; i += 0.01 {
+		desiredMatches = append(desiredMatches, i)
 	}
 
 	t.Run("base only", func(t *testing.T) {
