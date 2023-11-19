@@ -90,6 +90,9 @@ func windowMonthly(date time.Time) Window {
 		Bymonthday: []int{
 			date.Day(),
 		},
+		Bymonth: []int{
+			int(date.Month()),
+		},
 	}
 
 	rule, _ := rrule.NewRRule(option)
@@ -174,6 +177,9 @@ func windowYearly(date time.Time) Window {
 		// TODO this might not be right
 		Bymonthday: []int{
 			date.Day(),
+		},
+		Bymonth: []int{
+			int(date.Month()),
 		},
 	}
 
