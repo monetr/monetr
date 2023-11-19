@@ -9,6 +9,39 @@ import (
 )
 
 func TestWindowGetDeviation(t *testing.T) {
+	t.Run("weekly", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		date := time.Date(2023, 11, 19, 0, 0, 0, 0, timezone)
+		weekly := windowWeekly(date)
+
+		{ // Test the start date
+			delta, ok := weekly.GetDeviation(date)
+			assert.EqualValues(t, 0, delta, "input date should have a delta of 0")
+			assert.True(t, ok, "ok should be true when a date matches")
+		}
+
+		{ // Test the next date
+			next := date.AddDate(0, 0, 7)
+			delta, ok := weekly.GetDeviation(next)
+			assert.EqualValues(t, 0, delta, "next date should have a delta of 0")
+			assert.True(t, ok, "ok should be true when a date matches")
+		}
+
+		{ // Test outside window
+			next := date.AddDate(0, 0, 4)
+			delta, ok := weekly.GetDeviation(next)
+			assert.EqualValues(t, -1, delta)
+			assert.False(t, ok)
+		}
+
+		{ // Test edge of window
+			next := date.AddDate(0, 0, 2)
+			delta, ok := weekly.GetDeviation(next)
+			assert.EqualValues(t, 2, delta)
+			assert.True(t, ok)
+		}
+	})
+
 	t.Run("monthly", func(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		date := time.Date(2023, 11, 15, 0, 0, 0, 0, timezone)
