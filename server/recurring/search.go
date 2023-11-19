@@ -14,7 +14,7 @@ func (t *TransactionSearch) FindSimilarTransactions(baseline Transaction, all []
 		}
 		name := t.nameComparator.CompareTransactionName(baseline, transaction)
 		merchant := t.merchantComparator.CompareTransactionMerchant(baseline, transaction)
-		if name > 0.6 || merchant > 0.6 {
+		if name > 0.83 || merchant > 0.83 {
 			result = append(result, transaction)
 		}
 	}

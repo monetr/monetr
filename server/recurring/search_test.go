@@ -14,7 +14,7 @@ func TestSearchTransactions(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		data := GetFixtures(t, "monetr_sample_data_1.json")
 		comparison := &transactionComparatorBase{
-			impl: &metrics.Hamming{
+			impl: &metrics.JaroWinkler{
 				CaseSensitive: false,
 			},
 		}
