@@ -58,7 +58,7 @@ func (w Window) GetDeviation(date time.Time) (absoluteDays int, ok bool) {
 func GetWindowsForDate(date time.Time, timezone *time.Location) []Window {
 	date = util.Midnight(date, timezone)
 	windows := make([]Window, 0)
-	switch getDayOfmonth(date) {
+	switch getDayOfMonth(date) {
 	case 1:
 		windows = append(windows,
 			windowFirstAndFifthteenth(date),
@@ -87,14 +87,35 @@ func GetWindowsForDate(date time.Time, timezone *time.Location) []Window {
 	return windows
 }
 
-// getDayOfmonth returns the day of the month, if the day of the month is the last day then -1 will be returned.
-func getDayOfmonth(date time.Time) int {
+// getDayOfMonth returns the day of the month, if the day of the month is the last day then -1 will be returned.
+func getDayOfMonth(date time.Time) int {
 	tomorrow := date.AddDate(0, 0, 1)
 	if tomorrow.Month() != date.Month() {
 		return -1
 	}
 
 	return date.Day()
+}
+
+func getDayOfWeek(date time.Time) rrule.Weekday {
+	switch date.Weekday() {
+	case time.Sunday:
+		return rrule.SU
+	case time.Monday:
+		return rrule.MO
+	case time.Tuesday:
+		return rrule.TU
+	case time.Wednesday:
+		return rrule.WE
+	case time.Thursday:
+		return rrule.TH
+	case time.Friday:
+		return rrule.FR
+	case time.Saturday:
+		return rrule.SA
+	default:
+		panic("new day of the week has been invented")
+	}
 }
 
 func windowFirstAndFifthteenth(date time.Time) Window {
@@ -233,8 +254,8 @@ func windowWeekly(date time.Time) Window {
 		Freq:     rrule.WEEKLY,
 		Dtstart:  date,
 		Interval: 1,
-		Bymonthday: []int{
-			date.Day(),
+		Byweekday: []rrule.Weekday{
+			getDayOfWeek(date),
 		},
 	}
 
@@ -245,7 +266,7 @@ func windowWeekly(date time.Time) Window {
 	return Window{
 		Start: date,
 		Rule:  set,
-		Fuzzy: 3,
+		Fuzzy: 2,
 	}
 }
 
@@ -254,8 +275,8 @@ func windowBiWeekly(date time.Time) Window {
 		Freq:     rrule.WEEKLY,
 		Dtstart:  date,
 		Interval: 2,
-		Bymonthday: []int{
-			date.Day(),
+		Byweekday: []rrule.Weekday{
+			getDayOfWeek(date),
 		},
 	}
 
