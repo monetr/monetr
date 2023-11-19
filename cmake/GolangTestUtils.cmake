@@ -126,6 +126,9 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
           # Since we arent using the goofy binary format this might not be necessary?
           list(APPEND TEST_ARGS -test.coverprofile=${COVERAGE_FILE})
         endif()
+        if(TEST_SHORT)
+          list(APPEND TEST_ARGS "-test.short")
+        endif()
 
         add_test(
           NAME ${PACKAGE}/${FRIENDLY_TEST_NAME}
