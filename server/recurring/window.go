@@ -18,6 +18,43 @@ type Window struct {
 	Fuzzy int
 }
 
+const day = 24 * time.Hour
+
+func (w Window) GetDeviation(date time.Time) (absoluteDays int, ok bool) {
+	// If the provided date comes before this window even starts then we return -1 and false since it is not a valid match
+	// against the current window.
+	if date.Before(w.Start) {
+		return -1, false
+	}
+
+	end := w.Rule.After(date, true)
+	start := w.Rule.Before(date, true)
+
+	// TODO Does not account for daylight savings time.
+
+	{ // From the end date to the provided date, the end date is after.
+		endDiff := end.Sub(date)
+		if endDiff >= 0 {
+			days := int(endDiff.Hours() / 24)
+			if days <= w.Fuzzy {
+				return days, true
+			}
+		}
+	}
+
+	{ // From the provided date to the start date, which is before the provided.
+		startDiff := date.Sub(start)
+		if startDiff >= 0 {
+			days := int(startDiff.Hours() / 24)
+			if days <= w.Fuzzy {
+				return days, true
+			}
+		}
+	}
+
+	return -1, false
+}
+
 func GetWindowsForDate(date time.Time, timezone *time.Location) []Window {
 	date = util.Midnight(date, timezone)
 	windows := make([]Window, 0)
@@ -89,9 +126,6 @@ func windowMonthly(date time.Time) Window {
 		Interval: 1,
 		Bymonthday: []int{
 			date.Day(),
-		},
-		Bymonth: []int{
-			int(date.Month()),
 		},
 	}
 
