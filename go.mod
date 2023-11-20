@@ -7,12 +7,12 @@ require (
 	cloud.google.com/go/kms v1.15.5
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
+	github.com/adrg/strutil v0.3.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.31.0
 	github.com/aws/aws-sdk-go v1.47.9
 	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.24.0
-	github.com/form3tech-oss/jwt-go v3.2.5+incompatible
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/getsentry/sentry-go v0.21.0
@@ -30,7 +30,6 @@ require (
 	github.com/nyaruka/phonenumbers v1.1.8
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v14 v14.0.0
-	github.com/plaid/plaid-go/v16 v16.0.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.7.0
@@ -49,7 +48,6 @@ require (
 
 require (
 	cloud.google.com/go v0.110.8 // indirect
-	github.com/adrg/strutil v0.3.1 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
 
@@ -73,7 +71,6 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
@@ -106,7 +103,6 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.10.0 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tkuchiki/go-timezone v0.2.0 // indirect
@@ -138,7 +134,6 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20231016165738-49dd2c1f3d0b // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231030173426-d783a09b4405 // indirect
 	google.golang.org/grpc v1.59.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	mellium.im/sasl v0.3.1 // indirect
