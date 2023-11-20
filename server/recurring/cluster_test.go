@@ -29,7 +29,8 @@ func TestPreProcessor(t *testing.T) {
 	datums := processor.GetDatums()
 
 	// First test with 0.4 and 3 was excellent!
-	dbscan := NewDBSCAN(datums, 0.4, 3)
+	// 1.25 is also very good
+	dbscan := NewDBSCAN(datums, 1.25, 3)
 	result := dbscan.Calculate()
 	assert.NotEmpty(t, result)
 	type Presentation struct {
@@ -49,7 +50,7 @@ func TestPreProcessor(t *testing.T) {
 		}
 	}
 
-	j, err := json.MarshalIndent(output, "", "  ")
+	j, err := json.MarshalIndent(output, "", "    ")
 	if err != nil {
 		panic(err)
 	}
