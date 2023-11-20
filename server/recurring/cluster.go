@@ -114,19 +114,17 @@ func (p *PreProcessor) PostPrepareCalculations() {
 		if amount < min || min == 0 {
 			min = amount
 		}
-
 	}
 
+	minified := p.wc.Minify()
 	for i := range p.documents {
 		document := p.documents[i]
 		amount := float64(document.Transaction.Amount)
 		adjusted := (amount - min) / (max - min)
 		document.AmountScaled = 2*adjusted - 1
 
-		// Calculate a vector based on all the words from all transactions. This could be optimized a bit by throwing out
-		// words that are only used once. Or words that are only present in a single transaction.
+		// Calculate a vector based on all the words from all transactions.
 		// TODO Also need to look into Principal Component Analysis
-		minified := p.wc.Minify()
 		vector := make([]float64, len(minified))
 		for word, tfidfValue := range document.TFIDF {
 			index, exists := minified[word]
@@ -146,4 +144,128 @@ func (p *PreProcessor) PostPrepareCalculations() {
 		document.Vector = append([]float64{document.AmountScaled}, vector...)
 		p.documents[i] = document
 	}
+}
+
+func (p *PreProcessor) GetDatums() []Datum {
+	datums := make([]Datum, len(p.documents))
+	for i, document := range p.documents {
+		datums[i] = Datum{
+			ID:          document.Transaction.TransactionId,
+			Transaction: *document.Transaction,
+			Vector:      document.Vector,
+		}
+	}
+
+	return datums
+}
+
+type Datum struct {
+	ID          uint64
+	Transaction Transaction
+	Vector      []float64
+}
+
+func (a Datum) Distance(b Datum) float64 {
+	var distance float64
+	for i, value := range a.Vector {
+		distance += math.Pow(value-b.Vector[i], 2)
+	}
+	return distance
+}
+
+type Cluster struct {
+	Items map[int]Datum
+}
+
+type DBSCAN struct {
+	labels    map[uint64]bool
+	dataset   []Datum
+	epsilon   float64
+	minPoints int
+	clusters  []Cluster
+}
+
+func NewDBSCAN(dataset []Datum, epsilon float64, minPoints int) *DBSCAN {
+	return &DBSCAN{
+		labels:    map[uint64]bool{},
+		dataset:   dataset,
+		epsilon:   epsilon,
+		minPoints: minPoints,
+		clusters:  nil,
+	}
+}
+
+func (d *DBSCAN) Calculate() []Cluster {
+	d.clusters = make([]Cluster, 0)
+	for index, point := range d.dataset {
+		// If we have already visited this point then skip it
+		if _, visited := d.labels[point.ID]; visited {
+			continue
+		}
+
+		neighbors := d.getNeighbors(index)
+		if len(neighbors) < d.minPoints {
+			d.labels[point.ID] = true
+			continue
+		}
+		// mark point as visited
+		d.labels[point.ID] = false
+		d.clusters = append(d.clusters, d.expandCluster(index, neighbors))
+	}
+
+	return d.clusters
+}
+
+func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
+	cluster := Cluster{
+		Items: map[int]Datum{},
+	}
+	cluster.Items[index] = d.dataset[index]
+	for _, neighborIndex := range neighbors {
+		neighbor := d.dataset[neighborIndex]
+		// IF Q is not visited
+		if _, visited := d.labels[neighbor.ID]; !visited {
+			// Mark Q as visited
+			d.labels[neighbor.ID] = false
+			newNeighbors := d.getNeighbors(neighborIndex)
+			if len(newNeighbors) >= d.minPoints {
+				// Merge new neighbors with neighbors
+				// TODO Very evil to modify an array while inside it!
+				neighbors = append(neighbors, newNeighbors...)
+			}
+		}
+
+		// if Q is not yet part of any cluster
+		var found bool
+		for _, cluster := range d.clusters {
+			_, ok := cluster.Items[neighborIndex]
+			if ok {
+				found = true
+				break
+			}
+		}
+		if !found {
+			cluster.Items[neighborIndex] = neighbor
+		}
+	}
+
+	return cluster
+}
+
+func (d *DBSCAN) getNeighbors(index int) []int {
+	neighbors := make([]int, 0, len(d.dataset))
+	point := d.dataset[index]
+	for i, counterpoint := range d.dataset {
+		// Don't calculate against yourself
+		if i == index {
+			continue
+		}
+
+		distance := point.Distance(counterpoint)
+		if distance <= d.epsilon {
+			neighbors = append(neighbors, i)
+		}
+	}
+
+	return neighbors
 }
