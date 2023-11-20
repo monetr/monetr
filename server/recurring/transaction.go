@@ -1,6 +1,8 @@
 package recurring
 
-import "time"
+import (
+	"time"
+)
 
 type Transaction struct {
 	TransactionId        uint64    `json:"transactionId"`
@@ -9,4 +11,9 @@ type Transaction struct {
 	Date                 time.Time `json:"date"`
 	OriginalName         string    `json:"originalName"`
 	OriginalMerchantName *string   `json:"originalMerchantName"`
+}
+
+type TransactionReader interface {
+	Read() (*Transaction, error)
+	Close() error
 }
