@@ -10,6 +10,10 @@ var (
 	specialWeights = map[string]float64{
 		"amazon": 10,
 	}
+
+	synonyms = map[string]string{
+		"amzn": "amazon",
+	}
 )
 
 type Document struct {
@@ -18,47 +22,21 @@ type Document struct {
 	TFIDF        map[string]float64
 	AmountScaled float64
 	Vector       []float64
+	Valid        bool
 }
 
-type WordCount struct {
-	index int
-	wc    map[string][2]int
+type PreProcessor struct {
+	documents []Document
+	// Word count
+	wc  map[string]int
+	idf map[string]float64
 }
 
-func (w *WordCount) Increment(word string) {
-	value, ok := w.wc[word]
-	if !ok {
-		w.wc[word] = [2]int{
-			w.index,
-			1,
-		}
-		w.index++
-		return
-	}
-
-	value[1]++
-	w.wc[word] = value
-}
-
-func (w *WordCount) Iterate(callback func(word string, index int, count int)) {
-	for word, value := range w.wc {
-		callback(word, value[0], value[1])
-	}
-}
-
-func (w *WordCount) Index(word string) int {
-	value, ok := w.wc[word]
-	if !ok {
-		return -1
-	}
-	return value[0]
-}
-
-func (w *WordCount) Minify() map[string]int {
+func (p *PreProcessor) indexWords() map[string]int {
 	index := 0
 	result := make(map[string]int)
-	for word, value := range w.wc {
-		if value[1] == 1 {
+	for word, count := range p.wc {
+		if count == 1 {
 			continue
 		}
 		result[word] = index
@@ -66,13 +44,6 @@ func (w *WordCount) Minify() map[string]int {
 	}
 
 	return result
-}
-
-type PreProcessor struct {
-	documents []Document
-	// Word count
-	wc  *WordCount
-	idf map[string]float64
 }
 
 func (p *PreProcessor) AddTransaction(txn *Transaction) {
@@ -85,8 +56,12 @@ func (p *PreProcessor) AddTransaction(txn *Transaction) {
 	// Get the term frequency from the transaction name
 	for _, word := range words {
 		word = strings.ToLower(word)
+		// If there is a synonym for the current word use that instead.
+		if synonym, ok := synonyms[word]; ok {
+			word = synonym
+		}
 		wordCounts[word]++
-		p.wc.Increment(word)
+		p.wc[word]++
 	}
 
 	tf := make(map[string]float64, len(wordCounts))
@@ -104,16 +79,18 @@ func (p *PreProcessor) AddTransaction(txn *Transaction) {
 // PostPrepareCalculations should be called after all transactions have been added to the dataset.
 func (p *PreProcessor) PostPrepareCalculations() {
 	docCount := float64(len(p.documents))
-	p.wc.Iterate(func(word string, _ int, count int) {
+	for word, count := range p.wc {
 		p.idf[word] = math.Log(docCount / (float64(count) + 1))
-	})
+	}
 	// Get a map of all the meaningful words and their index to use in the vector
-	minified := p.wc.Minify()
+	minified := p.indexWords()
 	// Define the length of the vector and adjust it to be divisible by 4. This will enable us to leverage SIMD in the
 	// future.
 	vectorLength := len(minified) + (len(minified) % 4)
 	for i := range p.documents {
+		// Get the current document we are working with
 		document := p.documents[i]
+		// Calculate the TFIDF for that document
 		for word, tfValue := range document.TF {
 			document.TFIDF[word] = tfValue * p.idf[word]
 			// If this specific word is meant to be more meaningful than tfidf might treat it then adjust it accordingly
@@ -121,35 +98,47 @@ func (p *PreProcessor) PostPrepareCalculations() {
 				document.TFIDF[word] *= multiplier
 			}
 		}
-		vector := make([]float64, vectorLength)
+		// Then create a vector of the words in the document name to use for the DBSCAN clustering
+		document.Vector = make([]float64, vectorLength)
+		words := 0
 		for word, tfidfValue := range document.TFIDF {
 			index, exists := minified[word]
 			if !exists {
 				continue
 			}
-			vector[index] = tfidfValue
+			words++
+			document.Vector[index] = tfidfValue
 		}
+		if words == 0 {
+			document.Valid = false
+			p.documents[i] = document
+			continue
+		}
+		document.Valid = true
 		var norm float64
-		for _, value := range vector {
+		for _, value := range document.Vector {
 			norm += value * value
 		}
 		norm = math.Sqrt(norm)
-		for i, value := range vector {
-			vector[i] = value / norm
+		for i, value := range document.Vector {
+			document.Vector[i] = value / norm
 		}
-		document.Vector = vector
+		// Then store the document back in
 		p.documents[i] = document
 	}
 }
 
 func (p *PreProcessor) GetDatums() []Datum {
-	datums := make([]Datum, len(p.documents))
-	for i, document := range p.documents {
-		datums[i] = Datum{
+	datums := make([]Datum, 0, len(p.documents))
+	for _, document := range p.documents {
+		if !document.Valid {
+			continue
+		}
+		datums = append(datums, Datum{
 			ID:          document.Transaction.TransactionId,
 			Transaction: *document.Transaction,
 			Vector:      document.Vector,
-		}
+		})
 	}
 
 	return datums
@@ -162,6 +151,7 @@ type Datum struct {
 }
 
 func (a Datum) Distance(b Datum) float64 {
+	// This is just the Euclidean distance between two points since the vectors here have many many dimensions.
 	var distance float64
 	for i, value := range a.Vector {
 		distance += math.Pow(value-b.Vector[i], 2)
@@ -221,20 +211,26 @@ func NewDBSCAN(dataset []Datum, epsilon float64, minPoints int) *DBSCAN {
 }
 
 func (d *DBSCAN) Calculate() []Cluster {
+	// Initialize or reinitialize the clusters. We want to start with a clean slate.
 	d.clusters = make([]Cluster, 0)
+	// From the top, take one point at a time.
 	for index, point := range d.dataset {
 		// If we have already visited this point then skip it
 		if _, visited := d.labels[point.ID]; visited {
 			continue
 		}
 
+		// Find all the other points that are within the epsilon of this point.
 		neighbors := d.getNeighbors(index)
+		// If there are not enough points then this is not a core point.
 		if len(neighbors) < d.minPoints {
+			// Mark it as noise and keep moving
 			d.labels[point.ID] = true
 			continue
 		}
-		// mark point as visited
+		// Otherwise mark the point as visited so we don't do the same work again
 		d.labels[point.ID] = false
+		// Then start constructing a cluster around this point.
 		d.clusters = append(d.clusters, d.expandCluster(index, neighbors))
 	}
 
@@ -242,28 +238,34 @@ func (d *DBSCAN) Calculate() []Cluster {
 }
 
 func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
+	// Bootstrap a cluster for the current point, this function might be called recursively
 	cluster := Cluster{
 		Items: map[int]Datum{},
 	}
+	// And add a pointer to the current item into the new cluster.
 	cluster.Items[index] = d.dataset[index]
 	for _, neighborIndex := range neighbors {
+		// Retrieve the item from the dataset.
 		neighbor := d.dataset[neighborIndex]
-		// IF Q is not visited
+		// If Q (neighbor) is not visited then mark it as visited and check for more neighbors.
 		if _, visited := d.labels[neighbor.ID]; !visited {
-			// Mark Q as visited
+			// Mark Q as visited but not as noise.
 			d.labels[neighbor.ID] = false
+			// Find more nearby neighbors.
 			newNeighbors := d.getNeighbors(neighborIndex)
+			// If we have enough neighbors then we can expand the cluster even more.
 			if len(newNeighbors) >= d.minPoints {
 				// Merge new neighbors with neighbors
 				// Recursively descend and then add the data we get into the one we currently have.
 				recurResult := d.expandCluster(neighborIndex, newNeighbors)
+				// Just add the recurred items into this cluster.
 				for k, v := range recurResult.Items {
 					cluster.Items[k] = v
 				}
 			}
 		}
 
-		// if Q is not yet part of any cluster
+		// If Q (neighbor) is not yet part of any cluster
 		var found bool
 		for _, cluster := range d.clusters {
 			_, ok := cluster.Items[neighborIndex]
@@ -272,6 +274,7 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
 				break
 			}
 		}
+		// Then add it to this cluster.
 		if !found {
 			cluster.Items[neighborIndex] = neighbor
 		}
@@ -281,7 +284,8 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
 }
 
 func (d *DBSCAN) getNeighbors(index int) []int {
-	neighbors := make([]int, 0, len(d.dataset))
+	// Pre-allocate an array of neighbors for us to work with.
+	neighbors := make([]int, 0, len(d.dataset)/2)
 	point := d.dataset[index]
 	for i, counterpoint := range d.dataset {
 		// Don't calculate against yourself
@@ -289,7 +293,9 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 			continue
 		}
 
+		// Calculate the distance from our Q point to our P point.
 		distance := point.Distance(counterpoint)
+		// If we are close enough then we could be part of a core cluster point. Add it to the list.
 		if distance <= d.epsilon {
 			neighbors = append(neighbors, i)
 		}
