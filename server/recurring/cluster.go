@@ -2,7 +2,14 @@ package recurring
 
 import (
 	"math"
+	"sort"
 	"strings"
+)
+
+var (
+	specialWeights = map[string]float64{
+		"amazon": 10,
+	}
 )
 
 type Document struct {
@@ -71,7 +78,7 @@ type PreProcessor struct {
 func (p *PreProcessor) AddTransaction(txn *Transaction) {
 	words := cleanStringRegex.FindAllString(txn.OriginalName, len(txn.OriginalName))
 	if txn.OriginalMerchantName != nil {
-		words = append(words, strings.Fields(*txn.OriginalMerchantName)...)
+		words = append(words, cleanStringRegex.FindAllString(*txn.OriginalMerchantName, len(*txn.OriginalMerchantName))...)
 	}
 
 	wordCounts := make(map[string]int, len(words))
@@ -100,32 +107,21 @@ func (p *PreProcessor) PostPrepareCalculations() {
 	p.wc.Iterate(func(word string, _ int, count int) {
 		p.idf[word] = math.Log(docCount / (float64(count) + 1))
 	})
-	var min, max float64
+	// Get a map of all the meaningful words and their index to use in the vector
+	minified := p.wc.Minify()
+	// Define the length of the vector and adjust it to be divisible by 4. This will enable us to leverage SIMD in the
+	// future.
+	vectorLength := len(minified) + (len(minified) % 4)
 	for i := range p.documents {
 		document := p.documents[i]
 		for word, tfValue := range document.TF {
 			document.TFIDF[word] = tfValue * p.idf[word]
+			// If this specific word is meant to be more meaningful than tfidf might treat it then adjust it accordingly
+			if multiplier, ok := specialWeights[word]; ok {
+				document.TFIDF[word] *= multiplier
+			}
 		}
-		p.documents[i] = document
-		amount := float64(document.Transaction.Amount)
-		if amount > max || max == 0 {
-			max = amount
-		}
-		if amount < min || min == 0 {
-			min = amount
-		}
-	}
-
-	minified := p.wc.Minify()
-	for i := range p.documents {
-		document := p.documents[i]
-		amount := float64(document.Transaction.Amount)
-		adjusted := (amount - min) / (max - min)
-		document.AmountScaled = 2*adjusted - 1
-
-		// Calculate a vector based on all the words from all transactions.
-		// TODO Also need to look into Principal Component Analysis
-		vector := make([]float64, len(minified))
+		vector := make([]float64, vectorLength)
 		for word, tfidfValue := range document.TFIDF {
 			index, exists := minified[word]
 			if !exists {
@@ -141,7 +137,7 @@ func (p *PreProcessor) PostPrepareCalculations() {
 		for i, value := range vector {
 			vector[i] = value / norm
 		}
-		document.Vector = append([]float64{document.AmountScaled}, vector...)
+		document.Vector = vector
 		p.documents[i] = document
 	}
 }
@@ -171,6 +167,35 @@ func (a Datum) Distance(b Datum) float64 {
 		distance += math.Pow(value-b.Vector[i], 2)
 	}
 	return distance
+}
+
+func kDistances(data []Datum, minPoints int) []float64 {
+	distances := make([]float64, 0, len(data))
+	for _, p := range data {
+		pointDistances := make([]float64, 0, len(data))
+		for _, q := range data {
+			// A point should not be able to see itself.
+			if q.ID == p.ID {
+				continue
+			}
+
+			// Add the distance from p -> q to the current dataset
+			pointDistances = append(pointDistances, p.Distance(q))
+		}
+
+		// If we have not accumulated enough data points for p then it isn't good enough to be part of the set. Throw it out
+		// and keep going.
+		if len(pointDistances) < minPoints {
+			continue
+		}
+		sort.Float64s(pointDistances)
+		// Take the distance that is to the most extreme.
+		// TODO Double check this is correct, I can never remember if sort is ascending or descending.
+		distances = append(distances, pointDistances[minPoints-1])
+	}
+	// Sort it again before returning it to the caller
+	sort.Float64s(distances)
+	return distances
 }
 
 type Cluster struct {
@@ -230,8 +255,11 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
 			newNeighbors := d.getNeighbors(neighborIndex)
 			if len(newNeighbors) >= d.minPoints {
 				// Merge new neighbors with neighbors
-				// TODO Very evil to modify an array while inside it!
-				neighbors = append(neighbors, newNeighbors...)
+				// Recursively descend and then add the data we get into the one we currently have.
+				recurResult := d.expandCluster(neighborIndex, newNeighbors)
+				for k, v := range recurResult.Items {
+					cluster.Items[k] = v
+				}
 			}
 		}
 
