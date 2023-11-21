@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	cleanStringRegex = regexp.MustCompile(`[a-zA-Z\d_-]+`)
+	cleanStringRegex = regexp.MustCompile(`[a-zA-Z\d]+`)
 )
 
 type TransactionNameComparator interface {
