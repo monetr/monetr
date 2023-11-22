@@ -9,7 +9,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-webpack: (
+  generateBuildId: async () => {
+    return 'monetr.app';
+  },
+  webpack: (
     config,
     nextShit,
   ) => {
