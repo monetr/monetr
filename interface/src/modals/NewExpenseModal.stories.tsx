@@ -2,8 +2,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { rest } from 'msw';
 
 import NewExpenseModal, { showNewExpenseModal } from '@monetr/interface/modals/NewExpenseModal';
-
-import GetAPIFixtures from 'stories/apiFixtures';
+import GetAPIFixtures from '@monetr/interface/stories/apiFixtures';
 
 const meta: Meta<typeof NewExpenseModal> = {
   title: 'New UI/Modals/Expenses/Create',

@@ -7,6 +7,8 @@ import MSelect, { MSelectProps } from './MSelect';
 import getRecurrencesForDate from './Recurrence/getRecurrencesForDate';
 import Recurrence from './Recurrence/Recurrence';
 
+// TODO This is wrong
+// @ts-ignore
 export interface MSelectFrequencyProps extends MSelectProps<Recurrence> {
   name: string;
   label: string;

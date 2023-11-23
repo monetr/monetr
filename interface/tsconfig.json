@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
+    "composite": true,
     "allowJs": true,
-    "baseUrl": "src",
+    "baseUrl": ".",
     "esModuleInterop": true,
     "jsx": "react",
     "module": "ESNEXT",
@@ -12,14 +13,17 @@
     "sourceMap": true,
     "strict": false,
     "target": "ES2022",
+    "declaration": true,
+    "declarationDir": "../build/interface",
     "paths": {
-      "@monetr/interface/*": ["./*"]
+      "@monetr/interface/*": ["./src/*"]
     }
   },
   "include": [
     "src/**/*",
-    "../tailwind.config.cjs"
+    "tailwind.config.cjs"
   ],
+  "exclude": ["node_modules"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

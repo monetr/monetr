@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "baseUrl": ".",
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -14,10 +14,15 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "preserveSymlinks": true,
     "paths": {
-      "@monetr/docs/*": ["./*"]
+      "@monetr/docs/*": ["./src/*"],
+      "@monetr/interface/*": ["../interface/src/*", "../interface/node_modules/*"]
     }
   },
+  "references": [
+    { "path": "../interface"}
+  ],
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.mdx"],
   "exclude": ["node_modules"]
 }

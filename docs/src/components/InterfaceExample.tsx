@@ -2,6 +2,10 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 
+// // eslint-disable-next-line no-relative-import-paths/no-relative-import-paths
+// import Login from '../../../interface/src/pages/login';
+import Login from '@monetr/interface/pages/login';
+
 export default function InterfaceExample(): JSX.Element {
   const ref = useRef<HTMLIFrameElement>(null);
 
@@ -24,6 +28,10 @@ export default function InterfaceExample(): JSX.Element {
       current.removeEventListener('load', onLoad);
     };
   });
+
+  return (
+    <Login />
+  );
 
   return (
     <iframe

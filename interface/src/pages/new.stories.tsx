@@ -3,9 +3,8 @@ import React from 'react';
 import { Meta, StoryObj } from '@storybook/react';
 
 import MonetrWrapper from './new';
-
-import Monetr from 'monetr';
-import GetAPIFixtures from 'stories/apiFixtures';
+import Monetr from '@monetr/interface/monetr';
+import GetAPIFixtures from '@monetr/interface/stories/apiFixtures';
 
 const meta: Meta<typeof MonetrWrapper> = {
   title: 'New UI',

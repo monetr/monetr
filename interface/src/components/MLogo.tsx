@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Logo } from 'assets';
+import { Logo } from '@monetr/interface/assets';
 
 type ImgProps = React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
 
