@@ -14,7 +14,7 @@ import (
 func TestPreProcessor(t *testing.T) {
 	data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
-	//data := GetFixtures(t, "full sample.json")
+	// data := GetFixtures(t, "full sample.json")
 	var processor = &PreProcessor{
 		documents: []Document{},
 		wc:        map[string]int{},
@@ -32,26 +32,28 @@ func TestPreProcessor(t *testing.T) {
 
 	// First test with 0.4 and 3 was excellent!
 	// 1.25 is also very good
-	dbscan := NewDBSCAN(datums, 0.176054, 2)
+	dbscan := NewDBSCAN(datums, 0.98, 2)
 	result := dbscan.Calculate()
 	assert.NotEmpty(t, result)
 	type Presentation struct {
-		ID       uint64    `json:"id"`
-		Name     string    `json:"name"`
-		Merchant *string   `json:"merchant"`
-		Date     time.Time `json:"date"`
-		Amount   int64     `json:"amount"`
+		ID        uint64    `json:"id"`
+		Name      string    `json:"name"`
+		Sanitized string    `json:"sanitized"`
+		Merchant  *string   `json:"merchant"`
+		Date      time.Time `json:"date"`
+		Amount    int64     `json:"amount"`
 	}
 	output := make([][]Presentation, len(result))
 	for i, cluster := range result {
 		output[i] = make([]Presentation, 0, len(cluster.Items))
 		for _, item := range cluster.Items {
 			output[i] = append(output[i], Presentation{
-				ID:       item.Transaction.TransactionId,
-				Name:     item.Transaction.OriginalName,
-				Merchant: item.Transaction.OriginalMerchantName,
-				Date:     item.Transaction.Date,
-				Amount:   item.Transaction.Amount,
+				ID:        item.Transaction.TransactionId,
+				Name:      item.Transaction.OriginalName,
+				Sanitized: item.SanitizedName,
+				Merchant:  item.Transaction.OriginalMerchantName,
+				Date:      item.Transaction.Date,
+				Amount:    item.Transaction.Amount,
 			})
 		}
 		sort.Slice(output[i], func(x, y int) bool {

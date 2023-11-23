@@ -2,13 +2,25 @@ package recurring
 
 import (
 	"math"
+	"regexp"
 	"sort"
 	"strings"
 )
 
 var (
+	clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
+	numberOnly              = regexp.MustCompile(`^\d+$`)
+
 	specialWeights = map[string]float64{
-		"amazon": 10,
+		"amazon":      10,
+		"pwp":         0,
+		"debit":       0,
+		"pos":         0,
+		"visa":        0,
+		"ach":         0,
+		"transaction": 0,
+		"card":        0,
+		"check":       0,
 	}
 
 	synonyms = map[string]string{
@@ -17,12 +29,13 @@ var (
 )
 
 type Document struct {
-	Transaction  *Transaction
-	TF           map[string]float64
-	TFIDF        map[string]float64
-	AmountScaled float64
-	Vector       []float64
-	Valid        bool
+	Transaction   *Transaction
+	SanitizedName string
+	TF            map[string]float64
+	TFIDF         map[string]float64
+	AmountScaled  float64
+	Vector        []float64
+	Valid         bool
 }
 
 type PreProcessor struct {
@@ -47,21 +60,34 @@ func (p *PreProcessor) indexWords() map[string]int {
 }
 
 func (p *PreProcessor) AddTransaction(txn *Transaction) {
-	words := cleanStringRegex.FindAllString(txn.OriginalName, len(txn.OriginalName))
+	words := clusterCleanStringRegex.FindAllString(txn.OriginalName, len(txn.OriginalName))
 	if txn.OriginalMerchantName != nil {
-		words = append(words, cleanStringRegex.FindAllString(*txn.OriginalMerchantName, len(*txn.OriginalMerchantName))...)
+		words = append(words, clusterCleanStringRegex.FindAllString(*txn.OriginalMerchantName, len(*txn.OriginalMerchantName))...)
 	}
 
+	name := make([]string, 0, len(words))
 	wordCounts := make(map[string]int, len(words))
 	// Get the term frequency from the transaction name
 	for _, word := range words {
 		word = strings.ToLower(word)
+		word = strings.ReplaceAll(word, "'", "")
+		word = strings.ReplaceAll(word, ".", "")
+
+		numbers := numberOnly.FindAllString(word, len(word))
+		if len(numbers) > 0 {
+			continue
+		}
+
 		// If there is a synonym for the current word use that instead.
 		if synonym, ok := synonyms[word]; ok {
 			word = synonym
 		}
+		if multiplier, ok := specialWeights[word]; ok && multiplier == 0 {
+			continue
+		}
 		wordCounts[word]++
 		p.wc[word]++
+		name = append(name, word)
 	}
 
 	tf := make(map[string]float64, len(wordCounts))
@@ -70,9 +96,10 @@ func (p *PreProcessor) AddTransaction(txn *Transaction) {
 	}
 
 	p.documents = append(p.documents, Document{
-		Transaction: txn,
-		TF:          tf,
-		TFIDF:       map[string]float64{},
+		Transaction:   txn,
+		SanitizedName: strings.Join(name, " "),
+		TF:            tf,
+		TFIDF:         map[string]float64{},
 	})
 }
 
@@ -135,9 +162,10 @@ func (p *PreProcessor) GetDatums() []Datum {
 			continue
 		}
 		datums = append(datums, Datum{
-			ID:          document.Transaction.TransactionId,
-			Transaction: *document.Transaction,
-			Vector:      document.Vector,
+			ID:            document.Transaction.TransactionId,
+			SanitizedName: document.SanitizedName,
+			Transaction:   *document.Transaction,
+			Vector:        document.Vector,
 		})
 	}
 
@@ -145,9 +173,10 @@ func (p *PreProcessor) GetDatums() []Datum {
 }
 
 type Datum struct {
-	ID          uint64
-	Transaction Transaction
-	Vector      []float64
+	ID            uint64
+	SanitizedName string
+	Transaction   Transaction
+	Vector        []float64
 }
 
 func (a Datum) Distance(b Datum) float64 {
