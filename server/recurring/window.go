@@ -10,15 +10,15 @@ import (
 type WindowType string
 
 const (
-	FirstAndFifthTeenthWindowType WindowType = "FirstAndFifteenth"
-	FifthTeenthAndLastWindowType  WindowType = "FifteenthAndLast"
-	WeeklyWindowType              WindowType = "Weekly"
-	BiWeeklyWindowType            WindowType = "BiWeekly"
-	MonthlyWindowType             WindowType = "Monthly"
-	BiMonthlyWindowType           WindowType = "BiMonthly"
-	QuarterlyWindowType           WindowType = "Quarterly"
-	SemiYearlyWindowType          WindowType = "SemiYearly"
-	YearlyWindowType              WindowType = "Yearly"
+	FirstAndFifteenthWindowType WindowType = "FirstAndFifteenth"
+	FifteenthAndLastWindowType  WindowType = "FifteenthAndLast"
+	WeeklyWindowType            WindowType = "Weekly"
+	BiWeeklyWindowType          WindowType = "BiWeekly"
+	MonthlyWindowType           WindowType = "Monthly"
+	BiMonthlyWindowType         WindowType = "BiMonthly"
+	QuarterlyWindowType         WindowType = "Quarterly"
+	SemiYearlyWindowType        WindowType = "SemiYearly"
+	YearlyWindowType            WindowType = "Yearly"
 )
 
 type Window struct {
@@ -144,7 +144,7 @@ func windowFirstAndFifteenth(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 5,
-		Type:  FirstAndFifthTeenthWindowType,
+		Type:  FirstAndFifteenthWindowType,
 	}
 }
 
@@ -156,7 +156,7 @@ func windowFifteenthAndTheLastDay(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 5,
-		Type:  FifthTeenthAndLastWindowType,
+		Type:  FifteenthAndLastWindowType,
 	}
 }
 

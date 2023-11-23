@@ -2,12 +2,12 @@ package recurring
 
 import (
 	"fmt"
-	"slices"
 	"sort"
 	"testing"
 
 	"github.com/adrg/strutil/metrics"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/slices"
 )
 
 func TestCompare(t *testing.T) {
