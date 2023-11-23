@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/monetr/monetr/server/models"
 )
 
 var (
@@ -61,10 +63,10 @@ func (p *PreProcessor) indexWords() map[string]int {
 	return result
 }
 
-func (p *PreProcessor) AddTransaction(txn *Transaction) {
+func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
 	words := clusterCleanStringRegex.FindAllString(txn.OriginalName, len(txn.OriginalName))
-	if txn.OriginalMerchantName != nil {
-		words = append(words, clusterCleanStringRegex.FindAllString(*txn.OriginalMerchantName, len(*txn.OriginalMerchantName))...)
+	if txn.OriginalMerchantName != "" {
+		words = append(words, clusterCleanStringRegex.FindAllString(txn.OriginalMerchantName, len(txn.OriginalMerchantName))...)
 	}
 
 	name := make([]string, 0, len(words))

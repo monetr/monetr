@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/adrg/strutil"
+	"github.com/monetr/monetr/server/models"
 )
 
 var (
@@ -12,11 +13,11 @@ var (
 )
 
 type TransactionNameComparator interface {
-	CompareTransactionName(a, b Transaction) float64
+	CompareTransactionName(a, b models.Transaction) float64
 }
 
 type TransactionMerchantComparator interface {
-	CompareTransactionMerchant(a, b Transaction) float64
+	CompareTransactionMerchant(a, b models.Transaction) float64
 }
 
 // sanitizeString takes an input string and removes all non-alphanumeric characters except for underscore and dash.
@@ -43,7 +44,7 @@ type transactionComparatorBase struct {
 	equalizeLengths bool
 }
 
-func (t *transactionComparatorBase) CompareTransactionName(a, b Transaction) float64 {
+func (t *transactionComparatorBase) CompareTransactionName(a, b models.Transaction) float64 {
 	nameA := sanitizeString(a.OriginalName)
 	nameB := sanitizeString(b.OriginalName)
 	if t.equalizeLengths {
@@ -52,13 +53,13 @@ func (t *transactionComparatorBase) CompareTransactionName(a, b Transaction) flo
 	return t.impl.Compare(nameA, nameB)
 }
 
-func (t *transactionComparatorBase) CompareTransactionMerchant(a, b Transaction) float64 {
+func (t *transactionComparatorBase) CompareTransactionMerchant(a, b models.Transaction) float64 {
 	var merchantA, merchantB string
-	if a.OriginalMerchantName != nil {
-		merchantA = *a.OriginalMerchantName
+	if a.OriginalMerchantName != "" {
+		merchantA = a.OriginalMerchantName
 	}
-	if b.OriginalMerchantName != nil {
-		merchantB = *b.OriginalMerchantName
+	if b.OriginalMerchantName != "" {
+		merchantB = b.OriginalMerchantName
 	}
 	return t.impl.Compare(merchantA, merchantB)
 }

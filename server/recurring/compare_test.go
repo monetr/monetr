@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/adrg/strutil/metrics"
+	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slices"
 )
@@ -569,7 +570,7 @@ func TestCompare(t *testing.T) {
 			},
 		},
 	}
-	getTransaction := func(id uint64) Transaction {
+	getTransaction := func(id uint64) models.Transaction {
 		for i := range data {
 			txn := data[i]
 			if txn.TransactionId == id {
@@ -580,7 +581,7 @@ func TestCompare(t *testing.T) {
 	}
 
 	type Score struct {
-		A, B  Transaction
+		A, B  models.Transaction
 		Kind  string
 		Score float64
 	}
