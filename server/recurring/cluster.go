@@ -8,6 +8,10 @@ import (
 )
 
 var (
+	dbscanClusterDebug = false
+)
+
+var (
 	clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
 	numberOnly              = regexp.MustCompile(`^\d+$`)
 
@@ -29,13 +33,11 @@ var (
 )
 
 type Document struct {
-	Transaction   *Transaction
-	SanitizedName string
-	TF            map[string]float64
-	TFIDF         map[string]float64
-	AmountScaled  float64
-	Vector        []float64
-	Valid         bool
+	ID     uint64
+	TF     map[string]float64
+	TFIDF  map[string]float64
+	Vector []float64
+	Valid  bool
 }
 
 type PreProcessor struct {
@@ -96,10 +98,9 @@ func (p *PreProcessor) AddTransaction(txn *Transaction) {
 	}
 
 	p.documents = append(p.documents, Document{
-		Transaction:   txn,
-		SanitizedName: strings.Join(name, " "),
-		TF:            tf,
-		TFIDF:         map[string]float64{},
+		ID:    txn.TransactionId,
+		TF:    tf,
+		TFIDF: map[string]float64{},
 	})
 }
 
@@ -162,10 +163,8 @@ func (p *PreProcessor) GetDatums() []Datum {
 			continue
 		}
 		datums = append(datums, Datum{
-			ID:            document.Transaction.TransactionId,
-			SanitizedName: document.SanitizedName,
-			Transaction:   *document.Transaction,
-			Vector:        document.Vector,
+			ID:     document.ID,
+			Vector: document.Vector,
 		})
 	}
 
@@ -173,10 +172,8 @@ func (p *PreProcessor) GetDatums() []Datum {
 }
 
 type Datum struct {
-	ID            uint64
-	SanitizedName string
-	Transaction   Transaction
-	Vector        []float64
+	ID     uint64
+	Vector []float64
 }
 
 func (a Datum) Distance(b Datum) float64 {
@@ -218,7 +215,8 @@ func kDistances(data []Datum, minPoints int) []float64 {
 }
 
 type Cluster struct {
-	Items map[int]Datum
+	ID    uint64
+	Items map[int]uint8
 }
 
 type DBSCAN struct {
@@ -237,6 +235,14 @@ func NewDBSCAN(dataset []Datum, epsilon float64, minPoints int) *DBSCAN {
 		minPoints: minPoints,
 		clusters:  nil,
 	}
+}
+
+func (d *DBSCAN) GetDatumByIndex(index int) (*Datum, bool) {
+	if index >= len(d.dataset) || index < 0 {
+		return nil, false
+	}
+
+	return &d.dataset[index], true
 }
 
 func (d *DBSCAN) Calculate() []Cluster {
@@ -260,7 +266,23 @@ func (d *DBSCAN) Calculate() []Cluster {
 		// Otherwise mark the point as visited so we don't do the same work again
 		d.labels[point.ID] = false
 		// Then start constructing a cluster around this point.
-		d.clusters = append(d.clusters, d.expandCluster(index, neighbors))
+		newCluster := d.expandCluster(index, neighbors)
+		// Set the cluster's unique ID to the lowest numeric ID in that cluster.
+		// HACK: I need a way to uniquely identify each cluster. Generally by using the contents of that cluster. This
+		// relies on the contents of that cluster remaining consistent over time. While the order of the clusters might
+		// change in the future or they might expand as new transactions show up, I need to know which cluster they get
+		// added to in order to tune things over time. This has the potential to cause issues on its own, what if the
+		// cluster algorithm changes enough that the "lowest ID" gets kicked out of the cluster? What if we push a bad
+		// change and the clusters change entirely? Or what if that "lowest ID" gets moved to a different cluster. This
+		// needs improvement, but I think this should be fine for the initial implementation of the clustering algorithm.
+		for i, _ := range newCluster.Items {
+			item := d.dataset[i]
+			if item.ID < newCluster.ID || newCluster.ID == 0 {
+				newCluster.ID = item.ID
+			}
+		}
+
+		d.clusters = append(d.clusters, newCluster)
 	}
 
 	return d.clusters
@@ -269,10 +291,10 @@ func (d *DBSCAN) Calculate() []Cluster {
 func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
 	// Bootstrap a cluster for the current point, this function might be called recursively
 	cluster := Cluster{
-		Items: map[int]Datum{},
+		Items: map[int]uint8{},
 	}
 	// And add a pointer to the current item into the new cluster.
-	cluster.Items[index] = d.dataset[index]
+	cluster.Items[index] = 0
 	for _, neighborIndex := range neighbors {
 		// Retrieve the item from the dataset.
 		neighbor := d.dataset[neighborIndex]
@@ -305,7 +327,7 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
 		}
 		// Then add it to this cluster.
 		if !found {
-			cluster.Items[neighborIndex] = neighbor
+			cluster.Items[neighborIndex] = 0
 		}
 	}
 

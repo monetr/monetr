@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"sort"
 	"testing"
 	"time"
 
@@ -43,25 +42,25 @@ func TestPreProcessor(t *testing.T) {
 		Date      time.Time `json:"date"`
 		Amount    int64     `json:"amount"`
 	}
-	output := make([][]Presentation, len(result))
-	for i, cluster := range result {
-		output[i] = make([]Presentation, 0, len(cluster.Items))
-		for _, item := range cluster.Items {
-			output[i] = append(output[i], Presentation{
-				ID:        item.Transaction.TransactionId,
-				Name:      item.Transaction.OriginalName,
-				Sanitized: item.SanitizedName,
-				Merchant:  item.Transaction.OriginalMerchantName,
-				Date:      item.Transaction.Date,
-				Amount:    item.Transaction.Amount,
-			})
-		}
-		sort.Slice(output[i], func(x, y int) bool {
-			return output[i][x].Date.Before(output[i][y].Date)
-		})
-	}
+	// output := make([][]Presentation, len(result))
+	// for i, cluster := range result {
+	// 	output[i] = make([]Presentation, 0, len(cluster.Items))
+	// 	for _, item := range cluster.Items {
+	// 		output[i] = append(output[i], Presentation{
+	// 			ID:        item.Transaction.TransactionId,
+	// 			Name:      item.Transaction.OriginalName,
+	// 			Sanitized: item.SanitizedName,
+	// 			Merchant:  item.Transaction.OriginalMerchantName,
+	// 			Date:      item.Transaction.Date,
+	// 			Amount:    item.Transaction.Amount,
+	// 		})
+	// 	}
+	// 	sort.Slice(output[i], func(x, y int) bool {
+	// 		return output[i][x].Date.Before(output[i][y].Date)
+	// 	})
+	// }
 
-	j, err := json.MarshalIndent(output, "", "    ")
+	j, err := json.MarshalIndent(result, "", "    ")
 	if err != nil {
 		panic(err)
 	}
