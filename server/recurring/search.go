@@ -1,12 +1,14 @@
 package recurring
 
+import "github.com/monetr/monetr/server/models"
+
 type TransactionSearch struct {
 	nameComparator     TransactionNameComparator
 	merchantComparator TransactionMerchantComparator
 }
 
-func (t *TransactionSearch) FindSimilarTransactions(baseline Transaction, all []Transaction) []Transaction {
-	result := make([]Transaction, 0, len(all))
+func (t *TransactionSearch) FindSimilarTransactions(baseline models.Transaction, all []models.Transaction) []models.Transaction {
+	result := make([]models.Transaction, 0, len(all))
 	for i := range all {
 		transaction := all[i]
 		if baseline.TransactionId == transaction.TransactionId {
