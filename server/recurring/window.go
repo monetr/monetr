@@ -10,8 +10,8 @@ import (
 type WindowType string
 
 const (
-	FirstAndFifthTeenthWindowType WindowType = "FirstAndFifthTeenth"
-	FifthTeenthAndLastWindowType  WindowType = "FifthTeenthAndLast"
+	FirstAndFifthTeenthWindowType WindowType = "FirstAndFifteenth"
+	FifthTeenthAndLastWindowType  WindowType = "FifteenthAndLast"
 	WeeklyWindowType              WindowType = "Weekly"
 	BiWeeklyWindowType            WindowType = "BiWeekly"
 	MonthlyWindowType             WindowType = "Monthly"
@@ -79,16 +79,16 @@ func GetWindowsForDate(date time.Time, timezone *time.Location) []Window {
 	switch getDayOfMonth(date) {
 	case 1:
 		windows = append(windows,
-			windowFirstAndFifthteenth(date),
+			windowFirstAndFifteenth(date),
 		)
 	case 15:
 		windows = append(windows,
-			windowFirstAndFifthteenth(date),
-			windowFifthteenthAndTheLastDay(date),
+			windowFirstAndFifteenth(date),
+			windowFifteenthAndTheLastDay(date),
 		)
 	case -1: // Last day of the month
 		windows = append(windows,
-			windowFifthteenthAndTheLastDay(date),
+			windowFifteenthAndTheLastDay(date),
 		)
 	}
 
@@ -136,7 +136,7 @@ func getDayOfWeek(date time.Time) rrule.Weekday {
 	}
 }
 
-func windowFirstAndFifthteenth(date time.Time) Window {
+func windowFirstAndFifteenth(date time.Time) Window {
 	set, _ := rrule.StrToRRuleSet("RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1,15")
 	set.DTStart(date)
 
@@ -148,7 +148,7 @@ func windowFirstAndFifthteenth(date time.Time) Window {
 	}
 }
 
-func windowFifthteenthAndTheLastDay(date time.Time) Window {
+func windowFifteenthAndTheLastDay(date time.Time) Window {
 	set, _ := rrule.StrToRRuleSet("RRULE:FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
 	set.DTStart(date)
 
