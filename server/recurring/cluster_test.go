@@ -63,9 +63,9 @@ func BenchmarkDBSCAN(b *testing.B) {
 }
 
 func TestPreProcessor(t *testing.T) {
-	// data := GetFixtures(t, "monetr_sample_data_1.json")
+	data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
-	data := GetFixtures(t, "full sample.json")
+	// data := GetFixtures(t, "full sample.json")
 	var processor = &PreProcessor{
 		documents: []Document{},
 		wc:        map[string]int{},
