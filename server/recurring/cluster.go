@@ -39,6 +39,7 @@ type Document struct {
 	TF     map[string]float64
 	TFIDF  map[string]float64
 	Vector []float64
+	String string
 	Valid  bool
 }
 
@@ -100,9 +101,10 @@ func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
 	}
 
 	p.documents = append(p.documents, Document{
-		ID:    txn.TransactionId,
-		TF:    tf,
-		TFIDF: map[string]float64{},
+		ID:     txn.TransactionId,
+		String: strings.Join(name, " "),
+		TF:     tf,
+		TFIDF:  map[string]float64{},
 	})
 }
 
@@ -166,6 +168,7 @@ func (p *PreProcessor) GetDatums() []Datum {
 		}
 		datums = append(datums, Datum{
 			ID:     document.ID,
+			String: document.String,
 			Vector: document.Vector,
 		})
 	}
@@ -175,6 +178,7 @@ func (p *PreProcessor) GetDatums() []Datum {
 
 type Datum struct {
 	ID     uint64
+	String string
 	Vector []float64
 }
 

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/adrg/strutil/metrics"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -103,7 +103,7 @@ func TestWindowGetDeviation(t *testing.T) {
 			nameComparator:     comparison,
 			merchantComparator: comparison,
 		}
-		baseline := Transaction{
+		baseline := models.Transaction{
 			TransactionId: 291,
 			Amount:        1500,
 			OriginalCategories: []string{
@@ -113,7 +113,7 @@ func TestWindowGetDeviation(t *testing.T) {
 			},
 			Date:                 time.Date(2021, 7, 10, 0, 0, 0, 0, timezone),
 			OriginalName:         "FreshBooks. Merchant name: Freshbooks",
-			OriginalMerchantName: myownsanity.StringP("FreshBooks"),
+			OriginalMerchantName: "FreshBooks",
 		}
 
 		windows := GetWindowsForDate(baseline.Date, timezone)
@@ -122,7 +122,7 @@ func TestWindowGetDeviation(t *testing.T) {
 		assert.NotEmpty(t, result, "should have found at least some transactions")
 
 		type Match struct {
-			Transaction Transaction
+			Transaction models.Transaction
 			Window      Window
 			Delta       int
 		}

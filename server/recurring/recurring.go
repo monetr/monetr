@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
@@ -14,8 +15,8 @@ type Detection struct {
 	minimumNameScore     float64
 	merchantComparator   TransactionMerchantComparator
 	minimumMerchantScore float64
-	base                 Transaction
-	transactions         []Transaction
+	base                 models.Transaction
+	transactions         []models.Transaction
 	windows              []Window
 }
 
@@ -24,7 +25,7 @@ func NewDetection(
 	minimumNameScore float64,
 	merchant TransactionMerchantComparator,
 	minimumMerchantScore float64,
-	base Transaction,
+	base models.Transaction,
 ) *Detection {
 	return &Detection{
 		nameComparator:       name,
@@ -32,7 +33,7 @@ func NewDetection(
 		merchantComparator:   merchant,
 		minimumMerchantScore: minimumMerchantScore,
 		base:                 base,
-		transactions:         make([]Transaction, 0),
+		transactions:         make([]models.Transaction, 0),
 		windows:              make([]Window, 0),
 	}
 }

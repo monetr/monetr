@@ -4,16 +4,68 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"path"
 	"testing"
-	"time"
 
+	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
+func BenchmarkPreProcessor(b *testing.B) {
+	b.StopTimer()
+	fixtureJson, err := fixtureData.ReadFile(path.Join("fixtures", "monetr_sample_data_1.json"))
+	require.NoError(b, err, "must be able to load fixture data for recurring transactions")
+	var data []models.Transaction
+	require.NoError(b, json.Unmarshal(fixtureJson, &data), "must be able to decode fixture data")
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		var processor = &PreProcessor{
+			documents: []Document{},
+			wc:        map[string]int{},
+			idf:       map[string]float64{},
+		}
+		for i := range data {
+			processor.AddTransaction(&data[i])
+		}
+
+		processor.PostPrepareCalculations()
+		_ = processor.GetDatums()
+	}
+}
+
+func BenchmarkDBSCAN(b *testing.B) {
+	b.StopTimer()
+	fixtureJson, err := fixtureData.ReadFile(path.Join("fixtures", "monetr_sample_data_1.json"))
+	require.NoError(b, err, "must be able to load fixture data for recurring transactions")
+	var data []models.Transaction
+	require.NoError(b, json.Unmarshal(fixtureJson, &data), "must be able to decode fixture data")
+
+	var processor = &PreProcessor{
+		documents: []Document{},
+		wc:        map[string]int{},
+		idf:       map[string]float64{},
+	}
+	for i := range data {
+		processor.AddTransaction(&data[i])
+	}
+
+	processor.PostPrepareCalculations()
+	datums := processor.GetDatums()
+
+	dbscan := NewDBSCAN(datums, 0.98, 2)
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		_ = dbscan.Calculate()
+	}
+}
+
 func TestPreProcessor(t *testing.T) {
-	data := GetFixtures(t, "monetr_sample_data_1.json")
+	// data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
-	// data := GetFixtures(t, "full sample.json")
+	data := GetFixtures(t, "full sample.json")
 	var processor = &PreProcessor{
 		documents: []Document{},
 		wc:        map[string]int{},
@@ -31,36 +83,26 @@ func TestPreProcessor(t *testing.T) {
 
 	// First test with 0.4 and 3 was excellent!
 	// 1.25 is also very good
-	dbscan := NewDBSCAN(datums, 0.98, 2)
+	dbscan := NewDBSCAN(datums, 0.98, 1)
 	result := dbscan.Calculate()
 	assert.NotEmpty(t, result)
 	type Presentation struct {
-		ID        uint64    `json:"id"`
-		Name      string    `json:"name"`
-		Sanitized string    `json:"sanitized"`
-		Merchant  *string   `json:"merchant"`
-		Date      time.Time `json:"date"`
-		Amount    int64     `json:"amount"`
+		ID        uint64 `json:"id"`
+		Sanitized string `json:"sanitized"`
 	}
-	// output := make([][]Presentation, len(result))
-	// for i, cluster := range result {
-	// 	output[i] = make([]Presentation, 0, len(cluster.Items))
-	// 	for _, item := range cluster.Items {
-	// 		output[i] = append(output[i], Presentation{
-	// 			ID:        item.Transaction.TransactionId,
-	// 			Name:      item.Transaction.OriginalName,
-	// 			Sanitized: item.SanitizedName,
-	// 			Merchant:  item.Transaction.OriginalMerchantName,
-	// 			Date:      item.Transaction.Date,
-	// 			Amount:    item.Transaction.Amount,
-	// 		})
-	// 	}
-	// 	sort.Slice(output[i], func(x, y int) bool {
-	// 		return output[i][x].Date.Before(output[i][y].Date)
-	// 	})
-	// }
+	output := make([][]Presentation, len(result))
+	for i, cluster := range result {
+		output[i] = make([]Presentation, 0, len(cluster.Items))
+		for index := range cluster.Items {
+			item := dbscan.dataset[index]
+			output[i] = append(output[i], Presentation{
+				ID:        item.ID,
+				Sanitized: item.String,
+			})
+		}
+	}
 
-	j, err := json.MarshalIndent(result, "", "    ")
+	j, err := json.MarshalIndent(output, "", "    ")
 	if err != nil {
 		panic(err)
 	}
