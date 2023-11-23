@@ -9,6 +9,11 @@ import (
 	"github.com/monetr/monetr/server/models"
 )
 
+const (
+	Epsilon      = 0.98
+	MinNeighbors = 1
+)
+
 var (
 	dbscanClusterDebug = false
 )
@@ -35,12 +40,13 @@ var (
 )
 
 type Document struct {
-	ID     uint64
-	TF     map[string]float64
-	TFIDF  map[string]float64
-	Vector []float64
-	String string
-	Valid  bool
+	ID          uint64
+	TF          map[string]float64
+	TFIDF       map[string]float64
+	Vector      []float64
+	Transaction *models.Transaction
+	String      string
+	Valid       bool
 }
 
 type PreProcessor struct {
@@ -101,10 +107,11 @@ func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
 	}
 
 	p.documents = append(p.documents, Document{
-		ID:     txn.TransactionId,
-		String: strings.Join(name, " "),
-		TF:     tf,
-		TFIDF:  map[string]float64{},
+		ID:          txn.TransactionId,
+		String:      strings.Join(name, " "),
+		Transaction: txn,
+		TF:          tf,
+		TFIDF:       map[string]float64{},
 	})
 }
 
@@ -167,9 +174,10 @@ func (p *PreProcessor) GetDatums() []Datum {
 			continue
 		}
 		datums = append(datums, Datum{
-			ID:     document.ID,
-			String: document.String,
-			Vector: document.Vector,
+			ID:          document.ID,
+			Transaction: document.Transaction,
+			String:      document.String,
+			Vector:      document.Vector,
 		})
 	}
 
@@ -177,9 +185,10 @@ func (p *PreProcessor) GetDatums() []Datum {
 }
 
 type Datum struct {
-	ID     uint64
-	String string
-	Vector []float64
+	ID          uint64
+	Transaction *models.Transaction
+	String      string
+	Vector      []float64
 }
 
 func (a Datum) Distance(b Datum) float64 {

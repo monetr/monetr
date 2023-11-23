@@ -1,6 +1,8 @@
 package recurring
 
 import (
+	"fmt"
+	"sort"
 	"testing"
 	"time"
 
@@ -142,5 +144,52 @@ func TestWindowGetDeviation(t *testing.T) {
 		}
 
 		assert.NotEmpty(t, matches)
+	})
+}
+
+func TestWindowExperiment(t *testing.T) {
+	t.Run("with cluster", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		data := GetFixtures(t, "monetr_sample_data_1.json")
+		//data := GetFixtures(t, "Result_3.json")
+		// data := GetFixtures(t, "full sample.json")
+		var processor = &PreProcessor{
+			documents: []Document{},
+			wc:        map[string]int{},
+			idf:       map[string]float64{},
+		}
+		for i := range data {
+			processor.AddTransaction(&data[i])
+		}
+
+		processor.PostPrepareCalculations()
+
+		assert.NotEmpty(t, processor.idf)
+
+		dbscan := NewDBSCAN(processor.GetDatums(), 0.98, 1)
+		result := dbscan.Calculate()
+		assert.NotEmpty(t, result)
+
+		for _, cluster := range result {
+			transactions := make([]*models.Transaction, 0, len(cluster.Items))
+			for index := range cluster.Items {
+				transactions = append(transactions, dbscan.dataset[index].Transaction)
+			}
+			sort.Slice(transactions, func(i, j int) bool {
+				return transactions[i].Date.Before(transactions[j].Date)
+			})
+
+			windows := GetWindowsForDate(transactions[0].Date, timezone)
+
+			fmt.Println("base transaction:", transactions[0].OriginalName, "date:", transactions[0].Date)
+			for _, transaction := range transactions[1:] {
+				fmt.Println("\ttransaction:", transaction.OriginalName, "date:", transaction.Date)
+				for _, window := range windows {
+					days, ok := window.GetDeviation(transaction.Date)
+					fmt.Println("\t\twindow:", window.Type, "aligns:", days, ok)
+				}
+			}
+		}
+
 	})
 }
