@@ -177,6 +177,7 @@ func (p *PreProcessor) GetDatums() []Datum {
 			ID:          document.ID,
 			Transaction: document.Transaction,
 			String:      document.String,
+			Amount:      document.Transaction.Amount,
 			Vector:      document.Vector,
 		})
 	}
@@ -188,6 +189,7 @@ type Datum struct {
 	ID          uint64
 	Transaction *models.Transaction
 	String      string
+	Amount      int64
 	Vector      []float64
 }
 
