@@ -3,9 +3,9 @@ package recurring
 import (
 	"math"
 	"regexp"
-	"sort"
 	"strings"
 
+	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/models"
 )
 
@@ -125,7 +125,7 @@ func (p *PreProcessor) PostPrepareCalculations() {
 	minified := p.indexWords()
 	// Define the length of the vector and adjust it to be divisible by 4. This will enable us to leverage SIMD in the
 	// future.
-	vectorLength := len(minified) + (len(minified) % 4)
+	vectorLength := len(minified) + (4 - (len(minified) % 4))
 	for i := range p.documents {
 		// Get the current document we are working with
 		document := p.documents[i]
@@ -191,44 +191,6 @@ type Datum struct {
 	String      string
 	Amount      int64
 	Vector      []float64
-}
-
-func (a Datum) Distance(b Datum) float64 {
-	// This is just the Euclidean distance between two points since the vectors here have many many dimensions.
-	var distance float64
-	for i, value := range a.Vector {
-		distance += math.Pow(value-b.Vector[i], 2)
-	}
-	return distance
-}
-
-func kDistances(data []Datum, minPoints int) []float64 {
-	distances := make([]float64, 0, len(data))
-	for _, p := range data {
-		pointDistances := make([]float64, 0, len(data))
-		for _, q := range data {
-			// A point should not be able to see itself.
-			if q.ID == p.ID {
-				continue
-			}
-
-			// Add the distance from p -> q to the current dataset
-			pointDistances = append(pointDistances, p.Distance(q))
-		}
-
-		// If we have not accumulated enough data points for p then it isn't good enough to be part of the set. Throw it out
-		// and keep going.
-		if len(pointDistances) < minPoints {
-			continue
-		}
-		sort.Float64s(pointDistances)
-		// Take the distance that is to the most extreme.
-		// TODO Double check this is correct, I can never remember if sort is ascending or descending.
-		distances = append(distances, pointDistances[minPoints-1])
-	}
-	// Sort it again before returning it to the caller
-	sort.Float64s(distances)
-	return distances
 }
 
 type Cluster struct {
@@ -362,7 +324,7 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 		}
 
 		// Calculate the distance from our Q point to our P point.
-		distance := point.Distance(counterpoint)
+		distance := calc.EuclideanDistance(point.Vector, counterpoint.Vector)
 		// If we are close enough then we could be part of a core cluster point. Add it to the list.
 		if distance <= d.epsilon {
 			neighbors = append(neighbors, i)

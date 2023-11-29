@@ -3,7 +3,6 @@ package recurring
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"path"
 	"testing"
 
@@ -65,7 +64,7 @@ func BenchmarkDBSCAN(b *testing.B) {
 func TestPreProcessor(t *testing.T) {
 	data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
-	// data := GetFixtures(t, "full sample.json")
+	//data := GetFixtures(t, "full sample.json")
 	var processor = &PreProcessor{
 		documents: []Document{},
 		wc:        map[string]int{},
@@ -153,68 +152,4 @@ func TestParameters(t *testing.T) {
 		}
 	}
 
-}
-
-func TestKDistances(t *testing.T) {
-	data := GetFixtures(t, "monetr_sample_data_1.json")
-	//data := GetFixtures(t, "Result_3.json")
-	//data := GetFixtures(t, "full sample.json")
-	var processor = &PreProcessor{
-		documents: []Document{},
-		wc:        map[string]int{},
-		idf:       map[string]float64{},
-	}
-	for i := range data {
-		processor.AddTransaction(&data[i])
-	}
-
-	processor.PostPrepareCalculations()
-
-	assert.NotEmpty(t, processor.idf)
-
-	datums := processor.GetDatums()
-
-	distances := kDistances(datums, 2)
-	distancesFiltered := make([]float64, 0, len(distances))
-	for _, distance := range distances {
-		if distance < 0.0000001 || math.IsNaN(distance) {
-			continue
-		}
-		distancesFiltered = append(distancesFiltered, distance)
-	}
-	rates := rollingRateOfChange(1, distancesFiltered)
-	rates2 := rollingRateOfChange(1, rates)
-	// Log the rates, the rate2.0 will spike when we have a decent epsilon.
-	for i, distance := range distancesFiltered {
-		fmt.Printf("[%d] %f rate: %f rate2.0: %f\n", i, distance, rates[i], rates2[i])
-	}
-	//// Find the first big rate of change of rate of change spike. The distance _after_ this will serve as a reasonable
-	//// epsilon. Might be more reliable if this was normalized with log()
-	//for i := range distancesFiltered {
-	//	if rates2[i] > 10000 {
-	//		fmt.Println("found epsilon:", distancesFiltered[i+1])
-	//		break
-	//	}
-	//}
-}
-
-func rollingRateOfChange(n int, vector []float64) []float64 {
-	length := len(vector)
-	rates := make([]float64, length)
-
-	for i := n; i < length; i++ {
-		// This is just wrong? idk what i was thinking
-		previous := vector[i-n]
-		current := vector[i]
-
-		if previous != 0 {
-			rate := (current - previous) / previous
-			rates[i] = rate
-		} else {
-			// Handle division by zero if needed
-			rates[i] = 0
-		}
-	}
-
-	return rates
 }
