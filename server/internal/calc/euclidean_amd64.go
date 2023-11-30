@@ -3,8 +3,8 @@
 package calc
 
 //go:noescape
-func __euclideanDistance(a, b []float64) float64
+func __euclideanDistance64(a, b []float64) float64
 
 func init() {
-	euclideanImplementation = __euclideanDistance
+	euclideanImplementation64 = __euclideanDistance64
 }

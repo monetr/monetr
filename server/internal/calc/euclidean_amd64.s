@@ -1,7 +1,7 @@
 #include "textflag.h"
 
-// func __euclideanDistance(a, b []float64) float64
-TEXT ·__euclideanDistance(SB), NOSPLIT, $0-56
+// func __euclideanDistance64(a, b []float64) float64
+TEXT ·__euclideanDistance64(SB), NOSPLIT, $0-56
   MOVQ a+8(FP), DX  // Load the length of a into the DX register.
   MOVQ a+0(FP), AX  // Load the pointer of the first array.
   MOVQ b+24(FP), BX // Load the pointer of the second array.

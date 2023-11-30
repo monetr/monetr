@@ -324,7 +324,7 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 		}
 
 		// Calculate the distance from our Q point to our P point.
-		distance := calc.EuclideanDistance(point.Vector, counterpoint.Vector)
+		distance := calc.EuclideanDistance64(point.Vector, counterpoint.Vector)
 		// If we are close enough then we could be part of a core cluster point. Add it to the list.
 		if distance <= d.epsilon {
 			neighbors = append(neighbors, i)

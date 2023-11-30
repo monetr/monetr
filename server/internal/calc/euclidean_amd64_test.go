@@ -3,6 +3,7 @@
 package calc
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 
@@ -10,17 +11,33 @@ import (
 )
 
 func BenchmarkEuclideanDistanceSIMD(bench *testing.B) {
-	bench.StopTimer()
-	a := make([]float64, 512)
-	b := make([]float64, 512)
-	for i := range a {
-		a[i] = rand.Float64()
-		b[i] = rand.Float64()
+	sizes := []int{
+		16,
+		32,
+		64,
+		128,
+		256,
+		512,
+		1024,
+		2048,
+		4096,
+		8192,
 	}
+	for _, size := range sizes {
+		bench.Run(fmt.Sprint(size), func(bench *testing.B) {
+			bench.StopTimer()
+			a := make([]float64, size)
+			b := make([]float64, size)
+			for i := range a {
+				a[i] = rand.Float64()
+				b[i] = rand.Float64()
+			}
 
-	bench.StartTimer()
-	for i := 0; i < bench.N; i++ {
-		__euclideanDistance(a, b)
+			bench.StartTimer()
+			for i := 0; i < bench.N; i++ {
+				__euclideanDistance64(a, b)
+			}
+		})
 	}
 }
 
@@ -34,7 +51,7 @@ func TestEuclideanDistanceVsSIMD(t *testing.T) {
 			b[i] = rand.Float64()
 		}
 		goResult := euclideanDistanceGo(a, b)
-		simdResult := __euclideanDistance(a, b)
+		simdResult := __euclideanDistance64(a, b)
 		assert.EqualValues(t, goResult, simdResult, "go and simd must match!")
 	}
 }
