@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/klauspost/cpuid/v2"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/icons"
 	"github.com/monetr/monetr/server/ui"
@@ -36,6 +37,7 @@ func newVersionCommand(parent *cobra.Command) {
 				"  Icon Packs:    %s\n" +
 				"Architecture:    %s\n" +
 				"OS:              %s\n" +
+				"SIMD:            %s\n" +
 				"Compiler:        %s\n" +
 				"Go Version:      %s\n"
 
@@ -50,6 +52,13 @@ func newVersionCommand(parent *cobra.Command) {
 				}
 			}
 
+			simd := "N/A"
+			if cpuid.CPU.Supports(cpuid.AVX512F) {
+				simd = "AVX512"
+			} else if cpuid.CPU.Supports(cpuid.AVX) {
+				simd = "AVX"
+			}
+
 			fmt.Printf(
 				detailedString,
 				build.Release,
@@ -61,6 +70,7 @@ func newVersionCommand(parent *cobra.Command) {
 				iconPacks,
 				runtime.GOARCH,
 				runtime.GOOS,
+				simd,
 				runtime.Compiler,
 				runtime.Version(),
 			)

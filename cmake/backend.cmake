@@ -37,6 +37,9 @@ set(MONETR_GO_TAGS "icons")
 if(BUILD_SIMPLE_ICONS)
   list(APPEND MONETR_GO_TAGS "simple_icons")
 endif()
+if(BUILD_NOSIMD)
+  list(APPEND MONETR_GO_TAGS "nosimd")
+endif()
 set(MONETR_LD_FLAGS "-s" "-w")
 
 # If the hostname variable is present then add that to the LD flags.
