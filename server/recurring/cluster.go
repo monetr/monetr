@@ -123,9 +123,9 @@ func (p *PreProcessor) PostPrepareCalculations() {
 	}
 	// Get a map of all the meaningful words and their index to use in the vector
 	minified := p.indexWords()
-	// Define the length of the vector and adjust it to be divisible by 4. This will enable us to leverage SIMD in the
-	// future.
-	vectorLength := len(minified) + (4 - (len(minified) % 4))
+	// Define the length of the vector and adjust it to be divisible by 8. This will enable us to leverage SIMD in the
+	// future. By using 8 we are compatible with both AVX and AVX512.
+	vectorLength := len(minified) + (8 - (len(minified) % 8))
 	for i := range p.documents {
 		// Get the current document we are working with
 		document := p.documents[i]
@@ -254,7 +254,7 @@ func (d *DBSCAN) Calculate() []Cluster {
 		// cluster algorithm changes enough that the "lowest ID" gets kicked out of the cluster? What if we push a bad
 		// change and the clusters change entirely? Or what if that "lowest ID" gets moved to a different cluster. This
 		// needs improvement, but I think this should be fine for the initial implementation of the clustering algorithm.
-		for i, _ := range newCluster.Items {
+		for i := range newCluster.Items {
 			item := d.dataset[i]
 			if item.ID < newCluster.ID || newCluster.ID == 0 {
 				newCluster.ID = item.ID
