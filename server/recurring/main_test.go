@@ -1,6 +1,7 @@
 package recurring
 
 import (
+	"embed"
 	"encoding/json"
 	"path"
 	"testing"
@@ -8,6 +9,9 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/require"
 )
+
+//go:embed fixtures/*.json
+var fixtureData embed.FS
 
 func GetFixtures(t *testing.T, name string) []models.Transaction {
 	data, err := fixtureData.ReadFile(path.Join("fixtures", name))
