@@ -1,0 +1,2738 @@
+[
+  {
+    "transactionId": 291,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2021-07-10T05:00:00Z"
+  },
+  {
+    "transactionId": 290,
+    "amount": -10000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 798080132284EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-07-13T05:00:00Z"
+  },
+  {
+    "transactionId": 289,
+    "amount": 10000,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01015E-C. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud 01015 E-c.",
+    "date": "2021-07-17T05:00:00Z"
+  },
+  {
+    "transactionId": 288,
+    "amount": 2000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2021-07-19T05:00:00Z"
+  },
+  {
+    "transactionId": 287,
+    "amount": 4000,
+    "originalCategories": ["Service"],
+    "originalName": "Domains. Merchant name: Google Pay",
+    "originalMerchantName": "Google Domains",
+    "date": "2021-07-23T05:00:00Z"
+  },
+  {
+    "transactionId": 286,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2021-07-27T05:00:00Z"
+  },
+  {
+    "transactionId": 285,
+    "amount": -10000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 772059589650EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-07-29T05:00:00Z"
+  },
+  {
+    "transactionId": 284,
+    "amount": 2,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_011896-9F7D. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-07-31T05:00:00Z"
+  },
+  {
+    "transactionId": 283,
+    "amount": 2,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01382A-A1A9. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-07-31T05:00:00Z"
+  },
+  {
+    "transactionId": 282,
+    "amount": 1380,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2021-08-02T05:00:00Z"
+  },
+  {
+    "transactionId": 281,
+    "amount": 600,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE MONETR.A. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2021-08-06T05:00:00Z"
+  },
+  {
+    "transactionId": 280,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2021-08-10T05:00:00Z"
+  },
+  {
+    "transactionId": 279,
+    "amount": -10000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 796079306324EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-08-12T05:00:00Z"
+  },
+  {
+    "transactionId": 278,
+    "amount": 17201,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 01015E-C6. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-08-16T05:00:00Z"
+  },
+  {
+    "transactionId": 277,
+    "amount": 2000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: Github",
+    "originalMerchantName": "GitHub",
+    "date": "2021-08-19T05:00:00Z"
+  },
+  {
+    "transactionId": 276,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2021-08-27T05:00:00Z"
+  },
+  {
+    "transactionId": 275,
+    "amount": -13000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 930220775324EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-08-30T05:00:00Z"
+  },
+  {
+    "transactionId": 274,
+    "amount": 3338,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 01382A-A1. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-08-31T05:00:00Z"
+  },
+  {
+    "transactionId": 273,
+    "amount": 12,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_011896-9F7D. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-08-31T05:00:00Z"
+  },
+  {
+    "transactionId": 272,
+    "amount": 1379,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2021-09-02T05:00:00Z"
+  },
+  {
+    "transactionId": 271,
+    "amount": 600,
+    "originalCategories": ["Service", "Entertainment"],
+    "originalName": "Google Play",
+    "originalMerchantName": "Google Play",
+    "date": "2021-09-03T05:00:00Z"
+  },
+  {
+    "transactionId": 270,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2021-09-10T05:00:00Z"
+  },
+  {
+    "transactionId": 269,
+    "amount": -13000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 929721254890EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-09-14T05:00:00Z"
+  },
+  {
+    "transactionId": 268,
+    "amount": 16463,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 01015E-C6. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-09-15T05:00:00Z"
+  },
+  {
+    "transactionId": 267,
+    "amount": 2000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: Github",
+    "originalMerchantName": "GitHub",
+    "date": "2021-09-20T05:00:00Z"
+  },
+  {
+    "transactionId": 265,
+    "amount": 1013,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2021-09-23T05:00:00Z"
+  },
+  {
+    "transactionId": 266,
+    "amount": 5394,
+    "originalCategories": ["Service", "Entertainment"],
+    "originalName": "Google Play",
+    "originalMerchantName": "Google Play",
+    "date": "2021-09-23T05:00:00Z"
+  },
+  {
+    "transactionId": 264,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2021-09-27T05:00:00Z"
+  },
+  {
+    "transactionId": 263,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2021-09-28T05:00:00Z"
+  },
+  {
+    "transactionId": 262,
+    "amount": -13000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 680052793710EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-09-29T05:00:00Z"
+  },
+  {
+    "transactionId": 261,
+    "amount": 5934,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 01382A-A1. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-09-30T05:00:00Z"
+  },
+  {
+    "transactionId": 260,
+    "amount": 21,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_011896-9F7D. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-09-30T05:00:00Z"
+  },
+  {
+    "transactionId": 259,
+    "amount": 680,
+    "originalCategories": ["Service", "Entertainment"],
+    "originalName": "Google Play",
+    "originalMerchantName": "Google Play",
+    "date": "2021-10-04T05:00:00Z"
+  },
+  {
+    "transactionId": 258,
+    "amount": 361,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2021-10-04T05:00:00Z"
+  },
+  {
+    "transactionId": 257,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2021-10-11T05:00:00Z"
+  },
+  {
+    "transactionId": 256,
+    "amount": -13000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 519080644356EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-10-13T05:00:00Z"
+  },
+  {
+    "transactionId": 255,
+    "amount": 15293,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01015E-C621. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-10-14T05:00:00Z"
+  },
+  {
+    "transactionId": 254,
+    "amount": 2000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2021-10-18T05:00:00Z"
+  },
+  {
+    "transactionId": 253,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2021-10-27T05:00:00Z"
+  },
+  {
+    "transactionId": 251,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 943318790712EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-10-27T05:00:00Z"
+  },
+  {
+    "transactionId": 252,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2021-10-28T05:00:00Z"
+  },
+  {
+    "transactionId": 250,
+    "amount": 8478,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01382A-A1A9. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-10-29T05:00:00Z"
+  },
+  {
+    "transactionId": 249,
+    "amount": 27,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_011896-9F7D. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-10-30T05:00:00Z"
+  },
+  {
+    "transactionId": 247,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2021-11-02T05:00:00Z"
+  },
+  {
+    "transactionId": 248,
+    "amount": 1351,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2021-11-02T05:00:00Z"
+  },
+  {
+    "transactionId": 246,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 090071340794EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-11-08T06:00:00Z"
+  },
+  {
+    "transactionId": 245,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2021-11-10T06:00:00Z"
+  },
+  {
+    "transactionId": 244,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 942519103673EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-11-12T06:00:00Z"
+  },
+  {
+    "transactionId": 243,
+    "amount": 18320,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 01015E-C6. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-11-14T06:00:00Z"
+  },
+  {
+    "transactionId": 242,
+    "amount": 2000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: Github",
+    "originalMerchantName": "GitHub",
+    "date": "2021-11-19T06:00:00Z"
+  },
+  {
+    "transactionId": 241,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 769082142363EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-11-26T06:00:00Z"
+  },
+  {
+    "transactionId": 240,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2021-11-27T06:00:00Z"
+  },
+  {
+    "transactionId": 239,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2021-11-28T06:00:00Z"
+  },
+  {
+    "transactionId": 238,
+    "amount": 8666,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01382A-A1A9. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-11-28T06:00:00Z"
+  },
+  {
+    "transactionId": 237,
+    "amount": 30,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_011896-9F7D. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-11-29T06:00:00Z"
+  },
+  {
+    "transactionId": 236,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2021-12-01T06:00:00Z"
+  },
+  {
+    "transactionId": 235,
+    "amount": 1349,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2021-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 234,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2021-12-10T06:00:00Z"
+  },
+  {
+    "transactionId": 232,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 230089209804EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-12-14T06:00:00Z"
+  },
+  {
+    "transactionId": 233,
+    "amount": 18834,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD YKFKZY. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Yk",
+    "date": "2021-12-14T06:00:00Z"
+  },
+  {
+    "transactionId": 231,
+    "amount": 1600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2021-12-19T06:00:00Z"
+  },
+  {
+    "transactionId": 230,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2021-12-27T06:00:00Z"
+  },
+  {
+    "transactionId": 227,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 518084249422EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2021-12-28T06:00:00Z"
+  },
+  {
+    "transactionId": 229,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2021-12-28T06:00:00Z"
+  },
+  {
+    "transactionId": 228,
+    "amount": 8655,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 5LAVNY. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2021-12-28T06:00:00Z"
+  },
+  {
+    "transactionId": 226,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD YYG6FN. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Yyg",
+    "date": "2021-12-31T06:00:00Z"
+  },
+  {
+    "transactionId": 224,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-01-02T06:00:00Z"
+  },
+  {
+    "transactionId": 225,
+    "amount": 1348,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-01-02T06:00:00Z"
+  },
+  {
+    "transactionId": 223,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-01-10T06:00:00Z"
+  },
+  {
+    "transactionId": 222,
+    "amount": 3999,
+    "originalCategories": ["Service", "Legal"],
+    "originalName": "ROCKETLAW 877-757-1550. Merchant name: Rocket Lawyer",
+    "originalMerchantName": "Rocket Lawyer",
+    "date": "2022-01-12T06:00:00Z"
+  },
+  {
+    "transactionId": 221,
+    "amount": 19222,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01015E-C. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud 01015 E-c.",
+    "date": "2022-01-13T06:00:00Z"
+  },
+  {
+    "transactionId": 220,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 768081363364EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-01-13T06:00:00Z"
+  },
+  {
+    "transactionId": 219,
+    "amount": 1600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-01-19T06:00:00Z"
+  },
+  {
+    "transactionId": 218,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-01-27T06:00:00Z"
+  },
+  {
+    "transactionId": 216,
+    "amount": 8685,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01382A-A. Merchant name: Google Pay",
+    "originalMerchantName": "A-a.",
+    "date": "2022-01-28T06:00:00Z"
+  },
+  {
+    "transactionId": 215,
+    "amount": -16000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 627081036833EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-01-28T06:00:00Z"
+  },
+  {
+    "transactionId": 217,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-01-28T06:00:00Z"
+  },
+  {
+    "transactionId": 214,
+    "amount": 27,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD NUKBYS. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Nukbys.",
+    "date": "2022-01-30T06:00:00Z"
+  },
+  {
+    "transactionId": 212,
+    "amount": 1324,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-02-02T06:00:00Z"
+  },
+  {
+    "transactionId": 213,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE MONETR.A. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-02-03T06:00:00Z"
+  },
+  {
+    "transactionId": 211,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-02-10T06:00:00Z"
+  },
+  {
+    "transactionId": 210,
+    "amount": 20093,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 76486S. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-02-11T06:00:00Z"
+  },
+  {
+    "transactionId": 209,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 442562792509EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-02-12T06:00:00Z"
+  },
+  {
+    "transactionId": 208,
+    "amount": 1600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-02-19T06:00:00Z"
+  },
+  {
+    "transactionId": 207,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 625080565799EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-02-25T06:00:00Z"
+  },
+  {
+    "transactionId": 206,
+    "amount": 8878,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD PJDS2F. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Pjds",
+    "date": "2022-02-26T06:00:00Z"
+  },
+  {
+    "transactionId": 205,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-02-27T06:00:00Z"
+  },
+  {
+    "transactionId": 204,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-02-28T06:00:00Z"
+  },
+  {
+    "transactionId": 203,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 3LMGUU. Merchant name: Google Pay",
+    "originalMerchantName": "Lmguu.",
+    "date": "2022-03-01T06:00:00Z"
+  },
+  {
+    "transactionId": 201,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-03-02T06:00:00Z"
+  },
+  {
+    "transactionId": 202,
+    "amount": 1324,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-03-02T06:00:00Z"
+  },
+  {
+    "transactionId": 200,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-03-10T06:00:00Z"
+  },
+  {
+    "transactionId": 199,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 624081795599EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-03-12T06:00:00Z"
+  },
+  {
+    "transactionId": 198,
+    "amount": 19623,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD RFU7T5. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-03-13T06:00:00Z"
+  },
+  {
+    "transactionId": 197,
+    "amount": 1600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-03-19T05:00:00Z"
+  },
+  {
+    "transactionId": 196,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-03-27T05:00:00Z"
+  },
+  {
+    "transactionId": 195,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-03-28T05:00:00Z"
+  },
+  {
+    "transactionId": 194,
+    "amount": 8814,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD K3NJPV. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-03-28T05:00:00Z"
+  },
+  {
+    "transactionId": 193,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 928522995578EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-03-30T05:00:00Z"
+  },
+  {
+    "transactionId": 192,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD W6HF6S. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-03-31T05:00:00Z"
+  },
+  {
+    "transactionId": 191,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-04-01T05:00:00Z"
+  },
+  {
+    "transactionId": 190,
+    "amount": 1324,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-04-02T05:00:00Z"
+  },
+  {
+    "transactionId": 189,
+    "amount": 451,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-04-05T05:00:00Z"
+  },
+  {
+    "transactionId": 188,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-04-11T05:00:00Z"
+  },
+  {
+    "transactionId": 187,
+    "amount": 19194,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD G8U64H. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-04-12T05:00:00Z"
+  },
+  {
+    "transactionId": 186,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 728084395168EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-04-13T05:00:00Z"
+  },
+  {
+    "transactionId": 185,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-04-15T05:00:00Z"
+  },
+  {
+    "transactionId": 184,
+    "amount": 13800,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "DOMAINS. Merchant name: Google Pay",
+    "originalMerchantName": "Domains.com",
+    "date": "2022-04-17T05:00:00Z"
+  },
+  {
+    "transactionId": 183,
+    "amount": 2600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-04-19T05:00:00Z"
+  },
+  {
+    "transactionId": 180,
+    "amount": 8658,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01382A-A1A9. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-04-27T05:00:00Z"
+  },
+  {
+    "transactionId": 182,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-04-27T05:00:00Z"
+  },
+  {
+    "transactionId": 181,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-04-28T05:00:00Z"
+  },
+  {
+    "transactionId": 179,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-04-29T05:00:00Z"
+  },
+  {
+    "transactionId": 178,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_011896-9F7D. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-04-30T05:00:00Z"
+  },
+  {
+    "transactionId": 176,
+    "amount": 12142,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01015E-C621. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-05-01T05:00:00Z"
+  },
+  {
+    "transactionId": 175,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-05-01T05:00:00Z"
+  },
+  {
+    "transactionId": 177,
+    "amount": 1291,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01382A-A1A9. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-05-01T05:00:00Z"
+  },
+  {
+    "transactionId": 174,
+    "amount": 1316,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-05-05T05:00:00Z"
+  },
+  {
+    "transactionId": 173,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-05-10T05:00:00Z"
+  },
+  {
+    "transactionId": 172,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-05-13T05:00:00Z"
+  },
+  {
+    "transactionId": 170,
+    "amount": -992,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "WHEN I WORK INC; WHEN I WORK INC:1233303024 57:COURANT,ELLIOT; 932423455102EPJ. Merchant name: WHEN I WORK INC",
+    "originalMerchantName": null,
+    "date": "2022-05-18T05:00:00Z"
+  },
+  {
+    "transactionId": 171,
+    "amount": 2600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-05-19T05:00:00Z"
+  },
+  {
+    "transactionId": 169,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-05-27T05:00:00Z"
+  },
+  {
+    "transactionId": 168,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-05-28T05:00:00Z"
+  },
+  {
+    "transactionId": 167,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-05-31T05:00:00Z"
+  },
+  {
+    "transactionId": 164,
+    "amount": 9100,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01382A-A1A9. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-06-01T05:00:00Z"
+  },
+  {
+    "transactionId": 165,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_011896-9F7D. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-06-01T05:00:00Z"
+  },
+  {
+    "transactionId": 166,
+    "amount": 20078,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD_01015E-C621. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-06-01T05:00:00Z"
+  },
+  {
+    "transactionId": 163,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-06-03T05:00:00Z"
+  },
+  {
+    "transactionId": 162,
+    "amount": 1316,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-06-04T05:00:00Z"
+  },
+  {
+    "transactionId": 161,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-06-10T05:00:00Z"
+  },
+  {
+    "transactionId": 160,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-06-15T05:00:00Z"
+  },
+  {
+    "transactionId": 159,
+    "amount": 2600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-06-19T05:00:00Z"
+  },
+  {
+    "transactionId": 158,
+    "amount": 6000,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "NGROK 6RWWW7NJFQD-0002. Merchant name: NGROK 6RWWW7NJFQD-0002",
+    "originalMerchantName": "Ngrok",
+    "date": "2022-06-26T05:00:00Z"
+  },
+  {
+    "transactionId": 157,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-06-27T05:00:00Z"
+  },
+  {
+    "transactionId": 156,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-06-28T05:00:00Z"
+  },
+  {
+    "transactionId": 155,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-06-30T05:00:00Z"
+  },
+  {
+    "transactionId": 154,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.. Merchant name: Google Pay",
+    "originalMerchantName": "Gsuite Mone",
+    "date": "2022-07-01T05:00:00Z"
+  },
+  {
+    "transactionId": 153,
+    "amount": 19983,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 8S9Hx8. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-07-01T05:00:00Z"
+  },
+  {
+    "transactionId": 151,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 3v67X3. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-07-01T05:00:00Z"
+  },
+  {
+    "transactionId": 152,
+    "amount": 8854,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 5LFzvQ. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-07-01T05:00:00Z"
+  },
+  {
+    "transactionId": 150,
+    "amount": 1316,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-07-02T05:00:00Z"
+  },
+  {
+    "transactionId": 149,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FreshBooks. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-07-11T05:00:00Z"
+  },
+  {
+    "transactionId": 148,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-07-15T05:00:00Z"
+  },
+  {
+    "transactionId": 147,
+    "amount": 2600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-07-19T05:00:00Z"
+  },
+  {
+    "transactionId": 146,
+    "amount": 4000,
+    "originalCategories": ["Service"],
+    "originalName": "Domains. Merchant name: Google Pay",
+    "originalMerchantName": "Google Domains",
+    "date": "2022-07-23T05:00:00Z"
+  },
+  {
+    "transactionId": 145,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-07-27T05:00:00Z"
+  },
+  {
+    "transactionId": 144,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-07-28T05:00:00Z"
+  },
+  {
+    "transactionId": 143,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-07-29T05:00:00Z"
+  },
+  {
+    "transactionId": 139,
+    "amount": 20504,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 5TSz3x. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-08-01T05:00:00Z"
+  },
+  {
+    "transactionId": 140,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD FDJRJK. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Fdjr",
+    "date": "2022-08-01T05:00:00Z"
+  },
+  {
+    "transactionId": 138,
+    "amount": 1371,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-08-02T05:00:00Z"
+  },
+  {
+    "transactionId": 141,
+    "amount": 9155,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 3DHv7C. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-08-02T05:00:00Z"
+  },
+  {
+    "transactionId": 142,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.. Merchant name: Google Pay",
+    "originalMerchantName": "Gsuite Mone",
+    "date": "2022-08-02T05:00:00Z"
+  },
+  {
+    "transactionId": 137,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-08-10T05:00:00Z"
+  },
+  {
+    "transactionId": 136,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-08-15T05:00:00Z"
+  },
+  {
+    "transactionId": 135,
+    "amount": 2716,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-08-19T05:00:00Z"
+  },
+  {
+    "transactionId": 134,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-08-27T05:00:00Z"
+  },
+  {
+    "transactionId": 133,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-08-27T05:00:00Z"
+  },
+  {
+    "transactionId": 132,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-08-31T05:00:00Z"
+  },
+  {
+    "transactionId": 130,
+    "amount": 28,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD HDzKzL. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Hdz",
+    "date": "2022-09-01T05:00:00Z"
+  },
+  {
+    "transactionId": 129,
+    "amount": 20708,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD vDSMTT. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Vds",
+    "date": "2022-09-01T05:00:00Z"
+  },
+  {
+    "transactionId": 128,
+    "amount": 9235,
+    "originalCategories": ["Service", "Entertainment"],
+    "originalName": "Google Play",
+    "originalMerchantName": "Google Play",
+    "date": "2022-09-02T05:00:00Z"
+  },
+  {
+    "transactionId": 127,
+    "amount": 1368,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-09-02T05:00:00Z"
+  },
+  {
+    "transactionId": 131,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.. Merchant name: Google Pay",
+    "originalMerchantName": "Gsuite Mone",
+    "date": "2022-09-02T05:00:00Z"
+  },
+  {
+    "transactionId": 126,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-09-10T05:00:00Z"
+  },
+  {
+    "transactionId": 125,
+    "amount": 500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "ROCKETLAW 877-757-1550. Merchant name: ROCKETLAW",
+    "originalMerchantName": "Rocketlaw",
+    "date": "2022-09-13T05:00:00Z"
+  },
+  {
+    "transactionId": 124,
+    "amount": -20000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-09-15T05:00:00Z"
+  },
+  {
+    "transactionId": 123,
+    "amount": 2205,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-09-19T05:00:00Z"
+  },
+  {
+    "transactionId": 122,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-09-27T05:00:00Z"
+  },
+  {
+    "transactionId": 121,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-09-28T05:00:00Z"
+  },
+  {
+    "transactionId": 120,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-09-30T05:00:00Z"
+  },
+  {
+    "transactionId": 116,
+    "amount": 10,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 3844JF. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-10-01T05:00:00Z"
+  },
+  {
+    "transactionId": 118,
+    "amount": 21478,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD LLXHFG. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Llxh",
+    "date": "2022-10-01T05:00:00Z"
+  },
+  {
+    "transactionId": 117,
+    "amount": 8770,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD PwvTWD. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Pwvtwd.",
+    "date": "2022-10-01T05:00:00Z"
+  },
+  {
+    "transactionId": 115,
+    "amount": 1368,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-10-02T05:00:00Z"
+  },
+  {
+    "transactionId": 119,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE MONETR.A. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-10-02T05:00:00Z"
+  },
+  {
+    "transactionId": 114,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-10-10T05:00:00Z"
+  },
+  {
+    "transactionId": 113,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-10-14T05:00:00Z"
+  },
+  {
+    "transactionId": 112,
+    "amount": 2200,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-10-19T05:00:00Z"
+  },
+  {
+    "transactionId": 111,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-10-27T05:00:00Z"
+  },
+  {
+    "transactionId": 110,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-10-28T05:00:00Z"
+  },
+  {
+    "transactionId": 109,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-10-31T05:00:00Z"
+  },
+  {
+    "transactionId": 105,
+    "amount": 24708,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD 4PKDGT. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-11-01T05:00:00Z"
+  },
+  {
+    "transactionId": 106,
+    "amount": 8979,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD GBK384. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-11-01T05:00:00Z"
+  },
+  {
+    "transactionId": 108,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2022-11-01T05:00:00Z"
+  },
+  {
+    "transactionId": 107,
+    "amount": 1344,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE VOICE USD. Merchant name: GOOGLE VOICE USD",
+    "originalMerchantName": "Voice Usd",
+    "date": "2022-11-02T05:00:00Z"
+  },
+  {
+    "transactionId": 104,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-11-09T06:00:00Z"
+  },
+  {
+    "transactionId": 103,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-11-15T06:00:00Z"
+  },
+  {
+    "transactionId": 102,
+    "amount": 2207,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-11-19T06:00:00Z"
+  },
+  {
+    "transactionId": 101,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-11-27T06:00:00Z"
+  },
+  {
+    "transactionId": 100,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-11-28T06:00:00Z"
+  },
+  {
+    "transactionId": 99,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-11-30T06:00:00Z"
+  },
+  {
+    "transactionId": 95,
+    "amount": 24105,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD w39KN6. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud",
+    "date": "2022-12-01T06:00:00Z"
+  },
+  {
+    "transactionId": 96,
+    "amount": 8737,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "CLOUD KBR75T. Merchant name: Google Pay",
+    "originalMerchantName": "Cloud Kbr",
+    "date": "2022-12-01T06:00:00Z"
+  },
+  {
+    "transactionId": 90,
+    "amount": 1439,
+    "originalCategories": ["Service"],
+    "originalName": "WWW.UROTUNING.COM. Merchant name: WWW.UROTUNING.COM",
+    "originalMerchantName": "Urotuning",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 94,
+    "amount": 1439,
+    "originalCategories": ["Service"],
+    "originalName": "WWW.UROTUNING.COM. Merchant name: WWW.UROTUNING.COM",
+    "originalMerchantName": "Urotuning",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 98,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.. Merchant name: Google Pay",
+    "originalMerchantName": "Gsuite Mone",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 97,
+    "amount": 1439,
+    "originalCategories": ["Service"],
+    "originalName": "STATIONMADE.COM. Merchant name: STATIONMADE.COM",
+    "originalMerchantName": "Stationmade.com.",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 89,
+    "amount": 1344,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 93,
+    "amount": 1439,
+    "originalCategories": ["Service"],
+    "originalName": "WWW.UROTUNING.COM. Merchant name: WWW.UROTUNING.COM",
+    "originalMerchantName": "Urotuning",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 92,
+    "amount": 1439,
+    "originalCategories": ["Service"],
+    "originalName": "WWW.UROTUNING.COM. Merchant name: WWW.UROTUNING.COM",
+    "originalMerchantName": "Urotuning",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 91,
+    "amount": 1439,
+    "originalCategories": ["Service"],
+    "originalName": "WWW.UROTUNING.COM. Merchant name: WWW.UROTUNING.COM",
+    "originalMerchantName": "Urotuning",
+    "date": "2022-12-02T06:00:00Z"
+  },
+  {
+    "transactionId": 82,
+    "amount": -3,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:012968304 CREDIT:monetr LLC; US003PKOTV. Merchant name: GOOGLE",
+    "originalMerchantName": null,
+    "date": "2022-12-03T06:00:00Z"
+  },
+  {
+    "transactionId": 84,
+    "amount": -1439,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "Provisional Credit for 6388dfe10d013d69b677ce4a. Merchant name: Mercury Technologies Inc.",
+    "originalMerchantName": null,
+    "date": "2022-12-07T06:00:00Z"
+  },
+  {
+    "transactionId": 88,
+    "amount": -1439,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "Provisional Credit for 6388e02a1bf7849e14e58eb8. Merchant name: Mercury Technologies Inc.",
+    "originalMerchantName": null,
+    "date": "2022-12-07T06:00:00Z"
+  },
+  {
+    "transactionId": 87,
+    "amount": -1439,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "Provisional Credit for 6388c810127bf0571c7037a6. Merchant name: Mercury Technologies Inc.",
+    "originalMerchantName": null,
+    "date": "2022-12-07T06:00:00Z"
+  },
+  {
+    "transactionId": 86,
+    "amount": -1439,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "Provisional Credit for 6388dfae0b9dad3c4d153e96. Merchant name: Mercury Technologies Inc.",
+    "originalMerchantName": null,
+    "date": "2022-12-07T06:00:00Z"
+  },
+  {
+    "transactionId": 85,
+    "amount": -1439,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "Provisional Credit for 6388dfc90d013d69b677ce45. Merchant name: Mercury Technologies Inc.",
+    "originalMerchantName": null,
+    "date": "2022-12-07T06:00:00Z"
+  },
+  {
+    "transactionId": 83,
+    "amount": -1439,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "Provisional Credit for 6388dffbed41a40df74285dd. Merchant name: Mercury Technologies Inc.",
+    "originalMerchantName": null,
+    "date": "2022-12-07T06:00:00Z"
+  },
+  {
+    "transactionId": 81,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2022-12-09T06:00:00Z"
+  },
+  {
+    "transactionId": 80,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-12-15T06:00:00Z"
+  },
+  {
+    "transactionId": 79,
+    "amount": 2200,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2022-12-19T06:00:00Z"
+  },
+  {
+    "transactionId": 78,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2022-12-27T06:00:00Z"
+  },
+  {
+    "transactionId": 77,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2022-12-28T06:00:00Z"
+  },
+  {
+    "transactionId": 76,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2022-12-30T06:00:00Z"
+  },
+  {
+    "transactionId": 74,
+    "amount": 1344,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSMONETR.APP. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-01-02T06:00:00Z"
+  },
+  {
+    "transactionId": 75,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE MONETR.A. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2023-01-02T06:00:00Z"
+  },
+  {
+    "transactionId": 72,
+    "amount": 9018,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013024238 DEBIT:monetr LLC; US003SFSLQ. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-01-05T06:00:00Z"
+  },
+  {
+    "transactionId": 73,
+    "amount": 24838,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013024238 DEBIT:monetr LLC; US003SB64F. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-01-05T06:00:00Z"
+  },
+  {
+    "transactionId": 71,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-01-09T06:00:00Z"
+  },
+  {
+    "transactionId": 70,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-01-13T06:00:00Z"
+  },
+  {
+    "transactionId": 69,
+    "amount": 2235,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-01-19T06:00:00Z"
+  },
+  {
+    "transactionId": 68,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-01-27T06:00:00Z"
+  },
+  {
+    "transactionId": 66,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "DOMAINS. Merchant name: Google Pay",
+    "originalMerchantName": "Domains.com",
+    "date": "2023-01-29T06:00:00Z"
+  },
+  {
+    "transactionId": 67,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2023-01-29T06:00:00Z"
+  },
+  {
+    "transactionId": 65,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-01-31T06:00:00Z"
+  },
+  {
+    "transactionId": 63,
+    "amount": 1344,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSMONETR.APP. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-02-02T06:00:00Z"
+  },
+  {
+    "transactionId": 64,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE MONETR.A. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2023-02-02T06:00:00Z"
+  },
+  {
+    "transactionId": 61,
+    "amount": 8419,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013069568 DEBIT:monetr LLC; US003SX8Y7. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-02-06T06:00:00Z"
+  },
+  {
+    "transactionId": 62,
+    "amount": 24791,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013066003 DEBIT:monetr LLC; US003SWOGR. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-02-06T06:00:00Z"
+  },
+  {
+    "transactionId": 60,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-02-09T06:00:00Z"
+  },
+  {
+    "transactionId": 59,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-02-15T06:00:00Z"
+  },
+  {
+    "transactionId": 58,
+    "amount": 2205,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-02-19T06:00:00Z"
+  },
+  {
+    "transactionId": 57,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-02-27T06:00:00Z"
+  },
+  {
+    "transactionId": 56,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2023-02-28T06:00:00Z"
+  },
+  {
+    "transactionId": 55,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-02-28T06:00:00Z"
+  },
+  {
+    "transactionId": 54,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2023-03-01T06:00:00Z"
+  },
+  {
+    "transactionId": 53,
+    "amount": 1366,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSMONETR.APP. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-03-02T06:00:00Z"
+  },
+  {
+    "transactionId": 52,
+    "amount": 22882,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013105806 DEBIT:monetr LLC; US003TGLDM. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-03-06T06:00:00Z"
+  },
+  {
+    "transactionId": 51,
+    "amount": 7656,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013105806 DEBIT:monetr LLC; US003TK1VB. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-03-06T06:00:00Z"
+  },
+  {
+    "transactionId": 50,
+    "amount": 1500,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-03-09T06:00:00Z"
+  },
+  {
+    "transactionId": 49,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "BAMBOOHR PAYROLL; BAMBOOHR PAYROLL::ELLIOT COURANT; 513026. Merchant name: BAMBOOHR PAYROLL",
+    "originalMerchantName": null,
+    "date": "2023-03-14T05:00:00Z"
+  },
+  {
+    "transactionId": 48,
+    "amount": 1000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-03-19T05:00:00Z"
+  },
+  {
+    "transactionId": 47,
+    "amount": 1200,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": "GitHub",
+    "date": "2023-03-19T05:00:00Z"
+  },
+  {
+    "transactionId": 46,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-03-27T05:00:00Z"
+  },
+  {
+    "transactionId": 45,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2023-03-28T05:00:00Z"
+  },
+  {
+    "transactionId": 44,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-03-31T05:00:00Z"
+  },
+  {
+    "transactionId": 43,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE MONETR.A. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2023-04-02T05:00:00Z"
+  },
+  {
+    "transactionId": 42,
+    "amount": 1366,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-04-02T05:00:00Z"
+  },
+  {
+    "transactionId": 41,
+    "amount": 24754,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013153739 DEBIT:monetr LLC; US003TYTY4. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-04-05T05:00:00Z"
+  },
+  {
+    "transactionId": 40,
+    "amount": 8363,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013148094 DEBIT:monetr LLC; US003TYTU4. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-04-05T05:00:00Z"
+  },
+  {
+    "transactionId": 39,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-04-09T05:00:00Z"
+  },
+  {
+    "transactionId": 38,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-04-14T05:00:00Z"
+  },
+  {
+    "transactionId": 37,
+    "amount": 13800,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "DOMAINS. Merchant name: Google Pay",
+    "originalMerchantName": "Domains.com",
+    "date": "2023-04-17T05:00:00Z"
+  },
+  {
+    "transactionId": 35,
+    "amount": 1000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-04-19T05:00:00Z"
+  },
+  {
+    "transactionId": 36,
+    "amount": 1223,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": "GitHub",
+    "date": "2023-04-19T05:00:00Z"
+  },
+  {
+    "transactionId": 34,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-04-27T05:00:00Z"
+  },
+  {
+    "transactionId": 32,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-04-28T05:00:00Z"
+  },
+  {
+    "transactionId": 33,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2023-04-28T05:00:00Z"
+  },
+  {
+    "transactionId": 31,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2023-05-01T05:00:00Z"
+  },
+  {
+    "transactionId": 30,
+    "amount": 1345,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-05-02T05:00:00Z"
+  },
+  {
+    "transactionId": 29,
+    "amount": 24159,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013190208 DEBIT:monetr LLC; US003UFE4R. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-05-05T05:00:00Z"
+  },
+  {
+    "transactionId": 28,
+    "amount": 8127,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013190208 DEBIT:monetr LLC; US003UGB8G. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-05-05T05:00:00Z"
+  },
+  {
+    "transactionId": 27,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-05-10T05:00:00Z"
+  },
+  {
+    "transactionId": 26,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-05-13T05:00:00Z"
+  },
+  {
+    "transactionId": 25,
+    "amount": 240,
+    "originalCategories": ["Service", "Business Services"],
+    "originalName": "Plaid",
+    "originalMerchantName": "Plaid Technologies",
+    "date": "2023-05-16T05:00:00Z"
+  },
+  {
+    "transactionId": 24,
+    "amount": 1000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-05-19T05:00:00Z"
+  },
+  {
+    "transactionId": 23,
+    "amount": 1243,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": "GitHub",
+    "date": "2023-05-19T05:00:00Z"
+  },
+  {
+    "transactionId": 22,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-05-27T05:00:00Z"
+  },
+  {
+    "transactionId": 21,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2023-05-28T05:00:00Z"
+  },
+  {
+    "transactionId": 20,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-05-31T05:00:00Z"
+  },
+  {
+    "transactionId": 19,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2023-06-01T05:00:00Z"
+  },
+  {
+    "transactionId": 18,
+    "amount": 1345,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-06-02T05:00:00Z"
+  },
+  {
+    "transactionId": 17,
+    "amount": 8402,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013234314 DEBIT:monetr LLC; US003V1DJH. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-06-05T05:00:00Z"
+  },
+  {
+    "transactionId": 16,
+    "amount": 24819,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013234314 DEBIT:monetr LLC; US003UWWX6. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-06-06T05:00:00Z"
+  },
+  {
+    "transactionId": 15,
+    "amount": 154,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": "GitHub",
+    "date": "2023-06-07T05:00:00Z"
+  },
+  {
+    "transactionId": 14,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-06-10T05:00:00Z"
+  },
+  {
+    "transactionId": 12,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-06-15T05:00:00Z"
+  },
+  {
+    "transactionId": 13,
+    "amount": 240,
+    "originalCategories": ["Service", "Business Services"],
+    "originalName": "Plaid",
+    "originalMerchantName": "Plaid Technologies",
+    "date": "2023-06-16T05:00:00Z"
+  },
+  {
+    "transactionId": 11,
+    "amount": 1000,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-06-19T05:00:00Z"
+  },
+  {
+    "transactionId": 10,
+    "amount": 1673,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": "GitHub",
+    "date": "2023-06-19T05:00:00Z"
+  },
+  {
+    "transactionId": 6,
+    "amount": 34800,
+    "originalCategories": ["Service"],
+    "originalName": "GITLAB INC.. Merchant name: GITLAB INC.",
+    "originalMerchantName": "Gitlab Inc.",
+    "date": "2023-06-28T05:00:00Z"
+  },
+  {
+    "transactionId": 9,
+    "amount": 1500,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "BUILDKITE. Merchant name: BUILDKITE",
+    "originalMerchantName": "Buildkite.",
+    "date": "2023-06-28T05:00:00Z"
+  },
+  {
+    "transactionId": 8,
+    "amount": 4583,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-06-28T05:00:00Z"
+  },
+  {
+    "transactionId": 7,
+    "amount": 6000,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "NGROK 6RWWW7NJFQD-0003. Merchant name: NGROK 6RWWW7NJFQD-0003",
+    "originalMerchantName": "Ngrok",
+    "date": "2023-06-28T05:00:00Z"
+  },
+  {
+    "transactionId": 5,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-06-30T05:00:00Z"
+  },
+  {
+    "transactionId": 4,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Google Workspace",
+    "date": "2023-07-01T05:00:00Z"
+  },
+  {
+    "transactionId": 3,
+    "amount": 1345,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-07-02T05:00:00Z"
+  },
+  {
+    "transactionId": 1,
+    "amount": 8159,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013283042 DEBIT:monetr LLC; US003VEI5G. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-07-05T05:00:00Z"
+  },
+  {
+    "transactionId": 2,
+    "amount": 24189,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013283042 DEBIT:monetr LLC; US003VIR0H. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-07-05T05:00:00Z"
+  },
+  {
+    "transactionId": 293,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-07-10T05:00:00Z"
+  },
+  {
+    "transactionId": 296,
+    "amount": 240,
+    "originalCategories": ["Service", "Business Services"],
+    "originalName": "Plaid",
+    "originalMerchantName": "Plaid Technologies",
+    "date": "2023-07-12T05:00:00Z"
+  },
+  {
+    "transactionId": 297,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-07-14T05:00:00Z"
+  },
+  {
+    "transactionId": 301,
+    "amount": 1637,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": "GitHub",
+    "date": "2023-07-19T05:00:00Z"
+  },
+  {
+    "transactionId": 300,
+    "amount": 1060,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-07-19T05:00:00Z"
+  },
+  {
+    "transactionId": 303,
+    "amount": 4000,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "DOMAINS. Merchant name: Google Pay",
+    "originalMerchantName": "Domains.com",
+    "date": "2023-07-24T05:00:00Z"
+  },
+  {
+    "transactionId": 304,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-07-27T05:00:00Z"
+  },
+  {
+    "transactionId": 305,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-07-29T05:00:00Z"
+  },
+  {
+    "transactionId": 308,
+    "amount": 1345,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-08-02T05:00:00Z"
+  },
+  {
+    "transactionId": 309,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.. Merchant name: Google Pay",
+    "originalMerchantName": "Gsuite Mone",
+    "date": "2023-08-02T05:00:00Z"
+  },
+  {
+    "transactionId": 602,
+    "amount": 21578,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013325338 DEBIT:monetr LLC; US003VWJPI. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-08-07T05:00:00Z"
+  },
+  {
+    "transactionId": 588,
+    "amount": 2141,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013325338 DEBIT:monetr LLC; US003W0C9B. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-08-07T05:00:00Z"
+  },
+  {
+    "transactionId": 608,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-08-09T05:00:00Z"
+  },
+  {
+    "transactionId": 622,
+    "amount": 240,
+    "originalCategories": ["Service", "Business Services"],
+    "originalName": "Plaid",
+    "originalMerchantName": "Plaid Technologies",
+    "date": "2023-08-14T05:00:00Z"
+  },
+  {
+    "transactionId": 633,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-08-15T05:00:00Z"
+  },
+  {
+    "transactionId": 674,
+    "amount": 1600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": "GitHub",
+    "date": "2023-08-19T05:00:00Z"
+  },
+  {
+    "transactionId": 675,
+    "amount": 1060,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-08-19T05:00:00Z"
+  },
+  {
+    "transactionId": 680,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry",
+    "date": "2023-08-27T05:00:00Z"
+  },
+  {
+    "transactionId": 681,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-08-31T05:00:00Z"
+  },
+  {
+    "transactionId": 740,
+    "amount": 1348,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-09-02T05:00:00Z"
+  },
+  {
+    "transactionId": 741,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.. Merchant name: Google Pay",
+    "originalMerchantName": "Gsuite Monetr..",
+    "date": "2023-09-02T05:00:00Z"
+  },
+  {
+    "transactionId": 745,
+    "amount": 20045,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013369273 DEBIT:monetr LLC; US003WHUAW. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-09-06T05:00:00Z"
+  },
+  {
+    "transactionId": 744,
+    "amount": 24,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013369273 DEBIT:monetr LLC; US003WHUFW. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-09-06T05:00:00Z"
+  },
+  {
+    "transactionId": 747,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: FRESHBOOKS",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-09-10T05:00:00Z"
+  },
+  {
+    "transactionId": 749,
+    "amount": -25000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-09-15T05:00:00Z"
+  },
+  {
+    "transactionId": 750,
+    "amount": 240,
+    "originalCategories": ["Service", "Business Services"],
+    "originalName": "Plaid",
+    "originalMerchantName": "Plaid Technologies",
+    "date": "2023-09-16T05:00:00Z"
+  },
+  {
+    "transactionId": 753,
+    "amount": 1613,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: GITHUB, INC.",
+    "originalMerchantName": null,
+    "date": "2023-09-19T05:00:00Z"
+  },
+  {
+    "transactionId": 754,
+    "amount": 1060,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: GITHUB",
+    "originalMerchantName": "GitHub",
+    "date": "2023-09-19T05:00:00Z"
+  },
+  {
+    "transactionId": 757,
+    "amount": 3999,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "ROCKETLAW 877-757-1550. Merchant name: ROCKETLAW",
+    "originalMerchantName": "Rocketlaw",
+    "date": "2023-09-23T05:00:00Z"
+  },
+  {
+    "transactionId": 759,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: SENTRY",
+    "originalMerchantName": "Sentry.",
+    "date": "2023-09-27T05:00:00Z"
+  },
+  {
+    "transactionId": 760,
+    "amount": -21000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; 5176 TREASURY PR:13141467:COURANT ELLIOT; 513026. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-09-29T05:00:00Z"
+  },
+  {
+    "transactionId": 761,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GSUITE_monetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Gsuite Monetr.app.",
+    "date": "2023-10-01T05:00:00Z"
+  },
+  {
+    "transactionId": 763,
+    "amount": 1347,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSmonetr.app. Merchant name: Google Pay",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-10-02T05:00:00Z"
+  },
+  {
+    "transactionId": 766,
+    "amount": 20076,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; GOOGLE:013408689 DEBIT:monetr LLC; US003WVLA1. Merchant name: GOOGLE",
+    "originalMerchantName": "Monetr LLC",
+    "date": "2023-10-05T05:00:00Z"
+  },
+  {
+    "transactionId": 768,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-10-10T05:00:00Z"
+  },
+  {
+    "transactionId": 769,
+    "amount": -19,
+    "originalCategories": ["Transfer", "Credit"],
+    "originalName": "GOOGLE; ACCTVERIFY. Merchant name: GOOGLE",
+    "originalMerchantName": null,
+    "date": "2023-10-10T05:00:00Z"
+  },
+  {
+    "transactionId": 772,
+    "amount": 8000,
+    "originalCategories": ["Service", "Shipping and Freight"],
+    "originalName": "USPS PO BOXES ONLINE. Merchant name: USPS",
+    "originalMerchantName": "U.S. Post Office",
+    "date": "2023-10-13T05:00:00Z"
+  },
+  {
+    "transactionId": 771,
+    "amount": -21000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; DEPOSIT. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-10-13T05:00:00Z"
+  },
+  {
+    "transactionId": 774,
+    "amount": 240,
+    "originalCategories": ["Service", "Business Services"],
+    "originalName": "Plaid",
+    "originalMerchantName": "Plaid Technologies Inc.",
+    "date": "2023-10-16T05:00:00Z"
+  },
+  {
+    "transactionId": 777,
+    "amount": 1600,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB, INC.. Merchant name: Github",
+    "originalMerchantName": "GitHub",
+    "date": "2023-10-19T05:00:00Z"
+  },
+  {
+    "transactionId": 778,
+    "amount": 1060,
+    "originalCategories": ["Service", "Computers", "Software Development"],
+    "originalName": "GITHUB. Merchant name: Github",
+    "originalMerchantName": "GitHub",
+    "date": "2023-10-19T05:00:00Z"
+  },
+  {
+    "transactionId": 780,
+    "amount": 8900,
+    "originalCategories": ["Transfer", "Debit"],
+    "originalName": "CRUIP. Merchant name: Cruip",
+    "originalMerchantName": "Cruip.",
+    "date": "2023-10-21T05:00:00Z"
+  },
+  {
+    "transactionId": 782,
+    "amount": 2900,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SENTRY. Merchant name: Sentry",
+    "originalMerchantName": "Sentry.",
+    "date": "2023-10-27T05:00:00Z"
+  },
+  {
+    "transactionId": 783,
+    "amount": -21000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; DEPOSIT. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-10-31T05:00:00Z"
+  },
+  {
+    "transactionId": 789,
+    "amount": 1292,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "SVCSMONETR.APP. Merchant name: Google",
+    "originalMerchantName": "Svcsmonetr.app.",
+    "date": "2023-11-02T05:00:00Z"
+  },
+  {
+    "transactionId": 786,
+    "amount": 1200,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE GSUITE_monetr.. Merchant name: GOOGLE GSUITE_monetr.",
+    "originalMerchantName": "Gsuite Monetr..",
+    "date": "2023-11-02T05:00:00Z"
+  },
+  {
+    "transactionId": 790,
+    "amount": 20754,
+    "originalCategories": ["Shops", "Digital Purchase"],
+    "originalName": "GOOGLE; CLOUD_PLAT. Merchant name: GOOGLE",
+    "originalMerchantName": "Cloud Plat.",
+    "date": "2023-11-06T06:00:00Z"
+  },
+  {
+    "transactionId": 792,
+    "amount": 800,
+    "originalCategories": ["Recreation", "Arts and Entertainment"],
+    "originalName": "MAGIC PATTERNS. Merchant name: Magic Patterns",
+    "originalMerchantName": "Magic Patterns.",
+    "date": "2023-11-09T06:00:00Z"
+  },
+  {
+    "transactionId": 794,
+    "amount": 1700,
+    "originalCategories": ["Service", "Financial", "Accounting and Bookkeeping"],
+    "originalName": "FRESHBOOKS. Merchant name: Freshbooks",
+    "originalMerchantName": "FreshBooks",
+    "date": "2023-11-10T06:00:00Z"
+  },
+  {
+    "transactionId": 796,
+    "amount": 240,
+    "originalCategories": ["Service", "Business Services"],
+    "originalName": "Plaid",
+    "originalMerchantName": "Plaid Technologies Inc.",
+    "date": "2023-11-12T06:00:00Z"
+  },
+  {
+    "transactionId": 797,
+    "amount": -21000,
+    "originalCategories": ["Transfer", "Payroll"],
+    "originalName": "5176 TREASURY PR; DEPOSIT. Merchant name: 5176 TREASURY PR",
+    "originalMerchantName": null,
+    "date": "2023-11-15T06:00:00Z"
+  }
+]

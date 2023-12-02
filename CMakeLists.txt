@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 option(BUILD_THIRD_PARTY_NOTICE "Generate a third party notice as part of the build stage, requires Ruby." OFF)
 option(BUILD_SIMPLE_ICONS "Embed simple-icons into the final binary, used for providing icons for transactions." ON)
+option(BUILD_NOSIMD "Disable SIMD support at compile time." OFF)
 option(BUILD_DEPLOYMENT_TARGETS "Include targets for deploying monetr using helm and kubectl" OFF)
 option(BUILD_CONTAINER_TAG_LATEST "Tag containers with latest when building them." ON)
 
@@ -9,6 +10,7 @@ option(TEST_JUNIT "Tests should produce a JUnit XML file" OFF)
 option(TEST_RACE "Go tests should be run with the -race flag" ON)
 option(TEST_COVERAGE "Coverage data should be collected from tests" ON)
 option(TEST_USE_GOTESTSUM "Wrap test execution in gotestsum" OFF)
+option(TEST_SHORT "Exclude long running tests" ON)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
   message(STATUS "Mode: Release - Build must include third party notice")

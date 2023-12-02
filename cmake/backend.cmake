@@ -1,4 +1,4 @@
-set(GO_MIN_VERSION "1.19.0")
+set(GO_MIN_VERSION "1.20.1")
 
 # GO_MODULES is only a marker file to indicate that modules have actually been fetched.
 set(GO_MODULES ${CMAKE_BINARY_DIR}/go-dependencies-marker.txt)
@@ -36,6 +36,9 @@ endif()
 set(MONETR_GO_TAGS "icons")
 if(BUILD_SIMPLE_ICONS)
   list(APPEND MONETR_GO_TAGS "simple_icons")
+endif()
+if(BUILD_NOSIMD)
+  list(APPEND MONETR_GO_TAGS "nosimd")
 endif()
 set(MONETR_LD_FLAGS "-s" "-w")
 
