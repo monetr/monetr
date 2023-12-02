@@ -154,6 +154,7 @@ func (p *PreProcessor) PostPrepareCalculations() {
 			continue
 		}
 		document.Valid = true
+		// TODO Replace this with the NormalizeVector64 function in calc.
 		var norm float64
 		for _, value := range document.Vector {
 			norm += value * value
