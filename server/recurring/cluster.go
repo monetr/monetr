@@ -154,15 +154,8 @@ func (p *PreProcessor) PostPrepareCalculations() {
 			continue
 		}
 		document.Valid = true
-		// TODO Replace this with the NormalizeVector64 function in calc.
-		var norm float64
-		for _, value := range document.Vector {
-			norm += value * value
-		}
-		norm = math.Sqrt(norm)
-		for i, value := range document.Vector {
-			document.Vector[i] = value / norm
-		}
+		// Normalize the document's tfidf vector.
+		calc.NormalizeVector64(document.Vector)
 		// Then store the document back in
 		p.documents[i] = document
 	}
