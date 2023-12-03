@@ -1,7 +1,9 @@
 package recurring
 
 import (
+	"encoding/json"
 	"fmt"
+	"math"
 	"sort"
 	"testing"
 	"time"
@@ -151,19 +153,54 @@ func TestWindowExperiment(t *testing.T) {
 	t.Run("with cluster", func(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		data := GetFixtures(t, "monetr_sample_data_1.json")
-		//data := GetFixtures(t, "Result_3.json")
+		// data := GetFixtures(t, "Result_3.json")
 		// data := GetFixtures(t, "full sample.json")
 		var processor = &PreProcessor{
 			documents: []Document{},
 			wc:        map[string]float64{},
 		}
+		latest := time.Time{}
 		for i := range data {
 			processor.AddTransaction(&data[i])
+			if data[i].Date.After(latest) {
+				latest = data[i].Date
+			}
 		}
 
 		dbscan := NewDBSCAN(processor.GetDatums(), 0.98, 1)
 		result := dbscan.Calculate()
 		assert.NotEmpty(t, result)
+
+		type Hit struct {
+			Window WindowType
+			Time   time.Time
+		}
+		type Miss struct {
+			Window WindowType
+			Time   time.Time
+		}
+		type Transaction struct {
+			ID       uint64
+			Name     string
+			Merchant string
+			Date     time.Time
+			Amount   int64
+		}
+		type Score struct {
+			Group              string
+			Window             WindowType
+			Start              time.Time
+			Last               time.Time
+			Next               time.Time
+			Hits               int
+			Misses             int
+			Transactions       int
+			Confidence         float64
+			Ended              bool
+			TransactionMatches []Transaction
+		}
+
+		bestScores := make([]Score, 0, len(result))
 
 		for _, cluster := range result {
 			transactions := make([]*models.Transaction, 0, len(cluster.Items))
@@ -174,17 +211,89 @@ func TestWindowExperiment(t *testing.T) {
 				return transactions[i].Date.Before(transactions[j].Date)
 			})
 
+			start, end := transactions[0].Date, transactions[len(transactions)-1].Date
 			windows := GetWindowsForDate(transactions[0].Date, timezone)
-
-			fmt.Println("base transaction:", transactions[0].OriginalName, "date:", transactions[0].Date)
-			for _, transaction := range transactions[1:] {
-				fmt.Println("\ttransaction:", transaction.OriginalName, "date:", transaction.Date)
-				for _, window := range windows {
-					days, ok := window.GetDeviation(transaction.Date)
-					fmt.Println("\t\twindow:", window.Type, "aligns:", days, ok)
+			scores := make([]Score, 0, len(windows))
+			for _, window := range windows {
+				misses := make([]Miss, 0)
+				hits := make([]Hit, 0, len(transactions))
+				ids := make([]Transaction, 0, len(transactions))
+				occurrences := window.Rule.Between(start.AddDate(0, 0, -window.Fuzzy), end.AddDate(0, 0, window.Fuzzy), false)
+				for x := range occurrences {
+					occurrence := occurrences[x]
+					foundAny := false
+					for i := range transactions {
+						transaction := transactions[i]
+						delta := math.Abs(transaction.Date.Sub(occurrence).Hours())
+						fuzz := float64(window.Fuzzy) * 24
+						if fuzz >= delta {
+							foundAny = true
+							hits = append(hits, Hit{
+								Window: window.Type,
+								Time:   occurrence,
+							})
+							ids = append(ids, Transaction{
+								ID:       transaction.TransactionId,
+								Name:     transaction.OriginalName,
+								Merchant: transaction.OriginalMerchantName,
+								Date:     transaction.Date,
+								Amount:   transaction.Amount,
+							})
+							continue
+						}
+					}
+					if !foundAny {
+						misses = append(misses, Miss{
+							Window: window.Type,
+							Time:   occurrence,
+						})
+					}
 				}
+
+				if len(hits) == 0 {
+					continue
+				}
+				next := window.Rule.After(hits[len(hits)-1].Time, false)
+				scores = append(scores, Score{
+					Group:              transactions[0].OriginalName,
+					Window:             window.Type,
+					Hits:               len(hits),
+					Misses:             len(misses),
+					Transactions:       len(transactions),
+					Start:              hits[0].Time,
+					Last:               hits[len(hits)-1].Time,
+					Next:               next,
+					Ended:              next.Before(latest.AddDate(0, 0, window.Fuzzy)),
+					TransactionMatches: ids,
+				})
+			}
+
+			sort.Slice(scores, func(i, j int) bool {
+				hitsA := float64(scores[i].Hits)
+				missesA := float64(scores[i].Misses) * 1.1
+				txnsA := float64(scores[i].Transactions)
+
+				hitsB := float64(scores[j].Hits)
+				missesB := float64(scores[j].Misses) * 1.1
+				txnsB := float64(scores[j].Transactions)
+
+				accuracyA := (hitsA - missesA) / txnsA
+				accuracyB := (hitsB - missesB) / txnsB
+				scores[i].Confidence = accuracyA
+				scores[j].Confidence = accuracyB
+				return accuracyA > accuracyB
+			})
+
+			if scores[0].Confidence > 0.65 && !scores[0].Ended {
+				bestScores = append(bestScores, scores[0])
 			}
 		}
 
+		j, err := json.MarshalIndent(bestScores, "", "    ")
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(string(j))
 	})
 }

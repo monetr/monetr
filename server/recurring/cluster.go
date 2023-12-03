@@ -32,6 +32,8 @@ var (
 		"transaction": 0,
 		"card":        0,
 		"check":       0,
+		"transfer":    0,
+		"deposit":     0,
 	}
 
 	synonyms = map[string]string{

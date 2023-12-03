@@ -76,23 +76,9 @@ func GetWindowsForDate(date time.Time, timezone *time.Location) []Window {
 	// when we return the rules.
 	date = util.Midnight(date, timezone)
 	windows := make([]Window, 0)
-	switch getDayOfMonth(date) {
-	case 1:
-		windows = append(windows,
-			windowFirstAndFifteenth(date),
-		)
-	case 15:
-		windows = append(windows,
-			windowFirstAndFifteenth(date),
-			windowFifteenthAndTheLastDay(date),
-		)
-	case -1: // Last day of the month
-		windows = append(windows,
-			windowFifteenthAndTheLastDay(date),
-		)
-	}
-
 	windows = append(windows,
+		//windowFirstAndFifteenth(date),
+		windowFifteenthAndTheLastDay(date),
 		windowMonthly(date),
 		windowBiMonthly(date),
 		windowQuarterly(date),
