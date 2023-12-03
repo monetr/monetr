@@ -45,6 +45,8 @@ func (c *Controller) getRecurring(ctx echo.Context) error {
 			txnLog.Trace("reached end of transactions")
 			break
 		}
+
+		offset += len(transactions)
 	}
 
 	result := recurringDetection.GetRecurringTransactions()
