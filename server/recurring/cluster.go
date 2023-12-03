@@ -52,8 +52,7 @@ type Document struct {
 type PreProcessor struct {
 	documents []Document
 	// Word count
-	wc  map[string]int
-	idf map[string]float64
+	wc map[string]float64
 }
 
 func (p *PreProcessor) indexWords() map[string]int {
@@ -71,24 +70,10 @@ func (p *PreProcessor) indexWords() map[string]int {
 }
 
 func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
-	words := clusterCleanStringRegex.FindAllString(txn.OriginalName, len(txn.OriginalName))
-	if txn.OriginalMerchantName != "" {
-		words = append(words, clusterCleanStringRegex.FindAllString(txn.OriginalMerchantName, len(txn.OriginalMerchantName))...)
-	}
-
+	words := CleanNameRegex(txn)
 	name := make([]string, 0, len(words))
-	wordCounts := make(map[string]int, len(words))
-	// Get the term frequency from the transaction name
+	wordCounts := make(map[string]float64, len(words))
 	for _, word := range words {
-		word = strings.ToLower(word)
-		word = strings.ReplaceAll(word, "'", "")
-		word = strings.ReplaceAll(word, ".", "")
-
-		numbers := numberOnly.FindAllString(word, len(word))
-		if len(numbers) > 0 {
-			continue
-		}
-
 		// If there is a synonym for the current word use that instead.
 		if synonym, ok := synonyms[word]; ok {
 			word = synonym
@@ -103,7 +88,7 @@ func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
 
 	tf := make(map[string]float64, len(wordCounts))
 	for word, count := range wordCounts {
-		tf[word] = float64(count) / float64(len(words))
+		tf[word] = count / float64(len(words))
 	}
 
 	p.documents = append(p.documents, Document{
@@ -115,11 +100,12 @@ func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
 	})
 }
 
-// PostPrepareCalculations should be called after all transactions have been added to the dataset.
-func (p *PreProcessor) PostPrepareCalculations() {
+func (p *PreProcessor) GetDatums() []Datum {
+	datums := make([]Datum, 0, len(p.documents))
 	docCount := float64(len(p.documents))
+	idf := make(map[string]float64, len(p.wc))
 	for word, count := range p.wc {
-		p.idf[word] = math.Log(docCount / (float64(count) + 1))
+		idf[word] = math.Log(docCount / (count + 1))
 	}
 	// Get a map of all the meaningful words and their index to use in the vector
 	minified := p.indexWords()
@@ -131,7 +117,7 @@ func (p *PreProcessor) PostPrepareCalculations() {
 		document := p.documents[i]
 		// Calculate the TFIDF for that document
 		for word, tfValue := range document.TF {
-			document.TFIDF[word] = tfValue * p.idf[word]
+			document.TFIDF[word] = tfValue * idf[word]
 			// If this specific word is meant to be more meaningful than tfidf might treat it then adjust it accordingly
 			if multiplier, ok := specialWeights[word]; ok {
 				document.TFIDF[word] *= multiplier
@@ -156,24 +142,17 @@ func (p *PreProcessor) PostPrepareCalculations() {
 		document.Valid = true
 		// Normalize the document's tfidf vector.
 		calc.NormalizeVector64(document.Vector)
-		// Then store the document back in
 		p.documents[i] = document
-	}
-}
-
-func (p *PreProcessor) GetDatums() []Datum {
-	datums := make([]Datum, 0, len(p.documents))
-	for _, document := range p.documents {
-		if !document.Valid {
-			continue
+		// Then store the document back in
+		if document.Valid {
+			datums = append(datums, Datum{
+				ID:          document.ID,
+				Transaction: document.Transaction,
+				String:      document.String,
+				Amount:      document.Transaction.Amount,
+				Vector:      document.Vector,
+			})
 		}
-		datums = append(datums, Datum{
-			ID:          document.ID,
-			Transaction: document.Transaction,
-			String:      document.String,
-			Amount:      document.Transaction.Amount,
-			Vector:      document.Vector,
-		})
 	}
 
 	return datums

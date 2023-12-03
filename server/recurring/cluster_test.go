@@ -22,14 +22,12 @@ func BenchmarkPreProcessor(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var processor = &PreProcessor{
 			documents: []Document{},
-			wc:        map[string]int{},
-			idf:       map[string]float64{},
+			wc:        map[string]float64{},
 		}
 		for i := range data {
 			processor.AddTransaction(&data[i])
 		}
 
-		processor.PostPrepareCalculations()
 		_ = processor.GetDatums()
 	}
 }
@@ -43,14 +41,12 @@ func BenchmarkDBSCAN(b *testing.B) {
 
 	var processor = &PreProcessor{
 		documents: []Document{},
-		wc:        map[string]int{},
-		idf:       map[string]float64{},
+		wc:        map[string]float64{},
 	}
 	for i := range data {
 		processor.AddTransaction(&data[i])
 	}
 
-	processor.PostPrepareCalculations()
 	datums := processor.GetDatums()
 
 	dbscan := NewDBSCAN(datums, 0.98, 2)
@@ -67,16 +63,11 @@ func TestPreProcessor(t *testing.T) {
 	//data := GetFixtures(t, "full sample.json")
 	var processor = &PreProcessor{
 		documents: []Document{},
-		wc:        map[string]int{},
-		idf:       map[string]float64{},
+		wc:        map[string]float64{},
 	}
 	for i := range data {
 		processor.AddTransaction(&data[i])
 	}
-
-	processor.PostPrepareCalculations()
-
-	assert.NotEmpty(t, processor.idf)
 
 	datums := processor.GetDatums()
 
@@ -117,16 +108,11 @@ func TestParameters(t *testing.T) {
 	//data := GetFixtures(t, "Result_3.json")
 	var processor = &PreProcessor{
 		documents: []Document{},
-		wc:        map[string]int{},
-		idf:       map[string]float64{},
+		wc:        map[string]float64{},
 	}
 	for i := range data {
 		processor.AddTransaction(&data[i])
 	}
-
-	processor.PostPrepareCalculations()
-
-	assert.NotEmpty(t, processor.idf)
 
 	datums := processor.GetDatums()
 

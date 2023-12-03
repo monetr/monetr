@@ -155,16 +155,11 @@ func TestWindowExperiment(t *testing.T) {
 		// data := GetFixtures(t, "full sample.json")
 		var processor = &PreProcessor{
 			documents: []Document{},
-			wc:        map[string]int{},
-			idf:       map[string]float64{},
+			wc:        map[string]float64{},
 		}
 		for i := range data {
 			processor.AddTransaction(&data[i])
 		}
-
-		processor.PostPrepareCalculations()
-
-		assert.NotEmpty(t, processor.idf)
 
 		dbscan := NewDBSCAN(processor.GetDatums(), 0.98, 1)
 		result := dbscan.Calculate()
