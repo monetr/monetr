@@ -28,15 +28,15 @@ func NewRecurringTransactionDetection(timezone *time.Location) *Detection {
 }
 
 type RecurringTransaction struct {
-	Name       string
-	Window     WindowType
-	Rule       *models.RuleSet
-	First      time.Time
-	Last       time.Time
-	Next       time.Time
-	Ended      bool
-	Confidence float64
-	Matches    []uint64
+	Name       string          `json:"name"`
+	Window     WindowType      `json:"windowType"`
+	Rule       *models.RuleSet `json:"rule"`
+	First      time.Time       `json:"first"`
+	Last       time.Time       `json:"last"`
+	Next       time.Time       `json:"next"`
+	Ended      bool            `json:"ended"`
+	Confidence float64         `json:"confidence"`
+	Matches    []uint64        `json:"matches"`
 }
 
 func (d *Detection) AddTransaction(txn *models.Transaction) {
