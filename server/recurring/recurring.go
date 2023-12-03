@@ -116,7 +116,7 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 			countHits := float64(len(hits))
 			countMisses := float64(len(misses)) * 1.1
 			countTxns := float64(len(transactions))
-			ended := next.Before(d.latestObservedDate.AddDate(0, 0, window.Fuzzy))
+			ended := next.Before(d.latestObservedDate.AddDate(0, 0, -window.Fuzzy*2))
 			latestTxn := transactions[len(transactions)-1]
 			name := latestTxn.OriginalName
 			if latestTxn.OriginalMerchantName != "" {
