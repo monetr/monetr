@@ -10,7 +10,7 @@ macro(provision_golang_tests CURRENT_SOURCE_DIR)
       message(STATUS "Preparing tests for: ${PACKAGE}")
 
       execute_process(
-        COMMAND ${CMAKE_Go_COMPILER} run ${CMAKE_SOURCE_DIR}/scripts/find_tests.go ${CURRENT_SOURCE_DIR}
+        COMMAND ${CMAKE_Go_COMPILER} run ${CMAKE_SOURCE_DIR}/cmake/find_tests.go ${CURRENT_SOURCE_DIR}
         OUTPUT_VARIABLE RAW_TEST_LIST
         OUTPUT_STRIP_TRAILING_WHITESPACE
         WORKING_DIRECTORY ${CURRENT_SOURCE_DIR}
