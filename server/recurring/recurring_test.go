@@ -12,21 +12,41 @@ import (
 )
 
 func TestRecurringDetection(t *testing.T) {
-	data := GetFixtures(t, "monetr_sample_data_1.json")
-	// data := GetFixtures(t, "Result_3.json")
-	// data := GetFixtures(t, "full sample.json")
+	t.Run("monetr sample data", func(t *testing.T) {
+		data := GetFixtures(t, "monetr_sample_data_1.json")
+		// data := GetFixtures(t, "Result_3.json")
+		// data := GetFixtures(t, "full sample.json")
 
-	timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
-	detection := NewRecurringTransactionDetection(timezone)
-	for i := range data {
-		detection.AddTransaction(&data[i])
-	}
+		// data := GetFixtures(t, "full sample.json")
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		detection := NewRecurringTransactionDetection(timezone)
+		for i := range data {
+			detection.AddTransaction(&data[i])
+		}
 
-	result := detection.GetRecurringTransactions()
-	assert.NotEmpty(t, result)
+		result := detection.GetRecurringTransactions()
+		assert.NotEmpty(t, result)
 
-	j, err := json.MarshalIndent(result, "", "    ")
-	require.NoError(t, err, "must be able to marshall result")
+		j, err := json.MarshalIndent(result, "", "    ")
+		require.NoError(t, err, "must be able to marshall result")
 
-	fmt.Println(string(j))
+		fmt.Println(string(j))
+	})
+
+	t.Run("amazon sample data", func(t *testing.T) {
+		data := GetFixtures(t, "amazon_sample_data_1.json")
+
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		detection := NewRecurringTransactionDetection(timezone)
+		for i := range data {
+			detection.AddTransaction(&data[i])
+		}
+
+		result := detection.GetRecurringTransactions()
+
+		j, err := json.MarshalIndent(result, "", "    ")
+		require.NoError(t, err, "must be able to marshall result")
+
+		fmt.Println(string(j))
+	})
 }

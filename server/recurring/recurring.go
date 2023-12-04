@@ -36,6 +36,8 @@ type RecurringTransaction struct {
 	Next       time.Time       `json:"next"`
 	Ended      bool            `json:"ended"`
 	Confidence float64         `json:"confidence"`
+	Amounts    map[int64]int   `json:"amounts"`
+	LastAmount int64           `json:"lastAmount"`
 	Matches    []uint64        `json:"matches"`
 }
 
@@ -68,9 +70,18 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 	bestScores := make([]RecurringTransaction, 0, len(result))
 
 	for _, cluster := range result {
+		clusterAmounts := map[int64]AmountCluster{}
 		transactions := make([]*models.Transaction, 0, len(cluster.Items))
 		for index := range cluster.Items {
-			transactions = append(transactions, d.dbscan.dataset[index].Transaction)
+			transaction := d.dbscan.dataset[index]
+			transactions = append(transactions, transaction.Transaction)
+			a, ok := clusterAmounts[transaction.Transaction.Amount]
+			if !ok {
+				a.IDs = make([]uint64, 0, 1)
+				a.Amount = transaction.Transaction.Amount
+			}
+			a.IDs = append(a.IDs, transaction.ID)
+			clusterAmounts[transaction.Transaction.Amount] = a
 		}
 		sort.Slice(transactions, func(i, j int) bool {
 			return transactions[i].Date.Before(transactions[j].Date)
@@ -80,10 +91,15 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 		windows := GetWindowsForDate(transactions[0].Date, d.timezone)
 		scores := make([]RecurringTransaction, 0, len(windows))
 		for _, window := range windows {
+			var lastAmount int64 = 0
 			misses := make([]Miss, 0)
 			hits := make([]Hit, 0, len(transactions))
 			ids := make([]uint64, 0, len(transactions))
+			amounts := make(map[int64]int, len(transactions))
 			occurrences := window.Rule.Between(start.AddDate(0, 0, -window.Fuzzy), end.AddDate(0, 0, window.Fuzzy), false)
+			if len(occurrences) == 1 {
+				continue
+			}
 			for x := range occurrences {
 				occurrence := occurrences[x]
 				foundAny := false
@@ -97,7 +113,9 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 							Window: window.Type,
 							Time:   occurrence,
 						})
+						amounts[transaction.Amount] += 1
 						ids = append(ids, transaction.TransactionId)
+						lastAmount = transaction.Amount
 						continue
 					}
 				}
@@ -133,17 +151,55 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 				Ended:      ended,
 				Confidence: (countHits - countMisses) / countTxns,
 				Matches:    ids,
+				Amounts:    amounts,
+				LastAmount: lastAmount,
 			})
 		}
 
-		sort.Slice(scores, func(i, j int) bool {
-			return scores[i].Confidence > scores[j].Confidence
-		})
+		if len(scores) > 0 {
+			sort.Slice(scores, func(i, j int) bool {
+				return scores[i].Confidence > scores[j].Confidence
+			})
 
-		if scores[0].Confidence > 0.65 {
-			bestScores = append(bestScores, scores[0])
+			if scores[0].Confidence > 0.65 {
+				bestScores = append(bestScores, scores[0])
+			}
 		}
 	}
 
 	return bestScores
+}
+
+type AmountCluster struct {
+	Amount int64
+	IDs    []uint64
+}
+
+func findBuckets(clusterAmounts map[int64]AmountCluster) []AmountCluster {
+	amountsSorted := make([]AmountCluster, 0, len(clusterAmounts))
+	for i := range clusterAmounts {
+		amountsSorted = append(amountsSorted, clusterAmounts[i])
+	}
+	sort.Slice(amountsSorted, func(i, j int) bool {
+		return amountsSorted[i].Amount < amountsSorted[j].Amount
+	})
+
+	if len(amountsSorted) <= 16 {
+		return amountsSorted
+	}
+
+	bottom, top := amountsSorted[:len(amountsSorted)/2], amountsSorted[len(amountsSorted)/2:]
+	bottomScore, topScore := 0, 0
+	for _, bottomItem := range bottom {
+		bottomScore += len(bottomItem.IDs)
+	}
+	for _, topItem := range top {
+		topScore += len(topItem.IDs)
+	}
+
+	if bottomScore > topScore {
+		return bottom
+	}
+
+	return top
 }

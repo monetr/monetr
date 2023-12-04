@@ -1,0 +1,3885 @@
+[
+  {
+    "transactionId": 158,
+    "bankAccountId": 0,
+    "amount": 3399,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-05-10T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 171,
+    "bankAccountId": 0,
+    "amount": 1786,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-05-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*2R1E64B AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 172,
+    "bankAccountId": 0,
+    "amount": 4079,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-05-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 170,
+    "bankAccountId": 0,
+    "amount": 1555,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-05-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*2R6N58L AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 173,
+    "bankAccountId": 0,
+    "amount": 1469,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-05-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*2R5P043 AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 180,
+    "bankAccountId": 0,
+    "amount": 5369,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-06-01T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 183,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-06-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 201,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-07-06T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 216,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-08-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 230,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-09-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 244,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-10-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 272,
+    "bankAccountId": 0,
+    "amount": 2323,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-10-19T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 276,
+    "bankAccountId": 0,
+    "amount": 2323,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-10-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 292,
+    "bankAccountId": 0,
+    "amount": 2146,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-11-02T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 295,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-11-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 298,
+    "bankAccountId": 0,
+    "amount": 3295,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-11-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 325,
+    "bankAccountId": 0,
+    "amount": 1073,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-11-12T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 391,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2021-12-03T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 406,
+    "bankAccountId": 0,
+    "amount": 3757,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-12-06T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON PAYMENT 844-771822",
+    "originalMerchantName": "",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 405,
+    "bankAccountId": 0,
+    "amount": 1069,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-12-06T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 404,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-12-06T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 403,
+    "bankAccountId": 0,
+    "amount": 7401,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-12-06T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 415,
+    "bankAccountId": 0,
+    "amount": 3858,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-12-07T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 437,
+    "bankAccountId": 0,
+    "amount": 42651,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-12-15T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 438,
+    "bankAccountId": 0,
+    "amount": 2399,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2021-12-15T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON PAYMENT 844-771822",
+    "originalMerchantName": "",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 503,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-01-03T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 508,
+    "bankAccountId": 0,
+    "amount": 1661,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2022-01-04T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM AMZ 844-771822",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 544,
+    "bankAccountId": 0,
+    "amount": 4584,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2022-01-19T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON PAYMENT 844-771822",
+    "originalMerchantName": "",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 554,
+    "bankAccountId": 0,
+    "amount": 1944,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2022-01-24T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON PAYMENT 844-771822",
+    "originalMerchantName": "",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 589,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-02-03T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 592,
+    "bankAccountId": 0,
+    "amount": 2855,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2022-02-04T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PWP*AMAZON.COM",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 640,
+    "bankAccountId": 0,
+    "amount": 1073,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Entertainment"
+    ],
+    "date": "2022-02-28T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PRIME VIDEO*1I7A34 888-802-30",
+    "originalMerchantName": "Amazon Prime Video",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 648,
+    "bankAccountId": 0,
+    "amount": 5205,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-01T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1I1193G AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 657,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-03T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 669,
+    "bankAccountId": 0,
+    "amount": 16817,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-09T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1W9E62X AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 672,
+    "bankAccountId": 0,
+    "amount": 38650,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-10T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 680,
+    "bankAccountId": 0,
+    "amount": 4995,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-18T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1Z3Q28D AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 687,
+    "bankAccountId": 0,
+    "amount": 1286,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-21T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1N4CD59 AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 688,
+    "bankAccountId": 0,
+    "amount": 7407,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-22T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 693,
+    "bankAccountId": 0,
+    "amount": 963,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 692,
+    "bankAccountId": 0,
+    "amount": 964,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 691,
+    "bankAccountId": 0,
+    "amount": 4294,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 703,
+    "bankAccountId": 0,
+    "amount": 6978,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-03-29T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 718,
+    "bankAccountId": 0,
+    "amount": 536,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Entertainment"
+    ],
+    "date": "2022-04-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PRIME VIDEO*1H7J49 888-802-30",
+    "originalMerchantName": "Amazon Prime Video",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 720,
+    "bankAccountId": 0,
+    "amount": 428,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Entertainment"
+    ],
+    "date": "2022-04-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PRIME VIDEO*168SX5 888-802-30",
+    "originalMerchantName": "Amazon Prime Video",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 726,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-04-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 721,
+    "bankAccountId": 0,
+    "amount": 428,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Entertainment"
+    ],
+    "date": "2022-04-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PRIME VIDEO*167JV1 888-802-30",
+    "originalMerchantName": "Amazon Prime Video",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 722,
+    "bankAccountId": 0,
+    "amount": 428,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Entertainment"
+    ],
+    "date": "2022-04-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PRIME VIDEO*166QD7 888-802-30",
+    "originalMerchantName": "Amazon Prime Video",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 719,
+    "bankAccountId": 0,
+    "amount": 428,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Entertainment"
+    ],
+    "date": "2022-04-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - PRIME VIDEO*169SG2 888-802-30",
+    "originalMerchantName": "Amazon Prime Video",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 742,
+    "bankAccountId": 0,
+    "amount": 3220,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-04-12T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1H2BW52 AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 754,
+    "bankAccountId": 0,
+    "amount": 3220,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-04-20T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 764,
+    "bankAccountId": 0,
+    "amount": 2571,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-04-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 765,
+    "bankAccountId": 0,
+    "amount": 1902,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-04-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 766,
+    "bankAccountId": 0,
+    "amount": 1902,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-04-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 788,
+    "bankAccountId": 0,
+    "amount": 1929,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-02T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 794,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 797,
+    "bankAccountId": 0,
+    "amount": 7599,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-05T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 798,
+    "bankAccountId": 0,
+    "amount": 2469,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-05T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 814,
+    "bankAccountId": 0,
+    "amount": 8374,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-09T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 816,
+    "bankAccountId": 0,
+    "amount": 1502,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-09T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 815,
+    "bankAccountId": 0,
+    "amount": 2920,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-09T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 813,
+    "bankAccountId": 0,
+    "amount": 5346,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-09T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*135YQ2T AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 812,
+    "bankAccountId": 0,
+    "amount": 2683,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-09T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*139EM3J AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 811,
+    "bankAccountId": 0,
+    "amount": 3075,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-09T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1L0CH7F AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 824,
+    "bankAccountId": 0,
+    "amount": 1224,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-13T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*130HX39 AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 826,
+    "bankAccountId": 0,
+    "amount": 1180,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-13T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 822,
+    "bankAccountId": 0,
+    "amount": 6654,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-13T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 831,
+    "bankAccountId": 0,
+    "amount": 5214,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-16T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*131WU8W AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 830,
+    "bankAccountId": 0,
+    "amount": 2400,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-16T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*135I82Y AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 842,
+    "bankAccountId": 0,
+    "amount": 1224,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-23T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1X1ZJ8L AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 843,
+    "bankAccountId": 0,
+    "amount": 1268,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-23T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 846,
+    "bankAccountId": 0,
+    "amount": 1556,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-05-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 883,
+    "bankAccountId": 0,
+    "amount": 32210,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-06-02T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*HS78H0T AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 886,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-06-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 915,
+    "bankAccountId": 0,
+    "amount": 5945,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-06-13T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*GH9LQ3F AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 953,
+    "bankAccountId": 0,
+    "amount": 32425,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-06-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 978,
+    "bankAccountId": 0,
+    "amount": 8696,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-06-30T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 973,
+    "bankAccountId": 0,
+    "amount": 12173,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-06-30T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*JV8ST4X AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1003,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-07-05T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1022,
+    "bankAccountId": 0,
+    "amount": 287,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-07-08T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1031,
+    "bankAccountId": 0,
+    "amount": 1334,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-07-11T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1035,
+    "bankAccountId": 0,
+    "amount": 6755,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-07-12T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1032,
+    "bankAccountId": 0,
+    "amount": 7526,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-07-12T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*TG5JM2W AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1040,
+    "bankAccountId": 0,
+    "amount": 25017,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-07-15T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*JX6YR0H AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1119,
+    "bankAccountId": 0,
+    "amount": 8096,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-02T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1126,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1137,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-05T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1197,
+    "bankAccountId": 0,
+    "amount": 1073,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-22T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1190,
+    "bankAccountId": 0,
+    "amount": 5366,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-22T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*QO7JT46 AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1200,
+    "bankAccountId": 0,
+    "amount": 3023,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-23T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*B04PW2O AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1205,
+    "bankAccountId": 0,
+    "amount": 6656,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1206,
+    "bankAccountId": 0,
+    "amount": 1932,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1211,
+    "bankAccountId": 0,
+    "amount": 2576,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 1209,
+    "bankAccountId": 0,
+    "amount": 2039,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*II48I1U AMZN.COM B",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 13,
+    "bankAccountId": 0,
+    "amount": 1287,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-29T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12,
+    "bankAccountId": 0,
+    "amount": 2576,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-29T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11,
+    "bankAccountId": 0,
+    "amount": 4585,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-08-29T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 48,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-06T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 55,
+    "bankAccountId": 0,
+    "amount": 2894,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-07T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1V12555 AMZN.COM/BILLWA",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 56,
+    "bankAccountId": 0,
+    "amount": 2791,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-07T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 83,
+    "bankAccountId": 0,
+    "amount": 1073,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-15T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 102,
+    "bankAccountId": 0,
+    "amount": 2250,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-20T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 101,
+    "bankAccountId": 0,
+    "amount": 3563,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-20T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1M81366 AMZN.COM/BILLWA",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 105,
+    "bankAccountId": 0,
+    "amount": 6437,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-22T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4307,
+    "bankAccountId": 0,
+    "amount": 1287,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-27T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4306,
+    "bankAccountId": 0,
+    "amount": 2930,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-27T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4305,
+    "bankAccountId": 0,
+    "amount": 22545,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-09-27T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*1U85G5D AMZN.COM/BILLWA",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4434,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4548,
+    "bankAccountId": 0,
+    "amount": 1287,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-11T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4547,
+    "bankAccountId": 0,
+    "amount": 5046,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-11T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4577,
+    "bankAccountId": 0,
+    "amount": 2309,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-13T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4697,
+    "bankAccountId": 0,
+    "amount": 7301,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-17T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4698,
+    "bankAccountId": 0,
+    "amount": 751,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-17T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4846,
+    "bankAccountId": 0,
+    "amount": 7506,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4848,
+    "bankAccountId": 0,
+    "amount": 2608,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4849,
+    "bankAccountId": 0,
+    "amount": 956,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4847,
+    "bankAccountId": 0,
+    "amount": 2934,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-24T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4868,
+    "bankAccountId": 0,
+    "amount": 4831,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-25T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4877,
+    "bankAccountId": 0,
+    "amount": 7515,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-26T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "POS Debit - Visa Check Card 5988 - AMAZON.COM*H83W841 AMZN.COM/BILLWA",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 4916,
+    "bankAccountId": 0,
+    "amount": 1670,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-10-28T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7342,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7424,
+    "bankAccountId": 0,
+    "amount": 2683,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-07T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*h04652k Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7423,
+    "bankAccountId": 0,
+    "amount": 3630,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-07T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*h07855r Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7457,
+    "bankAccountId": 0,
+    "amount": 8585,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-10T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*hb69a3n Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7495,
+    "bankAccountId": 0,
+    "amount": 2898,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-14T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*h285d0b Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7515,
+    "bankAccountId": 0,
+    "amount": 3239,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-16T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*hi25w0t Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7528,
+    "bankAccountId": 0,
+    "amount": 3004,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7529,
+    "bankAccountId": 0,
+    "amount": 964,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7581,
+    "bankAccountId": 0,
+    "amount": 5582,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-21T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7613,
+    "bankAccountId": 0,
+    "amount": 11312,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-23T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*hw70141 Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7640,
+    "bankAccountId": 0,
+    "amount": 3090,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-25T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7718,
+    "bankAccountId": 0,
+    "amount": 1395,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-28T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7721,
+    "bankAccountId": 0,
+    "amount": 1359,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-11-29T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*hw1et1k Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7920,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-05T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7921,
+    "bankAccountId": 0,
+    "amount": 6919,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-05T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7992,
+    "bankAccountId": 0,
+    "amount": 3859,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-08T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*pn7jf19 Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7998,
+    "bankAccountId": 0,
+    "amount": 311,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-09T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 7997,
+    "bankAccountId": 0,
+    "amount": 945,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-09T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8082,
+    "bankAccountId": 0,
+    "amount": 9874,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-14T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8108,
+    "bankAccountId": 0,
+    "amount": 3543,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-15T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*q43ct5m Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8193,
+    "bankAccountId": 0,
+    "amount": 4133,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-19T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*4t8xp1v Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8192,
+    "bankAccountId": 0,
+    "amount": 2144,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-19T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*5g1we0i Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8197,
+    "bankAccountId": 0,
+    "amount": 6119,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-20T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8235,
+    "bankAccountId": 0,
+    "amount": 3575,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-21T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*h64447n Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8234,
+    "bankAccountId": 0,
+    "amount": 1435,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-21T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*xo2ll7j Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8319,
+    "bankAccountId": 0,
+    "amount": 1823,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-27T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8372,
+    "bankAccountId": 0,
+    "amount": 6437,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-29T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8405,
+    "bankAccountId": 0,
+    "amount": 3575,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2022-12-30T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*gm85w2h Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8491,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-03T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8544,
+    "bankAccountId": 0,
+    "amount": 1823,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-05T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8546,
+    "bankAccountId": 0,
+    "amount": 11120,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-06T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8547,
+    "bankAccountId": 0,
+    "amount": 2572,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-06T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8574,
+    "bankAccountId": 0,
+    "amount": 2362,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-09T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*1d7pn6u Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8627,
+    "bankAccountId": 0,
+    "amount": 1253,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-12T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*yv39d26 Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8630,
+    "bankAccountId": 0,
+    "amount": 5873,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-12T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8707,
+    "bankAccountId": 0,
+    "amount": 1266,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8704,
+    "bankAccountId": 0,
+    "amount": 7511,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8697,
+    "bankAccountId": 0,
+    "amount": 3216,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*s11fv8z Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8706,
+    "bankAccountId": 0,
+    "amount": 3220,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8705,
+    "bankAccountId": 0,
+    "amount": 3220,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8703,
+    "bankAccountId": 0,
+    "amount": 13303,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8708,
+    "bankAccountId": 0,
+    "amount": 1022,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-17T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8767,
+    "bankAccountId": 0,
+    "amount": 2536,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-20T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8951,
+    "bankAccountId": 0,
+    "amount": 5368,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-30T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*s46fh4i Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8952,
+    "bankAccountId": 0,
+    "amount": 3575,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-30T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*h33e25s Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 8953,
+    "bankAccountId": 0,
+    "amount": 5368,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-01-30T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*5w1yj26 Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 9029,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-02-03T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 9261,
+    "bankAccountId": 0,
+    "amount": 434,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-02-21T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 9548,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-03-03T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 9823,
+    "bankAccountId": 0,
+    "amount": 4830,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-03-23T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*hc62p2d Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 9896,
+    "bankAccountId": 0,
+    "amount": 1374,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops"
+    ],
+    "date": "2023-03-27T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Pwp*amzn Mktp Us",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 9941,
+    "bankAccountId": 0,
+    "amount": 4078,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-03-30T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 10052,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-04-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 10185,
+    "bankAccountId": 0,
+    "amount": 1362,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-04-12T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 10572,
+    "bankAccountId": 0,
+    "amount": 1717,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-05-02T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 10565,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-05-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 10747,
+    "bankAccountId": 0,
+    "amount": 935,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-05-19T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11026,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-06-05T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11138,
+    "bankAccountId": 0,
+    "amount": 20000,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-06-12T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*g719q1x Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11137,
+    "bankAccountId": 0,
+    "amount": 8802,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-06-12T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11447,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Subscription"
+    ],
+    "date": "2023-07-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon Prime",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11835,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Subscription"
+    ],
+    "date": "2023-08-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon Prime",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11855,
+    "bankAccountId": 0,
+    "amount": 2464,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-08-04T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*th46b4y Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 11947,
+    "bankAccountId": 0,
+    "amount": 2469,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-08-14T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*ta9ct9i Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12056,
+    "bankAccountId": 0,
+    "amount": 751,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-08-30T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12053,
+    "bankAccountId": 0,
+    "amount": 1932,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-08-31T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12198,
+    "bankAccountId": 0,
+    "amount": 5580,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-09-05T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12195,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Subscription"
+    ],
+    "date": "2023-09-05T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon Prime",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12268,
+    "bankAccountId": 0,
+    "amount": 2415,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-09-12T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*tr4mi78",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12522,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Subscription"
+    ],
+    "date": "2023-10-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon Prime",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12733,
+    "bankAccountId": 0,
+    "amount": 20265,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-10-23T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 12784,
+    "bankAccountId": 0,
+    "amount": 3543,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-10-27T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*4v2nk99",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 13398,
+    "bankAccountId": 0,
+    "amount": 1610,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Service",
+      "Subscription"
+    ],
+    "date": "2023-11-03T05:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon Prime",
+    "originalMerchantName": "Amazon Prime",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 13555,
+    "bankAccountId": 0,
+    "amount": 2361,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-11-13T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Pos Debit- 5988 5988 Amazon.com*ul38x5f Amzn.com/bill",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  },
+  {
+    "transactionId": 13598,
+    "bankAccountId": 0,
+    "amount": 6652,
+    "spendingId": null,
+    "categories": null,
+    "originalCategories": [
+      "Shops",
+      "Digital Purchase"
+    ],
+    "date": "2023-11-16T06:00:00Z",
+    "authorizedDate": null,
+    "customName": null,
+    "originalName": "Amazon",
+    "originalMerchantName": "Amazon",
+    "currency": "",
+    "isPending": false,
+    "createdAt": "0001-01-01T00:00:00Z",
+    "deletedAt": null
+  }
+]
