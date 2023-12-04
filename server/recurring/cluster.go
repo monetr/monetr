@@ -57,6 +57,13 @@ type PreProcessor struct {
 	wc map[string]float64
 }
 
+func NewPreProcessor() *PreProcessor {
+	return &PreProcessor{
+		documents: []Document{},
+		wc:        map[string]float64{},
+	}
+}
+
 func (p *PreProcessor) indexWords() map[string]int {
 	index := 0
 	result := make(map[string]int)
