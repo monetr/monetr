@@ -17,11 +17,14 @@ type gcsStorage struct {
 	client *storage.Client
 }
 
-func (s *gcsStorage) Store(ctx context.Context, buf io.ReadSeekCloser) (uri string, err error) {
+func (s *gcsStorage) Store(ctx context.Context, buf io.ReadSeekCloser, contentType ContentType) (uri string, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	key := getStorePath()
+	key, err := getStorePath(contentType)
+	if err != nil {
+		return "", err
+	}
 	uri = fmt.Sprintf("gcs://%s/%s", s.bucket, key)
 
 	log := s.log.

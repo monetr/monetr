@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
@@ -17,11 +18,14 @@ type s3Storage struct {
 	session *s3.S3
 }
 
-func (s *s3Storage) Store(ctx context.Context, buf io.ReadSeekCloser) (uri string, err error) {
+func (s *s3Storage) Store(ctx context.Context, buf io.ReadSeekCloser, contentType ContentType) (uri string, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	key := getStorePath()
+	key, err := getStorePath(contentType)
+	if err != nil {
+		return "", err
+	}
 	uri = fmt.Sprintf("s3://%s/%s", s.bucket, key)
 
 	log := s.log.
@@ -38,6 +42,7 @@ func (s *s3Storage) Store(ctx context.Context, buf io.ReadSeekCloser) (uri strin
 		Body:                    buf,
 		Bucket:                  &s.bucket,
 		Key:                     &key,
+		ContentType:             aws.String(string(contentType)),
 		Metadata:                map[string]*string{},
 		SSEKMSEncryptionContext: nil,
 		SSEKMSKeyId:             nil,

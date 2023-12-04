@@ -4,8 +4,15 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"path"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
+)
+
+var (
+	ErrInvalidContentType = errors.New("invalid content type")
 )
 
 // Storage is the interface for reading and writing files presented to monetr by clients. These files might be images,
@@ -19,17 +26,49 @@ type Storage interface {
 	// Depending on the implementation the file may still be present in whatever storage system even if the file was not
 	// successfully stored. This should be considered on a per-implementation basis as it will be unique to the
 	// implementation itself.
-	Store(ctx context.Context, buf io.ReadSeekCloser) (uri string, err error)
+	Store(ctx context.Context, buf io.ReadSeekCloser, contentType ContentType) (uri string, err error)
 	// Read will take a file URI and will read it from the underlying storage system. If the URI provided is not for the
 	// storage interface under this then an error will be returned. For example; if this is backed by a file system but
 	// the provided URI is an S3 protocol, then this would return an error for protocol mismatch. If a file can be read
 	// then an buffer will be returned for that file.
-	Read(ctx context.Context, uri string) (buf io.ReadCloser, err error)
+	Read(ctx context.Context, uri string) (buf io.ReadCloser, contentType ContentType, err error)
 }
 
-func getStorePath() string {
+func getStorePath(contentType ContentType) (string, error) {
 	chunk := uuid.NewString()
 	name := uuid.NewString()
-	key := fmt.Sprintf("%s/%s.[FILETYPE]", chunk, name)
-	return key
+	extension, ok := contentTypeExtensions[contentType]
+	if !ok {
+		return "", errors.WithStack(ErrInvalidContentType)
+	}
+
+	key := fmt.Sprintf("%s/%s.%s", chunk, name, extension)
+	return key, nil
+}
+
+type ContentType string
+
+const (
+	TextCSVContentType      ContentType = "text/csv"
+	OpenXMLExcelContentType ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+	IntuitQFXContentType    ContentType = "application/vnd.intu.QFX"
+)
+
+var (
+	contentTypeExtensions = map[ContentType]string{
+		TextCSVContentType:      "csv",
+		OpenXMLExcelContentType: "xlsx",
+		IntuitQFXContentType:    "qfx",
+	}
+)
+
+func getContentTypeByPath(filePath string) (ContentType, error) {
+	extension := strings.TrimPrefix(path.Ext(filePath), ".")
+	for contentType, ext := range contentTypeExtensions {
+		if ext == extension {
+			return contentType, nil
+		}
+	}
+
+	return "", errors.WithStack(ErrInvalidContentType)
 }
