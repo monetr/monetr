@@ -473,6 +473,10 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		}
 
 		if len(transactionsToInsert) > 0 {
+			// Reverse the list so the oldest records are inserted first.
+			for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
+				transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
+			}
 			log.Infof("creating %d transactions", len(transactionsToInsert))
 			crumbs.Debug(span.Context(), "Creating transactions.", map[string]interface{}{
 				"count": len(transactionsToInsert),
