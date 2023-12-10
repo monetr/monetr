@@ -49,10 +49,11 @@ type Configuration struct {
 	RabbitMQ            RabbitMQ       `yaml:"rabbitMQ"`
 	ReCAPTCHA           ReCAPTCHA      `yaml:"reCAPTCHA"`
 	Redis               Redis          `yaml:"redis"`
+	Security            Security       `yaml:"security"`
 	Sentry              Sentry         `yaml:"sentry"`
 	Server              Server         `yaml:"server"`
+	Storage             Storage        `yaml:"storage"`
 	Stripe              Stripe         `yaml:"stripe"`
-	Security            Security       `yaml:"security"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -69,6 +70,43 @@ func (c Configuration) GetHTTPSecureCookie() bool {
 
 func (c Configuration) GetUIURL() string {
 	return fmt.Sprintf("%s://%s", c.ExternalURLProtocol, c.UIDomainName)
+}
+
+type Storage struct {
+	// Enabled controls whether or not monetr can actually store files. If this is disabled then some monetr features will
+	// not be available. These features include things like file imports for transactions.
+	Enabled bool `yaml:"enabled"`
+	// Provider specifies which storage backend monetr should use. Allowed values are:
+	// - `s3`
+	// - `gcs`
+	// - `filesystem`
+	// Note: If you use the filesystem backend you cannot run multiple monetr servers. Even if the filesystem is shared
+	// between the instances via something like NFS; it can cause unpredictable behavior. It is recommended to use GCS or
+	// S3 backed storage when you are running multiple instances of monetr.
+	// If you are self-hosting monetr though as a single instance, then filesystem is the recommended storage backend for
+	// ease of use.
+	Provider   string             `yaml:"provider"`
+	S3         *S3Storage         `yaml:"s3"`
+	GCS        *GCSStorage        `yaml:"gcs"`
+	Filesystem *FilesystemStorage `yaml:"filesystem"`
+}
+
+type S3Storage struct {
+	Endpoint          *string `yaml:"endpoint"`
+	Bucket            string  `yaml:"bucket"`
+	UseEnvCredentials bool    `yaml:"useEnvCredentials"`
+	AccessKeyID       *string `yaml:"accessKeyId"`
+	SecretAccessKey   *string `yaml:"secretAccessKey"`
+}
+
+type GCSStorage struct {
+	Endpoint           *string `yaml:"endpoint"`
+	Bucket             string  `yaml:"bucket"`
+	ServiceAccountFile *string `yaml:"serviceAccountFile"`
+}
+
+type FilesystemStorage struct {
+	BasePath string `yaml:"basePath"`
 }
 
 // KeyManagement specifies the properties required to securely encrypt and decrypt stored secrets. If enabled only one

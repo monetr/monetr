@@ -104,3 +104,8 @@ data:
     security:
     {{- toYaml .Values.api.security | nindent 6 }}
     {{- end }}
+
+    {{- if .Values.api.storage }}
+    storage:
+    {{- toYaml .Values.api.storage | nindent 6 }}
+    {{- end }}

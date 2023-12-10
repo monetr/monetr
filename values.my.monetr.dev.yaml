@@ -140,4 +140,5 @@ api:
       features:
         - ManualBudgeting
         - LinkedBudgeting
-
+  storage:
+    enabled: false

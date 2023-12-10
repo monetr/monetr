@@ -195,4 +195,20 @@ api:
       secretKey: null
       keyId: ""
       endpoint: null
+  storage:
+    enabled: false
+    provider: gcs
+    gcs:
+      endpoint: null
+      bucket: monetr-storage
+      serviceAccountFile: null # Should autodetect
+    s3:
+      endpoint: null
+      bucket: monetr-storage
+      useEnvCredentials: false
+      accessKeyId: null
+      secretAccessKey: null
+    filesystem:
+      basePath: "/var/monetr/storage"
+
 

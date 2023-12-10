@@ -55,3 +55,9 @@ keyManagement:
   google:
     credentialsJson: /etc/monetr/google-service-account.json
     # Resource name must be specified using MONETR_KMS_RESOURCE_NAME
+storage:
+  enabled: true
+  provider: s3
+  s3:
+    bucket: monetr-storage
+    useEnvCredentials: true # Use the AWS_ACCESS_KEY and AWS_SECRET_KEY env variables in development.
