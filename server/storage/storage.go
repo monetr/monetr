@@ -72,3 +72,8 @@ func getContentTypeByPath(filePath string) (ContentType, error) {
 
 	return "", errors.WithStack(ErrInvalidContentType)
 }
+
+func GetContentTypeIsValid(contentType string) bool {
+	_, ok := contentTypeExtensions[ContentType(contentType)]
+	return ok
+}

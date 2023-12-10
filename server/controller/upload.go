@@ -4,6 +4,8 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/storage"
 )
 
 func (c *Controller) postUploadTransactions(ctx echo.Context) error {
@@ -21,6 +23,15 @@ func (c *Controller) postUploadTransactions(ctx echo.Context) error {
 
 	if !ok {
 		return c.badRequest(ctx, "Cannot import transactions for non-manual link.")
+	}
+
+	contentType := ctx.Request().Header.Get("Content-Type")
+	valid := storage.GetContentTypeIsValid(contentType)
+	if !valid {
+		crumbs.Debug(c.getContext(ctx), "Unsupported file type was provided!", map[string]interface{}{
+			"contentType": contentType,
+		})
+		return c.badRequest(ctx, "Unsupported file type!")
 	}
 
 	return nil
