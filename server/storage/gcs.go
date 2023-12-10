@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/url"
 
 	"cloud.google.com/go/storage"
 	"github.com/monetr/monetr/server/crumbs"
@@ -15,6 +16,14 @@ type gcsStorage struct {
 	log    *logrus.Entry
 	bucket string
 	client *storage.Client
+}
+
+func NewGCSStorageBackend(log *logrus.Entry, bucket string, client *storage.Client) Storage {
+	return &gcsStorage{
+		log:    log,
+		bucket: bucket,
+		client: client,
+	}
 }
 
 func (s *gcsStorage) Store(ctx context.Context, buf io.ReadSeekCloser, contentType ContentType) (uri string, err error) {
@@ -42,5 +51,30 @@ func (s *gcsStorage) Store(ctx context.Context, buf io.ReadSeekCloser, contentTy
 		return "", errors.Wrap(err, "failed to write buffer to gcs writer")
 	}
 
+	writer.Attrs().ContentType = string(contentType)
+	writer.ContentType = string(contentType)
+
 	return uri, errors.Wrap(writer.Close(), "failed to store file in gcs")
+}
+
+func (s *gcsStorage) Read(ctx context.Context, uri string) (buf io.ReadCloser, contentType ContentType, err error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	url, err := url.Parse(uri)
+	if err != nil {
+		return nil, "", errors.Wrap(err, "failed to parse file uri")
+	}
+
+	// TODO Make sure the context here does not pass a bad timeout to the actual reader object, if it does it could cause
+	// the reader itself to expire before we would want it to.
+	reader, err := s.client.
+		Bucket(url.Host).
+		Object(url.Path).
+		NewReader(span.Context())
+	if err != nil {
+		return nil, "", errors.Wrap(err, "failed to create object reader for google cloud storage")
+	}
+
+	return reader, ContentType(reader.Attrs.ContentType), nil
 }
