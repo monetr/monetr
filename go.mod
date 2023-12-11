@@ -3,7 +3,7 @@ module github.com/monetr/monetr
 go 1.20
 
 require (
-	aidanwoods.dev/go-paseto v1.5.0
+	aidanwoods.dev/go-paseto v1.5.1
 	cloud.google.com/go/kms v1.15.5
 	github.com/MicahParks/keyfunc v1.0.1
 	github.com/OneOfOne/xxhash v1.2.8
