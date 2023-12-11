@@ -254,3 +254,114 @@ func calculateDistances(points []float64) []float64 {
 
 	return distances
 }
+
+func TestAmountDifferent(t *testing.T) {
+	t.Run("KDE", func(t *testing.T) {
+		items := GetFixtures(t, "amazon_sample_data_1.json")
+		data := make([]float64, len(items))
+		for i, item := range items {
+			data[i] = float64(item.Amount)
+		}
+
+		freq := map[int64]int64{
+			-3:    1,
+			20045: 1,
+			20076: 1,
+			2141:  1,
+			21578: 1,
+			22882: 1,
+			24159: 1,
+			24189: 1,
+			24754: 1,
+			24791: 1,
+			24819: 1,
+			24838: 1,
+			24:    1,
+			7656:  1,
+			8127:  1,
+			8159:  1,
+			8363:  1,
+			8402:  1,
+			8419:  1,
+			9018:  1,
+		}
+		fmt.Sprint(freq)
+		data = make([]float64, 0)
+		for amount, count := range freq {
+			for i := 0; i < int(count); i++ {
+				data = append(data, float64(amount))
+			}
+		}
+
+		sort.Float64s(data)
+
+		// Estimate the bandwidth
+		bandwidth := SilvermansRuleOfThumb(data)
+
+		// Points where we want to estimate the density
+		points := make([]float64, 0)
+		for _, amount := range data {
+			if slices.Contains(points, amount) {
+				continue
+			}
+
+			points = append(points, amount)
+		}
+		// points := []float64{1395, 1610, 100, 500, 1000, 10000, 20000}
+
+		// Perform KDE
+		densities := KernelDensityEstimation(data, bandwidth, points)
+
+		// Print the estimated densities
+		fmt.Println("Estimated Densities:", densities)
+
+		graph := asciigraph.PlotMany([][]float64{
+			densities,
+		}, asciigraph.Height(35), asciigraph.Width(225))
+		fmt.Println(graph)
+
+		maxIndex, maxDensity := -1, 0.0
+		for i, density := range densities {
+			if density > maxDensity {
+				maxIndex = i
+				maxDensity = density
+			}
+		}
+		fmt.Println("bandwidth:", bandwidth)
+		fmt.Println("Densist value:", points[maxIndex])
+	})
+}
+
+func GaussianKernel(x float64) float64 {
+	return (1 / math.Sqrt(2*math.Pi)) * math.Exp(-0.5*x*x)
+}
+
+func KernelDensityEstimation(data []float64, bandwidth float64, points []float64) []float64 {
+	densities := make([]float64, len(points))
+
+	for i, x := range points {
+		sum := 0.0
+		for _, xi := range data {
+			sum += GaussianKernel((x - xi) / bandwidth)
+		}
+		densities[i] = sum / (float64(len(data)) * bandwidth)
+	}
+
+	return densities
+}
+
+func SilvermansRuleOfThumb(data []float64) float64 {
+	var mean, variance float64
+	for _, value := range data {
+		mean += value
+	}
+	mean /= float64(len(data))
+
+	for _, value := range data {
+		variance += (value - mean) * (value - mean)
+	}
+	variance /= float64(len(data))
+
+	stdDev := math.Sqrt(variance)
+	return 1.06 * stdDev * math.Pow(float64(len(data)), -1.0/5.0)
+}
