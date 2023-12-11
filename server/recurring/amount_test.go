@@ -285,18 +285,37 @@ func TestAmountDifferent(t *testing.T) {
 			8419:  1,
 			9018:  1,
 		}
+		// freq = map[int64]int64{
+		// 	1500: 10,
+		// 	1700: 15,
+		// }
 		fmt.Sprint(freq)
-		data = make([]float64, 0)
-		for amount, count := range freq {
-			for i := 0; i < int(count); i++ {
-				data = append(data, float64(amount))
-			}
-		}
+		// data = make([]float64, 0)
+		// for amount, count := range freq {
+		// 	for i := 0; i < int(count); i++ {
+		// 		data = append(data, float64(amount))
+		// 	}
+		// }
 
 		sort.Float64s(data)
 
 		// Estimate the bandwidth
 		bandwidth := SilvermansRuleOfThumb(data)
+
+		bandwidths := make([]float64, 0)
+		for i := 500; i < 5000; i += 10 {
+			bandwidths = append(bandwidths, float64(i))
+		}
+		scores := make([]float64, len(bandwidths))
+		for i, bandwidth := range bandwidths {
+			scores[i] = LSCVScore(data, bandwidth)
+		}
+		sort.Slice(bandwidths, func(i, j int) bool {
+			return scores[i] > scores[j]
+		})
+		bandwidth = bandwidths[0]
+
+		fmt.Println("Chosen Bandwidth:", bandwidth)
 
 		// Points where we want to estimate the density
 		points := make([]float64, 0)
@@ -364,4 +383,15 @@ func SilvermansRuleOfThumb(data []float64) float64 {
 
 	stdDev := math.Sqrt(variance)
 	return 1.06 * stdDev * math.Pow(float64(len(data)), -1.0/5.0)
+}
+
+// LSCVScore calculates the Least Squares Cross-Validation score for a given bandwidth
+func LSCVScore(data []float64, bandwidth float64) float64 {
+	n := float64(len(data))
+	sum := 0.0
+	for _, xi := range data {
+		sum += KernelDensityEstimation(data, xi, []float64{bandwidth})[0]
+	}
+	score := (1 / (n * bandwidth)) - (2/(n*n))*sum
+	return score
 }
