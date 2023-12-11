@@ -133,8 +133,8 @@ importers:
         specifier: 11.10.6
         version: 11.10.6(@emotion/react@11.10.6)(@types/react@18.2.33)(react@18.2.0)
       '@fontsource-variable/inter':
-        specifier: 5.0.15
-        version: 5.0.15
+        specifier: 5.0.16
+        version: 5.0.16
       '@mui/icons-material':
         specifier: 5.11.0
         version: 5.11.0(@mui/material@5.11.3)(@types/react@18.2.33)(react@18.2.0)
@@ -332,8 +332,8 @@ importers:
   stories:
     dependencies:
       '@fontsource-variable/inter':
-        specifier: 5.0.15
-        version: 5.0.15
+        specifier: 5.0.16
+        version: 5.0.16
       '@monetr/interface':
         specifier: workspace:*
         version: link:../interface
@@ -2944,8 +2944,8 @@ packages:
     resolution: {integrity: sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==}
     dev: false
 
-  /@fontsource-variable/inter@5.0.15:
-    resolution: {integrity: sha512-CdQPQQgOVxg6ifmbrqYZeUqtQf7p2wPn6EvJ4M+vdNnsmYZgYwPPPQDNlIOU7LCUlSGaN26v6H0uA030WKn61g==}
+  /@fontsource-variable/inter@5.0.16:
+    resolution: {integrity: sha512-k+BUNqksTL+AN+o+OV7ILeiE9B5M5X+/jA7LWvCwjbV9ovXTqZyKRhA/x7uYv/ml8WQ0XNLBM7cRFIx4jW0/hg==}
     dev: false
 
   /@hapi/hoek@9.3.0:
@@ -6090,7 +6090,7 @@ packages:
       '@storybook/client-logger': 7.0.0
       '@storybook/components': 7.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.1-next.0
+      '@storybook/csf': 0.1.2-next.0
       '@storybook/docs-tools': 7.0.0
       '@storybook/global': 5.0.0
       '@storybook/manager-api': 7.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -6343,7 +6343,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@storybook/client-logger': 7.0.0
-      '@storybook/csf': 0.1.1-next.0
+      '@storybook/csf': 0.1.2-next.0
       '@storybook/global': 5.0.0
       '@storybook/theming': 7.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.0.0
@@ -6617,7 +6617,7 @@ packages:
       '@babel/parser': 7.21.9
       '@babel/traverse': 7.21.5
       '@babel/types': 7.21.5
-      '@storybook/csf': 0.1.1-next.0
+      '@storybook/csf': 0.1.2-next.0
       '@storybook/types': 7.0.0
       fs-extra: 11.1.1
       recast: 0.23.4
@@ -6687,8 +6687,8 @@ packages:
       type-fest: 2.19.0
     dev: false
 
-  /@storybook/csf@0.1.1-next.0:
-    resolution: {integrity: sha512-2M8E4CZOVW77P9lrgZZc2rcwxhNKVVykpzbcAauc3bots7xvDJMG60EasMRB/Y+cfqnSu6aaSUEVmKHTKsVJ3A==}
+  /@storybook/csf@0.1.2-next.0:
+    resolution: {integrity: sha512-Kf9XPAnO9VBxxYWNiW3pc1t7lDZ178VFfTCVWOm9r6Fdzm94j3zUNT06WiOojblVVaKsJktk8cT9b27Fmcxs5Q==}
     dependencies:
       type-fest: 2.19.0
     dev: false
@@ -6758,7 +6758,7 @@ packages:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.1-next.0
+      '@storybook/csf': 0.1.2-next.0
       '@storybook/global': 5.0.0
       '@storybook/router': 7.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/theming': 7.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -6887,7 +6887,7 @@ packages:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.1-next.0
+      '@storybook/csf': 0.1.2-next.0
       '@storybook/global': 5.0.0
       '@storybook/types': 7.0.0
       '@types/qs': 6.9.9
