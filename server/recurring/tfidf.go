@@ -1,0 +1,160 @@
+package recurring
+
+import (
+	"math"
+	"regexp"
+	"strings"
+
+	"github.com/monetr/monetr/server/internal/calc"
+	"github.com/monetr/monetr/server/models"
+)
+
+var (
+	clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
+	numberOnly              = regexp.MustCompile(`^\d+$`)
+
+	specialWeights = map[string]float32{
+		"amazon":      10,
+		"pwp":         0,
+		"debit":       0,
+		"pos":         0,
+		"visa":        0,
+		"ach":         0,
+		"transaction": 0,
+		"card":        0,
+		"check":       0,
+		"transfer":    0,
+		"deposit":     0,
+	}
+
+	synonyms = map[string]string{
+		"amzn": "amazon",
+	}
+)
+
+type Document struct {
+	ID          uint64
+	TF          map[string]float32
+	TFIDF       map[string]float32
+	Vector      []float32
+	Transaction *models.Transaction
+	String      string
+	Valid       bool
+}
+
+type Datum struct {
+	ID          uint64
+	Transaction *models.Transaction
+	String      string
+	Amount      int64
+	Vector      []float32
+}
+
+type TFIDF struct {
+	documents []Document
+	wc        map[string]float32
+}
+
+func NewTransactionTFIDF() *TFIDF {
+	return &TFIDF{
+		documents: []Document{},
+		wc:        map[string]float32{},
+	}
+}
+
+func (p *TFIDF) indexWords() map[string]int {
+	index := 0
+	result := make(map[string]int)
+	for word, count := range p.wc {
+		if count == 1 {
+			continue
+		}
+		result[word] = index
+		index++
+	}
+
+	return result
+}
+
+func (p *TFIDF) AddTransaction(txn *models.Transaction) {
+	words := CleanNameRegex(txn)
+	name := make([]string, 0, len(words))
+	wordCounts := make(map[string]float32, len(words))
+	for _, word := range words {
+		// If there is a synonym for the current word use that instead.
+		if synonym, ok := synonyms[word]; ok {
+			word = synonym
+		}
+		if multiplier, ok := specialWeights[word]; ok && multiplier == 0 {
+			continue
+		}
+		wordCounts[word]++
+		p.wc[word]++
+		name = append(name, word)
+	}
+
+	tf := make(map[string]float32, len(wordCounts))
+	for word, count := range wordCounts {
+		tf[word] = count / float32(len(words))
+	}
+
+	p.documents = append(p.documents, Document{
+		ID:          txn.TransactionId,
+		String:      strings.Join(name, " "),
+		Transaction: txn,
+		TF:          tf,
+		TFIDF:       map[string]float32{},
+	})
+}
+
+func (p *TFIDF) GetDocuments() []Document {
+	resultDocuments := make([]Document, 0, len(p.documents))
+	docCount := float32(len(p.documents))
+	idf := make(map[string]float32, len(p.wc))
+	for word, count := range p.wc {
+		idf[word] = float32(math.Log(float64(docCount / (count + 1))))
+	}
+	// Get a map of all the meaningful words and their index to use in the vector
+	minified := p.indexWords()
+	// Define the length of the vector and adjust it to be divisible by 8. This will enable us to leverage SIMD in the
+	// future. By using 8 we are compatible with both AVX and AVX512.
+	vectorLength := len(minified) + (16 - (len(minified) % 16))
+	for i := range p.documents {
+		// Get the current document we are working with
+		document := p.documents[i]
+		// Calculate the TFIDF for that document
+		for word, tfValue := range document.TF {
+			document.TFIDF[word] = tfValue * idf[word]
+			// If this specific word is meant to be more meaningful than tfidf might treat it then adjust it accordingly
+			if multiplier, ok := specialWeights[word]; ok {
+				document.TFIDF[word] *= multiplier
+			}
+		}
+		// Then create a vector of the words in the document name to use for the DBSCAN clustering
+		document.Vector = make([]float32, vectorLength)
+		words := 0
+		for word, tfidfValue := range document.TFIDF {
+			index, exists := minified[word]
+			if !exists {
+				continue
+			}
+			words++
+			document.Vector[index] = tfidfValue
+		}
+		if words == 0 {
+			document.Valid = false
+			p.documents[i] = document
+			continue
+		}
+		document.Valid = true
+		// Normalize the document's tfidf vector.
+		calc.NormalizeVector32(document.Vector)
+		p.documents[i] = document
+		// Then store the document back in
+		if document.Valid {
+			resultDocuments = append(resultDocuments, document)
+		}
+	}
+
+	return resultDocuments
+}

@@ -20,15 +20,12 @@ func BenchmarkPreProcessor(b *testing.B) {
 
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		var processor = &TFIDF{
-			documents: []Document{},
-			wc:        map[string]float32{},
-		}
+		processor := NewTransactionTFIDF()
 		for i := range data {
 			processor.AddTransaction(&data[i])
 		}
 
-		_ = processor.GetDatums()
+		_ = processor.GetDocuments()
 	}
 }
 
@@ -39,15 +36,12 @@ func BenchmarkDBSCAN(b *testing.B) {
 	var data []models.Transaction
 	require.NoError(b, json.Unmarshal(fixtureJson, &data), "must be able to decode fixture data")
 
-	var processor = &TFIDF{
-		documents: []Document{},
-		wc:        map[string]float32{},
-	}
+	processor := NewTransactionTFIDF()
 	for i := range data {
 		processor.AddTransaction(&data[i])
 	}
 
-	datums := processor.GetDatums()
+	datums := processor.GetDocuments()
 
 	dbscan := NewDBSCAN(datums, 0.98, 2)
 
@@ -61,15 +55,12 @@ func TestPreProcessor(t *testing.T) {
 	data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
 	//data := GetFixtures(t, "full sample.json")
-	var processor = &TFIDF{
-		documents: []Document{},
-		wc:        map[string]float32{},
-	}
+	processor := NewTransactionTFIDF()
 	for i := range data {
 		processor.AddTransaction(&data[i])
 	}
 
-	datums := processor.GetDatums()
+	datums := processor.GetDocuments()
 
 	// First test with 0.4 and 3 was excellent!
 	// 1.25 is also very good
@@ -106,15 +97,12 @@ func TestParameters(t *testing.T) {
 	}
 	data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
-	var processor = &TFIDF{
-		documents: []Document{},
-		wc:        map[string]float32{},
-	}
+	processor := NewTransactionTFIDF()
 	for i := range data {
 		processor.AddTransaction(&data[i])
 	}
 
-	datums := processor.GetDatums()
+	datums := processor.GetDocuments()
 
 	epsilons := make([]float32, 0)
 	for i := float32(0.1); i < 2.0; i += 0.1 {

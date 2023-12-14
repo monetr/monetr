@@ -1,12 +1,7 @@
 package recurring
 
 import (
-	"math"
-	"regexp"
-	"strings"
-
 	"github.com/monetr/monetr/server/internal/calc"
-	"github.com/monetr/monetr/server/models"
 )
 
 const (
@@ -18,162 +13,6 @@ var (
 	dbscanClusterDebug = false
 )
 
-var (
-	clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
-	numberOnly              = regexp.MustCompile(`^\d+$`)
-
-	specialWeights = map[string]float32{
-		"amazon":      10,
-		"pwp":         0,
-		"debit":       0,
-		"pos":         0,
-		"visa":        0,
-		"ach":         0,
-		"transaction": 0,
-		"card":        0,
-		"check":       0,
-		"transfer":    0,
-		"deposit":     0,
-	}
-
-	synonyms = map[string]string{
-		"amzn": "amazon",
-	}
-)
-
-type Document struct {
-	ID          uint64
-	TF          map[string]float32
-	TFIDF       map[string]float32
-	Vector      []float32
-	Transaction *models.Transaction
-	String      string
-	Valid       bool
-}
-
-type TFIDF struct {
-	documents []Document
-	wc        map[string]float32
-}
-
-func NewPreProcessor() *TFIDF {
-	return &TFIDF{
-		documents: []Document{},
-		wc:        map[string]float32{},
-	}
-}
-
-func (p *TFIDF) indexWords() map[string]int {
-	index := 0
-	result := make(map[string]int)
-	for word, count := range p.wc {
-		if count == 1 {
-			continue
-		}
-		result[word] = index
-		index++
-	}
-
-	return result
-}
-
-func (p *TFIDF) AddTransaction(txn *models.Transaction) {
-	words := CleanNameRegex(txn)
-	name := make([]string, 0, len(words))
-	wordCounts := make(map[string]float32, len(words))
-	for _, word := range words {
-		// If there is a synonym for the current word use that instead.
-		if synonym, ok := synonyms[word]; ok {
-			word = synonym
-		}
-		if multiplier, ok := specialWeights[word]; ok && multiplier == 0 {
-			continue
-		}
-		wordCounts[word]++
-		p.wc[word]++
-		name = append(name, word)
-	}
-
-	tf := make(map[string]float32, len(wordCounts))
-	for word, count := range wordCounts {
-		tf[word] = count / float32(len(words))
-	}
-
-	p.documents = append(p.documents, Document{
-		ID:          txn.TransactionId,
-		String:      strings.Join(name, " "),
-		Transaction: txn,
-		TF:          tf,
-		TFIDF:       map[string]float32{},
-	})
-}
-
-func (p *TFIDF) GetDatums() []Datum {
-	datums := make([]Datum, 0, len(p.documents))
-	docCount := float32(len(p.documents))
-	idf := make(map[string]float32, len(p.wc))
-	for word, count := range p.wc {
-		idf[word] = float32(math.Log(float64(docCount / (count + 1))))
-	}
-	// Get a map of all the meaningful words and their index to use in the vector
-	minified := p.indexWords()
-	// Define the length of the vector and adjust it to be divisible by 8. This will enable us to leverage SIMD in the
-	// future. By using 8 we are compatible with both AVX and AVX512.
-	vectorLength := len(minified) + (16 - (len(minified) % 16))
-	for i := range p.documents {
-		// Get the current document we are working with
-		document := p.documents[i]
-		// Calculate the TFIDF for that document
-		for word, tfValue := range document.TF {
-			document.TFIDF[word] = tfValue * idf[word]
-			// If this specific word is meant to be more meaningful than tfidf might treat it then adjust it accordingly
-			if multiplier, ok := specialWeights[word]; ok {
-				document.TFIDF[word] *= multiplier
-			}
-		}
-		// Then create a vector of the words in the document name to use for the DBSCAN clustering
-		document.Vector = make([]float32, vectorLength)
-		words := 0
-		for word, tfidfValue := range document.TFIDF {
-			index, exists := minified[word]
-			if !exists {
-				continue
-			}
-			words++
-			document.Vector[index] = tfidfValue
-		}
-		if words == 0 {
-			document.Valid = false
-			p.documents[i] = document
-			continue
-		}
-		document.Valid = true
-		// Normalize the document's tfidf vector.
-		calc.NormalizeVector32(document.Vector)
-		p.documents[i] = document
-		// Then store the document back in
-		if document.Valid {
-			datums = append(datums, Datum{
-				ID:          document.ID,
-				Transaction: document.Transaction,
-				String:      document.String,
-				Amount:      document.Transaction.Amount,
-				Vector:      document.Vector,
-			})
-		}
-	}
-
-	return datums
-}
-
-type Datum struct {
-	ID          uint64
-	Transaction *models.Transaction
-	String      string
-	Amount      int64
-	Vector      []float32
-}
-
 type Cluster struct {
 	ID    uint64
 	Items map[int]uint8
@@ -181,13 +20,13 @@ type Cluster struct {
 
 type DBSCAN struct {
 	labels    map[uint64]bool
-	dataset   []Datum
+	dataset   []Document
 	epsilon   float32
 	minPoints int
 	clusters  []Cluster
 }
 
-func NewDBSCAN(dataset []Datum, epsilon float32, minPoints int) *DBSCAN {
+func NewDBSCAN(dataset []Document, epsilon float32, minPoints int) *DBSCAN {
 	return &DBSCAN{
 		labels:    map[uint64]bool{},
 		dataset:   dataset,
@@ -197,7 +36,7 @@ func NewDBSCAN(dataset []Datum, epsilon float32, minPoints int) *DBSCAN {
 	}
 }
 
-func (d *DBSCAN) GetDatumByIndex(index int) (*Datum, bool) {
+func (d *DBSCAN) GetDocumentByIndex(index int) (*Document, bool) {
 	if index >= len(d.dataset) || index < 0 {
 		return nil, false
 	}
@@ -225,8 +64,14 @@ func (d *DBSCAN) Calculate() []Cluster {
 		}
 		// Otherwise mark the point as visited so we don't do the same work again
 		d.labels[point.ID] = false
+
+		// Bootstrap a cluster for the current point
+		newCluster := Cluster{
+			Items: map[int]uint8{},
+		}
+
 		// Then start constructing a cluster around this point.
-		newCluster := d.expandCluster(index, neighbors)
+		d.expandCluster(index, neighbors, &newCluster)
 		// Set the cluster's unique ID to the lowest numeric ID in that cluster.
 		// HACK: I need a way to uniquely identify each cluster. Generally by using the contents of that cluster. This
 		// relies on the contents of that cluster remaining consistent over time. While the order of the clusters might
@@ -248,11 +93,7 @@ func (d *DBSCAN) Calculate() []Cluster {
 	return d.clusters
 }
 
-func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
-	// Bootstrap a cluster for the current point, this function might be called recursively
-	cluster := Cluster{
-		Items: map[int]uint8{},
-	}
+func (d *DBSCAN) expandCluster(index int, neighbors []int, cluster *Cluster) {
 	// And add a pointer to the current item into the new cluster.
 	cluster.Items[index] = 0
 	for _, neighborIndex := range neighbors {
@@ -268,11 +109,7 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
 			if len(newNeighbors) >= d.minPoints {
 				// Merge new neighbors with neighbors
 				// Recursively descend and then add the data we get into the one we currently have.
-				recurResult := d.expandCluster(neighborIndex, newNeighbors)
-				// Just add the recurred items into this cluster.
-				for k, v := range recurResult.Items {
-					cluster.Items[k] = v
-				}
+				d.expandCluster(neighborIndex, newNeighbors, cluster)
 			}
 		}
 
@@ -290,8 +127,6 @@ func (d *DBSCAN) expandCluster(index int, neighbors []int) Cluster {
 			cluster.Items[neighborIndex] = 0
 		}
 	}
-
-	return cluster
 }
 
 func (d *DBSCAN) getNeighbors(index int) []int {

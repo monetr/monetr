@@ -17,11 +17,8 @@ type Detection struct {
 
 func NewRecurringTransactionDetection(timezone *time.Location) *Detection {
 	return &Detection{
-		timezone: timezone,
-		preprocessor: &TFIDF{
-			documents: make([]Document, 0, 500),
-			wc:        make(map[string]float32, 128),
-		},
+		timezone:           timezone,
+		preprocessor:       NewTransactionTFIDF(),
 		dbscan:             nil,
 		latestObservedDate: time.Time{},
 	}
@@ -65,7 +62,7 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 		Amount   int64
 	}
 
-	d.dbscan = NewDBSCAN(d.preprocessor.GetDatums(), Epsilon, MinNeighbors)
+	d.dbscan = NewDBSCAN(d.preprocessor.GetDocuments(), Epsilon, MinNeighbors)
 	result := d.dbscan.Calculate()
 	bestScores := make([]RecurringTransaction, 0, len(result))
 

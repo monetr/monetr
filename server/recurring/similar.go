@@ -17,25 +17,22 @@ type SimilarTransactionGroup struct {
 }
 
 type SimilarTransactions_TFIDF_DBSCAN struct {
-	preprocessor *TFIDF
-	dbscan       *DBSCAN
+	tfidf  *TFIDF
+	dbscan *DBSCAN
 }
 
 func NewSimilarTransactions_TFIDF_DBSCAN() SimilarTransactionDetection {
 	return &SimilarTransactions_TFIDF_DBSCAN{
-		preprocessor: &TFIDF{
-			documents: make([]Document, 0, 500),
-			wc:        make(map[string]float32, 128),
-		},
+		tfidf: NewTransactionTFIDF(),
 	}
 }
 
 func (s *SimilarTransactions_TFIDF_DBSCAN) AddTransaction(txn *models.Transaction) {
-	s.preprocessor.AddTransaction(txn)
+	s.tfidf.AddTransaction(txn)
 }
 
 func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []SimilarTransactionGroup {
-	datums := s.preprocessor.GetDatums()
+	datums := s.tfidf.GetDocuments()
 	s.dbscan = NewDBSCAN(datums, Epsilon, MinNeighbors)
 	result := s.dbscan.Calculate()
 	similar := make([]SimilarTransactionGroup, len(result))
@@ -47,7 +44,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []Similar
 		}
 
 		for index := range cluster.Items {
-			datum, ok := s.dbscan.GetDatumByIndex(index)
+			datum, ok := s.dbscan.GetDocumentByIndex(index)
 			if !ok {
 				// I don't know what kind of information would be helpful to include here since we cannot find the data
 				// associated with the index anyway. But this would indicate a significant bug.
