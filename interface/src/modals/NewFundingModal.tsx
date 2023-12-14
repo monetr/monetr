@@ -62,7 +62,7 @@ function NewFundingModal(): JSX.Element {
   }
 
   return (
-    <MModal open={ modal.visible } ref={ ref } className='py-4 md:max-w-sm'>
+    <MModal open={ modal.visible } ref={ ref } className='md:max-w-sm'>
       <MForm
         initialValues={ initialValues }
         onSubmit={ submit }
@@ -98,14 +98,14 @@ function NewFundingModal(): JSX.Element {
             required
             name='ruleset'
           />
-          <div className='flex justify-end gap-2'>
-            <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-funding-modal'>
+        </div>
+        <div className='flex justify-end gap-2'>
+          <MFormButton color='cancel' onClick={ modal.remove } data-testid='close-new-funding-modal'>
               Cancel
-            </MFormButton>
-            <MFormButton color='primary' type='submit'>
+          </MFormButton>
+          <MFormButton color='primary' type='submit'>
               Create
-            </MFormButton>
-          </div>
+          </MFormButton>
         </div>
       </MForm>
     </MModal>
