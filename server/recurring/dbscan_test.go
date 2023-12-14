@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/monetr/monetr/server/models"
@@ -78,7 +79,7 @@ func TestPreProcessor(t *testing.T) {
 			item := dbscan.dataset[index]
 			output[i] = append(output[i], Presentation{
 				ID:        item.ID,
-				Sanitized: item.String,
+				Sanitized: strings.Join(item.Parts, " "),
 			})
 		}
 	}

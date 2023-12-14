@@ -14,10 +14,10 @@ func TestCleanNameRegex(t *testing.T) {
 			OriginalMerchantName: "",
 		}
 
-		result := CleanNameRegex(&txn)
+		lower, _ := CleanNameRegex(&txn)
 		assert.EqualValues(t, []string{
 			"when", "i", "work", "inc", "courant", "elliot", "798080132284epj", "merchant", "name", "when", "i", "work", "inc",
-		}, result, "should match the cleaned string")
+		}, lower, "should match the cleaned string")
 	})
 
 	t.Run("github", func(t *testing.T) {
@@ -26,10 +26,10 @@ func TestCleanNameRegex(t *testing.T) {
 			OriginalMerchantName: "GitHub",
 		}
 
-		result := CleanNameRegex(&txn)
+		lower, _ := CleanNameRegex(&txn)
 		assert.EqualValues(t, []string{
 			"github", "merchant", "name", "github", "github",
-		}, result, "should match the cleaned string")
+		}, lower, "should match the cleaned string")
 	})
 }
 

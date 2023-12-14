@@ -3,7 +3,6 @@ package recurring
 import (
 	"math"
 	"regexp"
-	"strings"
 
 	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/monetr/monetr/server/models"
@@ -38,7 +37,7 @@ type Document struct {
 	TFIDF       map[string]float32
 	Vector      []float32
 	Transaction *models.Transaction
-	String      string
+	Parts       []string
 	Valid       bool
 }
 
@@ -78,10 +77,10 @@ func (p *TFIDF) indexWords() map[string]int {
 }
 
 func (p *TFIDF) AddTransaction(txn *models.Transaction) {
-	words := CleanNameRegex(txn)
-	name := make([]string, 0, len(words))
-	wordCounts := make(map[string]float32, len(words))
-	for _, word := range words {
+	lower, normal := CleanNameRegex(txn)
+	name := make([]string, 0, len(lower))
+	wordCounts := make(map[string]float32, len(lower))
+	for i, word := range lower {
 		// If there is a synonym for the current word use that instead.
 		if synonym, ok := synonyms[word]; ok {
 			word = synonym
@@ -91,17 +90,17 @@ func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 		}
 		wordCounts[word]++
 		p.wc[word]++
-		name = append(name, word)
+		name = append(name, normal[i])
 	}
 
 	tf := make(map[string]float32, len(wordCounts))
 	for word, count := range wordCounts {
-		tf[word] = count / float32(len(words))
+		tf[word] = count / float32(len(lower))
 	}
 
 	p.documents = append(p.documents, Document{
 		ID:          txn.TransactionId,
-		String:      strings.Join(name, " "),
+		Parts:       name,
 		Transaction: txn,
 		TF:          tf,
 		TFIDF:       map[string]float32{},
