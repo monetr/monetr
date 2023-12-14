@@ -18,6 +18,10 @@ func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
 
 		groups := detector.DetectSimilarTransactions()
 		assert.NotEmpty(t, groups, "must return an array of groups of similar transactions")
+		for _, group := range groups {
+			assert.NotEmpty(t, group.Matches, "a groups matches should not be empty!")
+			assert.NotEmpty(t, group.Name, "a groups name should not be empty!")
+		}
 		// TODO, add specific assertions here about what the groups are.
 	})
 

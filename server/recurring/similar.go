@@ -12,6 +12,7 @@ type SimilarTransactionDetection interface {
 }
 
 type SimilarTransactionGroup struct {
+	Name    string   `json:"name"`
 	Matches []uint64 `json:"matches"`
 }
 
@@ -52,6 +53,14 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []Similar
 		// something that would always be unique.
 		// If possible it would also be good to take into account the order of the terms for the final name. But I'm not
 		// sure how important that will be yet.
+		// =================================================================================================================
+		// In the mean time I'm going to use the most common merchant name or the name of the transaction with the highest
+		// ID.
+
+		merchants := map[string]int{}
+		var highestName string
+		var highestId uint64
+
 		for index := range cluster.Items {
 			datum, ok := s.dbscan.GetDocumentByIndex(index)
 			if !ok {
@@ -62,11 +71,34 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []Similar
 
 			// Add the transaction ID to the matches.
 			group.Matches = append(group.Matches, datum.ID)
+
+			if datum.Transaction.OriginalMerchantName != "" {
+				merchants[datum.Transaction.OriginalMerchantName] += 1
+			}
+			if datum.ID > highestId {
+				highestName = datum.Transaction.OriginalName
+				highestId = datum.ID
+			}
 		}
 
 		sort.Slice(group.Matches, func(i, j int) bool {
 			return group.Matches[i] < group.Matches[j]
 		})
+
+		if len(merchants) == 0 {
+			group.Name = highestName
+		} else {
+			highestId = 0
+			highestName = ""
+			for merchant, count := range merchants {
+				if uint64(count) > highestId {
+					highestName = merchant
+					highestId = uint64(count)
+				}
+			}
+
+			group.Name = highestName
+		}
 
 		similar[i] = group
 	}
