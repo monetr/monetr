@@ -25,7 +25,7 @@ func NewSimilarTransactions_TFIDF_DBSCAN() SimilarTransactionDetection {
 	return &SimilarTransactions_TFIDF_DBSCAN{
 		preprocessor: &TFIDF{
 			documents: make([]Document, 0, 500),
-			wc:        make(map[string]float64, 128),
+			wc:        make(map[string]float32, 128),
 		},
 	}
 }

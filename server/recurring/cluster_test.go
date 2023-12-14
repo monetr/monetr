@@ -22,7 +22,7 @@ func BenchmarkPreProcessor(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		var processor = &TFIDF{
 			documents: []Document{},
-			wc:        map[string]float64{},
+			wc:        map[string]float32{},
 		}
 		for i := range data {
 			processor.AddTransaction(&data[i])
@@ -41,7 +41,7 @@ func BenchmarkDBSCAN(b *testing.B) {
 
 	var processor = &TFIDF{
 		documents: []Document{},
-		wc:        map[string]float64{},
+		wc:        map[string]float32{},
 	}
 	for i := range data {
 		processor.AddTransaction(&data[i])
@@ -63,7 +63,7 @@ func TestPreProcessor(t *testing.T) {
 	//data := GetFixtures(t, "full sample.json")
 	var processor = &TFIDF{
 		documents: []Document{},
-		wc:        map[string]float64{},
+		wc:        map[string]float32{},
 	}
 	for i := range data {
 		processor.AddTransaction(&data[i])
@@ -108,7 +108,7 @@ func TestParameters(t *testing.T) {
 	//data := GetFixtures(t, "Result_3.json")
 	var processor = &TFIDF{
 		documents: []Document{},
-		wc:        map[string]float64{},
+		wc:        map[string]float32{},
 	}
 	for i := range data {
 		processor.AddTransaction(&data[i])
@@ -116,8 +116,8 @@ func TestParameters(t *testing.T) {
 
 	datums := processor.GetDatums()
 
-	epsilons := make([]float64, 0)
-	for i := 0.1; i < 2.0; i += 0.1 {
+	epsilons := make([]float32, 0)
+	for i := float32(0.1); i < 2.0; i += 0.1 {
 		epsilons = append(epsilons, i)
 	}
 	minPoints := make([]int, 0)

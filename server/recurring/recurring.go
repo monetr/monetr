@@ -20,7 +20,7 @@ func NewRecurringTransactionDetection(timezone *time.Location) *Detection {
 		timezone: timezone,
 		preprocessor: &TFIDF{
 			documents: make([]Document, 0, 500),
-			wc:        make(map[string]float64, 128),
+			wc:        make(map[string]float32, 128),
 		},
 		dbscan:             nil,
 		latestObservedDate: time.Time{},
@@ -35,7 +35,7 @@ type RecurringTransaction struct {
 	Last       time.Time       `json:"last"`
 	Next       time.Time       `json:"next"`
 	Ended      bool            `json:"ended"`
-	Confidence float64         `json:"confidence"`
+	Confidence float32         `json:"confidence"`
 	Amounts    map[int64]int   `json:"amounts"`
 	LastAmount int64           `json:"lastAmount"`
 	Matches    []uint64        `json:"matches"`
@@ -131,9 +131,9 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 				continue
 			}
 			next := window.Rule.After(hits[len(hits)-1].Time, false)
-			countHits := float64(len(hits))
-			countMisses := float64(len(misses)) * 1.1
-			countTxns := float64(len(transactions))
+			countHits := float32(len(hits))
+			countMisses := float32(len(misses)) * 1.1
+			countTxns := float32(len(transactions))
 			ended := next.Before(d.latestObservedDate.AddDate(0, 0, -window.Fuzzy*2))
 			latestTxn := transactions[len(transactions)-1]
 			name := latestTxn.OriginalName

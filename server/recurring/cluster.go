@@ -22,7 +22,7 @@ var (
 	clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
 	numberOnly              = regexp.MustCompile(`^\d+$`)
 
-	specialWeights = map[string]float64{
+	specialWeights = map[string]float32{
 		"amazon":      10,
 		"pwp":         0,
 		"debit":       0,
@@ -43,9 +43,9 @@ var (
 
 type Document struct {
 	ID          uint64
-	TF          map[string]float64
-	TFIDF       map[string]float64
-	Vector      []float64
+	TF          map[string]float32
+	TFIDF       map[string]float32
+	Vector      []float32
 	Transaction *models.Transaction
 	String      string
 	Valid       bool
@@ -53,13 +53,13 @@ type Document struct {
 
 type TFIDF struct {
 	documents []Document
-	wc        map[string]float64
+	wc        map[string]float32
 }
 
 func NewPreProcessor() *TFIDF {
 	return &TFIDF{
 		documents: []Document{},
-		wc:        map[string]float64{},
+		wc:        map[string]float32{},
 	}
 }
 
@@ -80,7 +80,7 @@ func (p *TFIDF) indexWords() map[string]int {
 func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 	words := CleanNameRegex(txn)
 	name := make([]string, 0, len(words))
-	wordCounts := make(map[string]float64, len(words))
+	wordCounts := make(map[string]float32, len(words))
 	for _, word := range words {
 		// If there is a synonym for the current word use that instead.
 		if synonym, ok := synonyms[word]; ok {
@@ -94,9 +94,9 @@ func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 		name = append(name, word)
 	}
 
-	tf := make(map[string]float64, len(wordCounts))
+	tf := make(map[string]float32, len(wordCounts))
 	for word, count := range wordCounts {
-		tf[word] = count / float64(len(words))
+		tf[word] = count / float32(len(words))
 	}
 
 	p.documents = append(p.documents, Document{
@@ -104,22 +104,22 @@ func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 		String:      strings.Join(name, " "),
 		Transaction: txn,
 		TF:          tf,
-		TFIDF:       map[string]float64{},
+		TFIDF:       map[string]float32{},
 	})
 }
 
 func (p *TFIDF) GetDatums() []Datum {
 	datums := make([]Datum, 0, len(p.documents))
-	docCount := float64(len(p.documents))
-	idf := make(map[string]float64, len(p.wc))
+	docCount := float32(len(p.documents))
+	idf := make(map[string]float32, len(p.wc))
 	for word, count := range p.wc {
-		idf[word] = math.Log(docCount / (count + 1))
+		idf[word] = float32(math.Log(float64(docCount / (count + 1))))
 	}
 	// Get a map of all the meaningful words and their index to use in the vector
 	minified := p.indexWords()
 	// Define the length of the vector and adjust it to be divisible by 8. This will enable us to leverage SIMD in the
 	// future. By using 8 we are compatible with both AVX and AVX512.
-	vectorLength := len(minified) + (8 - (len(minified) % 8))
+	vectorLength := len(minified) + (16 - (len(minified) % 16))
 	for i := range p.documents {
 		// Get the current document we are working with
 		document := p.documents[i]
@@ -132,7 +132,7 @@ func (p *TFIDF) GetDatums() []Datum {
 			}
 		}
 		// Then create a vector of the words in the document name to use for the DBSCAN clustering
-		document.Vector = make([]float64, vectorLength)
+		document.Vector = make([]float32, vectorLength)
 		words := 0
 		for word, tfidfValue := range document.TFIDF {
 			index, exists := minified[word]
@@ -149,7 +149,7 @@ func (p *TFIDF) GetDatums() []Datum {
 		}
 		document.Valid = true
 		// Normalize the document's tfidf vector.
-		calc.NormalizeVector64(document.Vector)
+		calc.NormalizeVector32(document.Vector)
 		p.documents[i] = document
 		// Then store the document back in
 		if document.Valid {
@@ -171,7 +171,7 @@ type Datum struct {
 	Transaction *models.Transaction
 	String      string
 	Amount      int64
-	Vector      []float64
+	Vector      []float32
 }
 
 type Cluster struct {
@@ -182,12 +182,12 @@ type Cluster struct {
 type DBSCAN struct {
 	labels    map[uint64]bool
 	dataset   []Datum
-	epsilon   float64
+	epsilon   float32
 	minPoints int
 	clusters  []Cluster
 }
 
-func NewDBSCAN(dataset []Datum, epsilon float64, minPoints int) *DBSCAN {
+func NewDBSCAN(dataset []Datum, epsilon float32, minPoints int) *DBSCAN {
 	return &DBSCAN{
 		labels:    map[uint64]bool{},
 		dataset:   dataset,
@@ -305,7 +305,7 @@ func (d *DBSCAN) getNeighbors(index int) []int {
 		}
 
 		// Calculate the distance from our Q point to our P point.
-		distance := calc.EuclideanDistance64(point.Vector, counterpoint.Vector)
+		distance := calc.EuclideanDistance32(point.Vector, counterpoint.Vector)
 		// If we are close enough then we could be part of a core cluster point. Add it to the list.
 		if distance <= d.epsilon {
 			neighbors = append(neighbors, i)

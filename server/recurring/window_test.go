@@ -157,7 +157,7 @@ func TestWindowExperiment(t *testing.T) {
 		// data := GetFixtures(t, "full sample.json")
 		var processor = &TFIDF{
 			documents: []Document{},
-			wc:        map[string]float64{},
+			wc:        map[string]float32{},
 		}
 		latest := time.Time{}
 		for i := range data {
