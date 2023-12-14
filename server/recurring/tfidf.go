@@ -53,6 +53,7 @@ type Datum struct {
 type TFIDF struct {
 	documents []Document
 	wc        map[string]float32
+	idf       map[string]float32
 }
 
 func NewTransactionTFIDF() *TFIDF {
@@ -110,21 +111,21 @@ func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 func (p *TFIDF) GetDocuments() []Document {
 	resultDocuments := make([]Document, 0, len(p.documents))
 	docCount := float32(len(p.documents))
-	idf := make(map[string]float32, len(p.wc))
+	p.idf = make(map[string]float32, len(p.wc))
 	for word, count := range p.wc {
-		idf[word] = float32(math.Log(float64(docCount / (count + 1))))
+		p.idf[word] = float32(math.Log(float64(docCount / (count + 1))))
 	}
 	// Get a map of all the meaningful words and their index to use in the vector
 	minified := p.indexWords()
-	// Define the length of the vector and adjust it to be divisible by 8. This will enable us to leverage SIMD in the
-	// future. By using 8 we are compatible with both AVX and AVX512.
+	// Define the length of the vector and adjust it to be divisible by 16. This will enable us to leverage SIMD in the
+	// future. By using 16 we are compatible with both AVX and AVX512.
 	vectorLength := len(minified) + (16 - (len(minified) % 16))
 	for i := range p.documents {
 		// Get the current document we are working with
 		document := p.documents[i]
 		// Calculate the TFIDF for that document
 		for word, tfValue := range document.TF {
-			document.TFIDF[word] = tfValue * idf[word]
+			document.TFIDF[word] = tfValue * p.idf[word]
 			// If this specific word is meant to be more meaningful than tfidf might treat it then adjust it accordingly
 			if multiplier, ok := specialWeights[word]; ok {
 				document.TFIDF[word] *= multiplier
