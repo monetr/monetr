@@ -31,6 +31,8 @@ const MModal = React.forwardRef<MModalRef, MModalProps>((props, ref) => {
     'w-screen',
     'sm:w-full',
     'sm:max-w-lg',
+    'pb-6',
+    'md:pb-2',
     'transform',
     props.className,
   );

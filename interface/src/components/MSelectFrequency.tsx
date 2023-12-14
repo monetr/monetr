@@ -51,8 +51,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   }));
 
   const value = selectedIndex !== null && selectedIndex >= 0 && selectedIndex < options.length ?
-    options[selectedIndex] :
-    { label: 'Select a frequency...', value: -1 };
+    options[selectedIndex] : null;
 
   function onChange(newValue: OnChangeValue<SelectOption, false>, _: ActionMeta<SelectOption>) {
     setSelectedIndex(newValue.value);
@@ -64,6 +63,7 @@ export default function MSelectFrequency(props: MSelectFrequencyProps): JSX.Elem
   return (
     <MSelect
       { ...props }
+      placeholder='Select a frequency...'
       disabled={ formikContext?.isSubmitting }
       error={ formikContext?.errors[props.name] }
       isClearable={ false }

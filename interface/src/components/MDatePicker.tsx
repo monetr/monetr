@@ -99,8 +99,8 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     }
 
     setSelectedValue(value);
-    close();
-  }, [setSelectedValue, formikContext, props.name]);
+    handleClose();
+  }, [setSelectedValue, formikContext, props.name, handleClose]);
 
   const classNames = mergeTailwind(
     {
