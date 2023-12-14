@@ -1,0 +1,38 @@
+package recurring
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestSimilarTransactions_TFIDF_DBSCAN(t *testing.T) {
+	t.Run("monetr mercury dataset", func(t *testing.T) {
+		data := GetFixtures(t, "monetr_sample_data_1.json")
+
+		detector := NewSimilarTransactions_TFIDF_DBSCAN()
+
+		for i := range data {
+			detector.AddTransaction(&data[i])
+		}
+
+		groups := detector.DetectSimilarTransactions()
+		assert.NotEmpty(t, groups, "must return an array of groups of similar transactions")
+		// TODO, add specific assertions here about what the groups are.
+	})
+
+	t.Run("amazon dataset", func(t *testing.T) {
+		data := GetFixtures(t, "amazon_sample_data_1.json")
+
+		detector := NewSimilarTransactions_TFIDF_DBSCAN()
+
+		for i := range data {
+			detector.AddTransaction(&data[i])
+		}
+
+		groups := detector.DetectSimilarTransactions()
+		assert.NotEmpty(t, groups, "must return an array of groups of similar transactions")
+		// Since the amazon dataset only has amazon transactions there should only be a single group.
+		assert.Len(t, groups, 1, "should have only a single group")
+	})
+}
