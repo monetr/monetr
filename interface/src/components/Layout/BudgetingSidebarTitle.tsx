@@ -7,13 +7,14 @@ import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useLink } from '@monetr/interface/hooks/links';
+import { useLink, useTriggerManualSync } from '@monetr/interface/hooks/links';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const { data: link } = useLink(bankAccount?.linkId);
+  const triggerSync = useTriggerManualSync();
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const open = Boolean(anchorEl);
@@ -31,6 +32,11 @@ export default function BudgetingSidebarTitle(): JSX.Element {
       link: link,
     });
   }, [closeMenu, link]);
+
+  const handleTriggerResync = useCallback(() => {
+    closeMenu();
+    triggerSync(bankAccount?.linkId);
+  }, [bankAccount?.linkId, closeMenu, triggerSync]);
 
   const handleUpdateAccountSelection = useCallback(() => {
     closeMenu();
@@ -81,7 +87,7 @@ export default function BudgetingSidebarTitle(): JSX.Element {
             <PriceChangeOutlined className='mr-1 mb-0.5' />
             Update Account Selection
           </MenuItem>
-          <MenuItem visible={ link.getIsPlaid() } onClick={ () => {} }>
+          <MenuItem visible={ link.getIsPlaid() } onClick={ handleTriggerResync }>
             <AutorenewOutlined className='mr-1 mb-0.5' />
             Manually Resync
           </MenuItem>

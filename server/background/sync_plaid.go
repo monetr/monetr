@@ -142,7 +142,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 		Where(`"plaid_link"."use_plaid_sync" = ?`, true).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
 		Where(`"link"."link_status" = ?`, models.LinkStatusSetup).
-		Where(`"link"."last_successful_update" < ?`, cutoff).
+		Where(`"link"."last_attempted_update" < ?`, cutoff).
 		Select(&links)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve links that need to by synced with plaid")
@@ -340,6 +340,20 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			return errors.Wrap(err, "failed to sync with plaid")
 		}
 
+		// If we received nothing to insert/update/remove then do nothing
+		if len(syncData.New)+len(syncData.Updated)+len(syncData.Deleted) == 0 {
+
+			link.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
+			if err = s.repo.UpdateLink(span.Context(), link); err != nil {
+				log.WithError(err).Error("failed to update link with last attempt timestamp")
+				return err
+			}
+
+			log.Info("no new data from plaid, nothing to be done")
+			return nil
+		}
+
+		// If we did receive something then log that and process it below.
 		if err = s.repo.RecordPlaidSync(
 			span.Context(),
 			*link.PlaidLinkId,
@@ -354,12 +368,6 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 		// Update the cursor incase we need to iterate again.
 		cursor = &syncData.NextCursor
-
-		// If we received nothing to insert/update/remove then do nothing
-		if len(syncData.New)+len(syncData.Updated)+len(syncData.Deleted) == 0 {
-			log.Info("no new data from plaid, nothing to be done")
-			return nil
-		}
 
 		plaidTransactions := append(syncData.New, syncData.Updated...)
 
@@ -648,6 +656,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		linkWasSetup = true
 	}
 	link.LastSuccessfulUpdate = myownsanity.TimeP(s.clock.Now().UTC())
+	link.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
 	if err = s.repo.UpdateLink(span.Context(), link); err != nil {
 		log.WithError(err).Error("failed to update link after transaction sync")
 		return err
