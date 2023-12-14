@@ -17,13 +17,13 @@ type SimilarTransactionGroup struct {
 }
 
 type SimilarTransactions_TFIDF_DBSCAN struct {
-	preprocessor *PreProcessor
+	preprocessor *TFIDF
 	dbscan       *DBSCAN
 }
 
 func NewSimilarTransactions_TFIDF_DBSCAN() SimilarTransactionDetection {
 	return &SimilarTransactions_TFIDF_DBSCAN{
-		preprocessor: &PreProcessor{
+		preprocessor: &TFIDF{
 			documents: make([]Document, 0, 500),
 			wc:        make(map[string]float64, 128),
 		},

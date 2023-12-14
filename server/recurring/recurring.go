@@ -10,7 +10,7 @@ import (
 
 type Detection struct {
 	timezone           *time.Location
-	preprocessor       *PreProcessor
+	preprocessor       *TFIDF
 	dbscan             *DBSCAN
 	latestObservedDate time.Time
 }
@@ -18,7 +18,7 @@ type Detection struct {
 func NewRecurringTransactionDetection(timezone *time.Location) *Detection {
 	return &Detection{
 		timezone: timezone,
-		preprocessor: &PreProcessor{
+		preprocessor: &TFIDF{
 			documents: make([]Document, 0, 500),
 			wc:        make(map[string]float64, 128),
 		},

@@ -51,20 +51,19 @@ type Document struct {
 	Valid       bool
 }
 
-type PreProcessor struct {
+type TFIDF struct {
 	documents []Document
-	// Word count
-	wc map[string]float64
+	wc        map[string]float64
 }
 
-func NewPreProcessor() *PreProcessor {
-	return &PreProcessor{
+func NewPreProcessor() *TFIDF {
+	return &TFIDF{
 		documents: []Document{},
 		wc:        map[string]float64{},
 	}
 }
 
-func (p *PreProcessor) indexWords() map[string]int {
+func (p *TFIDF) indexWords() map[string]int {
 	index := 0
 	result := make(map[string]int)
 	for word, count := range p.wc {
@@ -78,7 +77,7 @@ func (p *PreProcessor) indexWords() map[string]int {
 	return result
 }
 
-func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
+func (p *TFIDF) AddTransaction(txn *models.Transaction) {
 	words := CleanNameRegex(txn)
 	name := make([]string, 0, len(words))
 	wordCounts := make(map[string]float64, len(words))
@@ -109,7 +108,7 @@ func (p *PreProcessor) AddTransaction(txn *models.Transaction) {
 	})
 }
 
-func (p *PreProcessor) GetDatums() []Datum {
+func (p *TFIDF) GetDatums() []Datum {
 	datums := make([]Datum, 0, len(p.documents))
 	docCount := float64(len(p.documents))
 	idf := make(map[string]float64, len(p.wc))

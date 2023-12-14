@@ -20,7 +20,7 @@ func BenchmarkPreProcessor(b *testing.B) {
 
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		var processor = &PreProcessor{
+		var processor = &TFIDF{
 			documents: []Document{},
 			wc:        map[string]float64{},
 		}
@@ -39,7 +39,7 @@ func BenchmarkDBSCAN(b *testing.B) {
 	var data []models.Transaction
 	require.NoError(b, json.Unmarshal(fixtureJson, &data), "must be able to decode fixture data")
 
-	var processor = &PreProcessor{
+	var processor = &TFIDF{
 		documents: []Document{},
 		wc:        map[string]float64{},
 	}
@@ -61,7 +61,7 @@ func TestPreProcessor(t *testing.T) {
 	data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
 	//data := GetFixtures(t, "full sample.json")
-	var processor = &PreProcessor{
+	var processor = &TFIDF{
 		documents: []Document{},
 		wc:        map[string]float64{},
 	}
@@ -106,7 +106,7 @@ func TestParameters(t *testing.T) {
 	}
 	data := GetFixtures(t, "monetr_sample_data_1.json")
 	//data := GetFixtures(t, "Result_3.json")
-	var processor = &PreProcessor{
+	var processor = &TFIDF{
 		documents: []Document{},
 		wc:        map[string]float64{},
 	}
