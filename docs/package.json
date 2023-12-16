@@ -18,8 +18,8 @@
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "18.2.33",
-    "@types/react-dom": "18.2.14",
+    "@types/react": "18.2.45",
+    "@types/react-dom": "18.2.18",
     "autoprefixer": "10.4.16",
     "cheerio": "1.0.0-rc.12",
     "postcss": "8.4.31",
