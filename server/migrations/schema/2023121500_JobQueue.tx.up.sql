@@ -18,13 +18,11 @@ CREATE TABLE "jobs" (
 );
 
 CREATE TABLE "cron_jobs" (
-  cron_job_id   BIGSERIAL,
   queue         TEXT NOT NULL,
   cron_schedule TEXT NOT NULL,
   last_run_at   TIMESTAMP WITH TIME ZONE,
   next_run_at   TIMESTAMP WITH TIME ZONE NOT NULL,
 
-  CONSTRAINT pk_cron_jobs PRIMARY KEY (cron_job_id),
-  CONSTRAINT uq_cron_jobs UNIQUE (queue, cron_schedule)
+  CONSTRAINT pk_cron_jobs PRIMARY KEY (queue)
 );
 

@@ -27,6 +27,7 @@ type postgresJobProcessor struct {
 	state           uint32
 	shutdownThreads []chan chan struct{}
 	dispatch        chan *models.Job
+	cronJobQueues   []string
 	queues          []string
 	registeredJobs  map[string]postgresJobFunction
 	jobQuery        *pg.Query
@@ -53,7 +54,27 @@ func (p *postgresJobProcessor) RegisterJob(ctx context.Context, handler JobHandl
 	p.registeredJobs[handler.QueueName()] = p.buildJobExecutor(handler)
 	p.queues = append(p.queues, handler.QueueName())
 
-	// TODO Implement the job handler bois
+	// TODO Implement the job handler bois, also handle cron jobs
+
+	if p.configuration.Scheduler == config.BackgroundJobSchedulerInternal {
+		if scheduledJob, ok := handler.(ScheduledJobHandler); ok {
+			schedule := scheduledJob.DefaultSchedule()
+			log.WithField("schedule", schedule).Trace("job will be run on a schedule automatically")
+			// We use a special queue name to trigger the actual jobs.
+			schedulerName := scheduledJob.QueueName() + "CronJob"
+
+			p.cronJobQueues = append(p.cronJobQueues, schedulerName)
+			p.registeredJobs[schedulerName] = func(ctx context.Context, _ *models.Job) error {
+				span := sentry.StartSpan(
+					ctx,
+					"topic.process",
+					sentry.TransactionName(schedulerName),
+				)
+				defer span.Finish()
+				return scheduledJob.EnqueueTriggeredJob(span.Context(), p.enqueuer)
+			}
+		}
+	}
 
 	return nil
 }
@@ -61,6 +82,23 @@ func (p *postgresJobProcessor) RegisterJob(ctx context.Context, handler JobHandl
 func (p *postgresJobProcessor) Start() error {
 	if !atomic.CompareAndSwapUint32(&p.state, 0, 1) {
 		return errors.New("postgres job processor is either already started, or is in an invalid state")
+	}
+
+	{ // Clean up cron jobs that are not registered.
+		result, err := p.db.Model(new(models.Job)).
+			WhereIn(`"queue" NOT IN (?)`, p.cronJobQueues).
+			Delete()
+		if err != nil {
+			p.log.WithError(err).Error("failed to clean up old cron jobs from postgres")
+		} else if affected := result.RowsAffected(); affected > 0 {
+			p.log.Infof("removed %d outdated cron job(s) from postgres", affected)
+		} else {
+			p.log.Debug("no outdated cron jobs were removed")
+		}
+	}
+
+	{ // Insert the existing cron jobs or update the cron schedule.
+		// TODO Implement a way to provision the cron jobs.
 	}
 
 	// Setup the job query to be used by the consumer. It is built to only retrieve jobs for the queues that have been
