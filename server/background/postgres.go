@@ -181,11 +181,42 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 	}
 }
 
+func (p *postgresJobProcessor) markJobStatus(ctx context.Context, job *models.Job, jobError error) {
+	log := p.log.
+		WithContext(ctx).
+		WithFields(logrus.Fields{
+			"jobId": job.JobId,
+			"queue": job.Queue,
+		})
+
+	if jobError != nil {
+		log.Debug("marking job as failed")
+		_, err := p.db.ModelContext(ctx, job).
+			Set(`"status" = ?`, models.FailedJobStatus).
+			WherePK().
+			Update(&job)
+		if err != nil {
+			log.WithError(err).Error("failed to update job status")
+		}
+
+		return
+	}
+
+	log.Debug("marking job as complete")
+	_, err := p.db.ModelContext(ctx, job).
+		Set(`"status" = ?`, models.CompletedJobStatus).
+		WherePK().
+		Update(&job)
+	if err != nil {
+		log.WithError(err).Error("failed to update job status")
+	}
+}
+
 func (p *postgresJobProcessor) buildJobExecutor(handler JobHandler) postgresJobFunction {
 	return func(ctx context.Context, job *models.Job) (err error) {
 		// We want to have sentry tracking jobs as they are being processed. In order to do this we need to inject a
 		// sentry hub into the context and create a new span using that context.
-		highContext := sentry.SetHubOnContext(context.Background(), sentry.CurrentHub().Clone())
+		highContext := sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
 		span := sentry.StartSpan(highContext, "topic.process", sentry.TransactionName(handler.QueueName()))
 		span.Description = handler.QueueName()
 		jobLog := p.log.WithContext(span.Context())
@@ -216,6 +247,8 @@ func (p *postgresJobProcessor) buildJobExecutor(handler JobHandler) postgresJobF
 					hub.CaptureException(err)
 				}
 			}
+
+			p.markJobStatus(span.Context(), job, err)
 		}()
 		defer span.Finish()
 
