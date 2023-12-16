@@ -27,7 +27,7 @@ type postgresJobProcessor struct {
 	state           uint32
 	shutdownThreads []chan chan struct{}
 	dispatch        chan *models.Job
-	cronJobQueues   []string
+	cronJobQueues   []ScheduledJobHandler
 	queues          []string
 	registeredJobs  map[string]postgresJobFunction
 	jobQuery        *pg.Query
@@ -39,7 +39,10 @@ type postgresJobProcessor struct {
 	marshal         JobMarshaller
 }
 
-func (p *postgresJobProcessor) RegisterJob(ctx context.Context, handler JobHandler) error {
+func (p *postgresJobProcessor) RegisterJob(
+	ctx context.Context,
+	handler JobHandler,
+) error {
 	if atomic.LoadUint32(&p.state) != 0 {
 		return errors.New("jobs cannot be added to the postgres job processor after it has been started or closed")
 	}
@@ -48,7 +51,10 @@ func (p *postgresJobProcessor) RegisterJob(ctx context.Context, handler JobHandl
 	log.Trace("registering job handler")
 
 	if _, ok := p.registeredJobs[handler.QueueName()]; ok {
-		return errors.Errorf("job has already been registered: %s", handler.QueueName())
+		return errors.Errorf(
+			"job has already been registered: %s",
+			handler.QueueName(),
+		)
 	}
 
 	p.registeredJobs[handler.QueueName()] = p.buildJobExecutor(handler)
@@ -59,12 +65,16 @@ func (p *postgresJobProcessor) RegisterJob(ctx context.Context, handler JobHandl
 	if p.configuration.Scheduler == config.BackgroundJobSchedulerInternal {
 		if scheduledJob, ok := handler.(ScheduledJobHandler); ok {
 			schedule := scheduledJob.DefaultSchedule()
-			log.WithField("schedule", schedule).Trace("job will be run on a schedule automatically")
+			log.WithField("schedule", schedule).
+				Trace("job will be run on a schedule automatically")
 			// We use a special queue name to trigger the actual jobs.
 			schedulerName := scheduledJob.QueueName() + "CronJob"
 
-			p.cronJobQueues = append(p.cronJobQueues, schedulerName)
-			p.registeredJobs[schedulerName] = func(ctx context.Context, _ *models.Job) error {
+			p.cronJobQueues = append(p.cronJobQueues, scheduledJob)
+			p.registeredJobs[schedulerName] = func(
+				ctx context.Context,
+				_ *models.Job,
+			) error {
 				span := sentry.StartSpan(
 					ctx,
 					"topic.process",
@@ -84,25 +94,12 @@ func (p *postgresJobProcessor) Start() error {
 		return errors.New("postgres job processor is either already started, or is in an invalid state")
 	}
 
-	{ // Clean up cron jobs that are not registered.
-		result, err := p.db.Model(new(models.Job)).
-			WhereIn(`"queue" NOT IN (?)`, p.cronJobQueues).
-			Delete()
-		if err != nil {
-			p.log.WithError(err).Error("failed to clean up old cron jobs from postgres")
-		} else if affected := result.RowsAffected(); affected > 0 {
-			p.log.Infof("removed %d outdated cron job(s) from postgres", affected)
-		} else {
-			p.log.Debug("no outdated cron jobs were removed")
-		}
+	if err := p.prepareCronJobTable(); err != nil {
+		return err
 	}
 
-	{ // Insert the existing cron jobs or update the cron schedule.
-		// TODO Implement a way to provision the cron jobs.
-	}
-
-	// Setup the job query to be used by the consumer. It is built to only retrieve jobs for the queues that have been
-	// reigstered.
+	// Setup the job query to be used by the consumer. It is built to only
+	// retrieve jobs for the queues that have been reigstered.
 	p.jobQuery = p.db.Model(new(models.Job)).
 		Column("job_id").
 		Where(`"status" = ?`, models.PendingJobStatus).
@@ -126,6 +123,69 @@ func (p *postgresJobProcessor) Start() error {
 	return nil
 }
 
+func (p *postgresJobProcessor) getCronJobQueueName(handler ScheduledJobHandler) string {
+	return fmt.Sprintf("%sCronJob", handler.QueueName())
+}
+
+func (p *postgresJobProcessor) prepareCronJobTable() error {
+	cronJobQueueNames := make([]string, len(p.cronJobQueues))
+	for _, cronJob := range p.cronJobQueues {
+		cronJobQueueNames = append(cronJobQueueNames, p.getCronJobQueueName(cronJob))
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return p.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
+		{ // Clean up cron jobs that are not registered.
+			result, err := tx.Model(new(models.Job)).
+				WhereIn(`"queue" NOT IN (?)`, cronJobQueueNames).
+				Delete()
+			if err != nil {
+				return errors.Wrap(err, "failed to clean up old cron jobs from postgres")
+			} else if affected := result.RowsAffected(); affected > 0 {
+				p.log.
+					Infof("removed %d outdated cron job(s) from postgres", affected)
+			} else {
+				p.log.
+					Debug("no outdated cron jobs were removed")
+			}
+		}
+
+		for _, cronJob := range p.cronJobQueues {
+			queue := p.getCronJobQueueName(cronJob)
+			schedule := cronJob.DefaultSchedule()
+			log := p.log.WithFields(logrus.Fields{
+				"queue":    queue,
+				"schedule": schedule,
+			})
+			log.Debug("upserting cron job into postgres")
+			nextRunAt := time.Now() // TODO Calculate next
+			result, err := tx.ModelContext(ctx, &models.CronJob{
+				Queue:        queue,
+				CronSchedule: schedule,
+				LastRunAt:    nil,
+				NextRunAt:    nextRunAt,
+			}).
+				OnConflict(`("queue") DO UPDATE`).
+				Set(`"cron_schedule" = ?`, cronJob.DefaultSchedule()).
+				Set(`"next_run_at" = ?`, nextRunAt).
+				Insert()
+			if err != nil {
+				return errors.Wrapf(err, "failed to provision cron job: %s", cronJob)
+			}
+
+			if result.RowsAffected() == 0 {
+				log.Trace("cron job already exists and did not need updating")
+			} else {
+				log.Debug("cron job was updated")
+			}
+		}
+
+		return nil
+	})
+}
+
 func (p *postgresJobProcessor) Close() error {
 	if !atomic.CompareAndSwapUint32(&p.state, 1, 2) {
 		return errors.New("postgres job processor is either already closed, or is in an invalid state")
@@ -144,6 +204,10 @@ func (p *postgresJobProcessor) Close() error {
 	// TODO Add timeout
 	for i := 0; i < len(p.shutdownThreads); i++ {
 		<-shutdownChannel
+	}
+	close(shutdownChannel)
+	for _, channel := range p.shutdownThreads {
+		close(channel)
 	}
 
 	return nil
@@ -207,9 +271,13 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 
 			executor, ok := p.registeredJobs[job.Queue]
 			if !ok {
-				panic(fmt.Sprintf("could not execute job with queue name: %s no handler registered", job.Queue))
+				panic(fmt.Sprintf(
+					"could not execute job with queue name: %s no handler registered",
+					job.Queue,
+				))
 			}
 
+			// Execute the job with a 1 minute timeout.
 			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 			if err := executor(ctx, job); err != nil {
 				log.WithError(err).Error("failed to execute job")
@@ -219,7 +287,11 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 	}
 }
 
-func (p *postgresJobProcessor) markJobStatus(ctx context.Context, job *models.Job, jobError error) {
+func (p *postgresJobProcessor) markJobStatus(
+	ctx context.Context,
+	job *models.Job,
+	jobError error,
+) {
 	log := p.log.
 		WithContext(ctx).
 		WithFields(logrus.Fields{
@@ -250,12 +322,18 @@ func (p *postgresJobProcessor) markJobStatus(ctx context.Context, job *models.Jo
 	}
 }
 
-func (p *postgresJobProcessor) buildJobExecutor(handler JobHandler) postgresJobFunction {
+func (p *postgresJobProcessor) buildJobExecutor(
+	handler JobHandler,
+) postgresJobFunction {
 	return func(ctx context.Context, job *models.Job) (err error) {
 		// We want to have sentry tracking jobs as they are being processed. In order to do this we need to inject a
 		// sentry hub into the context and create a new span using that context.
 		highContext := sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
-		span := sentry.StartSpan(highContext, "topic.process", sentry.TransactionName(handler.QueueName()))
+		span := sentry.StartSpan(
+			highContext,
+			"topic.process",
+			sentry.TransactionName(handler.QueueName()),
+		)
 		span.Description = handler.QueueName()
 		jobLog := p.log.WithContext(span.Context())
 		hub := sentry.GetHubFromContext(span.Context())
@@ -292,18 +370,8 @@ func (p *postgresJobProcessor) buildJobExecutor(handler JobHandler) postgresJobF
 
 		jobLog.Trace("handling job")
 
-		var data []byte
-		// TODO Implement arguments?
-		// if argsString, ok := job.Args["args"].(string); ok {
-		// 	data, err = hex.DecodeString(argsString)
-		// 	if err = errors.Wrap(err, "failed to decode args string"); err != nil {
-		// 		jobLog.WithError(err).Error("failed to decode arguments for job")
-		// 		return err
-		// 	}
-		// }
-
-		err = handler.HandleConsumeJob(span.Context(), data) // Set err outright to make sentry reporting easier.
+		// Set err outright to make sentry reporting easier.
+		err = handler.HandleConsumeJob(span.Context(), job.Input)
 		return
 	}
-
 }
