@@ -390,14 +390,6 @@ const (
 	// deprecated in the future though as it seems the library supporting it is not really maintained anymore. If Redis
 	// is enabled but RabbitMQ is not, then this is the default job engine if none is specified.
 	BackgroundJobEngineGoCraftWork BackgroundJobEngine = "gocraft"
-	// BackgroundJobEngineRabbitMQ is ideal for high-availability deployments. It allows many instances of monetr to
-	// process background jobs while being reasonably tolerant to individual monetr failures or RabbitMQ failures. If
-	// RabbitMQ is enabled, then this engine is selected by default if no engine is specified. This engine **requires**
-	// an external job scheduler. Since there is no logic implemented for leader-election for RabbitMQ there is no
-	// internal way to schedule jobs automatically. If you are deploying monetr to Kubernetes, then the CronJob resource
-	// is the recommended way to schedule jobs. A CronJob should be created for each scheduled job type.
-	// **NOT YET IMPLEMENTED**
-	BackgroundJobEngineRabbitMQ BackgroundJobEngine = "rabbitmq"
 	// BackgroundJobEnginePostgreSQL might be another option for self-hosted deployments. It allows for multiple
 	// replicas of monetr to be deployed and scaled independently. Allowing for a somewhat high-availability deployment.
 	// This job engine will be built out in the future, but has some downsides as it will create a not-insignificant

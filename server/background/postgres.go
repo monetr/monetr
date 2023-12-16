@@ -15,9 +15,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	postgresJobQueueUninitialized = 0
+	postgresJobQueueRunning       = 1
+	postgresJobQueueStopped       = 2
+)
+
 type postgresJobEnqueuer struct {
 	log     *logrus.Entry
-	db      *pg.DB
+	db      pg.DBI
 	marshal JobMarshaller
 }
 
@@ -31,19 +37,41 @@ type postgresJobProcessor struct {
 	queues          []string
 	registeredJobs  map[string]postgresJobFunction
 	jobQuery        *pg.Query
-	clock           clock.Clock
-	configuration   config.BackgroundJobs
-	log             *logrus.Entry
-	db              *pg.DB
-	enqueuer        JobEnqueuer
-	marshal         JobMarshaller
+
+	clock         clock.Clock
+	configuration config.BackgroundJobs
+	log           *logrus.Entry
+	db            pg.DBI
+	enqueuer      JobEnqueuer
+	marshal       JobMarshaller
+}
+
+func NewPostgresJobProcessor(
+	log *logrus.Entry,
+	configuration config.BackgroundJobs,
+	db pg.DBI,
+	enqueuer JobEnqueuer,
+) *postgresJobProcessor {
+	return &postgresJobProcessor{
+		shutdownThreads: []chan chan struct{}{},
+		dispatch:        make(chan *models.Job),
+		cronJobQueues:   []ScheduledJobHandler{},
+		queues:          []string{},
+		registeredJobs:  map[string]postgresJobFunction{},
+		clock:           nil,
+		configuration:   configuration,
+		log:             log,
+		db:              db,
+		enqueuer:        enqueuer,
+		marshal:         DefaultJobMarshaller,
+	}
 }
 
 func (p *postgresJobProcessor) RegisterJob(
 	ctx context.Context,
 	handler JobHandler,
 ) error {
-	if atomic.LoadUint32(&p.state) != 0 {
+	if atomic.LoadUint32(&p.state) != postgresJobQueueUninitialized {
 		return errors.New("jobs cannot be added to the postgres job processor after it has been started or closed")
 	}
 
@@ -60,15 +88,13 @@ func (p *postgresJobProcessor) RegisterJob(
 	p.registeredJobs[handler.QueueName()] = p.buildJobExecutor(handler)
 	p.queues = append(p.queues, handler.QueueName())
 
-	// TODO Implement the job handler bois, also handle cron jobs
-
 	if p.configuration.Scheduler == config.BackgroundJobSchedulerInternal {
 		if scheduledJob, ok := handler.(ScheduledJobHandler); ok {
 			schedule := scheduledJob.DefaultSchedule()
 			log.WithField("schedule", schedule).
 				Trace("job will be run on a schedule automatically")
 			// We use a special queue name to trigger the actual jobs.
-			schedulerName := scheduledJob.QueueName() + "CronJob"
+			schedulerName := p.getCronJobQueueName(scheduledJob)
 
 			p.cronJobQueues = append(p.cronJobQueues, scheduledJob)
 			p.registeredJobs[schedulerName] = func(
@@ -90,7 +116,11 @@ func (p *postgresJobProcessor) RegisterJob(
 }
 
 func (p *postgresJobProcessor) Start() error {
-	if !atomic.CompareAndSwapUint32(&p.state, 0, 1) {
+	if !atomic.CompareAndSwapUint32(
+		&p.state,
+		postgresJobQueueUninitialized,
+		postgresJobQueueRunning,
+	) {
 		return errors.New("postgres job processor is either already started, or is in an invalid state")
 	}
 
@@ -123,7 +153,11 @@ func (p *postgresJobProcessor) Start() error {
 	return nil
 }
 
-func (p *postgresJobProcessor) getCronJobQueueName(handler ScheduledJobHandler) string {
+// getCronJobQueueName is used to make the cron job queue names consistent
+// throughout this code.
+func (p *postgresJobProcessor) getCronJobQueueName(
+	handler ScheduledJobHandler,
+) string {
 	return fmt.Sprintf("%sCronJob", handler.QueueName())
 }
 
@@ -187,7 +221,11 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 }
 
 func (p *postgresJobProcessor) Close() error {
-	if !atomic.CompareAndSwapUint32(&p.state, 1, 2) {
+	if !atomic.CompareAndSwapUint32(
+		&p.state,
+		postgresJobQueueRunning,
+		postgresJobQueueStopped,
+	) {
 		return errors.New("postgres job processor is either already closed, or is in an invalid state")
 	}
 
@@ -216,6 +254,7 @@ func (p *postgresJobProcessor) Close() error {
 func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
+		// TODO, maybe implement pubsub here as well instead of polling?
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down job consumer")
