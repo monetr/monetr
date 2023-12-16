@@ -2,16 +2,26 @@ package models
 
 import "time"
 
+type JobStatus string
+
+const (
+	PendingJobStatus    JobStatus = "pending"
+	ProcessingJobStatus JobStatus = "processing"
+	FailedJobStatus     JobStatus = "failed"
+	CompletedJobStatus  JobStatus = "completed"
+)
+
 type Job struct {
 	tableName string `pg:"jobs"`
 
-	JobId      string                 `json:"jobId" pg:"job_id,notnull,pk"`
-	AccountId  uint64                 `json:"-" pg:"account_id,on_delete:CASCADE"`
-	Account    *Account               `json:"-" pg:"rel:has-one"`
-	Name       string                 `json:"name" pg:"name,notnull"`
-	Args       map[string]interface{} `json:"arguments" pg:"arguments,type:jsonb"`
-	EnqueuedAt time.Time              `json:"enqueuedAt" pg:"enqueued_at,notnull"`
-	StartedAt  *time.Time             `json:"startedAt" pg:"started_at"`
-	FinishedAt *time.Time             `json:"finishedAt" pg:"finished_at"`
-	Retries    int                    `json:"retries" pg:"retries,use_zero"`
+	JobId       uint64     `json:"-" pg:"job_id,notnull,pk,type:'bigserial'"`
+	Queue       string     `json:"-" pg:"queue,notnull"`
+	Signature   string     `json:"-" pg:"signature,notnull"`
+	Input       []byte     `json:"-" pg:"input"`
+	Output      []byte     `json:"-" pg:"output"`
+	Status      JobStatus  `json:"-" pg:"status,notnull"`
+	CreatedAt   time.Time  `json:"-" pg:"created_at,notnull"`
+	UpdatedAt   time.Time  `json:"-" pg:"updated_at,notnull"`
+	StartedAt   *time.Time `json:"-" pg:"started_at"`
+	CompletedAt *time.Time `json:"-" pg:"completed_at"`
 }
