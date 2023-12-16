@@ -2,7 +2,9 @@ package background
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
+	"hash/fnv"
 	"sync/atomic"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -24,7 +27,75 @@ const (
 type postgresJobEnqueuer struct {
 	log     *logrus.Entry
 	db      pg.DBI
+	clock   clock.Clock
 	marshal JobMarshaller
+}
+
+func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, arguments interface{}) error {
+	span := sentry.StartSpan(ctx, "topic.send")
+	defer span.Finish()
+	span.Description = "postgres Enqueue"
+	span.SetTag("queue", queue)
+	span.Data = map[string]interface{}{
+		"queue":     queue,
+		"arguments": arguments,
+	}
+
+	crumbs.Debug(
+		span.Context(),
+		"Enqueueing job for background processing",
+		map[string]interface{}{
+			"queue":     queue,
+			"arguments": arguments,
+		},
+	)
+
+	log := p.log.WithContext(span.Context()).
+		WithField("queue", queue)
+
+	log.Debug("enqueuing job to be run")
+
+	encodedArguments, err := p.marshal(arguments)
+	if err = errors.Wrap(err, "failed to marshal arguments"); err != nil {
+		return err
+	}
+
+	timestamp := p.clock.Now().UTC()
+
+	var signature string
+	{ // Build the signature using a hash of the arguments and a truncated timestamp.
+		truncatedTimestamp := timestamp.Truncate(time.Minute)
+		signatureBuilder := fnv.New32()
+		signatureBuilder.Write(encodedArguments)
+		signatureBuilder.Write([]byte(truncatedTimestamp.String()))
+		signature = hex.EncodeToString(signatureBuilder.Sum(nil))
+	}
+
+	job := models.Job{
+		Queue:       queue,
+		Signature:   signature,
+		Input:       encodedArguments,
+		Output:      nil,
+		Status:      models.PendingJobStatus,
+		CreatedAt:   timestamp,
+		UpdatedAt:   timestamp,
+		StartedAt:   nil,
+		CompletedAt: nil,
+	}
+	_, err = p.db.ModelContext(span.Context(), &job).Insert(&job)
+	if err != nil {
+		// TODO Check to see if this is a conflict error, we don't want to enqueue
+		// the same job if it is already in the queue. It will conflict on the
+		// signature column if that is the case.
+		return errors.Wrap(err, "failed to enqueue job for postgres")
+	}
+
+	log.WithFields(logrus.Fields{
+		"jobId":     job.JobId,
+		"signature": signature,
+	}).Debug("successfully enqueued job")
+
+	return nil
 }
 
 type postgresJobFunction func(ctx context.Context, job *models.Job) error
@@ -122,6 +193,12 @@ func (p *postgresJobProcessor) Start() error {
 		postgresJobQueueRunning,
 	) {
 		return errors.New("postgres job processor is either already started, or is in an invalid state")
+	}
+
+	if len(p.registeredJobs) == 0 {
+		// Reset the state so start could be called again.
+		atomic.StoreUint32(&p.state, postgresJobQueueUninitialized)
+		return errors.New("cannot start processor with no jobs registered")
 	}
 
 	if err := p.prepareCronJobTable(); err != nil {

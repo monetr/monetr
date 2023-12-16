@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/stretchr/testify/assert"
@@ -32,13 +31,16 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
 		job := models.Job{
-			JobId:      gofakeit.UUID(),
-			Name:       "test job",
-			Args:       nil,
-			EnqueuedAt: time.Now().Add(-30 * 24 * time.Hour),
-			StartedAt:  nil,
-			FinishedAt: nil,
-			Retries:    0,
+			JobId:       12345,
+			Queue:       "test queue",
+			Signature:   "abc123",
+			Input:       []byte{},
+			Output:      nil,
+			Status:      models.PendingJobStatus,
+			CreatedAt:   time.Now().Add(-30 * 24 * time.Hour),
+			UpdatedAt:   time.Now().Add(-30 * 24 * time.Hour),
+			StartedAt:   nil,
+			CompletedAt: nil,
 		}
 		_, err := db.Model(&job).Insert(&job)
 		assert.NoError(t, err, "must be able to seed the test job")
@@ -65,13 +67,16 @@ func TestCleanupJobsJob_Run(t *testing.T) {
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 
 		job := models.Job{
-			JobId:      gofakeit.UUID(),
-			Name:       "test job",
-			Args:       nil,
-			EnqueuedAt: time.Now().Add(-5 * 24 * time.Hour),
-			StartedAt:  nil,
-			FinishedAt: nil,
-			Retries:    0,
+			JobId:       12345,
+			Queue:       "test queue",
+			Signature:   "abc123",
+			Input:       []byte{},
+			Output:      nil,
+			Status:      models.PendingJobStatus,
+			CreatedAt:   time.Now().Add(-5 * 24 * time.Hour),
+			UpdatedAt:   time.Now().Add(-5 * 24 * time.Hour),
+			StartedAt:   nil,
+			CompletedAt: nil,
 		}
 		_, err := db.Model(&job).Insert(&job)
 		assert.NoError(t, err, "must be able to seed the test job")

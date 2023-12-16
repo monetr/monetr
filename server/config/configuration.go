@@ -487,8 +487,6 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 				log.Fatal("invalid scheduler provided to configuration for background jobs")
 				return
 			}
-		case BackgroundJobEngineRabbitMQ:
-			log.Fatal("RabbitMQ job scheduling is not yet implemented")
 		}
 	}
 
