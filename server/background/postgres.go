@@ -101,13 +101,14 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 type postgresJobFunction func(ctx context.Context, job *models.Job) error
 
 type postgresJobProcessor struct {
-	state           uint32
-	shutdownThreads []chan chan struct{}
-	dispatch        chan *models.Job
-	cronJobQueues   []ScheduledJobHandler
-	queues          []string
-	registeredJobs  map[string]postgresJobFunction
-	jobQuery        *pg.Query
+	state            uint32
+	availableThreads chan struct{}
+	shutdownThreads  []chan chan struct{}
+	dispatch         chan *models.Job
+	cronJobQueues    []ScheduledJobHandler
+	queues           []string
+	registeredJobs   map[string]postgresJobFunction
+	jobQuery         *pg.Query
 
 	clock         clock.Clock
 	configuration config.BackgroundJobs
@@ -216,6 +217,7 @@ func (p *postgresJobProcessor) Start() error {
 		Limit(1)
 
 	numberOfWorkers := 4
+	p.availableThreads = make(chan struct{}, numberOfWorkers)
 	p.shutdownThreads = make([]chan chan struct{}, numberOfWorkers+1)
 	// Start the worker threads.
 	for i := 0; i < 4; i++ {
@@ -332,6 +334,18 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
 		// TODO, maybe implement pubsub here as well instead of polling?
+
+		// Block if there are no available threads but allow the consumer to be
+		// shutdown while we are waiting.
+		select {
+		case promise := <-shutdown:
+			p.log.Debug("shutting down job consumer")
+			promise <- struct{}{}
+			ticker.Stop()
+			return
+		case <-p.availableThreads:
+		}
+
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down job consumer")
@@ -373,6 +387,8 @@ func (p *postgresJobProcessor) consumeJobMaybe() (*models.Job, error) {
 
 func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 	for {
+		// Tell the consumer that a worker is available.
+		p.availableThreads <- struct{}{}
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down worker thread")
