@@ -15,6 +15,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
+	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,6 +30,19 @@ type postgresJobEnqueuer struct {
 	db      pg.DBI
 	clock   clock.Clock
 	marshal JobMarshaller
+}
+
+func NewPostgresJobEnqueuer(
+	log *logrus.Entry,
+	db pg.DBI,
+	clock clock.Clock,
+) *postgresJobEnqueuer {
+	return &postgresJobEnqueuer{
+		log:     log,
+		db:      db,
+		clock:   clock,
+		marshal: DefaultJobMarshaller,
+	}
 }
 
 func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, arguments interface{}) error {
@@ -121,6 +135,7 @@ type postgresJobProcessor struct {
 func NewPostgresJobProcessor(
 	log *logrus.Entry,
 	configuration config.BackgroundJobs,
+	clock clock.Clock,
 	db pg.DBI,
 	enqueuer JobEnqueuer,
 ) *postgresJobProcessor {
@@ -130,7 +145,7 @@ func NewPostgresJobProcessor(
 		cronJobQueues:   []ScheduledJobHandler{},
 		queues:          []string{},
 		registeredJobs:  map[string]postgresJobFunction{},
-		clock:           nil,
+		clock:           clock,
 		configuration:   configuration,
 		log:             log,
 		db:              db,
@@ -268,12 +283,19 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 		for _, cronJob := range p.cronJobQueues {
 			queue := p.getCronJobQueueName(cronJob)
 			schedule := cronJob.DefaultSchedule()
+
+			cronSchedule, err := cron.Parse(schedule)
+			if err != nil {
+				return errors.Wrapf(err, "failed to parse cron schedule for job: %s - %s", queue, schedule)
+			}
+			nextRunAt := cronSchedule.Next(p.clock.Now().UTC())
+
 			log := p.log.WithFields(logrus.Fields{
 				"queue":    queue,
 				"schedule": schedule,
+				"next":     nextRunAt,
 			})
 			log.Debug("upserting cron job into postgres")
-			nextRunAt := time.Now() // TODO Calculate next
 			result, err := tx.ModelContext(ctx, &models.CronJob{
 				Queue:        queue,
 				CronSchedule: schedule,
