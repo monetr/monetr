@@ -78,7 +78,7 @@ func (c *CleanupJobsJob) Run(ctx context.Context) error {
 	log.Info("getting ready to clean up the jobs table")
 
 	result, err := c.db.ModelContext(span.Context(), &models.Job{}).
-		Where(`"job"."enqueued_at" < ?`, time.Now().Add(-15*24*time.Hour)).
+		Where(`"job"."created_at" < ?`, time.Now().Add(-15*24*time.Hour)).
 		Delete()
 	if err = errors.Wrap(err, "failed to cleanup old jobs from the jobs table"); err != nil {
 		log.WithError(err).Errorf("failed to cleanup")
