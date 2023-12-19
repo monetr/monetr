@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash/fnv"
+	"sort"
 	"sync/atomic"
 	"time"
 
@@ -123,13 +124,12 @@ type postgresJobProcessor struct {
 	queues           []string
 	registeredJobs   map[string]postgresJobFunction
 	jobQuery         *pg.Query
-
-	clock         clock.Clock
-	configuration config.BackgroundJobs
-	log           *logrus.Entry
-	db            pg.DBI
-	enqueuer      JobEnqueuer
-	marshal       JobMarshaller
+	clock            clock.Clock
+	configuration    config.BackgroundJobs
+	log              *logrus.Entry
+	db               pg.DBI
+	enqueuer         JobEnqueuer
+	marshal          JobMarshaller
 }
 
 func NewPostgresJobProcessor(
@@ -382,6 +382,43 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 			}
 
 			p.dispatch <- job
+		}
+	}
+}
+
+func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
+	schedules := make([]cron.Schedule, len(p.cronJobQueues))
+	for i, queue := range p.cronJobQueues {
+		schedule, err := cron.Parse(queue.DefaultSchedule())
+		if err != nil {
+			panic("cron schedule is not valid, job processor should have have started")
+		}
+
+		schedules[i] = schedule
+	}
+
+	for {
+		now := p.clock.Now()
+		nextTimes := make([]time.Time, len(schedules))
+		for i := range schedules {
+			nextTimes[i] = schedules[i].Next(now)
+		}
+		// Sort the next times
+		sort.Slice(nextTimes, func(i, j int) bool {
+			return nextTimes[i].Before(nextTimes[j])
+		})
+
+		sleep := nextTimes[0].Sub(now)
+
+		timer := time.NewTimer(sleep)
+		select {
+		case promise := <-shutdown:
+			p.log.Debug("shutting down job consumer")
+			promise <- struct{}{}
+			timer.Stop()
+			return
+		case <-timer.C:
+			// Consume cron job
 		}
 	}
 }
