@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/stretchr/testify/assert"
@@ -11,6 +12,7 @@ import (
 
 func TestPostgresJobProcessor_RegisterJob(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
 		configuration := config.BackgroundJobs{
@@ -19,7 +21,7 @@ func TestPostgresJobProcessor_RegisterJob(t *testing.T) {
 			JobSchedule: map[string]string{},
 		}
 
-		processor := NewPostgresJobProcessor(log, configuration, db, nil)
+		processor := NewPostgresJobProcessor(log, configuration, clock, db, nil)
 
 		testHandler := NewTestJobHandler(
 			t,
@@ -40,6 +42,7 @@ func TestPostgresJobProcessor_RegisterJob(t *testing.T) {
 	})
 
 	t.Run("cant register duplicates", func(t *testing.T) {
+		clock := clock.NewMock()
 		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
 		log := testutils.GetLog(t)
 		configuration := config.BackgroundJobs{
@@ -48,7 +51,7 @@ func TestPostgresJobProcessor_RegisterJob(t *testing.T) {
 			JobSchedule: map[string]string{},
 		}
 
-		processor := NewPostgresJobProcessor(log, configuration, db, nil)
+		processor := NewPostgresJobProcessor(log, configuration, clock, db, nil)
 
 		testHandler := NewTestJobHandler(
 			t,
