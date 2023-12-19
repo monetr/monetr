@@ -27,7 +27,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.6
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/mileusna/useragent v1.3.4
-	github.com/nleeper/goment v1.4.4
 	github.com/nyaruka/phonenumbers v1.1.8
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v14 v14.0.0
@@ -114,7 +113,6 @@ require (
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/tkuchiki/go-timezone v0.2.0 // indirect
 	github.com/tmthrgd/go-hex v0.0.0-20190904060850-447a3041c3bc // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.40.0 // indirect
