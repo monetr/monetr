@@ -71,8 +71,7 @@ func TestPostFundingSchedules(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		timezone := testutils.MustEz(t, user.Account.GetTimezone)
-		rule := testutils.Must(t, models.NewRule, "FREQ=WEEKLY;BYDAY=FR")
-		rule.DTStart(util.Midnight(app.Clock.Now().In(timezone).Add(-30*24*time.Hour), timezone)) // Force the Rule to be in the correct TZ.
+		rule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=WEEKLY;BYDAY=FR")
 		nextFriday := rule.After(app.Clock.Now(), false)
 		assert.Greater(t, nextFriday, app.Clock.Now(), "next friday should be in the future relative to now")
 		nextFriday = util.Midnight(nextFriday, timezone)

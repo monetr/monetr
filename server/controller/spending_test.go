@@ -142,8 +142,7 @@ func TestPostSpending(t *testing.T) {
 		{ // Create an expense
 			now := time.Now()
 			timezone := testutils.MustEz(t, user.Account.GetTimezone)
-			rule := testutils.Must(t, models.NewRule, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
-			rule.DTStart(util.Midnight(now, timezone)) // Force the Rule to be in the correct TZ.
+			rule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
 			nextRecurrence := rule.After(now, false)
 			assert.Greater(t, nextRecurrence, now, "first of the next month should be relative to now")
 			nextRecurrence = util.Midnight(nextRecurrence, timezone)
