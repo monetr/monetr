@@ -25,7 +25,7 @@ RUN make monetr-release
 
 FROM debian:12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      tzdata=2023c-5 \
+      tzdata=2023c-5+deb12u1 \
       ca-certificates=20230311 \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
