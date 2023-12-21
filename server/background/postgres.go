@@ -235,7 +235,7 @@ func (p *postgresJobProcessor) Start() error {
 	p.availableThreads = make(chan struct{}, numberOfWorkers)
 	p.shutdownThreads = make([]chan chan struct{}, numberOfThreads)
 	// Start the worker threads.
-	for i := 0; i < 4; i++ {
+	for i := 0; i < numberOfWorkers; i++ {
 		p.shutdownThreads[i] = make(chan chan struct{})
 		go p.worker(p.shutdownThreads[i])
 	}
@@ -259,7 +259,7 @@ func (p *postgresJobProcessor) Start() error {
 func (p *postgresJobProcessor) getCronJobQueueName(
 	handler ScheduledJobHandler,
 ) string {
-	return fmt.Sprintf("%sCronJob", handler.QueueName())
+	return fmt.Sprintf("%s::CronJob", handler.QueueName())
 }
 
 func (p *postgresJobProcessor) prepareCronJobTable() error {
