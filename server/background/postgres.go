@@ -21,6 +21,10 @@ import (
 )
 
 const (
+	numberOfPostgresQueueWorkers = 4
+)
+
+const (
 	postgresJobQueueUninitialized = 0
 	postgresJobQueueRunning       = 1
 	postgresJobQueueStopped       = 2
@@ -79,7 +83,7 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 
 	var signature string
 	{ // Build the signature using a hash of the arguments and a truncated timestamp.
-		truncatedTimestamp := timestamp.Truncate(time.Minute)
+		truncatedTimestamp := timestamp.Truncate(time.Second)
 		signatureBuilder := fnv.New32()
 		signatureBuilder.Write(encodedArguments)
 		signatureBuilder.Write([]byte(truncatedTimestamp.String()))
@@ -120,6 +124,7 @@ type postgresJobProcessor struct {
 	availableThreads chan struct{}
 	shutdownThreads  []chan chan struct{}
 	dispatch         chan *models.Job
+	trigger          chan struct{}
 	cronJobQueues    []ScheduledJobHandler
 	queues           []string
 	registeredJobs   map[string]postgresJobFunction
@@ -142,6 +147,7 @@ func NewPostgresJobProcessor(
 	return &postgresJobProcessor{
 		shutdownThreads: []chan chan struct{}{},
 		dispatch:        make(chan *models.Job),
+		trigger:         make(chan struct{}),
 		cronJobQueues:   []ScheduledJobHandler{},
 		queues:          []string{},
 		registeredJobs:  map[string]postgresJobFunction{},
@@ -227,22 +233,38 @@ func (p *postgresJobProcessor) Start() error {
 		Column("job_id").
 		Where(`"status" = ?`, models.PendingJobStatus).
 		WhereIn(`"queue" IN (?)`, p.queues).
-		Order(`"created_at" ASC`).
+		Order(`created_at ASC`).
 		For(`UPDATE SKIP LOCKED`).
 		Limit(1)
 
-	numberOfWorkers := 4
+	numberOfWorkers := numberOfPostgresQueueWorkers
+	// Number of threads is the number of workers plus the number of other things we kick off to consume things. At least
+	// one for regular jobs, and then another for cron jobs if there are any crons enabled.
+	numberOfThreads := numberOfWorkers + 1
+
+	// If we are using cron jobs then we will kick off another thread.
+	if len(p.cronJobQueues) > 0 {
+		numberOfThreads += 1
+	}
+
 	p.availableThreads = make(chan struct{}, numberOfWorkers)
-	p.shutdownThreads = make([]chan chan struct{}, numberOfWorkers+1)
+	p.shutdownThreads = make([]chan chan struct{}, numberOfThreads)
 	// Start the worker threads.
 	for i := 0; i < 4; i++ {
 		p.shutdownThreads[i] = make(chan chan struct{})
 		go p.worker(p.shutdownThreads[i])
 	}
 
+	// If there are any cron jobs registered then start the cron consumer.
+	if len(p.cronJobQueues) > 0 {
+		// Use number of
+		p.shutdownThreads[numberOfThreads-2] = make(chan chan struct{})
+		go p.cronConsumer(p.shutdownThreads[numberOfThreads-2])
+	}
+
 	// Start the consumer thread.
-	p.shutdownThreads[numberOfWorkers] = make(chan chan struct{})
-	go p.backgroundConsumer(p.shutdownThreads[numberOfWorkers])
+	p.shutdownThreads[numberOfThreads-1] = make(chan chan struct{})
+	go p.backgroundConsumer(p.shutdownThreads[numberOfThreads-1])
 
 	return nil
 }
@@ -256,7 +278,7 @@ func (p *postgresJobProcessor) getCronJobQueueName(
 }
 
 func (p *postgresJobProcessor) prepareCronJobTable() error {
-	cronJobQueueNames := make([]string, len(p.cronJobQueues))
+	cronJobQueueNames := make([]string, 0, len(p.cronJobQueues))
 	for _, cronJob := range p.cronJobQueues {
 		cronJobQueueNames = append(cronJobQueueNames, p.getCronJobQueueName(cronJob))
 	}
@@ -266,7 +288,7 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 
 	return p.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		{ // Clean up cron jobs that are not registered.
-			result, err := tx.Model(new(models.Job)).
+			result, err := tx.ModelContext(ctx, new(models.Job)).
 				WhereIn(`"queue" NOT IN (?)`, cronJobQueueNames).
 				Delete()
 			if err != nil {
@@ -349,6 +371,8 @@ func (p *postgresJobProcessor) Close() error {
 		close(channel)
 	}
 
+	p.log.Info("postgres job processor shut down complete")
+
 	return nil
 }
 
@@ -368,57 +392,31 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 		case <-p.availableThreads:
 		}
 
+		// Before we even tick, try to consume a job.
+		job, err := p.consumeJobMaybe()
+		if err != nil {
+			p.log.WithError(err).Error("failed to consume job")
+			continue
+		}
+
+		if job != nil {
+			p.log.WithFields(logrus.Fields{
+				"jobId": job.JobId,
+				"queue": job.Queue,
+			}).Debug("successfully consumed job, dispatching to worker thread")
+			p.dispatch <- job
+		}
+
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down job consumer")
 			promise <- struct{}{}
 			ticker.Stop()
 			return
+		case <-p.trigger:
+			continue
 		case <-ticker.C:
-			job, err := p.consumeJobMaybe()
-			if err != nil {
-				p.log.WithError(err).Error("failed to consume job")
-				continue
-			}
-
-			p.dispatch <- job
-		}
-	}
-}
-
-func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
-	schedules := make([]cron.Schedule, len(p.cronJobQueues))
-	for i, queue := range p.cronJobQueues {
-		schedule, err := cron.Parse(queue.DefaultSchedule())
-		if err != nil {
-			panic("cron schedule is not valid, job processor should have have started")
-		}
-
-		schedules[i] = schedule
-	}
-
-	for {
-		now := p.clock.Now()
-		nextTimes := make([]time.Time, len(schedules))
-		for i := range schedules {
-			nextTimes[i] = schedules[i].Next(now)
-		}
-		// Sort the next times
-		sort.Slice(nextTimes, func(i, j int) bool {
-			return nextTimes[i].Before(nextTimes[j])
-		})
-
-		sleep := nextTimes[0].Sub(now)
-
-		timer := time.NewTimer(sleep)
-		select {
-		case promise := <-shutdown:
-			p.log.Debug("shutting down job consumer")
-			promise <- struct{}{}
-			timer.Stop()
-			return
-		case <-timer.C:
-			// Consume cron job
+			continue
 		}
 	}
 }
@@ -427,12 +425,134 @@ func (p *postgresJobProcessor) consumeJobMaybe() (*models.Job, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
+	p.log.Trace("attempting to consume job from the queue")
 	var job models.Job
 	result, err := p.db.ModelContext(ctx, &job).
 		Set(`"status" = ?`, models.ProcessingJobStatus).
 		Set(`"started_at" = ?`, p.clock.Now()).
-		Where(`"job_id" = ?`, p.jobQuery).
+		Where(`"job_id" = (?)`, p.jobQuery).
+		Returning("*").
 		Update(&job)
+	if err != nil {
+		if err == pg.ErrNoRows {
+			p.log.Trace("no job consumed")
+			return nil, nil
+		}
+		return nil, errors.Wrap(err, "failed to consume job")
+	}
+
+	if result.RowsAffected() == 0 {
+		p.log.Trace("no job consumed")
+		return nil, nil
+	}
+
+	p.log.WithFields(logrus.Fields{
+		"jobId": job.JobId,
+		"queue": job.Queue,
+	}).Trace("found job")
+
+	return &job, nil
+}
+
+func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
+	type cronJobTracker struct {
+		handler   ScheduledJobHandler
+		schedule  cron.Schedule
+		queueName string
+		next      time.Time
+	}
+
+	crons := make([]cronJobTracker, len(p.cronJobQueues))
+	for i, queue := range p.cronJobQueues {
+		schedule, err := cron.Parse(queue.DefaultSchedule())
+		if err != nil {
+			panic("cron schedule is not valid, job processor should have have started")
+		}
+
+		crons[i] = cronJobTracker{
+			handler:   p.cronJobQueues[i],
+			schedule:  schedule,
+			queueName: p.getCronJobQueueName(queue),
+			next:      schedule.Next(p.clock.Now()),
+		}
+	}
+
+	relativeTo := p.clock.Now()
+	for {
+		// Sort the crons by their next time a cron job happens.
+		sort.Slice(crons, func(i, j int) bool {
+			return crons[i].next.Before(crons[j].next)
+		})
+
+		// Grab the next cron that will happen, we are going to watch for this one.
+		nextJob := crons[0]
+
+		// // But if that cron job is in the past then we should just process it now
+		// if nextJob.next.Before(p.clock.Now()) {
+		// 	crons[0].next = crons[0].schedule.Next(p.clock.Now())
+		// 	// TODO Try to consume a cron job
+		// }
+
+		// TODO What happens if sleep is negative or 0
+		// How long do we need to wait for this cron job?
+		sleep := nextJob.next.Sub(relativeTo)
+
+		// Create a timer.
+		timer := time.NewTimer(sleep)
+		select {
+		case promise := <-shutdown:
+			p.log.Debug("shutting down cron job consumer")
+			promise <- struct{}{}
+			timer.Stop()
+			return
+		case <-timer.C:
+			// Bump the cron we just did.
+			nextTimestamp := nextJob.schedule.Next(p.clock.Now())
+			crons[0].next = nextTimestamp
+
+			consumedCronJob, err := p.consumeCronMaybe(nextJob.queueName, nextTimestamp)
+			if err != nil {
+				p.log.WithError(err).Error("failed to consume cron job")
+				continue
+			}
+
+			if consumedCronJob == nil {
+				continue
+			}
+
+			if err := nextJob.handler.EnqueueTriggeredJob(context.Background(), p.enqueuer); err != nil {
+				p.log.WithError(err).Error("failed to enqueue cron job to be executed")
+				continue
+			}
+
+			// If possible, try to trigger the consumption of the cron job locally.
+			select {
+			case p.trigger <- struct{}{}:
+				p.log.Trace("successfully triggered immediate job consumption")
+			default:
+				p.log.Trace("trigger queue was full, cron job processing may be slightly delayed")
+			}
+		}
+	}
+}
+
+func (p *postgresJobProcessor) consumeCronMaybe(queue string, next time.Time) (*models.CronJob, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	subQuery := p.db.ModelContext(ctx, new(models.CronJob)).
+		Column("queue").
+		Where(`"queue" = ?`, queue).
+		Where(`"next_run_at" <= ?`, next).
+		For(`UPDATE SKIP LOCKED`).
+		Limit(1)
+
+	var cronJob models.CronJob
+	result, err := p.db.ModelContext(ctx, &cronJob).
+		Set(`"last_run_at" = "next_run_at"`).
+		Set(`"next_run_at" = ?`, next).
+		Where(`"queue" = (?)`, subQuery).
+		Update(&cronJob)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to consume job")
 	}
@@ -441,7 +561,7 @@ func (p *postgresJobProcessor) consumeJobMaybe() (*models.Job, error) {
 		return nil, nil
 	}
 
-	return &job, nil
+	return &cronJob, nil
 }
 
 func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {

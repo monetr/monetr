@@ -88,15 +88,15 @@ func (c *CleanupJobsJob) Run(ctx context.Context) error {
 	if affected := result.RowsAffected(); affected > 0 {
 		log.WithFields(logrus.Fields{
 			"deleted": affected,
-		}).Info("deleted old jobs from the jobs table, performing vacuum")
+		}).Info("deleted old jobs from the jobs table")
 
-		if _, err := c.db.ExecContext(span.Context(), `VACUUM jobs;`); err != nil {
-			log.WithError(err).Error("failed to vacuum jobs table")
-		}
-
-		if _, err := c.db.ExecContext(span.Context(), `VACUUM cron_jobs;`); err != nil {
-			log.WithError(err).Error("failed to vacuum cron jobs table")
-		}
+		// if _, err := c.db.ExecContext(span.Context(), `VACUUM jobs;`); err != nil {
+		// 	log.WithError(err).Error("failed to vacuum jobs table")
+		// }
+		//
+		// if _, err := c.db.ExecContext(span.Context(), `VACUUM cron_jobs;`); err != nil {
+		// 	log.WithError(err).Error("failed to vacuum cron jobs table")
+		// }
 	} else {
 		log.Info("no jobs were cleaned up from the jobs table")
 	}
