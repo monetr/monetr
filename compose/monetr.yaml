@@ -3,7 +3,7 @@ externalUrlProtocol: https
 plaid:
   environment: https://sandbox.plaid.com
 backgroundjobs:
-  engine: gocraft
+  engine: postgres
   scheduler: internal
 redis:
   enabled: true

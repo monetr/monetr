@@ -63,15 +63,25 @@ func NewBackgroundJobs(
 		enqueuer = NewGoCraftWorkJobEnqueuer(log, redisPool)
 		craftProcessor := NewGoCraftWorkJobProcessor(log, configuration.BackgroundJobs, redisPool, enqueuer)
 		processor = craftProcessor
-	case config.BackgroundJobEngineRabbitMQ:
-		panic("RabbitMQ job engine not implemented")
 	case config.BackgroundJobEnginePostgreSQL:
-		panic("PostgreSQL job engine not implemented")
+		enqueuer = NewPostgresJobEnqueuer(
+			log,
+			db,
+			clock,
+		)
+		processor = NewPostgresJobProcessor(
+			log,
+			configuration.BackgroundJobs,
+			clock,
+			db,
+			enqueuer, // TODO
+		)
 	default:
 		return nil, errors.New("invalid background job engine specified")
 	}
 
 	jobs := []JobHandler{
+		NewCleanupJobsHandler(log, db),
 		NewDeactivateLinksHandler(log, db, clock, configuration, plaidSecrets, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db, clock),
 		NewProcessSpendingHandler(log, db, clock),
