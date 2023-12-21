@@ -22,14 +22,14 @@ var (
 
 type CleanupJobsHandler struct {
 	log *logrus.Entry
-	db  *pg.DB
+	db  pg.DBI
 }
 
 func TriggerCleanupJobs(ctx context.Context, backgroundJobs JobController) error {
 	return backgroundJobs.TriggerJob(ctx, CleanupJobs, nil)
 }
 
-func NewCleanupJobsHandler(log *logrus.Entry, db *pg.DB) *CleanupJobsHandler {
+func NewCleanupJobsHandler(log *logrus.Entry, db pg.DBI) *CleanupJobsHandler {
 	return &CleanupJobsHandler{
 		log: log,
 		db:  db,
@@ -49,13 +49,11 @@ func (c CleanupJobsHandler) QueueName() string {
 }
 
 func (c *CleanupJobsHandler) HandleConsumeJob(ctx context.Context, data []byte) error {
-	return c.db.RunInTransaction(ctx, func(txn *pg.Tx) error {
-		span := sentry.StartSpan(ctx, "db.transaction")
-		defer span.Finish()
+	span := sentry.StartSpan(ctx, "db.transaction")
+	defer span.Finish()
 
-		job := NewCleanupJobsJob(c.log, txn)
-		return job.Run(span.Context())
-	})
+	job := NewCleanupJobsJob(c.log, c.db)
+	return job.Run(span.Context())
 }
 
 type CleanupJobsJob struct {
@@ -90,13 +88,13 @@ func (c *CleanupJobsJob) Run(ctx context.Context) error {
 			"deleted": affected,
 		}).Info("deleted old jobs from the jobs table")
 
-		// if _, err := c.db.ExecContext(span.Context(), `VACUUM jobs;`); err != nil {
-		// 	log.WithError(err).Error("failed to vacuum jobs table")
-		// }
-		//
-		// if _, err := c.db.ExecContext(span.Context(), `VACUUM cron_jobs;`); err != nil {
-		// 	log.WithError(err).Error("failed to vacuum cron jobs table")
-		// }
+		if _, err := c.db.ExecContext(span.Context(), `VACUUM jobs;`); err != nil {
+			log.WithError(err).Error("failed to vacuum jobs table")
+		}
+
+		if _, err := c.db.ExecContext(span.Context(), `VACUUM cron_jobs;`); err != nil {
+			log.WithError(err).Error("failed to vacuum cron jobs table")
+		}
 	} else {
 		log.Info("no jobs were cleaned up from the jobs table")
 	}
