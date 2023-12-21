@@ -273,7 +273,7 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 
 	return p.db.RunInTransaction(ctx, func(tx *pg.Tx) error {
 		{ // Clean up cron jobs that are not registered.
-			result, err := tx.ModelContext(ctx, new(models.Job)).
+			result, err := tx.ModelContext(ctx, new(models.CronJob)).
 				WhereIn(`"queue" NOT IN (?)`, cronJobQueueNames).
 				Delete()
 			if err != nil {
@@ -595,6 +595,7 @@ func (p *postgresJobProcessor) markJobStatus(
 	if jobError != nil {
 		log.Debug("marking job as failed")
 		_, err := p.db.ModelContext(ctx, job).
+			Set(`"completed_at" = ?`, p.clock.Now().UTC()).
 			Set(`"status" = ?`, models.FailedJobStatus).
 			WherePK().
 			Update(&job)
@@ -607,6 +608,7 @@ func (p *postgresJobProcessor) markJobStatus(
 
 	log.Debug("marking job as complete")
 	_, err := p.db.ModelContext(ctx, job).
+		Set(`"completed_at" = ?`, p.clock.Now().UTC()).
 		Set(`"status" = ?`, models.CompletedJobStatus).
 		WherePK().
 		Update(&job)
