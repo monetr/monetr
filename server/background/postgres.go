@@ -223,8 +223,9 @@ func (p *postgresJobProcessor) Start() error {
 		Limit(1)
 
 	numberOfWorkers := numberOfPostgresQueueWorkers
-	// Number of threads is the number of workers plus the number of other things we kick off to consume things. At least
-	// one for regular jobs, and then another for cron jobs if there are any crons enabled.
+	// Number of threads is the number of workers plus the number of other things
+	// we kick off to consume things. At least one for regular jobs, and then
+	// another for cron jobs if there are any crons enabled.
 	numberOfThreads := numberOfWorkers + 1
 
 	// If we are using cron jobs then we will kick off another thread.
@@ -338,7 +339,8 @@ func (p *postgresJobProcessor) Close() error {
 
 	p.log.Info("shutting down postgres job processor")
 
-	// Create a channel buffer with the number of messages we need to send to all the worker threads.
+	// Create a channel buffer with the number of messages we need to send to all
+	// the worker threads.
 	shutdownChannel := make(chan struct{}, len(p.shutdownThreads))
 	// Then send the shutdown channel to each worker thread as a "promise".
 	for i := range p.shutdownThreads {
@@ -386,8 +388,9 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 			}).Debug("successfully consumed job, dispatching to worker thread")
 			p.dispatch <- job
 		} else {
-			// If we did not retrieve a job at all then we need to put our "hold" on an available thread back in the channel
-			// this way a thread can still be consumed on the next loop.
+			// If we did not retrieve a job at all then we need to put our "hold" on
+			// an available thread back in the channel this way a thread can still be
+			// consumed on the next loop.
 			p.availableThreads <- struct{}{}
 		}
 
@@ -621,8 +624,9 @@ func (p *postgresJobProcessor) buildJobExecutor(
 	handler JobHandler,
 ) postgresJobFunction {
 	return func(ctx context.Context, job *models.Job) (err error) {
-		// We want to have sentry tracking jobs as they are being processed. In order to do this we need to inject a
-		// sentry hub into the context and create a new span using that context.
+		// We want to have sentry tracking jobs as they are being processed. In
+		// order to do this we need to inject a sentry hub into the context and
+		// create a new span using that context.
 		highContext := sentry.SetHubOnContext(ctx, sentry.CurrentHub().Clone())
 		span := sentry.StartSpan(
 			highContext,
