@@ -363,8 +363,6 @@ func (p *postgresJobProcessor) Close() error {
 func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 	ticker := time.NewTicker(5 * time.Second)
 	for {
-		// TODO, maybe implement pubsub here as well instead of polling?
-
 		// Block if there are no available threads but allow the consumer to be
 		// shutdown while we are waiting.
 		select {
@@ -374,21 +372,23 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 			ticker.Stop()
 			return
 		case <-p.availableThreads:
+			// This receive blocks if there are no available threads.
 		}
 
 		// Before we even tick, try to consume a job.
 		job, err := p.consumeJobMaybe()
 		if err != nil {
 			p.log.WithError(err).Error("failed to consume job")
-			continue
-		}
-
-		if job != nil {
+		} else if job != nil {
 			p.log.WithFields(logrus.Fields{
 				"jobId": job.JobId,
 				"queue": job.Queue,
 			}).Debug("successfully consumed job, dispatching to worker thread")
 			p.dispatch <- job
+		} else {
+			// If we did not retrieve a job at all then we need to put our "hold" on an available thread back in the channel
+			// this way a thread can still be consumed on the next loop.
+			p.availableThreads <- struct{}{}
 		}
 
 		select {
