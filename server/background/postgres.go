@@ -326,7 +326,6 @@ func (p *postgresJobProcessor) prepareCronJobTable() error {
 			}).
 				OnConflict(`("queue") DO UPDATE`).
 				Set(`"cron_schedule" = ?`, cronJob.DefaultSchedule()).
-				Set(`"next_run_at" = ?`, nextRunAt).
 				Insert()
 			if err != nil {
 				return errors.Wrapf(err, "failed to provision cron job: %s", cronJob)
@@ -477,7 +476,6 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 		}
 	}
 
-	relativeTo := p.clock.Now()
 	for {
 		// Sort the crons by their next time a cron job happens.
 		sort.Slice(crons, func(i, j int) bool {
@@ -487,15 +485,9 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 		// Grab the next cron that will happen, we are going to watch for this one.
 		nextJob := crons[0]
 
-		// // But if that cron job is in the past then we should just process it now
-		// if nextJob.next.Before(p.clock.Now()) {
-		// 	crons[0].next = crons[0].schedule.Next(p.clock.Now())
-		// 	// TODO Try to consume a cron job
-		// }
-
 		// TODO What happens if sleep is negative or 0
 		// How long do we need to wait for this cron job?
-		sleep := nextJob.next.Sub(relativeTo)
+		sleep := nextJob.next.Sub(p.clock.Now())
 
 		// Create a timer.
 		timer := time.NewTimer(sleep)
@@ -509,28 +501,33 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			// Bump the cron we just did.
 			nextTimestamp := nextJob.schedule.Next(p.clock.Now())
 			crons[0].next = nextTimestamp
+			log := p.log.WithFields(logrus.Fields{
+				"queue": nextJob.queueName,
+			})
 
 			consumedCronJob, err := p.consumeCronMaybe(nextJob.queueName, nextTimestamp)
 			if err != nil {
-				p.log.WithError(err).Error("failed to consume cron job")
+				log.WithError(err).Error("failed to consume cron job")
 				continue
 			}
 
 			if consumedCronJob == nil {
+				log.Trace("did not consume cron job")
 				continue
 			}
 
+			log.Trace("consumed cron job")
 			if err := nextJob.handler.EnqueueTriggeredJob(context.Background(), p.enqueuer); err != nil {
-				p.log.WithError(err).Error("failed to enqueue cron job to be executed")
+				log.WithError(err).Error("failed to enqueue cron job to be executed")
 				continue
 			}
 
 			// If possible, try to trigger the consumption of the cron job locally.
 			select {
 			case p.trigger <- struct{}{}:
-				p.log.Trace("successfully triggered immediate job consumption")
+				log.Trace("successfully triggered immediate job consumption")
 			default:
-				p.log.Trace("trigger queue was full, cron job processing may be slightly delayed")
+				log.Trace("trigger queue was full, cron job processing may be slightly delayed")
 			}
 		}
 	}
