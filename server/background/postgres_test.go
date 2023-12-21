@@ -177,6 +177,7 @@ func TestPostgresJobProcessor_CronJobs(t *testing.T) {
 			t,
 			"* * * * * *",
 			func(_ *testing.T, _ context.Context, _ []byte) error {
+				// Make sure that we have not processed a job at the same time.
 				_, loaded := idempotent.LoadOrStore(clock.Now().Truncate(time.Second).String(), "test")
 				assert.False(t, loaded, "must store data")
 				atomic.AddInt32(&counter, 1)

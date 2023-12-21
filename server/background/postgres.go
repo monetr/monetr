@@ -186,22 +186,7 @@ func (p *postgresJobProcessor) RegisterJob(
 			schedule := scheduledJob.DefaultSchedule()
 			log.WithField("schedule", schedule).
 				Trace("job will be run on a schedule automatically")
-			// We use a special queue name to trigger the actual jobs.
-			schedulerName := p.getCronJobQueueName(scheduledJob)
-
 			p.cronJobQueues = append(p.cronJobQueues, scheduledJob)
-			p.registeredJobs[schedulerName] = func(
-				ctx context.Context,
-				_ *models.Job,
-			) error {
-				span := sentry.StartSpan(
-					ctx,
-					"topic.process",
-					sentry.TransactionName(schedulerName),
-				)
-				defer span.Finish()
-				return scheduledJob.EnqueueTriggeredJob(span.Context(), p.enqueuer)
-			}
 		}
 	}
 
