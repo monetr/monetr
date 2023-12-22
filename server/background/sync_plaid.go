@@ -673,5 +673,6 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		}
 	}
 
+	// TODO Trigger similar transaction calculation here.
 	return nil
 }

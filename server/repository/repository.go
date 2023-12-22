@@ -76,6 +76,13 @@ type BaseRepository interface {
 	// UpdateTransactions is unique in that it REQUIRES that all data on each transaction object be populated. It is
 	// doing a bulk update, so if data is missing it has the potential to overwrite a transaction incorrectly.
 	UpdateTransactions(ctx context.Context, transactions []*models.Transaction) error
+
+	// WriteTransactionClusters will take the array of transaction clusters
+	// provided and persist them to the trnasaction clusters table but will also
+	// delete any existing transaction clusters for the bank account specified.
+	// This is because clusters are meant to be regenerated each time new
+	// transactions come in.
+	WriteTransactionClusters(ctx context.Context, bankAccountId uint64, clusters []models.TransactionCluster) error
 }
 
 type Repository interface {
