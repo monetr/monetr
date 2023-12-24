@@ -52,6 +52,17 @@ list(APPEND MONETR_LD_FLAGS "-X" "main.release=$(RELEASE_VERSION)")
 list(APPEND MONETR_LD_FLAGS "-X" "main.revision=$(RELEASE_REVISION)")
 list(APPEND MONETR_LD_FLAGS "-X" "main.buildTime=$(BUILD_TIME)")
 
+# Detect if we are building inside a container, if we are make sure to set the build type LDFLAG.
+if(NOT WIN32)
+  if (EXISTS "/proc/1/cgroup")
+    file(READ "/proc/1/cgroup" CONTAINER_DETECTION)
+    if ("${CONTAINER_DETECTION}" MATCHES "docker")
+      list(APPEND MONETR_LD_FLAGS "-X" "main.buildType=container")
+    endif()
+  endif()
+endif()
+
+
 list(JOIN MONETR_GO_TAGS "," MONETR_EXECUTABLE_TAGS)
 string(REPLACE " " ";" MONETR_EXECUTABLE_LD_FLAGS "${MONETR_LD_FLAGS}")
 add_custom_command(
