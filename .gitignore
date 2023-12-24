@@ -40,3 +40,5 @@ Brewfile.lock.json
 docs/developing/api/swagger.*
 .licenses
 .pnpm-store
+
+CMakeUserPresets.json
