@@ -158,6 +158,19 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 		log.WithField("bankAccountIds", bankAccountIds).Info("removing data for bank account Ids for link")
 
 		{
+			result, err := r.db.ModelContext(span.Context(), &models.TransactionCluster{}).
+				Where(`"account_id" = ?`, accountId).
+				WhereIn(`"bank_account_id" IN (?)`, bankAccountIds).
+				Delete()
+			if err != nil {
+				log.WithError(err).Errorf("failed to remove transaction clusters for link")
+				return errors.Wrap(err, "failed to remove transaction clusters for link")
+			}
+
+			log.WithField("removed", result.RowsAffected()).Info("removed transaction cluster(s)")
+		}
+
+		{
 			result, err := r.db.ModelContext(span.Context(), &models.Transaction{}).
 				Where(`"transaction"."account_id" = ?`, accountId).
 				WhereIn(`"transaction"."bank_account_id" IN (?)`, bankAccountIds).
