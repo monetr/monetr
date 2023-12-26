@@ -377,26 +377,24 @@ type RabbitMQ struct {
 type BackgroundJobEngine string
 
 const (
-	// BackgroundJobEngineInMemory is ideal for self-hosted or development deployments. It is not recommended at all for
-	// any type of deployment that demands reliability or high-availability. When using this option you **cannot**
-	// deploy more than a single replica of monetr. This is because jobs will not be shared between replicas, and you
-	// can end up with problems where scheduled jobs are performed multiple times by each replica. This option must be
-	// manually specified and is only the default configuration when Redis and RabbitMQ are disabled.
-	// **NOT YET IMPLEMENTED**
+	// BackgroundJobEngineInMemory is ideal for self-hosted or development
+	// deployments. It is not recommended at all for any type of deployment that
+	// demands reliability or high-availability. When using this option you
+	// **cannot** deploy more than a single replica of monetr. This is because
+	// jobs will not be shared between replicas, and you can end up with problems
+	// where scheduled jobs are performed multiple times by each replica. This
+	// option must be manually specified and is only the default configuration
+	// when Redis and RabbitMQ are disabled. **NOT YET IMPLEMENTED**
 	BackgroundJobEngineInMemory BackgroundJobEngine = "memory"
-	// BackgroundJobEngineGoCraftWork is an okay middle-ground between in-memory and RabbitMQ. GoCraft requires that a
-	// Redis instance is available and that all monetr instances are connected to that same Redis instance. Jobs and
-	// scheduling are coordinated through Redis and are reasonably fault-tolerant. This particular job engine may be
-	// deprecated in the future though as it seems the library supporting it is not really maintained anymore. If Redis
-	// is enabled but RabbitMQ is not, then this is the default job engine if none is specified.
+	// BackgroundJobEngineGoCraftWork will soon be deprecated as monetr moves
+	// towards using PostgreSQL as its primary job queue. It should not be used
+	// anymore and will be removed before the V1.0 release.
+	// TODO Remove before the V1.0 release.
 	BackgroundJobEngineGoCraftWork BackgroundJobEngine = "gocraft"
-	// BackgroundJobEnginePostgreSQL might be another option for self-hosted deployments. It allows for multiple
-	// replicas of monetr to be deployed and scaled independently. Allowing for a somewhat high-availability deployment.
-	// This job engine will be built out in the future, but has some downsides as it will create a not-insignificant
-	// amount of churn in the PostgreSQL database. Things like vacuuming should be done far more frequently if this job
-	// engine is used.
-	// **NOT YET IMPLEMENTED**
-	BackgroundJobEnginePostgreSQL BackgroundJobEngine = "postgres"
+	// BackgroundJobEnginePostgreSQL is the preferred option for job queues, as it
+	// provides some consistency guarantees that Redis cannot. Specifically making
+	// sure that a job is not processed more than once.
+	BackgroundJobEnginePostgreSQL BackgroundJobEngine = "postgresql"
 )
 
 type BackgroundJobScheduler string

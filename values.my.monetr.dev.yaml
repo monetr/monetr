@@ -71,6 +71,9 @@ api:
   apiDomainName: my.monetr.dev
   allowSignUp: true
   enableWebhooks: true # Will be deprecated soon.
+  backgroundJobs:
+    engine: postgresql
+    scheduler: internal
   beta:
     enableBetaCodes: true
   postgreSql:
@@ -117,7 +120,7 @@ api:
     address: redis
     port: 6379
   logging:
-    level: trace
+    level: debug
     format: json
     stackDriver:
       enabled: false
