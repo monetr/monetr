@@ -42,7 +42,3 @@ type JobProcessor interface {
 	Start() error
 	Close() error
 }
-
-type JobEnqueuer interface {
-	EnqueueJob(ctx context.Context, queue string, data interface{}) error
-}

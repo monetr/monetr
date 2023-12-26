@@ -40,6 +40,8 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
+		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+
 		plaidPlatypus.EXPECT().
 			NewClient(
 				gomock.Any(),
@@ -100,7 +102,19 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				Deleted: []string{},
 			}, nil)
 
-		handler := NewSyncPlaidHandler(log, db, clock, provider, plaidPlatypus, publisher)
+		firstCalculateCall := enqueuer.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(CalculateTransactionClusters),
+				testutils.NewGenericMatcher(func(args CalculateTransactionClustersArguments) bool {
+					return assert.Equal(t, plaidBankAccount.BankAccountId, args.BankAccountId) &&
+						assert.Equal(t, plaidBankAccount.AccountId, args.AccountId)
+				}),
+			).
+			Times(1).
+			Return(nil)
+
+		handler := NewSyncPlaidHandler(log, db, clock, provider, plaidPlatypus, publisher, enqueuer)
 
 		{ // Do our first plaid sync.
 			args := SyncPlaidArguments{
@@ -157,6 +171,19 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 					pendingTxnId,
 				},
 			}, nil)
+
+		enqueuer.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(CalculateTransactionClusters),
+				testutils.NewGenericMatcher(func(args CalculateTransactionClustersArguments) bool {
+					return assert.Equal(t, plaidBankAccount.BankAccountId, args.BankAccountId) &&
+						assert.Equal(t, plaidBankAccount.AccountId, args.AccountId)
+				}),
+			).
+			MinTimes(1).
+			After(firstCalculateCall).
+			Return(nil)
 
 		{ // Do our second plaid sync.
 			args := SyncPlaidArguments{

@@ -35,6 +35,7 @@ type (
 		plaidSecrets  secrets.PlaidSecretsProvider
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
+		enqueuer      JobEnqueuer
 		unmarshaller  JobUnmarshaller
 		clock         clock.Clock
 	}
@@ -53,6 +54,7 @@ type (
 		plaidSecrets  secrets.PlaidSecretsProvider
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
+		enqueuer      JobEnqueuer
 		clock         clock.Clock
 	}
 )
@@ -75,6 +77,7 @@ func NewSyncPlaidHandler(
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
+	enqueuer JobEnqueuer,
 ) *SyncPlaidHandler {
 	return &SyncPlaidHandler{
 		log:           log,
@@ -82,6 +85,7 @@ func NewSyncPlaidHandler(
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
+		enqueuer:      enqueuer,
 		unmarshaller:  DefaultJobUnmarshaller,
 		clock:         clock,
 	}
@@ -114,6 +118,7 @@ func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) er
 			s.plaidSecrets,
 			s.plaidPlatypus,
 			s.publisher,
+			s.enqueuer,
 			args,
 		)
 		if err != nil {
@@ -187,6 +192,7 @@ func NewSyncPlaidJob(
 	plaidSecrets secrets.PlaidSecretsProvider,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
+	enqueuer JobEnqueuer,
 	args SyncPlaidArguments,
 ) (*SyncPlaidJob, error) {
 	return &SyncPlaidJob{
@@ -196,6 +202,7 @@ func NewSyncPlaidJob(
 		plaidSecrets:  plaidSecrets,
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
+		enqueuer:      enqueuer,
 		clock:         clock,
 	}, nil
 }
@@ -334,6 +341,8 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		cursor = &lastSync.NextCursor
 	}
 
+	transactionSimilaritySyncs := map[uint64]CalculateTransactionClustersArguments{}
+
 	for iter := 0; iter < 10; iter++ {
 		syncData, err := plaidClient.Sync(span.Context(), cursor)
 		if err != nil {
@@ -419,9 +428,11 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 			existingTransaction, ok := transactionsByPlaidId[plaidTransaction.GetTransactionId()]
 			if !ok {
+				accountId := s.repo.AccountId()
+				bankAccountId := plaidIdsToBankIds[plaidTransaction.GetBankAccountId()]
 				transactionsToInsert = append(transactionsToInsert, models.Transaction{
-					AccountId:                 s.repo.AccountId(),
-					BankAccountId:             plaidIdsToBankIds[plaidTransaction.GetBankAccountId()],
+					AccountId:                 accountId,
+					BankAccountId:             bankAccountId,
 					PlaidTransactionId:        plaidTransaction.GetTransactionId(),
 					Amount:                    amount,
 					SpendingId:                nil,
@@ -438,6 +449,10 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 					CreatedAt:                 now,
 					PendingPlaidTransactionId: plaidTransaction.GetPendingTransactionId(),
 				})
+				transactionSimilaritySyncs[existingTransaction.BankAccountId] = CalculateTransactionClustersArguments{
+					AccountId:     accountId,
+					BankAccountId: bankAccountId,
+				}
 				continue
 			}
 
@@ -466,6 +481,10 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 			if shouldUpdate {
 				transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
+				transactionSimilaritySyncs[existingTransaction.BankAccountId] = CalculateTransactionClustersArguments{
+					AccountId:     existingTransaction.AccountId,
+					BankAccountId: existingTransaction.BankAccountId,
+				}
 			}
 		}
 
@@ -595,6 +614,11 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			}
 
 			for _, existingTransaction := range transactions {
+				transactionSimilaritySyncs[existingTransaction.BankAccountId] = CalculateTransactionClustersArguments{
+					AccountId:     existingTransaction.AccountId,
+					BankAccountId: existingTransaction.BankAccountId,
+				}
+
 				if existingTransaction.SpendingId == nil {
 					continue
 				}
@@ -660,6 +684,12 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	if err = s.repo.UpdateLink(span.Context(), link); err != nil {
 		log.WithError(err).Error("failed to update link after transaction sync")
 		return err
+	}
+
+	// Then enqueue all of the bank accounts we touched to have their similar
+	// transactions recalculated.
+	for _, item := range transactionSimilaritySyncs {
+		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, item)
 	}
 
 	if linkWasSetup { // Send the notification that the link has been set up.
