@@ -74,7 +74,7 @@ api:
   beta:
     enableBetaCodes: true
   postgreSql:
-    address: slonik-rw.postgres.svc.cluster.local
+    address: slonik-bouncer.postgres.svc.cluster.local
     port: 5432
     database: monetr
   email:
