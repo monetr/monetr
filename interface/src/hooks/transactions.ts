@@ -12,6 +12,7 @@ import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import Balance from '@monetr/interface/models/Balance';
 import Spending from '@monetr/interface/models/Spending';
 import Transaction from '@monetr/interface/models/Transaction';
+import TransactionCluster from '@monetr/interface/models/TransactionCluster';
 import request from '@monetr/interface/util/request';
 
 export type TransactionsResult = {
@@ -43,6 +44,16 @@ export function useTransaction(transactionId: number | null): UseQueryResult<Tra
     {
       enabled: !!selectedBankAccountId && !!transactionId,
       select: data => new Transaction(data),
+    },
+  );
+}
+
+export function useSimilarTransactions(transaction: Transaction | null): UseQueryResult<TransactionCluster> {
+  return useQuery<Partial<TransactionCluster>, unknown, TransactionCluster>(
+    [`/bank_accounts/${ transaction?.bankAccountId }/transactions/similar/${ transaction?.transactionId }`],
+    {
+      enabled: Boolean(transaction),
+      select: data => new TransactionCluster(data),
     },
   );
 }
