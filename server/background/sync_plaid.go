@@ -688,8 +688,8 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 	// Then enqueue all of the bank accounts we touched to have their similar
 	// transactions recalculated.
-	for _, item := range transactionSimilaritySyncs {
-		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, item)
+	for key := range transactionSimilaritySyncs {
+		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, transactionSimilaritySyncs[key])
 	}
 
 	if linkWasSetup { // Send the notification that the link has been set up.

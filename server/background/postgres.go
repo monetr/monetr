@@ -20,6 +20,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	consumerSignal = struct{}{}
+)
+
 const (
 	numberOfPostgresQueueWorkers = 4
 )
@@ -370,7 +374,7 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down job consumer")
-			promise <- struct{}{}
+			promise <- consumerSignal
 			ticker.Stop()
 			return
 		case <-p.availableThreads:
@@ -391,13 +395,13 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 			// If we did not retrieve a job at all then we need to put our "hold" on
 			// an available thread back in the channel this way a thread can still be
 			// consumed on the next loop.
-			p.availableThreads <- struct{}{}
+			p.availableThreads <- consumerSignal
 		}
 
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down job consumer")
-			promise <- struct{}{}
+			promise <- consumerSignal
 			ticker.Stop()
 			return
 		case <-p.trigger:
@@ -412,24 +416,22 @@ func (p *postgresJobProcessor) consumeJobMaybe() (*models.Job, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	p.log.Trace("attempting to consume job from the queue")
 	var job models.Job
 	result, err := p.db.ModelContext(ctx, &job).
 		Set(`"status" = ?`, models.ProcessingJobStatus).
 		Set(`"started_at" = ?`, p.clock.Now()).
 		Where(`"job_id" = (?)`, p.jobQuery).
-		Returning("*").
+		Returning("*; /* NO LOG */").
 		Update(&job)
 	if err != nil {
 		if err == pg.ErrNoRows {
-			p.log.Trace("no job consumed")
 			return nil, nil
 		}
 		return nil, errors.Wrap(err, "failed to consume job")
 	}
 
 	if result.RowsAffected() == 0 {
-		p.log.Trace("no job consumed")
+		// Do nothing, there either isn't a job or we didn't get one.
 		return nil, nil
 	}
 
@@ -482,7 +484,7 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down cron job consumer")
-			promise <- struct{}{}
+			promise <- consumerSignal
 			timer.Stop()
 			return
 		case <-timer.C:
@@ -512,7 +514,7 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 
 			// If possible, try to trigger the consumption of the cron job locally.
 			select {
-			case p.trigger <- struct{}{}:
+			case p.trigger <- consumerSignal:
 				log.Trace("successfully triggered immediate job consumption")
 			default:
 				log.Trace("trigger queue was full, cron job processing may be slightly delayed")
@@ -552,11 +554,11 @@ func (p *postgresJobProcessor) consumeCronMaybe(queue string, next time.Time) (*
 func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 	for {
 		// Tell the consumer that a worker is available.
-		p.availableThreads <- struct{}{}
+		p.availableThreads <- consumerSignal
 		select {
 		case promise := <-shutdown:
 			p.log.Debug("shutting down worker thread")
-			promise <- struct{}{}
+			promise <- consumerSignal
 			return
 		case job := <-p.dispatch:
 			log := p.log.WithFields(logrus.Fields{
@@ -579,6 +581,9 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 				log.WithError(err).Error("failed to execute job")
 			}
 			cancel()
+
+			// Try to consume another job again immediately incase there are more.
+			p.trigger <- consumerSignal
 		}
 	}
 }

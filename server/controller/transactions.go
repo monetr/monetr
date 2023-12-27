@@ -92,6 +92,31 @@ func (c *Controller) getTransactionById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, transaction)
 }
 
+func (c *Controller) getSimilarTransactionsById(ctx echo.Context) error {
+	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
+	if err != nil || bankAccountId == 0 {
+		return c.badRequest(ctx, "must specify a valid bank account Id")
+	}
+
+	transactionId, err := strconv.ParseUint(ctx.Param("transactionId"), 10, 64)
+	if err != nil || transactionId == 0 {
+		return c.badRequest(ctx, "must specify a valid transaction Id")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	cluster, err := repo.GetTransactionClusterByMember(
+		c.getContext(ctx),
+		bankAccountId,
+		transactionId,
+	)
+	if err != nil {
+		return c.wrapPgError(ctx, err, "Could not find similar transactions")
+	}
+
+	return ctx.JSON(http.StatusOK, cluster)
+}
+
 // List Transactions For Spending
 // @Summary List Transactions For Spending
 // @ID list-transactions-for-spending

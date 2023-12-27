@@ -36,3 +36,25 @@ func (r *repositoryBase) WriteTransactionClusters(
 
 	return nil
 }
+
+func (r *repositoryBase) GetTransactionClusterByMember(
+	ctx context.Context,
+	bankAccountId uint64,
+	transactionId uint64,
+) (*models.TransactionCluster, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var cluster models.TransactionCluster
+	err := r.txn.ModelContext(span.Context(), &cluster).
+		Where(`"account_id" = ?`, r.AccountId()).
+		Where(`"bank_account_id" = ?`, bankAccountId).
+		Where(`? = ANY ("members")`, transactionId).
+		Limit(1).
+		Select(&cluster)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find cluster containing transaction")
+	}
+
+	return &cluster, nil
+}

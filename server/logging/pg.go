@@ -34,7 +34,8 @@ func (h *PostgresHooks) BeforeQuery(ctx context.Context, event *pg.QueryEvent) (
 	if err != nil {
 		return ctx, nil
 	}
-	if strings.TrimSpace(strings.ToLower(string(query))) != "select 1" {
+	cleanedQuery := strings.TrimSpace(strings.ToLower(string(query)))
+	if cleanedQuery != "select 1" && !strings.HasSuffix(cleanedQuery, "/* no log */") {
 		h.log.WithContext(ctx).Trace(strings.TrimSpace(string(query)))
 	}
 

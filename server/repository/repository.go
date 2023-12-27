@@ -83,6 +83,11 @@ type BaseRepository interface {
 	// This is because clusters are meant to be regenerated each time new
 	// transactions come in.
 	WriteTransactionClusters(ctx context.Context, bankAccountId uint64, clusters []models.TransactionCluster) error
+	// GetTransactionClusterByMember will return a transaction cluster that
+	// contains the specified transaction ID as a member for the specified bank.
+	// If no cluster can be found then nil and pg.NoRows will be returned
+	// (wrapped).
+	GetTransactionClusterByMember(ctx context.Context, bankAccountId uint64, transactionId uint64) (*models.TransactionCluster, error)
 }
 
 type Repository interface {
