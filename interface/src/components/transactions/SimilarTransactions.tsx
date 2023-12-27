@@ -25,10 +25,11 @@ export default function SimilarTransactions(props: SimilarTransactionsProps): JS
     return null;
   }
 
+  const maxNumberOfSimilarTransactions = 10;
   const items = similarData.members
     .filter(item => item !== props.transaction.transactionId)
     .sort((a, b) => b - a)
-    .slice(0, Math.min(5, similarData.members.length) - 1)
+    .slice(0, Math.min(maxNumberOfSimilarTransactions, similarData.members.length) - 1)
     .map(item => <SimilarTransactionItem key={ item } transactionId={ item } />);
 
   return (
