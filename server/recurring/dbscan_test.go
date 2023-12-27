@@ -71,6 +71,7 @@ func TestPreProcessor(t *testing.T) {
 	type Presentation struct {
 		ID        uint64 `json:"id"`
 		Sanitized string `json:"sanitized"`
+		Original  string `json:"original"`
 	}
 	output := make([][]Presentation, len(result))
 	for i, cluster := range result {
@@ -80,6 +81,7 @@ func TestPreProcessor(t *testing.T) {
 			output[i] = append(output[i], Presentation{
 				ID:        item.ID,
 				Sanitized: strings.Join(item.Parts, " "),
+				Original:  strings.TrimSpace(item.Transaction.OriginalName + " " + item.Transaction.OriginalMerchantName),
 			})
 		}
 	}
