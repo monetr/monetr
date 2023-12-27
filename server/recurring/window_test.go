@@ -169,11 +169,11 @@ func TestWindowExperiment(t *testing.T) {
 		assert.NotEmpty(t, result)
 
 		type Hit struct {
-			Window WindowType
+			Window models.WindowType
 			Time   time.Time
 		}
 		type Miss struct {
-			Window WindowType
+			Window models.WindowType
 			Time   time.Time
 		}
 		type Transaction struct {
@@ -185,7 +185,7 @@ func TestWindowExperiment(t *testing.T) {
 		}
 		type Score struct {
 			Group              string
-			Window             WindowType
+			Window             models.WindowType
 			Start              time.Time
 			Last               time.Time
 			Next               time.Time

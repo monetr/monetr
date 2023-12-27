@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/monetr/monetr/server/models"
 )
 
@@ -24,20 +25,6 @@ func NewRecurringTransactionDetection(timezone *time.Location) *Detection {
 	}
 }
 
-type RecurringTransaction struct {
-	Name       string          `json:"name"`
-	Window     WindowType      `json:"windowType"`
-	Rule       *models.RuleSet `json:"rule"`
-	First      time.Time       `json:"first"`
-	Last       time.Time       `json:"last"`
-	Next       time.Time       `json:"next"`
-	Ended      bool            `json:"ended"`
-	Confidence float32         `json:"confidence"`
-	Amounts    map[int64]int   `json:"amounts"`
-	LastAmount int64           `json:"lastAmount"`
-	Matches    []uint64        `json:"matches"`
-}
-
 func (d *Detection) AddTransaction(txn *models.Transaction) {
 	d.preprocessor.AddTransaction(txn)
 	if txn.Date.After(d.latestObservedDate) {
@@ -45,13 +32,13 @@ func (d *Detection) AddTransaction(txn *models.Transaction) {
 	}
 }
 
-func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
+func (d *Detection) GetRecurringTransactions() []models.TransactionRecurring {
 	type Hit struct {
-		Window WindowType
+		Window models.WindowType
 		Time   time.Time
 	}
 	type Miss struct {
-		Window WindowType
+		Window models.WindowType
 		Time   time.Time
 	}
 	type Transaction struct {
@@ -64,7 +51,7 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 
 	d.dbscan = NewDBSCAN(d.preprocessor.GetDocuments(), Epsilon, MinNeighbors)
 	result := d.dbscan.Calculate()
-	bestScores := make([]RecurringTransaction, 0, len(result))
+	bestScores := make([]models.TransactionRecurring, 0, len(result))
 
 	for _, cluster := range result {
 		clusterAmounts := map[int64]AmountCluster{}
@@ -86,7 +73,7 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 
 		start, end := transactions[0].Date, transactions[len(transactions)-1].Date
 		windows := GetWindowsForDate(transactions[0].Date, d.timezone)
-		scores := make([]RecurringTransaction, 0, len(windows))
+		scores := make([]models.TransactionRecurring, 0, len(windows))
 		for _, window := range windows {
 			var lastAmount int64 = 0
 			misses := make([]Miss, 0)
@@ -138,18 +125,19 @@ func (d *Detection) GetRecurringTransactions() []RecurringTransaction {
 				name = latestTxn.OriginalMerchantName
 			}
 
-			scores = append(scores, RecurringTransaction{
-				Name:       name,
-				Window:     window.Type,
-				Rule:       &models.RuleSet{Set: *window.Rule},
-				First:      hits[0].Time,
-				Last:       hits[len(hits)-1].Time,
-				Next:       next,
-				Ended:      ended,
-				Confidence: (countHits - countMisses) / countTxns,
-				Matches:    ids,
-				Amounts:    amounts,
-				LastAmount: lastAmount,
+			scores = append(scores, models.TransactionRecurring{
+				TransactionRecurringId: uuid.NewString(),
+				Name:                   name,
+				Window:                 window.Type,
+				RuleSet:                &models.RuleSet{Set: *window.Rule},
+				First:                  hits[0].Time,
+				Last:                   hits[len(hits)-1].Time,
+				Next:                   next,
+				Ended:                  ended,
+				Confidence:             (countHits - countMisses) / countTxns,
+				Members:                ids,
+				Amounts:                amounts,
+				LastAmount:             lastAmount,
 			})
 		}
 

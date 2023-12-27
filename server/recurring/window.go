@@ -3,22 +3,9 @@ package recurring
 import (
 	"time"
 
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
 	"github.com/teambition/rrule-go"
-)
-
-type WindowType string
-
-const (
-	FirstAndFifteenthWindowType WindowType = "FirstAndFifteenth"
-	FifteenthAndLastWindowType  WindowType = "FifteenthAndLast"
-	WeeklyWindowType            WindowType = "Weekly"
-	BiWeeklyWindowType          WindowType = "BiWeekly"
-	MonthlyWindowType           WindowType = "Monthly"
-	BiMonthlyWindowType         WindowType = "BiMonthly"
-	QuarterlyWindowType         WindowType = "Quarterly"
-	SemiYearlyWindowType        WindowType = "SemiYearly"
-	YearlyWindowType            WindowType = "Yearly"
 )
 
 type Window struct {
@@ -31,7 +18,7 @@ type Window struct {
 	// must always be less than the delta of the recurrence.
 	Fuzzy int
 	// The type or name of the window
-	Type WindowType
+	Type models.WindowType
 }
 
 func (w Window) GetDeviation(date time.Time) (absoluteDays int, ok bool) {
@@ -130,7 +117,7 @@ func windowFirstAndFifteenth(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 5,
-		Type:  FirstAndFifteenthWindowType,
+		Type:  models.FirstAndFifteenthWindowType,
 	}
 }
 
@@ -142,7 +129,7 @@ func windowFifteenthAndTheLastDay(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 5,
-		Type:  FifteenthAndLastWindowType,
+		Type:  models.FifteenthAndLastWindowType,
 	}
 }
 
@@ -164,7 +151,7 @@ func windowMonthly(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 7,
-		Type:  MonthlyWindowType,
+		Type:  models.MonthlyWindowType,
 	}
 }
 
@@ -186,7 +173,7 @@ func windowBiMonthly(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 7,
-		Type:  BiMonthlyWindowType,
+		Type:  models.BiMonthlyWindowType,
 	}
 }
 
@@ -208,7 +195,7 @@ func windowQuarterly(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 7,
-		Type:  QuarterlyWindowType,
+		Type:  models.QuarterlyWindowType,
 	}
 }
 
@@ -230,7 +217,7 @@ func windowSemiYearly(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 7,
-		Type:  SemiYearlyWindowType,
+		Type:  models.SemiYearlyWindowType,
 	}
 }
 
@@ -256,7 +243,7 @@ func windowYearly(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 14,
-		Type:  YearlyWindowType,
+		Type:  models.YearlyWindowType,
 	}
 }
 
@@ -278,7 +265,7 @@ func windowWeekly(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 2,
-		Type:  WeeklyWindowType,
+		Type:  models.WeeklyWindowType,
 	}
 }
 
@@ -300,6 +287,6 @@ func windowBiWeekly(date time.Time) Window {
 		Start: date,
 		Rule:  set,
 		Fuzzy: 3,
-		Type:  BiWeeklyWindowType,
+		Type:  models.BiWeeklyWindowType,
 	}
 }
