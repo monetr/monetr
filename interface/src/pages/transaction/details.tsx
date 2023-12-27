@@ -12,6 +12,7 @@ import MSelectSpending from '@monetr/interface/components/MSelectSpending';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import Transaction from '@monetr/interface/models/Transaction';
 import MerchantIcon from '@monetr/interface/pages/new/MerchantIcon';
@@ -155,6 +156,9 @@ export default function TransactionDetails(): JSX.Element {
                 name='spendingId'
               />
             ) }
+          </div>
+          <div className='w-full md:w-1/2 flex flex-col items-center'>
+            <SimilarTransactions transaction={ transaction } />
           </div>
         </div>
       </div>
