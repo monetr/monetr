@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
+	// clusterCleanStringRegex = regexp.MustCompile(`[a-zA-Z'\.\d]+`)
+	clusterCleanStringRegex = regexp.MustCompile(`(?:\b(?:[a-zA-Z]|\d){1}(?:[a-zA-Z.]{1,})(?:\d{1}[a-zA-Z]*){0,2}\b)`)
 	numberOnly              = regexp.MustCompile(`^\d+$`)
 
 	specialWeights = map[string]float32{
@@ -24,6 +25,8 @@ var (
 		"check":       0,
 		"transfer":    0,
 		"deposit":     0,
+		"purchase":    0,
+		"adjustment":  0,
 	}
 
 	synonyms = map[string]string{
