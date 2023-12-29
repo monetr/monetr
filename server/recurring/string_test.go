@@ -16,7 +16,7 @@ func TestCleanNameRegex(t *testing.T) {
 
 		lower, _ := CleanNameRegex(&txn)
 		assert.EqualValues(t, []string{
-			"when", "i", "work", "inc", "courant", "elliot", "798080132284epj", "merchant", "name", "when", "i", "work", "inc",
+			"when", "work", "inc", "courant", "elliot", "merchant", "name", "when", "work", "inc",
 		}, lower, "should match the cleaned string")
 	})
 
