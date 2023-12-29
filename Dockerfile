@@ -1,11 +1,18 @@
 FROM debian:12-slim AS base_builder
 WORKDIR /work
-RUN apt-get update && apt-get install -y git curl ca-certificates gnupg wget pkg-config cmake ruby-full libssl-dev
-RUN mkdir -p /etc/apt/keyrings && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-RUN apt-get update -y && \
-    apt-get install -y \
-    nodejs
+RUN apt-get update && apt-get install -y \
+  git \
+  curl \
+  ca-certificates \
+  gnupg \
+  wget \
+  pkg-config \
+  cmake \
+  ruby-full \
+  libssl-dev \
+  nodejs=18.* \
+  npm
+
 RUN npm install -g pnpm
 RUN wget -c https://golang.org/dl/go1.20.1.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.20.1.linux-amd64.tar.gz
 ENV GOPATH /home/go
@@ -24,10 +31,13 @@ COPY . /work
 RUN make monetr-release
 
 FROM debian:12-slim
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
       tzdata=2023c-5+deb12u1 \
       ca-certificates=20230311 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN useradd -rm -d /home/monetr -s /bin/bash -g root -G sudo -u 1000 monetr
 RUN mkdir -p /etc/monetr && chown -R 1000:1000 /etc/monetr
