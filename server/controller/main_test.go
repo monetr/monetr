@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/http/httputil"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -31,6 +33,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
+	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/sirupsen/logrus"
@@ -132,11 +135,18 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 			return redis.Dial("tcp", miniRedis.Server().Addr().String())
 		},
 	}
-
 	t.Cleanup(func() {
 		require.NoError(t, redisPool.Close())
 		miniRedis.Close()
 	})
+
+	// Create a temporary directory for file uploads.
+	tempDirectory, err := os.MkdirTemp("", fmt.Sprintf("monetr-test-%x", t.Name()))
+	require.NoError(t, err, "must be able to create a temp directory for uploads")
+	log.Debugf("[TEST] created temporary directory for uploads: %s", tempDirectory)
+
+	fileStorage := storage.NewFilesystemStorage(log, tempDirectory)
+
 	plaidSecrets := mock_secrets.NewMockPlaidSecrets()
 
 	var jobRunner background.JobController
@@ -169,7 +179,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		),
 		email,
 		clientTokens,
-		nil, // TODO Add storage stuff for tests
+		fileStorage,
 		clock,
 	)
 	app := application.NewApp(configuration, c)

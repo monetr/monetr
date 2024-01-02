@@ -298,19 +298,23 @@ func setupStorage(
 	case "s3":
 		log.Trace("setting up file storage interface using S3 protocol")
 		s3Config := configuration.Storage.S3
-		awsConfig := aws.NewConfig()
+		awsConfig := aws.NewConfig().WithS3ForcePathStyle(s3Config.ForcePathStyle)
 		if endpoint := s3Config.Endpoint; endpoint != nil {
 			awsConfig = awsConfig.WithEndpoint(*endpoint)
 		}
 
 		if useEnvCredentials := s3Config.UseEnvCredentials; useEnvCredentials {
 			awsConfig = awsConfig.WithCredentials(credentials.NewEnvCredentials())
-		} else if s3Config.AccessKeyID != nil {
+		} else if s3Config.AccessKey != nil {
 			awsConfig = awsConfig.WithCredentials(credentials.NewStaticCredentials(
-				*s3Config.AccessKeyID,
-				*s3Config.SecretAccessKey,
+				*s3Config.AccessKey,
+				*s3Config.SecretKey,
 				"", // Not requiured since we aren't using temporary credentials.
 			))
+		}
+
+		if s3Config.Region != "" {
+			awsConfig = awsConfig.WithRegion(s3Config.Region)
 		}
 
 		session, err := session.NewSession(awsConfig)

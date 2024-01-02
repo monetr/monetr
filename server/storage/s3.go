@@ -27,19 +27,19 @@ func NewS3StorageBackend(
 	return &s3Storage{
 		log:     log,
 		bucket:  bucket,
-		session: &s3.S3{},
+		session: s3client,
 	}
 }
 
 func (s *s3Storage) Store(
 	ctx context.Context,
 	buf io.ReadSeekCloser,
-	contentType ContentType,
+	info FileInfo,
 ) (uri string, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	key, err := getStorePath(contentType)
+	key, err := getStorePath(info)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func (s *s3Storage) Store(
 			Body:        buf,
 			Bucket:      &s.bucket,
 			Key:         &key,
-			ContentType: aws.String(string(contentType)),
+			ContentType: aws.String(string(info.ContentType)),
 			Metadata:    map[string]*string{},
 		},
 	)

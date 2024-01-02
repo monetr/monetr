@@ -31,12 +31,12 @@ func NewFilesystemStorage(
 func (f *filesystemStorage) Store(
 	ctx context.Context,
 	buf io.ReadSeekCloser,
-	contentType ContentType,
+	info FileInfo,
 ) (uri string, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	key, err := getStorePath(contentType)
+	key, err := getStorePath(info)
 	if err != nil {
 		return "", err
 	}
