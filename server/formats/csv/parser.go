@@ -5,19 +5,16 @@ import (
 	"io"
 
 	"github.com/monetr/monetr/server/formats"
+	"github.com/pkg/errors"
 )
 
-type FieldIndex []formats.Field
-
-type Row map[formats.Field]string
-
 type CSVParser struct {
-	mapping        FieldIndex
+	mapping        formats.FieldIndex
 	firstRowHeader bool
 	reader         *csv.Reader
 }
 
-func NewCSVParser(mapping FieldIndex, firstRowHeader bool, reader io.Reader) *CSVParser {
+func NewCSVParser(mapping formats.FieldIndex, firstRowHeader bool, reader io.Reader) *CSVParser {
 	return &CSVParser{
 		mapping:        mapping,
 		firstRowHeader: firstRowHeader,
@@ -25,10 +22,27 @@ func NewCSVParser(mapping FieldIndex, firstRowHeader bool, reader io.Reader) *CS
 	}
 }
 
-func (c *CSVParser) GetNextRow() (Row, error) {
+func (c *CSVParser) GetNextRow() (formats.Row, error) {
 	baseRow, err := c.reader.Read()
 	if err != nil {
 		return nil, err
 	}
 
+	if len(c.mapping) > len(baseRow) {
+		return nil, errors.Errorf(
+			"col number mismatch, expected %d column(s); found %d",
+			len(c.mapping), len(baseRow),
+		)
+	}
+
+	row := make(formats.Row)
+
+	for index, field := range c.mapping {
+		if field == formats.FieldIgnore {
+			continue
+		}
+		row[field] = baseRow[index]
+	}
+
+	return row, nil
 }

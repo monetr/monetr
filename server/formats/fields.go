@@ -17,3 +17,7 @@ const (
 	FieldAmountDebit     Field = 11
 	FieldAmountCredit    Field = 12
 )
+
+type FieldIndex []Field
+
+type Row map[Field]string
