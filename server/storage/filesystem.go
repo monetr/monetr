@@ -18,7 +18,21 @@ type filesystemStorage struct {
 	baseDirectory string
 }
 
-func (f *filesystemStorage) Store(ctx context.Context, buf io.ReadSeekCloser, contentType ContentType) (uri string, err error) {
+func NewFilesystemStorage(
+	log *logrus.Entry,
+	baseDirectory string,
+) Storage {
+	return &filesystemStorage{
+		log:           log,
+		baseDirectory: baseDirectory,
+	}
+}
+
+func (f *filesystemStorage) Store(
+	ctx context.Context,
+	buf io.ReadSeekCloser,
+	contentType ContentType,
+) (uri string, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -62,7 +76,10 @@ func (f *filesystemStorage) Store(ctx context.Context, buf io.ReadSeekCloser, co
 	return uri, nil
 }
 
-func (f *filesystemStorage) Read(ctx context.Context, uri string) (buf io.ReadCloser, contentType ContentType, err error) {
+func (f *filesystemStorage) Read(
+	ctx context.Context,
+	uri string,
+) (buf io.ReadCloser, contentType ContentType, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

@@ -10,6 +10,7 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
+	"github.com/monetr/monetr/server/storage"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -52,6 +53,7 @@ func NewBackgroundJobs(
 	publisher pubsub.Publisher,
 	plaidPlatypus platypus.Platypus,
 	plaidSecrets secrets.PlaidSecretsProvider,
+	fileStorage storage.Storage,
 ) (*BackgroundJobs, error) {
 	var enqueuer JobEnqueuer
 	var processor JobProcessor

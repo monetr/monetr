@@ -14,7 +14,11 @@ type CSVParser struct {
 	reader         *csv.Reader
 }
 
-func NewCSVParser(mapping formats.FieldIndex, firstRowHeader bool, reader io.Reader) *CSVParser {
+func NewCSVParser(
+	mapping formats.FieldIndex,
+	firstRowHeader bool,
+	reader io.Reader,
+) *CSVParser {
 	return &CSVParser{
 		mapping:        mapping,
 		firstRowHeader: firstRowHeader,

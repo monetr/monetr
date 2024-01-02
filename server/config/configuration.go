@@ -100,9 +100,10 @@ type S3Storage struct {
 }
 
 type GCSStorage struct {
-	Endpoint           *string `yaml:"endpoint"`
-	Bucket             string  `yaml:"bucket"`
-	ServiceAccountFile *string `yaml:"serviceAccountFile"`
+	URL             *string `yaml:"url"`
+	Bucket          string  `yaml:"bucket"`
+	APIKey          *string `yaml:"apiKey"`
+	CredentialsJSON *string `yaml:"credentialsFile"`
 }
 
 type FilesystemStorage struct {

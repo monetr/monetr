@@ -169,6 +169,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		),
 		email,
 		clientTokens,
+		nil, // TODO Add storage stuff for tests
 		clock,
 	)
 	app := application.NewApp(configuration, c)
