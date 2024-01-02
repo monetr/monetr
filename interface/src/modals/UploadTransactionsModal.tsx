@@ -1,30 +1,64 @@
 import React, { FormEvent, useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
-import { UploadFileOutlined } from '@mui/icons-material';
+import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { AxiosProgressEvent } from 'axios';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
+import fileSize from '@monetr/interface/util/fileSize';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 import request from '@monetr/interface/util/request';
 import { ExtractProps } from '@monetr/interface/util/typescriptEvils';
 
+enum UploadTransactionStage {
+  FileUpload = 1,
+  FieldMapping = 3,
+  Processing = 4,
+  Completed = 5,
+  Error = 6,
+}
+
 function UploadTransactionsModal(): JSX.Element {
   const modal = useModal();
-  const selectedBankAccountId = useSelectedBankAccountId();
-  const [file, setFile] = useState<File|null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const ref = useRef<MModalRef>(null);
+  const [stage, setStage] = useState<UploadTransactionStage>(UploadTransactionStage.FileUpload);
+
+  function CurrentStage(): JSX.Element {
+    switch (stage) {
+      case UploadTransactionStage.FileUpload:
+        return <UploadFileStage setFileId={ () => {} } setStage={ setStage } />;
+      default:
+        return null;
+    }
+
+  }
+  
+  return (
+    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
+      <CurrentStage />
+    </MModal>
+  );
+}
+
+interface StageProps {
+  setFileId: (fileId: number) => void;
+  setStage: (stage: UploadTransactionStage) => void;
+}
+
+function UploadFileStage(props: StageProps) {
+  const [file, setFile] = useState<File|null>(null);
+  const selectedBankAccountId = useSelectedBankAccountId();
+  const [uploadProgress, setUploadProgress] = useState(-1);
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
     const selectedFile = acceptedFiles[0];
     setFile(selectedFile);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
     const formData = new FormData();
@@ -39,13 +73,27 @@ function UploadTransactionsModal(): JSX.Element {
         setUploadProgress(percentCompleted);
       },
     };
+    setUploadProgress(0);
 
     return request()
-      .post(`/bank_accounts/${ selectedBankAccountId }/files`, formData, config)
+      .post(`/bank_accounts/${ selectedBankAccountId }/files/transactions`, formData, config)
       .then(result => {
-        console.log(result);
+        props.setFileId(result?.data?.fileId);
+        setTimeout(() => {
+          switch (file.type) {
+            case 'text/csv':
+              props.setStage(UploadTransactionStage.FieldMapping);
+              break;
+            default:
+              props.setStage(UploadTransactionStage.Processing);
+              break;
+          }
+        }, 1000);
+      })
+      .catch(error => {
+        console.error('file upload failed', error);
+        // props.setStage(UploadTransactionStage.Error);
       });
-
   }
 
   const uploadClassNames = mergeTailwind(
@@ -53,10 +101,10 @@ function UploadTransactionsModal(): JSX.Element {
     { 'border-dark-monetr-border hover:border-dark-monetr-border-string': !isDragActive },
     { 'border-dark-monetr-brand-subtle': isDragActive },
   );
-  
-  return (
-    <MModal open={ modal.visible } ref={ ref } className='sm:max-w-xl'>
-      <form onSubmit={ handleSubmit }  className='h-full flex flex-col gap-2 p-2 justify-between'>
+
+  if (uploadProgress >= 0) {
+    return (
+      <div className='h-full flex flex-col gap-2 p-2 justify-between'>
         <div className='flex flex-col gap-2 h-full'>
           <div className='flex justify-between'>
             <MSpan weight='bold' size='xl'>
@@ -66,19 +114,49 @@ function UploadTransactionsModal(): JSX.Element {
               { /* TODO Close button */ }
             </div>
           </div>
+
+          <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
+            <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
+            <div className='flex flex-col py-1 w-full'>
+              <MSpan size='lg'>{ file.name }</MSpan>
+              <div className='w-full bg-gray-200 rounded-full h-1.5 my-2 dark:bg-gray-700 relative'>
+                <div className='absolute top-0 bg-green-600 h-1.5 rounded-full dark:bg-green-600' style={ { width: `${uploadProgress}%` } }></div>
+              </div>
+            </div>
+            <Close className='mr-2 text-dark-monetr-content-subtle hover:text-dark-monetr-content' />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (file) {
+    return (
+      <form onSubmit={ handleSubmit } className='h-full flex flex-col gap-2 p-2 justify-between'>
+        <div className='flex flex-col gap-2 h-full'>
+          <div className='flex justify-between'>
+            <MSpan weight='bold' size='xl'>
+            Upload Transactions
+            </MSpan>
+            <div>
+              { /* TODO Close button */ }
+            </div>
+          </div>
           <MSpan>
             Upload a CSV to import transaction data manually into your account. Maximum of 5MB.
           </MSpan>
 
-          <div { ...getRootProps() } className={ uploadClassNames }>
-            <input { ...getInputProps() } />
-            <UploadFileOutlined className='text-6xl text-dark-monetr-content' />
-            <MSpan size='lg' weight='semibold'>Drag CSV here</MSpan>
-            <MSpan>Or click to browse</MSpan>
+          <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
+            <FilePresentOutlined className='text-6xl text-dark-monetr-content' />
+            <div className='flex flex-col py-1 w-full'>
+              <MSpan size='lg'>{ file.name }</MSpan>
+              <MSpan>{ fileSize(file.size) }</MSpan>
+            </div>
+            <Close className='mr-2 text-dark-monetr-content-subtle hover:text-dark-monetr-content' />
           </div>
         </div>
-        <div className='flex justify-end gap-2'>
-          <MBaseButton color='secondary' onClick={ modal.remove }>
+        <div className='flex justify-end gap-2 mt-2'>
+          <MBaseButton color='secondary' onClick={ () => {} }> { /* TODO Cancel */ }
             Cancel
           </MBaseButton>
           <MBaseButton color='primary' type='submit'>
@@ -86,7 +164,40 @@ function UploadTransactionsModal(): JSX.Element {
           </MBaseButton>
         </div>
       </form>
-    </MModal>
+    );
+  }
+
+  return (
+    <form onSubmit={ handleSubmit } className='h-full flex flex-col gap-2 p-2 justify-between'>
+      <div className='flex flex-col gap-2 h-full'>
+        <div className='flex justify-between'>
+          <MSpan weight='bold' size='xl'>
+            Upload Transactions
+          </MSpan>
+          <div>
+            { /* TODO Close button */ }
+          </div>
+        </div>
+        <MSpan>
+          Upload a CSV to import transaction data manually into your account. Maximum of 5MB.
+        </MSpan>
+
+        <div { ...getRootProps() } className={ uploadClassNames }>
+          <input { ...getInputProps() } />
+          <UploadFileOutlined className='text-6xl text-dark-monetr-content' />
+          <MSpan size='lg' weight='semibold'>Drag CSV here</MSpan>
+          <MSpan>Or click to browse</MSpan>
+        </div>
+      </div>
+      <div className='flex justify-end gap-2 mt-2'>
+        <MBaseButton color='secondary' onClick={ () => {} }> { /* TODO Cancel */ }
+          Cancel
+        </MBaseButton>
+        <MBaseButton color='primary' type='submit'>
+          Upload
+        </MBaseButton>
+      </div>
+    </form>
   );
 }
 
