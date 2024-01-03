@@ -54,6 +54,7 @@ export function useSimilarTransactions(transaction: Transaction | null): UseQuer
     {
       enabled: Boolean(transaction),
       select: data => new TransactionCluster(data),
+      retry: false,
     },
   );
 }
