@@ -217,6 +217,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	repoParty.POST("/authentication/forgot", c.postForgotPassword)
 	repoParty.POST("/authentication/reset", c.resetPassword)
 
+	multiFactorRequired := repoParty.Group("", c.multiFactorMiddleware)
+	multiFactorRequired.POST("/authentication/multifactor", c.postMultifactor)
+
 	authed := repoParty.Group("", c.authenticationMiddleware)
 	// User
 	authed.GET("/users/me", c.getMe)

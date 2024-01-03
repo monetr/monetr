@@ -16,6 +16,7 @@ type Audience string
 
 const (
 	AuthenticatedAudience Audience = "authenticated"
+	MultiFactorAudience   Audience = "multiFactor"
 	ResetPasswordAudience Audience = "resetPassword"
 	VerifyEmailAudience   Audience = "verifyEmail"
 )
