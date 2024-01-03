@@ -91,7 +91,7 @@ func (c *Controller) removeCookieIfPresent(ctx echo.Context) {
 	c.updateAuthenticationCookie(ctx, ClearAuthentication)
 }
 
-func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
+func (c *Controller) authenticateUser(ctx echo.Context, audience security.Audience) (err error) {
 	now := c.clock.Now()
 	log := c.getLog(ctx)
 	var token string
@@ -140,7 +140,7 @@ func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
 		return errors.New("token must be provided")
 	}
 
-	claims, err := c.clientTokens.Parse(security.AuthenticatedAudience, token)
+	claims, err := c.clientTokens.Parse(audience, token)
 	if err != nil {
 		c.updateAuthenticationCookie(ctx, ClearAuthentication)
 		// Don't return the JWT error to the client, but throw it in Sentry so it can still be used for debugging.
@@ -181,7 +181,18 @@ func (c *Controller) authenticateUser(ctx echo.Context) (err error) {
 
 func (c *Controller) authenticationMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
-		if err := c.authenticateUser(ctx); err != nil {
+		if err := c.authenticateUser(ctx, security.AuthenticatedAudience); err != nil {
+			c.updateAuthenticationCookie(ctx, ClearAuthentication)
+			return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
+		}
+
+		return next(ctx)
+	}
+}
+
+func (c *Controller) multiFactorMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(ctx echo.Context) error {
+		if err := c.authenticateUser(ctx, security.MultiFactorAudience); err != nil {
 			c.updateAuthenticationCookie(ctx, ClearAuthentication)
 			return echo.NewHTTPError(http.StatusUnauthorized, "unauthorized")
 		}
