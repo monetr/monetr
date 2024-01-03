@@ -135,7 +135,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 
 	legalName := ""
 	if len(me.LastName) > 0 {
-		legalName = fmt.Sprintf("%s %s", me.FirstName, me.LastName)
+		legalName = fmt.Sprintf("%s %s", me.Login.FirstName, me.Login.LastName)
 	}
 
 	var phoneNumber *string

@@ -95,12 +95,9 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
 
-		firstName, lastName := gofakeit.FirstName(), gofakeit.LastName()
 		user := models.User{
 			LoginId:          login.LoginId,
 			AccountId:        account.AccountId,
-			FirstName:        firstName,
-			LastName:         lastName,
 			StripeCustomerId: nil,
 		}
 		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
@@ -130,12 +127,9 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 		assert.NotEmpty(t, account, "new account should not be empty")
 		assert.Greater(t, account.AccountId, uint64(0), "accountId should be greater than 0")
 
-		firstName, lastName := gofakeit.FirstName(), gofakeit.LastName()
 		user := models.User{
 			LoginId:          login.LoginId,
 			AccountId:        account.AccountId,
-			FirstName:        firstName,
-			LastName:         lastName,
 			StripeCustomerId: nil,
 		}
 		err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)

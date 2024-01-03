@@ -363,8 +363,6 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 	user := models.User{
 		LoginId:   login.LoginId,
 		AccountId: account.AccountId,
-		FirstName: registerRequest.FirstName,
-		LastName:  registerRequest.LastName,
 	}
 
 	// Now that we have an accountId we can create the user object which will

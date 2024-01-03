@@ -66,8 +66,6 @@ func SeedAccount(t *testing.T, db *pg.DB, clock clock.Clock, options SeedAccount
 		user = models.User{
 			LoginId:   login.LoginId,
 			AccountId: account.AccountId,
-			FirstName: login.FirstName,
-			LastName:  login.LastName,
 		}
 
 		_, err = txn.Model(&user).Insert(&user)

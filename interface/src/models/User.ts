@@ -11,8 +11,6 @@ export default class User {
     timezone: string;
   };
   login: Login;
-  firstName: string;
-  lastName: string;
 
   constructor(data?: Partial<User>) {
     if (data) Object.assign(this, {

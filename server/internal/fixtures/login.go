@@ -87,8 +87,6 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 		Login:            &login,
 		AccountId:        account.AccountId,
 		Account:          &account,
-		FirstName:        login.FirstName,
-		LastName:         login.LastName,
 		StripeCustomerId: account.StripeCustomerId,
 	}
 	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)
@@ -117,8 +115,6 @@ func GivenIHaveATrialingAccount(t *testing.T, clock clock.Clock, login models.Lo
 		Login:            &login,
 		AccountId:        account.AccountId,
 		Account:          &account,
-		FirstName:        login.FirstName,
-		LastName:         login.LastName,
 		StripeCustomerId: account.StripeCustomerId,
 	}
 	err = repo.CreateUser(context.Background(), login.LoginId, account.AccountId, &user)

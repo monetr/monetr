@@ -122,7 +122,7 @@ func (c *Controller) handlePostCreateCheckout(ctx echo.Context) error {
 	if account.StripeCustomerId == nil {
 		crumbs.Debug(c.getContext(ctx), "Account does not have a Stripe Customer ID, a customer will be created.", nil)
 		log.Warn("attempting to create a checkout session for an account with no customer, customer will be created")
-		name := me.FirstName + " " + me.LastName
+		name := me.Login.FirstName + " " + me.Login.LastName
 		customer, err := c.stripe.CreateCustomer(c.getContext(ctx), stripe.CustomerParams{
 			Email: &me.Login.Email,
 			Name:  &name,
