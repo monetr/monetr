@@ -23,7 +23,7 @@ func TestNewBackgroundJobs(t *testing.T) {
 			},
 		}
 
-		jobs, err := NewBackgroundJobs(ctx, log, clock, configuration, nil, nil, nil, nil, nil)
+		jobs, err := NewBackgroundJobs(ctx, log, clock, configuration, nil, nil, nil, nil, nil, nil)
 		assert.Nil(t, jobs, "object returned should be nil")
 		assert.EqualError(t, err, "invalid background job engine specified")
 	})
