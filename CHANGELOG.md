@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/monetr/monetr/compare/v0.16.0...v0.16.1) (2024-01-03)
+
+
+### Bug Fixes
+
+* **deploy:** Fixed production deployment configuration. ([6e3bb14](https://github.com/monetr/monetr/commit/6e3bb14503f081c470aed4448a90e01120341140))
+
 ## [0.16.0](https://github.com/monetr/monetr/compare/v0.15.12...v0.16.0) (2024-01-03)
 
 
