@@ -130,26 +130,6 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		})
 	}
 
-	// Check if the login requires MFA in order to authenticate.
-	if login.TOTP != "" {
-		log.Debug("login requires TOTP MFA, but none was provided")
-		return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
-	}
-	// else if login.TOTP != "" && loginRequest.TOTP != "" {
-	// 	// If the login does require TOTP and a code was provided in the request, then validate that the provided code is
-	// 	// correct.
-	// 	log.Trace("login requires TOTP MFA, and a code was provided; it will be verified")
-	//
-	// 	if err := login.VerifyTOTP(loginRequest.TOTP, c.clock.Now()); err != nil {
-	// 		log.Trace("provided TOTP MFA code is not valid")
-	// 		return c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
-	// 	}
-	//
-	// 	log.Trace("provided TOTP MFA code is valid")
-	// } else if login.TOTP == "" && loginRequest.TOTP != "" {
-	// 	log.Warn("login does not require TOTP MFA, but a code was provided anyway")
-	// }
-
 	switch len(login.Users) {
 	case 0:
 		// TODO (elliotcourant) Should we allow them to create an account?
@@ -158,6 +138,25 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		user := login.Users[0]
 
 		crumbs.IncludeUserInScope(c.getContext(ctx), user.AccountId)
+
+		// Check if the login requires MFA in order to authenticate.
+		if login.TOTP != "" {
+			log.Debug("login requires TOTP MFA")
+
+			token, err := c.clientTokens.Create(security.MultiFactorAudience, 5*time.Minute, security.Claims{
+				EmailAddress: login.Email,
+				UserId:       user.UserId.String(),
+				AccountId:    user.AccountId.String(),
+				LoginId:      user.LoginId.String(),
+			})
+			if err != nil {
+				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
+			}
+			c.updateAuthenticationCookie(ctx, token)
+
+			return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
+		}
+
 		token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
 			EmailAddress: login.Email,
 			UserId:       user.UserId.String(),
@@ -225,9 +224,9 @@ func (c *Controller) postMultifactor(ctx echo.Context) error {
 
 	token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
 		EmailAddress: me.Login.Email,
-		UserId:       me.UserId,
-		AccountId:    me.AccountId,
-		LoginId:      me.LoginId,
+		UserId:       me.UserId.String(),
+		AccountId:    me.AccountId.String(),
+		LoginId:      me.LoginId.String(),
 	})
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
