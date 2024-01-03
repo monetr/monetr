@@ -225,6 +225,8 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// User
 	authed.GET("/users/me", c.getMe)
 	authed.PUT("/users/security/password", c.changePassword)
+	authed.POST("/users/security/totp", c.postSetupTOTP)
+	authed.POST("/users/security/totp/confirm", c.postConfirmTOTP)
 	// Billing
 	authed.POST("/billing/create_checkout", c.handlePostCreateCheckout)
 	authed.GET("/billing/checkout/:checkoutSessionId", c.handleGetAfterCheckout)
