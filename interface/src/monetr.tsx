@@ -65,6 +65,7 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/login' element={ <Login /> } />
+        <Route path='/login/multifactor' element={ <h1>test</h1> } />
         <Route path='/logout' element={ <LogoutPage /> } />
         {config?.allowSignUp && <Route path='/register' element={ <Register /> } />}
         {config?.allowForgotPassword && <Route path='/password/forgot' element={ <ForgotPasswordNew /> } />}
@@ -81,6 +82,7 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/logout' element={ <LogoutPage /> } />
+        <Route path='/login/multifactor' element={ <h1>test</h1> } />
         <Route path='/account/subscribe' element={ <SubscribePage /> } />
         <Route path='/account/subscribe/after' element={ <AfterCheckoutPage /> } />
         <Route path='*' element={ <Navigate replace to='/account/subscribe' /> } />
@@ -93,6 +95,7 @@ export default function Monetr(): JSX.Element {
     return (
       <Routes>
         <Route path='/logout' element={ <LogoutPage /> } />
+        <Route path='/login/multifactor' element={ <h1>test</h1> } />
         <Route path='/setup' element={ <SetupPage manualEnabled={ config?.manualEnabled } /> } />
         <Route path='/setup/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
         <Route path='/setup/manual' element={ <SetupManual /> } />

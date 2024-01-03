@@ -143,16 +143,21 @@ func (c *Controller) getLog(ctx echo.Context) *logrus.Entry {
 		"requestId": util.GetRequestID(ctx),
 	})
 
-	if accountId, ok := ctx.Get(accountIdContextKey).(uint64); ok {
-		log = log.WithField("accountId", accountId)
+	claims, ok := ctx.Get(authenticationKey).(security.Claims)
+	if !ok {
+		return log
 	}
 
-	if userId, ok := ctx.Get(userIdContextKey).(uint64); ok {
-		log = log.WithField("userId", userId)
+	if claims.AccountId != "" {
+		log = log.WithField("accountId", claims.AccountId)
 	}
 
-	if loginId, ok := ctx.Get(loginIdContextKey).(uint64); ok {
-		log = log.WithField("loginId", loginId)
+	if claims.UserId != "" {
+		log = log.WithField("userId", claims.UserId)
+	}
+
+	if claims.LoginId != "" {
+		log = log.WithField("loginId", claims.LoginId)
 	}
 
 	return log
