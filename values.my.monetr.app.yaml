@@ -41,6 +41,16 @@ customEnvFrom:
   - secretRef:
       name: monetr-config-secrets
 
+extraVolumes:
+  - name: certificates
+    secret:
+      secretName: monetr-authentication-certificate
+
+extraVolumeMounts:
+  - name: certificates
+    mountPath: /etc/monetr/certs
+    readOnly: true
+
 api:
   name: monetr
   customEnv:
@@ -52,6 +62,9 @@ api:
   enableWebhooks: true # Will be deprecated soon.
   beta:
     enableBetaCodes: true
+  backgroundJobs:
+    engine: postgresql
+    scheduler: internal
   postgreSql:
     address: postgres.production.monetr.in
     port: 5432
@@ -86,9 +99,7 @@ api:
     webhooksEnabled: true
     webhooksDomain: my.monetr.app
     oauthDomain: my.monetr.app
-    maxNumberOfLinks: 2
-  jwt:
-    loginExpiration: 14
+    maxNumberOfLinks: 3
   cors:
     allowedOrigins:
       - "https://my.monetr.app"
@@ -111,6 +122,10 @@ api:
     provider: google
     google:
       resourceName: projects/production-362403/locations/us/keyRings/monetr-production-362403-monetr-in/cryptoKeys/monetr-secrets-monetr-production-362403-monetr-in
+  security:
+    privateKey: /etc/monetr/certs/tls.key
+  storage:
+    enabled: false
   stripe:
     enabled: true
     webhooksEnabled: true # Still working on this for now.
