@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"crypto/rand"
+	"encoding/base32"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -8,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
+	"github.com/xlzd/gotp"
 )
 
 func (c *Controller) getMe(ctx echo.Context) error {
@@ -130,4 +134,21 @@ func (c *Controller) changePassword(ctx echo.Context) error {
 	default:
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to change password")
 	}
+}
+
+func (c *Controller) postSetupTOTP(ctx echo.Context) error {
+	randBytes := make([]byte, 64)
+	if _, err := rand.Read(randBytes); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to generate secret")
+	}
+	secret := base32.StdEncoding.EncodeToString(randBytes)
+	totp := gotp.NewDefaultTOTP(secret)
+	fmt.Sprint(totp)
+
+	// TODO How do we store the secret before committing it as active?
+	return nil
+}
+
+func (c *Controller) postConfirmTOTP(ctx echo.Context) error {
+	return nil
 }
