@@ -32,6 +32,7 @@ func newVersionCommand(parent *cobra.Command) {
 				"Revision:        %s\n" +
 				"Build time:      %s\n" +
 				"Build host:      %s\n" +
+				"Build type:      %s\n" +
 				"Embedded UI:     %t\n" +
 				"Embedded Icons:  %t\n" +
 				"  Icon Packs:    %s\n" +
@@ -65,6 +66,7 @@ func newVersionCommand(parent *cobra.Command) {
 				build.Revision,
 				build.BuildTime,
 				build.BuildHost,
+				build.BuildType,
 				ui.EmbeddedUI,
 				iconsEnabled,
 				iconPacks,
