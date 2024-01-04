@@ -22,6 +22,7 @@ const (
 
 type Token interface {
 	Token() string
+	XML() string
 }
 
 type Field struct {
@@ -33,6 +34,10 @@ func (f Field) Token() string {
 	return f.Name
 }
 
+func (f Field) XML() string {
+	return fmt.Sprintf("<%s>%s</%s>", f.Name, strings.TrimSpace(f.Value), f.Name)
+}
+
 type Array struct {
 	Name  string
 	Items []Token
@@ -40,6 +45,14 @@ type Array struct {
 
 func (a Array) Token() string {
 	return a.Name
+}
+
+func (a Array) XML() string {
+	pieces := make([]string, len(a.Items))
+	for i := range a.Items {
+		pieces[i] = a.Items[i].XML()
+	}
+	return fmt.Sprintf("<%s>%s</%s>", a.Name, strings.Join(pieces, ""), a.Name)
 }
 
 func Tokenize(qfxData string) Token {
