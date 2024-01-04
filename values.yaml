@@ -199,9 +199,10 @@ api:
     enabled: false
     provider: gcs
     gcs:
-      endpoint: null
+      url: null
       bucket: monetr-storage
-      serviceAccountFile: null # Should autodetect
+      apiKey: null
+      credentialsJSON: null # Should autodetect if not specified and key is omitted.
     s3:
       endpoint: null
       bucket: monetr-storage

@@ -22,6 +22,7 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
+	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
@@ -29,26 +30,27 @@ import (
 )
 
 type Controller struct {
-	db                       *pg.DB
-	configuration            config.Configuration
-	captcha                  captcha.Verification
-	plaid                    platypus.Platypus
-	plaidWebhookVerification platypus.WebhookVerification
-	plaidSecrets             secrets.PlaidSecretsProvider
-	plaidInstitutions        platypus.PlaidInstitutions
-	log                      *logrus.Entry
-	jobRunner                background.JobController
-	stats                    *metrics.Stats
-	stripe                   stripe_helper.Stripe
-	ps                       pubsub.PublishSubscribe
-	cache                    cache.Cache
 	accounts                 billing.AccountRepository
-	paywall                  billing.BasicPayWall
 	billing                  billing.BasicBilling
-	stripeWebhooks           billing.StripeWebhookHandler
-	email                    communication.EmailCommunication
+	cache                    cache.Cache
+	captcha                  captcha.Verification
 	clientTokens             security.ClientTokens
 	clock                    clock.Clock
+	configuration            config.Configuration
+	db                       *pg.DB
+	email                    communication.EmailCommunication
+	fileStorage              storage.Storage
+	jobRunner                background.JobController
+	log                      *logrus.Entry
+	paywall                  billing.BasicPayWall
+	plaid                    platypus.Platypus
+	plaidInstitutions        platypus.PlaidInstitutions
+	plaidSecrets             secrets.PlaidSecretsProvider
+	plaidWebhookVerification platypus.WebhookVerification
+	ps                       pubsub.PublishSubscribe
+	stats                    *metrics.Stats
+	stripe                   stripe_helper.Stripe
+	stripeWebhooks           billing.StripeWebhookHandler
 }
 
 func NewController(
@@ -64,6 +66,7 @@ func NewController(
 	basicPaywall billing.BasicPayWall,
 	email communication.EmailCommunication,
 	clientTokens security.ClientTokens,
+	fileStorage storage.Storage,
 	clock clock.Clock,
 ) *Controller {
 	var recaptcha captcha.Verification
@@ -86,26 +89,27 @@ func NewController(
 	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(log, plaidClient, 5*time.Minute)
 
 	return &Controller{
-		captcha:                  recaptcha,
-		configuration:            configuration,
-		db:                       db,
-		plaid:                    plaidClient,
-		plaidWebhookVerification: plaidWebhookVerification,
-		plaidSecrets:             plaidSecrets,
-		plaidInstitutions:        platypus.NewPlaidInstitutionWrapper(log, plaidClient, caching),
-		log:                      log,
-		jobRunner:                jobRunner,
-		stats:                    stats,
-		stripe:                   stripe,
-		ps:                       pubSub,
-		cache:                    caching,
 		accounts:                 accountsRepo,
-		paywall:                  basicPaywall,
 		billing:                  basicBilling,
-		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
-		email:                    email,
+		cache:                    caching,
+		captcha:                  recaptcha,
 		clientTokens:             clientTokens,
 		clock:                    clock,
+		configuration:            configuration,
+		db:                       db,
+		email:                    email,
+		fileStorage:              fileStorage,
+		jobRunner:                jobRunner,
+		log:                      log,
+		paywall:                  basicPaywall,
+		plaid:                    plaidClient,
+		plaidInstitutions:        platypus.NewPlaidInstitutionWrapper(log, plaidClient, caching),
+		plaidSecrets:             plaidSecrets,
+		plaidWebhookVerification: plaidWebhookVerification,
+		ps:                       pubSub,
+		stats:                    stats,
+		stripe:                   stripe,
+		stripeWebhooks:           billing.NewStripeWebhookHandler(log, accountsRepo, basicBilling, pubSub),
 	}
 }
 

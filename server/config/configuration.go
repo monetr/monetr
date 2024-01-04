@@ -95,14 +95,17 @@ type S3Storage struct {
 	Endpoint          *string `yaml:"endpoint"`
 	Bucket            string  `yaml:"bucket"`
 	UseEnvCredentials bool    `yaml:"useEnvCredentials"`
-	AccessKeyID       *string `yaml:"accessKeyId"`
-	SecretAccessKey   *string `yaml:"secretAccessKey"`
+	Region            string  `yaml:"region"`
+	ForcePathStyle    bool    `yaml:"forcePathStyle"`
+	AccessKey         *string `yaml:"accessKeyId"`
+	SecretKey         *string `yaml:"secretAccessKey"`
 }
 
 type GCSStorage struct {
-	Endpoint           *string `yaml:"endpoint"`
-	Bucket             string  `yaml:"bucket"`
-	ServiceAccountFile *string `yaml:"serviceAccountFile"`
+	URL             *string `yaml:"url"`
+	Bucket          string  `yaml:"bucket"`
+	APIKey          *string `yaml:"apiKey"`
+	CredentialsJSON *string `yaml:"credentialsFile"`
 }
 
 type FilesystemStorage struct {

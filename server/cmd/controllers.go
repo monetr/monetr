@@ -14,6 +14,7 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
+	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/ui"
 	"github.com/sirupsen/logrus"
@@ -32,6 +33,7 @@ func getControllers(
 	basicPaywall billing.BasicPayWall,
 	email communication.EmailCommunication,
 	clientTokens security.ClientTokens,
+	fileStorage storage.Storage,
 	clock clock.Clock,
 ) []application.Controller {
 	return []application.Controller{
@@ -48,6 +50,7 @@ func getControllers(
 			basicPaywall,
 			email,
 			clientTokens,
+			fileStorage,
 			clock,
 		),
 		ui.NewUIController(log, configuration),

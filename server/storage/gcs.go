@@ -26,11 +26,15 @@ func NewGCSStorageBackend(log *logrus.Entry, bucket string, client *storage.Clie
 	}
 }
 
-func (s *gcsStorage) Store(ctx context.Context, buf io.ReadSeekCloser, contentType ContentType) (uri string, err error) {
+func (s *gcsStorage) Store(
+	ctx context.Context,
+	buf io.ReadSeekCloser,
+	info FileInfo,
+) (uri string, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	key, err := getStorePath(contentType)
+	key, err := getStorePath(info)
 	if err != nil {
 		return "", err
 	}
@@ -51,13 +55,16 @@ func (s *gcsStorage) Store(ctx context.Context, buf io.ReadSeekCloser, contentTy
 		return "", errors.Wrap(err, "failed to write buffer to gcs writer")
 	}
 
-	writer.Attrs().ContentType = string(contentType)
-	writer.ContentType = string(contentType)
+	writer.Attrs().ContentType = string(info.ContentType)
+	writer.ContentType = string(info.ContentType)
 
 	return uri, errors.Wrap(writer.Close(), "failed to store file in gcs")
 }
 
-func (s *gcsStorage) Read(ctx context.Context, uri string) (buf io.ReadCloser, contentType ContentType, err error) {
+func (s *gcsStorage) Read(
+	ctx context.Context,
+	uri string,
+) (buf io.ReadCloser, contentType ContentType, err error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 

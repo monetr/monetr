@@ -8,6 +8,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
@@ -19,6 +20,7 @@ type JobRepository interface {
 	GetPlaidLinksByAccount(ctx context.Context) ([]PlaidLinksForAccount, error)
 	GetLinksForExpiredAccounts(ctx context.Context) ([]models.Link, error)
 	GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error)
+	GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error)
 }
 
 type ProcessFundingSchedulesItem struct {
@@ -185,4 +187,29 @@ func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([
 	}
 
 	return result, err
+}
+
+type AccountWithTooManyFiles struct {
+	tableName string `pg:"files"`
+
+	AccountId uint64 `pg:"account_id"`
+	Count     int64  `pg:"count"`
+}
+
+func (j *jobRepository) GetAccountsWithTooManyFiles(ctx context.Context) ([]AccountWithTooManyFiles, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var result []AccountWithTooManyFiles
+	err := j.txn.ModelContext(span.Context(), &result).
+		ColumnExpr(`"account_id"`).
+		ColumnExpr(`COUNT("file_id") AS "count"`).
+		GroupExpr(`"account_id"`).
+		Having(`COUNT("file_id") > ?`, 10).
+		Select(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to find accounts with too many files")
+	}
+
+	return result, nil
 }

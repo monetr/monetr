@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/benbjohnson/clock"
+	"github.com/google/uuid"
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
@@ -137,6 +138,52 @@ func TestJobRepository_GetLinksForExpiredAccounts(t *testing.T) {
 			assert.NoError(t, err, "should not have an error retrieving links for expired accounts")
 			assert.Len(t, result, 1, "should have one link that is expired")
 			assert.EqualValues(t, link.LinkId, result[0].LinkId, "expired link should be the one created for this test")
+		}
+	})
+}
+
+func TestJobRepository_GetAccountsWithTooManyFiles(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+
+		jobRepo := repository.NewJobRepository(db, clock)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		bankAccount := fixtures.GivenIHaveABankAccount(t, clock, &link, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+
+		{
+			// Check before we create the files, there shouldn't be any accounts right
+			// now.
+			tooMany, err := jobRepo.GetAccountsWithTooManyFiles(context.Background())
+			assert.NoError(t, err, "should not return an error looking for too many files")
+			assert.Empty(t, tooMany, "there should not be any accounts with too many files")
+		}
+
+		// Create a ton of files in a single account
+		for i := 0; i < 100; i++ {
+			testutils.MustDBInsert(t, &models.File{
+				AccountId:       bankAccount.AccountId,
+				BankAccountId:   bankAccount.BankAccountId,
+				Name:            uuid.NewString(),
+				ContentType:     "text/csv",
+				Size:            100,
+				ObjectUri:       "bogus://temp",
+				CreatedAt:       time.Now(),
+				CreatedByUserId: user.UserId,
+			})
+		}
+
+		{
+			// Now that some files exist we check again.
+			tooMany, err := jobRepo.GetAccountsWithTooManyFiles(context.Background())
+			assert.NoError(t, err, "should not return an error looking for too many files")
+			assert.EqualValues(t, []repository.AccountWithTooManyFiles{
+				{
+					AccountId: bankAccount.AccountId,
+					Count:     100,
+				},
+			}, tooMany, "should have 100 files now")
 		}
 	})
 }

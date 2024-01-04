@@ -87,6 +87,8 @@ type BaseRepository interface {
 	// If no cluster can be found then nil and pg.NoRows will be returned
 	// (wrapped).
 	GetTransactionClusterByMember(ctx context.Context, bankAccountId uint64, transactionId uint64) (*models.TransactionCluster, error)
+
+	fileRepositoryInterface
 }
 
 type Repository interface {
