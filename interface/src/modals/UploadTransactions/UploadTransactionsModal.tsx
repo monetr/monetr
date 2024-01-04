@@ -7,7 +7,6 @@ import { AxiosProgressEvent } from 'axios';
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
 import MSpan from '@monetr/interface/components/MSpan';
-import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccountId } from '@monetr/interface/hooks/bankAccounts';
 import MonetrFile from '@monetr/interface/models/File';
 import fileSize from '@monetr/interface/util/fileSize';
@@ -23,41 +22,6 @@ enum UploadTransactionStage {
   Error = 5,
 }
 
-interface UploadContext {
-  fileToUpload: File | null;
-  stage: UploadTransactionStage;
-  file: MonetrFile | null;
-}
-
-interface UploadTransactionContextWrapperProps {
-  children: ReactElement;
-}
-
-const Context = React.createContext<[UploadContext, (update: Partial<UploadContext>) => void]>([{
-  fileToUpload: null,
-  file: null,
-  stage: UploadTransactionStage.FileUpload,
-}, () => {}]);
-
-function UploadContextWrapper(props: UploadTransactionContextWrapperProps): JSX.Element {
-  const [state, setState] = useState<UploadContext>({
-    fileToUpload: null,
-    file: null,
-    stage: UploadTransactionStage.FileUpload,
-  });
-  const setStateWrapper = useCallback((update: Partial<UploadContext>) => {
-    setState((previousState: UploadContext) => ({
-      ...previousState,
-      ...update,
-    }));
-  }, [setState]);
-  return (
-    <Context.Provider value={ [state, setStateWrapper] }>
-      { props.children }
-    </Context.Provider>
-  );
-}
-
 function UploadTransactionsModal(): JSX.Element {
   const modal = useModal();
   const ref = useRef<MModalRef>(null);
@@ -67,7 +31,9 @@ function UploadTransactionsModal(): JSX.Element {
   function CurrentStage(): JSX.Element {
     switch (stage) {
       case UploadTransactionStage.FileUpload:
-        return <UploadFileStage setResult={ () => {} } setStage={ setStage } />;
+        return <UploadFileStage setResult={ () => {} } setStage={ setStage } close={ modal.remove } />;
+      case UploadTransactionStage.Processing:
+        
       default:
         return null;
     }
@@ -82,6 +48,7 @@ function UploadTransactionsModal(): JSX.Element {
 }
 
 interface StageProps {
+  close: () => void;
   setResult: (file: MonetrFile) => void;
   setStage: (stage: UploadTransactionStage) => void;
 }
@@ -180,7 +147,7 @@ function UploadFileStage(props: StageProps) {
             </div>
           </div>
           <MSpan>
-            Upload a CSV to import transaction data manually into your account. Maximum of 5MB.
+            Upload a QFX to import transaction data manually into your account. Maximum of 5MB.
           </MSpan>
 
           <div className='flex gap-2 items-center border rounded-md w-full p-2 border-dark-monetr-border'>
@@ -193,7 +160,7 @@ function UploadFileStage(props: StageProps) {
           </div>
         </div>
         <div className='flex justify-end gap-2 mt-2'>
-          <MBaseButton color='secondary' onClick={ () => {} }> { /* TODO Cancel */ }
+          <MBaseButton color='secondary' onClick={ props.close }>
             Cancel
           </MBaseButton>
           <MBaseButton color='primary' type='submit'>
@@ -216,18 +183,18 @@ function UploadFileStage(props: StageProps) {
           </div>
         </div>
         <MSpan>
-          Upload a CSV to import transaction data manually into your account. Maximum of 5MB.
+          Upload a QFX to import transaction data manually into your account. Maximum of 5MB.
         </MSpan>
 
         <div { ...getRootProps() } className={ uploadClassNames }>
           <input { ...getInputProps() } />
           <UploadFileOutlined className='text-6xl text-dark-monetr-content' />
-          <MSpan size='lg' weight='semibold'>Drag CSV here</MSpan>
+          <MSpan size='lg' weight='semibold'>Drag QFX file here</MSpan>
           <MSpan>Or click to browse</MSpan>
         </div>
       </div>
       <div className='flex justify-end gap-2 mt-2'>
-        <MBaseButton color='secondary' onClick={ () => {} }> { /* TODO Cancel */ }
+        <MBaseButton color='secondary' onClick={ props.close }>
           Cancel
         </MBaseButton>
         <MBaseButton color='primary' type='submit'>

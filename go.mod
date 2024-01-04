@@ -14,6 +14,7 @@ require (
 	github.com/aws/aws-sdk-go v1.47.9
 	github.com/benbjohnson/clock v1.3.5
 	github.com/brianvoe/gofakeit/v6 v6.24.0
+	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/getsentry/sentry-go v0.21.0
@@ -49,7 +50,6 @@ require (
 
 require (
 	cloud.google.com/go v0.110.10 // indirect
-	github.com/elliotcourant/gofx v0.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
