@@ -1,6 +1,6 @@
 module github.com/monetr/monetr
 
-go 1.20
+go 1.21.1
 
 require (
 	aidanwoods.dev/go-paseto v1.5.1
@@ -49,6 +49,7 @@ require (
 
 require (
 	cloud.google.com/go v0.110.10 // indirect
+	github.com/elliotcourant/gofx v0.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
