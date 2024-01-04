@@ -196,7 +196,7 @@ importers:
         specifier: 18.2.0
         version: 18.2.0(react@18.2.0)
       react-dropzone:
-        specifier: ^14.2.3
+        specifier: 14.2.3
         version: 14.2.3(react@18.2.0)
       react-google-recaptcha:
         specifier: 2.1.0
