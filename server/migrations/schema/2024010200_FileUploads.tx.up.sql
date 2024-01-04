@@ -14,18 +14,3 @@ CREATE TABLE "files" (
   CONSTRAINT "fk_files_bank_account"             FOREIGN KEY ("bank_account_id", "account_id") REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
   CONSTRAINT "fk_files_users_created_by_user_id" FOREIGN KEY ("created_by_user_id")            REFERENCES "users" ("user_id")
 );
-
-CREATE TABLE "file_sessions" (
-  "file_session_id"    BIGSERIAL                NOT NULL,
-  "account_id"         BIGINT                   NOT NULL,
-  "bank_account_id"    BIGINT                   NOT NULL,
-  "file_id"            BIGINT                   NOT NULL,
-  "fields"             INT[],
-  "created_at"         TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
-  "created_by_user_id" BIGINT                   NOT NULL,
-  CONSTRAINT "pk_file_sessions"                          PRIMARY KEY ("file_session_id", "account_id", "bank_account_id"),
-  CONSTRAINT "fk_file_sessions_account"                  FOREIGN KEY ("account_id")                               REFERENCES "accounts" ("account_id"),
-  CONSTRAINT "fk_file_sessions_bank_account"             FOREIGN KEY ("bank_account_id", "account_id")            REFERENCES "bank_accounts" ("bank_account_id", "account_id"),
-  CONSTRAINT "fk_file_sessions_file"                     FOREIGN KEY ("file_id", "account_id", "bank_account_id") REFERENCES "files" ("file_id", "account_id", "bank_account_id"),
-  CONSTRAINT "fk_file_sessions_users_created_by_user_id" FOREIGN KEY ("created_by_user_id")                       REFERENCES "users" ("user_id")
-);
