@@ -1,0 +1,151 @@
+OFXHEADER:100
+DATA:OFXSGML
+VERSION:102
+SECURITY:NONE
+ENCODING:USASCII
+CHARSET:1252
+COMPRESSION:NONE
+OLDFILEUID:NONE
+NEWFILEUID:NONE
+
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <DTSERVER>20240104130432.399
+      <LANGUAGE>ENG
+      <DTPROFUP>20050531050000.000
+      <FI>
+        <ORG>U.S. Bank
+        <FID>1402
+      </FI>
+      <INTU.BID>1402
+    </SONRS>
+  </SIGNONMSGSRSV1>
+  <CREDITCARDMSGSRSV1>
+    <CCSTMTTRNRS>
+      <TRNUID>0
+      <STATUS>
+        <CODE>0
+        <SEVERITY>INFO
+      </STATUS>
+      <CCSTMTRS>
+        <CURDEF>USD
+        <CCACCTFROM>
+          <ACCTID>1234567890123456
+        </CCACCTFROM>
+        <BANKTRANLIST>
+          <DTSTART>20220501050000.000
+          <DTEND>20220701060000.000
+          <STMTTRN>
+            <TRNTYPE>DEBIT
+            <DTPOSTED>20220503120000.000
+            <TRNAMT>-17.89
+            <FITID>20220503184126665229
+            <NAME>Steam Purchase 425-9522985 WA  
+            <MEMO>24906412122146310025438; 05816; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT
+            <DTPOSTED>20220503120000.000
+            <TRNAMT>600.00
+            <FITID>20220503225014228323
+            <NAME>PAYMENT THANK YOU  
+            <MEMO>WEB AUTOMTC; 00000; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT
+            <DTPOSTED>20220509120000.000
+            <TRNAMT>-226.22
+            <FITID>20220509185855909064
+            <NAME>Amazon.com*132OZ0EG2 Amzn.com/bi
+            <MEMO>24692162128100895446967; 05942; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT
+            <DTPOSTED>20220511120000.000
+            <TRNAMT>-75.14
+            <FITID>20220511183601077611
+            <NAME>AMZN Mktp US*1L47B4611 Amzn.com/
+            <MEMO>24692162130100898231974; 05942; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT
+            <DTPOSTED>20220511120000.000
+            <TRNAMT>-82.44
+            <FITID>20220511183601077663
+            <NAME>Amazon.com*1L3NF56N1 Amzn.com/bi
+            <MEMO>24692162130100866376934; 05942; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT
+            <DTPOSTED>20220513120000.000
+            <TRNAMT>-140.11
+            <FITID>20220513230943875877
+            <NAME>INTEREST CHARGE ON PURCHASES  
+            <MEMO>1; 00000; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT
+            <DTPOSTED>20220603120000.000
+            <TRNAMT>600.00
+            <FITID>20220603224344807939
+            <NAME>PAYMENT THANK YOU  
+            <MEMO>WEB AUTOMTC; 00000; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT
+            <DTPOSTED>20220613120000.000
+            <TRNAMT>-146.66
+            <FITID>20220613230809795760
+            <NAME>INTEREST CHARGE ON PURCHASES  
+            <MEMO>1; 00000; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT
+            <DTPOSTED>20220627120000.000
+            <TRNAMT>8097.09
+            <FITID>20220627225243682009
+            <NAME>INTERNET PAYMENT THANK YOU  
+            <MEMO>INTERNET; 00000; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>DEBIT
+            <DTPOSTED>20220628120000.000
+            <TRNAMT>-101.46
+            <FITID>20220628183551210340
+            <NAME>AMZN Mktp US*NR5OE7ZR3 Amzn.com/
+            <MEMO>24692162179100026826697; 05942; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT
+            <DTPOSTED>20220630120000.000
+            <TRNAMT>100.36
+            <FITID>20220630224726376256
+            <NAME>REWARDS REDEEMED FOR STATEMENT C
+            <MEMO>; 00000; ;
+          </STMTTRN>
+          <STMTTRN>
+            <TRNTYPE>CREDIT
+            <DTPOSTED>20220630120000.000
+            <TRNAMT>101.46
+            <FITID>20220630224726376530
+            <NAME>INTERNET PAYMENT THANK YOU  
+            <MEMO>INTERNET; 00000; ;
+          </STMTTRN>
+        </BANKTRANLIST>
+        <LEDGERBAL>
+          <BALAMT>0.00
+          <DTASOF>20240104130432.401
+        </LEDGERBAL>
+        <AVAILBAL>
+          <BALAMT>0.00
+          <DTASOF>20240104130432.401
+        </AVAILBAL>
+      </CCSTMTRS>
+    </CCSTMTTRNRS>
+  </CREDITCARDMSGSRSV1>
+</OFX>
