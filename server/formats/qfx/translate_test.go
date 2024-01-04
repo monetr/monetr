@@ -8,12 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConvertToXML(t *testing.T) {
+func TestConvertQFXToXML(t *testing.T) {
 	t.Run("nfcu", func(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu.qfx")
 		token := Tokenize(string(data))
 
-		xmlString := ConvertToXML(token)
+		xmlString := ConvertQFXToXML(token)
+		assert.NotEmpty(t, xmlString, "must produce an xml string")
+	})
+
+	t.Run("us bank", func(t *testing.T) {
+		data := GetFixtures(t, "sample-usbank.qfx")
+		token := Tokenize(string(data))
+
+		xmlString := ConvertQFXToXML(token)
 		assert.NotEmpty(t, xmlString, "must produce an xml string")
 	})
 }
@@ -23,7 +31,7 @@ func TestValidXMLOutput(t *testing.T) {
 		data := GetFixtures(t, "sample-nfcu.qfx")
 		token := Tokenize(string(data))
 
-		convertedToXml := ConvertToXML(token)
+		convertedToXml := ConvertQFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")
 
 		var ofx gofx.OFX
@@ -36,7 +44,7 @@ func TestValidXMLOutput(t *testing.T) {
 		data := GetFixtures(t, "sample-usbank.qfx")
 		token := Tokenize(string(data))
 
-		convertedToXml := ConvertToXML(token)
+		convertedToXml := ConvertQFXToXML(token)
 		assert.NotEmpty(t, convertedToXml, "must produce an xml string")
 
 		var ofx gofx.OFX
