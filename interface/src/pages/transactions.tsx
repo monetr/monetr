@@ -9,7 +9,7 @@ import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import { useTransactions } from '@monetr/interface/hooks/transactions';
-import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactionsModal';
+import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import Transaction from '@monetr/interface/models/Transaction';
 import TransactionDateItem from '@monetr/interface/pages/new/TransactionDateItem';
 import TransactionItem from '@monetr/interface/pages/new/TransactionItem';
@@ -131,6 +131,10 @@ export default function Transactions(): JSX.Element {
           icon={ ShoppingCartOutlined }
           title='Transactions'
         >
+          <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showUploadTransactionsModal }>
+            <UploadOutlined />
+            Upload
+          </MBaseButton>
         </MTopNavigation>
         <div className='w-full h-full flex justify-center items-center'>
           <div className='flex flex-col gap-2 items-center max-w-md'>
@@ -156,6 +160,10 @@ export default function Transactions(): JSX.Element {
         icon={ ShoppingCartOutlined }
         title='Transactions'
       >
+        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showUploadTransactionsModal }>
+          <UploadOutlined />
+          Upload
+        </MBaseButton>
       </MTopNavigation>
       <div className='flex flex-grow min-w-0 min-h-0'>
         <ul className='w-full overflow-y-auto' ref={ ref }>
