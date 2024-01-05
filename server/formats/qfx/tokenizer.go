@@ -57,6 +57,9 @@ func (a Array) XML() string {
 
 func Tokenize(qfxData string) Token {
 	items := dataRegex.FindAllStringSubmatch(qfxData, -1)
+	if len(items) == 0 {
+		panic("QFX file provided is not valid")
+	}
 	_, token := tokenizeItem(0, items)
 	return token
 }

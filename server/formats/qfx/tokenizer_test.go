@@ -20,4 +20,11 @@ func TestTokenizer(t *testing.T) {
 		assert.NotEmpty(t, items)
 		assert.IsType(t, new(Array), items, "Root item should be an array")
 	})
+
+	t.Run("panics for invalid", func(t *testing.T) {
+		data := GetFixtures(t, "invalid.qfx")
+		assert.PanicsWithValue(t, "QFX file provided is not valid", func() {
+			_ = Tokenize(string(data))
+		})
+	})
 }
