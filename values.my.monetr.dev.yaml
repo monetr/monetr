@@ -93,12 +93,6 @@ api:
       username: apikey
       host: smtp.sendgrid.net
       port: 587
-  sendGrid:
-    enabled: false
-    apiKey: ""
-    templates:
-      verifyEmailTemplate: ""
-      forgotPasswordTemplate: ""
   reCaptcha:
     enabled: true
     verifyLogin: false
