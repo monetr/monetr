@@ -2,7 +2,7 @@ import { PlaidLinkOnSuccessMetadata } from 'react-plaid-link';
 import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 
-import { useBankAccounts } from './bankAccounts';
+import { useBankAccounts, useSelectedBankAccount } from './bankAccounts';
 import { useAuthenticationSink } from './useAuthentication';
 import Link from '@monetr/interface/models/Link';
 import request from '@monetr/interface/util/request';
@@ -37,6 +37,11 @@ export function useLink(linkId: number | null): UseQueryResult<Link> {
         .getQueryState(['/links'])?.dataUpdatedAt,
     }
   );
+}
+
+export function useCurrentLink(): UseQueryResult<Link | undefined> {
+  const { data: bankAccount } = useSelectedBankAccount();
+  return useLink(bankAccount?.linkId);
 }
 
 export interface CreateLinkRequest {

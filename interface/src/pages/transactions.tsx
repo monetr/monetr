@@ -8,6 +8,7 @@ import * as R from 'ramda';
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MSpan from '@monetr/interface/components/MSpan';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
+import { useCurrentLink } from '@monetr/interface/hooks/links';
 import { useTransactions } from '@monetr/interface/hooks/transactions';
 import { showUploadTransactionsModal } from '@monetr/interface/modals/UploadTransactions/UploadTransactionsModal';
 import Transaction from '@monetr/interface/models/Transaction';
@@ -24,6 +25,7 @@ export default function Transactions(): JSX.Element {
     fetchNextPage,
     result: transactions, hasNextPage,
   } = useTransactions();
+  const { data: link } = useCurrentLink();
 
   // Scroll restoration code.
   const ref = useRef<HTMLUListElement>(null);
@@ -92,6 +94,19 @@ export default function Transactions(): JSX.Element {
     );
   }
 
+  function UploadButtonMaybe(): JSX.Element {
+    if (!link?.getIsManual()) {
+      return null;
+    }
+
+    return (
+      <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showUploadTransactionsModal }>
+        <UploadOutlined />
+        Upload
+      </MBaseButton>
+    );
+  }
+
   function TransactionItems() {
     interface TransactionGroup {
       transactions: Array<Transaction>;
@@ -131,10 +146,7 @@ export default function Transactions(): JSX.Element {
           icon={ ShoppingCartOutlined }
           title='Transactions'
         >
-          <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showUploadTransactionsModal }>
-            <UploadOutlined />
-            Upload
-          </MBaseButton>
+          <UploadButtonMaybe />
         </MTopNavigation>
         <div className='w-full h-full flex justify-center items-center'>
           <div className='flex flex-col gap-2 items-center max-w-md'>
@@ -160,10 +172,7 @@ export default function Transactions(): JSX.Element {
         icon={ ShoppingCartOutlined }
         title='Transactions'
       >
-        <MBaseButton color='primary' className='gap-1 py-1 px-2' onClick={ showUploadTransactionsModal }>
-          <UploadOutlined />
-          Upload
-        </MBaseButton>
+        <UploadButtonMaybe />
       </MTopNavigation>
       <div className='flex flex-grow min-w-0 min-h-0'>
         <ul className='w-full overflow-y-auto' ref={ ref }>
