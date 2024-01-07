@@ -5,7 +5,7 @@ set(GO_MODULES ${CMAKE_BINARY_DIR}/go-dependencies-marker.txt)
 add_custom_command(
   OUTPUT ${GO_MODULES}
   BYPRODUCTS ${GO_MODULES}
-  COMMAND ${CMAKE_Go_COMPILER} get -t ${CMAKE_SOURCE_DIR}/server/...
+  COMMAND ${CMAKE_Go_COMPILER} mod download
   COMMAND ${CMAKE_COMMAND} -E touch ${GO_MODULES}
   COMMENT "Installing go dependencies"
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
