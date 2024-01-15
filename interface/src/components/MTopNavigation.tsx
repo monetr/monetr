@@ -66,7 +66,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
   }
 
   return (
-    <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-4 justify-between'>
+    <div className='w-full h-auto md:h-12 flex flex-col md:flex-row md:items-center px-4 gap-x-4 justify-between'>
       <div className='flex gap-2 min-w-0 h-12 items-center flex-grow'>
         <MSidebarToggle className='mr-2' backButton={ props.base } />
         <span className='flex gap-2 flex-grow min-w-0'>
@@ -75,7 +75,7 @@ export default function MTopNavigation(props: MTopNavigationProps): JSX.Element 
         </span>
       </div>
       { props.children && (
-        <div className='flex gap-2 pb-4 md:p-0'>
+        <div className='flex gap-x-2 md:p-0'>
           { props.children }
         </div>
       )}
