@@ -27,6 +27,7 @@ var (
 		"deposit":     0,
 		"purchase":    0,
 		"adjustment":  0,
+		"helppay":     0, // Shows up on some google transactions, not helpful.
 	}
 
 	synonyms = map[string]string{
