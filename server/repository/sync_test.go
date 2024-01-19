@@ -7,7 +7,7 @@ import (
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/server/consts"
+	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -17,14 +17,10 @@ import (
 func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 	t.Run("no previous syncs", func(t *testing.T) {
 		clock := clock.NewMock()
-		plaidLink := models.PlaidLink{
-			ItemId:          gofakeit.UUID(),
-			Products:        consts.PlaidProductStrings(),
-			WebhookUrl:      "https://monetr.test/webhook",
-			InstitutionId:   "ins_123",
-			InstitutionName: "Platypus Bank",
-		}
-		testutils.MustDBInsert(t, &plaidLink)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		plaidLink := *link.PlaidLink
 		assert.NotZero(t, plaidLink.PlaidLinkID, "plaid link ID must not be zero, must have a valid record!")
 
 		db := testutils.GetPgDatabase(t)
@@ -36,14 +32,9 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 
 	t.Run("one previous sync", func(t *testing.T) {
 		clock := clock.NewMock()
-		plaidLink := models.PlaidLink{
-			ItemId:          gofakeit.UUID(),
-			Products:        consts.PlaidProductStrings(),
-			WebhookUrl:      "https://monetr.test/webhook",
-			InstitutionId:   "ins_123",
-			InstitutionName: "Platypus Bank",
-		}
-		testutils.MustDBInsert(t, &plaidLink)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		plaidLink := *link.PlaidLink
 		assert.NotZero(t, plaidLink.PlaidLinkID, "plaid link ID must not be zero, must have a valid record!")
 
 		plaidSync := models.PlaidSync{
@@ -67,14 +58,9 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 
 	t.Run("multiple previous syncs", func(t *testing.T) {
 		clock := clock.NewMock()
-		plaidLink := models.PlaidLink{
-			ItemId:          gofakeit.UUID(),
-			Products:        consts.PlaidProductStrings(),
-			WebhookUrl:      "https://monetr.test/webhook",
-			InstitutionId:   "ins_123",
-			InstitutionName: "Platypus Bank",
-		}
-		testutils.MustDBInsert(t, &plaidLink)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		plaidLink := *link.PlaidLink
 		assert.NotZero(t, plaidLink.PlaidLinkID, "plaid link ID must not be zero, must have a valid record!")
 
 		{ // One from a few days ago
