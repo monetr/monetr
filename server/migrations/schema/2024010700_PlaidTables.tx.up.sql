@@ -21,8 +21,6 @@ ADD COLUMN "updated_at" TIMESTAMP WITH TIME ZONE,
 ADD COLUMN "created_at" TIMESTAMP WITH TIME ZONE,
 ADD COLUMN "created_by_user_id" BIGINT;
 
--- TODO ALSO NEED TO UPDATE/BACKFILL PLAID SYNCS!
-
 UPDATE "plaid_links" 
 SET "account_id"             = "links"."account_id",
     "institution_id"         = "links"."plaid_institution_id",
@@ -53,10 +51,24 @@ ALTER COLUMN "created_at" SET NOT NULL,
 ALTER COLUMN "created_at" SET DEFAULT now(),
 ALTER COLUMN "created_by_user_id" SET NOT NULL,
 DROP CONSTRAINT "pk_plaid_links" CASCADE, 
-ADD PRIMARY KEY ("plaid_link_id", "account_id");
+ADD PRIMARY KEY ("plaid_link_id", "account_id"),
+ADD CONSTRAINT "fk_plaid_links_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id");
 
--- TODO Cleanup links table.
+ALTER TABLE "plaid_syncs"
+DROP CONSTRAINT "pk_plaid_syncs" CASCADE, 
+ADD PRIMARY KEY ("plaid_sync_id", "account_id"),
+ADD CONSTRAINT "fk_plaid_syncs_plaid_link" FOREIGN KEY ("plaid_link_id", "account_id") REFERENCES "plaid_links" ("plaid_link_id", "account_id"),
+ADD CONSTRAINT "fk_plaid_syncs_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id");
 
+ALTER TABLE "links"
+DROP COLUMN "link_status",
+DROP COLUMN "last_successful_update",
+DROP COLUMN "expiration_date",
+DROP COLUMN "plaid_institution_id",
+DROP COLUMN "last_manual_sync",
+DROP COLUMN "last_attempted_update",
+DROP COLUMN "plaid_new_accounts_available",
+ADD CONSTRAINT "fk_links_plaid_link" FOREIGN KEY ("plaid_link_id", "account_id") REFERENCES "plaid_links" ("plaid_link_id", "account_id");
 
 -- Now create the new plaid bank accounts table and backfill it.
 CREATE TABLE "plaid_bank_accounts" (
@@ -89,11 +101,15 @@ SELECT
 FROM "bank_accounts"
 INNER JOIN "links" ON "links"."link_id" = "bank_accounts"."link_id" AND 
                       "links"."account_id" = "bank_accounts"."account_id"
-WHERE "bank_accounts"."plaid_account_id" IS NOT NULL;
-
+WHERE "bank_accounts"."plaid_account_id" IS NOT NULL AND
+      "links"."plaid_link_id" IS NOT NULL;
 
 -- Then update the bank accounts table with the new stuff.
-ALTER TABLE "bank_accounts" ADD COLUMN "plaid_bank_account_id" BIGINT;
+ALTER TABLE "bank_accounts" 
+ADD COLUMN "plaid_bank_account_id" BIGINT,
+ADD COLUMN "updated_at" TIMESTAMP WITH TIME ZONE,
+ADD COLUMN "created_at" TIMESTAMP WITH TIME ZONE,
+ADD COLUMN "created_by_user_id" BIGINT;
 
 UPDATE "bank_accounts" 
 SET "plaid_bank_account_id" = "plaid_bank_accounts"."plaid_bank_account_id"
@@ -101,11 +117,25 @@ FROM "plaid_bank_accounts"
 WHERE "plaid_bank_accounts"."plaid_id" = "bank_accounts"."plaid_account_id" AND
       "plaid_bank_accounts"."account_id" = "bank_accounts"."account_id";
 
+UPDATE "bank_accounts" 
+SET "updated_at" = "links"."updated_at",
+    "created_at" = "links"."created_at",
+    "created_by_user_id" = "links"."created_by_user_id"
+FROM "links"
+WHERE "links"."link_id" = "bank_accounts"."link_id" AND
+      "links"."account_id" = "bank_accounts"."account_id";
+
 -- Then cleanup the columns that are no longer meant to be read from this table.
 ALTER TABLE "bank_accounts"
 DROP COLUMN "plaid_account_id",
 DROP COLUMN "plaid_name",
-DROP COLUMN "plaid_official_name";
+DROP COLUMN "plaid_official_name",
+ALTER COLUMN "updated_at" SET NOT NULL,
+ALTER COLUMN "updated_at" SET DEFAULT now(),
+ALTER COLUMN "created_at" SET NOT NULL,
+ALTER COLUMN "created_at" SET DEFAULT now(),
+ALTER COLUMN "created_by_user_id" SET NOT NULL,
+ADD CONSTRAINT "fk_bank_accounts_plaid_bank_accounts" FOREIGN KEY ("plaid_bank_account_id", "account_id") REFERENCES "plaid_bank_accounts" ("plaid_bank_account_id", "account_id");
 
 
 CREATE TABLE "plaid_transactions" (
