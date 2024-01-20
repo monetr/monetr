@@ -8,8 +8,6 @@ type PlaidTransaction struct {
 	PlaidTransactionId uint64            `json:"plaidTransactionId" pg:"plaid_transaction_id,notnull,pk,type:'bigserial'"`
 	AccountId          uint64            `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
 	Account            *Account          `json:"-" pg:"rel:has-one"`
-	PlaidLinkId        uint64            `json:"plaidLinkId" pg:"plaid_link_id,type:'bigint'"`
-	PlaidLink          *PlaidLink        `json:"-" pg:"rel:has-one"`
 	PlaidBankAccountId uint64            `json:"plaidBankAccountId" pg:"plaid_bank_account_id,notnull,type:'bigint',unique:per_bank_account"`
 	PlaidBankAccount   *PlaidBankAccount `json:"-" pg:"rel:has-one"`
 	PlaidId            string            `json:"-" pg:"plaid_id,notnull,unique:per_bank_account"`

@@ -263,9 +263,12 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context
 	err := r.txn.ModelContext(span.Context(), &result).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
+		Join(`INNER JOIN "plaid_transactions" AS "plaid_transaction"`).
+		JoinOn(`"plaid_transaction"."plaid_transaction_id" IN ("transaction"."plaid_transaction_id", "transaction"."pending_plaid_transaction_id") AND "plaid_transaction"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ?`, linkId).
-		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
+		WhereIn(`"plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds).
+		DistinctOn(`"transaction"."transaction_id"`).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve transactions by plaid Id")
