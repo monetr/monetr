@@ -68,6 +68,7 @@ DROP COLUMN "plaid_institution_id",
 DROP COLUMN "last_manual_sync",
 DROP COLUMN "last_attempted_update",
 DROP COLUMN "plaid_new_accounts_available",
+DROP COLUMN "error_code",
 ADD CONSTRAINT "fk_links_plaid_link" FOREIGN KEY ("plaid_link_id", "account_id") REFERENCES "plaid_links" ("plaid_link_id", "account_id");
 
 -- Now create the new plaid bank accounts table and backfill it.
