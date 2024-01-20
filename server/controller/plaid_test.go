@@ -44,7 +44,7 @@ func TestPostTokenCallback(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().Equal("could not retrieve details for any accounts")
+		response.JSON().Path("$.error").String().IsEqual("could not retrieve details for any accounts")
 	})
 }
 
@@ -135,7 +135,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("cannot update a non-Plaid link")
+		response.JSON().Path("$.error").String().IsEqual("cannot update a non-Plaid link")
 	})
 
 	t.Run("no plaid access token", func(t *testing.T) {
@@ -153,7 +153,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().Equal("failed to create Plaid client for link")
+		response.JSON().Path("$.error").String().IsEqual("failed to create Plaid client for link")
 	})
 
 	t.Run("missing link ID", func(t *testing.T) {
@@ -166,7 +166,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("must specify a link Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a link Id")
 	})
 
 	t.Run("bad link ID", func(t *testing.T) {
@@ -179,7 +179,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("must specify a link Id")
+		response.JSON().Path("$.error").String().IsEqual("must specify a link Id")
 	})
 
 	t.Run("missing link", func(t *testing.T) {
@@ -191,7 +191,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("failed to retrieve link: record does not exist")
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
 	})
 }
 
@@ -284,7 +284,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusTooEarly)
-			response.JSON().Path("$.error").String().Equal("link has been manually synced too recently")
+			response.JSON().Path("$.error").String().IsEqual("link has been manually synced too recently")
 		}
 	})
 
@@ -325,7 +325,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().Equal("failed to trigger manual sync")
+		response.JSON().Path("$.error").String().IsEqual("failed to trigger manual sync")
 	})
 
 	t.Run("invalid link ID", func(t *testing.T) {
@@ -342,7 +342,7 @@ func TestPostSyncPlaidManually(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusNotFound)
-		response.JSON().Path("$.error").String().Equal("failed to retrieve link: record does not exist")
+		response.JSON().Path("$.error").String().IsEqual("failed to retrieve link: record does not exist")
 	})
 
 	t.Run("manual link", func(t *testing.T) {
@@ -360,6 +360,6 @@ func TestPostSyncPlaidManually(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusBadRequest)
-		response.JSON().Path("$.error").String().Equal("cannot manually sync a non-Plaid link")
+		response.JSON().Path("$.error").String().IsEqual("cannot manually sync a non-Plaid link")
 	})
 }

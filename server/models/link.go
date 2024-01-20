@@ -11,7 +11,7 @@ type Link struct {
 	LinkType  LinkType `json:"linkType" pg:"link_type,notnull"`
 
 	PlaidLinkId *uint64    `json:"-" pg:"plaid_link_id"`
-	PlaidLink   *PlaidLink `json:"-" pg:"rel:has-one"`
+	PlaidLink   *PlaidLink `json:"plaidLink,omitempty" pg:"rel:has-one"`
 
 	InstitutionName string    `json:"institutionName" pg:"institution_name"`
 	Description     *string   `json:"description" pg:"description"`

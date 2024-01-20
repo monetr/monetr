@@ -108,13 +108,8 @@ func TestWindowGetDeviation(t *testing.T) {
 			merchantComparator: comparison,
 		}
 		baseline := models.Transaction{
-			TransactionId: 291,
-			Amount:        1500,
-			OriginalCategories: []string{
-				"Service",
-				"Financial",
-				"Accounting and Bookkeeping",
-			},
+			TransactionId:        291,
+			Amount:               1500,
 			Date:                 time.Date(2021, 7, 10, 0, 0, 0, 0, timezone),
 			OriginalName:         "FreshBooks. Merchant name: Freshbooks",
 			OriginalMerchantName: "FreshBooks",

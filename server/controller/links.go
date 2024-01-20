@@ -126,8 +126,7 @@ func (c *Controller) putLink(ctx echo.Context) error {
 	}
 
 	var link struct {
-		CustomInstitutionName string  `json:"customInstitutionName"`
-		Description           *string `json:"description"`
+		Description *string `json:"description"`
 	}
 	if err := ctx.Bind(&link); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed JSON")
@@ -147,7 +146,7 @@ func (c *Controller) putLink(ctx echo.Context) error {
 	}
 
 	if !hasUpdate {
-		return ctx.JSON(http.StatusNotModified, existingLink)
+		return ctx.NoContent(http.StatusNotModified)
 	}
 
 	if err = repo.UpdateLink(c.getContext(ctx), existingLink); err != nil {

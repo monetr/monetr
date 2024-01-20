@@ -17,7 +17,7 @@ const (
 type PlaidLink struct {
 	tableName string `pg:"plaid_links"`
 
-	PlaidLinkID          uint64          `json:"plaidLinkId" pg:"plaid_link_id,notnull,pk,type:'bigserial'"`
+	PlaidLinkID          uint64          `json:"-" pg:"plaid_link_id,notnull,pk,type:'bigserial'"`
 	AccountId            uint64          `json:"-" pg:"account_id,notnull,type:'bigint'"`
 	Account              *Account        `json:"-" pg:"rel:has-one"`
 	PlaidId              string          `json:"-" pg:"item_id,unique,notnull"`
@@ -29,7 +29,6 @@ type PlaidLink struct {
 	WebhookUrl           string          `json:"-" pg:"webhook_url"`
 	InstitutionId        string          `json:"institutionId" pg:"institution_id"`
 	InstitutionName      string          `json:"institutionName" pg:"institution_name"`
-	UsePlaidSync         bool            `json:"-" pg:"use_plaid_sync,notnull"`
 	LastManualSync       *time.Time      `json:"lastManualSync" pg:"last_manual_sync"`
 	LastSuccessfulUpdate *time.Time      `json:"lastSuccessfulUpdate" pg:"last_successful_update"`
 	LastAttemptedUpdate  *time.Time      `json:"lastAttemptedUpdate" pg:"last_attempted_update"`

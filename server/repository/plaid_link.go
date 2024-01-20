@@ -6,7 +6,6 @@ package repository
 import (
 	"context"
 
-	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
@@ -86,9 +85,8 @@ type plaidRepositoryBase struct {
 }
 
 func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string) (*models.Link, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetLinkByItemId"
 	span.Data = map[string]interface{}{
 		"itemId": itemId,
 	}
@@ -107,9 +105,8 @@ func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string
 }
 
 func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId, linkId uint64) (*models.Link, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetLink"
 
 	span.Data = map[string]interface{}{
 		"accountId": accountId,
@@ -119,7 +116,6 @@ func (r *plaidRepositoryBase) GetLink(ctx context.Context, accountId, linkId uin
 	var link models.Link
 	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
-		Relation("BankAccounts").
 		Where(`"link"."account_id" = ?`, accountId).
 		Where(`"link"."link_id" = ?`, linkId).
 		Limit(1).

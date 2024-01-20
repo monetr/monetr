@@ -171,7 +171,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) updatePlaidLink(ctx echo.Context) error {
+func (c *Controller) putUpdatePlaidLink(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -370,7 +370,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, link)
 }
 
-func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
+func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -437,7 +437,6 @@ func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 		Status:          models.PlaidLinkStatusPending,
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
-		UsePlaidSync:    true,
 	}
 	if err = repo.CreatePlaidLink(c.getContext(ctx), &plaidLink); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
@@ -447,6 +446,7 @@ func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 		AccountId:       repo.AccountId(),
 		PlaidLinkId:     &plaidLink.PlaidLinkID,
 		InstitutionName: callbackRequest.InstitutionName,
+		LinkType:        models.PlaidLinkType,
 	}
 	if err = repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
@@ -610,7 +610,6 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 		return c.badRequest(ctx, "cannot manually sync a non-Plaid link")
 	}
 
-	// TODO do we even want to check status anymore?
 	switch link.PlaidLink.Status {
 	case models.PlaidLinkStatusSetup, models.PlaidLinkStatusError:
 		log.Debug("link is not revoked, triggering manual sync")
@@ -619,10 +618,14 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 		return c.badRequest(ctx, "link is not in a valid status, it cannot be manually synced")
 	}
 
-	if ok, err := repo.UpdateLinkManualSyncTimestampMaybe(c.getContext(ctx), link.LinkId); err != nil {
-		return c.wrapPgError(ctx, err, "could not manually sync link")
-	} else if !ok {
+	plaidLink := link.PlaidLink
+	if lastManualSync := plaidLink.LastManualSync; lastManualSync != nil && lastManualSync.After(c.clock.Now().Add(-30*time.Minute)) {
 		return c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
+	}
+
+	plaidLink.LastManualSync = myownsanity.TimeP(c.clock.Now().UTC())
+	if err := repo.UpdatePlaidLink(c.getContext(ctx), plaidLink); err != nil {
+		return c.wrapPgError(ctx, err, "could not manually sync link")
 	}
 
 	err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{

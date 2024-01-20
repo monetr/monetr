@@ -46,24 +46,55 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount models
 
 		company := gofakeit.Company()
 		name := fmt.Sprintf("%s%s", prefix, strings.ToUpper(company))
+		amount := int64(gofakeit.Number(100, 10000))
+
+		var plaidTransaction *models.PlaidTransaction
+		if plaidBankAccount := bankAccount.PlaidBankAccount; plaidBankAccount != nil {
+			plaidTransaction = &models.PlaidTransaction{
+				AccountId:          bankAccount.AccountId,
+				PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
+				PlaidId:            gofakeit.UUID(),
+				PendingPlaidId:     nil,
+				Categories:         nil,
+				Date:               date,
+				AuthorizedDate:     nil,
+				Name:               name,
+				MerchantName:       company,
+				Amount:             amount,
+				Currency:           "USD",
+				IsPending:          false,
+				CreatedAt:          clock.Now().UTC(),
+				DeletedAt:          nil,
+			}
+
+			require.NoError(
+				t,
+				repo.CreatePlaidTransaction(context.Background(), plaidTransaction),
+				"must be able to seed transaction",
+			)
+		}
 
 		transaction := models.Transaction{
-			AccountId:     bankAccount.AccountId,
-			Account:       bankAccount.Account,
-			BankAccountId: bankAccount.BankAccountId,
-			BankAccount:   &bankAccount,
-			// PlaidTransactionId:        gofakeit.UUID(),
+			AccountId:                 bankAccount.AccountId,
+			Account:                   bankAccount.Account,
+			BankAccountId:             bankAccount.BankAccountId,
+			BankAccount:               &bankAccount,
 			PendingPlaidTransactionId: nil,
-			Amount:                    int64(gofakeit.Number(100, 10000)),
+			Amount:                    amount,
 			SpendingId:                nil,
 			Spending:                  nil,
 			SpendingAmount:            nil,
 			Categories:                nil,
 			Date:                      util.Midnight(clock.Now(), timezone),
 			Name:                      name,
+			OriginalName:              name,
 			MerchantName:              company,
+			OriginalMerchantName:      company,
 			IsPending:                 false,
 			CreatedAt:                 clock.Now(),
+		}
+		if plaidTransaction != nil {
+			transaction.PlaidTransactionId = &plaidTransaction.PlaidTransactionId
 		}
 
 		err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)

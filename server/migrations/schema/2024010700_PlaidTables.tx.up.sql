@@ -19,7 +19,8 @@ ADD COLUMN "last_successful_update" TIMESTAMP WITH TIME ZONE,
 ADD COLUMN "last_attempted_update" TIMESTAMP WITH TIME ZONE,
 ADD COLUMN "updated_at" TIMESTAMP WITH TIME ZONE,
 ADD COLUMN "created_at" TIMESTAMP WITH TIME ZONE,
-ADD COLUMN "created_by_user_id" BIGINT;
+ADD COLUMN "created_by_user_id" BIGINT,
+DROP COLUMN "use_plaid_sync";
 
 UPDATE "plaid_links" 
 SET "account_id"             = "links"."account_id",
@@ -69,6 +70,7 @@ DROP COLUMN "last_manual_sync",
 DROP COLUMN "last_attempted_update",
 DROP COLUMN "plaid_new_accounts_available",
 DROP COLUMN "error_code",
+DROP COLUMN "custom_institution_name",
 ADD CONSTRAINT "fk_links_plaid_link" FOREIGN KEY ("plaid_link_id", "account_id") REFERENCES "plaid_links" ("plaid_link_id", "account_id");
 
 -- Now create the new plaid bank accounts table and backfill it.

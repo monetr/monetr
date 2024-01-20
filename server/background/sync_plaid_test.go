@@ -36,7 +36,13 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		accessToken := gofakeit.UUID()
 		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.PlaidId, accessToken))
 
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		plaidBankAccount := fixtures.GivenIHaveAPlaidBankAccount(
+			t,
+			clock,
+			&plaidLink,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
@@ -58,14 +64,14 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			).
 			Return([]platypus.BankAccount{
 				platypus.PlaidBankAccount{
-					AccountId: plaidBankAccount.PlaidAccountId,
+					AccountId: plaidBankAccount.PlaidBankAccount.PlaidId,
 					Balances: platypus.PlaidBankAccountBalances{
 						Available: 100,
 						Current:   100,
 					},
 					Mask:         plaidBankAccount.Mask,
 					Name:         plaidBankAccount.Name,
-					OfficialName: plaidBankAccount.PlaidOfficialName,
+					OfficialName: plaidBankAccount.PlaidBankAccount.OfficialName,
 					Type:         "depository",
 					SubType:      "checking",
 				},
@@ -85,7 +91,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				New: []platypus.Transaction{
 					platypus.PlaidTransaction{
 						Amount:                 1250,
-						BankAccountId:          plaidBankAccount.PlaidAccountId,
+						BankAccountId:          plaidBankAccount.PlaidBankAccount.PlaidId,
 						Category:               []string{},
 						Date:                   time.Date(2023, 01, 01, 0, 0, 0, 0, time.Local),
 						ISOCurrencyCode:        "USD",
@@ -153,7 +159,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				New: []platypus.Transaction{
 					platypus.PlaidTransaction{
 						Amount:                 1250,
-						BankAccountId:          plaidBankAccount.PlaidAccountId,
+						BankAccountId:          plaidBankAccount.PlaidBankAccount.PlaidId,
 						Category:               []string{},
 						Date:                   time.Date(2023, 01, 01, 0, 0, 0, 0, time.Local),
 						ISOCurrencyCode:        "USD",

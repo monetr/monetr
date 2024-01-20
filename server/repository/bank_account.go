@@ -10,9 +10,8 @@ import (
 )
 
 func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAccount, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetBankAccounts"
 
 	span.Data = map[string]interface{}{
 		"accountId": r.AccountId(),
@@ -26,17 +25,19 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAcco
 }
 
 func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ...*models.BankAccount) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "CreateBankAccounts"
 
 	span.Data = map[string]interface{}{
 		"accountId": r.AccountId(),
 	}
 
+	now := r.clock.Now().UTC()
 	for i := range bankAccounts {
 		bankAccounts[i].BankAccountId = 0
 		bankAccounts[i].AccountId = r.AccountId()
+		bankAccounts[i].CreatedByUserId = r.UserId()
+		bankAccounts[i].CreatedAt = now
 		if bankAccounts[i].Status == "" {
 			bankAccounts[i].Status = models.ActiveBankAccountStatus
 		}

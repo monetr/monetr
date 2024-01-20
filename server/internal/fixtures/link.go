@@ -30,7 +30,6 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) mod
 		WebhookUrl:           "https://monetr.mini/api/plaid/webhook",
 		InstitutionId:        gofakeit.Generate("ins_######"),
 		InstitutionName:      fmt.Sprintf("Bank Of %s", gofakeit.City()),
-		UsePlaidSync:         false,
 		LastManualSync:       nil,
 		LastSuccessfulUpdate: nil,
 		LastAttemptedUpdate:  nil,
