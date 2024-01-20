@@ -34,7 +34,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
-		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, accessToken))
+		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.PlaidId, accessToken))
 
 		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
 
@@ -47,7 +47,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				gomock.Any(),
 				gomock.AssignableToTypeOf(new(models.Link)),
 				gomock.Eq(accessToken),
-				gomock.Eq(plaidLink.PlaidLink.ItemId),
+				gomock.Eq(plaidLink.PlaidLink.PlaidId),
 			).
 			Return(plaidClient, nil).
 			AnyTimes()

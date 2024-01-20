@@ -173,19 +173,19 @@ func newDevelopCommand(parent *cobra.Command) {
 			plaid := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
 
 			for _, link := range plaidLinks {
-				accessToken, err := plaidSecrets.GetAccessTokenForPlaidLinkId(context.Background(), link.AccountId, link.PlaidLink.ItemId)
+				accessToken, err := plaidSecrets.GetAccessTokenForPlaidLinkId(context.Background(), link.AccountId, link.PlaidLink.PlaidId)
 				if err != nil {
 					log.WithError(err).Warn("failed to retrieve access token for link")
 					continue
 				}
 
-				client, err := plaid.NewClient(context.Background(), &link, accessToken, link.PlaidLink.ItemId)
+				client, err := plaid.NewClient(context.Background(), &link, accessToken, link.PlaidLink.PlaidId)
 				if err != nil {
 					log.WithError(err).Warn("failed to create Plaid client")
 					continue
 				}
 
-				log.WithField("itemId", link.PlaidLink.ItemId).Info("removing item")
+				log.WithField("itemId", link.PlaidLink.PlaidId).Info("removing item")
 				if err = client.RemoveItem(context.Background()); err != nil {
 					log.WithError(err).Warn("failed to remove item")
 					continue

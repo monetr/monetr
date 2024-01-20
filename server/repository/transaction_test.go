@@ -39,11 +39,7 @@ func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 			Categories: []string{
 				"Fast Food",
 			},
-			OriginalCategories: []string{
-				"Fast Food",
-			},
 			Date:                 time.Now(),
-			AuthorizedDate:       nil,
 			Name:                 "Wendy's",
 			OriginalName:         "Wendy's",
 			MerchantName:         "Wendy's",

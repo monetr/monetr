@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -43,11 +44,17 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 	var items []models.Transaction
 	// Deliberatly include all transactions, regardless of delete status.
 	err := r.txn.ModelContext(span.Context(), &items).
+		Relation("PlaidTransaction").
+		Relation("PendingPlaidTransaction").
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ?`, linkId).
-		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
+		WhereOrGroup(func(q *orm.Query) (*orm.Query, error) {
+			q = q.WhereIn(`"plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds)
+			q = q.WhereIn(`"pending_plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds)
+			return q, nil
+		}).
 		Select(&items)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -57,8 +64,14 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 	span.Status = sentry.SpanStatusOK
 
 	result := map[string]models.Transaction{}
-	for _, item := range items {
-		result[item.PlaidTransactionId] = item
+	for i := range items {
+		item := items[i]
+		if item.PlaidTransaction != nil {
+			result[item.PlaidTransaction.PlaidId] = item
+		}
+		if item.PendingPlaidTransaction != nil {
+			result[item.PendingPlaidTransaction.PlaidId] = item
+		}
 	}
 
 	return result, nil

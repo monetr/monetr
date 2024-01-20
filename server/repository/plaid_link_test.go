@@ -47,7 +47,7 @@ func TestPlaidRepositoryBase_GetLinkByItemId(t *testing.T) {
 	plaidRepo := repository.NewPlaidRepository(db)
 
 	t.Run("simple", func(t *testing.T) {
-		readLink, err := plaidRepo.GetLinkByItemId(context.Background(), plaidLink.ItemId)
+		readLink, err := plaidRepo.GetLinkByItemId(context.Background(), plaidLink.PlaidId)
 		assert.NoError(t, err, "failed to retrieve link")
 		assert.NotNil(t, readLink.PlaidLink, "must include plaid link child")
 		assert.EqualValues(t, link.LinkId, readLink.LinkId, "link Id must match")

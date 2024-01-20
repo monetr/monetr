@@ -62,7 +62,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		assert.NoError(t, secret.UpdateAccessTokenForPlaidLinkId(
 			context.Background(),
 			link.AccountId,
-			link.PlaidLink.ItemId,
+			link.PlaidLink.PlaidId,
 			gofakeit.UUID(),
 		), "must be able to store a secret for the fake plaid link")
 
@@ -99,7 +99,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		assert.NoError(t, secret.UpdateAccessTokenForPlaidLinkId(
 			context.Background(),
 			link.AccountId,
-			link.PlaidLink.ItemId,
+			link.PlaidLink.PlaidId,
 			gofakeit.UUID(),
 		), "must be able to store a secret for the fake plaid link")
 
@@ -213,10 +213,10 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		jobController.EXPECT().
-			TriggerJob(
+			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.PullTransactions),
-				testutils.NewGenericMatcher(func(args background.PullTransactionsArguments) bool {
+				gomock.Eq(background.SyncPlaid),
+				testutils.NewGenericMatcher(func(args background.SyncPlaidArguments) bool {
 					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
 					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
 					return a && b
@@ -252,10 +252,10 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		jobController.EXPECT().
-			TriggerJob(
+			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.PullTransactions),
-				testutils.NewGenericMatcher(func(args background.PullTransactionsArguments) bool {
+				gomock.Eq(background.SyncPlaid),
+				testutils.NewGenericMatcher(func(args background.SyncPlaidArguments) bool {
 					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
 					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
 					return a && b
@@ -305,10 +305,10 @@ func TestPostSyncPlaidManually(t *testing.T) {
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		jobController.EXPECT().
-			TriggerJob(
+			EnqueueJob(
 				gomock.Any(),
-				gomock.Eq(background.PullTransactions),
-				testutils.NewGenericMatcher(func(args background.PullTransactionsArguments) bool {
+				gomock.Eq(background.SyncPlaid),
+				testutils.NewGenericMatcher(func(args background.SyncPlaidArguments) bool {
 					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
 					b := assert.EqualValues(t, link.AccountId, args.AccountId, "Account ID should match")
 					return a && b

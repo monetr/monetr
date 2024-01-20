@@ -17,10 +17,6 @@ func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, 
 	require.NotZero(t, link.LinkId, "link id must be included")
 	require.NotZero(t, link.AccountId, "link id must be included")
 
-	if link.BankAccounts == nil {
-		link.BankAccounts = make([]models.BankAccount, 0, 1)
-	}
-
 	db := testutils.GetPgDatabase(t)
 	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
 
@@ -30,30 +26,23 @@ func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, 
 	// By doing this as an array, its actually a pointer. And can be updated by reference.
 	banks := []*models.BankAccount{
 		{
-			AccountId:         link.AccountId,
-			Account:           link.Account,
-			LinkId:            link.LinkId,
-			Link:              link,
-			PlaidAccountId:    gofakeit.UUID(),
-			AvailableBalance:  available,
-			CurrentBalance:    current,
-			Mask:              gofakeit.Generate("####"),
-			Name:              "E-ACCOUNT",
-			PlaidName:         "EACCOUNT",
-			PlaidOfficialName: "EACCOUNT",
-			Type:              accountType,
-			SubType:           subType,
-			LastUpdated:       clock.Now(),
+			AccountId:        link.AccountId,
+			Account:          link.Account,
+			LinkId:           link.LinkId,
+			Link:             link,
+			AvailableBalance: available,
+			CurrentBalance:   current,
+			Mask:             gofakeit.Generate("####"),
+			Name:             "E-ACCOUNT",
+			Type:             accountType,
+			SubType:          subType,
+			LastUpdated:      clock.Now(),
 		},
 	}
 
 	err := repo.CreateBankAccounts(context.Background(), banks...)
 	require.NoError(t, err, "must seed bank account")
 	require.NotZero(t, banks[0].BankAccountId, "bank account Id must have been set")
-
-	for i := range banks {
-		link.BankAccounts = append(link.BankAccounts, *banks[i])
-	}
 
 	return *banks[0]
 

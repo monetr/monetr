@@ -110,11 +110,11 @@ func TestCountPendingTransactions(t *testing.T) {
 		name := fmt.Sprintf("%s%s", prefix, strings.ToUpper(company))
 
 		transaction := models.Transaction{
-			AccountId:            bankAccount.AccountId,
-			Account:              bankAccount.Account,
-			BankAccountId:        bankAccount.BankAccountId,
-			BankAccount:          &bankAccount,
-			PlaidTransactionId:   gofakeit.UUID(),
+			AccountId:     bankAccount.AccountId,
+			Account:       bankAccount.Account,
+			BankAccountId: bankAccount.BankAccountId,
+			BankAccount:   &bankAccount,
+			// PlaidTransactionId:   gofakeit.UUID(),
 			Amount:               int64(gofakeit.Number(100, 10000)),
 			Date:                 util.Midnight(clock.Now(), timezone),
 			Name:                 name,

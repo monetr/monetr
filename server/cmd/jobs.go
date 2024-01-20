@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/background"
@@ -23,21 +22,19 @@ func init() {
 
 	JobCommand.AddCommand(RunJobCommand)
 	newCleanupJobsCommand(RunJobCommand)
-	RunJobCommand.AddCommand(RunPullTransactionsCommand)
+	RunJobCommand.AddCommand(RunSyncPlaidCommand)
 
-	RunPullTransactionsCommand.PersistentFlags().BoolVar(&AllFlag, "all", false, "Pull transactions for all accounts. This job should not be run locally unless you are debugging as it may take a very long time. Will ignore 'account' and 'link' flags.")
-	RunPullTransactionsCommand.PersistentFlags().Uint64VarP(&AccountIDFlag, "account", "a", 0, "Account ID to target for the task. Will only run against this account. (required)")
-	RunPullTransactionsCommand.PersistentFlags().Uint64VarP(&LinkIDFlag, "link", "l", 0, "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
-	RunPullTransactionsCommand.PersistentFlags().DurationVarP(&SinceFlag, "since", "s", 0, "Retrieve transactions since duration. For example, '7d' will retrieve the past 7 days.")
-	RunPullTransactionsCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run the retrieval of transactions, this will log what transactions might be changed or created. No changes will be persisted. [local]")
-	RunPullTransactionsCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
+	RunSyncPlaidCommand.PersistentFlags().BoolVar(&AllFlag, "all", false, "Pull transactions for all accounts. This job should not be run locally unless you are debugging as it may take a very long time. Will ignore 'account' and 'link' flags.")
+	RunSyncPlaidCommand.PersistentFlags().Uint64VarP(&AccountIDFlag, "account", "a", 0, "Account ID to target for the task. Will only run against this account. (required)")
+	RunSyncPlaidCommand.PersistentFlags().Uint64VarP(&LinkIDFlag, "link", "l", 0, "Link ID to target for the task. Will only affect objects for this Link. Must belong to the account specified. (required)")
+	RunSyncPlaidCommand.PersistentFlags().BoolVarP(&DryRunFlag, "dry-run", "d", false, "Dry run the retrieval of transactions, this will log what transactions might be changed or created. No changes will be persisted. [local]")
+	RunSyncPlaidCommand.PersistentFlags().BoolVar(&LocalFlag, "local", false, "Run the job locally, this means the job is not dispatched to the external scheduler like RabbitMQ or Redis. This defaults to true when dry running or when the job engine is in-memory.")
 }
 
 var (
 	AllFlag       bool
 	AccountIDFlag uint64
 	LinkIDFlag    uint64
-	SinceFlag     time.Duration
 	DryRunFlag    bool
 	LocalFlag     bool
 )
@@ -120,8 +117,8 @@ var (
 		},
 	}
 
-	RunPullTransactionsCommand = &cobra.Command{
-		Use:   "pull-latest-transactions",
+	RunSyncPlaidCommand = &cobra.Command{
+		Use:   "sync-transactions",
 		Short: "Pull latest transactions for a specific link and account.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clock := clock.New()
@@ -145,56 +142,10 @@ var (
 
 			ctx := context.Background()
 
-			if SinceFlag == 0 {
-				SinceFlag = 24 * time.Hour
-			}
-
-			jobArgs := background.PullTransactionsArguments{
+			jobArgs := background.SyncPlaidArguments{
 				AccountId: AccountIDFlag,
 				LinkId:    LinkIDFlag,
-				Start:     clock.Now().Add(-SinceFlag),
-				End:       clock.Now(),
-			}
-
-			if LocalFlag || DryRunFlag {
-				log.Info("running locally")
-				txn, err := db.BeginContext(ctx)
-				if err != nil {
-					log.WithError(err).Fatalf("failed to begin transaction to cleanup jobs")
-					return err
-				}
-
-				repo := repository.NewRepositoryFromSession(clock, 0, AccountIDFlag, txn)
-
-				kms, err := getKMS(log, configuration)
-				if err != nil {
-					log.WithError(err).Fatal("failed to initialize KMS")
-					return err
-				}
-
-				plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
-				job, err := background.NewPullTransactionsJob(
-					log,
-					repo,
-					clock,
-					plaidSecrets,
-					platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(txn), configuration.Plaid),
-					pubsub.NewPostgresPubSub(log, db),
-					jobArgs,
-				)
-
-				if err := job.Run(ctx); err != nil {
-					log.WithError(err).Fatalf("failed to run pull latest transactions")
-					_ = txn.RollbackContext(ctx)
-					return err
-				}
-
-				if DryRunFlag {
-					log.Info("dry run... rolling changes back")
-					return txn.RollbackContext(ctx)
-				} else {
-					return txn.CommitContext(ctx)
-				}
+				Trigger:   "command",
 			}
 
 			redisController, err := cache.NewRedisCache(log, configuration.Redis)
@@ -220,7 +171,49 @@ var (
 				return err
 			}
 
-			return background.TriggerPullTransactions(ctx, backgroundJobs, jobArgs)
+			if LocalFlag || DryRunFlag {
+				log.Info("running locally")
+				txn, err := db.BeginContext(ctx)
+				if err != nil {
+					log.WithError(err).Fatalf("failed to begin transaction to cleanup jobs")
+					return err
+				}
+
+				repo := repository.NewRepositoryFromSession(clock, 0, AccountIDFlag, txn)
+
+				kms, err := getKMS(log, configuration)
+				if err != nil {
+					log.WithError(err).Fatal("failed to initialize KMS")
+					return err
+				}
+
+				plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
+				job, err := background.NewSyncPlaidJob(
+					log,
+					repo,
+					clock,
+					plaidSecrets,
+					platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(txn), configuration.Plaid),
+					pubsub.NewPostgresPubSub(log, db),
+					backgroundJobs,
+					jobArgs,
+				)
+
+				if err := job.Run(ctx); err != nil {
+					log.WithError(err).Fatalf("failed to run pull latest transactions")
+					_ = txn.RollbackContext(ctx)
+					return err
+				}
+
+				if DryRunFlag {
+					log.Info("dry run... rolling changes back")
+					return txn.RollbackContext(ctx)
+				} else {
+					return txn.CommitContext(ctx)
+				}
+			}
+
+			return background.TriggerSyncPlaid(ctx, backgroundJobs, jobArgs)
 		},
 	}
 )

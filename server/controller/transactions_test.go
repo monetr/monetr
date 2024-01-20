@@ -33,7 +33,7 @@ func TestGetTransactions(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Array().Length().Equal(10)
+		response.JSON().Array().Length().IsEqual(10)
 	})
 
 	t.Run("pagination", func(t *testing.T) {

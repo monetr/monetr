@@ -46,7 +46,7 @@ func TriggerCalculateTransactionClusters(
 	backgroundJobs BackgroundJobs,
 	arguments CalculateTransactionClustersArguments,
 ) error {
-	return backgroundJobs.TriggerJob(ctx, CalculateTransactionClusters, arguments)
+	return backgroundJobs.EnqueueJob(ctx, CalculateTransactionClusters, arguments)
 }
 
 func NewCalculateTransactionClustersHandler(

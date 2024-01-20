@@ -21,6 +21,7 @@ const (
 
 var (
 	_ JobController = &BackgroundJobs{}
+	_ JobEnqueuer   = &BackgroundJobs{}
 )
 
 //go:generate mockgen -source=jobs.go -package=mockgen -destination=../internal/mockgen/jobs.go JobController
@@ -32,7 +33,7 @@ type (
 	JobController interface {
 		// TriggerJob is used internally to allow other areas of monetr to trigger jobs safely. This must be called by a
 		// wrapping function for the specific job.
-		TriggerJob(ctx context.Context, queue string, data interface{}) error
+		EnqueueJob(ctx context.Context, queue string, data interface{}) error
 	}
 
 	BackgroundJobs struct {
@@ -88,9 +89,7 @@ func NewBackgroundJobs(
 		NewDeactivateLinksHandler(log, db, clock, configuration, plaidSecrets, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db, clock),
 		NewProcessSpendingHandler(log, db, clock),
-		NewPullTransactionsHandler(log, db, clock, plaidSecrets, plaidPlatypus, publisher),
 		NewRemoveLinkHandler(log, db, clock, publisher),
-		NewRemoveTransactionsHandler(log, db, clock),
 		NewSyncPlaidHandler(log, db, clock, plaidSecrets, plaidPlatypus, publisher, enqueuer),
 	}
 
@@ -139,6 +138,6 @@ func (b *BackgroundJobs) Close() error {
 	return b.processor.Close()
 }
 
-func (b *BackgroundJobs) TriggerJob(ctx context.Context, queue string, data interface{}) error {
+func (b *BackgroundJobs) EnqueueJob(ctx context.Context, queue string, data interface{}) error {
 	return b.enqueuer.EnqueueJob(ctx, queue, data)
 }

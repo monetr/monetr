@@ -380,12 +380,12 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 		return nil, errors.New("cannot create client without link")
 	}
 
-	accessToken, err := p.secret.GetAccessTokenForPlaidLinkId(span.Context(), link.AccountId, link.PlaidLink.ItemId)
+	accessToken, err := p.secret.GetAccessTokenForPlaidLinkId(span.Context(), link.AccountId, link.PlaidLink.PlaidId)
 	if err != nil {
 		return nil, err
 	}
 
-	return p.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
+	return p.NewClient(span.Context(), link, accessToken, link.PlaidLink.PlaidId)
 }
 
 func (p *Plaid) Close() error {

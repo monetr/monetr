@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
@@ -51,9 +52,8 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 }
 
 func (r *repositoryBase) GetBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.BankAccount, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "GetBankAccountsByLinkId"
 
 	span.Data = map[string]interface{}{
 		"accountId": r.AccountId(),
@@ -64,6 +64,61 @@ func (r *repositoryBase) GetBankAccountsByLinkId(ctx context.Context, linkId uin
 	err := r.txn.ModelContext(span.Context(), &result).
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ? `, linkId).
+		Select(&result)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve bank accounts by Id")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return result, nil
+}
+
+func (r *repositoryBase) GetBankAccountsWithPlaidByLinkId(
+	ctx context.Context,
+	linkId uint64,
+) ([]models.BankAccount, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId": r.AccountId(),
+		"linkId":    linkId,
+	}
+
+	var result []models.BankAccount
+	err := r.txn.ModelContext(span.Context(), &result).
+		Relation(`PlaidBankAccount`).
+		Where(`"bank_account"."plaid_bank_acount_id" IS NOT NULL`).
+		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
+		Where(`"bank_account"."link_id" = ? `, linkId).
+		Select(&result)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve bank accounts by Id")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return result, nil
+}
+
+func (r *repositoryBase) GetPlaidBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.PlaidBankAccount, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId": r.AccountId(),
+		"linkId":    linkId,
+	}
+
+	var result []models.PlaidBankAccount
+	err := r.txn.ModelContext(span.Context(), &result).
+		Join(`INNER JOIN "links" AS "link"`).
+		JoinOn(`"link"."account_id" = "plaid_bank_account"."account_id" AND "link"."plaid_link_id" = "plaid_bank_account"."plaid_link_id"`).
+		Where(`"plaid_bank_account"."account_id" = ?`, r.AccountId()).
+		Where(`"link"."link_id" = ? `, linkId).
 		Select(&result)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError

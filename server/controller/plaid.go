@@ -231,18 +231,6 @@ func (c *Controller) updatePlaidLink(ctx echo.Context) error {
 	})
 }
 
-// Token Callback for Plaid Link
-// @Summary Updated Token Callback
-// @id updated-token-callback
-// @tags Plaid
-// @Description This is used when handling an update flow for a Plaid link. Rather than returning the public token to the normal callback endpoint, this one should be used instead. This one assumes the link already exists and handles it slightly differently than it would for a new link.
-// @Security ApiKeyAuth
-// @Produce json
-// @Accept json
-// @Param Request body swag.UpdatePlaidTokenCallbackRequest true "Update token callback request."
-// @Router /plaid/update/callback [post]
-// @Success 200 {object} swag.LinkResponse
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
@@ -281,7 +269,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	currentAccessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(
 		c.getContext(ctx),
 		repo.AccountId(),
-		link.PlaidLink.ItemId,
+		link.PlaidLink.PlaidId,
 	)
 	if err != nil {
 		log.WithError(err).Warn("failed to retrieve access token for existing plaid link")
@@ -292,7 +280,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
 			c.getContext(ctx),
 			repo.AccountId(),
-			link.PlaidLink.ItemId,
+			link.PlaidLink.PlaidId,
 			result.AccessToken,
 		); err != nil {
 			log.WithError(err).Warn("failed to store updated access token")
@@ -302,19 +290,19 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		log.Info("access token for link has not changed")
 	}
 
-	link.LinkStatus = models.LinkStatusSetup
-	link.ErrorCode = nil
-	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
+	link.PlaidLink.Status = models.PlaidLinkStatusSetup
+	link.PlaidLink.ErrorCode = nil
+	if err = repo.UpdatePlaidLink(c.getContext(ctx), link.PlaidLink); err != nil {
 		return c.wrapPgError(ctx, err, "failed to update link status")
 	}
 
-	currentBankAccounts, err := repo.GetBankAccountsByLinkId(c.getContext(ctx), link.LinkId)
+	currentBankAccounts, err := repo.GetPlaidBankAccountsByLinkId(c.getContext(ctx), link.LinkId)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve existing bank accounts")
 	}
 	currentBankAccountPlaidIds := map[string]struct{}{}
 	for _, bankAccount := range currentBankAccounts {
-		currentBankAccountPlaidIds[bankAccount.PlaidAccountId] = struct{}{}
+		currentBankAccountPlaidIds[bankAccount.PlaidId] = struct{}{}
 	}
 	newBankAccountPlaidIds := make([]string, 0, len(callbackRequest.AccountIds))
 	for _, accountId := range callbackRequest.AccountIds {
@@ -342,20 +330,28 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 
 		now := time.Now()
 		accounts := make([]*models.BankAccount, len(plaidAccounts))
+		// TODO This isn't full implemented
 		for i, plaidAccount := range plaidAccounts {
 			accounts[i] = &models.BankAccount{
-				AccountId:         repo.AccountId(),
-				LinkId:            link.LinkId,
-				PlaidAccountId:    plaidAccount.GetAccountId(),
-				AvailableBalance:  plaidAccount.GetBalances().GetAvailable(),
-				CurrentBalance:    plaidAccount.GetBalances().GetCurrent(),
-				Name:              plaidAccount.GetName(),
-				Mask:              plaidAccount.GetMask(),
-				PlaidName:         plaidAccount.GetName(),
-				PlaidOfficialName: plaidAccount.GetOfficialName(),
-				Type:              models.BankAccountType(plaidAccount.GetType()),
-				SubType:           models.BankAccountSubType(plaidAccount.GetSubType()),
-				LastUpdated:       now,
+				AccountId: repo.AccountId(),
+				LinkId:    link.LinkId,
+				PlaidBankAccount: &models.PlaidBankAccount{
+					AccountId:       repo.AccountId(),
+					PlaidLinkId:     *link.PlaidLinkId,
+					PlaidId:         plaidAccount.GetAccountId(),
+					Name:            plaidAccount.GetName(),
+					OfficialName:    plaidAccount.GetOfficialName(),
+					Mask:            plaidAccount.GetMask(),
+					CreatedAt:       c.clock.Now().UTC(),
+					CreatedByUserId: repo.UserId(),
+				},
+				AvailableBalance: plaidAccount.GetBalances().GetAvailable(),
+				CurrentBalance:   plaidAccount.GetBalances().GetCurrent(),
+				Name:             plaidAccount.GetName(),
+				Mask:             plaidAccount.GetMask(),
+				Type:             models.BankAccountType(plaidAccount.GetType()),
+				SubType:          models.BankAccountSubType(plaidAccount.GetSubType()),
+				LastUpdated:      now,
 			}
 		}
 		if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
@@ -363,19 +359,10 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	if link.PlaidLink.UsePlaidSync {
-		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
-			AccountId: link.AccountId,
-			LinkId:    link.LinkId,
-		})
-	} else {
-		err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-			AccountId: link.AccountId,
-			LinkId:    link.LinkId,
-			Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
-			End:       time.Now(),
-		})
-	}
+	err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+		AccountId: link.AccountId,
+		LinkId:    link.LinkId,
+	})
 	if err != nil {
 		log.WithError(err).Warn("failed to trigger pulling latest transactions after updating plaid link")
 	}
@@ -383,18 +370,6 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, link)
 }
 
-// Plaid Token Callback
-// @Summary Plaid Token Callback
-// @id plaid-token-callback
-// @tags Plaid
-// @description Receives the public token after a user has authenticated their bank account to exchange with plaid.
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Param Request body swag.NewPlaidTokenCallbackRequest true "New token callback request."
-// @Router /plaid/token/callback [post]
-// @Success 200 {object} swag.PlaidTokenCallbackResponse
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
@@ -456,9 +431,10 @@ func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 	}
 
 	plaidLink := models.PlaidLink{
-		ItemId:          result.ItemId,
+		PlaidId:         result.ItemId,
 		Products:        consts.PlaidProductStrings(),
 		WebhookUrl:      webhook,
+		Status:          models.PlaidLinkStatusPending,
 		InstitutionId:   callbackRequest.InstitutionId,
 		InstitutionName: callbackRequest.InstitutionName,
 		UsePlaidSync:    true,
@@ -468,13 +444,9 @@ func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 	}
 
 	link := models.Link{
-		AccountId:          repo.AccountId(),
-		PlaidLinkId:        &plaidLink.PlaidLinkID,
-		PlaidInstitutionId: &plaidLink.InstitutionId,
-		LinkType:           models.PlaidLinkType,
-		LinkStatus:         models.LinkStatusPending,
-		InstitutionName:    callbackRequest.InstitutionName,
-		CreatedByUserId:    repo.UserId(),
+		AccountId:       repo.AccountId(),
+		PlaidLinkId:     &plaidLink.PlaidLinkID,
+		InstitutionName: callbackRequest.InstitutionName,
 	}
 	if err = repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
@@ -496,42 +468,47 @@ func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusInternalServerError, "could not retrieve details for any accounts")
 	}
 
-	now := time.Now().UTC()
+	now := c.clock.Now().UTC()
 	accounts := make([]*models.BankAccount, len(plaidAccounts))
-	for i, plaidAccount := range plaidAccounts {
-		accounts[i] = &models.BankAccount{
-			AccountId:         repo.AccountId(),
-			LinkId:            link.LinkId,
-			PlaidAccountId:    plaidAccount.GetAccountId(),
-			AvailableBalance:  plaidAccount.GetBalances().GetAvailable(),
-			CurrentBalance:    plaidAccount.GetBalances().GetCurrent(),
-			Name:              plaidAccount.GetName(),
-			Mask:              plaidAccount.GetMask(),
-			PlaidName:         plaidAccount.GetName(),
-			PlaidOfficialName: plaidAccount.GetOfficialName(),
-			Type:              models.BankAccountType(plaidAccount.GetType()),
-			SubType:           models.BankAccountSubType(plaidAccount.GetSubType()),
-			LastUpdated:       now,
+	for i := range plaidAccounts {
+		plaidAccount := plaidAccounts[i]
+		plaidBankAccount := models.PlaidBankAccount{
+			PlaidLinkId:  plaidLink.PlaidLinkID,
+			PlaidId:      plaidAccount.GetAccountId(),
+			Name:         plaidAccount.GetName(),
+			OfficialName: plaidAccount.GetOfficialName(),
+			Mask:         plaidAccount.GetMask(),
 		}
+		if err := repo.CreatePlaidBankAccount(
+			c.getContext(ctx),
+			&plaidBankAccount,
+		); err != nil {
+			return c.wrapPgError(ctx, err, "failed to create plaid bank account")
+		}
+
+		accounts[i] = &models.BankAccount{
+			LinkId:             link.LinkId,
+			PlaidBankAccountId: &plaidBankAccount.PlaidBankAccountId,
+			AvailableBalance:   plaidAccount.GetBalances().GetAvailable(),
+			CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
+			Name:               plaidAccount.GetName(),
+			Mask:               plaidAccount.GetMask(),
+			Type:               models.BankAccountType(plaidAccount.GetType()),
+			SubType:            models.BankAccountSubType(plaidAccount.GetSubType()),
+			LastUpdated:        now,
+			Status:             models.ActiveBankAccountStatus,
+		}
+
 	}
 	if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create bank accounts")
 	}
 
 	if !c.configuration.Plaid.WebhooksEnabled {
-		if plaidLink.UsePlaidSync {
-			err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-			})
-		} else {
-			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-				Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
-				End:       time.Now(),
-			})
-		}
+		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+		})
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to pull initial transactions")
 		}
@@ -543,16 +520,6 @@ func (c *Controller) plaidTokenCallback(ctx echo.Context) error {
 	})
 }
 
-// Wait For Plaid Account Data
-// @Summary Wait For Plaid Account Data
-// @id wait-for-plaid-data
-// @tags Plaid
-// @description Long poll endpoint that will timeout if data has not yet been pulled. Or will return 200 if data is ready.
-// @Security ApiKeyAuth
-// @Param linkId path int true "Link ID for the plaid link that is being setup. NOTE: Not Plaid's ID, this is a numeric ID we assign to the object that is returned from the callback endpoint."
-// @Router /plaid/link/setup/wait/{linkId:uint64} [get]
-// @Success 200
-// @Success 408
 func (c *Controller) waitForPlaid(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
@@ -574,7 +541,7 @@ func (c *Controller) waitForPlaid(ctx echo.Context) error {
 	}
 
 	// If the link is done just return.
-	if link.LinkStatus == models.LinkStatusSetup {
+	if link.PlaidLink.Status == models.PlaidLinkStatusSetup {
 		crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
 		return ctx.NoContent(http.StatusOK)
 	}
@@ -643,11 +610,12 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 		return c.badRequest(ctx, "cannot manually sync a non-Plaid link")
 	}
 
-	switch link.LinkStatus {
-	case models.LinkStatusSetup, models.LinkStatusError:
+	// TODO do we even want to check status anymore?
+	switch link.PlaidLink.Status {
+	case models.PlaidLinkStatusSetup, models.PlaidLinkStatusError:
 		log.Debug("link is not revoked, triggering manual sync")
 	default:
-		log.WithField("status", link.LinkStatus).Warn("link is not in a valid status, it cannot be manually synced")
+		log.WithField("status", link.PlaidLink.Status).Warn("link is not in a valid status, it cannot be manually synced")
 		return c.badRequest(ctx, "link is not in a valid status, it cannot be manually synced")
 	}
 
@@ -657,19 +625,10 @@ func (c *Controller) postSyncPlaidManually(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusTooEarly, "link has been manually synced too recently")
 	}
 
-	if link.PlaidLink.UsePlaidSync {
-		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
-			AccountId: link.AccountId,
-			LinkId:    link.LinkId,
-		})
-	} else {
-		err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-			AccountId: link.AccountId,
-			LinkId:    link.LinkId,
-			Start:     time.Now().Add(-14 * 24 * time.Hour), // Last 14 days.
-			End:       time.Now(),
-		})
-	}
+	err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+		AccountId: link.AccountId,
+		LinkId:    link.LinkId,
+	})
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to trigger manual sync")
 	}

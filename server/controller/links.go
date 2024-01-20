@@ -72,16 +72,14 @@ func (c *Controller) getLink(ctx echo.Context) error {
 
 func (c *Controller) postLinks(ctx echo.Context) error {
 	var request struct {
-		InstitutionName       string  `json:"institutionName"`
-		CustomInstitutionName string  `json:"customInstitutionName"`
-		Description           *string `json:"description"`
+		InstitutionName string  `json:"institutionName"`
+		Description     *string `json:"description"`
 	}
 	if err := ctx.Bind(&request); err != nil {
 		return c.invalidJson(ctx)
 	}
 
 	request.InstitutionName = strings.TrimSpace(request.InstitutionName)
-	request.CustomInstitutionName = strings.TrimSpace(request.CustomInstitutionName)
 	if request.InstitutionName == "" {
 		return c.badRequest(ctx, "link must have an institution name")
 	}
@@ -92,14 +90,9 @@ func (c *Controller) postLinks(ctx echo.Context) error {
 	}
 
 	link := models.Link{
-		InstitutionName:       request.InstitutionName,
-		CustomInstitutionName: request.CustomInstitutionName,
-		Description:           request.Description,
-		LinkType:              models.ManualLinkType,
-		LinkStatus:            models.LinkStatusSetup,
-	}
-	if request.CustomInstitutionName == "" {
-		link.CustomInstitutionName = request.InstitutionName
+		InstitutionName: request.InstitutionName,
+		Description:     request.Description,
+		LinkType:        models.ManualLinkType,
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
@@ -148,10 +141,6 @@ func (c *Controller) putLink(ctx echo.Context) error {
 
 	hasUpdate := false
 
-	if link.CustomInstitutionName != "" {
-		existingLink.CustomInstitutionName = link.CustomInstitutionName
-		hasUpdate = true
-	}
 	if link.Description != nil {
 		existingLink.Description = link.Description
 		hasUpdate = true
@@ -204,7 +193,6 @@ func (c *Controller) convertLink(ctx echo.Context) error {
 	}
 
 	link.LinkType = models.ManualLinkType
-	link.LinkStatus = models.LinkStatusSetup
 
 	if err = repo.UpdateLink(c.getContext(ctx), link); err != nil {
 		return c.wrapPgError(ctx, err, "failed to convert link to manual")
@@ -250,24 +238,17 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
-	if link.LinkType == models.PlaidLinkType {
-		if link.PlaidLink == nil {
-			crumbs.Error(c.getContext(ctx), "BUG: Plaid Link object was missing on the link object", "bug", map[string]interface{}{
-				"linkId": link.LinkId,
-			})
-			return c.returnError(ctx, http.StatusInternalServerError, "missing plaid data to remove link")
-		}
-
-		accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId)
+	if link.PlaidLink != nil {
+		accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId)
 		if err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to retrieve access token for plaid link.", "secrets", map[string]interface{}{
 				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.ItemId,
+				"itemId": link.PlaidLink.PlaidId,
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
 		}
 
-		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken, link.PlaidLink.ItemId)
+		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken, link.PlaidLink.PlaidId)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
 		}
@@ -275,16 +256,16 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]interface{}{
 				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.ItemId,
+				"itemId": link.PlaidLink.PlaidId,
 				"error":  err.Error(),
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
 		}
 
-		if err = c.plaidSecrets.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.ItemId); err != nil {
+		if err = c.plaidSecrets.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId); err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to remove access token", "secrets", map[string]interface{}{
 				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.ItemId,
+				"itemId": link.PlaidLink.PlaidId,
 				"error":  err.Error(),
 			})
 			// We don't want to stop the request here, it does suck that we weren't able to remove the access token, but
@@ -303,22 +284,8 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-// Wait For Link Deletion
-// @Summary Wait For Link Deletion
-// @id wait-for-link-deletion
-// @tags Links
-// @description This endpoint is used to "wait" for all of the data associated with a link to be deleted. If the link is
-// @description is already deleted then a simple **200** is returned to the caller. If the link is not deleted then this
-// @description endpoint will block for up to 30 seconds at a time while it waits for the link to be removed. If it is
-// @description removed while the endpoint is blocking then it will return 200 at that time.
-// @Security ApiKeyAuth
-// @Param linkId path int true "Link ID for the link that was/is being removed."
-// @Router /link/wait/{linkId:uint64} [get]
-// @Success 200
-// @Success 408
-// @Failure 402 {object} SubscriptionNotActiveError The user's subscription is not active.
-// @Failure 500 {object} ApiError Something went wrong on our end.
 func (c *Controller) waitForDeleteLink(ctx echo.Context) error {
+	// TODO Just deprecate this endpoint entirely and instead use soft delete?
 	linkId, err := strconv.ParseUint(ctx.Param("linkId"), 10, 64)
 	if err != nil {
 		return c.returnError(ctx, http.StatusBadRequest, "must specify a link Id to wait for")
@@ -328,18 +295,18 @@ func (c *Controller) waitForDeleteLink(ctx echo.Context) error {
 		"linkId": linkId,
 	})
 	repo := c.mustGetAuthenticatedRepository(ctx)
-	link, err := repo.GetLink(c.getContext(ctx), linkId)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to retrieve link")
-	}
+	// link, err := repo.GetLink(c.getContext(ctx), linkId)
+	// if err != nil {
+	// 	return c.wrapPgError(ctx, err, "failed to retrieve link")
+	// }
 
 	// If the link is done just return.
 	// TODO This is all wrong, why are we checking for link status setup for deleting?
 	//      Just going to have it return nothing for now.
-	if link.LinkStatus == models.LinkStatusSetup {
-		crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
-		return ctx.NoContent(http.StatusNoContent)
-	}
+	// if link.LinkStatus == models.LinkStatusSetup {
+	// 	crumbs.Debug(c.getContext(ctx), "Link is setup, no need to poll.", nil)
+	// 	return ctx.NoContent(http.StatusNoContent)
+	// }
 
 	channelName := fmt.Sprintf("link:remove:%d:%d", repo.AccountId(), linkId)
 

@@ -13,6 +13,9 @@ import (
 type BaseRepository interface {
 	AccountId() uint64
 
+	CreatePlaidBankAccount(ctx context.Context, bankAccount *models.PlaidBankAccount) error
+	GetPlaidBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.PlaidBankAccount, error)
+
 	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error
 	CreateBankAccounts(ctx context.Context, bankAccounts ...*models.BankAccount) error
 	CreateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error
@@ -20,6 +23,12 @@ type BaseRepository interface {
 	CreatePlaidLink(ctx context.Context, link *models.PlaidLink) error
 	CreateSpending(ctx context.Context, expense *models.Spending) error
 	CreateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error
+
+	// CreatePlaidTransaction takes a Plaid transaction model and ensures the
+	// account ID and the created at timestamp are properly set then stores the
+	// transaction in the database.
+	CreatePlaidTransaction(ctx context.Context, transaction *models.PlaidTransaction) error
+
 	// DeleteAccount removes all of the records from the database related to the current account. This action cannot be
 	// undone. Any Plaid links should be removed BEFORE calling this function.
 	DeleteAccount(ctx context.Context) error
@@ -32,6 +41,10 @@ type BaseRepository interface {
 	GetBankAccount(ctx context.Context, bankAccountId uint64) (*models.BankAccount, error)
 	GetBankAccounts(ctx context.Context) ([]models.BankAccount, error)
 	GetBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.BankAccount, error)
+	// GetBankAccountsWithPlaidByLinkId will return all the bank accounts
+	// associated with the provided link ID that also have a Plaid bank account
+	// associated with them.
+	GetBankAccountsWithPlaidByLinkId(ctx context.Context, linkId uint64) ([]models.BankAccount, error)
 	GetFundingSchedule(ctx context.Context, bankAccountId, fundingScheduleId uint64) (*models.FundingSchedule, error)
 	GetFundingSchedules(ctx context.Context, bankAccountId uint64) ([]models.FundingSchedule, error)
 	GetFundingStats(ctx context.Context, bankAccountId uint64) ([]FundingStats, error)
@@ -40,6 +53,14 @@ type BaseRepository interface {
 	GetLinkIsManual(ctx context.Context, linkId uint64) (bool, error)
 	GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error)
 	GetLinks(ctx context.Context) ([]models.Link, error)
+
+	// GetTransactionByPendingTransactionPlaidId takes a bank account and a Plaid
+	// Transaction ID string. It will find a monetr transaction that has a pending
+	// transaction equivalent to the provided pending plaid transaction ID, if
+	// there is one it will return it. If there is not then it will return nil
+	// with a nil error. If there is a problem then error will have a value and
+	// the transaction will be nil.
+	GetTransactionByPendingTransactionPlaidId(ctx context.Context, bankAccountId uint64, plaidPendingTransactionId string) (*models.Transaction, error)
 
 	// Plaid syncing
 	GetLastPlaidSync(ctx context.Context, linkId uint64) (*models.PlaidSync, error)

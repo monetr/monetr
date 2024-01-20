@@ -8,21 +8,28 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
+	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 )
 
 func (r *repositoryBase) CreatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
-	_, err := r.txn.Model(link).Insert(link)
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	link.AccountId = r.AccountId()
+	link.CreatedAt = r.clock.Now().UTC()
+	link.CreatedByUserId = r.UserId()
+	_, err := r.txn.ModelContext(span.Context(), link).Insert(link)
 	return errors.Wrap(err, "failed to create plaid link")
 }
 
 func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *models.PlaidLink) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "UpdatePlaidLink"
+
 	span.SetTag("accountId", r.AccountIdStr())
-	span.SetTag("plaidItemId", link.ItemId)
+	span.SetTag("plaidItemId", link.PlaidId)
 
 	_, err := r.txn.ModelContext(span.Context(), link).
 		WherePK().
@@ -31,9 +38,8 @@ func (r *repositoryBase) UpdatePlaidLink(ctx context.Context, link *models.Plaid
 }
 
 func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64) error {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "DeletePlaidLink"
 
 	// Update the link record to indicate that it is no longer a Plaid link but instead a manual one. This way some data
 	// is still preserved.
@@ -42,6 +48,7 @@ func (r *repositoryBase) DeletePlaidLink(ctx context.Context, plaidLinkId uint64
 		Set(`"link_type" = ?`, models.ManualLinkType).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."plaid_link_id" = ?`, plaidLinkId).
+		// TODO That won't work anymore
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
 		Update()
 	if err != nil {
@@ -89,7 +96,6 @@ func (r *plaidRepositoryBase) GetLinkByItemId(ctx context.Context, itemId string
 	var link models.Link
 	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
-		Relation("BankAccounts").
 		Where(`"plaid_link"."item_id" = ?`, itemId).
 		Limit(1).
 		Select(&link)
