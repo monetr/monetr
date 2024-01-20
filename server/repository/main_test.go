@@ -1,19 +1,20 @@
-package repository
+package repository_test
 
 import (
 	"testing"
 
 	"github.com/benbjohnson/clock"
+	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func GetTestAuthenticatedRepository(t *testing.T) Repository {
-	clock := clock.NewMock()
+func GetTestAuthenticatedRepository(t *testing.T, clock clock.Clock) repository.Repository {
 	db := testutils.GetPgDatabase(t)
 
-	user, _ := testutils.SeedAccount(t, db, clock, testutils.WithPlaidAccount)
+	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
 	txn, err := db.Begin()
 	require.NoError(t, err, "failed to begin transaction")
@@ -22,10 +23,5 @@ func GetTestAuthenticatedRepository(t *testing.T) Repository {
 		assert.NoError(t, txn.Commit(), "should commit")
 	})
 
-	return &repositoryBase{
-		userId:    user.UserId,
-		accountId: user.AccountId,
-		txn:       txn,
-		account:   user.Account,
-	}
+	return repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, txn)
 }

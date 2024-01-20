@@ -1,48 +1,25 @@
-package repository
+package repository_test
 
 import (
 	"context"
 	"testing"
-	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/monetr/monetr/server/consts"
-	"github.com/monetr/monetr/server/models"
+	"github.com/benbjohnson/clock"
+	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPlaidRepositoryBase_GetLink(t *testing.T) {
-	repo := GetTestAuthenticatedRepository(t)
-	txn := repo.(*repositoryBase).txn
-	require.NotNil(t, txn, "must be able to pull the transaction for test")
+	clock := clock.NewMock()
+	db := testutils.GetPgDatabase(t)
 
-	plaidLink := &models.PlaidLink{
-		ItemId:     gofakeit.UUID(),
-		Products:   consts.PlaidProductStrings(),
-		WebhookUrl: "https://monetr.test/webhook",
-	}
+	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+	link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+	plaidLink := link.PlaidLink
 
-	link := &models.Link{
-		AccountId:             repo.AccountId(),
-		LinkType:              models.PlaidLinkType,
-		PlaidLinkId:           nil,
-		LinkStatus:            models.LinkStatusSetup,
-		InstitutionName:       "Institution " + t.Name(),
-		CustomInstitutionName: "Institution " + t.Name(),
-		CreatedAt:             time.Now(),
-		CreatedByUserId:       repo.UserId(),
-		UpdatedAt:             time.Now(),
-		LastSuccessfulUpdate:  nil,
-	}
-
-	{ // Create the links.
-		require.NoError(t, repo.CreatePlaidLink(context.Background(), plaidLink), "must create plaid link")
-		link.PlaidLinkId = &plaidLink.PlaidLinkID
-		require.NoError(t, repo.CreateLink(context.Background(), link), "must create link")
-	}
-
-	plaidRepo := NewPlaidRepository(txn)
+	plaidRepo := repository.NewPlaidRepository(db)
 
 	t.Run("simple", func(t *testing.T) {
 		readLink, err := plaidRepo.GetLink(context.Background(), link.AccountId, link.LinkId)
@@ -60,36 +37,14 @@ func TestPlaidRepositoryBase_GetLink(t *testing.T) {
 }
 
 func TestPlaidRepositoryBase_GetLinkByItemId(t *testing.T) {
-	repo := GetTestAuthenticatedRepository(t)
-	txn := repo.(*repositoryBase).txn
-	require.NotNil(t, txn, "must be able to pull the transaction for test")
+	clock := clock.NewMock()
+	db := testutils.GetPgDatabase(t)
 
-	plaidLink := &models.PlaidLink{
-		ItemId:     gofakeit.UUID(),
-		Products:   consts.PlaidProductStrings(),
-		WebhookUrl: "https://monetr.test/webhook",
-	}
+	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+	link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+	plaidLink := link.PlaidLink
 
-	link := &models.Link{
-		AccountId:             repo.AccountId(),
-		LinkType:              models.PlaidLinkType,
-		PlaidLinkId:           nil,
-		LinkStatus:            models.LinkStatusSetup,
-		InstitutionName:       "Institution " + t.Name(),
-		CustomInstitutionName: "Institution " + t.Name(),
-		CreatedAt:             time.Now(),
-		CreatedByUserId:       repo.UserId(),
-		UpdatedAt:             time.Now(),
-		LastSuccessfulUpdate:  nil,
-	}
-
-	{ // Create the links.
-		require.NoError(t, repo.CreatePlaidLink(context.Background(), plaidLink), "must create plaid link")
-		link.PlaidLinkId = &plaidLink.PlaidLinkID
-		require.NoError(t, repo.CreateLink(context.Background(), link), "must create link")
-	}
-
-	plaidRepo := NewPlaidRepository(txn)
+	plaidRepo := repository.NewPlaidRepository(db)
 
 	t.Run("simple", func(t *testing.T) {
 		readLink, err := plaidRepo.GetLinkByItemId(context.Background(), plaidLink.ItemId)

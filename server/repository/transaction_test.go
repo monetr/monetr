@@ -1,30 +1,35 @@
-package repository
+package repository_test
 
 import (
 	"context"
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestRepositoryBase_GetTransactionsByPlaidTransactionId(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		repo := GetTestAuthenticatedRepository(t)
+		clock := clock.NewMock()
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
+		checkingAccount := fixtures.GivenIHaveABankAccount(
+			t,
+			clock,
+			&link,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
 
-		bankAccounts, err := repo.GetBankAccounts(context.Background())
-		require.NoError(t, err, "must be able to retrieve bank accounts")
-
-		var checkingAccount models.BankAccount
-		for _, bankAccount := range bankAccounts {
-			if bankAccount.SubType == "checking" {
-				checkingAccount = bankAccount
-				break
-			}
-		}
+		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
 		transaction := models.Transaction{
 			AccountId:          repo.AccountId(),

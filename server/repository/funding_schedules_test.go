@@ -10,23 +10,7 @@ import (
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
-
-func GetTestAuthenticatedRepository(t *testing.T, clock clock.Clock) repository.Repository {
-	db := testutils.GetPgDatabase(t)
-
-	user, _ := testutils.SeedAccount(t, db, clock, testutils.WithPlaidAccount)
-
-	txn, err := db.Begin()
-	require.NoError(t, err, "failed to begin transaction")
-
-	t.Cleanup(func() {
-		assert.NoError(t, txn.Commit(), "should commit")
-	})
-
-	return repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, txn)
-}
 
 func TestRepositoryBase_UpdateFundingSchedule(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {

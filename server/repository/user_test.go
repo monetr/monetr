@@ -1,11 +1,13 @@
-package repository
+package repository_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/benbjohnson/clock"
+	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,9 +15,9 @@ func TestRepositoryBase_GetMe(t *testing.T) {
 	clock := clock.NewMock()
 	db := testutils.GetPgDatabase(t)
 
-	user, _ := testutils.SeedAccount(t, db, clock, testutils.WithPlaidAccount)
+	user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 
-	repo := NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
 	me, err := repo.GetMe(context.Background())
 	assert.NoError(t, err, "should not return an error for retrieving me")
