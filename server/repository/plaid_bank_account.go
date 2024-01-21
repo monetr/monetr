@@ -23,3 +23,19 @@ func (r *repositoryBase) CreatePlaidBankAccount(
 
 	return errors.Wrap(err, "failed to create plaid bank account")
 }
+
+func (r *repositoryBase) UpdatePlaidBankAccount(
+	ctx context.Context,
+	bankAccount *models.PlaidBankAccount,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	bankAccount.AccountId = r.AccountId()
+
+	_, err := r.txn.ModelContext(span.Context(), bankAccount).
+		WherePK().
+		Update(bankAccount)
+
+	return errors.Wrap(err, "failed to update plaid bank account")
+}

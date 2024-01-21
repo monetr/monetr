@@ -82,6 +82,9 @@ CREATE TABLE "plaid_bank_accounts" (
   "name"                  TEXT      NOT NULL,
   "official_name"         TEXT,
   "mask"                  TEXT,
+  "available_balance"     BIGINT    NOT NULL,
+  "current_balance"       BIGINT    NOT NULL,
+  "limit_balance"         BIGINT,
   "created_at"            TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   "created_by_user_id"    BIGINT NOT NULL,
 
@@ -92,7 +95,7 @@ CREATE TABLE "plaid_bank_accounts" (
 );
 
 INSERT INTO "plaid_bank_accounts" 
-  ("account_id", "plaid_link_id", "plaid_id", "name", "official_name", "mask", "created_by_user_id")
+  ("account_id", "plaid_link_id", "plaid_id", "name", "official_name", "mask", "available_balance", "current_balance", "created_by_user_id")
 SELECT 
   "bank_accounts"."account_id",
   "links"."plaid_link_id",
@@ -100,6 +103,8 @@ SELECT
   "bank_accounts"."plaid_name" AS "name",
   "bank_accounts"."plaid_official_name" AS "official_name",
   "bank_accounts"."mask",
+  "bank_accounts"."available_balance",
+  "bank_accounts"."current_balance",
   "links"."created_by_user_id"
 FROM "bank_accounts"
 INNER JOIN "links" ON "links"."link_id" = "bank_accounts"."link_id" AND 
@@ -109,6 +114,7 @@ WHERE "bank_accounts"."plaid_account_id" IS NOT NULL AND
 
 -- Then update the bank accounts table with the new stuff.
 ALTER TABLE "bank_accounts" 
+ADD COLUMN "original_name" TEXT,
 ADD COLUMN "plaid_bank_account_id" BIGINT,
 ADD COLUMN "updated_at" TIMESTAMP WITH TIME ZONE,
 ADD COLUMN "created_at" TIMESTAMP WITH TIME ZONE,
@@ -121,7 +127,8 @@ WHERE "plaid_bank_accounts"."plaid_id" = "bank_accounts"."plaid_account_id" AND
       "plaid_bank_accounts"."account_id" = "bank_accounts"."account_id";
 
 UPDATE "bank_accounts" 
-SET "updated_at" = "links"."updated_at",
+SET "original_name" = "plaid_name",
+    "updated_at" = "links"."updated_at",
     "created_at" = "links"."created_at",
     "created_by_user_id" = "links"."created_by_user_id"
 FROM "links"

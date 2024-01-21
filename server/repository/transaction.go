@@ -28,6 +28,7 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
+// DEPRECATED!
 func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
 	if len(plaidTransactionIds) == 0 {
 		return map[string]models.Transaction{}, nil
@@ -43,6 +44,9 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 
 	var items []models.Transaction
 	// Deliberatly include all transactions, regardless of delete status.
+	// TODO This query is using a FROM for models.Transaction, but it would
+	// probably be more efficient to use the plaid transactions table as the base
+	// and then join on transaction. But for now this is still fine.
 	err := r.txn.ModelContext(span.Context(), &items).
 		Relation("PlaidTransaction").
 		Relation("PendingPlaidTransaction").

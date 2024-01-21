@@ -14,6 +14,8 @@ type BaseRepository interface {
 	AccountId() uint64
 
 	CreatePlaidBankAccount(ctx context.Context, bankAccount *models.PlaidBankAccount) error
+	UpdatePlaidBankAccount(ctx context.Context, bankAccount *models.PlaidBankAccount) error
+
 	GetPlaidBankAccountsByLinkId(ctx context.Context, linkId uint64) ([]models.PlaidBankAccount, error)
 
 	AddExpenseToTransaction(ctx context.Context, transaction *models.Transaction, spending *models.Spending) error
