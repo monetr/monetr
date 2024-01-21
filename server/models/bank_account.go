@@ -47,8 +47,8 @@ type BankAccount struct {
 	Account            *Account           `json:"-" pg:"rel:has-one"`
 	LinkId             uint64             `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE"`
 	Link               *Link              `json:"-,omitempty" pg:"rel:has-one"`
-	PlaidBankAccountId *uint64            `json:"plaidBankAccountId" pg:"plaid_bank_account_id"`
-	PlaidBankAccount   *PlaidBankAccount  `json:"-" pg:"rel:has-one,fk:plaid_bank_account_id"`
+	PlaidBankAccountId *uint64            `json:"-" pg:"plaid_bank_account_id"`
+	PlaidBankAccount   *PlaidBankAccount  `json:"plaidBankAccount,omitempty" pg:"rel:has-one,fk:plaid_bank_account_id"`
 	AvailableBalance   int64              `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance     int64              `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
 	Mask               string             `json:"mask" pg:"mask"`

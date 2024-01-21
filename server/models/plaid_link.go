@@ -27,7 +27,7 @@ type PlaidLink struct {
 	ExpirationDate       *time.Time      `json:"expirationDate" pg:"expiration_date"`
 	NewAccountsAvailable bool            `json:"newAccountsAvailable" pg:"new_accounts_available,use_zero"`
 	WebhookUrl           string          `json:"-" pg:"webhook_url"`
-	InstitutionId        string          `json:"institutionId" pg:"institution_id"`
+	InstitutionId        string          `json:"institutionId" pg:"institution_id,notnull"`
 	InstitutionName      string          `json:"institutionName" pg:"institution_name"`
 	LastManualSync       *time.Time      `json:"lastManualSync" pg:"last_manual_sync"`
 	LastSuccessfulUpdate *time.Time      `json:"lastSuccessfulUpdate" pg:"last_successful_update"`

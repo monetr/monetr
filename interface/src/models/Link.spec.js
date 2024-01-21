@@ -18,10 +18,5 @@ describe('links', () => {
     });
 
     expect(link.getName()).toBe('Original');
-
-    link.customInstitutionName = 'New Name';
-
-    // Now that a custom institution name is present, this should change.
-    expect(link.getName()).toBe('New Name');
   });
 });

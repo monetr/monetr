@@ -5,7 +5,7 @@ import "time"
 type PlaidBankAccount struct {
 	tableName string `pg:"plaid_bank_accounts"`
 
-	PlaidBankAccountId uint64     `json:"plaidBankAccountId" pg:"plaid_bank_account_id,notnull,pk,type:'bigserial'"`
+	PlaidBankAccountId uint64     `json:"-" pg:"plaid_bank_account_id,notnull,pk,type:'bigserial'"`
 	AccountId          uint64     `json:"-" pg:"account_id,notnull,pk"`
 	Account            *Account   `json:"-" pg:"rel:has-one"`
 	PlaidLinkId        uint64     `json:"-" pg:"plaid_link_id,type:'bigint'"`
