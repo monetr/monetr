@@ -332,7 +332,6 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 
 		now := time.Now()
 		accounts := make([]*models.BankAccount, len(plaidAccounts))
-		// TODO This isn't full implemented
 		for i := range plaidAccounts {
 			plaidAccount := plaidAccounts[i]
 			plaidBankAccount := models.PlaidBankAccount{
@@ -481,11 +480,13 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	for i := range plaidAccounts {
 		plaidAccount := plaidAccounts[i]
 		plaidBankAccount := models.PlaidBankAccount{
-			PlaidLinkId:  plaidLink.PlaidLinkID,
-			PlaidId:      plaidAccount.GetAccountId(),
-			Name:         plaidAccount.GetName(),
-			OfficialName: plaidAccount.GetOfficialName(),
-			Mask:         plaidAccount.GetMask(),
+			PlaidLinkId:      plaidLink.PlaidLinkID,
+			PlaidId:          plaidAccount.GetAccountId(),
+			Name:             plaidAccount.GetName(),
+			OfficialName:     plaidAccount.GetOfficialName(),
+			Mask:             plaidAccount.GetMask(),
+			AvailableBalance: plaidAccount.GetBalances().GetAvailable(),
+			CurrentBalance:   plaidAccount.GetBalances().GetCurrent(),
 		}
 		if err := repo.CreatePlaidBankAccount(
 			c.getContext(ctx),
