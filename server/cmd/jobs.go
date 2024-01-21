@@ -118,7 +118,7 @@ var (
 	}
 
 	RunSyncPlaidCommand = &cobra.Command{
-		Use:   "sync-transactions",
+		Use:   "sync-plaid",
 		Short: "Pull latest transactions for a specific link and account.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clock := clock.New()
@@ -139,6 +139,9 @@ var (
 			}
 
 			db, err := getDatabase(log, configuration, nil)
+			if err != nil {
+				return errors.Wrap(err, "failed to get database instance")
+			}
 
 			ctx := context.Background()
 
@@ -198,6 +201,9 @@ var (
 					backgroundJobs,
 					jobArgs,
 				)
+				if err != nil {
+					return errors.Wrap(err, "failed to create sync job")
+				}
 
 				if err := job.Run(ctx); err != nil {
 					log.WithError(err).Fatalf("failed to run pull latest transactions")

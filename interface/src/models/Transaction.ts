@@ -9,7 +9,6 @@ export default class Transaction {
   spendingId?: number;
   spendingAmount?: number;
   categories: string[];
-  originalCategories: string[];
   date: Date;
   authorizedDate?: Date;
   name?: string;
@@ -87,10 +86,6 @@ export default class Transaction {
   getMainCategory(): string {
     if (this.categories && this.categories.length > 0) {
       return this.categories[0];
-    }
-
-    if (this.originalCategories && this.originalCategories.length > 0) {
-      return this.originalCategories[0];
     }
 
     return 'Other';

@@ -156,6 +156,8 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, tran
 
 	var result models.Transaction
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("PlaidTransaction").
+		Relation("PendingPlaidTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).

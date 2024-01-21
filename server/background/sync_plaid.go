@@ -551,7 +551,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, s.similarity[key])
 	}
 
-	return nil
+	return s.maintainLinkStatus(ctx, plaidLink)
 }
 
 func (s *SyncPlaidJob) tagBankAccountForSimilarityRecalc(bankAccountId uint64) {
