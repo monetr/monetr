@@ -32,7 +32,9 @@ func (c *Controller) storeLinkTokenInCache(
 
 	key := fmt.Sprintf("plaid:in_progress:%d:%d", userId, linkId)
 	return errors.Wrap(
-		c.cache.SetEzTTL(span.Context(), key, linkToken, expiration.Sub(time.Now())),
+		// Cache TTL's should not use the internal clock. Because redis has it's own
+		// clock.
+		c.cache.SetEzTTL(span.Context(), key, linkToken, time.Until(expiration)),
 		"failed to cache link token",
 	)
 }
@@ -331,27 +333,33 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		now := time.Now()
 		accounts := make([]*models.BankAccount, len(plaidAccounts))
 		// TODO This isn't full implemented
-		for i, plaidAccount := range plaidAccounts {
-			accounts[i] = &models.BankAccount{
-				AccountId: repo.AccountId(),
-				LinkId:    link.LinkId,
-				PlaidBankAccount: &models.PlaidBankAccount{
-					AccountId:       repo.AccountId(),
-					PlaidLinkId:     *link.PlaidLinkId,
-					PlaidId:         plaidAccount.GetAccountId(),
-					Name:            plaidAccount.GetName(),
-					OfficialName:    plaidAccount.GetOfficialName(),
-					Mask:            plaidAccount.GetMask(),
-					CreatedAt:       c.clock.Now().UTC(),
-					CreatedByUserId: repo.UserId(),
-				},
+		for i := range plaidAccounts {
+			plaidAccount := plaidAccounts[i]
+			plaidBankAccount := models.PlaidBankAccount{
+				PlaidLinkId:      *link.PlaidLinkId,
+				PlaidId:          plaidAccount.GetAccountId(),
+				Name:             plaidAccount.GetName(),
+				OfficialName:     plaidAccount.GetOfficialName(),
+				Mask:             plaidAccount.GetMask(),
 				AvailableBalance: plaidAccount.GetBalances().GetAvailable(),
 				CurrentBalance:   plaidAccount.GetBalances().GetCurrent(),
-				Name:             plaidAccount.GetName(),
-				Mask:             plaidAccount.GetMask(),
-				Type:             models.BankAccountType(plaidAccount.GetType()),
-				SubType:          models.BankAccountSubType(plaidAccount.GetSubType()),
-				LastUpdated:      now,
+			}
+			if err := repo.CreatePlaidBankAccount(c.getContext(ctx), &plaidBankAccount); err != nil {
+				return c.wrapPgError(ctx, err, "failed to create plaid bank account")
+			}
+
+			accounts[i] = &models.BankAccount{
+				AccountId:          repo.AccountId(),
+				LinkId:             link.LinkId,
+				PlaidBankAccountId: &plaidBankAccount.PlaidBankAccountId,
+				PlaidBankAccount:   &plaidBankAccount,
+				AvailableBalance:   plaidAccount.GetBalances().GetAvailable(),
+				CurrentBalance:     plaidAccount.GetBalances().GetCurrent(),
+				Name:               plaidAccount.GetName(),
+				Mask:               plaidAccount.GetMask(),
+				Type:               models.BankAccountType(plaidAccount.GetType()),
+				SubType:            models.BankAccountSubType(plaidAccount.GetSubType()),
+				LastUpdated:        now,
 			}
 		}
 		if err = repo.CreateBankAccounts(c.getContext(ctx), accounts...); err != nil {
