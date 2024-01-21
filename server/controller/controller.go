@@ -86,7 +86,11 @@ func NewController(
 	pubSub := pubsub.NewPostgresPubSub(log, db)
 	basicBilling := billing.NewBasicBilling(log, clock, accountsRepo, pubSub)
 
-	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(log, plaidClient, 5*time.Minute)
+	plaidWebhookVerification := platypus.NewInMemoryWebhookVerification(
+		log,
+		plaidClient,
+		1*time.Hour,
+	)
 
 	return &Controller{
 		accounts:                 accountsRepo,
