@@ -36,6 +36,7 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 
 	var result []models.Link
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("PlaidLink").
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Select(&result)
 	if err != nil {

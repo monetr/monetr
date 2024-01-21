@@ -19,6 +19,7 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAcco
 
 	var result []models.BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("PlaidBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
@@ -143,6 +144,7 @@ func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId uint6
 
 	var result models.BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("PlaidBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ? `, bankAccountId).
 		Select(&result)
