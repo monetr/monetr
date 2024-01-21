@@ -91,7 +91,7 @@ func (r *repositoryBase) GetBankAccountsWithPlaidByLinkId(
 	var result []models.BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation(`PlaidBankAccount`).
-		Where(`"bank_account"."plaid_bank_acount_id" IS NOT NULL`).
+		Where(`"bank_account"."plaid_bank_account_id" IS NOT NULL`).
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ? `, linkId).
 		Select(&result)

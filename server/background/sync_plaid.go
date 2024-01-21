@@ -611,9 +611,9 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	//
 	// // Then enqueue all of the bank accounts we touched to have their similar
 	// // transactions recalculated.
-	// for key := range transactionSimilaritySyncs {
-	// 	s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, transactionSimilaritySyncs[key])
-	// }
+	for key := range s.similarity {
+		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, s.similarity[key])
+	}
 	//
 	// if linkWasSetup { // Send the notification that the link has been set up.
 	// 	channelName := fmt.Sprintf("initial:plaid:link:%d:%d", s.args.AccountId, s.args.LinkId)

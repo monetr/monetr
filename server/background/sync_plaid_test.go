@@ -211,4 +211,16 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		count = fixtures.CountAllTransactions(t, user.AccountId)
 		assert.EqualValues(t, 2, count, "should have a total of two transactions including the deleted one")
 	})
+
+	t.Run("initial setup", func(t *testing.T) {
+		// TODO!!
+	})
+
+	t.Run("remove with spending", func(t *testing.T) {
+		// TODO!!
+	})
+
+	t.Run("no updates", func(t *testing.T) {
+		// TODO!!
+	})
 }

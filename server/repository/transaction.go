@@ -54,9 +54,9 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ?`, linkId).
-		WhereOrGroup(func(q *orm.Query) (*orm.Query, error) {
-			q = q.WhereIn(`"plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds)
-			q = q.WhereIn(`"pending_plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds)
+		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
+			q = q.WhereIn(`"plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds).
+				WhereInOr(`"pending_plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds)
 			return q, nil
 		}).
 		Select(&items)
