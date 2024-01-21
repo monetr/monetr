@@ -42,7 +42,7 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 		"plaidTransactionIds": plaidTransactionIds,
 	}
 
-	var items []models.Transaction
+	items := make([]models.Transaction, 0)
 	// Deliberatly include all transactions, regardless of delete status.
 	// TODO This query is using a FROM for models.Transaction, but it would
 	// probably be more efficient to use the plaid transactions table as the base
@@ -253,7 +253,7 @@ func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, t
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
-		Set(`"deleted_at" = ?`, time.Now().UTC()).
+		Set(`"deleted_at" = ?`, r.clock.Now().UTC()).
 		Update()
 
 	return errors.Wrap(err, "failed to soft-delete transaction")

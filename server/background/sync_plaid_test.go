@@ -208,8 +208,9 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		count = fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.EqualValues(t, 1, count, "should have one transaction now!")
 
+		// There should be only one transaction since we handle merging.
 		count = fixtures.CountAllTransactions(t, user.AccountId)
-		assert.EqualValues(t, 2, count, "should have a total of two transactions including the deleted one")
+		assert.EqualValues(t, 1, count, "should have a total of two transactions including the deleted one")
 	})
 
 	t.Run("initial setup", func(t *testing.T) {

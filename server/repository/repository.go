@@ -56,14 +56,6 @@ type BaseRepository interface {
 	GetLinkIsManualByBankAccountId(ctx context.Context, bankAccountId uint64) (bool, error)
 	GetLinks(ctx context.Context) ([]models.Link, error)
 
-	// GetTransactionByPendingTransactionPlaidId takes a bank account and a Plaid
-	// Transaction ID string. It will find a monetr transaction that has a pending
-	// transaction equivalent to the provided pending plaid transaction ID, if
-	// there is one it will return it. If there is not then it will return nil
-	// with a nil error. If there is a problem then error will have a value and
-	// the transaction will be nil.
-	GetTransactionByPendingTransactionPlaidId(ctx context.Context, bankAccountId uint64, plaidPendingTransactionId string) (*models.Transaction, error)
-
 	// Plaid syncing
 	GetLastPlaidSync(ctx context.Context, linkId uint64) (*models.PlaidSync, error)
 	RecordPlaidSync(ctx context.Context, plaidLinkId uint64, trigger, nextCursor string, added, modified, removed int) error

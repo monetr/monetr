@@ -19,10 +19,10 @@ type Transaction struct {
 	BankAccountId uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,type:'bigint',unique:per_bank_account"`
 	BankAccount   *BankAccount `json:"-" pg:"rel:has-one"`
 
-	PlaidTransactionId        *uint64           `json:"plaidTransactionId" pg:"plaid_transaction_id"`
-	PlaidTransaction          *PlaidTransaction `json:"-" pg:"rel:has-one"`
-	PendingPlaidTransactionId *uint64           `json:"pendingPlaidTransactionId" pg:"pending_plaid_transaction_id"`
-	PendingPlaidTransaction   *PlaidTransaction `json:"-" pg:"rel:has-one,fk:pending_plaid_transaction_id"`
+	PlaidTransactionId        *uint64           `json:"-" pg:"plaid_transaction_id"`
+	PlaidTransaction          *PlaidTransaction `json:"plaidTransaction" pg:"rel:has-one"`
+	PendingPlaidTransactionId *uint64           `json:"-" pg:"pending_plaid_transaction_id"`
+	PendingPlaidTransaction   *PlaidTransaction `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
 
 	Amount     int64     `json:"amount" pg:"amount,notnull,use_zero"`
 	SpendingId *uint64   `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
