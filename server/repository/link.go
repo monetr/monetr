@@ -54,7 +54,7 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 		Where(`"link"."account_id" = ?`, r.accountId).
 		// TODO This is partially correct, but we should really look at the status
 		// on the plaid link itself for this?
-		Where(`"link"."plaid_link_id" IS NOT NULL`).
+		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
 		Count()
 	if err != nil {
 		return count, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
@@ -73,7 +73,7 @@ func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bo
 	ok, err := r.txn.ModelContext(span.Context(), &models.Link{}).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
-		Where(`"link"."plaid_link_id" IS NULL`).
+		Where(`"link"."link_type" = ?`, models.ManualLinkType).
 		Exists()
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -97,7 +97,7 @@ func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, ban
 		JoinOn(`"bank_account"."link_id" = "link"."link_id" AND "bank_account"."account_id" = "link"."account_id"`).
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ?`, bankAccountId).
-		Where(`"link"."plaid_link_id" IS NULL`).
+		Where(`"link"."link_type" = ?`, models.ManualLinkType).
 		Exists()
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
