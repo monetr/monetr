@@ -15,6 +15,7 @@ import (
 
 var (
 	_ JobController = &SynchronousJobRunner{}
+	_ JobEnqueuer   = &SynchronousJobRunner{}
 )
 
 // SynchronousJobRunner is a harness around running jobs that allows jobs to be triggered normally outside this package
@@ -52,9 +53,7 @@ func NewSynchronousJobRunner(
 
 	jobs := []JobHandler{
 		NewProcessFundingScheduleHandler(log, db, clock),
-		NewPullTransactionsHandler(log, db, clock, plaidSecrets, plaidPlatypus, publisher),
 		NewRemoveLinkHandler(log, db, clock, publisher),
-		NewRemoveTransactionsHandler(log, db, clock),
 	}
 	for i := range jobs {
 		runner.jobs[jobs[i].QueueName()] = jobs[i]
@@ -63,7 +62,7 @@ func NewSynchronousJobRunner(
 	return runner
 }
 
-func (s *SynchronousJobRunner) TriggerJob(ctx context.Context, queue string, data interface{}) error {
+func (s *SynchronousJobRunner) EnqueueJob(ctx context.Context, queue string, data interface{}) error {
 	require.Contains(s.t, s.jobs, queue, "job must be registered in order to be triggered, might need to be updated?")
 	jobHandler := s.jobs[queue]
 

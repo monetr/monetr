@@ -42,22 +42,23 @@ const (
 type BankAccount struct {
 	tableName string `pg:"bank_accounts"`
 
-	BankAccountId    uint64   `json:"bankAccountId" pg:"bank_account_id,notnull,pk,type:'bigserial'" example:"1234"`
-	AccountId        uint64   `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE"`
-	Account          *Account `json:"-" pg:"rel:has-one"`
-	LinkId           uint64   `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE" example:"2345"`
-	Link             *Link    `json:"-,omitempty" pg:"rel:has-one"`
-	PlaidAccountId   string   `json:"-" pg:"plaid_account_id"`
-	AvailableBalance int64    `json:"availableBalance" pg:"available_balance,notnull,use_zero" example:"102356"`
-	// Current Balance is a 64-bit representation of a bank account's total balance (excluding pending transactions) in
-	// the form of an integer. To derive a decimal value divide this value by 100.
-	CurrentBalance    int64              `json:"currentBalance" pg:"current_balance,notnull,use_zero" example:"102400"`
-	Mask              string             `json:"mask" pg:"mask" example:"0000"`
-	Name              string             `json:"name,omitempty" pg:"name,notnull" example:"Checking Account"`
-	PlaidName         string             `json:"originalName" pg:"plaid_name" example:"Checking Account #1"`
-	PlaidOfficialName string             `json:"officialName" pg:"plaid_official_name" example:"US Bank - Checking Account"`
-	Type              BankAccountType    `json:"accountType" pg:"account_type" example:"depository"`
-	SubType           BankAccountSubType `json:"accountSubType" pg:"account_sub_type" example:"checking"`
-	Status            BankAccountStatus  `json:"status" pg:"status,notnull"`
-	LastUpdated       time.Time          `json:"lastUpdated" pg:"last_updated,notnull"`
+	BankAccountId      uint64             `json:"bankAccountId" pg:"bank_account_id,notnull,pk,type:'bigserial'"`
+	AccountId          uint64             `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE"`
+	Account            *Account           `json:"-" pg:"rel:has-one"`
+	LinkId             uint64             `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE"`
+	Link               *Link              `json:"-,omitempty" pg:"rel:has-one"`
+	PlaidBankAccountId *uint64            `json:"-" pg:"plaid_bank_account_id"`
+	PlaidBankAccount   *PlaidBankAccount  `json:"plaidBankAccount,omitempty" pg:"rel:has-one,fk:plaid_bank_account_id"`
+	AvailableBalance   int64              `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
+	CurrentBalance     int64              `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
+	Mask               string             `json:"mask" pg:"mask"`
+	Name               string             `json:"name,omitempty" pg:"name,notnull"`
+	OriginalName       string             `json:"originalName" pg:"original_name,notnull"`
+	Type               BankAccountType    `json:"accountType" pg:"account_type"`
+	SubType            BankAccountSubType `json:"accountSubType" pg:"account_sub_type"`
+	Status             BankAccountStatus  `json:"status" pg:"status,notnull"`
+	LastUpdated        time.Time          `json:"lastUpdated" pg:"last_updated,notnull"`
+	CreatedAt          time.Time          `json:"createdAt" pg:"created_at,notnull"`
+	CreatedByUserId    uint64             `json:"createdByUserId" pg:"created_by_user_id,notnull"`
+	CreatedByUser      *User              `json:"-" pg:"rel:has-one,fk:created_by_user_id"`
 }

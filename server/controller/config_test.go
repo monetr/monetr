@@ -11,10 +11,10 @@ func TestGetConfig(t *testing.T) {
 
 	response.Status(http.StatusOK)
 	j := response.JSON()
-	j.Path("$.requireLegalName").Boolean().False()
-	j.Path("$.requirePhoneNumber").Boolean().False()
-	j.Path("$.verifyLogin").Boolean().False()
-	j.Path("$.verifyRegister").Boolean().False()
-	j.Path("$.allowSignUp").Boolean().True()
-	j.Path("$.allowForgotPassword").Boolean().False()
+	j.Path("$.requireLegalName").Boolean().IsFalse()
+	j.Path("$.requirePhoneNumber").Boolean().IsFalse()
+	j.Path("$.verifyLogin").Boolean().IsFalse()
+	j.Path("$.verifyRegister").Boolean().IsFalse()
+	j.Path("$.allowSignUp").Boolean().IsTrue()
+	j.Path("$.allowForgotPassword").Boolean().IsFalse()
 }

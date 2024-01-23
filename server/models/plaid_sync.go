@@ -6,7 +6,9 @@ type PlaidSync struct {
 	tableName string `pg:"plaid_syncs"`
 
 	PlaidSyncID uint64     `json:"plaidSyncId" pg:"plaid_sync_id,notnull,pk,type:'bigserial'"`
-	PlaidLinkID uint64     `json:"-" pg:"plaid_link_id,notnull,on_delete:CASCADE,type:'bigint'"`
+	AccountId   uint64     `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE"`
+	Account     *Account   `json:"-" pg:"rel:has-one"`
+	PlaidLinkId uint64     `json:"-" pg:"plaid_link_id,notnull,on_delete:CASCADE,type:'bigint'"`
 	PlaidLink   *PlaidLink `json:"-" pg:"rel:has-one"`
 	Timestamp   time.Time  `json:"timestamp" pg:"timestamp,notnull"`
 	Trigger     string     `json:"trigger" pg:"trigger,notnull"`

@@ -17,10 +17,6 @@ func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, 
 	require.NotZero(t, link.LinkId, "link id must be included")
 	require.NotZero(t, link.AccountId, "link id must be included")
 
-	if link.BankAccounts == nil {
-		link.BankAccounts = make([]models.BankAccount, 0, 1)
-	}
-
 	db := testutils.GetPgDatabase(t)
 	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
 
@@ -30,20 +26,17 @@ func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, 
 	// By doing this as an array, its actually a pointer. And can be updated by reference.
 	banks := []*models.BankAccount{
 		{
-			AccountId:         link.AccountId,
-			Account:           link.Account,
-			LinkId:            link.LinkId,
-			Link:              link,
-			PlaidAccountId:    gofakeit.UUID(),
-			AvailableBalance:  available,
-			CurrentBalance:    current,
-			Mask:              gofakeit.Generate("####"),
-			Name:              "E-ACCOUNT",
-			PlaidName:         "EACCOUNT",
-			PlaidOfficialName: "EACCOUNT",
-			Type:              accountType,
-			SubType:           subType,
-			LastUpdated:       clock.Now(),
+			AccountId:        link.AccountId,
+			Account:          link.Account,
+			LinkId:           link.LinkId,
+			Link:             link,
+			AvailableBalance: available,
+			CurrentBalance:   current,
+			Mask:             gofakeit.Generate("####"),
+			Name:             "E-ACCOUNT",
+			Type:             accountType,
+			SubType:          subType,
+			LastUpdated:      clock.Now(),
 		},
 	}
 
@@ -51,10 +44,67 @@ func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, 
 	require.NoError(t, err, "must seed bank account")
 	require.NotZero(t, banks[0].BankAccountId, "bank account Id must have been set")
 
-	for i := range banks {
-		link.BankAccounts = append(link.BankAccounts, *banks[i])
+	return *banks[0]
+}
+
+func GivenIHaveAPlaidBankAccount(
+	t *testing.T,
+	clock clock.Clock,
+	link *models.Link,
+	accountType models.BankAccountType,
+	subType models.BankAccountSubType,
+) models.BankAccount {
+	require.NotNil(t, link, "link must actually be provided")
+	require.NotZero(t, link.LinkId, "link id must be included")
+	require.NotZero(t, link.AccountId, "link id must be included")
+	require.NotZero(t, link.PlaidLinkId, "link plaid link id must be included")
+
+	db := testutils.GetPgDatabase(t)
+	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
+
+	current := int64(gofakeit.Number(2000, 100000))
+	available := current - int64(gofakeit.Number(100, 2000))
+
+	plaidBankAccount := models.PlaidBankAccount{
+		AccountId:       link.AccountId,
+		PlaidLinkId:     *link.PlaidLinkId,
+		PlaidId:         gofakeit.UUID(),
+		Name:            "E-ACCOUNT",
+		OfficialName:    "E-ACCOUNT",
+		Mask:            gofakeit.Generate("####"),
+		CreatedAt:       clock.Now(),
+		CreatedByUserId: link.CreatedByUserId,
+	}
+	require.NoError(
+		t,
+		repo.CreatePlaidBankAccount(context.Background(), &plaidBankAccount),
+		"must be able to create the plaid bank account record",
+	)
+
+	bankAccount := models.BankAccount{
+		AccountId:          link.AccountId,
+		Account:            link.Account,
+		LinkId:             link.LinkId,
+		Link:               link,
+		PlaidBankAccountId: &plaidBankAccount.PlaidBankAccountId,
+		PlaidBankAccount:   &plaidBankAccount,
+		AvailableBalance:   available,
+		CurrentBalance:     current,
+		Mask:               gofakeit.Generate("####"),
+		Name:               "E-ACCOUNT",
+		Type:               accountType,
+		SubType:            subType,
+		LastUpdated:        clock.Now(),
+		CreatedAt:          clock.Now(),
+		CreatedByUserId:    link.CreatedByUserId,
 	}
 
-	return *banks[0]
+	require.NoError(
+		t,
+		repo.CreateBankAccounts(context.Background(), &bankAccount),
+		"must seed bank account",
+	)
+	require.NotZero(t, bankAccount.BankAccountId, "bank account Id must have been set")
 
+	return bankAccount
 }

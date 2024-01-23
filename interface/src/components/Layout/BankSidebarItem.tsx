@@ -15,7 +15,7 @@ interface BankSidebarItemProps {
 }
 
 export default function BankSidebarItem({ link }: BankSidebarItemProps): JSX.Element {
-  const { result: institution } = useInstitution(link.plaidInstitutionId);
+  const { result: institution } = useInstitution(link.plaidLink?.institutionId);
   const selectBankAccount = useSelectedBankAccount();
   const { data: bankAccounts } = useBankAccounts();
   const active = selectBankAccount.data?.linkId === link.linkId;

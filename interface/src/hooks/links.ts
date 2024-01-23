@@ -98,7 +98,7 @@ export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata
   return function (metadata: PlaidLinkOnSuccessMetadata): boolean {
     const linksForInstitution = new Map(links
       .filter(item => item.getIsPlaid())
-      .filter(item => item.plaidInstitutionId === metadata.institution.institution_id)
+      .filter(item => item.plaidLink?.institutionId === metadata.institution.institution_id)
       .map(item => [item.linkId, item]));
 
     // Check to see if the bank account we are creating is at an institution that is already added, and then check to

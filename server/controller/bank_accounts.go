@@ -150,9 +150,10 @@ func (c *Controller) putBankAccounts(ctx echo.Context) error {
 		return c.invalidJson(ctx)
 	}
 
-	// TODO Eventually we should just query the link to see if its a manual link. But for now if the bank account has a
-	//  plaid account ID then its probably safe to assume that it is a Plaid managed bank account.
-	if existingBankAccount.PlaidAccountId != "" {
+	// TODO Eventually we should just query the link to see if its a manual link.
+	// But for now if the bank account has a plaid account ID then its probably
+	// safe to assume that it is a Plaid managed bank account.
+	if existingBankAccount.PlaidBankAccountId != nil {
 		existingBankAccount.Name = strings.TrimSpace(request.Name)
 	} else {
 		existingBankAccount.AvailableBalance = request.AvailableBalance

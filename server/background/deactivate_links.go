@@ -195,9 +195,9 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
+	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
 
-	accessToken, err := d.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), d.args.AccountId, link.PlaidLink.ItemId)
+	accessToken, err := d.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), d.args.AccountId, link.PlaidLink.PlaidId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
 		// If the token is simply missing from vault then something is goofy. Don't retry the job but mark it as a
 		// failure.
@@ -217,7 +217,7 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	client, err := d.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
+	client, err := d.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.PlaidId)
 	if err != nil {
 		log.WithError(err).Error("failed to create client for link deactivation")
 		return err
@@ -236,7 +236,7 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 
 	log.Info("Plaid link was successfully deactivated, removing Plaid details now")
 
-	if err = d.plaidSecrets.RemoveAccessTokenForPlaidLink(span.Context(), d.args.AccountId, link.PlaidLink.ItemId); err != nil {
+	if err = d.plaidSecrets.RemoveAccessTokenForPlaidLink(span.Context(), d.args.AccountId, link.PlaidLink.PlaidId); err != nil {
 		log.WithError(err).Error("failed to remove Plaid credentials for link")
 		return nil // Don't retry.
 	}

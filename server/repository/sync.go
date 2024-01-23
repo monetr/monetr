@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"time"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
@@ -23,6 +22,7 @@ func (r *repositoryBase) GetLastPlaidSync(ctx context.Context, plaidLinkId uint6
 	var sync models.PlaidSync
 	err := r.txn.ModelContext(span.Context(), &sync).
 		Where(`"plaid_sync"."plaid_link_id" = ?`, plaidLinkId).
+		Where(`"plaid_sync"."account_id" = ?`, r.AccountId()).
 		Order(`timestamp DESC`).
 		Limit(1).
 		Select(&sync)
@@ -52,8 +52,9 @@ func (r *repositoryBase) RecordPlaidSync(
 	}
 
 	item := models.PlaidSync{
-		PlaidLinkID: plaidLinkId,
-		Timestamp:   time.Now().UTC(),
+		PlaidLinkId: plaidLinkId,
+		AccountId:   r.AccountId(),
+		Timestamp:   r.clock.Now().UTC(),
 		Trigger:     trigger,
 		NextCursor:  nextCursor,
 		Added:       added,

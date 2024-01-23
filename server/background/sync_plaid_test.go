@@ -34,9 +34,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
-		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.ItemId, accessToken))
+		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.PlaidId, accessToken))
 
-		plaidBankAccount := fixtures.GivenIHaveABankAccount(t, clock, &plaidLink, models.DepositoryBankAccountType, models.CheckingBankAccountSubType)
+		plaidBankAccount := fixtures.GivenIHaveAPlaidBankAccount(
+			t,
+			clock,
+			&plaidLink,
+			models.DepositoryBankAccountType,
+			models.CheckingBankAccountSubType,
+		)
 
 		plaidPlatypus := mockgen.NewMockPlatypus(ctrl)
 		plaidClient := mockgen.NewMockClient(ctrl)
@@ -47,7 +53,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				gomock.Any(),
 				gomock.AssignableToTypeOf(new(models.Link)),
 				gomock.Eq(accessToken),
-				gomock.Eq(plaidLink.PlaidLink.ItemId),
+				gomock.Eq(plaidLink.PlaidLink.PlaidId),
 			).
 			Return(plaidClient, nil).
 			AnyTimes()
@@ -58,14 +64,14 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			).
 			Return([]platypus.BankAccount{
 				platypus.PlaidBankAccount{
-					AccountId: plaidBankAccount.PlaidAccountId,
+					AccountId: plaidBankAccount.PlaidBankAccount.PlaidId,
 					Balances: platypus.PlaidBankAccountBalances{
 						Available: 100,
 						Current:   100,
 					},
 					Mask:         plaidBankAccount.Mask,
 					Name:         plaidBankAccount.Name,
-					OfficialName: plaidBankAccount.PlaidOfficialName,
+					OfficialName: plaidBankAccount.PlaidBankAccount.OfficialName,
 					Type:         "depository",
 					SubType:      "checking",
 				},
@@ -85,7 +91,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				New: []platypus.Transaction{
 					platypus.PlaidTransaction{
 						Amount:                 1250,
-						BankAccountId:          plaidBankAccount.PlaidAccountId,
+						BankAccountId:          plaidBankAccount.PlaidBankAccount.PlaidId,
 						Category:               []string{},
 						Date:                   time.Date(2023, 01, 01, 0, 0, 0, 0, time.Local),
 						ISOCurrencyCode:        "USD",
@@ -153,7 +159,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 				New: []platypus.Transaction{
 					platypus.PlaidTransaction{
 						Amount:                 1250,
-						BankAccountId:          plaidBankAccount.PlaidAccountId,
+						BankAccountId:          plaidBankAccount.PlaidBankAccount.PlaidId,
 						Category:               []string{},
 						Date:                   time.Date(2023, 01, 01, 0, 0, 0, 0, time.Local),
 						ISOCurrencyCode:        "USD",
@@ -202,7 +208,20 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		count = fixtures.CountNonDeletedTransactions(t, user.AccountId)
 		assert.EqualValues(t, 1, count, "should have one transaction now!")
 
+		// There should be only one transaction since we handle merging.
 		count = fixtures.CountAllTransactions(t, user.AccountId)
-		assert.EqualValues(t, 2, count, "should have a total of two transactions including the deleted one")
+		assert.EqualValues(t, 1, count, "should have a total of two transactions including the deleted one")
+	})
+
+	t.Run("initial setup", func(t *testing.T) {
+		// TODO!!
+	})
+
+	t.Run("remove with spending", func(t *testing.T) {
+		// TODO!!
+	})
+
+	t.Run("no updates", func(t *testing.T) {
+		// TODO!!
 	})
 }

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10/orm"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
@@ -27,6 +28,7 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
+// DEPRECATED!
 func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
 	if len(plaidTransactionIds) == 0 {
 		return map[string]models.Transaction{}, nil
@@ -40,14 +42,23 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 		"plaidTransactionIds": plaidTransactionIds,
 	}
 
-	var items []models.Transaction
+	items := make([]models.Transaction, 0)
 	// Deliberatly include all transactions, regardless of delete status.
+	// TODO This query is using a FROM for models.Transaction, but it would
+	// probably be more efficient to use the plaid transactions table as the base
+	// and then join on transaction. But for now this is still fine.
 	err := r.txn.ModelContext(span.Context(), &items).
+		Relation("PlaidTransaction").
+		Relation("PendingPlaidTransaction").
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ?`, linkId).
-		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
+		WhereGroup(func(q *orm.Query) (*orm.Query, error) {
+			q = q.WhereIn(`"plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds).
+				WhereInOr(`"pending_plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds)
+			return q, nil
+		}).
 		Select(&items)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -57,8 +68,14 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 	span.Status = sentry.SpanStatusOK
 
 	result := map[string]models.Transaction{}
-	for _, item := range items {
-		result[item.PlaidTransactionId] = item
+	for i := range items {
+		item := items[i]
+		if item.PlaidTransaction != nil {
+			result[item.PlaidTransaction.PlaidId] = item
+		}
+		if item.PendingPlaidTransaction != nil {
+			result[item.PendingPlaidTransaction.PlaidId] = item
+		}
 	}
 
 	return result, nil
@@ -139,6 +156,8 @@ func (r *repositoryBase) GetTransaction(ctx context.Context, bankAccountId, tran
 
 	var result models.Transaction
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("PlaidTransaction").
+		Relation("PendingPlaidTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
@@ -236,7 +255,7 @@ func (r *repositoryBase) DeleteTransaction(ctx context.Context, bankAccountId, t
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."transaction_id" = ?`, transactionId).
-		Set(`"deleted_at" = ?`, time.Now().UTC()).
+		Set(`"deleted_at" = ?`, r.clock.Now().UTC()).
 		Update()
 
 	return errors.Wrap(err, "failed to soft-delete transaction")
@@ -250,9 +269,12 @@ func (r *repositoryBase) GetTransactionsByPlaidTransactionId(ctx context.Context
 	err := r.txn.ModelContext(span.Context(), &result).
 		Join(`INNER JOIN "bank_accounts" AS "bank_account"`).
 		JoinOn(`"bank_account"."bank_account_id" = "transaction"."bank_account_id" AND "bank_account"."account_id" = "transaction"."account_id"`).
+		Join(`INNER JOIN "plaid_transactions" AS "plaid_transaction"`).
+		JoinOn(`"plaid_transaction"."plaid_transaction_id" IN ("transaction"."plaid_transaction_id", "transaction"."pending_plaid_transaction_id") AND "plaid_transaction"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ?`, linkId).
-		WhereIn(`"transaction"."plaid_transaction_id" IN (?)`, plaidTransactionIds).
+		WhereIn(`"plaid_transaction"."plaid_id" IN (?)`, plaidTransactionIds).
+		DistinctOn(`"transaction"."transaction_id"`).
 		Select(&result)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve transactions by plaid Id")

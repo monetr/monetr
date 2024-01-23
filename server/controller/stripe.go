@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -26,7 +26,7 @@ func (c *Controller) handleStripeWebhook(ctx echo.Context) error {
 	}
 	defer body.Close()
 
-	requestBody, err := ioutil.ReadAll(body)
+	requestBody, err := io.ReadAll(body)
 	if err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to read request body")
 	}

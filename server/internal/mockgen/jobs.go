@@ -34,16 +34,16 @@ func (m *MockJobController) EXPECT() *MockJobControllerMockRecorder {
 	return m.recorder
 }
 
-// TriggerJob mocks base method.
-func (m *MockJobController) TriggerJob(ctx context.Context, queue string, data interface{}) error {
+// EnqueueJob mocks base method.
+func (m *MockJobController) EnqueueJob(ctx context.Context, queue string, data interface{}) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TriggerJob", ctx, queue, data)
+	ret := m.ctrl.Call(m, "EnqueueJob", ctx, queue, data)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// TriggerJob indicates an expected call of TriggerJob.
-func (mr *MockJobControllerMockRecorder) TriggerJob(ctx, queue, data interface{}) *gomock.Call {
+// EnqueueJob indicates an expected call of EnqueueJob.
+func (mr *MockJobControllerMockRecorder) EnqueueJob(ctx, queue, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TriggerJob", reflect.TypeOf((*MockJobController)(nil).TriggerJob), ctx, queue, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnqueueJob", reflect.TypeOf((*MockJobController)(nil).EnqueueJob), ctx, queue, data)
 }

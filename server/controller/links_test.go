@@ -17,14 +17,12 @@ func TestPostLink(t *testing.T) {
 		token := GivenIHaveToken(t, e)
 		createdAndUpdatedBogus := app.Clock.Now().Add(-1 * time.Hour)
 		link := models.Link{
-			LinkId:                math.MaxInt64,        // Set it to something so we can verify its different in the result.
-			LinkType:              models.PlaidLinkType, // This should be changed to manual in the response.
-			InstitutionName:       "U.S. Bank",
-			CustomInstitutionName: "US Bank",
-			Description:           myownsanity.StringP("My personal link"),
-			PlaidInstitutionId:    myownsanity.StringP("ins_123"),
-			CreatedAt:             createdAndUpdatedBogus, // Set these to something to make sure it gets overwritten.
-			UpdatedAt:             createdAndUpdatedBogus,
+			LinkId:          math.MaxInt64,        // Set it to something so we can verify its different in the result.
+			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
+			InstitutionName: "U.S. Bank",
+			Description:     myownsanity.StringP("My personal link"),
+			CreatedAt:       createdAndUpdatedBogus, // Set these to something to make sure it gets overwritten.
+			UpdatedAt:       createdAndUpdatedBogus,
 		}
 
 		response := e.POST("/api/links").
@@ -35,18 +33,16 @@ func TestPostLink(t *testing.T) {
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
 		response.JSON().Path("$.linkId").Number().Gt(0)
-		response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
+		response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
 		response.JSON().Path("$.institutionName").String().NotEmpty()
-		response.JSON().Path("$.description").String().Equal("My personal link")
-		response.JSON().Path("$.plaidInstitutionId").Null()
+		response.JSON().Path("$.description").String().IsEqual("My personal link")
 	})
 
 	t.Run("missing name", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)
 		link := models.Link{
-			InstitutionName:       "",
-			CustomInstitutionName: "",
+			InstitutionName: "",
 		}
 
 		response := e.POST("/api/links").
@@ -74,12 +70,11 @@ func TestPostLink(t *testing.T) {
 	t.Run("unauthenticated", func(t *testing.T) {
 		app, e := NewTestApplication(t)
 		link := models.Link{
-			LinkId:                math.MaxInt64,        // Set it to something so we can verify its different in the result.
-			LinkType:              models.PlaidLinkType, // This should be changed to manual in the response.
-			InstitutionName:       "U.S. Bank",
-			CustomInstitutionName: "US Bank",
-			CreatedAt:             app.Clock.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
-			UpdatedAt:             app.Clock.Now().Add(1 * time.Hour),
+			LinkId:          math.MaxInt64,        // Set it to something so we can verify its different in the result.
+			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
+			InstitutionName: "U.S. Bank",
+			CreatedAt:       app.Clock.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
+			UpdatedAt:       app.Clock.Now().Add(1 * time.Hour),
 		}
 
 		response := e.POST("/api/links").
@@ -98,12 +93,11 @@ func TestGetLink(t *testing.T) {
 		tokenA, tokenB := GivenIHaveToken(t, e), GivenIHaveToken(t, e)
 
 		link := models.Link{
-			LinkId:                math.MaxInt64,        // Set it to something so we can verify its different in the result.
-			LinkType:              models.PlaidLinkType, // This should be changed to manual in the response.
-			InstitutionName:       "U.S. Bank",
-			CustomInstitutionName: "US Bank",
-			CreatedAt:             app.Clock.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
-			UpdatedAt:             app.Clock.Now().Add(1 * time.Hour),
+			LinkId:          math.MaxInt64,        // Set it to something so we can verify its different in the result.
+			LinkType:        models.PlaidLinkType, // This should be changed to manual in the response.
+			InstitutionName: "U.S. Bank",
+			CreatedAt:       app.Clock.Now().Add(-1 * time.Hour), // Set these to something to make sure it gets overwritten.
+			UpdatedAt:       app.Clock.Now().Add(1 * time.Hour),
 		}
 
 		// We want to create a link with tokenA. This link should not be visible later when we request the link for
@@ -118,9 +112,11 @@ func TestGetLink(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
 			response.JSON().Path("$.linkId").Number().Gt(0)
-			response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
+			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
-			response.JSON().Path("$.plaidInstitutionId").Null()
+			// Even if we specify a Plaid link type, it shouldn't be; so we should not
+			// see a plaid link on the result.
+			response.JSON().Object().Keys().NotContainsAll("plaidLink")
 			linkAID = uint64(response.JSON().Path("$.linkId").Number().Raw())
 		}
 
@@ -134,7 +130,7 @@ func TestGetLink(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").Number().NotEqual(link.LinkId)
 			response.JSON().Path("$.linkId").Number().Gt(0)
-			response.JSON().Path("$.linkType").Number().Equal(models.ManualLinkType)
+			response.JSON().Path("$.linkType").Number().IsEqual(models.ManualLinkType)
 			response.JSON().Path("$.institutionName").String().NotEmpty()
 		}
 
@@ -145,8 +141,8 @@ func TestGetLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$").Array().Length().Equal(1)
-			response.JSON().Path("$[0].linkId").Number().Equal(linkAID)
+			response.JSON().Path("$").Array().Length().IsEqual(1)
+			response.JSON().Path("$[0].linkId").Number().IsEqual(linkAID)
 		}
 
 		// Now we want to test GET with token B.
@@ -156,7 +152,7 @@ func TestGetLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$").Array().Length().Equal(1)
+			response.JSON().Path("$").Array().Length().IsEqual(1)
 			// Make sure that we do not receive token A's link.
 			response.JSON().Path("$[0].linkId").Number().NotEqual(linkAID)
 		}
@@ -168,7 +164,7 @@ func TestGetLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusUnauthorized)
-		response.JSON().Path("$.error").String().Equal("unauthorized")
+		response.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
 
 	t.Run("precise", func(t *testing.T) {
@@ -178,9 +174,8 @@ func TestGetLink(t *testing.T) {
 		institutionName := "U.S. Bank"
 
 		link := models.Link{
-			LinkType:              models.ManualLinkType,
-			InstitutionName:       institutionName,
-			CustomInstitutionName: institutionName,
+			LinkType:        models.ManualLinkType,
+			InstitutionName: institutionName,
 		}
 
 		{ // Create the link.
@@ -191,8 +186,7 @@ func TestGetLink(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").Number().Gt(0)
-			response.JSON().Path("$.institutionName").String().Equal(institutionName)
-			response.JSON().Path("$.customInstitutionName").String().Equal(institutionName)
+			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
 			link.LinkId = uint64(response.JSON().Path("$.linkId").Number().Raw())
 		}
@@ -204,7 +198,7 @@ func TestGetLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.JSON().Path("$.linkId").Equal(link.LinkId)
+			response.JSON().Path("$.linkId").IsEqual(link.LinkId)
 		}
 	})
 
@@ -219,7 +213,7 @@ func TestGetLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusNotFound)
-			response.JSON().Path("$.error").Equal("failed to retrieve link: record does not exist")
+			response.JSON().Path("$.error").IsEqual("failed to retrieve link: record does not exist")
 		}
 	})
 
@@ -233,7 +227,7 @@ func TestGetLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").Equal("must specify a link Id to retrieve")
+			response.JSON().Path("$.error").IsEqual("must specify a link Id to retrieve")
 		}
 	})
 
@@ -255,7 +249,8 @@ func TestGetLink(t *testing.T) {
 			Expect()
 
 		response.Status(http.StatusOK)
-		response.JSON().Path("$.plaidInstitutionId").String().NotEmpty()
+		// When we have a real plaid link, there will be a plaid link sub object.
+		response.JSON().Path("$.plaidLink.institutionId").String().NotEmpty()
 	})
 }
 
@@ -267,9 +262,8 @@ func TestPutLink(t *testing.T) {
 		institutionName := "U.S. Bank"
 
 		link := models.Link{
-			LinkType:              models.ManualLinkType,
-			InstitutionName:       institutionName,
-			CustomInstitutionName: institutionName,
+			LinkType:        models.ManualLinkType,
+			InstitutionName: institutionName,
 		}
 
 		response := e.POST("/api/links").
@@ -279,14 +273,13 @@ func TestPutLink(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.linkId").Number().Gt(0)
-		response.JSON().Path("$.institutionName").String().Equal(institutionName)
-		response.JSON().Path("$.customInstitutionName").String().Equal(institutionName)
+		response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
 		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
 
 		link.LinkId = linkId
-		link.CustomInstitutionName = "New Name"
 		link.InstitutionName = "New Name"
+		link.Description = myownsanity.StringP("Add description")
 
 		updated := e.PUT("/api/links/{linkId}").
 			WithPath("linkId", linkId).
@@ -295,11 +288,44 @@ func TestPutLink(t *testing.T) {
 			Expect()
 
 		updated.Status(http.StatusOK)
-		updated.JSON().Path("$.linkId").Number().Equal(linkId)
+		updated.JSON().Path("$.linkId").Number().IsEqual(linkId)
 		// Make sure the institution name has not changed. This cannot be changed once a link is created.
-		updated.JSON().Path("$.institutionName").String().Equal(institutionName)
-		// But make sure that the custom institution name has changed.
-		updated.JSON().Path("$.customInstitutionName").String().Equal("New Name")
+		updated.JSON().Path("$.institutionName").String().IsEqual(institutionName)
+	})
+
+	t.Run("not modified", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		token := GivenIHaveToken(t, e)
+
+		institutionName := "U.S. Bank"
+
+		link := models.Link{
+			LinkType:        models.ManualLinkType,
+			InstitutionName: institutionName,
+		}
+
+		response := e.POST("/api/links").
+			WithCookie(TestCookieName, token).
+			WithJSON(link).
+			Expect()
+
+		response.Status(http.StatusOK)
+		response.JSON().Path("$.linkId").Number().Gt(0)
+		response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
+
+		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
+
+		link.LinkId = linkId
+		link.InstitutionName = "New Name"
+
+		updated := e.PUT("/api/links/{linkId}").
+			WithPath("linkId", linkId).
+			WithCookie(TestCookieName, token).
+			WithJSON(link).
+			Expect()
+
+		updated.Status(http.StatusNotModified)
+		updated.NoContent()
 	})
 
 	t.Run("unauthenticated", func(t *testing.T) {
@@ -309,9 +335,8 @@ func TestPutLink(t *testing.T) {
 		institutionName := "U.S. Bank"
 
 		link := models.Link{
-			LinkType:              models.ManualLinkType,
-			InstitutionName:       institutionName,
-			CustomInstitutionName: institutionName,
+			LinkType:        models.ManualLinkType,
+			InstitutionName: institutionName,
 		}
 
 		response := e.POST("/api/links").
@@ -321,13 +346,11 @@ func TestPutLink(t *testing.T) {
 
 		response.Status(http.StatusOK)
 		response.JSON().Path("$.linkId").Number().Gt(0)
-		response.JSON().Path("$.institutionName").String().Equal(institutionName)
-		response.JSON().Path("$.customInstitutionName").String().Equal(institutionName)
+		response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
 
 		linkId := uint64(response.JSON().Path("$.linkId").Number().Raw())
 
 		link.LinkId = linkId
-		link.CustomInstitutionName = "New Name"
 		link.InstitutionName = "New Name"
 
 		// Try to perform an update without a token.
@@ -337,7 +360,7 @@ func TestPutLink(t *testing.T) {
 			Expect()
 
 		updated.Status(http.StatusUnauthorized)
-		updated.JSON().Path("$.error").String().Equal("unauthorized")
+		updated.JSON().Path("$.error").String().IsEqual("unauthorized")
 	})
 
 	t.Run("cannot update someone elses", func(t *testing.T) {
@@ -346,8 +369,7 @@ func TestPutLink(t *testing.T) {
 		tokenA, tokenB := GivenIHaveToken(t, e), GivenIHaveToken(t, e)
 
 		link := models.Link{
-			InstitutionName:       "U.S. Bank",
-			CustomInstitutionName: "US Bank",
+			InstitutionName: "U.S. Bank",
 		}
 
 		// We want to create a link with tokenA. This link should not be visible later when we request the link for
@@ -385,8 +407,7 @@ func TestPutLink(t *testing.T) {
 		// Now using token A, try to update token B's link.
 		{
 			link := models.Link{
-				LinkId:                linkBID,
-				CustomInstitutionName: "I have changed",
+				LinkId: linkBID,
 			}
 			response := e.PUT("/api/links/{linkId}").
 				WithPath("linkId", link.LinkId).
@@ -395,14 +416,13 @@ func TestPutLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusNotFound)
-			response.JSON().Path("$.error").String().Equal("failed to retrieve existing link for update: record does not exist")
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing link for update: record does not exist")
 		}
 
 		// Now do the same thing with token B for token A's link.
 		{
 			link := models.Link{
-				LinkId:                linkAID,
-				CustomInstitutionName: "I have changed",
+				LinkId: linkAID,
 			}
 			response := e.PUT("/api/links/{linkId}").
 				WithPath("linkId", link.LinkId).
@@ -411,7 +431,7 @@ func TestPutLink(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusNotFound)
-			response.JSON().Path("$.error").String().Equal("failed to retrieve existing link for update: record does not exist")
+			response.JSON().Path("$.error").String().IsEqual("failed to retrieve existing link for update: record does not exist")
 		}
 	})
 }
@@ -424,9 +444,8 @@ func TestDeleteLink(t *testing.T) {
 		institutionName := "U.S. Bank"
 
 		link := models.Link{
-			LinkType:              models.ManualLinkType,
-			InstitutionName:       institutionName,
-			CustomInstitutionName: institutionName,
+			LinkType:        models.ManualLinkType,
+			InstitutionName: institutionName,
 		}
 
 		{ // Create the link.
@@ -438,7 +457,6 @@ func TestDeleteLink(t *testing.T) {
 			response.Status(http.StatusOK)
 			response.JSON().Path("$.linkId").Number().Gt(0)
 			response.JSON().Path("$.institutionName").String().IsEqual(institutionName)
-			response.JSON().Path("$.customInstitutionName").String().IsEqual(institutionName)
 
 			link.LinkId = uint64(response.JSON().Path("$.linkId").Number().Raw())
 		}

@@ -20,7 +20,6 @@ func (r *repositoryBase) GetLink(ctx context.Context, linkId uint64) (*models.Li
 	var link models.Link
 	err := r.txn.ModelContext(span.Context(), &link).
 		Relation("PlaidLink").
-		Relation("BankAccounts").
 		Where(`"link"."link_id" = ? AND "link"."account_id" = ?`, linkId, r.AccountId()).
 		Limit(1).
 		Select(&link)
@@ -37,6 +36,7 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 
 	var result []models.Link
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("PlaidLink").
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Select(&result)
 	if err != nil {
@@ -52,6 +52,8 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 
 	count, err := r.txn.ModelContext(span.Context(), &models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
+		// TODO This is partially correct, but we should really look at the status
+		// on the plaid link itself for this?
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
 		Count()
 	if err != nil {
@@ -112,7 +114,7 @@ func (r *repositoryBase) CreateLink(ctx context.Context, link *models.Link) erro
 	defer span.Finish()
 
 	userId := r.UserId()
-	now := time.Now().UTC()
+	now := r.clock.Now().UTC()
 	link.AccountId = r.AccountId()
 	link.CreatedByUserId = userId
 	link.CreatedAt = now
@@ -131,7 +133,7 @@ func (r *repositoryBase) UpdateLink(ctx context.Context, link *models.Link) erro
 	}
 
 	link.AccountId = r.AccountId()
-	link.UpdatedAt = time.Now().UTC()
+	link.UpdatedAt = r.clock.Now().UTC()
 
 	_, err := r.txn.ModelContext(span.Context(), link).
 		WherePK().

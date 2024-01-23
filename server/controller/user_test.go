@@ -235,7 +235,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusUnauthorized)
-			response.JSON().Path("$.error").String().Equal("current password provided is not correct")
+			response.JSON().Path("$.error").String().IsEqual("current password provided is not correct")
 		}
 
 		{ // Make sure that even though the change password request failed that the password really didn't change.
@@ -292,7 +292,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().Equal("new password is not valid")
+			response.JSON().Path("$.error").String().IsEqual("new password is not valid")
 		}
 	})
 
@@ -324,7 +324,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().Equal("new password must be different from the current password")
+			response.JSON().Path("$.error").String().IsEqual("new password must be different from the current password")
 		}
 	})
 
@@ -353,7 +353,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusBadRequest)
-			response.JSON().Path("$.error").String().Equal("invalid JSON body")
+			response.JSON().Path("$.error").String().IsEqual("invalid JSON body")
 		}
 	})
 

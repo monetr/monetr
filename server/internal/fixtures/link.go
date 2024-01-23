@@ -8,7 +8,6 @@ import (
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/monetr/monetr/server/consts"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -21,31 +20,37 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) mod
 	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
 	plaidLink := models.PlaidLink{
-		ItemId:          gofakeit.Generate("???????????????????????????????????"),
-		Products:        consts.PlaidProductStrings(),
-		WebhookUrl:      "https://monetr.mini/api/plaid/webhook",
-		InstitutionId:   gofakeit.Generate("ins_######"),
-		InstitutionName: fmt.Sprintf("Bank Of %s", gofakeit.City()),
+		AccountId:            user.AccountId,
+		PlaidId:              gofakeit.Generate("???????????????????????????????????"),
+		Products:             consts.PlaidProductStrings(),
+		Status:               models.PlaidLinkStatusSetup,
+		ErrorCode:            nil,
+		ExpirationDate:       nil,
+		NewAccountsAvailable: false,
+		WebhookUrl:           "https://monetr.mini/api/plaid/webhook",
+		InstitutionId:        gofakeit.Generate("ins_######"),
+		InstitutionName:      fmt.Sprintf("Bank Of %s", gofakeit.City()),
+		LastManualSync:       nil,
+		LastSuccessfulUpdate: nil,
+		LastAttemptedUpdate:  nil,
+		UpdatedAt:            clock.Now().UTC(),
+		CreatedAt:            clock.Now().UTC(),
+		CreatedByUserId:      user.UserId,
 	}
 	err := repo.CreatePlaidLink(context.Background(), &plaidLink)
 	require.NoError(t, err, "must be able to seed plaid link")
 
 	link := models.Link{
-		AccountId:             user.AccountId,
-		Account:               user.Account,
-		LinkType:              models.PlaidLinkType,
-		PlaidLinkId:           &plaidLink.PlaidLinkID, // To be filled in later.
-		PlaidLink:             &plaidLink,
-		LinkStatus:            models.LinkStatusSetup,
-		InstitutionName:       plaidLink.InstitutionName,
-		PlaidInstitutionId:    myownsanity.StringP(gofakeit.Generate("ins_####")),
-		CustomInstitutionName: "",
-		CreatedAt:             clock.Now(),
-		CreatedByUserId:       user.UserId,
-		CreatedByUser:         &user,
-		UpdatedAt:             clock.Now(),
-		LastSuccessfulUpdate:  myownsanity.TimeP(clock.Now()),
-		BankAccounts:          nil,
+		AccountId:       user.AccountId,
+		Account:         user.Account,
+		LinkType:        models.PlaidLinkType,
+		PlaidLinkId:     &plaidLink.PlaidLinkID, // To be filled in later.
+		PlaidLink:       &plaidLink,
+		InstitutionName: plaidLink.InstitutionName,
+		CreatedAt:       clock.Now(),
+		CreatedByUserId: user.UserId,
+		CreatedByUser:   &user,
+		UpdatedAt:       clock.Now(),
 	}
 
 	err = repo.CreateLink(context.Background(), &link)
@@ -60,18 +65,14 @@ func GivenIHaveAManualLink(t *testing.T, clock clock.Clock, user models.User) mo
 	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
 	link := models.Link{
-		AccountId:             user.AccountId,
-		Account:               user.Account,
-		LinkType:              models.ManualLinkType,
-		LinkStatus:            models.LinkStatusSetup,
-		InstitutionName:       "Manual Link",
-		CustomInstitutionName: "",
-		CreatedAt:             clock.Now(),
-		CreatedByUserId:       user.UserId,
-		CreatedByUser:         &user,
-		UpdatedAt:             clock.Now(),
-		LastSuccessfulUpdate:  myownsanity.TimeP(clock.Now()),
-		BankAccounts:          nil,
+		AccountId:       user.AccountId,
+		Account:         user.Account,
+		LinkType:        models.ManualLinkType,
+		InstitutionName: "Manual Link",
+		CreatedAt:       clock.Now(),
+		CreatedByUserId: user.UserId,
+		CreatedByUser:   &user,
+		UpdatedAt:       clock.Now(),
 	}
 
 	err := repo.CreateLink(context.Background(), &link)

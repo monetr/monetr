@@ -1,16 +1,11 @@
 import { parseJSON } from 'date-fns';
 
+import PlaidLink, { PlaidLinkStatus } from '@monetr/interface/models/PlaidLink';
+
 export enum LinkType {
   Unknown = 0,
   Plaid = 1,
   Manual = 2,
-}
-
-export enum LinkStatus {
-  Unknown = 0,
-  Pending = 1,
-  Setup = 2,
-  Error = 3,
 }
 
 export const errorMessages = {
@@ -29,24 +24,24 @@ export default class Link {
    */
   linkId: number;
   linkType: LinkType;
-  linkStatus: LinkStatus;
-  errorCode: string | null;
-  plaidInstitutionId: string | null;
-  plaidNewAccountsAvailable: boolean | null;
   institutionName: string;
-  customInstitutionName?: string;
+  updatedAt: Date;
+  createdAt: Date;
   createdByUserId: number;
-  lastSuccessfulUpdate: Date | null;
+
+  plaidLink: PlaidLink | null;
 
   constructor(data?: Partial<Link>) {
     if (data) Object.assign(this, {
       ...data,
-      lastSuccessfulUpdate: data.lastSuccessfulUpdate && parseJSON(data.lastSuccessfulUpdate),
+      plaidLink: data?.plaidLink && new PlaidLink(data.plaidLink),
+      updatedAt: data.updatedAt && parseJSON(data.updatedAt),
+      createdAt: data.createdAt && parseJSON(data.createdAt),
     });
   }
 
   getName(): string {
-    return this.customInstitutionName ?? this.institutionName;
+    return this.institutionName;
   }
 
   getIsManual(): boolean {
@@ -54,18 +49,19 @@ export default class Link {
   }
 
   getIsPlaid(): boolean {
-    return this.linkType === LinkType.Plaid;
+    return this.linkType === LinkType.Plaid && Boolean(this.plaidLink);
   }
 
   getCanUpdateAccountSelection(): boolean {
-    return this.getIsPlaid() && this.plaidNewAccountsAvailable === true;
+    return this.getIsPlaid() && this.plaidLink?.newAccountsAvailable === true;
   }
 
   getIsError(): boolean {
-    return this.linkStatus === LinkStatus.Error || this.errorCode != null;
+    return this.plaidLink?.status === PlaidLinkStatus.Error;
   }
 
   getErrorMessage(): string | null {
-    return errorMessages[this.errorCode] || null;
+    const code = this.plaidLink?.status;
+    return errorMessages[code] || null;
   }
 }

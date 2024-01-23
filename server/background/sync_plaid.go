@@ -3,6 +3,7 @@ package background
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -43,7 +44,7 @@ type (
 	SyncPlaidArguments struct {
 		AccountId uint64 `json:"accountId"`
 		LinkId    uint64 `json:"linkId"`
-		// Trigger will be "webhook" or "manual"
+		// Trigger will be "webhook" or "manual" or "command"
 		Trigger string `json:"trigger"`
 	}
 
@@ -56,7 +57,27 @@ type (
 		publisher     pubsub.Publisher
 		enqueuer      JobEnqueuer
 		clock         clock.Clock
+
+		timezone     *time.Location
+		bankAccounts map[string]models.BankAccount
+		transactions map[string]models.Transaction
+		similarity   map[uint64]CalculateTransactionClustersArguments
+		actions      map[uint64]SyncAction
 	}
+
+	SyncChange struct {
+		Field string `json:"field"`
+		Old   any    `json:"old"`
+		New   any    `json:"new"`
+	}
+
+	SyncAction string
+)
+
+const (
+	CreateSyncAction SyncAction = "create"
+	UpdateSyncAction SyncAction = "update"
+	DeleteSyncAction SyncAction = "delete"
 )
 
 func TriggerSyncPlaid(
@@ -67,7 +88,7 @@ func TriggerSyncPlaid(
 	if arguments.Trigger == "" {
 		arguments.Trigger = "manual"
 	}
-	return backgroundJobs.TriggerJob(ctx, SyncPlaid, arguments)
+	return backgroundJobs.EnqueueJob(ctx, SyncPlaid, arguments)
 }
 
 func NewSyncPlaidHandler(
@@ -146,7 +167,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
 		Where(`"plaid_link"."use_plaid_sync" = ?`, true).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-		Where(`"link"."link_status" = ?`, models.LinkStatusSetup).
+		Where(`"link"."link_status" = ?`, models.PlaidLinkStatusSetup).
 		Where(`"link"."last_attempted_update" < ?`, cutoff).
 		Select(&links)
 	if err != nil {
@@ -204,13 +225,18 @@ func NewSyncPlaidJob(
 		publisher:     publisher,
 		enqueuer:      enqueuer,
 		clock:         clock,
+
+		timezone:     nil, // Is set below
+		transactions: make(map[string]models.Transaction),
+		bankAccounts: make(map[string]models.BankAccount),
+		similarity:   make(map[uint64]CalculateTransactionClustersArguments),
+		actions:      make(map[uint64]SyncAction),
 	}, nil
 }
 
 func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	span := sentry.StartSpan(ctx, "job.exec")
 	defer span.Finish()
-	span.Description = PullTransactions
 
 	log := s.log.WithContext(span.Context())
 
@@ -233,19 +259,43 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.ItemId)
-
-	if link.PlaidInstitutionId != nil {
-		crumbs.AddTag(span.Context(), "plaid.institution_id", *link.PlaidInstitutionId)
+	account, err := s.repo.GetAccount(span.Context())
+	if err != nil {
+		log.WithError(err).Error("failed to retrieve account for job")
+		return err
 	}
 
-	if len(link.BankAccounts) == 0 {
+	s.timezone, err = account.GetTimezone()
+	if err != nil {
+		log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
+		s.timezone = time.UTC
+	}
+
+	plaidLink := link.PlaidLink
+
+	bankAccounts, err := s.repo.GetBankAccountsWithPlaidByLinkId(
+		span.Context(),
+		link.LinkId,
+	)
+	if err = errors.Wrap(err, "failed to read bank accounts for plaid sync"); err != nil {
+		log.WithError(err).Error("cannot sync without bank accounts")
+		return err
+	}
+
+	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
+	crumbs.AddTag(span.Context(), "plaid.institution_id", link.PlaidLink.InstitutionId)
+
+	if len(bankAccounts) == 0 {
 		log.Warn("no bank accounts for plaid link")
 		crumbs.Debug(span.Context(), "No bank accounts setup for plaid link", nil)
 		return nil
 	}
 
-	accessToken, err := s.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), s.args.AccountId, link.PlaidLink.ItemId)
+	accessToken, err := s.plaidSecrets.GetAccessTokenForPlaidLinkId(
+		span.Context(),
+		s.args.AccountId,
+		plaidLink.PlaidId,
+	)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
 		// If the token is simply missing from vault then something is goofy. Don't retry the job but mark it as a
 		// failure.
@@ -265,8 +315,12 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		return err
 	}
 
-	now := s.clock.Now().UTC()
-	plaidClient, err := s.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.ItemId)
+	plaidClient, err := s.plaidPlatypus.NewClient(
+		span.Context(),
+		link,
+		accessToken,
+		plaidLink.PlaidId,
+	)
 	if err != nil {
 		log.WithError(err).Error("failed to create plaid client for link")
 		return err
@@ -286,16 +340,12 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	plaidIdsToBankIds := map[string]uint64{}
-	plaidBankToLocalBank := map[string]models.BankAccount{}
-	bankAccountIds := make([]string, 0, len(link.BankAccounts))
-
-	for _, bankAccount := range link.BankAccounts {
-		for _, plaidBankAccount := range plaidBankAccounts {
-			if plaidBankAccount.GetAccountId() == bankAccount.PlaidAccountId {
-				bankAccountIds = append(bankAccountIds, bankAccount.PlaidAccountId)
-				plaidIdsToBankIds[bankAccount.PlaidAccountId] = bankAccount.BankAccountId
-				plaidBankToLocalBank[bankAccount.PlaidAccountId] = bankAccount
+	for x := range bankAccounts {
+		bankAccount := bankAccounts[x]
+		for y := range plaidBankAccounts {
+			plaidBankAccount := plaidBankAccounts[y]
+			if plaidBankAccount.GetAccountId() == bankAccount.PlaidBankAccount.PlaidId {
+				s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId] = bankAccount
 				break
 			}
 		}
@@ -303,15 +353,21 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		// If an account is no longer visible in plaid that means that we won't receive updates for that account anymore. If
 		// this happens, log something and mark that account as inactive. This way we can inform the user that the account
 		// is no longer receiving updates.
-		if _, ok := plaidIdsToBankIds[bankAccount.PlaidAccountId]; !ok {
+		if _, ok := s.bankAccounts[bankAccount.PlaidBankAccount.PlaidId]; !ok {
 			log.WithFields(logrus.Fields{
 				"bankAccountId": bankAccount.BankAccountId,
 			}).Info("found bank account that is no longer present in plaid, it will be updated as inactive")
 			crumbs.Warn(span.Context(), "Found bank account that is no longer present in Plaid", "plaid", map[string]interface{}{
 				"bankAccountId": bankAccount.BankAccountId,
 			})
-			bankAccount.Status = models.InactiveBankAccountStatus
-			if err = s.repo.UpdateBankAccounts(span.Context(), bankAccount); err != nil {
+			if err := s.syncPlaidBankAccount(
+				span.Context(),
+				link,
+				&bankAccount,
+				plaidLink,
+				bankAccount.PlaidBankAccount,
+				nil, // Not visible via sync anymore
+			); err != nil {
 				log.WithFields(logrus.Fields{
 					"bankAccountId": bankAccount.BankAccountId,
 				}).
@@ -321,15 +377,11 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		}
 	}
 
-	if len(bankAccountIds) == 0 {
+	if len(s.bankAccounts) == 0 {
 		log.Warn("none of the linked bank accounts are active at plaid")
 		crumbs.IndicateBug(span.Context(), "none of the linked bank accounts are active at plaid", nil)
 		return nil
 	}
-
-	crumbs.Debug(span.Context(), "pulling transactions for bank accounts", map[string]interface{}{
-		"plaidAccountIds": bankAccountIds,
-	})
 
 	lastSync, err := s.repo.GetLastPlaidSync(span.Context(), *link.PlaidLinkId)
 	if err != nil {
@@ -341,8 +393,6 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		cursor = &lastSync.NextCursor
 	}
 
-	transactionSimilaritySyncs := map[uint64]CalculateTransactionClustersArguments{}
-
 	for iter := 0; iter < 10; iter++ {
 		syncData, err := plaidClient.Sync(span.Context(), cursor)
 		if err != nil {
@@ -351,9 +401,8 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 		// If we received nothing to insert/update/remove then do nothing
 		if len(syncData.New)+len(syncData.Updated)+len(syncData.Deleted) == 0 {
-
-			link.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
-			if err = s.repo.UpdateLink(span.Context(), link); err != nil {
+			plaidLink.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
+			if err = s.repo.UpdatePlaidLink(span.Context(), plaidLink); err != nil {
 				log.WithError(err).Error("failed to update link with last attempt timestamp")
 				return err
 			}
@@ -385,107 +434,39 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 			"count": len(plaidTransactions),
 		})
 
-		account, err := s.repo.GetAccount(span.Context())
-		if err != nil {
-			log.WithError(err).Error("failed to retrieve account for job")
-			return err
+		if err := s.hydrateTransactions(span.Context(), link, syncData); err != nil {
+			return errors.Wrap(err, "failed to hydrate existing transaction data")
 		}
 
-		timezone, err := account.GetTimezone()
-		if err != nil {
-			log.WithError(err).Warn("failed to get account's time zone, defaulting to UTC")
-			timezone = time.UTC
-		}
-
-		plaidTransactionIds := make([]string, len(plaidTransactions))
-		for i, transaction := range plaidTransactions {
-			plaidTransactionIds[i] = transaction.GetTransactionId()
-		}
-
-		transactionsByPlaidId, err := s.repo.GetTransactionsByPlaidId(span.Context(), link.LinkId, plaidTransactionIds)
-		if err != nil {
-			log.WithError(err).Error("failed to retrieve transaction ids for updating plaid transactions")
-			return err
-		}
-
-		log.Debugf("found %d existing transactions", len(transactionsByPlaidId))
+		log.Debugf("found %d existing transactions", len(s.transactions))
 
 		transactionsToUpdate := make([]*models.Transaction, 0)
 		transactionsToInsert := make([]models.Transaction, 0)
-		for _, plaidTransaction := range plaidTransactions {
-			amount := plaidTransaction.GetAmount()
+		for i := range plaidTransactions {
+			plaidTransaction := plaidTransactions[i]
+			bankAccount := s.bankAccounts[plaidTransaction.GetBankAccountId()]
 
-			date := plaidTransaction.GetDateLocal(timezone)
-
-			transactionName := plaidTransaction.GetName()
-
-			// We only want to make the transaction name be the merchant name if the merchant name is shorter. This is
-			// due to something I observed with a dominos transaction, where the merchant was improperly parsed and the
-			// transaction ended up being called `Mnuslindstrom` rather than `Domino's`. This should fix that problem.
-			if plaidTransaction.GetMerchantName() != "" && len(plaidTransaction.GetMerchantName()) < len(transactionName) {
-				transactionName = plaidTransaction.GetMerchantName()
+			created, updated, err := s.syncPlaidTransaction(
+				span.Context(),
+				link,
+				&bankAccount,
+				plaidLink,
+				bankAccount.PlaidBankAccount,
+				plaidTransaction,
+			)
+			if err != nil {
+				return errors.Wrap(err, "failed to sync transaction")
 			}
 
-			existingTransaction, ok := transactionsByPlaidId[plaidTransaction.GetTransactionId()]
-			if !ok {
-				accountId := s.repo.AccountId()
-				bankAccountId := plaidIdsToBankIds[plaidTransaction.GetBankAccountId()]
-				transactionsToInsert = append(transactionsToInsert, models.Transaction{
-					AccountId:                 accountId,
-					BankAccountId:             bankAccountId,
-					PlaidTransactionId:        plaidTransaction.GetTransactionId(),
-					Amount:                    amount,
-					SpendingId:                nil,
-					Spending:                  nil,
-					Categories:                plaidTransaction.GetCategory(),
-					OriginalCategories:        plaidTransaction.GetCategory(),
-					Date:                      date,
-					Name:                      transactionName,
-					OriginalName:              plaidTransaction.GetName(),
-					MerchantName:              plaidTransaction.GetMerchantName(),
-					OriginalMerchantName:      plaidTransaction.GetMerchantName(),
-					Currency:                  plaidTransaction.GetISOCurrencyCode(),
-					IsPending:                 plaidTransaction.GetIsPending(),
-					CreatedAt:                 now,
-					PendingPlaidTransactionId: plaidTransaction.GetPendingTransactionId(),
-				})
-				transactionSimilaritySyncs[existingTransaction.BankAccountId] = CalculateTransactionClustersArguments{
-					AccountId:     accountId,
-					BankAccountId: bankAccountId,
-				}
-				continue
+			if created != nil {
+				transactionsToInsert = append(transactionsToInsert, *created)
+				s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
+			} else if updated != nil {
+				transactionsToUpdate = append(transactionsToUpdate, updated)
+				s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 			}
 
-			var shouldUpdate bool
-			if existingTransaction.Amount != amount {
-				shouldUpdate = true
-			}
-
-			if existingTransaction.IsPending != plaidTransaction.GetIsPending() {
-				shouldUpdate = true
-			}
-
-			if !myownsanity.StringPEqual(existingTransaction.PendingPlaidTransactionId, plaidTransaction.GetPendingTransactionId()) {
-				shouldUpdate = true
-			}
-
-			existingTransaction.Amount = amount
-			existingTransaction.IsPending = plaidTransaction.GetIsPending()
-			existingTransaction.PendingPlaidTransactionId = plaidTransaction.GetPendingTransactionId()
-
-			// Fix timezone of records.
-			if !existingTransaction.Date.Equal(date) {
-				existingTransaction.Date = date
-				shouldUpdate = true
-			}
-
-			if shouldUpdate {
-				transactionsToUpdate = append(transactionsToUpdate, &existingTransaction)
-				transactionSimilaritySyncs[existingTransaction.BankAccountId] = CalculateTransactionClustersArguments{
-					AccountId:     existingTransaction.AccountId,
-					BankAccountId: existingTransaction.BankAccountId,
-				}
-			}
+			continue
 		}
 
 		if len(transactionsToUpdate) > 0 {
@@ -497,13 +478,21 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 				log.WithError(err).Errorf("failed to update transactions for job")
 				return err
 			}
+			for i := range transactionsToUpdate {
+				s.actions[transactionsToUpdate[i].TransactionId] = UpdateSyncAction
+			}
 		}
 
 		if len(transactionsToInsert) > 0 {
-			// Reverse the list so the oldest records are inserted first.
-			for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
-				transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
-			}
+			// Sort by oldest to newest
+			sort.Slice(transactionsToInsert, func(i, j int) bool {
+				return transactionsToInsert[i].Date.Before(transactionsToInsert[j].Date)
+			})
+
+			// // Reverse the list so the oldest records are inserted first.
+			// for i, j := 0, len(transactionsToInsert)-1; i < j; i, j = i+1, j-1 {
+			// 	transactionsToInsert[i], transactionsToInsert[j] = transactionsToInsert[j], transactionsToInsert[i]
+			// }
 			log.Infof("creating %d transactions", len(transactionsToInsert))
 			crumbs.Debug(span.Context(), "Creating transactions.", map[string]interface{}{
 				"count": len(transactionsToInsert),
@@ -512,151 +501,41 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 				log.WithError(err).Error("failed to insert new transactions")
 				return err
 			}
-		}
-
-		if len(transactionsToInsert)+len(transactionsToUpdate) > 0 {
-			updatedBankAccounts := make([]models.BankAccount, 0, len(plaidBankAccounts))
-			for _, item := range plaidBankAccounts {
-				bankAccount, ok := plaidBankToLocalBank[item.GetAccountId()]
-				if !ok {
-					log.WithField("plaidBankAccountId", item.GetAccountId()).Warn("bank was not found in map")
-					continue
-				}
-
-				bankLog := log.WithFields(logrus.Fields{
-					"bankAccountId": bankAccount.BankAccountId,
-					"linkId":        bankAccount.LinkId,
-				})
-				shouldUpdate := false
-				available := item.GetBalances().GetAvailable()
-				current := item.GetBalances().GetCurrent()
-
-				if bankAccount.CurrentBalance != current {
-					bankLog = bankLog.WithField("currentBalanceChanged", true)
-					shouldUpdate = true
-				} else {
-					bankLog = bankLog.WithField("currentBalanceChanged", false)
-				}
-
-				if bankAccount.AvailableBalance != available {
-					bankLog = bankLog.WithField("availableBalanceChanged", true)
-					shouldUpdate = true
-				} else {
-					bankLog = bankLog.WithField("availableBalanceChanged", false)
-				}
-
-				plaidName := bankAccount.PlaidName
-				if bankAccount.PlaidName != item.GetName() {
-					plaidName = item.GetName()
-					shouldUpdate = true
-					bankLog = bankLog.WithField("plaidNameChanged", true)
-				} else {
-					bankLog = bankLog.WithField("plaidNameChanged", false)
-				}
-
-				plaidOfficialName := bankAccount.PlaidOfficialName
-				if bankAccount.PlaidOfficialName != item.GetOfficialName() {
-					plaidOfficialName = item.GetOfficialName()
-					shouldUpdate = true
-					bankLog = bankLog.WithField("plaidOfficialNameChanged", true)
-				} else {
-					bankLog = bankLog.WithField("plaidOfficialNameChanged", false)
-				}
-
-				bankLog = bankLog.WithField("willUpdate", shouldUpdate)
-
-				if shouldUpdate {
-					bankLog.Info("updating bank account balances")
-				} else {
-					bankLog.Trace("balances do not need to be updated")
-				}
-
-				if shouldUpdate {
-					updatedBankAccounts = append(updatedBankAccounts, models.BankAccount{
-						BankAccountId:     bankAccount.BankAccountId,
-						AccountId:         s.args.AccountId,
-						AvailableBalance:  available,
-						CurrentBalance:    current,
-						PlaidName:         plaidName,
-						PlaidOfficialName: plaidOfficialName,
-						LastUpdated:       now.UTC(),
-					})
-				}
-			}
-
-			if err = s.repo.UpdateBankAccounts(span.Context(), updatedBankAccounts...); err != nil {
-				log.WithError(err).Error("failed to update bank account balances")
-				crumbs.ReportError(span.Context(), err, "Failed to update bank account balances", "job", nil)
+			for i := range transactionsToInsert {
+				s.actions[transactionsToInsert[i].TransactionId] = CreateSyncAction
 			}
 		}
 
-		if len(syncData.Deleted) > 0 { // Handle removed transactions
-			log.Infof("removing %d transaction(s)", len(syncData.Deleted))
-
-			transactions, err := s.repo.GetTransactionsByPlaidTransactionId(span.Context(), s.args.LinkId, syncData.Deleted)
-			if err != nil {
-				log.WithError(err).Error("failed to retrieve transactions by plaid transaction Id for removal")
-				return err
+		for _, item := range plaidBankAccounts {
+			bankAccount, ok := s.bankAccounts[item.GetAccountId()]
+			if !ok {
+				log.WithField("plaidBankAccountId", item.GetAccountId()).Warn("bank was not found in map")
+				continue
 			}
 
-			if len(transactions) == 0 {
-				log.Warnf("no transactions retrieved, nothing to be done. transactions might already have been deleted")
-				return nil
+			if err := s.syncPlaidBankAccount(
+				span.Context(),
+				link,
+				&bankAccount,
+				plaidLink,
+				bankAccount.PlaidBankAccount,
+				item,
+			); err != nil {
+				log.WithError(err).Error("failed to update bank account")
+				crumbs.ReportError(span.Context(), err, "Failed to update bank account", "job", nil)
 			}
+		}
 
-			if len(transactions) != len(syncData.Deleted) {
-				log.Warnf("number of transactions retrieved does not match expected number of transactions, expected: %d found: %d", len(syncData.Deleted), len(transactions))
-				crumbs.IndicateBug(span.Context(), "The number of transactions retrieved does not match the expected number of transactions", map[string]interface{}{
-					"expected":            len(syncData.Deleted),
-					"found":               len(transactions),
-					"plaidTransactionIds": syncData.Deleted,
-				})
+		// Handle deleted transactions
+		for i := range syncData.Deleted {
+			if err := s.syncRemovedTransaction(
+				ctx,
+				link,
+				plaidLink,
+				syncData.Deleted[i],
+			); err != nil {
+				return errors.Wrap(err, "failed to sync deleted transaction")
 			}
-
-			for _, existingTransaction := range transactions {
-				transactionSimilaritySyncs[existingTransaction.BankAccountId] = CalculateTransactionClustersArguments{
-					AccountId:     existingTransaction.AccountId,
-					BankAccountId: existingTransaction.BankAccountId,
-				}
-
-				if existingTransaction.SpendingId == nil {
-					continue
-				}
-
-				// If the transaction is spent from something then we need to remove the spent from before deleting it to
-				// maintain our balances correctly.
-				updatedTransaction := existingTransaction
-				updatedTransaction.SpendingId = nil
-
-				// This is a simple sanity check, working with objects in slices and for loops can be goofy, or my
-				// understanding of the way objects works with how they are referenced in memory is poor. This is to make
-				// sure im not doing it wrong though. I'm worried that making a "copy" of the object and then modifying the
-				// copy will modify the original as well.
-				if existingTransaction.SpendingId == nil {
-					sentry.CaptureMessage("original transaction modified")
-					panic("original transaction modified")
-				}
-
-				_, err = s.repo.ProcessTransactionSpentFrom(
-					span.Context(),
-					existingTransaction.BankAccountId,
-					&updatedTransaction,
-					&existingTransaction,
-				)
-				if err != nil {
-					return err
-				}
-			}
-
-			for _, transaction := range transactions {
-				if err = s.repo.DeleteTransaction(span.Context(), transaction.BankAccountId, transaction.TransactionId); err != nil {
-					log.WithField("transactionId", transaction.TransactionId).WithError(err).
-						Error("failed to delete transaction")
-					return err
-				}
-			}
-
-			log.Debugf("successfully removed %d transaction(s)", len(transactions))
 		}
 
 		if !syncData.HasMore {
@@ -666,43 +545,437 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		log.WithField("iter", iter).Info("there is more data to sync from plaid, continuing")
 	}
 
-	linkWasSetup := false
-
-	// If the link status is not setup or pending expiration. Then change the status to setup
-	switch link.LinkStatus {
-	case models.LinkStatusSetup, models.LinkStatusPendingExpiration:
-	default:
-		crumbs.Debug(span.Context(), "Updating link status.", map[string]interface{}{
-			"old": link.LinkStatus,
-			"new": models.LinkStatusSetup,
-		})
-		link.LinkStatus = models.LinkStatusSetup
-		linkWasSetup = true
-	}
-	link.LastSuccessfulUpdate = myownsanity.TimeP(s.clock.Now().UTC())
-	link.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
-	if err = s.repo.UpdateLink(span.Context(), link); err != nil {
-		log.WithError(err).Error("failed to update link after transaction sync")
-		return err
-	}
-
 	// Then enqueue all of the bank accounts we touched to have their similar
 	// transactions recalculated.
-	for key := range transactionSimilaritySyncs {
-		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, transactionSimilaritySyncs[key])
+	for key := range s.similarity {
+		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, s.similarity[key])
+	}
+
+	return s.maintainLinkStatus(ctx, plaidLink)
+}
+
+func (s *SyncPlaidJob) tagBankAccountForSimilarityRecalc(bankAccountId uint64) {
+	s.similarity[bankAccountId] = CalculateTransactionClustersArguments{
+		AccountId:     s.args.AccountId,
+		BankAccountId: bankAccountId,
+	}
+}
+
+func (s *SyncPlaidJob) maintainLinkStatus(ctx context.Context, plaidLink *models.PlaidLink) error {
+	linkWasSetup := false
+	// If the link status is not setup or pending expiration. Then change the status to setup
+	switch plaidLink.Status {
+	case models.PlaidLinkStatusSetup, models.PlaidLinkStatusPendingExpiration:
+	default:
+		crumbs.Debug(ctx, "Updating plaid link status.", map[string]interface{}{
+			"old": plaidLink.Status,
+			"new": models.PlaidLinkStatusSetup,
+		})
+		plaidLink.Status = models.PlaidLinkStatusSetup
+		linkWasSetup = true
+	}
+	plaidLink.LastSuccessfulUpdate = myownsanity.TimeP(s.clock.Now().UTC())
+	plaidLink.LastAttemptedUpdate = myownsanity.TimeP(s.clock.Now().UTC())
+	if err := s.repo.UpdatePlaidLink(ctx, plaidLink); err != nil {
+		s.log.WithError(err).Error("failed to update link after transaction sync")
+		return err
 	}
 
 	if linkWasSetup { // Send the notification that the link has been set up.
 		channelName := fmt.Sprintf("initial:plaid:link:%d:%d", s.args.AccountId, s.args.LinkId)
 		if notifyErr := s.publisher.Notify(
-			span.Context(),
+			ctx,
 			channelName,
 			"success",
 		); notifyErr != nil {
-			log.WithError(notifyErr).Error("failed to publish link status to pubsub")
+			s.log.WithError(notifyErr).Error("failed to publish link status to pubsub")
 		}
 	}
 
-	// TODO Trigger similar transaction calculation here.
+	return nil
+}
+
+// hydrateTransactions takes all of the transaction's retrieved from Plaid
+// (including deleted ones please) and retrieves them and stores them on the job
+// object. This way when we are processing the transactions we can calculate
+// differences between the transactions retrieved and the ones we have stored.
+func (s *SyncPlaidJob) hydrateTransactions(
+	ctx context.Context,
+	link *models.Link,
+	sync *platypus.SyncResult,
+) error {
+	plaidTransactionIds := make([]string, 0, len(sync.Deleted)+len(sync.Updated)+len(sync.New))
+	for _, transaction := range sync.New {
+		plaidTransactionIds = append(plaidTransactionIds, transaction.GetTransactionId())
+	}
+	for _, transaction := range sync.Updated {
+		plaidTransactionIds = append(plaidTransactionIds, transaction.GetTransactionId())
+	}
+	plaidTransactionIds = append(plaidTransactionIds, sync.Deleted...)
+
+	s.log.
+		WithContext(ctx).
+		Tracef("checking database for %d plaid transaction(s)", len(plaidTransactionIds))
+
+	var err error
+	s.transactions, err = s.repo.GetTransactionsByPlaidId(
+		ctx,
+		link.LinkId,
+		plaidTransactionIds,
+	)
+	if err != nil {
+		s.log.
+			WithContext(ctx).
+			WithError(err).
+			Error("failed to retrieve transaction ids for updating plaid transactions")
+		return err
+	}
+
+	return nil
+}
+
+func (s *SyncPlaidJob) lookupTransaction(
+	plaidId string,
+	pendingPlaidId *string,
+) (models.Transaction, bool) {
+	txn, ok := s.transactions[plaidId]
+	if ok {
+		return txn, ok
+	}
+	if pendingPlaidId != nil {
+		txn, ok = s.transactions[*pendingPlaidId]
+		return txn, ok
+	}
+
+	return models.Transaction{}, false
+}
+
+func (s *SyncPlaidJob) syncPlaidTransaction(
+	ctx context.Context,
+	link *models.Link,
+	bankAccount *models.BankAccount,
+	plaidLink *models.PlaidLink,
+	plaidBankAccount *models.PlaidBankAccount,
+	input platypus.Transaction,
+) (created, updated *models.Transaction, err error) {
+	existingTransaction, exists := s.lookupTransaction(
+		input.GetTransactionId(),
+		input.GetPendingTransactionId(),
+	)
+
+	amount := input.GetAmount()
+	date := input.GetDateLocal(s.timezone)
+	transactionName := input.GetName()
+
+	// We only want to make the transaction name be the merchant name if the
+	// merchant name is shorter. This is due to something I observed with a
+	// dominos transaction, where the merchant was improperly parsed and the
+	// transaction ended up being called `Mnuslindstrom` rather than `Domino's`.
+	// This should fix that problem.
+	if input.GetMerchantName() != "" && len(input.GetMerchantName()) < len(transactionName) {
+		transactionName = input.GetMerchantName()
+	}
+
+	if !exists {
+		plaidTransaction := models.PlaidTransaction{
+			AccountId:          link.AccountId,
+			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
+			PlaidId:            input.GetTransactionId(),
+			PendingPlaidId:     input.GetPendingTransactionId(),
+			Categories:         input.GetCategory(),
+			Date:               date,
+			Name:               transactionName,
+			MerchantName:       input.GetMerchantName(),
+			Amount:             amount,
+			Currency:           input.GetISOCurrencyCode(),
+			IsPending:          input.GetIsPending(),
+		}
+		if err := s.repo.CreatePlaidTransaction(ctx, &plaidTransaction); err != nil {
+			return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
+		}
+
+		existingTransaction = models.Transaction{
+			AccountId:            link.AccountId,
+			BankAccountId:        bankAccount.BankAccountId,
+			Amount:               amount,
+			SpendingId:           nil,
+			SpendingAmount:       nil,
+			Categories:           input.GetCategory(),
+			Date:                 date,
+			Name:                 transactionName,
+			OriginalName:         input.GetName(),
+			MerchantName:         input.GetMerchantName(),
+			OriginalMerchantName: input.GetMerchantName(),
+			Currency:             input.GetISOCurrencyCode(),
+			IsPending:            input.GetIsPending(),
+		}
+
+		if input.GetIsPending() {
+			existingTransaction.PendingPlaidTransactionId = &plaidTransaction.PlaidTransactionId
+		} else {
+			existingTransaction.PlaidTransactionId = &plaidTransaction.PlaidTransactionId
+		}
+
+		return &existingTransaction, nil, nil
+	}
+
+	var existingPlaidTransaction *models.PlaidTransaction
+	if input.GetIsPending() {
+		existingPlaidTransaction = existingTransaction.PendingPlaidTransaction
+	} else {
+		existingPlaidTransaction = existingTransaction.PlaidTransaction
+	}
+
+	if existingPlaidTransaction == nil && input.GetIsPending() {
+		crumbs.IndicateBug(ctx, "Existing transaction did not correctly have the associated pending plaid transaction stored", map[string]interface{}{
+			"plaidId":            input.GetTransactionId(),
+			"linkId":             link.LinkId,
+			"plaidLinkId":        link.PlaidLinkId,
+			"bankAccountId":      bankAccount.BankAccountId,
+			"plaidBankAccountId": bankAccount.PlaidBankAccountId,
+			"institutionId":      plaidLink.InstitutionId,
+			"itemId":             plaidLink.PlaidId,
+		})
+		panic("existing plaid transaction is missing, there is a bug")
+	}
+
+	changes := make([]SyncChange, 0)
+
+	// If the existing plaid transaction is nil and we are not pending that means
+	// we have transitioned from a pending status to a cleared status for this
+	// transaction. We need to create the new plaid transaction for this input.
+	if existingPlaidTransaction == nil {
+		existingPlaidTransaction = &models.PlaidTransaction{
+			AccountId:          link.AccountId,
+			PlaidBankAccountId: plaidBankAccount.PlaidBankAccountId,
+			PlaidId:            input.GetTransactionId(),
+			PendingPlaidId:     input.GetPendingTransactionId(),
+			Categories:         input.GetCategory(),
+			Date:               date,
+			Name:               transactionName,
+			MerchantName:       input.GetMerchantName(),
+			Amount:             amount,
+			Currency:           input.GetISOCurrencyCode(),
+			IsPending:          input.GetIsPending(),
+		}
+		if err := s.repo.CreatePlaidTransaction(ctx, existingPlaidTransaction); err != nil {
+			return nil, nil, errors.Wrap(err, "failed to store new plaid transaction")
+		}
+
+		existingTransaction.PlaidTransactionId = &existingPlaidTransaction.PlaidTransactionId
+		changes = append(changes, SyncChange{
+			Field: "plaidTransactionId",
+			Old:   nil,
+			New:   existingPlaidTransaction.PlaidTransactionId,
+		})
+	}
+
+	if existingPlaidTransaction.Amount != existingTransaction.Amount {
+		changes = append(changes, SyncChange{
+			Field: "amount",
+			Old:   existingTransaction.Amount,
+			New:   existingPlaidTransaction.Amount,
+		})
+		existingTransaction.Amount = existingPlaidTransaction.Amount
+	}
+
+	if existingPlaidTransaction.Date != existingTransaction.Date {
+		changes = append(changes, SyncChange{
+			Field: "date",
+			Old:   existingTransaction.Date,
+			New:   existingPlaidTransaction.Date,
+		})
+		existingTransaction.Date = existingPlaidTransaction.Date
+	}
+
+	if existingPlaidTransaction.Name != existingTransaction.Name {
+		changes = append(changes, SyncChange{
+			Field: "name",
+			Old:   existingTransaction.Name,
+			New:   existingPlaidTransaction.Name,
+		})
+		existingTransaction.Name = existingPlaidTransaction.Name
+	}
+
+	if existingPlaidTransaction.MerchantName != existingTransaction.MerchantName {
+		changes = append(changes, SyncChange{
+			Field: "merchantName",
+			Old:   existingTransaction.MerchantName,
+			New:   existingPlaidTransaction.MerchantName,
+		})
+		existingTransaction.MerchantName = existingPlaidTransaction.MerchantName
+	}
+
+	if existingPlaidTransaction.IsPending != existingTransaction.IsPending {
+		changes = append(changes, SyncChange{
+			Field: "isPending",
+			Old:   existingTransaction.IsPending,
+			New:   existingPlaidTransaction.IsPending,
+		})
+		existingTransaction.IsPending = existingPlaidTransaction.IsPending
+	}
+
+	// This happens when a transactions that is pending has it's pending
+	// transaction removed (the pending is not visible anymore). But the
+	// non-pending transaction has not appeared yet. Then when the non-pending
+	// transaction becomes visible (sometime later) this happens and we have to
+	// undelete the transaction.
+	if existingPlaidTransaction.DeletedAt == nil && existingTransaction.DeletedAt != nil {
+		changes = append(changes, SyncChange{
+			Field: "deletedAt",
+			Old:   existingTransaction.DeletedAt,
+			New:   nil,
+		})
+		existingTransaction.DeletedAt = nil
+	}
+
+	// If any of the fields did change, log the changes and return the updated
+	// transaction object.
+	if len(changes) > 0 {
+		s.log.WithContext(ctx).WithFields(logrus.Fields{
+			"plaidId": input.GetTransactionId(),
+			"kind":    "transaction",
+			"changes": changes,
+		}).Debug("detected transaction updates from plaid")
+		return nil, &existingTransaction, nil
+	}
+
+	// There were no changes but no errors.
+	return nil, nil, nil
+}
+
+func (s *SyncPlaidJob) syncRemovedTransaction(
+	ctx context.Context,
+	link *models.Link,
+	plaidLink *models.PlaidLink,
+	id string,
+) error {
+	log := s.log.WithFields(logrus.Fields{
+		"itemId":  plaidLink.PlaidId,
+		"linkId":  link.LinkId,
+		"kind":    "transaction",
+		"plaidId": id,
+	})
+	existingTransaction, exists := s.lookupTransaction(id, &id)
+	if !exists {
+		log.Warn("plaid wants to remove a transaction that does not exist")
+		return nil
+	}
+	log = log.WithFields(logrus.Fields{
+		"bankAccountId":             existingTransaction.BankAccountId,
+		"transactionId":             existingTransaction.TransactionId,
+		"plaidTransactionId":        existingTransaction.PlaidTransactionId,
+		"pendingPlaidTransactionId": existingTransaction.PendingPlaidTransactionId,
+	})
+
+	action := s.actions[existingTransaction.TransactionId]
+	switch action {
+	// TODO At the moment Created would not actually be detected.
+	case CreateSyncAction, UpdateSyncAction:
+		// If a transaction was updated or created as part of this sync then that
+		// means the transaction we are deleting was likely a pending transaction
+		// and the cleared transaction has become available and was properly
+		// associated with the pending transaction in Plaid. As such we should not
+		// remove the transaction since it should have the correct status now.
+		// TODO Keep an eye on this, the logic is new and might be wrong.
+		log.WithField("action", action).Debug("transaction to be removed has also been created or updated in this sync, it will not be removed")
+	default:
+		s.tagBankAccountForSimilarityRecalc(existingTransaction.BankAccountId)
+
+		log.Debug("removing transaction")
+
+		if existingTransaction.SpendingId != nil {
+			log.WithField("spendingId", existingTransaction.SpendingId).
+				Debug("transaction has spending, it will be removed")
+			updatedTransaction := existingTransaction
+			updatedTransaction.SpendingId = nil
+			_, err := s.repo.ProcessTransactionSpentFrom(
+				ctx,
+				existingTransaction.BankAccountId,
+				&updatedTransaction,
+				&existingTransaction,
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Safe to remove this transaction
+		if err := s.repo.DeleteTransaction(
+			ctx,
+			existingTransaction.BankAccountId,
+			existingTransaction.TransactionId,
+		); err != nil {
+			return errors.Wrap(err, "failed to remove pending transaction")
+		}
+	}
+
+	return nil
+}
+
+func (s *SyncPlaidJob) syncPlaidBankAccount(
+	ctx context.Context,
+	link *models.Link,
+	bankAccount *models.BankAccount,
+	plaidLink *models.PlaidLink,
+	plaidBankAccount *models.PlaidBankAccount,
+	input platypus.BankAccount,
+) error {
+	// If input is nil that means we are no longer seeing this specific account
+	// and we should mark it as inactive.
+	if input == nil {
+		// TODO, should we add a similar status to the plaid bank account?
+		bankAccount.Status = models.InactiveBankAccountStatus
+		bankAccount.LastUpdated = s.clock.Now().UTC()
+		return s.repo.UpdateBankAccounts(ctx, *bankAccount)
+	}
+
+	changes := make([]SyncChange, 0)
+	if input.GetName() != plaidBankAccount.Name {
+		changes = append(changes, SyncChange{
+			Field: "name",
+			Old:   plaidBankAccount.Name,
+			New:   input.GetName(),
+		})
+		plaidBankAccount.Name = input.GetName()
+		bankAccount.OriginalName = input.GetName()
+	}
+
+	if input.GetBalances().GetAvailable() != bankAccount.AvailableBalance {
+		changes = append(changes, SyncChange{
+			Field: "availableBalance",
+			Old:   bankAccount.AvailableBalance,
+			New:   input.GetBalances().GetAvailable(),
+		})
+		plaidBankAccount.AvailableBalance = input.GetBalances().GetAvailable()
+		bankAccount.AvailableBalance = input.GetBalances().GetAvailable()
+	}
+
+	if input.GetBalances().GetCurrent() != bankAccount.CurrentBalance {
+		changes = append(changes, SyncChange{
+			Field: "currentBalance",
+			Old:   bankAccount.CurrentBalance,
+			New:   input.GetBalances().GetCurrent(),
+		})
+		plaidBankAccount.CurrentBalance = input.GetBalances().GetCurrent()
+		bankAccount.CurrentBalance = input.GetBalances().GetCurrent()
+	}
+
+	if len(changes) > 0 {
+		s.log.WithContext(ctx).WithFields(logrus.Fields{
+			"plaidId": input.GetAccountId(),
+			"kind":    "bankAccount",
+			"changes": changes,
+		}).Debug("detected bank account updates from plaid")
+
+		if err := s.repo.UpdateBankAccounts(ctx, *bankAccount); err != nil {
+			return errors.Wrap(err, "failed to persists bank account changes from plaid sync")
+		}
+
+		if err := s.repo.UpdatePlaidBankAccount(ctx, plaidBankAccount); err != nil {
+			return errors.Wrap(err, "failed to persists plaid bank account changes from plaid sync")
+		}
+	}
+
 	return nil
 }

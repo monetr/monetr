@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/sirupsen/logrus"
 )
@@ -322,17 +321,8 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 			return c.badRequest(ctx, "cannot change transaction date on non-manual links")
 		}
 
-		if !myownsanity.TimesPEqual(existingTransaction.AuthorizedDate, transaction.AuthorizedDate) {
-			c.getLog(ctx).WithFields(logrus.Fields{
-				"existingAuthorizedDate": existingTransaction.AuthorizedDate,
-				"newAuthorizedDate":      transaction.AuthorizedDate,
-			}).Warn("cannot change transaction authorized date on non-manual links")
-			return c.badRequest(ctx, "cannot change transaction authorized date on non-manual links")
-		}
-
 		transaction.OriginalName = existingTransaction.OriginalName
 		transaction.OriginalMerchantName = existingTransaction.OriginalMerchantName
-		transaction.OriginalCategories = existingTransaction.OriginalCategories
 	}
 
 	updatedExpenses, err := repo.ProcessTransactionSpentFrom(c.getContext(ctx), bankAccountId, &transaction, existingTransaction)

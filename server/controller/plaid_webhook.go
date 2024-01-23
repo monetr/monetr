@@ -195,6 +195,7 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 			"itemId": hook.ItemId,
 			"link":   link,
 		})
+		// TODO Return here, we can't process it!
 	}
 
 	log = c.log.WithFields(logrus.Fields{
@@ -215,76 +216,42 @@ func (c *Controller) processWebhook(ctx echo.Context, hook PlaidWebhook) error {
 		crumbs.Warn(c.getContext(ctx), "Webhook has an error", "plaid", hook.Error)
 	}
 
+	plaidLink := link.PlaidLink
+
 	switch hook.WebhookType {
 	case "TRANSACTIONS":
-		switch link.PlaidLink.UsePlaidSync {
-		case true:
+		err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
+			AccountId: link.AccountId,
+			LinkId:    link.LinkId,
+			Trigger:   "webhook",
+		})
+	case "ITEM":
+		switch hook.WebhookCode {
+		case "ERROR":
+			code := hook.Error["error_code"]
+			plaidLink.Status = models.PlaidLinkStatusError
+			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
+			log.Warn("plaid link is in an error state, updating")
+			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
+		case "PENDING_EXPIRATION":
+			plaidLink.Status = models.PlaidLinkStatusPendingExpiration
+			plaidLink.ExpirationDate = hook.ConsentExpirationTime
+			log.Warn("plaid link is pending expiration")
+			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
+		case "USER_PERMISSION_REVOKED":
+			code := hook.Error["error_code"]
+			plaidLink.Status = models.PlaidLinkStatusRevoked
+			plaidLink.ErrorCode = myownsanity.StringP(code.(string))
+			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
+		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
 			err = background.TriggerSyncPlaid(c.getContext(ctx), c.jobRunner, background.SyncPlaidArguments{
 				AccountId: link.AccountId,
 				LinkId:    link.LinkId,
 				Trigger:   "webhook",
 			})
-		default:
-			switch hook.WebhookCode {
-			case "INITIAL_UPDATE":
-				err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-					AccountId: link.AccountId,
-					LinkId:    link.LinkId,
-					Start:     time.Now().Add(-30 * 24 * time.Hour), // Last 30 days.
-					End:       time.Now(),
-				})
-			case "HISTORICAL_UPDATE":
-				err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-					AccountId: link.AccountId,
-					LinkId:    link.LinkId,
-					Start:     time.Now().Add(-2 * 365 * 24 * time.Hour), // Last 2 years.
-					End:       time.Now(),
-				})
-			case "DEFAULT_UPDATE":
-				err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-					AccountId: link.AccountId,
-					LinkId:    link.LinkId,
-					Start:     time.Now().Add(-7 * 24 * time.Hour), // Last 7 days.
-					End:       time.Now(),
-				})
-			case "TRANSACTIONS_REMOVED":
-				err = background.TriggerRemoveTransactions(c.getContext(ctx), c.jobRunner, background.RemoveTransactionsArguments{
-					AccountId:           link.AccountId,
-					LinkId:              link.LinkId,
-					PlaidTransactionIds: hook.RemovedTransactions,
-				})
-			default:
-				crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
-			}
-		}
-	case "ITEM":
-		switch hook.WebhookCode {
-		case "ERROR":
-			code := hook.Error["error_code"]
-			link.LinkStatus = models.LinkStatusError
-			link.ErrorCode = myownsanity.StringP(code.(string))
-			log.Warn("link is in an error state, updating")
-			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
-		case "PENDING_EXPIRATION":
-			link.LinkStatus = models.LinkStatusPendingExpiration
-			link.ExpirationDate = hook.ConsentExpirationTime
-			log.Warn("link is pending expiration")
-			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
-		case "USER_PERMISSION_REVOKED":
-			code := hook.Error["error_code"]
-			link.LinkStatus = models.LinkStatusRevoked
-			link.ErrorCode = myownsanity.StringP(code.(string))
-			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
-		case "WEBHOOK_UPDATE_ACKNOWLEDGED":
-			err = background.TriggerPullTransactions(c.getContext(ctx), c.jobRunner, background.PullTransactionsArguments{
-				AccountId: link.AccountId,
-				LinkId:    link.LinkId,
-				Start:     time.Now().Add(-7 * 24 * time.Hour),
-				End:       time.Now(),
-			})
 		case "NEW_ACCOUNTS_AVAILABLE":
-			link.PlaidNewAccountsAvailable = true
-			err = authenticatedRepo.UpdateLink(c.getContext(ctx), link)
+			plaidLink.NewAccountsAvailable = true
+			err = authenticatedRepo.UpdatePlaidLink(c.getContext(ctx), plaidLink)
 		default:
 			crumbs.Warn(c.getContext(ctx), "Plaid webhook will not be handled, it is not implemented.", "plaid", nil)
 		}

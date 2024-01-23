@@ -277,10 +277,10 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	// Recurring
 	billed.GET("/bank_accounts/:bankAccountId/recurring", c.getRecurring)
 	// Plaid Link
-	billed.PUT("/plaid/link/update/:linkId", c.updatePlaidLink)
+	billed.PUT("/plaid/link/update/:linkId", c.putUpdatePlaidLink)
 	billed.POST("/plaid/link/update/callback", c.updatePlaidTokenCallback)
 	billed.GET("/plaid/link/token/new", c.newPlaidToken)
-	billed.POST("/plaid/link/token/callback", c.plaidTokenCallback)
+	billed.POST("/plaid/link/token/callback", c.postPlaidTokenCallback)
 	billed.GET("/plaid/link/setup/wait/:linkId", c.waitForPlaid)
 	billed.POST("/plaid/link/sync", c.postSyncPlaidManually)
 }
