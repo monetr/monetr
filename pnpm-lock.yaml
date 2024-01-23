@@ -225,6 +225,9 @@ importers:
       tailwindcss:
         specifier: 3.3.7
         version: 3.3.7(ts-node@10.9.1)
+      teller-connect-react:
+        specifier: 0.1.0
+        version: 0.1.0(react-dom@18.2.0)(react@18.2.0)
       web-vitals:
         specifier: 2.1.4
         version: 2.1.4
@@ -20186,6 +20189,17 @@ packages:
     resolution: {integrity: sha512-1QTEcJkJEhc8OnStBx/ILRu5J2p0GjvWsBx56bmZRqnrkdBMUe+nX92jxV+p3dB4CP6PZCdJMQJwCggkNBMzkQ==}
     dependencies:
       memoizerific: 1.11.3
+    dev: false
+
+  /teller-connect-react@0.1.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-ZI+OULCsuo/v1qetpjepOgM7TyIzwnMVE/54IruOPguQtJ/Ui3C1ax3wUb65AKZDyVQ7ZyjA+8ypT/yMYD9bIQ==}
+    peerDependencies:
+      react: ^16.8.6 || 17 - 18
+      react-dom: ^16.8.6 || 17 - 18
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-script-hook: 1.7.2(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /temp-dir@2.0.0:
