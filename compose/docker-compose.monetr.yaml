@@ -73,7 +73,6 @@ services:
       - redis
       - postgres
       - s3
-      - ngrok
       - kms
       - mail
     ports:
@@ -91,8 +90,6 @@ services:
       postgres:
         condition: service_started
       kms:
-        condition: service_started
-      ngrok:
         condition: service_started
   ui:
     # The UI will be run inside a container as well. However if you are having trouble getting it to work make sure you
@@ -159,8 +156,8 @@ services:
       NGROK_DEBUG: "true"
       NGROK_AUTH: $NGROK_AUTH
       NGROK_HOSTNAME: $NGROK_HOSTNAME
-    # profiles:
-    #   - donotstart
+    profiles:
+      - donotstart
   postgres:
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
