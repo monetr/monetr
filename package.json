@@ -25,6 +25,13 @@
     "eslint-plugin-unused-imports": "3.0.0",
     "typescript": "5.1.3"
   },
+  "scripts": {
+    "monetr": "cmake --preset default && cmake --build build -t build.monetr",
+    "release": "cmake --preset release && cmake --build build -t build.monetr",
+    "test": "cmake --preset testing && ctest --test-dir build --no-tests=error --output-on-failure",
+    "shutdown": "cmake --preset default && cmake --build build -t development.down",
+    "clean": "pnpm shutdown && cmake --build build -t clean && rm -rf build && git clean -f -X server/ui/static && git submodule deinit -f server/icons/sources/simple-icons"
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
