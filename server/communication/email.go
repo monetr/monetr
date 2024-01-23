@@ -7,6 +7,7 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"io"
 	"net"
 	"net/smtp"
 	"strings"
@@ -134,12 +135,40 @@ func (e *emailCommunicationBase) SendPasswordReset(ctx context.Context, params P
 	return e.sendMessage(span.Context(), payload)
 }
 
+func (e *emailCommunicationBase) splitPayloadPiece(piece string) string {
+	// SMTP has a max of 1000 characters per line (bytes?) including the \r\n at the end. So this splits the buffer such
+	// that it should not exceed that length.
+	maxLength := 900
+	join := "\r\n"
+	output := make([]string, 0)
+	buffer := strings.NewReader(piece)
+	chunk := make([]byte, maxLength-len(join))
+	for {
+		n, err := buffer.Read(chunk)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			panic(err)
+		}
+		if n > 0 {
+			output = append(output, string(chunk[:n]))
+		}
+
+		if n < 78 {
+			break
+		}
+	}
+
+	return strings.Join(output, join)
+}
+
 func (e *emailCommunicationBase) getTemplates(name string) (html *template.Template, text *template.Template) {
 	{ // HTML template
 		data, err := templates.ReadFile(fmt.Sprintf("email_templates/%s.html", name))
 		if err != nil {
 			panic(fmt.Sprintf("failed to load embedded email template %s: %+v", name, err))
 		}
+		data = bytes.Join(bytes.Split(data, []byte("\n")), []byte{})
 
 		html = template.New(name)
 		html, err = html.Parse(string(data))
@@ -212,10 +241,6 @@ func (e *emailCommunicationBase) sendMessage(ctx context.Context, payload messag
 		panic("text or html content missing, are your templates generated properly?")
 	}
 
-	// Since the boundaries are named and I really don't know how SMTP works, I don't want someone to be able to use the
-	// actual boundary names in the parts of the template that we are filling in from user input. So I'm going to generate
-	// a boundary name every time we send an email. This way there isn't a way that someone can guess the boundary names
-	// which could result in some weird injection between the plain text part of the email and the HTML part of the email.
 	htmlBoundry, textBoundry := uuid.NewString(), uuid.NewString()
 	builder.WriteString(`Content-Type: multipart/mixed; boundary=`)
 	builder.WriteRune('"')
@@ -267,7 +292,7 @@ func (e *emailCommunicationBase) sendMessage(ctx context.Context, payload messag
 
 	builder.WriteRune('\r') // HTML content
 	builder.WriteRune('\n')
-	builder.WriteString(payload.HTMLContent)
+	builder.WriteString(e.splitPayloadPiece(payload.HTMLContent))
 	builder.WriteRune('\r') // End of HTML content, start the next boundary
 	builder.WriteRune('\n')
 
