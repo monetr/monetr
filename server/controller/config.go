@@ -28,6 +28,8 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		BillingEnabled       bool         `json:"billingEnabled"`
 		IconsEnabled         bool         `json:"iconsEnabled"`
 		PlaidEnabled         bool         `json:"plaidEnabled"`
+		TellerEnabled        bool         `json:"tellerEnabled"`
+		TellerApplicationId  *string      `json:"tellerApplicationId"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
 		BuildType            string       `json:"buildType"`
@@ -79,6 +81,11 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		}
 
 		configuration.BillingEnabled = c.configuration.Stripe.BillingEnabled
+	}
+
+	if c.configuration.Teller.GetEnabled() {
+		configuration.TellerEnabled = true
+		configuration.TellerApplicationId = &c.configuration.Teller.ApplicationId
 	}
 
 	configuration.RequireBetaCode = c.configuration.Beta.EnableBetaCodes

@@ -42,8 +42,8 @@ type Configuration struct {
 	Beta                Beta           `yaml:"beta"`
 	CORS                CORS           `yaml:"cors"`
 	Email               Email          `yaml:"email"`
-	Logging             Logging        `yaml:"logging"`
 	KeyManagement       KeyManagement  `yaml:"keyManagement"`
+	Logging             Logging        `yaml:"logging"`
 	Plaid               Plaid          `yaml:"plaid"`
 	PostgreSQL          PostgreSQL     `yaml:"postgreSql"`
 	RabbitMQ            RabbitMQ       `yaml:"rabbitMQ"`
@@ -54,6 +54,7 @@ type Configuration struct {
 	Server              Server         `yaml:"server"`
 	Storage             Storage        `yaml:"storage"`
 	Stripe              Stripe         `yaml:"stripe"`
+	Teller              Teller         `yaml:"teller"`
 }
 
 func (c Configuration) GetConfigFileName() string {
@@ -269,6 +270,15 @@ func (r ReCAPTCHA) ShouldVerifyRegistration() bool {
 
 func (r ReCAPTCHA) ShouldVerifyForgotPassword() bool {
 	return r.Enabled && r.VerifyForgotPassword
+}
+
+type Teller struct {
+	Enabled       bool   `yaml:"enabled"`
+	ApplicationId string `yaml:"applicationId"`
+}
+
+func (t Teller) GetEnabled() bool {
+	return t.Enabled && t.ApplicationId != ""
 }
 
 type Plaid struct {
@@ -627,4 +637,5 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.BillingEnabled", "MONETR_STRIPE_BILLING_ENABLED")
 	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
+	_ = v.BindEnv("Teller.ApplicationId", "MONETR_TELLER_APPLICATION_ID")
 }
