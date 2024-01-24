@@ -283,4 +283,6 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/plaid/link/token/callback", c.postPlaidTokenCallback)
 	billed.GET("/plaid/link/setup/wait/:linkId", c.waitForPlaid)
 	billed.POST("/plaid/link/sync", c.postSyncPlaidManually)
+	// Teller
+	billed.POST("/teller/link", c.postTellerLink)
 }
