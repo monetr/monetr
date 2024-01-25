@@ -50,6 +50,7 @@ const (
 )
 
 type Transaction struct {
+	Id          string             `json:"id"`
 	AccountId   string             `json:"account_id"`
 	Amount      string             `json:"amount"`
 	Date        time.Time          `json:"date"`
