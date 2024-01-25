@@ -25,6 +25,11 @@ type Client interface {
 	GetInstitutions(ctx context.Context) ([]Institution, error)
 }
 
+type AuthenticatedClient interface {
+	GetAccounts(ctx context.Context) ([]Account, error)
+	DeleteAccount(ctx context.Context, id string) error
+}
+
 type clientBase struct {
 	log           *logrus.Entry
 	client        *http.Client
