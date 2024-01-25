@@ -28,6 +28,7 @@ type Client interface {
 type AuthenticatedClient interface {
 	GetAccounts(ctx context.Context) ([]Account, error)
 	DeleteAccount(ctx context.Context, id string) error
+	GetTransactions(ctx context.Context, fromId *string, limit int) ([]Transaction, error)
 }
 
 type clientBase struct {
@@ -79,7 +80,6 @@ func (s *clientBase) tellerRoundTripper(
 	response *http.Response,
 	err error,
 ) {
-
 	var statusCode int
 	var requestId string
 	if response != nil {
