@@ -54,7 +54,7 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) mod
 		AccountId:       user.AccountId,
 		Account:         user.Account,
 		LinkType:        models.PlaidLinkType,
-		PlaidLinkId:     &plaidLink.PlaidLinkID, // To be filled in later.
+		PlaidLinkId:     &plaidLink.PlaidLinkId, // To be filled in later.
 		PlaidLink:       &plaidLink,
 		InstitutionName: plaidLink.InstitutionName,
 		CreatedAt:       clock.Now(),

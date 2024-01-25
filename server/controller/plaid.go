@@ -451,7 +451,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 
 	link := models.Link{
 		AccountId:       repo.AccountId(),
-		PlaidLinkId:     &plaidLink.PlaidLinkID,
+		PlaidLinkId:     &plaidLink.PlaidLinkId,
 		InstitutionName: callbackRequest.InstitutionName,
 		LinkType:        models.PlaidLinkType,
 	}
@@ -480,7 +480,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	for i := range plaidAccounts {
 		plaidAccount := plaidAccounts[i]
 		plaidBankAccount := models.PlaidBankAccount{
-			PlaidLinkId:      plaidLink.PlaidLinkID,
+			PlaidLinkId:      plaidLink.PlaidLinkId,
 			PlaidId:          plaidAccount.GetAccountId(),
 			Name:             plaidAccount.GetName(),
 			OfficialName:     plaidAccount.GetOfficialName(),

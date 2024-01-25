@@ -272,15 +272,6 @@ func (r ReCAPTCHA) ShouldVerifyForgotPassword() bool {
 	return r.Enabled && r.VerifyForgotPassword
 }
 
-type Teller struct {
-	Enabled       bool   `yaml:"enabled"`
-	ApplicationId string `yaml:"applicationId"`
-}
-
-func (t Teller) GetEnabled() bool {
-	return t.Enabled && t.ApplicationId != ""
-}
-
 type Plaid struct {
 	Enabled      bool              `yaml:"enabled"`
 	ClientID     string            `yaml:"clientId"`

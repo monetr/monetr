@@ -13,6 +13,9 @@ type Link struct {
 	PlaidLinkId *uint64    `json:"-" pg:"plaid_link_id"`
 	PlaidLink   *PlaidLink `json:"plaidLink,omitempty" pg:"rel:has-one"`
 
+	TellerLinkId *uint64     `json:"-" pg:"teller_link_id"`
+	TellerLink   *TellerLink `json:"tellerLink,omitempty" pg:"rel:has-one"`
+
 	InstitutionName string    `json:"institutionName" pg:"institution_name"`
 	Description     *string   `json:"description" pg:"description"`
 	CreatedAt       time.Time `json:"createdAt" pg:"created_at,notnull"`
