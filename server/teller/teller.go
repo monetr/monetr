@@ -1,8 +1,10 @@
 package teller
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -23,12 +25,6 @@ const APIVersion = "2020-10-12"
 type Client interface {
 	GetHealth(ctx context.Context) error
 	GetInstitutions(ctx context.Context) ([]Institution, error)
-}
-
-type AuthenticatedClient interface {
-	GetAccounts(ctx context.Context) ([]Account, error)
-	DeleteAccount(ctx context.Context, id string) error
-	GetTransactions(ctx context.Context, fromId *string, limit int) ([]Transaction, error)
 }
 
 type clientBase struct {
@@ -100,12 +96,22 @@ func (s *clientBase) tellerRoundTripper(
 	)
 }
 
-func (c *clientBase) newRequest(ctx context.Context, method string, path string, body io.Reader) *http.Request {
+func (c *clientBase) newUnauthenticatedRequest(ctx context.Context, method string, path string, body any) *http.Request {
+	var reader io.Reader
+
+	if body != nil {
+		buffer := bytes.NewBuffer(nil)
+		if err := json.NewEncoder(buffer).Encode(body); err != nil {
+			panic(fmt.Sprintf("failed to marshal request body: %+v", err))
+		}
+		reader = buffer
+	}
+
 	request, err := http.NewRequestWithContext(
 		ctx,
 		method,
 		fmt.Sprintf("https://%s%s", APIHostname, path),
-		body,
+		reader,
 	)
 	if err != nil {
 		panic(fmt.Sprintf("unable to create teller http request for %s %s", method, path))
@@ -129,7 +135,7 @@ func (c *clientBase) GetInstitutions(ctx context.Context) ([]Institution, error)
 	defer span.Finish()
 
 	institutions := make([]Institution, 0)
-	request := c.newRequest(span.Context(), "GET", "/institutions", nil)
+	request := c.newUnauthenticatedRequest(span.Context(), "GET", "/institutions", nil)
 	response, err := c.client.Do(request)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request teller institutions")
@@ -141,4 +147,45 @@ func (c *clientBase) GetInstitutions(ctx context.Context) ([]Institution, error)
 	}
 
 	return institutions, nil
+}
+
+func (c *clientBase) GetAuthenticatedClient(accessToken string) AuthenticatedClient {
+	return &authenticatedClientBase{
+		clientBase:  c,
+		accessToken: accessToken,
+	}
+}
+
+type AuthenticatedClient interface {
+	GetAccounts(ctx context.Context) ([]Account, error)
+	DeleteAccount(ctx context.Context, id string) error
+	GetTransactions(ctx context.Context, fromId *string, limit int) ([]Transaction, error)
+}
+
+type authenticatedClientBase struct {
+	*clientBase
+	accessToken string
+}
+
+func (c *authenticatedClientBase) newAuthenticatedRequest(ctx context.Context, method string, path string, body any) *http.Request {
+	request := c.newUnauthenticatedRequest(ctx, method, path, body)
+
+	authentication := base64.StdEncoding.EncodeToString(
+		[]byte(fmt.Sprintf("%s:", c.accessToken)),
+	)
+	request.Header.Add("Basic", authentication)
+
+	return request
+}
+
+func (c *authenticatedClientBase) GetAccounts(ctx context.Context) ([]Account, error) {
+	return nil, nil
+}
+
+func (c *authenticatedClientBase) DeleteAccount(ctx context.Context, id string) error {
+	return nil
+}
+
+func (c *authenticatedClientBase) GetTransactions(ctx context.Context, fromId *string, limit int) ([]Transaction, error) {
+	return nil, nil
 }
