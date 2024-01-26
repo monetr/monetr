@@ -5,7 +5,7 @@
   "dependencies": {
     "@react-email/components": "0.0.11",
     "@storybook/react": "7.0.18",
-    "react-email": "1.9.5",
+    "react-email": "1.10.1",
     "storybook": "7.2.1"
   }
 }
