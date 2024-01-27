@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/monetr/monetr/server/build"
@@ -127,7 +129,17 @@ func (c *clientBase) GetHealth(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	return nil
+	request := c.newUnauthenticatedRequest(span.Context(), "GET", "/institutions", nil)
+	response, err := c.client.Do(request)
+	if err != nil {
+		return errors.Wrap(err, "failed to request teller health")
+	}
+
+	if response.StatusCode == http.StatusOK {
+		return nil
+	}
+
+	return errors.Errorf("failed teller health check: %d", response.StatusCode)
 }
 
 func (c *clientBase) GetInstitutions(ctx context.Context) ([]Institution, error) {
@@ -159,7 +171,7 @@ func (c *clientBase) GetAuthenticatedClient(accessToken string) AuthenticatedCli
 type AuthenticatedClient interface {
 	GetAccounts(ctx context.Context) ([]Account, error)
 	DeleteAccount(ctx context.Context, id string) error
-	GetTransactions(ctx context.Context, fromId *string, limit int) ([]Transaction, error)
+	GetTransactions(ctx context.Context, accountId string, fromId *string, limit int64) ([]Transaction, error)
 }
 
 type authenticatedClientBase struct {
@@ -179,13 +191,69 @@ func (c *authenticatedClientBase) newAuthenticatedRequest(ctx context.Context, m
 }
 
 func (c *authenticatedClientBase) GetAccounts(ctx context.Context) ([]Account, error) {
-	return nil, nil
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	items := make([]Account, 0)
+	request := c.newAuthenticatedRequest(span.Context(), "GET", "/accounts", nil)
+	response, err := c.client.Do(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request teller accounts")
+	}
+	defer response.Body.Close()
+
+	if err := json.NewDecoder(response.Body).Decode(&items); err != nil {
+		return nil, errors.Wrap(err, "failed to decode json response")
+	}
+
+	return items, nil
 }
 
 func (c *authenticatedClientBase) DeleteAccount(ctx context.Context, id string) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	path := fmt.Sprintf("/accounts/%s", id)
+	request := c.newAuthenticatedRequest(span.Context(), "DELETE", path, nil)
+	response, err := c.client.Do(request)
+	if err != nil {
+		return errors.Wrap(err, "failed to request delete teller account")
+	}
+
+	if response.StatusCode >= 400 {
+		return errors.Errorf("failed to delete account: %d", response.StatusCode)
+	}
+
 	return nil
 }
 
-func (c *authenticatedClientBase) GetTransactions(ctx context.Context, fromId *string, limit int) ([]Transaction, error) {
-	return nil, nil
+func (c *authenticatedClientBase) GetTransactions(ctx context.Context, accountId string, fromId *string, limit int64) ([]Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	params := url.Values{
+		"count": []string{
+			strconv.FormatInt(limit, 10),
+		},
+	}
+	if fromId != nil {
+		params["from_id"] = []string{
+			*fromId,
+		}
+	}
+	path := fmt.Sprintf("/accounts/%s/transactions?%s", accountId, params.Encode())
+
+	items := make([]Transaction, 0)
+	request := c.newAuthenticatedRequest(span.Context(), "GET", path, nil)
+	response, err := c.client.Do(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request teller accounts")
+	}
+	defer response.Body.Close()
+
+	if err := json.NewDecoder(response.Body).Decode(&items); err != nil {
+		return nil, errors.Wrap(err, "failed to decode json response")
+	}
+
+	return items, nil
 }

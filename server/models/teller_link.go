@@ -6,7 +6,7 @@ type TellerLinkStatus uint8
 
 //go:generate stringer -type=TellerLinkStatus -output=teller_link.strings.go
 const (
-	TellerLinkStatusUnkown       TellerLinkStatus = 0
+	TellerLinkStatusUnknown      TellerLinkStatus = 0
 	TellerLinkStatusSetup        TellerLinkStatus = 1
 	TellerLinkStatusDisconnected TellerLinkStatus = 2
 )
