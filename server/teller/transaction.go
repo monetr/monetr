@@ -50,13 +50,16 @@ const (
 )
 
 type Transaction struct {
-	Id          string             `json:"id"`
-	AccountId   string             `json:"account_id"`
-	Amount      string             `json:"amount"`
-	Date        time.Time          `json:"date"`
-	Description string             `json:"description"`
-	Details     TransactionDetails `json:"details"`
-	Status      TransactionStatus  `json:"status"`
+	Id             string             `json:"id"`
+	AccountId      string             `json:"account_id"`
+	Date           time.Time          `json:"date"`
+	Description    string             `json:"description"`
+	Details        TransactionDetails `json:"details"`
+	Status         TransactionStatus  `json:"status"`
+	Links          map[string]string  `json:"links"`
+	Amount         string             `json:"amount"`
+	RunningBalance *string            `json:"running_balance"`
+	Type           string             `json:"type"`
 }
 
 type TransactionDetails struct {

@@ -12,8 +12,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type SecretsProvider interface {
+	PlaidSecretsProvider
+	TellerSecretsProvider
+}
+
 var (
-	_ PlaidSecretsProvider = &postgresPlaidSecretProvider{}
+	_ PlaidSecretsProvider  = &postgresPlaidSecretProvider{}
+	_ TellerSecretsProvider = &postgresPlaidSecretProvider{}
 )
 
 type postgresPlaidSecretProvider struct {
@@ -22,7 +28,7 @@ type postgresPlaidSecretProvider struct {
 	kms KeyManagement
 }
 
-func NewPostgresPlaidSecretsProvider(log *logrus.Entry, db pg.DBI, kms KeyManagement) PlaidSecretsProvider {
+func NewPostgresSecretsProvider(log *logrus.Entry, db pg.DBI, kms KeyManagement) SecretsProvider {
 	return &postgresPlaidSecretProvider{
 		log: log,
 		db:  db,
@@ -150,4 +156,70 @@ func (p *postgresPlaidSecretProvider) RemoveAccessTokenForPlaidLink(ctx context.
 
 func (p *postgresPlaidSecretProvider) Close() error {
 	return nil
+}
+
+// TODO This wont work because it has a foreign key against the teller link but
+// that link won't exist in this transaction
+// GetAccessTokenForTellerLinkId implements TellerSecretsProvider.
+func (p *postgresPlaidSecretProvider) GetAccessTokenForTellerLinkId(ctx context.Context, accountId uint64, tellerLinkId uint64) (accessToken string, err error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var result models.TellerToken
+	err = p.db.ModelContext(span.Context(), &result).
+		Where(`"plaid_token"."account_id" = ?`, accountId).
+		Where(`"plaid_token"."teller_link_id" = ?`, tellerLinkId).
+		Limit(1).
+		Select(&result)
+	if err != nil {
+		span.Status = sentry.SpanStatusNotFound
+		return accessToken, errors.Wrap(err, "failed to retrieve access token for teller link")
+	}
+
+	if p.kms != nil && result.KeyID != nil {
+		span.Data = map[string]interface{}{
+			"kms": true,
+		}
+		version := ""
+		if result.Version != nil {
+			version = *result.Version
+		}
+		decoded, err := hex.DecodeString(result.AccessToken)
+		if err != nil {
+			span.Status = sentry.SpanStatusDataLoss
+			return accessToken, errors.Wrap(err, "failed to hex decode encrypted access token")
+		}
+		decrypted, err := p.kms.Decrypt(span.Context(), *result.KeyID, version, decoded)
+		if err != nil {
+			span.Status = sentry.SpanStatusInternalError
+			return accessToken, errors.Wrap(err, "failed to encrypt access token")
+		}
+
+		span.Status = sentry.SpanStatusOK
+
+		return string(decrypted), nil
+	} else if p.kms != nil {
+		crumbs.Debug(span.Context(), "Not decrypting using KMS because access token was not encrypted", nil)
+		span.Data = map[string]interface{}{
+			"kms": false,
+		}
+	} else {
+		span.Data = map[string]interface{}{
+			"kms": false,
+		}
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return result.AccessToken, nil
+}
+
+// RemoveAccessTokenForTellerLinkId implements TellerSecretsProvider.
+func (p *postgresPlaidSecretProvider) RemoveAccessTokenForTellerLinkId(ctx context.Context, accountId uint64, tellerLinkId uint64) error {
+	panic("unimplemented")
+}
+
+// UpdateAccessTokenForTellerLinkId implements TellerSecretsProvider.
+func (p *postgresPlaidSecretProvider) UpdateAccessTokenForTellerLinkId(ctx context.Context, accountId uint64, tellerLinkId uint64, accessToken string) error {
+	panic("unimplemented")
 }

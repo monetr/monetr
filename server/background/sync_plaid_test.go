@@ -28,7 +28,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)

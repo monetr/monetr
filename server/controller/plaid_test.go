@@ -58,7 +58,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
 		// We need to store a Plaid access token for this test.
-		secret := secrets.NewPostgresPlaidSecretsProvider(testutils.GetLog(t), testutils.GetPgDatabase(t), nil)
+		secret := secrets.NewPostgresSecretsProvider(testutils.GetLog(t), testutils.GetPgDatabase(t), nil)
 		assert.NoError(t, secret.UpdateAccessTokenForPlaidLinkId(
 			context.Background(),
 			link.AccountId,
@@ -95,7 +95,7 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
 
 		// We need to store a Plaid access token for this test.
-		secret := secrets.NewPostgresPlaidSecretsProvider(testutils.GetLog(t), testutils.GetPgDatabase(t), nil)
+		secret := secrets.NewPostgresSecretsProvider(testutils.GetLog(t), testutils.GetPgDatabase(t), nil)
 		assert.NoError(t, secret.UpdateAccessTokenForPlaidLinkId(
 			context.Background(),
 			link.AccountId,

@@ -238,7 +238,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 	}
 
 	if link.PlaidLink != nil {
-		accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId)
+		accessToken, err := c.secret.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId)
 		if err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to retrieve access token for plaid link.", "secrets", map[string]interface{}{
 				"linkId": link.LinkId,
@@ -261,7 +261,7 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
 		}
 
-		if err = c.plaidSecrets.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId); err != nil {
+		if err = c.secret.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId); err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to remove access token", "secrets", map[string]interface{}{
 				"linkId": link.LinkId,
 				"itemId": link.PlaidLink.PlaidId,

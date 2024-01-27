@@ -118,7 +118,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	clock.Set(time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC))
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	secretProvider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+	secretProvider := secrets.NewPostgresSecretsProvider(log, db, nil)
 	plaidRepo := repository.NewPlaidRepository(db)
 	plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, configuration.Plaid)
 

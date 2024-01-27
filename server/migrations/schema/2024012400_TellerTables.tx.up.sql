@@ -39,7 +39,7 @@ CREATE TABLE "teller_bank_accounts" (
   "created_by_user_id"     BIGINT    NOT NULL,
   CONSTRAINT "pk_teller_bank_accounts"                          PRIMARY KEY ("teller_bank_account_id", "account_id"),
   CONSTRAINT "fk_teller_bank_accounts_account"                  FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
-  CONSTRAINT "fk_teller_bank_accounts_teller_link"              FORIENG KEY ("teller_link_id", "account_id") REFERENCES "teller_links" ("teller_link_id", "account_id"),
+  CONSTRAINT "fk_teller_bank_accounts_teller_link"              FOREIGN KEY ("teller_link_id", "account_id") REFERENCES "teller_links" ("teller_link_id", "account_id"),
   CONSTRAINT "fk_teller_bank_accounts_users_created_by_user_id" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id"),
   CONSTRAINT "uq_teller_bank_accounts_teller_id"                UNIQUE ("account_id", "teller_id")
 );

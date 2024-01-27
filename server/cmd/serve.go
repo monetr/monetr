@@ -113,7 +113,7 @@ func RunServer() error {
 			SampleRate:       configuration.Sentry.SampleRate,
 			EnableTracing:    configuration.Sentry.TraceSampleRate > 0,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
-			BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			BeforeSend: func(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 				// Make sure user authentication doesn't make its way into sentry.
 				if event.Request != nil {
 					event.Request.Cookies = ""
@@ -135,7 +135,7 @@ func RunServer() error {
 		}
 
 		sentry.ConfigureScope(func(scope *sentry.Scope) {
-			scope.AddEventProcessor(func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			scope.AddEventProcessor(func(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 				if event.Request != nil {
 					event.Request.Cookies = ""
 					if event.Request.Headers != nil {
@@ -209,7 +209,7 @@ func RunServer() error {
 		return err
 	}
 
-	plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
+	plaidSecrets := secrets.NewPostgresSecretsProvider(log, db, kms)
 	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
 
 	var email communication.EmailCommunication

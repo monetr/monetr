@@ -45,7 +45,7 @@ type Controller struct {
 	paywall                  billing.BasicPayWall
 	plaid                    platypus.Platypus
 	plaidInstitutions        platypus.PlaidInstitutions
-	plaidSecrets             secrets.PlaidSecretsProvider
+	secret                   secrets.SecretsProvider
 	plaidWebhookVerification platypus.WebhookVerification
 	ps                       pubsub.PublishSubscribe
 	stats                    *metrics.Stats
@@ -62,7 +62,7 @@ func NewController(
 	stats *metrics.Stats,
 	stripe stripe_helper.Stripe,
 	cachePool *redis.Pool,
-	plaidSecrets secrets.PlaidSecretsProvider,
+	secretProvider secrets.SecretsProvider,
 	basicPaywall billing.BasicPayWall,
 	email communication.EmailCommunication,
 	clientTokens security.ClientTokens,
@@ -108,7 +108,7 @@ func NewController(
 		paywall:                  basicPaywall,
 		plaid:                    plaidClient,
 		plaidInstitutions:        platypus.NewPlaidInstitutionWrapper(log, plaidClient, caching),
-		plaidSecrets:             plaidSecrets,
+		secret:                   secretProvider,
 		plaidWebhookVerification: plaidWebhookVerification,
 		ps:                       pubSub,
 		stats:                    stats,

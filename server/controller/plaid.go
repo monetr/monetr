@@ -268,7 +268,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 	}
 
-	currentAccessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(
+	currentAccessToken, err := c.secret.GetAccessTokenForPlaidLinkId(
 		c.getContext(ctx),
 		repo.AccountId(),
 		link.PlaidLink.PlaidId,
@@ -279,7 +279,7 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 
 	if currentAccessToken != result.AccessToken {
 		log.Info("access token for link has been updated")
-		if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
+		if err = c.secret.UpdateAccessTokenForPlaidLinkId(
 			c.getContext(ctx),
 			repo.AccountId(),
 			link.PlaidLink.PlaidId,
@@ -427,7 +427,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
+	if err = c.secret.UpdateAccessTokenForPlaidLinkId(
 		c.getContext(ctx),
 		repo.AccountId(),
 		result.ItemId,

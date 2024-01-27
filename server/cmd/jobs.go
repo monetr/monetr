@@ -190,7 +190,7 @@ var (
 					return err
 				}
 
-				plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
+				plaidSecrets := secrets.NewPostgresSecretsProvider(log, db, kms)
 				job, err := background.NewSyncPlaidJob(
 					log,
 					repo,

@@ -155,7 +155,7 @@ func newDevelopCommand(parent *cobra.Command) {
 				return err
 			}
 
-			plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
+			plaidSecrets := secrets.NewPostgresSecretsProvider(log, db, kms)
 
 			log.Info("retrieving Plaid links from the database")
 			var plaidLinks []models.Link

@@ -25,7 +25,7 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
 		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, math.MaxInt64, plaidItemId, accessToken)
 		assert.EqualError(t, err, `failed to update access token: ERROR #23503 insert or update on table "plaid_tokens" violates foreign key constraint "fk_plaid_tokens_account"`)
 	})
@@ -40,7 +40,7 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
 		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
 		assert.NoError(t, err, "must be able to write access token for the first time")
 
@@ -80,7 +80,7 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 			).
 			MaxTimes(1)
 
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
+		provider := secrets.NewPostgresSecretsProvider(log, db, kms)
 		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
 		assert.NoError(t, err, "must be able to write access token for the first time")
 
@@ -112,7 +112,7 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
-		provider := secrets.NewPostgresPlaidSecretsProvider(log, db, nil)
+		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
 		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
 		assert.NoError(t, err, "must be able to write access token for the first time")
 

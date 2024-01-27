@@ -103,6 +103,10 @@ type BaseRepository interface {
 	// (wrapped).
 	GetTransactionClusterByMember(ctx context.Context, bankAccountId uint64, transactionId uint64) (*models.TransactionCluster, error)
 
+	// Teller functions
+	CreateTellerLink(ctx context.Context, link *models.TellerLink) error
+	UpdateTellerLink(ctx context.Context, link *models.TellerLink) error
+
 	fileRepositoryInterface
 }
 
