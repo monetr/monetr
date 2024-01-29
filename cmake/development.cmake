@@ -137,19 +137,26 @@ endif()
 add_custom_target(
   development.logs
   COMMENT "Tailing logs from monetr's local development environment"
-  COMMAND ${DOCKER_EXECUTABLE} compose ${ALL_COMPOSE_ARGS} logs -f
+  COMMAND ${DOCKER_EXECUTABLE} compose ${ALL_COMPOSE_ARGS} logs -f $(CONTAINER)
   COMMAND_EXPAND_LISTS
   USES_TERMINAL
 )
 
-add_custom_target(
-  development.down
-  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:plaid || exit 0
-  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:stripe || exit 0
-  COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || exit 0
-  COMMAND_EXPAND_LISTS
-  USES_TERMINAL
-)
+if(DOCKER_SERVER) 
+  add_custom_target(
+    development.down
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:plaid || exit 0
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:stripe || exit 0
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || exit 0
+    COMMAND_EXPAND_LISTS
+    USES_TERMINAL
+  )
+else()
+  add_custom_target(
+    development.down
+    COMMAND ${CMAKE_COMMAND} -E echo "-- Docker server is not running, development.down is a no-op"
+  )
+endif()
 
 add_custom_target(
   development.shell
