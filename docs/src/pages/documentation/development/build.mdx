@@ -42,8 +42,11 @@ make monetr
 In order to produce a release build of monetr the following flag must be added.
 
 ```shell filename="Shell"
-cmake --preset release
-make monetr
+# Specify the release preset manually
+make monetr CMAKE_PRESET=release
+
+# Or you can simply run
+make release
 ```
 
 <Callout type="info">

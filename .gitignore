@@ -1,6 +1,7 @@
 *.log
 .pnpm-store
 .react-email
+.cmakepreset
 bin
 coverage
 libexec

@@ -19,31 +19,40 @@ go_install(
   VERSION ${HOSTESS_VERSION}
 )
 
-set(LOCAL_DOMAIN "monetr.local")
+if (NOT MONETR_LOCAL_DOMAIN)
+  set(MONETR_LOCAL_DOMAIN "monetr.local")
+endif()
 set(LOCAL_PROTOCOL "https")
 set(CLOUD_MAGIC OFF)
 
 if(DEFINED ENV{GITPOD_WORKSPACE_ID})
   message(STATUS "Detected GitPod workspace environment, some local development settings will be adjusted.")
-  set(LOCAL_DOMAIN "80-$ENV{GITPOD_WORKSPACE_ID}.$ENV{GITPOD_WORKSPACE_CLUSTER_HOST}")
+  set(MONETR_LOCAL_DOMAIN "80-$ENV{GITPOD_WORKSPACE_ID}.$ENV{GITPOD_WORKSPACE_CLUSTER_HOST}")
   set(LOCAL_PROTOCOL "https")
   set(CLOUD_MAGIC ON)
 elseif(DEFINED ENV{CODESPACE_NAME})
   message(STATUS "Detected GitHub Codespaces environment, some local development settings will be adjusted.")
-  set(LOCAL_DOMAIN "$ENV{CODESPACE_NAME}-80.githubpreview.dev")
+  set(MONETR_LOCAL_DOMAIN "$ENV{CODESPACE_NAME}-80.githubpreview.dev")
   set(LOCAL_PROTOCOL "https")
   set(CLOUD_MAGIC ON)
 else()
-  set(LOCAL_DOMAIN "monetr.local")
   set(LOCAL_PROTOCOL "https")
   set(CLOUD_MAGIC OFF)
 endif()
 
-set(LOCAL_CERTIFICATE_DIR ${CMAKE_BINARY_DIR}/certificates/${LOCAL_DOMAIN})
+# When we are running locally we want nginx to handle our TLS termination with a self-signed certificate. But if we are
+# using something like GitPod or Github workspaces then they will handle TLS termination for us.
+set(NGINX_PORT "443")
+set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx.conf")
+if (CLOUD_MAGIC)
+  set(NGINX_PORT "80")
+  set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx-cloud.conf")
+endif()
+
+set(LOCAL_CERTIFICATE_DIR ${CMAKE_BINARY_DIR}/certificates/${MONETR_LOCAL_DOMAIN})
 set(LOCAL_CERTIFICATE_KEY ${LOCAL_CERTIFICATE_DIR}/key.pem)
 set(LOCAL_CERTIFICATE_CERT ${LOCAL_CERTIFICATE_DIR}/cert.pem)
 file(MAKE_DIRECTORY ${LOCAL_CERTIFICATE_DIR})
-
 
 set(LOCAL_HOSTS_MARKER ${CMAKE_BINARY_DIR}/etc-hosts.marker)
 
@@ -54,14 +63,14 @@ endif()
 
 if(WIN32)
   message(AUTHOR_WARNING "Because you are running on Windows, TLS might not be able to be provisioned for the local development environment.")
-  message(AUTHOR_WARNING "Because you are running on Windows, ${LOCAL_DOMAIN} might not be able to be registered with the hosts file.")
+  message(AUTHOR_WARNING "Because you are running on Windows, ${MONETR_LOCAL_DOMAIN} might not be able to be registered with the hosts file.")
 endif()
 
 add_custom_command(
   OUTPUT ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT}
   BYPRODUCTS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT}
   COMMAND ${SUDO_EXECUTABLE} ${MKCERT_EXECUTABLE} -install
-  COMMAND ${MKCERT_EXECUTABLE} -key-file ${LOCAL_CERTIFICATE_KEY} -cert-file ${LOCAL_CERTIFICATE_CERT} ${LOCAL_DOMAIN}
+  COMMAND ${MKCERT_EXECUTABLE} -key-file ${LOCAL_CERTIFICATE_KEY} -cert-file ${LOCAL_CERTIFICATE_CERT} ${MONETR_LOCAL_DOMAIN}
   COMMENT "Setting up local development TLS certificate, this is required for OAuth2. You may be prompted for a password"
   DEPENDS ${MKCERT_EXECUTABLE}
 )
@@ -69,16 +78,47 @@ add_custom_command(
 add_custom_command(
   OUTPUT ${LOCAL_HOSTS_MARKER}
   BYPRODUCTS ${LOCAL_HOSTS_MARKER}
-  COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${LOCAL_DOMAIN} 127.0.0.1
+  COMMAND ${SUDO_EXECUTABLE} ${HOSTESS_EXECUTABLE} add ${MONETR_LOCAL_DOMAIN} 127.0.0.1
   COMMAND ${CMAKE_COMMAND} -E touch ${LOCAL_HOSTS_MARKER}
-  COMMENT "Setting up ${LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
+  COMMENT "Setting up ${MONETR_LOCAL_DOMAIN} domain with your /etc/hosts file. You may be prompted for a password"
   DEPENDS ${HOSTESS_EXECUTABLE}
 )
 
 add_custom_target(development.certificates DEPENDS ${LOCAL_CERTIFICATE_KEY} ${LOCAL_CERTIFICATE_CERT})
 add_custom_target(development.hostsfile DEPENDS ${LOCAL_HOSTS_MARKER})
 
-set(LOCAL_COMPOSE_FILE ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml)
+set(COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose.monetr.yaml.in)
+if (NGROK_AUTH OR DEFINED ENV{NGROK_AUTH} OR NGROK_ENABLED)
+  set(NGROK_AUTH "${NGROK_AUTH}")
+  if(NOT NGROK_AUTH)
+    set(NGROK_AUTH "$ENV{NGROK_AUTH}")
+  endif()
+
+  set(NGROK_HOSTNAME "${NGROK_HOSTNAME}")
+  if(NOT NGROK_HOSTNAME)
+    set(NGROK_HOSTNAME "$ENV{NGROK_HOSTNAME}")
+  endif()
+  list(APPEND COMPOSE_FILE_TEMPLATES ${CMAKE_SOURCE_DIR}/compose/docker-compose-ngrok.monetr.yaml.in)
+  message(STATUS "Detected ngrok credentials, webhooks will be enabled for local development.")
+  if(NGROK_HOSTNAME)
+    message(STATUS "  Webhook domain: ${NGROK_HOSTNAME}")
+  endif()
+else()
+  message(STATUS "No ngrok credentials detected, webhooks will not be enabled for local development.")
+endif()
+
+set(COMPOSE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/development)
+file(MAKE_DIRECTORY ${COMPOSE_OUTPUT_DIRECTORY})
+
+set(COMPOSE_FILES)
+foreach(COMPOSE_FILE_TEMPLATE ${COMPOSE_FILE_TEMPLATES})
+  set(COMPOSE_FILE_OUTPUT "${COMPOSE_FILE_TEMPLATE}")
+  string(REPLACE ".in" "" COMPOSE_FILE_OUTPUT "${COMPOSE_FILE_OUTPUT}")
+  string(REPLACE "${CMAKE_SOURCE_DIR}/compose" "${COMPOSE_OUTPUT_DIRECTORY}" COMPOSE_FILE_OUTPUT "${COMPOSE_FILE_OUTPUT}")
+  configure_file("${COMPOSE_FILE_TEMPLATE}" "${COMPOSE_FILE_OUTPUT}" @ONLY)
+  list(APPEND COMPOSE_FILES "-f" "${COMPOSE_FILE_OUTPUT}")
+endforeach()
+
 
 set(ENV{LOCAL_CERTIFICATE_DIR} ${LOCAL_CERTIFICATE_DIR})
 set(BASE_ARGS "--project-directory" "${CMAKE_SOURCE_DIR}")
@@ -90,18 +130,18 @@ if(EXISTS ${HOME}/.monetr/development.env)
   list(APPEND BASE_ARGS "--env-file=${HOME}/.monetr/development.env")
 endif()
 
-set(DEVELOPMENT_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" ${BASE_ARGS})
-set(ALL_COMPOSE_ARGS "-f" "${LOCAL_COMPOSE_FILE}" ${BASE_ARGS})
+set(DEVELOPMENT_COMPOSE_ARGS ${COMPOSE_FILES} ${BASE_ARGS})
+set(ALL_COMPOSE_ARGS ${COMPOSE_FILES} ${BASE_ARGS})
 
 add_custom_target(
   development.monetr.up
   COMMENT "Starting monetr using Docker compose locally..."
-  COMMAND ${CMAKE_COMMAND} -E env LOCAL_PROTOCOL=${LOCAL_PROTOCOL} LOCAL_DOMAIN=${LOCAL_DOMAIN} ${DOCKER_EXECUTABLE} compose ${DEVELOPMENT_COMPOSE_ARGS} up --wait --remove-orphans
+  COMMAND ${CMAKE_COMMAND} -E env LOCAL_PROTOCOL=${LOCAL_PROTOCOL} MONETR_LOCAL_DOMAIN=${MONETR_LOCAL_DOMAIN} ${DOCKER_EXECUTABLE} compose ${DEVELOPMENT_COMPOSE_ARGS} up --wait --remove-orphans
   COMMAND ${CMAKE_COMMAND} -E echo "-- ========================================================================="
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- monetr is now running locally."
-  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${LOCAL_PROTOCOL}://${LOCAL_DOMAIN}"
-  COMMAND ${CMAKE_COMMAND} -E echo "-- Emails sent during development can be seen at ${LOCAL_PROTOCOL}://${LOCAL_DOMAIN}/mail"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- You can access monetr via ${LOCAL_PROTOCOL}://${MONETR_LOCAL_DOMAIN}"
+  COMMAND ${CMAKE_COMMAND} -E echo "-- Emails sent during development can be seen at ${LOCAL_PROTOCOL}://${MONETR_LOCAL_DOMAIN}/mail"
   COMMAND ${CMAKE_COMMAND} -E echo "--"
   COMMAND ${CMAKE_COMMAND} -E echo "-- When you are done you can shutdown the local development environment using:"
   COMMAND ${CMAKE_COMMAND} -E echo "--   make shutdown"
@@ -118,20 +158,7 @@ add_custom_target(
 )
 
 if(NOT CLOUD_MAGIC)
-  # If we are not in the cloud then we need to make sure we setup TLS stuff locally.
-  # TODO Put the hosts file and tls stuff behind a feature flag.
   add_dependencies(development.monetr.up development.certificates development.hostsfile)
-  # if(NOT DEFINED ENV{CI})
-  #   add_dependencies(development.monetr.up development.certificates development.hostsfile)
-  # else()
-  #   add_dependencies(development.monetr.up development.certificates)
-  # endif()
-else()
-  # If we are in the cloud we need to also make sure nginx uses the right config.
-  set_target_properties(development.monetr.up PROPERTY ENVIRONMENT
-    "NGINX_CONFIG_NAME=nginx-cloud.conf"
-    "NGINX_PORT=80"
-  )
 endif()
 
 add_custom_target(
@@ -145,8 +172,8 @@ add_custom_target(
 if(DOCKER_SERVER) 
   add_custom_target(
     development.down
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:plaid || exit 0
-    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr development clean:stripe || exit 0
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:plaid || exit 0
+    COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${DEVELOPMENT_COMPOSE_ARGS} exec monetr monetr -c /build/compose/monetr.yaml development clean:stripe || exit 0
     COMMAND ${DOCKER_EXECUTABLE} --log-level ERROR compose ${ALL_COMPOSE_ARGS} down --remove-orphans -v || exit 0
     COMMAND_EXPAND_LISTS
     USES_TERMINAL

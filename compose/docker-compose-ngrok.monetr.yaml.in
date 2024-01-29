@@ -1,0 +1,16 @@
+services:
+  ngrok:
+    image: wernight/ngrok
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4040" ]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+    ports:
+      - 4040:4040
+    environment:
+      NGROK_PORT: monetr:4000
+      NGROK_DEBUG: "true"
+      NGROK_AUTH: "@NGROK_AUTH@"
+      NGROK_HOSTNAME: "@NGROK_HOSTNAME@"

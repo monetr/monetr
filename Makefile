@@ -17,15 +17,22 @@ else
     TIME := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 endif
 
-ifndef CI
-	CMAKE_OPTIONS ?= -DBUILD_THIRD_PARTY_NOTICE=OFF -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF
-	CONCURRENCY ?= 8
-else
-	CMAKE_OPTIONS ?= -DBUILD_THIRD_PARTY_NOTICE=ON -DCMAKE_BUILD_TYPE=Release
-	CONCURRENCY := 4
+ifneq ("$(wildcard $(PWD)/.cmakepreset)","")
+	CMAKE_PRESET ?= $(shell cat $(PWD)/.cmakepreset)
 endif
 
-GENERATOR ?= "Unix Makefiles"
+ifneq ("$(wildcard $(HOME)/.monetr/development.env)","")
+	include $(HOME)/.monetr/development.env
+	export
+endif
+
+ifndef CI
+	CMAKE_PRESET ?= default
+	CONCURRENCY ?= 8
+else
+	CMAKE_PRESET ?= release
+	CONCURRENCY := 4
+endif
 
 ifdef DEBUG
 	CMAKE_ARGS += --debug-output
@@ -41,10 +48,11 @@ export BUILD_TIME=$(TIME)
 default: monetr
 
 CMAKE_CONFIGURATION_DIRECTORY=build
+# cmake -S . -B $(CMAKE_CONFIGURATION_DIRECTORY) -G $(GENERATOR) $(CMAKE_OPTIONS) $(CMAKE_ARGS)
 
 .PHONY: $(CMAKE_CONFIGURATION_DIRECTORY)
-$(CMAKE_CONFIGURATION_DIRECTORY): CMakeLists.txt
-	cmake -S . -B $(CMAKE_CONFIGURATION_DIRECTORY) -G $(GENERATOR) $(CMAKE_OPTIONS) $(CMAKE_ARGS)
+$(CMAKE_CONFIGURATION_DIRECTORY): CMakeLists.txt CMakePresets.json CMakeUserPresets.json
+	cmake --preset $(CMAKE_PRESET)
 
 clean:
 	-@$(MAKE) shutdown CMAKE_OPTIONS="$(CMAKE_OPTIONS) -DBUILD_TESTING=OFF"
@@ -62,7 +70,9 @@ monetr: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.monetr -j $(CONCURRENCY) $(BUILD_ARGS)
 
 monetr-release:
-	$(MAKE) monetr -B CMAKE_OPTIONS=-DCMAKE_BUILD_TYPE=Release
+	$(MAKE) monetr -B CMAKE_PRESET=release
+
+release: monetr-release
 
 
 .PHONY: docs
@@ -79,7 +89,7 @@ migrate: | $(CMAKE_CONFIGURATION_DIRECTORY)
 	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t development.migrate $(BUILD_ARGS)
 
 test:
-	cmake -S . -B $(CMAKE_CONFIGURATION_DIRECTORY) -G $(GENERATOR) -DBUILD_TESTING=ON $(CMAKE_ARGS)
+	cmake --preset testing
 	ctest --test-dir $(CMAKE_CONFIGURATION_DIRECTORY) --no-tests=error --output-on-failure -j $(CONCURRENCY)
 
 develop: | $(CMAKE_CONFIGURATION_DIRECTORY)
