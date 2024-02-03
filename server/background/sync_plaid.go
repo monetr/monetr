@@ -302,20 +302,6 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 
 	secret, err := s.secrets.Read(span.Context(), plaidLink.SecretId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
-		// If the token is simply missing from vault then something is goofy. Don't retry the job but mark it as a
-		// failure.
-		if errors.Is(errors.Cause(err), secrets.ErrNotFound) {
-			if hub := sentry.GetHubFromContext(span.Context()); hub != nil {
-				hub.ConfigureScope(func(scope *sentry.Scope) {
-					// Mark the scope as an error.
-					scope.SetLevel(sentry.LevelError)
-				})
-			}
-
-			log.WithError(err).Error("could not retrieve API credentials for Plaid for link, job will not be retried")
-			return nil
-		}
-
 		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
 		return err
 	}

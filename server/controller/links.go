@@ -238,34 +238,43 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 	}
 
 	if link.PlaidLink != nil {
-		accessToken, err := c.secret.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId)
+		secretsRepo := c.mustGetSecretsRepository(ctx)
+		secret, err := secretsRepo.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 		if err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to retrieve access token for plaid link.", "secrets", map[string]interface{}{
-				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.PlaidId,
+				"linkId":   link.LinkId,
+				"itemId":   link.PlaidLink.PlaidId,
+				"secretId": secret.SecretId,
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
 		}
 
-		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken, link.PlaidLink.PlaidId)
+		client, err := c.plaid.NewClient(
+			c.getContext(ctx),
+			link,
+			secret.Secret,
+			link.PlaidLink.PlaidId,
+		)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
 		}
 
 		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]interface{}{
-				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.PlaidId,
-				"error":  err.Error(),
+				"linkId":   link.LinkId,
+				"itemId":   link.PlaidLink.PlaidId,
+				"secretId": secret.SecretId,
+				"error":    err.Error(),
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
 		}
 
-		if err = c.secret.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId); err != nil {
+		if err = secretsRepo.Delete(c.getContext(ctx), secret.SecretId); err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to remove access token", "secrets", map[string]interface{}{
-				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.PlaidId,
-				"error":  err.Error(),
+				"linkId":   link.LinkId,
+				"itemId":   link.PlaidLink.PlaidId,
+				"secretId": secret.SecretId,
+				"error":    err.Error(),
 			})
 			// We don't want to stop the request here, it does suck that we weren't able to remove the access token, but
 			// at this point the user could not retry this request. So we have to commit to it. If a stray access token
