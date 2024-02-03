@@ -4,222 +4,149 @@ import (
 	"context"
 	"encoding/hex"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-type SecretsProvider interface {
-	PlaidSecretsProvider
-	TellerSecretsProvider
-}
-
 var (
-	_ PlaidSecretsProvider  = &postgresPlaidSecretProvider{}
-	_ TellerSecretsProvider = &postgresPlaidSecretProvider{}
+	_ SecretsProvider = &postgresSecretStorage{}
 )
 
-type postgresPlaidSecretProvider struct {
-	log *logrus.Entry
-	db  pg.DBI
-	kms KeyManagement
+type postgresSecretStorage struct {
+	clock clock.Clock
+	log   *logrus.Entry
+	db    pg.DBI
+	kms   KeyManagement
 }
 
-func NewPostgresSecretsProvider(log *logrus.Entry, db pg.DBI, kms KeyManagement) SecretsProvider {
-	return &postgresPlaidSecretProvider{
+func NewPostgresSecretsStorage(log *logrus.Entry, db pg.DBI, kms KeyManagement) SecretsProvider {
+	myownsanity.ASSERT_NOTNIL(kms, "key management interface must be provided to postgres secret storage")
+	return &postgresSecretStorage{
 		log: log,
 		db:  db,
 		kms: kms,
 	}
 }
 
-func (p *postgresPlaidSecretProvider) UpdateAccessTokenForPlaidLinkId(ctx context.Context, accountId uint64, plaidItemId, accessToken string) error {
-	span := sentry.StartSpan(ctx, "UpdateAccessTokenForPlaidLinkId [POSTGRES]")
-	defer span.Finish()
-
-	token := models.PlaidToken{
-		ItemId:      plaidItemId,
-		AccountId:   accountId,
-		AccessToken: accessToken,
-	}
-
-	if p.kms != nil {
-		span.Data = map[string]interface{}{
-			"kms": true,
-		}
-		keyId, version, encrypted, err := p.kms.Encrypt(span.Context(), []byte(accessToken))
-		if err != nil {
-			span.Status = sentry.SpanStatusInternalError
-			return errors.Wrap(err, "failed to encrypt access token")
-		}
-
-		token.KeyID = &keyId
-		if version != "" {
-			token.Version = &version
-		}
-		token.AccessToken = hex.EncodeToString(encrypted)
-	} else {
-		span.Data = map[string]interface{}{
-			"kms": false,
-		}
-	}
-
-	_, err := p.db.ModelContext(span.Context(), &token).
-		OnConflict(`(item_id, account_id) DO UPDATE`).
-		Insert(&token)
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return errors.Wrap(err, "failed to update access token")
-	}
-
-	span.Status = sentry.SpanStatusOK
-
-	return nil
-}
-
-func (p *postgresPlaidSecretProvider) GetAccessTokenForPlaidLinkId(ctx context.Context, accountId uint64, plaidItemId string) (accessToken string, err error) {
-	span := sentry.StartSpan(ctx, "GetAccessTokenForPlaidLinkId [POSTGRES]")
-	defer span.Finish()
-
-	var result models.PlaidToken
-	err = p.db.ModelContext(span.Context(), &result).
-		Where(`"plaid_token"."account_id" = ?`, accountId).
-		Where(`"plaid_token"."item_id" = ?`, plaidItemId).
-		Limit(1).
-		Select(&result)
-	if err != nil {
-		// TODO Add proper returning of the ErrNotFound here.
-		span.Status = sentry.SpanStatusInternalError
-		return accessToken, errors.Wrap(err, "failed to retrieve access token for plaid link")
-	}
-
-	if p.kms != nil && result.KeyID != nil {
-		span.Data = map[string]interface{}{
-			"kms": true,
-		}
-		version := ""
-		if result.Version != nil {
-			version = *result.Version
-		}
-		decoded, err := hex.DecodeString(result.AccessToken)
-		if err != nil {
-			span.Status = sentry.SpanStatusDataLoss
-			return accessToken, errors.Wrap(err, "failed to hex decode encrypted access token")
-		}
-		decrypted, err := p.kms.Decrypt(span.Context(), *result.KeyID, version, decoded)
-		if err != nil {
-			span.Status = sentry.SpanStatusInternalError
-			return accessToken, errors.Wrap(err, "failed to encrypt access token")
-		}
-
-		span.Status = sentry.SpanStatusOK
-
-		return string(decrypted), nil
-	} else if p.kms != nil {
-		crumbs.Debug(span.Context(), "Not decrypting using KMS because access token was not encrypted", nil)
-		span.Data = map[string]interface{}{
-			"kms": false,
-		}
-	} else {
-		span.Data = map[string]interface{}{
-			"kms": false,
-		}
-	}
-
-	span.Status = sentry.SpanStatusOK
-
-	return result.AccessToken, nil
-}
-
-func (p *postgresPlaidSecretProvider) RemoveAccessTokenForPlaidLink(ctx context.Context, accountId uint64, plaidItemId string) error {
-	span := sentry.StartSpan(ctx, "GetAccessTokenForPlaidLinkId [POSTGRES]")
-	defer span.Finish()
-	span.Data = map[string]interface{}{
-		"itemId": plaidItemId,
-	}
-
-	_, err := p.db.ModelContext(span.Context(), &models.PlaidToken{}).
-		Where(`"plaid_token"."account_id" = ?`, accountId).
-		Where(`"plaid_token"."item_id" = ?`, plaidItemId).
-		Limit(1).
-		Delete()
-	if err != nil {
-		span.Status = sentry.SpanStatusInternalError
-		return errors.Wrap(err, "failed to delete plaid access token")
-	}
-
-	return nil
-}
-
-func (p *postgresPlaidSecretProvider) Close() error {
-	return nil
-}
-
-// TODO This wont work because it has a foreign key against the teller link but
-// that link won't exist in this transaction
-// GetAccessTokenForTellerLinkId implements TellerSecretsProvider.
-func (p *postgresPlaidSecretProvider) GetAccessTokenForTellerLinkId(ctx context.Context, accountId uint64, tellerLinkId uint64) (accessToken string, err error) {
+func (p *postgresSecretStorage) Store(ctx context.Context, secret *Data) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var result models.TellerToken
-	err = p.db.ModelContext(span.Context(), &result).
-		Where(`"plaid_token"."account_id" = ?`, accountId).
-		Where(`"plaid_token"."teller_link_id" = ?`, tellerLinkId).
-		Limit(1).
-		Select(&result)
-	if err != nil {
-		span.Status = sentry.SpanStatusNotFound
-		return accessToken, errors.Wrap(err, "failed to retrieve access token for teller link")
+	log := p.log.WithField("accountId", secret.AccountId)
+
+	var item models.Secret
+	if secret.SecretId != 0 {
+		log = log.WithField("secretId", secret.SecretId)
+		err := p.db.ModelContext(span.Context(), &item).
+			Where(`"secret"."account_id" = ?`, secret.AccountId).
+			Where(`"secret"."secret_id" = ?`, secret.SecretId).
+			Limit(1).
+			For(`UPDATE`).
+			Select(&item)
+		if err != nil {
+			log.WithError(err).Error("failed to read an existing secret for update")
+			return errors.Wrap(err, "failed to retrieve secretfor update")
+		}
+		log.Trace("found an existing secret to update")
+		item.UpdatedAt = p.clock.Now().UTC()
+	} else {
+		log.Trace("secret does not exist, a new secret will be stored")
+		item = models.Secret{
+			AccountId: secret.AccountId,
+			Kind:      secret.Kind,
+			UpdatedAt: p.clock.Now().UTC(),
+			CreatedAt: p.clock.Now().UTC(),
+		}
 	}
 
-	if p.kms != nil && result.KeyID != nil {
-		span.Data = map[string]interface{}{
-			"kms": true,
-		}
-		version := ""
-		if result.Version != nil {
-			version = *result.Version
-		}
-		decoded, err := hex.DecodeString(result.AccessToken)
-		if err != nil {
-			span.Status = sentry.SpanStatusDataLoss
-			return accessToken, errors.Wrap(err, "failed to hex decode encrypted access token")
-		}
-		decrypted, err := p.kms.Decrypt(span.Context(), *result.KeyID, version, decoded)
-		if err != nil {
-			span.Status = sentry.SpanStatusInternalError
-			return accessToken, errors.Wrap(err, "failed to encrypt access token")
-		}
+	keyId, version, encrypted, err := p.kms.Encrypt(
+		span.Context(),
+		[]byte(secret.Secret),
+	)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to encrypt access token")
+	}
+	item.KeyID = keyId
+	item.Version = version
+	item.Secret = hex.EncodeToString(encrypted)
 
-		span.Status = sentry.SpanStatusOK
-
-		return string(decrypted), nil
-	} else if p.kms != nil {
-		crumbs.Debug(span.Context(), "Not decrypting using KMS because access token was not encrypted", nil)
-		span.Data = map[string]interface{}{
-			"kms": false,
-		}
+	query := p.db.ModelContext(span.Context(), &item)
+	if item.SecretId == 0 {
+		_, err = query.Insert(&item)
 	} else {
-		span.Data = map[string]interface{}{
-			"kms": false,
-		}
+		_, err = query.WherePK().Update(&item)
+	}
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return errors.Wrap(err, "failed to store secret")
+	}
+
+	log = log.WithField("secretId", item.SecretId)
+	log.Trace("successfully stored secret")
+
+	span.Status = sentry.SpanStatusOK
+
+	secret.SecretId = item.SecretId
+	return nil
+}
+
+func (p *postgresSecretStorage) Read(
+	ctx context.Context,
+	secretId, accountId uint64,
+) (*Data, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var item models.Secret
+	err := p.db.ModelContext(span.Context(), &item).
+		Where(`"secret"."account_id" = ?`, accountId).
+		Where(`"secret"."secret_id" = ?`, secretId).
+		Limit(1).
+		Select(&item)
+	if err != nil {
+		// TODO Add proper returning of the ErrNotFound here.
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve secret")
+	}
+
+	decoded, err := hex.DecodeString(item.Secret)
+	if err != nil {
+		span.Status = sentry.SpanStatusDataLoss
+		return nil, errors.Wrap(err, "failed to hex decode encrypted secret")
+	}
+	decrypted, err := p.kms.Decrypt(span.Context(), item.KeyID, item.Version, decoded)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to decrypt secret")
 	}
 
 	span.Status = sentry.SpanStatusOK
 
-	return result.AccessToken, nil
+	return &Data{
+		SecretId:  secretId,
+		AccountId: accountId,
+		Kind:      item.Kind,
+		Secret:    string(decrypted),
+	}, nil
 }
 
-// RemoveAccessTokenForTellerLinkId implements TellerSecretsProvider.
-func (p *postgresPlaidSecretProvider) RemoveAccessTokenForTellerLinkId(ctx context.Context, accountId uint64, tellerLinkId uint64) error {
-	panic("unimplemented")
-}
+func (p *postgresSecretStorage) Delete(
+	ctx context.Context,
+	secretId, accountId uint64,
+) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
 
-// UpdateAccessTokenForTellerLinkId implements TellerSecretsProvider.
-func (p *postgresPlaidSecretProvider) UpdateAccessTokenForTellerLinkId(ctx context.Context, accountId uint64, tellerLinkId uint64, accessToken string) error {
-	panic("unimplemented")
+	_, err := p.db.ModelContext(span.Context(), new(models.Secret)).
+		Where(`"secret"."account_id" = ?`, accountId).
+		Where(`"secret"."secret_id" = ?`, secretId).
+		Delete()
+	return errors.Wrap(err, "failed to delete secret")
 }

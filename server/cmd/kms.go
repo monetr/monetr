@@ -11,15 +11,9 @@ import (
 )
 
 func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyManagement, error) {
-	if !configuration.KeyManagement.Enabled {
-		log.Trace("key management is not enabled, it will not be initialized")
-		return nil, nil
-	}
-
 	log.Trace("setting up key management interface")
-
 	if configuration.KeyManagement.Provider == "" {
-		return nil, errors.New("key management is enabled by not provider is configured")
+		return nil, errors.New("a key management provider must be specified")
 	}
 
 	var kms secrets.KeyManagement
@@ -50,6 +44,9 @@ func getKMS(log *logrus.Entry, configuration config.Configuration) (secrets.KeyM
 			APIKey:          nil,
 			CredentialsFile: kmsConfig.CredentialsJSON,
 		})
+	case "plaintext":
+		log.Trace("using plaintext KMS, secrets will not be encrypted")
+		return secrets.NewPlaintextKMS(), nil
 	default:
 		return nil, errors.Errorf("invalid kms provider: %s", configuration.KeyManagement.Provider)
 	}

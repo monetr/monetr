@@ -29,7 +29,7 @@ func getControllers(
 	stats *metrics.Stats,
 	stripe stripe_helper.Stripe,
 	cache *redis.Pool,
-	secretProvider secrets.SecretsProvider,
+	secretProvider secrets.ParentSecretsProvider,
 	basicPaywall billing.BasicPayWall,
 	email communication.EmailCommunication,
 	clientTokens security.ClientTokens,

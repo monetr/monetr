@@ -116,7 +116,7 @@ var (
 	_ Platypus = &Plaid{}
 )
 
-func NewPlaid(log *logrus.Entry, secret secrets.PlaidSecretsProvider, repo repository.PlaidRepository, options config.Plaid) *Plaid {
+func NewPlaid(log *logrus.Entry, secret secrets.SecretsProvider, repo repository.PlaidRepository, options config.Plaid) *Plaid {
 	httpClient := &http.Client{
 		Timeout: 60 * time.Second,
 	}
@@ -141,7 +141,7 @@ func NewPlaid(log *logrus.Entry, secret secrets.PlaidSecretsProvider, repo repos
 type Plaid struct {
 	client *plaid.APIClient
 	log    *logrus.Entry
-	secret secrets.PlaidSecretsProvider
+	secret secrets.SecretsProvider
 	repo   repository.PlaidRepository
 	config config.Plaid
 }
@@ -318,9 +318,8 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 }
 
 func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - NewClientFromItemId"
 
 	link, err := p.repo.GetLinkByItemId(span.Context(), itemId)
 	if err != nil {
@@ -331,9 +330,8 @@ func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client,
 }
 
 func (p *Plaid) NewClientFromLink(ctx context.Context, accountId uint64, linkId uint64) (Client, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - NewClientFromLink"
 
 	link, err := p.repo.GetLink(span.Context(), accountId, linkId)
 	if err != nil {
@@ -368,9 +366,8 @@ func (p *Plaid) NewClient(ctx context.Context, link *models.Link, accessToken, i
 }
 
 func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - newClient"
 
 	if link == nil {
 		return nil, errors.New("cannot create client without link")
@@ -380,12 +377,17 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 		return nil, errors.New("cannot create client without link")
 	}
 
-	accessToken, err := p.secret.GetAccessTokenForPlaidLinkId(span.Context(), link.AccountId, link.PlaidLink.PlaidId)
+	plaidLink := link.PlaidLink
+	secret, err := p.secret.Read(
+		span.Context(),
+		plaidLink.SecretId,
+		plaidLink.AccountId,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return p.NewClient(span.Context(), link, accessToken, link.PlaidLink.PlaidId)
+	return p.NewClient(span.Context(), link, secret.Secret, link.PlaidLink.PlaidId)
 }
 
 func (p *Plaid) Close() error {

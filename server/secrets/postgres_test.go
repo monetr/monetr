@@ -12,21 +12,29 @@ import (
 	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.T) {
+func TestPostgresSecretStorage_Store(t *testing.T) {
 	t.Run("account does not exist", func(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		ctx := context.Background()
 
-		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
-		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
-		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, math.MaxInt64, plaidItemId, accessToken)
+		provider := secrets.NewPostgresSecretsStorage(
+			log,
+			db,
+			secrets.NewPlaintextKMS(),
+		)
+		err := provider.Store(ctx, &secrets.Data{
+			AccountId: math.MaxInt64,
+			Kind:      models.PlaidSecretKind,
+			Secret:    accessToken,
+		})
 		assert.EqualError(t, err, `failed to update access token: ERROR #23503 insert or update on table "plaid_tokens" violates foreign key constraint "fk_plaid_tokens_account"`)
 	})
 
@@ -37,16 +45,24 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		ctx := context.Background()
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
-		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
-		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
+		provider := secrets.NewPostgresSecretsStorage(
+			log,
+			db,
+			secrets.NewPlaintextKMS(),
+		)
+		secret := secrets.Data{
+			AccountId: user.AccountId,
+			Kind:      models.PlaidSecretKind,
+			Secret:    accessToken,
+		}
+		err := provider.Store(ctx, &secret)
 		assert.NoError(t, err, "must be able to write access token for the first time")
 
-		token, err := provider.GetAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId)
+		data, err := provider.Read(ctx, secret.SecretId, secret.AccountId)
 		assert.NoError(t, err, "must retrieve the written token")
-		assert.Equal(t, accessToken, token, "retrieved token must match the one written")
+		assert.Equal(t, accessToken, data.Secret, "retrieved token must match the one written")
 	})
 
 	t.Run("first write kms", func(t *testing.T) {
@@ -59,7 +75,6 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		ctx := context.Background()
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
 		kms := mockgen.NewMockKeyManagement(ctrl)
@@ -73,22 +88,27 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 				gomock.Eq([]byte(accessToken)),
 			).
 			Return(
-				version,   // Key version
-				keyName,   // Key name
+				&keyName,  // Key name
+				&version,  // Key version
 				encrypted, // Encrypted value
 				nil,       // Error
 			).
 			MaxTimes(1)
 
-		provider := secrets.NewPostgresSecretsProvider(log, db, kms)
-		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
+		provider := secrets.NewPostgresSecretsStorage(log, db, kms)
+		secret := secrets.Data{
+			AccountId: user.AccountId,
+			Kind:      models.PlaidSecretKind,
+			Secret:    accessToken,
+		}
+		err := provider.Store(ctx, &secret)
 		assert.NoError(t, err, "must be able to write access token for the first time")
 
 		kms.EXPECT().
 			Decrypt(
 				gomock.Any(),
-				gomock.Eq(version),
 				gomock.Eq(keyName),
+				gomock.Eq(version),
 				gomock.Eq(encrypted),
 			).
 			Return(
@@ -97,9 +117,9 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 			).
 			MaxTimes(1)
 
-		token, err := provider.GetAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId)
+		result, err := provider.Read(ctx, secret.SecretId, secret.AccountId)
 		assert.NoError(t, err, "must retrieve the written token")
-		assert.Equal(t, accessToken, token, "retrieved token must match the one written")
+		assert.Equal(t, accessToken, result.Secret, "retrieved token must match the one written")
 	})
 
 	t.Run("handle changes", func(t *testing.T) {
@@ -109,28 +129,34 @@ func TestPostgresPlaidSecretProvider_UpdateAccessTokenForPlaidLinkId(t *testing.
 		ctx := context.Background()
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
-		plaidItemId := gofakeit.UUID()
 		accessToken := gofakeit.UUID()
 
-		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
-		err := provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessToken)
+		provider := secrets.NewPostgresSecretsStorage(
+			log,
+			db,
+			secrets.NewPlaintextKMS(),
+		)
+		secret := secrets.Data{
+			AccountId: user.AccountId,
+			Kind:      models.PlaidSecretKind,
+			Secret:    accessToken,
+		}
+		err := provider.Store(ctx, &secret)
 		assert.NoError(t, err, "must be able to write access token for the first time")
 
-		token, err := provider.GetAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId)
+		result, err := provider.Read(ctx, secret.SecretId, secret.AccountId)
 		assert.NoError(t, err, "must retrieve the written token")
-		assert.Equal(t, accessToken, token, "retrieved token must match the one written")
+		assert.Equal(t, accessToken, result.Secret, "retrieved token must match the one written")
 
 		accessTokenUpdated := gofakeit.UUID()
 		assert.NotEqual(t, accessToken, accessTokenUpdated, "make sure the new token does not match the old one")
 
-		err = provider.UpdateAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId, accessTokenUpdated)
+		secret.Secret = accessTokenUpdated
+		err = provider.Store(ctx, &secret)
 		assert.NoError(t, err, "must be able to update an existing access token")
 
-		token, err = provider.GetAccessTokenForPlaidLinkId(ctx, user.AccountId, plaidItemId)
+		result, err = provider.Read(ctx, secret.SecretId, secret.AccountId)
 		assert.NoError(t, err, "must retrieve the written token")
-		assert.Equal(t, accessTokenUpdated, token, "retrieved token must match the second one written")
+		assert.Equal(t, accessTokenUpdated, result.Secret, "retrieved token must match the second one written")
 	})
-}
-
-func TestPostgresPlaidSecretProvider_RemoveAccessTokenForPlaidLink(t *testing.T) {
 }

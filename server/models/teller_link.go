@@ -17,6 +17,8 @@ type TellerLink struct {
 	TellerLinkId         uint64           `json:"-" pg:"teller_link_id,notnull,pk,type:'bigserial'"`
 	AccountId            uint64           `json:"-" pg:"account_id,notnull,type:'bigint',unique:per_account"`
 	Account              *Account         `json:"-" pg:"rel:has-one"`
+	SecretId             uint64           `json:"-" pg:"secret_id,type:'bigint'"`
+	Secret               *Secret          `json:"-" pg:"rel:has-one"`
 	EnrollmentId         string           `json:"-" pg:"enrollment_id,notnull,unique:per_account"`
 	UserId               string           `json:"-" pg:"teller_user_id,notnull"`
 	Status               TellerLinkStatus `json:"status" pg:"status,notnull,default:0"`
@@ -29,14 +31,4 @@ type TellerLink struct {
 	CreatedAt            time.Time        `json:"createdAt" pg:"created_at,notnull"`
 	CreatedByUserId      uint64           `json:"createdByUserId" pg:"created_by_user_id,notnull"`
 	CreatedByUser        *User            `json:"-" pg:"rel:has-one,fk:created_by_user_id"`
-}
-
-type TellerLinkWithAccessToken struct {
-	tableName string `pg:"teller_links"`
-
-	TellerLink
-
-	KeyID       *string `pg:"access_token_key_id"`
-	Version     *string `pg:"access_token_key_version"`
-	AccessToken string  `pg:"access_token,notnull"`
 }

@@ -25,7 +25,11 @@ func TestNewInMemoryWebhookVerification(t *testing.T) {
 
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabaseTxn(t)
-		secret := secrets.NewPostgresSecretsProvider(log, db, nil)
+		secret := secrets.NewPostgresSecretsStorage(
+			log,
+			db,
+			secrets.NewPlaintextKMS(),
+		)
 		plaidRepo := repository.NewPlaidRepository(db)
 
 		plaid := NewPlaid(log, secret, plaidRepo, config.Plaid{

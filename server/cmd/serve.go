@@ -209,8 +209,8 @@ func RunServer() error {
 		return err
 	}
 
-	plaidSecrets := secrets.NewPostgresSecretsProvider(log, db, kms)
-	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
+	secretsStorage := secrets.NewPostgresSecretsStorage(log, db, kms)
+	plaidClient := platypus.NewPlaid(log, secretsStorage, repository.NewPlaidRepository(db), configuration.Plaid)
 
 	var email communication.EmailCommunication
 	if configuration.Email.Enabled {
@@ -229,7 +229,7 @@ func RunServer() error {
 		redisController.Pool(),
 		pubsub.NewPostgresPubSub(log, db),
 		plaidClient,
-		plaidSecrets,
+		secretsStorage,
 		fileStorage,
 	)
 	if err != nil {
@@ -256,7 +256,7 @@ func RunServer() error {
 		stats,
 		stripe,
 		redisController.Pool(),
-		plaidSecrets,
+		secretsStorage,
 		basicPaywall,
 		email,
 		clientTokens,

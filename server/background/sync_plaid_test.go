@@ -28,13 +28,17 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresSecretsProvider(log, db, nil)
+		provider := secrets.NewPostgresSecretsStorage(log, db, nil)
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
 		accessToken := gofakeit.UUID()
-		require.NoError(t, provider.UpdateAccessTokenForPlaidLinkId(context.Background(), plaidLink.AccountId, plaidLink.PlaidLink.PlaidId, accessToken))
+		require.NoError(t, provider.Store(context.Background(), &secrets.Data{
+			AccountId: plaidLink.AccountId,
+			Kind:      models.PlaidSecretKind,
+			Secret:    accessToken,
+		}))
 
 		plaidBankAccount := fixtures.GivenIHaveAPlaidBankAccount(
 			t,

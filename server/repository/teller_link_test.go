@@ -22,18 +22,15 @@ func TestRepository_CreateTellerLink(t *testing.T) {
 
 		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
-		link := models.TellerLinkWithAccessToken{
-			TellerLink: models.TellerLink{
-				EnrollmentId:         gofakeit.UUID(),
-				UserId:               gofakeit.Generate("user_######"),
-				Status:               models.TellerLinkStatusSetup,
-				ErrorCode:            nil,
-				InstitituionName:     fmt.Sprintf("Bank Of %s", gofakeit.City()),
-				LastManualSync:       nil,
-				LastSuccessfulUpdate: nil,
-				LastAttemptedUpdate:  nil,
-			},
-			AccessToken: gofakeit.UUID(),
+		link := models.TellerLink{
+			EnrollmentId:         gofakeit.UUID(),
+			UserId:               gofakeit.Generate("user_######"),
+			Status:               models.TellerLinkStatusSetup,
+			ErrorCode:            nil,
+			InstitituionName:     fmt.Sprintf("Bank Of %s", gofakeit.City()),
+			LastManualSync:       nil,
+			LastSuccessfulUpdate: nil,
+			LastAttemptedUpdate:  nil,
 		}
 
 		err := repo.CreateTellerLink(context.Background(), &link)
