@@ -53,7 +53,7 @@ func NewBackgroundJobs(
 	redisPool *redis.Pool,
 	publisher pubsub.Publisher,
 	plaidPlatypus platypus.Platypus,
-	secretStorage secrets.SecretsProvider,
+	kms secrets.KeyManagement,
 	fileStorage storage.Storage,
 ) (*BackgroundJobs, error) {
 	var enqueuer JobEnqueuer
@@ -86,7 +86,7 @@ func NewBackgroundJobs(
 	jobs := []JobHandler{
 		NewCalculateTransactionClustersHandler(log, db, clock),
 		NewCleanupJobsHandler(log, db),
-		NewDeactivateLinksHandler(log, db, clock, configuration, secretStorage, plaidPlatypus),
+		NewDeactivateLinksHandler(log, db, clock, configuration, kms, plaidPlatypus),
 		NewProcessFundingScheduleHandler(log, db, clock),
 		NewProcessSpendingHandler(log, db, clock),
 		NewRemoveLinkHandler(log, db, clock, publisher),

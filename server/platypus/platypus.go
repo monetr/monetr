@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
@@ -116,7 +118,13 @@ var (
 	_ Platypus = &Plaid{}
 )
 
-func NewPlaid(log *logrus.Entry, secret secrets.SecretsProvider, repo repository.PlaidRepository, options config.Plaid) *Plaid {
+func NewPlaid(
+	log *logrus.Entry,
+	clock clock.Clock,
+	kms secrets.KeyManagement,
+	db pg.DBI,
+	options config.Plaid,
+) *Plaid {
 	httpClient := &http.Client{
 		Timeout: 60 * time.Second,
 	}
@@ -130,18 +138,22 @@ func NewPlaid(log *logrus.Entry, secret secrets.SecretsProvider, repo repository
 	client := plaid.NewAPIClient(conf)
 
 	return &Plaid{
+		clock:  clock,
 		client: client,
+		db:     db,
 		log:    log,
-		secret: secret,
-		repo:   repo,
+		kms:    kms,
+		repo:   repository.NewPlaidRepository(db),
 		config: options,
 	}
 }
 
 type Plaid struct {
+	clock  clock.Clock
 	client *plaid.APIClient
+	db     pg.DBI
 	log    *logrus.Entry
-	secret secrets.SecretsProvider
+	kms    secrets.KeyManagement
 	repo   repository.PlaidRepository
 	config config.Plaid
 }
@@ -378,10 +390,16 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 	}
 
 	plaidLink := link.PlaidLink
-	secret, err := p.secret.Read(
+	secretRepo := repository.NewSecretsRepository(
+		p.log,
+		p.clock,
+		p.db,
+		p.kms,
+		plaidLink.AccountId,
+	)
+	secret, err := secretRepo.Read(
 		span.Context(),
 		plaidLink.SecretId,
-		plaidLink.AccountId,
 	)
 	if err != nil {
 		return nil, err

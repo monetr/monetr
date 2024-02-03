@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/assert"
@@ -23,16 +23,12 @@ func TestNewInMemoryWebhookVerification(t *testing.T) {
 
 		mock_plaid.MockGetWebhookVerificationKey(t)
 
+		clock := clock.NewMock()
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabaseTxn(t)
-		secret := secrets.NewPostgresSecretsStorage(
-			log,
-			db,
-			secrets.NewPlaintextKMS(),
-		)
-		plaidRepo := repository.NewPlaidRepository(db)
+		kms := secrets.NewPlaintextKMS()
 
-		plaid := NewPlaid(log, secret, plaidRepo, config.Plaid{
+		plaid := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
 			Environment:  plaid.Sandbox,

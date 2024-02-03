@@ -26,8 +26,6 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
@@ -209,8 +207,7 @@ func RunServer() error {
 		return err
 	}
 
-	secretsStorage := secrets.NewPostgresSecretsStorage(log, db, kms)
-	plaidClient := platypus.NewPlaid(log, secretsStorage, repository.NewPlaidRepository(db), configuration.Plaid)
+	plaidClient := platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
 
 	var email communication.EmailCommunication
 	if configuration.Email.Enabled {
@@ -229,7 +226,7 @@ func RunServer() error {
 		redisController.Pool(),
 		pubsub.NewPostgresPubSub(log, db),
 		plaidClient,
-		secretsStorage,
+		kms,
 		fileStorage,
 	)
 	if err != nil {

@@ -25,7 +25,7 @@ type (
 		db            *pg.DB
 		configuration config.Configuration
 		repo          repository.JobRepository
-		plaidSecrets  secrets.PlaidSecretsProvider
+		kms           secrets.KeyManagement
 		plaidPlatypus platypus.Platypus
 		unmarshaller  JobUnmarshaller
 		clock         clock.Clock
@@ -40,7 +40,7 @@ type (
 		args          DeactivateLinksArguments
 		log           *logrus.Entry
 		repo          repository.BaseRepository
-		plaidSecrets  secrets.PlaidSecretsProvider
+		secrets       repository.SecretsRepository
 		plaidPlatypus platypus.Platypus
 		clock         clock.Clock
 	}
@@ -51,7 +51,7 @@ func NewDeactivateLinksHandler(
 	db *pg.DB,
 	clock clock.Clock,
 	configuration config.Configuration,
-	plaidSecrets secrets.PlaidSecretsProvider,
+	kms secrets.KeyManagement,
 	plaidPlatypus platypus.Platypus,
 ) *DeactivateLinksHandler {
 	return &DeactivateLinksHandler{
@@ -59,7 +59,7 @@ func NewDeactivateLinksHandler(
 		db:            db,
 		configuration: configuration,
 		repo:          repository.NewJobRepository(db, clock),
-		plaidSecrets:  plaidSecrets,
+		kms:           kms,
 		plaidPlatypus: plaidPlatypus,
 		unmarshaller:  DefaultJobUnmarshaller,
 		clock:         clock,
@@ -160,7 +160,7 @@ func NewDeactivateLinksJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
 	clock clock.Clock,
-	plaidSecrets secrets.PlaidSecretsProvider,
+	kms secrets.KeyManagement,
 	plaidPlatypus platypus.Platypus,
 	args DeactivateLinksArguments,
 ) (*DeactivateLinksJob, error) {

@@ -16,7 +16,6 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSyncPlaidJob_Run(t *testing.T) {
@@ -28,17 +27,10 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 		log := testutils.GetLog(t)
 		db := testutils.GetPgDatabase(t)
 		publisher := pubsub.NewPostgresPubSub(log, db)
-		provider := secrets.NewPostgresSecretsStorage(log, db, nil)
+		kms := secrets.NewPlaintextKMS()
 
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
-
-		accessToken := gofakeit.UUID()
-		require.NoError(t, provider.Store(context.Background(), &secrets.Data{
-			AccountId: plaidLink.AccountId,
-			Kind:      models.PlaidSecretKind,
-			Secret:    accessToken,
-		}))
 
 		plaidBankAccount := fixtures.GivenIHaveAPlaidBankAccount(
 			t,
@@ -56,7 +48,7 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			NewClient(
 				gomock.Any(),
 				gomock.AssignableToTypeOf(new(models.Link)),
-				gomock.Eq(accessToken),
+				gomock.Any(),
 				gomock.Eq(plaidLink.PlaidLink.PlaidId),
 			).
 			Return(plaidClient, nil).
@@ -124,7 +116,15 @@ func TestSyncPlaidJob_Run(t *testing.T) {
 			Times(1).
 			Return(nil)
 
-		handler := NewSyncPlaidHandler(log, db, clock, provider, plaidPlatypus, publisher, enqueuer)
+		handler := NewSyncPlaidHandler(
+			log,
+			db,
+			clock,
+			kms,
+			plaidPlatypus,
+			publisher,
+			enqueuer,
+		)
 
 		{ // Do our first plaid sync.
 			args := SyncPlaidArguments{
