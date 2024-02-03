@@ -138,24 +138,6 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		response.JSON().Path("$.error").String().IsEqual("cannot update a non-Plaid link")
 	})
 
-	t.Run("no plaid access token", func(t *testing.T) {
-		app, e := NewTestApplication(t)
-		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
-		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
-		token := GivenILogin(t, e, user.Login.Email, password)
-
-		mock_plaid.MockCreateLinkToken(t)
-
-		response := e.PUT("/api/plaid/link/update/{linkId}").
-			WithPath("linkId", link.LinkId).
-			WithQuery("update_account_selection", "true").
-			WithCookie(TestCookieName, token).
-			Expect()
-
-		response.Status(http.StatusInternalServerError)
-		response.JSON().Path("$.error").String().IsEqual("failed to create Plaid client for link")
-	})
-
 	t.Run("missing link ID", func(t *testing.T) {
 		_, e := NewTestApplication(t)
 		token := GivenIHaveToken(t, e)

@@ -19,9 +19,19 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) mod
 
 	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
 
+	itemId := gofakeit.Generate("???????????????????????????????????")
+	plaidToken := models.PlaidToken{
+		ItemId:      itemId,
+		AccountId:   user.AccountId,
+		KeyID:       nil,
+		Version:     nil,
+		AccessToken: gofakeit.UUID(),
+	}
+	testutils.MustDBInsert(t, &plaidToken)
+
 	plaidLink := models.PlaidLink{
 		AccountId:            user.AccountId,
-		PlaidId:              gofakeit.Generate("???????????????????????????????????"),
+		PlaidId:              itemId,
 		Products:             consts.PlaidProductStrings(),
 		Status:               models.PlaidLinkStatusSetup,
 		ErrorCode:            nil,

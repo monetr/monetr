@@ -15,6 +15,9 @@ const config: Config = {
     '!src/**/*.d.ts',
     '!src/**/*.stories.{js,jsx,ts,tsx}',
   ],
+  coveragePathIgnorePatterns: [
+    'node_modules',
+  ],
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: [
     '<rootDir>/src/setupTests.ts',
