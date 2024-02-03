@@ -9,10 +9,10 @@ import (
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
+	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -145,12 +145,6 @@ var (
 
 			ctx := context.Background()
 
-			jobArgs := background.SyncPlaidArguments{
-				AccountId: AccountIDFlag,
-				LinkId:    LinkIDFlag,
-				Trigger:   "command",
-			}
-
 			redisController, err := cache.NewRedisCache(log, configuration.Redis)
 			if err != nil {
 				log.WithError(err).Fatalf("failed to create redis cache: %+v", err)
@@ -174,52 +168,87 @@ var (
 				return err
 			}
 
-			if LocalFlag || DryRunFlag {
-				log.Info("running locally")
-				txn, err := db.BeginContext(ctx)
-				if err != nil {
-					log.WithError(err).Fatalf("failed to begin transaction to cleanup jobs")
-					return err
+			jobs := make([]background.SyncPlaidArguments, 0)
+			if !AllFlag {
+				jobArgs := background.SyncPlaidArguments{
+					AccountId: AccountIDFlag,
+					LinkId:    LinkIDFlag,
+					Trigger:   "command",
 				}
-
-				repo := repository.NewRepositoryFromSession(clock, 0, AccountIDFlag, txn)
-
-				kms, err := getKMS(log, configuration)
-				if err != nil {
-					log.WithError(err).Fatal("failed to initialize KMS")
-					return err
-				}
-
-				plaidSecrets := secrets.NewPostgresSecretsStorage(log, db, kms)
-				job, err := background.NewSyncPlaidJob(
-					log,
-					repo,
-					clock,
-					plaidSecrets,
-					platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(txn), configuration.Plaid),
-					pubsub.NewPostgresPubSub(log, db),
-					backgroundJobs,
-					jobArgs,
-				)
-				if err != nil {
-					return errors.Wrap(err, "failed to create sync job")
-				}
-
-				if err := job.Run(ctx); err != nil {
-					log.WithError(err).Fatalf("failed to run pull latest transactions")
-					_ = txn.RollbackContext(ctx)
-					return err
-				}
-
-				if DryRunFlag {
-					log.Info("dry run... rolling changes back")
-					return txn.RollbackContext(ctx)
-				} else {
-					return txn.CommitContext(ctx)
+				jobs = append(jobs, jobArgs)
+			} else {
+				var links []models.Link
+				db.Model(&links).
+					Where(`"link"."link_type" = ?`, models.PlaidLinkType).
+					Where(`"link"."plaid_link_id" IS NOT NULL`).
+					Select(&links)
+				for _, link := range links {
+					jobs = append(jobs, background.SyncPlaidArguments{
+						AccountId: link.AccountId,
+						LinkId:    link.LinkId,
+						Trigger:   "command",
+					})
 				}
 			}
 
-			return background.TriggerSyncPlaid(ctx, backgroundJobs, jobArgs)
+			log.Infof("syncing %d link(s)", len(jobs))
+
+			for _, jobArgs := range jobs {
+				if LocalFlag || DryRunFlag {
+					txn, err := db.BeginContext(ctx)
+					if err != nil {
+						log.WithError(err).Fatalf("failed to begin transaction to cleanup jobs")
+						return err
+					}
+
+					repo := repository.NewRepositoryFromSession(clock, 0, jobArgs.AccountId, txn)
+
+					kms, err := getKMS(log, configuration)
+					if err != nil {
+						log.WithError(err).Fatal("failed to initialize KMS")
+						return err
+					}
+
+					secretsRepo := repository.NewSecretsRepository(
+						log,
+						clock,
+						txn,
+						kms,
+						jobArgs.AccountId,
+					)
+
+					job, err := background.NewSyncPlaidJob(
+						log,
+						repo,
+						clock,
+						secretsRepo,
+						platypus.NewPlaid(log, clock, kms, txn, configuration.Plaid),
+						pubsub.NewPostgresPubSub(log, db),
+						backgroundJobs,
+						jobArgs,
+					)
+					if err != nil {
+						return errors.Wrap(err, "failed to create sync job")
+					}
+
+					if err := job.Run(ctx); err != nil {
+						log.WithError(err).Fatalf("failed to run sync latest transactions")
+						_ = txn.RollbackContext(ctx)
+						continue
+					}
+
+					if DryRunFlag {
+						log.Info("dry run... rolling changes back")
+						return txn.RollbackContext(ctx)
+					} else {
+						return txn.CommitContext(ctx)
+					}
+				} else {
+					return background.TriggerSyncPlaid(ctx, backgroundJobs, jobArgs)
+				}
+			}
+
+			return nil
 		},
 	}
 )

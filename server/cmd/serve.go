@@ -253,7 +253,7 @@ func RunServer() error {
 		stats,
 		stripe,
 		redisController.Pool(),
-		secretsStorage,
+		kms,
 		basicPaywall,
 		email,
 		clientTokens,

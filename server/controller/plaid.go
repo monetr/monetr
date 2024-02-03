@@ -16,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -268,23 +269,16 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 	}
 
-	currentAccessToken, err := c.secret.GetAccessTokenForPlaidLinkId(
-		c.getContext(ctx),
-		repo.AccountId(),
-		link.PlaidLink.PlaidId,
-	)
+	secrets := c.mustGetSecretsRepository(ctx)
+	secret, err := secrets.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 	if err != nil {
 		log.WithError(err).Warn("failed to retrieve access token for existing plaid link")
 	}
 
-	if currentAccessToken != result.AccessToken {
+	if secret.Secret != result.AccessToken {
 		log.Info("access token for link has been updated")
-		if err = c.secret.UpdateAccessTokenForPlaidLinkId(
-			c.getContext(ctx),
-			repo.AccountId(),
-			link.PlaidLink.PlaidId,
-			result.AccessToken,
-		); err != nil {
+		secret.Secret = result.AccessToken
+		if err = secrets.Store(c.getContext(ctx), secret); err != nil {
 			log.WithError(err).Warn("failed to store updated access token")
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
 		}
@@ -427,18 +421,19 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	if err = c.secret.UpdateAccessTokenForPlaidLinkId(
-		c.getContext(ctx),
-		repo.AccountId(),
-		result.ItemId,
-		result.AccessToken,
-	); err != nil {
+	secrets := c.mustGetSecretsRepository(ctx)
+	secret := repository.Secret{
+		Kind:   models.PlaidSecretKind,
+		Secret: result.AccessToken,
+	}
+	if err = secrets.Store(c.getContext(ctx), &secret); err != nil {
 		log.WithError(err).Errorf("failed to store access token")
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
 	}
 
 	plaidLink := models.PlaidLink{
 		PlaidId:         result.ItemId,
+		SecretId:        secret.SecretId,
 		Products:        consts.PlaidProductStrings(),
 		WebhookUrl:      webhook,
 		Status:          models.PlaidLinkStatusPending,

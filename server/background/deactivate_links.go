@@ -85,12 +85,20 @@ func (d *DeactivateLinksHandler) HandleConsumeJob(ctx context.Context, data []by
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
+		log := d.log.WithContext(span.Context())
 		repo := repository.NewRepositoryFromSession(d.clock, 0, args.AccountId, txn)
+		secretsRepo := repository.NewSecretsRepository(
+			log,
+			d.clock,
+			txn,
+			d.kms,
+			args.AccountId,
+		)
 		job, err := NewDeactivateLinksJob(
-			d.log.WithContext(span.Context()),
+			log,
 			repo,
 			d.clock,
-			d.plaidSecrets,
+			secretsRepo,
 			d.plaidPlatypus,
 			args,
 		)
@@ -160,7 +168,7 @@ func NewDeactivateLinksJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
 	clock clock.Clock,
-	kms secrets.KeyManagement,
+	secrets repository.SecretsRepository,
 	plaidPlatypus platypus.Platypus,
 	args DeactivateLinksArguments,
 ) (*DeactivateLinksJob, error) {
@@ -168,7 +176,7 @@ func NewDeactivateLinksJob(
 		args:          args,
 		log:           log,
 		repo:          repo,
-		plaidSecrets:  plaidSecrets,
+		secrets:       secrets,
 		plaidPlatypus: plaidPlatypus,
 		clock:         clock,
 	}, nil
@@ -197,27 +205,13 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 
 	crumbs.IncludePlaidItemIDTag(span, link.PlaidLink.PlaidId)
 
-	accessToken, err := d.plaidSecrets.GetAccessTokenForPlaidLinkId(span.Context(), d.args.AccountId, link.PlaidLink.PlaidId)
+	secret, err := d.secrets.Read(span.Context(), link.PlaidLink.SecretId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
-		// If the token is simply missing from vault then something is goofy. Don't retry the job but mark it as a
-		// failure.
-		if errors.Is(errors.Cause(err), secrets.ErrNotFound) {
-			if hub := sentry.GetHubFromContext(span.Context()); hub != nil {
-				hub.ConfigureScope(func(scope *sentry.Scope) {
-					// Mark the scope as an error.
-					scope.SetLevel(sentry.LevelError)
-				})
-			}
-
-			log.WithError(err).Error("could not retrieve API credentials for Plaid for link, job will not be retried")
-			return nil
-		}
-
 		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
 		return err
 	}
 
-	client, err := d.plaidPlatypus.NewClient(span.Context(), link, accessToken, link.PlaidLink.PlaidId)
+	client, err := d.plaidPlatypus.NewClient(span.Context(), link, secret.Secret, link.PlaidLink.PlaidId)
 	if err != nil {
 		log.WithError(err).Error("failed to create client for link deactivation")
 		return err
@@ -236,7 +230,7 @@ func (d *DeactivateLinksJob) Run(ctx context.Context) error {
 
 	log.Info("Plaid link was successfully deactivated, removing Plaid details now")
 
-	if err = d.plaidSecrets.RemoveAccessTokenForPlaidLink(span.Context(), d.args.AccountId, link.PlaidLink.PlaidId); err != nil {
+	if err = d.secrets.Delete(span.Context(), secret.SecretId); err != nil {
 		log.WithError(err).Error("failed to remove Plaid credentials for link")
 		return nil // Don't retry.
 	}

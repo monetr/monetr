@@ -8,7 +8,6 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/secrets"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
@@ -35,7 +34,6 @@ func NewSynchronousJobRunner(
 	t *testing.T,
 	clock clock.Clock,
 	plaidPlatypus platypus.Platypus,
-	plaidSecrets secrets.PlaidSecretsProvider,
 ) *SynchronousJobRunner {
 	if t == nil {
 		panic("must be run within a test")

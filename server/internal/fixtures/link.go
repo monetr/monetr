@@ -15,6 +15,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// GivenIHaveAPlaidLink will seed the following models and assoc them and return
+// the parent Link model:
+//   - Secret
+//   - PlaidLink
+//   - Link
+//
+// Note: The secret subobject will be nil on the plaid link.
 func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) models.Link {
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)

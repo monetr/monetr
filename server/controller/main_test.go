@@ -26,11 +26,9 @@ import (
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/controller"
-	"github.com/monetr/monetr/server/internal/mock_secrets"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/platypus"
-	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
@@ -118,9 +116,8 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	clock.Set(time.Date(2023, 10, 9, 13, 32, 0, 0, time.UTC))
 	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
-	secretProvider := secrets.NewPostgresSecretsStorage(log, db, secrets.NewPlaintextKMS())
-	plaidRepo := repository.NewPlaidRepository(db)
-	plaidClient := platypus.NewPlaid(log, secretProvider, plaidRepo, configuration.Plaid)
+	kms := secrets.NewPlaintextKMS()
+	plaidClient := platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
 
 	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	require.NoError(t, err, "must be able to generate keys")
@@ -147,13 +144,11 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 
 	fileStorage := storage.NewFilesystemStorage(log, tempDirectory)
 
-	plaidSecrets := mock_secrets.NewMockPlaidSecrets()
-
 	var jobRunner background.JobController
 	if patched.JobController != nil {
 		jobRunner = *patched.JobController
 	} else {
-		jobRunner = background.NewSynchronousJobRunner(t, clock, plaidClient, plaidSecrets)
+		jobRunner = background.NewSynchronousJobRunner(t, clock, plaidClient)
 	}
 
 	emailMockController := gomock.NewController(t)
@@ -171,7 +166,7 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 		nil,
 		stripe_helper.NewStripeHelper(log, gofakeit.UUID()),
 		redisPool,
-		plaidSecrets,
+		kms,
 		billing.NewBasicPaywall(
 			log,
 			clock,

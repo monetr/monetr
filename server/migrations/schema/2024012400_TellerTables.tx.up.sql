@@ -32,6 +32,8 @@ SET "secret_id" = "secrets"."secret_id"
 FROM "secrets"
 WHERE "secrets"."account_id" = "plaid_links"."account_id" AND "secrets"."plaid_link_id" =  "plaid_links"."plaid_link_id";
 
+ALTER TABLE "plaid_links" ALTER COLUMN "secret_id" SET NOT NULL;
+
 ALTER TABLE "secrets" 
 DROP COLUMN "plaid_link_id";
 

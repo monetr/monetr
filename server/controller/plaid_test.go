@@ -1,7 +1,6 @@
 package controller_test
 
 import (
-	"context"
 	"errors"
 	"math"
 	"net/http"
@@ -15,8 +14,6 @@ import (
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/testutils"
-	"github.com/monetr/monetr/server/models"
-	"github.com/monetr/monetr/server/secrets"
 	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/assert"
 )
@@ -57,22 +54,6 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
-
-		// We need to store a Plaid access token for this test.
-		secret := secrets.NewPostgresSecretsStorage(
-			testutils.GetLog(t),
-			testutils.GetPgDatabase(t),
-			secrets.NewPlaintextKMS(),
-		)
-		assert.NoError(t, secret.Store(
-			context.Background(),
-			&secrets.Data{
-				AccountId: link.AccountId,
-				Kind:      models.PlaidSecretKind,
-				Secret:    gofakeit.UUID(),
-			},
-		), "must be able to store a secret for the fake plaid link")
-
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		mock_plaid.MockCreateLinkToken(t, func(t *testing.T, request plaid.LinkTokenCreateRequest) {
@@ -100,22 +81,6 @@ func TestPutUpdatePlaidLink(t *testing.T) {
 		app, e := NewTestApplication(t)
 		user, password := fixtures.GivenIHaveABasicAccount(t, app.Clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, app.Clock, user)
-
-		// We need to store a Plaid access token for this test.
-		secret := secrets.NewPostgresSecretsStorage(
-			testutils.GetLog(t),
-			testutils.GetPgDatabase(t),
-			secrets.NewPlaintextKMS(),
-		)
-		assert.NoError(t, secret.Store(
-			context.Background(),
-			&secrets.Data{
-				AccountId: link.AccountId,
-				Kind:      models.PlaidSecretKind,
-				Secret:    gofakeit.UUID(),
-			},
-		), "must be able to store a secret for the fake plaid link")
-
 		token := GivenILogin(t, e, user.Login.Email, password)
 
 		mock_plaid.MockCreateLinkToken(t, func(t *testing.T, request plaid.LinkTokenCreateRequest) {

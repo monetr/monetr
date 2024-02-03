@@ -90,7 +90,7 @@ func NewBackgroundJobs(
 		NewProcessFundingScheduleHandler(log, db, clock),
 		NewProcessSpendingHandler(log, db, clock),
 		NewRemoveLinkHandler(log, db, clock, publisher),
-		NewSyncPlaidHandler(log, db, clock, secretStorage, plaidPlatypus, publisher, enqueuer),
+		NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
 	}
 
 	// Setup jobs

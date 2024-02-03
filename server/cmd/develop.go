@@ -5,13 +5,12 @@ package main
 import (
 	"context"
 
+	"github.com/benbjohnson/clock"
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
-	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -136,6 +135,7 @@ func newDevelopCommand(parent *cobra.Command) {
 		Use:   "clean:plaid",
 		Short: "Remove all Plaid links currently configured in the development environment.",
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			clock := clock.New()
 			configuration := config.LoadConfiguration()
 
 			log := logging.NewLoggerWithConfig(configuration.Logging)
@@ -155,8 +155,6 @@ func newDevelopCommand(parent *cobra.Command) {
 				return err
 			}
 
-			plaidSecrets := secrets.NewPostgresSecretsStorage(log, db, kms)
-
 			log.Info("retrieving Plaid links from the database")
 			var plaidLinks []models.Link
 			db.Model(&plaidLinks).
@@ -170,16 +168,16 @@ func newDevelopCommand(parent *cobra.Command) {
 
 			log.WithField("count", len(plaidLinks)).Info("found Plaid link(s)")
 
-			plaid := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
+			plaid := platypus.NewPlaid(
+				log,
+				clock,
+				kms,
+				db,
+				configuration.Plaid,
+			)
 
 			for _, link := range plaidLinks {
-				accessToken, err := plaidSecrets.GetAccessTokenForPlaidLinkId(context.Background(), link.AccountId, link.PlaidLink.PlaidId)
-				if err != nil {
-					log.WithError(err).Warn("failed to retrieve access token for link")
-					continue
-				}
-
-				client, err := plaid.NewClient(context.Background(), &link, accessToken, link.PlaidLink.PlaidId)
+				client, err := plaid.NewClientFromLink(context.Background(), link.AccountId, link.LinkId)
 				if err != nil {
 					log.WithError(err).Warn("failed to create Plaid client")
 					continue
