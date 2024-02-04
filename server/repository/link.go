@@ -40,7 +40,7 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 		Relation("PlaidLink").
 		Relation("TellerLink").
 		Where(`"link"."account_id" = ?`, r.accountId).
-		Where(`"link"."deleted_at" IS NOT NULL`).
+		Where(`"link"."deleted_at" IS NULL`).
 		Select(&result)
 	if err != nil {
 		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
@@ -56,7 +56,7 @@ func (r *repositoryBase) GetNumberOfPlaidLinks(ctx context.Context) (int, error)
 	count, err := r.txn.ModelContext(span.Context(), &models.Link{}).
 		Where(`"link"."account_id" = ?`, r.accountId).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-		Where(`"link"."deleted_at" IS NOT NULL`).
+		Where(`"link"."deleted_at" IS NULL`).
 		Count()
 	if err != nil {
 		return count, crumbs.WrapError(span.Context(), err, "failed to retrieve links")
@@ -76,7 +76,7 @@ func (r *repositoryBase) GetLinkIsManual(ctx context.Context, linkId uint64) (bo
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"link"."link_id" = ?`, linkId).
 		Where(`"link"."link_type" = ?`, models.ManualLinkType).
-		Where(`"link"."deleted_at" IS NOT NULL`).
+		Where(`"link"."deleted_at" IS NULL`).
 		Exists()
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -101,7 +101,7 @@ func (r *repositoryBase) GetLinkIsManualByBankAccountId(ctx context.Context, ban
 		Where(`"link"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ?`, bankAccountId).
 		Where(`"link"."link_type" = ?`, models.ManualLinkType).
-		Where(`"link"."deleted_at" IS NOT NULL`).
+		Where(`"link"."deleted_at" IS NULL`).
 		Exists()
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError

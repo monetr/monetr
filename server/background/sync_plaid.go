@@ -177,7 +177,7 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 		Where(`"plaid_link"."status" = ?`, models.PlaidLinkStatusSetup).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
 		Where(`"link"."last_attempted_update" < ?`, cutoff).
-		Where(`"link"."deleted_at" IS NOT NULL`).
+		Where(`"link"."deleted_at" IS NULL`).
 		Select(&links)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve links that need to by synced with plaid")
