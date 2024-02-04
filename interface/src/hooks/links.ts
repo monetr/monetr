@@ -84,9 +84,11 @@ export function useRemoveLink(): (_linkId: number) => Promise<void> {
     return request()
       .delete(`/links/${linkId}`)
       .then(() => void Promise.all([
-        queryClient.invalidateQueries(['/links']),
-        queryClient.invalidateQueries(['/bank_accounts']),
-        // TODO Invalidate other endpoints for the removed bank accounts?
+        queryClient.setQueriesData(
+          ['/links'],
+          (previous: Array<Partial<Link>>) => previous.filter(item => item.linkId !== linkId),
+        ),
+        queryClient.removeQueries([`/links/${linkId}`]),
       ]));
   };
 }

@@ -156,7 +156,7 @@ func (c *Controller) getWaitForTeller(ctx echo.Context) error {
 	span := sentry.StartSpan(c.getContext(ctx), "Wait For Notification")
 	defer span.Finish()
 
-	deadLine := time.NewTimer(30 * time.Second)
+	deadLine := time.NewTimer(25 * time.Second)
 	defer deadLine.Stop()
 
 	select {
@@ -166,6 +166,7 @@ func (c *Controller) getWaitForTeller(ctx echo.Context) error {
 	case <-listener.Channel():
 		// Just exit successfully, any message on this channel is considered a success.
 		log.Trace("link setup successfully")
+		time.Sleep(5 * time.Second)
 		return ctx.NoContent(http.StatusOK)
 	}
 }

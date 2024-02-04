@@ -74,7 +74,7 @@ export default function TellerSetup(): JSX.Element {
             queryClient.invalidateQueries(['/links']);
             queryClient.invalidateQueries(['/bank_accounts']);
             navigate('/');
-          }, 8000);
+          }, 10000);
         })
         .catch(error => {
           setState({
