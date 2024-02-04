@@ -11,27 +11,41 @@ import (
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/stretchr/testify/require"
 )
 
+// GivenIHaveAPlaidLink will seed the following models and assoc them and return
+// the parent Link model:
+//   - Secret
+//   - PlaidLink
+//   - Link
+//
+// Note: The secret subobject will be nil on the plaid link.
 func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) models.Link {
+	log := testutils.GetLog(t)
 	db := testutils.GetPgDatabase(t)
 
 	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+	secretsRepo := repository.NewSecretsRepository(
+		log,
+		clock,
+		db,
+		secrets.NewPlaintextKMS(),
+		user.AccountId,
+	)
 
-	itemId := gofakeit.Generate("???????????????????????????????????")
-	plaidToken := models.PlaidToken{
-		ItemId:      itemId,
-		AccountId:   user.AccountId,
-		KeyID:       nil,
-		Version:     nil,
-		AccessToken: gofakeit.UUID(),
+	secret := repository.Secret{
+		Kind:   models.PlaidSecretKind,
+		Secret: gofakeit.UUID(),
 	}
-	testutils.MustDBInsert(t, &plaidToken)
+	err := secretsRepo.Store(context.Background(), &secret)
+	require.NoError(t, err, "must be able to see plaid token secret")
 
 	plaidLink := models.PlaidLink{
 		AccountId:            user.AccountId,
-		PlaidId:              itemId,
+		SecretId:             secret.SecretId,
+		PlaidId:              gofakeit.Generate("???????????????????????????????????"),
 		Products:             consts.PlaidProductStrings(),
 		Status:               models.PlaidLinkStatusSetup,
 		ErrorCode:            nil,
@@ -47,14 +61,14 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) mod
 		CreatedAt:            clock.Now().UTC(),
 		CreatedByUserId:      user.UserId,
 	}
-	err := repo.CreatePlaidLink(context.Background(), &plaidLink)
+	err = repo.CreatePlaidLink(context.Background(), &plaidLink)
 	require.NoError(t, err, "must be able to seed plaid link")
 
 	link := models.Link{
 		AccountId:       user.AccountId,
 		Account:         user.Account,
 		LinkType:        models.PlaidLinkType,
-		PlaidLinkId:     &plaidLink.PlaidLinkID, // To be filled in later.
+		PlaidLinkId:     &plaidLink.PlaidLinkId, // To be filled in later.
 		PlaidLink:       &plaidLink,
 		InstitutionName: plaidLink.InstitutionName,
 		CreatedAt:       clock.Now(),

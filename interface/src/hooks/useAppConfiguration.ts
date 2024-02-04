@@ -22,6 +22,7 @@ export class AppConfiguration {
   plaidEnabled: boolean;
   tellerEnabled: boolean;
   tellerApplicationId: string | null;
+  tellerEnvironment: 'sandbox' | 'development' | 'production' | null;
   release: string | null;
   revision: string;
   buildType: string;

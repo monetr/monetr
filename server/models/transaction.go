@@ -24,12 +24,16 @@ type Transaction struct {
 	PendingPlaidTransactionId *uint64           `json:"-" pg:"pending_plaid_transaction_id"`
 	PendingPlaidTransaction   *PlaidTransaction `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
 
+	TellerTransactionId *uint64            `json:"-" pg:"teller_transaction_id"`
+	TellerTransaction   *TellerTransaction `json:"tellerTransaction" pg:"rel:has-one"`
+
 	Amount     int64     `json:"amount" pg:"amount,notnull,use_zero"`
 	SpendingId *uint64   `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
 	Spending   *Spending `json:"spending,omitempty" pg:"rel:has-one"`
-	// SpendingAmount is the amount deducted from the expense this transaction was spent from. This is used when a
-	// transaction is more than the expense currently has allocated. If the transaction were to be deleted or changed we
-	// want to make sure we return the correct amount to the expense.
+	// SpendingAmount is the amount deducted from the expense this transaction was
+	// spent from. This is used when a transaction is more than the expense
+	// currently has allocated. If the transaction were to be deleted or changed
+	// we want to make sure we return the correct amount to the expense.
 	SpendingAmount       *int64     `json:"spendingAmount,omitempty" pg:"spending_amount,use_zero"`
 	Categories           []string   `json:"categories" pg:"categories,type:'text[]'"`
 	Date                 time.Time  `json:"date" pg:"date,notnull"`
@@ -47,37 +51,45 @@ func (t Transaction) IsAddition() bool {
 	return t.Amount < 0 // Deposits will show as negative amounts.
 }
 
-// AddSpendingToTransaction will take the provided spending object and deduct as much as possible from this transaction
-// from that spending object. It does not change the spendingId on the transaction, it simply performs the deductions.
+// AddSpendingToTransaction will take the provided spending object and deduct as
+// much as possible from this transaction from that spending object. It does not
+// change the spendingId on the transaction, it simply performs the deductions.
 func (t *Transaction) AddSpendingToTransaction(ctx context.Context, spending *Spending, account *Account) error {
 	span := sentry.StartSpan(ctx, "AddSpendingToTransaction")
 	defer span.Finish()
 
 	var allocationAmount int64
-	// If the amount allocated to the spending we are adding to the transaction is less than the amount of the
-	// transaction then we can only do a partial allocation.
+	// If the amount allocated to the spending we are adding to the transaction is
+	// less than the amount of the transaction then we can only do a partial
+	// allocation.
 	if spending.CurrentAmount < t.Amount {
 		allocationAmount = spending.CurrentAmount
 	} else {
-		// Otherwise, we will allocate the entire transaction amount from the spending.
+		// Otherwise, we will allocate the entire transaction amount from the
+		// spending.
 		allocationAmount = t.Amount
 	}
 
-	// Subtract the amount we are taking from the spending from it's current amount.
+	// Subtract the amount we are taking from the spending from it's current
+	// amount.
 	spending.CurrentAmount -= allocationAmount
 
 	switch spending.SpendingType {
 	case SpendingTypeExpense:
-	// We don't need to do anything special if it's an expense, at least not right now.
+	// We don't need to do anything special if it's an expense, at least not right
+	// now.
 	case SpendingTypeGoal:
-		// Goals also keep track of how much has been spent, so increment the used amount.
+		// Goals also keep track of how much has been spent, so increment the used
+		// amount.
 		spending.UsedAmount += allocationAmount
 	}
 
-	// Keep track of how much we took from the spending in case things change later.
+	// Keep track of how much we took from the spending in case things change
+	// later.
 	t.SpendingAmount = &allocationAmount
 
-	// Now that we have deducted the amount we need from the spending we need to recalculate it's next contribution.
+	// Now that we have deducted the amount we need from the spending we need to
+	// recalculate it's next contribution.
 	if err := spending.CalculateNextContribution(
 		span.Context(),
 		account.Timezone,
@@ -101,23 +113,28 @@ func AddSpendingToTransaction(
 	defer span.Finish()
 
 	var allocationAmount int64
-	// If the amount allocated to the spending we are adding to the transaction is less than the amount of the
-	// transaction then we can only do a partial allocation.
+	// If the amount allocated to the spending we are adding to the transaction is
+	// less than the amount of the transaction then we can only do a partial
+	// allocation.
 	if spending.CurrentAmount < transaction.Amount {
 		allocationAmount = spending.CurrentAmount
 	} else {
-		// Otherwise, we will allocate the entire transaction amount from the spending.
+		// Otherwise, we will allocate the entire transaction amount from the
+		// spending.
 		allocationAmount = transaction.Amount
 	}
 
-	// Subtract the amount we are taking from the spending from it's current amount.
+	// Subtract the amount we are taking from the spending from it's current
+	// amount.
 	spending.CurrentAmount -= allocationAmount
 
 	switch spending.SpendingType {
 	case SpendingTypeExpense:
-	// We don't need to do anything special if it's an expense, at least not right now.
+	// We don't need to do anything special if it's an expense, at least not right
+	// now.
 	case SpendingTypeGoal:
-		// Goals also keep track of how much has been spent, so increment the used amount.
+		// Goals also keep track of how much has been spent, so increment the used
+		// amount.
 		spending.UsedAmount += allocationAmount
 	}
 
@@ -183,8 +200,8 @@ func ProcessSpentFrom(
 
 	switch expensePlan {
 	case ChangeExpense, RemoveExpense:
-		// If the transaction already has an expense then it should have an expense amount. If this is missing then
-		// something is wrong.
+		// If the transaction already has an expense then it should have an expense
+		// amount. If this is missing then something is wrong.
 		myownsanity.ASSERT_NOTNIL(
 			currentTransaction.SpendingAmount,
 			"transaction spending amount can't be nil because it has been spent from something",
@@ -208,7 +225,8 @@ func ProcessSpentFrom(
 			"current spend is missing the embedded funding schedule data",
 		)
 
-		// Now that we have added that money back to the expense we need to calculate the expense's next contribution.
+		// Now that we have added that money back to the expense we need to
+		// calculate the expense's next contribution.
 		updatedSpending = append(updatedSpending, CalculateNextContribution(
 			span.Context(),
 			*currentSpend,
@@ -222,8 +240,8 @@ func ProcessSpentFrom(
 			break
 		}
 
-		// If we are changing the expense though then we want to fallthrough to handle the processing of the new
-		// expense.
+		// If we are changing the expense though then we want to fallthrough to
+		// handle the processing of the new expense.
 		fallthrough
 	case AddExpense:
 
@@ -235,7 +253,8 @@ func ProcessSpentFrom(
 			now,
 		)
 
-		// Then take all the fields that have changed and throw them in our list of things to update.
+		// Then take all the fields that have changed and throw them in our list of
+		// things to update.
 		updatedSpending = append(updatedSpending, updatedNewSpend)
 		updatedTransaction.SpendingAmount = &amountSpent
 	}

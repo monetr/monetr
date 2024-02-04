@@ -5,25 +5,41 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/internal/fixtures"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
+	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPlaidClient_GetAccount(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
+		clock := clock.New()
+
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
 		log := testutils.GetLog(t)
-		accountId := testutils.GetAccountIdForTest(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
-		accessToken := gofakeit.UUID()
+		secret, err := repository.NewSecretsRepository(
+			log,
+			clock,
+			db,
+			kms,
+			plaidLink.AccountId,
+		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		assert.NoError(t, err, "must be able to read the secret")
 
 		account := mock_plaid.BankAccountFixture(t)
 
@@ -31,7 +47,7 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 			account,
 		})
 
-		client := NewPlaid(log, nil, nil, config.Plaid{
+		client := NewPlaid(log, clock, secrets.NewPlaintextKMS(), nil, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
 			Environment:  plaid.Sandbox,
@@ -39,10 +55,15 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 
 		link := &models.Link{
 			LinkId:    1234,
-			AccountId: accountId,
+			AccountId: user.AccountId,
 		}
 
-		platypus, err := client.NewClient(context.Background(), link, accessToken, gofakeit.UUID())
+		platypus, err := client.NewClient(
+			context.Background(),
+			link,
+			secret.Secret,
+			gofakeit.UUID(),
+		)
 		assert.NoError(t, err, "should create platypus")
 		assert.NotNil(t, platypus, "should not be nil")
 
@@ -54,13 +75,25 @@ func TestPlaidClient_GetAccount(t *testing.T) {
 
 func TestPlaidClient_GetAllTransactions(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
+		clock := clock.New()
+
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
 		log := testutils.GetLog(t)
-		accountId := testutils.GetAccountIdForTest(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
-		accessToken := gofakeit.UUID()
+		secret, err := repository.NewSecretsRepository(
+			log,
+			clock,
+			db,
+			kms,
+			plaidLink.AccountId,
+		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		assert.NoError(t, err, "must be able to read the secret")
 
 		account := mock_plaid.BankAccountFixture(t)
 
@@ -70,7 +103,7 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 			account.GetAccountId(),
 		})
 
-		platypus := NewPlaid(log, nil, nil, config.Plaid{
+		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
 			Environment:  plaid.Sandbox,
@@ -78,16 +111,26 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 
 		link := &models.Link{
 			LinkId:    1234,
-			AccountId: accountId,
+			AccountId: user.AccountId,
 		}
 
-		client, err := platypus.NewClient(context.Background(), link, accessToken, gofakeit.UUID())
+		client, err := platypus.NewClient(
+			context.Background(),
+			link,
+			secret.Secret,
+			gofakeit.UUID(),
+		)
 		assert.NoError(t, err, "should create platypus")
 		assert.NotNil(t, client, "should not be nil")
 
-		transactions, err := client.GetAllTransactions(context.Background(), start, end, []string{
-			account.GetAccountId(),
-		})
+		transactions, err := client.GetAllTransactions(
+			context.Background(),
+			start,
+			end,
+			[]string{
+				account.GetAccountId(),
+			},
+		)
 		assert.NoError(t, err, "should not return an error")
 		assert.NotEmpty(t, transactions, "should return a few transactions")
 		assert.Equal(t, map[string]int{
@@ -98,17 +141,29 @@ func TestPlaidClient_GetAllTransactions(t *testing.T) {
 
 func TestPlaidClient_UpdateItem(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
+		clock := clock.New()
+
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
 		log := testutils.GetLog(t)
-		accountId := testutils.GetAccountIdForTest(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		plaidLink := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 
-		accessToken := gofakeit.UUID()
+		secret, err := repository.NewSecretsRepository(
+			log,
+			clock,
+			db,
+			kms,
+			plaidLink.AccountId,
+		).Read(context.Background(), plaidLink.PlaidLink.SecretId)
+		assert.NoError(t, err, "must be able to read the secret")
 
 		mock_plaid.MockCreateLinkToken(t)
 
-		platypus := NewPlaid(log, nil, nil, config.Plaid{
+		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
 			Environment:  plaid.Sandbox,
@@ -117,10 +172,15 @@ func TestPlaidClient_UpdateItem(t *testing.T) {
 
 		link := &models.Link{
 			LinkId:    1234,
-			AccountId: accountId,
+			AccountId: user.AccountId,
 		}
 
-		client, err := platypus.NewClient(context.Background(), link, accessToken, gofakeit.UUID())
+		client, err := platypus.NewClient(
+			context.Background(),
+			link,
+			secret.Secret,
+			gofakeit.UUID(),
+		)
 		assert.NoError(t, err, "should create client")
 		assert.NotNil(t, client, "should not be nil")
 

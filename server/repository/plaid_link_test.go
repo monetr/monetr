@@ -26,7 +26,7 @@ func TestPlaidRepositoryBase_GetLink(t *testing.T) {
 		assert.NoError(t, err, "failed to retrieve link")
 		assert.NotNil(t, readLink.PlaidLink, "must include plaid link child")
 		assert.EqualValues(t, link.LinkId, readLink.LinkId, "link Id must match")
-		assert.EqualValues(t, plaidLink.PlaidLinkID, readLink.PlaidLink.PlaidLinkID, "plaid link Id must match")
+		assert.EqualValues(t, plaidLink.PlaidLinkId, readLink.PlaidLink.PlaidLinkId, "plaid link Id must match")
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestPlaidRepositoryBase_GetLinkByItemId(t *testing.T) {
 		assert.NoError(t, err, "failed to retrieve link")
 		assert.NotNil(t, readLink.PlaidLink, "must include plaid link child")
 		assert.EqualValues(t, link.LinkId, readLink.LinkId, "link Id must match")
-		assert.EqualValues(t, plaidLink.PlaidLinkID, readLink.PlaidLink.PlaidLinkID, "plaid link Id must match")
+		assert.EqualValues(t, plaidLink.PlaidLinkId, readLink.PlaidLink.PlaidLinkId, "plaid link Id must match")
 	})
 
 	t.Run("not found", func(t *testing.T) {

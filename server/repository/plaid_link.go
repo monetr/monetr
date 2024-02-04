@@ -1,6 +1,3 @@
-//go:build !vault
-// +build !vault
-
 package repository
 
 import (

@@ -30,6 +30,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 		PlaidEnabled         bool         `json:"plaidEnabled"`
 		TellerEnabled        bool         `json:"tellerEnabled"`
 		TellerApplicationId  *string      `json:"tellerApplicationId"`
+		TellerEnvironment    *string      `json:"tellerEnvironment"`
 		Release              string       `json:"release"`
 		Revision             string       `json:"revision"`
 		BuildType            string       `json:"buildType"`
@@ -86,6 +87,7 @@ func (c *Controller) configEndpoint(ctx echo.Context) error {
 	if c.configuration.Teller.GetEnabled() {
 		configuration.TellerEnabled = true
 		configuration.TellerApplicationId = &c.configuration.Teller.ApplicationId
+		configuration.TellerEnvironment = &c.configuration.Teller.Environment
 	}
 
 	configuration.RequireBetaCode = c.configuration.Beta.EnableBetaCodes

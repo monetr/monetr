@@ -21,11 +21,11 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 		plaidLink := *link.PlaidLink
-		assert.NotZero(t, plaidLink.PlaidLinkID, "plaid link ID must not be zero, must have a valid record!")
+		assert.NotZero(t, plaidLink.PlaidLinkId, "plaid link ID must not be zero, must have a valid record!")
 
 		db := testutils.GetPgDatabase(t)
 		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
-		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkID)
+		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkId)
 		assert.NoError(t, err, "should not receive an error when there is no previous plaid sync")
 		assert.Nil(t, result, "should receive nil, because there has not been a plaid sync before this")
 	})
@@ -35,10 +35,10 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 		plaidLink := *link.PlaidLink
-		assert.NotZero(t, plaidLink.PlaidLinkID, "plaid link ID must not be zero, must have a valid record!")
+		assert.NotZero(t, plaidLink.PlaidLinkId, "plaid link ID must not be zero, must have a valid record!")
 
 		plaidSync := models.PlaidSync{
-			PlaidLinkId: plaidLink.PlaidLinkID,
+			PlaidLinkId: plaidLink.PlaidLinkId,
 			AccountId:   user.AccountId,
 			Timestamp:   clock.Now().UTC(),
 			NextCursor:  gofakeit.UUID(),
@@ -52,7 +52,7 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 
 		db := testutils.GetPgDatabase(t)
 		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
-		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkID)
+		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkId)
 		assert.NoError(t, err, "should not receive an error when there is no previous plaid sync")
 		assert.NotNil(t, result, "resulting plaid sync should be returned")
 		assert.Equal(t, plaidSync.PlaidSyncID, result.PlaidSyncID, "should have received the last inserted plaid sync")
@@ -63,11 +63,11 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
 		link := fixtures.GivenIHaveAPlaidLink(t, clock, user)
 		plaidLink := *link.PlaidLink
-		assert.NotZero(t, plaidLink.PlaidLinkID, "plaid link ID must not be zero, must have a valid record!")
+		assert.NotZero(t, plaidLink.PlaidLinkId, "plaid link ID must not be zero, must have a valid record!")
 
 		{ // One from a few days ago
 			plaidSync := models.PlaidSync{
-				PlaidLinkId: plaidLink.PlaidLinkID,
+				PlaidLinkId: plaidLink.PlaidLinkId,
 				AccountId:   user.AccountId,
 				Timestamp:   clock.Now().UTC(),
 				NextCursor:  gofakeit.UUID(),
@@ -85,7 +85,7 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 
 		// And one from yesterday
 		plaidSync := models.PlaidSync{
-			PlaidLinkId: plaidLink.PlaidLinkID,
+			PlaidLinkId: plaidLink.PlaidLinkId,
 			AccountId:   user.AccountId,
 			Timestamp:   clock.Now().UTC(),
 			NextCursor:  gofakeit.UUID(),
@@ -101,7 +101,7 @@ func TestRepositoryBaseGetLastPlaidSync(t *testing.T) {
 
 		db := testutils.GetPgDatabase(t)
 		repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
-		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkID)
+		result, err := repo.GetLastPlaidSync(context.Background(), plaidLink.PlaidLinkId)
 		assert.NoError(t, err, "should not receive an error when there is no previous plaid sync")
 		assert.Equal(t, plaidSync.PlaidSyncID, result.PlaidSyncID, "should have received the last inserted plaid sync")
 	})

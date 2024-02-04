@@ -4,24 +4,31 @@ import (
 	"context"
 	"testing"
 
+	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jarcoal/httpmock"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/internal/mock_plaid"
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/plaid/plaid-go/v14/plaid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPlaid_CreateLinkToken(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
+		clock := clock.New()
+
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
 		log := testutils.GetLog(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+
 		mock_plaid.MockCreateLinkToken(t)
 
-		platypus := NewPlaid(log, nil, nil, config.Plaid{
+		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
 			Environment:  plaid.Sandbox,
@@ -45,13 +52,18 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 	})
 
 	t.Run("with webhook", func(t *testing.T) {
+		clock := clock.New()
+
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
 		log := testutils.GetLog(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+
 		mock_plaid.MockCreateLinkToken(t)
 
-		platypus := NewPlaid(log, nil, nil, config.Plaid{
+		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:        gofakeit.UUID(),
 			ClientSecret:    gofakeit.UUID(),
 			Environment:     plaid.Sandbox,
@@ -77,13 +89,18 @@ func TestPlaid_CreateLinkToken(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
+		clock := clock.New()
+
 		httpmock.Activate()
 		defer httpmock.DeactivateAndReset()
 
 		log := testutils.GetLog(t)
+		kms := secrets.NewPlaintextKMS()
+		db := testutils.GetPgDatabase(t)
+
 		mock_plaid.MockCreateLinkTokenFailure(t)
 
-		platypus := NewPlaid(log, nil, nil, config.Plaid{
+		platypus := NewPlaid(log, clock, kms, db, config.Plaid{
 			ClientID:     gofakeit.UUID(),
 			ClientSecret: gofakeit.UUID(),
 			Environment:  plaid.Sandbox,

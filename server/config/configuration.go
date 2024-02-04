@@ -113,13 +113,9 @@ type FilesystemStorage struct {
 	BasePath string `yaml:"basePath"`
 }
 
-// KeyManagement specifies the properties required to securely encrypt and decrypt stored secrets. If enabled only one
-// of the providers can be enabled at a time. It is not recommended to change providers.
+// KeyManagement specifies the properties required to securely encrypt and
+// decrypt stored secrets. It is not recommended to change providers.
 type KeyManagement struct {
-	// Enabled determines whether or not key management is being used. If it is enabled and there is a key ID and
-	// version present on a given token; then the KMS will be used. Otherwise it will be read as plaintext if vault is
-	// disabled (deprecated), or will be read from vault.
-	Enabled  bool   `yaml:"enabled"`
 	Provider string `yaml:"provider"`
 	// AWS provides configuration for using AWS's KMS for encrypting and decrypting secrets.
 	AWS AWSKMS `yaml:"aws"`
@@ -270,15 +266,6 @@ func (r ReCAPTCHA) ShouldVerifyRegistration() bool {
 
 func (r ReCAPTCHA) ShouldVerifyForgotPassword() bool {
 	return r.Enabled && r.VerifyForgotPassword
-}
-
-type Teller struct {
-	Enabled       bool   `yaml:"enabled"`
-	ApplicationId string `yaml:"applicationId"`
-}
-
-func (t Teller) GetEnabled() bool {
-	return t.Enabled && t.ApplicationId != ""
 }
 
 type Plaid struct {
@@ -540,7 +527,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
-	v.SetDefault("KeyManagement.Provider", nil)
+	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("KeyManagement.AWS", nil)
 	v.SetDefault("KeyManagement.Google", nil)
 	v.SetDefault("Plaid.Enabled", true)
@@ -638,4 +625,7 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
 	_ = v.BindEnv("Teller.ApplicationId", "MONETR_TELLER_APPLICATION_ID")
+	_ = v.BindEnv("Teller.Environment", "MONETR_TELLER_ENVIRONMENT")
+	_ = v.BindEnv("Teller.Certificate", "MONETR_TELLER_CERTIFICATE")
+	_ = v.BindEnv("Teller.PrivateKey", "MONETR_TELLER_PRIVATE_KEY")
 }

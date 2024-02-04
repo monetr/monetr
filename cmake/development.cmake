@@ -49,6 +49,21 @@ if (CLOUD_MAGIC)
   set(NGINX_CONFIG_FILE "${CMAKE_SOURCE_DIR}/compose/nginx-cloud.conf")
 endif()
 
+if(TELLER_CERTIFICATE AND TELLER_PRIVATE_KEY)
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/compose/teller)
+  configure_file(${TELLER_CERTIFICATE} ${CMAKE_BINARY_DIR}/compose/teller/certificate.pem COPYONLY)
+  configure_file(${TELLER_PRIVATE_KEY} ${CMAKE_BINARY_DIR}/compose/teller/private_key.pem COPYONLY)
+  set(MONETR_TELLER_CERTIFICATE "/build/build/compose/teller/certificate.pem")
+  set(MONETR_TELLER_PRIVATE_KEY "/build/build/compose/teller/private_key.pem")
+  message(STATUS "Detected teller certificates, they will configured for local development")
+else()
+  # If we are not using certificates for teller then make sure these values are cleared for when we configure the docker
+  # compose manifest.
+  set(MONETR_TELLER_CERTIFICATE "")
+  set(MONETR_TELLER_PRIVATE_KEY "")
+endif()
+
+
 set(LOCAL_CERTIFICATE_DIR ${CMAKE_BINARY_DIR}/certificates/${MONETR_LOCAL_DOMAIN})
 set(LOCAL_CERTIFICATE_KEY ${LOCAL_CERTIFICATE_DIR}/key.pem)
 set(LOCAL_CERTIFICATE_CERT ${LOCAL_CERTIFICATE_DIR}/cert.pem)

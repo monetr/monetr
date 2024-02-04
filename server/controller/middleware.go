@@ -221,8 +221,9 @@ func (c *Controller) mustGetDatabase(ctx echo.Context) pg.DBI {
 	return txn
 }
 
-// mustGetSecurityRepository is used to retrieve/create a repository interface that can interact with more security
-// sensitive parts of the data layer. This interface is not specific to a single tenant. If the interface cannot be
+// mustGetSecurityRepository is used to retrieve/create a repository interface
+// that can interact with more security sensitive parts of the data layer. This
+// interface is not specific to a single tenant. If the interface cannot be
 // created due then this method will panic.
 func (c *Controller) mustGetSecurityRepository(ctx echo.Context) repository.SecurityRepository {
 	db, ok := ctx.Get(databaseContextKey).(pg.DBI)
@@ -295,6 +296,37 @@ func (c *Controller) getAuthenticatedRepository(ctx echo.Context) (repository.Re
 
 func (c *Controller) mustGetAuthenticatedRepository(ctx echo.Context) repository.Repository {
 	repo, err := c.getAuthenticatedRepository(ctx)
+	if err != nil {
+		panic("unauthorized")
+	}
+
+	return repo
+}
+
+func (c *Controller) getSecretsRepository(ctx echo.Context) (repository.SecretsRepository, error) {
+	accountId, ok := ctx.Get(accountIdContextKey).(uint64)
+	if accountId == 0 || !ok {
+		return nil, errors.Errorf("you are not authenticated to an account")
+	}
+
+	txn, ok := ctx.Get(databaseContextKey).(pg.DBI)
+	if !ok {
+		return nil, errors.Errorf("no transaction for request")
+	}
+
+	log := c.getLog(ctx)
+
+	return repository.NewSecretsRepository(
+		log,
+		c.clock,
+		txn,
+		c.kms,
+		accountId,
+	), nil
+}
+
+func (c *Controller) mustGetSecretsRepository(ctx echo.Context) repository.SecretsRepository {
+	repo, err := c.getSecretsRepository(ctx)
 	if err != nil {
 		panic("unauthorized")
 	}

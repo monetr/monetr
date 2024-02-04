@@ -54,7 +54,9 @@ func NewGoogleKMS(ctx context.Context, config GoogleKMSConfig) (KeyManagement, e
 	}
 
 	// Check to make sure that we have permissions to access the specified key name using our current credentials.
-	permissions, err := client.ResourceIAM(config.KeyName).TestPermissions(ctx, requiredPermissions)
+	permissions, err := client.
+		ResourceIAM(config.KeyName).
+		TestPermissions(ctx, requiredPermissions)
 	if err != nil {
 		defer client.Close()
 		return nil, errors.Wrap(err, "could not validate permissions to use google KMS")
@@ -71,7 +73,7 @@ func NewGoogleKMS(ctx context.Context, config GoogleKMSConfig) (KeyManagement, e
 	}, nil
 }
 
-func (g *GoogleKMS) Encrypt(ctx context.Context, input []byte) (keyID, version string, result []byte, _ error) {
+func (g *GoogleKMS) Encrypt(ctx context.Context, input []byte) (keyID, version *string, result []byte, _ error) {
 	span := sentry.StartSpan(ctx, "grpc.client")
 	defer span.Finish()
 	span.Description = "Encrypt KMS"
@@ -95,15 +97,17 @@ func (g *GoogleKMS) Encrypt(ctx context.Context, input []byte) (keyID, version s
 	response, err := g.client.Encrypt(span.Context(), request)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		return "", "", nil, errors.Wrap(err, "failed to encrypt data using Google KMS")
+		return nil, nil, nil, errors.Wrap(err, "failed to encrypt data using Google KMS")
 	}
 
 	versionPrefix := fmt.Sprintf("%s/cryptoKeyVersions/", g.config.KeyName)
 
-	return g.config.KeyName, strings.TrimPrefix(response.Name, versionPrefix), response.Ciphertext, nil
+	id := g.config.KeyName
+	v := strings.TrimPrefix(response.Name, versionPrefix)
+	return &id, &v, response.Ciphertext, nil
 }
 
-func (g *GoogleKMS) Decrypt(ctx context.Context, keyID, version string, input []byte) (result []byte, _ error) {
+func (g *GoogleKMS) Decrypt(ctx context.Context, keyID, version *string, input []byte) (result []byte, _ error) {
 	span := sentry.StartSpan(ctx, "grpc.client")
 	defer span.Finish()
 	span.Description = "Decrypt KMS"
@@ -118,7 +122,7 @@ func (g *GoogleKMS) Decrypt(ctx context.Context, keyID, version string, input []
 	}
 
 	request := &kmspb.DecryptRequest{
-		Name:       keyID, // The server knows the appropriate version.
+		Name:       *keyID, // The server knows the appropriate version.
 		Ciphertext: input,
 		CiphertextCrc32C: &wrapperspb.Int64Value{
 			Value: int64(inputCRC32C),
