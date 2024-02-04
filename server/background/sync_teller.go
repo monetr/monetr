@@ -321,6 +321,12 @@ func (s *SyncTellerJob) Run(ctx context.Context) error {
 		return err
 	}
 
+	// Then enqueue all of the bank accounts we touched to have their similar
+	// transactions recalculated.
+	for key := range s.similarity {
+		s.enqueuer.EnqueueJob(span.Context(), CalculateTransactionClusters, s.similarity[key])
+	}
+
 	return nil
 }
 
@@ -399,6 +405,7 @@ func (s *SyncTellerJob) syncBankAccounts(ctx context.Context) error {
 			bankAccount = models.BankAccount{
 				LinkId:              s.args.LinkId,
 				TellerBankAccountId: &tellerBankAccount.TellerBankAccountId,
+				TellerBankAccount:   &tellerBankAccount,
 				AvailableBalance:    0,
 				CurrentBalance:      0,
 				Mask:                account.Mask,
@@ -660,6 +667,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 				if !isPending {
 					s.netChanges[tellerId] -= amount
 				}
+				s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 				continue
 			}
 
@@ -700,6 +708,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			if err := s.repo.UpdateTransaction(span.Context(), bankAccount.BankAccountId, &transaction); err != nil {
 				return err
 			}
+			s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 		}
 
 		// Detect deleted transactions
@@ -726,6 +735,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			); err != nil {
 				return err
 			}
+			s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 		}
 
 		// Now calculate the new immutable timestamp based on the transactions we
@@ -743,7 +753,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			}
 		}
 		// If there wasn't one then use the latest transaction's date.
-		if immutableTimestamp.IsZero() {
+		if newImmutableTimestamp.IsZero() {
 			date, err := tellerTransactions[len(tellerTransactions)-1].GetDate(s.timezone)
 			if err != nil {
 				return err
@@ -1038,4 +1048,11 @@ func (s *SyncTellerJob) flagNeedsBalance(tellerBankAccountId string) {
 // example, we don't need to retrieve it's transactions anymore.
 func (s *SyncTellerJob) flagNeedsTransactions(tellerBankAccountId string) {
 	s.needsTransactions[tellerBankAccountId] = struct{}{}
+}
+
+func (s *SyncTellerJob) tagBankAccountForSimilarityRecalc(bankAccountId uint64) {
+	s.similarity[bankAccountId] = CalculateTransactionClustersArguments{
+		AccountId:     s.args.AccountId,
+		BankAccountId: bankAccountId,
+	}
 }

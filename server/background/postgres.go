@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash/fnv"
+	"runtime/debug"
 	"sort"
 	"sync/atomic"
 	"time"
@@ -647,7 +648,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 
 		defer func() {
 			if panicErr := recover(); panicErr != nil {
-				jobLog.Errorf("panic while processing job\n%+v", panicErr)
+				jobLog.Errorf("panic while processing job\n%+v\n", panicErr, string(debug.Stack()))
 				if hub != nil {
 					hub.RecoverWithContext(span.Context(), panicErr)
 					hub.ConfigureScope(func(scope *sentry.Scope) {
