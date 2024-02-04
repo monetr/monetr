@@ -28,7 +28,7 @@ var (
 
 func init() {
 	rootCommand.PersistentFlags().StringVarP(&config.LogLevel, "log-level", "L", "info", "Specify the log level to use, allowed values: trace, debug, info, warn, error, fatal")
-	rootCommand.PersistentFlags().StringVarP(&config.FilePath, "config", "c", "", "Specify the config file to use.")
+	rootCommand.PersistentFlags().StringArrayVarP(&config.FilePath, "config", "c", []string{}, "Specify the config file to use.")
 	viper.BindPFlag("Logging.Level", rootCommand.PersistentFlags().Lookup("log-level"))
 	viper.BindPFlag("configFile", rootCommand.PersistentFlags().Lookup("config"))
 	newVersionCommand(rootCommand)

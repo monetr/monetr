@@ -66,6 +66,7 @@ CREATE TABLE "teller_links" (
 
 ALTER TABLE "links" 
 ADD COLUMN "teller_link_id" BIGINT,
+ADD COLUMN "deleted_at" TIMESTAMP WITH TIME ZONE,
 ADD CONSTRAINT "fk_links_teller_link" FOREIGN KEY ("teller_link_id", "account_id") REFERENCES "teller_links" ("teller_link_id", "account_id");
 
 ALTER TABLE "bank_accounts"

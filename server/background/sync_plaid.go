@@ -174,10 +174,10 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 	err := s.db.ModelContext(ctx, &links).
 		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
-		Where(`"plaid_link"."use_plaid_sync" = ?`, true).
+		Where(`"plaid_link"."status" = ?`, models.PlaidLinkStatusSetup).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-		Where(`"link"."link_status" = ?`, models.PlaidLinkStatusSetup).
 		Where(`"link"."last_attempted_update" < ?`, cutoff).
+		Where(`"link"."deleted_at" IS NOT NULL`).
 		Select(&links)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve links that need to by synced with plaid")

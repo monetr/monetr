@@ -62,3 +62,15 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Monetr config file arguments
+*/}}
+{{- define "monetr.config.args" -}}
+- "-c"
+- "/etc/monetr/config.yaml"
+{{- range .Values.api.additionalConfigFilePaths }}
+- "-c"
+- {{ . | quote }}
+{{- end }}
+{{- end }}

@@ -56,10 +56,16 @@ extraVolumes:
   - name: certificates
     secret:
       secretName: monetr-authentication-certificate
+  - name: teller
+    secret:
+      secretName: monetr-teller-config
 
 extraVolumeMounts:
   - name: certificates
     mountPath: /etc/monetr/certs
+    readOnly: true
+  - name: teller
+    mountPath: /etc/monetr/teller
     readOnly: true
 
 api:
@@ -67,6 +73,8 @@ api:
   customEnv:
     - name: MONETR_ENVIRONMENT
       value: "my.monetr.dev"
+  additionalConfigFilePaths: 
+    - /etc/monetr/teller/config.yaml # Also load the teller configuration
   uiDomainName: my.monetr.dev
   apiDomainName: my.monetr.dev
   allowSignUp: true

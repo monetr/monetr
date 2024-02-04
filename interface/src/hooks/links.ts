@@ -108,7 +108,7 @@ export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata
   };
 }
 
-export function useTriggerManualSync(): (_linkId: number) => Promise<void> {
+export function useTriggerManualPlaidSync(): (_linkId: number) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
   return async (linkId: number): Promise<void> => {
     return request()

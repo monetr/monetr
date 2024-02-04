@@ -91,6 +91,7 @@ customEnvFrom: [ ]
 
 api:
   customEnv: [ ]
+  additionalConfigFilePaths: [ ]
   includeSecrets: false
   name: monetr
   uiDomainName: localhost:4000
@@ -144,6 +145,7 @@ api:
     verifyRegister: false
     verifyForgotPassword: false
   plaid:
+    enabled: true
     clientId: "abc123"
     clientSecret: "abc123"
     environment: "https://sandbox.plaid.com"
@@ -153,6 +155,12 @@ api:
     webhooksDomain: ""
     oauthDomain: ""
     maxNumberOfLinks: 0
+  teller:
+    enabled: false
+    environment: sandbox
+    applicationId: ""
+    cerficiate: "" # Path to the certificate.pem file
+    privateKey: "" # Path to the private_key.pem file
   cors:
     allowedOrigins:
       - "*"

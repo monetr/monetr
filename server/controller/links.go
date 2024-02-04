@@ -237,6 +237,11 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
+	link.DeletedAt = myownsanity.TimeP(c.clock.Now().UTC())
+	if err := repo.UpdateLink(c.getContext(ctx), link); err != nil {
+		return c.wrapPgError(ctx, err, "failed to mark the link as deleted")
+	}
+
 	if link.PlaidLink != nil {
 		secretsRepo := c.mustGetSecretsRepository(ctx)
 		secret, err := secretsRepo.Read(c.getContext(ctx), link.PlaidLink.SecretId)

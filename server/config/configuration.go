@@ -13,7 +13,7 @@ import (
 
 var (
 	// FilePath is set via a flag in pkg/cmd.
-	FilePath string
+	FilePath []string
 	// LogLevel is set via a flag in pkg/cmd.
 	LogLevel string
 )
@@ -415,49 +415,57 @@ type BackgroundJobs struct {
 	JobSchedule map[string]string      `yaml:"jobSchedule"`
 }
 
-func getViper(configFilePath *string) *viper.Viper {
+func getViper(configFilePath []string) *viper.Viper {
 	v := viper.GetViper()
+	v.SetConfigType("yaml")
 
-	if configFilePath != nil && *configFilePath != "" {
-		v.SetConfigFile(*configFilePath)
-	} else {
-		v.SetConfigName("config")
-		v.SetConfigType("yaml")
-
+	configs := make([]string, 0)
+	switch len(FilePath) {
+	case 0:
 		{ // If we can determine the user's home directory, then look there + /.sentry for the config
 			homeDir, err := os.UserHomeDir()
 			if err == nil {
-				v.AddConfigPath(homeDir + "/.monetr")
+				configs = append(configs, homeDir+"/.monetr")
 			}
 		}
 
-		v.AddConfigPath("/etc/monetr/")
-		v.AddConfigPath(".")
+		configs = append(configs, "/etc/monetr/")
+		configs = append(configs, ".")
+	default:
+		configs = append(configs, configFilePath...)
+	}
+
+	setupDefaults(v)
+	setupEnv(v)
+
+	for i := range configs {
+		path := configs[i]
+		v.SetConfigFile(path)
+		if i == 0 {
+			if err := v.ReadInConfig(); err != nil {
+				log.Fatalf("failed to read config [%s]: %+v", path, err)
+			}
+		} else {
+			if err := v.MergeInConfig(); err != nil {
+				log.Fatalf("failed to read config [%s]: %+v", path, err)
+			}
+		}
 	}
 
 	return v
 }
 
 func LoadConfiguration() Configuration {
-	return LoadConfigurationFromFile(&FilePath)
+	return LoadConfigurationFromFile(FilePath)
 }
 
-func LoadConfigurationFromFile(configFilePath *string) Configuration {
+func LoadConfigurationFromFile(configFilePath []string) Configuration {
 	v := getViper(configFilePath)
 
 	return LoadConfigurationEx(v)
 }
 
 func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
-	setupDefaults(v)
-	setupEnv(v)
-
-	writeConfig := false
-	if err := v.ReadInConfig(); err != nil {
-		fmt.Printf("failed to read in config from file: %+v\n", err)
-		writeConfig = true
-	}
-
 	if err := v.Unmarshal(&config); err != nil {
 		panic(err)
 	}
@@ -494,25 +502,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 	}
 	config.Security.PrivateKey = privateKey
 
-	if writeConfig {
-		if err := v.WriteConfigAs("/etc/monetr/config.yaml"); err != nil {
-			fmt.Printf("failed to write config to file: %+v\n", err)
-		}
-	}
-
 	return config
-}
-
-func GenerateConfigFile(configFilePath *string, outputFilePath string) error {
-	var v *viper.Viper
-	if configFilePath == nil || *configFilePath == "" {
-		v = viper.GetViper()
-		setupDefaults(v)
-	} else {
-		v = getViper(configFilePath)
-	}
-
-	return v.SafeWriteConfigAs(outputFilePath)
 }
 
 func setupDefaults(v *viper.Viper) {
