@@ -529,6 +529,10 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			bankAccount.BankAccountId,
 			immutableTimestamp,
 		)
+		if err != nil {
+			log.WithError(err).Error("failed to read working transactions from the database")
+			continue
+		}
 		for _, transaction := range workingTransactions {
 			if transaction.TellerTransaction == nil {
 				continue

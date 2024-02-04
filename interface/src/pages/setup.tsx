@@ -1,12 +1,15 @@
 /* eslint-disable max-len */
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { CheckCircle, EditOutlined, LinkOutlined } from '@mui/icons-material';
+import { CheckCircle, EditOutlined } from '@mui/icons-material';
 
+import PlaidLogo from '@monetr/interface/components/Logo/PlaidLogo';
+import TellerLogo from '@monetr/interface/components/Logo/TellerLogo';
 import { MBaseButton } from '@monetr/interface/components/MButton';
-import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
+import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
+import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import TellerSetup from '@monetr/interface/components/setup/TellerSetup';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
@@ -26,9 +29,9 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
   switch (step) {
     case 'greeting':
       return <Greeting onContinue={ setStep } manualEnabled={ props.manualEnabled } alreadyOnboarded={ props.alreadyOnboarded } />;
-    // case 'plaid':
-    //   return <PlaidSetup alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'plaid':
+      return <PlaidSetup alreadyOnboarded={ props.alreadyOnboarded } />;
+    case 'teller':
       return <TellerSetup />;
     case 'manual':
       return <Navigate to={ manualPath } />;
@@ -46,7 +49,7 @@ interface GreetingProps {
 
 function Greeting(props: GreetingProps): JSX.Element {
   const config = useAppConfiguration();
-  const [active, setActive] = useState<'plaid'|'manual'|null>(null);
+  const [active, setActive] = useState<'plaid'|'teller'|'manual'|null>(null);
 
   function Banner(): JSX.Element {
     if (!props.alreadyOnboarded) {
@@ -78,10 +81,7 @@ function Greeting(props: GreetingProps): JSX.Element {
     if (props.alreadyOnboarded) return null;
 
     return (
-      <div className='flex justify-center gap-1'>
-        <MSpan color='subtle' className='text-sm'>Not ready to continue?</MSpan>
-        <MLink to='/logout' size='sm'>Logout for now</MLink>
-      </div>
+      <LogoutFooter />
     );
   }
 
@@ -91,9 +91,17 @@ function Greeting(props: GreetingProps): JSX.Element {
       <Banner />
       <div className='flex gap-4 flex-col md:flex-row p-2'>
         <OnboardingTile
-          icon={ <LinkOutlined /> }
-          name='Connected'
-          description='Connect to your bank account automatically using Plaid.'
+          icon={ <TellerLogo /> }
+          name='Teller'
+          description='Teller can provide more frequent updates on your transactions.'
+          active={ active === 'teller' }
+          onClick={ () => setActive('teller') }
+          disabled={ !config?.tellerEnabled }
+        />
+        <OnboardingTile
+          icon={ <PlaidLogo /> }
+          name='Plaid'
+          description='Plaid offers more institutions, but less frequent data updates.'
           active={ active === 'plaid' }
           onClick={ () => setActive('plaid') }
           disabled={ !config?.plaidEnabled }
@@ -101,7 +109,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         <OnboardingTile
           icon={ <EditOutlined /> }
           name='Manual'
-          description='Enter transaction and balance data manually.'
+          description='Manage your transactions and budget manually with monetr.'
           active={ active === 'manual' }
           onClick={ () => setActive('manual') }
           comingSoon={ !props.manualEnabled }
@@ -175,6 +183,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
     'md:p-4',
     'relative',
     'rounded-lg',
+    'h-36',
   );
 
   function handleClick() {
@@ -186,7 +195,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
   return (
     <a className={ wrapperClasses } onClick={ handleClick }>
       { props.active && <CheckCircle className='absolute dark:text-dark-monetr-brand-subtle top-2 right-2' /> }
-      { React.cloneElement(props.icon, { className: 'w-10 h-10 md:w-16 md:h-16 ml-4 md:ml-0 md:mt-2' }) }
+      { React.cloneElement(props.icon, { className: 'w-16 h-12 md:w-20 md:h-12 ml-4 md:ml-0 md:mt-6' }) }
       <div className='flex flex-col gap-2 items-center h-full md:mt-4 text-center w-full md:w-auto'>
         <MSpan className='text-lg font-medium'>
           { props.name }
@@ -194,7 +203,7 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
         <MSpan color='subtle'>
           { props.description }
         </MSpan>
-        { !props.comingSoon && <MSpan>&nbsp;</MSpan>}
+        { !props.comingSoon && <MSpan className='md:block hidden'>&nbsp;</MSpan>}
         { props.comingSoon &&
           <MSpan className='md:mt-5 font-medium'>
             Coming Soon

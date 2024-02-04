@@ -111,10 +111,12 @@ export default function TellerSetup(): JSX.Element {
 
   useEffect(() => {
     if (ready && !loading && !exited && !settingUp) {
-      open();
-      setState({
-        loading: true,
-      });
+      setTimeout(() => {
+        open();
+        setState({
+          loading: true,
+        });
+      }, 1000);
     }
   }, [ready, open, loading, exited, settingUp]);
 
