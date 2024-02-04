@@ -475,6 +475,7 @@ func TestDeleteLink(t *testing.T) {
 			response := e.DELETE("/api/links/{linkId}").
 				WithPath("linkId", link.LinkId).
 				WithCookie(TestCookieName, token).
+				WithTimeout(5 * time.Second).
 				Expect()
 
 			response.Status(http.StatusOK)

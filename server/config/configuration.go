@@ -419,35 +419,32 @@ func getViper(configFilePath []string) *viper.Viper {
 	v := viper.GetViper()
 	v.SetConfigType("yaml")
 
-	configs := make([]string, 0)
+	setupDefaults(v)
+	setupEnv(v)
+
 	switch len(FilePath) {
 	case 0:
 		{ // If we can determine the user's home directory, then look there + /.sentry for the config
 			homeDir, err := os.UserHomeDir()
 			if err == nil {
-				configs = append(configs, homeDir+"/.monetr")
+				v.AddConfigPath(homeDir + "/.monetr/config.yaml")
 			}
 		}
 
-		configs = append(configs, "/etc/monetr/")
-		configs = append(configs, ".")
+		v.AddConfigPath("/etc/monetr/config.yaml")
+		v.AddConfigPath("config.yaml")
 	default:
-		configs = append(configs, configFilePath...)
-	}
-
-	setupDefaults(v)
-	setupEnv(v)
-
-	for i := range configs {
-		path := configs[i]
-		v.SetConfigFile(path)
-		if i == 0 {
-			if err := v.ReadInConfig(); err != nil {
-				log.Fatalf("failed to read config [%s]: %+v", path, err)
-			}
-		} else {
-			if err := v.MergeInConfig(); err != nil {
-				log.Fatalf("failed to read config [%s]: %+v", path, err)
+		for i := range configFilePath {
+			path := configFilePath[i]
+			v.SetConfigFile(path)
+			if i == 0 {
+				if err := v.ReadInConfig(); err != nil {
+					log.Fatalf("failed to read config [%s]: %+v", path, err)
+				}
+			} else {
+				if err := v.MergeInConfig(); err != nil {
+					log.Fatalf("failed to read config [%s]: %+v", path, err)
+				}
 			}
 		}
 	}
