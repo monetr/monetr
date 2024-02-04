@@ -9,8 +9,6 @@ import { MBaseButton } from '@monetr/interface/components/MButton';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import LogoutFooter from '@monetr/interface/components/setup/LogoutFooter';
-import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
-import TellerSetup from '@monetr/interface/components/setup/TellerSetup';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -24,15 +22,17 @@ type Step = 'greeting'|'plaid'|'teller'|'manual'|'loading';
 
 export default function SetupPage(props: SetupPageProps): JSX.Element {
   const [step, setStep] = useState<Step>('greeting');
+  const tellerPath = props.alreadyOnboarded ? '/link/create/teller' : '/setup/teller';
+  const plaidPath = props.alreadyOnboarded ? '/link/create/plaid' : '/setup/plaid';
   const manualPath = props.alreadyOnboarded ? '/link/create/manual' : '/setup/manual';
 
   switch (step) {
     case 'greeting':
       return <Greeting onContinue={ setStep } manualEnabled={ props.manualEnabled } alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'plaid':
-      return <PlaidSetup alreadyOnboarded={ props.alreadyOnboarded } />;
+      return <Navigate to={ plaidPath } />;
     case 'teller':
-      return <TellerSetup />;
+      return <Navigate to={ tellerPath } />;
     case 'manual':
       return <Navigate to={ manualPath } />;
     case 'loading':
