@@ -14,13 +14,13 @@ const (
 type TellerBankAccount struct {
 	tableName string `pg:"teller_bank_accounts"`
 
-	TellerBankAccountId uint64                  `json:"-" pg:"teller_bank_account_id"`
-	AccountId           uint64                  `json:"-" pg:"account_id,notnull,type:'bigint',unique:per_account"`
+	TellerBankAccountId uint64                  `json:"-" pg:"teller_bank_account_id,pk,notnull"`
+	AccountId           uint64                  `json:"-" pg:"account_id,pk,notnull,type:'bigint',unique:per_account"`
 	Account             *Account                `json:"-" pg:"rel:has-one"`
 	TellerLinkId        uint64                  `json:"-" pg:"teller_link_id,type:'bigint'"`
 	TellerLink          *TellerLink             `json:"-" pg:"rel:has-one"`
 	TellerId            string                  `json:"-" pg:"teller_id,notnull"`
-	InstitutionId       string                  `json:"institutionId" pg:"intitution_id,notnull"`
+	InstitutionId       string                  `json:"institutionId" pg:"institution_id,notnull"`
 	InstitutionName     string                  `json:"institutionName" pg:"institution_name,notnull"`
 	Mask                string                  `json:"mask" pg:"mask,notnull"`
 	Name                string                  `json:"name" pg:"name,notnull"`

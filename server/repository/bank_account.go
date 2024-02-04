@@ -17,9 +17,10 @@ func (r *repositoryBase) GetBankAccounts(ctx context.Context) ([]models.BankAcco
 		"accountId": r.AccountId(),
 	}
 
-	var result []models.BankAccount
+	result := make([]models.BankAccount, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidBankAccount").
+		Relation("TellerBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Select(&result)
 	return result, errors.Wrap(err, "failed to retrieve bank accounts")
@@ -37,7 +38,6 @@ func (r *repositoryBase) CreateBankAccounts(ctx context.Context, bankAccounts ..
 	for i := range bankAccounts {
 		bankAccounts[i].BankAccountId = 0
 		bankAccounts[i].AccountId = r.AccountId()
-		bankAccounts[i].CreatedByUserId = r.UserId()
 		bankAccounts[i].CreatedAt = now
 		if bankAccounts[i].Status == "" {
 			bankAccounts[i].Status = models.ActiveBankAccountStatus

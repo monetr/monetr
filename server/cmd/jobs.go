@@ -78,6 +78,7 @@ var (
 				nil,
 				nil,
 				nil,
+				nil,
 			)
 			if err != nil {
 				return err
@@ -159,6 +160,7 @@ var (
 				configuration,
 				db,
 				redisController.Pool(),
+				nil,
 				nil,
 				nil,
 				nil,

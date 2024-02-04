@@ -9,6 +9,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
@@ -90,6 +91,12 @@ func (c *Controller) postTellerLink(ctx echo.Context) error {
 	if err := repo.CreateLink(c.getContext(ctx), &link); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create link")
 	}
+
+	background.TriggerSyncTeller(c.getContext(ctx), c.jobRunner, background.SyncTellerArguments{
+		AccountId: link.AccountId,
+		LinkId:    link.LinkId,
+		Trigger:   "initial",
+	})
 
 	return ctx.JSON(http.StatusOK, link)
 }

@@ -9,13 +9,14 @@ func _() {
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
 	_ = x[TellerLinkStatusUnknown-0]
-	_ = x[TellerLinkStatusSetup-1]
-	_ = x[TellerLinkStatusDisconnected-2]
+	_ = x[TellerLinkStatusPending-1]
+	_ = x[TellerLinkStatusSetup-2]
+	_ = x[TellerLinkStatusDisconnected-3]
 }
 
-const _TellerLinkStatus_name = "TellerLinkStatusUnknownTellerLinkStatusSetupTellerLinkStatusDisconnected"
+const _TellerLinkStatus_name = "TellerLinkStatusUnknownTellerLinkStatusPendingTellerLinkStatusSetupTellerLinkStatusDisconnected"
 
-var _TellerLinkStatus_index = [...]uint8{0, 23, 44, 72}
+var _TellerLinkStatus_index = [...]uint8{0, 23, 46, 67, 95}
 
 func (i TellerLinkStatus) String() string {
 	if i >= TellerLinkStatus(len(_TellerLinkStatus_index)-1) {

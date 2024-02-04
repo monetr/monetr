@@ -50,9 +50,9 @@ type BankAccount struct {
 	LinkId              uint64             `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE"`
 	Link                *Link              `json:"-,omitempty" pg:"rel:has-one"`
 	PlaidBankAccountId  *uint64            `json:"-" pg:"plaid_bank_account_id"`
-	PlaidBankAccount    *PlaidBankAccount  `json:"plaidBankAccount,omitempty" pg:"rel:has-one,fk:plaid_bank_account_id"`
+	PlaidBankAccount    *PlaidBankAccount  `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
 	TellerBankAccountId *uint64            `json:"-" pg:"teller_bank_account_id"`
-	TellerBankAccount   *TellerBankAccount `json:"tellerBankAccount,omitempty" pg:"rel:has-one,fk:teller_bank_account_id"`
+	TellerBankAccount   *TellerBankAccount `json:"tellerBankAccount,omitempty" pg:"rel:has-one"`
 	AvailableBalance    int64              `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance      int64              `json:"currentBalance" pg:"current_balance,notnull,use_zero"`
 	Mask                string             `json:"mask" pg:"mask"`
