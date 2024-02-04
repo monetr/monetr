@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
@@ -68,6 +69,15 @@ type BaseRepository interface {
 	GetSpendingExists(ctx context.Context, bankAccountId, spendingId uint64) (bool, error)
 	GetTransaction(ctx context.Context, bankAccountId, transactionId uint64) (*models.Transaction, error)
 	GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
+	// GetTransactionsAfter will return all of the transactions after the
+	// specified date, if the specified date is null then all transactions for an
+	// account is returned. This is intended to be used for partial syncing for
+	// file uploads or teller.
+	GetTransactionsAfter(ctx context.Context, bankAccountId uint64, after *time.Time) ([]models.Transaction, error)
+	// GetPendingTransactions is the same as GetTransactions but will only return
+	// transactions that are currently in a pending state. It will not return
+	// transactions that have been deleted.
+	GetPendingTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error)
 	// GetRecentDepositTransactions will return all deposit transactions for the specified bank account within the past
 	// 24 hours.
 	GetRecentDepositTransactions(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error)
@@ -79,10 +89,6 @@ type BaseRepository interface {
 	UpdateBankAccounts(ctx context.Context, accounts ...models.BankAccount) error
 	UpdateSpending(ctx context.Context, bankAccountId uint64, updates []models.Spending) error
 	UpdateLink(ctx context.Context, link *models.Link) error
-	// UpdateLinkManualSyncTimestampMaybe will take a link ID as a candidate to be manually resynced. If that link has not
-	// been manually synced in the last 30 minutes then it will bump the last manual sync timestamp on that link and
-	// return `true`. If the link has been manually synced in the last 30 minutes, then it will return `false`.
-	UpdateLinkManualSyncTimestampMaybe(ctx context.Context, linkId uint64) (ok bool, err error)
 	UpdateFundingSchedule(ctx context.Context, fundingSchedule *models.FundingSchedule) error
 	UpdatePlaidLink(ctx context.Context, plaidLink *models.PlaidLink) error
 	UpdateTransaction(ctx context.Context, bankAccountId uint64, transaction *models.Transaction) error
@@ -106,6 +112,11 @@ type BaseRepository interface {
 	// Teller functions
 	CreateTellerLink(ctx context.Context, link *models.TellerLink) error
 	UpdateTellerLink(ctx context.Context, link *models.TellerLink) error
+	CreateTellerBankAccount(ctx context.Context, bankAccount *models.TellerBankAccount) error
+	UpdateTellerBankAccount(ctx context.Context, bankAccount *models.TellerBankAccount) error
+	CreateTellerTransaction(ctx context.Context, transaction *models.TellerTransaction) error
+	CreateTellerSync(ctx context.Context, sync *models.TellerSync) error
+	GetLatestTellerSync(ctx context.Context, tellerBankAccountId uint64) (*models.TellerSync, error)
 
 	fileRepositoryInterface
 }

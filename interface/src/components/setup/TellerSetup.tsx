@@ -12,7 +12,11 @@ export default function TellerSetup(): JSX.Element {
   const config = useAppConfiguration();
   const { open, ready, error } = useTellerConnect({
     applicationId: config.tellerApplicationId,
-    environment: 'sandbox', // Hard coded for now.
+    environment: config.tellerEnvironment, // Hard coded for now.
+    products: [
+      'balance',
+      'transactions',
+    ],
     onSuccess: (result: TellerConnectEnrollment) => {
       console.log(result);
       return;

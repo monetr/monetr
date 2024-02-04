@@ -7,8 +7,9 @@ type TellerLinkStatus uint8
 //go:generate stringer -type=TellerLinkStatus -output=teller_link.strings.go
 const (
 	TellerLinkStatusUnknown      TellerLinkStatus = 0
-	TellerLinkStatusSetup        TellerLinkStatus = 1
-	TellerLinkStatusDisconnected TellerLinkStatus = 2
+	TellerLinkStatusPending      TellerLinkStatus = 1
+	TellerLinkStatusSetup        TellerLinkStatus = 2
+	TellerLinkStatusDisconnected TellerLinkStatus = 3
 )
 
 type TellerLink struct {

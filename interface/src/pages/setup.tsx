@@ -7,7 +7,6 @@ import { MBaseButton } from '@monetr/interface/components/MButton';
 import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
-import PlaidSetup from '@monetr/interface/components/setup/PlaidSetup';
 import TellerSetup from '@monetr/interface/components/setup/TellerSetup';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
@@ -27,9 +26,9 @@ export default function SetupPage(props: SetupPageProps): JSX.Element {
   switch (step) {
     case 'greeting':
       return <Greeting onContinue={ setStep } manualEnabled={ props.manualEnabled } alreadyOnboarded={ props.alreadyOnboarded } />;
+    // case 'plaid':
+    //   return <PlaidSetup alreadyOnboarded={ props.alreadyOnboarded } />;
     case 'plaid':
-      return <PlaidSetup alreadyOnboarded={ props.alreadyOnboarded } />;
-    case 'teller':
       return <TellerSetup />;
     case 'manual':
       return <Navigate to={ manualPath } />;

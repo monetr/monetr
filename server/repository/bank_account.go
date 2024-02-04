@@ -64,6 +64,8 @@ func (r *repositoryBase) GetBankAccountsByLinkId(ctx context.Context, linkId uin
 
 	var result []models.BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
+		Relation("PlaidBankAccount").
+		Relation("TellerBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."link_id" = ? `, linkId).
 		Select(&result)

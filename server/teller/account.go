@@ -19,7 +19,7 @@ const (
 	AccountSubTypeSweep                AccountSubType = "sweep"
 
 	// Credit
-	AccountSubTypeCreditCart AccountSubType = "credit_card"
+	AccountSubTypeCreditCard AccountSubType = "credit_card"
 )
 
 type AccountStatus string

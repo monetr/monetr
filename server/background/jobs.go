@@ -11,6 +11,7 @@ import (
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/storage"
+	"github.com/monetr/monetr/server/teller"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -53,6 +54,7 @@ func NewBackgroundJobs(
 	redisPool *redis.Pool,
 	publisher pubsub.Publisher,
 	plaidPlatypus platypus.Platypus,
+	tellerClient teller.Client,
 	kms secrets.KeyManagement,
 	fileStorage storage.Storage,
 ) (*BackgroundJobs, error) {
@@ -91,6 +93,7 @@ func NewBackgroundJobs(
 		NewProcessSpendingHandler(log, db, clock),
 		NewRemoveLinkHandler(log, db, clock, publisher),
 		NewSyncPlaidHandler(log, db, clock, kms, plaidPlatypus, publisher, enqueuer),
+		NewSyncTellerHandler(log, db, clock, kms, tellerClient, publisher, enqueuer),
 	}
 
 	// Setup jobs

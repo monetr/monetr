@@ -1,6 +1,11 @@
 package teller
 
-import "time"
+import (
+	"strconv"
+	"time"
+
+	"github.com/pkg/errors"
+)
 
 type TransactionProcessingStatus string
 
@@ -60,6 +65,30 @@ type Transaction struct {
 	Amount         string             `json:"amount"`
 	RunningBalance *string            `json:"running_balance"`
 	Type           string             `json:"type"`
+}
+
+func (t Transaction) GetAmount() (int64, error) {
+	amount, err := strconv.ParseFloat(t.Amount, 64)
+	if err != nil {
+		return 0, errors.Wrap(err, "failed to parse amount")
+	}
+
+	// Convert to total cents and invert the value
+	return int64(amount) * -100, nil
+}
+
+func (t Transaction) GetRunningBalance() (*int64, error) {
+	if t.RunningBalance == nil {
+		return nil, nil
+	}
+	balance, err := strconv.ParseFloat(*t.RunningBalance, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse running balance")
+	}
+
+	// Convert to total cents and invert the value
+	cents := int64(balance) * 100
+	return &cents, nil
 }
 
 type TransactionDetails struct {

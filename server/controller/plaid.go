@@ -441,7 +441,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		InstitutionName: callbackRequest.InstitutionName,
 	}
 	if err = repo.CreatePlaidLink(c.getContext(ctx), &plaidLink); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid link")
 	}
 
 	link := models.Link{
@@ -524,7 +524,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) waitForPlaid(ctx echo.Context) error {
+func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -542,6 +542,10 @@ func (c *Controller) waitForPlaid(ctx echo.Context) error {
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve link")
+	}
+
+	if link.LinkType != models.PlaidLinkType {
+		return c.badRequest(ctx, "Link is not a Plaid link")
 	}
 
 	// If the link is done just return.

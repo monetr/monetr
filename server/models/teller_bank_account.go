@@ -27,8 +27,8 @@ type TellerBankAccount struct {
 	Type                string                  `json:"type" pg:"type,notnull"`
 	SubType             string                  `json:"subType" pg:"sub_type,notnull"`
 	Status              TellerBankAccountStatus `json:"status" pg:"status,notnull,default:0"`
+	LedgerBalance       *int64                  `json:"ledgerBalance" pg:"ledger_balance,use_zero"`
 	UpdatedAt           time.Time               `json:"updatedAt" pg:"updated_at,notnull"`
 	CreatedAt           time.Time               `json:"createdAt" pg:"created_at,notnull"`
-	CreatedByUserId     uint64                  `json:"createdByUserId" pg:"created_by_user_id,notnull"`
-	CreatedByUser       *User                   `json:"-" pg:"rel:has-one,fk:created_by_user_id"`
+	BalancedAt          *time.Time              `json:"balancedAt" pg:"balanced_at"`
 }

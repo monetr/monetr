@@ -68,6 +68,9 @@ ALTER TABLE "links"
 ADD COLUMN "teller_link_id" BIGINT,
 ADD CONSTRAINT "fk_links_teller_link" FOREIGN KEY ("teller_link_id", "account_id") REFERENCES "teller_links" ("teller_link_id", "account_id");
 
+ALTER TABLE "bank_accounts"
+DROP COLUMN "created_by_user_id";
+
 CREATE TABLE "teller_bank_accounts" (
   "teller_bank_account_id" BIGSERIAL NOT NULL,
   "account_id"             BIGINT    NOT NULL,
@@ -80,19 +83,34 @@ CREATE TABLE "teller_bank_accounts" (
   "type"                   TEXT      NOT NULL,
   "sub_type"               TEXT      NOT NULL,
   "status"                 INT       NOT NULL,
+  "ledger_balance"         BIGINT,
   "updated_at"             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
   "created_at"             TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
-  "created_by_user_id"     BIGINT    NOT NULL,
+  "balanced_at"            TIMESTAMP WITH TIME ZONE,
   CONSTRAINT "pk_teller_bank_accounts"                          PRIMARY KEY ("teller_bank_account_id", "account_id"),
   CONSTRAINT "fk_teller_bank_accounts_account"                  FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
   CONSTRAINT "fk_teller_bank_accounts_teller_link"              FOREIGN KEY ("teller_link_id", "account_id") REFERENCES "teller_links" ("teller_link_id", "account_id"),
-  CONSTRAINT "fk_teller_bank_accounts_users_created_by_user_id" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id"),
   CONSTRAINT "uq_teller_bank_accounts_teller_id"                UNIQUE ("account_id", "teller_id")
 );
 
 ALTER TABLE "bank_accounts"
 ADD COLUMN "teller_bank_account_id" BIGINT,
 ADD CONSTRAINT "fk_bank_accounts_teller_bank_account" FOREIGN KEY ("teller_bank_account_id", "account_id") REFERENCES "teller_bank_accounts" ("teller_bank_account_id", "account_id");
+
+CREATE TABLE "teller_syncs" (
+  "teller_sync_id"         BIGSERIAL NOT NULL,
+  "account_id"             BIGINT    NOT NULL,
+  "teller_bank_account_id" BIGINT    NOT NULL,
+  "timestamp"              TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+  "trigger"                TEXT NOT NULL,
+  "immutable_timestamp"    TIMESTAMP WITH TIME ZONE NOT NULL,
+  "added"                  INT NOT NULL,
+  "modified"               INT NOT NULL,
+  "removed"                INT NOT NULL,
+  CONSTRAINT "pk_teller_syncs"                     PRIMARY KEY ("teller_sync_id", "account_id"),
+  CONSTRAINT "fk_teller_syncs_account"             FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_teller_syncs_teller_bank_account" FOREIGN KEY ("teller_bank_account_id", "account_id") REFERENCES "teller_bank_accounts" ("teller_bank_account_id", "account_id")
+);
 
 CREATE TABLE "teller_transactions" (
   "teller_transaction_id"  BIGSERIAL NOT NULL,

@@ -27,6 +27,7 @@ const APIVersion = "2020-10-12"
 type Client interface {
 	GetHealth(ctx context.Context) error
 	GetInstitutions(ctx context.Context) ([]Institution, error)
+	GetAuthenticatedClient(accessToken string) AuthenticatedClient
 }
 
 type clientBase struct {
@@ -170,6 +171,7 @@ func (c *clientBase) GetAuthenticatedClient(accessToken string) AuthenticatedCli
 
 type AuthenticatedClient interface {
 	GetAccounts(ctx context.Context) ([]Account, error)
+	GetAccountBalance(ctx context.Context, id string) (*Balance, error)
 	DeleteAccount(ctx context.Context, id string) error
 	GetTransactions(ctx context.Context, accountId string, fromId *string, limit int64) ([]Transaction, error)
 }
@@ -227,6 +229,36 @@ func (c *authenticatedClientBase) DeleteAccount(ctx context.Context, id string) 
 	return nil
 }
 
+func (c *authenticatedClientBase) GetAccountBalance(
+	ctx context.Context,
+	id string,
+) (*Balance, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	var result Balance
+	path := fmt.Sprintf("/accounts/%s/balances", id)
+	request := c.newAuthenticatedRequest(span.Context(), "GET", path, nil)
+	response, err := c.client.Do(request)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to request teller account balance")
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		return nil, errors.Errorf(
+			"failed to retrieve Teller account balance: %d",
+			response.StatusCode,
+		)
+	}
+
+	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+		return nil, errors.Wrap(err, "failed to decode json response")
+	}
+
+	return &result, nil
+}
+
 func (c *authenticatedClientBase) GetTransactions(ctx context.Context, accountId string, fromId *string, limit int64) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -243,13 +275,20 @@ func (c *authenticatedClientBase) GetTransactions(ctx context.Context, accountId
 	}
 	path := fmt.Sprintf("/accounts/%s/transactions?%s", accountId, params.Encode())
 
-	items := make([]Transaction, 0)
+	items := make([]Transaction, 0, limit)
 	request := c.newAuthenticatedRequest(span.Context(), "GET", path, nil)
 	response, err := c.client.Do(request)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to request teller accounts")
+		return nil, errors.Wrap(err, "failed to request Teller transactions")
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		return nil, errors.Errorf(
+			"failed to retrieve Teller transactions: %d",
+			response.StatusCode,
+		)
+	}
 
 	if err := json.NewDecoder(response.Body).Decode(&items); err != nil {
 		return nil, errors.Wrap(err, "failed to decode json response")

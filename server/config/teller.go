@@ -2,6 +2,7 @@ package config
 
 type Teller struct {
 	Enabled       bool   `yaml:"enabled"`
+	Environment   string `yaml:"environment"`
 	ApplicationId string `yaml:"applicationId"`
 	// Certificate is the path to the certificate.pem file provided by teller.io
 	// for your client application.
