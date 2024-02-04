@@ -96,7 +96,6 @@ func GivenIHaveAPlaidBankAccount(
 		SubType:            subType,
 		LastUpdated:        clock.Now(),
 		CreatedAt:          clock.Now(),
-		CreatedByUserId:    link.CreatedByUserId,
 	}
 
 	require.NoError(

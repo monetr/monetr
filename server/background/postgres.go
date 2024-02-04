@@ -648,7 +648,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 
 		defer func() {
 			if panicErr := recover(); panicErr != nil {
-				jobLog.Errorf("panic while processing job\n%+v\n", panicErr, string(debug.Stack()))
+				jobLog.Errorf("panic while processing job\n%+v\n%s", panicErr, string(debug.Stack()))
 				if hub != nil {
 					hub.RecoverWithContext(span.Context(), panicErr)
 					hub.ConfigureScope(func(scope *sentry.Scope) {
