@@ -57,7 +57,7 @@ const (
 type Transaction struct {
 	Id             string             `json:"id"`
 	AccountId      string             `json:"account_id"`
-	Date           time.Time          `json:"date"`
+	Date           string             `json:"date"`
 	Description    string             `json:"description"`
 	Details        TransactionDetails `json:"details"`
 	Status         TransactionStatus  `json:"status"`
@@ -89,6 +89,11 @@ func (t Transaction) GetRunningBalance() (*int64, error) {
 	// Convert to total cents and invert the value
 	cents := int64(balance) * 100
 	return &cents, nil
+}
+
+func (t Transaction) GetDate(timezone *time.Location) (time.Time, error) {
+	date, err := time.ParseInLocation("2006-01-02", t.Date, timezone)
+	return date, errors.Wrap(err, "failed to parse transaction date")
 }
 
 type TransactionDetails struct {

@@ -566,7 +566,11 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			// transactions until we find one older than the date we are working with.
 			if length := len(tellerTransactions); length > 0 {
 				last := tellerTransactions[length-1]
-				if immutableTimestamp.After(last.Date) {
+				date, err := last.GetDate(s.timezone)
+				if err != nil {
+					return err
+				}
+				if immutableTimestamp.After(date) {
 					break
 				}
 			}
@@ -575,7 +579,12 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 		// Cache the transactions we have retrieve first
 		for _, tellerTransaction := range tellerTransactions {
 			// Throw out transactions who are older than our immutable timestamp.
-			if immutableTimestamp != nil && immutableTimestamp.After(tellerTransaction.Date) {
+			date, err := tellerTransaction.GetDate(s.timezone)
+			if err != nil {
+				return err
+			}
+
+			if immutableTimestamp != nil && immutableTimestamp.After(date) {
 				continue
 			}
 			s.tellerTransactions[tellerTransaction.Id] = tellerTransaction
@@ -596,6 +605,11 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 				return err
 			}
 
+			date, err := tellerTxnRaw.GetDate(s.timezone)
+			if err != nil {
+				return err
+			}
+
 			isPending := tellerTxnRaw.Status == teller.TransactionStatusPending
 
 			transaction, ok := s.transactions[tellerTransactionId]
@@ -608,7 +622,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 					Name:                tellerTxnRaw.Description,
 					Category:            string(tellerTxnRaw.Details.Category),
 					Type:                tellerTxnRaw.Type,
-					Date:                tellerTxnRaw.Date,
+					Date:                date,
 					IsPending:           isPending,
 					Amount:              amount,
 					RunningBalance:      runningBalance,
@@ -626,7 +640,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 					TellerTransaction:    &tellerTransaction,
 					Amount:               amount,
 					Categories:           nil,
-					Date:                 tellerTxnRaw.Date,
+					Date:                 date,
 					Name:                 tellerTxnRaw.Description,
 					OriginalName:         tellerTxnRaw.Description,
 					MerchantName:         tellerTxnRaw.Details.Counterparty.Name,
@@ -721,12 +735,20 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 		for i := len(tellerTransactions) - 1; i >= 0; i-- {
 			txn := tellerTransactions[i]
 			if txn.Status == teller.TransactionStatusPending {
-				newImmutableTimestamp = txn.Date.AddDate(0, 0, -1)
+				date, err := txn.GetDate(s.timezone)
+				if err != nil {
+					return err
+				}
+				newImmutableTimestamp = date.AddDate(0, 0, -1)
 			}
 		}
 		// If there wasn't one then use the latest transaction's date.
 		if immutableTimestamp.IsZero() {
-			newImmutableTimestamp = tellerTransactions[len(tellerTransactions)-1].Date.AddDate(0, 0, -1)
+			date, err := tellerTransactions[len(tellerTransactions)-1].GetDate(s.timezone)
+			if err != nil {
+				return err
+			}
+			newImmutableTimestamp = date.AddDate(0, 0, -1)
 		}
 
 		if err := s.repo.CreateTellerSync(span.Context(), &models.TellerSync{

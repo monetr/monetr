@@ -61,6 +61,7 @@ func NewClient(log *logrus.Entry, configuration config.Teller) (Client, error) {
 			Certificates: []tls.Certificate{cert},
 		}
 		roundTripper = baseTransport
+		log.Debug("teller is using mutual TLS for API calls")
 	}
 
 	base.client = &http.Client{
@@ -69,7 +70,7 @@ func NewClient(log *logrus.Entry, configuration config.Teller) (Client, error) {
 			base.tellerRoundTripper,
 		),
 		Jar:     nil,
-		Timeout: 1 * time.Second,
+		Timeout: 60 * time.Second,
 	}
 
 	return base, nil
