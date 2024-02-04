@@ -43,11 +43,12 @@ func NewClient(log *logrus.Entry, configuration config.Teller) (Client, error) {
 		configuration: configuration,
 	}
 
-	baseTransport := &http.Transport{
-		TLSHandshakeTimeout:   5 * time.Second,
-		ResponseHeaderTimeout: 60 * time.Second,
-	}
+	var roundTripper = http.DefaultTransport
 	if configuration.Certificate != "" && configuration.PrivateKey != "" {
+		baseTransport := &http.Transport{
+			TLSHandshakeTimeout:   5 * time.Second,
+			ResponseHeaderTimeout: 60 * time.Second,
+		}
 		cert, err := tls.LoadX509KeyPair(
 			configuration.Certificate,
 			configuration.PrivateKey,
@@ -59,15 +60,16 @@ func NewClient(log *logrus.Entry, configuration config.Teller) (Client, error) {
 		baseTransport.TLSClientConfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
 		}
+		roundTripper = baseTransport
 	}
 
 	base.client = &http.Client{
 		Transport: round.NewObservabilityRoundTripper(
-			baseTransport,
+			roundTripper,
 			base.tellerRoundTripper,
 		),
 		Jar:     nil,
-		Timeout: 60 * time.Second,
+		Timeout: 1 * time.Second,
 	}
 
 	return base, nil
@@ -187,7 +189,7 @@ func (c *authenticatedClientBase) newAuthenticatedRequest(ctx context.Context, m
 	authentication := base64.StdEncoding.EncodeToString(
 		[]byte(fmt.Sprintf("%s:", c.accessToken)),
 	)
-	request.Header.Add("Basic", authentication)
+	request.Header.Add("Authorization", fmt.Sprintf("Basic %s", authentication))
 
 	return request
 }
@@ -203,6 +205,10 @@ func (c *authenticatedClientBase) GetAccounts(ctx context.Context) ([]Account, e
 		return nil, errors.Wrap(err, "failed to request teller accounts")
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		return nil, errors.Errorf("failed to retrieve accounts: %d", response.StatusCode)
+	}
 
 	if err := json.NewDecoder(response.Body).Decode(&items); err != nil {
 		return nil, errors.Wrap(err, "failed to decode json response")
