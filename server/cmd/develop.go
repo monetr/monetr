@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/benbjohnson/clock"
@@ -17,9 +18,9 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/teller"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/internal/errors"
 )
 
 func init() {
@@ -298,6 +299,7 @@ func newDevelopCommand(parent *cobra.Command) {
 				CreatedByUserId:      0,
 				CreatedByUser:        &models.User{},
 			}
+			fmt.Sprint(enrollmentId, instititutionId, institutionName, tellerLink)
 
 			jobArgs := background.SyncTellerArguments{
 				AccountId: importTellerAccountId,
