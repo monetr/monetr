@@ -58,7 +58,7 @@ extraVolumes:
       secretName: monetr-authentication-certificate
   - name: teller
     secret:
-      secretName: monetr-teller-config
+      secretName: teller-configuration
 
 extraVolumeMounts:
   - name: certificates
