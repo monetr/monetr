@@ -626,4 +626,6 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
 	_ = v.BindEnv("Teller.ApplicationId", "MONETR_TELLER_APPLICATION_ID")
 	_ = v.BindEnv("Teller.Environment", "MONETR_TELLER_ENVIRONMENT")
+	_ = v.BindEnv("Teller.Certificate", "MONETR_TELLER_CERTIFICATE")
+	_ = v.BindEnv("Teller.PrivateKey", "MONETR_TELLER_PRIVATE_KEY")
 }

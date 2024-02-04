@@ -357,7 +357,7 @@ func (s *SyncTellerJob) syncBankAccounts(ctx context.Context) error {
 		return errors.New("no Teller accounts found")
 	}
 
-	s.log.Trace("found %d account(s) from Teller", len(tellerAccounts))
+	s.log.Tracef("found %d account(s) from Teller", len(tellerAccounts))
 
 	for _, account := range tellerAccounts {
 		s.tellerAccounts[account.Id] = account
@@ -422,6 +422,7 @@ func (s *SyncTellerJob) syncBankAccounts(ctx context.Context) error {
 
 			s.bankAccounts[tellerId] = bankAccount
 			s.flagNeedsBalance(tellerId)
+			s.flagNeedsTransactions(tellerId)
 			continue
 		}
 
@@ -498,7 +499,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 		return nil
 	}
 
-	for tellerId, _ := range s.needsTransactions {
+	for tellerId := range s.needsTransactions {
 		bankAccount := s.bankAccounts[tellerId]
 		log := s.log.WithFields(logrus.Fields{
 			"tellerAccountId": tellerId,
