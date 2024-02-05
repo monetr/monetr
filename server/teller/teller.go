@@ -199,6 +199,8 @@ func (c *authenticatedClientBase) GetAccounts(ctx context.Context) ([]Account, e
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	c.log.WithContext(ctx).Debug("listing teller accounts")
+
 	items := make([]Account, 0)
 	request := c.newAuthenticatedRequest(span.Context(), "GET", "/accounts", nil)
 	response, err := c.client.Do(request)
@@ -222,6 +224,10 @@ func (c *authenticatedClientBase) DeleteAccount(ctx context.Context, id string) 
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
+	c.log.WithContext(ctx).WithFields(logrus.Fields{
+		"tellerAccountId": id,
+	}).Debug("deleting access to teller account")
+
 	path := fmt.Sprintf("/accounts/%s", id)
 	request := c.newAuthenticatedRequest(span.Context(), "DELETE", path, nil)
 	response, err := c.client.Do(request)
@@ -242,6 +248,10 @@ func (c *authenticatedClientBase) GetAccountBalance(
 ) (*Balance, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+
+	c.log.WithContext(ctx).WithFields(logrus.Fields{
+		"tellerAccountId": id,
+	}).Debug("retrieving teller account balance")
 
 	var result Balance
 	path := fmt.Sprintf("/accounts/%s/balances", id)
@@ -269,6 +279,12 @@ func (c *authenticatedClientBase) GetAccountBalance(
 func (c *authenticatedClientBase) GetTransactions(ctx context.Context, accountId string, fromId *string, limit int64) ([]Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
+
+	c.log.WithContext(ctx).WithFields(logrus.Fields{
+		"tellerAccountId": accountId,
+		"fromId":          fromId,
+		"limit":           limit,
+	}).Debug("retrieving transactions from teller")
 
 	params := url.Values{
 		"count": []string{
