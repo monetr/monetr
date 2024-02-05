@@ -98,8 +98,8 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 	job := models.Job{
 		Queue:       queue,
 		Signature:   signature,
-		Input:       encodedArguments,
-		Output:      nil,
+		Input:       string(encodedArguments),
+		Output:      "",
 		Status:      models.PendingJobStatus,
 		CreatedAt:   timestamp,
 		UpdatedAt:   timestamp,
@@ -676,7 +676,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		jobLog.Trace("handling job")
 
 		// Set err outright to make sentry reporting easier.
-		err = handler.HandleConsumeJob(span.Context(), job.Input)
+		err = handler.HandleConsumeJob(span.Context(), []byte(job.Input))
 		return
 	}
 }

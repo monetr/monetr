@@ -137,3 +137,9 @@ CREATE TABLE "teller_transactions" (
 ALTER TABLE "transactions"
 ADD COLUMN "teller_transaction_id" BIGINT,
 ADD CONSTRAINT "fk_transactions_teller_transaction" FOREIGN KEY ("teller_transaction_id", "account_id") REFERENCES "teller_transactions" ("teller_transaction_id", "account_id");
+
+ALTER TABLE "jobs" 
+DROP COLUMN "input",
+DROP COLUMN "output",
+ADD COLUMN "input" JSONB,
+ADD COLUMN "output" JSONB;

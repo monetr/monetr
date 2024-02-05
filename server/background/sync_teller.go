@@ -171,6 +171,7 @@ func (s *SyncTellerHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Jo
 		Where(`"link"."link_type" = ?`, models.TellerLinkType).
 		Where(`"teller_link"."status" = ?`, models.TellerLinkStatusSetup).
 		Where(`"link"."last_attempted_update" < ?`, cutoff).
+		Where(`"link"."deleted_at" IS NULL`).
 		Select(&links)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve links that need to by synced with Teller")
@@ -786,7 +787,7 @@ func (s *SyncTellerJob) syncBalances(ctx context.Context) error {
 	defer span.Finish()
 
 	net := make([]string, 0)
-	for tellerId, _ := range s.needsBalance {
+	for tellerId := range s.needsBalance {
 		bankAccount := s.bankAccounts[tellerId]
 		log := s.log.WithFields(logrus.Fields{
 			"tellerAccountId": tellerId,
