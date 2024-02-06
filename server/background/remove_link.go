@@ -347,3 +347,20 @@ func (r *RemoveLinkJob) Run(ctx context.Context) error {
 
 	return nil
 }
+
+func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
+	ctx context.Context,
+	bankAccountIds []uint64,
+) ([]uint64, error) {
+	plaidTransactionIds := make([]uint64, 0)
+	err := r.db.ModelContext(ctx, &models.PlaidTransaction{}).
+		Join(`INNER JOIN "transactions" AS "transaction"`).
+		JoinOn(`"plaid_transaction"."plaid_transaction_id" IN ("transaction"."plaid_transaction_id", "transaction"."pending_plaid_transaction_id")`).
+		JoinOn(`"plaid_transaction"."account_id" = "transaction"."account_id"`).
+		Where(`"transaction"."account_id" = ?`, r.args.AccountId).
+		WhereIn(`"transaction"."bank_account_id" IN (?)`, bankAccountIds).
+		Column("plaid_transaction_id").
+		Select(&plaidTransactionIds)
+
+	return plaidTransactionIds, errors.Wrap(err, "failed to find plaid transactions to be removed")
+}
