@@ -240,7 +240,7 @@ func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
 		JoinOn(`"plaid_transaction"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.args.AccountId).
 		WhereIn(`"transaction"."bank_account_id" IN (?)`, bankAccountIds).
-		Column("plaid_transaction_id").
+		Column("plaid_transaction.plaid_transaction_id").
 		Select(&plaidTransactionIds)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find plaid transactions to be removed"))
@@ -251,11 +251,15 @@ func (r *RemoveLinkJob) getPlaidTransactionsToRemove(
 
 func (r *RemoveLinkJob) removePlaidTransactions(
 	ctx context.Context,
-	plaidTransactionIds []uint64,
+	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.PlaidTransaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"plaid_transaction_id" IN (?)`, plaidTransactionIds).
+		WhereIn(`"plaid_transaction_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
 		r.log.WithError(err).Errorf("failed to remove plaid transactions for link")
@@ -276,7 +280,7 @@ func (r *RemoveLinkJob) getTellerTransactionsToRemove(
 		JoinOn(`"teller_transaction"."account_id" = "transaction"."account_id"`).
 		Where(`"transaction"."account_id" = ?`, r.args.AccountId).
 		WhereIn(`"transaction"."bank_account_id" IN (?)`, bankAccountIds).
-		Column("teller_transaction_id").
+		Column("teller_transaction.teller_transaction_id").
 		Select(&tellerTransactionIds)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find teller transactions to remove"))
@@ -287,11 +291,15 @@ func (r *RemoveLinkJob) getTellerTransactionsToRemove(
 
 func (r *RemoveLinkJob) removeTellerTransactions(
 	ctx context.Context,
-	tellerTransactionIds []uint64,
+	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.TellerTransaction{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
-		WhereIn(`"teller_transaction_id" IN (?)`, tellerTransactionIds).
+		WhereIn(`"teller_transaction_id" IN (?)`, ids).
 		Delete()
 	if err != nil {
 		r.log.WithError(err).Errorf("failed to remove teller transactions for link")
@@ -360,6 +368,10 @@ func (r *RemoveLinkJob) removePlaidSyncs(
 	ctx context.Context,
 	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.PlaidSync{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"plaid_sync_id" IN (?)`, ids).
@@ -396,6 +408,10 @@ func (r *RemoveLinkJob) removeTellerSyncs(
 	ctx context.Context,
 	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.TellerSync{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"teller_sync_id" IN (?)`, ids).
@@ -419,7 +435,7 @@ func (r *RemoveLinkJob) getPlaidBankAccountsToRemove(
 		JoinOn(`"plaid_bank_account"."account_id" = "bank_account"."account_id"`).
 		Where(`"plaid_bank_account"."account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account"."bank_account_id" IN (?)`, bankAccountIds).
-		Column("plaid_bank_account_id").
+		Column("plaid_bank_account.plaid_bank_account_id").
 		Select(&ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find plaid bank accounts to remove"))
@@ -432,6 +448,10 @@ func (r *RemoveLinkJob) removePlaidBankAccounts(
 	ctx context.Context,
 	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.PlaidBankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"plaid_bank_account_id" IN (?)`, ids).
@@ -455,7 +475,7 @@ func (r *RemoveLinkJob) getTellerBankAccountsToRemove(
 		JoinOn(`"teller_bank_account"."account_id" = "bank_account"."account_id"`).
 		Where(`"teller_bank_account"."account_id" = ?`, r.args.AccountId).
 		WhereIn(`"bank_account"."bank_account_id" IN (?)`, bankAccountIds).
-		Column("teller_bank_account_id").
+		Column("teller_bank_account.teller_bank_account_id").
 		Select(&ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find teller bank accounts to remove"))
@@ -468,6 +488,10 @@ func (r *RemoveLinkJob) removeTellerBankAccounts(
 	ctx context.Context,
 	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.TellerBankAccount{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"teller_bank_account_id" IN (?)`, ids).
@@ -490,7 +514,7 @@ func (r *RemoveLinkJob) getPlaidLinksToRemove(
 		JoinOn(`"plaid_link"."account_id" = "link"."account_id"`).
 		Where(`"plaid_link"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
-		Column("plaid_link_id").
+		Column("plaid_link.plaid_link_id").
 		Select(&ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find plaid links to remove"))
@@ -503,6 +527,10 @@ func (r *RemoveLinkJob) removePlaidLinks(
 	ctx context.Context,
 	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.PlaidLink{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"plaid_link_id" IN (?)`, ids).
@@ -525,7 +553,7 @@ func (r *RemoveLinkJob) getTellerLinksToRemove(
 		JoinOn(`"teller_link"."account_id" = "link"."account_id"`).
 		Where(`"teller_link"."account_id" = ?`, r.args.AccountId).
 		Where(`"link"."link_id" = ?`, r.args.LinkId).
-		Column("teller_link_id").
+		Column("teller_link.teller_link_id").
 		Select(&ids)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to find teller links to remove"))
@@ -538,6 +566,10 @@ func (r *RemoveLinkJob) removeTellerLinks(
 	ctx context.Context,
 	ids []uint64,
 ) {
+	if len(ids) == 0 {
+		return
+	}
+
 	result, err := r.db.ModelContext(ctx, &models.TellerLink{}).
 		Where(`"account_id" = ?`, r.args.AccountId).
 		WhereIn(`"teller_link_id" IN (?)`, ids).

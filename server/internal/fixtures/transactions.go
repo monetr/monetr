@@ -95,6 +95,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount models
 		}
 		if plaidTransaction != nil {
 			transaction.PlaidTransactionId = &plaidTransaction.PlaidTransactionId
+			transaction.PlaidTransaction = plaidTransaction
 		}
 
 		err = repo.CreateTransaction(context.Background(), bankAccount.BankAccountId, &transaction)
