@@ -106,6 +106,7 @@ If you are working with Teller.io locally then you may need to configure certifi
 environment for testing. Or you may wish to use certificates even for sandbox development. If you want to do this you
 will need to create a `CMakeUserPresets.json` file with a preset that has the following cache variables:
 
+- `TELLER_ENVIRONMENT`: One of Teller's supported environments, Sandbox is recommended.
 - `TELLER_CERTIFICATE`: A path to the `.pem` certificate file from teller.io on your computer.
 - `TELLER_PRIVATE_KEY`: A path to the `.pem` private key file from teller.io on your computer.
 
@@ -128,6 +129,7 @@ For example:
       "binaryDir": "${sourceDir}/build",
       "inherits": "default",
       "cacheVariables": {
+        "TELLER_ENVIRONMENT": "sandbox",
         "TELLER_CERTIFICATE": "~/.monetr/teller/certificate.pem",
         "TELLER_PRIVATE_KEY": "~/.monetr/teller/private_key.pem"
       }
