@@ -83,6 +83,71 @@ func GivenIHaveAPlaidLink(t *testing.T, clock clock.Clock, user models.User) mod
 	return link
 }
 
+// GivenIHaveATellerLink will seed the following models and assoc them and return
+// the parent Link model:
+//   - Secret
+//   - TellerLink
+//   - Link
+//
+// Note: The secret subobject will be nil on the plaid link.
+func GivenIHaveATellerLink(t *testing.T, clock clock.Clock, user models.User) models.Link {
+	log := testutils.GetLog(t)
+	db := testutils.GetPgDatabase(t)
+	kms := testutils.GetKMS(t)
+
+	repo := repository.NewRepositoryFromSession(clock, user.UserId, user.AccountId, db)
+	secretsRepo := repository.NewSecretsRepository(
+		log,
+		clock,
+		db,
+		kms,
+		user.AccountId,
+	)
+
+	secret := repository.Secret{
+		Kind:   models.TellerSecretKind,
+		Secret: gofakeit.Generate("token_????????????????????????????????"),
+	}
+	err := secretsRepo.Store(context.Background(), &secret)
+	require.NoError(t, err, "must be able to see plaid token secret")
+
+	tellerLink := models.TellerLink{
+		AccountId:            user.AccountId,
+		SecretId:             secret.SecretId,
+		EnrollmentId:         gofakeit.Generate("enr_????????????????"),
+		UserId:               gofakeit.Generate("usr_????????????????"),
+		Status:               models.TellerLinkStatusSetup,
+		ErrorCode:            nil,
+		InstitituionName:     fmt.Sprintf("Bank Of %s", gofakeit.City()),
+		LastManualSync:       nil,
+		LastSuccessfulUpdate: nil,
+		LastAttemptedUpdate:  nil,
+		UpdatedAt:            clock.Now().UTC(),
+		CreatedAt:            clock.Now().UTC(),
+		CreatedByUserId:      user.UserId,
+	}
+	err = repo.CreateTellerLink(context.Background(), &tellerLink)
+	require.NoError(t, err, "must be able to seed teller link")
+
+	link := models.Link{
+		AccountId:       user.AccountId,
+		Account:         user.Account,
+		LinkType:        models.TellerLinkType,
+		TellerLinkId:    &tellerLink.TellerLinkId,
+		TellerLink:      &tellerLink,
+		InstitutionName: tellerLink.InstitituionName,
+		CreatedAt:       clock.Now(),
+		CreatedByUserId: user.UserId,
+		CreatedByUser:   &user,
+		UpdatedAt:       clock.Now(),
+	}
+
+	err = repo.CreateLink(context.Background(), &link)
+	require.NoError(t, err, "must be able to seed link")
+
+	return link
+}
+
 func GivenIHaveAManualLink(t *testing.T, clock clock.Clock, user models.User) models.Link {
 	db := testutils.GetPgDatabase(t)
 

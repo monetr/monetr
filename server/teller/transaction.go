@@ -1,10 +1,16 @@
 package teller
 
 import (
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
+)
+
+var (
+	descriptionRegex = regexp.MustCompile(`\S+`)
 )
 
 type TransactionProcessingStatus string
@@ -67,6 +73,11 @@ type Transaction struct {
 	Type           string             `json:"type"`
 }
 
+func (t Transaction) GetDescription() string {
+	pieces := descriptionRegex.FindAllString(t.Description, -1)
+	return strings.Join(pieces, " ")
+}
+
 func (t Transaction) GetAmount() (int64, error) {
 	amount, err := strconv.ParseFloat(t.Amount, 64)
 	if err != nil {
@@ -74,7 +85,7 @@ func (t Transaction) GetAmount() (int64, error) {
 	}
 
 	// Convert to total cents and invert the value
-	return int64(amount) * -100, nil
+	return int64(amount * -100), nil
 }
 
 func (t Transaction) GetRunningBalance() (*int64, error) {
@@ -87,7 +98,7 @@ func (t Transaction) GetRunningBalance() (*int64, error) {
 	}
 
 	// Convert to total cents and invert the value
-	cents := int64(balance) * 100
+	cents := int64(balance * 100)
 	return &cents, nil
 }
 

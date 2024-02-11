@@ -20,7 +20,7 @@ func (b Balance) GetLedger() (int64, error) {
 	}
 
 	// Convert to total cents
-	return int64(ledger) * 100, nil
+	return int64(ledger * 100), nil
 }
 
 // GetAvailable will return the available balance from Teller's API as a 64 bit
@@ -33,5 +33,5 @@ func (b Balance) GetAvailable() (int64, error) {
 	}
 
 	// Convert to total cents
-	return int64(balance) * 100, nil
+	return int64(balance * 100), nil
 }

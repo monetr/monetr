@@ -498,6 +498,114 @@ func (s *SyncTellerJob) syncBankAccounts(ctx context.Context) error {
 	return nil
 }
 
+func (s *SyncTellerJob) retrieveTransactions(
+	ctx context.Context,
+	log *logrus.Entry,
+	tellerId string,
+	immutableTimestamp *time.Time,
+) error {
+	tellerTransactions := make([]teller.Transaction, 0)
+	var pageSize int64 = 25
+	for {
+		var fromId *string
+		if length := len(tellerTransactions); length > 0 {
+			fromId = &tellerTransactions[length-1].Id
+		}
+		transactions, err := s.client.GetTransactions(
+			ctx,
+			tellerId,
+			fromId,
+			pageSize,
+		)
+		if err != nil {
+			log.WithField("fromId", fromId).
+				WithError(err).
+				Error("failed to retrieve transactions from Teller")
+			return err
+		}
+
+		tellerTransactions = append(tellerTransactions, transactions...)
+		if len(transactions) < int(pageSize) {
+			// If we receive fewer than the number we requested that means we have
+			// reached the end of the list.
+			break
+		}
+
+		// If we do not have an immutable timestamp then keep requesting until we
+		// run out of transactions.
+		if immutableTimestamp == nil {
+			continue
+		}
+
+		// If we do have an immutable timestamp though then only request
+		// transactions until we find one older than the date we are working with.
+		if length := len(tellerTransactions); length > 0 {
+			last := tellerTransactions[length-1]
+			date, err := last.GetDate(s.timezone)
+			if err != nil {
+				return err
+			}
+			if immutableTimestamp.After(date) {
+				break
+			}
+		}
+	}
+
+	// Clear out the transactions from a previous account. We are only working
+	// with a single account at a time.
+	s.tellerTransactions = make(map[string]teller.Transaction)
+
+	// Cache the transactions we have retrieve first
+	for _, tellerTransaction := range tellerTransactions {
+		// Throw out transactions who are older than our immutable timestamp.
+		date, err := tellerTransaction.GetDate(s.timezone)
+		if err != nil {
+			return err
+		}
+
+		if immutableTimestamp != nil && immutableTimestamp.After(date) {
+			continue
+		}
+		s.tellerTransactions[tellerTransaction.Id] = tellerTransaction
+	}
+
+	return nil
+}
+
+func (s *SyncTellerJob) getNewImmutableTimestamp() (time.Time, error) {
+	// Now calculate the new immutable timestamp based on the transactions we
+	// just received.
+	var newImmutableTimestamp time.Time
+	// Find the oldest pending transaction and use that
+	for _, txn := range s.tellerTransactions {
+		if txn.Status == teller.TransactionStatusPending {
+			date, err := txn.GetDate(s.timezone)
+			if err != nil {
+				return newImmutableTimestamp, err
+			}
+			date = date.AddDate(0, 0, -1)
+			if newImmutableTimestamp.IsZero() || date.Before(newImmutableTimestamp) {
+				newImmutableTimestamp = date
+			}
+		}
+	}
+	// If there wasn't one then use the latest transaction's date.
+	if newImmutableTimestamp.IsZero() {
+		for _, txn := range s.tellerTransactions {
+			date, err := txn.GetDate(s.timezone)
+			if err != nil {
+				return newImmutableTimestamp, err
+			}
+			date = date.AddDate(0, 0, -1)
+			if newImmutableTimestamp.IsZero() || date.Before(newImmutableTimestamp) {
+				newImmutableTimestamp = date
+			}
+		}
+	}
+
+	return newImmutableTimestamp, nil
+}
+
 func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
@@ -516,7 +624,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 
 		latestSync, err := s.repo.GetLatestTellerSync(span.Context(), *bankAccount.TellerBankAccountId)
 		if err != nil {
-			log.WithError(err).Error("failed to detrmine latest sync data, will skip syncing transactions for account")
+			log.WithError(err).Error("failed to determine latest sync data, will skip syncing transactions for account")
 			continue
 		}
 
@@ -541,65 +649,15 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			s.transactions[transaction.TellerTransaction.TellerId] = transaction
 		}
 
-		tellerTransactions := make([]teller.Transaction, 0)
-		var pageSize int64 = 25
-		for {
-			var fromId *string
-			if length := len(tellerTransactions); length > 0 {
-				fromId = &tellerTransactions[length-1].Id
-			}
-			transactions, err := s.client.GetTransactions(
-				span.Context(),
-				tellerId,
-				fromId,
-				pageSize,
-			)
-			if err != nil {
-				log.WithField("fromId", fromId).
-					WithError(err).
-					Error("failed to retrieve transactions from Teller")
-				return err
-			}
-
-			tellerTransactions = append(tellerTransactions, transactions...)
-			if len(transactions) < int(pageSize) {
-				// If we receive fewer than the number we requested that means we have
-				// reached the end of the list.
-				break
-			}
-
-			// If we do not have an immutable timestamp then keep requesting until we
-			// run out of transactions.
-			if immutableTimestamp == nil {
-				continue
-			}
-
-			// If we do have an immutable timestamp though then only request
-			// transactions until we find one older than the date we are working with.
-			if length := len(tellerTransactions); length > 0 {
-				last := tellerTransactions[length-1]
-				date, err := last.GetDate(s.timezone)
-				if err != nil {
-					return err
-				}
-				if immutableTimestamp.After(date) {
-					break
-				}
-			}
-		}
-
-		// Cache the transactions we have retrieve first
-		for _, tellerTransaction := range tellerTransactions {
-			// Throw out transactions who are older than our immutable timestamp.
-			date, err := tellerTransaction.GetDate(s.timezone)
-			if err != nil {
-				return err
-			}
-
-			if immutableTimestamp != nil && immutableTimestamp.After(date) {
-				continue
-			}
-			s.tellerTransactions[tellerTransaction.Id] = tellerTransaction
+		// Retrieve the transactions from teller and store them.
+		if err := s.retrieveTransactions(
+			span.Context(),
+			log,
+			tellerId,
+			immutableTimestamp,
+		); err != nil {
+			log.WithError(err).Error("failed to retrieve transactions from teller")
+			continue
 		}
 
 		for tellerTransactionId, tellerTxnRaw := range s.tellerTransactions {
@@ -631,7 +689,7 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 				tellerTransaction := models.TellerTransaction{
 					TellerBankAccountId: *bankAccount.TellerBankAccountId,
 					TellerId:            tellerTransactionId,
-					Name:                tellerTxnRaw.Description,
+					Name:                tellerTxnRaw.GetDescription(),
 					Category:            string(tellerTxnRaw.Details.Category),
 					Type:                tellerTxnRaw.Type,
 					Date:                date,
@@ -646,15 +704,15 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 					return err
 				}
 
-				transaction := models.Transaction{
+				transaction = models.Transaction{
 					BankAccountId:        bankAccount.BankAccountId,
 					TellerTransactionId:  &tellerTransaction.TellerTransactionId,
 					TellerTransaction:    &tellerTransaction,
 					Amount:               amount,
 					Categories:           nil,
 					Date:                 date,
-					Name:                 tellerTxnRaw.Description,
-					OriginalName:         tellerTxnRaw.Description,
+					Name:                 tellerTxnRaw.GetDescription(),
+					OriginalName:         tellerTxnRaw.GetDescription(),
 					MerchantName:         tellerTxnRaw.Details.Counterparty.Name,
 					OriginalMerchantName: tellerTxnRaw.Details.Counterparty.Name,
 					Currency:             "USD", // TODO Derive this from somewhere
@@ -671,6 +729,11 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 				// if the transaction is not pending.
 				if !isPending {
 					s.netChanges[tellerId] -= amount
+				} else {
+					// Flag the account for updating, but don't affect main balance. Net changes only affects the
+					// current balance, but by flagging it like this we make sure that it will be recalculated for the
+					// available balance based on the pending transactions.
+					s.netChanges[tellerId] += 0
 				}
 				s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 				continue
@@ -743,27 +806,9 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 		}
 
-		// Now calculate the new immutable timestamp based on the transactions we
-		// just received.
-		var newImmutableTimestamp time.Time
-		// Find the oldest pending transaction and use that
-		for i := len(tellerTransactions) - 1; i >= 0; i-- {
-			txn := tellerTransactions[i]
-			if txn.Status == teller.TransactionStatusPending {
-				date, err := txn.GetDate(s.timezone)
-				if err != nil {
-					return err
-				}
-				newImmutableTimestamp = date.AddDate(0, 0, -1)
-			}
-		}
-		// If there wasn't one then use the latest transaction's date.
-		if newImmutableTimestamp.IsZero() {
-			date, err := tellerTransactions[len(tellerTransactions)-1].GetDate(s.timezone)
-			if err != nil {
-				return err
-			}
-			newImmutableTimestamp = date.AddDate(0, 0, -1)
+		newImmutableTimestamp, err := s.getNewImmutableTimestamp()
+		if err != nil {
+			return err
 		}
 
 		if err := s.repo.CreateTellerSync(span.Context(), &models.TellerSync{
@@ -781,7 +826,6 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 
 	return nil
 }
-
 func (s *SyncTellerJob) syncBalances(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()

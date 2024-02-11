@@ -123,6 +123,7 @@ func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId
 
 	var items []models.Transaction
 	query := r.txn.ModelContext(span.Context(), &items).
+		Relation("TellerTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
 		Where(`"transaction"."deleted_at" IS NULL`).

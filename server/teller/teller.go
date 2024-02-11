@@ -24,6 +24,7 @@ import (
 const APIHostname = "api.teller.io"
 const APIVersion = "2020-10-12"
 
+//go:generate mockgen -source=teller.go -package=mockgenteller -destination=../internal/mockgenteller/teller.go Client
 type Client interface {
 	GetHealth(ctx context.Context) error
 	GetInstitutions(ctx context.Context) ([]Institution, error)
@@ -172,6 +173,7 @@ func (c *clientBase) GetAuthenticatedClient(accessToken string) AuthenticatedCli
 	}
 }
 
+//go:generate mockgen -source=teller.go -package=mockgenteller -destination=../internal/mockgenteller/teller.go AuthenticatedClient
 type AuthenticatedClient interface {
 	GetAccounts(ctx context.Context) ([]Account, error)
 	GetAccountBalance(ctx context.Context, id string) (*Balance, error)
