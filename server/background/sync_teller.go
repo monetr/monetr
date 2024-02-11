@@ -155,7 +155,7 @@ func (s SyncTellerHandler) DefaultSchedule() string {
 	// Run every 12 hours. Links that have not received any updates in the last 13
 	// hours will be synced with Teller. If no updates have been detected then
 	// nothing will happen.
-	return "0 0 */12 * * *"
+	return "0 0 */6 * * *"
 }
 
 func (s *SyncTellerHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer JobEnqueuer) error {
@@ -164,7 +164,7 @@ func (s *SyncTellerHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Jo
 	log.Info("retrieving links to sync with Teller")
 
 	links := make([]models.Link, 0)
-	cutoff := s.clock.Now().Add(-11 * time.Hour)
+	cutoff := s.clock.Now().Add(-3 * time.Hour)
 	err := s.db.ModelContext(ctx, &links).
 		Join(`INNER JOIN "teller_links" AS "teller_link"`).
 		JoinOn(`"teller_link"."teller_link_id" = "link"."teller_link_id" AND "teller_link"."account_id" = "link"."account_id"`).
