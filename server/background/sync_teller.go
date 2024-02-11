@@ -170,7 +170,7 @@ func (s *SyncTellerHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Jo
 		JoinOn(`"teller_link"."teller_link_id" = "link"."teller_link_id" AND "teller_link"."account_id" = "link"."account_id"`).
 		Where(`"link"."link_type" = ?`, models.TellerLinkType).
 		Where(`"teller_link"."status" = ?`, models.TellerLinkStatusSetup).
-		Where(`"link"."last_attempted_update" < ?`, cutoff).
+		Where(`"teller_link"."last_attempted_update" < ? OR "teller_link"."last_attempted_update" IS NULL`, cutoff).
 		Where(`"link"."deleted_at" IS NULL`).
 		Select(&links)
 	if err != nil {
@@ -897,8 +897,7 @@ func (s *SyncTellerJob) syncBalances(ctx context.Context) error {
 		balance, err := s.client.GetAccountBalance(span.Context(), tellerId)
 		if err != nil {
 			log.WithError(err).Error("failed to retrieve account balance from Teller")
-			net = append(net, tellerId)
-			continue
+			return errors.Wrap(err, "failed to hard sync balance for account")
 		}
 
 		currentBalance := bankAccount.CurrentBalance
@@ -919,7 +918,10 @@ func (s *SyncTellerJob) syncBalances(ctx context.Context) error {
 
 		bankAccount.AvailableBalance = bankAccount.CurrentBalance - pendingBalance
 
-		tellerAvailable, _ := balance.GetAvailable()
+		tellerAvailable, err := balance.GetAvailable()
+		if err != nil {
+			return err
+		}
 
 		log.WithFields(logrus.Fields{
 			"oldCurrent":      currentBalance,
