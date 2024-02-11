@@ -2,6 +2,7 @@ package recurring
 
 import (
 	"sort"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/monetr/monetr/server/models"
@@ -27,6 +28,11 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) AddTransaction(txn *models.Transactio
 	s.tfidf.AddTransaction(txn)
 }
 
+type memberItem struct {
+	ID   uint64
+	Date time.Time
+}
+
 func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.TransactionCluster {
 	datums := s.tfidf.GetDocuments()
 	s.dbscan = NewDBSCAN(datums, Epsilon, MinNeighbors)
@@ -36,7 +42,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 	for i, cluster := range result {
 		group := models.TransactionCluster{
 			TransactionClusterId: uuid.NewString(),
-			Members:              make([]uint64, 0, len(cluster.Items)),
+			Members:              make([]uint64, len(cluster.Items)),
 		}
 
 		// TODO I want to determine what the best name for a given cluster is, and
@@ -62,6 +68,7 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 		var highestName string
 		var highestId uint64
 
+		items := make([]memberItem, 0, len(cluster.Items))
 		for index := range cluster.Items {
 			datum, ok := s.dbscan.GetDocumentByIndex(index)
 			if !ok {
@@ -71,7 +78,10 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 			}
 
 			// Add the transaction ID to the matches.
-			group.Members = append(group.Members, datum.ID)
+			items = append(items, memberItem{
+				ID:   datum.ID,
+				Date: datum.Transaction.Date,
+			})
 
 			if datum.Transaction.OriginalMerchantName != "" {
 				merchants[datum.Transaction.OriginalMerchantName] += 1
@@ -82,9 +92,13 @@ func (s *SimilarTransactions_TFIDF_DBSCAN) DetectSimilarTransactions() []models.
 			}
 		}
 
-		sort.Slice(group.Members, func(i, j int) bool {
-			return group.Members[i] < group.Members[j]
+		sort.SliceStable(items, func(i, j int) bool {
+			return items[i].Date.After(items[j].Date)
 		})
+
+		for i := range items {
+			group.Members[i] = items[i].ID
+		}
 
 		if len(merchants) == 0 {
 			group.Name = highestName

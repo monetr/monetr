@@ -2,16 +2,15 @@ package background
 
 import (
 	"context"
-
-	"github.com/vmihailenco/msgpack/v5"
+	"encoding/json"
 )
 
 type JobMarshaller func(v interface{}) ([]byte, error)
 type JobUnmarshaller func(src []byte, dst interface{}) error
 
 var (
-	DefaultJobMarshaller   JobMarshaller   = msgpack.Marshal
-	DefaultJobUnmarshaller JobUnmarshaller = msgpack.Unmarshal
+	DefaultJobMarshaller   JobMarshaller   = json.Marshal
+	DefaultJobUnmarshaller JobUnmarshaller = json.Unmarshal
 )
 
 type JobHandler interface {

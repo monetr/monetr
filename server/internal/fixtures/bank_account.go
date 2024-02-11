@@ -12,6 +12,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func ReadBankAccounts(t *testing.T, clock clock.Clock, link models.Link) []models.BankAccount {
+	require.NotZero(t, link.LinkId, "link id must be included")
+	require.NotZero(t, link.AccountId, "link id must be included")
+
+	db := testutils.GetPgDatabase(t)
+	repo := repository.NewRepositoryFromSession(clock, link.CreatedByUserId, link.AccountId, db)
+
+	bankAccounts, err := repo.GetBankAccountsByLinkId(context.Background(), link.LinkId)
+	require.NoError(t, err, "must be able to read bank accounts")
+
+	return bankAccounts
+}
+
 func GivenIHaveABankAccount(t *testing.T, clock clock.Clock, link *models.Link, accountType models.BankAccountType, subType models.BankAccountSubType) models.BankAccount {
 	require.NotNil(t, link, "link must actually be provided")
 	require.NotZero(t, link.LinkId, "link id must be included")
@@ -96,7 +109,6 @@ func GivenIHaveAPlaidBankAccount(
 		SubType:            subType,
 		LastUpdated:        clock.Now(),
 		CreatedAt:          clock.Now(),
-		CreatedByUserId:    link.CreatedByUserId,
 	}
 
 	require.NoError(

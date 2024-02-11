@@ -199,12 +199,16 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	})
 
 	repoParty := baseParty.Group("", c.databaseRepositoryMiddleware)
-	// Plaid incoming webhooks
-	repoParty.POST("/plaid/webhook", c.handlePlaidWebhook)
-	// Stripe incoming webhooks
+
+	// Webhook endpoints
+	repoParty.POST("/plaid/webhook", c.postPlaidWebhook)
+	repoParty.POST("/teller/webhook", c.postTellerWebhook)
 	repoParty.POST("/stripe/webhook", c.handleStripeWebhook)
+
+	// Endpoints used by the client/UI.
 	repoParty.GET("/sentry", c.getSentryUI)
 	repoParty.GET("/config", c.configEndpoint)
+
 	// Authentication
 	repoParty.POST("/authentication/login", c.loginEndpoint)
 	repoParty.GET("/authentication/logout", c.logoutEndpoint)
@@ -281,8 +285,9 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	billed.POST("/plaid/link/update/callback", c.updatePlaidTokenCallback)
 	billed.GET("/plaid/link/token/new", c.newPlaidToken)
 	billed.POST("/plaid/link/token/callback", c.postPlaidTokenCallback)
-	billed.GET("/plaid/link/setup/wait/:linkId", c.waitForPlaid)
+	billed.GET("/plaid/link/setup/wait/:linkId", c.getWaitForPlaid)
 	billed.POST("/plaid/link/sync", c.postSyncPlaidManually)
 	// Teller
 	billed.POST("/teller/link", c.postTellerLink)
+	billed.GET("/teller/link/:linkId/wait", c.getWaitForTeller)
 }

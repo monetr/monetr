@@ -28,7 +28,6 @@ func (r *repositoryBase) InsertTransactions(ctx context.Context, transactions []
 	return errors.Wrap(err, "failed to insert transactions")
 }
 
-// DEPRECATED!
 func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error) {
 	if len(plaidTransactionIds) == 0 {
 		return map[string]models.Transaction{}, nil
@@ -96,6 +95,76 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."deleted_at" IS NULL`).
+		Limit(limit).
+		Offset(offset).
+		Order(`date DESC`).
+		Order(`transaction_id DESC`).
+		Select(&items)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return items, nil
+}
+
+func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId uint64, after *time.Time) ([]models.Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+		"after":         after,
+	}
+
+	var items []models.Transaction
+	query := r.txn.ModelContext(span.Context(), &items).
+		Relation("TellerTransaction").
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."deleted_at" IS NULL`).
+		Order(`date DESC`).
+		Order(`transaction_id DESC`)
+
+	if after != nil {
+		query = query.Where(`"transaction"."date" > ?`, *after)
+	}
+
+	err := query.Select(&items)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, crumbs.WrapError(span.Context(), err, "failed to retrieve transactions")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return items, nil
+}
+
+func (r *repositoryBase) GetPendingTransactions(
+	ctx context.Context,
+	bankAccountId uint64,
+	limit, offset int,
+) ([]models.Transaction, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"accountId":     r.AccountId(),
+		"bankAccountId": bankAccountId,
+		"limit":         limit,
+		"offset":        offset,
+	}
+
+	var items []models.Transaction
+	err := r.txn.ModelContext(span.Context(), &items).
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
+		Where(`"transaction"."is_pending" = ?`, true).
 		Where(`"transaction"."deleted_at" IS NULL`).
 		Limit(limit).
 		Offset(offset).

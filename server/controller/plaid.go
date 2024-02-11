@@ -16,6 +16,7 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/platypus"
+	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
@@ -268,23 +269,16 @@ func (c *Controller) updatePlaidTokenCallback(ctx echo.Context) error {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to exchange token")
 	}
 
-	currentAccessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(
-		c.getContext(ctx),
-		repo.AccountId(),
-		link.PlaidLink.PlaidId,
-	)
+	secrets := c.mustGetSecretsRepository(ctx)
+	secret, err := secrets.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 	if err != nil {
 		log.WithError(err).Warn("failed to retrieve access token for existing plaid link")
 	}
 
-	if currentAccessToken != result.AccessToken {
+	if secret.Secret != result.AccessToken {
 		log.Info("access token for link has been updated")
-		if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
-			c.getContext(ctx),
-			repo.AccountId(),
-			link.PlaidLink.PlaidId,
-			result.AccessToken,
-		); err != nil {
+		secret.Secret = result.AccessToken
+		if err = secrets.Store(c.getContext(ctx), secret); err != nil {
 			log.WithError(err).Warn("failed to store updated access token")
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store updated access token")
 		}
@@ -427,18 +421,19 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		}
 	}
 
-	if err = c.plaidSecrets.UpdateAccessTokenForPlaidLinkId(
-		c.getContext(ctx),
-		repo.AccountId(),
-		result.ItemId,
-		result.AccessToken,
-	); err != nil {
+	secrets := c.mustGetSecretsRepository(ctx)
+	secret := repository.Secret{
+		Kind:   models.PlaidSecretKind,
+		Secret: result.AccessToken,
+	}
+	if err = secrets.Store(c.getContext(ctx), &secret); err != nil {
 		log.WithError(err).Errorf("failed to store access token")
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
 	}
 
 	plaidLink := models.PlaidLink{
 		PlaidId:         result.ItemId,
+		SecretId:        secret.SecretId,
 		Products:        consts.PlaidProductStrings(),
 		WebhookUrl:      webhook,
 		Status:          models.PlaidLinkStatusPending,
@@ -446,12 +441,12 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 		InstitutionName: callbackRequest.InstitutionName,
 	}
 	if err = repo.CreatePlaidLink(c.getContext(ctx), &plaidLink); err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store credentials")
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create Plaid link")
 	}
 
 	link := models.Link{
 		AccountId:       repo.AccountId(),
-		PlaidLinkId:     &plaidLink.PlaidLinkID,
+		PlaidLinkId:     &plaidLink.PlaidLinkId,
 		InstitutionName: callbackRequest.InstitutionName,
 		LinkType:        models.PlaidLinkType,
 	}
@@ -480,7 +475,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	for i := range plaidAccounts {
 		plaidAccount := plaidAccounts[i]
 		plaidBankAccount := models.PlaidBankAccount{
-			PlaidLinkId:      plaidLink.PlaidLinkID,
+			PlaidLinkId:      plaidLink.PlaidLinkId,
 			PlaidId:          plaidAccount.GetAccountId(),
 			Name:             plaidAccount.GetName(),
 			OfficialName:     plaidAccount.GetOfficialName(),
@@ -529,7 +524,7 @@ func (c *Controller) postPlaidTokenCallback(ctx echo.Context) error {
 	})
 }
 
-func (c *Controller) waitForPlaid(ctx echo.Context) error {
+func (c *Controller) getWaitForPlaid(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Plaid is not enabled on this server, only manual links are allowed.")
 	}
@@ -547,6 +542,10 @@ func (c *Controller) waitForPlaid(ctx echo.Context) error {
 	link, err := repo.GetLink(c.getContext(ctx), linkId)
 	if err != nil {
 		return c.wrapPgError(ctx, err, "failed to retrieve link")
+	}
+
+	if link.LinkType != models.PlaidLinkType {
+		return c.badRequest(ctx, "Link is not a Plaid link")
 	}
 
 	// If the link is done just return.

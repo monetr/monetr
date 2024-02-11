@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash/fnv"
+	"runtime/debug"
 	"sort"
 	"sync/atomic"
 	"time"
@@ -97,8 +98,8 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 	job := models.Job{
 		Queue:       queue,
 		Signature:   signature,
-		Input:       encodedArguments,
-		Output:      nil,
+		Input:       string(encodedArguments),
+		Output:      "",
 		Status:      models.PendingJobStatus,
 		CreatedAt:   timestamp,
 		UpdatedAt:   timestamp,
@@ -647,7 +648,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 
 		defer func() {
 			if panicErr := recover(); panicErr != nil {
-				jobLog.Error("panic while processing job")
+				jobLog.Errorf("panic while processing job\n%+v\n%s", panicErr, string(debug.Stack()))
 				if hub != nil {
 					hub.RecoverWithContext(span.Context(), panicErr)
 					hub.ConfigureScope(func(scope *sentry.Scope) {
@@ -675,7 +676,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		jobLog.Trace("handling job")
 
 		// Set err outright to make sentry reporting easier.
-		err = handler.HandleConsumeJob(span.Context(), job.Input)
+		err = handler.HandleConsumeJob(span.Context(), []byte(job.Input))
 		return
 	}
 }

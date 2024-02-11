@@ -237,39 +237,72 @@ func (c *Controller) deleteLink(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "failed to retrieve the specified link")
 	}
 
+	link.DeletedAt = myownsanity.TimeP(c.clock.Now().UTC())
+	if err := repo.UpdateLink(c.getContext(ctx), link); err != nil {
+		return c.wrapPgError(ctx, err, "failed to mark the link as deleted")
+	}
+
+	secretsRepo := c.mustGetSecretsRepository(ctx)
+
 	if link.PlaidLink != nil {
-		accessToken, err := c.plaidSecrets.GetAccessTokenForPlaidLinkId(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId)
+		secret, err := secretsRepo.Read(c.getContext(ctx), link.PlaidLink.SecretId)
 		if err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to retrieve access token for plaid link.", "secrets", map[string]interface{}{
-				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.PlaidId,
+				"linkId":   link.LinkId,
+				"itemId":   link.PlaidLink.PlaidId,
+				"secretId": secret.SecretId,
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
 		}
 
-		client, err := c.plaid.NewClient(c.getContext(ctx), link, accessToken, link.PlaidLink.PlaidId)
+		client, err := c.plaid.NewClient(
+			c.getContext(ctx),
+			link,
+			secret.Secret,
+			link.PlaidLink.PlaidId,
+		)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to create plaid client")
 		}
 
 		if err = client.RemoveItem(c.getContext(ctx)); err != nil {
 			crumbs.Error(c.getContext(ctx), "Failed to remove item", "plaid", map[string]interface{}{
-				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.PlaidId,
-				"error":  err.Error(),
+				"linkId":   link.LinkId,
+				"itemId":   link.PlaidLink.PlaidId,
+				"secretId": secret.SecretId,
+				"error":    err.Error(),
 			})
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove item from Plaid")
 		}
-
-		if err = c.plaidSecrets.RemoveAccessTokenForPlaidLink(c.getContext(ctx), repo.AccountId(), link.PlaidLink.PlaidId); err != nil {
-			crumbs.Error(c.getContext(ctx), "Failed to remove access token", "secrets", map[string]interface{}{
-				"linkId": link.LinkId,
-				"itemId": link.PlaidLink.PlaidId,
-				"error":  err.Error(),
+	}
+	if link.TellerLink != nil {
+		secret, err := secretsRepo.Read(c.getContext(ctx), link.TellerLink.SecretId)
+		if err != nil {
+			crumbs.Error(c.getContext(ctx), "Failed to retrieve access token for Teller link.", "secrets", map[string]interface{}{
+				"linkId":       link.LinkId,
+				"enrollmentId": link.TellerLink.EnrollmentId,
+				"secretId":     secret.SecretId,
 			})
-			// We don't want to stop the request here, it does suck that we weren't able to remove the access token, but
-			// at this point the user could not retry this request. So we have to commit to it. If a stray access token
-			// is left over then that is okay. We could add a job later to do periodic cleanup if this becomes an issue.
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve access token for removal")
+		}
+
+		client := c.teller.GetAuthenticatedClient(secret.Secret)
+
+		bankAccounts, err := repo.GetBankAccountsByLinkId(c.getContext(ctx), link.LinkId)
+		if err != nil {
+			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to retrieve bank accounts")
+		}
+
+		for i := range bankAccounts {
+			bankAccount := bankAccounts[i]
+			if err := client.DeleteAccount(c.getContext(ctx), bankAccount.TellerBankAccount.TellerId); err != nil {
+				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to remove account access")
+			}
+
+			bankAccount.TellerBankAccount.Status = models.TellerBankAccountStatusClosed
+			if err := repo.UpdateTellerBankAccount(c.getContext(ctx), bankAccount.TellerBankAccount); err != nil {
+				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to update teller bank account")
+			}
 		}
 	}
 

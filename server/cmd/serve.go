@@ -26,11 +26,10 @@ import (
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
-	"github.com/monetr/monetr/server/repository"
-	"github.com/monetr/monetr/server/secrets"
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
+	"github.com/monetr/monetr/server/teller"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -113,7 +112,7 @@ func RunServer() error {
 			SampleRate:       configuration.Sentry.SampleRate,
 			EnableTracing:    configuration.Sentry.TraceSampleRate > 0,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
-			BeforeSend: func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			BeforeSend: func(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 				// Make sure user authentication doesn't make its way into sentry.
 				if event.Request != nil {
 					event.Request.Cookies = ""
@@ -135,7 +134,7 @@ func RunServer() error {
 		}
 
 		sentry.ConfigureScope(func(scope *sentry.Scope) {
-			scope.AddEventProcessor(func(event *sentry.Event, hint *sentry.EventHint) *sentry.Event {
+			scope.AddEventProcessor(func(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 				if event.Request != nil {
 					event.Request.Cookies = ""
 					if event.Request.Headers != nil {
@@ -195,10 +194,6 @@ func RunServer() error {
 		basicPaywall = billing.NewBasicPaywall(log, clock, accountRepo)
 	}
 
-	if configuration.Plaid.WebhooksEnabled {
-		log.Debugf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain)
-	}
-
 	if configuration.Stripe.Enabled && configuration.Stripe.WebhooksEnabled {
 		log.Debugf("stripe webhooks are enabled and will be sent to: %s", configuration.Stripe.WebhooksDomain)
 	}
@@ -209,32 +204,52 @@ func RunServer() error {
 		return err
 	}
 
-	plaidSecrets := secrets.NewPostgresPlaidSecretsProvider(log, db, kms)
-	plaidClient := platypus.NewPlaid(log, plaidSecrets, repository.NewPlaidRepository(db), configuration.Plaid)
+	var plaidClient *platypus.Plaid
+	if configuration.Plaid.Enabled {
+		log.Debug("plaid is enabled and will be setup")
+		if configuration.Plaid.WebhooksEnabled {
+			log.Debugf("plaid webhooks are enabled and will be sent to: %s", configuration.Plaid.WebhooksDomain)
+		}
+		plaidClient = platypus.NewPlaid(log, clock, kms, db, configuration.Plaid)
+	}
+
+	var tellerClient teller.Client
+	if configuration.Teller.GetEnabled() {
+		log.Debug("teller is enabled and will be setup")
+		tellerClient, err = teller.NewClient(log, configuration.Teller)
+		if err != nil {
+			log.WithError(err).Fatal("failed to setup teller!")
+			return err
+		}
+	}
 
 	var email communication.EmailCommunication
 	if configuration.Email.Enabled {
-		email = communication.NewEmailCommunication(
-			log,
-			configuration,
-		)
+		email = communication.NewEmailCommunication(log, configuration)
 	}
 
-	backgroundJobs, err := background.NewBackgroundJobs(
-		context.Background(),
-		log,
-		clock,
-		configuration,
-		db,
-		redisController.Pool(),
-		pubsub.NewPostgresPubSub(log, db),
-		plaidClient,
-		plaidSecrets,
-		fileStorage,
-	)
-	if err != nil {
-		log.WithError(err).Fatalf("failed to setup background job proceessor")
-		return err
+	var backgroundJobs *background.BackgroundJobs
+	{ // Setup the background job processor with a 30 second timeout.
+		withTimeout, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		backgroundJobs, err = background.NewBackgroundJobs(
+			withTimeout,
+			log,
+			clock,
+			configuration,
+			db,
+			redisController.Pool(),
+			pubsub.NewPostgresPubSub(log, db),
+			plaidClient,
+			tellerClient,
+			kms,
+			fileStorage,
+		)
+		if err != nil {
+			cancel()
+			log.WithError(err).Fatalf("failed to setup background job proceessor")
+			return err
+		}
+		cancel()
 	}
 
 	if err = backgroundJobs.Start(); err != nil {
@@ -253,10 +268,11 @@ func RunServer() error {
 		db,
 		backgroundJobs,
 		plaidClient,
+		tellerClient,
 		stats,
 		stripe,
 		redisController.Pool(),
-		plaidSecrets,
+		kms,
 		basicPaywall,
 		email,
 		clientTokens,

@@ -39,6 +39,7 @@ spec:
           command:
             - "/usr/bin/monetr"
           args:
+            {{- include "monetr.config.args" . | nindent 12 }}
             - "database"
             - "migrate"
           envFrom:
@@ -70,6 +71,11 @@ spec:
           {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - "/usr/bin/monetr"
+          args:
+            {{- include "monetr.config.args" . | nindent 12 }}
+            - "serve"
           envFrom:
             - configMapRef:
                 name: {{ include "api.fullname" . }}

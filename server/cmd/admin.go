@@ -83,21 +83,12 @@ func newViewSecretCommand(parent *cobra.Command) {
 				return errors.Wrap(err, "failed to retrieve secret")
 			}
 
-			if token.KeyID == nil {
-				fmt.Println(token.AccessToken)
-				return nil
-			}
-
-			version := ""
-			if token.Version != nil && *token.Version != "" {
-				version = *token.Version
-			}
 			decoded, err := hex.DecodeString(token.AccessToken)
 			if err != nil {
 				log.WithError(err).Fatal("failed to decode secret")
 				return err
 			}
-			decrypted, err := kms.Decrypt(cmd.Context(), *token.KeyID, version, decoded)
+			decrypted, err := kms.Decrypt(cmd.Context(), token.KeyID, token.Version, decoded)
 			if err != nil {
 				log.WithError(err).Fatal("failed to decrypt secret")
 				return err

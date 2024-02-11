@@ -6,9 +6,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/benbjohnson/clock"
+	"github.com/golang/mock/gomock"
+	"github.com/monetr/monetr/server/background"
 	"github.com/monetr/monetr/server/internal/fixtures"
+	"github.com/monetr/monetr/server/internal/mockgen"
 	"github.com/monetr/monetr/server/internal/myownsanity"
+	"github.com/monetr/monetr/server/internal/testutils"
 	"github.com/monetr/monetr/server/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostLink(t *testing.T) {
@@ -438,8 +444,19 @@ func TestPutLink(t *testing.T) {
 
 func TestDeleteLink(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		_, e := NewTestApplication(t)
-		token := GivenIHaveToken(t, e)
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		clock := clock.New()
+
+		jobController := mockgen.NewMockJobController(ctrl)
+		var controller background.JobController = jobController
+		config := NewTestApplicationConfig(t)
+		_, e := NewTestApplicationPatched(t, config, TestAppInterfaces{
+			JobController: &controller,
+		})
+
+		user, password := fixtures.GivenIHaveABasicAccount(t, clock)
+		token := GivenILogin(t, e, user.Login.Email, password)
 
 		institutionName := "U.S. Bank"
 
@@ -461,6 +478,19 @@ func TestDeleteLink(t *testing.T) {
 			link.LinkId = uint64(response.JSON().Path("$.linkId").Number().Raw())
 		}
 
+		jobController.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(background.RemoveLink),
+				testutils.NewGenericMatcher(func(args background.RemoveLinkArguments) bool {
+					a := assert.EqualValues(t, link.LinkId, args.LinkId, "Link ID should match")
+					b := assert.EqualValues(t, user.AccountId, args.AccountId, "Account ID should match")
+					return a && b
+				}),
+			).
+			Times(1).
+			Return(nil)
+
 		{ // Try to retrieve the link before it's been deleted.
 			response := e.GET("/api/links/{linkId}").
 				WithPath("linkId", link.LinkId).
@@ -469,12 +499,14 @@ func TestDeleteLink(t *testing.T) {
 
 			response.Status(http.StatusOK)
 			response.JSON().Object().NotEmpty()
+			response.JSON().Path("$.deletedAt").IsNull()
 		}
 
 		{ // Try to delete it.
 			response := e.DELETE("/api/links/{linkId}").
 				WithPath("linkId", link.LinkId).
 				WithCookie(TestCookieName, token).
+				WithTimeout(5 * time.Second).
 				Expect()
 
 			response.Status(http.StatusOK)
@@ -487,8 +519,8 @@ func TestDeleteLink(t *testing.T) {
 				WithCookie(TestCookieName, token).
 				Expect()
 
-			response.Status(http.StatusNotFound)
-			response.JSON().Path("$.error").IsEqual("failed to retrieve link: record does not exist")
+			response.Status(http.StatusOK)
+			response.JSON().Path("$.deletedAt").NotNull()
 		}
 	})
 }

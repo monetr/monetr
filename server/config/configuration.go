@@ -13,7 +13,7 @@ import (
 
 var (
 	// FilePath is set via a flag in pkg/cmd.
-	FilePath string
+	FilePath []string
 	// LogLevel is set via a flag in pkg/cmd.
 	LogLevel string
 )
@@ -113,13 +113,9 @@ type FilesystemStorage struct {
 	BasePath string `yaml:"basePath"`
 }
 
-// KeyManagement specifies the properties required to securely encrypt and decrypt stored secrets. If enabled only one
-// of the providers can be enabled at a time. It is not recommended to change providers.
+// KeyManagement specifies the properties required to securely encrypt and
+// decrypt stored secrets. It is not recommended to change providers.
 type KeyManagement struct {
-	// Enabled determines whether or not key management is being used. If it is enabled and there is a key ID and
-	// version present on a given token; then the KMS will be used. Otherwise it will be read as plaintext if vault is
-	// disabled (deprecated), or will be read from vault.
-	Enabled  bool   `yaml:"enabled"`
 	Provider string `yaml:"provider"`
 	// AWS provides configuration for using AWS's KMS for encrypting and decrypting secrets.
 	AWS AWSKMS `yaml:"aws"`
@@ -272,15 +268,6 @@ func (r ReCAPTCHA) ShouldVerifyForgotPassword() bool {
 	return r.Enabled && r.VerifyForgotPassword
 }
 
-type Teller struct {
-	Enabled       bool   `yaml:"enabled"`
-	ApplicationId string `yaml:"applicationId"`
-}
-
-func (t Teller) GetEnabled() bool {
-	return t.Enabled && t.ApplicationId != ""
-}
-
 type Plaid struct {
 	Enabled      bool              `yaml:"enabled"`
 	ClientID     string            `yaml:"clientId"`
@@ -428,49 +415,54 @@ type BackgroundJobs struct {
 	JobSchedule map[string]string      `yaml:"jobSchedule"`
 }
 
-func getViper(configFilePath *string) *viper.Viper {
+func getViper(configFilePath []string) *viper.Viper {
 	v := viper.GetViper()
+	v.SetConfigType("yaml")
 
-	if configFilePath != nil && *configFilePath != "" {
-		v.SetConfigFile(*configFilePath)
-	} else {
-		v.SetConfigName("config")
-		v.SetConfigType("yaml")
+	setupDefaults(v)
+	setupEnv(v)
 
+	switch len(FilePath) {
+	case 0:
 		{ // If we can determine the user's home directory, then look there + /.sentry for the config
 			homeDir, err := os.UserHomeDir()
 			if err == nil {
-				v.AddConfigPath(homeDir + "/.monetr")
+				v.AddConfigPath(homeDir + "/.monetr/config.yaml")
 			}
 		}
 
-		v.AddConfigPath("/etc/monetr/")
-		v.AddConfigPath(".")
+		v.AddConfigPath("/etc/monetr/config.yaml")
+		v.AddConfigPath("config.yaml")
+	default:
+		for i := range configFilePath {
+			path := configFilePath[i]
+			v.SetConfigFile(path)
+			if i == 0 {
+				if err := v.ReadInConfig(); err != nil {
+					log.Fatalf("failed to read config [%s]: %+v", path, err)
+				}
+			} else {
+				if err := v.MergeInConfig(); err != nil {
+					log.Fatalf("failed to read config [%s]: %+v", path, err)
+				}
+			}
+		}
 	}
 
 	return v
 }
 
 func LoadConfiguration() Configuration {
-	return LoadConfigurationFromFile(&FilePath)
+	return LoadConfigurationFromFile(FilePath)
 }
 
-func LoadConfigurationFromFile(configFilePath *string) Configuration {
+func LoadConfigurationFromFile(configFilePath []string) Configuration {
 	v := getViper(configFilePath)
 
 	return LoadConfigurationEx(v)
 }
 
 func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
-	setupDefaults(v)
-	setupEnv(v)
-
-	writeConfig := false
-	if err := v.ReadInConfig(); err != nil {
-		fmt.Printf("failed to read in config from file: %+v\n", err)
-		writeConfig = true
-	}
-
 	if err := v.Unmarshal(&config); err != nil {
 		panic(err)
 	}
@@ -507,25 +499,7 @@ func LoadConfigurationEx(v *viper.Viper) (config Configuration) {
 	}
 	config.Security.PrivateKey = privateKey
 
-	if writeConfig {
-		if err := v.WriteConfigAs("/etc/monetr/config.yaml"); err != nil {
-			fmt.Printf("failed to write config to file: %+v\n", err)
-		}
-	}
-
 	return config
-}
-
-func GenerateConfigFile(configFilePath *string, outputFilePath string) error {
-	var v *viper.Viper
-	if configFilePath == nil || *configFilePath == "" {
-		v = viper.GetViper()
-		setupDefaults(v)
-	} else {
-		v = getViper(configFilePath)
-	}
-
-	return v.SafeWriteConfigAs(outputFilePath)
 }
 
 func setupDefaults(v *viper.Viper) {
@@ -540,7 +514,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Logging.Format", "text")
 	v.SetDefault("Logging.Level", LogLevel) // Info
 	v.SetDefault("Logging.StackDriver.Enabled", false)
-	v.SetDefault("KeyManagement.Provider", nil)
+	v.SetDefault("KeyManagement.Provider", "plaintext")
 	v.SetDefault("KeyManagement.AWS", nil)
 	v.SetDefault("KeyManagement.Google", nil)
 	v.SetDefault("Plaid.Enabled", true)
@@ -564,6 +538,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.FreeTrialDays", 30)
+	v.SetDefault("Teller.Environment", "sandbox")
 	v.SetDefault("UIDomainName", "0.0.0.0:4000")
 }
 
@@ -638,4 +613,8 @@ func setupEnv(v *viper.Viper) {
 	_ = v.BindEnv("Stripe.TaxesEnabled", "MONETR_STRIPE_TAXES_ENABLED")
 	_ = v.BindEnv("Stripe.InitialPlan.StripePriceId", "MONETR_STRIPE_DEFAULT_PRICE_ID")
 	_ = v.BindEnv("Teller.ApplicationId", "MONETR_TELLER_APPLICATION_ID")
+	_ = v.BindEnv("Teller.WebhookSigningSecret", "MONETR_TELLER_WEBHOOK_SECRETS")
+	_ = v.BindEnv("Teller.Environment", "MONETR_TELLER_ENVIRONMENT")
+	_ = v.BindEnv("Teller.Certificate", "MONETR_TELLER_CERTIFICATE")
+	_ = v.BindEnv("Teller.PrivateKey", "MONETR_TELLER_PRIVATE_KEY")
 }

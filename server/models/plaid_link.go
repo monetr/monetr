@@ -17,9 +17,11 @@ const (
 type PlaidLink struct {
 	tableName string `pg:"plaid_links"`
 
-	PlaidLinkID          uint64          `json:"-" pg:"plaid_link_id,notnull,pk,type:'bigserial'"`
+	PlaidLinkId          uint64          `json:"-" pg:"plaid_link_id,notnull,pk,type:'bigserial'"`
 	AccountId            uint64          `json:"-" pg:"account_id,notnull,type:'bigint'"`
 	Account              *Account        `json:"-" pg:"rel:has-one"`
+	SecretId             uint64          `json:"-" pg:"secret_id,type:'bigint'"`
+	Secret               *Secret         `json:"-" pg:"rel:has-one"`
 	PlaidId              string          `json:"-" pg:"item_id,unique,notnull"`
 	Products             []string        `json:"products" pg:"products,type:'text[]'"`
 	Status               PlaidLinkStatus `json:"status" pg:"status,notnull,default:0"`

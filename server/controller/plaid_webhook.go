@@ -67,7 +67,7 @@ func (c PlaidClaims) Valid() error {
 	return vErr
 }
 
-func (c *Controller) handlePlaidWebhook(ctx echo.Context) error {
+func (c *Controller) postPlaidWebhook(ctx echo.Context) error {
 	if !c.configuration.Plaid.Enabled || !c.configuration.Plaid.WebhooksEnabled {
 		return c.notFound(ctx, "plaid webhooks are not enabled")
 	}

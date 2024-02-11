@@ -1,4 +1,4 @@
-package secrets
+package secrets_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,7 +40,7 @@ func TestNewGoogleKMS(t *testing.T) {
 		log := testutils.GetLog(t)
 		credentialsFile, keyName := MustHaveLegitimateCredentials(t)
 
-		kms, err := NewGoogleKMS(context.Background(), GoogleKMSConfig{
+		kms, err := secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         keyName,
 			CredentialsFile: &credentialsFile,
@@ -54,7 +55,7 @@ func TestGoogleKMS_Encrypt(t *testing.T) {
 		log := testutils.GetLog(t)
 		credentialsFile, keyName := MustHaveLegitimateCredentials(t)
 
-		kms, err := NewGoogleKMS(context.Background(), GoogleKMSConfig{
+		kms, err := secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         keyName,
 			CredentialsFile: &credentialsFile,
@@ -65,7 +66,7 @@ func TestGoogleKMS_Encrypt(t *testing.T) {
 		input := []byte("i am a little teapot")
 		keyId, version, data, err := kms.Encrypt(context.Background(), input)
 		assert.NoError(t, err, "should not return an error when encrypting")
-		assert.Equal(t, keyName, keyId, "should have the same key Id as the configuration specified")
+		assert.Equal(t, keyName, *keyId, "should have the same key Id as the configuration specified")
 		assert.NotEmpty(t, version, "should contain a version")
 		assert.NotEmpty(t, data, "some data should have been returned")
 		assert.NotEqual(t, input, data, "the returned data should not be the unencrypted input")
@@ -77,7 +78,7 @@ func TestGoogleKMS_Dencrypt(t *testing.T) {
 		log := testutils.GetLog(t)
 		credentialsFile, keyName := MustHaveLegitimateCredentials(t)
 
-		kms, err := NewGoogleKMS(context.Background(), GoogleKMSConfig{
+		kms, err := secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         keyName,
 			CredentialsFile: &credentialsFile,
@@ -88,7 +89,7 @@ func TestGoogleKMS_Dencrypt(t *testing.T) {
 		input := []byte("i am a little teapot")
 		keyId, version, data, err := kms.Encrypt(context.Background(), input)
 		require.NoError(t, err, "should not return an error when encrypting")
-		require.Equal(t, keyName, keyId, "should have the same key Id as the configuration specified")
+		require.Equal(t, keyName, *keyId, "should have the same key Id as the configuration specified")
 		require.NotEmpty(t, version, "should contain a version")
 		require.NotEmpty(t, data, "some data should have been returned")
 		require.NotEqual(t, input, data, "the returned data should not be the unencrypted input")

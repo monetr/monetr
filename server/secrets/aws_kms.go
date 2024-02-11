@@ -61,13 +61,13 @@ func NewAWSKMS(ctx context.Context, config AWSKMSConfig) (KeyManagement, error) 
 	}, nil
 }
 
-func (a *AWSKMS) Encrypt(ctx context.Context, input []byte) (keyID string, version string, result []byte, _ error) {
+func (a *AWSKMS) Encrypt(ctx context.Context, input []byte) (keyId, version *string, result []byte, _ error) {
 	span := sentry.StartSpan(ctx, "Encrypt KMS")
 	defer span.Finish()
 	span.SetTag("kms", "aws")
 
 	span.Data = map[string]interface{}{
-		"resource": keyID,
+		"resource": keyId,
 	}
 
 	request := &kms.EncryptInput{
@@ -81,21 +81,21 @@ func (a *AWSKMS) Encrypt(ctx context.Context, input []byte) (keyID string, versi
 	response, err := a.client.EncryptWithContext(span.Context(), request)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		return "", "", nil, errors.Wrap(err, "failed to encrypt data using AWS KMS")
+		return nil, nil, nil, errors.Wrap(err, "failed to encrypt data using AWS KMS")
 	}
 
 	span.Status = sentry.SpanStatusOK
 
-	return *response.KeyId, "", response.CiphertextBlob, nil
+	return response.KeyId, nil, response.CiphertextBlob, nil
 }
 
-func (a *AWSKMS) Decrypt(ctx context.Context, keyID string, version string, input []byte) (result []byte, _ error) {
+func (a *AWSKMS) Decrypt(ctx context.Context, keyId, version *string, input []byte) (result []byte, _ error) {
 	span := sentry.StartSpan(ctx, "Decrypt KMS")
 	defer span.Finish()
 	span.SetTag("kms", "aws")
 
 	span.Data = map[string]interface{}{
-		"resource": keyID,
+		"resource": keyId,
 	}
 
 	request := &kms.DecryptInput{
@@ -103,7 +103,7 @@ func (a *AWSKMS) Decrypt(ctx context.Context, keyID string, version string, inpu
 		EncryptionAlgorithm: aws.String("SYMMETRIC_DEFAULT"), // TODO Maybe make this a config thing?
 		EncryptionContext:   nil,
 		GrantTokens:         []*string{},
-		KeyId:               aws.String(keyID),
+		KeyId:               keyId,
 	}
 
 	response, err := a.client.DecryptWithContext(span.Context(), request)

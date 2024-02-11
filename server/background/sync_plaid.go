@@ -33,7 +33,7 @@ type (
 	SyncPlaidHandler struct {
 		log           *logrus.Entry
 		db            *pg.DB
-		plaidSecrets  secrets.PlaidSecretsProvider
+		kms           secrets.KeyManagement
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
 		enqueuer      JobEnqueuer
@@ -52,7 +52,7 @@ type (
 		args          SyncPlaidArguments
 		log           *logrus.Entry
 		repo          repository.BaseRepository
-		plaidSecrets  secrets.PlaidSecretsProvider
+		secrets       repository.SecretsRepository
 		plaidPlatypus platypus.Platypus
 		publisher     pubsub.Publisher
 		enqueuer      JobEnqueuer
@@ -95,7 +95,7 @@ func NewSyncPlaidHandler(
 	log *logrus.Entry,
 	db *pg.DB,
 	clock clock.Clock,
-	plaidSecrets secrets.PlaidSecretsProvider,
+	kms secrets.KeyManagement,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
 	enqueuer JobEnqueuer,
@@ -103,7 +103,7 @@ func NewSyncPlaidHandler(
 	return &SyncPlaidHandler{
 		log:           log,
 		db:            db,
-		plaidSecrets:  plaidSecrets,
+		kms:           kms,
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
 		enqueuer:      enqueuer,
@@ -131,12 +131,21 @@ func (s *SyncPlaidHandler) HandleConsumeJob(ctx context.Context, data []byte) er
 		span := sentry.StartSpan(ctx, "db.transaction")
 		defer span.Finish()
 
+		log := s.log.WithContext(span.Context())
+
 		repo := repository.NewRepositoryFromSession(s.clock, 0, args.AccountId, txn)
+		secretsRepo := repository.NewSecretsRepository(
+			log,
+			s.clock,
+			txn,
+			s.kms,
+			args.AccountId,
+		)
 		job, err := NewSyncPlaidJob(
-			s.log.WithContext(span.Context()),
+			log,
 			repo,
 			s.clock,
-			s.plaidSecrets,
+			secretsRepo,
 			s.plaidPlatypus,
 			s.publisher,
 			s.enqueuer,
@@ -165,10 +174,10 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 	err := s.db.ModelContext(ctx, &links).
 		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
-		Where(`"plaid_link"."use_plaid_sync" = ?`, true).
+		Where(`"plaid_link"."status" = ?`, models.PlaidLinkStatusSetup).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-		Where(`"link"."link_status" = ?`, models.PlaidLinkStatusSetup).
 		Where(`"link"."last_attempted_update" < ?`, cutoff).
+		Where(`"link"."deleted_at" IS NULL`).
 		Select(&links)
 	if err != nil {
 		return errors.Wrap(err, "failed to retrieve links that need to by synced with plaid")
@@ -210,7 +219,7 @@ func NewSyncPlaidJob(
 	log *logrus.Entry,
 	repo repository.BaseRepository,
 	clock clock.Clock,
-	plaidSecrets secrets.PlaidSecretsProvider,
+	secrets repository.SecretsRepository,
 	plaidPlatypus platypus.Platypus,
 	publisher pubsub.Publisher,
 	enqueuer JobEnqueuer,
@@ -220,7 +229,7 @@ func NewSyncPlaidJob(
 		args:          args,
 		log:           log,
 		repo:          repo,
-		plaidSecrets:  plaidSecrets,
+		secrets:       secrets,
 		plaidPlatypus: plaidPlatypus,
 		publisher:     publisher,
 		enqueuer:      enqueuer,
@@ -291,26 +300,8 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 		return nil
 	}
 
-	accessToken, err := s.plaidSecrets.GetAccessTokenForPlaidLinkId(
-		span.Context(),
-		s.args.AccountId,
-		plaidLink.PlaidId,
-	)
+	secret, err := s.secrets.Read(span.Context(), plaidLink.SecretId)
 	if err = errors.Wrap(err, "failed to retrieve access token for plaid link"); err != nil {
-		// If the token is simply missing from vault then something is goofy. Don't retry the job but mark it as a
-		// failure.
-		if errors.Is(errors.Cause(err), secrets.ErrNotFound) {
-			if hub := sentry.GetHubFromContext(span.Context()); hub != nil {
-				hub.ConfigureScope(func(scope *sentry.Scope) {
-					// Mark the scope as an error.
-					scope.SetLevel(sentry.LevelError)
-				})
-			}
-
-			log.WithError(err).Error("could not retrieve API credentials for Plaid for link, job will not be retried")
-			return nil
-		}
-
 		log.WithError(err).Error("could not retrieve API credentials for Plaid for link, this job will be retried")
 		return err
 	}
@@ -318,7 +309,7 @@ func (s *SyncPlaidJob) Run(ctx context.Context) error {
 	plaidClient, err := s.plaidPlatypus.NewClient(
 		span.Context(),
 		link,
-		accessToken,
+		secret.Secret,
 		plaidLink.PlaidId,
 	)
 	if err != nil {

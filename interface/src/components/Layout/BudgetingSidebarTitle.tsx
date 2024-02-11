@@ -7,14 +7,14 @@ import MDivider from '@monetr/interface/components/MDivider';
 import MSpan from '@monetr/interface/components/MSpan';
 import { ReactElement } from '@monetr/interface/components/types';
 import { useSelectedBankAccount } from '@monetr/interface/hooks/bankAccounts';
-import { useLink, useTriggerManualSync } from '@monetr/interface/hooks/links';
+import { useLink, useTriggerManualPlaidSync } from '@monetr/interface/hooks/links';
 import { showRemoveLinkModal } from '@monetr/interface/modals/RemoveLinkModal';
 import { showUpdatePlaidAccountOverlay } from '@monetr/interface/modals/UpdatePlaidAccountOverlay';
 
 export default function BudgetingSidebarTitle(): JSX.Element {
   const { data: bankAccount, isLoading, isError } = useSelectedBankAccount();
   const { data: link } = useLink(bankAccount?.linkId);
-  const triggerSync = useTriggerManualSync();
+  const triggerSync = useTriggerManualPlaidSync();
 
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
   const open = Boolean(anchorEl);

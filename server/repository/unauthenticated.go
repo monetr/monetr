@@ -32,7 +32,7 @@ const (
 )
 
 type unauthenticatedRepo struct {
-	txn pg.DBI
+	txn   pg.DBI
 	clock clock.Clock
 }
 
@@ -139,7 +139,7 @@ func (u *unauthenticatedRepo) SetEmailVerified(ctx context.Context, emailAddress
 	var login models.Login
 	result, err := u.txn.ModelContext(span.Context(), &login).
 		Set(`"is_email_verified" = ?`, EmailVerified).               // Change the verification to true.
-		Set(`"email_verified_at" = ?`, u.clock.Now().UTC()).            // Set the verified at time to now.
+		Set(`"email_verified_at" = ?`, u.clock.Now().UTC()).         // Set the verified at time to now.
 		Where(`"login"."email" = ?`, strings.ToLower(emailAddress)). // Only for a login with this email.
 		Where(`"login"."is_enabled" = ?`, true).                     // Only if the login is actually enabled.
 		Where(`"login"."is_email_verified" = ?`, EmailNotVerified).  // And only if the login is not already verified.
@@ -178,6 +178,34 @@ func (u *unauthenticatedRepo) GetLinksForItem(ctx context.Context, itemId string
 	if link.PlaidLink == nil {
 		span.Status = sentry.SpanStatusNotFound
 		return nil, errors.Errorf("failed to retrieve link for item id")
+	}
+
+	span.Status = sentry.SpanStatusOK
+
+	return &link, nil
+}
+
+func (u *unauthenticatedRepo) GetLinkByTellerEnrollmentId(ctx context.Context, enrollmentId string) (*models.Link, error) {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+	span.Data = map[string]interface{}{
+		"enrollmentId": enrollmentId,
+	}
+
+	var link models.Link
+	err := u.txn.ModelContext(span.Context(), &link).
+		Relation("TellerLink").
+		Where(`"teller_link"."enrollment_id" = ?`, enrollmentId).
+		Limit(1).
+		Select(&link)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to retrieve teller link")
+	}
+
+	if link.TellerLink == nil {
+		span.Status = sentry.SpanStatusNotFound
+		return nil, errors.Errorf("failed to retrieve link for enrollment id")
 	}
 
 	span.Status = sentry.SpanStatusOK

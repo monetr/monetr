@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
+	"github.com/go-pg/pg/v10"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
@@ -116,7 +118,13 @@ var (
 	_ Platypus = &Plaid{}
 )
 
-func NewPlaid(log *logrus.Entry, secret secrets.PlaidSecretsProvider, repo repository.PlaidRepository, options config.Plaid) *Plaid {
+func NewPlaid(
+	log *logrus.Entry,
+	clock clock.Clock,
+	kms secrets.KeyManagement,
+	db pg.DBI,
+	options config.Plaid,
+) *Plaid {
 	httpClient := &http.Client{
 		Timeout: 60 * time.Second,
 	}
@@ -130,18 +138,22 @@ func NewPlaid(log *logrus.Entry, secret secrets.PlaidSecretsProvider, repo repos
 	client := plaid.NewAPIClient(conf)
 
 	return &Plaid{
+		clock:  clock,
 		client: client,
+		db:     db,
 		log:    log,
-		secret: secret,
-		repo:   repo,
+		kms:    kms,
+		repo:   repository.NewPlaidRepository(db),
 		config: options,
 	}
 }
 
 type Plaid struct {
+	clock  clock.Clock
 	client *plaid.APIClient
+	db     pg.DBI
 	log    *logrus.Entry
-	secret secrets.PlaidSecretsProvider
+	kms    secrets.KeyManagement
 	repo   repository.PlaidRepository
 	config config.Plaid
 }
@@ -318,9 +330,8 @@ func (p *Plaid) GetInstitution(ctx context.Context, institutionId string) (*plai
 }
 
 func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - NewClientFromItemId"
 
 	link, err := p.repo.GetLinkByItemId(span.Context(), itemId)
 	if err != nil {
@@ -331,9 +342,8 @@ func (p *Plaid) NewClientFromItemId(ctx context.Context, itemId string) (Client,
 }
 
 func (p *Plaid) NewClientFromLink(ctx context.Context, accountId uint64, linkId uint64) (Client, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - NewClientFromLink"
 
 	link, err := p.repo.GetLink(span.Context(), accountId, linkId)
 	if err != nil {
@@ -368,9 +378,8 @@ func (p *Plaid) NewClient(ctx context.Context, link *models.Link, accessToken, i
 }
 
 func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error) {
-	span := sentry.StartSpan(ctx, "function")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
-	span.Description = "Plaid - newClient"
 
 	if link == nil {
 		return nil, errors.New("cannot create client without link")
@@ -380,12 +389,23 @@ func (p *Plaid) newClient(ctx context.Context, link *models.Link) (Client, error
 		return nil, errors.New("cannot create client without link")
 	}
 
-	accessToken, err := p.secret.GetAccessTokenForPlaidLinkId(span.Context(), link.AccountId, link.PlaidLink.PlaidId)
+	plaidLink := link.PlaidLink
+	secretRepo := repository.NewSecretsRepository(
+		p.log,
+		p.clock,
+		p.db,
+		p.kms,
+		plaidLink.AccountId,
+	)
+	secret, err := secretRepo.Read(
+		span.Context(),
+		plaidLink.SecretId,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return p.NewClient(span.Context(), link, accessToken, link.PlaidLink.PlaidId)
+	return p.NewClient(span.Context(), link, secret.Secret, link.PlaidLink.PlaidId)
 }
 
 func (p *Plaid) Close() error {

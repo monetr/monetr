@@ -25,12 +25,6 @@ data:
   MONETR_LOG_LEVEL: {{ quote .Values.api.logging.level }}
   MONETR_LOG_FORMAT: {{ quote .Values.api.logging.format }}
   MONETR_LOG_STACKDRIVER_ENABLED: {{ quote .Values.api.logging.stackDriver.enabled }}
-  MONETR_PLAID_ENVIRONMENT: {{ quote .Values.api.plaid.environment }}
-  MONETR_PLAID_BIRTHDATE_PROMPT: {{ quote .Values.api.plaid.birthdatePrompt }}
-  MONETR_PLAID_RETURNING_EXPERIENCE: {{ quote .Values.api.plaid.enableReturningUserExperience }}
-  MONETR_PLAID_WEBHOOKS_ENABLED: {{ quote .Values.api.plaid.webhooksEnabled }}
-  MONETR_PLAID_WEBHOOKS_DOMAIN: {{ quote .Values.api.plaid.webhooksDomain }}
-  MONETR_PLAID_OAUTH_DOMAIN: {{ quote .Values.api.plaid.oauthDomain }}
   MONETR_PG_ADDRESS: {{ quote .Values.api.postgreSql.address }}
   MONETR_PG_PORT: {{ quote .Values.api.postgreSql.port }}
   MONETR_PG_DATABASE: {{ quote .Values.api.postgreSql.database }}
@@ -63,13 +57,6 @@ metadata:
   {{- include "api.labels" . | nindent 4 }}
 data:
   config.yaml: |
-    rabbitMQ:
-      enabled: false
-      hostname: ""
-      port: 1
-      username: ""
-      # Do not include password.
-
     backgroundJobs:
       engine: {{ quote .Values.api.backgroundJobs.engine }}
       scheduler: {{ quote .Values.api.backgroundJobs.scheduler }}
@@ -92,8 +79,17 @@ data:
     {{- toYaml .Values.api.stripe.initialPlan | nindent 8 }}
     {{- end }}
 
+    # Plaid configuration if it is enabled
+    {{- if .Values.api.plaid.enabled }}
     plaid:
-      maxNumberOfLinks: {{ .Values.api.plaid.maxNumberOfLinks }}
+    {{- toYaml .Values.api.plaid | nindent 6 }}
+    {{- end }}
+
+    # Teller configuration if it is enabled
+    {{- if .Values.api.teller.enabled }}
+    teller:
+    {{- toYaml .Values.api.teller | nindent 6 }}
+    {{- end }}
 
     {{- if .Values.api.keyManagement }}
     keyManagement:
