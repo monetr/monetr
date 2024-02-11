@@ -749,7 +749,9 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 					Old:   transaction.Amount,
 					New:   amount,
 				})
-				// TODO Double check this math. But this should account for the delta
+				// When the amount of a transaction changes we need to adjust the net
+				// for this account by the delta of that change. But we have to add it
+				// rather than subtract it because its the delta.
 				delta := transaction.Amount - amount
 				s.netChanges[tellerId] += delta
 				transaction.Amount = amount
@@ -765,6 +767,8 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 				// balance.
 				if !isPending {
 					s.netChanges[tellerId] -= transaction.Amount
+				} else {
+					s.netChanges[tellerId] += 0
 				}
 				transaction.IsPending = isPending
 			}
@@ -780,35 +784,10 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
 		}
 
-		// Detect deleted transactions
-		for tellerTransactionId, transaction := range s.transactions {
-			_, ok := s.tellerTransactions[tellerTransactionId]
-			if ok {
-				continue
-			}
-
-			txnLog := log.WithFields(logrus.Fields{
-				"tellerTransactionId": tellerTransactionId,
-				"transactionId":       transaction.TransactionId,
-			})
-			txnLog.Debug("transaction is not deleted in monetr but is missing in teller, it will be removed")
-
-			// Add the amount of the transaction back to the net balance.
-			if !transaction.IsPending {
-				s.netChanges[tellerId] += transaction.Amount
-			} else {
-				s.netChanges[tellerId] += 0
-			}
-
-			// TODO Handle spending
-			if err := s.repo.DeleteTransaction(
-				span.Context(),
-				bankAccount.BankAccountId,
-				transaction.TransactionId,
-			); err != nil {
-				return err
-			}
-			s.tagBankAccountForSimilarityRecalc(bankAccount.BankAccountId)
+		// Check for and remove any transactions that are no longer present in the
+		// list from teller.
+		if err := s.syncRemovedTransactions(span.Context(), log, tellerId); err != nil {
+			return err
 		}
 
 		newImmutableTimestamp, err := s.getNewImmutableTimestamp()
@@ -816,6 +795,8 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			return err
 		}
 
+		// TODO It might be nice to add the balance sync boi here instead. That way
+		// we can log the balance with the sync. Or lift this to be afterwards?
 		if err := s.repo.CreateTellerSync(span.Context(), &models.TellerSync{
 			TellerBankAccountId: *bankAccount.TellerBankAccountId,
 			Timestamp:           s.clock.Now(),
@@ -831,6 +812,68 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 
 	return nil
 }
+
+func (s *SyncTellerJob) syncRemovedTransactions(
+	ctx context.Context,
+	log *logrus.Entry,
+	tellerId string,
+) error {
+	// Detect deleted transactions
+	for tellerTransactionId, transaction := range s.transactions {
+		_, ok := s.tellerTransactions[tellerTransactionId]
+		if ok {
+			continue
+		}
+
+		existing := transaction
+
+		txnLog := log.WithFields(logrus.Fields{
+			"tellerTransactionId": tellerTransactionId,
+			"transactionId":       transaction.TransactionId,
+		})
+		txnLog.Debug("transaction is not deleted in monetr but is missing in teller, it will be removed")
+
+		// Add the amount of the transaction back to the net balance.
+		if !transaction.IsPending {
+			s.netChanges[tellerId] += transaction.Amount
+		} else {
+			s.netChanges[tellerId] += 0
+		}
+
+		// If the transaction has a spending object associated with it, remove it.
+		if transaction.SpendingId != nil {
+			updated := transaction
+			// Unset the spending ID on the updated one, but not the existing one.
+			updated.SpendingId = nil
+			if existing.SpendingId == nil {
+				panic("WHY DOES MEMORY WORK LIKE THIS")
+			}
+
+			transaction.SpendingId = nil
+			_, err := s.repo.ProcessTransactionSpentFrom(
+				ctx,
+				transaction.BankAccountId,
+				&updated,
+				&existing,
+			)
+			if err != nil {
+				return err
+			}
+		}
+
+		if err := s.repo.DeleteTransaction(
+			ctx,
+			transaction.BankAccountId,
+			transaction.TransactionId,
+		); err != nil {
+			return err
+		}
+		s.tagBankAccountForSimilarityRecalc(transaction.BankAccountId)
+	}
+
+	return nil
+}
+
 func (s *SyncTellerJob) syncBalances(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()

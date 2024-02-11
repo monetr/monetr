@@ -424,6 +424,11 @@ func TestSyncTellerJob_Run(t *testing.T) {
 		}
 	})
 
+	// This test handles the scenario where the amount of a posted transaction has
+	// changed since the last sync. This should technically never happen, but it
+	// since we don't control teller's API and they could have a bug where they
+	// give us the wrong amount its best to have a way to handle this so that the
+	// ledger balance can be adjusted.
 	t.Run("handle posted amount change rare", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
