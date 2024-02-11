@@ -538,6 +538,7 @@ func setupDefaults(v *viper.Viper) {
 	v.SetDefault("Server.StatsPort", 9000)
 	v.SetDefault("Server.UICacheHours", 12)
 	v.SetDefault("Stripe.FreeTrialDays", 30)
+	v.SetDefault("Teller.Environment", "sandbox")
 	v.SetDefault("UIDomainName", "0.0.0.0:4000")
 }
 
