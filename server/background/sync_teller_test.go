@@ -392,7 +392,7 @@ func TestSyncTellerJob_Run(t *testing.T) {
 				Times(1)
 		}
 
-		{ // Do our second Teller sync.
+		{ // Do our third Teller sync.
 			args := background.SyncTellerArguments{
 				AccountId: link.AccountId,
 				LinkId:    link.LinkId,
@@ -406,7 +406,7 @@ func TestSyncTellerJob_Run(t *testing.T) {
 			assert.NoError(t, err, "must process job successfully")
 		}
 
-		{ // Make sure the available balance went down!
+		{ // Make sure our balances adjust proprly for the cleared transaction!
 			bankAccounts := fixtures.ReadBankAccounts(t, clock, link)
 			assert.Len(t, bankAccounts, 1, "should only have one bank account")
 			bankAccount := bankAccounts[0]
