@@ -1,11 +1,7 @@
 package controller
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -17,6 +13,7 @@ import (
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/repository"
+	"github.com/monetr/monetr/server/teller"
 	"github.com/sirupsen/logrus"
 )
 
@@ -94,16 +91,11 @@ func (c *Controller) postTellerWebhook(ctx echo.Context) error {
 	// Then using all of the secrets we have configured, generate the signature
 	// for that secret and the provided signature timestamp. One of the signatures
 	// in the request must match one of these potential signatures.
-	potentials := make([]string, len(webhookSecrets))
-	for i := range webhookSecrets {
-		secret := webhookSecrets[i]
-		data := fmt.Sprintf("%d.%s", signatureTimestamp, string(body))
-		sig := hmac.New(sha256.New, []byte(secret))
-		sig.Write([]byte(data))
-		dataHmac := sig.Sum(nil)
-		hmacHex := hex.EncodeToString(dataHmac)
-		potentials[i] = hmacHex
-	}
+	potentials := teller.GenerateWebhookSignatures(
+		time.Unix(signatureTimestamp, 0),
+		body,
+		webhookSecrets,
+	)
 	log.Debugf("generated %d potential signature(s)", len(potentials))
 
 	// Validate the provided signatures
