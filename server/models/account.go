@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/monetr/monetr/server/feature"
+	"github.com/monetr/monetr/server/internal/identification"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
 	"github.com/stripe/stripe-go/v72"
@@ -12,7 +13,7 @@ import (
 type Account struct {
 	tableName string `pg:"accounts"`
 
-	AccountId                    uint64                     `json:"accountId" pg:"account_id,notnull,pk,type:'bigserial'"`
+	AccountId                    identification.ID          `json:"accountId" pg:"account_id,notnull,pk,type:'bigserial'"`
 	Timezone                     string                     `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
 	StripeCustomerId             *string                    `json:"-" pg:"stripe_customer_id"`
 	StripeSubscriptionId         *string                    `json:"-" pg:"stripe_subscription_id"`
