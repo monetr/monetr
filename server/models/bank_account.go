@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/monetr/monetr/server/internal/identification"
+)
 
 type BankAccountType string
 
@@ -44,14 +48,14 @@ const (
 type BankAccount struct {
 	tableName string `pg:"bank_accounts"`
 
-	BankAccountId       uint64             `json:"bankAccountId" pg:"bank_account_id,notnull,pk,type:'bigserial'"`
-	AccountId           uint64             `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE"`
+	BankAccountId       identification.ID  `json:"bankAccountId" pg:"bank_account_id,notnull,pk,type:'bigserial'"`
+	AccountId           identification.ID  `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE"`
 	Account             *Account           `json:"-" pg:"rel:has-one"`
-	LinkId              uint64             `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE"`
+	LinkId              identification.ID  `json:"linkId" pg:"link_id,notnull,on_delete:CASCADE"`
 	Link                *Link              `json:"-,omitempty" pg:"rel:has-one"`
-	PlaidBankAccountId  *uint64            `json:"-" pg:"plaid_bank_account_id"`
+	PlaidBankAccountId  *identification.ID `json:"-" pg:"plaid_bank_account_id"`
 	PlaidBankAccount    *PlaidBankAccount  `json:"plaidBankAccount,omitempty" pg:"rel:has-one"`
-	TellerBankAccountId *uint64            `json:"-" pg:"teller_bank_account_id"`
+	TellerBankAccountId *identification.ID `json:"-" pg:"teller_bank_account_id"`
 	TellerBankAccount   *TellerBankAccount `json:"tellerBankAccount,omitempty" pg:"rel:has-one"`
 	AvailableBalance    int64              `json:"availableBalance" pg:"available_balance,notnull,use_zero"`
 	CurrentBalance      int64              `json:"currentBalance" pg:"current_balance,notnull,use_zero"`

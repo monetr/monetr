@@ -6,6 +6,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/crumbs"
+	"github.com/monetr/monetr/server/internal/identification"
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/pkg/errors"
 )
@@ -13,23 +14,20 @@ import (
 type Transaction struct {
 	tableName string `pg:"transactions"`
 
-	TransactionId uint64       `json:"transactionId" pg:"transaction_id,notnull,pk,type:'bigserial'"`
-	AccountId     uint64       `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
-	Account       *Account     `json:"-" pg:"rel:has-one"`
-	BankAccountId uint64       `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,type:'bigint',unique:per_bank_account"`
-	BankAccount   *BankAccount `json:"-" pg:"rel:has-one"`
-
-	PlaidTransactionId        *uint64           `json:"-" pg:"plaid_transaction_id"`
-	PlaidTransaction          *PlaidTransaction `json:"plaidTransaction" pg:"rel:has-one"`
-	PendingPlaidTransactionId *uint64           `json:"-" pg:"pending_plaid_transaction_id"`
-	PendingPlaidTransaction   *PlaidTransaction `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
-
-	TellerTransactionId *uint64            `json:"-" pg:"teller_transaction_id"`
-	TellerTransaction   *TellerTransaction `json:"tellerTransaction" pg:"rel:has-one"`
-
-	Amount     int64     `json:"amount" pg:"amount,notnull,use_zero"`
-	SpendingId *uint64   `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
-	Spending   *Spending `json:"spending,omitempty" pg:"rel:has-one"`
+	TransactionId             identification.ID  `json:"transactionId" pg:"transaction_id,notnull,pk,type:'bigserial'"`
+	AccountId                 identification.ID  `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
+	Account                   *Account           `json:"-" pg:"rel:has-one"`
+	BankAccountId             identification.ID  `json:"bankAccountId" pg:"bank_account_id,notnull,pk,on_delete:CASCADE,type:'bigint',unique:per_bank_account"`
+	BankAccount               *BankAccount       `json:"-" pg:"rel:has-one"`
+	PlaidTransactionId        *identification.ID `json:"-" pg:"plaid_transaction_id"`
+	PlaidTransaction          *PlaidTransaction  `json:"plaidTransaction" pg:"rel:has-one"`
+	PendingPlaidTransactionId *identification.ID `json:"-" pg:"pending_plaid_transaction_id"`
+	PendingPlaidTransaction   *PlaidTransaction  `json:"pendingPlaidTransaction" pg:"rel:has-one,fk:pending_"` // fk: is the prefix of the column we want to use to join on in a multikey join.
+	TellerTransactionId       *identification.ID `json:"-" pg:"teller_transaction_id"`
+	TellerTransaction         *TellerTransaction `json:"tellerTransaction" pg:"rel:has-one"`
+	Amount                    int64              `json:"amount" pg:"amount,notnull,use_zero"`
+	SpendingId                *identification.ID `json:"spendingId" pg:"spending_id,on_delete:SET NULL"`
+	Spending                  *Spending          `json:"spending,omitempty" pg:"rel:has-one"`
 	// SpendingAmount is the amount deducted from the expense this transaction was
 	// spent from. This is used when a transaction is more than the expense
 	// currently has allocated. If the transaction were to be deleted or changed
