@@ -793,7 +793,11 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			txnLog.Debug("transaction is not deleted in monetr but is missing in teller, it will be removed")
 
 			// Add the amount of the transaction back to the net balance.
-			s.netChanges[tellerId] += transaction.Amount
+			if !transaction.IsPending {
+				s.netChanges[tellerId] += transaction.Amount
+			} else {
+				s.netChanges[tellerId] += 0
+			}
 
 			// TODO Handle spending
 			if err := s.repo.DeleteTransaction(
