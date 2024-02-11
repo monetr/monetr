@@ -138,6 +138,8 @@ ALTER TABLE "transactions"
 ADD COLUMN "teller_transaction_id" BIGINT,
 ADD CONSTRAINT "fk_transactions_teller_transaction" FOREIGN KEY ("teller_transaction_id", "account_id") REFERENCES "teller_transactions" ("teller_transaction_id", "account_id");
 
+-- We are going to change the entire table, so we need to clean out the table as part of this.
+DELETE FROM "jobs" WHERE 1=1;
 ALTER TABLE "jobs" 
 DROP COLUMN "input",
 DROP COLUMN "output",
