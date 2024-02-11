@@ -71,13 +71,13 @@ func TestSecretsRepository_Store(t *testing.T) {
 
 		kms := mockgen.NewMockKeyManagement(ctrl)
 
-		encrypted := []byte(base64.StdEncoding.EncodeToString([]byte(accessToken)))
+		encrypted := base64.StdEncoding.EncodeToString([]byte(accessToken))
 		version := "1"
 		keyName := "project/us-east1/key"
 		kms.EXPECT().
 			Encrypt(
 				gomock.Any(),
-				gomock.Eq([]byte(accessToken)),
+				gomock.Eq(accessToken),
 			).
 			Return(
 				&keyName,  // Key name
@@ -105,8 +105,8 @@ func TestSecretsRepository_Store(t *testing.T) {
 				gomock.Eq(encrypted),
 			).
 			Return(
-				[]byte(accessToken), // Decrypted access token
-				nil,                 // Error
+				accessToken, // Decrypted access token
+				nil,         // Error
 			).
 			MaxTimes(1)
 
