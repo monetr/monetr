@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"encoding/hex"
 
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
@@ -87,7 +86,7 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *Secret) error
 
 	keyId, version, encrypted, err := b.kms.Encrypt(
 		span.Context(),
-		[]byte(secret.Secret),
+		secret.Secret,
 	)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
@@ -96,7 +95,7 @@ func (b *baseSecretsRepository) Store(ctx context.Context, secret *Secret) error
 	item.AccountId = b.AccountId()
 	item.KeyID = keyId
 	item.Version = version
-	item.Secret = hex.EncodeToString(encrypted)
+	item.Secret = encrypted
 
 	query := b.db.ModelContext(span.Context(), &item)
 	if item.SecretId == 0 {
@@ -137,12 +136,7 @@ func (b *baseSecretsRepository) Read(
 		return nil, errors.Wrap(err, "failed to retrieve secret")
 	}
 
-	decoded, err := hex.DecodeString(item.Secret)
-	if err != nil {
-		span.Status = sentry.SpanStatusDataLoss
-		return nil, errors.Wrap(err, "failed to hex decode encrypted secret")
-	}
-	decrypted, err := b.kms.Decrypt(span.Context(), item.KeyID, item.Version, decoded)
+	decrypted, err := b.kms.Decrypt(span.Context(), item.KeyID, item.Version, item.Secret)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
 		return nil, errors.Wrap(err, "failed to decrypt secret")

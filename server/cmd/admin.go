@@ -83,12 +83,7 @@ func newViewSecretCommand(parent *cobra.Command) {
 				return errors.Wrap(err, "failed to retrieve secret")
 			}
 
-			decoded, err := hex.DecodeString(token.AccessToken)
-			if err != nil {
-				log.WithError(err).Fatal("failed to decode secret")
-				return err
-			}
-			decrypted, err := kms.Decrypt(cmd.Context(), token.KeyID, token.Version, decoded)
+			decrypted, err := kms.Decrypt(cmd.Context(), token.KeyID, token.Version, token.AccessToken)
 			if err != nil {
 				log.WithError(err).Fatal("failed to decrypt secret")
 				return err
@@ -132,7 +127,7 @@ func newTestKMSCommand(parent *cobra.Command) {
 			testString := "Lorem ipsum dolor sit amet"
 			fmt.Printf("Testing KMS with test string: %s\n", testString)
 
-			keyId, version, result, err := kms.Encrypt(context.Background(), []byte(testString))
+			keyId, version, result, err := kms.Encrypt(context.Background(), testString)
 			if err != nil {
 				log.WithError(err).Error("failed to encrypt test string")
 				return err
@@ -143,9 +138,9 @@ func newTestKMSCommand(parent *cobra.Command) {
 			fmt.Printf("Version: %s\n", version)
 			fmt.Printf("Result Binary -----------\n")
 			fmt.Println()
-			fmt.Println(hex.Dump(result))
+			fmt.Println(hex.Dump([]byte(result)))
 			fmt.Println()
-			fmt.Printf("Result Formatted: %s\n", hex.EncodeToString(result))
+			fmt.Printf("Result Formatted: %s\n", result)
 			fmt.Println()
 			fmt.Println("Testing decryption with test string...")
 
@@ -157,7 +152,7 @@ func newTestKMSCommand(parent *cobra.Command) {
 
 			fmt.Printf("Successfully dencrypted test string!\n")
 
-			if !bytes.Equal([]byte(testString), decrypted) {
+			if !bytes.Equal([]byte(testString), []byte(decrypted)) {
 				log.Error("Input string and result do not match!")
 				fmt.Println("Input:", testString)
 				fmt.Println("Output:", string(decrypted))

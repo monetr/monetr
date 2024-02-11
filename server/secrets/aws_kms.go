@@ -2,6 +2,7 @@ package secrets
 
 import (
 	"context"
+	"encoding/hex"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -61,7 +62,7 @@ func NewAWSKMS(ctx context.Context, config AWSKMSConfig) (KeyManagement, error) 
 	}, nil
 }
 
-func (a *AWSKMS) Encrypt(ctx context.Context, input []byte) (keyId, version *string, result []byte, _ error) {
+func (a *AWSKMS) Encrypt(ctx context.Context, input string) (keyId, version *string, result string, _ error) {
 	span := sentry.StartSpan(ctx, "Encrypt KMS")
 	defer span.Finish()
 	span.SetTag("kms", "aws")
@@ -75,27 +76,33 @@ func (a *AWSKMS) Encrypt(ctx context.Context, input []byte) (keyId, version *str
 		EncryptionContext:   nil,
 		GrantTokens:         []*string{},
 		KeyId:               aws.String(a.config.KeyID),
-		Plaintext:           input,
+		Plaintext:           []byte(input),
 	}
 
 	response, err := a.client.EncryptWithContext(span.Context(), request)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		return nil, nil, nil, errors.Wrap(err, "failed to encrypt data using AWS KMS")
+		return nil, nil, "", errors.Wrap(err, "failed to encrypt data using AWS KMS")
 	}
 
 	span.Status = sentry.SpanStatusOK
 
-	return response.KeyId, nil, response.CiphertextBlob, nil
+	encrypted := hex.EncodeToString(response.CiphertextBlob)
+	return response.KeyId, nil, encrypted, nil
 }
 
-func (a *AWSKMS) Decrypt(ctx context.Context, keyId, version *string, input []byte) (result []byte, _ error) {
+func (a *AWSKMS) Decrypt(ctx context.Context, keyId, version *string, encrypted string) (result string, _ error) {
 	span := sentry.StartSpan(ctx, "Decrypt KMS")
 	defer span.Finish()
 	span.SetTag("kms", "aws")
 
 	span.Data = map[string]interface{}{
 		"resource": keyId,
+	}
+
+	input, err := hex.DecodeString(encrypted)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to decode encrypted secret")
 	}
 
 	request := &kms.DecryptInput{
@@ -109,10 +116,10 @@ func (a *AWSKMS) Decrypt(ctx context.Context, keyId, version *string, input []by
 	response, err := a.client.DecryptWithContext(span.Context(), request)
 	if err != nil {
 		span.Status = sentry.SpanStatusInternalError
-		return nil, errors.Wrap(err, "failed to decrypt data using AWS KMS")
+		return "", errors.Wrap(err, "failed to decrypt data using AWS KMS")
 	}
 
 	span.Status = sentry.SpanStatusOK
 
-	return response.Plaintext, nil
+	return string(response.Plaintext), nil
 }
