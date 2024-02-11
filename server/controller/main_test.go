@@ -147,8 +147,6 @@ func NewTestApplicationPatched(t *testing.T, configuration config.Configuration,
 	var jobRunner background.JobController
 	if patched.JobController != nil {
 		jobRunner = *patched.JobController
-	} else {
-		jobRunner = background.NewSynchronousJobRunner(t, clock, plaidClient)
 	}
 
 	emailMockController := gomock.NewController(t)
