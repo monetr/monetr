@@ -1,8 +1,7 @@
 package teller
 
 import (
-	"strconv"
-
+	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/pkg/errors"
 )
 
@@ -14,24 +13,22 @@ type Balance struct {
 }
 
 func (b Balance) GetLedger() (int64, error) {
-	ledger, err := strconv.ParseFloat(b.Ledger, 64)
+	balance, err := calc.ConvertStringToCents(b.Ledger)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to parse ledger balance")
 	}
 
-	// Convert to total cents
-	return int64(ledger * 100), nil
+	return balance, nil
 }
 
 // GetAvailable will return the available balance from Teller's API as a 64 bit
 // integer representing the total cents of the balance instead of a floating
 // point number.
 func (b Balance) GetAvailable() (int64, error) {
-	balance, err := strconv.ParseFloat(b.Available, 64)
+	balance, err := calc.ConvertStringToCents(b.Available)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to parse available balance")
 	}
 
-	// Convert to total cents
-	return int64(balance * 100), nil
+	return balance, nil
 }

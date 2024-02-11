@@ -2,10 +2,10 @@ package teller
 
 import (
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/monetr/monetr/server/internal/calc"
 	"github.com/pkg/errors"
 )
 
@@ -79,27 +79,25 @@ func (t Transaction) GetDescription() string {
 }
 
 func (t Transaction) GetAmount() (int64, error) {
-	amount, err := strconv.ParseFloat(t.Amount, 64)
+	amount, err := calc.ConvertStringToCents(t.Amount)
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to parse amount")
+		return 0, err
 	}
-
-	// Convert to total cents and invert the value
-	return int64(amount * -100), nil
+	// Invert because of how teller shows debits vs monetr
+	amount = amount * -1
+	return amount, nil
 }
 
 func (t Transaction) GetRunningBalance() (*int64, error) {
 	if t.RunningBalance == nil {
 		return nil, nil
 	}
-	balance, err := strconv.ParseFloat(*t.RunningBalance, 64)
+	balance, err := calc.ConvertStringToCents(*t.RunningBalance)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to parse running balance")
 	}
 
-	// Convert to total cents and invert the value
-	cents := int64(balance * 100)
-	return &cents, nil
+	return &balance, nil
 }
 
 func (t Transaction) GetDate(timezone *time.Location) (time.Time, error) {

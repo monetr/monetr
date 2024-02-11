@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/benbjohnson/clock"
 	"github.com/brianvoe/gofakeit/v6"
@@ -14,6 +15,26 @@ import (
 	"github.com/monetr/monetr/server/util"
 	"github.com/stretchr/testify/require"
 )
+
+func GivenIHaveATransactionName(t *testing.T, clock clock.Clock) (name, company string) {
+	date := util.Midnight(clock.Now(), time.UTC)
+	prefix := gofakeit.RandomString([]string{
+		fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX1234 %s", date.Format("01/02/06")),
+		"DEBIT FOR PAYPAL INST XFER CO REF- ",
+		"CHECKCARD PURCHASE - ",
+		"POS Debit - Visa Check Card 1234 -\n\t\t\t\t\t",
+		"POS Debit - 1234 -\n\t\t\t\t\t",
+		"POS Debit - Visa Check Card 1234 -\n\t\t\t\t\tPWP*",
+		"POS Debit - 1234 -\n\t\t\t\t\tPWP*",
+		"ACH Transaction - ",
+	})
+
+	company = gofakeit.Company()
+	name = fmt.Sprintf("%s%s", prefix, strings.ToUpper(company))
+	require.NotEmpty(t, name, "transaction name cannot be empty")
+
+	return name, company
+}
 
 func GivenIHaveATransaction(t *testing.T, clock clock.Clock, bankAccount models.BankAccount) models.Transaction {
 	transactions := GivenIHaveNTransactions(t, clock, bankAccount, 1)
@@ -37,15 +58,7 @@ func GivenIHaveNTransactions(t *testing.T, clock clock.Clock, bankAccount models
 
 	for i := 0; i < n; i++ {
 		date := util.Midnight(clock.Now(), timezone)
-
-		prefix := gofakeit.RandomString([]string{
-			fmt.Sprintf("DEBIT FOR CHECKCARD XXXXXX%s %s", gofakeit.Generate("####"), date.Format("01/02/06")),
-			"DEBIT FOR PAYPAL INST XFER CO REF- ",
-			"CHECKCARD PURCHASE - ",
-		})
-
-		company := gofakeit.Company()
-		name := fmt.Sprintf("%s%s", prefix, strings.ToUpper(company))
+		name, company := GivenIHaveATransactionName(t, clock)
 		amount := int64(gofakeit.Number(100, 10000))
 
 		var plaidTransaction *models.PlaidTransaction

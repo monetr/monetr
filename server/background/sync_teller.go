@@ -750,7 +750,8 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 					New:   amount,
 				})
 				// TODO Double check this math. But this should account for the delta
-				s.netChanges[tellerId] += transaction.Amount - amount
+				delta := transaction.Amount - amount
+				s.netChanges[tellerId] += delta
 				transaction.Amount = amount
 			}
 

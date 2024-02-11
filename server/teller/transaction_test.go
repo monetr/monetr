@@ -22,3 +22,14 @@ func TestTransaction_GetDescription(t *testing.T) {
 		)
 	})
 }
+
+func TestTransaction_GetAmount(t *testing.T) {
+	t.Run("debit", func(t *testing.T) {
+		transaction := teller.Transaction{
+			Amount: "-10.12",
+		}
+		amount, err := transaction.GetAmount()
+		assert.NoError(t, err, "should not have an error parsing amount")
+		assert.EqualValues(t, 1012, amount, "amount should now the inverted cents")
+	})
+}
