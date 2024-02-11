@@ -1157,6 +1157,49 @@ func TestSyncTellerHandler_EnqueueTriggeredJob(t *testing.T) {
 		assert.NoError(t, err, "should not return an error")
 	})
 
+	t.Run("fail gracefully", func(t *testing.T) {
+		clock := clock.NewMock()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		log := testutils.GetLog(t)
+		db := testutils.GetPgDatabase(t, testutils.IsolatedDatabase)
+		kms := testutils.GetKMS(t)
+		publisher := pubsub.NewPostgresPubSub(log, db)
+
+		user, _ := fixtures.GivenIHaveABasicAccount(t, clock)
+		link := fixtures.GivenIHaveATellerLink(t, clock, user)
+
+		client := mockgenteller.NewMockClient(ctrl)
+		enqueuer := mockgen.NewMockJobEnqueuer(ctrl)
+
+		handler := background.NewSyncTellerHandler(
+			log,
+			db,
+			clock,
+			kms,
+			client,
+			publisher,
+			enqueuer,
+		)
+
+		enqueuer.EXPECT().
+			EnqueueJob(
+				gomock.Any(),
+				gomock.Eq(handler.QueueName()),
+				gomock.Eq(background.SyncTellerArguments{
+					AccountId: link.AccountId,
+					LinkId:    link.LinkId,
+					Trigger:   "cron",
+				}),
+			).
+			Return(errors.New("failed to enqueue")).
+			Times(1)
+
+		err := handler.EnqueueTriggeredJob(context.Background(), enqueuer)
+		assert.NoError(t, err, "should not return an error")
+	})
+
 	t.Run("will not enqueue a bad link", func(t *testing.T) {
 		clock := clock.NewMock()
 		ctrl := gomock.NewController(t)
