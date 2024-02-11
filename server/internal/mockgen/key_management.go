@@ -35,10 +35,10 @@ func (m *MockKeyManagement) EXPECT() *MockKeyManagementMockRecorder {
 }
 
 // Decrypt mocks base method.
-func (m *MockKeyManagement) Decrypt(ctx context.Context, keyID, version *string, input []byte) ([]byte, error) {
+func (m *MockKeyManagement) Decrypt(ctx context.Context, keyID, version *string, input string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Decrypt", ctx, keyID, version, input)
-	ret0, _ := ret[0].([]byte)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -50,12 +50,12 @@ func (mr *MockKeyManagementMockRecorder) Decrypt(ctx, keyID, version, input inte
 }
 
 // Encrypt mocks base method.
-func (m *MockKeyManagement) Encrypt(ctx context.Context, input []byte) (*string, *string, []byte, error) {
+func (m *MockKeyManagement) Encrypt(ctx context.Context, input string) (*string, *string, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Encrypt", ctx, input)
 	ret0, _ := ret[0].(*string)
 	ret1, _ := ret[1].(*string)
-	ret2, _ := ret[2].([]byte)
+	ret2, _ := ret[2].(string)
 	ret3, _ := ret[3].(error)
 	return ret0, ret1, ret2, ret3
 }

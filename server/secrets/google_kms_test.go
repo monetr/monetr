@@ -63,7 +63,7 @@ func TestGoogleKMS_Encrypt(t *testing.T) {
 		require.NoError(t, err, "must not return an error when creating the KMS interface")
 		require.NotNil(t, kms, "the KMS interface returned must be valid")
 
-		input := []byte("i am a little teapot")
+		input := "i am a little teapot"
 		keyId, version, data, err := kms.Encrypt(context.Background(), input)
 		assert.NoError(t, err, "should not return an error when encrypting")
 		assert.Equal(t, keyName, *keyId, "should have the same key Id as the configuration specified")
@@ -86,7 +86,7 @@ func TestGoogleKMS_Dencrypt(t *testing.T) {
 		require.NoError(t, err, "must not return an error when creating the KMS interface")
 		require.NotNil(t, kms, "the KMS interface returned must be valid")
 
-		input := []byte("i am a little teapot")
+		input := "i am a little teapot"
 		keyId, version, data, err := kms.Encrypt(context.Background(), input)
 		require.NoError(t, err, "should not return an error when encrypting")
 		require.Equal(t, keyName, *keyId, "should have the same key Id as the configuration specified")
