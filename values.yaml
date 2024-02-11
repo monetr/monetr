@@ -193,8 +193,7 @@ api:
     webhooksDomain: ""
     webhookSecret: ""
   keyManagement:
-    enabled: false
-    provider: google # Google or AWS
+    provider: plaintext # Google or AWS or Plaintext
     google:
       resourceName: ""
     aws:

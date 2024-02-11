@@ -133,7 +133,7 @@ api:
     sampleRate: 1.0
     traceSampleRate: 1.0
   keyManagement:
-    enabled: false
+    provider: plaintext
   stripe:
     enabled: false
     webhooksEnabled: true # Still working on this for now.
