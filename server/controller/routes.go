@@ -199,12 +199,16 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	})
 
 	repoParty := baseParty.Group("", c.databaseRepositoryMiddleware)
-	// Plaid incoming webhooks
-	repoParty.POST("/plaid/webhook", c.handlePlaidWebhook)
-	// Stripe incoming webhooks
+
+	// Webhook endpoints
+	repoParty.POST("/plaid/webhook", c.postPlaidWebhook)
+	repoParty.POST("/teller/webhook", c.postTellerWebhook)
 	repoParty.POST("/stripe/webhook", c.handleStripeWebhook)
+
+	// Endpoints used by the client/UI.
 	repoParty.GET("/sentry", c.getSentryUI)
 	repoParty.GET("/config", c.configEndpoint)
+
 	// Authentication
 	repoParty.POST("/authentication/login", c.loginEndpoint)
 	repoParty.GET("/authentication/logout", c.logoutEndpoint)

@@ -134,6 +134,7 @@ type UnauthenticatedRepository interface {
 	CreateLogin(ctx context.Context, email, password string, firstName, lastName string) (*models.Login, error)
 	CreateUser(ctx context.Context, loginId, accountId uint64, user *models.User) error
 	GetLinksForItem(ctx context.Context, itemId string) (*models.Link, error)
+	GetLinkByTellerEnrollmentId(ctx context.Context, enrollmentId string) (*models.Link, error)
 	GetLoginForEmail(ctx context.Context, emailAddress string) (*models.Login, error)
 	ResetPassword(ctx context.Context, loginId uint64, hashedPassword string) error
 	SetEmailVerified(ctx context.Context, emailAddress string) error
