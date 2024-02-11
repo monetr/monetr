@@ -1,4 +1,4 @@
-package secrets
+package secrets_test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/monetr/monetr/server/internal/testutils"
+	"github.com/monetr/monetr/server/secrets"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,7 +40,7 @@ func TestNewGoogleKMS(t *testing.T) {
 		log := testutils.GetLog(t)
 		credentialsFile, keyName := MustHaveLegitimateCredentials(t)
 
-		kms, err := NewGoogleKMS(context.Background(), GoogleKMSConfig{
+		kms, err := secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         keyName,
 			CredentialsFile: &credentialsFile,
@@ -54,7 +55,7 @@ func TestGoogleKMS_Encrypt(t *testing.T) {
 		log := testutils.GetLog(t)
 		credentialsFile, keyName := MustHaveLegitimateCredentials(t)
 
-		kms, err := NewGoogleKMS(context.Background(), GoogleKMSConfig{
+		kms, err := secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         keyName,
 			CredentialsFile: &credentialsFile,
@@ -77,7 +78,7 @@ func TestGoogleKMS_Dencrypt(t *testing.T) {
 		log := testutils.GetLog(t)
 		credentialsFile, keyName := MustHaveLegitimateCredentials(t)
 
-		kms, err := NewGoogleKMS(context.Background(), GoogleKMSConfig{
+		kms, err := secrets.NewGoogleKMS(context.Background(), secrets.GoogleKMSConfig{
 			Log:             log,
 			KeyName:         keyName,
 			CredentialsFile: &credentialsFile,
