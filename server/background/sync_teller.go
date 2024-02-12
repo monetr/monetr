@@ -603,6 +603,10 @@ func (s *SyncTellerJob) getNewImmutableTimestamp() (time.Time, error) {
 		}
 	}
 
+	if newImmutableTimestamp.IsZero() {
+		newImmutableTimestamp = s.clock.Now().AddDate(0, 0, -7)
+	}
+
 	return newImmutableTimestamp, nil
 }
 
