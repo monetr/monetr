@@ -29,13 +29,11 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 
 	policies := map[string]map[string]struct{}{
 		"default-src": {
-			Self:                    noop,
-			"https://cdn.plaid.com": noop,
+			Self: noop,
 		},
 		"script-src-elem": {
-			Self:                  noop,
-			"https://*.plaid.com": noop,
-			UnsafeInline:          noop,
+			Self:         noop,
+			UnsafeInline: noop,
 		},
 		"font-src": {
 			Self:    noop,
@@ -49,13 +47,24 @@ func (c *UIController) ApplyContentSecurityPolicy(ctx echo.Context) {
 			Self: noop, // Add ws if its in development mode.
 		},
 		"frame-src": {
-			Self:                  noop,
-			"https://*.plaid.com": noop,
+			Self: noop,
 		},
 		"img-src": {
 			Self:    noop,
 			"data:": noop,
 		},
+	}
+
+	if c.configuration.Plaid.GetEnabled() {
+		policies["default-src"]["https://cdn.plaid.com"] = noop
+		policies["script-src-elem"]["https://*.plaid.com"] = noop
+		policies["frame-src"]["https://*.plaid.com"] = noop
+	}
+
+	if c.configuration.Teller.GetEnabled() {
+		policies["default-src"]["https://cdn.teller.io"] = noop
+		policies["script-src-elem"]["https://*.teller.io"] = noop
+		policies["frame-src"]["https://*.teller.io"] = noop
 	}
 
 	// Only allow google to connect when ReCAPTCHA is enabled.
