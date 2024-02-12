@@ -147,6 +147,7 @@ func (r *repositoryBase) GetBankAccount(ctx context.Context, bankAccountId uint6
 	var result models.BankAccount
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidBankAccount").
+		Relation("TellerBankAccount").
 		Where(`"bank_account"."account_id" = ?`, r.AccountId()).
 		Where(`"bank_account"."bank_account_id" = ? `, bankAccountId).
 		Select(&result)
