@@ -370,6 +370,12 @@ func (s *SyncTellerJob) syncBankAccounts(ctx context.Context) error {
 		s.tellerAccounts[account.Id] = account
 	}
 
+	crumbs.AddTag(
+		span.Context(),
+		"teller.institution_id",
+		tellerAccounts[0].Institution.Id,
+	)
+
 	for tellerId, account := range s.tellerAccounts {
 		log := s.log.WithField("tellerAccountId", tellerId)
 		log.Trace("syncing Teller account")
@@ -705,6 +711,11 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 					span.Context(),
 					&tellerTransaction,
 				); err != nil {
+					crumbs.Error(span.Context(), "Failed to insert teller transaction", "teller", map[string]interface{}{
+						"tellerTransactionId": tellerTransactionId,
+						"tellerAccountId":     tellerId,
+						"bankAccountId":       bankAccount.BankAccountId,
+					})
 					return err
 				}
 
