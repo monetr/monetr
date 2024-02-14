@@ -302,6 +302,8 @@ func (c *Controller) putTransactions(ctx echo.Context) error {
 	}
 
 	transaction.PlaidTransactionId = existingTransaction.PlaidTransactionId
+	transaction.PendingPlaidTransactionId = existingTransaction.PendingPlaidTransactionId
+	transaction.TellerTransactionId = existingTransaction.TellerTransactionId
 
 	if !isManual {
 		// Prevent the user from attempting to change a transaction's amount if we are on a plaid link.
