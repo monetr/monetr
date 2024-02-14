@@ -131,7 +131,7 @@ func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId
 		Order(`transaction_id DESC`)
 
 	if after != nil {
-		query = query.Where(`"transaction"."date" > ?`, *after)
+		query = query.Where(`"transaction"."date" >= ?`, *after)
 	}
 
 	err := query.Select(&items)

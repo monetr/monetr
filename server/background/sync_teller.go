@@ -714,6 +714,8 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 						"tellerTransactionId": tellerTransactionId,
 						"tellerAccountId":     tellerId,
 						"bankAccountId":       bankAccount.BankAccountId,
+						"immutableTimestamp":  immutableTimestamp,
+						"date":                date,
 					})
 					return err
 				}
