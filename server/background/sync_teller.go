@@ -569,10 +569,9 @@ func (s *SyncTellerJob) retrieveTransactions(
 			return err
 		}
 
-		if immutableTimestamp != nil && immutableTimestamp.After(date) {
-			continue
+		if immutableTimestamp == nil || date.After(*immutableTimestamp) {
+			s.tellerTransactions[tellerTransaction.Id] = tellerTransaction
 		}
-		s.tellerTransactions[tellerTransaction.Id] = tellerTransaction
 	}
 
 	return nil
