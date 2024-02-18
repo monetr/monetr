@@ -126,7 +126,6 @@ func (r *repositoryBase) GetTransactionsAfter(ctx context.Context, bankAccountId
 		Relation("TellerTransaction").
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
-		Where(`"transaction"."deleted_at" IS NULL`).
 		Order(`date DESC`).
 		Order(`transaction_id DESC`)
 
