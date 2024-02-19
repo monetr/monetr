@@ -108,9 +108,11 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 	}
 	_, err = p.db.ModelContext(span.Context(), &job).Insert(&job)
 	if err != nil {
-		// TODO Check to see if this is a conflict error, we don't want to enqueue
-		// the same job if it is already in the queue. It will conflict on the
-		// signature column if that is the case.
+		if pgErr, ok := err.(pg.Error); ok && pgErr.Field(67) == "23505" {
+			// Do nothing. It is a duplicate enqueue.
+			log.WithField("signature", signature).Trace("job has already been enqueued, it will not be enqueued again")
+			return nil
+		}
 		return errors.Wrap(err, "failed to enqueue job for postgres")
 	}
 
