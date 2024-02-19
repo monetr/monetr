@@ -395,7 +395,9 @@ var (
 						return txn.CommitContext(ctx)
 					}
 				} else {
-					return background.TriggerSyncTeller(ctx, backgroundJobs, jobArgs)
+					if err := background.TriggerSyncTeller(ctx, backgroundJobs, jobArgs); err != nil {
+						return err
+					}
 				}
 			}
 
