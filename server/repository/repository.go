@@ -116,6 +116,7 @@ type BaseRepository interface {
 	CreateTellerBankAccount(ctx context.Context, bankAccount *models.TellerBankAccount) error
 	UpdateTellerBankAccount(ctx context.Context, bankAccount *models.TellerBankAccount) error
 	CreateTellerTransaction(ctx context.Context, transaction *models.TellerTransaction) error
+	DeleteTellerTransaction(ctx context.Context, transaction *models.TellerTransaction) error
 	CreateTellerSync(ctx context.Context, sync *models.TellerSync) error
 	GetLatestTellerSync(ctx context.Context, tellerBankAccountId uint64) (*models.TellerSync, error)
 

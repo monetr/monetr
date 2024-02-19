@@ -914,6 +914,12 @@ func (s *SyncTellerJob) syncRemovedTransactions(
 		); err != nil {
 			return err
 		}
+		if err := s.repo.DeleteTellerTransaction(
+			ctx,
+			transaction.TellerTransaction,
+		); err != nil {
+			return err
+		}
 		s.tagBankAccountForSimilarityRecalc(transaction.BankAccountId)
 	}
 
