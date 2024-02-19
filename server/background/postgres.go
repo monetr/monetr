@@ -508,10 +508,29 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 			}
 
 			log.Trace("consumed cron job")
-			if err := nextJob.handler.EnqueueTriggeredJob(context.Background(), p.enqueuer); err != nil {
-				log.WithError(err).Error("failed to enqueue cron job to be executed")
-				continue
-			}
+
+			// Wrap the execution of the cron
+			func(log *logrus.Entry, nextJob cronJobTracker) {
+				ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+				defer cancel()
+				span := sentry.StartSpan(
+					ctx,
+					"topic.process",
+					sentry.WithTransactionName(nextJob.queueName),
+				)
+				defer span.Finish()
+
+				// TODO Handle panics, if the trigger job panics here then we will
+				// basically kill the cron job processor and it won't restart on its
+				// own, the server would need to be restarted.
+				if err := nextJob.handler.EnqueueTriggeredJob(
+					span.Context(),
+					p.enqueuer,
+				); err != nil {
+					log.WithError(err).Error("failed to enqueue cron job to be executed")
+					return
+				}
+			}(log, nextJob)
 
 			// If possible, try to trigger the consumption of the cron job locally.
 			select {

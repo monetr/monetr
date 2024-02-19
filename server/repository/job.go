@@ -168,7 +168,7 @@ func (j *jobRepository) GetLinksForExpiredAccounts(ctx context.Context) ([]model
 // with a next recurrence that is in the past. This is used to find spending objects that need to be updated as they
 // have not been spent from for at least once cycle.
 func (j *jobRepository) GetBankAccountsWithStaleSpending(ctx context.Context) ([]BankAccountWithStaleSpendingItem, error) {
-	span := sentry.StartSpan(ctx, "GetBankAccountsWithStaleSpending")
+	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
 	var result []BankAccountWithStaleSpendingItem
