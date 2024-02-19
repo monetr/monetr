@@ -82,6 +82,7 @@ type BaseRepository interface {
 	// 24 hours.
 	GetRecentDepositTransactions(ctx context.Context, bankAccountId uint64) ([]models.Transaction, error)
 	GetTransactionsByPlaidId(ctx context.Context, linkId uint64, plaidTransactionIds []string) (map[string]models.Transaction, error)
+	// Deprecated: Use GetTransactionsByPlaidId
 	GetTransactionsByPlaidTransactionId(ctx context.Context, linkId uint64, plaidTransactionIds []string) ([]models.Transaction, error)
 	GetTransactionsForSpending(ctx context.Context, bankAccountId, spendingId uint64, limit, offset int) ([]models.Transaction, error)
 	InsertTransactions(ctx context.Context, transactions []models.Transaction) error
@@ -117,6 +118,19 @@ type BaseRepository interface {
 	CreateTellerTransaction(ctx context.Context, transaction *models.TellerTransaction) error
 	CreateTellerSync(ctx context.Context, sync *models.TellerSync) error
 	GetLatestTellerSync(ctx context.Context, tellerBankAccountId uint64) (*models.TellerSync, error)
+
+	// GetTransactionsByTellerId is used by the sync code to compare transactions
+	// from teller to the transactions in the database. All transactions that have
+	// the specified teller Ids will be included if they exist. But if
+	// includePending is true then additional transactions might also be returned.
+	// This way pending transactios that are no longer present in the API can be
+	// compared easily.
+	GetTransactionsByTellerId(
+		ctx context.Context,
+		bankAccountId uint64,
+		tellerIds []string,
+		includePending bool,
+	) ([]models.Transaction, error)
 
 	fileRepositoryInterface
 }

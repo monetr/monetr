@@ -80,6 +80,55 @@ func (r *repositoryBase) GetTransactionsByPlaidId(ctx context.Context, linkId ui
 	return result, nil
 }
 
+// GetTransactionsByTellerId is used by the sync code to compare transactions
+// from teller to the transactions in the database. All transactions that have
+// the specified teller Ids will be included if they exist. But if
+// includePending is true then additional transactions might also be returned.
+// This way pending transactios that are no longer present in the API can be
+// compared easily.
+func (r *repositoryBase) GetTransactionsByTellerId(
+	ctx context.Context,
+	bankAccountId uint64,
+	tellerIds []string,
+	includePending bool,
+) ([]models.Transaction, error) {
+	if len(tellerIds) == 0 {
+		return []models.Transaction{}, nil
+	}
+
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	span.Data = map[string]interface{}{
+		"bankAccountId": bankAccountId,
+		"tellerIds":     tellerIds,
+	}
+
+	items := make([]models.Transaction, 0)
+	query := r.txn.ModelContext(span.Context(), &items).
+		Relation("TellerTransaction").
+		Where(`"transaction"."account_id" = ?`, r.AccountId()).
+		Where(`"transaction"."bank_account_id" = ?`, bankAccountId)
+
+	if includePending {
+		query = query.WhereGroup(func(q *orm.Query) (*orm.Query, error) {
+			q = q.WhereInOr(`"teller_transaction"."teller_id" IN (?)`, tellerIds).
+				WhereOr(`"teller_transaction"."is_pending" = ?`, true)
+			return q, nil
+		})
+	} else {
+		query = query.WhereIn(`"teller_transaction"."teller_id" IN (?)`, tellerIds)
+	}
+
+	err := query.Select(&items)
+	if err != nil {
+		span.Status = sentry.SpanStatusInternalError
+		return nil, errors.Wrap(err, "failed to find transactions by teller Id")
+	}
+
+	return items, nil
+}
+
 func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint64, limit, offset int) ([]models.Transaction, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()

@@ -68,8 +68,9 @@ type (
 		needsBalance      map[string]struct{}
 		netChanges        map[string]int64
 
-		tellerAccounts     map[string]teller.Account
-		tellerTransactions map[string]teller.Transaction
+		tellerAccounts       map[string]teller.Account
+		tellerTransactions   map[string]teller.Transaction
+		tellerTransactionIds []string
 	}
 )
 
@@ -339,50 +340,54 @@ func (s *SyncTellerJob) syncBankAccounts(ctx context.Context) error {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	bankAccounts, err := s.repo.GetBankAccountsByLinkId(span.Context(), s.args.LinkId)
-	if err != nil {
-		return errors.Wrap(err, "failed to retrieve bank accounts for Teller sync")
-	}
-	for _, account := range bankAccounts {
-		if account.TellerBankAccount == nil {
-			s.log.WithField("bankAccountId", account.BankAccountId).
-				Warn("bank account is part of a teller link, but does not have a teller bank account associated with it; it will be skipped")
-			continue
+	{ // Load the bank accounts that we already have into memory.
+		bankAccounts, err := s.repo.GetBankAccountsByLinkId(span.Context(), s.args.LinkId)
+		if err != nil {
+			return errors.Wrap(err, "failed to retrieve bank accounts for Teller sync")
 		}
-		s.bankAccounts[account.TellerBankAccount.TellerId] = account
+		for _, account := range bankAccounts {
+			if account.TellerBankAccount == nil {
+				s.log.WithField("bankAccountId", account.BankAccountId).
+					Warn("bank account is part of a teller link, but does not have a teller bank account associated with it; it will be skipped")
+				continue
+			}
+			s.bankAccounts[account.TellerBankAccount.TellerId] = account
+		}
 	}
 
-	s.log.Debug("retrieving bank accounts from teller")
-	tellerAccounts, err := s.client.GetAccounts(span.Context())
-	if err != nil {
-		s.log.WithError(err).Error("failed to retrieve bank accounts from teller")
-		return err
+	{ // Load the accounts from teller's API into memory.
+		s.log.Debug("retrieving bank accounts from teller")
+		tellerAccounts, err := s.client.GetAccounts(span.Context())
+		if err != nil {
+			s.log.WithError(err).Error("failed to retrieve bank accounts from teller")
+			return err
+		}
+
+		if len(tellerAccounts) == 0 {
+			s.log.Warn("no accounts found from Teller, something is wrong")
+			return errors.New("no Teller accounts found")
+		}
+
+		s.log.Tracef("found %d account(s) from Teller", len(tellerAccounts))
+
+		for _, account := range tellerAccounts {
+			s.tellerAccounts[account.Id] = account
+		}
+
+		crumbs.AddTag(
+			span.Context(),
+			"teller.institution_id",
+			tellerAccounts[0].Institution.Id,
+		)
 	}
 
-	if len(tellerAccounts) == 0 {
-		s.log.Warn("no accounts found from Teller, something is wrong")
-		return errors.New("no Teller accounts found")
-	}
-
-	s.log.Tracef("found %d account(s) from Teller", len(tellerAccounts))
-
-	for _, account := range tellerAccounts {
-		s.tellerAccounts[account.Id] = account
-	}
-
-	crumbs.AddTag(
-		span.Context(),
-		"teller.institution_id",
-		tellerAccounts[0].Institution.Id,
-	)
-
+	var err error
 	for tellerId, account := range s.tellerAccounts {
 		log := s.log.WithField("tellerAccountId", tellerId)
 		log.Trace("syncing Teller account")
 		bankAccount, ok := s.bankAccounts[tellerId]
 		if !ok {
 			log.Debug("Teller account has not been created in monetr, creating now")
-
 			tellerBankAccount := models.TellerBankAccount{
 				TellerLinkId:    *s.link.TellerLinkId,
 				TellerId:        tellerId,
@@ -504,7 +509,7 @@ func (s *SyncTellerJob) syncBankAccounts(ctx context.Context) error {
 	return nil
 }
 
-func (s *SyncTellerJob) retrieveTransactions(
+func (s *SyncTellerJob) retrieveTellerTransactions(
 	ctx context.Context,
 	log *logrus.Entry,
 	tellerId string,
@@ -551,7 +556,9 @@ func (s *SyncTellerJob) retrieveTransactions(
 			if err != nil {
 				return err
 			}
-			if immutableTimestamp.After(date) {
+			// Only if the date is before do we stop, if the date is the same that's
+			// fine.
+			if date.Before(*immutableTimestamp) {
 				break
 			}
 		}
@@ -560,6 +567,7 @@ func (s *SyncTellerJob) retrieveTransactions(
 	// Clear out the transactions from a previous account. We are only working
 	// with a single account at a time.
 	s.tellerTransactions = make(map[string]teller.Transaction)
+	s.tellerTransactionIds = make([]string, 0, len(tellerTransactions))
 
 	// Cache the transactions we have retrieve first
 	for _, tellerTransaction := range tellerTransactions {
@@ -569,9 +577,17 @@ func (s *SyncTellerJob) retrieveTransactions(
 			return err
 		}
 
-		if immutableTimestamp == nil || date.After(*immutableTimestamp) {
-			s.tellerTransactions[tellerTransaction.Id] = tellerTransaction
+		// If we actually have an immutable timestamp for this sync.
+		if immutableTimestamp != nil {
+			// Then throw out any transactions that we did retrieve that are before
+			// that timestamp.
+			if date.Before(*immutableTimestamp) {
+				continue
+			}
 		}
+
+		s.tellerTransactions[tellerTransaction.Id] = tellerTransaction
+		s.tellerTransactionIds = append(s.tellerTransactionIds, tellerTransaction.Id)
 	}
 
 	return nil
@@ -642,24 +658,8 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 			immutableTimestamp = &latestSync.ImmutableTimestamp
 		}
 
-		workingTransactions, err := s.repo.GetTransactionsAfter(
-			span.Context(),
-			bankAccount.BankAccountId,
-			immutableTimestamp,
-		)
-		if err != nil {
-			log.WithError(err).Error("failed to read working transactions from the database")
-			continue
-		}
-		for _, transaction := range workingTransactions {
-			if transaction.TellerTransaction == nil {
-				continue
-			}
-			s.transactions[transaction.TellerTransaction.TellerId] = transaction
-		}
-
-		// Retrieve the transactions from teller and store them.
-		if err := s.retrieveTransactions(
+		// Retrieve the transactions from teller and store them first.
+		if err := s.retrieveTellerTransactions(
 			span.Context(),
 			log,
 			tellerId,
@@ -667,6 +667,27 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 		); err != nil {
 			log.WithError(err).Error("failed to retrieve transactions from teller")
 			continue
+		}
+
+		{ // Retrieve stored transaction data to compare to the API results from teller.
+			workingTransactions, err := s.repo.GetTransactionsByTellerId(
+				span.Context(),
+				bankAccount.BankAccountId,
+				s.tellerTransactionIds,
+				true, // Include pending transactions
+			)
+			if err != nil {
+				log.WithError(err).Error("failed to read working transactions from the database")
+				continue
+			}
+
+			s.transactions = make(map[string]models.Transaction)
+			for _, transaction := range workingTransactions {
+				if transaction.TellerTransaction == nil {
+					continue
+				}
+				s.transactions[transaction.TellerTransaction.TellerId] = transaction
+			}
 		}
 
 		for tellerTransactionId, tellerTxnRaw := range s.tellerTransactions {
@@ -839,6 +860,15 @@ func (s *SyncTellerJob) syncRemovedTransactions(
 		_, ok := s.tellerTransactions[tellerTransactionId]
 		if ok {
 			continue
+		}
+
+		if !transaction.IsPending {
+			crumbs.IndicateBug(ctx, "Trying to remove a posted transaction, this is a bug", map[string]interface{}{
+				"tellerAccountId":     tellerId,
+				"tellerTransactionId": tellerTransactionId,
+				"transactionId":       transaction.TransactionId,
+				"bankAccountId":       transaction.BankAccountId,
+			})
 		}
 
 		existing := transaction
