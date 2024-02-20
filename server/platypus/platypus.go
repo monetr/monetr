@@ -18,7 +18,7 @@ import (
 	"github.com/monetr/monetr/server/repository"
 	"github.com/monetr/monetr/server/secrets"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -195,9 +195,9 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 				Ssn:                      nil,
 				DateOfBirth:              *plaid.NewNullableString(nil),
 			},
-			Products:              &consts.PlaidProducts,
+			Products:              consts.PlaidProducts,
 			Webhook:               webhooksUrl,
-			AccessToken:           nil,
+			AccessToken:           *plaid.NewNullableString(nil),
 			LinkCustomizationName: nil,
 			RedirectUri:           redirectUri,
 			AndroidPackageName:    nil,

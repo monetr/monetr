@@ -7,7 +7,6 @@ require (
 	cloud.google.com/go/kms v1.15.5
 	cloud.google.com/go/storage v1.36.0
 	github.com/MicahParks/keyfunc v1.0.1
-	github.com/OneOfOne/xxhash v1.2.8
 	github.com/adrg/strutil v0.3.1
 	github.com/ahmetb/go-linq/v3 v3.2.0
 	github.com/alicebob/miniredis/v2 v2.31.0
@@ -31,7 +30,6 @@ require (
 	github.com/mileusna/useragent v1.3.4
 	github.com/nyaruka/phonenumbers v1.1.8
 	github.com/pkg/errors v0.9.1
-	github.com/plaid/plaid-go/v14 v14.0.0
 	github.com/plaid/plaid-go/v20 v20.1.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/sirupsen/logrus v1.9.3

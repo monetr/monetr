@@ -1,6 +1,6 @@
 package platypus
 
-import "github.com/plaid/plaid-go/v14/plaid"
+import "github.com/plaid/plaid-go/v20/plaid"
 
 type (
 	BankAccount interface {
@@ -101,9 +101,9 @@ func NewPlaidBankAccount(bankAccount plaid.AccountBase) (PlaidBankAccount, error
 }
 
 type PlaidBankAccount struct {
-	AccountId string
-	Balances  PlaidBankAccountBalances
-	Mask      string
+	AccountId    string
+	Balances     PlaidBankAccountBalances
+	Mask         string
 	Name         string
 	OfficialName string
 	Type         string

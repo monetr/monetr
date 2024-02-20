@@ -33,7 +33,7 @@ import (
 	"github.com/monetr/monetr/server/security"
 	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

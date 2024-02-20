@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -259,7 +259,7 @@ func (p *PlaidClient) UpdateItem(ctx context.Context, updateAccountSelection boo
 				EmailAddress: nil,
 			},
 			Webhook:               webhooksUrl,
-			AccessToken:           &p.accessToken,
+			AccessToken:           *plaid.NewNullableString(&p.accessToken),
 			LinkCustomizationName: nil,
 			RedirectUri:           redirectUri,
 			Update: &plaid.LinkTokenCreateRequestUpdate{

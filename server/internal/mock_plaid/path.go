@@ -2,9 +2,10 @@ package mock_plaid
 
 import (
 	"fmt"
-	"github.com/plaid/plaid-go/v14/plaid"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/plaid/plaid-go/v20/plaid"
+	"github.com/stretchr/testify/require"
 )
 
 func Path(t *testing.T, relative string) string {

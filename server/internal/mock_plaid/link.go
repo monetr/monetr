@@ -11,7 +11,7 @@ import (
 	"github.com/monetr/monetr/server/consts"
 	"github.com/monetr/monetr/server/internal/mock_http_helper"
 	"github.com/monetr/monetr/server/internal/myownsanity"
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +36,7 @@ func MockCreateLinkToken(t *testing.T, callbacks ...func(t *testing.T, request p
 			require.Equal(t, consts.PlaidClientName, createLinkTokenRequest.ClientName, "client name must match the shared const")
 			require.NotEmpty(t, createLinkTokenRequest.Language, "language is required")
 
-			if createLinkTokenRequest.AccessToken != nil {
+			if createLinkTokenRequest.AccessToken.IsSet() {
 				require.Empty(t, createLinkTokenRequest.Products, "products array must be empty when updating a link")
 			}
 
@@ -67,7 +67,7 @@ func MockCreateLinkTokenFailure(t *testing.T) {
 			require.Equal(t, consts.PlaidClientName, createLinkTokenRequest.ClientName, "client name must match the shared const")
 			require.NotEmpty(t, createLinkTokenRequest.Language, "language is required")
 
-			if createLinkTokenRequest.AccessToken != nil {
+			if createLinkTokenRequest.AccessToken.IsSet() {
 				require.Empty(t, createLinkTokenRequest.Products, "products array must be empty when updating a link")
 			}
 

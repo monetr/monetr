@@ -7,7 +7,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/cache"
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v20/plaid"
 	"github.com/sirupsen/logrus"
 )
 

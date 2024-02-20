@@ -5,7 +5,7 @@ import (
 
 	"github.com/monetr/monetr/server/util"
 	"github.com/pkg/errors"
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v20/plaid"
 )
 
 type Transaction interface {

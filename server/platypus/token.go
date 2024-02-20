@@ -3,7 +3,7 @@ package platypus
 import (
 	"time"
 
-	"github.com/plaid/plaid-go/v14/plaid"
+	"github.com/plaid/plaid-go/v20/plaid"
 )
 
 type ItemToken struct {

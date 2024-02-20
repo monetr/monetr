@@ -11,7 +11,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	models "github.com/monetr/monetr/server/models"
 	platypus "github.com/monetr/monetr/server/platypus"
-	plaid "github.com/plaid/plaid-go/v14/plaid"
+	plaid "github.com/plaid/plaid-go/v20/plaid"
 )
 
 // MockPlatypus is a mock of Platypus interface.
