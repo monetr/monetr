@@ -517,6 +517,12 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 
 			// Wrap the execution of the cron
 			func(log *logrus.Entry, nextJob cronJobTracker) {
+				defer func() {
+					if err := recover(); err != nil {
+						log.WithField("panic", err).Error("cron job panicked!")
+					}
+				}()
+
 				ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 				defer cancel()
 				span := sentry.StartSpan(
@@ -526,9 +532,6 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 				)
 				defer span.Finish()
 
-				// TODO Handle panics, if the trigger job panics here then we will
-				// basically kill the cron job processor and it won't restart on its
-				// own, the server would need to be restarted.
 				if err := nextJob.handler.EnqueueTriggeredJob(
 					span.Context(),
 					p.enqueuer,
@@ -601,12 +604,20 @@ func (p *postgresJobProcessor) worker(shutdown chan chan struct{}) {
 				))
 			}
 
-			// Execute the job with a 1 minute timeout.
-			ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-			if err := executor(ctx, job); err != nil {
-				log.WithError(err).Error("failed to execute job")
-			}
-			cancel()
+			func(log *logrus.Entry, executor postgresJobFunction, job *models.Job) {
+				defer func() {
+					if err := recover(); err != nil {
+						log.WithField("panic", err).Error("job panicked!")
+					}
+				}()
+
+				// Execute the job with a 1 minute timeout.
+				ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+				defer cancel()
+				if err := executor(ctx, job); err != nil {
+					log.WithError(err).Error("failed to execute job")
+				}
+			}(log, executor, job)
 
 			// Try to consume another job again immediately incase there are more.
 			p.trigger <- consumerSignal
@@ -662,7 +673,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		span := sentry.StartSpan(
 			highContext,
 			"topic.process",
-			sentry.TransactionName(handler.QueueName()),
+			sentry.WithTransactionName(handler.QueueName()),
 		)
 		span.Description = handler.QueueName()
 		jobLog := p.log.WithContext(span.Context())

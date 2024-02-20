@@ -10,3 +10,7 @@ UPDATE "jobs" SET
 ALTER TABLE "jobs"
 ALTER COLUMN "attempt" SET NOT NULL,
 ALTER COLUMN "timestamp" SET NOT NULL;
+
+CREATE INDEX "ix_jobs_timestamped" 
+ON "jobs" ("timestamp", "status", "queue") 
+WHERE "status" = 'pending';
