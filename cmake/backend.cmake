@@ -81,6 +81,7 @@ add_custom_command(
     ${APP_GO_FILES}
     build.interface
     build.email
+    download.legal
 )
 
 set(SIMPLE_ICONS ${CMAKE_SOURCE_DIR}/server/icons/sources/simple-icons/icons)
