@@ -208,6 +208,9 @@ func (p *Plaid) CreateLinkToken(ctx context.Context, options LinkTokenOptions) (
 			DepositSwitch:         nil,
 			IncomeVerification:    nil,
 			Auth:                  nil,
+			Transactions: &plaid.LinkTokenTransactions{
+				DaysRequested: myownsanity.Int32P(2 * 365), // 2 years
+			},
 		})
 
 	result, response, err := request.Execute()

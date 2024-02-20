@@ -40,6 +40,16 @@ func (p *PlaidClient) Sync(ctx context.Context, cursor *string) (*SyncResult, er
 			AccessToken: p.accessToken,
 			Cursor:      cursor,
 			Count:       myownsanity.Int32P(500),
+			Options: &plaid.TransactionsSyncRequestOptions{
+				// Why does the constructor for the nullable bool return a pointer to a
+				// nullable wrapper type? What the fuck? Absolutely fucking garbage
+				// openapi code generator.
+				IncludeOriginalDescription: *plaid.NewNullableBool(myownsanity.BoolP(true)),
+				// Why the fuck is this a boolean pointer, but the field above is a
+				// nullable boolean.
+				IncludePersonalFinanceCategory: myownsanity.BoolP(true),
+				IncludeLogoAndCounterpartyBeta: myownsanity.BoolP(true),
+			},
 		})
 
 	result, response, err := request.Execute()
