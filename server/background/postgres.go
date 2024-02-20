@@ -96,15 +96,18 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 	}
 
 	job := models.Job{
-		Queue:       queue,
-		Signature:   signature,
-		Input:       string(encodedArguments),
-		Output:      "",
-		Status:      models.PendingJobStatus,
-		CreatedAt:   timestamp,
-		UpdatedAt:   timestamp,
-		StartedAt:   nil,
-		CompletedAt: nil,
+		Queue:         queue,
+		Signature:     signature,
+		Input:         string(encodedArguments),
+		Output:        "",
+		Status:        models.PendingJobStatus,
+		Attempt:       1,
+		PreviousJobId: nil, // First attempt
+		Timestamp:     timestamp,
+		CreatedAt:     timestamp,
+		UpdatedAt:     timestamp,
+		StartedAt:     nil,
+		CompletedAt:   nil,
 	}
 	_, err = p.db.ModelContext(span.Context(), &job).Insert(&job)
 	if err != nil {
@@ -224,6 +227,7 @@ func (p *postgresJobProcessor) Start() error {
 	p.jobQuery = p.db.Model(new(models.Job)).
 		Column("job_id").
 		Where(`"status" = ?`, models.PendingJobStatus).
+		Where(`"timestamp" <= ?`, p.clock.Now()).
 		WhereIn(`"queue" IN (?)`, p.queues).
 		Order(`created_at ASC`).
 		For(`UPDATE SKIP LOCKED`).
