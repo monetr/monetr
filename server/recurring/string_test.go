@@ -31,6 +31,17 @@ func TestCleanNameRegex(t *testing.T) {
 			"github", "merchant", "name", "github", "github",
 		}, lower, "should match the cleaned string")
 	})
+
+	t.Run("debit card", func(t *testing.T) {
+		txn := models.Transaction{
+			OriginalName: "POS Debit - 1234 - GOOGLE *YOUTUBEPRE G.CO/HELPPAY#CA",
+		}
+
+		lower, _ := CleanNameRegex(&txn)
+		assert.EqualValues(t, []string{
+			"pos", "debit", "google", "youtubepre", "gco", "helppay", "ca",
+		}, lower, "should match the cleaned string")
+	})
 }
 
 func BenchmarkCleanNameRegex(b *testing.B) {
