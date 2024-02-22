@@ -63,12 +63,12 @@ clean:
 	-git submodule deinit -f server/legal/data/legal
 
 dependencies: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t dependencies -j $(CONCURRENCY) $(BUILD_ARGS)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t dependencies $(BUILD_ARGS)
 
 deps: dependencies
 
 monetr: | $(CMAKE_CONFIGURATION_DIRECTORY)
-	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.monetr -j $(CONCURRENCY) $(BUILD_ARGS)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.monetr $(BUILD_ARGS)
 
 monetr-release:
 	$(MAKE) monetr -B CMAKE_PRESET=release

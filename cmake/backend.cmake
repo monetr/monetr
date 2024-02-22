@@ -84,18 +84,10 @@ add_custom_command(
     download.legal
 )
 
-set(SIMPLE_ICONS ${CMAKE_SOURCE_DIR}/server/icons/sources/simple-icons/icons)
-add_custom_command(
-  OUTPUT ${SIMPLE_ICONS}
-  COMMAND ${GIT_EXECUTABLE} submodule update --init server/icons/sources/simple-icons
-  COMMENT "Retrieving simple-icons"
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
-
 if(BUILD_SIMPLE_ICONS)
   message(STATUS "Simple Icons enabled, icons will be embedded at compile time")
   add_custom_command(
     OUTPUT ${MONETR_EXECUTABLE} APPEND
-    DEPENDS ${SIMPLE_ICONS}
+    DEPENDS download.simple-icons
   )
 endif()

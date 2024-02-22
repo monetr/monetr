@@ -167,7 +167,7 @@ add_custom_target(
   COMMAND_EXPAND_LISTS
   USES_TERMINAL
   DEPENDS
-    ${SIMPLE_ICONS}
+    download.simple-icons
     dependencies.node_modules
     build.email
 )
