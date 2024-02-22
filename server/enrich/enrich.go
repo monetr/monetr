@@ -100,7 +100,7 @@ type Category struct {
 	Confidence Confidence
 }
 
-type EnrichmentProcessor interface {
+type EnrichmentProvider interface {
 	// Enrich will take an array of transaction items (maximum of 100) and enrich
 	// them synchronously. It will return an array of enriched transactions. There
 	// will always be at least one enrichment per transaction but some details on
