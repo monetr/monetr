@@ -6,13 +6,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
-	gcs "cloud.google.com/go/storage"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/benbjohnson/clock"
 	"github.com/getsentry/sentry-go"
 	"github.com/monetr/monetr/server/application"
@@ -27,13 +23,10 @@ import (
 	"github.com/monetr/monetr/server/platypus"
 	"github.com/monetr/monetr/server/pubsub"
 	"github.com/monetr/monetr/server/security"
-	"github.com/monetr/monetr/server/storage"
 	"github.com/monetr/monetr/server/stripe_helper"
 	"github.com/monetr/monetr/server/teller"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"google.golang.org/api/option"
 )
 
 func init() {
@@ -286,9 +279,12 @@ func RunServer() error {
 			log.WithError(err).Fatal("failed to start the server")
 		}
 	}()
+
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	log.Infof("monetr is running, listening at http://%s", listenAddress)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+	log.WithField("address", fmt.Sprintf("http://%s", listenAddress)).
+		Info("monetr is running")
+
 	<-quit
 	log.Info("shutting down")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -299,84 +295,4 @@ func RunServer() error {
 	log.Info("http server shutdown complete")
 
 	return nil
-}
-
-func setupStorage(
-	log *logrus.Entry,
-	configuration config.Configuration,
-) (fileStorage storage.Storage, err error) {
-	if !configuration.Storage.Enabled {
-		log.Trace("file storage is not enabled")
-		return nil, nil
-	}
-
-	switch configuration.Storage.Provider {
-	case "s3":
-		log.Trace("setting up file storage interface using S3 protocol")
-		s3Config := configuration.Storage.S3
-		awsConfig := aws.NewConfig().WithS3ForcePathStyle(s3Config.ForcePathStyle)
-		if endpoint := s3Config.Endpoint; endpoint != nil {
-			awsConfig = awsConfig.WithEndpoint(*endpoint)
-		}
-
-		if useEnvCredentials := s3Config.UseEnvCredentials; useEnvCredentials {
-			awsConfig = awsConfig.WithCredentials(credentials.NewEnvCredentials())
-		} else if s3Config.AccessKey != nil {
-			awsConfig = awsConfig.WithCredentials(credentials.NewStaticCredentials(
-				*s3Config.AccessKey,
-				*s3Config.SecretKey,
-				"", // Not requiured since we aren't using temporary credentials.
-			))
-		}
-
-		if s3Config.Region != "" {
-			awsConfig = awsConfig.WithRegion(s3Config.Region)
-		}
-
-		session, err := session.NewSession(awsConfig)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to create s3 session")
-		}
-
-		client := s3.New(session)
-
-		fileStorage = storage.NewS3StorageBackend(log, s3Config.Bucket, client)
-	case "gcs":
-		log.Trace("setting up file storage interface using GCS")
-
-		gcsConfig := configuration.Storage.GCS
-
-		options := make([]option.ClientOption, 0)
-		if gcsConfig.URL != nil && *gcsConfig.URL != "" {
-			options = append(options, option.WithEndpoint(*gcsConfig.URL))
-		}
-
-		if gcsConfig.APIKey != nil && *gcsConfig.APIKey != "" {
-			options = append(options, option.WithAPIKey(*gcsConfig.APIKey))
-		}
-
-		if gcsConfig.CredentialsJSON != nil && *gcsConfig.CredentialsJSON != "" {
-			options = append(options, option.WithCredentialsFile(*gcsConfig.CredentialsJSON))
-		}
-
-		client, err := gcs.NewClient(context.Background(), options...)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to initialize GCS client")
-		}
-
-		fileStorage = storage.NewGCSStorageBackend(log, gcsConfig.Bucket, client)
-	case "filesystem":
-		log.Trace("setting up file storage interface using local filesystem")
-		fileStorage = storage.NewFilesystemStorage(
-			log,
-			configuration.Storage.Filesystem.BasePath,
-		)
-	default:
-		return nil, errors.Errorf(
-			"invalid storage provider: %s",
-			configuration.Storage.Provider,
-		)
-	}
-
-	return fileStorage, err
 }

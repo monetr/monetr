@@ -38,7 +38,7 @@ func (s *gcsStorage) Store(
 	if err != nil {
 		return "", err
 	}
-	uri = fmt.Sprintf("gcs://%s/%s", s.bucket, key)
+	uri = fmt.Sprintf("gs://%s/%s", s.bucket, key)
 
 	log := s.log.
 		WithContext(span.Context()).
