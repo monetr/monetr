@@ -43,6 +43,7 @@ type Configuration struct {
 	CORS                CORS           `yaml:"cors"`
 	Email               Email          `yaml:"email"`
 	KeyManagement       KeyManagement  `yaml:"keyManagement"`
+	Links               Links          `yaml:"links"`
 	Logging             Logging        `yaml:"logging"`
 	Plaid               Plaid          `yaml:"plaid"`
 	PostgreSQL          PostgreSQL     `yaml:"postgreSql"`
@@ -296,9 +297,6 @@ type Plaid struct {
 	// protocol or a path. The protocol is auto inserted as `https` as it is the only protocol supported. The path is
 	// currently hard coded until a need for different paths arises?
 	OAuthDomain string `yaml:"oauthDomain"`
-	// MaxNumberOfLinks defines the max number of active Plaid links a single account can have. If this is set to 0 then
-	// there is no limit.
-	MaxNumberOfLinks int `yaml:"maxNumberOfLinks"`
 }
 
 func (p Plaid) GetEnabled() bool {

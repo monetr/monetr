@@ -79,6 +79,12 @@ data:
     {{- toYaml .Values.api.stripe.initialPlan | nindent 8 }}
     {{- end }}
 
+    # Links configuration if it is enabled
+    {{- if .Values.api.links.enabled }}
+    links:
+    {{- toYaml .Values.api.links | nindent 6 }}
+    {{- end }}
+
     # Plaid configuration if it is enabled
     {{- if .Values.api.plaid.enabled }}
     plaid:

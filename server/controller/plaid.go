@@ -99,7 +99,7 @@ func (c *Controller) newPlaidToken(ctx echo.Context) error {
 	}
 
 	// If there is a configured limit on Plaid links then enforce that limit.
-	if maxLinks := c.configuration.Plaid.MaxNumberOfLinks; maxLinks > 0 && numberOfLinks >= maxLinks {
+	if maxLinks := c.configuration.Links.MaxNumberOfLinks; maxLinks > 0 && numberOfLinks >= maxLinks {
 		return c.badRequest(ctx, "max number of Plaid links already reached")
 	}
 

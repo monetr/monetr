@@ -21,6 +21,18 @@ func (c *Controller) postTellerLink(ctx echo.Context) error {
 		return c.returnError(ctx, http.StatusNotAcceptable, "Teller is not enabled on this server.")
 	}
 
+	repo := c.mustGetAuthenticatedRepository(ctx)
+
+	numberOfLinks, err := repo.GetNumberOfPlaidLinks(c.getContext(ctx))
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine the number of existing plaid links")
+	}
+
+	// If there is a configured limit on links then enforce that limit.
+	if maxLinks := c.configuration.Links.MaxNumberOfLinks; maxLinks > 0 && numberOfLinks >= maxLinks {
+		return c.badRequest(ctx, "Maximum number of links already reached")
+	}
+
 	var request struct {
 		AccessToken string `json:"accessToken"`
 		User        struct {
@@ -63,8 +75,6 @@ func (c *Controller) postTellerLink(ctx echo.Context) error {
 	if err := secretsRepo.Store(c.getContext(ctx), &secret); err != nil {
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to store access token")
 	}
-
-	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	tellerLink := models.TellerLink{
 		SecretId:             secret.SecretId,

@@ -144,6 +144,8 @@ api:
     verifyLogin: false
     verifyRegister: false
     verifyForgotPassword: false
+  links:
+    maxNumberOfLinks: 0
   plaid:
     enabled: true
     clientId: "abc123"
@@ -154,7 +156,6 @@ api:
     webhooksEnabled: false
     webhooksDomain: ""
     oauthDomain: ""
-    maxNumberOfLinks: 0
   teller:
     enabled: false
     environment: sandbox

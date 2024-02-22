@@ -87,13 +87,14 @@ api:
     verifyLogin: false
     verifyRegister: false
     verifyForgotPassword: false
+  links:
+    maxNumberOfLinks: 3
   plaid:
     environment: "https://production.plaid.com"
     enableReturningUserExperience: true
     webhooksEnabled: true
     webhooksDomain: my.monetr.app
     oauthDomain: my.monetr.app
-    maxNumberOfLinks: 3
   cors:
     allowedOrigins:
       - "https://my.monetr.app"
