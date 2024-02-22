@@ -876,6 +876,11 @@ func (s *SyncTellerJob) syncRemovedTransactions(
 			})
 		}
 
+		if transaction.DeletedAt != nil && transaction.TellerTransaction.DeletedAt != nil {
+			// If the transaction is already deleted then nothing needs to be done.
+			continue
+		}
+
 		existing := transaction
 
 		txnLog := log.WithFields(logrus.Fields{
