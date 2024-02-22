@@ -3,6 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import NiceModal, { useModal } from '@ebay/nice-modal-react';
 import { Close, FilePresentOutlined, UploadFileOutlined } from '@mui/icons-material';
 import { AxiosProgressEvent } from 'axios';
+import { useSnackbar } from 'notistack';
 
 import { MBaseButton } from '@monetr/interface/components/MButton';
 import MModal, { MModalRef } from '@monetr/interface/components/MModal';
@@ -54,6 +55,7 @@ interface StageProps {
 }
 
 function UploadFileStage(props: StageProps) {
+  const { enqueueSnackbar } = useSnackbar();
   const [file, setFile] = useState<File|null>(null);
   const selectedBankAccountId = useSelectedBankAccountId();
   const [uploadProgress, setUploadProgress] = useState(-1);
@@ -98,6 +100,12 @@ function UploadFileStage(props: StageProps) {
       .catch(error => {
         console.error('file upload failed', error);
         // props.setStage(UploadTransactionStage.Error);
+        const message = error.response.data.error || 'Unkown error';
+        enqueueSnackbar(`Failed to upload file: ${message}`, {
+          variant: 'error',
+          disableWindowBlurListener: true,
+        });
+        props.close();
       });
   }
 
