@@ -32,3 +32,7 @@ type TellerBankAccount struct {
 	CreatedAt           time.Time               `json:"createdAt" pg:"created_at,notnull"`
 	BalancedAt          *time.Time              `json:"balancedAt" pg:"balanced_at"`
 }
+
+func (t TellerBankAccount) GetIsCredit() bool {
+	return t.Type == "credit" && t.SubType == "credit_card"
+}

@@ -700,6 +700,11 @@ func (s *SyncTellerJob) syncTransactions(ctx context.Context) error {
 				return err
 			}
 
+			// If the account is a credit account, invert the transaction amount
+			if bankAccount.TellerBankAccount.GetIsCredit() {
+				amount *= -1
+			}
+
 			runningBalance, err := tellerTxnRaw.GetRunningBalance()
 			if err != nil {
 				return err
