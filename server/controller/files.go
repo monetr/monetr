@@ -15,7 +15,7 @@ import (
 
 func (c *Controller) postFile(ctx echo.Context) error {
 	if !c.configuration.Storage.Enabled {
-		return c.notFound(ctx, "file uploads are not enabled on this server")
+		return c.notFound(ctx, "File uploads are not enabled on this server")
 	}
 
 	log := c.getLog(ctx)
@@ -31,7 +31,7 @@ func (c *Controller) postFile(ctx echo.Context) error {
 
 	ok, err := repo.GetLinkIsManualByBankAccountId(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to verify bank account link type")
+		return c.wrapPgError(ctx, err, "Failed to verify bank account link type")
 	}
 	if !ok {
 		return c.badRequest(ctx, "Cannot import transactions for non-manual link.")
@@ -39,7 +39,7 @@ func (c *Controller) postFile(ctx echo.Context) error {
 
 	reader, header, err := ctx.Request().FormFile("data")
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "failed to read file upload")
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "Failed to read file upload")
 	}
 	defer reader.Close()
 
@@ -86,7 +86,7 @@ func (c *Controller) postFile(ctx echo.Context) error {
 		},
 	)
 	if err != nil {
-		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to upload file")
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "Failed to upload file")
 	}
 
 	file := models.File{
@@ -99,7 +99,7 @@ func (c *Controller) postFile(ctx echo.Context) error {
 	}
 
 	if err := repo.CreateFile(c.getContext(ctx), &file); err != nil {
-		return c.wrapPgError(ctx, err, "failed to create file")
+		return c.wrapPgError(ctx, err, "Failed to create file")
 	}
 
 	return ctx.JSON(http.StatusOK, file)
@@ -108,14 +108,14 @@ func (c *Controller) postFile(ctx echo.Context) error {
 func (c *Controller) getFiles(ctx echo.Context) error {
 	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
 	if err != nil {
-		return c.badRequest(ctx, "must specify a valid bank account Id")
+		return c.badRequest(ctx, "Must specify a valid bank account Id")
 	}
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
 	files, err := repo.GetFiles(c.getContext(ctx), bankAccountId)
 	if err != nil {
-		return c.wrapPgError(ctx, err, "failed to list files")
+		return c.wrapPgError(ctx, err, "Failed to list files")
 	}
 
 	return ctx.JSON(http.StatusOK, files)
