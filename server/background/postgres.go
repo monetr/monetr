@@ -658,7 +658,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 		span := sentry.StartSpan(
 			highContext,
 			"topic.process",
-			sentry.TransactionName(handler.QueueName()),
+			sentry.WithTransactionName(handler.QueueName()),
 		)
 		span.Description = handler.QueueName()
 		jobLog := p.log.WithContext(span.Context())
@@ -680,6 +680,7 @@ func (p *postgresJobProcessor) buildJobExecutor(
 				if err == nil {
 					err = errors.Errorf("panic in job: %v", panicErr)
 				}
+				span.Status = sentry.SpanStatusInternalError
 			} else if err != nil {
 				jobLog.WithError(err).Error("error while processing job")
 				if hub != nil {
@@ -688,6 +689,12 @@ func (p *postgresJobProcessor) buildJobExecutor(
 					})
 					hub.CaptureException(err)
 				}
+				span.Status = sentry.SpanStatusInternalError
+			} else {
+				hub.ConfigureScope(func(scope *sentry.Scope) {
+					scope.SetLevel(sentry.LevelInfo)
+				})
+				span.Status = sentry.SpanStatusOK
 			}
 
 			p.markJobStatus(span.Context(), job, err)
