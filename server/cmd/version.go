@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"strings"
 
+	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/klauspost/cpuid/v2"
 	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/icons"
@@ -36,11 +37,14 @@ func newVersionCommand(parent *cobra.Command) {
 				"Embedded UI:     %t\n" +
 				"Embedded Icons:  %t\n" +
 				"  Icon Packs:    %s\n" +
+				"Locales:         %d\n" +
 				"Architecture:    %s\n" +
 				"OS:              %s\n" +
 				"SIMD:            %s\n" +
 				"Compiler:        %s\n" +
 				"Go Version:      %s\n"
+
+			locales := locale.GetInstalledLocales()
 
 			iconsEnabled := icons.GetIconsEnabled()
 			iconPacks := "<not enabled>"
@@ -70,6 +74,7 @@ func newVersionCommand(parent *cobra.Command) {
 				ui.EmbeddedUI,
 				iconsEnabled,
 				iconPacks,
+				len(locales),
 				runtime.GOARCH,
 				runtime.GOOS,
 				simd,
