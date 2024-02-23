@@ -90,6 +90,8 @@ export default function Register(): JSX.Element {
   const queryClient = useQueryClient();
   const [successful, setSuccessful] = useState(false);
 
+  console.log('config', config);
+
   function BetaCodeInput(): JSX.Element {
     if (!config?.requireBetaCode) return null;
 
@@ -151,7 +153,6 @@ export default function Register(): JSX.Element {
       <RegisterSuccessful />
     );
   }
-
 
   return (
     <div className='w-full h-full flex pt-10 md:pt-0 md:pb-10 md:justify-center items-center flex-col gap-1 px-5 overflow-y-auto py-4'>
