@@ -15,9 +15,10 @@ list(TRANSFORM TEXT_EMAIL_TEMPLATES REPLACE ".tsx" ".txt")
 add_custom_command(
   OUTPUT ${HTML_EMAIL_TEMPLATES} ${TEXT_EMAIL_TEMPLATES}
   BYPRODUCTS ${HTML_EMAIL_TEMPLATES} ${TEXT_EMAIL_TEMPLATES}
-  COMMAND ${REACT_EMAIL_EXECUTABLE} export --dir ${EMAIL_TEMPLATE_INPUT_DIRECTORY} --outDir ${EMAIL_TEMPLATE_OUTPUT_DIRECTORY}
-  COMMAND ${REACT_EMAIL_EXECUTABLE} export --plainText --dir ${EMAIL_TEMPLATE_INPUT_DIRECTORY} --outDir ${EMAIL_TEMPLATE_OUTPUT_DIRECTORY}
+  COMMAND ${REACT_EMAIL_EXECUTABLE} export --dir src --outDir ${EMAIL_TEMPLATE_OUTPUT_DIRECTORY}
+  COMMAND ${REACT_EMAIL_EXECUTABLE} export --plainText --dir src --outDir ${EMAIL_TEMPLATE_OUTPUT_DIRECTORY}
   COMMENT "Building email templates from React"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS
     tools.react-email
     ${EMAIL_TEMPLATE_INPUTS}
@@ -31,22 +32,11 @@ add_custom_target(
     ${TEXT_EMAIL_TEMPLATES}
 )
 
-set(EMAIL_DEV_DIRECTORY ${CMAKE_BINARY_DIR}/development.email)
-file(MAKE_DIRECTORY ${EMAIL_DEV_DIRECTORY})
-
-add_custom_command(
-  OUTPUT ${EMAIL_DEV_DIRECTORY}/package.json
-  BYPRODUCTS ${EMAIL_DEV_DIRECTORY}/package.json
-  COMMENT "Setting up required filed for react-email development"
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/package.json ${EMAIL_DEV_DIRECTORY}/package.json
-)
-
 add_custom_target(
   development.email
   COMMENT "Running the local development tools for email templates"
-  COMMAND ${REACT_EMAIL_EXECUTABLE} dev --dir ${EMAIL_TEMPLATE_INPUT_DIRECTORY}
-  WORKING_DIRECTORY ${EMAIL_DEV_DIRECTORY}
+  COMMAND ${REACT_EMAIL_EXECUTABLE} dev --dir src
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   DEPENDS
     tools.react-email
-    ${EMAIL_DEV_DIRECTORY}/package.json
 )
