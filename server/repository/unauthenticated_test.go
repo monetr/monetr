@@ -29,6 +29,7 @@ func TestUnauthenticatedRepo_CreateAccount(t *testing.T) {
 	repo := GetTestUnauthenticatedRepository(t, clock)
 	account := models.Account{
 		Timezone:                time.UTC.String(),
+		Locale:                  "en_US",
 		StripeCustomerId:        nil,
 		StripeSubscriptionId:    nil,
 		SubscriptionActiveUntil: nil,
@@ -86,6 +87,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 
 		account := models.Account{
 			Timezone:                time.UTC.String(),
+			Locale:                  "en_US",
 			StripeCustomerId:        nil,
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,
@@ -118,6 +120,7 @@ func TestUnauthenticatedRepo_CreateUser(t *testing.T) {
 
 		account := models.Account{
 			Timezone:                time.UTC.String(),
+			Locale:                  "en_US",
 			StripeCustomerId:        nil,
 			StripeSubscriptionId:    nil,
 			SubscriptionActiveUntil: nil,

@@ -35,7 +35,7 @@ func (r *repositoryBase) GetLinks(ctx context.Context) ([]models.Link, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
-	var result []models.Link
+	result := make([]models.Link, 0)
 	err := r.txn.ModelContext(span.Context(), &result).
 		Relation("PlaidLink").
 		Relation("TellerLink").

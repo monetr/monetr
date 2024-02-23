@@ -1,7 +1,7 @@
 
 import { format, isThisYear, parseJSON } from 'date-fns';
 
-import { amountToFriendly, formatAmount } from '@monetr/interface/util/amounts';
+import { amountToFriendly, AmountType, formatAmount } from '@monetr/interface/util/amounts';
 
 export enum SpendingType {
   Expense = 0,
@@ -54,8 +54,8 @@ export default class Spending {
     return amountToFriendly(this.targetAmount);
   }
 
-  getCurrentAmountString(): string {
-    return formatAmount(this.currentAmount);
+  getCurrentAmountString(locale: string = 'en_US'): string {
+    return formatAmount(this.currentAmount, AmountType.Stored, locale);
   }
 
   getUsedAmountString(): string {

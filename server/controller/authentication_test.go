@@ -434,11 +434,15 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		{ // Register a new user.
 			response := e.POST(`/api/authentication/register`).
@@ -478,11 +482,15 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
@@ -503,12 +511,16 @@ func TestRegister(t *testing.T) {
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
 			BetaCode  string `json:"betaCode"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
 		registerRequest.BetaCode = "123456"
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
@@ -525,11 +537,15 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 4)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		response := e.POST(`/api/authentication/register`).
 			WithJSON(registerRequest).
@@ -546,12 +562,14 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
 			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 10)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
 		registerRequest.Timezone = "going for broke"
 
 		response := e.POST(`/api/authentication/register`).
@@ -591,12 +609,16 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 			Captcha   string `json:"captcha"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 		registerRequest.Captcha = "I am a valid captcha"
 
 		response := e.POST(`/api/authentication/register`).
@@ -622,12 +644,16 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 			Captcha   string `json:"captcha"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 		registerRequest.Captcha = "I am not a valid captcha"
 
 		response := e.POST(`/api/authentication/register`).
@@ -658,11 +684,15 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		{
 			response := e.POST(`/api/authentication/register`).
@@ -703,12 +733,16 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		{ // Register for a new account
 			registerRequest.Email = testutils.GetUniqueEmail(t)
 			registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 			registerRequest.FirstName = gofakeit.FirstName()
 			registerRequest.LastName = gofakeit.LastName()
+			registerRequest.Locale = "en_US"
+			registerRequest.Timezone = "America/Chicago"
 
 			response := e.POST(`/api/authentication/register`).
 				WithJSON(registerRequest).
@@ -752,11 +786,15 @@ func TestRegister(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		MustSendVerificationEmail(t, app, 1)
 
@@ -770,6 +808,54 @@ func TestRegister(t *testing.T) {
 			String().
 			IsEqual("A verification email has been sent to your email address, please verify your email.")
 		response.JSON().Object().NotContainsKey("token")
+	})
+
+	t.Run("no locale", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+			Timezone  string `json:"timezone"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 12)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Timezone = "America/Chicago"
+
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Locale must be specified to register")
+	})
+
+	t.Run("invalid locale", func(t *testing.T) {
+		_, e := NewTestApplication(t)
+		var registerRequest struct {
+			Email     string `json:"email"`
+			Password  string `json:"password"`
+			FirstName string `json:"firstName"`
+			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
+		}
+		registerRequest.Email = testutils.GetUniqueEmail(t)
+		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 12)
+		registerRequest.FirstName = gofakeit.FirstName()
+		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "uh-UH"
+		registerRequest.Timezone = "America/Chicago"
+
+		response := e.POST(`/api/authentication/register`).
+			WithJSON(registerRequest).
+			Expect()
+
+		response.Status(http.StatusBadRequest)
+		response.JSON().Path("$.error").IsEqual("Invalid or unrecognized locale")
 	})
 }
 
@@ -789,11 +875,15 @@ func TestVerifyEmail(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		MustSendVerificationEmail(t, app, 1)
 
@@ -876,11 +966,15 @@ func TestVerifyEmail(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		MustSendVerificationEmail(t, app, 1)
 
@@ -945,11 +1039,15 @@ func TestVerifyEmail(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		MustSendVerificationEmail(t, app, 1)
 
@@ -1052,11 +1150,15 @@ func TestResendVerificationEmail(t *testing.T) {
 			Password  string `json:"password"`
 			FirstName string `json:"firstName"`
 			LastName  string `json:"lastName"`
+			Locale    string `json:"locale"`
+			Timezone  string `json:"timezone"`
 		}
 		registerRequest.Email = testutils.GetUniqueEmail(t)
 		registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 		registerRequest.FirstName = gofakeit.FirstName()
 		registerRequest.LastName = gofakeit.LastName()
+		registerRequest.Locale = "en_US"
+		registerRequest.Timezone = "America/Chicago"
 
 		MustSendVerificationEmail(t, app, 2)
 

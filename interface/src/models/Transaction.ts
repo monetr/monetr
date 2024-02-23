@@ -1,6 +1,6 @@
 import { parseJSON } from 'date-fns';
 
-import { formatAmount } from '@monetr/interface/util/amounts';
+import { AmountType, formatAmount } from '@monetr/interface/util/amounts';
 
 export default class Transaction {
   transactionId: number;
@@ -16,6 +16,7 @@ export default class Transaction {
   merchantName?: string;
   originalMerchantName?: string;
   isPending: boolean;
+  currency: string;
   createdAt: Date;
 
   constructor(data?: Partial<Transaction>) {
@@ -29,13 +30,13 @@ export default class Transaction {
     }
   }
 
-  getAmountString(): string {
+  getAmountString(locale: string = 'en_US'): string {
     const amount = Math.abs(this.amount);
     if (this.amount < 0) {
-      return `+ ${ formatAmount(amount) }`;
+      return `+ ${ formatAmount(amount, AmountType.Stored, locale, this.currency) }`;
     }
 
-    return formatAmount(amount);
+    return formatAmount(amount, AmountType.Stored, locale, this.currency);
   }
 
   getIsAddition(): boolean {

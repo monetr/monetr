@@ -5,10 +5,10 @@ import "time"
 type PlaidTransaction struct {
 	tableName string `pg:"plaid_transactions"`
 
-	PlaidTransactionId uint64            `json:"plaidTransactionId" pg:"plaid_transaction_id,notnull,pk,type:'bigserial'"`
+	PlaidTransactionId uint64            `json:"-" pg:"plaid_transaction_id,notnull,pk,type:'bigserial'"`
 	AccountId          uint64            `json:"-" pg:"account_id,notnull,pk,on_delete:CASCADE,type:'bigint'"`
 	Account            *Account          `json:"-" pg:"rel:has-one"`
-	PlaidBankAccountId uint64            `json:"plaidBankAccountId" pg:"plaid_bank_account_id,notnull,type:'bigint',unique:per_bank_account"`
+	PlaidBankAccountId uint64            `json:"-" pg:"plaid_bank_account_id,notnull,type:'bigint',unique:per_bank_account"`
 	PlaidBankAccount   *PlaidBankAccount `json:"-" pg:"rel:has-one"`
 	PlaidId            string            `json:"-" pg:"plaid_id,notnull,unique:per_bank_account"`
 	PendingPlaidId     *string           `json:"-" pg:"pending_plaid_id"`

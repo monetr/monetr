@@ -8,6 +8,7 @@ export interface SignUpArguments {
   lastName: string;
   password: string;
   timezone: string;
+  locale: string;
 }
 
 export interface SignUpResponse {

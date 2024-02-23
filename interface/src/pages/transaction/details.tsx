@@ -14,6 +14,7 @@ import MTextField from '@monetr/interface/components/MTextField';
 import MTopNavigation from '@monetr/interface/components/MTopNavigation';
 import SimilarTransactions from '@monetr/interface/components/transactions/SimilarTransactions';
 import { useTransaction, useUpdateTransaction } from '@monetr/interface/hooks/transactions';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
 import MerchantIcon from '@monetr/interface/pages/new/MerchantIcon';
 import { amountToFriendly } from '@monetr/interface/util/amounts';
@@ -28,6 +29,7 @@ interface TransactionValues {
 }
 
 export default function TransactionDetails(): JSX.Element {
+  const user = useAuthentication();
   const { transactionId: id } = useParams();
   const updateTransaction = useUpdateTransaction();
   const transactionId = +id || null;
@@ -89,7 +91,7 @@ export default function TransactionDetails(): JSX.Element {
     date: transaction.date,
     spendingId: transaction.spendingId,
     isPending: transaction.isPending,
-    amount: amountToFriendly(transaction.amount),
+    amount: amountToFriendly(transaction.amount, user.account.locale, transaction.currency),
   };
 
   return (

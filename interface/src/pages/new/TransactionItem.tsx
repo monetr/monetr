@@ -6,6 +6,7 @@ import { KeyboardArrowRight } from '@mui/icons-material';
 import TransactionMerchantIcon from './TransactionMerchantIcon';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
 import { useSpendingOld } from '@monetr/interface/hooks/spending';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -14,6 +15,7 @@ export interface TransactionItemProps {
 }
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
+  const user = useAuthentication();
   const spending = useSpendingOld(transaction.spendingId);
   const navigate = useNavigate();
 
@@ -110,7 +112,7 @@ export default function TransactionItem({ transaction }: TransactionItemProps): 
         )}
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
           <span className={ amountClassnames }>
-            {transaction.getAmountString()}
+            { transaction.getAmountString(user.account.locale) }
           </span>
           <KeyboardArrowRight
             className='flex-none dark:text-dark-monetr-content-subtle dark:group-hover:text-dark-monetr-content-emphasis md:cursor-pointer'

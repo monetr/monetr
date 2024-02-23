@@ -9,9 +9,10 @@
  * @param {string} locale The local code for the current user's perspective. Defaults to `en-US`.
  * @param {string} currency The ISO currency code of the current the amount is in. Defaults to `USD`.
  */
-export function amountToFriendly(amount: number, locale: string = 'en-US', currency: string = 'USD'): number {
+export function amountToFriendly(amount: number, locale: string = 'en_US', currency: string = 'USD'): number {
+  const localeAdjusted = locale.replace('_', '-');
   const specs = new Intl.NumberFormat(
-    locale,
+    localeAdjusted,
     {
       style: 'currency',
       currency: currency,
@@ -39,9 +40,10 @@ export function amountToFriendly(amount: number, locale: string = 'en-US', curre
  * @param {string} locale The locale code for the current user's perspective. Defaults to `en-US`.
  * @param {string} currency The ISO currency code of the currency the amount is in. Defaults to `USD`.
  */
-export function friendlyToAmount(friendly: number, locale: string = 'en-US', currency: string = 'USD'): number {
+export function friendlyToAmount(friendly: number, locale: string = 'en_US', currency: string = 'USD'): number {
+  const localeAdjusted = locale.replace('_', '-');
   const specs = new Intl.NumberFormat(
-    locale,
+    localeAdjusted,
     {
       style: 'currency',
       currency: currency,
@@ -84,11 +86,12 @@ export enum AmountType {
 export function formatAmount(
   amount: number,
   type: AmountType = AmountType.Stored,
-  locale: string = 'en-US',
+  locale: string = 'en_US',
   currency: string = 'USD',
 ): string {
+  const localeAdjusted = locale.replace('_', '-');
   const intl = new Intl.NumberFormat(
-    locale,
+    localeAdjusted,
     {
       style: 'currency',
       currency: currency,

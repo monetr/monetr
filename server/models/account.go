@@ -14,6 +14,7 @@ type Account struct {
 
 	AccountId                    uint64                     `json:"accountId" pg:"account_id,notnull,pk,type:'bigserial'"`
 	Timezone                     string                     `json:"timezone" pg:"timezone,notnull,default:'UTC'"`
+	Locale                       string                     `json:"locale" pg:"locale,notnull"`
 	StripeCustomerId             *string                    `json:"-" pg:"stripe_customer_id"`
 	StripeSubscriptionId         *string                    `json:"-" pg:"stripe_subscription_id"`
 	StripeWebhookLatestTimestamp *time.Time                 `json:"-" pg:"stripe_webhook_latest_timestamp"`

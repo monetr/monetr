@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+if [ ! -f "/tmp/locales-marker" ]
+then
+  echo "[executor] locales have not been installed yet, installing them now"
+  apt-get update && apt-get install -y locales-all
+fi
+
 if ! command -v air &> /dev/null
 then
     echo "[executor] cosmtrek/air could not be found, it will be installed"

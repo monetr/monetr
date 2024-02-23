@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	locale "github.com/elliotcourant/go-lclocale"
 	"github.com/getsentry/sentry-go"
 	"github.com/labstack/echo/v4"
 	"github.com/monetr/monetr/server/communication"
@@ -242,7 +243,7 @@ func (c *Controller) logoutEndpoint(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (c *Controller) registerEndpoint(ctx echo.Context) error {
+func (c *Controller) postRegister(ctx echo.Context) error {
 	if !c.configuration.AllowSignUp {
 		return c.notFound(ctx, "sign up is not enabled on this server")
 	}
@@ -253,6 +254,7 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 		FirstName string  `json:"firstName"`
 		LastName  string  `json:"lastName"`
 		Timezone  string  `json:"timezone"`
+		Locale    string  `json:"locale"`
 		Captcha   string  `json:"captcha"`
 		BetaCode  *string `json:"betaCode"`
 	}
@@ -272,8 +274,17 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 	registerRequest.Email = strings.TrimSpace(registerRequest.Email)
 	registerRequest.Password = strings.TrimSpace(registerRequest.Password)
 	registerRequest.FirstName = strings.TrimSpace(registerRequest.FirstName)
+	registerRequest.Locale = strings.TrimSpace(registerRequest.Locale)
 	if registerRequest.BetaCode != nil {
 		*registerRequest.BetaCode = strings.TrimSpace(*registerRequest.BetaCode)
+	}
+
+	if registerRequest.Locale == "" {
+		return c.badRequest(ctx, "Locale must be specified to register")
+	}
+
+	if !locale.Valid(registerRequest.Locale) {
+		return c.badRequest(ctx, "Invalid or unrecognized locale")
 	}
 
 	if err := c.validateRegistration(
@@ -348,6 +359,7 @@ func (c *Controller) registerEndpoint(ctx echo.Context) error {
 	account := models.Account{
 		Timezone:    timezone.String(),
 		TrialEndsAt: trialEndsAt,
+		Locale:      registerRequest.Locale,
 	}
 	// Now that the login exists we can create the account, at the time of
 	// writing this we are only using the local time zone of the server, but in

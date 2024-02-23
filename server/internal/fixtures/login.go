@@ -72,6 +72,7 @@ func GivenIHaveAnAccount(t *testing.T, clock clock.Clock, login models.Login) mo
 	subStatus := stripe.SubscriptionStatusActive
 	account := models.Account{
 		Timezone:                     gofakeit.TimeZoneRegion(),
+		Locale:                       "en_US",
 		StripeCustomerId:             myownsanity.StringP(mock_stripe.FakeStripeCustomerId(t)),
 		StripeSubscriptionId:         myownsanity.StringP(mock_stripe.FakeStripeSubscriptionId(t)),
 		StripeWebhookLatestTimestamp: myownsanity.TimeP(clock.Now().Add(-4 * time.Minute)),

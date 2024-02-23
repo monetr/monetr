@@ -290,11 +290,15 @@ func register(t *testing.T, e *httpexpect.Expect) (email, password string) {
 		Password  string `json:"password"`
 		FirstName string `json:"firstName"`
 		LastName  string `json:"lastName"`
+		Locale    string `json:"locale"`
+		Timezone  string `json:"timezone"`
 	}
 	registerRequest.Email = testutils.GetUniqueEmail(t)
 	registerRequest.Password = gofakeit.Password(true, true, true, true, false, 32)
 	registerRequest.FirstName = gofakeit.FirstName()
 	registerRequest.LastName = gofakeit.LastName()
+	registerRequest.Locale = "en_US"
+	registerRequest.Timezone = "America/Chicago"
 
 	response := e.POST(`/api/authentication/register`).
 		WithJSON(registerRequest).

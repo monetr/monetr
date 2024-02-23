@@ -15,6 +15,7 @@ import MSpan from '@monetr/interface/components/MSpan';
 import MTextField from '@monetr/interface/components/MTextField';
 import { useAppConfiguration } from '@monetr/interface/hooks/useAppConfiguration';
 import useSignUp, { SignUpResponse } from '@monetr/interface/hooks/useSignUp';
+import { getLocale, getTimezone } from '@monetr/interface/util/locale';
 import { APIError } from '@monetr/interface/util/request';
 import verifyEmailAddress from '@monetr/interface/util/verifyEmailAddress';
 
@@ -114,7 +115,8 @@ export default function Register(): JSX.Element {
       firstName: values.firstName,
       lastName: values.lastName,
       password: values.password,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezone: getTimezone(),
+      locale: getLocale(),
     })
       .then((result: SignUpResponse) => {
         // After sending the sign up request, if the user needs to verify their email then the requires verification

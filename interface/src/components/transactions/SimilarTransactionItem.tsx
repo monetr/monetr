@@ -2,6 +2,7 @@ import React from 'react';
 import { format, isThisYear } from 'date-fns';
 
 import { useTransaction } from '@monetr/interface/hooks/transactions';
+import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import TransactionMerchantIcon from '@monetr/interface/pages/new/TransactionMerchantIcon';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
@@ -10,6 +11,7 @@ export interface SimilarTransactionItemProps {
 }
 
 export default function SimilarTransactionItem(props: SimilarTransactionItemProps): JSX.Element {
+  const user = useAuthentication();
   const { data: transaction, isLoading, isError } = useTransaction(props.transactionId);
 
   if (isLoading) {
@@ -64,7 +66,7 @@ export default function SimilarTransactionItem(props: SimilarTransactionItemProp
         </div>
         <div className='flex shrink-0 items-center justify-end gap-2 md:min-w-[8em]'>
           <span className={ amountClassnames }>
-            {transaction.getAmountString()}
+            { transaction.getAmountString(user.account.locale) }
           </span>
         </div>
       </div>

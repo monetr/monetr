@@ -9,6 +9,7 @@ export default class User {
     subscriptionActiveUntil: string;
     subscriptionStatus: string;
     timezone: string;
+    locale: string;
   };
   login: Login;
 
