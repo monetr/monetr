@@ -6,6 +6,12 @@
     "node": ">=18",
     "pnpm": ">=8"
   },
+  "workspaces": [
+    "docs/*",
+    "interface/*",
+    "emails/*",
+    "stories/*"
+  ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.42.0",
     "@typescript-eslint/parser": "5.42.0",

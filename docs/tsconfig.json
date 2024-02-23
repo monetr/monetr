@@ -15,9 +15,13 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@monetr/docs/*": ["./*"]
+      "@monetr/docs/*": ["./*"],
+      "@monetr/interface/*": ["../../interface/src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.mdx"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "references": [
+    { "path": "../interface/src" }
+  ]
 }
