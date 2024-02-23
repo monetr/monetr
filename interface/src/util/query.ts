@@ -13,6 +13,7 @@ export default async function Query<T = unknown, TQueryKey extends QueryKey = Qu
     data: context.queryKey.length === 2 && context.queryKey[1],
   })
     .catch(result => {
+      console.warn('query', result);
       switch (result.response.status) {
         case 404:
         case 500: // Internal Server Error
@@ -22,5 +23,7 @@ export default async function Query<T = unknown, TQueryKey extends QueryKey = Qu
           return result.response;
       }
     });
+  console.info('query', context.queryKey, 'data', data);
+
   return data;
 }

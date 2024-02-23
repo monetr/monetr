@@ -23,7 +23,7 @@ macro(provision_node_tests CURRENT_SOURCE_DIR)
 
       add_test(
         NAME ${PACKAGE}/${SPEC_NAME}
-        COMMAND ${JEST_EXECUTABLE} ${TEST_ARGS} ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
+        COMMAND bun ${CURRENT_SOURCE_DIR}/${SPEC_FILE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
       )
       set_tests_properties(${PACKAGE}/${SPEC_NAME} PROPERTIES FIXTURES_REQUIRED node_modules)
