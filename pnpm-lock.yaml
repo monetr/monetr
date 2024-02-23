@@ -235,6 +235,9 @@ importers:
         specifier: 4.1.4
         version: 4.1.4(react@18.2.0)
     devDependencies:
+      '@rspack/binding-linux-arm64-gnu':
+        specifier: 0.3.6
+        version: 0.3.6
       '@rspack/binding-linux-x64-gnu':
         specifier: 0.3.6
         version: 0.3.6
@@ -5127,7 +5130,6 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
-    optional: true
 
   /@rspack/binding-linux-arm64-musl@0.1.12:
     resolution: {integrity: sha512-qeKUjZqZoqXZuL+fJt4ZxmJ9UTjYyF5Nld+xlyFS3F3h2BebRStPPJ2zJ9vU+tvuMZS+PMer54N0Zi3GIFgf+w==}
