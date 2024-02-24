@@ -275,8 +275,8 @@ importers:
         specifier: 18.2.18
         version: 18.2.18
       '@types/react-google-recaptcha':
-        specifier: 2.1.6
-        version: 2.1.6
+        specifier: 2.1.9
+        version: 2.1.9
       autoprefixer:
         specifier: 10.4.16
         version: 10.4.16(postcss@8.4.31)
@@ -8307,7 +8307,7 @@ packages:
       '@storybook/channels': 7.2.1
       '@storybook/client-logger': 7.2.1
       '@storybook/core-events': 7.2.1
-      '@storybook/csf': 0.1.1
+      '@storybook/csf': 0.1.2
       '@storybook/global': 5.0.0
       '@storybook/types': 7.2.1
       '@types/qs': 6.9.9
@@ -9613,8 +9613,8 @@ packages:
     dependencies:
       '@types/react': 18.2.45
 
-  /@types/react-google-recaptcha@2.1.6:
-    resolution: {integrity: sha512-U+dLY6lGoa9sDfArZAmAItk9MpOaNV7TJtRqEox74zkXL4Qx6FnakIeM9e3HQaWYwfBgoOa7SMhWBgpnyycdvQ==}
+  /@types/react-google-recaptcha@2.1.9:
+    resolution: {integrity: sha512-nT31LrBDuoSZJN4QuwtQSF3O89FVHC4jLhM+NtKEmVF5R1e8OY0Jo4//x2Yapn2aNHguwgX5doAq8Zo+Ehd0ug==}
     dependencies:
       '@types/react': 18.2.45
     dev: true
