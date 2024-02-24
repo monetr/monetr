@@ -787,6 +787,21 @@ func (c *Controller) resetPassword(ctx echo.Context) error {
 		return c.wrapPgError(ctx, err, "Failed to reset password")
 	}
 
+	if err := c.email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
+		BaseURL:      c.configuration.GetUIURL(),
+		Email:        login.Email,
+		FirstName:    login.FirstName,
+		LastName:     login.LastName,
+		SupportEmail: "support@monetr.app",
+	}); err != nil {
+		return c.wrapAndReturnError(
+			ctx,
+			err,
+			http.StatusInternalServerError,
+			"Failed to send password changed notification",
+		)
+	}
+
 	return ctx.NoContent(http.StatusOK)
 }
 

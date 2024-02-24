@@ -21,9 +21,9 @@ import (
 )
 
 const (
-	VerifyEmailTemplate    = "VerifyEmailAddress"
-	ForgotPasswordTemplate = "ForgotPassword"
-	// PasswordChangedTemplate = "email_templates/password_changed.html"
+	VerifyEmailTemplate     = "VerifyEmailAddress"
+	ForgotPasswordTemplate  = "ForgotPassword"
+	PasswordChangedTemplate = "PasswordChanged"
 )
 
 //go:embed email_templates/*
@@ -47,12 +47,21 @@ type (
 		SupportEmail string
 		ResetURL     string
 	}
+
+	PasswordChangedParams struct {
+		BaseURL      string
+		Email        string
+		FirstName    string
+		LastName     string
+		SupportEmail string
+	}
 )
 
 //go:generate mockgen -source=email.go -package=mockgen -destination=../internal/mockgen/email.go EmailCommunication
 type EmailCommunication interface {
 	SendVerification(ctx context.Context, params VerifyEmailParams) error
 	SendPasswordReset(ctx context.Context, params PasswordResetParams) error
+	SendPasswordChanged(ctx context.Context, params PasswordChangedParams) error
 }
 
 func NewEmailCommunication(log *logrus.Entry, configuration config.Configuration) EmailCommunication {
@@ -128,6 +137,33 @@ func (e *emailCommunicationBase) SendPasswordReset(ctx context.Context, params P
 		From:        e.fromAddress(),
 		To:          e.toAddress(params.FirstName, params.LastName, params.Email),
 		Subject:     "Reset Your Password",
+		HTMLContent: htmlBuffer.String(),
+		TextContent: textBuffer.String(),
+	}
+
+	return e.sendMessage(span.Context(), payload)
+}
+
+func (e *emailCommunicationBase) SendPasswordChanged(ctx context.Context, params PasswordChangedParams) error {
+	span := crumbs.StartFnTrace(ctx)
+	defer span.Finish()
+
+	html, text := e.getTemplates(PasswordChangedTemplate)
+
+	htmlBuffer := bytes.NewBuffer(nil)
+	if err := html.Execute(htmlBuffer, params); err != nil {
+		return errors.Wrap(err, "failed to execute password changed email html template")
+	}
+
+	textBuffer := bytes.NewBuffer(nil)
+	if err := text.Execute(textBuffer, params); err != nil {
+		return errors.Wrap(err, "failed to execute password changed email text template")
+	}
+
+	payload := messagePayload{
+		From:        e.fromAddress(),
+		To:          e.toAddress(params.FirstName, params.LastName, params.Email),
+		Subject:     "Password Updated",
 		HTMLContent: htmlBuffer.String(),
 		TextContent: textBuffer.String(),
 	}

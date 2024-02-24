@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/repository"
 	"github.com/pkg/errors"
 )
@@ -110,6 +111,21 @@ func (c *Controller) changePassword(ctx echo.Context) error {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "current password provided is not correct")
 	case nil:
+		if err := c.email.SendPasswordChanged(c.getContext(ctx), communication.PasswordChangedParams{
+			BaseURL:      c.configuration.GetUIURL(),
+			Email:        user.Login.Email,
+			FirstName:    user.Login.FirstName,
+			LastName:     user.Login.LastName,
+			SupportEmail: "support@monetr.app",
+		}); err != nil {
+			return c.wrapAndReturnError(
+				ctx,
+				err,
+				http.StatusInternalServerError,
+				"Failed to send password changed notification",
+			)
+		}
+
 		return ctx.NoContent(http.StatusOK)
 	default:
 		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to change password")

@@ -35,6 +35,20 @@ func (m *MockEmailCommunication) EXPECT() *MockEmailCommunicationMockRecorder {
 	return m.recorder
 }
 
+// SendPasswordChanged mocks base method.
+func (m *MockEmailCommunication) SendPasswordChanged(ctx context.Context, params communication.PasswordChangedParams) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendPasswordChanged", ctx, params)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendPasswordChanged indicates an expected call of SendPasswordChanged.
+func (mr *MockEmailCommunicationMockRecorder) SendPasswordChanged(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendPasswordChanged", reflect.TypeOf((*MockEmailCommunication)(nil).SendPasswordChanged), ctx, params)
+}
+
 // SendPasswordReset mocks base method.
 func (m *MockEmailCommunication) SendPasswordReset(ctx context.Context, params communication.PasswordResetParams) error {
 	m.ctrl.T.Helper()
