@@ -1463,6 +1463,8 @@ func TestResetPassword(t *testing.T) {
 			)
 			assert.NoError(t, err, "must be able to generate a password reset token")
 
+			MustSendPasswordChangedEmail(t, app, 1, user.Login.Email)
+
 			response := e.POST(`/api/authentication/reset`).
 				WithJSON(map[string]interface{}{
 					"password": newPassword,
@@ -1536,6 +1538,8 @@ func TestResetPassword(t *testing.T) {
 		// Generate a new password to reset to.
 		newPassword := gofakeit.Generate("????????")
 
+		MustSendPasswordChangedEmail(t, app, 1, user.Login.Email)
+
 		{ // Reset the password using the first token.
 			response := e.POST(`/api/authentication/reset`).
 				WithJSON(map[string]interface{}{
@@ -1578,6 +1582,8 @@ func TestResetPassword(t *testing.T) {
 
 		// Generate a new password to reset to.
 		newPassword := gofakeit.Generate("????????")
+
+		MustSendPasswordChangedEmail(t, app, 1, user.Login.Email)
 
 		{ // Reset the password using the first token.
 			response := e.POST(`/api/authentication/reset`).
@@ -1625,6 +1631,8 @@ func TestResetPassword(t *testing.T) {
 		// Generate a new password to reset to.
 		newPassword := gofakeit.Generate("????????")
 
+		MustSendPasswordChangedEmail(t, app, 0)
+
 		{ // Try to reset the password using the expired token.
 			response := e.POST(`/api/authentication/reset`).
 				WithJSON(map[string]interface{}{
@@ -1652,6 +1660,8 @@ func TestResetPassword(t *testing.T) {
 		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
+		MustSendPasswordChangedEmail(t, app, 0)
+
 		response := e.POST(`/api/authentication/reset`).
 			WithJSON(map[string]interface{}{
 				"password": "doesn'tEvenMatter",
@@ -1664,7 +1674,9 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
-		_, e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
+
+		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.POST(`/api/authentication/reset`).
 			WithBytes([]byte("I am not json")).
@@ -1678,7 +1690,9 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("token is empty", func(t *testing.T) {
-		_, e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
+
+		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.POST(`/api/authentication/reset`).
 			WithJSON(map[string]interface{}{
@@ -1702,6 +1716,8 @@ func TestResetPassword(t *testing.T) {
 		})
 		assert.NoError(t, err, "must be able to generate a password reset token")
 
+		MustSendPasswordChangedEmail(t, app, 0)
+
 		response := e.POST(`/api/authentication/reset`).
 			WithJSON(map[string]interface{}{
 				"password": "short",
@@ -1714,7 +1730,9 @@ func TestResetPassword(t *testing.T) {
 	})
 
 	t.Run("invalid token", func(t *testing.T) {
-		_, e := NewTestApplicationWithConfig(t, conf)
+		app, e := NewTestApplicationWithConfig(t, conf)
+
+		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.POST(`/api/authentication/reset`).
 			WithJSON(map[string]interface{}{

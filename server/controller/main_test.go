@@ -400,3 +400,35 @@ func MustSendPasswordResetEmail(t *testing.T, app *TestApp, n int, emails ...str
 			return nil
 		})
 }
+
+func MustSendPasswordChangedEmail(t *testing.T, app *TestApp, n int, emails ...string) {
+	app.Email.
+		EXPECT().
+		SendPasswordChanged(
+			gomock.Any(),
+			gomock.Any(),
+		).
+		Return(nil).
+		Times(n).
+		Do(func(ctx context.Context, params communication.PasswordChangedParams) error {
+			require.NotNil(t, ctx, "email context cannot be nil")
+			require.NotEmpty(t, params.Email, "password reset email address cannot be empty")
+			require.NotEmpty(t, params.FirstName, "password reset email first name cannot be empty")
+			require.NotEmpty(t, params.LastName, "password reset email last name cannot be empty")
+			require.NotEmpty(t, params.BaseURL, "password reset email base url must be defined")
+			if len(emails) > 0 {
+				for _, email := range emails {
+					if strings.EqualFold(email, params.Email) {
+						return nil
+					}
+				}
+				// If none of the emails match then something is wrong.
+				t.Fatalf(
+					"email specified for password changed <%s> was not expected, expected address(es): %s",
+					params.Email,
+					strings.Join(emails, ", "),
+				)
+			}
+			return nil
+		})
+}

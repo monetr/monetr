@@ -156,6 +156,8 @@ func TestChangePassword(t *testing.T) {
 			token = AssertSetTokenCookie(t, response)
 		}
 
+		MustSendPasswordChangedEmail(t, app, 1, user.Login.Email)
+
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
@@ -166,7 +168,7 @@ func TestChangePassword(t *testing.T) {
 				Expect()
 
 			response.Status(http.StatusOK)
-			response.Body().Empty()
+			response.Body().IsEmpty()
 		}
 
 		// This is just here to make sure that the current token still works after changing the password. If this test
@@ -225,6 +227,8 @@ func TestChangePassword(t *testing.T) {
 			token = AssertSetTokenCookie(t, response)
 		}
 
+		MustSendPasswordChangedEmail(t, app, 0)
+
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
@@ -282,6 +286,8 @@ func TestChangePassword(t *testing.T) {
 			token = AssertSetTokenCookie(t, response)
 		}
 
+		MustSendPasswordChangedEmail(t, app, 0)
+
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
@@ -313,6 +319,8 @@ func TestChangePassword(t *testing.T) {
 			// Then make sure we get a token back and that it is valid.
 			token = AssertSetTokenCookie(t, response)
 		}
+
+		MustSendPasswordChangedEmail(t, app, 0)
 
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
@@ -346,6 +354,8 @@ func TestChangePassword(t *testing.T) {
 			token = AssertSetTokenCookie(t, response)
 		}
 
+		MustSendPasswordChangedEmail(t, app, 0)
+
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
@@ -371,6 +381,8 @@ func TestChangePassword(t *testing.T) {
 		bogusCurrentPassword := gofakeit.Generate("????????")
 		bogusNewPassword := gofakeit.Generate("????????")
 
+		MustSendPasswordChangedEmail(t, app, 0)
+
 		{ // Change the user's password.
 			response := e.PUT(`/api/users/security/password`).
 				WithCookie(TestCookieName, token).
@@ -386,7 +398,9 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("bad token", func(t *testing.T) {
-		_, e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
+
+		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.PUT(`/api/users/security/password`).
 			WithCookie(TestCookieName, gofakeit.UUID()).
@@ -400,7 +414,9 @@ func TestChangePassword(t *testing.T) {
 	})
 
 	t.Run("no token", func(t *testing.T) {
-		_, e := NewTestApplication(t)
+		app, e := NewTestApplication(t)
+
+		MustSendPasswordChangedEmail(t, app, 0)
 
 		response := e.PUT(`/api/users/security/password`).
 			WithJSON(map[string]interface{}{
