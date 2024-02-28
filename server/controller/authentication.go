@@ -81,7 +81,11 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
-	login, requiresPasswordChange, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, loginRequest.Password)
+	login, requiresPasswordChange, err := secureRepo.Login(
+		c.getContext(ctx),
+		loginRequest.Email,
+		loginRequest.Password,
+	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
@@ -143,12 +147,16 @@ func (c *Controller) postLogin(ctx echo.Context) error {
 		if login.TOTP != "" {
 			log.Debug("login requires TOTP MFA")
 
-			token, err := c.clientTokens.Create(security.MultiFactorAudience, 5*time.Minute, security.Claims{
-				EmailAddress: login.Email,
-				UserId:       user.UserId.String(),
-				AccountId:    user.AccountId.String(),
-				LoginId:      user.LoginId.String(),
-			})
+			token, err := c.clientTokens.Create(
+				security.MultiFactorAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: login.Email,
+					UserId:       user.UserId.String(),
+					AccountId:    user.AccountId.String(),
+					LoginId:      user.LoginId.String(),
+				},
+			)
 			if err != nil {
 				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
 			}
