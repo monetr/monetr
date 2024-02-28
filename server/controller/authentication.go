@@ -103,7 +103,11 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
-	login, requiresPasswordChange, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, loginRequest.Password)
+	login, requiresPasswordChange, err := secureRepo.Login(
+		c.getContext(ctx),
+		loginRequest.Email,
+		loginRequest.Password,
+	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
@@ -172,12 +176,16 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 		if login.TOTP != "" {
 			log.Debug("login requires TOTP MFA")
 
-			token, err := c.clientTokens.Create(security.MultiFactorAudience, 5*time.Minute, security.Claims{
-				EmailAddress: login.Email,
-				UserId:       user.UserId,
-				AccountId:    user.AccountId,
-				LoginId:      user.LoginId,
-			})
+			token, err := c.clientTokens.Create(
+				security.MultiFactorAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: login.Email,
+					UserId:       user.UserId,
+					AccountId:    user.AccountId,
+					LoginId:      user.LoginId,
+				},
+			)
 			if err != nil {
 				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
 			}
@@ -186,12 +194,16 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 			return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
 		}
 
-		token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
-			EmailAddress: login.Email,
-			UserId:       user.UserId,
-			AccountId:    user.AccountId,
-			LoginId:      user.LoginId,
-		})
+		token, err := c.clientTokens.Create(
+			security.AuthenticatedAudience,
+			14*24*time.Hour,
+			security.Claims{
+				EmailAddress: login.Email,
+				UserId:       user.UserId,
+				AccountId:    user.AccountId,
+				LoginId:      user.LoginId,
+			},
+		)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
 		}
