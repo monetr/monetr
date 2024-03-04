@@ -42,13 +42,17 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
     switch (bankAccount?.accountSubType) {
       case 'checking':
       case 'savings':
+        const valueClassName = mergeTailwind({
+          'dark:text-dark-monetr-content-emphasis': balance?.free >= 0,
+          'dark:text-dark-monetr-red': balance?.free < 0,
+        });
         return (
           <div className='flex w-full justify-between'>
             <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
               <AccountBalanceWalletOutlined />
               Free-To-Use:
             </MSpan>
-            <MSpan size='lg' weight='semibold' className='dark:text-dark-monetr-content-emphasis'>
+            <MSpan size='lg' weight='semibold' className={ valueClassName }>
               {balance?.getFreeToUseString()}
             </MSpan>
           </div>
