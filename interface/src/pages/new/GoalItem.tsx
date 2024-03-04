@@ -22,9 +22,15 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
     navigate(`/bank/${spending.bankAccountId}/goals/${spending.spendingId}/details`);
   }
 
-  const contributionString = spending.isPaused ? 
-    'Paused' :
-    `${spending.getNextContributionAmountString()} / ${ fundingSchedule?.name}`;
+  // By default the contribution string should simply be the amount that will be added to this goal per funding schedule
+  // it is associated with.
+  let contributionString = `${spending.getNextContributionAmountString()} / ${ fundingSchedule?.name }`;
+  // But if the goal is no longer in progress (it is complete). Then indicate that.
+  if (!spending.getGoalIsInProgress()) {
+    contributionString = 'Complete';
+  } else if (spending.isPaused) { // Or if the goal is just paused.
+    contributionString = 'Paused';
+  }
 
   return (
     <li className='group relative w-full px-1 md:px-2'>
