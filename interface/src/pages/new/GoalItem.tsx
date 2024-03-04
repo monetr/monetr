@@ -22,6 +22,10 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
     navigate(`/bank/${spending.bankAccountId}/goals/${spending.spendingId}/details`);
   }
 
+  const contributionString = spending.isPaused ? 
+    'Paused' :
+    `${spending.getNextContributionAmountString()} / ${ fundingSchedule?.name}`;
+
   return (
     <li className='group relative w-full px-1 md:px-2'>
       <div
@@ -44,13 +48,13 @@ export default function GoalItem({ spending }: GoalItemProps): JSX.Element {
                   { spending.getNextOccurrenceString() }
                 </span>
                 <span className='md:hidden text-zinc-200 text-sm overflow-hidden text-ellipsis whitespace-nowrap min-w-0'>
-                  { spending.getNextContributionAmountString() } / { fundingSchedule?.name }
+                  { contributionString }
                 </span>
               </div>
             </div>
             <div className='hidden md:flex w-1/2 overflow-hidden flex-1 min-w-0 items-center'>
               <span className='text-zinc-50/75 font-medium text-base text-ellipsis whitespace-nowrap overflow-hidden min-w-0'>
-                { spending.getNextContributionAmountString() } / { fundingSchedule?.name }
+                { contributionString }
               </span>
             </div>
             <GoalAmount spending={ spending } />
