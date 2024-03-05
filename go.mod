@@ -31,7 +31,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.6
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/mileusna/useragent v1.3.4
-	github.com/nyaruka/phonenumbers v1.1.8
+	github.com/nyaruka/phonenumbers v1.3.2
 	github.com/pkg/errors v0.9.1
 	github.com/plaid/plaid-go/v20 v20.1.0
 	github.com/prometheus/client_golang v1.17.0
