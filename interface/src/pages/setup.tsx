@@ -93,7 +93,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         <OnboardingTile
           icon={ <TellerLogo /> }
           name='Teller'
-          description='Teller can provide more frequent updates on your transactions.'
+          description='Teller can provide frequent updates from your bank.'
           active={ active === 'teller' }
           onClick={ () => setActive('teller') }
           disabled={ !config?.tellerEnabled }
@@ -101,7 +101,7 @@ function Greeting(props: GreetingProps): JSX.Element {
         <OnboardingTile
           icon={ <PlaidLogo /> }
           name='Plaid'
-          description='Plaid offers more institutions, but less frequent data updates.'
+          description='Plaid makes connecting your monetr account to your bank easy.'
           active={ active === 'plaid' }
           onClick={ () => setActive('plaid') }
           disabled={ !config?.plaidEnabled }
@@ -188,8 +188,13 @@ function OnboardingTile(props: OnboardingTileProps): JSX.Element {
 
   function handleClick() {
     if (props.comingSoon) return;
+    if (props.disabled) return;
 
     props.onClick();
+  }
+
+  if (props.disabled) {
+    return null;
   }
 
   return (
