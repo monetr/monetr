@@ -17,7 +17,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.24.0
 	github.com/elliotcourant/go-lclocale v0.0.3
 	github.com/elliotcourant/gofx v0.0.1
-	github.com/fsnotify/fsnotify v1.6.0
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/getsentry/sentry-go v0.21.0
 	github.com/go-pg/migrations/v8 v8.1.0
