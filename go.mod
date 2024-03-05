@@ -19,7 +19,7 @@ require (
 	github.com/elliotcourant/gofx v0.0.1
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.16.0
-	github.com/getsentry/sentry-go v0.21.0
+	github.com/getsentry/sentry-go v0.27.0
 	github.com/go-pg/migrations/v8 v8.1.0
 	github.com/go-pg/pg/v10 v10.12.0
 	github.com/gocraft/work v0.5.1
