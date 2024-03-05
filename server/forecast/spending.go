@@ -182,7 +182,8 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 }
 
 func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context, input time.Time, timezone *time.Location, balance int64) *SpendingEvent {
-	// If the spending object is paused then there wont be any events for it at all.
+	// If the spending object is paused then there wont be any events for it at
+	// all.
 	if s.spending.IsPaused {
 		return nil
 	}
@@ -200,8 +201,9 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	case models.SpendingTypeOverflow:
 		return nil
 	case models.SpendingTypeGoal:
-		// If we are working with a goal and it has already "completed" then there is nothing more to do, no more events
-		// will come up for this spending object.
+		// If we are working with a goal and it has already "completed" then there
+		// is nothing more to do, no more events will come up for this spending
+		// object.
 		if !nextRecurrence.After(input) || nextRecurrence.Equal(input) {
 			return nil
 		}
@@ -220,20 +222,24 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	{ // Get our next two funding events
 		fundingEvents := s.funding.GetNFundingEventsAfter(ctx, 2, input, timezone)
 		if len(fundingEvents) != 2 {
-			// TODO, if there are multiple funding schedules and they land on the same day, this will happen.
+			// TODO, if there are multiple funding schedules and they land on the same
+			// day, this will happen.
 			panic("invalid number of funding events returned;")
 		}
 
 		fundingFirst, fundingSecond = fundingEvents[0], fundingEvents[1]
 	}
 
-	// The number of times this item will be spent before it receives funding again. This is considered the current
-	// funding period. This is used to determine if the spending is currently behind. As the total amount that will be
-	// spent must be <= the amount currently allocated to this spending item. If it is not then there will not be enough
-	// funds to cover each spending event between now and the next funding event.
+	// The number of times this item will be spent before it receives funding
+	// again. This is considered the current funding period. This is used to
+	// determine if the spending is currently behind. As the total amount that
+	// will be spent must be <= the amount currently allocated to this spending
+	// item. If it is not then there will not be enough funds to cover each
+	// spending event between now and the next funding event.
 	eventsBeforeFirst := int64(len(s.GetRecurrencesBetween(ctx, input, fundingFirst.Date, timezone)))
-	// The number of times this item will be spent in the subsequent funding period. This is used to determine how much
-	// needs to be allocated at the beginning of the next funding period.
+	// The number of times this item will be spent in the subsequent funding
+	// period. This is used to determine how much needs to be allocated at the
+	// beginning of the next funding period.
 	eventsBeforeSecond := int64(len(s.GetRecurrencesBetween(ctx, fundingFirst.Date, fundingSecond.Date, timezone)))
 
 	// The amount of funds needed for each individual spending event.
@@ -242,14 +248,17 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	case models.SpendingTypeExpense:
 		perSpendingAmount = s.spending.TargetAmount
 	case models.SpendingTypeGoal:
-		// If we are working with a goal then we need to subtract the amount we have already used from the goal. This is
-		// because a goal could have its funds spent from it throughout the life of the goal. But we don't want to change
-		// the target. We assume that spending from a goal is progress towards that goal.
-		// Basically for a completed goal we don't need to make any contributions to it.
+		// If we are working with a goal then we need to subtract the amount we have
+		// already used from the goal. This is because a goal could have its funds
+		// spent from it throughout the life of the goal. But we don't want to
+		// change the target. We assume that spending from a goal is progress
+		// towards that goal. Basically for a completed goal we don't need to make
+		// any contributions to it.
 		perSpendingAmount = myownsanity.Max(s.spending.TargetAmount-s.spending.UsedAmount, 0)
 	}
-	// The amount of funds currently allocated towards this spending item. This is not increased until the next funding
-	// event, or the user transfers funds to this spending item.
+	// The amount of funds currently allocated towards this spending item. This is
+	// not increased until the next funding event, or the user transfers funds to
+	// this spending item.
 
 	event := SpendingEvent{
 		Date:               time.Time{},
@@ -260,28 +269,41 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		SpendingId:         s.spending.SpendingId,
 	}
 
-	// The total contribution amount is the amount of money that needs to be allocated to this spending item during the
-	// next funding event in order to cover all the spending events that will happen between then and the subsequent
-	// funding event.
+	// The total contribution amount is the amount of money that needs to be
+	// allocated to this spending item during the next funding event in order to
+	// cover all the spending events that will happen between then and the
+	// subsequent funding event.
 	var totalContributionAmount int64
 
-	// If there are spending events in the next funding period then we need to make sure that we calculate for those.
+	// If we are full then assume we are empty for the next calculation. This
+	// basically handles a spending object that is past its spending date but
+	// hasn't been spent yet.
+	if balance >= s.spending.TargetAmount && fundingFirst.Date.Before(nextRecurrence) {
+		balance -= s.spending.TargetAmount
+	}
+
+	// If there are spending events in the next funding period then we need to
+	// make sure that we calculate for those.
 	if eventsBeforeSecond > 0 {
-		// We need to subtract the spending that will happen before the next period though.
-		// We have $5 allocated but between now and the next funding we need to spend $5. So we cannot take the $5 we
-		// currently have into account when we calculate how much will be needed for the next funding event.
+		// We need to subtract the spending that will happen before the next period
+		// though. We have $5 allocated but between now and the next funding we need
+		// to spend $5. So we cannot take the $5 we currently have into account when
+		// we calculate how much will be needed for the next funding event.
 		amountAfterCurrentSpending := myownsanity.Max(0, balance-(perSpendingAmount*eventsBeforeFirst))
-		// The total amount we need is determined by how many times we will need the target amount during the next period
-		// between funding events multiplied by how much each spending event costs.
-		// If the current spending object is over-allocated for this funding period and the next funding period then
-		// this can result in a negative contribution amount. Because we would be subtracting more than the calculated
-		// amount that we need.
+		// The total amount we need is determined by how many times we will need the
+		// target amount during the next period between funding events multiplied by
+		// how much each spending event costs. If the current spending object is
+		// over-allocated for this funding period and the next funding period then
+		// this can result in a negative contribution amount. Because we would be
+		// subtracting more than the calculated amount that we need.
 		nextSpendingPeriodTotal := perSpendingAmount * eventsBeforeSecond
-		// By taking the min of the amount we will have allocated and the amount needed. We can safely arrive at a 0
-		// contribution amount when we are over-allocated.
+		// By taking the min of the amount we will have allocated and the amount
+		// needed. We can safely arrive at a 0 contribution amount when we are
+		// over-allocated.
 		totalContributionAmount = nextSpendingPeriodTotal - myownsanity.Min(amountAfterCurrentSpending, nextSpendingPeriodTotal)
 	} else {
-		// Otherwise we can simply look at how much we need vs how much we already have.
+		// Otherwise we can simply look at how much we need vs how much we already
+		// have.
 		amountNeeded := myownsanity.Max(0, perSpendingAmount-balance)
 		// And how many times we will have a funding event before our due date.
 		numberOfContributions := s.funding.GetNumberOfFundingEventsBetween(ctx, input, nextRecurrence, timezone)
@@ -302,16 +324,18 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// The next event will be a transaction.
 		event.Date = nextRecurrence
 		event.TransactionAmount = s.spending.TargetAmount
-		// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
-		// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
+		// NOTE At the time of writing this, event.RollingAllocation is not being
+		// defined anywhere. But this is ultimately what the math will end up being
+		// once it is defined, and we calculate the effects of a transaction.
 		event.RollingAllocation = event.RollingAllocation - s.spending.TargetAmount
 	case nextRecurrence.Equal(fundingFirst.Date):
 		// The next event will be both a contribution and a transaction.
 		event.Date = nextRecurrence
 		event.ContributionAmount = totalContributionAmount
 		event.TransactionAmount = s.spending.TargetAmount
-		// NOTE At the time of writing this, event.RollingAllocation is not being defined anywhere. But this is
-		// ultimately what the math will end up being once it is defined, and we calculate the effects of a transaction.
+		// NOTE At the time of writing this, event.RollingAllocation is not being
+		// defined anywhere. But this is ultimately what the math will end up being
+		// once it is defined, and we calculate the effects of a transaction.
 		event.RollingAllocation = (event.RollingAllocation + totalContributionAmount) - s.spending.TargetAmount
 		event.Funding = []FundingEvent{
 			fundingFirst,

@@ -88,6 +88,81 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		}, events)
 	})
 
+	t.Run("spending was late so balance is full", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 10, 1, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=1")
+		now := time.Date(2024, 3, 4, 0, 0, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: false,
+				NextOccurrence:  time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   5000,
+				CurrentAmount:  5000,
+				NextRecurrence: time.Date(2024, 4, 1, 0, 0, 0, 0, timezone),
+				RuleSet:        spendingRule,
+			},
+			fundingInstructions,
+		)
+
+		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
+		for i, item := range events {
+			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
+				j, _ := json.MarshalIndent(item, "                        \t", "  ")
+				fmt.Println("                        \t" + string(j))
+			}
+		}
+		assert.Equal(t, []SpendingEvent{
+			{
+				Date:               time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 2500,
+				RollingAllocation:  7500,
+				Funding: []FundingEvent{
+					{
+						Date:              time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
+						OriginalDate:      time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
+						WeekendAvoided:    false,
+						FundingScheduleId: 0,
+					},
+				},
+				SpendingId: 0,
+			},
+			{
+				Date:               time.Date(2024, 3, 31, 0, 0, 0, 0, timezone),
+				TransactionAmount:  0,
+				ContributionAmount: 2500,
+				RollingAllocation:  10000,
+				Funding: []FundingEvent{
+					{
+						Date:              time.Date(2024, 3, 31, 0, 0, 0, 0, timezone),
+						OriginalDate:      time.Date(2024, 3, 31, 0, 0, 0, 0, timezone),
+						WeekendAvoided:    false,
+						FundingScheduleId: 0,
+					},
+				},
+				SpendingId: 0,
+			},
+			{
+				Date:               time.Date(2024, 4, 1, 0, 0, 0, 0, timezone),
+				TransactionAmount:  5000,
+				ContributionAmount: 0,
+				RollingAllocation:  5000,
+				Funding:            []FundingEvent{},
+				SpendingId:         0,
+			},
+		}, events)
+	})
+
 	t.Run("spent more frequently than funded", func(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")

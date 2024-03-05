@@ -2,7 +2,7 @@
   "startingTime": "2023-07-05T20:09:00Z",
   "endingTime": "2023-08-03T05:00:00Z",
   "startingBalance": 223600,
-  "endingBalance": 299021,
+  "endingBalance": 318725,
   "events": [
     {
       "date": "2023-07-06T05:00:00Z",
@@ -78,10 +78,10 @@
     },
     {
       "date": "2023-07-14T05:00:00Z",
-      "delta": 293744,
-      "contribution": 293744,
+      "delta": 304080,
+      "contribution": 304080,
       "transaction": 0,
-      "balance": 464644,
+      "balance": 474980,
       "spending": [
         {
           "date": "2023-07-14T05:00:00Z",
@@ -191,8 +191,8 @@
         {
           "date": "2023-07-14T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 999,
+          "contributionAmount": 499,
+          "rollingAllocation": 1498,
           "funding": [
             {
               "date": "2023-07-14T05:00:00Z",
@@ -281,8 +281,8 @@
         {
           "date": "2023-07-14T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 1073,
+          "contributionAmount": 536,
+          "rollingAllocation": 1609,
           "funding": [
             {
               "date": "2023-07-14T05:00:00Z",
@@ -326,8 +326,8 @@
         {
           "date": "2023-07-14T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 20000,
+          "contributionAmount": 3333,
+          "rollingAllocation": 23333,
           "funding": [
             {
               "date": "2023-07-14T05:00:00Z",
@@ -356,8 +356,8 @@
         {
           "date": "2023-07-14T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 6962,
+          "contributionAmount": 3481,
+          "rollingAllocation": 10443,
           "funding": [
             {
               "date": "2023-07-14T05:00:00Z",
@@ -401,8 +401,8 @@
         {
           "date": "2023-07-14T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 14925,
+          "contributionAmount": 2487,
+          "rollingAllocation": 17412,
           "funding": [
             {
               "date": "2023-07-14T05:00:00Z",
@@ -638,7 +638,7 @@
       "delta": -100000,
       "contribution": 0,
       "transaction": 100000,
-      "balance": 364644,
+      "balance": 374980,
       "spending": [
         {
           "date": "2023-07-15T05:00:00Z",
@@ -656,7 +656,7 @@
       "delta": -2468,
       "contribution": 0,
       "transaction": 2468,
-      "balance": 362176,
+      "balance": 372512,
       "spending": [
         {
           "date": "2023-07-16T05:00:00Z",
@@ -674,7 +674,7 @@
       "delta": -1000,
       "contribution": 0,
       "transaction": 1000,
-      "balance": 361176,
+      "balance": 371512,
       "spending": [
         {
           "date": "2023-07-18T05:00:00Z",
@@ -692,7 +692,7 @@
       "delta": -36300,
       "contribution": 0,
       "transaction": 36300,
-      "balance": 324876,
+      "balance": 335212,
       "spending": [
         {
           "date": "2023-07-20T05:00:00Z",
@@ -710,7 +710,7 @@
       "delta": -1214,
       "contribution": 0,
       "transaction": 1214,
-      "balance": 323662,
+      "balance": 333998,
       "spending": [
         {
           "date": "2023-07-25T05:00:00Z",
@@ -736,7 +736,7 @@
       "delta": -1987,
       "contribution": 0,
       "transaction": 1987,
-      "balance": 321675,
+      "balance": 332011,
       "spending": [
         {
           "date": "2023-07-26T05:00:00Z",
@@ -762,7 +762,7 @@
       "delta": -4000,
       "contribution": 0,
       "transaction": 4000,
-      "balance": 317675,
+      "balance": 328011,
       "spending": [
         {
           "date": "2023-07-28T05:00:00Z",
@@ -780,7 +780,7 @@
       "delta": -999,
       "contribution": 0,
       "transaction": 999,
-      "balance": 316676,
+      "balance": 327012,
       "spending": [
         {
           "date": "2023-07-29T05:00:00Z",
@@ -798,7 +798,7 @@
       "delta": -2000,
       "contribution": 0,
       "transaction": 2000,
-      "balance": 314676,
+      "balance": 325012,
       "spending": [
         {
           "date": "2023-07-30T05:00:00Z",
@@ -813,10 +813,10 @@
     },
     {
       "date": "2023-07-31T05:00:00Z",
-      "delta": 177955,
-      "contribution": 287955,
+      "delta": 187323,
+      "contribution": 297323,
       "transaction": 110000,
-      "balance": 492631,
+      "balance": 512335,
       "spending": [
         {
           "date": "2023-07-31T05:00:00Z",
@@ -926,8 +926,8 @@
         {
           "date": "2023-07-31T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 999,
+          "contributionAmount": 500,
+          "rollingAllocation": 1998,
           "funding": [
             {
               "date": "2023-07-31T05:00:00Z",
@@ -1016,8 +1016,8 @@
         {
           "date": "2023-07-31T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 1073,
+          "contributionAmount": 537,
+          "rollingAllocation": 2146,
           "funding": [
             {
               "date": "2023-07-31T05:00:00Z",
@@ -1061,8 +1061,8 @@
         {
           "date": "2023-07-31T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 20000,
+          "contributionAmount": 2777,
+          "rollingAllocation": 26110,
           "funding": [
             {
               "date": "2023-07-31T05:00:00Z",
@@ -1091,8 +1091,8 @@
         {
           "date": "2023-07-31T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 6962,
+          "contributionAmount": 3481,
+          "rollingAllocation": 13924,
           "funding": [
             {
               "date": "2023-07-31T05:00:00Z",
@@ -1136,8 +1136,8 @@
         {
           "date": "2023-07-31T05:00:00Z",
           "transactionAmount": 0,
-          "contributionAmount": 0,
-          "rollingAllocation": 14925,
+          "contributionAmount": 2073,
+          "rollingAllocation": 19485,
           "funding": [
             {
               "date": "2023-07-31T05:00:00Z",
@@ -1373,7 +1373,7 @@
       "delta": -192611,
       "contribution": 0,
       "transaction": 192611,
-      "balance": 300020,
+      "balance": 319724,
       "spending": [
         {
           "date": "2023-08-01T05:00:00Z",
@@ -1415,13 +1415,13 @@
       "delta": -999,
       "contribution": 0,
       "transaction": 999,
-      "balance": 299021,
+      "balance": 318725,
       "spending": [
         {
           "date": "2023-08-03T05:00:00Z",
           "transactionAmount": 999,
           "contributionAmount": 0,
-          "rollingAllocation": 0,
+          "rollingAllocation": 999,
           "funding": [],
           "spendingId": 103
         }
