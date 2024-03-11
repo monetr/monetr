@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
+    '../interface/src/**/*.tsx',
+    '../interface/src/**/*.jsx',
+    '../interface/src/**/*.js',
     './src/pages/**/*.{js,ts,jsx,tsx,md,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,md,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,md,mdx}',
@@ -12,6 +15,62 @@ module.exports = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      },
+      colors: {
+        'monetr': {
+          brand: {
+            DEFAULT: '#4E1AA0',
+          },
+          background: {
+            subtle: '',
+            DEFAULT: '#F8F8F8',
+            emphasis: '',
+          },
+          border: {
+            DEFAULT: '', // zinc-700
+          },
+          content: {
+            subtle: '#6b7280', // gray-500
+            DEFAULT: '#111827', // gray-900
+            emphasis: '', // zinc-50
+          },
+        },
+        'dark-monetr': {
+          red: {
+            DEFAULT: '#ef4444',
+          },
+          green: {
+            DEFAULT: '#22c55e',
+          },
+          blue: {
+            DEFAULT: '#3b82f6',
+          },
+          brand: {
+            bright: '#CFB9F4',
+            faint: '#AC84EB',
+            muted: '#9461E5',
+            subtle: '#5D1FC1',
+            DEFAULT: '#4E1AA0',
+          },
+          background: {
+            subtle: '#27272a', // zinc-800
+            DEFAULT: '#19161f',
+            emphasis: '#3f3f46', // zinc-700
+            focused: '#131118',
+            bright: '#fafafa', // zinc-50
+          },
+          border: {
+            subtle: '#27272a', // zinc-800
+            DEFAULT: '#3f3f46', // zinc-700
+            string: '#71717a',
+          },
+          content: {
+            muted: '#52525b',
+            subtle: '#a1a1aa', // zinc-400
+            DEFAULT: '#d4d4d8', // zinc-200
+            emphasis: '#fafafa', // zinc-50
+          },
+        },
       },
     },
     aspectRatio: {

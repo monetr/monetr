@@ -12,20 +12,8 @@ const nextConfig = {
   generateBuildId: async () => {
     return 'monetr.app';
   },
-  webpack: (
-    config,
-    nextShit,
-  ) => {
-    // Important: return the modified config
-    config.resolve = {
-      ...config?.resolve,
-      alias: {
-        ...config?.resolve?.alias,
-        '@monetr/docs': path.resolve(__dirname, 'src'),
-        '@monetr/interface': path.resolve(__dirname, '../interface/src'),
-      }
-    }
-    return config
+  experimental: {
+    externalDir: true,
   },
 }
 
