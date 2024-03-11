@@ -28,7 +28,7 @@ require (
 	github.com/gomodule/redigo v1.8.9
 	github.com/google/uuid v1.6.0
 	github.com/jarcoal/httpmock v1.3.1
-	github.com/klauspost/cpuid/v2 v2.2.6
+	github.com/klauspost/cpuid/v2 v2.2.7
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/mileusna/useragent v1.3.4
 	github.com/nyaruka/phonenumbers v1.3.2
