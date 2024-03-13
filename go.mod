@@ -46,7 +46,7 @@ require (
 	golang.org/x/crypto v0.18.0
 	google.golang.org/api v0.162.0
 	google.golang.org/genproto v0.0.0-20240125205218-1f4bbc51befe
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 	gopkg.in/ezzarghili/recaptcha-go.v4 v4.3.0
 )
 
@@ -60,7 +60,6 @@ require (
 	go.opentelemetry.io/otel v1.22.0 // indirect
 	go.opentelemetry.io/otel/metric v1.22.0 // indirect
 	go.opentelemetry.io/otel/trace v1.22.0 // indirect
-	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
 
 require (
