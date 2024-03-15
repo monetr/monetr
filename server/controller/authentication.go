@@ -81,7 +81,6 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 		Captcha  string `json:"captcha"`
-		TOTP     string `json:"totp"`
 		IsMobile bool   `json:"isMobile"`
 	}
 	if err := ctx.Bind(&loginRequest); err != nil {
@@ -98,14 +97,17 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 
 	loginRequest.Email = strings.ToLower(strings.TrimSpace(loginRequest.Email))
 	loginRequest.Password = strings.TrimSpace(loginRequest.Password)
-	loginRequest.TOTP = strings.TrimSpace(loginRequest.TOTP)
 
 	if err := c.validateLogin(ctx, loginRequest.Email, loginRequest.Password); err != nil {
 		return err // Validate login errors are valid http errors.
 	}
 
 	secureRepo := c.mustGetSecurityRepository(ctx)
-	login, requiresPasswordChange, err := secureRepo.Login(c.getContext(ctx), loginRequest.Email, loginRequest.Password)
+	login, requiresPasswordChange, err := secureRepo.Login(
+		c.getContext(ctx),
+		loginRequest.Email,
+		loginRequest.Password,
+	)
 	switch errors.Cause(err) {
 	case repository.ErrInvalidCredentials:
 		return c.returnError(ctx, http.StatusUnauthorized, "invalid email and password")
@@ -154,25 +156,6 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 		})
 	}
 
-	// Check if the login requires MFA in order to authenticate.
-	if login.TOTP != "" && loginRequest.TOTP == "" {
-		log.Debug("login requires TOTP MFA, but none was provided")
-		return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
-	} else if login.TOTP != "" && loginRequest.TOTP != "" {
-		// If the login does require TOTP and a code was provided in the request, then validate that the provided code is
-		// correct.
-		log.Trace("login requires TOTP MFA, and a code was provided; it will be verified")
-
-		if err := login.VerifyTOTP(loginRequest.TOTP, c.clock.Now()); err != nil {
-			log.Trace("provided TOTP MFA code is not valid")
-			return c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
-		}
-
-		log.Trace("provided TOTP MFA code is valid")
-	} else if login.TOTP == "" && loginRequest.TOTP != "" {
-		log.Warn("login does not require TOTP MFA, but a code was provided anyway")
-	}
-
 	switch len(login.Users) {
 	case 0:
 		// TODO (elliotcourant) Should we allow them to create an account?
@@ -189,12 +172,38 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 			})
 		}
 
-		token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
-			EmailAddress: login.Email,
-			UserId:       user.UserId,
-			AccountId:    user.AccountId,
-			LoginId:      user.LoginId,
-		})
+		// Check if the login requires MFA in order to authenticate.
+		if login.TOTP != "" {
+			log.Debug("login requires TOTP MFA")
+
+			token, err := c.clientTokens.Create(
+				security.MultiFactorAudience,
+				5*time.Minute,
+				security.Claims{
+					EmailAddress: login.Email,
+					UserId:       user.UserId,
+					AccountId:    user.AccountId,
+					LoginId:      user.LoginId,
+				},
+			)
+			if err != nil {
+				return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
+			}
+			c.updateAuthenticationCookie(ctx, token)
+
+			return c.failure(ctx, http.StatusPreconditionRequired, MFARequiredError{})
+		}
+
+		token, err := c.clientTokens.Create(
+			security.AuthenticatedAudience,
+			14*24*time.Hour,
+			security.Claims{
+				EmailAddress: login.Email,
+				UserId:       user.UserId,
+				AccountId:    user.AccountId,
+				LoginId:      user.LoginId,
+			},
+		)
 		if err != nil {
 			return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
 		}
@@ -232,6 +241,60 @@ func (c *Controller) loginEndpoint(ctx echo.Context) error {
 		// an account.
 		return c.badRequest(ctx, "multiple accounts not implemented, please contact support")
 	}
+}
+
+func (c *Controller) postMultifactor(ctx echo.Context) error {
+	var request struct {
+		TOTP string `json:"totp"`
+	}
+	if err := ctx.Bind(&request); err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusBadRequest, "malformed json")
+	}
+
+	repo := c.mustGetAuthenticatedRepository(ctx)
+	me, err := repo.GetMe(c.getContext(ctx))
+	if err != nil {
+		c.updateAuthenticationCookie(ctx, ClearAuthentication)
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "unable to retrieve current user")
+	}
+
+	if err := me.Login.VerifyTOTP(request.TOTP, c.clock.Now()); err != nil {
+		return c.returnError(ctx, http.StatusUnauthorized, "invalid TOTP code")
+	}
+
+	token, err := c.clientTokens.Create(security.AuthenticatedAudience, 14*24*time.Hour, security.Claims{
+		EmailAddress: me.Login.Email,
+		UserId:       me.UserId,
+		AccountId:    me.AccountId,
+		LoginId:      me.LoginId,
+	})
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "could not generate token")
+	}
+
+	c.updateAuthenticationCookie(ctx, token)
+
+	result := map[string]interface{}{
+		"isActive": true,
+	}
+
+	if !c.configuration.Stripe.IsBillingEnabled() {
+		// Return their account token.
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	subscriptionIsActive, err := c.paywall.GetSubscriptionIsActive(c.getContext(ctx), me.AccountId)
+	if err != nil {
+		return c.wrapAndReturnError(ctx, err, http.StatusInternalServerError, "failed to determine whether or not subscription is active")
+	}
+
+	result["isActive"] = subscriptionIsActive
+
+	if !subscriptionIsActive {
+		result["nextUrl"] = "/account/subscribe"
+	}
+
+	return ctx.JSON(http.StatusOK, result)
 }
 
 func (c *Controller) logoutEndpoint(ctx echo.Context) error {

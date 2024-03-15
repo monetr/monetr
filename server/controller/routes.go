@@ -218,10 +218,15 @@ func (c *Controller) RegisterRoutes(app *echo.Echo) {
 	repoParty.POST("/authentication/forgot", c.sendForgotPassword)
 	repoParty.POST("/authentication/reset", c.resetPassword)
 
+	multiFactorRequired := repoParty.Group("", c.multiFactorMiddleware)
+	multiFactorRequired.POST("/authentication/multifactor", c.postMultifactor)
+
 	authed := repoParty.Group("", c.authenticationMiddleware)
 	// User
 	authed.GET("/users/me", c.getMe)
 	authed.PUT("/users/security/password", c.changePassword)
+	authed.POST("/users/security/totp", c.postSetupTOTP)
+	authed.POST("/users/security/totp/confirm", c.postConfirmTOTP)
 	// Billing
 	authed.POST("/billing/create_checkout", c.handlePostCreateCheckout)
 	authed.GET("/billing/checkout/:checkoutSessionId", c.handleGetAfterCheckout)
