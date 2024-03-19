@@ -205,8 +205,8 @@ importers:
         specifier: 4.0.4
         version: 4.0.4(react@18.2.0)
       react-number-format:
-        specifier: 5.3.1
-        version: 5.3.1(react-dom@18.2.0)(react@18.2.0)
+        specifier: 5.3.4
+        version: 5.3.4(react-dom@18.2.0)(react@18.2.0)
       react-plaid-link:
         specifier: 3.5.1
         version: 3.5.1(react-dom@18.2.0)(react@18.2.0)
@@ -7397,7 +7397,7 @@ packages:
       '@storybook/client-logger': 7.0.0
       '@storybook/components': 7.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.2-next.0
+      '@storybook/csf': 0.1.3-next.0
       '@storybook/docs-tools': 7.0.0
       '@storybook/global': 5.0.0
       '@storybook/manager-api': 7.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -7667,7 +7667,7 @@ packages:
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@storybook/client-logger': 7.0.0
-      '@storybook/csf': 0.1.2-next.0
+      '@storybook/csf': 0.1.3-next.0
       '@storybook/global': 5.0.0
       '@storybook/theming': 7.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 7.0.0
@@ -7970,7 +7970,7 @@ packages:
       '@babel/parser': 7.21.9
       '@babel/traverse': 7.21.5
       '@babel/types': 7.21.5
-      '@storybook/csf': 0.1.2-next.0
+      '@storybook/csf': 0.1.3-next.0
       '@storybook/types': 7.0.0
       fs-extra: 11.1.1
       recast: 0.23.4
@@ -8046,8 +8046,8 @@ packages:
       type-fest: 2.19.0
     dev: false
 
-  /@storybook/csf@0.1.2-next.0:
-    resolution: {integrity: sha512-Kf9XPAnO9VBxxYWNiW3pc1t7lDZ178VFfTCVWOm9r6Fdzm94j3zUNT06WiOojblVVaKsJktk8cT9b27Fmcxs5Q==}
+  /@storybook/csf@0.1.3-next.0:
+    resolution: {integrity: sha512-GHnOs+9L3QvgmqHAL9OilG9Pd5nFQozQCi+R0s7A0Fk3NmoqjPvCztwS6ZQkRy6L5ngnqWJ1aAiIoLiKl5dycg==}
     dependencies:
       type-fest: 2.19.0
     dev: false
@@ -8117,7 +8117,7 @@ packages:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.2-next.0
+      '@storybook/csf': 0.1.3-next.0
       '@storybook/global': 5.0.0
       '@storybook/router': 7.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/theming': 7.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -8268,7 +8268,7 @@ packages:
       '@storybook/channels': 7.0.0
       '@storybook/client-logger': 7.0.0
       '@storybook/core-events': 7.0.0
-      '@storybook/csf': 0.1.2-next.0
+      '@storybook/csf': 0.1.3-next.0
       '@storybook/global': 5.0.0
       '@storybook/types': 7.0.0
       '@types/qs': 6.9.9
@@ -8307,7 +8307,7 @@ packages:
       '@storybook/channels': 7.2.1
       '@storybook/client-logger': 7.2.1
       '@storybook/core-events': 7.2.1
-      '@storybook/csf': 0.1.1
+      '@storybook/csf': 0.1.2
       '@storybook/global': 5.0.0
       '@storybook/types': 7.2.1
       '@types/qs': 6.9.9
@@ -20355,8 +20355,8 @@ packages:
   /react-is@18.2.0:
     resolution: {integrity: sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==}
 
-  /react-number-format@5.3.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-qpYcQLauIeEhCZUZY9jXZnnroOtdy3jYaS1zQ3M1Sr6r/KMOBEIGNIb7eKT19g2N1wbYgFgvDzs19hw5TrB8XQ==}
+  /react-number-format@5.3.4(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-2hHN5mbLuCDUx19bv0Q8wet67QqYK6xmtLQeY5xx+h7UXiMmRtaCwqko4mMPoKXLc6xAzwRrutg8XbTRlsfjRg==}
     peerDependencies:
       react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
       react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
