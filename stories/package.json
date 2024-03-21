@@ -24,7 +24,7 @@
     "@storybook/testing-library": "0.0.14-next.2",
     "msw": "1.2.2",
     "msw-storybook-addon": "1.8.0",
-    "postcss": "8.4.31",
+    "postcss": "8.4.38",
     "postcss-flexbugs-fixes": "5.0.2",
     "postcss-loader": "7.0.2",
     "postcss-normalize": "10.0.1",
