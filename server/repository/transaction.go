@@ -140,7 +140,7 @@ func (r *repositoryBase) GetTransactions(ctx context.Context, bankAccountId uint
 		"offset":        offset,
 	}
 
-	var items []models.Transaction
+	items := make([]models.Transaction, 0)
 	err := r.txn.ModelContext(span.Context(), &items).
 		Where(`"transaction"."account_id" = ?`, r.AccountId()).
 		Where(`"transaction"."bank_account_id" = ?`, bankAccountId).
