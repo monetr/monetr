@@ -148,7 +148,7 @@ importers:
         specifier: 5.11.2
         version: 5.11.2(@types/react@18.2.45)(react@18.2.0)
       '@radix-ui/react-dialog':
-        specifier: ^1.0.5
+        specifier: 1.0.5
         version: 1.0.5(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-popover':
         specifier: 1.0.7
@@ -175,7 +175,7 @@ importers:
         specifier: 1.6.1
         version: 1.6.1
       cmdk:
-        specifier: ^1.0.0
+        specifier: 1.0.0
         version: 1.0.0(@types/react-dom@18.2.18)(@types/react@18.2.45)(react-dom@18.2.0)(react@18.2.0)
       date-fns:
         specifier: 2.30.0
@@ -187,7 +187,7 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       lucide-react:
-        specifier: ^0.363.0
+        specifier: 0.363.0
         version: 0.363.0(react@18.2.0)
       notistack:
         specifier: 3.0.1
@@ -237,6 +237,9 @@ importers:
       tailwindcss:
         specifier: 3.3.7
         version: 3.3.7(ts-node@10.9.1)
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.3.7)
       teller-connect-react:
         specifier: 0.1.0
         version: 0.1.0(react-dom@18.2.0)(react@18.2.0)
@@ -22547,6 +22550,14 @@ packages:
     resolution: {integrity: sha512-SqqhhaL0T06SW59+JVNfAqKdqLs0497esifRrZ7jOaefP3o64fdFNDMrAQWZFMxTLJPiHVjRLUywT8uFz1xNWQ==}
     dependencies:
       '@babel/runtime': 7.23.9
+    dev: false
+
+  /tailwindcss-animate@1.0.7(tailwindcss@3.3.7):
+    resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+    dependencies:
+      tailwindcss: 3.3.7(ts-node@10.9.1)
     dev: false
 
   /tailwindcss@3.3.7(ts-node@10.9.1):
