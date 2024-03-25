@@ -68,6 +68,10 @@ module.exports = {
             DEFAULT: '#d4d4d8', // zinc-200
             emphasis: '#fafafa', // zinc-50
           },
+          popover: {
+            DEFAULT: '0 0% 100%',
+            foreground: '222.2 47.4% 11.2%',
+          },
         },
       },
     },
