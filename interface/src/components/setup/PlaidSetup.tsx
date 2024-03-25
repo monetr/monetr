@@ -221,7 +221,7 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }
 
   if (exited) {
-    const backUrl = props.alreadyOnboarded ? '/' : '/setup';
+    const backUrl = props.alreadyOnboarded ? '/link/create' : '/setup';
     inner = (
       <div className='flex flex-col justify-center items-center'>
         <MSpan size='2xl' weight='medium'>

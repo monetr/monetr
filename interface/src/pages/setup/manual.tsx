@@ -37,7 +37,11 @@ const initialValues: SetupManualValues = {
   paydayAmount: 0.00,
 };
 
-export default function SetupManual(): JSX.Element {
+interface SetupManualProps {
+  alreadyOnboarded?: boolean;
+}
+
+export default function SetupManual(props: SetupManualProps): JSX.Element {
   const createLink = useCreateLink();
   const createBankAccount = useCreateBankAccount();
   const createFundingSchedule = useCreateFundingSchedule();
@@ -151,6 +155,13 @@ export default function SetupManual(): JSX.Element {
     }
   }
 
+  function Footer(): JSX.Element {
+    if (props.alreadyOnboarded) return null;
+
+    return (
+      <LogoutFooter />
+    );
+  }
 
   return (
     <div
@@ -170,7 +181,7 @@ export default function SetupManual(): JSX.Element {
           <CurrentStep />
           <SetupButtons />
         </div>
-        <LogoutFooter />
+        <Footer />
       </MForm>
       <div className='md:h-28' />
     </div>
