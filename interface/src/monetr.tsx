@@ -132,7 +132,7 @@ export default function Monetr(): JSX.Element {
           </Route>
           <Route path='/link/create' element={ <LinkCreatePage /> } />
           <Route path='/link/create/teller' element={ <TellerSetup /> } />
-          <Route path='/link/create/plaid' element={ <PlaidSetup /> } />
+          <Route path='/link/create/plaid' element={ <PlaidSetup alreadyOnboarded /> } />
           <Route path='/link/create/manual' element={ <SetupManual /> } />
           <Route path='/logout' element={ <LogoutPage /> } />
           <Route path='/plaid/oauth-return' element={ <OauthReturn /> } />

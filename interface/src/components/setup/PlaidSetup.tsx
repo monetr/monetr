@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { useQueryClient } from '@tanstack/react-query';
 
+import MLink from '@monetr/interface/components/MLink';
 import MLogo from '@monetr/interface/components/MLogo';
 import MSpan from '@monetr/interface/components/MSpan';
 import MSpinner from '@monetr/interface/components/MSpinner';
@@ -220,13 +221,17 @@ export default function PlaidSetup(props: PlaidProps): JSX.Element {
   }
 
   if (exited) {
+    const backUrl = props.alreadyOnboarded ? '/' : '/setup';
     inner = (
       <div className='flex flex-col justify-center items-center'>
-        <MSpan className='text-2xl font-medium'>
+        <MSpan size='2xl' weight='medium'>
           Something isn't quite right
         </MSpan>
-        <MSpan className='text-lg' color='subtle'>
+        <MSpan size='lg' color='subtle'>
           Plaid exited, did you want to set it up later?
+        </MSpan>
+        <MSpan size='md' color='subtle'>
+          Or <MLink to={ backUrl }>go back</MLink> and pick another option?
         </MSpan>
       </div>
     );
