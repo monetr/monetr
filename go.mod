@@ -42,7 +42,7 @@ require (
 	github.com/stripe/stripe-go/v72 v72.122.0
 	github.com/teambition/rrule-go v1.8.2
 	github.com/vmihailenco/msgpack/v5 v5.3.5
-	github.com/xlzd/gotp v0.0.0-20220110052318-fab697c03c2c
+	github.com/xlzd/gotp v0.1.0
 	golang.org/x/crypto v0.19.0
 	google.golang.org/api v0.169.0
 	google.golang.org/genproto v0.0.0-20240213162025-012b6fc9bca9
