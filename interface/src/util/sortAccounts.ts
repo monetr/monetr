@@ -33,13 +33,15 @@ export default function sortAccounts(bankAccounts: Array<BankAccount> | undefine
         0, // b
       ];
       for (let i = 0; i < 2; i++) {
+        // Put inactive items last.
+        const multiplier = items[i].status === 'inactive' ? -2 : 1;
         values[i] += accountTypeOrder.indexOf(items[i].accountType);
         values[i] += accountSubTypeOrder.indexOf(items[i].accountSubType);
+        values[i] *= multiplier;
       }
 
       // I want to sort these in descenging order. So invert whether or not the value returned
       // is negative or positive.
-
       return values[0] < values[1] ? 1 :
         values[0] > values[1] ? -1 : 0;
     });
