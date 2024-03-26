@@ -1,11 +1,11 @@
 /* eslint-disable max-len */
 
 import React from 'react';
+import { type DialogProps } from '@radix-ui/react-dialog';
 
 import { Dialog, DialogContent } from '@monetr/interface/components/Dialog';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-import { type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
  

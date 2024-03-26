@@ -252,6 +252,7 @@
                 "^@ebay",
                 "^@emotion",
                 "^@mui",
+                "^@radix",
                 "^@react-email",
                 "^@sentry",
                 "^@storybook",

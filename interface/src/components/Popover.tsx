@@ -1,8 +1,7 @@
 import React from 'react';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
 
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
-
-import * as PopoverPrimitive from '@radix-ui/react-popover';
  
 const Popover = PopoverPrimitive.Root;
  
