@@ -387,6 +387,8 @@ github.com/nyaruka/phonenumbers v1.1.8 h1:mjFu85FeoH2Wy18aOMUvxqi1GgAqiQSJsa/cCC
 github.com/nyaruka/phonenumbers v1.1.8/go.mod h1:DC7jZd321FqUe+qWSNcHi10tyIyGNXGcNbfkPvdp1Vs=
 github.com/nyaruka/phonenumbers v1.3.2 h1:ACdPdlDGabEwkF6Asfd1Jv+azcoPJP/FujXnnisp0vw=
 github.com/nyaruka/phonenumbers v1.3.2/go.mod h1:4jyKp/BFUokLbCHyoZag+T3S1KezFVoEKtgnbpzItC4=
+github.com/nyaruka/phonenumbers v1.3.4 h1:bF1Wdh++fxw09s3surhVeBhXEcUKG07pHeP8HQXqjn8=
+github.com/nyaruka/phonenumbers v1.3.4/go.mod h1:Ut+eFwikULbmCenH6InMKL9csUNLyxHuBLyfkpum11s=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.12.1/go.mod h1:zj2OWP4+oCPe1qIXoGWkgMRwljMUYCdkwsT2108oapk=
 github.com/onsi/ginkgo v1.14.2 h1:8mVmC9kjFFmA8H4pKMUhcblgifdkOIXPvbhN1T36q1M=
