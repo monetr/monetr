@@ -98,13 +98,16 @@ func (c *Controller) getSimilarTransactionsById(ctx echo.Context) error {
 
 	repo := c.mustGetAuthenticatedRepository(ctx)
 
-	cluster, err := repo.GetTransactionClusterByMember(
+	cluster, _ := repo.GetTransactionClusterByMember(
 		c.getContext(ctx),
 		bankAccountId,
 		transactionId,
 	)
-	if err != nil {
-		return c.wrapPgError(ctx, err, "Could not find similar transactions")
+
+	// If there are no similar transactions then return no content, this will
+	// prevent react-query from retrying in a weird way.
+	if cluster == nil || len(cluster.Members) == 0 {
+		return ctx.NoContent(http.StatusNoContent)
 	}
 
 	return ctx.JSON(http.StatusOK, cluster)
