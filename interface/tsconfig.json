@@ -18,7 +18,8 @@
   },
   "include": [
     "src/**/*",
-    "../tailwind.config.cjs"
+    "../tailwind.config.cjs",
+    "../../tailwind.config.js"
   ],
   "ts-node": {
     "esm": true,

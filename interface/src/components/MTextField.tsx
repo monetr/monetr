@@ -62,7 +62,8 @@ export default function MTextField(props: MTextFieldProps = MTextFieldPropsDefau
       'focus:ring-red-400': props.error,
     },
     {
-      'dark:bg-dark-monetr-background': !props.disabled,
+      'dark:bg-transparent': !props.disabled,
+      // 'dark:bg-dark-monetr-background': !props.disabled,
       'dark:text-zinc-200': !props.disabled,
       'text-gray-900': !props.disabled,
     },
