@@ -10,7 +10,7 @@ import { useSpending } from '@monetr/interface/hooks/spending';
 import { formatAmount } from '@monetr/interface/util/amounts';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
 
-export interface ExpenseTimelineProps {
+export interface GoalTimelineProps {
   spendingId: number;
 }
 
@@ -23,7 +23,7 @@ interface TimelineItemData {
   endingAllocation: number;
 }
 
-export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Element {
+export default function GoalTimeline(props: GoalTimelineProps): JSX.Element {
   const { data: spending } = useSpending(props.spendingId);
   const { data: fundingSchedule } = useFundingSchedule(spending?.fundingScheduleId);
   const { result: forecast, isLoading, isError } = useForecast();
@@ -36,7 +36,7 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
 
   if (isError || !spending) {
     return (
-      <MSpan>Failed to load expense forecast!</MSpan>
+      <MSpan>Failed to load goal forecast!</MSpan>
     );
   }
 
@@ -79,21 +79,21 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
     let icon: JSX.Element | null = null;
     if (props.contributedAmount > 0 && props.spentAmount > 0) {
       // Spent and contributed
-      header = 'Contribution & Spending';
+      header = 'Contribution & Completion';
       icon = <AirlineStopsOutlined />;
       // NOTE To repro this, have your funding schedule land on the same day the item is being spent. For example
       // a funding schedule that is 15th and the last day of the month, landing on september 15th (friday) funding
       // an expense that is spent every friday.
       if (props.endingAllocation > 0) {
-        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, ${formatAmount(props.contributedAmount)} was contributed to this budget at the same time. ${formatAmount(props.endingAllocation)} is left over to use from this budget until the next contribution.`;
+        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, ${formatAmount(props.contributedAmount)} was contributed to this goal at the same time. ${formatAmount(props.endingAllocation)} is left over to use from this goal until the next contribution.`;
       } else {
-        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, included the ${formatAmount(props.contributedAmount)} that was contributed to this budget at the same time to account for the spending.`;
+        body = `An estimated ${formatAmount(props.spentAmount)} will be spent or be ready to spend, included the ${formatAmount(props.contributedAmount)} that was contributed to this goal at the same time to account for the spending.`;
       }
     } else if (props.contributedAmount === 0 && props.spentAmount > 0) {
       // Only spent
       header = 'Spending';
       icon = <SouthEast />;
-      body = `An estimated ${formatAmount(props.spentAmount)} will be spent or will be ready to spend, from your ${spending.name} budget.`;
+      body = `An estimated ${formatAmount(props.spentAmount)} will be spent or will be ready to spend, from your ${spending.name} goal.`;
     } else if (props.contributedAmount > 0 && props.spentAmount === 0) {
       // Only contributed
       header = 'Contribution';
@@ -137,7 +137,7 @@ export default function ExpenseTimeline(props: ExpenseTimelineProps): JSX.Elemen
           {spending.name} currently has {spending.getCurrentAmountString()} allocated towards it.
         </p>
         <p className='mb-4 text-base font-normal text-zinc-500 dark:text-zinc-400'>
-          Below is the timeline for this expense over the next month.
+          Below is the timeline for this goal over the next month.
         </p>
       </li>
       {timelineItems.map((item, index) => (<TimelineItem key={ getUnixTime(item.date) } { ...item } last={ timelineItems.length - 1 === index } />))}
