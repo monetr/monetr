@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.16.3](https://github.com/monetr/monetr/compare/v0.16.2...v0.16.3) (2024-03-28)
+
+
+### Features
+
+* **ui:** Add timeline to the goal details view. ([b25c84c](https://github.com/monetr/monetr/commit/b25c84c5999270ad37e2a4a66d822974c3af6ce0)), closes [#1699](https://github.com/monetr/monetr/issues/1699)
+* **ui:** Adding custom popover component ([520ede1](https://github.com/monetr/monetr/commit/520ede18e31b541f74924653281001a5bd19a75f))
+* **ui:** Adding OTP input component. ([89b32aa](https://github.com/monetr/monetr/commit/89b32aab96c0cec0db5227be2f9890e53dbaa649))
+* **ui:** Consolidating tailwind configuration + docs updates. ([e6d7860](https://github.com/monetr/monetr/commit/e6d7860ca953f799ed3885ebf9e45e985cbdee66))
+* **ui:** Improve plaid setup UI. ([9095c53](https://github.com/monetr/monetr/commit/9095c53e16c0c4448905b398bede2d3a7ea6eed7))
+* **ui:** Improving the manual setup page ([a459b2e](https://github.com/monetr/monetr/commit/a459b2e7423afb483bf3aa897a4f076a2aab35ab))
+* **ui:** Laying groundwork for new popover component. ([bab4939](https://github.com/monetr/monetr/commit/bab49392b3eb309315c6efa352d629db23cf53c2))
+* **ui:** More UI components. ([c076022](https://github.com/monetr/monetr/commit/c07602285032e5a9ac967c3a8dcc503d25a7be04))
+
+
+### Dependencies
+
+* **api:** update module cloud.google.com/go/kms to v1.15.8 ([#1707](https://github.com/monetr/monetr/issues/1707)) ([9b7ed31](https://github.com/monetr/monetr/commit/9b7ed31bb6f205797d9e8bfd4611296ee1e40731))
+* **api:** update module github.com/nyaruka/phonenumbers to v1.3.4 ([#1712](https://github.com/monetr/monetr/issues/1712)) ([1cda365](https://github.com/monetr/monetr/commit/1cda36576f92592571732a97a4c34120df2e48a2))
+
+
+### Bug Fixes
+
+* **deps:** Fixing pnpm lockfile ([540af63](https://github.com/monetr/monetr/commit/540af633a33ba494942639d03c8ef19ab4182cc1))
+* **ui:** Don't keep querying similar transactions. ([58a9cb2](https://github.com/monetr/monetr/commit/58a9cb25f6a0d5e10918ee4290031c7522fa842a)), closes [#1705](https://github.com/monetr/monetr/issues/1705)
+* **ui:** Put inactive accounts at the end of the selector. ([1a8ccef](https://github.com/monetr/monetr/commit/1a8ccef73e668c70a6aa36363fab75ce86667208)), closes [#1708](https://github.com/monetr/monetr/issues/1708)
+
+
+### Miscellaneous
+
+* **api:** Tweak transactions controller result. ([e273455](https://github.com/monetr/monetr/commit/e27345548b8c88600abfb0f92dc5160be8227d57))
+* **ui:** Working on UI stuff. ([f797185](https://github.com/monetr/monetr/commit/f797185173ea7f11199ff8f3dbdef3531baa4027))
+
 ## [0.16.2](https://github.com/monetr/monetr/compare/v0.16.1...v0.16.2) (2024-03-19)
 
 
