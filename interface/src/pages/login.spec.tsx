@@ -1,4 +1,5 @@
 import React from 'react';
+import * as reactRouter from 'react-router-dom';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
@@ -6,7 +7,7 @@ import MockAdapter from 'axios-mock-adapter';
 import Login from '@monetr/interface/pages/login';
 import testRenderer from '@monetr/interface/testutils/renderer';
 
-import { afterAll, afterEach, beforeEach, describe, expect, it, test } from 'bun:test';
+import { afterAll, afterEach, beforeEach, describe, expect, it, jest, mock, test } from 'bun:test';
 
 // const mockUseNavigate = mock((_url: string) => { });
 // // jest.mock('react-router-dom', () => ({
@@ -22,6 +23,13 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, test } from 'bun
 //     useNavigate: () => mockUseNavigate,
 //   };
 // });
+
+const mockUseNavigate = jest.fn((_url: string) => { });
+mock.module(reactRouter, () => ({
+  // __esModule: true,
+  // ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockUseNavigate,
+}));
 
 
 describe('login page', () => {
@@ -105,12 +113,14 @@ describe('login page', () => {
     await waitFor(() => expect(world.queryByTestId('login-forgot')).not.toBeInTheDocument());
     await waitFor(() => expect(world.queryByTestId('login-signup')).not.toBeInTheDocument());
 
-    act(() => {
-      fireEvent.change(world.getByTestId('login-email'), { target: { value: 'test@test.com' } });
-      fireEvent.change(world.getByTestId('login-password'), { target: { value: 'password' } });
-      world.getByTestId('login-submit').click();
-    });
+    // act(() => {
+    fireEvent.change(world.getByTestId('login-email'), { target: { value: 'test@test.com' } });
+    fireEvent.change(world.getByTestId('login-password'), { target: { value: 'password' } });
+    fireEvent.click(world.getByTestId('login-submit'));
+    // world.getByTestId('login-submit').click();
+    // });
 
+    console.log('CALLS', mockUseNavigate.mock.calls);
     // When we login we should be redirected to this route.
     // await waitFor(() => expect(mockUseNavigate).toBeCalledWith('/'));
   });

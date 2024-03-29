@@ -74,6 +74,7 @@ export default function Login(): JSX.Element {
 
   async function submit(values: LoginValues, helpers: FormikHelpers<LoginValues>) {
     helpers.setSubmitting(true);
+    console.log('SUBMIT', values); // This never happens in the test?
 
     return login({
       captcha: values.captcha,

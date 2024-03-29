@@ -15,6 +15,7 @@ export default function useLogin(): (loginArgs: LoginArguments) => Promise<void>
   const queryClient = useQueryClient();
 
   return async (loginArgs: LoginArguments): Promise<void> => {
+    console.log('DEBUG', navigate);
     return request().post('/authentication/login', loginArgs)
       .then(async result => {
         // Then bootstrap the authentication, once it's bootstrapped we want to consider the `nextUrl` field from the
