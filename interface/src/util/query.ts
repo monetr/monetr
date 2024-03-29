@@ -4,9 +4,10 @@ import axios from 'axios';
 export default async function Query<T = unknown, TQueryKey extends QueryKey = QueryKey>(
   context: QueryFunctionContext<TQueryKey>,
 ): Promise<T> {
+  const method = context.queryKey.length === 1 ? 'GET' : 'POST';
   const { data } = await axios.request<T>({
     url: `/api${context.queryKey[0]}`,
-    method: context.queryKey.length === 1 ? 'GET' : 'POST',
+    method: method,
     params: context.pageParam && {
       offset: context.pageParam,
     },
