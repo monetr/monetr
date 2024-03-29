@@ -187,8 +187,8 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 	// midnight.
 	rule.DTStart(rule.GetDTStart().In(timezone))
 	items := rule.Between(start, end, true)
-	events := make([]FundingEvent, len(items))
-	for i, item := range items {
+	events := make([]FundingEvent, 0, len(items))
+	for i := range items {
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
@@ -200,12 +200,34 @@ func (f *fundingScheduleBase) GetFundingEventsBetween(
 			// Do nothing
 		}
 
-		// TODO Implement the skip weekends here too.
-		events[i] = FundingEvent{
-			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
-			Date:              item,
-			OriginalDate:      item,
+		date := items[i]
+		nextContributionDate := date
+		weekendAvoided := false
+		if f.fundingSchedule.ExcludeWeekends {
+			switch date.Weekday() {
+			case time.Sunday:
+				nextContributionDate = nextContributionDate.AddDate(0, 0, -2)
+				weekendAvoided = true
+			case time.Saturday:
+				nextContributionDate = nextContributionDate.AddDate(0, 0, -1)
+				weekendAvoided = true
+			default:
+				weekendAvoided = false
+			}
+
+			// If we have adjusted for a weekend and it was before the start time then
+			// don't include it in the result set.
+			if nextContributionDate.Before(start) {
+				continue
+			}
 		}
+
+		events = append(events, FundingEvent{
+			FundingScheduleId: f.fundingSchedule.FundingScheduleId,
+			Date:              nextContributionDate,
+			OriginalDate:      date,
+			WeekendAvoided:    weekendAvoided,
+		})
 	}
 	return events
 }

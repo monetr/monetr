@@ -600,4 +600,44 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 		result := spendingInstructions.getNextSpendingEventAfter(context.Background(), start, timezone, 0)
 		assert.Nil(t, result, "result should be nil because the goal is completed as of the start timestamp")
 	})
+
+	t.Run("odd goal contribution repro", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2021, 12, 31, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		now := time.Date(2024, 3, 28, 0, 0, 0, 0, timezone)
+		log := testutils.GetLog(t)
+
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet: fundingRule,
+				// This is the problem, with exclude weekends set to false the
+				// contribution amount is accurate. Ultimately this is because
+				// GetFundingEventsBetween does not properly implement excluding
+				// weekends.
+				ExcludeWeekends:   true,
+				NextOccurrence:    time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
+				FundingScheduleId: 1,
+			},
+		)
+
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				FundingScheduleId: 1,
+				SpendingType:      models.SpendingTypeGoal,
+				TargetAmount:      1000000,
+				CurrentAmount:     48394,
+				UsedAmount:        319861,
+				NextRecurrence:    time.Date(2024, 5, 16, 0, 0, 0, 0, timezone),
+				RuleSet:           nil,
+				SpendingId:        1,
+			},
+			fundingInstructions,
+		).(*spendingInstructionBase)
+
+		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
+		j, _ := json.MarshalIndent(events, "", "  ")
+		fmt.Println(string(j))
+	})
 }
