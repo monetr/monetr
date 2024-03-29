@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.16.4](https://github.com/monetr/monetr/compare/v0.16.3...v0.16.4) (2024-03-29)
+
+
+### Dependencies
+
+* **ui:** update dependency @fontsource-variable/inter to v5.0.17 ([#1694](https://github.com/monetr/monetr/issues/1694)) ([b97bfb8](https://github.com/monetr/monetr/commit/b97bfb83b0e66e16ce2bb81a89e5a65b468b82b5))
+* **ui:** update dependency @react-email/components to v0.0.16 ([#1718](https://github.com/monetr/monetr/issues/1718)) ([fb73de7](https://github.com/monetr/monetr/commit/fb73de7f39f046d34001295db78d7c0884d46e87))
+* **ui:** update dependency autoprefixer to v10.4.19 ([#1695](https://github.com/monetr/monetr/issues/1695)) ([e1497b6](https://github.com/monetr/monetr/commit/e1497b6a8817457ef7ff45097c92d3484bd9cc9b))
+* **ui:** update dependency axios to v1.6.8 ([#1696](https://github.com/monetr/monetr/issues/1696)) ([44bc837](https://github.com/monetr/monetr/commit/44bc837ee222661a6bbb19a723ae8eb52e2ee4fe))
+* **ui:** update dependency postcss to v8.4.38 ([#1646](https://github.com/monetr/monetr/issues/1646)) ([a43b941](https://github.com/monetr/monetr/commit/a43b94117da2fdb95fe27afec72456e70c6d1ed7))
+* **ui:** update dependency react-email to v2.1.1 ([#1719](https://github.com/monetr/monetr/issues/1719)) ([645170c](https://github.com/monetr/monetr/commit/645170c58d1b26dbb11325afd26fb7851377398a))
+
+
+### Bug Fixes
+
+* **ci:** Fixed staging deploying an invalid tag during release. ([a6f3131](https://github.com/monetr/monetr/commit/a6f3131668402d10f7238b0ef60c368fbf9eee23))
+* **forecast:** Fixed bug causing inconsistent contributions to goals. ([29f777c](https://github.com/monetr/monetr/commit/29f777cb14af3d986eb49e9f26490539132cb6bf))
+
 ## [0.16.3](https://github.com/monetr/monetr/compare/v0.16.2...v0.16.3) (2024-03-28)
 
 
