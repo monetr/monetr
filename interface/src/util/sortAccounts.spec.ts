@@ -1,6 +1,8 @@
 import sortAccounts from './sortAccounts';
 import BankAccount from '@monetr/interface/models/BankAccount';
 
+import { describe, expect, it } from 'bun:test';
+
 describe('sort accounts', () => {
   it('will handle a null or undefined input', () => {
     const foo = sortAccounts(null);
