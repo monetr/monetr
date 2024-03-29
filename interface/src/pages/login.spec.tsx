@@ -32,7 +32,6 @@ describe('login page', () => {
   });
   afterEach(() => {
     mock.reset();
-    document.getElementsByTagName('body')[0].innerHTML = ''; 
   });
   afterAll(() => mock.restore());
 

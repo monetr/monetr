@@ -9,7 +9,7 @@ import axios from 'axios';
 
 // import { server } from '@monetr/interface/testutils/server';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { expect } from 'bun:test';
+import { afterEach, expect } from 'bun:test';
 
 GlobalRegistrator.register();;
 
@@ -44,5 +44,7 @@ configure({
 // beforeAll(() => server.listen({
 //   onUnhandledRequest: 'error',
 // }));
-// afterEach(() => server.resetHandlers());
+afterEach(() => {
+  document.getElementsByTagName('body')[0].innerHTML = '';
+});
 // afterAll(() => server.close());
