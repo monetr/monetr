@@ -210,6 +210,8 @@ jobs:
   docker:
     name: Container (Docker)
     runs-on: ubuntu-latest
+    outputs:
+      post-tag: ${{ steps.tag.outputs.POST_TAG }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -249,15 +251,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      # - uses: actions/download-artifact@v3
-      #   name: Download Compiled UI Artifacts
-      #   with:
-      #     name: '${{ github.sha }}-source-maps'
-      #     path: '${{ github.workspace }}/build/source_maps'
-      - name: Save Tag Variable
-        id: tag
-        run: |
-          echo POST_TAG=$(git describe --tag | cut -d "v" -f 2) >> $GITHUB_OUTPUT
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
         env:
@@ -266,7 +259,7 @@ jobs:
           SENTRY_PROJECT: monetr
         with:
           environment: 'my.monetr.dev'
-          version: 'v${{ steps.tag.outputs.POST_TAG }}'
+          version: 'v${{ needs.docker.outputs.post-tag }}'
           # sourcemaps: './build/source_maps'
           url_prefix: 'https://my.monetr.dev'
       - name: Trigger Deployment
@@ -276,5 +269,5 @@ jobs:
             -F token=${{ secrets.GITLAB_CI_TOKEN }} \
             -F "ref=${{ github.head_ref || github.ref_name }}" \
             -F "variables[ENVIRONMENT]=my.monetr.dev" \
-            -F "variables[DEPLOY_VERSION]=${{ steps.tag.outputs.POST_TAG }}" \
+            -F "variables[DEPLOY_VERSION]=${{ needs.docker.outputs.post-tag }}" \
             https://gitlab.com/api/v4/projects/46647440/trigger/pipeline
