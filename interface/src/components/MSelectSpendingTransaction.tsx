@@ -26,6 +26,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   const updateTransaction = useUpdateTransaction();
   const theme = useTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const id = `txn-${transaction.transactionId}-spending-input`;
 
   async function updateSpentFrom(selection: Spending | null) {
     const spendingId = selection ? selection.spendingId : null;
@@ -42,7 +43,15 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
       spendingId: spendingId,
     });
 
-    return updateTransaction(updatedTransaction).finally(() => setIsLoading(false));
+    return updateTransaction(updatedTransaction)
+      .finally(() => {
+        setIsLoading(false);
+        // Needs to be in a timeout for some reason. But basically re-focus the select after we have updated the
+        // spending.
+        setTimeout(() => {
+          document.getElementById(id).focus();
+        }, 0);
+      });
   }
 
   function handleSpentFromChange(newValue: OnChangeValue<SpendingOption, false>, _: ActionMeta<SpendingOption>) {
@@ -92,6 +101,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
   return (
     <div className='hidden md:flex w-1/2 flex-1 items-center'>
       <Select
+        inputId={ id }
         theme={ (baseTheme: Theme): Theme => ({
           ...baseTheme,
           borderRadius: 8,
