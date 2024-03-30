@@ -2,6 +2,7 @@ package testutils
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"sort"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"github.com/monetr/monetr/server/logging"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/stretchr/testify/require"
 )
 
 type testLogEntry struct {
@@ -46,7 +46,8 @@ func GetTestLog(t *testing.T) (*logrus.Entry, *test.Hook) {
 	logger.Logger.Level = logrus.TraceLevel
 
 	output := bytes.NewBuffer(nil)
-	logger.Logger.Out = output
+	both := io.MultiWriter(output, os.Stderr)
+	logger.Logger.Out = both
 	logger.Logger.Formatter = &logrus.TextFormatter{
 		ForceColors:               true,
 		DisableColors:             false,
@@ -85,11 +86,6 @@ func GetTestLog(t *testing.T) (*logrus.Entry, *test.Hook) {
 		defer testLogs.lock.Unlock()
 
 		delete(testLogs.logs, t.Name())
-
-		if t.Failed() {
-			_, err := os.Stderr.Write(output.Bytes())
-			require.NoError(t, err, "must write failed logs")
-		}
 	})
 
 	logger = logger.WithField("test", t.Name())

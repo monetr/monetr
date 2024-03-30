@@ -380,6 +380,12 @@ func (p *postgresJobProcessor) backgroundConsumer(shutdown chan chan struct{}) {
 			promise <- consumerSignal
 			ticker.Stop()
 			return
+		case <-ticker.C:
+			p.log.Trace("background consumer currently has no available worker threads")
+			continue
+		case <-p.trigger:
+			p.log.Trace("received trigger notification, but background consumer has no available worker threads")
+			continue
 		case <-p.availableThreads:
 			// This receive blocks if there are no available threads.
 		}
@@ -477,6 +483,12 @@ func (p *postgresJobProcessor) cronConsumer(shutdown chan chan struct{}) {
 
 		// Grab the next cron that will happen, we are going to watch for this one.
 		nextJob := crons[0]
+
+		p.log.WithFields(logrus.Fields{
+			"queue": nextJob.queueName,
+			"next":  nextJob.next,
+			"now":   p.clock.Now(),
+		}).Trace("staged next cron job to be run")
 
 		// TODO What happens if sleep is negative or 0
 		// How long do we need to wait for this cron job?
