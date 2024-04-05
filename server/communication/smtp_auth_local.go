@@ -4,7 +4,8 @@ package communication
 
 import (
 	"errors"
-	"net/smtp"
+
+	"github.com/wneessen/go-mail/smtp"
 )
 
 // Sending emails via SMTP requires props TLS. When we are running things locally though in minikube I just want to be
