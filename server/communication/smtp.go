@@ -6,13 +6,13 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
-	"net/smtp"
 	"time"
 
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/wneessen/go-mail/smtp"
 )
 
 type SendEmailRequest struct {

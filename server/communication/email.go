@@ -10,6 +10,7 @@ import (
 	textTemplate "text/template"
 	"time"
 
+	"github.com/monetr/monetr/server/build"
 	"github.com/monetr/monetr/server/config"
 	"github.com/monetr/monetr/server/crumbs"
 	"github.com/pkg/errors"
@@ -187,6 +188,10 @@ func (e *emailCommunicationBase) sendMessage(ctx context.Context, payload *mail.
 			e.config.Email.SMTP.Host,
 		)),
 		mail.WithTimeout(5*time.Second),
+		mail.WithTLSPolicy(TLSPolicy),
+		// Move to this once we are no longer using mailhog? It overwrites the port
+		// in a weird way.
+		// mail.WithTLSPortPolicy(TLSPolicy),
 	)
 	if err != nil {
 		return errors.Wrap(err, "failed to create mail client")
@@ -194,6 +199,7 @@ func (e *emailCommunicationBase) sendMessage(ctx context.Context, payload *mail.
 	defer c.Close()
 
 	payload.SetDate()
+	payload.SetUserAgent(strings.TrimSpace(fmt.Sprintf("monetr %s", build.Release)))
 
 	if err := c.DialAndSendWithContext(span.Context(), payload); err != nil {
 		return errors.Wrap(err, "failed to send email")
