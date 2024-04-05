@@ -4,8 +4,12 @@ package communication
 
 import (
 	"errors"
-	"net/smtp"
+
+	"github.com/wneessen/go-mail"
+	"github.com/wneessen/go-mail/smtp"
 )
+
+const TLSPolicy = mail.NoTLS
 
 // Sending emails via SMTP requires props TLS. When we are running things locally though in minikube I just want to be
 // able to use mailhog to send emails. It's not an insignificant amount of work to give mailhog proper TLS within the
