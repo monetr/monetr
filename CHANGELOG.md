@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.16.5](https://github.com/monetr/monetr/compare/v0.16.4...v0.16.5) (2024-04-05)
+
+
+### Bug Fixes
+
+* **api:** Fix email sending bugs ([#1730](https://github.com/monetr/monetr/issues/1730)) ([2fbb721](https://github.com/monetr/monetr/commit/2fbb721957ec14ccebbc67cc0de817e2b83fc632))
+* **background:** Fixing background job issue ([2514c6e](https://github.com/monetr/monetr/commit/2514c6eed24a278755dac845b480e720bdf17310))
+* **build:** Fixed emails deleting the readme. ([852db5f](https://github.com/monetr/monetr/commit/852db5f447383c049d37b9f7c894b8d786f2a96c))
+* **docs:** Fix fonts ([d201a9f](https://github.com/monetr/monetr/commit/d201a9fa90ba9eba23ab38e3301545a9ca7fb236))
+* **ui:** Fix transaction spending selection not refocusing. ([b1ec7f3](https://github.com/monetr/monetr/commit/b1ec7f3cf7f861850900b8d69e28869d0e02f7a6))
+
 ## [0.16.4](https://github.com/monetr/monetr/compare/v0.16.3...v0.16.4) (2024-03-29)
 
 
