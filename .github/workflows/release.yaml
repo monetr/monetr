@@ -35,6 +35,8 @@ jobs:
   build_ui:
     name: Build UI
     if: ${{ needs.release_please.outputs.release_created }}
+    needs:
+      - release_please
     runs-on: ubuntu-latest
     steps:
       - id: go-cache-paths
