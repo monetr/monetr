@@ -13,6 +13,10 @@ export default class TransactionCluster {
         ...data,
         createdAt: data.createdAt ?? parseJSON(data.createdAt),
       });
+    } else {
+      Object.assign(this, {
+        members: [],
+      });
     }
   }
 }
