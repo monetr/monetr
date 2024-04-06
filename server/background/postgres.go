@@ -127,21 +127,22 @@ func (p *postgresJobEnqueuer) EnqueueJob(ctx context.Context, queue string, argu
 type postgresJobFunction func(ctx context.Context, job *models.Job) error
 
 type postgresJobProcessor struct {
-	state            uint32
-	availableThreads chan struct{}
-	shutdownThreads  []chan chan struct{}
-	dispatch         chan *models.Job
-	trigger          chan struct{}
-	cronJobQueues    []ScheduledJobHandler
-	queues           []string
-	registeredJobs   map[string]postgresJobFunction
-	jobQuery         *pg.Query
-	clock            clock.Clock
-	configuration    config.BackgroundJobs
-	log              *logrus.Entry
-	db               pg.DBI
-	enqueuer         JobEnqueuer
-	marshal          JobMarshaller
+	state                   uint32
+	availableThreads        chan struct{}
+	shutdownConsumerThreads []chan chan struct{}
+	shutdownWorkerThreads   []chan chan struct{}
+	dispatch                chan *models.Job
+	trigger                 chan struct{}
+	cronJobQueues           []ScheduledJobHandler
+	queues                  []string
+	registeredJobs          map[string]postgresJobFunction
+	jobQuery                *pg.Query
+	clock                   clock.Clock
+	configuration           config.BackgroundJobs
+	log                     *logrus.Entry
+	db                      pg.DBI
+	enqueuer                JobEnqueuer
+	marshal                 JobMarshaller
 }
 
 func NewPostgresJobProcessor(
@@ -152,18 +153,18 @@ func NewPostgresJobProcessor(
 	enqueuer JobEnqueuer,
 ) *postgresJobProcessor {
 	return &postgresJobProcessor{
-		shutdownThreads: []chan chan struct{}{},
-		dispatch:        make(chan *models.Job),
-		trigger:         make(chan struct{}),
-		cronJobQueues:   []ScheduledJobHandler{},
-		queues:          []string{},
-		registeredJobs:  map[string]postgresJobFunction{},
-		clock:           clock,
-		configuration:   configuration,
-		log:             log,
-		db:              db,
-		enqueuer:        enqueuer,
-		marshal:         DefaultJobMarshaller,
+		shutdownConsumerThreads: []chan chan struct{}{},
+		dispatch:                make(chan *models.Job),
+		trigger:                 make(chan struct{}),
+		cronJobQueues:           []ScheduledJobHandler{},
+		queues:                  []string{},
+		registeredJobs:          map[string]postgresJobFunction{},
+		clock:                   clock,
+		configuration:           configuration,
+		log:                     log,
+		db:                      db,
+		enqueuer:                enqueuer,
+		marshal:                 DefaultJobMarshaller,
 	}
 }
 
@@ -230,34 +231,37 @@ func (p *postgresJobProcessor) Start() error {
 		Limit(1)
 
 	numberOfWorkers := numberOfPostgresQueueWorkers
-	// Number of threads is the number of workers plus the number of other things
-	// we kick off to consume things. At least one for regular jobs, and then
-	// another for cron jobs if there are any crons enabled.
-	numberOfThreads := numberOfWorkers + 1
+	numberOfConsumerThreads := 1 // Minimum of one for consuming jobs
 
-	// If we are using cron jobs then we will kick off another thread.
+	// If we are also consuming crons then we need an additional supporting
+	// thread.
 	if len(p.cronJobQueues) > 0 {
-		numberOfThreads += 1
+		numberOfConsumerThreads += 1
 	}
 
-	p.availableThreads = make(chan struct{}, numberOfWorkers)
-	p.shutdownThreads = make([]chan chan struct{}, numberOfThreads)
-	// Start the worker threads.
-	for i := 0; i < numberOfWorkers; i++ {
-		p.shutdownThreads[i] = make(chan chan struct{}, 1)
-		go p.worker(p.shutdownThreads[i])
+	{ // Worker threads that actually perform the jobs
+		p.availableThreads = make(chan struct{}, numberOfWorkers)
+		p.shutdownWorkerThreads = make([]chan chan struct{}, numberOfWorkers)
+		// Start the worker threads.
+		for i := 0; i < numberOfWorkers; i++ {
+			p.shutdownWorkerThreads[i] = make(chan chan struct{}, 1)
+			go p.worker(p.shutdownWorkerThreads[i])
+		}
 	}
 
-	// If there are any cron jobs registered then start the cron consumer.
-	if len(p.cronJobQueues) > 0 {
-		// Use number of
-		p.shutdownThreads[numberOfThreads-2] = make(chan chan struct{}, 1)
-		go p.cronConsumer(p.shutdownThreads[numberOfThreads-2])
-	}
+	{ // Supporting threads like job and cron consumers
+		p.shutdownConsumerThreads = make([]chan chan struct{}, numberOfConsumerThreads)
 
-	// Start the consumer thread.
-	p.shutdownThreads[numberOfThreads-1] = make(chan chan struct{})
-	go p.backgroundConsumer(p.shutdownThreads[numberOfThreads-1])
+		// Start the consumer thread.
+		p.shutdownConsumerThreads[0] = make(chan chan struct{})
+		go p.backgroundConsumer(p.shutdownConsumerThreads[0])
+
+		// If there are any cron jobs registered then start the cron consumer.
+		if len(p.cronJobQueues) > 0 {
+			p.shutdownConsumerThreads[1] = make(chan chan struct{})
+			go p.cronConsumer(p.shutdownConsumerThreads[1])
+		}
+	}
 
 	return nil
 }
@@ -344,35 +348,79 @@ func (p *postgresJobProcessor) Close() error {
 		return errors.New("postgres job processor is either already closed, or is in an invalid state")
 	}
 
-	p.log.Info("shutting down postgres job processor")
-
-	// Create a channel buffer with the number of messages we need to send to all
-	// the worker threads.
-	shutdownChannel := make(chan struct{}, len(p.shutdownThreads))
-	// Then send the shutdown channel to each worker thread as a "promise".
-	for i := range p.shutdownThreads {
-		p.shutdownThreads[i] <- shutdownChannel
-	}
-
-	p.log.Tracef("shutdown signal has been sent to %d worker threads, waiting for workers to be drained now", len(p.shutdownThreads))
-
 	timer := time.NewTimer(15 * time.Second)
 
-	// Then wait for the expected number of responses.
-	for i := 0; i < len(p.shutdownThreads); i++ {
-		select {
-		case <-shutdownChannel:
-			p.log.Trace("worker successfully drained")
-			continue
-		case <-timer.C:
-			return errors.New("timed out draining worker threads")
+	p.log.Info("shutting down postgresql job processor")
+
+	{ // Shutdown the consumers first
+		// Create a channel buffer with the number of messages we need to send to
+		// all the consumer threads.
+		consumerShutdownChannel := make(chan struct{}, len(p.shutdownConsumerThreads))
+		p.log.Debugf("shutting down %d postgresql job consumers", len(p.shutdownConsumerThreads))
+
+		// Then send the shutdown channel to each consumer thread as a "promise".
+		for i := range p.shutdownConsumerThreads {
+			select {
+			case p.shutdownConsumerThreads[i] <- consumerShutdownChannel:
+				continue
+			case <-timer.C:
+				return errors.New("timed out sending shutdown signal to consumers")
+			}
 		}
+
+		// Then wait for all consumers to be completely shutdown
+		for i := 0; i < len(p.shutdownConsumerThreads); i++ {
+			select {
+			case <-consumerShutdownChannel:
+				p.log.Trace("consumer successfully drained")
+				continue
+			case <-timer.C:
+				return errors.New("timed out waiting for consumers to drain")
+			}
+		}
+		close(consumerShutdownChannel)
 	}
 
-	close(shutdownChannel)
-	for _, channel := range p.shutdownThreads {
+	{ // Then shutdown the workers
+		// Create a channel buffer with the number of messages we need to send to
+		// all the worker threads.
+		workerShutdownChannel := make(chan struct{}, len(p.shutdownWorkerThreads))
+		p.log.Debugf("shutting down %d postgresql job workers", len(p.shutdownWorkerThreads))
+
+		// Then send the shutdown channel to each consumer thread as a "promise".
+		for i := range p.shutdownWorkerThreads {
+			select {
+			case p.shutdownWorkerThreads[i] <- workerShutdownChannel:
+				continue
+			case <-timer.C:
+				return errors.New("timed out sending shutdown signal to workers")
+			}
+		}
+
+		// Then wait for all consumers to be completely shutdown
+		for i := 0; i < len(p.shutdownWorkerThreads); i++ {
+			select {
+			case <-workerShutdownChannel:
+				p.log.Trace("worker successfully drained")
+				continue
+			case <-timer.C:
+				return errors.New("timed out waiting for workers to drain")
+			}
+		}
+		close(workerShutdownChannel)
+	}
+
+	p.log.Info("postgresql job processor threads shutdown, cleaning up")
+
+	for _, channel := range p.shutdownConsumerThreads {
 		close(channel)
 	}
+	for _, channel := range p.shutdownWorkerThreads {
+		close(channel)
+	}
+	close(p.trigger)
+	close(p.dispatch)
+	close(p.availableThreads)
 
 	p.log.Info("postgres job processor shut down complete")
 
