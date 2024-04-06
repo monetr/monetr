@@ -244,14 +244,14 @@ func (p *postgresJobProcessor) Start() error {
 	p.shutdownThreads = make([]chan chan struct{}, numberOfThreads)
 	// Start the worker threads.
 	for i := 0; i < numberOfWorkers; i++ {
-		p.shutdownThreads[i] = make(chan chan struct{})
+		p.shutdownThreads[i] = make(chan chan struct{}, 1)
 		go p.worker(p.shutdownThreads[i])
 	}
 
 	// If there are any cron jobs registered then start the cron consumer.
 	if len(p.cronJobQueues) > 0 {
 		// Use number of
-		p.shutdownThreads[numberOfThreads-2] = make(chan chan struct{})
+		p.shutdownThreads[numberOfThreads-2] = make(chan chan struct{}, 1)
 		go p.cronConsumer(p.shutdownThreads[numberOfThreads-2])
 	}
 
@@ -354,11 +354,21 @@ func (p *postgresJobProcessor) Close() error {
 		p.shutdownThreads[i] <- shutdownChannel
 	}
 
+	p.log.Tracef("shutdown signal has been sent to %d worker threads, waiting for workers to be drained now", len(p.shutdownThreads))
+
+	timer := time.NewTimer(15 * time.Second)
+
 	// Then wait for the expected number of responses.
-	// TODO Add timeout
 	for i := 0; i < len(p.shutdownThreads); i++ {
-		<-shutdownChannel
+		select {
+		case <-shutdownChannel:
+			p.log.Trace("worker successfully drained")
+			continue
+		case <-timer.C:
+			return errors.New("timed out draining worker threads")
+		}
 	}
+
 	close(shutdownChannel)
 	for _, channel := range p.shutdownThreads {
 		close(channel)
