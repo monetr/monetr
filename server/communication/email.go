@@ -99,8 +99,8 @@ func (e *emailCommunicationBase) SendVerification(ctx context.Context, params Ve
 	m.Subject("Verify Your Email Address")
 	e.toAddress(m, params.FirstName, params.LastName, params.Email)
 	e.fromAddress(m)
-	m.SetBodyHTMLTemplate(html, params)
-	m.AddAlternativeTextTemplate(text, params)
+	m.SetBodyTextTemplate(text, params)
+	m.AddAlternativeHTMLTemplate(html, params)
 
 	return e.sendMessage(span.Context(), m)
 }
@@ -114,8 +114,8 @@ func (e *emailCommunicationBase) SendPasswordReset(ctx context.Context, params P
 	m.Subject("Reset Your Password")
 	e.toAddress(m, params.FirstName, params.LastName, params.Email)
 	e.fromAddress(m)
-	m.SetBodyHTMLTemplate(html, params)
-	m.AddAlternativeTextTemplate(text, params)
+	m.SetBodyTextTemplate(text, params)
+	m.AddAlternativeHTMLTemplate(html, params)
 
 	return e.sendMessage(span.Context(), m)
 }
@@ -129,8 +129,8 @@ func (e *emailCommunicationBase) SendPasswordChanged(ctx context.Context, params
 	m.Subject("Password Updated")
 	e.toAddress(m, params.FirstName, params.LastName, params.Email)
 	e.fromAddress(m)
-	m.SetBodyHTMLTemplate(html, params)
-	m.AddAlternativeTextTemplate(text, params)
+	m.SetBodyTextTemplate(text, params)
+	m.AddAlternativeHTMLTemplate(html, params)
 
 	return e.sendMessage(span.Context(), m)
 }
