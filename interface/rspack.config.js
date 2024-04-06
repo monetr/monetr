@@ -100,7 +100,7 @@ module.exports = (env, _argv) => {
         '@monetr/interface': path.resolve(__dirname, 'src'),
       },
     },
-    devtool: isDevelopment ? 'inline-source-map' : 'hidden-source-map',
+    devtool: isDevelopment ? 'inline-source-map' : 'source-map',
     devServer: {
       allowedHosts: 'all',
       static: {

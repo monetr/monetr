@@ -53,6 +53,13 @@ jobs:
         run: |
           make monetr
 
+      - uses: actions/upload-artifact@v3
+        name: Upload UI As Artifact
+        with:
+          name: '${{ github.sha }}-maps'
+          path: '${{ github.workspace }}/server/ui/static'
+          retention-days: 7
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -251,6 +258,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: actions/download-artifact@v3
+        name: Download UI As Artifact
+        with:
+          name: '${{ github.sha }}-maps'
+          path: '${{ github.workspace }}/server/ui/static'
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
         env:
@@ -260,7 +272,7 @@ jobs:
         with:
           environment: 'my.monetr.dev'
           version: 'v${{ needs.docker.outputs.post-tag }}'
-          # sourcemaps: './build/source_maps'
+          sourcemaps: 'server/ui/static/assets/scripts'
           url_prefix: 'https://my.monetr.dev'
       - name: Trigger Deployment
         run: |
