@@ -58,13 +58,14 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 	c.registerIndexRenderer(app)
 
 	app.GET("/*", func(ctx echo.Context) error {
-		ctx.Response().Header().Set("X-Frame-Options", "DENY")
-		ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
-		ctx.Response().Header().Set("Referrer-Policy", "same-origin")
-		c.ApplyContentSecurityPolicy(ctx)
-		c.ApplyPermissionsPolicy(ctx)
-
 		requestedPath := ctx.Request().URL.Path
+
+		// If they request `/index.html` simply redirect them to `/`.
+		if requestedPath == indexFile {
+			url := ctx.Request().URL.String()
+			url = strings.TrimSuffix(url, requestedPath)
+			return ctx.Redirect(http.StatusPermanentRedirect, url)
+		}
 
 		log := c.log.WithFields(logrus.Fields{
 			"path":            requestedPath,
@@ -76,7 +77,16 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 		switch c.fixFilesystemError(err) {
 		case fs.ErrNotExist, fs.ErrInvalid:
 			log = log.WithField("resolvedToIndex", true)
+
+			// Only apply these headers and content security permissions to the
+			// index.html return result.
 			ctx.Response().Header().Set("Cache-Control", "no-cache")
+			ctx.Response().Header().Set("X-Frame-Options", "DENY")
+			ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
+			ctx.Response().Header().Set("Referrer-Policy", "same-origin")
+			c.ApplyContentSecurityPolicy(ctx)
+			c.ApplyPermissionsPolicy(ctx)
+
 			log.WithField("contentType", "text/html").Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
 			return ctx.Render(http.StatusOK, indexFile, indexParams{
 				SentryDSN: c.configuration.Sentry.ExternalDSN,
