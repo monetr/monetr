@@ -75,6 +75,8 @@ monetr-release:
 
 release: monetr-release
 
+interface: $(CMAKE_CONFIGURATION_DIRECTORY)
+	cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t build.interface $(BUILD_ARGS)
 
 .PHONY: docs
 docs: | $(CMAKE_CONFIGURATION_DIRECTORY)

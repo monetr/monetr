@@ -32,77 +32,44 @@ jobs:
           version-file: version.txt
           bump-patch-for-minor-pre-major: true
 
-  # build_ui:
-  #   if: ${{ needs.release_please.outputs.release_created }}
-  #   needs:
-  #     - release_please
-  #   name: Build UI
-  #   runs-on: ubuntu-latest
-  #   container: ghcr.io/monetr/build-containers/node:18.10.0-buster
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           ${{ github.workspace }}/node_modules
-  #         key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-  #     - name: Build
-  #       run: |
-  #         echo "${{ needs.release_please.outputs.version }}"
-  #         make ui-dependencies
-  #         RELEASE_VERSION=v${{ needs.release_please.outputs.version }} make build-ui
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: '${{ needs.release_please.outputs.version }}-ui'
-  #         path: '${{ github.workspace }}/pkg/ui/static/'
-  #         retention-days: 1
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: '${{ needs.release_please.outputs.version }}-source-maps'
-  #         path: '${{ github.workspace }}/build/source_maps'
-  #         retention-days: 1
-  #
-  # build_notice:
-  #   if: ${{ needs.release_please.outputs.release_created }}
-  #   needs:
-  #     - release_please
-  #   name: Build Third Party Notice
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           ~/.cache/go-build
-  #           ~/go/pkg/mod
-  #           ${{ github.workspace }}/vendor
-  #         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-  #           ${{ runner.os }}-go-
-  #     - uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           ${{ github.workspace }}/node_modules
-  #         key: ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-ui-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
-  #     - name: Set up QEMU
-  #       uses: docker/setup-qemu-action@v1
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v1
-  #     - name: Build Third Party Notice
-  #       run: |
-  #         npm install -g pnpm
-  #         make notice
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: '${{ needs.release_please.outputs.version }}-notice'
-  #         path: '${{ github.workspace }}/pkg/build/NOTICE.md'
-  #         retention-days: 7
-  #
+  build_ui:
+    name: Build UI
+    if: ${{ needs.release_please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: go-cache-paths
+        name: Install pnpm and configure cache
+        run: |
+          npm install -g pnpm
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fix dumb git issue
+        run: |
+          git config --global --add safe.directory ${PWD}
+
+      - name: pnpm Cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-pnpm-store
+
+      - name: Build Interface
+        run: |
+          make interface RELEASE=${{ needs.release_please.outputs.version }}
+
+      - uses: actions/upload-artifact@v3
+        name: Upload UI As Artifact
+        with:
+          name: '${{ needs.release_please.outputs.version }}-maps'
+          path: '${{ github.workspace }}/server/ui/static'
+          retention-days: 7
+
   # build_binary:
   #   if: ${{ needs.release_please.outputs.release_created }}
   #   needs:
@@ -238,6 +205,7 @@ jobs:
     needs:
       - "release_please"
       - "docker"
+      - "build_ui"
     name: Deploy my.monetr.app
     runs-on: ubuntu-latest
     steps:
@@ -251,11 +219,11 @@ jobs:
           environment: my.monetr.app
           ref: "v${{ needs.release_please.outputs.version }}"
       - uses: actions/checkout@v3
-      # - uses: actions/download-artifact@v3
-      #   name: Download Compiled UI Artifacts
-      #   with:
-      #     name: '${{ needs.release_please.outputs.version }}-source-maps'
-      #     path: '${{ github.workspace }}/build/source_maps'
+      - uses: actions/download-artifact@v3
+        name: Download UI As Artifact
+        with:
+          name: '${{ needs.release_please.outputs.version }}-maps'
+          path: '${{ github.workspace }}/server/ui/static'
       - name: Create Sentry Release
         uses: getsentry/action-release@v1
         env:
@@ -265,7 +233,7 @@ jobs:
         with:
           environment: 'my.monetr.app'
           version: 'v${{ needs.release_please.outputs.version }}'
-          # sourcemaps: './build/source_maps'
+          sourcemaps: 'server/ui/static/assets/scripts'
           url_prefix: 'https://my.monetr.app'
       - name: Trigger Deployment
         run: |
