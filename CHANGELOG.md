@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.16.7](https://github.com/monetr/monetr/compare/v0.16.6...v0.16.7) (2024-04-06)
+
+
+### Features
+
+* **api:** Change order of email content parts. ([e819d01](https://github.com/monetr/monetr/commit/e819d01fb5fdca542f98b9b3726e961bf68a3c9c))
+
+
+### Bug Fixes
+
+* **background:** Fixed timeouts in background tests ([bd9aac1](https://github.com/monetr/monetr/commit/bd9aac1073765f573d69db8481a9bbd441eca7ee))
+* **background:** Improve background processing ([2f5a4f2](https://github.com/monetr/monetr/commit/2f5a4f257ba33b7ec5a0a51d2a220763a0e33c29))
+* **csp:** Fixing content security policy headers. ([8da1314](https://github.com/monetr/monetr/commit/8da131417600e88a7f7196f218c2ca7c169651af))
+* **ui:** Fix crash loading transaction details page. ([8d281af](https://github.com/monetr/monetr/commit/8d281af37985aba9e60948d78cc0549976134a24))
+* **ui:** Fix Sentry DSN for local dev. ([bca73a1](https://github.com/monetr/monetr/commit/bca73a1889675bbcaaad7271d91cfca890f00b4d))
+
+
+### Miscellaneous
+
+* **email:** Experimenting with email images. ([fb4d8f0](https://github.com/monetr/monetr/commit/fb4d8f043a3df610dd7ce6fa1b2cb32910d44d5e))
+* **ui:** Improve UI routes. ([11e1f6e](https://github.com/monetr/monetr/commit/11e1f6e1d3e76062756496995523452dc39b756b))
+
 ## [0.16.6](https://github.com/monetr/monetr/compare/v0.16.5...v0.16.6) (2024-04-06)
 
 
