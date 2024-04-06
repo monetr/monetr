@@ -175,8 +175,8 @@ func (s *SyncPlaidHandler) EnqueueTriggeredJob(ctx context.Context, enqueuer Job
 		Join(`INNER JOIN "plaid_links" AS "plaid_link"`).
 		JoinOn(`"plaid_link"."plaid_link_id" = "link"."plaid_link_id"`).
 		Where(`"plaid_link"."status" = ?`, models.PlaidLinkStatusSetup).
+		Where(`"plaid_link"."last_attempted_update" < ?`, cutoff).
 		Where(`"link"."link_type" = ?`, models.PlaidLinkType).
-		Where(`"link"."last_attempted_update" < ?`, cutoff).
 		Where(`"link"."deleted_at" IS NULL`).
 		Select(&links)
 	if err != nil {

@@ -3,16 +3,17 @@
 package ui
 
 import (
-	"errors"
 	"fmt"
+	"html/template"
+	"io"
 	"io/fs"
-	"io/ioutil"
 	"net/http"
 	"path"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,7 +32,31 @@ func (c *UIController) fixFilesystemError(err error) error {
 	}
 }
 
+func (c *UIController) registerIndexRenderer(app *echo.Echo) {
+	index, err := c.filesystem.Open(indexFile)
+	if err != nil {
+		panic(fmt.Sprintf("failed to read index.html file: %+v", err))
+	}
+
+	indexData, err := io.ReadAll(index)
+	if err != nil {
+		panic(fmt.Sprintf("failed to read contents of index.html file: %+v", err))
+	}
+
+	indexTemplate := template.New(indexFile)
+	indexTemplate, err = indexTemplate.Parse(string(indexData))
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse index.html template: %+v", err))
+	}
+
+	app.Renderer = &indexRenderer{
+		index: indexTemplate,
+	}
+}
+
 func (c *UIController) RegisterRoutes(app *echo.Echo) {
+	c.registerIndexRenderer(app)
+
 	app.GET("/*", func(ctx echo.Context) error {
 		ctx.Response().Header().Set("X-Frame-Options", "DENY")
 		ctx.Response().Header().Set("X-Content-Type-Options", "nosniff")
@@ -47,17 +72,15 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 			"resolvedToIndex": false,
 		})
 
-		resolvedToIndex := false
 		content, err := c.filesystem.Open(requestedPath)
 		switch c.fixFilesystemError(err) {
 		case fs.ErrNotExist, fs.ErrInvalid:
-			content, err = c.filesystem.Open(indexFile)
-			resolvedToIndex = true
 			log = log.WithField("resolvedToIndex", true)
 			ctx.Response().Header().Set("Cache-Control", "no-cache")
-			if err != nil {
-				panic("could not find index file")
-			}
+			log.WithField("contentType", "text/html").Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
+			return ctx.Render(http.StatusOK, indexFile, indexParams{
+				SentryDSN: c.configuration.Sentry.ExternalDSN,
+			})
 		case nil:
 			if c.configuration.Server.UICacheHours > 0 {
 				cacheExpiration := time.Now().
@@ -72,15 +95,10 @@ func (c *UIController) RegisterRoutes(app *echo.Echo) {
 			return ctx.NoContent(http.StatusInternalServerError)
 		}
 
-		data, err := ioutil.ReadAll(content)
+		data, err := io.ReadAll(content)
 		if err != nil {
 			log.WithError(err).Error("failed to read content from embedded file")
 			return ctx.NoContent(http.StatusInternalServerError)
-		}
-
-		if resolvedToIndex {
-			log.WithField("contentType", "text/html").Tracef("%s %s", ctx.Request().Method, ctx.Request().URL.Path)
-			return ctx.HTMLBlob(http.StatusOK, data)
 		}
 
 		contentType := "text/plain"

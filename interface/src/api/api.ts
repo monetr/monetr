@@ -4,6 +4,9 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 declare global {
   interface Window {
     API: AxiosInterface;
+    __MONETR__: {
+      SENTRY_DSN: string | null;
+    }
   }
 }
 

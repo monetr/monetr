@@ -2,8 +2,6 @@ version: '3.9'
 services:
   postgres:
     image: postgres:14
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: superSecretPasswordPleaseChangeMe
       POSTGRES_USER: postgres
@@ -69,6 +67,8 @@ services:
       MONETR_PLAID_CLIENT_ID: ${MONETR_PLAID_CLIENT_ID}
       MONETR_PLAID_CLIENT_SECRET: ${MONETR_PLAID_CLIENT_SECRET}
       MONETR_PLAID_ENVIRONMENT: ${MONETR_PLAID_ENVIRONMENT}
+      MONETR_SENTRY_DSN: ${MONETR_SENTRY_DSN}
+      MONETR_SENTRY_EXTERNAL_DSN: ${MONETR_SENTRY_EXTERNAL_DSN:-${MONETR_SENTRY_DSN}}
       MONETR_JWT_LOGIN_SECRET: "pleaseAlsoChangeMe"
 
 volumes:
