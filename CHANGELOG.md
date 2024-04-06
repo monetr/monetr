@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.16.6](https://github.com/monetr/monetr/compare/v0.16.5...v0.16.6) (2024-04-06)
+
+
+### Features
+
+* **ui:** Better support runtime UI configurations. ([d92a721](https://github.com/monetr/monetr/commit/d92a7213fe80d7136671bf2305144da7c3dbd002))
+
+
+### Bug Fixes
+
+* **build:** Also include source maps for production builds. ([fb8920a](https://github.com/monetr/monetr/commit/fb8920ad0a9090f20c7890b202c1a38b3a5ec19c))
+* **test:** Fixed failing test due to tags ([aaf3cec](https://github.com/monetr/monetr/commit/aaf3cecce795a00df93a8cc96d9371b96073a320))
+
+
+### Miscellaneous
+
+* **build:** Improving sentry integration ([35ef431](https://github.com/monetr/monetr/commit/35ef431754daf33394c8b3fa029a3db689f77b87))
+* **ci:** Fix dependency in release pipeline ([a6126a9](https://github.com/monetr/monetr/commit/a6126a9a9014f99cc897cc0b5f2bb42f963d7946))
+
 ## [0.16.5](https://github.com/monetr/monetr/compare/v0.16.4...v0.16.5) (2024-04-05)
 
 
