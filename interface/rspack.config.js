@@ -67,7 +67,9 @@ module.exports = (env, _argv) => {
           filename: 'index.html',
           favicon: 'public/favicon.ico',
           templateParameters: {
-            appMountId: 'app',
+            // When we are doing local dev then don't use anything, maybe use an env var in the future but thats it. But
+            // for a production build add the go template string in so that the server can provide the DSN.
+            SENTRY_DSN: isDevelopment ? '' : '{{ .SentryDSN }}',
           },
         },
       ],
