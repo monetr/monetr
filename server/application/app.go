@@ -2,6 +2,7 @@ package application
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	sentryecho "github.com/getsentry/sentry-go/echo"
@@ -45,6 +46,20 @@ func NewApp(configuration config.Configuration, controllers ...Controller) *echo
 		MaxAge:           0,
 		AllowCredentials: true,
 	}))
+
+	app.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			if err := next(ctx); err != nil {
+				return err
+			}
+
+			ctx.Response().Header().Add(
+				echo.HeaderContentLength,
+				strconv.FormatInt(ctx.Response().Size, 10),
+			)
+			return nil
+		}
+	})
 
 	for _, controller := range controllers {
 		controller.RegisterRoutes(app)
