@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.8](https://github.com/monetr/monetr/compare/v0.16.7...v0.16.8) (2024-04-07)
+
+
+### Bug Fixes
+
+* **ui:** Trying to get content length working on assets ([20290a3](https://github.com/monetr/monetr/commit/20290a31c4ef2e02a2ad6424aed2ef0ae417f965))
+
 ## [0.16.7](https://github.com/monetr/monetr/compare/v0.16.6...v0.16.7) (2024-04-06)
 
 
