@@ -62,7 +62,7 @@ export default defineConfig(({ envMode }) => {
       },
       targets: ['web'],
       assetPrefix: '/',
-      cleanDistPath: true,
+      cleanDistPath: false,
       distPath: {
         root: '../server/ui/static',
         js: 'assets/scripts',
