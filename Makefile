@@ -59,6 +59,7 @@ clean:
 	-cmake --build $(CMAKE_CONFIGURATION_DIRECTORY) -t clean $(BUILD_ARGS)
 	-cmake -E remove_directory $(CMAKE_CONFIGURATION_DIRECTORY) $(BUILD_ARGS)
 	-git clean -f -X server/ui/static
+	-git clean -f -X server/internal/source/embed
 	-git submodule deinit -f server/icons/sources/simple-icons
 	-git submodule deinit -f server/legal/data/legal
 
