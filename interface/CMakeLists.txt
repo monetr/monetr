@@ -41,7 +41,9 @@ add_custom_command(
   # in the output directory.
   COMMAND ${GIT_EXECUTABLE} clean -f -X ${UI_DIST_DIR}
   # Once the output directory is clean, then actually build the user interface.
-  COMMAND ${RSPACK_EXECUTABLE} build --mode production
+  COMMAND ${RSBUILD_EXECUTABLE} build --env-mode production
+  # Cursed cleanup command because rsbuild was copying this file from fucking narnia
+  COMMAND ${CMAKE_COMMAND} -E rm ${UI_DIST_DIR}/mockServiceWorker.js
   COMMENT "Building monetr's user interface"
   WORKING_DIRECTORY ${UI_SRC_DIR}
   DEPENDS

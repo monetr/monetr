@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "rspack build",
-    "start": "MONETR_ENV=${MONETR_ENV:=local} rspack serve --mode development",
+    "build": "rsbuild build",
+    "start": "MONETR_ENV=${MONETR_ENV:=local} rsbuild dev --env-mode development",
     "test": "jest --config=jest.config.ts",
-    "coverage": "jest --config=jest.config.ts --coverage --coverageDirectory=./reports"
+    "coverage": "jest --config=jest.config.ts --coverage --coverageDirectory=./reports",
+    "doctor": "RSDOCTOR=true rsbuild build"
   },
   "browserslist": {
     "production": [
@@ -43,7 +44,6 @@
     "date-fns": "2.30.0",
     "formik": "2.4.5",
     "input-otp": "1.2.3",
-    "lodash": "4.17.21",
     "lucide-react": "0.363.0",
     "notistack": "3.0.1",
     "path-to-regexp": "6.2.1",
@@ -67,9 +67,11 @@
     "zustand": "4.1.4"
   },
   "devDependencies": {
-    "@rspack/binding-linux-arm64-gnu": "0.3.6",
-    "@rspack/binding-linux-x64-gnu": "0.3.6",
-    "@rspack/cli": "0.3.6",
+    "@rsbuild/core": "0.5.9",
+    "@rsbuild/plugin-react": "0.5.9",
+    "@rsdoctor/rspack-plugin": "0.1.9",
+    "@rspack/binding-linux-arm64-gnu": "0.5.9",
+    "@rspack/binding-linux-x64-gnu": "0.5.9",
     "@swc/core": "1.3.95",
     "@swc/jest": "0.2.29",
     "@testing-library/jest-dom": "5.16.5",
