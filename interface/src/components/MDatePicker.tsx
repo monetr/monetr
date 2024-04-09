@@ -54,7 +54,7 @@ export default function MDatePicker(props: MDatePickerProps): JSX.Element {
     enableClear = false,
     disabled,
     className,
-    enableYearNavigation = false,
+    enableYearNavigation = true,
   } = props;
 
   const [selectedValue, setSelectedValue] = useState<Date | null>(value);

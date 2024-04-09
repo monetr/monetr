@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import React from 'react';
 import { DayPicker, DayPickerRangeProps, DayPickerSingleProps, useNavigation } from 'react-day-picker';
-import { ArrowLeftOutlined, ArrowRightOutlined, ChevronLeft, ChevronRight } from '@mui/icons-material';
+import { ArrowLeftOutlined, ArrowRightOutlined, ChevronLeft, ChevronRight, FirstPage, LastPage } from '@mui/icons-material';
 import { addYears, format } from 'date-fns';
 
 import { MBaseButton } from './MButton';
@@ -64,9 +64,10 @@ export default function MCalendar<T extends DayPickerSingleProps | DayPickerRang
               <div className='flex items-center space-x-1'>
                 {enableYearNavigation && (
                   <MBaseButton
+                    variant='text'
                     onClick={ () => currentMonth && goToMonth(addYears(currentMonth, -1)) }
                   >
-                    Left Year
+                    <FirstPage className='text-lg' />
                   </MBaseButton>
                 )}
                 <MBaseButton
@@ -77,7 +78,7 @@ export default function MCalendar<T extends DayPickerSingleProps | DayPickerRang
                 </MBaseButton>
               </div>
 
-              <MSpan>
+              <MSpan className='mx-1'>
                 {format(props.displayMonth, 'LLLL yyy', { locale })}
               </MSpan>
 
@@ -90,9 +91,10 @@ export default function MCalendar<T extends DayPickerSingleProps | DayPickerRang
                 </MBaseButton>
                 {enableYearNavigation && (
                   <MBaseButton
+                    variant='text'
                     onClick={ () => currentMonth && goToMonth(addYears(currentMonth, 1)) }
                   >
-                    Right Year
+                    <LastPage className='text-lg' />
                   </MBaseButton>
                 )}
               </div>
