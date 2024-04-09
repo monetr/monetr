@@ -197,7 +197,7 @@ func urlParamIntDefault(ctx echo.Context, param string, defaultValue int) int {
 	if value == "" {
 		return defaultValue
 	}
-	parsed, err := strconv.ParseInt(value, 10, 64)
+	parsed, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
 		return defaultValue
 	}
