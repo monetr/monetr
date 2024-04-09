@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.16.9](https://github.com/monetr/monetr/compare/v0.16.8...v0.16.9) (2024-04-09)
+
+
+### Features
+
+* **ui:** Migrate to rsbuild from rspack ([19de4f0](https://github.com/monetr/monetr/commit/19de4f067461d907e34116bb5ef31edac1c9b249))
+
+
+### Bug Fixes
+
+* **local:** Fixed ui container local dev health check ([f33d286](https://github.com/monetr/monetr/commit/f33d286f49b41f0a41a10e9476caaf73d5ca629b))
+* **ui:** Allow year selection ([82eb89b](https://github.com/monetr/monetr/commit/82eb89bf9b254dbc8ac16aaa6a47dda6eace5df2)), closes [#1700](https://github.com/monetr/monetr/issues/1700)
+* **ui:** Fixed pagination parsing ([01516e3](https://github.com/monetr/monetr/commit/01516e323ebbffffa9e0454489cfdda21e489e65))
+
+
+### Miscellaneous
+
+* **ui:** Fix readme being removed by rsbuild ([22562cd](https://github.com/monetr/monetr/commit/22562cd8768d3b6f181901325eaf8820f15354c8))
+
 ## [0.16.8](https://github.com/monetr/monetr/compare/v0.16.7...v0.16.8) (2024-04-07)
 
 
