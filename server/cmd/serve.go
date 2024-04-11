@@ -18,6 +18,7 @@ import (
 	"github.com/monetr/monetr/server/cache"
 	"github.com/monetr/monetr/server/communication"
 	"github.com/monetr/monetr/server/config"
+	"github.com/monetr/monetr/server/internal/source"
 	"github.com/monetr/monetr/server/logging"
 	"github.com/monetr/monetr/server/metrics"
 	"github.com/monetr/monetr/server/platypus"
@@ -105,6 +106,10 @@ func RunServer() error {
 			SampleRate:       configuration.Sentry.SampleRate,
 			EnableTracing:    configuration.Sentry.TraceSampleRate > 0,
 			TracesSampleRate: configuration.Sentry.TraceSampleRate,
+			Integrations: func(i []sentry.Integration) []sentry.Integration {
+				// Add our own contextify frames integration
+				return append(i, new(source.ContextifyFramesIntegration))
+			},
 			BeforeSend: func(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 				// Make sure user authentication doesn't make its way into sentry.
 				if event.Request != nil {
