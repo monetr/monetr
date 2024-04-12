@@ -82,6 +82,7 @@ add_custom_command(
     build.interface
     build.email
     download.legal
+    sourcemaps.golang
 )
 
 if(BUILD_SIMPLE_ICONS)

@@ -144,7 +144,7 @@ func (g *GoCraftWorkJobProcessor) RegisterJob(ctx context.Context, handler JobHa
 		// We want to have sentry tracking jobs as they are being processed. In order to do this we need to inject a
 		// sentry hub into the context and create a new span using that context.
 		highContext := sentry.SetHubOnContext(context.Background(), sentry.CurrentHub().Clone())
-		span := sentry.StartSpan(highContext, "topic.process", sentry.TransactionName(handler.QueueName()))
+		span := sentry.StartSpan(highContext, "topic.process", sentry.WithTransactionName(handler.QueueName()))
 		span.Description = handler.QueueName()
 		jobLog := log.WithContext(span.Context())
 		hub := sentry.GetHubFromContext(span.Context())
@@ -206,7 +206,7 @@ func (g *GoCraftWorkJobProcessor) RegisterJob(ctx context.Context, handler JobHa
 				span := sentry.StartSpan(
 					context.Background(),
 					"topic.process",
-					sentry.TransactionName(schedulerName),
+					sentry.WithTransactionName(schedulerName),
 				)
 				defer span.Finish()
 				return scheduledJob.EnqueueTriggeredJob(span.Context(), g.enqueuer)
