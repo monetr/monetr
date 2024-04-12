@@ -31,8 +31,8 @@ func (c *Controller) getForecast(ctx echo.Context) error {
 	if endDate.Before(now) {
 		return c.badRequest(ctx, "invalid end time provided, end time must be in the future")
 	}
-	if endDate.After(now.AddDate(0, 3, 0)) {
-		return c.badRequest(ctx, "you are not allowed for forecast more than 3 months into the future")
+	if endDate.After(now.AddDate(0, 12, 0)) {
+		return c.badRequest(ctx, "you are not allowed for forecast more than 12 months into the future")
 	}
 
 	bankAccountId, err := strconv.ParseUint(ctx.Param("bankAccountId"), 10, 64)
