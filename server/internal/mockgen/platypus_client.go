@@ -71,6 +71,20 @@ func (mr *MockClientMockRecorder) GetAllTransactions(ctx, start, end, accountIds
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllTransactions", reflect.TypeOf((*MockClient)(nil).GetAllTransactions), ctx, start, end, accountIds)
 }
 
+// RefeshTransactions mocks base method.
+func (m *MockClient) RefeshTransactions(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RefeshTransactions", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RefeshTransactions indicates an expected call of RefeshTransactions.
+func (mr *MockClientMockRecorder) RefeshTransactions(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefeshTransactions", reflect.TypeOf((*MockClient)(nil).RefeshTransactions), ctx)
+}
+
 // RemoveItem mocks base method.
 func (m *MockClient) RemoveItem(ctx context.Context) error {
 	m.ctrl.T.Helper()
