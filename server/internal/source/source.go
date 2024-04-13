@@ -3,6 +3,7 @@ package source
 import (
 	"embed"
 	"fmt"
+	"path"
 	"runtime"
 	"strings"
 )
@@ -21,7 +22,7 @@ func init() {
 	}
 }
 
-func transformFileName(path string) string {
-	newPath := strings.TrimPrefix(path, basePath)
-	return fmt.Sprintf("/embed/%s.txt", newPath)
+func transformFileName(filePath string) string {
+	newPath := strings.TrimPrefix(filePath, basePath)
+	return fmt.Sprintf("%s.txt", path.Join("/embed/", newPath))
 }
