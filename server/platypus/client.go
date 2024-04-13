@@ -27,6 +27,8 @@ type (
 		RemoveItem(ctx context.Context) error
 		// Sync takes a cursor (or lack of one) and retrieves transaction data from Plaid that is newer than that cursor.
 		Sync(ctx context.Context, cursor *string) (*SyncResult, error)
+
+		RefeshTransactions(ctx context.Context) error
 	}
 )
 
@@ -314,6 +316,40 @@ func (p *PlaidClient) RemoveItem(ctx context.Context) error {
 		"failed to remove Plaid item",
 	); err != nil {
 		log.WithError(err).Errorf("failed to remove Plaid item")
+		return err
+	}
+
+	return nil
+}
+
+func (p *PlaidClient) RefeshTransactions(ctx context.Context) error {
+	span := sentry.StartSpan(ctx, "http.client")
+	defer span.Finish()
+	span.Description = "Plaid - ForceRefresh"
+
+	span.SetTag("itemId", p.itemId)
+
+	log := p.getLog(span)
+
+	log.Trace("force refreshing transactions for item")
+
+	request := p.client.PlaidApi.
+		TransactionsRefresh(span.Context()).
+		TransactionsRefreshRequest(plaid.TransactionsRefreshRequest{
+			AccessToken: p.accessToken,
+		})
+
+	// Send the request.
+	_, response, err := request.Execute()
+	// And handle the response.
+	if err = after(
+		span,
+		response,
+		err,
+		"Triggering transaction refresh for Plaid item",
+		"failed to trigger transaction refresh for Plaid item",
+	); err != nil {
+		log.WithError(err).Errorf("failed to trigger transaction refresh for Plaid item")
 		return err
 	}
 
