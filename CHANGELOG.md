@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.16.10](https://github.com/monetr/monetr/compare/v0.16.9...v0.16.10) (2024-04-13)
+
+
+### Features
+
+* **api:** Allow more data to be requested via forecast endpoint. ([84a7984](https://github.com/monetr/monetr/commit/84a79845eecf0c906a6e78ade2ac111a92fb38d4))
+* **api:** Building out a sourcemap system for sentry ([#1736](https://github.com/monetr/monetr/issues/1736)) ([807e455](https://github.com/monetr/monetr/commit/807e4557962d1d6b9f90e1396497eaf3b203a7b5))
+* **cli:** Adding CLI tool to trigger transaction refresh. ([8d6d757](https://github.com/monetr/monetr/commit/8d6d75742c178a909944c86f832cf9320f01f735))
+
+
+### Bug Fixes
+
+* **api:** fixed some api source mapping issue ([34aca84](https://github.com/monetr/monetr/commit/34aca84ac33c818eba2cd017287a6b942387063a))
+* **build:** Fix generated mocks ([cb7da55](https://github.com/monetr/monetr/commit/cb7da550923f97b65ffe9a730f1dde8f4788ec59))
+
 ## [0.16.9](https://github.com/monetr/monetr/compare/v0.16.8...v0.16.9) (2024-04-09)
 
 
