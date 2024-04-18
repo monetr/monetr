@@ -19,7 +19,7 @@ func (c *Controller) getForecast(ctx echo.Context) error {
 	end := ctx.QueryParam("end")
 	if strings.TrimSpace(end) == "" {
 		log.Trace("no end date specified for forecast, will default to 31 days")
-		endDate = now.AddDate(0, 0, 31).UTC()
+		endDate = now.AddDate(0, 0, 90).UTC()
 	} else {
 		var err error
 		endDate, err = time.Parse(time.RFC3339, end)
