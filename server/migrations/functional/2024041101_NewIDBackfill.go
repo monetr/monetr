@@ -33,8 +33,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.LoginKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -51,8 +53,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.AccountKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -69,8 +73,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.UserKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -87,8 +93,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.LinkKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -105,8 +113,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.SecretKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -123,8 +133,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.BankAccountKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -141,8 +153,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.TransactionKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -159,8 +173,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.TransactionClusterKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -177,8 +193,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.SpendingKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -195,8 +213,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.FundingSchedulekind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -213,8 +233,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.FileKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -231,8 +253,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.JobKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -249,8 +273,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.PlaidLinkKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -267,8 +293,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.PlaidSyncKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -285,8 +313,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.PlaidBankAccountKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -303,8 +333,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.PlaidTransactionKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -321,8 +353,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.TellerLinkKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -339,8 +373,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.TellerBankAccountKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
@@ -357,17 +393,19 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.TellerSyncKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
 			{ // Teller Tranasactions
 				var rows []struct {
-					tableName string `pg:"teller_transacations"`
+					tableName string `pg:"teller_transactions"`
 
-					IdOld uint64        `pg:"teller_transacation_id,pk"`
-					IdNew identifier.ID `pg:"teller_transacation_id_new"`
+					IdOld uint64        `pg:"teller_transaction_id,pk"`
+					IdNew identifier.ID `pg:"teller_transaction_id_new"`
 				}
 				if err := db.Model(&rows).Select(&rows); err != nil {
 					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
@@ -375,8 +413,10 @@ func init() {
 				for i := range rows {
 					rows[i].IdNew = identifier.New(identifier.TellerTransactionKind)
 				}
-				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
-					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				if len(rows) > 0 {
+					if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+						return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+					}
 				}
 			}
 
