@@ -85,14 +85,14 @@ func init() {
 					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
 				}
 				for i := range rows {
-					rows[i].IdNew = identifier.New(identifier.UserKind)
+					rows[i].IdNew = identifier.New(identifier.LinkKind)
 				}
 				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
 					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
 				}
 			}
 
-			{ // Links
+			{ // Secrets
 				var rows []struct {
 					tableName string `pg:"secrets"`
 
@@ -103,7 +103,97 @@ func init() {
 					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
 				}
 				for i := range rows {
-					rows[i].IdNew = identifier.New(identifier.UserKind)
+					rows[i].IdNew = identifier.New(identifier.SecretKind)
+				}
+				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+			}
+
+			{ // Bank Accounts
+				var rows []struct {
+					tableName string `pg:"bank_accounts"`
+
+					IdOld uint64        `pg:"bank_account_id,pk"`
+					IdNew identifier.ID `pg:"bank_account_id_new"`
+				}
+				if err := db.Model(&rows).Select(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+				for i := range rows {
+					rows[i].IdNew = identifier.New(identifier.BankAccountKind)
+				}
+				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+			}
+
+			{ // Transactions
+				var rows []struct {
+					tableName string `pg:"transactions"`
+
+					IdOld uint64        `pg:"transaction_id,pk"`
+					IdNew identifier.ID `pg:"transaction_id_new"`
+				}
+				if err := db.Model(&rows).Select(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+				for i := range rows {
+					rows[i].IdNew = identifier.New(identifier.TransactionKind)
+				}
+				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+			}
+
+			{ // Spending
+				var rows []struct {
+					tableName string `pg:"spending"`
+
+					IdOld uint64        `pg:"spending_id,pk"`
+					IdNew identifier.ID `pg:"spending_id_new"`
+				}
+				if err := db.Model(&rows).Select(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+				for i := range rows {
+					rows[i].IdNew = identifier.New(identifier.SpendingKind)
+				}
+				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+			}
+
+			{ // Funding Schedules
+				var rows []struct {
+					tableName string `pg:"funding_schedules"`
+
+					IdOld uint64        `pg:"funding_schedule_id,pk"`
+					IdNew identifier.ID `pg:"funding_schedule_id_new"`
+				}
+				if err := db.Model(&rows).Select(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+				for i := range rows {
+					rows[i].IdNew = identifier.New(identifier.FundingSchedulekind)
+				}
+				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+			}
+
+			{ // Plaid Links
+				var rows []struct {
+					tableName string `pg:"plaid_links"`
+
+					IdOld uint64        `pg:"plaid_link_id,pk"`
+					IdNew identifier.ID `pg:"plaid_link_id_new"`
+				}
+				if err := db.Model(&rows).Select(&rows); err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to query %s", db.Model(&rows).TableModel().Table().SQLName))
+				}
+				for i := range rows {
+					rows[i].IdNew = identifier.New(identifier.PlaidLinkKind)
 				}
 				if _, err := db.Model(&rows).WherePK().Update(&rows); err != nil {
 					return errors.Wrap(err, fmt.Sprintf("failed to update %s", db.Model(&rows).TableModel().Table().SQLName))
