@@ -5,7 +5,7 @@ import { KeyboardArrowRight } from '@mui/icons-material';
 
 import TransactionMerchantIcon from './TransactionMerchantIcon';
 import MSelectSpendingTransaction from '@monetr/interface/components/MSelectSpendingTransaction';
-import { useSpending } from '@monetr/interface/hooks/spending';
+import { useSpendingOld } from '@monetr/interface/hooks/spending';
 import { useAuthentication } from '@monetr/interface/hooks/useAuthentication';
 import Transaction from '@monetr/interface/models/Transaction';
 import mergeTailwind from '@monetr/interface/util/mergeTailwind';
@@ -16,7 +16,7 @@ export interface TransactionItemProps {
 
 export default function TransactionItem({ transaction }: TransactionItemProps): JSX.Element {
   const user = useAuthentication();
-  const spending = useSpending(transaction.spendingId);
+  const spending = useSpendingOld(transaction.spendingId);
   const navigate = useNavigate();
 
   const amountClassnames = mergeTailwind(

@@ -9,13 +9,12 @@ export type SpendingResult =
   { result: Array<Spending> }
   & UseQueryResult<Array<Partial<Spending>>>;
 
-export function useSpendingSink(enabled: boolean = true): SpendingResult {
+export function useSpendingSink(): SpendingResult {
   const selectedBankAccountId = useSelectedBankAccountId();
-  console.warn('enabled', enabled);
   const result = useQuery<Array<Partial<Spending>>>(
     [`/bank_accounts/${ selectedBankAccountId }/spending`],
     {
-      enabled: !!selectedBankAccountId && enabled,
+      enabled: !!selectedBankAccountId,
     },
   );
   return {
@@ -29,7 +28,7 @@ export function useSpending(spendingId: number | null): UseQueryResult<Spending>
   return useQuery<Partial<Spending>, unknown, Spending>(
     [`/bank_accounts/${ selectedBankAccountId }/spending/${spendingId}`],
     {
-      enabled: !!selectedBankAccountId && !!spendingId,
+      enabled: !!selectedBankAccountId,
       select: data => new Spending(data),
     },
   );

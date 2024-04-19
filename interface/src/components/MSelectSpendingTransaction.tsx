@@ -5,7 +5,7 @@ import { PriceCheckOutlined, SavingsOutlined } from '@mui/icons-material';
 import MBadge from './MBadge';
 import MSpan from './MSpan';
 import { useCurrentBalance } from '@monetr/interface/hooks/balances';
-import { useSpending, useSpendingSink } from '@monetr/interface/hooks/spending';
+import { useSpendingSink } from '@monetr/interface/hooks/spending';
 import { useUpdateTransaction } from '@monetr/interface/hooks/transactions';
 import useTheme from '@monetr/interface/hooks/useTheme';
 import Spending, { SpendingType } from '@monetr/interface/models/Spending';
@@ -20,12 +20,8 @@ export interface MSelectSpendingTransactionProps {
 }
 
 export default function MSelectSpendingTransaction(props: MSelectSpendingTransactionProps): JSX.Element {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { transaction } = props;
-  // Only load all of the spending objects once we actually open a select.
-  const { result: allSpending, isLoading: spendingIsLoading } = useSpendingSink(isOpen);
-  // Otherwise use the single specific spending object.
-  const { data: currentSpending, isLoading: currentSpendingIsLoading } = useSpending(props.transaction.spendingId);
+  const { result: allSpending, isLoading: spendingIsLoading } = useSpendingSink();
   const balances = useCurrentBalance();
   const updateTransaction = useUpdateTransaction();
   const theme = useTheme();
@@ -72,32 +68,19 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
       currentAmount: balances?.free,
     },
   };
-  const items: { [key: number]: { label: string; value: number; spending: Partial<Spending> }} = {}; 
-  if (allSpending?.length > 0) {
-    allSpending.forEach(item => {
-      items[item.spendingId] = {
-        label: item.name,
-        value: item.spendingId,
-        spending: item,
-      };
-    });
-  } 
-
-  if (currentSpending) {
-    items[currentSpending.spendingId] = {
-      label: currentSpending.name,
-      value: currentSpending.spendingId,
-      spending: currentSpending,
-    };
-  }
+  const items = allSpending.map(item => ({
+    label: item.name,
+    value: item.spendingId,
+    spending: item,
+  }));
 
   const options = [
     freeToUse,
     // Labels will be unique. So we only need 1 | -1
-    ...Object.values(items).sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1),
+    ...items.sort((a, b) => a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1),
   ];
 
-  const selectedItem = !transaction.spendingId ? freeToUse : items[transaction.spendingId];
+  const selectedItem = !transaction.spendingId ? freeToUse : items.find(item => item.value === transaction.spendingId);
 
   function formatOptionsLabel(option: SpendingOption, meta: FormatOptionLabelMeta<SpendingOption>): React.ReactNode {
     if (meta.context === 'value') {
@@ -147,7 +130,6 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
         components={ {
           Option: SpendingSelectOption,
         } }
-        onFocus={ () => setIsOpen(true) }
         styles={ {
           placeholder: (base: object) => ({
             ...base,
@@ -170,7 +152,7 @@ export default function MSelectSpendingTransaction(props: MSelectSpendingTransac
           }),
         } }
         classNamePrefix='m-select-spending-transaction'
-        isLoading={ isLoading || (currentSpendingIsLoading && Boolean(transaction.spendingId)) }
+        isLoading={ isLoading || (spendingIsLoading && Boolean(transaction.spendingId)) }
         onChange={ handleSpentFromChange }
         formatOptionLabel={ formatOptionsLabel }
         options={ options }
