@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
   npm
 
 RUN npm install -g pnpm
-RUN wget -c https://golang.org/dl/go1.21.7.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.7.linux-amd64.tar.gz
+RUN wget -c https://golang.org/dl/go1.21.9.linux-amd64.tar.gz && tar -C /usr/local -xzf go1.21.9.linux-amd64.tar.gz
 ENV GOPATH /home/go
 RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
 ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH:

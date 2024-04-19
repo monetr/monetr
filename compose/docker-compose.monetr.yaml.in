@@ -103,7 +103,7 @@ services:
       - /build/compose/ui-entrypoint.sh
   monetr:
     tty: true # Makes color output work nicely.
-    image: golang:1.21.7
+    image: golang:1.21.9
     user: "${UID:-0}:${GID:-0}"
     restart: always # If something goes wrong just restart the container, this is for development only.
     working_dir: /build
