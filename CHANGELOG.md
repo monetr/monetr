@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.16.11](https://github.com/monetr/monetr/compare/v0.16.10...v0.16.11) (2024-04-19)
+
+
+### Features
+
+* **ui:** Don't request all spending objects for transactions. ([c72eb81](https://github.com/monetr/monetr/commit/c72eb81bc9eea708f2325d1227afac5661c1523c))
+* **ui:** Show when the plaid link was last updated in the UI. ([061115e](https://github.com/monetr/monetr/commit/061115ed7bbfc7cfe6a39f66eb07501987150b21))
+
+
+### Miscellaneous
+
+* **deps:** Bump local docker compose node version ([6e19c00](https://github.com/monetr/monetr/commit/6e19c00fe36922e1fdf3d3b47aa2f6f2e80a2df0))
+* **forecast:** Change default forecast to 90 days ([6dd9e3c](https://github.com/monetr/monetr/commit/6dd9e3c240fa3fb245aecf8dd71967fdef386173))
+
 ## [0.16.10](https://github.com/monetr/monetr/compare/v0.16.9...v0.16.10) (2024-04-13)
 
 
