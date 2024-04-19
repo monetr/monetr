@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.16.12](https://github.com/monetr/monetr/compare/v0.16.11...v0.16.12) (2024-04-19)
+
+
+### Dependencies
+
+* **go:** Bump golang to 1.21.9 ([a3af70e](https://github.com/monetr/monetr/commit/a3af70e3a1371c245b773805a4c992ef02e726cc))
+
+
+### Miscellaneous
+
+* **deps:** bump golang.org/x/net from 0.21.0 to 0.23.0 ([#1744](https://github.com/monetr/monetr/issues/1744)) ([de94fd5](https://github.com/monetr/monetr/commit/de94fd5924f3d52f8cac766364827f560c90cc7d))
+
 ## [0.16.11](https://github.com/monetr/monetr/compare/v0.16.10...v0.16.11) (2024-04-19)
 
 
