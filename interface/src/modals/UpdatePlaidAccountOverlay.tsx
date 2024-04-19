@@ -75,7 +75,6 @@ function UpdatePlaidAccountOverlay({ link, updateAccountSelection }: UpdatePlaid
       error,
       metadata,
     });
-    if (!metadata || !error) return;
 
     modal.remove();
   }, [modal]);

@@ -89,7 +89,8 @@ function SidebarWrapper(props: SidebarWrapperProps): JSX.Element {
     'items-center',
     'lg:py-4',
     'pt-2',
-    'pb-4',
+    'pb-8',
+    'lg:pb-4',
     'w-16',
     props.className,
   );

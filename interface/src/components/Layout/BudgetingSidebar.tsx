@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { AccountBalanceWalletOutlined, LocalAtmOutlined, PriceCheckOutlined, SavingsOutlined, ShoppingCartOutlined, TodayOutlined, TollOutlined } from '@mui/icons-material';
 
 import BudgetingSidebarTitle from './BudgetingSidebarTitle';
+import PlaidLastUpdatedCard from '@monetr/interface/components/Layout/PlaidLastUpdatedCard';
 import MBadge from '@monetr/interface/components/MBadge';
 import MDivider from '@monetr/interface/components/MDivider';
 import MSelectAccount from '@monetr/interface/components/MSelectAccount';
@@ -26,7 +27,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
 
 
   const className = mergeTailwind(
-    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-4',
+    'w-72 h-full flex-none flex flex-col dark:border-r-dark-monetr-border border border-transparent items-center pb-6 lg:pb-4',
     props.className,
   );
 
@@ -85,7 +86,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
   return (
     <div className={ className }>
       <BudgetingSidebarTitle />
-      <div className='flex h-full w-full flex-col items-center gap-4 px-2 py-4'>
+      <div className='flex h-full w-full flex-col items-center gap-4 px-2 pt-4'>
         <MSelectAccount />
         <MDivider className='w-1/2' />
 
@@ -137,6 +138,7 @@ export default function BudgetingSidebar(props: BudgetingSidebarProps): JSX.Elem
             <NextFundingBadge />
           </NavigationItem>
         </div>
+        <PlaidLastUpdatedCard linkId={ bankAccount?.linkId } />
       </div>
     </div>
   );

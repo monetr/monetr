@@ -112,6 +112,7 @@ export function useDetectDuplicateLink(): (_metadata: PlaidLinkOnSuccessMetadata
 
 export function useTriggerManualPlaidSync(): (_linkId: number) => Promise<void> {
   const { enqueueSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
   return async (linkId: number): Promise<void> => {
     return request()
       .post('/plaid/link/sync', {
@@ -120,8 +121,9 @@ export function useTriggerManualPlaidSync(): (_linkId: number) => Promise<void> 
       .then(() => void enqueueSnackbar('Triggered a manual sync in the background!', {
         variant: 'success',
         disableWindowBlurListener: true,
-
       }))
+      // Will make things like the "last attempted update" timestamp thing update.
+      .then(() => setTimeout(() => queryClient.invalidateQueries(['/links']), 2000))
       .catch(error => void enqueueSnackbar(
         `Failed to trigger a manual sync: ${error?.response?.data?.error || 'unknown error'}.`,
         {
