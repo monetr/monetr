@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.13](https://github.com/monetr/monetr/compare/v0.16.12...v0.16.13) (2024-04-23)
+
+
+### Bug Fixes
+
+* **log:** Reduce noisy log messages from cache ([039f885](https://github.com/monetr/monetr/commit/039f885f510f049bca5244f74144fc9d1bdf988c))
+
 ## [0.16.12](https://github.com/monetr/monetr/compare/v0.16.11...v0.16.12) (2024-04-19)
 
 
