@@ -190,9 +190,38 @@ VOLATILE;
 WITH new_ids AS (
 	SELECT "logins"."login_id", generate_ulid('login') AS "id"
 	FROM "logins"
-	CROSS JOIN "id_generator"
 )
 UPDATE "logins"
 SET "login_id_new" = "new_ids"."id"
 FROM "new_ids"
 WHERE "new_ids"."login_id" = "logins"."login_id";
+
+-- Accounts
+WITH new_ids AS (
+	SELECT "accounts"."account_id", generate_ulid('account') AS "id"
+	FROM "accounts"
+)
+UPDATE "accounts"
+SET "account_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."account_id" = "accounts"."account_id";
+
+-- Users
+WITH new_ids AS (
+	SELECT "users"."user_id", generate_ulid('user') AS "id"
+	FROM "users"
+)
+UPDATE "users"
+SET "user_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."user_id" = "users"."user_id";
+
+-- Links
+WITH new_ids AS (
+	SELECT "links"."link_id", generate_ulid('link') AS "id"
+	FROM "links"
+)
+UPDATE "links"
+SET "link_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."link_id" = "links"."link_id";
