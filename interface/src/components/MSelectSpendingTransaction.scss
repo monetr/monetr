@@ -2,7 +2,7 @@
   &:hover {
     &:not(:focus-within) {
      div.m-select-spending-transaction__control  {
-        @apply border-dark-monetr-border-string !important;
+        @apply border-dark-monetr-border-string;
       }
     }
 
