@@ -9,6 +9,10 @@ ADD COLUMN "user_id_new" VARCHAR(64),
 ADD COLUMN "login_id_new" VARCHAR(64),
 ADD COLUMN "account_id_new" VARCHAR(64);
 
+ALTER TABLE "betas"
+ADD COLUMN "beta_id_new" VARCHAR(64),
+ADD COLUMN "used_by_user_id_new" VARCHAR(64);
+
 ALTER TABLE "links"
 ADD COLUMN "link_id_new" VARCHAR(64),
 ADD COLUMN "account_id_new" VARCHAR(64),
@@ -188,7 +192,7 @@ VOLATILE;
 
 -- Logins
 WITH new_ids AS (
-	SELECT "logins"."login_id", generate_ulid('login') AS "id"
+	SELECT "logins"."login_id", generate_ulid('lgn') AS "id"
 	FROM "logins"
 )
 UPDATE "logins"
@@ -198,7 +202,7 @@ WHERE "new_ids"."login_id" = "logins"."login_id";
 
 -- Accounts
 WITH new_ids AS (
-	SELECT "accounts"."account_id", generate_ulid('account') AS "id"
+	SELECT "accounts"."account_id", generate_ulid('acct') AS "id"
 	FROM "accounts"
 )
 UPDATE "accounts"
@@ -216,6 +220,16 @@ SET "user_id_new" = "new_ids"."id"
 FROM "new_ids"
 WHERE "new_ids"."user_id" = "users"."user_id";
 
+-- Betas
+WITH new_ids AS (
+	SELECT "betas"."beta_id", generate_ulid('beta') AS "id"
+	FROM "betas"
+)
+UPDATE "betas"
+SET "beta_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."beta_id" = "betas"."beta_id";
+
 -- Links
 WITH new_ids AS (
 	SELECT "links"."link_id", generate_ulid('link') AS "id"
@@ -225,3 +239,163 @@ UPDATE "links"
 SET "link_id_new" = "new_ids"."id"
 FROM "new_ids"
 WHERE "new_ids"."link_id" = "links"."link_id";
+
+-- Secrets
+WITH new_ids AS (
+	SELECT "secrets"."secret_id", generate_ulid('scrt') AS "id"
+	FROM "secrets"
+)
+UPDATE "secrets"
+SET "secret_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."secret_id" = "secrets"."secret_id";
+
+-- Bank Accounts
+WITH new_ids AS (
+	SELECT "bank_accounts"."bank_account_id", generate_ulid('bac') AS "id"
+	FROM "bank_accounts"
+)
+UPDATE "bank_accounts"
+SET "bank_account_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."bank_account_id" = "bank_accounts"."bank_account_id";
+
+-- Transactions
+WITH new_ids AS (
+	SELECT "transactions"."transaction_id", generate_ulid('txn') AS "id"
+	FROM "transactions"
+)
+UPDATE "transactions"
+SET "transaction_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."transaction_id" = "transactions"."transaction_id";
+
+-- Transaction Clusters
+WITH new_ids AS (
+	SELECT "transaction_clusters"."transaction_cluster_id", generate_ulid('tcl') AS "id"
+	FROM "transaction_clusters"
+)
+UPDATE "transaction_clusters"
+SET "transaction_cluster_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."transaction_cluster_id" = "transaction_clusters"."transaction_cluster_id";
+
+-- Spending
+WITH new_ids AS (
+	SELECT "spending"."spending_id", generate_ulid('spnd') AS "id"
+	FROM "spending"
+)
+UPDATE "spending"
+SET "spending_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."spending_id" = "spending"."spending_id";
+
+-- Funding schedule
+WITH new_ids AS (
+	SELECT "funding_schedules"."funding_schedule_id", generate_ulid('fund') AS "id"
+	FROM "funding_schedules"
+)
+UPDATE "funding_schedules"
+SET "funding_schedule_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."funding_schedule_id" = "funding_schedules"."funding_schedule_id";
+
+-- Files
+WITH new_ids AS (
+	SELECT "files"."file_id", generate_ulid('file') AS "id"
+	FROM "files"
+)
+UPDATE "files"
+SET "file_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."file_id" = "files"."file_id";
+
+-- Jobs
+WITH new_ids AS (
+	SELECT "jobs"."job_id", generate_ulid('job') AS "id"
+	FROM "jobs"
+)
+UPDATE "jobs"
+SET "job_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."job_id" = "jobs"."job_id";
+
+-- Plaid Links
+WITH new_ids AS (
+	SELECT "plaid_links"."plaid_link_id", generate_ulid('plx') AS "id"
+	FROM "plaid_links"
+)
+UPDATE "plaid_links"
+SET "plaid_link_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."plaid_link_id" = "plaid_links"."plaid_link_id";
+
+-- Plaid Syncs
+WITH new_ids AS (
+	SELECT "plaid_syncs"."plaid_sync_id", generate_ulid('psyn') AS "id"
+	FROM "plaid_syncs"
+)
+UPDATE "plaid_syncs"
+SET "plaid_sync_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."plaid_sync_id" = "plaid_syncs"."plaid_sync_id";
+
+-- Plaid Bank Accounts
+WITH new_ids AS (
+	SELECT "plaid_bank_accounts"."plaid_bank_account_id", generate_ulid('pbac') AS "id"
+	FROM "plaid_bank_accounts"
+)
+UPDATE "plaid_bank_accounts"
+SET "plaid_bank_account_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."plaid_bank_account_id" = "plaid_bank_accounts"."plaid_bank_account_id";
+
+-- Plaid Transactions
+WITH new_ids AS (
+	SELECT "plaid_transactions"."plaid_transaction_id", generate_ulid('ptxn') AS "id"
+	FROM "plaid_transactions"
+)
+UPDATE "plaid_transactions"
+SET "plaid_transaction_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."plaid_transaction_id" = "plaid_transactions"."plaid_transaction_id";
+
+-- Teller Links
+WITH new_ids AS (
+	SELECT "teller_links"."teller_link_id", generate_ulid('tlx') AS "id"
+	FROM "teller_links"
+)
+UPDATE "teller_links"
+SET "teller_link_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."teller_link_id" = "teller_links"."teller_link_id";
+
+-- Teller bank accounts
+WITH new_ids AS (
+	SELECT "teller_bank_accounts"."teller_bank_account_id", generate_ulid('tbac') AS "id"
+	FROM "teller_bank_accounts"
+)
+UPDATE "teller_bank_accounts"
+SET "teller_bank_account_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."teller_bank_account_id" = "teller_bank_accounts"."teller_bank_account_id";
+
+-- Teller syncs
+WITH new_ids AS (
+	SELECT "teller_syncs"."teller_sync_id", generate_ulid('tsyn') AS "id"
+	FROM "teller_syncs"
+)
+UPDATE "teller_syncs"
+SET "teller_sync_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."teller_sync_id" = "teller_syncs"."teller_sync_id";
+
+-- Teller transactions
+WITH new_ids AS (
+	SELECT "teller_transactions"."teller_transaction_id", generate_ulid('ttxn') AS "id"
+	FROM "teller_transactions"
+)
+UPDATE "teller_transactions"
+SET "teller_transaction_id_new" = "new_ids"."id"
+FROM "new_ids"
+WHERE "new_ids"."teller_transaction_id" = "teller_transactions"."teller_transaction_id";
