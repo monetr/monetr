@@ -187,11 +187,8 @@ VOLATILE;
 -- Repeat for every table.
 
 -- Logins
-WITH id_generator AS (
-	SELECT generate_ulid('login') AS "id"
-),
-new_ids AS (
-	SELECT "logins"."login_id", "id_generator"."id"
+WITH new_ids AS (
+	SELECT "logins"."login_id", generate_ulid('login') AS "id"
 	FROM "logins"
 	CROSS JOIN "id_generator"
 )
