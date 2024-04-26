@@ -128,8 +128,7 @@ ADD COLUMN "teller_bank_account_id_new" VARCHAR(64);
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-DROP FUNCTION generate_ulid;
-CREATE FUNCTION generate_ulid(kind TEXT)
+CREATE OR REPLACE FUNCTION generate_ulid(kind TEXT)
 RETURNS TEXT
 AS $$
 DECLARE
@@ -498,7 +497,7 @@ SELECT
   "u"."stripe_customer_id"
 FROM "users_old" AS "u"
 INNER JOIN "logins_old" AS "l" ON "l"."login_id" = "u"."login_id"
-INNER JOIN "accounts" AS "a" ON "a"."account_id" = "u"."account_id";
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "u"."account_id";
 
 ALTER TABLE "betas" RENAME CONSTRAINT "pk_betas" TO "pk_betas_old";
 ALTER TABLE "betas" DROP CONSTRAINT "uq_betas_code_hash";
@@ -523,6 +522,41 @@ SELECT
   "b"."expires_at"
 FROM "betas_old" AS "b"
 INNER JOIN "users_old" AS "u" ON "u"."user_id" = "b"."used_by_user_id";
+
+ALTER TABLE "secrets" RENAME CONSTRAINT "pk_secrets" TO "pk_secrets_old";
+ALTER TABLE "secrets" DROP CONSTRAINT "fk_secrets_account";
+ALTER TABLE "secrets" RENAME TO "secrets_old";
+
+CREATE TABLE "secrets" (
+  "secret_id"  VARCHAR(32) NOT NULL,
+  "account_id" VARCHAR(32) NOT NULL,
+  "kind"       VARCHAR(100) NOT NULL,
+  "key_id"     TEXT,
+  "version"    TEXT,
+  "secret"     TEXT NOT NULL,
+  "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  CONSTRAINT "pk_secrets" PRIMARY KEY ("secret_id", "account_id"),
+  CONSTRAINT "fk_secrets_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id")
+);
+
+INSERT INTO "secrets" ("secret_id", "account_id", "kind", "key_id", "version", "secret", "updated_at", "created_at")
+SELECT
+  "s"."secret_id_new",
+  "a"."account_id_new",
+  "s"."kind",
+  "s"."key_id",
+  "s"."version",
+  "s"."secret",
+  "s"."updated_at",
+  "s"."created_at"
+FROM "secrets_old" AS "s"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "s"."account_id";
+
+ALTER TABLE "plaid_links" RENAME CONSTRAINT "plaid_links_pkey" TO "plid_links_pkey_old";
+ALTER TABLE "plaid_links" DROP CONSTRAINT "uq_plaid_links_item_id";
+ALTER TABLE "plaid_links" DROP CONSTRAINT "fk_plaid_links_account";
+ALTER TABLE "plaid_links" DROP CONSTRAINT "fk_plaid_links_secret";
 
 
 
