@@ -128,6 +128,7 @@ ADD COLUMN "teller_bank_account_id_new" VARCHAR(64);
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+DROP FUNCTION generate_ulid;
 CREATE FUNCTION generate_ulid(kind TEXT)
 RETURNS TEXT
 AS $$
@@ -399,3 +400,132 @@ UPDATE "teller_transactions"
 SET "teller_transaction_id_new" = "new_ids"."id"
 FROM "new_ids"
 WHERE "new_ids"."teller_transaction_id" = "teller_transactions"."teller_transaction_id";
+
+
+-- Swap tables
+
+ALTER TABLE "logins" RENAME CONSTRAINT "pk_logins" TO "pk_logins_old";
+ALTER TABLE "logins" DROP CONSTRAINT "uq_logins_email";
+ALTER TABLE "logins" RENAME TO "logins_old";
+
+CREATE TABLE "logins" (
+  "login_id"          VARCHAR(32) NOT NULL,
+  "email"             VARCHAR(250) NOT NULL,
+  "first_name"        VARCHAR(250),
+  "last_name"         VARCHAR(250),
+  "totp"              TEXT,
+  "totp_enabled_at"   TIMESTAMP WITH TIME ZONE,
+  "crypt"             BYTEA NOT NULL,
+  "is_enabled"        BOOLEAN NOT NULL,
+  "is_email_verified" BOOLEAN NOT NULL,
+  "email_verified_at" TIMESTAMP WITH TIME ZONE,
+  "password_reset_at" TIMESTAMP WITH TIME ZONE,
+  CONSTRAINT "pk_logins" PRIMARY KEY ("login_id"),
+  CONSTRAINT "uq_logins_email" UNIQUE ("email")
+);
+
+INSERT INTO "logins" ("login_id", "email", "first_name", "last_name", "totp", "totp_enabled_at", "crypt", "is_enabled", "is_email_verified", "email_verified_at", "password_reset_at")
+SELECT
+  "l"."login_id_new",
+  "l"."email",
+  "l"."first_name",
+  "l"."last_name",
+  "l"."totp",
+  "l"."totp_enabled_at",
+  "l"."crypt",
+  "l"."is_enabled",
+  "l"."is_email_verified",
+  "l"."email_verified_at",
+  "l"."password_reset_at"
+FROM "logins_old" AS "l";
+
+ALTER TABLE "accounts" RENAME CONSTRAINT "pk_accounts" TO "pk_accounts_old";
+ALTER TABLE "accounts" DROP CONSTRAINT "uq_accounts_stripe_customer_id";
+ALTER TABLE "accounts" DROP CONSTRAINT "uq_accounts_stripe_subscription_id";
+ALTER TABLE "accounts" RENAME TO "accounts_old";
+
+CREATE TABLE "accounts" (
+  "account_id"                      VARCHAR(32) NOT NULL,
+  "timezone"                        VARCHAR(50) NOT NULL DEFAULT 'UTC',
+  "locale"                          VARCHAR(50) NOT NULL,
+  "stripe_customer_id"              VARCHAR(250),
+  "stripe_subscription_id"          VARCHAR(250),
+  "subscription_active_until"       TIMESTAMP WITH TIME ZONE,
+  "stripe_webhook_latest_timestamp" TIMESTAMP WITH TIME ZONE,
+  "subscription_status"             VARCHAR(50),
+  "trial_ends_at"                   TIMESTAMP WITH TIME ZONE,
+  "created_at"                      TIMESTAMP WITH TIME ZONE NOT NULL,
+  CONSTRAINT "pk_accounts" PRIMARY KEY ("account_id"),
+  CONSTRAINT "uq_accounts_stripe_customer_id" UNIQUE ("stripe_customer_id"),
+  CONSTRAINT "uq_accounts_stripe_subscription_id" UNIQUE ("stripe_subscription_id")
+);
+
+INSERT INTO "accounts" ("account_id", "timezone", "locale", "stripe_customer_id", "stripe_subscription_id", "stripe_webhook_latest_timestamp", "subscription_status", "trial_ends_at", "created_at")
+SELECT
+  "a"."account_id_new",
+  "a"."timezone",
+  "a"."locale",
+  "a"."stripe_customer_id",
+  "a"."stripe_subscription_id",
+  "a"."stripe_webhook_latest_timestamp",
+  "a"."subscription_status",
+  "a"."trial_ends_at",
+  "a"."created_at"
+FROM "accounts_old" AS "a";
+
+ALTER TABLE "users" RENAME CONSTRAINT "pk_users" TO "pk_users_old";
+ALTER TABLE "users" DROP CONSTRAINT "uq_users_login_id_account_id";
+ALTER TABLE "users" DROP CONSTRAINT "fk_users_accounts_account_id";
+ALTER TABLE "users" DROP CONSTRAINT "fk_users_logins_login_id";
+ALTER TABLE "users" RENAME TO "users_old";
+
+CREATE TABLE "users" (
+  "user_id"            VARCHAR(32) NOT NULL,
+  "login_id"           VARCHAR(32) NOT NULL,
+  "account_id"         VARCHAR(32) NOT NULL,
+  "stripe_customer_id" TEXT,
+  CONSTRAINT "pk_users" PRIMARY KEY ("user_id"),
+  CONSTRAINT "uq_users_login_account" UNIQUE ("login_id", "account_id"),
+  CONSTRAINT "fk_users_login" FOREIGN KEY ("login_id") REFERENCES "logins" ("login_id"),
+  CONSTRAINT "fk_users_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id")
+);
+
+INSERT INTO "users" ("user_id", "login_id", "account_id", "stripe_customer_id")
+SELECT 
+  "u"."user_id_new",
+  "l"."login_id_new",
+  "a"."account_id_new",
+  "u"."stripe_customer_id"
+FROM "users_old" AS "u"
+INNER JOIN "logins_old" AS "l" ON "l"."login_id" = "u"."login_id"
+INNER JOIN "accounts" AS "a" ON "a"."account_id" = "u"."account_id";
+
+ALTER TABLE "betas" RENAME CONSTRAINT "pk_betas" TO "pk_betas_old";
+ALTER TABLE "betas" DROP CONSTRAINT "uq_betas_code_hash";
+ALTER TABLE "betas" DROP CONSTRAINT "fk_betas_used_by";
+ALTER TABLE "betas" RENAME TO "betas_old";
+
+CREATE TABLE "betas" (
+  "beta_id"    VARCHAR(32) NOT NULL,
+  "code_hash"  TEXT NOT NULL,
+  "used_by"    VARCHAR(32),
+  "expires_at" TIMESTAMP WITH TIME ZONE NOT NULL,
+  CONSTRAINT "pk_betas" PRIMARY KEY ("beta_id"),
+  CONSTRAINT "uq_betas_code_hash" UNIQUE ("code_hash"),
+  CONSTRAINT "fk_betas_used_by" FOREIGN KEY ("used_by") REFERENCES "users" ("user_id")
+);
+
+INSERT INTO "betas" ("beta_id", "code_hash", "used_by", "expires_at")
+SELECT
+  "b"."beta_id_new",
+  "b"."code_hash",
+  "u"."user_id_new",
+  "b"."expires_at"
+FROM "betas_old" AS "b"
+INNER JOIN "users_old" AS "u" ON "u"."user_id" = "b"."used_by_user_id";
+
+
+
+
+
+
