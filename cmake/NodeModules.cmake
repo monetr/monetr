@@ -44,7 +44,7 @@ add_custom_command(
              ${CMAKE_SOURCE_DIR}/emails/node_modules
              ${CMAKE_SOURCE_DIR}/interface/node_modules
              ${CMAKE_SOURCE_DIR}/stories/node_modules
-  COMMAND ${PNPM_EXECUTABLE} install
+  COMMAND ${PNPM_EXECUTABLE} install --frozen-lockfile
   # By having a marker we make sure that if we cancel the install but the node_modules dir was created we still end up
   # doing install again if we didn't finish the first time.
   COMMAND ${CMAKE_COMMAND} -E touch ${NODE_MODULES_MARKER}
