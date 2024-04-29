@@ -30,7 +30,6 @@ Deploy Production:
       when: never
   environment:
     deployment_tier: production
-    action: prepare
     name: Production
     url: https://my.monetr.app
   tags:
