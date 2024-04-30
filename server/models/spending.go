@@ -81,6 +81,7 @@ func (e *Spending) GetRecurrencesBefore(now, before time.Time, timezone *time.Lo
 	}
 }
 
+// Deprecated: Please use the forcasting library.
 func (e *Spending) CalculateNextContribution(
 	ctx context.Context,
 	accountTimezone string,
@@ -113,6 +114,7 @@ func (e *Spending) CalculateNextContribution(
 //   - NextRecurrence
 //
 // The provided objects are unmodified.
+// Deprecaetd: Please use the forecasting package.
 func CalculateNextContribution(
 	ctx context.Context,
 	spending Spending,

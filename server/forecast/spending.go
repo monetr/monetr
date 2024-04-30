@@ -8,17 +8,37 @@ import (
 	"github.com/monetr/monetr/server/internal/myownsanity"
 	"github.com/monetr/monetr/server/models"
 	"github.com/monetr/monetr/server/util"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/teambition/rrule-go"
 )
 
 type SpendingEvent struct {
-	Date               time.Time      `json:"date"`
-	TransactionAmount  int64          `json:"transactionAmount"`
-	ContributionAmount int64          `json:"contributionAmount"`
-	RollingAllocation  int64          `json:"rollingAllocation"`
-	Funding            []FundingEvent `json:"funding"`
-	SpendingId         uint64         `json:"spendingId"`
+	// Date is the timestamp of the event. There will only be a single spending
+	// event per spending object per day max.
+	Date time.Time `json:"date"`
+	// TransactionAmount represents the amount of money removed from this spending
+	// object's allocation at this time.
+	TransactionAmount int64 `json:"transactionAmount"`
+	// ContributionAmount represents the amount of money contributed to this
+	// spending object at this time.
+	ContributionAmount int64 `json:"contributionAmount"`
+	// OverspendAmount represents the excess amount spent on an event beyond what
+	// was currently allocated to the spending object at that time.
+	OverspendAmount int64 `json:"overspendAmount"`
+	// RollingAllocation represents the amount of funds allocated towards this
+	// spending object at this moment in time. This is after contribution and
+	// spending has been taken into account (in that order) for this moment in
+	// time.
+	RollingAllocation int64 `json:"rollingAllocation"`
+	// IsBehind will be true if there was not enough funds allocated to cover this
+	// spending objects target amount at this time.
+	IsBehind bool `json:"isBehind"`
+	// Funding is an array of funding events that contributed to this event's
+	// contribution amount.
+	Funding []FundingEvent `json:"funding"`
+	// SpendingId is the unique identifier of this spending object.
+	SpendingId uint64 `json:"spendingId"`
 }
 
 var (
@@ -26,8 +46,33 @@ var (
 )
 
 type SpendingInstructions interface {
-	GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []SpendingEvent
-	GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent
+	// GetNextNSpendingEventsAfter will return an array of events for this
+	// spending object after the specified timestamp. If the spending object is a
+	// goal then fewer than n events may be returned depending on its current
+	// progress. For expense spending objects n events will always be returned.
+	GetNextNSpendingEventsAfter(
+		ctx context.Context,
+		n int,
+		input time.Time,
+		timezone *time.Location,
+	) ([]SpendingEvent, error)
+	// GetSpendingEventsBetween will return all of the events for this spending
+	// object between the two timestamps provided.
+	GetSpendingEventsBetween(
+		ctx context.Context,
+		start, end time.Time,
+		timezone *time.Location,
+	) ([]SpendingEvent, error)
+	// GetNextContributionEvent will return the next contribution that will be
+	// made to this spending object if there is one. Goals may not have a next
+	// contribution if the goal is complete or if the goal is past its target
+	// date. In that case the returned event will have the input date and a $0
+	// contribution.
+	GetNextContributionEvent(
+		ctx context.Context,
+		input time.Time,
+		timezone *time.Location,
+	) (SpendingEvent, error)
 }
 
 type spendingInstructionBase struct {
@@ -36,7 +81,11 @@ type spendingInstructionBase struct {
 	funding  FundingInstructions
 }
 
-func NewSpendingInstructions(log *logrus.Entry, spending models.Spending, fundingInstructions FundingInstructions) SpendingInstructions {
+func NewSpendingInstructions(
+	log *logrus.Entry,
+	spending models.Spending,
+	fundingInstructions FundingInstructions,
+) SpendingInstructions {
 	return &spendingInstructionBase{
 		log:      log,
 		spending: spending,
@@ -44,7 +93,11 @@ func NewSpendingInstructions(log *logrus.Entry, spending models.Spending, fundin
 	}
 }
 
-func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []SpendingEvent {
+func (s *spendingInstructionBase) GetSpendingEventsBetween(
+	ctx context.Context,
+	start, end time.Time,
+	timezone *time.Location,
+) ([]SpendingEvent, error) {
 	events := make([]SpendingEvent, 0)
 
 	log := s.log.
@@ -62,16 +115,18 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 				ilog.
 					WithError(err).
 					Error("timed out while trying to determine spending events between dates")
+
 				crumbs.Error(ctx, "Timed out while trying to determine spending events between dates", "forecast", map[string]interface{}{
 					"start":    start,
 					"end":      end,
 					"timezone": timezone.String(),
 					"i":        i,
 				})
-				panic(err)
+
+				return events, errors.WithStack(err)
 			}
 			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
-			return events
+			return events, nil
 		default:
 			// Do nothing
 		}
@@ -123,19 +178,25 @@ func (s *spendingInstructionBase) GetSpendingEventsBetween(ctx context.Context, 
 
 	log.WithField("count", len(events)).Trace("returning calculated events")
 
-	return events
+	return events, nil
 }
 
-func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context, n int, input time.Time, timezone *time.Location) []SpendingEvent {
+func (s spendingInstructionBase) GetNextNSpendingEventsAfter(
+	ctx context.Context,
+	n int,
+	input time.Time,
+	timezone *time.Location,
+) ([]SpendingEvent, error) {
 	events := make([]SpendingEvent, 0, n)
 	for i := 0; i < n; i++ {
 		select {
 		case <-ctx.Done():
 			if err := ctx.Err(); err != nil {
-				panic(err)
+				return events, errors.WithStack(err)
 			}
+
 			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
-			return events
+			return events, nil
 		default:
 			// Do nothing
 		}
@@ -155,20 +216,82 @@ func (s spendingInstructionBase) GetNextNSpendingEventsAfter(ctx context.Context
 		events = append(events, *event)
 	}
 
-	return events
+	return events, nil
 }
 
-func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, start, end time.Time, timezone *time.Location) []time.Time {
+func (s spendingInstructionBase) GetNextContributionEvent(
+	ctx context.Context,
+	input time.Time,
+	timezone *time.Location,
+) (SpendingEvent, error) {
+	balance := s.spending.CurrentAmount
+	fundingEvents := s.funding.GetNFundingEventsAfter(ctx, 1, input, timezone)
+	if len(fundingEvents) == 0 {
+		return SpendingEvent{
+			Date:               input,
+			TransactionAmount:  0,
+			ContributionAmount: 0,
+			RollingAllocation:  balance,
+			Funding:            fundingEvents,
+			SpendingId:         s.spending.SpendingId,
+		}, nil
+	}
+
+	end := fundingEvents[0].Date
+	start := input
+
+	for {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				return SpendingEvent{}, errors.WithStack(err)
+			}
+
+			crumbs.Warn(ctx, "Received done context signal with no error", "spending", nil)
+			return SpendingEvent{}, nil
+		default:
+			// Do nothing
+		}
+
+		event := s.getNextSpendingEventAfter(ctx, start, timezone, balance)
+		if event == nil || event.Date.After(end) {
+			return SpendingEvent{
+				Date:               input,
+				TransactionAmount:  0,
+				ContributionAmount: 0,
+				RollingAllocation:  balance,
+				Funding:            fundingEvents,
+				SpendingId:         s.spending.SpendingId,
+			}, nil
+		}
+
+		if event.ContributionAmount > 0 {
+			return *event, nil
+		}
+
+		// Bump the timestamp and do it again
+		start = event.Date
+	}
+}
+
+func (s *spendingInstructionBase) getRecurrencesBetween(
+	ctx context.Context,
+	start, end time.Time,
+	timezone *time.Location,
+) []time.Time {
 	switch s.spending.SpendingType {
 	case models.SpendingTypeExpense:
 		rule := s.spending.RuleSet.Set
 		rule.DTStart(rule.GetDTStart().In(timezone))
 
-		// This little bit is really confusing. Basically we want to know how many times this spending boi happens
-		// before the specified end date. This can include the start date, but we want to exclude the end date. This is
-		// because this function is **INTENDED** to be called with the start being now or the next funding event, and
-		// end being the next funding event immediately after that. We can't control what happens after the later
-		// funding event, so we need to know how much will be spent before then, so we know how much to allocate.
+		// This little bit is really confusing. Basically we want to know how many
+		// times this spending boi happens before the specified end date. This can
+		// include the start date, but we want to exclude the end date. This is
+		// because this function is **INTENDED** to be called with the start being
+		// now or the next funding event, and end being the next funding event
+		// immediately after that. We can't control what happens after the later
+		// funding event, so we need to know how much will be spent before then, so
+		// we know how much to allocate.
 		items := rule.Between(start, end.Add(-1*time.Second), true)
 		return items
 	case models.SpendingTypeGoal:
@@ -181,7 +304,12 @@ func (s *spendingInstructionBase) GetRecurrencesBetween(ctx context.Context, sta
 	}
 }
 
-func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context, input time.Time, timezone *time.Location, balance int64) *SpendingEvent {
+func (s *spendingInstructionBase) getNextSpendingEventAfter(
+	ctx context.Context,
+	input time.Time,
+	timezone *time.Location,
+	balance int64,
+) *SpendingEvent {
 	// If the spending object is paused then there wont be any events for it at
 	// all.
 	if s.spending.IsPaused {
@@ -236,11 +364,11 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 	// will be spent must be <= the amount currently allocated to this spending
 	// item. If it is not then there will not be enough funds to cover each
 	// spending event between now and the next funding event.
-	eventsBeforeFirst := int64(len(s.GetRecurrencesBetween(ctx, input, fundingFirst.Date, timezone)))
+	eventsBeforeFirst := int64(len(s.getRecurrencesBetween(ctx, input, fundingFirst.Date, timezone)))
 	// The number of times this item will be spent in the subsequent funding
 	// period. This is used to determine how much needs to be allocated at the
 	// beginning of the next funding period.
-	eventsBeforeSecond := int64(len(s.GetRecurrencesBetween(ctx, fundingFirst.Date, fundingSecond.Date, timezone)))
+	eventsBeforeSecond := int64(len(s.getRecurrencesBetween(ctx, fundingFirst.Date, fundingSecond.Date, timezone)))
 
 	// The amount of funds needed for each individual spending event.
 	var perSpendingAmount int64
@@ -329,22 +457,27 @@ func (s *spendingInstructionBase) getNextSpendingEventAfter(ctx context.Context,
 		// The next event will be a transaction.
 		event.Date = nextRecurrence
 		event.TransactionAmount = s.spending.TargetAmount
-		// NOTE At the time of writing this, event.RollingAllocation is not being
-		// defined anywhere. But this is ultimately what the math will end up being
-		// once it is defined, and we calculate the effects of a transaction.
+		event.IsBehind = s.spending.TargetAmount > event.RollingAllocation
 		event.RollingAllocation = event.RollingAllocation - s.spending.TargetAmount
 	case nextRecurrence.Equal(fundingFirst.Date):
 		// The next event will be both a contribution and a transaction.
 		event.Date = nextRecurrence
 		event.ContributionAmount = totalContributionAmount
 		event.TransactionAmount = s.spending.TargetAmount
-		// NOTE At the time of writing this, event.RollingAllocation is not being
-		// defined anywhere. But this is ultimately what the math will end up being
-		// once it is defined, and we calculate the effects of a transaction.
-		event.RollingAllocation = (event.RollingAllocation + totalContributionAmount) - s.spending.TargetAmount
+		adjustedRollingAllocation := (event.RollingAllocation + totalContributionAmount)
+		event.IsBehind = s.spending.TargetAmount > adjustedRollingAllocation
+		event.RollingAllocation = adjustedRollingAllocation - s.spending.TargetAmount
 		event.Funding = []FundingEvent{
 			fundingFirst,
 		}
+	}
+
+	if event.RollingAllocation < 0 {
+		// If the rolling allocation goes negative that means we will be spending
+		// from our free-to-use instead. We want to represent this as an overspend
+		// instead of a negative rolling allocation.
+		event.OverspendAmount = event.RollingAllocation * -1
+		event.RollingAllocation = 0
 	}
 
 	return &event

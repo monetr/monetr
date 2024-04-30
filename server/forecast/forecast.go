@@ -30,9 +30,22 @@ type Forecast struct {
 }
 
 type Forecaster interface {
-	GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast
-	GetAverageContribution(ctx context.Context, start, end time.Time, timezone *time.Location) int64
-	GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId uint64, timezone *time.Location) int64
+	GetForecast(
+		ctx context.Context,
+		start, end time.Time,
+		timezone *time.Location,
+	) (Forecast, error)
+	GetAverageContribution(
+		ctx context.Context,
+		start, end time.Time,
+		timezone *time.Location,
+	) (int64, error)
+	GetNextContribution(
+		ctx context.Context,
+		start time.Time,
+		fundingScheduleId uint64,
+		timezone *time.Location,
+	) (int64, error)
 }
 
 type forecasterBase struct {
@@ -42,7 +55,11 @@ type forecasterBase struct {
 	spending       map[uint64]SpendingInstructions
 }
 
-func NewForecaster(log *logrus.Entry, spending []models.Spending, funding []models.FundingSchedule) Forecaster {
+func NewForecaster(
+	log *logrus.Entry,
+	spending []models.Spending,
+	funding []models.FundingSchedule,
+) Forecaster {
 	forecaster := &forecasterBase{
 		log:      log,
 		funding:  map[uint64]FundingInstructions{},
@@ -74,13 +91,19 @@ func NewForecaster(log *logrus.Entry, spending []models.Spending, funding []mode
 	return forecaster
 }
 
-// GetForecast combines the instructions from the spending and funding objects and returns a timeline of events that are
-// expected to happen based on those instructions. All dates returned by this function will be in UTC. Dates returned by
-// other functions may be in the timezone provided by the caller. Timezones are converted in this function because they
-// will likely be surfaced via an API to a client. For the sake of consistency they should be in UTC. Events are
-// returned in order, with the most recent event being first. Objects related to a date are sorted in ascending order by
-// their ID.
-func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, timezone *time.Location) Forecast {
+// GetForecast combines the instructions from the spending and funding objects
+// and returns a timeline of events that are expected to happen based on those
+// instructions. All dates returned by this function will be in UTC. Dates
+// returned by other functions may be in the timezone provided by the caller.
+// Timezones are converted in this function because they will likely be surfaced
+// via an API to a client. For the sake of consistency they should be in UTC.
+// Events are returned in order, with the most recent event being first. Objects
+// related to a date are sorted in ascending order by their ID.
+func (f *forecasterBase) GetForecast(
+	ctx context.Context,
+	start, end time.Time,
+	timezone *time.Location,
+) (Forecast, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
@@ -96,13 +119,21 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 		Events:          make([]Event, 0),
 	}
 
-	linq.From(f.spending).
-		SelectT(func(item linq.KeyValue) SpendingInstructions {
-			return item.Value.(SpendingInstructions)
-		}).
-		SelectManyT(func(spending SpendingInstructions) linq.Query {
-			return linq.From(spending.GetSpendingEventsBetween(span.Context(), start, end, timezone))
-		}).
+	events := make([]SpendingEvent, 0)
+	for _, spendingInstruction := range f.spending {
+		result, err := spendingInstruction.GetSpendingEventsBetween(
+			span.Context(),
+			start, end,
+			timezone,
+		)
+		if err != nil {
+			return forecast, err
+		}
+
+		events = append(events, result...)
+	}
+
+	linq.From(events).
 		GroupByT(
 			func(item SpendingEvent) int64 {
 				return item.Date.Unix()
@@ -182,10 +213,14 @@ func (f *forecasterBase) GetForecast(ctx context.Context, start, end time.Time, 
 		forecast.EndingBalance = forecast.Events[len(forecast.Events)-1].Balance
 	}
 
-	return forecast
+	return forecast, nil
 }
 
-func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end time.Time, timezone *time.Location) int64 {
+func (f *forecasterBase) GetAverageContribution(
+	ctx context.Context,
+	start, end time.Time,
+	timezone *time.Location,
+) (int64, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 	span.Data = map[string]interface{}{
@@ -193,7 +228,11 @@ func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end 
 		"end":      end,
 		"timezone": timezone.String(),
 	}
-	forecast := f.GetForecast(span.Context(), start, end, timezone)
+	forecast, err := f.GetForecast(span.Context(), start, end, timezone)
+	if err != nil {
+		return 0, err
+	}
+
 	contributionAmounts := map[int64]int64{}
 	for _, event := range forecast.Events {
 		if event.Contribution == 0 {
@@ -210,10 +249,15 @@ func (f *forecasterBase) GetAverageContribution(ctx context.Context, start, end 
 		}
 	}
 
-	return popularContribution
+	return popularContribution, nil
 }
 
-func (f *forecasterBase) GetNextContribution(ctx context.Context, start time.Time, fundingScheduleId uint64, timezone *time.Location) int64 {
+func (f *forecasterBase) GetNextContribution(
+	ctx context.Context,
+	start time.Time,
+	fundingScheduleId uint64,
+	timezone *time.Location,
+) (int64, error) {
 	span := crumbs.StartFnTrace(ctx)
 	defer span.Finish()
 
@@ -226,14 +270,23 @@ func (f *forecasterBase) GetNextContribution(ctx context.Context, start time.Tim
 		"timezone":          timezone.String(),
 	}
 
-	forecast := f.GetForecast(span.Context(), start, end.Date.AddDate(0, 0, 1), timezone)
+	forecast, err := f.GetForecast(
+		span.Context(),
+		start,
+		end.Date.AddDate(0, 0, 1),
+		timezone,
+	)
+	if err != nil {
+		return 0, err
+	}
+
 	for _, event := range forecast.Events {
 		if len(event.Funding) == 0 {
 			continue
 		}
 
-		return event.Contribution
+		return event.Contribution, nil
 	}
 
-	return 0
+	return 0, nil
 }

@@ -12,6 +12,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func AssertValidRollingAllocation(t *testing.T, events []SpendingEvent) {
+	for i, item := range events {
+		if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
+			j, _ := json.MarshalIndent(item, "                        \t", "  ")
+			fmt.Println("                        \t" + string(j))
+		}
+	}
+}
+
 func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 	t.Run("simple monthly expense", func(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
@@ -39,13 +48,9 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
-		for i, item := range events {
-			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
-				j, _ := json.MarshalIndent(item, "                        \t", "  ")
-				fmt.Println("                        \t" + string(j))
-			}
-		}
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
+		assert.NoError(t, err, "should not return an error for getting spending events")
+		AssertValidRollingAllocation(t, events)
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -88,6 +93,49 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 		}, events)
 	})
 
+	t.Run("expense is behind", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 10, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		now := time.Date(2022, 10, 5, 0, 0, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: false,
+				NextOccurrence:  time.Date(2022, 10, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   5000,
+				CurrentAmount:  3000,
+				NextRecurrence: time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
+				RuleSet:        spendingRule,
+			},
+			fundingInstructions,
+		)
+
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 1, now, timezone)
+		assert.NoError(t, err, "should not return an error for getting spending events")
+		AssertValidRollingAllocation(t, events)
+		assert.Equal(t, []SpendingEvent{
+			{
+				Date:               time.Date(2022, 10, 8, 0, 0, 0, 0, timezone),
+				TransactionAmount:  5000,
+				ContributionAmount: 0,
+				OverspendAmount:    2000,
+				RollingAllocation:  0,
+				IsBehind:           true,
+				Funding:            []FundingEvent{},
+				SpendingId:         0,
+			},
+		}, events)
+	})
+
 	t.Run("spending was late so balance is full", func(t *testing.T) {
 		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
 		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
@@ -115,13 +163,9 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 
 		{ // If we do the forecase before the expenses due date, then we will get an event showing it was spent.
 			now := time.Date(2024, 3, 1, 0, 0, 1, 0, timezone).UTC()
-			events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 4, now, timezone)
-			for i, item := range events {
-				if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
-					j, _ := json.MarshalIndent(item, "                        \t", "  ")
-					fmt.Println("                        \t" + string(j))
-				}
-			}
+			events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 4, now, timezone)
+			assert.NoError(t, err, "should not return an error for getting spending events")
+			AssertValidRollingAllocation(t, events)
 			assert.Equal(t, []SpendingEvent{
 				{
 					Date:               time.Date(2024, 3, 2, 0, 0, 0, 0, timezone),
@@ -175,13 +219,9 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 
 		{ // But if it hasn't been spent after its due date then we want the same contributions.
 			now := time.Date(2024, 3, 4, 0, 0, 1, 0, timezone).UTC()
-			events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
-			for i, item := range events {
-				if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
-					j, _ := json.MarshalIndent(item, "                        \t", "  ")
-					fmt.Println("                        \t" + string(j))
-				}
-			}
+			events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 3, now, timezone)
+			assert.NoError(t, err, "should not return an error for getting spending events")
+			AssertValidRollingAllocation(t, events)
 			assert.Equal(t, []SpendingEvent{
 				{
 					Date:               time.Date(2024, 3, 15, 0, 0, 0, 0, timezone),
@@ -251,13 +291,9 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
-		for i, item := range events {
-			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
-				j, _ := json.MarshalIndent(item, "                        \t", "  ")
-				fmt.Println("                        \t" + string(j))
-			}
-		}
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 7, now, timezone)
+		assert.NoError(t, err, "should not return an error for getting spending events")
+		AssertValidRollingAllocation(t, events)
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -365,13 +401,9 @@ func TestSpendingInstructionBase_GetNextSpendingEventAfter(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
-		for i, item := range events {
-			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
-				j, _ := json.MarshalIndent(item, "                        \t", "  ")
-				fmt.Println("                        \t" + string(j))
-			}
-		}
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
+		assert.NoError(t, err, "should not return an error for getting spending events")
+		AssertValidRollingAllocation(t, events)
 		assert.Equal(t, []SpendingEvent{
 			{
 				Date:               time.Date(2022, 9, 15, 0, 0, 0, 0, timezone),
@@ -489,15 +521,11 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		events, err := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		assert.NoError(t, err, "should not have an errors getting spending events")
 		// Should have 36 events, 12 spending events and 24 funding events.
 		assert.Len(t, events, 12+24, "should have 36 events")
-		for i, item := range events {
-			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
-				j, _ := json.MarshalIndent(item, "                        \t", "  ")
-				fmt.Println("                        \t" + string(j))
-			}
-		}
+		AssertValidRollingAllocation(t, events)
 	})
 
 	t.Run("every other week for a year", func(t *testing.T) {
@@ -526,14 +554,10 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		events, err := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		assert.NoError(t, err, "should not have an errors getting spending events")
 		assert.Len(t, events, 45, "should have 45 events")
-		for i, item := range events {
-			if !assert.GreaterOrEqual(t, item.RollingAllocation, int64(0), "rolling allocation must be greater than zero: [%d] %s", i, item.Date) {
-				j, _ := json.MarshalIndent(item, "                        \t", "  ")
-				fmt.Println("                        \t" + string(j))
-			}
-		}
+		AssertValidRollingAllocation(t, events)
 	})
 
 	t.Run("no spending events for paused spending objects", func(t *testing.T) {
@@ -561,7 +585,8 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		)
 
-		events := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		events, err := spendingInstructions.GetSpendingEventsBetween(context.Background(), now, now.AddDate(1, 0, 0), timezone)
+		assert.NoError(t, err, "should not have an errors getting spending events")
 		assert.Empty(t, events, "there should be no spending events for paused spending")
 	})
 
@@ -636,8 +661,86 @@ func TestSpendingInstructionBase_GetSpendingEventsBetween(t *testing.T) {
 			fundingInstructions,
 		).(*spendingInstructionBase)
 
-		events := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
+		events, err := spendingInstructions.GetNextNSpendingEventsAfter(context.Background(), 8, now, timezone)
+		assert.NoError(t, err, "should not return an error for getting spending events")
+		// TODO Add assertions!
 		j, _ := json.MarshalIndent(events, "", "  ")
 		fmt.Println(string(j))
+	})
+}
+
+func TestSpendingInstructionsBase_GetNextContribution(t *testing.T) {
+	t.Run("simple monthly expense", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 10, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		now := time.Date(2024, 4, 9, 0, 0, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: false,
+				NextOccurrence:  time.Date(2024, 4, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   5000,
+				CurrentAmount:  0,
+				NextRecurrence: time.Date(2024, 4, 8, 0, 0, 0, 0, timezone),
+				RuleSet:        spendingRule,
+			},
+			fundingInstructions,
+		)
+
+		contribution, err := spendingInstructions.GetNextContributionEvent(
+			context.Background(),
+			now,
+			timezone,
+		)
+		assert.NoError(t, err, "should not return an error for getting spending events")
+		assert.EqualValues(t, 2500, contribution.ContributionAmount, "should contribution half of the target")
+		assert.Equal(t, time.Date(2024, 4, 15, 0, 0, 0, 0, timezone), contribution.Date, "should contribute on the 15th of april")
+	})
+
+	t.Run("monthly expense is late", func(t *testing.T) {
+		timezone := testutils.Must(t, time.LoadLocation, "America/Chicago")
+		fundingRule := testutils.NewRuleSet(t, 2022, 1, 15, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15,-1")
+		spendingRule := testutils.NewRuleSet(t, 2022, 10, 8, timezone, "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=8")
+		now := time.Date(2024, 4, 10, 0, 0, 1, 0, timezone).UTC()
+		log := testutils.GetLog(t)
+		fundingInstructions := NewFundingScheduleFundingInstructions(
+			log,
+			models.FundingSchedule{
+				RuleSet:         fundingRule,
+				ExcludeWeekends: false,
+				NextOccurrence:  time.Date(2024, 4, 15, 0, 0, 0, 0, timezone),
+			},
+		)
+		spendingInstructions := NewSpendingInstructions(
+			log,
+			models.Spending{
+				SpendingType:   models.SpendingTypeExpense,
+				TargetAmount:   5000,
+				CurrentAmount:  5000,
+				NextRecurrence: time.Date(2024, 4, 8, 0, 0, 0, 0, timezone),
+				RuleSet:        spendingRule,
+			},
+			fundingInstructions,
+		)
+
+		contribution, err := spendingInstructions.GetNextContributionEvent(
+			context.Background(),
+			now,
+			timezone,
+		)
+		assert.NoError(t, err, "should not return an error for getting spending events")
+		// When the expense is full we assume that is is just late to being spent.
+		// So we should still contribute a typical amount.
+		assert.EqualValues(t, 2500, contribution.ContributionAmount, "should contribution half of the target")
+		assert.Equal(t, time.Date(2024, 4, 15, 0, 0, 0, 0, timezone), contribution.Date, "should contribute on the 15th of april")
 	})
 }
