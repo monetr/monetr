@@ -299,8 +299,8 @@ importers:
         specifier: 18.2.18
         version: 18.2.18
       '@types/react-google-recaptcha':
-        specifier: 2.1.6
-        version: 2.1.6
+        specifier: 2.1.9
+        version: 2.1.9
       autoprefixer:
         specifier: 10.4.19
         version: 10.4.19(postcss@8.4.38)
@@ -4355,8 +4355,8 @@ packages:
   '@types/react-dom@18.2.18':
     resolution: {integrity: sha512-TJxDm6OfAX2KJWJdMEVTwWke5Sc/E/RlnPGvGfS0W7+6ocy2xhDVQVh/KvC2Uf7kACs+gDytdusDSdWfWkaNzw==}
 
-  '@types/react-google-recaptcha@2.1.6':
-    resolution: {integrity: sha512-U+dLY6lGoa9sDfArZAmAItk9MpOaNV7TJtRqEox74zkXL4Qx6FnakIeM9e3HQaWYwfBgoOa7SMhWBgpnyycdvQ==}
+  '@types/react-google-recaptcha@2.1.9':
+    resolution: {integrity: sha512-nT31LrBDuoSZJN4QuwtQSF3O89FVHC4jLhM+NtKEmVF5R1e8OY0Jo4//x2Yapn2aNHguwgX5doAq8Zo+Ehd0ug==}
 
   '@types/react-transition-group@4.4.8':
     resolution: {integrity: sha512-QmQ22q+Pb+HQSn04NL3HtrqHwYMf4h3QKArOy5F8U5nEVMaihBs3SR10WiOM1iwPz5jIo8x/u11al+iEGZZrvg==}
@@ -16938,7 +16938,7 @@ snapshots:
     dependencies:
       '@types/react': 18.2.45
 
-  '@types/react-google-recaptcha@2.1.6':
+  '@types/react-google-recaptcha@2.1.9':
     dependencies:
       '@types/react': 18.2.45
 
