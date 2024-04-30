@@ -557,9 +557,30 @@ ALTER TABLE "plaid_links" RENAME CONSTRAINT "plaid_links_pkey" TO "plid_links_pk
 ALTER TABLE "plaid_links" DROP CONSTRAINT "uq_plaid_links_item_id";
 ALTER TABLE "plaid_links" DROP CONSTRAINT "fk_plaid_links_account";
 ALTER TABLE "plaid_links" DROP CONSTRAINT "fk_plaid_links_secret";
+ALTER TABLE "plaid_links" RENAME TO "plaid_links_old";
 
-
-
-
-
+CREATE TABLE "plaid_links" (
+  "plaid_link_id"          VARCHAR(32) NOT NULL,
+  "account_id"             VARCHAR(32) NOT NULL,
+  "secret_id"              VARCHAR(32) NOT NULL,
+  "item_id"                TEXT NOT NULL,
+  "products"               TEXT[] NOT NULL,
+  "status"                 INT NOT NULL DEFAULT 0,
+  "error_code"             TEXT,
+  "expiration_date"        TIMESTAMP WITH TIME ZONE,
+  "new_accounts_available" BOOLEAN NOT NULL,
+  "webhook_url"            TEXT,
+  "institution_id"         TEXT NOT NULL,
+  "institution_name"       TEXT NOT NULL,
+  "last_manual_sync"       TIMESTAMP WITH TIME ZONE,
+  "last_successful_update" TIMESTAMP WITH TIME ZONE,
+  "last_attempted_update"  TIMESTAMP WITH TIME ZONE,
+  "updated_at"             TIMESTAMP WITH TIME ZONE NOT NULL,
+  "created_at"             TIMESTAMP WITH TIME ZONE NOT NULL,
+  "created_by_user_id"     VARCHAR(32) NOT NULL,
+  CONSTRAINT "pk_plaid_links" PRIMARY KEY ("plaid_link_id", "account_id"),
+  CONSTRAINT "fk_plaid_links_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_plaid_links_secret" FOREIGN KEY ("secret_id", "account_id") REFERENCES "secrets" ("secret_id", "account_id"),
+  CONSTRAINT "fk_plaid_links_created_by" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id")
+);
 
