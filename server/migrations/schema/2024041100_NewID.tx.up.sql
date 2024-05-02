@@ -584,3 +584,57 @@ CREATE TABLE "plaid_links" (
   CONSTRAINT "fk_plaid_links_created_by" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id")
 );
 
+INSERT INTO "plaid_links" ("plaid_link_id", "account_id", "secret_id", "item_id", "products", "status", "error_code", "expiration_date", "new_accounts_available", "webhook_url", "institution_id", "institution_name", "last_manual_sync", "last_successful_update", "last_attempted_update", "updated_at", "created_at", "created_by_user_id")
+SELECT
+  "p"."plaid_link_id_new",
+  "a"."account_id_new",
+  "s"."secret_id_new",
+  "p"."item_id",
+  "p"."products",
+  "p"."status",
+  "p"."error_code",
+  "p"."expiration_date",
+  "p"."new_accounts_available",
+  "p"."webhook_url",
+  "p"."institution_id",
+  "p"."institution_name",
+  "p"."last_manual_sync",
+  "p"."last_successful_update",
+  "p"."last_attempted_update",
+  "p"."updated_at",
+  "p"."created_at",
+  "u"."user_id_new"
+FROM "plaid_links_old" AS "p"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "p"."account_id"
+INNER JOIN "secrets_old" AS "s" ON "s"."secret_id" = "p"."secret_id" AND "s"."account_id" = "a"."account_id"
+INNER JOIN "users_old" AS "u" ON "u"."user_id" = "p"."created_by_user_id"; 
+
+ALTER TABLE "teller_links" RENAME CONSTRAINT "pk_teller_links" TO "pk_teller_links_old";
+ALTER TABLE "teller_links" DROP CONSTRAINT "uq_teller_links_enrollment";
+ALTER TABLE "teller_links" DROP CONSTRAINT "fk_teller_links_account";
+ALTER TABLE "teller_links" DROP CONSTRAINT "fk_teller_links_users_created_by_user_id";
+ALTER TABLE "teller_links" RENAME TO "teller_links_old";
+
+CREATE TABLE "teller_links" (
+  "teller_link_id"         VARCHAR(32) NOT NULL,
+  "account_id"             VARCHAR(32) NOT NULL,
+  "secret_id"              VARCHAR(32) NOT NULL,
+  "enrollment_id"          TEXT NOT NULL,
+  "teller_user_id"         TEXT NOT NULL,
+  "status"                 INT NOT NULL,
+  "error_code"             TEXT,
+  "institution_name"       TEXT NOT NULL,
+  "last_manual_sync"       TIMESTAMP WITH TIME ZONE,
+  "last_successful_update" TIMESTAMP WITH TIME ZONE,
+  "last_attempted_update"  TIMESTAMP WITH TIME ZONE,
+  "updated_at"             TIMESTAMP WITH TIME ZONE NOT NULL,
+  "created_at"             TIMESTAMP WITH TIME ZONE NOT NULL,
+  "created_by_user_id"     VARCHAR(32) NOT NULL,
+  CONSTRAINT "pk_teller_links" PRIMARY KEY ("teller_link_id", "account_id"),
+  CONSTRAINT "uq_teller_links_enrollment" UNIQUE ("account_id", "enrollment_id"),
+  CONSTRAINT "fk_teller_links_account" FOREIGN KEY ("account_id") REFERENCES "accounts" ("account_id"),
+  CONSTRAINT "fk_teller_links_secret" FOREIGN KEY ("secret_id", "account_id") REFERENCES "secrets" ("secret_id", "account_id"),
+  CONSTRAINT "fk_teller_links_created_by_user" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id")
+);
+
+
