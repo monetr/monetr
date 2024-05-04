@@ -637,4 +637,23 @@ CREATE TABLE "teller_links" (
   CONSTRAINT "fk_teller_links_created_by_user" FOREIGN KEY ("created_by_user_id") REFERENCES "users" ("user_id")
 );
 
-
+INSERT INTO "teller_links" ("teller_link_id", "account_id", "secret_id", "enrollment_id", "teller_user_id", "status", "error_code", "institution_name", "last_manual_sync", "last_successful_update", "last_attempted_update", "updated_at", "created_at", "created_by_user_id")
+SELECT
+  "t"."teller_link_id_new",
+  "a"."account_id_new",
+  "s"."secret_id_new",
+  "t"."enrollment_id",
+  "t"."teller_user_id",
+  "t"."status",
+  "t"."error_code",
+  "t"."institution_name",
+  "t"."last_manual_sync",
+  "t"."last_attempted_update",
+  "t"."last_attempted_update",
+  "t"."updated_at",
+  "t"."created_at",
+  "u"."user_id_new"
+FROM "teller_links_old" AS "t"
+INNER JOIN "accounts_old" AS "a" ON "a"."account_id" = "t"."account_id"
+INNER JOIN "secrets_old" AS "s" ON "s"."secret_id" = "t"."secret_id" AND "s"."account_id" = "a"."account_id"
+INNER JOIN "users_old" AS "u" ON "u"."user_id" = "t"."created_by_user_id"; 
